@@ -1,23 +1,15 @@
 package org.molgenis.migrate.version;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.UncheckedIOException;
-import java.sql.DatabaseMetaData;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.Properties;
-
-import javax.sql.DataSource;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.support.DatabaseMetaDataCallback;
-import org.springframework.jdbc.support.JdbcUtils;
-import org.springframework.jdbc.support.MetaDataAccessException;
+import org.springframework.jdbc.support.*;
 import org.springframework.stereotype.Service;
+
+import javax.sql.DataSource;
+import java.io.*;
+import java.sql.*;
+import java.util.Properties;
 
 /**
  * Get the Molgenis version from molgenis-server.properties or, in absence there, from a {@link DataSource}.
@@ -39,7 +31,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class MolgenisVersionService
 {
-	public static final int CURRENT_VERSION = 19;
+	public static final int CURRENT_VERSION = 30;
 
 	private static final Logger LOG = LoggerFactory.getLogger(MolgenisVersionService.class);
 

@@ -1,17 +1,23 @@
 package org.molgenis.data.mem;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.QueryImpl;
@@ -19,9 +25,9 @@ import org.molgenis.data.support.QueryImpl;
 import com.google.common.collect.Sets;
 
 /**
- * Reposirory that uses a hashmap as store.
+ * Repository that uses a hashmap as store.
  * 
- * For testing purposis
+ * For testing purposes
  */
 public class InMemoryRepository implements Repository
 {
@@ -52,6 +58,12 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		return entities.values().stream();
+	}
+
+	@Override
 	public void close() throws IOException
 	{
 
@@ -70,14 +82,32 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		if (new QueryImpl().equals(q))
 		{
-			return new ArrayList<>(entities.values());
+			return entities.values().stream();
 		}
 		else
 		{
+			// partial implementation: one EQUALS rule
+			if (q.getRules().size() == 1)
+			{
+				QueryRule r = q.getRules().iterator().next();
+				if (r.getOperator() == Operator.EQUALS)
+				{
+					return entities.entrySet().stream().map((e) -> {
+						if (e.getValue().get(r.getField()).equals(r.getValue()))
+						{
+							return e.getValue();
+						}
+						else
+						{
+							return null;
+						}
+					}).filter(Objects::nonNull);
+				}
+			}
 			throw new UnsupportedOperationException();
 		}
 	}
@@ -91,13 +121,25 @@ public class InMemoryRepository implements Repository
 	@Override
 	public Entity findOne(Object id)
 	{
+		return findOne(id, null);
+	}
+
+	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
 		return entities.get(id);
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
+	public Stream<Entity> findAll(Stream<Object> ids)
 	{
-		throw new UnsupportedOperationException();
+		return ids.map(id -> entities.get(id)).filter(Objects::nonNull);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		return ids.map(id -> entities.get(id)).filter(Objects::nonNull);
 	}
 
 	@Override
@@ -118,9 +160,9 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
+	public void update(Stream<? extends Entity> entities)
 	{
-		records.forEach(this::update);
+		entities.forEach(this::update);
 	}
 
 	private Object getId(Entity entity)
@@ -135,7 +177,7 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
-	public void delete(Iterable<? extends Entity> entities)
+	public void delete(Stream<? extends Entity> entities)
 	{
 		entities.forEach(this::delete);
 	}
@@ -147,7 +189,7 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		ids.forEach(this::deleteById);
 	}
@@ -174,15 +216,14 @@ public class InMemoryRepository implements Repository
 	}
 
 	@Override
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Stream<? extends Entity> entities)
 	{
-		int i = 0;
-		for (Entity entity : entities)
-		{
+		AtomicInteger count = new AtomicInteger();
+		entities.forEach(entity -> {
 			add(entity);
-			i++;
-		}
-		return i;
+			count.incrementAndGet();
+		});
+		return count.get();
 	}
 
 	@Override
@@ -200,8 +241,7 @@ public class InMemoryRepository implements Repository
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return Sets.newHashSet(RepositoryCapability.QUERYABLE, RepositoryCapability.UPDATEABLE,
-				RepositoryCapability.WRITABLE);
+		return Sets.newHashSet(RepositoryCapability.QUERYABLE, RepositoryCapability.WRITABLE);
 	}
 
 	@Override
@@ -210,4 +250,36 @@ public class InMemoryRepository implements Repository
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public void create()
+	{
+		// Repo is not MANAGABLE
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void drop()
+	{
+		// Repo is not MANAGABLE
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void rebuildIndex()
+	{
+		// Repo is not INDEXABLE
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		throw new UnsupportedOperationException();
+	}
 }

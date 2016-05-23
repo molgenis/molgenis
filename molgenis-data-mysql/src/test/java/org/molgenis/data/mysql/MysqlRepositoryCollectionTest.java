@@ -1,5 +1,7 @@
 package org.molgenis.data.mysql;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 import java.util.Locale;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -28,7 +30,7 @@ public class MysqlRepositoryCollectionTest extends AbstractTestNGSpringContextTe
 
 		// create collection, add repo, destroy and reload
 		DefaultEntityMetaData personMD = new DefaultEntityMetaData("coll_person");
-		personMD.addAttribute("email").setNillable(false).setIdAttribute(true);
+		personMD.addAttribute("email", ROLE_ID);
 		personMD.addAttribute("firstName");
 		personMD.addAttribute("lastName");
 		personMD.addAttribute("birthday").setDataType(MolgenisFieldTypes.DATE);

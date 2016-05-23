@@ -27,8 +27,8 @@ public class MolgenisUserViewData
 
 		fullName = firstName + ' ' + middleName + ' ' + lastName;
 
-		this.active = mu.getActive();
-		this.superuser = mu.getSuperuser();
+		this.active = mu.isActive();
+		this.superuser = mu.isSuperuser();
 
 		for (MolgenisGroup mg : molgenisGroups)
 		{
@@ -78,5 +78,77 @@ public class MolgenisUserViewData
 	public Boolean isGroupMember(String id)
 	{
 		return groupList.contains(id);
+	}
+
+	@Override
+	public int hashCode()
+	{
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((active == null) ? 0 : active.hashCode());
+		result = prime * result + ((firstName == null) ? 0 : firstName.hashCode());
+		result = prime * result + ((fullName == null) ? 0 : fullName.hashCode());
+		result = prime * result + ((groupList == null) ? 0 : groupList.hashCode());
+		result = prime * result + ((id == null) ? 0 : id.hashCode());
+		result = prime * result + ((lastName == null) ? 0 : lastName.hashCode());
+		result = prime * result + ((middleName == null) ? 0 : middleName.hashCode());
+		result = prime * result + ((superuser == null) ? 0 : superuser.hashCode());
+		result = prime * result + ((username == null) ? 0 : username.hashCode());
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj)
+	{
+		if (this == obj) return true;
+		if (obj == null) return false;
+		if (getClass() != obj.getClass()) return false;
+		MolgenisUserViewData other = (MolgenisUserViewData) obj;
+		if (active == null)
+		{
+			if (other.active != null) return false;
+		}
+		else if (!active.equals(other.active)) return false;
+		if (firstName == null)
+		{
+			if (other.firstName != null) return false;
+		}
+		else if (!firstName.equals(other.firstName)) return false;
+		if (fullName == null)
+		{
+			if (other.fullName != null) return false;
+		}
+		else if (!fullName.equals(other.fullName)) return false;
+		if (groupList == null)
+		{
+			if (other.groupList != null) return false;
+		}
+		else if (!groupList.equals(other.groupList)) return false;
+		if (id == null)
+		{
+			if (other.id != null) return false;
+		}
+		else if (!id.equals(other.id)) return false;
+		if (lastName == null)
+		{
+			if (other.lastName != null) return false;
+		}
+		else if (!lastName.equals(other.lastName)) return false;
+		if (middleName == null)
+		{
+			if (other.middleName != null) return false;
+		}
+		else if (!middleName.equals(other.middleName)) return false;
+		if (superuser == null)
+		{
+			if (other.superuser != null) return false;
+		}
+		else if (!superuser.equals(other.superuser)) return false;
+		if (username == null)
+		{
+			if (other.username != null) return false;
+		}
+		else if (!username.equals(other.username)) return false;
+		return true;
 	}
 }

@@ -4,8 +4,7 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.13.0-BBMRI-NL</version>
-	</parent>
+		<version>1.21.1-BBMRI-NL</version>	</parent>
 	<artifactId>molgenis-file</artifactId>
 	<packaging>jar</packaging>
 	<dependencies>

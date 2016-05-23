@@ -1,6 +1,7 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static org.mockito.Mockito.mock;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -43,7 +44,7 @@ public class ThousandGenomesAnnotatorTest extends AbstractTestNGSpringContextTes
 	public void testAnnotate()
 	{
 		DefaultEntityMetaData emdIn = new DefaultEntityMetaData("test");
-		emdIn.addAttribute(VcfRepository.CHROM).setIdAttribute(true).setNillable(false);
+		emdIn.addAttribute(VcfRepository.CHROM, ROLE_ID);
 		emdIn.addAttributeMetaData(VcfRepository.POS_META);
 		emdIn.addAttributeMetaData(VcfRepository.REF_META);
 		emdIn.addAttributeMetaData(VcfRepository.ALT_META);
@@ -65,6 +66,42 @@ public class ThousandGenomesAnnotatorTest extends AbstractTestNGSpringContextTes
 		expectedMap.put(VcfRepository.REF, "AGG");
 		expectedMap.put(VcfRepository.ALT, "A");
 		expectedMap.put(ThousandGenomesAnnotator.THOUSAND_GENOME_AF, "0.61861");
+		Entity expectedEntity = new MapEntity(expectedMap);
+
+		assertEquals(resultEntity.get(VcfRepository.CHROM), expectedEntity.get(VcfRepository.CHROM));
+		assertEquals(resultEntity.get(VcfRepository.POS), expectedEntity.get(VcfRepository.POS));
+		assertEquals(resultEntity.get(VcfRepository.REF), expectedEntity.get(VcfRepository.REF));
+		assertEquals(resultEntity.get(VcfRepository.ALT), expectedEntity.get(VcfRepository.ALT));
+		assertEquals(resultEntity.get(ThousandGenomesAnnotator.THOUSAND_GENOME_AF),
+				expectedEntity.get(ThousandGenomesAnnotator.THOUSAND_GENOME_AF));
+	}
+	
+	@Test
+	public void testAnnotateNegative()
+	{
+		DefaultEntityMetaData emdIn = new DefaultEntityMetaData("test");
+		emdIn.addAttribute(VcfRepository.CHROM, ROLE_ID);
+		emdIn.addAttributeMetaData(VcfRepository.POS_META);
+		emdIn.addAttributeMetaData(VcfRepository.REF_META);
+		emdIn.addAttributeMetaData(VcfRepository.ALT_META);
+
+		Entity inputEntity = new MapEntity(emdIn);
+		inputEntity.set(VcfRepository.CHROM, "1");
+		inputEntity.set(VcfRepository.POS, 249240543);
+		inputEntity.set(VcfRepository.REF, "A");
+		inputEntity.set(VcfRepository.ALT, "G");
+
+		Iterator<Entity> results = annotator.annotate(Collections.singletonList(inputEntity));
+		assertTrue(results.hasNext());
+		Entity resultEntity = results.next();
+		assertFalse(results.hasNext());
+
+		Map<String, Object> expectedMap = new LinkedHashMap<String, Object>();
+		expectedMap.put(VcfRepository.CHROM, "1");
+		expectedMap.put(VcfRepository.POS, 249240543);
+		expectedMap.put(VcfRepository.REF, "A");
+		expectedMap.put(VcfRepository.ALT, "G");
+		expectedMap.put(ThousandGenomesAnnotator.THOUSAND_GENOME_AF, null);
 		Entity expectedEntity = new MapEntity(expectedMap);
 
 		assertEquals(resultEntity.get(VcfRepository.CHROM), expectedEntity.get(VcfRepository.CHROM));

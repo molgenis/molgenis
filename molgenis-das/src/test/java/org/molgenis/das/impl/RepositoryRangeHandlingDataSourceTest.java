@@ -2,6 +2,8 @@ package org.molgenis.das.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_CHROM;
 import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_DESCRIPTION;
 import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_IDENTIFIER;
@@ -14,19 +16,22 @@ import static org.testng.AssertJUnit.assertEquals;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import org.mockito.Mockito;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.MapEntity;
@@ -87,18 +92,29 @@ public class RepositoryRangeHandlingDataSourceTest
 		linkout.put(new URL("http://www.molgenis.org/"), "Link");
 
 		List<DasTarget> dasTarget = new ArrayList<DasTarget>();
-		dasTarget.add(new MolgenisDasTarget("mutation id", 10, 1000, "mutation name,description"));
+		dasTarget.add(new MolgenisDasTarget("mutation id", 10, 1000, "description"));
 		List<String> notes = new ArrayList<String>();
 		notes.add("track:dataset");
 		notes.add("source:MOLGENIS");
 
-		dasFeature = new DasFeature("mutation id", "mutation name,description", type, method, 10, 1000, new Double(0),
+		dasFeature = new DasFeature("mutation id", "description", type, method, 10, 1000, new Double(0),
 				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout,
 				dasTarget, new ArrayList<String>(), null);
 
 		Query q = new QueryImpl().eq("CHROM", "1");
 		q.pageSize(100);
 		SearchResult result = mock(SearchResult.class);
+		DefaultEntityMetaData emd = new DefaultEntityMetaData("DAS");
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("STOP"));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("linkout"));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("NAME"), ROLE_LABEL);
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("INFO"));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("POS"));
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("ID"), ROLE_ID);
+		emd.addAttributeMetaData(new DefaultAttributeMetaData("CHROM"));
+
+		MapEntity entity = new MapEntity(emd);
+
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("STOP", 1000);
 		map.put("linkout", "http://www.molgenis.org/");
@@ -108,12 +124,20 @@ public class RepositoryRangeHandlingDataSourceTest
 		map.put("ID", "mutation id");
 		map.put("CHROM", "1");
 
-		MapEntity entity = new MapEntity(map);
-		resultList = new ArrayList<Hit>();
+		entity.set(new MapEntity(map));
+
+		resultList = new ArrayList<>();
 		resultList.add(new Hit("", "", map));
-		featureList = new ArrayList<DasFeature>();
+		featureList = new ArrayList<>();
 		featureList.add(dasFeature);
-		when(dataService.findAll("dataset", q)).thenReturn(Arrays.<Entity> asList(entity));
+		when(dataService.findAll("dataset", q)).thenAnswer(new Answer<Stream<Entity>>()
+		{
+			@Override
+			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Stream.of(entity);
+			}
+		});
 		when(result.iterator()).thenReturn(resultList.iterator());
 
 		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, entity.getEntityMetaData()))

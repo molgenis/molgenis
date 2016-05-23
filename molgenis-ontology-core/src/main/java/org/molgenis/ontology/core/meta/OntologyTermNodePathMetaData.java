@@ -1,10 +1,15 @@
 package org.molgenis.ontology.core.meta;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
+import org.springframework.stereotype.Component;
 
+@Component
 public class OntologyTermNodePathMetaData extends DefaultEntityMetaData
 {
 	public final static String ID = "id";
@@ -17,9 +22,10 @@ public class OntologyTermNodePathMetaData extends DefaultEntityMetaData
 	private OntologyTermNodePathMetaData()
 	{
 		super(SIMPLE_NAME, OntologyPackage.getPackageInstance());
-		addAttributeMetaData(new DefaultAttributeMetaData(ID).setIdAttribute(true).setNillable(false).setVisible(false));
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_NODE_PATH, FieldTypeEnum.STRING).setNillable(
-				false).setLabelAttribute(true));
+		addAttributeMetaData(new DefaultAttributeMetaData(ID).setVisible(false), ROLE_ID);
+		addAttributeMetaData(
+				new DefaultAttributeMetaData(ONTOLOGY_TERM_NODE_PATH, FieldTypeEnum.TEXT).setNillable(false),
+				ROLE_LABEL);
 		addAttributeMetaData(new DefaultAttributeMetaData(ROOT, FieldTypeEnum.BOOL).setNillable(false));
 	}
 }

@@ -1,5 +1,9 @@
 package org.molgenis;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -44,7 +48,14 @@ public class MolgenisFieldTypes
 
 	public enum FieldTypeEnum
 	{
-		BOOL, CATEGORICAL, CATEGORICAL_MREF, COMPOUND, DATE, DATE_TIME, DECIMAL, EMAIL, ENUM, FILE, HTML, HYPERLINK, IMAGE, INT, LONG, MREF, SCRIPT, STRING, TEXT, XREF
+		BOOL, CATEGORICAL, CATEGORICAL_MREF, COMPOUND, DATE, DATE_TIME, DECIMAL, EMAIL, ENUM, FILE, HTML, HYPERLINK, INT, LONG, MREF, SCRIPT, STRING, TEXT, XREF;
+
+		public static List<String> getOptionsLowercase()
+		{
+			return Arrays.stream(values()).map(value -> {
+				return value.toString().replace("_", "");
+			}).map(String::toLowerCase).collect(toList());
+		}
 	}
 
 	public static final FieldType BOOL = new BoolField();
@@ -58,7 +69,6 @@ public class MolgenisFieldTypes
 	public static final FieldType FILE = new FileField();
 	public static final FieldType HTML = new HtmlField();
 	public static final FieldType HYPERLINK = new HyperlinkField();
-	public static final FieldType IMAGE = new ImageField();
 	public static final FieldType INT = new IntField();
 	public static final FieldType LONG = new LongField();
 	public static final FieldType MREF = new MrefField();
@@ -66,6 +76,7 @@ public class MolgenisFieldTypes
 	public static final FieldType STRING = new StringField();
 	public static final FieldType TEXT = new TextField();
 	public static final FieldType XREF = new XrefField();
+	public static final FieldType ENUM = new EnumField();
 
 	// FIXME Do not add public static final ENUM here, as it holds the enum options so it is different per attribute,
 	// this should be fixed. The options should not be added to the field
@@ -87,7 +98,6 @@ public class MolgenisFieldTypes
 			addType(FILE);
 			addType(HTML);
 			addType(HYPERLINK);
-			addType(IMAGE);
 			addType(INT);
 			addType(LONG);
 			addType(MREF);
@@ -95,6 +105,7 @@ public class MolgenisFieldTypes
 			addType(SCRIPT);
 			addType(TEXT);
 			addType(XREF);
+			addType(ENUM);
 
 			init = true;
 		}

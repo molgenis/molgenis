@@ -1,5 +1,7 @@
 package org.molgenis.data.mysql;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
@@ -15,8 +17,7 @@ public class MysqlRepositoryIntTest extends MysqlRepositoryAbstractDatatypeTest
 	public EntityMetaData createMetaData()
 	{
 		EditableEntityMetaData varcharMD = new DefaultEntityMetaData("IntegerTest").setLabel("Integer Test");
-		varcharMD.setIdAttribute("col1");
-		varcharMD.addAttribute("col1").setDataType(MolgenisFieldTypes.INT).setNillable(false);
+		varcharMD.addAttribute("col1", ROLE_ID).setDataType(MolgenisFieldTypes.INT);
 		varcharMD.addAttribute("col2").setDataType(MolgenisFieldTypes.INT);
 		varcharMD.addAttribute("col3").setDataType(MolgenisFieldTypes.INT);
 		return varcharMD;

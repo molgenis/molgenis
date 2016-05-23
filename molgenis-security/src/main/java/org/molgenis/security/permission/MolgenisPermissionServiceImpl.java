@@ -8,6 +8,7 @@ import java.util.Collection;
 
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,7 +39,8 @@ public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
 			for (GrantedAuthority grantedAuthority : grantedAuthorities)
 			{
 				String authority = grantedAuthority.getAuthority();
-				if (authority.equals(AUTHORITY_SU) || authority.equals(pluginAuthority)) return true;
+				if (authority.equals(AUTHORITY_SU) || authority.equals(SystemSecurityToken.ROLE_SYSTEM)
+						|| authority.equals(pluginAuthority)) return true;
 			}
 		}
 		return false;

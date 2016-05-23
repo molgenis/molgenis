@@ -1,5 +1,8 @@
 package org.molgenis.data.excel;
 
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -16,13 +19,14 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.util.CaseInsensitiveLinkedHashMap;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import com.google.common.collect.Iterables;
 
@@ -52,7 +56,12 @@ public class ExcelRepository extends AbstractRepository
 
 	public ExcelRepository(String fileName, Sheet sheet, List<CellProcessor> cellProcessors)
 	{
-		this.sheet = sheet;
+		this.sheet = requireNonNull(sheet);
+		if (sheet.getNumMergedRegions() > 0)
+		{
+			throw new MolgenisDataException(
+					format("Sheet [%s] contains merged regions which is not supported", sheet.getSheetName()));
+		}
 		this.cellProcessors = cellProcessors;
 	}
 
@@ -151,8 +160,8 @@ public class ExcelRepository extends AbstractRepository
 			{
 				for (String colName : colNamesMap.keySet())
 				{
-					editableEntityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(colName,
-							FieldTypeEnum.STRING));
+					editableEntityMetaData
+							.addAttributeMetaData(new DefaultAttributeMetaData(colName, FieldTypeEnum.STRING));
 				}
 			}
 			entityMetaData = editableEntityMetaData;
@@ -165,7 +174,7 @@ public class ExcelRepository extends AbstractRepository
 	{
 		if (headerRow == null) return null;
 
-		Map<String, Integer> columnIdx = new CaseInsensitiveLinkedHashMap<Integer>();
+		Map<String, Integer> columnIdx = new LinkedCaseInsensitiveMap<>();
 		int i = 0;
 		for (Iterator<Cell> it = headerRow.cellIterator(); it.hasNext();)
 		{

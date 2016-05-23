@@ -1,15 +1,8 @@
 package org.molgenis.app.promise;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.app.promise.PromiseDataLoaderController.URI;
-
-import java.io.IOException;
-import java.util.List;
-
+import autovalue.shaded.com.google.common.common.collect.Lists;
 import org.molgenis.app.promise.client.PromiseDataParser;
-import org.molgenis.app.promise.mapper.MappingReport;
-import org.molgenis.app.promise.mapper.PromiseMapper;
-import org.molgenis.app.promise.mapper.PromiseMapperFactory;
+import org.molgenis.app.promise.mapper.*;
 import org.molgenis.app.promise.model.PromiseMappingProjectMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -22,12 +15,14 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.app.promise.PromiseDataLoaderController.URI;
 
 @Controller
 @EnableScheduling
@@ -64,7 +59,7 @@ public class PromiseDataLoaderController extends MolgenisPluginController
 	@ResponseBody
 	public List<String> projects()
 	{
-		Iterable<Entity> projects = dataService.findAll(PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME);
+		Stream<Entity> projects = dataService.findAll(PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME);
 		List<String> names = Lists.newArrayList();
 
 		projects.forEach(p -> names.add(p.getString("name")));
@@ -88,12 +83,11 @@ public class PromiseDataLoaderController extends MolgenisPluginController
 	{
 		// TODO make configurable via MOLGENIS 'scheduler'
 
-		Iterable<Entity> projects = dataService.findAll(PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME);
-		for (Entity project : projects)
-		{
+		Stream<Entity> projects = dataService.findAll(PromiseMappingProjectMetaData.FULLY_QUALIFIED_NAME);
+		projects.forEach(project -> {
 			LOG.info("Starting scheduled mapping task for ProMISe biobank " + project.getString("name"));
 			PromiseMapper promiseMapper = promiseMapperFactory.getMapper(project.getString("mapper"));
 			promiseMapper.map(project);
-		}
+		});
 	}
 }

@@ -1,5 +1,7 @@
 package org.molgenis.security.permission;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -8,6 +10,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.stream.Stream;
 
 import org.molgenis.auth.Authority;
 import org.molgenis.auth.GroupAuthority;
@@ -29,8 +32,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 @Service
@@ -57,7 +58,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Transactional(readOnly = true)
 	public List<MolgenisUser> getUsers()
 	{
-		return Lists.newArrayList(dataService.findAll(MolgenisUser.ENTITY_NAME, MolgenisUser.class));
+		return dataService.findAll(MolgenisUser.ENTITY_NAME, MolgenisUser.class).collect(toList());
 	}
 
 	@Override
@@ -65,7 +66,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@Transactional(readOnly = true)
 	public List<MolgenisGroup> getGroups()
 	{
-		return Lists.newArrayList(dataService.findAll(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class));
+		return dataService.findAll(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class).collect(toList());
 	}
 
 	@Override
@@ -79,7 +80,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public List<String> getEntityClassIds()
 	{
-		return Lists.newArrayList(dataService.getEntityNames());
+		return dataService.getEntityNames().collect(toList());
 	}
 
 	@Override
@@ -143,17 +144,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		if (molgenisUser == null) throw new RuntimeException("unknown user id [" + userId + "]");
 		List<Authority> userPermissions = getUserPermissions(molgenisUser, authorityPrefix);
 
-		Iterable<MolgenisGroupMember> groupMembersIt = dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser), MolgenisGroupMember.class);
+		List<MolgenisGroupMember> groupMembers = dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser), MolgenisGroupMember.class).collect(
+				toList());
 
-		if (groupMembersIt == null)
-		{
-			return Collections.emptyList();
-		}
-
-		List<MolgenisGroupMember> groupMembers = Lists.newArrayList(groupMembersIt);
-
-		if (groupMembers != null && !groupMembers.isEmpty())
+		if (!groupMembers.isEmpty())
 		{
 			List<MolgenisGroup> molgenisGroups = Lists.transform(groupMembers,
 					new Function<MolgenisGroupMember, MolgenisGroup>()
@@ -197,12 +192,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 			entityAuthority.setMolgenisGroup(molgenisGroup);
 
 		// delete old plugin authorities
-		List<Authority> oldEntityAuthorities = getGroupPermissions(molgenisGroup, authorityPrefix);
-		if (oldEntityAuthorities != null && !oldEntityAuthorities.isEmpty()) dataService.delete(
-				GroupAuthority.ENTITY_NAME, oldEntityAuthorities);
+		Stream<Authority> oldEntityAuthorities = getGroupPermissions(molgenisGroup, authorityPrefix).stream();
+		if (oldEntityAuthorities != null) dataService.delete(GroupAuthority.ENTITY_NAME, oldEntityAuthorities);
 
 		// insert new plugin authorities
-		if (!entityAuthorities.isEmpty()) dataService.add(GroupAuthority.ENTITY_NAME, entityAuthorities);
+		if (!entityAuthorities.isEmpty()) dataService.add(GroupAuthority.ENTITY_NAME, entityAuthorities.stream());
 	}
 
 	@Override
@@ -233,25 +227,20 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		// delete old plugin authorities
 		List<? extends Authority> oldEntityAuthorities = getUserPermissions(molgenisUser, authorityType);
 		if (oldEntityAuthorities != null && !oldEntityAuthorities.isEmpty()) dataService.delete(
-				UserAuthority.ENTITY_NAME, oldEntityAuthorities);
+				UserAuthority.ENTITY_NAME, oldEntityAuthorities.stream());
 
 		// insert new plugin authorities
-		if (!entityAuthorities.isEmpty()) dataService.add(UserAuthority.ENTITY_NAME, entityAuthorities);
+		if (!entityAuthorities.isEmpty()) dataService.add(UserAuthority.ENTITY_NAME, entityAuthorities.stream());
 	}
 
 	private List<Authority> getUserPermissions(MolgenisUser molgenisUser, final String authorityPrefix)
 	{
-		Iterable<UserAuthority> authorities = dataService.findAll(UserAuthority.ENTITY_NAME,
+		Stream<UserAuthority> authorities = dataService.findAll(UserAuthority.ENTITY_NAME,
 				new QueryImpl().eq(UserAuthority.MOLGENISUSER, molgenisUser), UserAuthority.class);
 
-		return Lists.<Authority> newArrayList(Iterables.filter(authorities, new Predicate<Authority>()
-		{
-			@Override
-			public boolean apply(Authority authority)
-			{
-				return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;
-			}
-		}));
+		return authorities.filter(authority -> {
+			return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;
+		}).collect(toList());
 	}
 
 	private List<Authority> getGroupPermissions(MolgenisGroup molgenisGroup)
@@ -271,17 +260,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 	private List<Authority> getGroupPermissions(List<MolgenisGroup> molgenisGroups, final String authorityPrefix)
 	{
-		Iterable<GroupAuthority> authorities = dataService.findAll(GroupAuthority.ENTITY_NAME,
+		Stream<GroupAuthority> authorities = dataService.findAll(GroupAuthority.ENTITY_NAME,
 				new QueryImpl().in(GroupAuthority.MOLGENISGROUP, molgenisGroups), GroupAuthority.class);
 
-		return Lists.<Authority> newArrayList(Iterables.filter(authorities, new Predicate<Authority>()
-		{
-			@Override
-			public boolean apply(Authority authority)
-			{
-				return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;
-			}
-		}));
+		return authorities.filter(authority -> {
+			return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;
+		}).collect(toList());
 	}
 
 	private Permissions createPermissions(List<? extends Authority> entityAuthorities, String authorityPrefix)

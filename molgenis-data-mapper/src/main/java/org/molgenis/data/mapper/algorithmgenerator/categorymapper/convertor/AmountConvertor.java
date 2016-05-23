@@ -9,7 +9,7 @@ import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapper
 
 public abstract class AmountConvertor
 {
-	public static final Unit<?> STANDARD_UNIT = NonSI.WEEK.inverse();
+	public static final Unit<?> STANDARD_PER_WEEK_UNIT = NonSI.WEEK.inverse();
 
 	public abstract boolean matchCriteria(String description);
 

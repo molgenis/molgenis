@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
@@ -100,7 +102,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			finalQueryRules.addAll(Arrays.asList(new QueryRule(Operator.AND), disMaxQueryRule));
 		}
 
-		Iterable<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
+		Stream<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
 				new QueryImpl(finalQueryRules));
 
 		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper.collectExpandedQueryMap(queryTerms,
@@ -108,18 +110,19 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 		// Because the explain-API can be computationally expensive we limit the explanation to the top 10 attributes
 		Map<AttributeMetaData, ExplainedAttributeMetaData> explainedAttributes = new LinkedHashMap<>();
-		int count = 0;
-		for (Entity attributeEntity : attributeMetaDataEntities)
+		AtomicInteger count = new AtomicInteger(0);
+		attributeMetaDataEntities.forEach(attributeEntity ->
+		// for (Entity attributeEntity : attributeMetaDataEntities)
 		{
 			AttributeMetaData attribute = sourceEntityMetaData
 					.getAttribute(attributeEntity.getString(AttributeMetaDataMetaData.NAME));
-			if (count < MAX_NUMBER_EXPLAINED_ATTRIBUTES)
+			if (count.get() < MAX_NUMBER_EXPLAINED_ATTRIBUTES)
 			{
 				Set<ExplainedQueryString> explanations = convertAttributeEntityToExplainedAttribute(attributeEntity,
 						sourceEntityMetaData, collectExpanedQueryMap, finalQueryRules);
 
-				boolean singleMatchHighQuality = isSingleMatchHighQuality(queryTerms, collectExpanedQueryMap.values(),
-						explanations);
+				boolean singleMatchHighQuality = isSingleMatchHighQuality(queryTerms,
+						Sets.newHashSet(collectExpanedQueryMap.values()), explanations);
 
 				explainedAttributes.put(attribute,
 						ExplainedAttributeMetaData.create(attribute, explanations, singleMatchHighQuality));
@@ -128,8 +131,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			{
 				explainedAttributes.put(attribute, ExplainedAttributeMetaData.create(attribute));
 			}
-			count++;
-		}
+			count.incrementAndGet();
+		});
 
 		return explainedAttributes;
 	}

@@ -9,7 +9,6 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.support.DefaultEntityMetaData;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
@@ -86,10 +85,6 @@ public abstract class MysqlRepositoryCollection implements ManageableRepositoryC
 		MysqlRepository repo = repositories.get(entityName);
 		if (repo == null) throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
 		repo.dropAttribute(attributeName);
-		DefaultEntityMetaData meta = new DefaultEntityMetaData(repo.getEntityMetaData());
-
-		AttributeMetaData attr = meta.getAttribute(entityName);
-		if (attr != null) meta.removeAttributeMetaData(attr);
 	}
 
 	@Override

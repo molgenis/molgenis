@@ -20,7 +20,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.mockito.Matchers;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -33,8 +35,10 @@ import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.rest.service.RestService;
@@ -121,25 +125,26 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		entities.add(entity2);
 		entities.add(entity);
 
-		when(dataService.getEntityNames()).thenReturn(Arrays.asList(ENTITY_NAME));
+		when(dataService.getEntityNames()).thenReturn(Stream.of(ENTITY_NAME));
 		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 
 		when(dataService.findOne(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
 
 		Query q = new QueryImpl().eq("name", "Piet").pageSize(10).offset(5);
-		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Arrays.asList(entity));
+		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(entity));
 
 		Query q2 = new QueryImpl().sort(new Sort().on("name", Direction.DESC)).pageSize(100).offset(0);
-		when(dataService.findAll(ENTITY_NAME, q2)).thenReturn(entities);
+		when(dataService.findAll(ENTITY_NAME, q2)).thenReturn(Stream.of(entity2, entity));
 
 		DefaultAttributeMetaData attrEnum = new DefaultAttributeMetaData("enum", FieldTypeEnum.ENUM)
 				.setEnumOptions(Arrays.asList("enum0, enum1"));
 
 		DefaultAttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.STRING);
-		attrName.setLookupAttribute(true);
 
 		DefaultAttributeMetaData attrId = new DefaultAttributeMetaData("id", FieldTypeEnum.STRING);
-		attrId.setIdAttribute(true);
+		attrId.setReadOnly(true);
+		attrId.setUnique(true);
+		attrId.setNillable(false);
 		attrId.setVisible(false);
 
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
@@ -233,12 +238,28 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveEntityMetaWritable() throws Exception
 	{
 		when(molgenisPermissionService.hasPermissionOnEntity(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
+		when(dataService.getCapabilities(ENTITY_NAME))
+				.thenReturn(new HashSet<RepositoryCapability>(Arrays.asList(RepositoryCapability.WRITABLE)));
 		mockMvc.perform(get(HREF_ENTITY_META)).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_META
 						+ "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"" + ENTITY_NAME
 						+ "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
 						+ "/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":true}"));
+	}
+
+	@Test
+	public void retrieveEntityMetaNotWritable() throws Exception
+	{
+		when(molgenisPermissionService.hasPermissionOnEntity(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
+		when(dataService.getCapabilities(ENTITY_NAME))
+				.thenReturn(new HashSet<RepositoryCapability>(Arrays.asList(RepositoryCapability.QUERYABLE)));
+		mockMvc.perform(get(HREF_ENTITY_META)).andExpect(status().isOk())
+				.andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_META
+						+ "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"" + ENTITY_NAME
+						+ "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
+						+ "/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false}"));
 	}
 
 	@Test
@@ -266,11 +287,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveEntityMetaExpandAttributes() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_META).param("expand", "attributes")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_META
-						+ "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"" + ENTITY_NAME
-						+ "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
-						+ "/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":true,\"aggregateable\":false},\"id\":{\"href\":\"/api/v1/Person/meta/id\",\"fieldType\":\"STRING\",\"name\":\"id\",\"label\":\"id\",\"attributes\":[],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":true,\"labelAttribute\":false,\"unique\":true,\"visible\":false,\"lookupAttribute\":false,\"aggregateable\":false},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\",\"fieldType\":\"ENUM\",\"name\":\"enum\",\"label\":\"enum\",\"attributes\":[],\"enumOptions\":[\"enum0, enum1\"],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"aggregateable\":false}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false}"));
+				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content().string(
+						"{\"href\":\"/api/v1/Person/meta\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"aggregateable\":false},\"id\":{\"href\":\"/api/v1/Person/meta/id\",\"fieldType\":\"STRING\",\"name\":\"id\",\"label\":\"id\",\"attributes\":[],\"maxLength\":255,\"auto\":false,\"nillable\":false,\"readOnly\":true,\"labelAttribute\":false,\"unique\":true,\"visible\":false,\"lookupAttribute\":false,\"aggregateable\":false},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\",\"fieldType\":\"ENUM\",\"name\":\"enum\",\"label\":\"enum\",\"attributes\":[],\"enumOptions\":[\"enum0, enum1\"],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"aggregateable\":false}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false}"));
 	}
 
 	@Test
@@ -367,7 +385,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		Repository repo = mock(Repository.class);
 		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
-		when(dataService.getEntityNames()).thenReturn(Arrays.asList(ENTITY_NAME));
+		when(dataService.getEntityNames()).thenReturn(Stream.of(ENTITY_NAME));
 		Entity entityXref = new MapEntity("id");
 		entityXref.set("id", ENTITY_ID);
 		entityXref.set("xrefValue", "PietXREF");
@@ -389,7 +407,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		attrName.setRefEntity(refMeta);
 
 		DefaultAttributeMetaData attrId = new DefaultAttributeMetaData("id", FieldTypeEnum.INT);
-		attrId.setIdAttribute(true);
 		attrId.setVisible(false);
 
 		when(meta.getAttribute("name")).thenReturn(attrName);
@@ -578,11 +595,17 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public LanguageService languageService()
+		{
+			return mock(LanguageService.class);
+		}
+
+		@Bean
 		public RestController restController()
 		{
 			return new RestController(dataService(), tokenService(), authenticationManager(),
 					molgenisPermissionService(), new ResourceFingerprintRegistry(), new MolgenisRSQL(),
-					new RestService(dataService(), idGenerator(), fileStore()));
+					new RestService(dataService(), idGenerator(), fileStore()), languageService());
 		}
 	}
 

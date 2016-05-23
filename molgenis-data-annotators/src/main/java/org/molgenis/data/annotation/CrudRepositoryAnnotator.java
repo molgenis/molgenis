@@ -1,13 +1,7 @@
 package org.molgenis.data.annotation;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-
-import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.data.DataService;
+import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
@@ -15,143 +9,167 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.security.core.MolgenisPermissionService;
-import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.security.user.UserAccountService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.context.SecurityContext;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+
+@Component
 public class CrudRepositoryAnnotator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(CrudRepositoryAnnotator.class);
+
 	private static final int BATCH_SIZE = 1000;
 
-	private final String newRepositoryLabel;
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
-	private final UserAccountService userAccountService;
-	private final MolgenisPermissionService molgenisPermissionService;
 
-	public CrudRepositoryAnnotator(DataService dataService, String newRepositoryName,
-			PermissionSystemService permissionSystemService, UserAccountService userAccountService,
-			MolgenisPermissionService molgenisPermissionService)
+	@Autowired
+	public CrudRepositoryAnnotator(DataService dataService, PermissionSystemService permissionSystemService)
 	{
 		this.dataService = dataService;
-		this.newRepositoryLabel = newRepositoryName;
 		this.permissionSystemService = permissionSystemService;
-		this.userAccountService = userAccountService;
-		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
 	/**
 	 * @param annotators
 	 * @param repo
-	 * @param createCopy
 	 */
-	public void annotate(List<RepositoryAnnotator> annotators, Repository repo, boolean createCopy) throws IOException
+	public void annotate(List<RepositoryAnnotator> annotators, Repository repo) throws IOException
 	{
 		for (RepositoryAnnotator annotator : annotators)
 		{
-			repo = annotate(annotator, repo, createCopy);
-			createCopy = false;
+			repo = annotate(annotator, repo);
 		}
 	}
 
 	/**
 	 * @param annotator
-	 * @param sourceRepo
-	 * @param createCopy
+	 * @param repository
 	 */
 	@Transactional
-	public Repository annotate(RepositoryAnnotator annotator, Repository sourceRepo, boolean createCopy)
-			throws IOException
+	public Repository annotate(RepositoryAnnotator annotator, Repository repository) throws IOException
 	{
-		if (!sourceRepo.getCapabilities().contains(RepositoryCapability.UPDATEABLE) && !createCopy)
+		EntityMetaData targetMetaData = null;
+		if (!repository.getCapabilities().contains(RepositoryCapability.WRITABLE))
 		{
-			throw new UnsupportedOperationException("Currently only updateable repositories can be annotated");
+			throw new UnsupportedOperationException("Currently only writable repositories can be annotated");
 		}
-
-		if (!molgenisPermissionService.hasPermissionOnEntity(sourceRepo.getName(), Permission.WRITE))
+		try
 		{
-			throw new AccessDeniedException("No write permission on entity '" + sourceRepo.getName() + "'");
-		}
+			EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(repository.getName());
 
-		if (createCopy) LOG.info("Creating a copy of " + sourceRepo.getName() + " repository, which will be labelled "
-				+ newRepositoryLabel + ". A UUID will be generated for the name/identifier");
-
-		String user = userAccountService.getCurrentUser().getUsername();
-		LOG.info("Started annotating \"" + sourceRepo.getName() + "\" with the " + annotator.getSimpleName()
-				+ " annotator (started by \"" + user + "\")");
-
-		// Current security context
-		SecurityContext securityContext = SecurityContextHolder.getContext();
-
-		return RunAsSystemProxy.runAsSystem(() -> {
-			EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(sourceRepo.getName());
-			DefaultAttributeMetaData compoundAttributeMetaData = AnnotatorUtils.getCompoundResultAttribute(annotator,
-					entityMetaData);
-
-			Repository targetRepo = addAnnotatorMetadataToRepositories(entityMetaData, createCopy,
-					compoundAttributeMetaData);
-
-			if (createCopy)
+			Repository crudRepository;
+			if (annotator instanceof RefEntityAnnotator)
 			{
-				// Give current user permissions on the created repo
-				permissionSystemService.giveUserEntityPermissions(securityContext, Arrays.asList(targetRepo.getName()));
+				targetMetaData = ((RefEntityAnnotator) annotator).getOutputMetaData(entityMetaData);
+				if (!dataService.hasRepository(targetMetaData.getName()))
+				{
+					// add new entities to new repo
+					Repository externalRepository = dataService.getMeta().addEntityMeta(targetMetaData);
+					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
+							Collections.singletonList(externalRepository.getName()));
+					crudRepository = iterateOverEntitiesAndAnnotate(repository, externalRepository, annotator,
+							DatabaseAction.ADD);
+				}
+				else
+				{
+					throw new UnsupportedOperationException(
+							"This entity has already been annotated with " + annotator.getSimpleName());
+				}
+			}
+			else
+			{
+				// add attribute meta data to source entity
+				DefaultAttributeMetaData compoundAttributeMetaData = AnnotatorUtils
+						.getCompoundResultAttribute(annotator, entityMetaData);
+
+				runAsSystem(() -> addAnnotatorMetadataToRepositories(entityMetaData, compoundAttributeMetaData));
+				crudRepository = iterateOverEntitiesAndAnnotate(repository, repository, annotator,
+						DatabaseAction.UPDATE);
 			}
 
-			Repository crudRepository = iterateOverEntitiesAndAnnotate(sourceRepo, targetRepo, annotator);
-
-			LOG.info("Finished annotating \"" + sourceRepo.getName() + "\" with the " + annotator.getSimpleName()
-					+ " annotator (started by \"" + user + "\")");
-
 			return crudRepository;
-		});
+		}
+		catch (Exception e)
+		{
+			deleteResultEntity(annotator, targetMetaData);
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void deleteResultEntity(RepositoryAnnotator annotator, EntityMetaData targetMetaData)
+	{
+		try
+		{
+			if (annotator instanceof RefEntityAnnotator && targetMetaData != null)
+			{
+				RunAsSystemProxy.runAsSystem(() -> {
+					dataService.deleteAll(targetMetaData.getName());
+					dataService.getMeta().deleteEntityMeta(targetMetaData.getName());
+				});
+			}
+		}
+		catch (Exception ex)
+		{
+			// log the problem but throw the original exception
+			LOG.error("Failed to remove result entity: %s", targetMetaData.getName());
+		}
 	}
 
 	/**
 	 * Iterates over all the entities within a repository and annotates.
 	 */
-	private Repository iterateOverEntitiesAndAnnotate(Repository sourceRepo, Repository targetRepo,
-			RepositoryAnnotator annotator)
+	private Repository iterateOverEntitiesAndAnnotate(Repository sourceRepository, Repository targetRepository,
+			RepositoryAnnotator annotator, DatabaseAction action)
 	{
-		Iterator<Entity> it = annotator.annotate(sourceRepo);
+		Iterator<Entity> it = annotator.annotate(sourceRepository);
 
-		List<Entity> batch = new ArrayList<Entity>();
+		List<Entity> batch = new ArrayList<>();
 		while (it.hasNext())
 		{
 			batch.add(it.next());
 			if (batch.size() == BATCH_SIZE)
 			{
-				processBatch(batch, sourceRepo, targetRepo);
+				processBatch(batch, targetRepository, action);
 				batch.clear();
 			}
 		}
 
 		if (!batch.isEmpty())
 		{
-			processBatch(batch, sourceRepo, targetRepo);
+			processBatch(batch, targetRepository, action);
 		}
 
-		return targetRepo == null ? sourceRepo : targetRepo;
+		return targetRepository;
 	}
 
-	private void processBatch(List<Entity> batch, Repository sourceRepo, Repository targetRepo)
+	private void processBatch(List<Entity> batch, Repository repository, DatabaseAction action)
 	{
-		if (targetRepo == null)
+		switch (action)
 		{
-			sourceRepo.update(batch);
+			case UPDATE:
+				repository.update(batch.stream());
+				break;
+			case ADD:
+				repository.add(batch.stream());
+				break;
+			default:
+				throw new UnsupportedOperationException();
 		}
-		else
-		{
-			targetRepo.add(batch);
-		}
+
 	}
 
 	/**
@@ -159,32 +177,17 @@ public class CrudRepositoryAnnotator
 	 *
 	 * @param entityMetaData
 	 *            {@link EntityMetaData} for the existing repository
-	 * @param createCopy
 	 * @param compoundAttributeMetaData
 	 */
-	private Repository addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, boolean createCopy,
+	private void addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData,
 			DefaultAttributeMetaData compoundAttributeMetaData)
 	{
-		if (createCopy)
-		{
-			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(RandomStringUtils.randomAlphabetic(30),
-					entityMetaData);
-			if (newEntityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
-			{
-				newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
-			}
-			newEntityMetaData.setLabel(newRepositoryLabel);
-
-			return dataService.getMeta().addEntityMeta(newEntityMetaData);
-		}
-		else if (entityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
+		if (entityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
 		{
 			DefaultEntityMetaData newEntityMetaData = new DefaultEntityMetaData(entityMetaData);
 			newEntityMetaData.addAttributeMetaData(compoundAttributeMetaData);
 			dataService.getMeta().updateSync(newEntityMetaData);
 		}
-
-		return null;
 	}
 
 }

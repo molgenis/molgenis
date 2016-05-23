@@ -1,8 +1,8 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 
-<#assign css=['mapping-service.css', 'select2.css']>
-<#assign js=['bootbox.min.js', 'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js', 'select2-patched.js', 'tag-wizard.js']>
+<#assign css=['mapping-service.css']>
+<#assign js=['bootbox.min.js', 'jquery/scrollTableBody/jquery.scrollTableBody-1.0.0.js', 'tag-wizard.js']>
 
 <@header css js/>
 
@@ -131,7 +131,7 @@
 			
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-				<h4 class="modal-title">Select ontologies to add as tags</h4>
+				<h4 class="modal-title">Select ontology terms to add as tag</h4>
 			</div>
 			
 			<div class="modal-body">

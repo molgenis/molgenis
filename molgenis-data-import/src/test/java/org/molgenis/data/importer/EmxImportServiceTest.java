@@ -24,6 +24,7 @@ import org.molgenis.data.Package;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
@@ -33,6 +34,8 @@ import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.ontology.ic.TermFrequencyService;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,17 +59,12 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	public static class Config
 	{
 		@Bean
-		public Client client()
-		{
-			return Mockito.mock(Client.class);
-		}
-
-		@Bean
 		public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory()
 		{
 
 			EmbeddedElasticSearchServiceFactory result = Mockito.mock(EmbeddedElasticSearchServiceFactory.class);
-			Mockito.when(result.getClient()).thenReturn(client());
+			Client client = Mockito.mock(Client.class);
+			Mockito.when(result.getClient()).thenReturn(client);
 			return result;
 		}
 
@@ -74,6 +72,18 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		public TermFrequencyService termFrequencyService()
 		{
 			return Mockito.mock(TermFrequencyService.class);
+		}
+
+		@Bean
+		public MolgenisPermissionService molgenisPermissionService()
+		{
+			return Mockito.mock(org.molgenis.security.core.MolgenisPermissionService.class);
+		}
+
+		@Bean
+		public LanguageService languageService()
+		{
+			return Mockito.mock(LanguageService.class);
 		}
 	}
 
@@ -92,6 +102,9 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	UntypedTagService tagService;
 
+	@Autowired
+	MolgenisPermissionService molgenisPermissionService;
+
 	@BeforeMethod
 	public void beforeMethod()
 	{
@@ -103,6 +116,8 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		{
 			dataService.deleteAll("import_city");
 		}
+		when(molgenisPermissionService.hasPermissionOnEntity(Mockito.anyString(), Mockito.any(Permission.class)))
+				.thenReturn(true);
 	}
 
 	@Test
@@ -114,7 +129,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 
 		// create importer
 		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService), new ImportWriter(
-				dataService, permissionSystemService, tagService), dataService);
+				dataService, permissionSystemService, tagService, molgenisPermissionService), dataService);
 
 		// generate report
 		EntitiesValidationReport report = importer.validateImport(f, source);
@@ -162,7 +177,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		Assert.assertNotNull(source.getRepository("attributes"));
 
 		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService), new ImportWriter(
-				dataService, permissionSystemService, tagService), dataService);
+				dataService, permissionSystemService, tagService, molgenisPermissionService), dataService);
 
 		// test import
 		EntityImportReport report = importer.doImport(source, DatabaseAction.ADD, Package.DEFAULT_PACKAGE_NAME);
@@ -180,7 +195,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		// Check parents
 		List<Entity> entitiesWithParents = StreamSupport
 				.stream(dataService.getRepository("import_person").spliterator(), false)
-				.filter(e -> e.getEntities("parent").iterator().hasNext())
+				.filter(e -> (e.getEntities("parent").iterator().hasNext()))
 				.collect(Collectors.toCollection(ArrayList::new));
 		Entity parent1 = entitiesWithParents.get(0).getEntity("parent");
 		Assert.assertEquals(parent1.getIdValue().toString(), "john");
@@ -205,7 +220,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		ExcelRepositoryCollection source = new ExcelRepositoryCollection(f);
 
 		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService), new ImportWriter(
-				dataService, permissionSystemService, tagService), dataService);
+				dataService, permissionSystemService, tagService, molgenisPermissionService), dataService);
 
 		// test import
 		importer.doImport(source, DatabaseAction.ADD, Package.DEFAULT_PACKAGE_NAME);
@@ -228,7 +243,7 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		when(file.getName()).thenReturn("file.xlsx");
 
 		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataService), new ImportWriter(
-				dataService, permissionSystemService, tagService), dataService);
+				dataService, permissionSystemService, tagService, molgenisPermissionService), dataService);
 
 		RepositoryCollection source = Mockito.mock(RepositoryCollection.class);
 		when(source.getEntityNames()).thenReturn(Arrays.asList("attributes"));
@@ -246,10 +261,11 @@ public class EmxImportServiceTest extends AbstractTestNGSpringContextTests
 		DataService dataServiceMock = Mockito.mock(DataService.class);
 		MetaDataService metaDataServiceMock = Mockito.mock(MetaDataService.class);
 		when(dataServiceMock.getMeta()).thenReturn(metaDataServiceMock);
-		when(metaDataServiceMock.getEntityMetaData("existingAttribute")).thenReturn(Mockito.mock(EntityMetaData.class));
+		EntityMetaData emd = Mockito.mock(EntityMetaData.class);
+		when(metaDataServiceMock.getEntityMetaData("existingAttribute")).thenReturn(emd);
 
 		EmxImportService importer = new EmxImportService(new EmxMetaDataParser(dataServiceMock), new ImportWriter(
-				dataServiceMock, permissionSystemService, tagService), dataServiceMock);
+				dataServiceMock, permissionSystemService, tagService, molgenisPermissionService), dataServiceMock);
 
 		RepositoryCollection source = Mockito.mock(RepositoryCollection.class);
 		when(source.getEntityNames()).thenReturn(Arrays.asList("existingAttribute"));

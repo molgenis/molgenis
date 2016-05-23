@@ -2,6 +2,8 @@ package org.molgenis.data.elasticsearch.index;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 
 import java.text.ParseException;
@@ -35,8 +37,8 @@ public class EntityToSourceConverterTest
 		String refLabelAttributeName = "reflabel";
 		String refMrefAttributeName = "refmref";
 		DefaultEntityMetaData refEntityMetaData = new DefaultEntityMetaData(refEntityName);
-		refEntityMetaData.addAttribute(idAttributeName).setIdAttribute(true).setUnique(true);
-		refEntityMetaData.addAttribute(refLabelAttributeName).setLabelAttribute(true).setUnique(true);
+		refEntityMetaData.addAttribute(idAttributeName, ROLE_ID);
+		refEntityMetaData.addAttribute(refLabelAttributeName, ROLE_LABEL).setUnique(true);
 		refEntityMetaData.addAttribute(refMrefAttributeName).setDataType(MolgenisFieldTypes.MREF).setNillable(true)
 				.setRefEntity(refEntityMetaData);
 
@@ -61,7 +63,7 @@ public class EntityToSourceConverterTest
 		String xrefAttributeName = "xxref";
 
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
-		entityMetaData.addAttribute(idAttributeName).setIdAttribute(true).setUnique(true);
+		entityMetaData.addAttribute(idAttributeName, ROLE_ID);
 		entityMetaData.addAttribute(boolAttributeName).setDataType(MolgenisFieldTypes.BOOL);
 		entityMetaData.addAttribute(categoricalAttributeName).setDataType(MolgenisFieldTypes.CATEGORICAL)
 				.setRefEntity(refEntityMetaData);
@@ -69,9 +71,7 @@ public class EntityToSourceConverterTest
 				.setDataType(MolgenisFieldTypes.STRING);
 		DefaultAttributeMetaData compoundPart1Attribute = new DefaultAttributeMetaData(compoundPart1AttributeName)
 				.setDataType(MolgenisFieldTypes.STRING);
-		entityMetaData
-				.addAttribute(compoundAttributeName)
-				.setDataType(MolgenisFieldTypes.COMPOUND)
+		entityMetaData.addAttribute(compoundAttributeName).setDataType(MolgenisFieldTypes.COMPOUND)
 				.setAttributesMetaData(
 						Arrays.<AttributeMetaData> asList(compoundPart0Attribute, compoundPart1Attribute));
 		entityMetaData.addAttribute(dateAttributeName).setDataType(MolgenisFieldTypes.DATE);

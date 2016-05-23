@@ -1,6 +1,7 @@
 package org.molgenis.data;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * Definition of a query
@@ -14,7 +15,7 @@ public interface Query extends Iterable<Entity>
 	 */
 	Long count();
 
-	Iterable<Entity> findAll();
+	Stream<Entity> findAll();
 
 	Entity findOne();
 
@@ -133,4 +134,33 @@ public interface Query extends Iterable<Entity>
 	Sort sort();
 
 	Query sort(Sort sort);
+
+	/**
+	 * Return the query {@link Fetch} that defines which entity attributes to retrieve.
+	 * 
+	 * @return the query {@link Fetch} or null
+	 */
+	Fetch getFetch();
+
+	/**
+	 * Sets the query {@link Fetch} that defines which entity attributes to retrieve.
+	 * 
+	 * @param fetch
+	 *            the query {@link Fetch}
+	 */
+	void setFetch(Fetch fetch);
+
+	/**
+	 * Create a new empty {@link Fetch} that defines which entity attributes to retrieve.
+	 * 
+	 * @return new empty {@link Fetch}
+	 */
+	Fetch fetch();
+
+	/**
+	 * Sets the query {@link Fetch} that defines which entity attributes to retrieve.
+	 * 
+	 * @return this query
+	 */
+	Query fetch(Fetch fetch);
 }

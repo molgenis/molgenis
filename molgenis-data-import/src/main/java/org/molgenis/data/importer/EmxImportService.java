@@ -51,6 +51,8 @@ public class EmxImportService implements ImportService
 			for (String entityName : source.getEntityNames())
 			{
 				if (entityName.equalsIgnoreCase(EmxMetaDataParser.ATTRIBUTES)) return true;
+				if (entityName.equalsIgnoreCase(EmxMetaDataParser.LANGUAGES)) return true;
+				if (entityName.equalsIgnoreCase(EmxMetaDataParser.I18NSTRINGS)) return true;
 				if (dataService.getMeta().getEntityMetaData(entityName) != null) return true;
 			}
 		}
@@ -85,17 +87,15 @@ public class EmxImportService implements ImportService
 			LOG.error("Error handling EmxImportJob", e);
 			try
 			{
+				// TODO rollback of languages
 				writer.rollbackSchemaChanges(job);
+				dataService.getMeta().refreshCaches();
 			}
 			catch (Exception ignore)
 			{
 				LOG.error("Error rolling back schema changes", ignore);
 			}
 			throw e;
-		}
-		finally
-		{
-			dataService.getMeta().refreshCaches();
 		}
 	}
 

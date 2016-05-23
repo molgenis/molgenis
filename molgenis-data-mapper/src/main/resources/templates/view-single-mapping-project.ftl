@@ -6,9 +6,6 @@
 
 <@header css js/>
 
-<script src="<@resource_href "/js/ace/src-min-noconflict/ace.js"/>" type="text/javascript" charset="utf-8"></script>
-<script src="<@resource_href "/js/ace/src-min-noconflict/ext-language_tools.js"/>" type="text/javascript" charset="utf-8"></script>
-
 <div class="row">
 	<div class="col-md-12">
 		<a href="${context_url}" class="btn btn-default btn-xs">
@@ -70,74 +67,72 @@
  				</tr>
  			</thead>
  			<tbody>
-				<#list mappingProject.getMappingTarget(selectedTarget).target.getAtomicAttributes().iterator() as attribute>
-					<#if !attribute.isIdAtrribute()>
-						<tr>
-							<td>
-								<b>${attribute.label?html}</b> (${attribute.dataType})
-								<#if !attribute.nillable> <span class="label label-default">required</span></#if>
-								<#if attribute.unique> <span class="label label-default">unique</span></#if>
-								<#if attribute.description??><br />${attribute.description?html}</#if>
-								<#if attribute.tags??><br />${attribute.tags?html}</#if>
-								<#if attributeTagMap[attribute.name]??>
-									<br />
-									<#list attributeTagMap[attribute.name] as tag>
-										<span class="label label-danger"> ${tag.label}</span>
-									</#list>
-								</#if>
-							</td>
-							<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
-								<td <#if source.getAttributeMapping(attribute.name)??>
-										<#assign attributeMapping = source.getAttributeMapping(attribute.name)>
-										<#if attributeMapping.algorithmState??>
-											<#if attributeMapping.algorithmState == "GENERATED_HIGH">
-												class="bg-info"
-											<#elseif attributeMapping.algorithmState == "GENERATED_LOW">
-												class="bg-warning"
-											<#elseif attributeMapping.algorithmState == "CURATED">
-												class="bg-success"
-											<#elseif attributeMapping.algorithmState == "DISCUSS">
-												class="bg-danger"
-											</#if>
+				<#list mappingProject.getMappingTarget(selectedTarget).target.getAtomicAttributes() as attribute>
+					<tr>
+						<td>
+							<b>${attribute.label?html}</b> (${attribute.dataType})
+							<#if !attribute.nillable> <span class="label label-default">required</span></#if>
+							<#if attribute.unique> <span class="label label-default">unique</span></#if>
+							<#if attribute.description??><br />${attribute.description?html}</#if>
+							<#if attribute.tags??><br />${attribute.tags?html}</#if>
+							<#if attributeTagMap[attribute.name]??>
+								<br />
+								<#list attributeTagMap[attribute.name] as tag>
+									<span class="label label-danger"> ${tag.label}</span>
+								</#list>
+							</#if>
+						</td>
+						<#list mappingProject.getMappingTarget(selectedTarget).entityMappings as source>
+							<td <#if source.getAttributeMapping(attribute.name)??>
+									<#assign attributeMapping = source.getAttributeMapping(attribute.name)>
+									<#if attributeMapping.algorithmState??>
+										<#if attributeMapping.algorithmState == "GENERATED_HIGH">
+											class="bg-info"
+										<#elseif attributeMapping.algorithmState == "GENERATED_LOW">
+											class="bg-warning"
+										<#elseif attributeMapping.algorithmState == "CURATED">
+											class="bg-success"
+										<#elseif attributeMapping.algorithmState == "DISCUSS">
+											class="bg-danger"
 										</#if>
-									</#if>>
-									<div class="pull-right">
-										<form method="get" action="${context_url}/attributeMapping" class="pull-right">
+									</#if>
+								</#if>>
+								<div class="pull-right">
+									<form method="get" action="${context_url}/attributeMapping" class="pull-right">
+										<button type="submit" class="btn btn-default btn-xs">
+											<span class="glyphicon glyphicon-pencil"></span>
+										</button>
+										<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
+										<input type="hidden" name="target" value="${selectedTarget}"/>
+										<input type="hidden" name="source" value="${source.name}"/>
+										<input type="hidden" name="targetAttribute" value="${attribute.name}"/>
+									</form>
+									<#if hasWritePermission && source.getAttributeMapping(attribute.name)??>
+										<form method="post" action="${context_url}/removeAttributeMapping" class="pull-right verify">
 											<button type="submit" class="btn btn-default btn-xs">
-												<span class="glyphicon glyphicon-pencil"></span>
+												<span class="glyphicon glyphicon-remove"></span>
 											</button>
 											<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
 											<input type="hidden" name="target" value="${selectedTarget}"/>
 											<input type="hidden" name="source" value="${source.name}"/>
-											<input type="hidden" name="targetAttribute" value="${attribute.name}"/>
+											<input type="hidden" name="attribute" value="${attribute.name}"/>
 										</form>
-										<#if hasWritePermission && source.getAttributeMapping(attribute.name)??>
-											<form method="post" action="${context_url}/removeAttributeMapping" class="pull-right verify">
-												<button type="submit" class="btn btn-default btn-xs">
-													<span class="glyphicon glyphicon-remove"></span>
-												</button>
-												<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}"/>
-												<input type="hidden" name="target" value="${selectedTarget}"/>
-												<input type="hidden" name="source" value="${source.name}"/>
-												<input type="hidden" name="attribute" value="${attribute.name}"/>
-											</form>
-										</#if>
-									</div>
-									<div>
-										<#if source.getAttributeMapping(attribute.name)??>
-											<#assign attributeMapping = source.getAttributeMapping(attribute.name)>		
-											<#list attributeMapping.sourceAttributeMetaDatas as mappedSourceAttribute>
-												${mappedSourceAttribute.label?html}<#if mappedSourceAttribute_has_next>, </#if>
-												<#if attributeMapping.algorithmState??></#if>
-											</#list>
-										<#elseif !attribute.nillable>
-											<span class="label label-danger">missing</span>
-										</#if>
-									</div>
-								</td>
-							</#list>
-						</tr>
-					</#if>
+									</#if>
+								</div>
+								<div>
+									<#if source.getAttributeMapping(attribute.name)??>
+										<#assign attributeMapping = source.getAttributeMapping(attribute.name)>		
+										<#list attributeMapping.sourceAttributeMetaDatas as mappedSourceAttribute>
+											${mappedSourceAttribute.label?html}<#if mappedSourceAttribute_has_next>, </#if>
+											<#if attributeMapping.algorithmState??></#if>
+										</#list>
+									<#elseif !attribute.nillable>
+										<span class="label label-danger">missing</span>
+									</#if>
+								</div>
+							</td>
+						</#list>
+					</tr>
 				</#list>
 			</tbody>
 		</table>
@@ -153,7 +148,7 @@
 <div class="row">		
 	<#if mappingProject.getMappingTarget(selectedTarget).entityMappings?has_content>
 		<div class="col-md-8">		
-			<a id="add-new-attr-mapping-btn" href="#" class="btn btn-success pull-right" data-toggle="modal" data-target="#create-integrated-entity-modal">
+			<a id="create-integrated-entity-open-modal-btn" href="#" class="btn btn-success pull-right" data-toggle="modal" data-target="#create-integrated-entity-modal">
 				<span class="glyphicon glyphicon-play"></span> Create integrated dataset
 			</a>
 		</div>
@@ -172,7 +167,7 @@
         		<form id="create-new-source-form" method="post" action="${context_url}/addEntityMapping">	
 					<div class="form-group">
 	            		<label>Select a new source to map against the target attribute</label>
-  						<select name="source" class="form-control" required="required" placeholder="Select a target entity">
+  						<select name="source" id="source-entity-select" class="form-control" required="required" placeholder="Select source entity">
 	    					<#list entityMetaDatas as entityMetaData>
     							<option value="${entityMetaData.name?html}">${entityMetaData.name?html}</option>
 	    					</#list>

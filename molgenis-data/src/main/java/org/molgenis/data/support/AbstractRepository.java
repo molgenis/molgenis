@@ -1,26 +1,29 @@
 package org.molgenis.data.support;
 
 import static com.google.common.base.Predicates.notNull;
-import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.filter;
-import static com.google.common.collect.Iterables.partition;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Maps.uniqueIndex;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 
 /**
@@ -30,8 +33,8 @@ public abstract class AbstractRepository implements Repository
 {
 	private static final int FIND_ALL_BATCH_SIZE = 1000;
 
-	private final static Logger LOG = LoggerFactory.getLogger(AbstractRepository.class);
-	
+	private final Logger LOG = LoggerFactory.getLogger(getClass());
+
 	private String name;
 
 	@Override
@@ -65,7 +68,7 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -79,21 +82,39 @@ public abstract class AbstractRepository implements Repository
 	@Override
 	public Entity findOne(Object id)
 	{
+		return findOne(id, null);
+	}
+
+	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
 	@Transactional(readOnly = true)
-	public Iterable<Entity> findAll(Iterable<Object> ids)
+	public Stream<Entity> findAll(Stream<Object> ids)
 	{
-		if (ids == null) return Collections.emptyList();
-		return concat(transform(partition(ids, FIND_ALL_BATCH_SIZE), this::findAllBatched));
+		return findAll(ids, null);
 	}
-	
-	private Iterable<Entity> findAllBatched(List<Object> ids)
+
+	@Override
+	@Transactional(readOnly = true)
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		Query inQuery = new QueryImpl().in(getEntityMetaData().getIdAttribute().getName(), Sets.newHashSet(ids));
-		Map<Object, Entity> indexedEntities = uniqueIndex(findAll(inQuery), Entity::getIdValue);
+		Iterator<List<Object>> batches = Iterators.partition(ids.iterator(), FIND_ALL_BATCH_SIZE);
+		Iterable<List<Object>> iterable = () -> batches;
+		return StreamSupport.stream(iterable.spliterator(), false).flatMap(batch -> {
+			return StreamSupport.stream(findAllBatched(batch, fetch).spliterator(), false);
+		});
+	}
+
+	private Iterable<Entity> findAllBatched(List<Object> ids, Fetch fetch)
+	{
+		String fieldIdAttributeName = getEntityMetaData().getIdAttribute().getName();
+		if (fetch != null) fetch.field(fieldIdAttributeName);
+		Query inQuery = new QueryImpl().in(fieldIdAttributeName, Sets.newHashSet(ids)).fetch(fetch);
+		Map<Object, Entity> indexedEntities = uniqueIndex(findAll(inQuery).iterator(), Entity::getIdValue);
 		return filter(transform(ids, id -> lookup(indexedEntities, id)), notNull());
 	}
 
@@ -102,9 +123,16 @@ public abstract class AbstractRepository implements Repository
 		Entity result = index.get(id);
 		if (result == null)
 		{
-			LOG.warn("Couldn't find {} for id {}.", getName(), id);
+			LOG.warn("Lookup: Couldn't find {} for id {}.", getName(), id);
 		}
 		return result;
+	}
+
+	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		// default action: ignore fetch
+		return stream();
 	}
 
 	@Override
@@ -120,7 +148,7 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> records)
+	public void update(Stream<? extends Entity> entities)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -132,7 +160,7 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
-	public void delete(Iterable<? extends Entity> entities)
+	public void delete(Stream<? extends Entity> entities)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -144,7 +172,7 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -162,7 +190,7 @@ public abstract class AbstractRepository implements Repository
 	}
 
 	@Override
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -175,5 +203,38 @@ public abstract class AbstractRepository implements Repository
 	@Override
 	public void clearCache()
 	{
+	}
+
+	// Implement in child class if repository has capability MANAGABLE
+	@Override
+	public void create()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	// Implement in child class if repository has capability MANAGABLE
+	@Override
+	public void drop()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	// Implement in child class if repository has capability INDEXABLE
+	@Override
+	public void rebuildIndex()
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		throw new UnsupportedOperationException();
 	}
 }

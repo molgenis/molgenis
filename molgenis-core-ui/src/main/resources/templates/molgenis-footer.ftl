@@ -23,6 +23,10 @@
             	</div>
             </div>
         </div>
+<#if authenticated?? && authenticated>
+<#else>
+    <#include "/login-modal.ftl">
+</#if>
 	</body>
 	<#if app_settings.trackingCodeFooter?has_content>
 		<script id="app-tracking-code-footer" type="text/javascript">

@@ -1,5 +1,7 @@
 package org.molgenis.data.meta;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,6 +50,43 @@ public class MetaValidationUtilsTest
 		MetaValidationUtils.validateName("SELECT");
 	}
 
+	@Test
+	public void testI18nName()
+	{
+		MetaValidationUtils.validateName("test-en");
+		MetaValidationUtils.validateName("test-eng");
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testI18nNameMilti()
+	{
+		MetaValidationUtils.validateName("test-en-nl");
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testI18nTooLong()
+	{
+		MetaValidationUtils.validateName("test-xxxx");
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testI18nMissing()
+	{
+		MetaValidationUtils.validateName("test-");
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testI18nUpperCase()
+	{
+		MetaValidationUtils.validateName("test-NL");
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testI18nNumber()
+	{
+		MetaValidationUtils.validateName("test-n2");
+	}
+
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityMetaDataTooLong()
 	{
@@ -58,7 +97,7 @@ public class MetaValidationUtilsTest
 				.setDataType(MolgenisFieldTypes.STRING));
 		compAttrs.add(new DefaultAttributeMetaData("aCompString2").setDataType(MolgenisFieldTypes.STRING));
 		emd.addAttribute("aComp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributesMetaData(compAttrs);
-		emd.addAttribute("aString").setDataType(MolgenisFieldTypes.STRING).setIdAttribute(true);
+		emd.addAttribute("aString", ROLE_ID);
 
 		MetaValidationUtils.validateEntityMetaData(emd);
 	}
@@ -72,7 +111,7 @@ public class MetaValidationUtilsTest
 		compAttrs.add(new DefaultAttributeMetaData("aCompString1").setDataType(MolgenisFieldTypes.STRING));
 		compAttrs.add(new DefaultAttributeMetaData("2aCompString").setDataType(MolgenisFieldTypes.STRING));
 		emd.addAttribute("aComp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributesMetaData(compAttrs);
-		emd.addAttribute("aString").setDataType(MolgenisFieldTypes.STRING).setIdAttribute(true);
+		emd.addAttribute("aString", ROLE_ID);
 
 		MetaValidationUtils.validateEntityMetaData(emd);
 	}
@@ -86,7 +125,7 @@ public class MetaValidationUtilsTest
 		compAttrs.add(new DefaultAttributeMetaData("aCompString1").setDataType(MolgenisFieldTypes.STRING));
 		compAttrs.add(new DefaultAttributeMetaData("aCompString2").setDataType(MolgenisFieldTypes.STRING));
 		emd.addAttribute("a.Comp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributesMetaData(compAttrs);
-		emd.addAttribute("aString").setDataType(MolgenisFieldTypes.STRING).setIdAttribute(true);
+		emd.addAttribute("aString", ROLE_ID);
 
 		MetaValidationUtils.validateEntityMetaData(emd);
 	}
@@ -95,7 +134,7 @@ public class MetaValidationUtilsTest
 	public void testValidateEntityMetaDataIdAttributeWithDefaultValue()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
-		emd.addAttribute("id").setIdAttribute(true).setDefaultValue("5");
+		emd.addAttribute("id", ROLE_ID).setDefaultValue("5");
 
 		MetaValidationUtils.validateEntityMetaData(emd);
 	}
@@ -104,7 +143,7 @@ public class MetaValidationUtilsTest
 	public void testValidateEntityMetaDataUniqueAttributeWithDefaultValue()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
-		emd.addAttribute("id").setIdAttribute(true);
+		emd.addAttribute("id", ROLE_ID);
 		emd.addAttribute("uniqueAttribute").setUnique(true).setDefaultValue("5");
 
 		MetaValidationUtils.validateEntityMetaData(emd);
@@ -114,7 +153,7 @@ public class MetaValidationUtilsTest
 	public void testValidateEntityComputedAttributeWithDefaultValue()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
-		emd.addAttribute("id").setIdAttribute(true);
+		emd.addAttribute("id", ROLE_ID);
 		emd.addAttribute("expressionAttribute").setExpression("$('id').value()").setDefaultValue("5");
 
 		MetaValidationUtils.validateEntityMetaData(emd);
@@ -124,7 +163,7 @@ public class MetaValidationUtilsTest
 	public void testValidateEntityMetaDataOkayAttributeWithDefaultValue()
 	{
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
-		emd.addAttribute("id").setIdAttribute(true);
+		emd.addAttribute("id", ROLE_ID);
 		emd.addAttribute("blah").setDefaultValue("5");
 
 		MetaValidationUtils.validateEntityMetaData(emd);

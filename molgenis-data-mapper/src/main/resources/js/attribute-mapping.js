@@ -75,7 +75,7 @@
 					};
 
 					var items = [];
-					items.push('<img id="validation-spinner" src="/css/select2-spinner.gif">&nbsp;');
+					items.push('<img id="validation-spinner" src="/css/validation-spinner.gif">&nbsp;');
 					items.push('<span class="label label-default">Total: <span id="validation-total">?</span></span>&nbsp;');
 					items.push('<span class="label label-success">Success: <span id="validation-success">0</span></span>&nbsp;');
 					items
@@ -290,7 +290,6 @@
 	function getAceEditor(){
 		
 		var $textarea = $("#ace-editor-text-area");
-		
 		if(!$textarea.data('ace')){			
 			// create ace editor
 			$textarea.ace({
@@ -302,24 +301,6 @@
 				mode : 'javascript',
 				showGutter : true,
 				highlightActiveLine : true
-			});
-			
-			$textarea.data('ace').editor.getSession().on('change', function(object) {
-				var algorithm = $textarea.data('ace').editor.getSession().getValue();
-				
-				// check attributes if manually added
-				checkSelectedAttributes(algorithm);
-				
-				// update save buttons visibility
-				disableEnableSaveButtons(algorithm);
-				
-				// validate mapping
-				validateAttrMapping(algorithm);
-
-				// preview mapping results
-				loadAlgorithmResult(algorithm);
-				
-				$('#result-container').css('display', 'inline');
 			});
 		}	
 		return $textarea.data('ace').editor;
@@ -354,15 +335,15 @@
 				data : JSON.stringify(generateAlgorithmRequest),
 				contentType : 'application/json',
 				success : function(generatedAlgorithm) {
-					console.log(generatedAlgorithm);
-					// on selection of an attribute, show all fields
-					$('#result-container').css('display', 'inline');
 					
 					// If the generated algorithm is empty
-					if(generatedAlgorithm && generatedAlgorithm.length === 0){
+					if(selectedAttributes.length === 0){
 						$('#result-container').css('display', 'none');
 						$('.nav-tabs a[href=#script]').tab('show') ;
 						$('#map-tab').hide();
+					} else {
+						// on selection of an attribute, show all fields
+						$('#result-container').css('display', 'inline');
 					}
 					
 					// generate result table
@@ -583,7 +564,26 @@
 			'targetAttribute' : $('[name="targetAttribute"]').val(),
 			'searchTerms' : ""
 		}, explainedAttributes, attributes = [];
-		
+
+		$('#validate-algorithm-btn').on('click', function() {
+			var algorithm = $("#ace-editor-text-area").data('ace').editor.getSession().getValue();
+
+			// check attributes if manually added
+			checkSelectedAttributes(algorithm);
+
+			// update save buttons visibility
+			disableEnableSaveButtons(algorithm);
+
+			// validate mapping
+			validateAttrMapping(algorithm);
+
+			// preview mapping results
+			loadAlgorithmResult(algorithm);
+
+			// Show the result container
+			$('#result-container').css('display', 'inline');
+		});
+
 		// tooltip placement
 		$("[rel=tooltip]").tooltip({
 			placement : 'right'

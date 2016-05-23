@@ -1,5 +1,6 @@
 package org.molgenis.data.csv.typed;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.io.File;
@@ -31,8 +32,7 @@ public class TypedCsvRepositoryTest
 		DefaultEntityMetaData meta = new DefaultEntityMetaData("Test", TestEntity.class);
 
 		DefaultAttributeMetaData attr = new DefaultAttributeMetaData("index", FieldTypeEnum.INT);
-		attr.setIdAttribute(true);
-		meta.addAttributeMetaData(attr);
+		meta.addAttributeMetaData(attr, ROLE_ID);
 
 		meta.addAttributeMetaData(new DefaultAttributeMetaData("col1", FieldTypeEnum.STRING));
 		meta.addAttributeMetaData(new DefaultAttributeMetaData("col2", FieldTypeEnum.STRING));

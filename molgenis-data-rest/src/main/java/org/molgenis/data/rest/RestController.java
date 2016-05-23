@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,6 +60,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultEntityCollection;
@@ -88,6 +90,8 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.ObjectError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -131,11 +135,13 @@ public class RestController
 	private final MolgenisPermissionService molgenisPermissionService;
 	private final MolgenisRSQL molgenisRSQL;
 	private final RestService restService;
+	private final LanguageService languageService;
 
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
 			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService,
-			ResourceFingerprintRegistry resourceFingerprintRegistry, MolgenisRSQL molgenisRSQL, RestService restService)
+			ResourceFingerprintRegistry resourceFingerprintRegistry, MolgenisRSQL molgenisRSQL,
+			RestService restService, LanguageService languageService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.tokenService = requireNonNull(tokenService);
@@ -143,6 +149,7 @@ public class RestController
 		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
 		this.molgenisRSQL = requireNonNull(molgenisRSQL);
 		this.restService = requireNonNull(restService);
+		this.languageService = requireNonNull(languageService);
 	}
 
 	/**
@@ -181,7 +188,8 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		return new EntityMetaDataResponse(meta, attributeSet, attributeExpandSet, molgenisPermissionService);
+		return new EntityMetaDataResponse(meta, attributeSet, attributeExpandSet, molgenisPermissionService,
+				dataService, languageService);
 	}
 
 	/**
@@ -201,7 +209,8 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		return new EntityMetaDataResponse(meta, attributesSet, attributeExpandSet, molgenisPermissionService);
+		return new EntityMetaDataResponse(meta, attributesSet, attributeExpandSet, molgenisPermissionService,
+				dataService, languageService);
 	}
 
 	/**
@@ -415,7 +424,7 @@ public class RestController
 	 * 
 	 * start: the index of the first row, default 0
 	 * 
-	 * num: the number of results to return, default 100, max 100000
+	 * num: the number of results to return, default 100, max 10000
 	 * 
 	 * 
 	 * Example: /api/v1/csv/person?q=firstName==Piet&attributes=firstName,lastName&start=10&num=100
@@ -481,7 +490,14 @@ public class RestController
 				return null;
 			}
 
-			entities = dataService.findAll(entityName, q);
+			entities = new Iterable<Entity>()
+			{
+				@Override
+				public Iterator<Entity> iterator()
+				{
+					return dataService.findAll(entityName, q).iterator();
+				}
+			};
 		}
 		catch (ConversionFailedException | RSQLParserException | UnknownAttributeException | IllegalArgumentException
 				| UnsupportedOperationException | UnknownEntityException e)
@@ -891,7 +907,11 @@ public class RestController
 
 		tokenService.removeToken(token);
 		SecurityContextHolder.getContext().setAuthentication(null);
-		request.getSession().invalidate();
+
+		if (request.getSession(false) != null)
+		{
+			request.getSession().invalidate();
+		}
 	}
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
@@ -928,6 +948,22 @@ public class RestController
 	{
 		LOG.debug("", e);
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+	}
+
+	@ExceptionHandler(MethodArgumentNotValidException.class)
+	@ResponseStatus(BAD_REQUEST)
+	@ResponseBody
+	public ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException e)
+	{
+		LOG.debug("", e);
+
+		List<ErrorMessage> messages = Lists.newArrayList();
+		for (ObjectError error : e.getBindingResult().getAllErrors())
+		{
+			messages.add(new ErrorMessage(error.getDefaultMessage()));
+		}
+
+		return new ErrorMessageResponse(messages);
 	}
 
 	@ExceptionHandler(MolgenisValidationException.class)
@@ -970,7 +1006,14 @@ public class RestController
 	public ErrorMessageResponse handleAuthenticationException(AuthenticationException e)
 	{
 		LOG.info("", e);
-		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
+		// workaround for https://github.com/molgenis/molgenis/issues/4441
+		String message = e.getMessage();
+		String messagePrefix = "org.springframework.security.core.userdetails.UsernameNotFoundException: ";
+		if (message.startsWith(messagePrefix))
+		{
+			message = message.substring(messagePrefix.length());
+		}
+		return new ErrorMessageResponse(new ErrorMessage(message));
 	}
 
 	@ExceptionHandler(MolgenisDataAccessException.class)
@@ -1043,8 +1086,8 @@ public class RestController
 		AttributeMetaData attributeMetaData = meta.getAttribute(attributeName);
 		if (attributeMetaData != null)
 		{
-			return new AttributeMetaDataResponse(entityName, attributeMetaData, attributeSet, attributeExpandSet,
-					molgenisPermissionService);
+			return new AttributeMetaDataResponse(entityName, meta, attributeMetaData, attributeSet, attributeExpandSet,
+					molgenisPermissionService, dataService, languageService);
 		}
 		else
 		{
@@ -1104,7 +1147,8 @@ public class RestController
 				}
 
 				EntityPager pager = new EntityPager(request.getStart(), request.getNum(), (long) count, mrefEntities);
-				return new EntityCollectionResponse(pager, refEntityMaps, attrHref, null, molgenisPermissionService);
+				return new EntityCollectionResponse(pager, refEntityMaps, attrHref, null, molgenisPermissionService,
+						dataService, languageService);
 			case CATEGORICAL:
 			case XREF:
 				Map<String, Object> entityXrefAttributeMap = getEntityAsMap((Entity) entity.get(refAttributeName),
@@ -1146,7 +1190,15 @@ public class RestController
 		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule> emptyList() : request.getQ();
 		Query q = new QueryImpl(queryRules).pageSize(request.getNum()).offset(request.getStart()).sort(sort);
 
-		Iterable<Entity> it = dataService.findAll(entityName, q);
+		Iterable<Entity> it = new Iterable<Entity>()
+		{
+
+			@Override
+			public Iterator<Entity> iterator()
+			{
+				return dataService.findAll(entityName, q).iterator();
+			}
+		};
 		Long count = repository.count(q);
 		EntityPager pager = new EntityPager(request.getStart(), request.getNum(), count, it);
 
@@ -1157,7 +1209,7 @@ public class RestController
 		}
 
 		return new EntityCollectionResponse(pager, entities, BASE_URI + "/" + entityName, meta,
-				molgenisPermissionService);
+				molgenisPermissionService, dataService, languageService);
 	}
 
 	// Transforms an entity to a Map so it can be transformed to json
@@ -1188,8 +1240,8 @@ public class RestController
 					if (attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
-						entityMap.put(attrName, new AttributeMetaDataResponse(meta.getName(), attr, subAttributesSet,
-								null, molgenisPermissionService));
+						entityMap.put(attrName, new AttributeMetaDataResponse(meta.getName(), meta, attr,
+								subAttributesSet, null, molgenisPermissionService, dataService, languageService));
 					}
 					else
 					{
@@ -1255,7 +1307,8 @@ public class RestController
 
 					EntityCollectionResponse ecr = new EntityCollectionResponse(pager, refEntityMaps,
 							Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
-									attrName), null, molgenisPermissionService);
+									attrName), null, molgenisPermissionService, dataService, languageService);
+
 					entityMap.put(attrName, ecr);
 				}
 				else if ((attrType == XREF && entity.get(attr.getName()) != null)

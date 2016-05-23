@@ -26,21 +26,21 @@ public class NumberAmountConvertor extends AmountConvertor
 		Unit<?> unit = CategoryMapperUtil.findDurationUnit(description);
 		Collections.sort(extractNumbers);
 
-		if (unit != null && unit.isCompatible(STANDARD_UNIT))
+		if (unit != null && unit.isCompatible(STANDARD_PER_WEEK_UNIT))
 		{
 			if (extractNumbers.size() == 1)
 			{
-				return AmountWrapper.create(Amount.valueOf(extractNumbers.get(0), unit).to(STANDARD_UNIT));
+				return AmountWrapper.create(Amount.valueOf(extractNumbers.get(0), unit).to(STANDARD_PER_WEEK_UNIT));
 			}
 			else if (extractNumbers.size() > 1)
 			{
 				return AmountWrapper.create(
 						Amount.rangeOf(extractNumbers.get(0), extractNumbers.get(extractNumbers.size() - 1), unit)
-								.to(STANDARD_UNIT));
+								.to(STANDARD_PER_WEEK_UNIT));
 			}
 			else
 			{
-				return AmountWrapper.create(Amount.valueOf(DEFAULT_NUMBER, unit).to(STANDARD_UNIT));
+				return AmountWrapper.create(Amount.valueOf(DEFAULT_NUMBER, unit).to(STANDARD_PER_WEEK_UNIT));
 			}
 		}
 
