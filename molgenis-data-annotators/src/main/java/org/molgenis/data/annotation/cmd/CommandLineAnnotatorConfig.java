@@ -12,11 +12,14 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.utils.JarRunnerImpl;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -32,6 +35,8 @@ import org.springframework.core.convert.support.DefaultConversionService;
 @CommandLineOnlyConfiguration
 public class CommandLineAnnotatorConfig
 {
+
+	private DataServiceImpl dataService = new DataServiceImpl();
 
 	@Value("${vcf-validator-location:@null}")
 	private String vcfValidatorLocation;
@@ -90,6 +95,18 @@ public class CommandLineAnnotatorConfig
 	}
 
 	@Bean
+	public UuidGenerator uuidGenerator()
+	{
+		return new UuidGenerator();
+	}
+
+	@Bean
+	public JarRunnerImpl jarRunner()
+	{
+		return new JarRunnerImpl();
+	}
+
+	@Bean
 	public Entity snpEffAnnotatorSettings()
 	{
 		return new MapEntity();
@@ -144,9 +161,27 @@ public class CommandLineAnnotatorConfig
 	}
 
 	@Bean
+	public Entity gavinAnnotatorSettings()
+	{
+		return new MapEntity();
+	}
+
+	@Bean
+	public Entity omimAnnotatorSettings()
+	{
+		return new MapEntity();
+	}
+
+	@Bean
 	DataService dataService()
 	{
-		return new DataServiceImpl();
+		return dataService;
+	}
+
+	@Bean
+	PermissionSystemService permissionSystemService()
+	{
+		return new PermissionSystemService(dataService);
 	}
 
 	@Bean
@@ -161,7 +196,8 @@ public class CommandLineAnnotatorConfig
 	 * @param configuredAnnotators
 	 * @return
 	 */
-	static HashMap<String, RepositoryAnnotator> getFreshAnnotators(Map<String, RepositoryAnnotator> configuredAnnotators)
+	static HashMap<String, RepositoryAnnotator> getFreshAnnotators(
+			Map<String, RepositoryAnnotator> configuredAnnotators)
 	{
 		HashMap<String, RepositoryAnnotator> configuredFreshAnnotators = new HashMap<String, RepositoryAnnotator>();
 		for (String annotator : configuredAnnotators.keySet())

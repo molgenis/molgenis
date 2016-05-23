@@ -1,11 +1,18 @@
 package org.molgenis.data;
 
+import java.util.Set;
+
 /**
  * EntityMetaData defines the structure and attributes of an Entity. Attributes are unique. Other software components
  * can use this to interact with Entity and/or to configure backends and frontends, including Repository instances.
  */
 public interface EntityMetaData
 {
+	enum AttributeRole
+	{
+		ROLE_ID, ROLE_LABEL, ROLE_LOOKUP
+	}
+
 	/**
 	 * Gets the package.
 	 * 
@@ -46,13 +53,33 @@ public interface EntityMetaData
 	String getLabel();
 
 	/**
+	 * Label of the entity in the requested language
+	 */
+	String getLabel(String languageCode);
+
+	/**
+	 * Get available label language codes
+	 */
+	Set<String> getLabelLanguageCodes();
+
+	/**
 	 * Description of the entity
 	 */
 	String getDescription();
 
 	/**
-	 * Returns all attributes. In case of compound attributes (attributes consisting of multiple atomic attributes) only
-	 * the compound attribute is returned. This attribute can be used to retrieve parts of the compound attribute.
+	 * Description of the entity in the requested language
+	 */
+	String getDescription(String languageCode);
+
+	/**
+	 * Get available description language codes
+	 */
+	Set<String> getDescriptionLanguageCodes();
+
+	/**
+	 * Returns all attributes. In case of compound attributes (attributes consisting of atomic attributes) only the
+	 * compound attribute is returned. This attribute can be used to retrieve parts of the compound attribute.
 	 * 
 	 * In case EntityMetaData extends other EntityMetaData then the attributes of this EntityMetaData as well as its
 	 * parent class are returned.
@@ -60,8 +87,15 @@ public interface EntityMetaData
 	Iterable<AttributeMetaData> getAttributes();
 
 	/**
-	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of multiple atomic
-	 * attributes) only the descendant atomic attributes are returned. The compound attribute itself is not returned.
+	 * Same as {@link #getAttributes()} but does not return attributes of its parent class.
+	 * 
+	 * @return
+	 */
+	Iterable<AttributeMetaData> getOwnAttributes();
+
+	/**
+	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of atomic attributes) only
+	 * the descendant atomic attributes are returned. The compound attribute itself is not returned.
 	 * 
 	 * In case EntityMetaData extends other EntityMetaData then the attributes of this EntityMetaData as well as its
 	 * parent class are returned.
@@ -69,9 +103,23 @@ public interface EntityMetaData
 	Iterable<AttributeMetaData> getAtomicAttributes();
 
 	/**
+	 * Same as {@link #getAtomicAttributes()} but does not return attributes of its parent class.
+	 * 
+	 * @return
+	 */
+	Iterable<AttributeMetaData> getOwnAtomicAttributes();
+
+	/**
 	 * Attribute that is used as unique Id. Id attribute should always be provided.
 	 */
 	AttributeMetaData getIdAttribute();
+
+	/**
+	 * Same as {@link #getIdAttribute()} but returns null if the id attribute is defined in its parent class.
+	 * 
+	 * @return
+	 */
+	AttributeMetaData getOwnIdAttribute();
 
 	/**
 	 * Attribute that is used as unique label. If no label exist, returns getIdAttribute().
@@ -79,9 +127,35 @@ public interface EntityMetaData
 	AttributeMetaData getLabelAttribute();
 
 	/**
+	 * Same as {@link #getLabelAttribute()} but returns null if the label does not exist or the label exists in its
+	 * parent class.
+	 * 
+	 * @return
+	 */
+	AttributeMetaData getOwnLabelAttribute();
+
+	/**
+	 * Gets the correct label attribute for the given language, or the default if not found
+	 */
+	AttributeMetaData getLabelAttribute(String languageCode);
+
+	/**
 	 * Returns attributes that must be searched in case of xref/mref search
 	 */
 	Iterable<AttributeMetaData> getLookupAttributes();
+
+	/**
+	 * Same as {@link #getLookupAttributes()} but does not return lookup attributes in its parent class.
+	 */
+	Iterable<AttributeMetaData> getOwnLookupAttributes();
+
+	/**
+	 * Get lookup attribute by name (case insensitive), returns null if not found
+	 * 
+	 * @param attributeName
+	 * @return
+	 */
+	AttributeMetaData getLookupAttribute(String attributeName);
 
 	/**
 	 * Get attribute by name (case insensitive), returns null if not found
@@ -89,14 +163,16 @@ public interface EntityMetaData
 	AttributeMetaData getAttribute(String attributeName);
 
 	/**
+	 * Returns whether this entity has a attribute with expression
+	 * 
+	 * @return whether this entity has a attribute with expression
+	 */
+	boolean hasAttributeWithExpression();
+
+	/**
 	 * Entity can extend another entity, adding its properties to their own
 	 */
 	public EntityMetaData getExtends();
 
 	Class<? extends Entity> getEntityClass();
-
-	/**
-	 * Returns the decorator for this entity, or null if no decorator is present
-	 */
-	RepositoryDecorator getDecorator();
 }

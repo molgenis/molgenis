@@ -20,7 +20,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>, Applica
 		Ordered
 {
 	/**
-	 * Sets the Backend, in wich the meta data and the user data is saved
+	 * Sets the backend, in wich the meta data and the user data is saved
 	 *
 	 * @param ManageableRepositoryCollection
 	 */
@@ -161,8 +161,6 @@ public interface MetaDataService extends Iterable<RepositoryCollection>, Applica
 	 * 
 	 * @param repositoryCollection
 	 *            the new entities
-	 * @param defaultPackage
-	 *            the default package for the entities that does not have a package
 	 * @return
 	 */
 	LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection);
@@ -181,4 +179,12 @@ public interface MetaDataService extends Iterable<RepositoryCollection>, Applica
 	 */
 	LinkedHashMap<String, Boolean> integrationTestMetaData(ImmutableMap<String, EntityMetaData> newEntitiesMetaDataMap,
 			List<String> skipEntities, String defaultPackage);
+	
+	/**
+	 * Has backend will check if the requested backend already exists and is registered.
+	 * 
+	 * @param backendName
+	 * @return
+	 */
+	boolean hasBackend(String backendName);
 }

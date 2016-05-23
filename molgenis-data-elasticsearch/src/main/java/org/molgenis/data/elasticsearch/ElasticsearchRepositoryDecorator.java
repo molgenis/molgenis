@@ -1,67 +1,83 @@
 package org.molgenis.data.elasticsearch;
 
-import java.util.Iterator;
-import java.util.Set;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.QueryRule.Operator.EQUALS;
+import static org.molgenis.data.RepositoryCapability.MANAGABLE;
+import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
+
+import org.elasticsearch.common.collect.Iterators;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IndexedRepository;
-import org.molgenis.data.Manageable;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataAccessException;
+import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.support.QueryImpl;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Sets;
 
 /**
  * Repository that wraps an existing repository and retrieves count/aggregate information from a Elasticsearch index
  */
-public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepository implements IndexedRepository
+public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepository
 {
-	private final Repository repository;
+	private static final int BATCH_SIZE = 1000;
 
-	public ElasticsearchRepositoryDecorator(Repository repository, SearchService elasticSearchService)
+	private final Repository decoratedRepo;
+
+	public ElasticsearchRepositoryDecorator(Repository decoratedRepo, SearchService elasticSearchService)
 	{
 		super(elasticSearchService);
-		if (repository == null) throw new IllegalArgumentException("repository is null");
-		this.repository = repository;
+		this.decoratedRepo = requireNonNull(decoratedRepo);
 	}
 
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return repository.getEntityMetaData();
+		return decoratedRepo.getEntityMetaData();
 	}
 
 	@Override
 	@Transactional
 	public void add(Entity entity)
 	{
-		repository.add(entity);
+		decoratedRepo.add(entity);
 		super.add(entity);
 	}
 
 	@Override
 	@Transactional
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Stream<? extends Entity> entities)
 	{
-		Integer count = repository.add(entities);
-		super.add(entities);
-
-		return count;
+		// TODO look into performance improvements
+		AtomicInteger count = new AtomicInteger();
+		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
+			Integer batchCount = decoratedRepo.add(batch.stream());
+			super.add(batch.stream());
+			count.addAndGet(batchCount);
+		});
+		return count.get();
 	}
 
 	@Override
 	public void flush()
 	{
-		repository.flush();
+		decoratedRepo.flush();
 		super.flush();
 	}
 
 	@Override
 	public void clearCache()
 	{
-		repository.clearCache();
+		decoratedRepo.clearCache();
 		super.clearCache();
 	}
 
@@ -69,93 +85,181 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Transactional
 	public void update(Entity entity)
 	{
-		repository.update(entity);
+		decoratedRepo.update(entity);
 		super.update(entity);
 	}
 
 	@Override
 	@Transactional
-	public void update(Iterable<? extends Entity> entities)
+	public void update(Stream<? extends Entity> entities)
 	{
-		repository.update(entities);
-		super.update(entities);
+		// TODO look into performance improvements
+		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
+			decoratedRepo.update(batch.stream());
+			super.update(batch.stream());
+		});
 	}
 
 	@Override
 	@Transactional
 	public void delete(Entity entity)
 	{
-		repository.delete(entity);
-		super.delete(entity);
+		super.delete(entity); // first delete from index, because the index might request deleted entities
+		decoratedRepo.delete(entity);
 	}
 
 	@Override
 	@Transactional
-	public void delete(Iterable<? extends Entity> entities)
+	public void delete(Stream<? extends Entity> entities)
 	{
-		repository.delete(entities);
-		super.delete(entities);
+		// TODO look into performance improvements
+		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
+			super.delete(batch.stream()); // first delete from index, because the index might request deleted entities
+			decoratedRepo.delete(batch.stream());
+		});
 	}
 
 	@Override
 	@Transactional
 	public void deleteById(Object id)
 	{
-		repository.deleteById(id);
-		super.deleteById(id);
+		super.deleteById(id); // first delete from index, because the index might request deleted entities
+		decoratedRepo.deleteById(id);
 	}
 
 	@Override
 	@Transactional
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
-		repository.deleteById(ids);
-		super.deleteById(ids);
+		// TODO look into performance improvements
+		Iterators.partition(ids.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
+			super.deleteById(batch); // first delete from index, because the index might request deleted entities
+			decoratedRepo.deleteById(batch);
+		});
 	}
 
 	@Override
 	@Transactional
 	public void deleteAll()
 	{
-		repository.deleteAll();
-		super.deleteAll();
+		super.deleteAll(); // first delete from index, because the index might request deleted entities
+		decoratedRepo.deleteAll();
 	}
 
 	// retrieve entity by id via decorated repository
 	@Override
 	public Entity findOne(Object id)
 	{
-		return repository.findOne(id);
+		return decoratedRepo.findOne(id);
+	}
+
+	// retrieve entity by id via decorated repository
+	@Override
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		return decoratedRepo.findOne(id, fetch);
+	}
+
+	@Override
+	public Entity findOne(Query q)
+	{
+		// optimization:
+		// retrieve entity by id via decorated repository in case query is of the form: <id attribute> EQUALS <id>
+		List<QueryRule> queryRules = q.getRules();
+		if (queryRules != null && queryRules.size() == 1)
+		{
+			QueryRule queryRule = queryRules.get(0);
+			if (queryRule.getOperator() == EQUALS)
+			{
+				String idAttrName = getEntityMetaData().getIdAttribute().getName();
+				if (queryRule.getField().equals(idAttrName))
+				{
+					return decoratedRepo.findOne(queryRule.getValue(), q.getFetch());
+				}
+			}
+		}
+
+		return super.findOne(q);
 	}
 
 	// retrieve entities by id via decorated repository
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
+	public Stream<Entity> findAll(Stream<Object> ids)
 	{
-		return repository.findAll(ids);
+		return decoratedRepo.findAll(ids);
+	}
+
+	// retrieve entities by id via decorated repository
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		return decoratedRepo.findAll(ids, fetch);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Query q)
+	{
+		// optimization:
+		// retrieve entities via decorated repository in case query contains no query rules
+		List<QueryRule> queryRules = q.getRules();
+		if (queryRules != null && queryRules.isEmpty())
+		{
+			if (q.getOffset() == 0 && q.getPageSize() == 0 && q.getSort() == null)
+			{
+				Fetch fetch = q.getFetch();
+				if (fetch != null)
+				{
+					return decoratedRepo.stream(fetch);
+				}
+				else
+				{
+					return decoratedRepo.stream();
+				}
+			}
+			return decoratedRepo.findAll(q);
+		}
+		return super.findAll(q);
 	}
 
 	// retrieve all entities via decorated repository
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		return repository.iterator();
+		return decoratedRepo.iterator();
+	}
+
+	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		return decoratedRepo.stream(fetch);
 	}
 
 	@Override
 	public void rebuildIndex()
 	{
-		elasticSearchService.rebuildIndex(repository, getEntityMetaData());
+		elasticSearchService.rebuildIndex(decoratedRepo, getEntityMetaData());
+	}
+
+	@Override
+	public void create()
+	{
+		if (!decoratedRepo.getCapabilities().contains(MANAGABLE))
+		{
+			throw new MolgenisDataAccessException("Repository '" + decoratedRepo.getName() + "' is not Manageable");
+		}
+		decoratedRepo.create();
+
+		super.create();
 	}
 
 	@Override
 	public void drop()
 	{
-		if (!(repository instanceof Manageable))
+		if (!decoratedRepo.getCapabilities().contains(MANAGABLE))
 		{
-			throw new MolgenisDataAccessException("Repository '" + repository.getName() + "' is not Manageable");
+			throw new MolgenisDataAccessException("Repository '" + decoratedRepo.getName() + "' is not Manageable");
 		}
-		((Manageable) repository).drop();
+		decoratedRepo.drop();
 
 		super.drop();
 	}
@@ -163,10 +267,14 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		Set<RepositoryCapability> capabilities = repository.getCapabilities();
-		capabilities.add(RepositoryCapability.QUERYABLE);
-		capabilities.add(RepositoryCapability.AGGREGATEABLE);
-
+		Set<RepositoryCapability> capabilities = Sets.newHashSet(decoratedRepo.getCapabilities());
+		super.getCapabilities().forEach(capability -> {
+			// Elasticsearch can write and update documents, but the parent repository might not
+			if (capability != WRITABLE && capability != MANAGABLE)
+			{
+				capabilities.add(capability);
+			}
+		});
 		return capabilities;
 	}
 }

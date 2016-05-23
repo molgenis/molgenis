@@ -1,5 +1,7 @@
 package org.molgenis.gaf;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -30,7 +32,7 @@ public class GafListDbSettings implements GafListSettings
 		public Meta()
 		{
 			super(ENTITY_NAME);
-			addAttribute(NAME).setIdAttribute(true).setNillable(false);
+			addAttribute(NAME, ROLE_ID);
 			addAttribute(VALUE).setNillable(false).setDataType(MolgenisFieldTypes.TEXT);
 		}
 	}

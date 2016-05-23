@@ -3,9 +3,11 @@ package org.molgenis.data.settings;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.ResourceBundle;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,8 @@ public abstract class DefaultSettingsEntity implements Entity
 
 	@Autowired
 	private DataService dataService;
+
+	private transient Entity cachedEntity;
 
 	public DefaultSettingsEntity(String entityId)
 	{
@@ -159,19 +163,97 @@ public abstract class DefaultSettingsEntity implements Entity
 		updateEntity(entity);
 	}
 
+	/**
+	 * Adds a listener for this settings entity that fires on entity updates
+	 * 
+	 * @param settingsEntityListener
+	 *            listener for this settings entity
+	 */
+	public void addListener(SettingsEntityListener settingsEntityListener)
+	{
+		RunAsSystemProxy.runAsSystem(() -> {
+			dataService.addEntityListener(entityName, new EntityListener()
+			{
+				@Override
+				public void postUpdate(Entity entity)
+				{
+					settingsEntityListener.postUpdate(entity);
+				}
+
+				@Override
+				public Object getEntityId()
+				{
+					return getEntityMetaData().getSimpleName();
+				}
+			});
+		});
+	}
+
+	/**
+	 * Removes a listener for this settings entity that fires on entity updates
+	 * 
+	 * @param settingsEntityListener
+	 *            listener for this settings entity
+	 */
+	public void removeListener(SettingsEntityListener settingsEntityListener)
+	{
+		RunAsSystemProxy.runAsSystem(() -> {
+			dataService.removeEntityListener(entityName, new EntityListener()
+			{
+
+				@Override
+				public void postUpdate(Entity entity)
+				{
+					settingsEntityListener.postUpdate(entity);
+				}
+
+				@Override
+				public Object getEntityId()
+				{
+					return getEntityMetaData().getSimpleName();
+				}
+			});
+		});
+	}
+
 	private Entity getEntity()
 	{
-		String id = getEntityMetaData().getSimpleName();
-		return RunAsSystemProxy.runAsSystem(() -> {
-			return dataService.findOne(entityName, id);
-		});
+		if (cachedEntity == null)
+		{
+			String id = getEntityMetaData().getSimpleName();
+			cachedEntity = RunAsSystemProxy.runAsSystem(() -> {
+				Entity entity = dataService.findOne(entityName, id);
+
+				// refresh cache on settings update
+					dataService.addEntityListener(entityName, new EntityListener()
+					{
+						@Override
+						public void postUpdate(Entity entity)
+						{
+							cachedEntity = entity;
+						}
+
+						@Override
+						public Object getEntityId()
+						{
+							return id;
+						}
+					});
+					return entity;
+				});
+
+		}
+		return cachedEntity;
 	}
 
 	private void updateEntity(Entity entity)
 	{
 		RunAsSystemProxy.runAsSystem(() -> {
 			dataService.update(entityName, entity);
-			return null;
-		});
+			ResourceBundle.clearCache();
+
+			// cache refresh is handled via entity listener
+				return null;
+			});
 	}
 }

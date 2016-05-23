@@ -92,7 +92,7 @@ public class CategoryMapperTest
 		Assert.assertEquals(
 				CategoryMapperUtil
 						.convertDescriptionToAmount("several times a month"),
-				AmountWrapper.create(Amount.rangeOf((double) 2,
+				AmountWrapper.create(Amount.rangeOf((double) 3,
 						NonSI.DAY.inverse().getConverterTo(NonSI.MONTH.inverse()).convert((double) 1) - 1,
 						NonSI.MONTH.inverse()).to(NonSI.WEEK.inverse()), false));
 	}
@@ -161,7 +161,7 @@ public class CategoryMapperTest
 		AmountWrapper amountTargetCategory2 = CategoryMapperUtil.convertDescriptionToAmount(targetCategory2);
 		Assert.assertTrue(CategoryMapperUtil.isAmountRanged(amountTargetCategory2.getAmount()));
 		Assert.assertEquals(amountTargetCategory2,
-				AmountWrapper.create(Amount.rangeOf((double) 2, (double) 6, NonSI.WEEK.inverse()), false));
+				AmountWrapper.create(Amount.rangeOf((double) 3, (double) 6, NonSI.WEEK.inverse()), false));
 
 		String targetCategory3 = "About once a week";
 		AmountWrapper amountTargetCategory3 = CategoryMapperUtil.convertDescriptionToAmount(targetCategory3);
@@ -174,24 +174,5 @@ public class CategoryMapperTest
 		Assert.assertTrue(CategoryMapperUtil.isAmountRanged(amountTargetCategory4.getAmount()));
 		Assert.assertEquals(amountTargetCategory4,
 				AmountWrapper.create(Amount.rangeOf((double) 0, (double) 1, NonSI.WEEK.inverse())));
-	}
-
-	@Test
-	public void testConvertFactor()
-	{
-		double convertFactor = categoryMapper.convertFactor(Amount.rangeOf((double) 1, (double) 6, NonSI.DAY.inverse()),
-				Amount.valueOf((double) 3, NonSI.DAY.inverse()));
-
-		double convertFactor2 = categoryMapper.convertFactor(
-				Amount.rangeOf((double) 1, (double) 6, NonSI.DAY.inverse()),
-				Amount.valueOf((double) 4, NonSI.DAY.inverse()));
-
-		double convertFactor3 = categoryMapper.convertFactor(
-				Amount.rangeOf((double) 1, (double) 6, NonSI.DAY.inverse()),
-				Amount.rangeOf((double) 4, (double) 5, NonSI.DAY.inverse()));
-
-		System.out.println(convertFactor);
-		System.out.println(convertFactor2);
-		System.out.println(convertFactor3);
 	}
 }

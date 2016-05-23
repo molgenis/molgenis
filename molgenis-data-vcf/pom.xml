@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.molgenis</groupId>
 		<artifactId>molgenis</artifactId>
-		<version>1.13.0-BBMRI-NL</version>
+		<version>1.21.1-BBMRI-NL</version>
 	</parent>
 	<artifactId>molgenis-data-vcf</artifactId>
 
@@ -16,23 +16,28 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
-			<artifactId>molgenis-data-merge</artifactId>
+			<artifactId>molgenis-data-validation</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-merge</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-security</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-		<dependency>
-			<groupId>nl.systemsgenetics</groupId>
-			<artifactId>Genotype-IO</artifactId>
-			<version>1.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>16.0.1</version>
+        <dependency>
+            <groupId>nl.systemsgenetics</groupId>
+            <artifactId>Genotype-IO</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+        <dependency>
+		    <groupId>com.google.guava</groupId>
+		    <artifactId>guava</artifactId>
+		    <version>16.0.1</version>
 		</dependency>
 	</dependencies>
 </project>

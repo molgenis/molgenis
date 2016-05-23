@@ -44,8 +44,8 @@ import org.slf4j.LoggerFactory;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 /**
  * Service to tag metadata with ontology terms.
@@ -207,6 +207,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		}
 	}
 
+	@Override
 	public Map<String, OntologyTag> tagAttributesInEntity(String entity, Map<AttributeMetaData, OntologyTerm> tags)
 	{
 		Map<String, OntologyTag> result = new LinkedHashMap<>();
@@ -271,11 +272,17 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	}
 
 	@RunAsSystem
-	private Entity findAttributeEntity(String entityName, String attributeName)
+	public Entity findAttributeEntity(String entityName, String attributeName)
 	{
 		Entity entityMetaDataEntity = dataService.findOne(ENTITY_NAME, entityName);
 		Optional<Entity> result = stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false).filter(
 				att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst();
+
+		if (!result.isPresent() && entityMetaDataEntity.get(EntityMetaDataMetaData.EXTENDS) != null)
+		{
+			return findAttributeEntity(entityMetaDataEntity.getEntity(EntityMetaDataMetaData.EXTENDS).getString(EntityMetaDataMetaData.FULL_NAME), attributeName);
+		}
+
 		return result.isPresent() ? result.get() : null;
 	}
 

@@ -31,12 +31,6 @@
 
     var Table, tableSort;
 
-    $(document).on('dataChange.diseasematcher', function(e) {
-    	if (e.namespace !== 'data' && Table){
-    		Table.setProps({query: getQuery()});
-    	}
-	});
-
     /**
 	 * @memberOf molgenis.dataexplorer.data
 	 */
@@ -55,24 +49,27 @@
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	function createDataTable() {
-		Table = React.render(molgenis.ui.Table({
-			entity: getEntity().name,
-			attrs: getAttributesTree(),
-			query: getQuery(),
-			onRowAdd: onDataChange,
-			onRowDelete: onDataChange,
-			onRowEdit: onDataChange,
-			onRowInspect: onRowInspect,
-			onRowClick: (doShowGenomeBrowser() && isGenomeBrowserAttributesSelected()) ? onRowClick : null,
-			onSort: function(e) {
-				tableSort = {
-					'orders' : [ {
-						'attr' : e.attr.name,
-						'direction' : e.order === 'desc' ? 'DESC' : 'ASC'
-					} ]
-				};
-			}
-		}), $('#data-table-container')[0]);
+		$.get('/permission/FreemarkerTemplate/read').done(function(canRead) {
+			Table = React.render(molgenis.ui.Table({
+				entity: getEntity().name,
+				attrs: getAttributesTree(),
+				query: getQuery(),
+				onRowAdd: onDataChange,
+				onRowDelete: onDataChange,
+				onRowEdit: onDataChange,
+				onRowInspect: onRowInspect,
+				onRowClick: (doShowGenomeBrowser() && isGenomeBrowserAttributesSelected()) ? onRowClick : null,
+				enableInspect: canRead,
+				onSort: function(e) {
+					tableSort = {
+						'orders' : [ {
+							'attr' : e.attr.name,
+							'direction' : e.order === 'desc' ? 'DESC' : 'ASC'
+						} ]
+					};
+				}
+			}), $('#data-table-container')[0]);
+		});
 	}
 
 	function onDataChange() {
@@ -267,8 +264,8 @@
                 if(selectedTrack) {
                     var a = $('<a href="javascript:void(0)">' + f.id + '</a>');
                     var attr;
-                    $.each(getAttributes(), function (key, attribute) {
-                        if (attribute === genomebrowserIdentifierAttribute) {
+					$.each(getAttributes(), function (key, attribute) {
+						if (attribute.name === entity.idAttribute) {
                             attr = attribute;
                         }
                     });
@@ -276,14 +273,22 @@
                         createFilter(attr, undefined, undefined, f.id);
                     });
                     if (f.id !== "-" && attr !== undefined) {
-                        info.setTitle(f.id);
-                        info.add('Filter on mutation:', a[0]);
-                        //cache the information
+						if(attr.visible) {
+							info.setTitle(f.id);
+							info.add('Filter on mutation:', a[0]);
+							//cache the information
+						}
                     }
                     else{
                         info.setTitle("Chromosome:"+f.segment+" Position:"+ f.min);
                     }
-                }
+
+					var entityReportLink = $('<a href="javascript:void(0)">Show details</a>');
+					entityReportLink.click(function () {
+						onRowInspect({id:f.id, name:getEntity().name});
+					});
+					info.add("", entityReportLink[0]);
+				}
             }
             featureInfoMap[info.tier.dasSource.name + f.id + f.label] = info;
         }
@@ -358,8 +363,16 @@
 	 * @memberOf molgenis.dataexplorer.data
 	 */
 	$(function() {
+		$(document).off('.data');
+		
+		$(document).on('changeModule.data', function(e, mod) {
+			if (mod === 'data') {
+				molgenis.dataexplorer.data.createDataTable();
+			}
+		});	
+		
 		$(document).on('changeAttributeSelection.data', function(e, data) {
-			if(Table) {
+			if(Table && Table.isMounted() && (molgenis.dataexplorer.getSelectedModule() == 'data')) {
 				var tableAttrs = Table.state.attrs;
 				var treeAttrs = data.attributesTree;
 				for(var attr in treeAttrs){
@@ -392,28 +405,30 @@
 					genomeBrowser.setLocation(chr, viewStart, viewEnd);
 				}
 			}
-
-			if(molgenis.dataexplorer.settings["genomebrowser"] !== 'false'){
-				// TODO implement elegant solution for genome browser specific code
-				$.each(data.filters, function() {
-					if(this.getComplexFilterElements && this.getComplexFilterElements()[0]){
-						if(this.attribute === genomebrowserStartAttribute){
-							setLocation(genomeBrowser.chr,
-									parseInt(this.getComplexFilterElements()[0].simpleFilter.fromValue),
-									parseInt(this.getComplexFilterElements()[0].simpleFilter.toValue));
+			
+			if (molgenis.dataexplorer.getSelectedModule() == 'data') {	
+				if(molgenis.dataexplorer.settings["genomebrowser"] !== 'false'){
+					// TODO implement elegant solution for genome browser specific code
+					$.each(data.filters, function() {
+						if(this.getComplexFilterElements && this.getComplexFilterElements()[0]){
+							if(this.attribute === genomebrowserStartAttribute){
+								setLocation(genomeBrowser.chr,
+										parseInt(this.getComplexFilterElements()[0].simpleFilter.fromValue),
+										parseInt(this.getComplexFilterElements()[0].simpleFilter.toValue));
+							}
+							else if(this.attribute === genomebrowserChromosomeAttribute){
+								setLocation(this.getComplexFilterElements()[0].simpleFilter.getValues()[0],
+										genomeBrowser.viewStart,
+										genomeBrowser.viewEnd);
+							}
 						}
-						else if(this.attribute === genomebrowserChromosomeAttribute){
-							setLocation(this.getComplexFilterElements()[0].simpleFilter.getValues()[0],
-									genomeBrowser.viewStart,
-									genomeBrowser.viewEnd);
-						}
-					}
-				});
+					});
+				}
 			}
 		});
 
 		$(document).on('changeQuery.data', function(e, query) {
-			if(Table) {
+			if(Table && Table.isMounted() && (molgenis.dataexplorer.getSelectedModule() == 'data')) {
 				Table.setProps({
 					query : query
 				});

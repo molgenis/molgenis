@@ -1,36 +1,54 @@
 package org.molgenis.data.support;
 
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
+
 import org.molgenis.data.Entity;
 import org.molgenis.data.Writable;
 
 public abstract class AbstractWritable implements Writable
 {
-	public enum WriteMode
+	public enum EntityWriteMode
 	{
 		ENTITY_LABELS, ENTITY_IDS
 	}
 
-	private WriteMode writeMode;
-
-	public WriteMode getWriteMode()
+	public enum AttributeWriteMode
 	{
-		return writeMode;
+		ATTRIBUTE_NAMES, ATTRIBUTE_LABELS
 	}
 
-	public void setWriteMode(WriteMode writeMode)
+	private EntityWriteMode entityWriteMode;
+	private AttributeWriteMode attributeWriteMode;
+
+	public EntityWriteMode getEntityWriteMode()
 	{
-		this.writeMode = writeMode;
+		return entityWriteMode;
+	}
+
+	public void setEntityWriteMode(EntityWriteMode entityWriteMode)
+	{
+		this.entityWriteMode = entityWriteMode;
+	}
+
+	public AttributeWriteMode getAttributeWriteMode()
+	{
+		return attributeWriteMode;
+	}
+
+	public void setAttributeWriteMode(AttributeWriteMode attributeWriteMode)
+	{
+		this.attributeWriteMode = attributeWriteMode;
 	}
 
 	@Override
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Stream<? extends Entity> entities)
 	{
-		Integer count = 0;
-		for (Entity entity : entities)
-		{
+		AtomicInteger count = new AtomicInteger(0);
+		entities.forEach(entity -> {
 			add(entity);
-			count++;
-		}
-		return count;
+			count.incrementAndGet();
+		});
+		return count.get();
 	}
 }

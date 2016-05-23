@@ -2,6 +2,7 @@ package org.molgenis.data.annotation.impl.tabix;
 
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.VcfRepository.ALT;
 import static org.molgenis.data.vcf.VcfRepository.ALT_META;
 import static org.molgenis.data.vcf.VcfRepository.CHROM;
@@ -46,9 +47,9 @@ public class TabixVcfRepositoryTest
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("FILTER", STRING));
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("QUAL", STRING));
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("ID", STRING));
-		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("INTERNAL_ID", STRING));
+		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("INTERNAL_ID", STRING), ROLE_ID);
 		repoMetaData.addAttributeMetaData(new DefaultAttributeMetaData("INFO", COMPOUND));
-		repoMetaData.addAttribute("INTERNAL_ID").setIdAttribute(true).setVisible(false);
+		repoMetaData.addAttribute("INTERNAL_ID").setVisible(false);
 
 		File file = ResourceUtils.getFile(getClass(),
 				"/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");

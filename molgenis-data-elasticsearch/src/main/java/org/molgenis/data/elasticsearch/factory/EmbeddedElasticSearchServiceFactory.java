@@ -12,8 +12,8 @@ import org.elasticsearch.common.settings.ImmutableSettings.Builder;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.node.Node;
 import org.molgenis.data.DataService;
+import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
-import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,9 +76,9 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 		LOG.info("Embedded elasticsearch server started, data path=[" + settings.get("path.data") + "]");
 	}
 
-	public ElasticsearchService create(DataService dataService, EntityToSourceConverter entityToSourceConverter)
+	public ElasticsearchService create(DataService dataService, ElasticsearchEntityFactory elasticsearchEntityFactory)
 	{
-		return new ElasticsearchService(client, indexName, dataService, entityToSourceConverter);
+		return new ElasticsearchService(client, indexName, dataService, elasticsearchEntityFactory);
 	}
 
 	public Client getClient()

@@ -3,15 +3,10 @@ package org.molgenis.ontology.controller;
 import static org.molgenis.ontology.controller.OntologyManagerController.URI;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.Collections;
 import java.util.Map;
 
-import org.molgenis.data.Entity;
-import org.molgenis.file.FileStore;
-import org.molgenis.ontology.matching.OntologyService;
-import org.molgenis.ontology.utils.OntologyServiceUtil;
+import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,10 +21,7 @@ public class OntologyManagerController extends MolgenisPluginController
 {
 	public static final String ID = "ontologymanager";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
-	public static final String ONTOLOGY_MANAGER_PLUGIN = "OntologyManagerPlugin";
-
-	@Autowired
-	private FileStore fileStore;
+	public static final String VIEW_ONTOLOGY_MANAGER = "ontology-manager-view";
 
 	@Autowired
 	private OntologyService ontologyService;
@@ -42,20 +34,21 @@ public class OntologyManagerController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model) throws Exception
 	{
-		return ONTOLOGY_MANAGER_PLUGIN;
+		model.addAttribute("ontologies", ontologyService.getOntologies());
+		return VIEW_ONTOLOGY_MANAGER;
+	}
+
+	@RequestMapping(method = RequestMethod.POST)
+	public String delete(Model model) throws Exception
+	{
+		model.addAttribute("ontologies", ontologyService.getOntologies());
+		return VIEW_ONTOLOGY_MANAGER;
 	}
 
 	@RequestMapping(value = "/ontology", method = RequestMethod.GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public Map<String, Object> getAllOntologies()
 	{
-		Map<String, Object> results = new HashMap<String, Object>();
-		List<Map<String, Object>> ontologies = new ArrayList<Map<String, Object>>();
-		for (Entity entity : ontologyService.getAllOntologyEntities())
-		{
-			ontologies.add(OntologyServiceUtil.getEntityAsMap(entity));
-		}
-		results.put("results", ontologies);
-		return results;
+		return Collections.singletonMap("results", ontologyService.getOntologies());
 	}
 }

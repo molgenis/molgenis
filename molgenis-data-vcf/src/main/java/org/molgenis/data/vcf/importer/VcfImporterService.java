@@ -1,24 +1,11 @@
 package org.molgenis.data.vcf.importer;
 
-import static java.util.Objects.requireNonNull;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.io.IOUtils;
+import com.google.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
@@ -38,7 +25,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import com.google.common.collect.Lists;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static java.util.Objects.requireNonNull;
 
 @Service
 public class VcfImporterService implements ImportService
@@ -46,22 +43,21 @@ public class VcfImporterService implements ImportService
 	private static final Logger LOG = LoggerFactory.getLogger(VcfImporterService.class);
 	private static final int BATCH_SIZE = 10000;
 	private static final String BACKEND = ElasticsearchRepositoryCollection.NAME;
-	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
+
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
 
 	@Autowired
-	public VcfImporterService(FileRepositoryCollectionFactory fileRepositoryCollectionFactory, DataService dataService,
-			PermissionSystemService permissionSystemService)
+	public VcfImporterService(DataService dataService, PermissionSystemService permissionSystemService)
 
 	{
-		this.fileRepositoryCollectionFactory = requireNonNull(fileRepositoryCollectionFactory);
 		this.dataService = requireNonNull(dataService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 	}
 
 	@Override
-	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction, String defaultPackage)
+	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction,
+			String defaultPackage)
 	{
 		if (databaseAction != DatabaseAction.ADD) throw new IllegalArgumentException("Only ADD is supported");
 
@@ -75,9 +71,6 @@ public class VcfImporterService implements ImportService
 				try (Repository repo = source.getRepository(it.next());)
 				{
 					report = importVcf(repo, addedEntities);
-					List<String> entityNames = addedEntities.stream().map(emd -> emd.getName())
-							.collect(Collectors.toList());
-					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(), entityNames);
 				}
 			}
 			else
@@ -100,12 +93,6 @@ public class VcfImporterService implements ImportService
 			}
 
 			throw new MolgenisDataException(e);
-		}
-		// Should not be necessary, bug in elasticsearch?
-		// "All shards failed" for big datasets if this flush is not here...
-		for (EntityMetaData entityMetaData : addedEntities)
-		{
-			dataService.getRepository(entityMetaData.getName()).flush();
 		}
 		return report;
 	}
@@ -167,28 +154,7 @@ public class VcfImporterService implements ImportService
 		return false;
 	}
 
-	public void importVcf(File vcfFile) throws IOException
-	{
-		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
-				.createFileRepositoryCollection(vcfFile);
-
-		Iterator<String> it = repositoryCollection.getEntityNames().iterator();
-		if (it.hasNext())
-		{
-			Repository repo = repositoryCollection.getRepository(it.next());
-			try
-			{
-				importVcf(repo, Lists.<EntityMetaData> newArrayList());
-			}
-			finally
-			{
-				IOUtils.closeQuietly(repo);
-			}
-		}
-	}
-
-	private EntityImportReport importVcf(Repository inRepository, List<EntityMetaData> addedEntities)
-			throws IOException
+	private EntityImportReport importVcf(Repository inRepository, List<EntityMetaData> addedEntities) throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
 		Repository sampleRepository = null;
@@ -214,7 +180,6 @@ public class VcfImporterService implements ImportService
 		}
 
 		Iterator<Entity> inIterator = inRepository.iterator();
-		int vcfEntityCount = 0;
 		int sampleEntityCount = 0;
 		List<Entity> sampleEntities = new ArrayList<>();
 		try (Repository outRepository = dataService.getMeta().addEntityMeta(entityMetaData))
@@ -229,7 +194,6 @@ public class VcfImporterService implements ImportService
 				while (inIterator.hasNext())
 				{
 					Entity entity = inIterator.next();
-					vcfEntityCount++;
 
 					Iterable<Entity> samples = entity.getEntities(VcfRepository.SAMPLES);
 					if (samples != null)
@@ -241,7 +205,7 @@ public class VcfImporterService implements ImportService
 
 							if (sampleEntities.size() == BATCH_SIZE)
 							{
-								sampleRepository.add(sampleEntities);
+								sampleRepository.add(sampleEntities.stream());
 								sampleEntityCount += sampleEntities.size();
 								sampleEntities.clear();
 							}
@@ -252,25 +216,31 @@ public class VcfImporterService implements ImportService
 
 				if (!sampleEntities.isEmpty())
 				{
-					sampleRepository.add(sampleEntities);
+					sampleRepository.add(sampleEntities.stream());
 					sampleEntityCount += sampleEntities.size();
 				}
 
 				sampleRepository.flush();
 
 				report.addNewEntity(sampleRepository.getName());
-				if (sampleEntityCount > 0) report.addEntityCount(sampleRepository.getName(), sampleEntityCount);
+				if (sampleEntityCount > 0)
+				{
+					report.addEntityCount(sampleRepository.getName(), sampleEntityCount);
+				}
 			}
 
-			outRepository.add(inRepository);
+			AtomicInteger vcfEntityCount = new AtomicInteger();
+			outRepository.add(inRepository.stream().filter(entity -> {
+				vcfEntityCount.incrementAndGet();
+				return true;
+			}));
+			if (vcfEntityCount.get() > 0)
+			{
+				report.addEntityCount(entityName, vcfEntityCount.get());
+			}
 		}
 
 		report.addNewEntity(entityName);
-
-		if (vcfEntityCount > 0)
-		{
-			report.addEntityCount(entityName, vcfEntityCount);
-		}
 
 		return report;
 	}

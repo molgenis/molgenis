@@ -1,23 +1,26 @@
 package org.molgenis.security.owned;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IndexedRepository;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.EntityUtils;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 
 /**
  * RepositoryDecorator that works on EntityMetaData that extends OwnedEntityMetaData.
@@ -27,110 +30,151 @@ import com.google.common.collect.Iterables;
  * 
  * Admins are not effected.
  */
-public class OwnedEntityRepositoryDecorator implements IndexedRepository
+public class OwnedEntityRepositoryDecorator implements Repository
 {
-	private final IndexedRepository decorated;
+	private final Repository decoratedRepo;
 
-	public OwnedEntityRepositoryDecorator(IndexedRepository decorated)
+	public OwnedEntityRepositoryDecorator(Repository decoratedRepo)
 	{
-		this.decorated = decorated;
+		this.decoratedRepo = requireNonNull(decoratedRepo);
 	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
 		if (mustAddRowLevelSecurity()) return findAll(new QueryImpl()).iterator();
-		return decorated.iterator();
+		return decoratedRepo.iterator();
+	}
+
+	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		if (fetch != null)
+		{
+			fetch.field(OwnedEntityMetaData.ATTR_OWNER_USERNAME);
+		}
+		Stream<Entity> entities = decoratedRepo.stream(fetch);
+		if (mustAddRowLevelSecurity())
+		{
+			entities = entities.filter(this::currentUserIsOwner);
+		}
+		return entities;
 	}
 
 	@Override
 	public void close() throws IOException
 	{
-		decorated.close();
+		decoratedRepo.close();
 	}
 
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return decorated.getCapabilities();
+		return decoratedRepo.getCapabilities();
 	}
 
 	@Override
 	public String getName()
 	{
-		return decorated.getName();
+		return decoratedRepo.getName();
 	}
 
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return decorated.getEntityMetaData();
+		return decoratedRepo.getEntityMetaData();
 	}
 
 	@Override
 	public long count()
 	{
 		if (mustAddRowLevelSecurity()) return count(new QueryImpl());
-		return decorated.count();
+		return decoratedRepo.count();
 	}
 
 	@Override
 	public Query query()
 	{
-		return decorated.query();
+		return decoratedRepo.query();
 	}
 
 	@Override
 	public long count(Query q)
 	{
 		if (mustAddRowLevelSecurity()) addRowLevelSecurity(q);
-		return decorated.count(q);
+		return decoratedRepo.count(q);
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
-		if (mustAddRowLevelSecurity()) addRowLevelSecurity(q);
-		return decorated.findAll(q);
+		if (mustAddRowLevelSecurity())
+		{
+			addRowLevelSecurity(q);
+		}
+		return decoratedRepo.findAll(q);
 	}
 
 	@Override
 	public Entity findOne(Query q)
 	{
 		if (mustAddRowLevelSecurity()) addRowLevelSecurity(q);
-		return decorated.findOne(q);
+		return decoratedRepo.findOne(q);
 	}
 
 	@Override
 	public Entity findOne(Object id)
 	{
-		Entity e = decorated.findOne(id);
+		Entity e = decoratedRepo.findOne(id);
 
 		if (mustAddRowLevelSecurity())
 		{
-			if (!SecurityUtils.getCurrentUsername().equals(getOwnerUserName(e))) return null;
+			if (!currentUserIsOwner(e)) return null;
 		}
 
 		return e;
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
+	public Entity findOne(Object id, Fetch fetch)
 	{
-		Iterable<Entity> entities = decorated.findAll(ids);
+		if (fetch != null)
+		{
+			fetch.field(OwnedEntityMetaData.ATTR_OWNER_USERNAME);
+		}
+		Entity e = decoratedRepo.findOne(id, fetch);
+
 		if (mustAddRowLevelSecurity())
 		{
-			entities = Iterables.filter(entities, new Predicate<Entity>()
-			{
-				@Override
-				public boolean apply(Entity e)
-				{
-					return SecurityUtils.getCurrentUsername().equals(getOwnerUserName(e));
-				}
-
-			});
+			if (!currentUserIsOwner(e)) return null;
 		}
 
+		return e;
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		Stream<Entity> entities = decoratedRepo.findAll(ids);
+		if (mustAddRowLevelSecurity())
+		{
+			entities = entities.filter(this::currentUserIsOwner);
+		}
+		return entities;
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		if (fetch != null)
+		{
+			fetch.field(OwnedEntityMetaData.ATTR_OWNER_USERNAME);
+		}
+		Stream<Entity> entities = decoratedRepo.findAll(ids, fetch);
+		if (mustAddRowLevelSecurity())
+		{
+			entities = entities.filter(this::currentUserIsOwner);
+		}
 		return entities;
 	}
 
@@ -138,61 +182,53 @@ public class OwnedEntityRepositoryDecorator implements IndexedRepository
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		if (mustAddRowLevelSecurity()) addRowLevelSecurity(aggregateQuery.getQuery());
-		return decorated.aggregate(aggregateQuery);
+		return decoratedRepo.aggregate(aggregateQuery);
 	}
 
 	@Override
 	public void update(Entity entity)
 	{
-		if (mustAddRowLevelSecurity()) entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME,
-				SecurityUtils.getCurrentUsername());
-		decorated.update(entity);
+		if (isOwnedEntityMetaData()
+				&& (mustAddRowLevelSecurity() || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null))
+			entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
+		decoratedRepo.update(entity);
 	}
 
 	@Override
-	public void update(Iterable<? extends Entity> entities)
+	public void update(Stream<? extends Entity> entities)
 	{
-		if (mustAddRowLevelSecurity())
+		if (isOwnedEntityMetaData())
 		{
-			entities = Iterables.filter(entities, new Predicate<Entity>()
-			{
-				@Override
-				public boolean apply(Entity entity)
+			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			entities = entities.map(entity -> {
+				if (mustAddRowLevelSecurity || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null)
 				{
-					entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
-					return true;
+					entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, currentUsername);
 				}
-
+				return entity;
 			});
 		}
 
-		decorated.update(entities);
+		decoratedRepo.update(entities);
 	}
 
 	@Override
 	public void delete(Entity entity)
 	{
-		if (mustAddRowLevelSecurity() && !SecurityUtils.getCurrentUsername().equals(getOwnerUserName(entity))) return;
-		decorated.delete(entity);
+		if (mustAddRowLevelSecurity() && !currentUserIsOwner(entity)) return;
+		decoratedRepo.delete(entity);
 	}
 
 	@Override
-	public void delete(Iterable<? extends Entity> entities)
+	public void delete(Stream<? extends Entity> entities)
 	{
 		if (mustAddRowLevelSecurity())
 		{
-			entities = Iterables.filter(entities, new Predicate<Entity>()
-			{
-				@Override
-				public boolean apply(Entity entity)
-				{
-					return SecurityUtils.getCurrentUsername().equals(getOwnerUserName(entity));
-				}
-
-			});
+			entities = entities.filter(this::currentUserIsOwner);
 		}
 
-		decorated.delete(entities);
+		decoratedRepo.delete(entities);
 	}
 
 	@Override
@@ -201,22 +237,22 @@ public class OwnedEntityRepositoryDecorator implements IndexedRepository
 		if (mustAddRowLevelSecurity())
 		{
 			Entity entity = findOne(id);
-			if ((entity != null) && !SecurityUtils.getCurrentUsername().equals(getOwnerUserName(entity))) return;
+			if ((entity != null) && !currentUserIsOwner(entity)) return;
 		}
 
-		decorated.deleteById(id);
+		decoratedRepo.deleteById(id);
 	}
 
 	@Override
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		if (mustAddRowLevelSecurity())
 		{
-			delete(decorated.findAll(ids));
+			delete(decoratedRepo.findAll(ids));
 		}
 		else
 		{
-			decorated.deleteById(ids);
+			decoratedRepo.deleteById(ids);
 		}
 	}
 
@@ -225,60 +261,66 @@ public class OwnedEntityRepositoryDecorator implements IndexedRepository
 	{
 		if (mustAddRowLevelSecurity())
 		{
-			delete(decorated);
+			delete(decoratedRepo.stream());
 		}
 		else
 		{
-			decorated.deleteAll();
+			decoratedRepo.deleteAll();
 		}
 	}
 
 	@Override
 	public void add(Entity entity)
 	{
-		if (mustAddRowLevelSecurity())
+		if (isOwnedEntityMetaData()
+				&& (mustAddRowLevelSecurity() || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null))
 		{
 			entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		}
 
-		decorated.add(entity);
+		decoratedRepo.add(entity);
 	}
 
 	@Override
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Stream<? extends Entity> entities)
 	{
-		if (mustAddRowLevelSecurity())
+		if (isOwnedEntityMetaData())
 		{
-			entities = Iterables.filter(entities, new Predicate<Entity>()
-			{
-				@Override
-				public boolean apply(Entity entity)
+			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			entities = entities.map(entity -> {
+				if (mustAddRowLevelSecurity || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null)
 				{
-					entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
-					return true;
+					entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, currentUsername);
 				}
-
+				return entity;
 			});
 		}
 
-		return decorated.add(entities);
+		return decoratedRepo.add(entities);
 	}
 
 	@Override
 	public void flush()
 	{
-		decorated.flush();
+		decoratedRepo.flush();
 	}
 
 	@Override
 	public void clearCache()
 	{
-		decorated.clearCache();
+		decoratedRepo.clearCache();
 	}
 
 	private boolean mustAddRowLevelSecurity()
 	{
-		if (SecurityUtils.currentUserIsSu()) return false;
+		if (SecurityUtils.currentUserIsSu() || SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
+			return false;
+		return isOwnedEntityMetaData();
+	}
+
+	private boolean isOwnedEntityMetaData()
+	{
 		return EntityUtils.doesExtend(getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME);
 	}
 
@@ -300,18 +342,36 @@ public class OwnedEntityRepositoryDecorator implements IndexedRepository
 	@Override
 	public void create()
 	{
-		decorated.create();
+		decoratedRepo.create();
 	}
 
 	@Override
 	public void drop()
 	{
-		decorated.drop();
+		decoratedRepo.drop();
 	}
 
 	@Override
 	public void rebuildIndex()
 	{
-		decorated.rebuildIndex();
+		decoratedRepo.rebuildIndex();
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		decoratedRepo.addEntityListener(entityListener);
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		decoratedRepo.removeEntityListener(entityListener);
+	}
+
+	private boolean currentUserIsOwner(Entity entity)
+	{
+		if (null == entity) return false;
+		return SecurityUtils.getCurrentUsername().equals(getOwnerUserName(entity));
 	}
 }

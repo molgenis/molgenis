@@ -2,8 +2,8 @@ package org.molgenis.data.mapper.config;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.mapper.algorithmgenerator.service.MapCategoryService;
-import org.molgenis.data.mapper.algorithmgenerator.service.impl.MapCategoryServiceImpl;
+import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
+import org.molgenis.data.mapper.algorithmgenerator.service.impl.AlgorithmGeneratorServiceImpl;
 import org.molgenis.data.mapper.repository.impl.AttributeMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.EntityMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl;
@@ -64,16 +64,16 @@ public class MappingConfig
 	}
 
 	@Bean
-	public MapCategoryService mapCategoryService()
+	public AlgorithmGeneratorService algorithmGeneratorService()
 	{
-		return new MapCategoryServiceImpl(dataService);
+		return new AlgorithmGeneratorServiceImpl(dataService, unitResolver(), algorithmTemplateServiceImpl());
 	}
 
 	@Bean
 	public AlgorithmService algorithmServiceImpl()
 	{
-		return new AlgorithmServiceImpl(dataService, ontologyTagService, semanticSearchService, unitResolver(),
-				algorithmTemplateServiceImpl(), mapCategoryService());
+		return new AlgorithmServiceImpl(dataService, ontologyTagService, semanticSearchService,
+				algorithmGeneratorService());
 	}
 
 	@Bean

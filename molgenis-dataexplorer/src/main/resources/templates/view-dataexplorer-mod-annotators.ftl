@@ -1,4 +1,23 @@
 <#include "resource-macros.ftl">
+<#if annotationRun?? && (annotationRun.status == 'RUNNING')>
+<div class="row">
+    <div class="col-md-12">
+        This entity is currently being annotated, details listed below.
+     </div>
+    	<div class="col-md-12">
+        	<div id="annotateRun"></div>
+    	</div>
+	</div>
+</div>
+    <script>
+    	$(function (){
+	 		var ProgressBar = React.render(molgenis.ui.jobs.JobContainer({
+	    	 	'jobHref' : '/api/v1/AnnotationJobExecution/${annotationRun.identifier}'
+			}), $('#annotateRun')[0]);
+        });
+    </script>
+<#else>
+
 <div class="row">
 	<div class="col-md-12" id="annotator-select-container">
 		<form id="annotate-dataset-form" role="form" class="well">
@@ -47,9 +66,6 @@
         	<div class="row">
         		<div class="col-md-12">
                     <div class="form-group">
-        			    <input type="checkbox" name="createCopy"> Copy before annotating
-                    </div>
-                    <div class="form-group">
                         <input type="hidden" value="" id="dataset-identifier" name="dataset-identifier">
                         <button id="annotate-dataset-button" class="btn btn-default">Annotate</button>
                     </div>
@@ -77,7 +93,7 @@
         </div>
     </div>
 </div>
-
+</#if>
 
 <script id="annotator-template" type="text/x-handlebars-template">
 	{{#equal this.enabled 'true'}}
@@ -157,6 +173,16 @@
     </div>
 </script>
 
+<#if annotationRun??>
+    <script>
+            if ('${annotationRun.status}' === "SUCCESS") {
+                molgenis.createAlert([{'message': 'This entity has most recently been annotated with: ${annotationRun.annotators}'}], 'info');
+            }
+            if ('${annotationRun.status}' === "FAILED") {
+                molgenis.createAlert([{'message': 'The last annotation run for this entity has failed'}], 'error');
+            }
+    </script>
+</#if>
 <script>
 	$.when($.ajax("<@resource_href "/js/dataexplorer-annotators.js"/>", {'cache': true}))
 		.then(function() {

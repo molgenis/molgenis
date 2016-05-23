@@ -167,7 +167,7 @@
                     data: form.serialize(),
                     contentType: 'application/x-www-form-urlencoded',
                     success: function (name) {
-                        molgenis.createAlert([{'message': 'Annotation completed. <a href=/menu/main/dataexplorer?entity='+name+'>Show result</a>'}], 'success');
+                        window.location.replace("?mod=annotators&entity="+name);
                     }
                 });
             }

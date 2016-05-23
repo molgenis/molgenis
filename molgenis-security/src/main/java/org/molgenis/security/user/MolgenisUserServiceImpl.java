@@ -1,7 +1,9 @@
 package org.molgenis.security.user;
 
-import java.util.Collections;
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.auth.MolgenisGroupMember;
@@ -11,10 +13,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 
 /**
  * Manage user in groups
@@ -35,18 +33,9 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	@RunAsSystem
 	public List<String> getSuEmailAddresses()
 	{
-		Iterable<MolgenisUser> superUsers = dataService.findAll(MolgenisUser.ENTITY_NAME,
+		Stream<MolgenisUser> superUsers = dataService.findAll(MolgenisUser.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisUser.SUPERUSER, true), MolgenisUser.class);
-
-		return superUsers != null ? Lists.transform(Lists.newArrayList(superUsers),
-				new Function<MolgenisUser, String>()
-				{
-					@Override
-					public String apply(MolgenisUser molgenisUser)
-					{
-						return molgenisUser.getEmail();
-					}
-				}) : Collections.<String> emptyList();
+		return superUsers.map(MolgenisUser::getEmail).collect(toList());
 	}
 
 	@Override
@@ -61,10 +50,10 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	@RunAsSystem
 	public Iterable<MolgenisGroup> getUserGroups(String username)
 	{
-		Iterable<MolgenisGroupMember> molgenisGroupMembers = dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
+		Stream<MolgenisGroupMember> molgenisGroupMembers = dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
 				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, getUser(username)), MolgenisGroupMember.class);
 		// N.B. Must collect the results in a list before yielding up the RunAsSystem privileges!
-		return Lists.newArrayList(Iterables.transform(molgenisGroupMembers, MolgenisGroupMember::getMolgenisGroup));
+		return molgenisGroupMembers.map(MolgenisGroupMember::getMolgenisGroup).collect(toList());
 	}
 
 	@Override

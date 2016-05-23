@@ -136,7 +136,7 @@ public class SecurityUtilsTest
 	{
 		List<String> authorities = SecurityUtils.getEntityAuthorities("test");
 		List<String> expected = Arrays.asList("ROLE_ENTITY_READ_TEST", "ROLE_ENTITY_WRITE_TEST",
-				"ROLE_ENTITY_COUNT_TEST", "ROLE_ENTITY_NONE_TEST");
+				"ROLE_ENTITY_COUNT_TEST", "ROLE_ENTITY_NONE_TEST", "ROLE_ENTITY_WRITEMETA_TEST");
 
 		Assert.assertEqualsNoOrder(authorities.toArray(), expected.toArray());
 	}

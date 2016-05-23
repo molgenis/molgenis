@@ -8,7 +8,10 @@ import java.util.Set;
 
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 
@@ -29,17 +32,20 @@ public class EntityMetaDataResponse
 	private final String idAttribute;
 	private final List<String> lookupAttributes;
 	private final Boolean isAbstract;
+	private String languageCode;
+
 	/**
-	 * Is this user allowed to add/update/delete entities of this type?
+	 * Is this user allowed to add/update/delete entities of this type and has the repo the capability?
 	 */
 	private final Boolean writable;
 
 	/**
 	 * @param meta
 	 */
-	public EntityMetaDataResponse(EntityMetaData meta, MolgenisPermissionService permissionService)
+	public EntityMetaDataResponse(EntityMetaData meta, MolgenisPermissionService permissionService,
+			DataService dataService, LanguageService languageService)
 	{
-		this(meta, null, null, permissionService);
+		this(meta, null, null, permissionService, dataService, languageService);
 	}
 
 	/**
@@ -51,11 +57,13 @@ public class EntityMetaDataResponse
 	 *            set of lowercase attribute names to expand in response
 	 */
 	public EntityMetaDataResponse(EntityMetaData meta, Set<String> attributesSet,
-			Map<String, Set<String>> attributeExpandsSet, MolgenisPermissionService permissionService)
+			Map<String, Set<String>> attributeExpandsSet, MolgenisPermissionService permissionService,
+			DataService dataService, LanguageService languageService)
 	{
 		String name = meta.getName();
 		this.href = Href.concatMetaEntityHref(RestController.BASE_URI, name);
 		this.hrefCollection = String.format("%s/%s", RestController.BASE_URI, name); // FIXME apply Href escaping fix
+		this.languageCode = languageService.getCurrentUserLanguageCode();
 
 		if (attributesSet == null || attributesSet.contains("name".toLowerCase()))
 		{
@@ -65,30 +73,33 @@ public class EntityMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("description".toLowerCase()))
 		{
-			this.description = meta.getDescription();
+			this.description = meta.getDescription(languageService.getCurrentUserLanguageCode());
 		}
 		else this.description = null;
 
 		if (attributesSet == null || attributesSet.contains("label".toLowerCase()))
 		{
-			label = meta.getLabel();
+			label = meta.getLabel(languageService.getCurrentUserLanguageCode());
 		}
 		else this.label = null;
 
 		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
 		{
 			this.attributes = new LinkedHashMap<String, Object>();
-
-			for (AttributeMetaData attr : meta.getAttributes())
+			//the newArraylist is a fix for concurrency trouble
+			//FIXME properly fix this by making metadata immutable
+			for (AttributeMetaData attr : Lists.newArrayList(meta.getAttributes()))
 			{
 				if (!attr.getName().equals("__Type"))
 				{
 					if (attributeExpandsSet != null && attributeExpandsSet.containsKey("attributes".toLowerCase()))
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
-						this.attributes.put(attr.getName(), new AttributeMetaDataResponse(name, attr, subAttributesSet,
-								Collections.singletonMap("refEntity".toLowerCase(), Sets.newHashSet("idattribute")),
-								permissionService));
+						this.attributes.put(attr.getName(),
+								new AttributeMetaDataResponse(name, meta, attr, subAttributesSet,
+										Collections.singletonMap("refEntity".toLowerCase(),
+												Sets.newHashSet("idattribute")),
+										permissionService, dataService, languageService));
 					}
 					else
 					{
@@ -102,7 +113,7 @@ public class EntityMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("labelAttribute".toLowerCase()))
 		{
-			AttributeMetaData labelAttribute = meta.getLabelAttribute();
+			AttributeMetaData labelAttribute = meta.getLabelAttribute(this.languageCode);
 			this.labelAttribute = labelAttribute != null ? labelAttribute.getName() : null;
 		}
 		else this.labelAttribute = null;
@@ -117,8 +128,8 @@ public class EntityMetaDataResponse
 		if (attributesSet == null || attributesSet.contains("lookupAttributes".toLowerCase()))
 		{
 			Iterable<AttributeMetaData> lookupAttributes = meta.getLookupAttributes();
-			this.lookupAttributes = lookupAttributes != null ? Lists.newArrayList(Iterables.transform(lookupAttributes,
-					new Function<AttributeMetaData, String>()
+			this.lookupAttributes = lookupAttributes != null
+					? Lists.newArrayList(Iterables.transform(lookupAttributes, new Function<AttributeMetaData, String>()
 					{
 						@Override
 						public String apply(AttributeMetaData attribute)
@@ -135,7 +146,8 @@ public class EntityMetaDataResponse
 		}
 		else this.isAbstract = null;
 
-		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE);
+		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE)
+				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
 	}
 
 	public String getHref()
@@ -192,4 +204,10 @@ public class EntityMetaDataResponse
 	{
 		return writable;
 	}
+
+	public String getLanguageCode()
+	{
+		return languageCode;
+	}
+
 }

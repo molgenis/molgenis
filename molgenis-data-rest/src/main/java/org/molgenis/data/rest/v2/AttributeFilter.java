@@ -1,15 +1,30 @@
 package org.molgenis.data.rest.v2;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 
-class AttributeFilter implements Iterable<AttributeFilter>
+/**
+ * An AttributeFilter represents the value of the attrs parameter in a REST query.
+ * 
+ * The AttributeFilter allows you to specify which attributes should be fetched for each {@link Entity} that is
+ * retrieved.
+ * 
+ * By default, the top level entity will always be fetched with all attributes, but you can also specify a list of
+ * attribute names. Those will be added to the ID and label attributes, which will always be fetched.
+ * 
+ * Referenced entities will always be fetched using ID and label, but you can also specify a list of attribute names.
+ * Those will be added to the ID and label attributes, which will always be fetched. You can also specify the special
+ * selector `*` which will fetch all attributes for a referenced entity.
+ */
+class AttributeFilter implements Iterable<Entry<String, AttributeFilter>>
 {
-	public static final AttributeFilter ALL_ATTRS_FILTER = new AttributeFilter().setIncludeAllAttrs(true);
-
 	private final Map<String, AttributeFilter> attributes;
 	private boolean includeAllAttrs;
 	private boolean includeIdAttr;
@@ -25,6 +40,14 @@ class AttributeFilter implements Iterable<AttributeFilter>
 	public boolean isIncludeAllAttrs()
 	{
 		return includeAllAttrs;
+	}
+
+	/**
+	 * Indicates if this filter is {@link #includeAllAttrs}, and NO other attributes are selected.
+	 */
+	public boolean isStar()
+	{
+		return includeAllAttrs && (attributes == null || attributes.keySet().isEmpty());
 	}
 
 	AttributeFilter setIncludeAllAttrs(boolean includeAllAttrs)
@@ -67,13 +90,13 @@ class AttributeFilter implements Iterable<AttributeFilter>
 		return this;
 	}
 
-	public AttributeFilter getAttributeFilter(AttributeMetaData attr)
+	public AttributeFilter getAttributeFilter(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		if (idAttrFilter != null && attr.isIdAtrribute())
+		if (idAttrFilter != null && attr.equals(entityMeta.getIdAttribute()))
 		{
 			return idAttrFilter;
 		}
-		else if (labelAttrFilter != null && attr.isLabelAttribute())
+		else if (labelAttrFilter != null && attr.equals(entityMeta.getLabelAttribute()))
 		{
 			return labelAttrFilter;
 		}
@@ -83,30 +106,10 @@ class AttributeFilter implements Iterable<AttributeFilter>
 		}
 	}
 
-	public boolean includeAttribute(AttributeMetaData attr)
-	{
-		if (this.includeAllAttrs)
-		{
-			return true;
-		}
-		else if (this.includeIdAttr && attr.isIdAtrribute())
-		{
-			return true;
-		}
-		else if (this.includeLabelAttr && attr.isLabelAttribute())
-		{
-			return true;
-		}
-		else
-		{
-			return attributes.containsKey(normalize(attr.getName()));
-		}
-	}
-
 	@Override
-	public Iterator<AttributeFilter> iterator()
+	public Iterator<Entry<String, AttributeFilter>> iterator()
 	{
-		return attributes.values().iterator();
+		return Collections.unmodifiableMap(attributes).entrySet().iterator();
 	}
 
 	public AttributeFilter add(String name)

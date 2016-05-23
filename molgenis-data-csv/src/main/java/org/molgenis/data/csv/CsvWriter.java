@@ -185,9 +185,9 @@ public class CsvWriter extends AbstractWritable
 		}
 		else if (obj instanceof Entity)
 		{
-			if (getWriteMode() != null)
+			if (getEntityWriteMode() != null)
 			{
-				switch (getWriteMode())
+				switch (getEntityWriteMode())
 				{
 					case ENTITY_IDS:
 						value = ((Entity) obj).getIdValue().toString();
@@ -196,7 +196,7 @@ public class CsvWriter extends AbstractWritable
 						value = ((Entity) obj).getLabelValue();
 						break;
 					default:
-						throw new RuntimeException("Unknown write mode [" + getWriteMode() + "]");
+						throw new RuntimeException("Unknown write mode [" + getEntityWriteMode() + "]");
 				}
 			}
 			else

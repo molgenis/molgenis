@@ -1,5 +1,6 @@
 package org.molgenis.app.promise.model;
 
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.stereotype.Component;
@@ -27,7 +28,9 @@ public class PromiseCredentialsMetaData extends DefaultEntityMetaData
 		setLabel("ProMISe credentials");
 		setDescription("Credentials for ProMISe SOAP endpoints");
 
-		addAttribute(ID).setIdAttribute(true).setNillable(false);
+		AttributeMetaData idAttribute = addAttribute(ID).setNillable(false);
+		setIdAttribute(idAttribute);
+
 		addAttribute(PROJ).setNillable(false);
 		addAttribute(USERNAME).setNillable(false);
 		addAttribute(PASSW).setNillable(false).setVisible(false);

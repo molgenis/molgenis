@@ -1,11 +1,14 @@
 package org.molgenis.data.meta;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
 public class TagMetaData extends DefaultEntityMetaData
 {
-
 	public static final String ENTITY_NAME = "tags";
 	public static final String IDENTIFIER = "identifier";
 	public static final String OBJECT_IRI = "objectIRI";
@@ -19,9 +22,9 @@ public class TagMetaData extends DefaultEntityMetaData
 	private TagMetaData()
 	{
 		super(ENTITY_NAME);
-		addAttribute(IDENTIFIER).setIdAttribute(true).setNillable(false);
-		addAttribute(OBJECT_IRI).setLookupAttribute(true).setDataType(MolgenisFieldTypes.TEXT);
-		addAttribute(LABEL).setNillable(false).setLookupAttribute(true).setLabelAttribute(true);
+		addAttribute(IDENTIFIER, ROLE_ID);
+		addAttribute(OBJECT_IRI, ROLE_LOOKUP).setDataType(MolgenisFieldTypes.TEXT);
+		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false);
 		addAttribute(RELATION_IRI).setNillable(false);
 		addAttribute(RELATION_LABEL).setNillable(false);
 		addAttribute(CODE_SYSTEM);

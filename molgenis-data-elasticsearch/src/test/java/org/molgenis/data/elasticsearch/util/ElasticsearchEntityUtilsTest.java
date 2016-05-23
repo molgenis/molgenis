@@ -1,16 +1,17 @@
 package org.molgenis.data.elasticsearch.util;
 
+import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.stream.Stream;
 
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
 import org.testng.annotations.Test;
 
 public class ElasticsearchEntityUtilsTest
@@ -28,8 +29,8 @@ public class ElasticsearchEntityUtilsTest
 	{
 		String id0 = "id0";
 		String id1 = "id1";
-		assertEquals(Arrays.<String> asList(id0, id1),
-				Lists.newArrayList(ElasticsearchEntityUtils.toElasticsearchIds(Arrays.<Object> asList(id0, id1))));
+		assertEquals(ElasticsearchEntityUtils.toElasticsearchIds(Stream.of(id0, id1)).collect(toList()),
+				Arrays.<String> asList(id0, id1));
 	}
 
 	@Test

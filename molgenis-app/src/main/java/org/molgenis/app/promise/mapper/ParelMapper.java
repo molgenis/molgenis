@@ -1,8 +1,28 @@
 package org.molgenis.app.promise.mapper;
 
+import com.google.common.collect.Lists;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.molgenis.app.promise.client.PromiseDataParser;
+import org.molgenis.app.promise.mapper.MappingReport.Status;
+import org.molgenis.app.promise.model.BbmriNlCheatSheet;
+import org.molgenis.app.promise.model.PromiseMappingProjectMetaData;
+import org.molgenis.data.*;
+import org.molgenis.data.support.MapEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.stereotype.Component;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.stream.Stream;
+
 import static com.google.common.collect.Lists.transform;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.app.promise.model.BbmriNlCheatSheet.ACRONYM;
 import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_HIGH;
 import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_LOW;
@@ -41,28 +61,6 @@ import static org.molgenis.app.promise.model.BbmriNlCheatSheet.SAMPLE_COLLECTION
 import static org.molgenis.app.promise.model.BbmriNlCheatSheet.SEX;
 import static org.molgenis.app.promise.model.BbmriNlCheatSheet.TYPE;
 import static org.molgenis.app.promise.model.BbmriNlCheatSheet.WEBSITE;
-
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.molgenis.app.promise.client.PromiseDataParser;
-import org.molgenis.app.promise.mapper.MappingReport.Status;
-import org.molgenis.app.promise.model.BbmriNlCheatSheet;
-import org.molgenis.app.promise.model.PromiseMappingProjectMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.stereotype.Component;
-
-import com.google.common.collect.Lists;
 
 @Component
 public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRefreshedEvent>
@@ -263,28 +261,28 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 	private Iterable<Entity> toGenders(String promiseSex)
 	{
 		Object[] sexes = promiseSex.split(",");
-		Iterable<Object> ids = Arrays.asList(sexes);
+		Stream<Object> ids = asList(sexes).stream();
 
-		Iterable<Entity> genderTypes = dataService.findAll(REF_GENDER_TYPES, ids);
+		Stream<Entity> genderTypes = dataService.findAll(REF_GENDER_TYPES, ids);
 		if (!genderTypes.iterator().hasNext())
 		{
 			throw new RuntimeException("Unknown '" + REF_GENDER_TYPES + "' [" + ids.toString() + "]");
 		}
-		return genderTypes;
+		return genderTypes.collect(toList());
 	}
 
 	private Iterable<Entity> toTypes(String promiseTypes)
 	{
 		Object[] types = promiseTypes.split(",");
-		Iterable<Object> ids = Arrays.asList(types);
+		Stream<Object> ids = asList(types).stream();
 
-		Iterable<Entity> collectionTypes = dataService.findAll(REF_COLLECTION_TYPES, ids);
+		Stream<Entity> collectionTypes = dataService.findAll(REF_COLLECTION_TYPES, ids);
 
 		if (!collectionTypes.iterator().hasNext())
 		{
 			throw new RuntimeException("Unknown '" + REF_COLLECTION_TYPES + "' [" + promiseTypes + "]");
 		}
-		return collectionTypes;
+		return collectionTypes.collect(toList());
 	}
 
 	private Iterable<Entity> toMaterialTypes(Iterable<Entity> promiseSampleEntities)
@@ -321,20 +319,18 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		}
 
 		if (!unknown.isEmpty())
-
 		{
 			throw new RuntimeException("Unknown ProMISe material types: [" + String.join(",", unknown) + "]");
 		}
 
-		Iterable<Entity> materialTypes = dataService.findAll(REF_MATERIAL_TYPES, transform(ids, id -> (Object) id));
-
+		Stream<Entity> materialTypes = dataService.findAll(REF_MATERIAL_TYPES, transform(ids, id -> (Object) id).stream());
 		if (!materialTypes.iterator().hasNext())
 
 		{
 			String message = String.format("Couldn't find mappings for some of the material types in %s.", ids);
 			throw new RuntimeException(message);
 		}
-		return materialTypes;
+		return materialTypes.collect(toList());
 	}
 
 }

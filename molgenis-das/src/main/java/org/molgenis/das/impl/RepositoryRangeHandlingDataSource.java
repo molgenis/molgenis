@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.servlet.ServletContext;
 
@@ -66,12 +68,10 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 
 		String posAttribute = null;
 		String chromosomeAttribute = null;
-		String idAttribute = null;
 		String stopAttribute = null;
 		String refAttribute = null;
 		String altAttribute = null;
 		String descriptionAttribute = null;
-		String nameAttribute = null;
 		String linkAttribute = null;
 		String patientAttribute = null;
 
@@ -88,20 +88,20 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 		{
 			maxbins = 1000;
 		}
-		Iterable<Entity> entityIterable = queryDataSet(segmentId, dataSet, maxbins);
+		Stream<Entity> entityIterable = queryDataSet(segmentId, dataSet, maxbins);
 		List<DasFeature> features = new ArrayList<DasFeature>();
 
 		Integer score = 0;
 		Map<String, DasType> patients = new HashMap<String, DasType>();
-		for (Entity entity : entityIterable)
+		for (Iterator<Entity> it = entityIterable.iterator(); it.hasNext();)
 		{
+			Entity entity = it.next();
+
 			DasFeature feature;
 
 			Integer valueStart = null;
 			Integer valueStop = null;
 			String valueDescription = null;
-			String valueIdentifier = null;
-			String valueName = null;
 			String valueLink = null;
 			String valuePatient = null;
 			String valueRef = null;
@@ -109,21 +109,17 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 
 			posAttribute = getAttributeName(posAttribute, GenomicDataSettings.Meta.ATTRS_POS, entity);
 			chromosomeAttribute = getAttributeName(chromosomeAttribute, GenomicDataSettings.Meta.ATTRS_CHROM, entity);
-			idAttribute = getAttributeName(idAttribute, GenomicDataSettings.Meta.ATTRS_IDENTIFIER, entity);
 			stopAttribute = getAttributeName(stopAttribute, GenomicDataSettings.Meta.ATTRS_STOP, entity);
 			descriptionAttribute = getAttributeName(descriptionAttribute, GenomicDataSettings.Meta.ATTRS_DESCRIPTION,
 					entity);
 			refAttribute = getAttributeName(refAttribute, GenomicDataSettings.Meta.ATTRS_REF, entity);
 			altAttribute = getAttributeName(altAttribute, GenomicDataSettings.Meta.ATTRS_ALT, entity);
-			nameAttribute = getAttributeName(nameAttribute, GenomicDataSettings.Meta.ATTRS_NAME, entity);
 			linkAttribute = getAttributeName(linkAttribute, GenomicDataSettings.Meta.ATTRS_LINKOUT, entity);
 			patientAttribute = getAttributeName(patientAttribute, GenomicDataSettings.Meta.ATTRS_PATIENT_ID, entity);
 
 			try
 			{
 				valueStart = entity.getInt(posAttribute);
-				valueIdentifier = StringUtils.isNotEmpty(idAttribute)
-						&& StringUtils.isNotEmpty(entity.getString(idAttribute)) ? entity.getString(idAttribute) : "-";
 			}
 			catch (ClassCastException e)
 			{
@@ -136,7 +132,6 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 			valueStop = Iterables.contains(attributes, stopAttribute) ? entity.getInt(stopAttribute) : valueStart;
 			valueDescription = Iterables.contains(attributes, descriptionAttribute)
 					? entity.getString(descriptionAttribute) : "";
-			valueName = Iterables.contains(attributes, nameAttribute) ? entity.getString(nameAttribute) : "";
 			valueLink = Iterables.contains(attributes, linkAttribute) ? entity.getString(linkAttribute) : "";
 			valuePatient = Iterables.contains(attributes, patientAttribute) ? entity.getString(patientAttribute) : "";
 
@@ -181,8 +176,9 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 					++score;
 				}
 
-				feature = createDasFeature(valueStart, valueStop, valueIdentifier, valueName, valueDescription,
-						valueLink, type, method, dataSet, valuePatient, notes);
+				feature = createDasFeature(valueStart, valueStop, entity.getIdValue().toString(),
+						entity.getLabelValue(), valueDescription, valueLink, type, method, dataSet, valuePatient,
+						notes);
 				features.add(feature);
 			}
 		}
@@ -199,8 +195,9 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 		return attribute;
 	}
 
-	protected Iterable<Entity> queryDataSet(String segmentId, String dataSet, int maxbins)
+	protected Stream<Entity> queryDataSet(String segmentId, String dataSet, int maxbins)
 	{
+
 		String chromosomeAttribute = config.getAttributeNameForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM,
 				dataService.getEntityMetaData(dataSet));
 		Query q = new QueryImpl().eq(chromosomeAttribute, segmentId);

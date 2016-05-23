@@ -1,24 +1,24 @@
 package org.molgenis.data.vcf;
 
+import com.google.common.collect.ImmutableSet;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Repository;
+import org.molgenis.data.support.FileRepositoryCollection;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
-import org.molgenis.data.support.FileRepositoryCollection;
-
-import com.google.common.collect.ImmutableSet;
-
 public class VcfRepositoryCollection extends FileRepositoryCollection
 {
 	public static final String NAME = "VCF";
 	private static final String EXTENSION_VCF = "vcf";
 	private static final String EXTENSION_VCF_GZ = "vcf.gz";
-	static final Set<String> EXTENSIONS = ImmutableSet.of(EXTENSION_VCF, EXTENSION_VCF_GZ);
+	private static final String EXTENSION_VCF_ZIP = "vcf.zip";
+	static final Set<String> EXTENSIONS = ImmutableSet.of(EXTENSION_VCF, EXTENSION_VCF_GZ, EXTENSION_VCF_ZIP);
 
 	private final File file;
 	private final String entityName;
@@ -37,6 +37,10 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 		else if (name.endsWith(EXTENSION_VCF_GZ))
 		{
 			this.entityName = name.substring(0, name.lastIndexOf('.' + EXTENSION_VCF_GZ));
+		}
+		else if (name.endsWith(EXTENSION_VCF_ZIP)) 
+		{
+			this.entityName = name.substring(0, name.lastIndexOf('.' + EXTENSION_VCF_ZIP));
 		}
 		else
 		{

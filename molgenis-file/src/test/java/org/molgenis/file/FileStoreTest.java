@@ -19,6 +19,15 @@ public class FileStoreTest
 	}
 
 	@Test
+	public void createDirectory() throws IOException
+	{
+		FileStore fileStore = new FileStore(System.getProperty("java.io.tmpdir"));
+		Assert.assertTrue(fileStore.createDirectory("testDir"));
+		Assert.assertTrue(fileStore.getFile("testDir").isDirectory());
+		fileStore.delete("testDir");
+	}
+	
+	@Test
 	public void store() throws IOException
 	{
 		FileStore fileStore = new FileStore(System.getProperty("java.io.tmpdir"));

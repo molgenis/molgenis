@@ -64,6 +64,19 @@
 			};
 		});
 		
+		$('.delete-script-parameter-btn').click(function() {
+			var scriptParameterToDelete = $(this).parent().siblings(".name").text();
+			
+			if (confirm("Delete script parameter named " + scriptParameterToDelete + " ?")){
+				restApi.remove("/api/v1/scriptParameter/" + encodeURIComponent(scriptParameterToDelete),{
+					success:function(){
+						location.reload();						
+					},
+					error:function(){}
+				});
+			};
+		});
+		
 		$('#create-scriptparameter-btn').click(function() {
 			React.render(molgenis.ui.Form({
 				mode: 'create',

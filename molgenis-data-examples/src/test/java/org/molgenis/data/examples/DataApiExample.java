@@ -1,5 +1,6 @@
 package org.molgenis.data.examples;
 
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.support.QueryImpl.EQ;
 
 import java.io.File;
@@ -42,8 +43,8 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 		dataService.update(UserMetaData.ENTITY_NAME, klaas);
 
 		// Find all active
-		dataService.findAll(UserMetaData.ENTITY_NAME, EQ(UserMetaData.ACTIVE, true), User.class).forEach(
-				System.out::println);
+		dataService.findAll(UserMetaData.ENTITY_NAME, EQ(UserMetaData.ACTIVE, true), User.class)
+				.forEach(System.out::println);
 		// OR ??
 		dataService.getRepository(UserMetaData.ENTITY_NAME).query().eq(UserMetaData.ACTIVE, true)
 				.forEach(System.out::println);
@@ -57,7 +58,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 
 		// Add streaming
 		File usersCsv = ResourceUtils.getFile("users.csv");
-		dataService.add(UserMetaData.ENTITY_NAME, new CsvRepository(usersCsv, null));
+		dataService.add(UserMetaData.ENTITY_NAME, new CsvRepository(usersCsv, null).stream());
 		printUsers();
 	}
 
@@ -71,7 +72,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 	{
 		// Create new dynamic repo
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("City");
-		emd.addAttribute("name").setIdAttribute(true).setNillable(false);
+		emd.addAttribute("name", ROLE_ID);
 		emd.addAttribute("population").setDataType(MolgenisFieldTypes.INT);
 
 		Repository repo = dataService.getMeta().addEntityMeta(emd);
@@ -114,7 +115,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 		// Add cities to MyRepo
 		DefaultEntityMetaData emd = new DefaultEntityMetaData("City1");
 		emd.setBackend("MyRepos");
-		emd.addAttribute("name").setIdAttribute(true).setNillable(false);
+		emd.addAttribute("name", ROLE_ID);
 		emd.addAttribute("population").setDataType(MolgenisFieldTypes.INT);
 
 		Repository repo = dataService.getMeta().addEntityMeta(emd);

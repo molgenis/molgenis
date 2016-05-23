@@ -12,9 +12,10 @@ import java.io.StringReader;
 
 import org.apache.commons.io.IOUtils;
 import org.mockito.Mockito;
-import org.molgenis.data.Repository;
+import org.molgenis.data.DataService;
+import org.molgenis.data.meta.system.FreemarkerTemplateMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.system.core.FreemarkerTemplate;
+import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,20 +32,20 @@ public class RepositoryTemplateLoaderTest extends AbstractTestNGSpringContextTes
 	static class Config
 	{
 		@Bean
-		public Repository repository()
+		public DataService dataService()
 		{
-			return mock(Repository.class);
+			return mock(DataService.class);
 		}
 
 		@Bean
 		public RepositoryTemplateLoader repositoryTemplateLoader()
 		{
-			return new RepositoryTemplateLoader(repository());
+			return new RepositoryTemplateLoader(dataService());
 		}
 	}
 
 	@Autowired
-	private Repository repository;
+	private DataService dataService;
 
 	@Autowired
 	private RepositoryTemplateLoader repositoryTemplateLoader;
@@ -75,13 +76,15 @@ public class RepositoryTemplateLoaderTest extends AbstractTestNGSpringContextTes
 	@BeforeMethod
 	public void reset()
 	{
-		Mockito.reset(repository);
+		Mockito.reset(dataService);
 	}
 
 	@Test
 	public void loadAndRead() throws IOException
 	{
-		when(repository.findOne(new QueryImpl().eq("Name", "template1"))).thenReturn(template1);
+		when(
+				dataService.findOne(FreemarkerTemplateMetaData.ENTITY_NAME, new QueryImpl().eq("Name", "template1"),
+						FreemarkerTemplate.class)).thenReturn(template1);
 		Object source = repositoryTemplateLoader.findTemplateSource("template1");
 		assertNotNull(source);
 		Reader reader = repositoryTemplateLoader.getReader(source, null);
@@ -91,7 +94,9 @@ public class RepositoryTemplateLoaderTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void lastModifiedEqualsMinusOne() throws IOException
 	{
-		when(repository.findOne(new QueryImpl().eq("Name", "template1"))).thenReturn(template1);
+		when(
+				dataService.findOne(FreemarkerTemplateMetaData.ENTITY_NAME, new QueryImpl().eq("Name", "template1"),
+						FreemarkerTemplate.class)).thenReturn(template1);
 		Object source = repositoryTemplateLoader.findTemplateSource("template1");
 		assertTrue(repositoryTemplateLoader.getLastModified(source) == -1);
 	}
@@ -99,7 +104,9 @@ public class RepositoryTemplateLoaderTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void newSourceReturnedWhenContentChanges() throws IOException
 	{
-		when(repository.findOne(new QueryImpl().eq("Name", "template1"))).thenReturn(template1, template1Modified);
+		when(
+				dataService.findOne(FreemarkerTemplateMetaData.ENTITY_NAME, new QueryImpl().eq("Name", "template1"),
+						FreemarkerTemplate.class)).thenReturn(template1, template1Modified);
 		Object source = repositoryTemplateLoader.findTemplateSource("template1");
 		assertTrue(IOUtils.contentEquals(repositoryTemplateLoader.getReader(source, null),
 				new StringReader(template1.getValue())));
@@ -112,8 +119,12 @@ public class RepositoryTemplateLoaderTest extends AbstractTestNGSpringContextTes
 	@Test
 	public void sourceBelongsToContentAndCanBeReadMultipleTimes() throws IOException
 	{
-		when(repository.findOne(new QueryImpl().eq("Name", "template1"))).thenReturn(template1);
-		when(repository.findOne(new QueryImpl().eq("Name", "template2"))).thenReturn(template2);
+		when(
+				dataService.findOne(FreemarkerTemplateMetaData.ENTITY_NAME, new QueryImpl().eq("Name", "template1"),
+						FreemarkerTemplate.class)).thenReturn(template1);
+		when(
+				dataService.findOne(FreemarkerTemplateMetaData.ENTITY_NAME, new QueryImpl().eq("Name", "template2"),
+						FreemarkerTemplate.class)).thenReturn(template2);
 
 		Object source1 = repositoryTemplateLoader.findTemplateSource("template1");
 		Object source2 = repositoryTemplateLoader.findTemplateSource("template2");

@@ -49,13 +49,20 @@ public class PermissionSystemService
 				{
 					for (Permission permission : Permission.values())
 					{
-						String role = SecurityUtils.AUTHORITY_ENTITY_PREFIX + permission.toString() + "_"
-								+ entity.toUpperCase();
-						roles.add(new SimpleGrantedAuthority(role));
-						UserAuthority userAuthority = new UserAuthority();
-						userAuthority.setMolgenisUser(user);
-						userAuthority.setRole(role);
-						dataService.add(UserAuthority.ENTITY_NAME, userAuthority);
+						if (permission != Permission.NONE)
+						{
+							String role = SecurityUtils.AUTHORITY_ENTITY_PREFIX + permission.toString() + "_"
+									+ entity.toUpperCase();
+							roles.add(new SimpleGrantedAuthority(role));
+							UserAuthority userAuthority = new UserAuthority();
+							userAuthority.setMolgenisUser(user);
+							userAuthority.setRole(role);
+
+							if (permission == Permission.WRITEMETA)
+							{
+								dataService.add(UserAuthority.ENTITY_NAME, userAuthority);
+							}
+						}
 					}
 				}
 

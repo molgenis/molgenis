@@ -1,21 +1,6 @@
 package org.molgenis.data.vcf.format;
 
-import static org.molgenis.data.vcf.VcfRepository.ALT_META;
-import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
-import static org.molgenis.data.vcf.VcfRepository.FILTER_META;
-import static org.molgenis.data.vcf.VcfRepository.ID_META;
-import static org.molgenis.data.vcf.VcfRepository.INFO;
-import static org.molgenis.data.vcf.VcfRepository.INTERNAL_ID;
-import static org.molgenis.data.vcf.VcfRepository.POS_META;
-import static org.molgenis.data.vcf.VcfRepository.QUAL_META;
-import static org.molgenis.data.vcf.VcfRepository.REF_META;
-import static org.testng.Assert.assertEquals;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-
+import com.google.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -29,7 +14,22 @@ import org.molgenis.vcf.meta.VcfMeta;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.Arrays;
+
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.vcf.VcfRepository.ALT_META;
+import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
+import static org.molgenis.data.vcf.VcfRepository.FILTER_META;
+import static org.molgenis.data.vcf.VcfRepository.ID_META;
+import static org.molgenis.data.vcf.VcfRepository.INFO;
+import static org.molgenis.data.vcf.VcfRepository.INTERNAL_ID;
+import static org.molgenis.data.vcf.VcfRepository.POS_META;
+import static org.molgenis.data.vcf.VcfRepository.QUAL_META;
+import static org.molgenis.data.vcf.VcfRepository.REF_META;
+import static org.testng.Assert.assertEquals;
 
 public class VcfToEntityTest
 {
@@ -63,14 +63,12 @@ public class VcfToEntityTest
 	public void testGetEntityMetaData()
 	{
 		DefaultEntityMetaData expected = new DefaultEntityMetaData("EntityName");
-		expected.addAllAttributeMetaData(Arrays.asList(CHROM_META, ALT_META, POS_META, REF_META, FILTER_META,
-				QUAL_META, ID_META));
+		expected.addAllAttributeMetaData(
+				Arrays.asList(CHROM_META, ALT_META, POS_META, REF_META, FILTER_META, QUAL_META, ID_META));
 		DefaultAttributeMetaData internalIdMeta = new DefaultAttributeMetaData(INTERNAL_ID,
 				MolgenisFieldTypes.FieldTypeEnum.STRING);
-		internalIdMeta.setNillable(false);
-		internalIdMeta.setIdAttribute(true);
 		internalIdMeta.setVisible(false);
-		expected.addAttributeMetaData(internalIdMeta);
+		expected.addAttributeMetaData(internalIdMeta, ROLE_ID);
 
 		DefaultAttributeMetaData infoMetaData = new DefaultAttributeMetaData(INFO,
 				MolgenisFieldTypes.FieldTypeEnum.COMPOUND).setNillable(true);
@@ -81,8 +79,8 @@ public class VcfToEntityTest
 		DefaultAttributeMetaData infoDF = new DefaultAttributeMetaData("DF", MolgenisFieldTypes.FieldTypeEnum.BOOL)
 				.setNillable(false).setDescription("Flag field");
 		infoMetaData.addAttributePart(infoDF);
-		DefaultAttributeMetaData infoDF2 = new DefaultAttributeMetaData("DF2",
-				MolgenisFieldTypes.FieldTypeEnum.BOOL).setNillable(false).setDescription("Flag field 2");
+		DefaultAttributeMetaData infoDF2 = new DefaultAttributeMetaData("DF2", MolgenisFieldTypes.FieldTypeEnum.BOOL)
+				.setNillable(false).setDescription("Flag field 2");
 		infoMetaData.addAttributePart(infoDF2);
 
 		expected.addAttributeMetaData(infoMetaData);

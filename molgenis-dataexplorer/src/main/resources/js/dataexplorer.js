@@ -17,6 +17,7 @@ function($, molgenis, settingsXhr) {
     self.getChromosomeAttribute = getChromosomeAttribute;
     self.getIdentifierAttribute = getIdentifierAttribute;
     self.getPatientAttribute = getPatientAttribute;
+    self.getSelectedModule = getSelectedModule;
 
     var restApi = new molgenis.RestClient();
 	var selectedEntityMetaData = null;
@@ -46,6 +47,13 @@ function($, molgenis, settingsXhr) {
 	};
 	
 	var state;
+	
+	/**
+	 * @memberOf molgenis.dataexplorer
+	 */
+	function getSelectedModule() {
+		return state.mod;
+	}
 	
 	/**
 	 * @memberOf molgenis.dataexplorer
@@ -284,7 +292,19 @@ function($, molgenis, settingsXhr) {
 		return entityCollectionRequest;
 	}
 	
+	/**
+     * @memberOf molgenis.dataexplorer
+     */
 	function render() {
+		// Check if the copy button should be shown or not
+		$.get(molgenis.getContextUrl() + '/copy?entity=' + state.entity).done(function(data) {
+			if(data === true){
+				$("#copy-data-btn").removeClass('hidden');
+			}else{
+				$("#copy-data-btn").addClass('hidden');
+			}
+		});
+		
 		// get entity meta data and update header and tree
 		var entityMetaDataRequest = restApi.getAsync('/api/v1/' + state.entity + '/meta', {expand: ['attributes']}, function(entityMetaData) {
 			selectedEntityMetaData = entityMetaData;
@@ -300,7 +320,7 @@ function($, molgenis, settingsXhr) {
 				// If the state is empty or undefined, or is set to
 				// 'none', return null. All attributes will be shown
 				if (state.attrs === undefined || state.attrs === null) {
-					selectedAttributes.push(attribute);
+					if(attribute.fieldType !== 'COMPOUND') selectedAttributes.push(attribute);
 				} else if (state.attrs === 'none') {
 					selectedAttributes = [];
 				} else {
@@ -336,6 +356,7 @@ function($, molgenis, settingsXhr) {
 		// get entity modules and load visible module
 		$.get(molgenis.getContextUrl() + '/modules?entity=' + state.entity).done(function(data) {
 			var container = $('#module-nav');
+			modules = data.modules;
 			createModuleNav(data.modules, state.entity, container);
 			
 			// select first tab
@@ -343,8 +364,10 @@ function($, molgenis, settingsXhr) {
 			if(state.mod) {
 				moduleTab = $('a[data-toggle="tab"][data-target="#tab-' + state.mod + '"]', container);
 			} else {
+				
 				moduleTab = $('a[data-toggle="tab"]', container).first();
 			}
+			state.mod = moduleTab.data('id');
 			
 			// show tab once entity meta data is available
 			$.when(entityMetaDataRequest).done(function(){
@@ -448,7 +471,7 @@ function($, molgenis, settingsXhr) {
 			$.each(modules, function() {
 				$(document).off('.' + this.id);	
 			});
-			
+	
 			render();
 		});
 		
@@ -519,7 +542,7 @@ function($, molgenis, settingsXhr) {
 			self.filter.wizard.openFilterWizardModal(selectedEntityMetaData, attributeFilters);
 		});
 
-		$('#module-nav').on('click', 'a', function(e) {
+		$('#module-nav').on('click', 'ul.nav > li > a', function(e) {
 			$(document).trigger('changeModule', $(this).data('id'));
 		});
 	
@@ -541,6 +564,36 @@ function($, molgenis, settingsXhr) {
 						document.location.href = '/menu/main/dataexplorer?entity=' + selectedEntityMetaData.name;
 					});
 				}
+			});
+		});
+		
+		$('#copy-data-btn').on('click', function(){
+			bootbox.prompt({
+				title: "<h4>Copy entity [" + selectedEntityMetaData.label + "]<h4/>" +
+					"<div class=\"small\">Please enter a new entity name." +
+					"<ul>" +
+					"<li>Use max 30 characters." +
+					"<li>Only letters (a-z, A-Z), digits (0-9), underscores (_) and hashes (#) are allowed.</li>" +
+					"</ul>" +
+					"<br/>By pushing the ok button you will create an new entity with copied data.</div>",
+				value: selectedEntityMetaData.label + '_',
+				callback: function(result){
+					if(result !== null){
+						   $.ajax({
+							    headers: { 
+							        'Accept': 'application/json',
+							        'Content-Type': 'application/json' 
+							    },
+							    'type': 'POST',
+							    'url': '/api/v2/copy/' + selectedEntityMetaData.name,
+							    'data': JSON.stringify({'newEntityName': result}),
+							    'dataType': 'json',
+							    'success': function(newEntityName){
+									document.location.href = '/menu/main/dataexplorer?entity=' + newEntityName;
+								}
+							    });
+					}
+				} 
 			});
 		});
 		

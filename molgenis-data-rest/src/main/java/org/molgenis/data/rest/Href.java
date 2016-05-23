@@ -150,7 +150,8 @@ public class Href
 		{
 			String ids;
 			ids = entitiesIds.stream().map(Href::encodeIdToRSQL).collect(Collectors.joining(","));
-			return String.format(baseUri + "/%s?q=%s=in=(%s)", UriUtils.encodePathSegment(qualifiedEntityName, "UTF-8"),
+			return String.format(baseUri + "/%s?q=%s=in=(%s)",
+					UriUtils.encodePathSegment(qualifiedEntityName, "UTF-8"),
 					UriUtils.encodePathSegment(qualifiedIdAttributeName, "UTF-8"), ids);
 		}
 		catch (UnsupportedEncodingException e)

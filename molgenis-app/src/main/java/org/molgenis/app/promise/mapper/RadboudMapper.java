@@ -1,6 +1,31 @@
 package org.molgenis.app.promise.mapper;
 
+import com.google.common.collect.Iterables;
+import com.google.common.hash.Hashing;
+import org.apache.commons.lang.exception.ExceptionUtils;
+import org.molgenis.app.promise.client.PromiseDataParser;
+import org.molgenis.app.promise.mapper.MappingReport.Status;
+import org.molgenis.app.promise.model.BbmriNlCheatSheet;
+import org.molgenis.app.promise.model.PromiseMappingProjectMetaData;
+import org.molgenis.data.*;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.UuidGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.stereotype.Component;
+
+import java.nio.charset.Charset;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang.StringUtils.join;
 import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_HIGH;
 import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_LOW;
 import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_UNIT;
@@ -24,39 +49,6 @@ import static org.molgenis.app.promise.model.BbmriNlCheatSheet.SAMPLE_COLLECTION
 import static org.molgenis.app.promise.model.BbmriNlCheatSheet.SEX;
 import static org.molgenis.app.promise.model.BbmriNlCheatSheet.TYPE;
 import static org.molgenis.app.promise.model.BbmriNlCheatSheet.WEBSITE;
-
-import java.nio.charset.Charset;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.exception.ExceptionUtils;
-import org.molgenis.app.promise.client.PromiseDataParser;
-import org.molgenis.app.promise.mapper.MappingReport.Status;
-import org.molgenis.app.promise.model.BbmriNlCheatSheet;
-import org.molgenis.app.promise.model.PromiseMappingProjectMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.UuidGenerator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.stereotype.Component;
-
-import com.google.common.collect.Iterables;
-import com.google.common.hash.Hashing;
 
 @Component
 public class RadboudMapper implements PromiseMapper, ApplicationListener<ContextRefreshedEvent>
@@ -299,7 +291,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 	// 1 = FEMALE
 	// 2 = MALE
 	// 3 = UNKNOWN
-	private Iterable<Entity> toSex(Iterable<Entity> promiseBiobankSamplesEntities)
+	private Iterable<Entity> toSex(Iterable<Entity> promiseBiobankSamplesEntities) throws RuntimeException
 	{
 		Set<Object> genderTypeIds = new LinkedHashSet<Object>();
 
@@ -323,11 +315,12 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		{
 			genderTypeIds.add("NAV");
 		}
-		Iterable<Entity> genderTypes = dataService.findAll("bbmri_nl_gender_types", genderTypeIds);
+		Iterable<Entity> genderTypes = dataService.findAll("bbmri_nl_gender_types", genderTypeIds.stream()).collect(
+				toList());
 		if (!genderTypeIds.iterator().hasNext())
 		{
 			throw new RuntimeException(
-					"Unknown 'bbmri_nl_gender_types' [" + StringUtils.join(genderTypeIds, ',') + "]");
+					"Unknown 'bbmri_nl_gender_types' [" + join(genderTypeIds, ',') + "]");
 		}
 		return genderTypes;
 	}
@@ -456,11 +449,11 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 			dataCategoryTypeIds.add("NAV");
 		}
 
-		Iterable<Entity> dataCategoryTypes = dataService.findAll("bbmri_nl_data_category_types", dataCategoryTypeIds);
+		Iterable<Entity> dataCategoryTypes = dataService.findAll("bbmri_nl_data_category_types", dataCategoryTypeIds.stream()).collect(toList());
 		if (!dataCategoryTypes.iterator().hasNext())
 		{
 			throw new RuntimeException(
-					"Unknown 'bbmri_nl_data_category_types' [" + StringUtils.join(dataCategoryTypeIds, ',') + "]");
+					"Unknown 'bbmri_nl_data_category_types' [" + join(dataCategoryTypeIds, ',') + "]");
 		}
 		return dataCategoryTypes;
 	}
@@ -556,11 +549,12 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		{
 			materialTypeIds.add("NAV");
 		}
-		Iterable<Entity> materialTypes = dataService.findAll("bbmri_nl_material_types", materialTypeIds);
+		Iterable<Entity> materialTypes = dataService.findAll("bbmri_nl_material_types", materialTypeIds.stream()).collect(
+				toList());
 		if (!materialTypes.iterator().hasNext())
 		{
 			throw new RuntimeException(
-					"Unknown 'bbmri_nl_material_types' [" + StringUtils.join(materialTypeIds, ',') + "]");
+					"Unknown 'bbmri_nl_material_types' [" + join(materialTypeIds, ',') + "]");
 		}
 
 		return materialTypes;
@@ -587,11 +581,12 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		{
 			omicsTypeIds.add("NAV");
 		}
-		Iterable<Entity> omicsTypes = dataService.findAll("bbmri_nl_omics_data_types", omicsTypeIds);
+		Iterable<Entity> omicsTypes = dataService.findAll("bbmri_nl_omics_data_types", omicsTypeIds.stream()).collect(
+				toList());
 		if (!omicsTypes.iterator().hasNext())
 		{
 			throw new RuntimeException(
-					"Unknown 'bbmri_nl_omics_data_types' [" + StringUtils.join(omicsTypeIds, ',') + "]");
+					"Unknown 'bbmri_nl_omics_data_types' [" + join(omicsTypeIds, ',') + "]");
 		}
 		return omicsTypes;
 	}

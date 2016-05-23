@@ -88,7 +88,7 @@
     <#assign nextDepth = depth + ["x"]/>
     <#assign dataType=attribute.dataType.enumType>
 	<tr id="attribute-${entity.name?replace(" ", "_")?html}${attribute.name?replace(" ", "_")?html}">
-        <td><#list depth as lvl>&nbsp;</#list>${attribute.label?html}<#if attribute.idAtrribute> <em>(id attribute)</em></#if><#if attribute.labelAttribute> <em>(label attribute)</em></#if><#if attribute.lookupAttribute> <em>(lookup attribute)</em></#if></td>
+        <td><#list depth as lvl>&nbsp;</#list>${attribute.label?html}<#if entity.idAttribute?? && entity.idAttribute.name == attribute.name> <em>(id attribute)</em></#if><#if entity.labelAttribute?? && entity.labelAttribute.name == attribute.name> <em>(label attribute)</em></#if><#list entity.lookupAttributes as lookupAttribute><#if lookupAttribute.name == attribute.name> <em>(lookup attribute)</em><#break></#if></#list></td>
     	<td><#if attribute.defaultValue?has_content>${attribute.defaultValue?html}</#if></td>
     	<td>${dataType?html}<#if dataType == "CATEGORICAL" || dataType == "CATEGORICAL_MREF" || dataType == "MREF" || dataType == "XREF"> (<a href="#entity-${attribute.refEntity.name?replace(" ", "_")?html}">${attribute.refEntity.label?html}</a>)</#if></td>
     	<td>

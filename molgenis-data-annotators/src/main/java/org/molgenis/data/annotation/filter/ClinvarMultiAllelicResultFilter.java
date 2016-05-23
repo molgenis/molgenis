@@ -7,9 +7,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.vcf.VcfRepository;
 
@@ -26,8 +26,12 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 	}
 
 	@Override
-	public Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity)
-	{
+		public Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity, boolean updateMode)
+{
+			if(updateMode == true)
+			{
+				throw new MolgenisDataException("This annotator/filter does not support updating of values");
+			}
 		Map<String, String> clnallValueMap = new LinkedHashMap<>();
 		Map<String, String> clnsigValueMap = new LinkedHashMap<>();
 		List<Entity> processedResults = new ArrayList<>();

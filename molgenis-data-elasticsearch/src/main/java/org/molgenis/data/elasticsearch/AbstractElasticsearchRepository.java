@@ -1,23 +1,34 @@
 package org.molgenis.data.elasticsearch;
 
+import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
+import static org.molgenis.data.RepositoryCapability.INDEXABLE;
+import static org.molgenis.data.RepositoryCapability.MANAGABLE;
+import static org.molgenis.data.RepositoryCapability.QUERYABLE;
+import static org.molgenis.data.RepositoryCapability.WRITABLE;
+
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Set;
+import java.util.stream.Stream;
 
 import org.elasticsearch.common.primitives.Ints;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IndexedRepository;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 
-public abstract class AbstractElasticsearchRepository implements IndexedRepository
+public abstract class AbstractElasticsearchRepository implements Repository
 {
 	protected final SearchService elasticSearchService;
 
@@ -25,6 +36,12 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	{
 		if (elasticSearchService == null) throw new IllegalArgumentException("elasticSearchService is null");
 		this.elasticSearchService = elasticSearchService;
+	}
+
+	@Override
+	public Set<RepositoryCapability> getCapabilities()
+	{
+		return Sets.newHashSet(AGGREGATEABLE, QUERYABLE, WRITABLE, INDEXABLE, MANAGABLE);
 	}
 
 	@Override
@@ -49,16 +66,17 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query q)
 	{
-		return elasticSearchService.search(q, getEntityMetaData());
+		return elasticSearchService.searchAsStream(q, getEntityMetaData());
 	}
 
 	@Override
 	public Entity findOne(Query q)
 	{
 		Iterable<Entity> entities = elasticSearchService.search(q, getEntityMetaData());
-		return !Iterables.isEmpty(entities) ? entities.iterator().next() : null;
+		Iterator<Entity> it = entities.iterator();
+		return it.hasNext() ? it.next() : null;
 	}
 
 	@Override
@@ -68,15 +86,35 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	}
 
 	@Override
-	public Iterable<Entity> findAll(Iterable<Object> ids)
+	public Entity findOne(Object id, Fetch fetch)
+	{
+		return elasticSearchService.get(id, getEntityMetaData(), fetch);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
 	{
 		return elasticSearchService.get(ids, getEntityMetaData());
 	}
 
 	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		return elasticSearchService.get(ids, getEntityMetaData(), fetch);
+	}
+
+	@Override
 	public Iterator<Entity> iterator()
 	{
-		return findAll(new QueryImpl()).iterator();
+		Query q = new QueryImpl();
+		return elasticSearchService.searchAsStream(q, getEntityMetaData()).iterator();
+	}
+
+	@Override
+	public Stream<Entity> stream(Fetch fetch)
+	{
+		Query q = new QueryImpl().fetch(fetch);
+		return elasticSearchService.searchAsStream(q, getEntityMetaData());
 	}
 
 	@Override
@@ -101,15 +139,15 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	public void add(Entity entity)
 	{
 		elasticSearchService.index(entity, getEntityMetaData(), IndexingMode.ADD);
-		elasticSearchService.refresh();
+		elasticSearchService.refresh(getEntityMetaData());
 	}
 
 	@Override
 	@Transactional
-	public Integer add(Iterable<? extends Entity> entities)
+	public Integer add(Stream<? extends Entity> entities)
 	{
 		long nrIndexedEntities = elasticSearchService.index(entities, getEntityMetaData(), IndexingMode.ADD);
-		elasticSearchService.refresh();
+		elasticSearchService.refresh(getEntityMetaData());
 		return Ints.checkedCast(nrIndexedEntities);
 	}
 
@@ -130,15 +168,15 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	public void update(Entity entity)
 	{
 		elasticSearchService.index(entity, getEntityMetaData(), IndexingMode.UPDATE);
-		elasticSearchService.refresh();
+		elasticSearchService.refresh(getEntityMetaData());
 	}
 
 	@Override
 	@Transactional
-	public void update(Iterable<? extends Entity> entities)
+	public void update(Stream<? extends Entity> entities)
 	{
 		elasticSearchService.index(entities, getEntityMetaData(), IndexingMode.UPDATE);
-		elasticSearchService.refresh();
+		elasticSearchService.refresh(getEntityMetaData());
 	}
 
 	@Override
@@ -146,15 +184,15 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	public void delete(Entity entity)
 	{
 		elasticSearchService.delete(entity, getEntityMetaData());
-		elasticSearchService.refresh();
+		elasticSearchService.refresh(getEntityMetaData());
 	}
 
 	@Override
 	@Transactional
-	public void delete(Iterable<? extends Entity> entities)
+	public void delete(Stream<? extends Entity> entities)
 	{
 		elasticSearchService.delete(entities, getEntityMetaData());
-		elasticSearchService.refresh();
+		elasticSearchService.refresh(getEntityMetaData());
 	}
 
 	@Override
@@ -162,15 +200,15 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	public void deleteById(Object id)
 	{
 		elasticSearchService.deleteById(ElasticsearchEntityUtils.toElasticsearchId(id), getEntityMetaData());
-		elasticSearchService.refresh();
+		elasticSearchService.refresh(getEntityMetaData());
 	}
 
 	@Override
 	@Transactional
-	public void deleteById(Iterable<Object> ids)
+	public void deleteById(Stream<Object> ids)
 	{
 		elasticSearchService.deleteById(ElasticsearchEntityUtils.toElasticsearchIds(ids), getEntityMetaData());
-		elasticSearchService.refresh();
+		elasticSearchService.refresh(getEntityMetaData());
 	}
 
 	@Override
@@ -178,19 +216,36 @@ public abstract class AbstractElasticsearchRepository implements IndexedReposito
 	public void deleteAll()
 	{
 		elasticSearchService.delete(getEntityMetaData().getName());
-		create();
-		elasticSearchService.refresh();
+		createMappings();
+		elasticSearchService.refresh(getEntityMetaData());
 	}
 
 	@Override
 	public void create()
 	{
-		elasticSearchService.createMappings(getEntityMetaData());
+		createMappings();
 	}
 
 	@Override
 	public void drop()
 	{
 		elasticSearchService.delete(getEntityMetaData().getName());
+	}
+
+	@Override
+	public void addEntityListener(EntityListener entityListener)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void removeEntityListener(EntityListener entityListener)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	private void createMappings()
+	{
+		elasticSearchService.createMappings(getEntityMetaData());
 	}
 }
