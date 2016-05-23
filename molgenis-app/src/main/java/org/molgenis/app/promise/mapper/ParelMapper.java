@@ -263,12 +263,12 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		Object[] sexes = promiseSex.split(",");
 		Stream<Object> ids = asList(sexes).stream();
 
-		Stream<Entity> genderTypes = dataService.findAll(REF_GENDER_TYPES, ids);
+		Iterable<Entity> genderTypes = dataService.findAll(REF_GENDER_TYPES, ids).collect(toList());
 		if (!genderTypes.iterator().hasNext())
 		{
 			throw new RuntimeException("Unknown '" + REF_GENDER_TYPES + "' [" + ids.toString() + "]");
 		}
-		return genderTypes.collect(toList());
+		return genderTypes;
 	}
 
 	private Iterable<Entity> toTypes(String promiseTypes)
@@ -276,13 +276,13 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		Object[] types = promiseTypes.split(",");
 		Stream<Object> ids = asList(types).stream();
 
-		Stream<Entity> collectionTypes = dataService.findAll(REF_COLLECTION_TYPES, ids);
+		Iterable<Entity> collectionTypes = dataService.findAll(REF_COLLECTION_TYPES, ids).collect(toList());
 
 		if (!collectionTypes.iterator().hasNext())
 		{
 			throw new RuntimeException("Unknown '" + REF_COLLECTION_TYPES + "' [" + promiseTypes + "]");
 		}
-		return collectionTypes.collect(toList());
+		return collectionTypes;
 	}
 
 	private Iterable<Entity> toMaterialTypes(Iterable<Entity> promiseSampleEntities)
@@ -323,14 +323,14 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 			throw new RuntimeException("Unknown ProMISe material types: [" + String.join(",", unknown) + "]");
 		}
 
-		Stream<Entity> materialTypes = dataService.findAll(REF_MATERIAL_TYPES, transform(ids, id -> (Object) id).stream());
+		Iterable<Entity> materialTypes = dataService.findAll(REF_MATERIAL_TYPES, transform(ids, id -> (Object) id).stream()).collect(toList());
 		if (!materialTypes.iterator().hasNext())
 
 		{
 			String message = String.format("Couldn't find mappings for some of the material types in %s.", ids);
 			throw new RuntimeException(message);
 		}
-		return materialTypes.collect(toList());
+		return materialTypes;
 	}
 
 }
