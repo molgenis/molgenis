@@ -34,7 +34,7 @@
     </#if>
         <#if app_settings.customJavascript?has_content>
             <#list app_settings.customJavascript?split(r"\s*,\s*", "r") as js_file_name>
-                <script src="<@resource_href "${js_file_name?html}"/>"></script>
+                <script src="${js_file_name?html}"></script>
             </#list>
         </#if>
         <#-- Bundle of third party JavaScript resources used by MOLGENIS: see minify-maven-plugin in molgenis-core-ui/pom.xml for bundle contents -->
