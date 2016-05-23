@@ -1,9 +1,8 @@
 package org.molgenis.app;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import freemarker.template.TemplateException;
 import org.molgenis.CommandLineOnlyConfiguration;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
@@ -31,6 +30,7 @@ import org.molgenis.migrate.version.v1_17.Step27MetaDataAttributeRoles;
 import org.molgenis.migrate.version.v1_19.Step28MigrateSorta;
 import org.molgenis.migrate.version.v1_21.Step29MigrateJobExecutionProgressMessage;
 import org.molgenis.migrate.version.v1_21.Step30MigrateJobExecutionUser;
+import org.molgenis.migrate.version.v1_22.Step31UpdateApplicationSettings;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.GsonConfig;
@@ -49,10 +49,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
-import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-
-import freemarker.template.TemplateException;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 @Configuration
 @EnableTransactionManagement
@@ -108,6 +107,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step28MigrateSorta(dataSource));
 		upgradeService.addUpgrade(new Step29MigrateJobExecutionProgressMessage(dataSource));
 		upgradeService.addUpgrade(new Step30MigrateJobExecutionUser(dataSource));
+		upgradeService.addUpgrade(new Step31UpdateApplicationSettings(dataSource, idGenerator));
 	}
 
 	@Override
