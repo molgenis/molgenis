@@ -1,9 +1,27 @@
 package org.molgenis.gavin.controller;
 
-import com.google.common.collect.ImmutableMap;
+import static java.io.File.separator;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.gavin.job.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
+import static org.testng.Assert.assertEquals;
+
+import java.io.File;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.concurrent.ExecutorService;
+
+import javax.servlet.http.HttpServletResponse;
+
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
@@ -21,18 +39,7 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.util.Collections;
-import java.util.concurrent.ExecutorService;
-
-import static java.io.File.separator;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.gavin.job.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
-import static org.testng.Assert.assertEquals;
+import com.google.common.collect.ImmutableMap;
 
 public class GavinControllerTest
 {
@@ -93,6 +100,7 @@ public class GavinControllerTest
 		File inputFile = mock(File.class);
 		File parentDir = mock(File.class);
 		MolgenisUser user = mock(MolgenisUser.class);
+		when(user.getUsername()).thenReturn("tommy");
 
 		// Job Factory sets the Identifier in the JobExecution object.
 		ArgumentCaptor<GavinJobExecution> captor = ArgumentCaptor.forClass(GavinJobExecution.class);
@@ -104,17 +112,18 @@ public class GavinControllerTest
 		}).when(gavinJobFactory).createJob(captor.capture());
 
 		when(inputFile.getParentFile()).thenReturn(parentDir);
-		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "input.vcf")).thenReturn(inputFile);
 
 		assertEquals(gavinController.annotateFile(vcf, "annotate-file"), "/api/v2/GavinJobExecution/ABCDE");
 
-		verify(vcf).transferTo(inputFile);
 		verify(fileStore).createDirectory("gavin-app");
 		verify(fileStore).createDirectory("gavin-app" + separator + "ABCDE");
+		verify(fileStore).writeToFile(Mockito.any(InputStream.class),
+				Mockito.eq("gavin-app" + separator + "ABCDE" + separator + "input.vcf"));
+
 		verify(executorService).submit(job);
 		GavinJobExecution jobExecution = captor.getValue();
 		assertEquals(jobExecution.getFilename(), "annotate-file-gavin.vcf");
-		assertEquals(jobExecution.getUser(), user);
+		assertEquals(jobExecution.getUser(), "tommy");
 	}
 
 	@Test

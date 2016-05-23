@@ -3,7 +3,6 @@ package org.molgenis.data.elasticsearch;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
-import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 import java.util.Iterator;
@@ -19,7 +18,6 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.springframework.transaction.annotation.Transactional;
@@ -204,36 +202,21 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 		// optimization:
 		// retrieve entities via decorated repository in case query contains no query rules
 		List<QueryRule> queryRules = q.getRules();
-		if (queryRules != null)
+		if (queryRules != null && queryRules.isEmpty())
 		{
-			if (queryRules.isEmpty())
+			if (q.getOffset() == 0 && q.getPageSize() == 0 && q.getSort() == null)
 			{
-				if (q.getOffset() == 0 && q.getPageSize() == 0 && q.getSort() == null)
+				Fetch fetch = q.getFetch();
+				if (fetch != null)
 				{
-					Fetch fetch = q.getFetch();
-					if (fetch != null)
-					{
-						return decoratedRepo.stream(fetch);
-					}
-					else
-					{
-						return decoratedRepo.stream();
-					}
+					return decoratedRepo.stream(fetch);
 				}
-				else if (decoratedRepo.getCapabilities().contains(QUERYABLE))
+				else
 				{
-					return decoratedRepo.findAll(q);
+					return decoratedRepo.stream();
 				}
 			}
-			else if (queryRules.size() == 1 && decoratedRepo.getCapabilities().contains(QUERYABLE))
-			{
-				// workaround for https://github.com/molgenis/molgenis/issues/4478
-				// FIXME remove workaround once issue has been resolved
-				if (queryRules.get(0).getOperator() == Operator.IN)
-				{
-					return decoratedRepo.findAll(q);
-				}
-			}
+			return decoratedRepo.findAll(q);
 		}
 		return super.findAll(q);
 	}

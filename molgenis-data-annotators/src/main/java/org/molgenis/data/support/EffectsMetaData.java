@@ -34,22 +34,22 @@ public class EffectsMetaData implements AnnotatorEntityMetaData
 			.setDescription("The alternative allele on which this EFFECT applies");
 	public static final DefaultAttributeMetaData PUTATIVE_IMPACT_ATTR = new DefaultAttributeMetaData(PUTATIVE_IMPACT,
 			STRING).setDescription(
-					"A simple estimation of putative impact / deleteriousness : {HIGH, MODERATE, LOW, MODIFIER}(source:http://snpeff.sourceforge.net)");
+					"A simple estimation of putative impact / deleteriousness : {HIGH, MODERATE, LOW, MODIFIER}(source:http://snpeff.sourceforge.net)").setAggregateable(true);
 	public static final DefaultAttributeMetaData GENE_NAME_ATTR = new DefaultAttributeMetaData(GENE_NAME, STRING)
 			.setDescription(
-					"Common gene name (HGNC). Optional: use closest gene when the variant is “intergenic”(source:http://snpeff.sourceforge.net)");
+					"Common gene name (HGNC). Optional: use closest gene when the variant is “intergenic”(source:http://snpeff.sourceforge.net)").setAggregateable(true);
 	public static final DefaultAttributeMetaData GENE_ID_ATTR = new DefaultAttributeMetaData(GENE_ID, STRING)
-			.setDescription("Gene ID");
+			.setDescription("Gene ID").setAggregateable(true);
 	public static final DefaultAttributeMetaData FEATURE_TYPE_ATTR = new DefaultAttributeMetaData(FEATURE_TYPE, STRING)
 			.setDescription(
 					"Which type of feature is in the next field (e.g. transcript, motif, miRNA, etc.). It is preferred to use Sequence Ontology (SO) terms, but ‘custom’ (user defined) are allowed. ANN=A|stop_gained|HIGH|||transcript|... Tissue specific features may include cell type / tissue information separated by semicolon e.g.: ANN=A|histone_binding_site|LOW|||H3K4me3:HeLa-S3|...\n"
-							+ "Feature ID: Depending on the annotation, this may be: Transcript ID (preferably using version number), Motif ID, miRNA, ChipSeq peak, Histone mark, etc. Note: Some features may not have ID (e.g. histone marks from custom Chip-Seq experiments may not have a unique ID). (source:http://snpeff.sourceforge.net)");
+							+ "Feature ID: Depending on the annotation, this may be: Transcript ID (preferably using version number), Motif ID, miRNA, ChipSeq peak, Histone mark, etc. Note: Some features may not have ID (e.g. histone marks from custom Chip-Seq experiments may not have a unique ID). (source:http://snpeff.sourceforge.net)").setAggregateable(true);
 	public static final DefaultAttributeMetaData FEATURE_ID_ATTR = new DefaultAttributeMetaData(FEATURE_ID, STRING)
 			.setDescription(
 					"Depending on the annotation, this may be: Transcript ID (preferably using version number), Motif ID, miRNA, ChipSeq peak, Histone mark, etc. Note: Some features may not have ID (e.g. histone marks from custom Chip-Seq experiments may not have a unique ID).(source:http://snpeff.sourceforge.net)");
 	public static final DefaultAttributeMetaData TRANSCRIPT_BIOTYPE_ATTR = new DefaultAttributeMetaData(
 			TRANSCRIPT_BIOTYPE, STRING).setDescription(
-					"The bare minimum is at least a description on whether the transcript is {“Coding”, “Noncoding”}. Whenever possible, use ENSEMBL biotypes.(source:http://snpeff.sourceforge.net)");
+					"The bare minimum is at least a description on whether the transcript is {“Coding”, “Noncoding”}. Whenever possible, use ENSEMBL biotypes.(source:http://snpeff.sourceforge.net)").setAggregateable(true);
 	public static final DefaultAttributeMetaData RANK_TOTAL_ATTR = new DefaultAttributeMetaData(RANK_TOTAL, STRING)
 			.setDescription(
 					"Exon or Intron rank / total number of exons or introns(source:http://snpeff.sourceforge.net)");
@@ -74,7 +74,7 @@ public class EffectsMetaData implements AnnotatorEntityMetaData
 					"Add errors, warnings oErrors, Warnings or Information messages: Add errors, warnings or r informative message that can affect annotation accuracy. It can be added using either ‘codes’ (as shown in column 1, e.g. W1) or ‘message types’ (as shown in column 2, e.g. WARNING_REF_DOES_NOT_MATCH_GENOME). All these errors, warnings or information messages messages are optional.(source:http://snpeff.sourceforge.net)");
 	public static final DefaultAttributeMetaData ANNOTATION_ATTR = new DefaultAttributeMetaData(ANNOTATION, STRING)
 			.setDescription(
-					"Annotated using Sequence Ontology terms. Multiple effects can be concatenated using ‘&’ (source:http://snpeff.sourceforge.net)");
+					"Annotated using Sequence Ontology terms. Multiple effects can be concatenated using ‘&’ (source:http://snpeff.sourceforge.net)").setAggregateable(true);
 
 	public LinkedList<AttributeMetaData> getOrderedAttributes()
 	{

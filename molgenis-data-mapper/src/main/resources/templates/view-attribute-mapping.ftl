@@ -99,8 +99,16 @@
 						<#list categories as category>
 							<#list refEntityMetaData.attributes as attribute>
 								<#assign attributeName = attribute.name>
-								<#if (category[attributeName])??>	
-									 ${category[attributeName]?string}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+								<#if (category[attributeName])??>
+									<#assign value = category[attributeName] />
+									<#assign dataType = attribute.dataType />
+									<#if dataType == "datetime">
+										${value?datetime}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+									<#elseif dataType == "date">
+										${value?date}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+									<#else>
+										${value?string}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>=</#if>
+									</#if>
 								</#if>
 							</#list>
 							</br>
@@ -231,21 +239,14 @@
 <#macro script>
 	<div class="row">
 		<div class="col-md-12">
+            <button class="btn btn-success pull-right" id="validate-algorithm-btn">Validate algorithm</button>
 			<div class="ace-editor-container">
 				<h4>Algorithm</h4>
+
 				<p>
 					Use the script editor to determine how the values of selected attributes are processed. 
 					See the <a id="js-function-modal-btn" href="#">list of available functions</a> for more information. 
 				</p>
-				<#-- For future calculator layout around script editor
-					<form>
-						<button type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-plus"></span></button>
-						<button type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-minus"></span></button>
-						<button type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-asterisk"></span></button>
-						<button type="button" class="btn btn-default btn-xs"><span class="glyphicon glyphicon-option-vertical"></span></button>
-					</form>
-					<br></br>
-				-->
 				<textarea id="ace-editor-text-area" name="algorithm" rows="15" <#if !hasWritePermission>data-readonly="true"</#if> 
 					style="width:100%;">${(attributeMapping.algorithm!"")?html}</textarea>
 			</div>

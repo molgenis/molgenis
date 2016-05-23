@@ -21,7 +21,7 @@ public class JobExecutionMetaData extends DefaultEntityMetaData
 		super(JobExecution.ENTITY_NAME, JobExecution.class);
 		setAbstract(true);
 		addAttribute(JobExecution.IDENTIFIER, ROLE_ID).setLabel("Job ID").setAuto(true).setNillable(false);
-		addAttribute(JobExecution.USER).setDataType(MolgenisFieldTypes.XREF).setRefEntity(new MolgenisUserMetaData())
+		addAttribute(JobExecution.USER).setDataType(MolgenisFieldTypes.STRING)
 				.setLabel("Job owner").setNillable(false);
 		addAttribute(JobExecution.STATUS).setDataType(new EnumField()).setEnumOptions(jobStatusOptions)
 				.setLabel("Job status").setNillable(false);
@@ -36,7 +36,7 @@ public class JobExecutionMetaData extends DefaultEntityMetaData
 				.setNillable(true);
 		addAttribute(JobExecution.PROGRESS_MAX).setDataType(MolgenisFieldTypes.INT).setLabel("Maximum progress")
 				.setNillable(true);
-		addAttribute(JobExecution.PROGRESS_MESSAGE).setDataType(MolgenisFieldTypes.STRING).setLabel("Progress message")
+		addAttribute(JobExecution.PROGRESS_MESSAGE).setDataType(MolgenisFieldTypes.TEXT).setLabel("Progress message")
 				.setNillable(true);
 		addAttribute(JobExecution.LOG).setDataType(MolgenisFieldTypes.TEXT).setLabel("Log").setNillable(true);
 		addAttribute(JobExecution.RESULT_URL).setDataType(MolgenisFieldTypes.HYPERLINK).setLabel("Result URL")
