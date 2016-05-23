@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch;
+package org.molgenis.data.elasticsearch.util;
 
 import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.bulk.BulkRequest;
@@ -7,7 +7,7 @@ import org.elasticsearch.client.Client;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class BulkProcessorFactory
+public class BulkProcessorFactory
 {
 	private static final Logger LOG = LoggerFactory.getLogger(BulkProcessorFactory.class);
 

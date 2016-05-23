@@ -3,17 +3,18 @@ package org.molgenis.data.elasticsearch.util;
 import static java.util.Arrays.asList;
 import static java.util.stream.StreamSupport.stream;
 import static org.elasticsearch.client.Requests.refreshRequest;
-import static org.molgenis.data.elasticsearch.request.SourceFilteringGenerator.toFetchFields;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsResponse;
 import org.elasticsearch.action.admin.indices.mapping.delete.DeleteMappingResponse;
@@ -27,17 +28,19 @@ import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.get.MultiGetRequest;
 import org.elasticsearch.action.get.MultiGetRequestBuilder;
 import org.elasticsearch.action.get.MultiGetResponse;
+import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.fetch.source.FetchSourceContext;
 import org.molgenis.data.*;
-import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,10 +55,17 @@ public class ElasticsearchUtils
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchUtils.class);
 	private final Client client;
 	private final SearchRequestGenerator generator = new SearchRequestGenerator();
+	private final BulkProcessorFactory bulkProcessorFactory;
 
 	public ElasticsearchUtils(Client client)
 	{
+		this(client, new BulkProcessorFactory());
+	}
+
+	public ElasticsearchUtils(Client client, BulkProcessorFactory bulkProcessorFactory)
+	{
 		this.client = client;
+		this.bulkProcessorFactory = bulkProcessorFactory;
 	}
 
 	public void deleteIndex(String index)
@@ -342,5 +352,62 @@ public class ElasticsearchUtils
 				return Stream.empty();
 			}
 		});
+	}
+
+	public SearchHits search(Consumer<SearchRequestBuilder> queryBuilder, String queryToString, String type, String indexName)
+	{
+		LOG.trace("Searching Elasticsearch '{}' docs using query [{}] ...", type, queryToString);
+		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
+		queryBuilder.accept(searchRequestBuilder);
+		LOG.trace("SearchRequest: {}", searchRequestBuilder);
+		SearchResponse searchResponse = searchRequestBuilder.execute().actionGet();
+
+		if (searchResponse.getFailedShards() > 0)
+		{
+			StringBuilder sb = new StringBuilder("Search failed.");
+			for (ShardSearchFailure failure : searchResponse.getShardFailures())
+			{
+				sb.append("\n").append(failure.reason());
+			}
+			throw new ElasticsearchException(sb.toString());
+		}
+		LOG.debug("Searched Elasticsearch '{}' docs using query [{}] in {}ms", type, queryToString,
+				searchResponse.getTookInMillis());
+		return searchResponse.getHits();
+	}
+
+	/**
+	 * Creates a {@link BulkProcessor} and adds a stream of {@link IndexRequest}s to it.
+	 * Counts how many requests of each type were added to the {@link BulkProcessor}.
+	 *
+	 * @param requests        the {@link IndexRequest}s to add
+	 * @param awaitCompletion indication if the completion of the requests should be awaited synchronously
+	 * @return AtomicLongMap containing per type how many requests of that type were added.
+	 */
+	public AtomicLongMap<String> index(Stream<IndexRequest> requests, boolean awaitCompletion)
+	{
+		AtomicLongMap<String> nrIndexedEntitiesPerType = AtomicLongMap.create();
+		BulkProcessor bulkProcessor = bulkProcessorFactory.create(client);
+		try
+		{
+			//TODO: Does order actually matter here?
+			requests.forEachOrdered(request -> {
+				if (LOG.isTraceEnabled())
+				{
+					LOG.trace("Indexing [{}] with id [{}] in index [{}]...", request.type(), request.id(),
+							request.index());
+				}
+				nrIndexedEntitiesPerType.incrementAndGet(request.type());
+				bulkProcessor.add(request);
+			});
+			return nrIndexedEntitiesPerType;
+		}
+		finally
+		{
+			if (awaitCompletion)
+			{
+				waitForCompletion(bulkProcessor);
+			}
+		}
 	}
 }
