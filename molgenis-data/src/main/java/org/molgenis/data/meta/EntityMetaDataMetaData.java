@@ -26,6 +26,7 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 	public static final String PACKAGE = "package";
 	public static final String TAGS = "tags";
 	public static final String ATTRIBUTES = "attributes";
+	public static final String ROW_LEVEL_SECURED = "rowLevelSecured";
 
 	public static final EntityMetaDataMetaData INSTANCE = new EntityMetaDataMetaData();
 
@@ -45,5 +46,6 @@ public class EntityMetaDataMetaData extends DefaultEntityMetaData
 		addAttribute(DESCRIPTION).setDataType(TEXT);
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(TagMetaData.INSTANCE);
 		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(AttributeMetaDataMetaData.INSTANCE);
+		addAttribute(ROW_LEVEL_SECURED).setDataType(BOOL);
 	}
 }
