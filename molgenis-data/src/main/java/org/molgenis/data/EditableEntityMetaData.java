@@ -65,6 +65,11 @@ public interface EditableEntityMetaData extends EntityMetaData
 	EditableEntityMetaData setBackend(String backend);
 
 	/**
+	 * Set row level security
+	 */
+	EditableEntityMetaData setRowLevelSecured(boolean rowLevelSecured);
+
+	/**
 	 * 
 	 * @param attributeMetaData
 	 * @param attributeTypes

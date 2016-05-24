@@ -175,4 +175,6 @@ public interface EntityMetaData
 	public EntityMetaData getExtends();
 
 	Class<? extends Entity> getEntityClass();
+
+	public boolean isRowLevelSecured();
 }
