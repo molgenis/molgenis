@@ -56,8 +56,8 @@ public class ProgressImpl implements Progress
 	@Override
 	public void start()
 	{
-		executionLogger.info("start ()");
-		LOG.info("start()");
+		executionLogger.info("Execution started.");
+		LOG.info("Execution started.");
 		jobExecution.setStartDate(new Date());
 		jobExecution.setStatus(RUNNING);
 		update();

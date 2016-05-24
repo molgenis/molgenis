@@ -65,7 +65,6 @@ import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.PackageImpl;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.UuidGenerator;
@@ -97,11 +96,6 @@ public class ElasticsearchService implements SearchService
 	{
 		ADD, UPDATE
 	};
-
-	static enum CrudType
-	{
-		ADD, UPDATE, DELETE
-	}
 
 	private final DataService dataService;
 	private final ElasticsearchEntityFactory elasticsearchEntityFactory;
@@ -332,60 +326,36 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void index(Entity entity, EntityMetaData entityMetaData, IndexingMode indexingMode)
 	{
-		index(entity, entityMetaData, indexingMode, true);
-	}
-
-	private void index(Entity entity, EntityMetaData entityMetaData, IndexingMode indexingMode, boolean updateIndex)
-	{
-		CrudType crudType = indexingMode == IndexingMode.ADD ? CrudType.ADD : CrudType.UPDATE;
-
-		index(indexName, Collections.singleton(entity).iterator(), entityMetaData, crudType, updateIndex);
+		index(indexName, Collections.singleton(entity).iterator(), entityMetaData, indexingMode);
 	}
 
 	@Override
 	public long index(Iterable<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode)
 	{
-		CrudType crudType = indexingMode == IndexingMode.ADD ? CrudType.ADD : CrudType.UPDATE;
-		return index(indexName, entities.iterator(), entityMetaData, crudType, true);
+		return index(indexName, entities.iterator(), entityMetaData, indexingMode);
 	}
 
 	@Override
 	public long index(Stream<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode)
 	{
-		CrudType crudType = indexingMode == IndexingMode.ADD ? CrudType.ADD : CrudType.UPDATE;
-		return index(indexName, entities.iterator(), entityMetaData, crudType, true);
+		return index(indexName, entities.iterator(), entityMetaData, indexingMode);
 	}
 
-	long index(String index, Iterator<? extends Entity> it, EntityMetaData entityMetaData, CrudType crudType,
-			boolean updateIndex)
+	private long index(String index, Iterator<? extends Entity> it, EntityMetaData entityMetaData,
+			IndexingMode indexingMode)
 	{
-		String entityName = entityMetaData.getName();
-		String type = sanitizeMapperType(entityName);
-
+		return index(index, it, entityMetaData, indexingMode, true);
+	}
+	
+	private long index(String index, Iterator<? extends Entity> it, EntityMetaData entityMetaData,
+			IndexingMode indexingMode, boolean updateReferences)
+	{
 		long nrIndexedEntities = 0;
 		BulkProcessor bulkProcessor = BULK_PROCESSOR_FACTORY.create(client);
 
 		try
 		{
-			while (it.hasNext())
-			{
-				Entity entity = it.next();
-				String id = toElasticsearchId(entity, entityMetaData);
-				Map<String, Object> source = elasticsearchEntityFactory.create(entityMetaData, entity);
-
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("Indexing [{}] with id [{}] in index [{}] mode [{}] ...", type, id, index, crudType);
-				}
-
-				bulkProcessor.add(new IndexRequest().index(index).type(type).id(id).source(source));
-				++nrIndexedEntities;
-
-				if (updateIndex && crudType == CrudType.UPDATE)
-				{
-					updateReferences(entity, entityMetaData);
-				}
-			}
+			this.index(nrIndexedEntities, index, it, entityMetaData, indexingMode, updateReferences, bulkProcessor);
 		}
 		finally
 		{
@@ -393,6 +363,67 @@ public class ElasticsearchService implements SearchService
 		}
 
 		return nrIndexedEntities;
+	}
+	
+	private void index(long nrIndexedEntities, String index, Iterator<? extends Entity> it,
+			EntityMetaData entityMetaData,
+			IndexingMode indexingMode, boolean updateReferences, BulkProcessor bulkProcessor)
+	{
+		String entityName = entityMetaData.getName();
+		String type = sanitizeMapperType(entityName);
+
+		while (it.hasNext())
+		{
+			Entity entity = it.next();
+			String id = toElasticsearchId(entity, entityMetaData);
+			Map<String, Object> source = elasticsearchEntityFactory.create(entityMetaData, entity);
+
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Indexing [{}] with id [{}] in index [{}] mode [{}] ...", type, id, index, indexingMode);
+			}
+
+			bulkProcessor.add(new IndexRequest().index(index).type(type).id(id).source(source));
+			++nrIndexedEntities;
+
+			if (updateReferences && IndexingMode.UPDATE.equals(indexingMode))
+			{
+				updateReferences(nrIndexedEntities, entity, entityMetaData, bulkProcessor);
+			}
+		}
+	}
+
+	private void updateReferences(long nrIndexedEntities, Entity refEntity, EntityMetaData refEntityMetaData,
+			BulkProcessor bulkProcessor)
+	{
+		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : EntityUtils.getReferencingEntityMetaData(
+				refEntityMetaData, dataService))
+		{
+			EntityMetaData entityMetaData = pair.getA();
+
+			// Skip this part if the entity type is not already exists in the elastic search
+			if (this.hasMapping(entityMetaData))
+			{
+				QueryImpl<Entity> q = null;
+				for (AttributeMetaData attributeMetaData : pair.getB())
+				{
+					if (q == null) q = new QueryImpl<Entity>();
+					else q.or();
+					q.eq(attributeMetaData.getName(), refEntity);
+				}
+
+				Iterable<Entity> entities = new ElasticsearchEntityIterable(q, entityMetaData, client,
+						elasticsearchEntityFactory, generator, new String[]
+						{ indexName });
+
+				index(nrIndexedEntities, indexName, entities.iterator(), entityMetaData, IndexingMode.UPDATE, false,
+						bulkProcessor);
+			}
+			else
+			{
+				LOG.warn("Entity [{}] is unknown", entityMetaData.getName());
+			}
+		}
 	}
 
 	@Override
@@ -806,40 +837,6 @@ public class ElasticsearchService implements SearchService
 			throw new ElasticsearchException("Optimize failed. Returned headers:" + response.getHeaders());
 		}
 		LOG.debug("Optimized Elasticsearch index [{}]", indexName);
-	}
-
-	private void updateReferences(Entity refEntity, EntityMetaData refEntityMetaData)
-	{
-		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : EntityUtils
-				.getReferencingEntityMetaData(refEntityMetaData, dataService))
-		{
-			EntityMetaData entityMetaData = pair.getA();
-
-			QueryImpl<Entity> q = null;
-			for (AttributeMetaData attributeMetaData : pair.getB())
-			{
-				if (q == null) q = new QueryImpl<Entity>();
-				else q.or();
-				q.eq(attributeMetaData.getName(), refEntity);
-			}
-
-			Iterable<Entity> entities = new ElasticsearchEntityIterable(q, entityMetaData, client,
-					elasticsearchEntityFactory, generator, new String[]
-			{ indexName });
-
-			// TODO discuss whether this is still required
-			// Don't use cached ref entities but make new ones
-			entities = Iterables.transform(entities, new Function<Entity, Entity>()
-			{
-				@Override
-				public Entity apply(Entity entity)
-				{
-					return new DefaultEntity(entityMetaData, dataService, entity);
-				}
-			});
-
-			index(indexName, entities.iterator(), entityMetaData, CrudType.UPDATE, false);
-		}
 	}
 
 	/**
