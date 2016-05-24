@@ -50,6 +50,7 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	private AttributeMetaData ownIdAttr;
 	private AttributeMetaData ownLabelAttr;
 	private Map<String, AttributeMetaData> ownLookupAttrs;
+	private boolean isRowLevelSecured;
 
 	// bookkeeping to improve performance of getters
 	private final AttributeChangeListener attrChangeListener;
@@ -128,7 +129,9 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 		this.ownLookupAttrs = stream(entityMetaData.getOwnLookupAttributes().spliterator(), false)
 				.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData> identity(), (u, v) -> {
 					throw new IllegalStateException(String.format("Duplicate key %s", u));
-				}, LinkedCaseInsensitiveMap::new));
+				} , LinkedCaseInsensitiveMap::new));
+
+		this.isRowLevelSecured = entityMetaData.isRowLevelSecured();
 	}
 
 	@Override
@@ -446,7 +449,7 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 		this.ownLookupAttrs = lookupAttrs
 				.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData> identity(), (u, v) -> {
 					throw new IllegalStateException(String.format("Duplicate key %s", u));
-				}, LinkedCaseInsensitiveMap::new));
+				} , LinkedCaseInsensitiveMap::new));
 		clearCache();
 	}
 
@@ -605,7 +608,7 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 				cachedLookupAttrs = stream(extends_.getLookupAttributes().spliterator(), false)
 						.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData> identity(), (u, v) -> {
 							throw new IllegalStateException(String.format("Duplicate key %s", u));
-						}, LinkedCaseInsensitiveMap::new));
+						} , LinkedCaseInsensitiveMap::new));
 			}
 		}
 		return cachedLookupAttrs != null ? cachedLookupAttrs : emptyMap();
@@ -707,4 +710,18 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	{
 		return Collections.unmodifiableSet(labelByLanguageCode.keySet());
 	}
+
+	@Override
+	public boolean isRowLevelSecured()
+	{
+		return this.isRowLevelSecured;
+	}
+
+	@Override
+	public EditableEntityMetaData setRowLevelSecured(boolean rowLevelSecured)
+	{
+		this.isRowLevelSecured = rowLevelSecured;
+		return this;
+	}
+
 }
