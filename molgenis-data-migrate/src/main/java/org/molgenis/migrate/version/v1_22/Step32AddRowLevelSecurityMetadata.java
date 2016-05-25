@@ -1,5 +1,6 @@
 package org.molgenis.migrate.version.v1_22;
 
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.framework.MolgenisUpgrade;
@@ -48,7 +49,7 @@ public class Step32AddRowLevelSecurityMetadata extends MolgenisUpgrade
 			String rowLevelSecurityId = idGenerator.generateId();
 			jdbcTemplate.update(
 					"INSERT INTO attributes (`identifier`,`name`,`dataType`,`refEntity`,`expression`,`nillable`,`auto`,`visible`,`label`,`description`,`aggregateable`,`enumOptions`,`rangeMin`,`rangeMax`,`readOnly`,`unique`,`visibleExpression`,`validationExpression`,`defaultValue`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-					rowLevelSecurityId, "_edit", "xref", MolgenisUserMetaData.class, null, false, false, true,
+					rowLevelSecurityId, "_edit", "xref", new MolgenisUser().getEntityMetaData().getName(), null, false, false, true,
 					"Custom javascript headers",
 					"Custom javascript headers, specified as comma separated list. These headers will be included in the molgenis header before the applications own javascript headers.",
 					false, null, null, null, false, false, null, null, "");
