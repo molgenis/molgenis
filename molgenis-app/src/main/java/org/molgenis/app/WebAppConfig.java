@@ -1,7 +1,6 @@
 package org.molgenis.app;
 
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
 import freemarker.template.TemplateException;
 import org.molgenis.CommandLineOnlyConfiguration;
 import org.molgenis.DatabaseConfig;
@@ -11,7 +10,6 @@ import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.config.HttpClientConfig;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
-import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.mysql.MysqlRepository;
@@ -31,6 +29,7 @@ import org.molgenis.migrate.version.v1_19.Step28MigrateSorta;
 import org.molgenis.migrate.version.v1_21.Step29MigrateJobExecutionProgressMessage;
 import org.molgenis.migrate.version.v1_21.Step30MigrateJobExecutionUser;
 import org.molgenis.migrate.version.v1_22.Step31UpdateApplicationSettings;
+import org.molgenis.migrate.version.v1_22.Step32AddRowLevelSecurityMetadata;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.GsonConfig;
@@ -50,6 +49,8 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -74,12 +75,6 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 	@Autowired
 	private ElasticsearchRepositoryCollection elasticsearchRepositoryCollection;
-
-	@Autowired
-	private EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
-
-	@Autowired
-	private Gson gson;
 
 	@Autowired
 	private Step20RebuildElasticsearchIndex step20RebuildElasticsearchIndex;
@@ -108,6 +103,9 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step29MigrateJobExecutionProgressMessage(dataSource));
 		upgradeService.addUpgrade(new Step30MigrateJobExecutionUser(dataSource));
 		upgradeService.addUpgrade(new Step31UpdateApplicationSettings(dataSource, idGenerator));
+		Step32AddRowLevelSecurityMetadata step32 = new Step32AddRowLevelSecurityMetadata(dataSource, idGenerator);
+		step32.setEntitiesToSecure(Arrays.asList("MolgenisUser"));
+		upgradeService.addUpgrade(step32);
 	}
 
 	@Override
