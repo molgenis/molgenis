@@ -654,6 +654,8 @@ public class EmxMetaDataParser implements MetaDataParser
 						intermediateResults.addEntityTag(TagImpl.<EntityMetaData> asTag(md, tagEntity));
 					}
 				}
+				if (entity.getBoolean(ROW_LEVEL_SECURED) != null)
+					md.setRowLevelSecured(entity.getBoolean(ROW_LEVEL_SECURED));
 			}
 		}
 	}
@@ -852,7 +854,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				if (editableEntityMetaData.isRowLevelSecured())
 				{
 
-					//FIXME: constant
+					// FIXME: constant
 					editableEntityMetaData
 							.addAttributeMetaData(new DefaultAttributeMetaData("_UPDATE", FieldTypeEnum.XREF)
 									.setRefEntity(new MolgenisUserMetaData()));
