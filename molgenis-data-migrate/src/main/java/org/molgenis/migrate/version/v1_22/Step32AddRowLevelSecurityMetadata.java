@@ -38,7 +38,7 @@ public class Step32AddRowLevelSecurityMetadata extends MolgenisUpgrade
 		LOG.info("Updating entities table ...");
 
 		// update existing settings table
-		jdbcTemplate.execute("ALTER TABLE entities ADD COLUMN `entities` boolean");
+		jdbcTemplate.execute("ALTER TABLE entities ADD COLUMN `rowLevelSecured` boolean");
 
 		LOG.debug("Updated application settings");
 
