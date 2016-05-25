@@ -112,7 +112,7 @@ class EntityMetaDataRepository
 			entityMetaData.setLabel(entity.getString(LABEL));
 			entityMetaData.setDescription(entity.getString(DESCRIPTION));
 			entityMetaData.setBackend(entity.getString(BACKEND));
-			entityMetaData.setRowLevelSecured(entity.getBoolean(ROW_LEVEL_SECURED));
+			entityMetaData.setRowLevelSecured(Boolean.getBoolean(entity.getString(ROW_LEVEL_SECURED)));//not entity.getBoolean because of a nullpointer when the value is missing
 
 			// Language attributes
 			for (String languageCode : languageService.getLanguageCodes())
