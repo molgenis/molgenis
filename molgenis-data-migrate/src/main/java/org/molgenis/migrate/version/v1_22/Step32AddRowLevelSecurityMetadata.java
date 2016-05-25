@@ -60,7 +60,7 @@ public class Step32AddRowLevelSecurityMetadata extends MolgenisUpgrade
 					fullname, rowLevelSecurityId);
 
 			// update existing settings table
-			jdbcTemplate.execute("ALTER TABLE " + fullname + " ADD COLUMN `_edit` text");
+			jdbcTemplate.execute("ALTER TABLE " + fullname + " ADD COLUMN `_UPDATE` text");
 		}
 		LOG.info("Updated entities to secure with row level security...");
 	}
