@@ -27,7 +27,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityCollection;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
-import org.molgenis.data.elasticsearch.ElasticsearchService.CrudType;
+import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.EntityMetaDataUtils;
@@ -87,14 +87,10 @@ class ElasticsearchEntityIterable extends BatchingQueryResult<Entity> implements
 		if (indexNames.length > 1)
 		{
 			QueryBuilder findUpdatesQuery = indicesQuery(
-					termQuery(ElasticsearchService.CRUD_TYPE_FIELD_NAME, CrudType.UPDATE.name()), indexNames[1]);
+					termQuery(ElasticsearchService.CRUD_TYPE_FIELD_NAME, IndexingMode.UPDATE.name()), indexNames[1]);
 
 			// Exclude the updated records from the first index
-			QueryBuilder excludeUpdatesQuery = indicesQuery(boolQuery().mustNot(findUpdatesQuery), indexNames[0]); // TODO
-																													// JJ
-																													// REMOVE
-																													// transactional
-																													// code
+			QueryBuilder excludeUpdatesQuery = indicesQuery(boolQuery().mustNot(findUpdatesQuery), indexNames[0]);
 
 			// NOTE: deletes cannot be handled by ES in this way, so if you do a delete then the entity will
 			// still be returned. Only after the commit of the transaction the queries won't return the
