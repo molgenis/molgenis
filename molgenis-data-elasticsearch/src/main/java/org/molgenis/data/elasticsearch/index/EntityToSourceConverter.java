@@ -127,20 +127,15 @@ public class EntityToSourceConverter
 				if (refEntities != null && !Iterables.isEmpty(refEntities))
 				{
 					final EntityMetaData refEntityMetaData = attributeMetaData.getRefEntity();
-					value = Lists.newArrayList(Iterables.transform(refEntities, new Function<Entity, Object>()
-					{
-						@Override
-						public Object apply(Entity refEntity)
-						{
-							if(refEntity != null) {
-								if (nestRefs) {
-									return convert(refEntity, refEntityMetaData, false);
-								} else {
-									return convertAttribute(refEntity, refEntityMetaData.getIdAttribute(), false);
-								}
+					value = Lists.newArrayList(Iterables.transform(refEntities, refEntity -> {
+						if(refEntity != null) {
+							if (nestRefs) {
+								return convert(refEntity, refEntityMetaData, false);
+							} else {
+								return convertAttribute(refEntity, refEntityMetaData.getIdAttribute(), false);
 							}
-							return null;
 						}
+						return null;
 					}));
 				}
 				else
@@ -157,6 +152,7 @@ public class EntityToSourceConverter
 		return value;
 	}
 
+	//TODO: Never used?!?
 	public Object convertAttributeValue(Object inputValue, Entity entity, AttributeMetaData attributeMetaData,
 			final boolean nestRefs)
 	{
@@ -215,19 +211,14 @@ public class EntityToSourceConverter
 				if (refEntities != null && !Iterables.isEmpty(refEntities))
 				{
 					final EntityMetaData refEntityMetaData = attributeMetaData.getRefEntity();
-					value = Lists.newArrayList(Iterables.transform(refEntities, new Function<Entity, Object>()
-					{
-						@Override
-						public Object apply(Entity refEntity)
+					value = Lists.newArrayList(Iterables.transform(refEntities, refEntity -> {
+						if (nestRefs)
 						{
-							if (nestRefs)
-							{
-								return convert(refEntity, refEntityMetaData, false);
-							}
-							else
-							{
-								return convertAttribute(refEntity, refEntityMetaData.getLabelAttribute(), false);
-							}
+							return convert(refEntity, refEntityMetaData, false);
+						}
+						else
+						{
+							return convertAttribute(refEntity, refEntityMetaData.getLabelAttribute(), false);
 						}
 					}));
 				}

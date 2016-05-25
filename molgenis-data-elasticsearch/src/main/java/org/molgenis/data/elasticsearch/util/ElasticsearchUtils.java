@@ -7,13 +7,13 @@ import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toEl
 import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import com.google.common.collect.HashMultiset;
 import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsResponse;
@@ -38,6 +38,7 @@ import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.fetch.source.FetchSourceContext;
 import org.molgenis.data.*;
@@ -68,11 +69,6 @@ public class ElasticsearchUtils
 		this.bulkProcessorFactory = bulkProcessorFactory;
 	}
 
-	public void deleteIndex(String index)
-	{
-		client.admin().indices().prepareDelete(index).execute().actionGet();
-	}
-
 	public boolean indexExists(String index)
 	{
 		return client.admin().indices().prepareExists(index).execute().actionGet().isExists();
@@ -89,7 +85,7 @@ public class ElasticsearchUtils
 		client.admin().indices().refresh(refreshRequest(index)).actionGet();
 	}
 
-	public void waitForCompletion(BulkProcessor bulkProcessor)
+	void waitForCompletion(BulkProcessor bulkProcessor)
 	{
 		try
 		{
@@ -354,7 +350,25 @@ public class ElasticsearchUtils
 		});
 	}
 
-	public SearchHits search(Consumer<SearchRequestBuilder> queryBuilder, String queryToString, String type, String indexName)
+	/**
+	 * Performs a search query and returns the result as a {@link Stream} of ID strings.
+	 */
+	public Stream<String> searchForIds(Consumer<SearchRequestBuilder> queryBuilder, String queryToString, String type, String indexName)
+	{
+		SearchHits searchHits = search(queryBuilder, queryToString, type, indexName);
+		return Arrays.stream(searchHits.hits()).map(SearchHit::getId);
+	}
+
+	/**
+	 * Performs a search query and returns the result as a {@link Stream} of source objects.
+	 */
+	public Stream<Map<String, Object>> searchForSources(Consumer<SearchRequestBuilder> queryBuilder, String queryToString, String type, String indexName)
+	{
+		SearchHits searchHits = search(queryBuilder, queryToString, type, indexName);
+		return Arrays.stream(searchHits.hits()).map(SearchHit::getSource);
+	}
+
+	private SearchHits search(Consumer<SearchRequestBuilder> queryBuilder, String queryToString, String type, String indexName)
 	{
 		LOG.trace("Searching Elasticsearch '{}' docs using query [{}] ...", type, queryToString);
 		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
@@ -392,11 +406,7 @@ public class ElasticsearchUtils
 		{
 			//TODO: Does order actually matter here?
 			requests.forEachOrdered(request -> {
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("Indexing [{}] with id [{}] in index [{}]...", request.type(), request.id(),
-							request.index());
-				}
+				LOG.trace("Indexing [{}] with id [{}] in index [{}]...", request.type(), request.id(), request.index());
 				nrIndexedEntitiesPerType.incrementAndGet(request.type());
 				bulkProcessor.add(request);
 			});

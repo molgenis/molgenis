@@ -1,21 +1,7 @@
 package org.molgenis.data.elasticsearch;
 
-import static java.util.Objects.requireNonNull;
-import static org.elasticsearch.index.query.QueryBuilders.termQuery;
-import static org.molgenis.data.DataConverter.convert;
-import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityCollection;
 import org.molgenis.data.EntityMetaData;
@@ -27,7 +13,14 @@ import org.molgenis.data.support.EntityMetaDataUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.DataConverter.convert;
+import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 /**
  * Retrieve search results in batches. Note: We do not use Elasticsearch scan & scroll, because scrolling is not
@@ -47,9 +40,9 @@ class ElasticsearchEntityIterable extends BatchingQueryResult<Entity> implements
 
 	private final String type;
 	private final ElasticsearchUtils elasticsearchFacade;
+	private final boolean elasticSearchBackend;
 
-	ElasticsearchEntityIterable(Query<Entity> q, EntityMetaData entityMetaData,
-			ElasticsearchUtils elasticsearchFacade,
+	ElasticsearchEntityIterable(Query<Entity> q, EntityMetaData entityMetaData, ElasticsearchUtils elasticsearchFacade,
 			ElasticsearchEntityFactory elasticsearchEntityFactory, SearchRequestGenerator searchRequestGenerator,
 			String indexName)
 	{
@@ -61,36 +54,28 @@ class ElasticsearchEntityIterable extends BatchingQueryResult<Entity> implements
 		this.indexName = requireNonNull(indexName);
 
 		this.type = sanitizeMapperType(entityMetaData.getName());
+		this.elasticSearchBackend = ElasticsearchRepositoryCollection.NAME.equals(entityMeta.getBackend());
 	}
 
 	@Override
 	protected List<Entity> getBatch(Query<Entity> q)
 	{
-		SearchHits searchHits = elasticsearchFacade.search((searchRequestBuilder) -> searchRequestGenerator
+		Consumer<SearchRequestBuilder> searchRequestBuilderConsumer = (searchRequestBuilder) -> searchRequestGenerator
 				.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH, q, null, null, null,
-						entityMeta), q.toString(), type, indexName);
-
-		List<Entity> entities;
-		if (searchHits.hits().length > 0)
+						entityMeta);
+		Stream<Entity> results;
+		if (elasticSearchBackend)
 		{
-			if (ElasticsearchRepositoryCollection.NAME.equals(entityMeta.getBackend()))
-			{
-				// create entities from the source documents
-				entities = StreamSupport.stream(searchHits.spliterator(), false)
-						.map(searchHit -> elasticsearchEntityFactory
-								.create(entityMeta, searchHit.getSource(), q.getFetch())).collect(Collectors.toList());
-			}
-			else
-			{
-				// create entity references for the search result document ids
-				entities = Lists.newArrayList(createEntityReferences(searchHits));
-			}
+			results = elasticsearchFacade.searchForSources(searchRequestBuilderConsumer, q.toString(), type, indexName)
+					.map(source -> elasticsearchEntityFactory.create(entityMeta, source, q.getFetch()));
 		}
 		else
 		{
-			entities = Collections.emptyList();
+			results = elasticsearchFacade.searchForIds(searchRequestBuilderConsumer, q.toString(), type, indexName)
+					.map(idString -> convert(idString, entityMeta.getIdAttribute()))
+					.map(idObject -> elasticsearchEntityFactory.getReference(entityMeta, idObject));
 		}
-		return entities;
+		return results.collect(toList());
 	}
 
 	@Override
@@ -102,17 +87,6 @@ class ElasticsearchEntityIterable extends BatchingQueryResult<Entity> implements
 	@Override
 	public boolean isLazy()
 	{
-		return !ElasticsearchRepositoryCollection.NAME.equals(entityMeta.getBackend());
-	}
-
-	private Iterable<Entity> createEntityReferences(SearchHits searchHits)
-	{
-		// create entity references for the search result document ids
-		return elasticsearchEntityFactory.getEntityManager().getReferences(entityMeta, () -> {
-			// convert id value to required id data type (Elasticsearch ids are always string)
-			return StreamSupport.stream(searchHits.spliterator(), false).map(SearchHit::getId)
-					.map(idString -> convert(idString, entityMeta.getIdAttribute())).collect(Collectors.toList())
-					.iterator();
-		});
+		return !elasticSearchBackend;
 	}
 }

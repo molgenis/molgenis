@@ -250,9 +250,7 @@ public class ElasticsearchService implements SearchService
 				q.eq(attributeMetaData.getName(), entity);
 			}
 
-			Iterable<Entity> referringEntities = new ElasticsearchEntityIterable(q, refEntityMetaData,
-					elasticsearchFacade, elasticsearchEntityFactory, generator, indexName);
-			Stream<Entity> referringEntitiesStream = stream(referringEntities.spliterator(), false);
+			Stream<Entity> referringEntitiesStream  = searchInternal(q, refEntityMetaData).stream();
 
 			references = concat(references, referringEntitiesStream
 					// TODO discuss whether this is still required
