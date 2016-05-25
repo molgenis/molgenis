@@ -1,6 +1,7 @@
 package org.molgenis.data;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.RowLevelSecurityUtils.validatePermission;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -10,6 +11,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.runas.SystemSecurityToken;
+import org.molgenis.security.core.utils.SecurityUtils;
 
 public class RowLevelSecurityRepositoryDecorator implements Repository
 {
@@ -106,7 +111,15 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 
 	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		return decoratedRepository.findAll(ids, fetch);
+		if (isRowLevelSecured())
+		{
+			return decoratedRepository.findAll(ids, fetch)
+					.filter(entity -> validatePermission(entity, Permission.UPDATE));
+		}
+		else
+		{
+			return decoratedRepository.findAll(ids, fetch);
+		}
 	}
 
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
@@ -116,11 +129,16 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 
 	public void update(Entity entity)
 	{
+		if (isRowLevelSecured()) validatePermission(entity, Permission.UPDATE);
 		decoratedRepository.update(entity);
 	}
 
 	public void update(Stream<? extends Entity> entities)
 	{
+		if (isRowLevelSecured())
+		{
+			entities = entities.filter(entity -> validatePermission(entity, Permission.UPDATE));
+		}
 		decoratedRepository.update(entities);
 	}
 
@@ -196,7 +214,15 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 
 	private boolean isRowLevelSecured()
 	{
-		return decoratedRepository.getEntityMetaData().isRowLevelSecured();
+		if (decoratedRepository.getEntityMetaData().isRowLevelSecured() || SecurityUtils.currentUserIsSu()
+				|| SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
+		{
+			return false;
+		}
+		else
+		{
+			return true;
+		}
 	}
 
 	private class RowLevelSecurityEntityMetaData implements EntityMetaData
@@ -268,7 +294,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 			return StreamSupport.stream(entityMetaData.getAttributes().spliterator(), false).filter(attribute -> {
 				if (ROW_LEVEL_SECURITY_ATTRIBUTES.contains(attribute.getName()))
 				{
-					return false;
+					return SecurityUtils.currentUserIsSu();
 				}
 				else
 				{
@@ -287,7 +313,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 			return StreamSupport.stream(entityMetaData.getAtomicAttributes().spliterator(), false).filter(attribute -> {
 				if (ROW_LEVEL_SECURITY_ATTRIBUTES.contains(attribute.getName()))
 				{
-					return false;
+					return SecurityUtils.currentUserIsSu();
 				}
 				else
 				{
