@@ -79,4 +79,8 @@ public interface AppSettings
 	void setGoogleAppClientId(String googleAppClientId);
 
 	String getGoogleAppClientId();
+
+	void setCustomJavascript(String customJavascript);
+
+	String getCustomJavascript();
 }
