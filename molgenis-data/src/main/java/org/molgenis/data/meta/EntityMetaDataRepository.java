@@ -15,6 +15,7 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL_ATTRIBUTE;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.LOOKUP_ATTRIBUTES;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ROW_LEVEL_SECURED;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.SIMPLE_NAME;
 
 import java.util.ArrayList;
@@ -111,6 +112,7 @@ class EntityMetaDataRepository
 			entityMetaData.setLabel(entity.getString(LABEL));
 			entityMetaData.setDescription(entity.getString(DESCRIPTION));
 			entityMetaData.setBackend(entity.getString(BACKEND));
+			entityMetaData.setRowLevelSecured(entity.getBoolean(ROW_LEVEL_SECURED));
 
 			// Language attributes
 			for (String languageCode : languageService.getLanguageCodes())
