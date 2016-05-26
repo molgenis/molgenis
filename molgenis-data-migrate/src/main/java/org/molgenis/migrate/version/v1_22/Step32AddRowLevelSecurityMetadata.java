@@ -38,7 +38,7 @@ public class Step32AddRowLevelSecurityMetadata extends MolgenisUpgrade
 		LOG.info("Updating entities table ...");
 
 		// update existing settings table
-		// jdbcTemplate.execute("ALTER TABLE entities ADD COLUMN `rowLevelSecured` boolean");
+		jdbcTemplate.execute("ALTER TABLE entities ADD COLUMN `rowLevelSecured` boolean");
 
 		LOG.debug("Updated application settings");
 
@@ -49,7 +49,7 @@ public class Step32AddRowLevelSecurityMetadata extends MolgenisUpgrade
 			String rowLevelSecurityId = idGenerator.generateId();
 			jdbcTemplate.update(
 					"INSERT INTO attributes (`identifier`,`name`,`dataType`,`refEntity`,`expression`,`nillable`,`auto`,`visible`,`label`,`description`,`aggregateable`,`enumOptions`,`rangeMin`,`rangeMax`,`readOnly`,`unique`,`visibleExpression`,`validationExpression`,`defaultValue`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-					rowLevelSecurityId, UPDATE, "xref", new MolgenisUserMetaData().getName(), null, false, false, true,
+					rowLevelSecurityId, UPDATE, "xref", new MolgenisUserMetaData().getName(), null, true, false, true,
 					"name", "desc", false, null, null, null, false, false, null, null, "");
 
 			jdbcTemplate.update("INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)",
