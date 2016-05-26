@@ -103,9 +103,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step29MigrateJobExecutionProgressMessage(dataSource));
 		upgradeService.addUpgrade(new Step30MigrateJobExecutionUser(dataSource));
 		upgradeService.addUpgrade(new Step31UpdateApplicationSettings(dataSource, idGenerator));
-		Step32AddRowLevelSecurityMetadata step32 = new Step32AddRowLevelSecurityMetadata(dataSource, idGenerator);
-		step32.setEntitiesToSecure(Arrays.asList("MolgenisUser"));
-		upgradeService.addUpgrade(step32);
+		upgradeService.addUpgrade(new Step32AddRowLevelSecurityMetadata(dataSource, idGenerator));
 	}
 
 	@Override
