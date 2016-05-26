@@ -3,6 +3,12 @@ import $ from 'jquery';
 
     var apiBaseUri = '/api/v2/';
 
+    var htmlEscape = function(string) {
+        return String(string).replace(/[&<>"'\/]/g, function(s) {
+            return entityMap[s];
+        });
+    };
+
     var createAttrsValue = function(attrs) {
         var items = [];
         for (var key in attrs) {
