@@ -36,7 +36,7 @@ public class Step31UpdateApplicationSettings extends MolgenisUpgrade
 		boolean googleSignInIdDefaultValue = true;
 		jdbcTemplate.update(
 				"INSERT INTO attributes (`identifier`,`name`,`dataType`,`refEntity`,`expression`,`nillable`,`auto`,`visible`,`label`,`description`,`aggregateable`,`enumOptions`,`rangeMin`,`rangeMax`,`readOnly`,`unique`,`visibleExpression`,`validationExpression`,`defaultValue`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-				customJavascriptHeadersId, "custom_javascript", "text", null, null, false, false, true,
+				customJavascriptHeadersId, "custom_javascript", "text", null, null, true, false, true,
 				"Custom javascript headers",
 				"Custom javascript headers, specified as comma separated list. These headers will be included in the molgenis header before the applications own javascript headers.",
 				false, null, null, null, false, false, null, null, "");
