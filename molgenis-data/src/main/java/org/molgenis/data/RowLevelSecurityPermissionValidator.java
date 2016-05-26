@@ -1,15 +1,14 @@
 package org.molgenis.data;
 
+import static autovalue.shaded.com.google.common.common.collect.Iterables.isEmpty;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.MolgenisUser.USERNAME;
+import static org.molgenis.data.RowLevelSecurityRepositoryDecorator.UPDATE_ATTRIBUTE;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
-
-import java.util.Set;
 
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
-
-import com.google.common.collect.Sets;
 
 public class RowLevelSecurityPermissionValidator
 {
@@ -34,18 +33,22 @@ public class RowLevelSecurityPermissionValidator
 	{
 		if (currentUserIsSu()) return true;
 
-		String usernamesStr = RunAsSystemProxy
-				.runAsSystem(() -> dataService.findOne(entity.getEntityMetaData().getName(), entity.getIdValue())
-						.getString("_" + permission.toString()));
+		String currentUsername = SecurityUtils.getCurrentUsername();
+		return RunAsSystemProxy.runAsSystem(() -> {
+			Iterable<Entity> users = dataService.findOne(entity.getEntityMetaData().getName(), entity.getIdValue())
+					.getEntities(UPDATE_ATTRIBUTE);
 
-		if (usernamesStr != null)
-		{
-			Set<String> usernames = Sets.newHashSet(usernamesStr.split(","));
-			if (usernames.contains(SecurityUtils.getCurrentUsername()))
+			if (users != null || !isEmpty(users))
 			{
-				return true;
+				for (Entity user : users)
+				{
+					if (user.getString(USERNAME).equals(currentUsername))
+					{
+						return true;
+					}
+				}
 			}
-		}
-		return false;
+			return false;
+		});
 	}
 }
