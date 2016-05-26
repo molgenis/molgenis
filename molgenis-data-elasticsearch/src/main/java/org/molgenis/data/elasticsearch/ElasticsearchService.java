@@ -329,12 +329,6 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void deleteById(String id, EntityMetaData entityMetaData)
 	{
-		if (isReferenced(singletonList(id), entityMetaData))
-		{
-			throw new MolgenisDataException(
-					"Cannot delete entity because there are other entities referencing it. Delete these first.");
-		}
-
 		deleteById(indexName, id, entityMetaData.getName());
 	}
 
@@ -575,35 +569,6 @@ public class ElasticsearchService implements SearchService
 	public void optimizeIndex()
 	{
 		elasticsearchFacade.optimizeIndex(indexName);
-	}
-
-	// Checks if entities can be deleted, have no ref entities pointing to it
-	private boolean isReferenced(Iterable<?> ids, EntityMetaData meta)
-	{
-		List<Pair<EntityMetaData, List<AttributeMetaData>>> referencingMetas = EntityUtils
-				.getReferencingEntityMetaData(meta, dataService);
-		if (referencingMetas.isEmpty()) return false;
-
-		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : referencingMetas)
-		{
-			EntityMetaData refEntityMetaData = pair.getA();
-
-			if (!refEntityMetaData.getName().equals(EntityMetaDataMetaData.ENTITY_NAME) && !refEntityMetaData.getName()
-					.equals(AttributeMetaDataMetaData.ENTITY_NAME))
-			{
-				QueryImpl<Entity> q = null;
-				for (AttributeMetaData attributeMetaData : pair.getB())
-				{
-					if (q == null) q = new QueryImpl<>();
-					else q.or();
-					q.in(attributeMetaData.getName(), ids);
-				}
-
-				if (dataService.count(refEntityMetaData.getName(), q) > 0) return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**
