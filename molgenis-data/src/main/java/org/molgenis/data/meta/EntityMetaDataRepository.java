@@ -206,6 +206,7 @@ class EntityMetaDataRepository
 		emd.setAbstract(entityMetaData.isAbstract());
 		emd.setDescription(entityMetaData.getDescription());
 		emd.setBackend(entityMetaData.getBackend() == null ? collection.getName() : entityMetaData.getBackend());
+		emd.setRowLevelSecured(entityMetaData.isRowLevelSecured());
 
 		// Language attributes
 		for (String languageCode : entityMetaData.getDescriptionLanguageCodes())
@@ -295,6 +296,7 @@ class EntityMetaDataRepository
 		entityMetaDataEntity.set(ABSTRACT, emd.isAbstract());
 		entityMetaDataEntity.set(LABEL, emd.getLabel());
 		entityMetaDataEntity.set(BACKEND, emd.getBackend());
+		entityMetaDataEntity.set(ROW_LEVEL_SECURED, emd.isRowLevelSecured());
 		if (emd.getExtends() != null)
 		{
 			entityMetaDataEntity.set(EXTENDS, getEntity(emd.getExtends().getName()));
