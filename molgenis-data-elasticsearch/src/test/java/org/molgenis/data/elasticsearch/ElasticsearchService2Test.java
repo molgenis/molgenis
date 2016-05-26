@@ -3,14 +3,11 @@ package org.molgenis.data.elasticsearch;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.search.SearchHits;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.EntityManager;
+import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
@@ -24,7 +21,6 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -33,7 +29,7 @@ import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayLi
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
@@ -49,7 +45,6 @@ public class ElasticsearchService2Test
 	@Mock
 	private DataServiceImpl dataService;
 
-	@Mock
 	private EntityManager entityManager;
 	@Mock
 	private SourceToEntityConverter sourceToEntityConverter;
@@ -58,6 +53,15 @@ public class ElasticsearchService2Test
 
 	@Captor
 	private ArgumentCaptor<Stream<IndexRequest>> indexRequestsCaptor;
+
+	@Captor
+	private ArgumentCaptor<Query<Entity>> queryCaptor;
+
+	@Captor
+	private ArgumentCaptor<Stream<String>> idStreamCaptor;
+
+	@Captor
+	private ArgumentCaptor<Stream<Object>> idObjectStreamCaptor;
 
 	private DefaultEntityMetaData typeTestMeta;
 	private DefaultEntityMetaData typeTestRefMeta;
@@ -69,6 +73,8 @@ public class ElasticsearchService2Test
 	public void beforeMethod() throws InterruptedException
 	{
 		initMocks(this);
+		entityManager = new EntityManagerImpl(dataService);
+
 		ElasticsearchEntityFactory elasticsearchEntityFactory = new ElasticsearchEntityFactory(entityManager,
 				sourceToEntityConverter, entityToSourceConverter);
 		elasticsearchService = new ElasticsearchService(elasticSearchFacade, "molgenis", dataService,
@@ -136,19 +142,20 @@ public class ElasticsearchService2Test
 	}
 
 	@Test
-	public void testIndexSingleEntityStreamUpdateReferencingEntity()
+	public void testIndexSingleEntityStreamAlsoUpdatesReferencingEntity()
 	{
 		AtomicLongMap<String> counts = AtomicLongMap.create();
 		counts.put("TypeTestRef", 1);
+		counts.put("TypeTest", 1);
 		when(elasticSearchFacade.index(indexRequestsCaptor.capture(), eq(true))).thenReturn(counts);
-
-		//		SearchHits referencingEntities = new SearchHits();
 
 		when(elasticSearchFacade
 				.searchForIds(any(Consumer.class), eq("rules=['xref' = 'Label 1'], pageSize=1000"), eq("TypeTest"),
 						eq("molgenis"))).thenReturn(Stream.of("FGHIJ"));
 
-		when(entityManager.getReference(typeTestMeta, "FGHIJ")).thenReturn(typeTestEntity);
+		Fetch fetch = new Fetch().field("id").field("xref", new Fetch().field("id").field("label"));
+		when(dataService.findAll(eq("TypeTest"), idObjectStreamCaptor.capture(), eq(fetch)))
+				.thenReturn(Stream.of(typeTestEntity));
 
 		assertEquals(1, elasticsearchService.index(Stream.of(typeTestRefEntity), typeTestRefMeta, UPDATE));
 
@@ -158,8 +165,19 @@ public class ElasticsearchService2Test
 				new IndexRequest().index("molgenis").type("TypeTest").id("FGHIJ")
 						.source(ImmutableMap.of("xref", typeTestRefSource, "id", "FGHIJ"))));
 
+		assertEquals(idObjectStreamCaptor.getValue().collect(toList()), newArrayList("FGHIJ"));
+
 	}
+
+	// TODO: test stream of two entities
 
 	// TODO: test what happens if search for referencing entities throws Exception
 
+	@Test()
+	public void testDeleteById()
+	{
+		elasticsearchService.deleteById(Stream.of("ABCDE"), typeTestRefMeta);
+		verify(elasticSearchFacade).deleteById("molgenis", "ABCDE", "TypeTestRef");
+		verifyNoMoreInteractions(dataService);
+	}
 }

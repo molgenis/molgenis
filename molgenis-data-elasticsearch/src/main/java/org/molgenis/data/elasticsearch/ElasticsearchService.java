@@ -17,10 +17,7 @@ import org.molgenis.data.elasticsearch.response.ResponseParser;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.PackageImpl;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.UuidGenerator;
@@ -32,11 +29,12 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.StreamSupport.stream;
@@ -236,30 +234,74 @@ public class ElasticsearchService implements SearchService
 	private Stream<IndexRequest> createIndexRequestsForReferencingEntities(Entity entity, EntityMetaData entityMetaData)
 	{
 		Stream<IndexRequest> references = Stream.of();
+		// Find entity metadata that is currently, in the database, referring to the entity we're reindexing
 		for (Pair<EntityMetaData, List<AttributeMetaData>> pair : EntityUtils
 				.getReferencingEntityMetaData(entityMetaData, dataService))
 		{
 			EntityMetaData refEntityMetaData = pair.getA();
 			String refEntityType = sanitizeMapperType(refEntityMetaData.getName());
 
-			QueryImpl<Entity> q = null;
-			for (AttributeMetaData attributeMetaData : pair.getB())
-			{
-				if (q == null) q = new QueryImpl<>();
-				else q.or();
-				q.eq(attributeMetaData.getName(), entity);
-			}
+			// Search the index for referring documents of this type
+			Stream<Entity> referringEntitiesStream = findReferringDocuments(entity, refEntityMetaData, pair.getB());
 
-			Stream<Entity> referringEntitiesStream  = searchInternal(q, refEntityMetaData).stream();
+			// Get actual entities from the dataservice, skipping the ones that no longer exist and
+			// fetching all of their attributes in one go
+			referringEntitiesStream = dataService
+					.findAll(refEntityMetaData.getName(), referringEntitiesStream.map(Entity::getIdValue),
+							createFetchForReindexing(refEntityMetaData));
 
 			references = concat(references, referringEntitiesStream
-					// TODO discuss whether this is still required
-					// Don't use cached ref entities but make new ones
-					.map(referencingEntity -> new DefaultEntity(refEntityMetaData, dataService, referencingEntity))
 					.map(referencingEntity -> createIndexRequestForEntity(referencingEntity, refEntityMetaData,
 							refEntityType)));
 		}
 		return references;
+	}
+
+	private Fetch createFetchForReindexing(EntityMetaData refEntityMetaData)
+	{
+		Fetch fetch = new Fetch();
+		for (AttributeMetaData attr : refEntityMetaData.getAtomicAttributes())
+		{
+			if (attr.getRefEntity() != null)
+			{
+				Fetch attributeFetch = new Fetch();
+				for (AttributeMetaData refAttr : attr.getRefEntity().getAtomicAttributes())
+				{
+					attributeFetch.field(refAttr.getName());
+				}
+				fetch.field(attr.getName(), attributeFetch);
+			}
+			else
+			{
+				fetch.field(attr.getName());
+			}
+
+		}
+		return fetch;
+	}
+
+	/**
+	 * Searches the index for documents of a certain type that contain a reference to a specific entity.
+	 * Uses searchInternal to create a batched stream.
+	 *
+	 * @param referredEntity          the entity that should be referred to in the documents
+	 * @param referringEntityMetaData {@link EntityMetaData} of the referring documents
+	 * @param referringAttributes     {@link List} of {@link AttributeMetaData} of attributes that may reference the #referredEntity
+	 * @return Stream of {@link Entity} references representing the documents.
+	 */
+	private Stream<Entity> findReferringDocuments(Entity referredEntity, EntityMetaData referringEntityMetaData,
+			List<AttributeMetaData> referringAttributes)
+	{
+		// Find out which documents of this type currently, in ElasticSearch, contain a reference to
+		// the entity we're reindexing
+		QueryImpl<Entity> q = null;
+		for (AttributeMetaData attributeMetaData : referringAttributes)
+		{
+			if (q == null) q = new QueryImpl<>();
+			else q.or();
+			q.eq(attributeMetaData.getName(), referredEntity);
+		}
+		return searchInternal(q, referringEntityMetaData).stream();
 	}
 
 	/**
@@ -318,15 +360,8 @@ public class ElasticsearchService implements SearchService
 	public void delete(Stream<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
 		Stream<Object> entityIds = entities.map(Entity::getIdValue);
-		Iterators.partition(entityIds.iterator(), BATCH_SIZE).forEachRemaining(batchEntityIds -> {
-			if (isReferenced(batchEntityIds, entityMetaData))
-			{
-				throw new MolgenisDataException(
-						"Cannot delete entity because there are other entities referencing it. Delete these first.");
-			}
-
-			deleteById(toElasticsearchIds(batchEntityIds.stream()), entityMetaData);
-		});
+		Iterators.partition(entityIds.iterator(), BATCH_SIZE).forEachRemaining(
+				batchEntityIds -> deleteById(toElasticsearchIds(batchEntityIds.stream()), entityMetaData));
 	}
 
 	@Override
@@ -574,7 +609,7 @@ public class ElasticsearchService implements SearchService
 	/**
 	 * Entities are stored (in addition to indexed) in Elasticsearch only if the entity backend is Elasticsearch
 	 *
-	 * @param entityMeta
+	 * @param entityMeta {@link EntityMetaData} to check
 	 * @return whether or not this entity class is stored in Elasticsearch
 	 */
 	private boolean storeSource(EntityMetaData entityMeta)
