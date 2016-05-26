@@ -3,6 +3,7 @@ package org.molgenis.data.reindex.meta;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.support.DefaultEntityMetaData;
 
 /**
@@ -26,7 +27,7 @@ public class ReindexActionJobMetaData extends DefaultEntityMetaData
 	{
 		super(ENTITY_NAME);
 		setDescription("This entity is used to group the reindex actions.");
-		setBackend(backend);
+		setBackend(RepositoryCollection.BACKEND.PostgreSQL.name());
 		addAttribute(ID, ROLE_ID);
 		addAttribute(COUNT).setDataType(MolgenisFieldTypes.INT).setNillable(false);
 	}

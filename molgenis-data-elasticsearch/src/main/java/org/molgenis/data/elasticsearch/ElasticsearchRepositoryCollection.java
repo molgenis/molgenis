@@ -9,6 +9,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.DefaultEntityMetaData;
@@ -22,7 +23,7 @@ import com.google.common.collect.Maps;
 @Component("ElasticsearchRepositoryCollection")
 public class ElasticsearchRepositoryCollection implements ManageableRepositoryCollection
 {
-	public static final String NAME = "ElasticSearch";
+	public static final String NAME = RepositoryCollection.BACKEND.ElasticSearch.name();
 	private final SearchService searchService;
 	private final DataService dataService;
 	private final Map<String, AbstractElasticsearchRepository> repositories = Maps.newLinkedHashMap();

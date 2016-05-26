@@ -9,6 +9,14 @@ import java.util.stream.StreamSupport;
 public interface RepositoryCollection extends Iterable<Repository<Entity>>
 {
 	/**
+	 * All back-ends names
+	 * */
+	public static enum BACKEND
+	{
+		PostgreSQL, ElasticSearch, IdCard, EXCEL, CSV;
+	};
+
+	/**
 	 * @return the name of this backend
 	 */
 	String getName();

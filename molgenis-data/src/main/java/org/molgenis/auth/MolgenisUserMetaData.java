@@ -7,6 +7,7 @@ import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,7 @@ public class MolgenisUserMetaData extends DefaultEntityMetaData
 	public MolgenisUserMetaData()
 	{
 		super(ENTITY_NAME);
+		setBackend(RepositoryCollection.BACKEND.PostgreSQL.name());
 		setDescription("Anyone who can login");
 
 		addAttribute(MolgenisUser.ID, ROLE_ID).setAuto(true).setVisible(false)
