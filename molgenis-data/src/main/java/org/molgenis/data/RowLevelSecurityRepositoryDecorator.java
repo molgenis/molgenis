@@ -1,7 +1,6 @@
 package org.molgenis.data;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.RowLevelSecurityUtils.validatePermission;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -22,10 +21,13 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	public static final List<String> ROW_LEVEL_SECURITY_ATTRIBUTES = Arrays.asList(UPDATE_ATTRIBUTE);
 
 	private final Repository decoratedRepository;
+	private final RowLevelSecurityPermissionValidator permissionValidator;
 
-	public RowLevelSecurityRepositoryDecorator(Repository decoratedRepository)
+	public RowLevelSecurityRepositoryDecorator(Repository decoratedRepository,
+			RowLevelSecurityPermissionValidator rowLevelSecurityPermissionValidator)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
+		this.permissionValidator = requireNonNull(rowLevelSecurityPermissionValidator);
 	}
 
 	@Override
@@ -180,7 +182,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		{
 			if (!SecurityUtils.currentUserIsSu() && !SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
 			{
-				validatePermission(entity, Permission.UPDATE);
+				permissionValidator.validatePermission(entity, Permission.UPDATE);
 			}
 		}
 		decoratedRepository.update(entity);
@@ -193,7 +195,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		{
 			if (!SecurityUtils.currentUserIsSu() && !SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
 			{
-				entities = entities.filter(entity -> validatePermission(entity, Permission.UPDATE));
+				entities = entities.filter(entity -> permissionValidator.validatePermission(entity, Permission.UPDATE));
 			}
 		}
 		decoratedRepository.update(entities);
@@ -285,14 +287,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 
 	private boolean isRowLevelSecured()
 	{
-		if (decoratedRepository.getEntityMetaData().isRowLevelSecured())
-		{
-			return true;
-		}
-		else
-		{
-			return false;
-		}
+		return decoratedRepository.getEntityMetaData().isRowLevelSecured();
 	}
 
 	private Entity injectPermissions(Entity entity)
