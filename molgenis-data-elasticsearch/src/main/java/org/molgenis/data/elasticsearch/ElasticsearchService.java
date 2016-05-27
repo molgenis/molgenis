@@ -63,7 +63,7 @@ public class ElasticsearchService implements SearchService
 	{
 		ADD, UPDATE
 	}
-
+	
 	private final DataService dataService;
 	private final ElasticsearchEntityFactory elasticsearchEntityFactory;
 	private final String indexName;

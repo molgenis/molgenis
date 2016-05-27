@@ -42,7 +42,7 @@ public class ProgressImplTest
 		progress.status("Working....");
 		progress.success();
 		System.out.println(jobExecution.getLog());
-		assertTrue(jobExecution.getLog().contains("INFO  - start ()" + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("INFO  - Execution started." + System.lineSeparator()));
 		assertTrue(jobExecution.getLog().contains("INFO  - Working...." + System.lineSeparator()));
 		assertTrue(jobExecution.getLog().contains("INFO  - Execution successful. Time spent: "));
 	}
@@ -55,7 +55,7 @@ public class ProgressImplTest
 		progress.status("Working....");
 		progress.success();
 		System.out.println(jobExecution.getLog());
-		assertTrue(jobExecution.getLog().contains("INFO  - start ()" + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("INFO  - Execution started." + System.lineSeparator()));
 		assertTrue(jobExecution.getLog().contains("INFO  - Working...." + System.lineSeparator()));
 		assertTrue(jobExecution.getLog().contains("INFO  - Execution successful. Time spent: "));
 
@@ -76,7 +76,7 @@ public class ProgressImplTest
 		Exception ex = new IllegalArgumentException("blah");
 		progress.failed(ex);
 		System.out.println(jobExecution.getLog());
-		assertTrue(jobExecution.getLog().contains("INFO  - start ()" + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("INFO  - Execution started." + System.lineSeparator()));
 		assertTrue(jobExecution.getLog().contains("INFO  - Working...." + System.lineSeparator()));
 		assertTrue(jobExecution.getLog().contains("ERROR - Failed"));
 		assertTrue(jobExecution.getLog().contains(ex.getMessage()));

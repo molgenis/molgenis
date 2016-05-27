@@ -400,42 +400,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	protected abstract ManageableRepositoryCollection getBackend();
 
-	// protected abstract void addReposToReindex(DataServiceImpl localDataService,
-	// MySqlEntityFactory localMySqlEntityFactory);
-
 	protected void reindex()
 	{
-		// FIXME reindexing should not depend on MySQL
-		// // Create local dataservice and metadataservice
-		// DataServiceImpl localDataService = new DataServiceImpl();
-		// EntityManager localEntityManager = new EntityManagerImpl(localDataService);
-		// MySqlEntityFactory localMySqlEntityFactory = new MySqlEntityFactory(localEntityManager, localDataService);
-		//
-		// MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(localDataService);
-		// metaDataService.setLanguageService(new LanguageService(localDataService, appDbSettings));
-		// localDataService.setMeta(metaDataService);
-		//
-		// addReposToReindex(localDataService, localMySqlEntityFactory);
-		//
-		// SourceToEntityConverter sourceToEntityConverter = new SourceToEntityConverter(localDataService,
-		// localEntityManager);
-		// EntityToSourceConverter entityToSourceConverter = new EntityToSourceConverter();
-		// SearchService localSearchService = embeddedElasticSearchServiceFactory.create(localDataService,
-		// new ElasticsearchEntityFactory(localEntityManager, sourceToEntityConverter, entityToSourceConverter));
-		//
-		// List<EntityMetaData> metas = DependencyResolver.resolve(Sets.newHashSet(localDataService.getMeta()
-		// .getEntityMetaDatas()));
-		//
-		// // Sort repos to the same sequence as the resolves metas
-		// List<Repository> repos = Lists.newArrayList(localDataService);
-		// repos.sort((r1, r2) -> Integer.compare(metas.indexOf(r1.getEntityMetaData()),
-		// metas.indexOf(r2.getEntityMetaData())));
-		//
-		// repos.forEach(repo -> {
-		// localSearchService.rebuildIndex(repo, repo.getEntityMetaData());
-		// });
-		//
-		// localSearchService.optimizeIndex();
+		// FIXME implement index/reindex
 	}
 
 	@PostConstruct
