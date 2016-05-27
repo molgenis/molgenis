@@ -1,19 +1,15 @@
 package org.molgenis.data;
 
-import static java.util.Objects.requireNonNull;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.*;
+
+import static java.util.Objects.requireNonNull;
 
 public class RowLevelSecurityRepositoryDecorator implements Repository
 {
@@ -292,8 +288,21 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 
 	private Entity injectPermissions(Entity entity)
 	{
-		// TODO
-		return entity;
+		boolean userHasPermissionToEditEntity = permissionValidator.userHasUpdatePermissionOnEntity(entity, Permission.UPDATE);
+		Entity permissionEntity = new MapEntity(entity, new RowLevelSecurityEntityMetaData(entity.getEntityMetaData()));
+
+		if(userHasPermissionToEditEntity)
+		{
+			// Current user is allowed to update
+			permissionEntity.set("_PERMISSIONS", true);
+			return permissionEntity;
+		}
+		else
+		{
+			// Current user does not have update permissions on this row
+			permissionEntity.set("_PERMISSIONS", false);
+			return permissionEntity;
+		}
 	}
 
 	private class RowLevelSecurityEntityMetaData implements EntityMetaData
