@@ -33,7 +33,7 @@
     "jquery-validation": "1.14.0",
     "jquery.cookie": "^1.4.1",
     "jquery.fancytree": "2.14.0",
-    "moment": "2.9.0",
+    "moment": "^2.11.0",
     "promise": "^6.1.0",
     "react": "0.13.3",
     "svg-pan-zoom": "3.2.6",
