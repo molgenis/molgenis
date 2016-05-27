@@ -3,10 +3,10 @@ package org.molgenis.data.elasticsearch.reindex.job;
 import static java.time.OffsetDateTime.now;
 import static java.util.Date.from;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMeta.REINDEX_JOB_EXECUTION;
 import static org.molgenis.data.jobs.JobExecution.END_DATE;
 import static org.molgenis.data.jobs.JobExecution.STATUS;
 import static org.molgenis.data.jobs.JobExecution.Status.SUCCESS;
-import static org.molgenis.data.reindex.job.ReindexJobExecutionMetaInterface.REINDEX_JOB_EXECUTION;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.util.Date;

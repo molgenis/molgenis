@@ -61,13 +61,12 @@ public class ReindexActionMetaData extends DefaultEntityMetaData
 	 */
 	public static final String REINDEX_STATUS = "reindexStatus";
 
-	public ReindexActionMetaData(ReindexActionJobMetaData indexTransactionLogMetaData, String backend)
+	public ReindexActionMetaData()
 	{
 		super(ENTITY_NAME);
-		setBackend(backend);
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
 		addAttribute(REINDEX_ACTION_GROUP).setDescription("The group that this reindex action belongs to")
-				.setDataType(MolgenisFieldTypes.XREF).setRefEntity(indexTransactionLogMetaData);
+				.setDataType(MolgenisFieldTypes.XREF).setRefEntity(new ReindexActionJobMetaData());
 		addAttribute(ACTION_ORDER).setDescription(
 				"The order in which the action is registered within its ReindexActionJob").setNillable(false);
 		addAttribute(ENTITY_FULL_NAME).setDescription("The full name of the entity that needs to be reindexed.")

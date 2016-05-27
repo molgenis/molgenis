@@ -129,6 +129,9 @@ public abstract class AbstractDataApiTestConfig
 		return new RepositoryDecoratorRegistry();
 	}
 
+	@Autowired
+	private ReindexActionRegisterService reindexActionRegisterService;
+
 	@Bean
 	public RepositoryDecoratorFactory repositoryDecoratorFactory()
 	{
@@ -139,7 +142,7 @@ public abstract class AbstractDataApiTestConfig
 			{
 				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(),
 						idGenerator, appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry(),
-						reindexActionRegisterService(), searchService).createDecoratedRepository(repository);
+						reindexActionRegisterService, searchService).createDecoratedRepository(repository);
 			}
 		};
 	}
@@ -168,12 +171,4 @@ public abstract class AbstractDataApiTestConfig
 		return new MolgenisPasswordEncoder(new BCryptPasswordEncoder());
 	}
 	
-	@Bean
-	public ReindexActionRegisterService reindexActionRegisterService()
-	{
-		ReindexActionJobMetaData reindexActionJobMetaData = new ReindexActionJobMetaData(getBackend().getName());
-		ReindexActionMetaData reindexActionMetaData = new ReindexActionMetaData(reindexActionJobMetaData, getBackend().getName());
-		return new ReindexActionRegisterService(dataService(), reindexActionJobMetaData, reindexActionMetaData);
-	}
-
 }

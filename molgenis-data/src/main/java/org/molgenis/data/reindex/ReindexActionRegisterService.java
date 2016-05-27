@@ -3,12 +3,11 @@ package org.molgenis.data.reindex;
 import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Set;
 
+import com.google.common.collect.Sets;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.reindex.job.ReindexJobExecutionMetaInterface;
 import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
@@ -16,49 +15,60 @@ import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
 import org.molgenis.data.support.DefaultEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Registers changes made to an indexed repository that need to be fixed by reindexing
  * the relevant data.
  */
+@Service
 public class ReindexActionRegisterService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ReindexActionRegisterService.class);
 
-	public static final List<String> EXCLUDED_ENTITIES = Arrays.asList(ReindexActionMetaData.ENTITY_NAME,
-			ReindexActionJobMetaData.ENTITY_NAME, ReindexJobExecutionMetaInterface.REINDEX_JOB_EXECUTION);
+	private final Set<String> excludedEntities = Sets.newConcurrentHashSet();
 
-	private final DataService dataService;
-	private final ReindexActionJobMetaData reindexActionJobMetaData;
-	private final ReindexActionMetaData reindexActionMetaData;
+	@Autowired
+	private DataService dataService;
 
-	public ReindexActionRegisterService(DataService dataService, ReindexActionJobMetaData reindexActionJobMetaData,
-			ReindexActionMetaData reindexActionMetaData)
+	public ReindexActionRegisterService()
 	{
-		this.dataService = dataService;
-		this.reindexActionJobMetaData = reindexActionJobMetaData;
-		this.reindexActionMetaData = reindexActionMetaData;
+		addExcludedEntity(ReindexActionJobMetaData.ENTITY_NAME);
+		addExcludedEntity(ReindexActionMetaData.ENTITY_NAME);
+	}
+
+	/**
+	 * Excludes an entity from being reindexed.
+	 *
+	 * @param entityFullName fully qualified name of the entity to exclude
+	 */
+	public void addExcludedEntity(String entityFullName)
+	{
+		excludedEntities.add(entityFullName);
 	}
 
 	/**
 	 * Log and create locks for an add/update/delete operation on a Repository
-	 * 
-	 * @param entityMetaData
-	 * @param cudType
-	 * @return
+	 *
+	 * @param entityFullName the fully qualified name of the {@link org.molgenis.data.Repository}
+	 * @param cudType        the {@link CudType} of the action
+	 * @param dataType       the {@link DataType} of the action
+	 * @param entityId       the ID of the entity, may be null to indicate change to entire repository
 	 */
 	public synchronized void register(String entityFullName, CudType cudType, DataType dataType, String entityId)
 	{
 		LOG.debug("register(entityFullName: [{}], cudType [{}], dataType: [{}], entityId: [{}])", entityFullName,
 				cudType, dataType, entityId);
-		if (!ReindexActionRegisterService.EXCLUDED_ENTITIES.contains(entityFullName))
+		if (!excludedEntities.contains(entityFullName))
 		{
 			String transactionId = (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);
 			if (transactionId != null)
 			{
 				runAsSystem(() -> {
-					Entity reindexActionJob = dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
+					Entity reindexActionJob = dataService
+							.findOneById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
 
 					if (reindexActionJob == null)
 					{
@@ -67,8 +77,9 @@ public class ReindexActionRegisterService
 					}
 
 					int actionOrder = increaseCountReindexActionJob(reindexActionJob);
-					Entity reindexAction = this.createReindexAction(reindexActionJob, entityFullName,
-							cudType, dataType, entityId, actionOrder);
+					Entity reindexAction = this
+							.createReindexAction(reindexActionJob, entityFullName, cudType, dataType, entityId,
+									actionOrder);
 					dataService.add(ReindexActionMetaData.ENTITY_NAME, reindexAction);
 				});
 			}
@@ -81,7 +92,7 @@ public class ReindexActionRegisterService
 
 	public int increaseCountReindexActionJob(Entity reindexActionJob)
 	{
-		int count = reindexActionJob.getInt(ReindexActionJobMetaData.COUNT).intValue() + 1;
+		int count = reindexActionJob.getInt(ReindexActionJobMetaData.COUNT) + 1;
 		reindexActionJob.set(ReindexActionJobMetaData.COUNT, count);
 		dataService.update(ReindexActionJobMetaData.ENTITY_NAME, reindexActionJob);
 		return count;
@@ -89,7 +100,7 @@ public class ReindexActionRegisterService
 
 	public DefaultEntity createReindexActionJob(String id)
 	{
-		DefaultEntity reindexActionJob = new DefaultEntity(reindexActionJobMetaData, dataService);
+		DefaultEntity reindexActionJob = new DefaultEntity(new ReindexActionJobMetaData(), dataService);
 		reindexActionJob.set(ReindexActionJobMetaData.ID, id);
 		reindexActionJob.set(ReindexActionJobMetaData.COUNT, 0);
 		return reindexActionJob;
@@ -98,7 +109,7 @@ public class ReindexActionRegisterService
 	public DefaultEntity createReindexAction(Entity reindexActionGroup, String entityFullName, CudType cudType,
 			DataType dataType, String entityId, int actionOrder)
 	{
-		DefaultEntity reindexAction = new DefaultEntity(this.reindexActionMetaData, this.dataService);
+		DefaultEntity reindexAction = new DefaultEntity(new ReindexActionMetaData(), this.dataService);
 		reindexAction.set(ReindexActionMetaData.REINDEX_ACTION_GROUP, reindexActionGroup);
 		reindexAction.set(ReindexActionMetaData.ENTITY_FULL_NAME, entityFullName);
 		reindexAction.set(ReindexActionMetaData.CUD_TYPE, cudType);
