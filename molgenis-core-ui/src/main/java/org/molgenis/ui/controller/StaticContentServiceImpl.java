@@ -1,7 +1,5 @@
 package org.molgenis.ui.controller;
 
-import static java.util.Objects.requireNonNull;
-
 import org.molgenis.data.DataService;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -12,6 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Controller that handles static content pages requests.
@@ -39,7 +39,7 @@ public class StaticContentServiceImpl implements StaticContentService
 			StaticContent staticContent = dataService.findOne(StaticContent.ENTITY_NAME, key, StaticContent.class);
 			if (staticContent == null)
 			{
-				staticContent = new StaticContent(key, dataService);
+				staticContent = new StaticContent(key, dataService, content);
 				dataService.add(StaticContent.ENTITY_NAME, staticContent);
 			}
 			else
