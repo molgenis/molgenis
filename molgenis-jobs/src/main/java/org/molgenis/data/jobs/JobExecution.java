@@ -58,14 +58,14 @@ public class JobExecution extends DefaultEntity
 		set(IDENTIFIER, value);
 	}
 
-	public MolgenisUser getUser()
+	public String getUser()
 	{
-		return getEntity(USER, MolgenisUser.class);
+		return getString(USER);
 	}
 
 	public void setUser(MolgenisUser value)
 	{
-		set(USER, value);
+		set(USER, value.getUsername());
 	}
 
 	public void setUser(String username)

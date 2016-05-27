@@ -189,8 +189,7 @@ public class SortaServiceController extends MolgenisPluginController
 			try
 			{
 				MolgenisUser currentUser = userAccountService.getCurrentUser();
-				if (currentUser.isSuperuser()
-						|| sortaJobExecution.getUser().getUsername().equals(currentUser.getUsername()))
+				if (currentUser.isSuperuser() || sortaJobExecution.getUser().equals(currentUser.getUsername()))
 				{
 					RunAsSystemProxy.runAsSystem(() -> {
 						Double thresholdValue = Double.parseDouble(threshold);
@@ -250,8 +249,7 @@ public class SortaServiceController extends MolgenisPluginController
 		if (sortaJobExecution != null)
 		{
 			MolgenisUser currentUser = userAccountService.getCurrentUser();
-			if (currentUser.isSuperuser()
-					|| sortaJobExecution.getUser().getUsername().equals(currentUser.getUsername()))
+			if (currentUser.isSuperuser() || sortaJobExecution.getUser().equals(currentUser.getUsername()))
 			{
 				RunAsSystemProxy.runAsSystem(() -> {
 					dataService.deleteById(SortaJobExecution.ENTITY_NAME, sortaJobExecution.getIdentifier());

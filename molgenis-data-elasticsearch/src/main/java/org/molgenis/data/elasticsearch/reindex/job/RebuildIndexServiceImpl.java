@@ -52,10 +52,10 @@ public class RebuildIndexServiceImpl implements RebuildIndexService
 		Entity reindexActionJob = dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
 		MolgenisUser admin = molgenisUserService.getUser("admin");
 
-		if (reindexActionJob != null && admin != null)
+		if (reindexActionJob != null)
 		{
 			ReindexJobExecution reindexJobExecution = new ReindexJobExecution(dataService);
-			reindexJobExecution.setUser(admin);
+			reindexJobExecution.setUser("admin");
 			reindexJobExecution.setReindexActionJobID(transactionId);
 			ReindexJob job = reindexJobFactory.createJob(reindexJobExecution);
 			executorService.submit(job);
