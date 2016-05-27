@@ -5,7 +5,7 @@ import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.util.Set;
 
-import autovalue.shaded.com.google.common.common.collect.Sets;
+import com.google.common.collect.Sets;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
@@ -16,14 +16,14 @@ import org.molgenis.data.support.DefaultEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Registers changes made to an indexed repository that need to be fixed by reindexing
  * the relevant data.
  */
-@Component
+@Service
 public class ReindexActionRegisterService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ReindexActionRegisterService.class);

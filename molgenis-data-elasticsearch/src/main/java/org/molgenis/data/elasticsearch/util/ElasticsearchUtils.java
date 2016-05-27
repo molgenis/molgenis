@@ -404,7 +404,6 @@ public class ElasticsearchUtils
 		BulkProcessor bulkProcessor = bulkProcessorFactory.create(client);
 		try
 		{
-			//TODO: Does order actually matter here?
 			requests.forEachOrdered(request -> {
 				LOG.trace("Indexing [{}] with id [{}] in index [{}]...", request.type(), request.id(), request.index());
 				nrIndexedEntitiesPerType.incrementAndGet(request.type());

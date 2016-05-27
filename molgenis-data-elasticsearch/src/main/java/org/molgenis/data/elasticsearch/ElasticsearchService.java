@@ -367,13 +367,13 @@ public class ElasticsearchService implements SearchService
 		{
 			if (!elasticsearchFacade.deleteMapping(type, indexName))
 			{
-				throw new ElasticsearchException("Delete of mapping '" + entityName + "' failed.");
+				throw new ElasticsearchException("Delete of mapping for type '" + type + "' failed.");
 			}
 		}
 
 		if (!elasticsearchFacade.deleteAllDocumentsOfType(type, indexName))
 		{
-			throw new ElasticsearchException("Delete all entities of type '" + entityName + "' failed.");
+			throw new ElasticsearchException("Deleting all documents of type '" + type + "' failed.");
 		}
 	}
 
