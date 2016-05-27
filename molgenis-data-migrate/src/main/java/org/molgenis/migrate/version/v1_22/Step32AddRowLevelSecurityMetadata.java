@@ -63,8 +63,6 @@ public class Step32AddRowLevelSecurityMetadata extends MolgenisUpgrade
 						"INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)", 0,
 						fullname, rowLevelSecurityId);
 
-				String foreignKeyConstraint = fullname + "_UPDATE";
-
 				AttributeMetaData idAttribute = null;// get idattribute from attributes table
 				StringBuilder sql = new StringBuilder();
 
