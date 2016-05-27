@@ -2,7 +2,6 @@ package org.molgenis.data.elasticsearch.reindex.meta;
 
 import static org.molgenis.data.jobs.JobExecutionMetaData.JOB_EXECUTION_META_DATA;
 
-import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.reindex.job.ReindexJobExecutionMetaInterface;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.stereotype.Component;
@@ -25,7 +24,6 @@ public class ReindexJobExecutionMeta extends DefaultEntityMetaData implements Re
 	{
 		super(REINDEX_JOB_EXECUTION);
 		setExtends(JOB_EXECUTION_META_DATA);
-		setBackend(RepositoryCollection.BACKEND.PostgreSQL.name());
 		addAttribute(REINDEX_ACTION_JOB_ID)
 				.setDescription(
 						"ID of the ReindexActionJob that contains the group of ReindexActions that this reindex job execution will reindex.")

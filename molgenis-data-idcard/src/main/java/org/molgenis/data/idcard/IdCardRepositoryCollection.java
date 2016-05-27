@@ -12,7 +12,6 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.idcard.model.IdCardBiobank;
@@ -25,7 +24,7 @@ import com.google.common.collect.Maps;
 @Component
 public class IdCardRepositoryCollection implements ManageableRepositoryCollection
 {
-	public static final String NAME = RepositoryCollection.BACKEND.IdCard.name();
+	public static final String NAME = "ID-Card";
 
 	private final DataService dataService;
 	private final IdCardBiobankRepository idCardBiobankRepository;

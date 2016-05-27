@@ -6,7 +6,6 @@ import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.springframework.stereotype.Component;
@@ -21,7 +20,6 @@ public class JobExecutionMetaData extends DefaultEntityMetaData
 	public JobExecutionMetaData()
 	{
 		super(JobExecution.ENTITY_NAME, JobExecution.class);
-		setBackend(RepositoryCollection.BACKEND.PostgreSQL.name());
 		setAbstract(true);
 		addAttribute(JobExecution.IDENTIFIER, ROLE_ID).setLabel("Job ID").setAuto(true).setNillable(false);
 		addAttribute(JobExecution.USER).setDataType(MolgenisFieldTypes.STRING).setLabel("Job owner").setNillable(false);

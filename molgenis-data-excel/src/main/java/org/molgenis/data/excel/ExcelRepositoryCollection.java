@@ -18,7 +18,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
@@ -35,7 +34,7 @@ import com.google.common.collect.Lists;
  */
 public class ExcelRepositoryCollection extends FileRepositoryCollection
 {
-	public static final String NAME = RepositoryCollection.BACKEND.EXCEL.name();
+	public static final String NAME = "EXCEL";
 
 	private final String name;
 	private final Workbook workbook;

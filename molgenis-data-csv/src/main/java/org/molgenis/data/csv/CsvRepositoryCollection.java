@@ -14,7 +14,6 @@ import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
@@ -30,7 +29,7 @@ import com.google.common.collect.Lists;
  */
 public class CsvRepositoryCollection extends FileRepositoryCollection
 {
-	public static final String NAME = RepositoryCollection.BACKEND.CSV.name();
+	public static final String NAME = "CSV";
 	private static final String MAC_ZIP = "__MACOSX";
 	private final File file;
 	private List<String> entityNames;

@@ -17,7 +17,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownEntityException;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -26,7 +25,7 @@ import com.google.common.collect.Iterators;
 
 public abstract class PostgreSqlRepositoryCollection implements ManageableRepositoryCollection
 {
-	public static final String NAME = RepositoryCollection.BACKEND.PostgreSQL.name();
+	public static final String NAME = "PostgreSQL";
 
 	private final DataSource dataSource;
 
