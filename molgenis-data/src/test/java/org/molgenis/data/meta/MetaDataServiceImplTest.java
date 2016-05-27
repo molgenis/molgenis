@@ -12,7 +12,10 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
@@ -82,8 +85,7 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 		DataServiceImpl dataService = new DataServiceImpl();
 
 		metaDataServiceImpl = new MetaDataServiceImpl(dataService);
-		metaDataServiceImpl.setReindexActionRegisterService(new ReindexActionRegisterService(mock(DataService.class),
-				mock(ReindexActionJobMetaData.class), mock(ReindexActionMetaData.class)));
+		metaDataServiceImpl.setReindexActionRegisterService(mock(ReindexActionRegisterService.class));
 
 		AppSettings appSettings = Mockito.mock(AppSettings.class);
 		metaDataServiceImpl.setLanguageService(new LanguageService(dataService, appSettings));
@@ -117,8 +119,7 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 
 		DataServiceImpl dataService = new DataServiceImpl();
 		metaDataServiceImpl = new MetaDataServiceImpl(dataService);
-		metaDataServiceImpl.setReindexActionRegisterService(new ReindexActionRegisterService(mock(DataService.class),
-				mock(ReindexActionJobMetaData.class), mock(ReindexActionMetaData.class)));
+		metaDataServiceImpl.setReindexActionRegisterService(mock(ReindexActionRegisterService.class));
 		AppSettings appSettings = Mockito.mock(AppSettings.class);
 		metaDataServiceImpl.setLanguageService(new LanguageService(dataService, appSettings));
 		metaDataServiceImpl.setDefaultBackend(manageableCrudRepositoryCollection);
@@ -169,8 +170,7 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 
 		when(dataServiceImpl.getEntityMetaData(entityName)).thenReturn(existingEntityMetaData);
 		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataServiceImpl);
-		metaDataServiceImpl.setReindexActionRegisterService(new ReindexActionRegisterService(mock(DataService.class),
-				mock(ReindexActionJobMetaData.class), mock(ReindexActionMetaData.class)));
+		metaDataServiceImpl.setReindexActionRegisterService(mock(ReindexActionRegisterService.class));
 
 		assertTrue(metaDataService.canIntegrateEntityMetadataCheck(newEntityMetaData));
 	}

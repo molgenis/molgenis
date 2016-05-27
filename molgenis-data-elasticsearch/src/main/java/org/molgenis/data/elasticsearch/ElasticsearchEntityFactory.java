@@ -69,8 +69,8 @@ public class ElasticsearchEntityFactory
 		return entityToSourceConverter.convert(entity, entityMeta);
 	}
 
-	EntityManager getEntityManager()
+	public Entity getReference(EntityMetaData entityMeta, Object idObject)
 	{
-		return entityManager;
+		return entityManager.getReference(entityMeta, idObject);
 	}
 }

@@ -16,7 +16,7 @@ public class ReindexJobExecution extends JobExecution
 
 	public ReindexJobExecution(DataService dataService)
 	{
-		super(dataService, ReindexJobExecutionMeta.REINDEX_JOB_EXECUTION_META_DATA);
+		super(dataService, new ReindexJobExecutionMeta());
 		setType("Reindex");
 	}
 

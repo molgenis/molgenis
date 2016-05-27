@@ -127,108 +127,15 @@ public class EntityToSourceConverter
 				if (refEntities != null && !Iterables.isEmpty(refEntities))
 				{
 					final EntityMetaData refEntityMetaData = attributeMetaData.getRefEntity();
-					value = Lists.newArrayList(Iterables.transform(refEntities, new Function<Entity, Object>()
-					{
-						@Override
-						public Object apply(Entity refEntity)
-						{
-							if(refEntity != null) {
-								if (nestRefs) {
-									return convert(refEntity, refEntityMetaData, false);
-								} else {
-									return convertAttribute(refEntity, refEntityMetaData.getIdAttribute(), false);
-								}
-							}
-							return null;
-						}
-					}));
-				}
-				else
-				{
-					value = null;
-				}
-				break;
-			}
-			case COMPOUND:
-				throw new RuntimeException("Compound attribute is not an atomic attribute");
-			default:
-				throw new RuntimeException("Unknown data type [" + dataType + "]");
-		}
-		return value;
-	}
-
-	public Object convertAttributeValue(Object inputValue, Entity entity, AttributeMetaData attributeMetaData,
-			final boolean nestRefs)
-	{
-		Object value;
-
-		FieldTypeEnum dataType = attributeMetaData.getDataType().getEnumType();
-		switch (dataType)
-		{
-			case BOOL:
-			case DECIMAL:
-			case INT:
-			case LONG:
-			case EMAIL:
-			case ENUM:
-			case HTML:
-			case HYPERLINK:
-			case SCRIPT:
-			case STRING:
-			case TEXT:
-				value = inputValue;
-				break;
-			case DATE:
-				value = inputValue != null ? MolgenisDateFormat.getDateFormat().format(inputValue) : null;
-				break;
-			case DATE_TIME:
-				value = inputValue != null ? MolgenisDateFormat.getDateTimeFormat().format(inputValue) : null;
-				break;
-			case CATEGORICAL:
-			case XREF:
-			case FILE:
-			{
-				Entity xrefEntity = (Entity) inputValue;
-				if (xrefEntity != null)
-				{
-					EntityMetaData xrefEntityMetaData = attributeMetaData.getRefEntity();
-					if (nestRefs)
-					{
-						value = convert(xrefEntity, xrefEntityMetaData, false);
-					}
-					else
-					{
-						value = convertAttribute(xrefEntity, xrefEntityMetaData.getLabelAttribute(), false);
-					}
-				}
-				else
-				{
-					value = null;
-				}
-				break;
-			}
-			case CATEGORICAL_MREF:
-			case MREF:
-			{
-				@SuppressWarnings("unchecked")
-				final Iterable<Entity> refEntities = (Iterable<Entity>) inputValue;
-				if (refEntities != null && !Iterables.isEmpty(refEntities))
-				{
-					final EntityMetaData refEntityMetaData = attributeMetaData.getRefEntity();
-					value = Lists.newArrayList(Iterables.transform(refEntities, new Function<Entity, Object>()
-					{
-						@Override
-						public Object apply(Entity refEntity)
-						{
-							if (nestRefs)
-							{
+					value = Lists.newArrayList(Iterables.transform(refEntities, refEntity -> {
+						if(refEntity != null) {
+							if (nestRefs) {
 								return convert(refEntity, refEntityMetaData, false);
-							}
-							else
-							{
-								return convertAttribute(refEntity, refEntityMetaData.getLabelAttribute(), false);
+							} else {
+								return convertAttribute(refEntity, refEntityMetaData.getIdAttribute(), false);
 							}
 						}
+						return null;
 					}));
 				}
 				else

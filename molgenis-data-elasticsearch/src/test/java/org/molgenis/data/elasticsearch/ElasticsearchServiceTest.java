@@ -36,9 +36,10 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.ElasticsearchService.BulkProcessorFactory;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
+import org.molgenis.data.elasticsearch.util.BulkProcessorFactory;
+import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
@@ -69,13 +70,14 @@ public class ElasticsearchServiceTest
 		EntityToSourceConverter entityToSourceManager = mock(EntityToSourceConverter.class);
 		elasticsearchEntityFactory = new ElasticsearchEntityFactory(entityManager, sourceToEntityManager,
 				entityToSourceManager);
-		searchService = spy(
-				new ElasticsearchService(client, indexName, dataService, elasticsearchEntityFactory, false));
 		BulkProcessorFactory bulkProcessorFactory = mock(BulkProcessorFactory.class);
 		BulkProcessor bulkProcessor = mock(BulkProcessor.class);
 		when(bulkProcessor.awaitClose(any(Long.class), any(TimeUnit.class))).thenReturn(true);
 		when(bulkProcessorFactory.create(client)).thenReturn(bulkProcessor);
-		ElasticsearchService.setBulkProcessorFactory(bulkProcessorFactory);
+
+		ElasticsearchUtils facade = new ElasticsearchUtils(client, bulkProcessorFactory);
+		searchService = spy(new ElasticsearchService(facade, indexName, dataService, elasticsearchEntityFactory));
+
 		doNothing().when(searchService).refresh();
 	}
 
