@@ -1,5 +1,14 @@
 package org.molgenis.data.elasticsearch.reindex.job;
 
+import static java.time.OffsetDateTime.now;
+import static java.util.Date.from;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.jobs.JobExecution.END_DATE;
+import static org.molgenis.data.jobs.JobExecution.STATUS;
+import static org.molgenis.data.jobs.JobExecution.Status.SUCCESS;
+import static org.molgenis.data.reindex.job.ReindexJobExecutionMetaInterface.REINDEX_JOB_EXECUTION;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
@@ -13,15 +22,6 @@ import org.molgenis.security.user.MolgenisUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
-
-import static java.time.OffsetDateTime.now;
-import static java.util.Date.from;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.jobs.JobExecution.END_DATE;
-import static org.molgenis.data.jobs.JobExecution.STATUS;
-import static org.molgenis.data.jobs.JobExecution.Status.SUCCESS;
-import static org.molgenis.data.reindex.job.ReindexJobExecutionMetaInterface.REINDEX_JOB_EXECUTION;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 public class RebuildIndexServiceImpl implements RebuildIndexService
 {
@@ -75,10 +75,18 @@ public class RebuildIndexServiceImpl implements RebuildIndexService
 		runAsSystem(() -> {
 			LOG.trace("Clean up Reindex job executions...");
 			Date fiveMinutesAgo = from(now().minusMinutes(5).toInstant());
-			Stream<Entity> executions = dataService.getRepository(REINDEX_JOB_EXECUTION).query()
-					.lt(END_DATE, fiveMinutesAgo).and().eq(STATUS, SUCCESS.toString()).findAll();
-			dataService.delete(REINDEX_JOB_EXECUTION, executions);
-			LOG.debug("Cleaned up Reindex job executions.");
+			boolean reindexJobExecutionExists = dataService.hasRepository(REINDEX_JOB_EXECUTION);
+			if (reindexJobExecutionExists)
+				{
+				Stream<Entity> executions = dataService.getRepository(REINDEX_JOB_EXECUTION).query()
+						.lt(END_DATE, fiveMinutesAgo).and().eq(STATUS, SUCCESS.toString()).findAll();
+							dataService.delete(REINDEX_JOB_EXECUTION, executions);
+						LOG.debug("Cleaned up Reindex job executions.");
+					}
+				else
+			{
+				LOG.warn(REINDEX_JOB_EXECUTION + " does not exists");
+			}
 		});
 	}
 }
