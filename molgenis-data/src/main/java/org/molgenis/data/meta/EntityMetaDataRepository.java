@@ -112,7 +112,14 @@ class EntityMetaDataRepository
 			entityMetaData.setLabel(entity.getString(LABEL));
 			entityMetaData.setDescription(entity.getString(DESCRIPTION));
 			entityMetaData.setBackend(entity.getString(BACKEND));
-			entityMetaData.setRowLevelSecured(Boolean.getBoolean(entity.getString(ROW_LEVEL_SECURED)));//not entity.getBoolean because of a nullpointer when the value is missing
+			entityMetaData.setRowLevelSecured(Boolean.parseBoolean(entity.getString(ROW_LEVEL_SECURED)));// not
+																											// entity.getBoolean
+																											// because
+																											// of a
+																											// nullpointer
+																											// when the
+																											// value is
+																											// missing
 
 			// Language attributes
 			for (String languageCode : languageService.getLanguageCodes())
@@ -151,7 +158,7 @@ class EntityMetaDataRepository
 			if (packageEntity != null)
 			{
 				PackageImpl p = (PackageImpl) packageRepository
-					.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));
+						.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));
 				if (null != p)
 				{
 					entityMetaData.setPackage(p);

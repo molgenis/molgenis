@@ -1,7 +1,9 @@
 package org.molgenis.app;
 
-import com.google.common.collect.Sets;
-import freemarker.template.TemplateException;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+
 import org.molgenis.CommandLineOnlyConfiguration;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.DataService;
@@ -48,11 +50,9 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import com.google.common.collect.Sets;
+
+import freemarker.template.TemplateException;
 
 @Configuration
 @EnableTransactionManagement
