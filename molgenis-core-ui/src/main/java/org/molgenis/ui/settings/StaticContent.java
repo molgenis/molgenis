@@ -12,8 +12,8 @@ public class StaticContent extends DefaultEntity
 
 	public static final EntityMetaData META_DATA = new StaticContentMeta();
 
-	private static final String KEY = "key_";
-	private static final String CONTENT = "content";
+	public static final String KEY = "key_";
+	public static final String CONTENT = "content";
 
 	public StaticContent(String key, DataService dataService, String content)
 	{
