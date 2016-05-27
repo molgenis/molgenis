@@ -170,7 +170,7 @@ public class Step27MetaDataAttributeRoles extends MolgenisUpgrade
 
 	private boolean compoundAttrIsAttributePart(String compoundAttrName)
 	{
-		return getCompoundAttrName(compoundAttrName) != "";
+		return getCompoundAttrName(compoundAttrName).isEmpty();
 	}
 
 	private String getCompoundAttrName(String attrName)
