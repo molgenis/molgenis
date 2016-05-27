@@ -1,7 +1,20 @@
 package org.molgenis.data;
 
 import org.molgenis.data.support.MapEntity;
+import static java.util.Objects.requireNonNull;
+
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
 
@@ -17,12 +30,14 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	public static final List<String> ROW_LEVEL_SECURITY_ATTRIBUTES = Arrays.asList(UPDATE_ATTRIBUTE);
 
 	private final Repository decoratedRepository;
+	private final DataService dataService;
 	private final RowLevelSecurityPermissionValidator permissionValidator;
 
-	public RowLevelSecurityRepositoryDecorator(Repository decoratedRepository,
+	public RowLevelSecurityRepositoryDecorator(Repository decoratedRepository, DataService dataService,
 			RowLevelSecurityPermissionValidator rowLevelSecurityPermissionValidator)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
+		this.dataService = requireNonNull(dataService);
 		this.permissionValidator = requireNonNull(rowLevelSecurityPermissionValidator);
 	}
 
@@ -55,7 +70,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured())
 		{
-			return new RowLevelSecurityEntityMetaData(decoratedRepository.getEntityMetaData());
+			return new RowLevelSecurityEntityMetaDataDecorator(decoratedRepository.getEntityMetaData());
 		}
 		else
 		{
@@ -180,8 +195,31 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 			{
 				permissionValidator.validatePermission(entity, Permission.UPDATE);
 			}
+
+			if (entity.getEntityMetaData().getAttribute(UPDATE_ATTRIBUTE) == null)
+			{
+				Entity currentEntity = RunAsSystemProxy.runAsSystem(() -> {
+					return findOne(entity.getIdValue());
+				});
+
+				Iterable<Entity> users = RunAsSystemProxy.runAsSystem(() -> {
+					return currentEntity.getEntities(UPDATE_ATTRIBUTE);
+				});
+
+				entity.set(UPDATE_ATTRIBUTE, users);
+				Entity updatedEntity = new DefaultEntity(currentEntity.getEntityMetaData(), dataService, entity);
+
+				RunAsSystemProxy.runAsSystem(() -> decoratedRepository.update(updatedEntity));
+			}
+			else
+			{
+				decoratedRepository.update(entity);
+			}
 		}
-		decoratedRepository.update(entity);
+		else
+		{
+			decoratedRepository.update(entity);
+		}
 	}
 
 	@Override
@@ -289,7 +327,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	private Entity injectPermissions(Entity entity)
 	{
 		boolean userHasPermissionToEditEntity = permissionValidator.userHasUpdatePermissionOnEntity(entity, Permission.UPDATE);
-		Entity permissionEntity = new MapEntity(entity, new RowLevelSecurityEntityMetaData(entity.getEntityMetaData()));
+		Entity permissionEntity = new MapEntity(entity, new RowLevelSecurityEntityMetaDataDecorator(entity.getEntityMetaData()));
 
 		if(userHasPermissionToEditEntity)
 		{
@@ -305,11 +343,11 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		}
 	}
 
-	private class RowLevelSecurityEntityMetaData implements EntityMetaData
+	private class RowLevelSecurityEntityMetaDataDecorator implements EntityMetaData
 	{
 		private EntityMetaData entityMetaData;
 
-		public RowLevelSecurityEntityMetaData(EntityMetaData entityMetaData)
+		public RowLevelSecurityEntityMetaDataDecorator(EntityMetaData entityMetaData)
 		{
 			this.entityMetaData = entityMetaData;
 		}
@@ -455,7 +493,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		@Override
 		public AttributeMetaData getAttribute(String attributeName)
 		{
-			return entityMetaData.getAttribute(attributeName);
+			return filterPermissionAttribute(entityMetaData.getAttribute(attributeName));
 		}
 
 		@Override
@@ -482,9 +520,9 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 			return entityMetaData.isRowLevelSecured();
 		}
 
-		private List<AttributeMetaData> filterPermissionAttributes(Iterable<AttributeMetaData> attribute)
+		private List<AttributeMetaData> filterPermissionAttributes(Iterable<AttributeMetaData> attributes)
 		{
-			return StreamSupport.stream(entityMetaData.getAttributes().spliterator(), false).filter(attr -> {
+			return StreamSupport.stream(attributes.spliterator(), false).filter(attr -> {
 				if (ROW_LEVEL_SECURITY_ATTRIBUTES.contains(attr.getName()))
 				{
 					return SecurityUtils.currentUserIsSu()
@@ -495,6 +533,26 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 					return true;
 				}
 			}).collect(Collectors.toList());
+		}
+
+		private AttributeMetaData filterPermissionAttribute(AttributeMetaData amd)
+		{
+			if (ROW_LEVEL_SECURITY_ATTRIBUTES.contains(amd.getName()))
+			{
+				if (SecurityUtils.currentUserIsSu()
+						|| SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
+				{
+					return amd;
+				}
+				else
+				{
+					return null;
+				}
+			}
+			else
+			{
+				return amd;
+			}
 		}
 	}
 }
