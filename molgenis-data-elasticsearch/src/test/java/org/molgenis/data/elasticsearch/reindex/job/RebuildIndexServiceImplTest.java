@@ -121,7 +121,7 @@ public class RebuildIndexServiceImplTest
 		when(dataService.getRepository(REINDEX_JOB_EXECUTION)).thenReturn(repository);
 		when(repository.query()).thenReturn(new QueryImpl<>(repository));
 		when(repository.findAll(queryCaptor.capture())).thenReturn(jobExecutions);
-
+		when(dataService.hasRepository(REINDEX_JOB_EXECUTION)).thenReturn(true);
 		rebuildIndexService.cleanupJobExecutions();
 
 		verify(dataService).delete(REINDEX_JOB_EXECUTION, jobExecutions);
