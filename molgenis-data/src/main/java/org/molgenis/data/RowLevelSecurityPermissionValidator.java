@@ -1,14 +1,14 @@
 package org.molgenis.data;
 
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.utils.SecurityUtils;
+
 import static autovalue.shaded.com.google.common.common.collect.Iterables.isEmpty;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.MolgenisUser.USERNAME;
 import static org.molgenis.data.RowLevelSecurityRepositoryDecorator.UPDATE_ATTRIBUTE;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
-
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.utils.SecurityUtils;
 
 public class RowLevelSecurityPermissionValidator
 {
