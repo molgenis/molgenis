@@ -1,33 +1,25 @@
 package org.molgenis.data;
 
-import org.molgenis.data.support.MapEntity;
-import static java.util.Objects.requireNonNull;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.*;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
 
 import java.io.IOException;
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.*;
 
+import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 
 public class RowLevelSecurityRepositoryDecorator implements Repository
 {
 	public static final String UPDATE_ATTRIBUTE = "_" + Permission.UPDATE.toString();
 	public static final List<String> ROW_LEVEL_SECURITY_ATTRIBUTES = Arrays.asList(UPDATE_ATTRIBUTE);
+	public static final String PERMISSIONS_ATTRIBUTE = "_PERMISSIONS";
 
 	private final Repository decoratedRepository;
 	private final DataService dataService;
@@ -70,7 +62,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured())
 		{
-			return new RowLevelSecurityEntityMetaDataDecorator(decoratedRepository.getEntityMetaData());
+			return new RowLevelSecurityEntityMetaDataDecorator(decoratedRepository.getEntityMetaData(), true);
 		}
 		else
 		{
@@ -326,30 +318,29 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 
 	private Entity injectPermissions(Entity entity)
 	{
-		boolean userHasPermissionToEditEntity = permissionValidator.userHasUpdatePermissionOnEntity(entity, Permission.UPDATE);
-		Entity permissionEntity = new MapEntity(entity, new RowLevelSecurityEntityMetaDataDecorator(entity.getEntityMetaData()));
+		List<String> permissions = newArrayList();
+		if(permissionValidator.userHasUpdatePermissionOnEntity(entity, Permission.UPDATE))
+		{
+			permissions.add(UPDATE_ATTRIBUTE);
+		}
+		// TODO Add more types of permissions e.g. MANAGE, DELETE etc...
 
-		if(userHasPermissionToEditEntity)
-		{
-			// Current user is allowed to update
-			permissionEntity.set("_PERMISSIONS", true);
-			return permissionEntity;
-		}
-		else
-		{
-			// Current user does not have update permissions on this row
-			permissionEntity.set("_PERMISSIONS", false);
-			return permissionEntity;
-		}
+
+		Entity permissionEntity = new RowLevelSecurityEntityDecorator(entity, getEntityMetaData());
+
+		permissionEntity.set(PERMISSIONS_ATTRIBUTE, permissions);
+		return permissionEntity;
 	}
 
 	private class RowLevelSecurityEntityMetaDataDecorator implements EntityMetaData
 	{
 		private EntityMetaData entityMetaData;
 
-		public RowLevelSecurityEntityMetaDataDecorator(EntityMetaData entityMetaData)
+		public RowLevelSecurityEntityMetaDataDecorator(EntityMetaData entityMetaData, boolean addPermissions)
 		{
-			this.entityMetaData = entityMetaData;
+			DefaultEntityMetaData permissionMetaData = new DefaultEntityMetaData(entityMetaData);
+			permissionMetaData.addAttribute(PERMISSIONS_ATTRIBUTE).setVisible(false).setReadOnly(true);
+			this.entityMetaData = permissionMetaData;
 		}
 
 		@Override
@@ -554,5 +545,98 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 				return amd;
 			}
 		}
+	}
+
+	private class RowLevelSecurityEntityDecorator implements Entity
+	{
+		Entity entity;
+		EntityMetaData entityMetaData;
+
+		public RowLevelSecurityEntityDecorator(Entity entity, EntityMetaData entityMetaData)
+		{
+			this.entity = entity;
+			this.entityMetaData = entityMetaData;
+		}
+
+		@Override public EntityMetaData getEntityMetaData() { return entityMetaData; }
+
+		@Override public Iterable<String> getAttributeNames()
+		{
+			return entity.getAttributeNames();
+		}
+
+		@Override public Object getIdValue()
+		{
+			return entity.getIdValue();
+		}
+
+		@Override public String getLabelValue()
+		{
+			return entity.getLabelValue();
+		}
+
+		@Override public Object get(String attributeName) { return entity.get(attributeName); }
+
+		@Override public String getString(String attributeName)
+		{
+			return entity.getString(attributeName);
+		}
+
+		@Override public Integer getInt(String attributeName)
+		{
+			return entity.getInt(attributeName);
+		}
+
+		@Override public Long getLong(String attributeName)
+		{
+			return entity.getLong(attributeName);
+		}
+
+		@Override public Boolean getBoolean(String attributeName)
+		{
+			return entity.getBoolean(attributeName);
+		}
+
+		@Override public Double getDouble(String attributeName)
+		{
+			return entity.getDouble(attributeName);
+		}
+
+		@Override public Date getDate(String attributeName)	{ return entity.getDate(attributeName); }
+
+		@Override public java.util.Date getUtilDate(String attributeName) {	return entity.getUtilDate(attributeName); }
+
+		@Override public Timestamp getTimestamp(String attributeName)
+		{
+			return entity.getTimestamp(attributeName);
+		}
+
+		@Override public Entity getEntity(String attributeName)
+		{
+			return entity.getEntity(attributeName);
+		}
+
+		@Override public <E extends Entity> E getEntity(String attributeName, Class<E> clazz) {	return entity.getEntity(attributeName, clazz);	}
+
+		@Override public Iterable<Entity> getEntities(String attributeName)
+		{
+			return entity.getEntities(attributeName);
+		}
+
+		@Override public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz) { return entity.getEntities(attributeName, clazz); }
+
+		@Override public List<String> getList(String attributeName)
+		{
+			return entity.getList(attributeName);
+		}
+
+		@Override public List<Integer> getIntList(String attributeName)
+		{
+			return entity.getIntList(attributeName);
+		}
+
+		@Override public void set(String attributeName, Object value) { entity.set(attributeName, value); }
+
+		@Override public void set(Entity values) { entity.set(values); }
 	}
 }
