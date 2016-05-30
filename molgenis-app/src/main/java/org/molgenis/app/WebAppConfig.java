@@ -1,6 +1,7 @@
 package org.molgenis.app;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -103,7 +104,10 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step29MigrateJobExecutionProgressMessage(dataSource));
 		upgradeService.addUpgrade(new Step30MigrateJobExecutionUser(dataSource));
 		upgradeService.addUpgrade(new Step31UpdateApplicationSettings(dataSource, idGenerator));
-		upgradeService.addUpgrade(new Step32AddRowLevelSecurityMetadata(dataSource, idGenerator));
+		Step32AddRowLevelSecurityMetadata step32 = new Step32AddRowLevelSecurityMetadata(dataSource, idGenerator);
+		//FIXME: remove before pushing
+		step32.setEntitiesToSecure(Arrays.asList("Ontology_Ontology"));
+		upgradeService.addUpgrade(step32);
 	}
 
 	@Override
