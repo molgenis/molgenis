@@ -11,8 +11,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
-import org.molgenis.data.elasticsearch.reindex.job.RebuildIndexService;
-import org.molgenis.data.elasticsearch.reindex.job.RebuildIndexServiceImpl;
+import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
+import org.molgenis.data.elasticsearch.reindex.job.ReindexServiceImpl;
 import org.molgenis.data.elasticsearch.reindex.job.ReindexJobFactory;
 import org.molgenis.data.elasticsearch.transaction.ReindexTransactionListener;
 import org.molgenis.data.jobs.JobExecutionUpdater;
@@ -105,9 +105,9 @@ public class EmbeddedElasticSearchConfig
 	}
 
 	@Bean
-	public RebuildIndexService rebuildIndexService()
+	public ReindexService rebuildIndexService()
 	{
-		return new RebuildIndexServiceImpl(dataService, reindexJobFactory(), molgenisUserService,
+		return new ReindexServiceImpl(dataService, reindexJobFactory(), molgenisUserService,
 				newSingleThreadExecutor());
 	}
 }
