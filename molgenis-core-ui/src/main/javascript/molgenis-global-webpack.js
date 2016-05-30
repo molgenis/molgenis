@@ -37,4 +37,4 @@ window.top.molgenis.isCompoundAttr = isCompoundAttr;
 
 import { htmlEscape } from 'utils/HtmlUtils';
 
-window.top.molgenis.htmlEscape = htmlEscape;
+window.htmlEscape = htmlEscape;
