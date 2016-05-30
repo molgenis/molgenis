@@ -112,7 +112,7 @@ public class RebuildIndexServiceImplTest
 		rebuildIndexService.rebuildIndex("abcde");
 
 		verify(reindexJobFactory, never()).createJob(any());
-		verify(executorService, never()).submit(any());
+		verify(executorService, never()).submit(reindexJob);
 	}
 
 	@Test
