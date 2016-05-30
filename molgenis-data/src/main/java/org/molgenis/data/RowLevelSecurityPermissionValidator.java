@@ -48,13 +48,9 @@ public class RowLevelSecurityPermissionValidator
 	{
 		if (currentUserIsSu()) return true;
 
-		String entityName = entity.getEntityMetaData().getName();
-		if(!getEntityAuthorities(entityName).contains(Permission.UPDATE)) return false;
-
-		String currentUsername = getCurrentUsername();
-		return RunAsSystemProxy.runAsSystem(() -> {
-			Iterable<Entity> users = dataService.findOne(entityName, entity.getIdValue())
-					.getEntities(UPDATE_ATTRIBUTE);
+		String currentUsername = SecurityUtils.getCurrentUsername();
+		return runAsSystem(() -> {
+			Iterable<Entity> users = dataService.findOne(entityMetaData.getName(), id).getEntities(UPDATE_ATTRIBUTE);
 
 			if (users != null || !isEmpty(users))
 			{
