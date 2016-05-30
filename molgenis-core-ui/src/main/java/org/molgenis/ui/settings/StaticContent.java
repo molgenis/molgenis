@@ -15,6 +15,11 @@ public class StaticContent extends DefaultEntity
 	static final String KEY = "key_";
 	static final String CONTENT = "content";
 
+	public StaticContent(DataService dataService)
+	{
+		super(META_DATA, dataService);
+	}
+	
 	public StaticContent(String key, DataService dataService)
 	{
 		super(META_DATA, dataService);
