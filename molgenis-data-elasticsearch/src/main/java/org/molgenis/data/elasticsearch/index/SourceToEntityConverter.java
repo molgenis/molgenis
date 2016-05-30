@@ -16,6 +16,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -43,7 +44,9 @@ public class SourceToEntityConverter
 				// this entity was retrieved from a transaction index, ignore 'meta' crud type attribute
 				return;
 			}
-			AttributeMetaData attr = entityMeta.getAttribute(attrName);
+			AttributeMetaData attr = RunAsSystemProxy.runAsSystem(() -> {
+				return entityMeta.getAttribute(attrName);
+			});
 			if (attr == null)
 			{
 				throw new UnknownAttributeException(

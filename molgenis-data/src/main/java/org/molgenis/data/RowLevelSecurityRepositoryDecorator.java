@@ -1,6 +1,7 @@
 package org.molgenis.data;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -11,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -21,12 +23,14 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	public static final List<String> ROW_LEVEL_SECURITY_ATTRIBUTES = Arrays.asList(UPDATE_ATTRIBUTE);
 
 	private final Repository decoratedRepository;
+	private final DataService dataService;
 	private final RowLevelSecurityPermissionValidator permissionValidator;
 
-	public RowLevelSecurityRepositoryDecorator(Repository decoratedRepository,
+	public RowLevelSecurityRepositoryDecorator(Repository decoratedRepository, DataService dataService,
 			RowLevelSecurityPermissionValidator rowLevelSecurityPermissionValidator)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
+		this.dataService = requireNonNull(dataService);
 		this.permissionValidator = requireNonNull(rowLevelSecurityPermissionValidator);
 	}
 
@@ -59,7 +63,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured())
 		{
-			return new RowLevelSecurityEntityMetaData(decoratedRepository.getEntityMetaData());
+			return new RowLevelSecurityEntityMetaDataDecorator(decoratedRepository.getEntityMetaData());
 		}
 		else
 		{
@@ -178,25 +182,27 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	@Override
 	public void update(Entity entity)
 	{
-		if (isRowLevelSecured())
+		if (isRowLevelSecured() && !isUserSuOrSystem())
 		{
-			if (!SecurityUtils.currentUserIsSu() && !SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
-			{
-				permissionValidator.validatePermission(entity, Permission.UPDATE);
-			}
+			permissionValidator.validatePermission(entity, Permission.UPDATE);
+			Entity completeEntity = getCompleteEntity(entity);
+			runAsSystem(() -> decoratedRepository.update(completeEntity));
 		}
-		decoratedRepository.update(entity);
+		else
+		{
+			decoratedRepository.update(entity);
+		}
 	}
 
 	@Override
 	public void update(Stream<? extends Entity> entities)
 	{
-		if (isRowLevelSecured())
+		if (isRowLevelSecured() && !isUserSuOrSystem())
 		{
-			if (!SecurityUtils.currentUserIsSu() && !SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
-			{
-				entities = entities.filter(entity -> permissionValidator.validatePermission(entity, Permission.UPDATE));
-			}
+			Stream<? extends Entity> completeEntities = entities
+					.filter(entity -> permissionValidator.validatePermission(entity, Permission.UPDATE))
+					.map(this::getCompleteEntity);
+			runAsSystem(() -> decoratedRepository.update(completeEntities));
 		}
 		decoratedRepository.update(entities);
 	}
@@ -204,31 +210,78 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	@Override
 	public void delete(Entity entity)
 	{
-		decoratedRepository.delete(entity);
+		if (isRowLevelSecured() && !isUserSuOrSystem())
+		{
+			// TODO use DELETE permission when implemented
+			permissionValidator.validatePermission(entity, Permission.UPDATE);
+			runAsSystem(() -> decoratedRepository.delete(entity));
+		}
+		else
+		{
+			decoratedRepository.delete(entity);
+		}
 	}
 
 	@Override
 	public void delete(Stream<? extends Entity> entities)
 	{
-		decoratedRepository.delete(entities);
+		if (isRowLevelSecured() && !isUserSuOrSystem())
+		{
+			// TODO use DELETE permission when implemented
+			Stream<? extends Entity> filteredEntities = entities
+					.filter(entity -> permissionValidator.validatePermission(entity, Permission.UPDATE));
+			runAsSystem(() -> decoratedRepository.delete(filteredEntities));
+		}
+		else
+		{
+			decoratedRepository.delete(entities);
+		}
 	}
 
 	@Override
 	public void deleteById(Object id)
 	{
-		decoratedRepository.deleteById(id);
+		if (isRowLevelSecured() && !isUserSuOrSystem())
+		{
+			// TODO use DELETE permission when implemented
+			permissionValidator.validatePermissionById(id, getEntityMetaData(), Permission.UPDATE);
+			runAsSystem(() -> decoratedRepository.deleteById(id));
+		}
+		else
+		{
+			decoratedRepository.deleteById(id);
+		}
 	}
 
 	@Override
 	public void deleteById(Stream<Object> ids)
 	{
-		decoratedRepository.deleteById(ids);
+		if (isRowLevelSecured() && !isUserSuOrSystem())
+		{
+			// TODO use DELETE permission when implemented
+			Stream<Object> filteredIds = ids.filter(
+					id -> permissionValidator.validatePermissionById(id, getEntityMetaData(), Permission.UPDATE));
+			runAsSystem(() -> decoratedRepository.deleteById(filteredIds));
+		}
+		else
+		{
+			decoratedRepository.deleteById(ids);
+		}
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		decoratedRepository.deleteAll();
+		if (isRowLevelSecured() && !isUserSuOrSystem())
+		{
+			// TODO use DELETE permission when implemented
+			stream().forEach(entity -> permissionValidator.validatePermission(entity, Permission.UPDATE));
+			runAsSystem(() -> decoratedRepository.deleteAll());
+		}
+		else
+		{
+			decoratedRepository.deleteAll();
+		}
 	}
 
 	@Override
@@ -290,17 +343,45 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		return decoratedRepository.getEntityMetaData().isRowLevelSecured();
 	}
 
+	private boolean isUserSuOrSystem()
+	{
+		return SecurityUtils.currentUserIsSu() || SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM);
+	}
+
 	private Entity injectPermissions(Entity entity)
 	{
 		// TODO
 		return entity;
 	}
 
-	private class RowLevelSecurityEntityMetaData implements EntityMetaData
+	private Entity getCompleteEntity(Entity entity)
+	{
+		if (entity.getEntityMetaData().getAttribute(UPDATE_ATTRIBUTE) == null)
+		{
+			Entity currentEntity = runAsSystem(() -> {
+				return findOne(entity.getIdValue());
+			});
+
+			Iterable<Entity> users = runAsSystem(() -> {
+				return currentEntity.getEntities(UPDATE_ATTRIBUTE);
+			});
+
+			entity.set(UPDATE_ATTRIBUTE, users);
+			Entity completeEntity = new DefaultEntity(currentEntity.getEntityMetaData(), dataService, entity);
+
+			return completeEntity;
+		}
+		else
+		{
+			return entity;
+		}
+	}
+
+	private class RowLevelSecurityEntityMetaDataDecorator implements EntityMetaData
 	{
 		private EntityMetaData entityMetaData;
 
-		public RowLevelSecurityEntityMetaData(EntityMetaData entityMetaData)
+		public RowLevelSecurityEntityMetaDataDecorator(EntityMetaData entityMetaData)
 		{
 			this.entityMetaData = entityMetaData;
 		}
@@ -446,7 +527,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		@Override
 		public AttributeMetaData getAttribute(String attributeName)
 		{
-			return entityMetaData.getAttribute(attributeName);
+			return filterPermissionAttribute(entityMetaData.getAttribute(attributeName));
 		}
 
 		@Override
@@ -473,9 +554,9 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 			return entityMetaData.isRowLevelSecured();
 		}
 
-		private List<AttributeMetaData> filterPermissionAttributes(Iterable<AttributeMetaData> attribute)
+		private List<AttributeMetaData> filterPermissionAttributes(Iterable<AttributeMetaData> attributes)
 		{
-			return StreamSupport.stream(entityMetaData.getAttributes().spliterator(), false).filter(attr -> {
+			return StreamSupport.stream(attributes.spliterator(), false).filter(attr -> {
 				if (ROW_LEVEL_SECURITY_ATTRIBUTES.contains(attr.getName()))
 				{
 					return SecurityUtils.currentUserIsSu()
@@ -486,6 +567,26 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 					return true;
 				}
 			}).collect(Collectors.toList());
+		}
+
+		private AttributeMetaData filterPermissionAttribute(AttributeMetaData amd)
+		{
+			if (ROW_LEVEL_SECURITY_ATTRIBUTES.contains(amd.getName()))
+			{
+				if (SecurityUtils.currentUserIsSu()
+						|| SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
+				{
+					return amd;
+				}
+				else
+				{
+					return null;
+				}
+			}
+			else
+			{
+				return amd;
+			}
 		}
 	}
 }
