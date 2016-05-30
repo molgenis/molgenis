@@ -1,5 +1,6 @@
 package org.molgenis.migrate.version.v1_22;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.fieldtypes.StringField;
@@ -71,14 +72,17 @@ public class Step32AddRowLevelSecurityMetadata extends MolgenisUpgrade
 					String idAttributeDatatype = jdbcTemplate.queryForObject(
 							"SELECT datatype FROM attributes WHERE identifier = '"+idAttributeID+"'",
 							String.class);
+					String idAttributeMySQLDatatype = idAttributeDatatype.equals("string")?"VARCHAR(255)":MolgenisFieldTypes.getType(jdbcTemplate.queryForObject(
+							"SELECT datatype FROM attributes WHERE identifier = '"+idAttributeID+"'",
+							String.class)).getMysqlType();
 					StringBuilder sql = new StringBuilder();
 
 					String refAttrMysqlType = (MOLGENIS_USER_META_DATA.getIdAttribute().getDataType() instanceof StringField
 							? VARCHAR : MOLGENIS_USER_META_DATA.getIdAttribute().getDataType().getMysqlType());
 
-					sql.append(" CREATE TABLE ").append('`').append(fullname).append('_').append(MOLGENIS_USER_META_DATA.getName()).append('`')
+					sql.append(" CREATE TABLE ").append('`').append(fullname).append('_').append(UPDATE).append('`')
 							.append("(`order` INT,`").append(idAttributeName).append('`').append(' ')
-							.append(idAttributeDatatype).append(" NOT NULL, ").append('`').append(UPDATE).append('`')
+							.append(idAttributeMySQLDatatype).append(" NOT NULL, ").append('`').append(UPDATE).append('`')
 							.append(' ').append(refAttrMysqlType).append(" NOT NULL, FOREIGN KEY (").append('`')
 							.append(idAttributeName).append('`').append(") REFERENCES ").append('`').append(fullname)
 							.append('`').append('(').append('`').append(idAttributeName)
@@ -89,6 +93,7 @@ public class Step32AddRowLevelSecurityMetadata extends MolgenisUpgrade
 							.append("`) ON DELETE CASCADE");
 
 					sql.append(") ENGINE=InnoDB;");
+					jdbcTemplate.execute(sql.toString());
 				} catch (Exception e) {
 					LOG.error("", e);
 				}
