@@ -1,15 +1,14 @@
 package org.molgenis.data;
 
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.core.utils.SecurityUtils;
 
 import static autovalue.shaded.com.google.common.common.collect.Iterables.isEmpty;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.MolgenisUser.USERNAME;
 import static org.molgenis.data.RowLevelSecurityRepositoryDecorator.UPDATE_ATTRIBUTE;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
-import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
-import static org.molgenis.security.core.utils.SecurityUtils.getEntityAuthorities;
 
 public class RowLevelSecurityPermissionValidator
 {
@@ -22,7 +21,7 @@ public class RowLevelSecurityPermissionValidator
 
 	public boolean validatePermission(Entity entity, Permission permission)
 	{
-		if (!userHasUpdatePermissionOnEntity(entity, permission))
+		if (!hasPermission(entity, permission))
 		{
 			throw new MolgenisDataAccessException(
 					"No " + permission.toString() + " permission on entity with id " + entity.getIdValue());
@@ -30,7 +29,6 @@ public class RowLevelSecurityPermissionValidator
 		return true;
 	}
 
-	public boolean userHasUpdatePermissionOnEntity(Entity entity, Permission permission)
 	public boolean validatePermissionById(Object id, EntityMetaData entityMetaData, Permission permission)
 	{
 		if (!hasPermissionById(id, entityMetaData, permission))
@@ -40,7 +38,6 @@ public class RowLevelSecurityPermissionValidator
 		}
 		return true;
 	}
-
 
 	public boolean hasPermission(Entity entity, Permission permission)
 	{

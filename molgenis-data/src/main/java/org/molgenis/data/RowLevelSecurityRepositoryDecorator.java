@@ -1,7 +1,6 @@
 package org.molgenis.data;
 
-import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.*;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -350,16 +349,14 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 
 	private Entity injectPermissions(Entity entity)
 	{
+		// TODO Add more types of permissions e.g. MANAGE, DELETE etc...
 		List<String> permissions = newArrayList();
 		if(permissionValidator.hasPermission(entity, Permission.UPDATE))
 		{
 			permissions.add(UPDATE_ATTRIBUTE);
 		}
-		// TODO Add more types of permissions e.g. MANAGE, DELETE etc...
 
-
-		Entity permissionEntity = new RowLevelSecurityEntityDecorator(entity, getEntityMetaData());
-
+		Entity permissionEntity = new MapEntity(entity, getEntityMetaData());
 		permissionEntity.set(PERMISSIONS_ATTRIBUTE, permissions);
 		return permissionEntity;
 	}
