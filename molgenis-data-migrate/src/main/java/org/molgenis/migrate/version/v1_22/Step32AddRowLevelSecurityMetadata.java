@@ -47,53 +47,52 @@ public class Step32AddRowLevelSecurityMetadata extends MolgenisUpgrade
 
 		LOG.debug("Updated application settings");
 
-		LOG.info("Updating entities to secure with row level security...");
-		for (String fullname : entitiesToSecure)
-		{
-			try
-			{
-				LOG.info("Updating [{}] with row level security...", fullname);
-				String rowLevelSecurityId = idGenerator.generateId();
-				jdbcTemplate.update(
-						"INSERT INTO attributes (`identifier`,`name`,`dataType`,`refEntity`,`expression`,`nillable`,`auto`,`visible`,`label`,`description`,`aggregateable`,`enumOptions`,`rangeMin`,`rangeMax`,`readOnly`,`unique`,`visibleExpression`,`validationExpression`,`defaultValue`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-						rowLevelSecurityId, UPDATE, "mref", new MolgenisUserMetaData().getName(), null, true, false,
-						true, "name", "desc", false, null, null, null, false, false, null, null, "");
+		if(!entitiesToSecure.isEmpty()) {
+			LOG.info("Updating entities to secure with row level security...");
+			for (String fullname : entitiesToSecure) {
+				try {
+					LOG.info("Updating [{}] with row level security...", fullname);
+					String rowLevelSecurityId = idGenerator.generateId();
+					jdbcTemplate.update(
+							"INSERT INTO attributes (`identifier`,`name`,`dataType`,`refEntity`,`expression`,`nillable`,`auto`,`visible`,`label`,`description`,`aggregateable`,`enumOptions`,`rangeMin`,`rangeMax`,`readOnly`,`unique`,`visibleExpression`,`validationExpression`,`defaultValue`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+							rowLevelSecurityId, UPDATE, "mref", new MolgenisUserMetaData().getName(), null, true, false,
+							true, "name", "desc", false, null, null, null, false, false, null, null, "");
 
-				jdbcTemplate.update(
-						"INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)", 0,
-						fullname, rowLevelSecurityId);
+					jdbcTemplate.update(
+							"INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)", 0,
+							fullname, rowLevelSecurityId);
 
-				AttributeMetaData idAttribute = null;// get idattribute from attributes table
-				StringBuilder sql = new StringBuilder();
+					AttributeMetaData idAttribute = null;// get idattribute from attributes table
+					StringBuilder sql = new StringBuilder();
 
-				// mysql keys cannot have TEXT value, so change it to VARCHAR when needed
-				String idAttrMysqlType = (idAttribute.getDataType() instanceof StringField ? VARCHAR
-						: idAttribute.getDataType().getMysqlType());
+					// mysql keys cannot have TEXT value, so change it to VARCHAR when needed
+					String idAttrMysqlType = (idAttribute.getDataType() instanceof StringField ? VARCHAR
+							: idAttribute.getDataType().getMysqlType());
 
-				String refAttrMysqlType = (MOLGENIS_USER_META_DATA.getIdAttribute().getDataType() instanceof StringField
-						? VARCHAR : MOLGENIS_USER_META_DATA.getIdAttribute().getDataType().getMysqlType());
+					String refAttrMysqlType = (MOLGENIS_USER_META_DATA.getIdAttribute().getDataType() instanceof StringField
+							? VARCHAR : MOLGENIS_USER_META_DATA.getIdAttribute().getDataType().getMysqlType());
 
-				sql.append(" CREATE TABLE ").append('`').append(fullname).append('_').append(UPDATE).append('`')
-						.append("(`order` INT,`").append(idAttribute.getName()).append('`').append(' ')
-						.append(idAttrMysqlType).append(" NOT NULL, ").append('`').append(UPDATE).append('`')
-						.append(' ').append(refAttrMysqlType).append(" NOT NULL, FOREIGN KEY (").append('`')
-						.append(idAttribute.getName()).append('`').append(") REFERENCES ").append('`').append(fullname)
-						.append('`').append('(').append('`').append(idAttribute.getName())
-						.append("`) ON DELETE CASCADE");
+					sql.append(" CREATE TABLE ").append('`').append(fullname).append('_').append(UPDATE).append('`')
+							.append("(`order` INT,`").append(idAttribute.getName()).append('`').append(' ')
+							.append(idAttrMysqlType).append(" NOT NULL, ").append('`').append(UPDATE).append('`')
+							.append(' ').append(refAttrMysqlType).append(" NOT NULL, FOREIGN KEY (").append('`')
+							.append(idAttribute.getName()).append('`').append(") REFERENCES ").append('`').append(fullname)
+							.append('`').append('(').append('`').append(idAttribute.getName())
+							.append("`) ON DELETE CASCADE");
 
-				sql.append(", FOREIGN KEY (").append('`').append(UPDATE).append('`').append(") REFERENCES ").append('`')
-						.append(MOLGENIS_USER_META_DATA.getName()).append('`').append('(').append('`').append("ID")
-						.append("`) ON DELETE CASCADE");
+					sql.append(", FOREIGN KEY (").append('`').append(UPDATE).append('`').append(") REFERENCES ").append('`')
+							.append(MOLGENIS_USER_META_DATA.getName()).append('`').append('(').append('`').append("ID")
+							.append("`) ON DELETE CASCADE");
 
-				sql.append(") ENGINE=InnoDB;");
+					sql.append(") ENGINE=InnoDB;");
+				} catch (Exception e) {
+					LOG.error("", e);
+				}
+
+
 			}
-			catch (Exception e)
-			{
-				LOG.error("", e);
-			}
-
+			LOG.info("Updated entities to secure with row level security...");
 		}
-		LOG.info("Updated entities to secure with row level security...");
 	}
 
 	public void setEntitiesToSecure(List<String> entitiesToSecure)
