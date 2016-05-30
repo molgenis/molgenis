@@ -76,7 +76,7 @@ public class Step32AddRowLevelSecurityMetadata extends MolgenisUpgrade
 					String refAttrMysqlType = (MOLGENIS_USER_META_DATA.getIdAttribute().getDataType() instanceof StringField
 							? VARCHAR : MOLGENIS_USER_META_DATA.getIdAttribute().getDataType().getMysqlType());
 
-					sql.append(" CREATE TABLE ").append('`').append(fullname).append('_').append(UPDATE).append('`')
+					sql.append(" CREATE TABLE ").append('`').append(fullname).append('_').append(MOLGENIS_USER_META_DATA.getName()).append('`')
 							.append("(`order` INT,`").append(idAttributeName).append('`').append(' ')
 							.append(idAttributeDatatype).append(" NOT NULL, ").append('`').append(UPDATE).append('`')
 							.append(' ').append(refAttrMysqlType).append(" NOT NULL, FOREIGN KEY (").append('`')
