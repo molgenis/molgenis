@@ -6,11 +6,13 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.TextField;
+import org.springframework.stereotype.Component;
 
 /**
  * The reindex action is used to describe the action that needs to be done to make a
  * {@link org.molgenis.data.Repository}'s index consistent again.
  */
+@Component
 public class ReindexActionMetaData extends DefaultEntityMetaData
 {
 	public static final String ENTITY_NAME = "ReindexAction";
