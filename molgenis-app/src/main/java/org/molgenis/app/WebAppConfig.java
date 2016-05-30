@@ -106,7 +106,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step31UpdateApplicationSettings(dataSource, idGenerator));
 		Step32AddRowLevelSecurityMetadata step32 = new Step32AddRowLevelSecurityMetadata(dataSource, idGenerator);
 		//FIXME: remove before pushing
-		step32.setEntitiesToSecure(Arrays.asList("Ontology_Ontology"));
+		//step32.setEntitiesToSecure(Arrays.asList("test"));
 		upgradeService.addUpgrade(step32);
 	}
 
