@@ -35,7 +35,7 @@ public class JobExecutionTest
 		MolgenisUser me = new MolgenisUser();
 		me.setUsername("fdlk");
 		jobExecution.setUser(me);
-		assertEquals(jobExecution.getUser(), me);
+		assertEquals(jobExecution.getUser(), "fdlk");
 	}
 
 	@Test

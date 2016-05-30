@@ -1,6 +1,29 @@
 package org.molgenis.data.elasticsearch.reindex.job;
 
-import org.mockito.*;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMeta.REINDEX_JOB_EXECUTION;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -12,24 +35,6 @@ import org.molgenis.security.user.MolgenisUserService;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMeta.REINDEX_JOB_EXECUTION;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 public class RebuildIndexServiceImplTest
 {
@@ -95,7 +100,7 @@ public class RebuildIndexServiceImplTest
 
 		ReindexJobExecution reindexJobExecution = reindexJobExecutionCaptor.getValue();
 		assertEquals(reindexJobExecution.getReindexActionJobID(), "abcde");
-		assertEquals(reindexJobExecution.getUser(), admin);
+		assertEquals(reindexJobExecution.getUser(), "admin");
 		verify(executorService).submit(reindexJob);
 	}
 
@@ -107,7 +112,7 @@ public class RebuildIndexServiceImplTest
 		rebuildIndexService.rebuildIndex("abcde");
 
 		verify(reindexJobFactory, never()).createJob(any());
-		verify(executorService, never()).submit(any(Callable.class));
+		verify(executorService, never()).submit(reindexJob);
 	}
 
 	@Test
@@ -116,7 +121,7 @@ public class RebuildIndexServiceImplTest
 		when(dataService.getRepository(REINDEX_JOB_EXECUTION)).thenReturn(repository);
 		when(repository.query()).thenReturn(new QueryImpl<>(repository));
 		when(repository.findAll(queryCaptor.capture())).thenReturn(jobExecutions);
-
+		when(dataService.hasRepository(REINDEX_JOB_EXECUTION)).thenReturn(true);
 		rebuildIndexService.cleanupJobExecutions();
 
 		verify(dataService).delete(REINDEX_JOB_EXECUTION, jobExecutions);
