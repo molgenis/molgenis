@@ -12,14 +12,13 @@ public class StaticContent extends DefaultEntity
 
 	public static final EntityMetaData META_DATA = new StaticContentMeta();
 
-	public static final String KEY = "key_";
-	public static final String CONTENT = "content";
+	static final String KEY = "key_";
+	static final String CONTENT = "content";
 
-	public StaticContent(String key, DataService dataService, String content)
+	public StaticContent(String key, DataService dataService)
 	{
 		super(META_DATA, dataService);
 		set(KEY, key);
-		set(CONTENT, content);
 	}
 
 	public String getKey()
