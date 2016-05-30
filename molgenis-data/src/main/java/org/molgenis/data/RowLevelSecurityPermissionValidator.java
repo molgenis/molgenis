@@ -31,6 +31,23 @@ public class RowLevelSecurityPermissionValidator
 	}
 
 	public boolean userHasUpdatePermissionOnEntity(Entity entity, Permission permission)
+	public boolean validatePermissionById(Object id, EntityMetaData entityMetaData, Permission permission)
+	{
+		if (!hasPermissionById(id, entityMetaData, permission))
+		{
+			throw new MolgenisDataAccessException(
+					"No " + permission.toString() + " permission on entity with id " + id);
+		}
+		return true;
+	}
+
+
+	public boolean hasPermission(Entity entity, Permission permission)
+	{
+		return hasPermissionById(entity.getIdValue(), entity.getEntityMetaData(), permission);
+	}
+
+	private boolean hasPermissionById(Object id, EntityMetaData entityMetaData, Permission permission)
 	{
 		if (currentUserIsSu()) return true;
 
