@@ -1,7 +1,6 @@
 package org.molgenis.migrate.version.v1_22;
 
 import org.molgenis.auth.MolgenisUserMetaData;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.fieldtypes.StringField;
 import org.molgenis.framework.MolgenisUpgrade;
@@ -62,22 +61,27 @@ public class Step32AddRowLevelSecurityMetadata extends MolgenisUpgrade
 							"INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)", 0,
 							fullname, rowLevelSecurityId);
 
-					AttributeMetaData idAttribute = null;// get idattribute from attributes table
-					StringBuilder sql = new StringBuilder();
 
-					// mysql keys cannot have TEXT value, so change it to VARCHAR when needed
-					String idAttrMysqlType = (idAttribute.getDataType() instanceof StringField ? VARCHAR
-							: idAttribute.getDataType().getMysqlType());
+					String idAttributeID = jdbcTemplate.queryForObject(
+							"SELECT idAttribute FROM entities WHERE fullname = '"+fullname+"';",
+							String.class);
+					String idAttributeName = jdbcTemplate.queryForObject(
+							"SELECT name FROM attributes WHERE identifier = '"+idAttributeID+"';",
+							String.class);
+					String idAttributeDatatype = jdbcTemplate.queryForObject(
+							"SELECT datatype FROM attributes WHERE identifier = '"+idAttributeID+"'",
+							String.class);
+					StringBuilder sql = new StringBuilder();
 
 					String refAttrMysqlType = (MOLGENIS_USER_META_DATA.getIdAttribute().getDataType() instanceof StringField
 							? VARCHAR : MOLGENIS_USER_META_DATA.getIdAttribute().getDataType().getMysqlType());
 
 					sql.append(" CREATE TABLE ").append('`').append(fullname).append('_').append(UPDATE).append('`')
-							.append("(`order` INT,`").append(idAttribute.getName()).append('`').append(' ')
-							.append(idAttrMysqlType).append(" NOT NULL, ").append('`').append(UPDATE).append('`')
+							.append("(`order` INT,`").append(idAttributeName).append('`').append(' ')
+							.append(idAttributeDatatype).append(" NOT NULL, ").append('`').append(UPDATE).append('`')
 							.append(' ').append(refAttrMysqlType).append(" NOT NULL, FOREIGN KEY (").append('`')
-							.append(idAttribute.getName()).append('`').append(") REFERENCES ").append('`').append(fullname)
-							.append('`').append('(').append('`').append(idAttribute.getName())
+							.append(idAttributeName).append('`').append(") REFERENCES ").append('`').append(fullname)
+							.append('`').append('(').append('`').append(idAttributeName)
 							.append("`) ON DELETE CASCADE");
 
 					sql.append(", FOREIGN KEY (").append('`').append(UPDATE).append('`').append(") REFERENCES ").append('`')
