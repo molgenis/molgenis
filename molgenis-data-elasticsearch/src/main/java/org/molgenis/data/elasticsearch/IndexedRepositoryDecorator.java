@@ -290,6 +290,7 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	@Override
 	public long count(Query<Entity> q)
 	{
+		// TODO add check is index stable ask question to index and not original backend. Optimization step!
 		if (querySupported(q))
 		{
 			return decoratedRepository.count(q);
