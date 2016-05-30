@@ -4,10 +4,10 @@ import static autovalue.shaded.com.google.common.common.collect.Iterables.isEmpt
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.MolgenisUser.USERNAME;
 import static org.molgenis.data.RowLevelSecurityRepositoryDecorator.UPDATE_ATTRIBUTE;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 
 public class RowLevelSecurityPermissionValidator
@@ -49,7 +49,7 @@ public class RowLevelSecurityPermissionValidator
 		if (currentUserIsSu()) return true;
 
 		String currentUsername = SecurityUtils.getCurrentUsername();
-		return RunAsSystemProxy.runAsSystem(() -> {
+		return runAsSystem(() -> {
 			Iterable<Entity> users = dataService.findOne(entityMetaData.getName(), id).getEntities(UPDATE_ATTRIBUTE);
 
 			if (users != null || !isEmpty(users))

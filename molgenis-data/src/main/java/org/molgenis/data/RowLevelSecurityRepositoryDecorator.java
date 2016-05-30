@@ -1,6 +1,7 @@
 package org.molgenis.data;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -13,7 +14,6 @@ import java.util.stream.StreamSupport;
 
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
 
@@ -186,7 +186,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		{
 			permissionValidator.validatePermission(entity, Permission.UPDATE);
 			Entity completeEntity = getCompleteEntity(entity);
-			RunAsSystemProxy.runAsSystem(() -> decoratedRepository.update(completeEntity));
+			runAsSystem(() -> decoratedRepository.update(completeEntity));
 		}
 		else
 		{
@@ -202,7 +202,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 			Stream<? extends Entity> completeEntities = entities
 					.filter(entity -> permissionValidator.validatePermission(entity, Permission.UPDATE))
 					.map(this::getCompleteEntity);
-			RunAsSystemProxy.runAsSystem(() -> decoratedRepository.update(completeEntities));
+			runAsSystem(() -> decoratedRepository.update(completeEntities));
 		}
 		decoratedRepository.update(entities);
 	}
@@ -214,7 +214,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		{
 			// TODO use DELETE permission when implemented
 			permissionValidator.validatePermission(entity, Permission.UPDATE);
-			RunAsSystemProxy.runAsSystem(() -> decoratedRepository.delete(entity));
+			runAsSystem(() -> decoratedRepository.delete(entity));
 		}
 		else
 		{
@@ -230,7 +230,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 			// TODO use DELETE permission when implemented
 			Stream<? extends Entity> filteredEntities = entities
 					.filter(entity -> permissionValidator.validatePermission(entity, Permission.UPDATE));
-			RunAsSystemProxy.runAsSystem(() -> decoratedRepository.delete(filteredEntities));
+			runAsSystem(() -> decoratedRepository.delete(filteredEntities));
 		}
 		else
 		{
@@ -245,7 +245,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		{
 			// TODO use DELETE permission when implemented
 			permissionValidator.validatePermissionById(id, getEntityMetaData(), Permission.UPDATE);
-			RunAsSystemProxy.runAsSystem(() -> decoratedRepository.deleteById(id));
+			runAsSystem(() -> decoratedRepository.deleteById(id));
 		}
 		else
 		{
@@ -261,7 +261,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 			// TODO use DELETE permission when implemented
 			Stream<Object> filteredIds = ids.filter(
 					id -> permissionValidator.validatePermissionById(id, getEntityMetaData(), Permission.UPDATE));
-			RunAsSystemProxy.runAsSystem(() -> decoratedRepository.deleteById(filteredIds));
+			runAsSystem(() -> decoratedRepository.deleteById(filteredIds));
 		}
 		else
 		{
@@ -276,7 +276,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		{
 			// TODO use DELETE permission when implemented
 			stream().forEach(entity -> permissionValidator.validatePermission(entity, Permission.UPDATE));
-			RunAsSystemProxy.runAsSystem(() -> decoratedRepository.deleteAll());
+			runAsSystem(() -> decoratedRepository.deleteAll());
 		}
 		else
 		{
@@ -358,11 +358,11 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (entity.getEntityMetaData().getAttribute(UPDATE_ATTRIBUTE) == null)
 		{
-			Entity currentEntity = RunAsSystemProxy.runAsSystem(() -> {
+			Entity currentEntity = runAsSystem(() -> {
 				return findOne(entity.getIdValue());
 			});
 
-			Iterable<Entity> users = RunAsSystemProxy.runAsSystem(() -> {
+			Iterable<Entity> users = runAsSystem(() -> {
 				return currentEntity.getEntities(UPDATE_ATTRIBUTE);
 			});
 
