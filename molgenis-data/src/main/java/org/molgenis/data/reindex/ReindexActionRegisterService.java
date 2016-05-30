@@ -5,7 +5,6 @@ import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.util.Set;
 
-import com.google.common.collect.Sets;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
@@ -18,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import com.google.common.collect.Sets;
 
 /**
  * Registers changes made to an indexed repository that need to be fixed by reindexing
@@ -59,13 +60,13 @@ public class ReindexActionRegisterService
 	 */
 	public synchronized void register(String entityFullName, CudType cudType, DataType dataType, String entityId)
 	{
-		LOG.debug("register(entityFullName: [{}], cudType [{}], dataType: [{}], entityId: [{}])", entityFullName,
-				cudType, dataType, entityId);
 		if (!excludedEntities.contains(entityFullName))
 		{
 			String transactionId = (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);
 			if (transactionId != null)
 			{
+				LOG.debug("register(entityFullName: [{}], cudType [{}], dataType: [{}], entityId: [{}])",
+						entityFullName, cudType, dataType, entityId);
 				runAsSystem(() -> {
 					Entity reindexActionJob = dataService
 							.findOneById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
