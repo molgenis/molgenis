@@ -56,7 +56,7 @@ public class Step32AddRowLevelSecurityMetadata extends MolgenisUpgrade
 					jdbcTemplate.update(
 							"INSERT INTO attributes (`identifier`,`name`,`dataType`,`refEntity`,`expression`,`nillable`,`auto`,`visible`,`label`,`description`,`aggregateable`,`enumOptions`,`rangeMin`,`rangeMax`,`readOnly`,`unique`,`visibleExpression`,`validationExpression`,`defaultValue`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
 							rowLevelSecurityId, UPDATE, "mref", new MolgenisUserMetaData().getName(), null, true, false,
-							true, "name", "desc", false, null, null, null, false, false, null, null, "");
+							true, null, "Row level permissions", false, null, null, null, false, false, null, null, "");
 
 					jdbcTemplate.update(
 							"INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)", 0,
@@ -94,6 +94,8 @@ public class Step32AddRowLevelSecurityMetadata extends MolgenisUpgrade
 
 					sql.append(") ENGINE=InnoDB;");
 					jdbcTemplate.execute(sql.toString());
+
+					jdbcTemplate.update("UPDATE entities SET rowLevelSecured = '1' WHERE fullname = '" + fullname + "'");
 				} catch (Exception e) {
 					LOG.error("", e);
 				}
