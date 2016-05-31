@@ -1,7 +1,6 @@
 package org.molgenis.data;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.security.core.Permission;
@@ -369,12 +368,8 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 			Entity currentEntity = runAsSystem(() -> findOne(entity.getIdValue()));
 			Iterable<Entity> users = runAsSystem(() -> currentEntity.getEntities(UPDATE_ATTRIBUTE));
 			entity.set(UPDATE_ATTRIBUTE, users);
-			return new DefaultEntity(currentEntity.getEntityMetaData(), dataService, entity);
 		}
-		else
-		{
-			return entity;
-		}
+		return entity;
 	}
 
 	private class RowLevelSecurityEntityMetaDataDecorator extends DefaultEntityMetaData implements EntityMetaData
