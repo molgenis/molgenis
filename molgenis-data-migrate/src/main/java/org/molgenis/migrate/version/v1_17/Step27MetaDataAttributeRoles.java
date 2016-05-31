@@ -1,26 +1,20 @@
 package org.molgenis.migrate.version.v1_17;
 
-import static java.util.Objects.requireNonNull;
-
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
-import javax.sql.DataSource;
-
 import org.molgenis.framework.MolgenisUpgrade;
 import org.molgenis.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowCallbackHandler;
-import org.springframework.jdbc.core.RowMapper;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.*;
+
+import javax.sql.DataSource;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static java.util.Objects.requireNonNull;
 
 public class Step27MetaDataAttributeRoles extends MolgenisUpgrade
 {
@@ -50,6 +44,13 @@ public class Step27MetaDataAttributeRoles extends MolgenisUpgrade
 			{
 				String entityName = rs.getString("fullName");
 				String attrName = rs.getString("identifier");
+
+				if(entityName == null || entityName == "NULL")
+				{
+					LOG.info("Found an attribute part which is also a lookup attribute. Manually recovering Entity fullName");
+					entityName = getAttrEntityName(attrName);
+				}
+
 				return new Pair<String, String>(entityName, attrName);
 			}
 		});
@@ -67,8 +68,7 @@ public class Step27MetaDataAttributeRoles extends MolgenisUpgrade
 		});
 
 		// Create entities_lookupattributes table
-		jdbcTemplate.execute(
-				"CREATE TABLE `entities_lookupAttributes` (`order` int(11) DEFAULT NULL, `fullName` varchar(255) NOT NULL, `lookupAttributes` varchar(255) NOT NULL, KEY `fullName` (`fullName`), KEY `lookupAttributes` (`lookupAttributes`), CONSTRAINT `entities_lookupAttributes_ibfk_1` FOREIGN KEY (`fullName`) REFERENCES `entities` (`fullName`) ON DELETE CASCADE, CONSTRAINT `entities_lookupAttributes_ibfk_2` FOREIGN KEY (`lookupAttributes`) REFERENCES `attributes` (`identifier`) ON DELETE CASCADE) ENGINE=InnoDB");
+		jdbcTemplate.execute("CREATE TABLE `entities_lookupAttributes` (`order` int(11) DEFAULT NULL, `fullName` varchar(255) NOT NULL, `lookupAttributes` varchar(255) NOT NULL, KEY `fullName` (`fullName`), KEY `lookupAttributes` (`lookupAttributes`), CONSTRAINT `entities_lookupAttributes_ibfk_1` FOREIGN KEY (`fullName`) REFERENCES `entities` (`fullName`) ON DELETE CASCADE, CONSTRAINT `entities_lookupAttributes_ibfk_2` FOREIGN KEY (`lookupAttributes`) REFERENCES `attributes` (`identifier`) ON DELETE CASCADE) ENGINE=InnoDB");
 
 		// Fill entities_lookupattributes table with data
 		entityAttrsMap.entrySet().forEach(entry -> {
@@ -80,9 +80,7 @@ public class Step27MetaDataAttributeRoles extends MolgenisUpgrade
 						"INSERT INTO `entities_lookupAttributes` (`order`,`fullName`,`lookupAttributes`) VALUES (?, ?, ?)",
 						new Object[]
 				{ currentOrder, entityName, attrName });
-
 			});
-
 		});
 
 		// remove idAttribute, labelAttribute and lookupAttribute column from attributes table
@@ -144,6 +142,54 @@ public class Step27MetaDataAttributeRoles extends MolgenisUpgrade
 				"ALTER TABLE `attributes` MODIFY COLUMN `dataType` ENUM('bool', 'categorical', 'categoricalmref', 'compound', 'date', 'datetime', 'decimal', 'email', 'enum', 'file', 'html', 'hyperlink', 'image', 'int', 'long', 'mref', 'script', 'string', 'text', 'xref')");
 
 		LOG.info("Updated metadata from version 26 to 27");
+	}
+
+	/**
+	 * Recursive method to find the EntityName for an attribute part which is also a lookup attribute
+	 * @param attrPartName of the attribute part
+	 * @return the entity fullName to which the attribute part belongs
+	 */
+	private String getAttrEntityName(String attrPartName)
+	{
+		String compoundAttrName = getCompoundAttrName(attrPartName);
+		if(compoundAttrIsAttributePart(compoundAttrName))
+		{
+			return getAttrEntityName(compoundAttrName);
+		}
+
+		LOG.info("Finding entity name for attribute: " + compoundAttrName);
+
+		String sql = "SELECT `fullName` FROM `entities_attributes` WHERE `attributes` = '" + compoundAttrName + "'";
+		return jdbcTemplate.queryForObject(sql, new RowMapper<String>()
+		{
+			public String mapRow(ResultSet rs, int rowNum) throws SQLException {
+				return rs.getString("fullName");
+			}
+		});
+	}
+
+	private boolean compoundAttrIsAttributePart(String compoundAttrName)
+	{
+		return getCompoundAttrName(compoundAttrName).isEmpty();
+	}
+
+	private String getCompoundAttrName(String attrName)
+	{
+		String sql = "SELECT `identifier` FROM `attributes_parts` WHERE `attributes_parts`.`parts` = '" + attrName + "'";
+		try
+		{
+			return jdbcTemplate.queryForObject(sql, new RowMapper<String>()
+			{
+				public String mapRow(ResultSet rs, int rowNum) throws SQLException
+				{
+					return rs.getString("identifier");
+				}
+			});
+		}
+		catch(EmptyResultDataAccessException e)
+		{
+			return "";
+		}
 	}
 
 	private static class Triple<T1, T2, T3>
