@@ -17,14 +17,35 @@ public class RowLevelSecurityPermissionValidator
 		this.dataService = requireNonNull(dataService);
 	}
 
-	public boolean validatePermission(Entity entity, Permission permission, String username)
+	public boolean validatePermission(Entity completeEntity, Permission permission, String username)
 	{
-		if (!hasPermission(entity, permission, username))
+		if (!hasPermission(completeEntity, permission, username))
 		{
 			throw new MolgenisDataAccessException(
-					"No " + permission.toString() + " permission on entity with id " + entity.getIdValue());
+					"No " + permission.toString() + " permission on entity with id " + completeEntity.getIdValue());
 		}
 		return true;
+	}
+
+	public boolean hasPermission(Entity completeEntity, Permission permission, String username)
+	{
+		if (currentUserIsSu()) return true;
+
+		return runAsSystem(() -> {
+			Iterable<Entity> users = completeEntity.getEntities("_" + permission.toString());
+
+			if (users != null && !isEmpty(users))
+			{
+				for (Entity user : users)
+				{
+					if (user.getString(USERNAME).equals(username))
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		});
 	}
 
 	public boolean validatePermissionById(Object id, EntityMetaData entityMetaData, Permission permission,
@@ -36,11 +57,6 @@ public class RowLevelSecurityPermissionValidator
 					"No " + permission.toString() + " permission on entity with id " + id);
 		}
 		return true;
-	}
-
-	public boolean hasPermission(Entity entity, Permission permission, String username)
-	{
-		return hasPermissionById(entity.getIdValue(), entity.getEntityMetaData(), permission, username);
 	}
 
 	private boolean hasPermissionById(Object id, EntityMetaData entityMetaData, Permission permission, String username)

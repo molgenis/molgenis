@@ -81,6 +81,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	@Override
 	public Iterator<Entity> iterator()
 	{
+		// TODO
 		return decoratedRepository.iterator();
 	}
 
