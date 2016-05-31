@@ -15,7 +15,6 @@ import java.util.stream.StreamSupport;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -23,7 +22,7 @@ import org.molgenis.security.core.utils.SecurityUtils;
 public class RowLevelSecurityRepositoryDecorator implements Repository
 {
 	public static final String UPDATE_ATTRIBUTE = "_" + Permission.UPDATE.toString();
-	public static final List<String> ROW_LEVEL_SECURITY_ATTRIBUTES = Collections.singletonList(UPDATE_ATTRIBUTE);
+	private static final List<String> ROW_LEVEL_SECURITY_ATTRIBUTES = Collections.singletonList(UPDATE_ATTRIBUTE);
 	public static final String PERMISSIONS_ATTRIBUTE = "_PERMISSIONS";
 
 	private final Repository decoratedRepository;
@@ -365,9 +364,8 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 			permissions.add(UPDATE_ATTRIBUTE);
 		}
 
-		Entity permissionEntity = new MapEntity(entity, getEntityMetaData());
-		permissionEntity.set(PERMISSIONS_ATTRIBUTE, StringUtils.join(permissions, ','));
-		return permissionEntity;
+		entity.set(PERMISSIONS_ATTRIBUTE, StringUtils.join(permissions, ','));
+		return entity;
 	}
 
 	private Entity getCompleteEntity(Entity entity)
@@ -386,7 +384,6 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		public RowLevelSecurityEntityMetaData(EntityMetaData entityMetaData)
 		{
 			super(entityMetaData);
-			this.addAttribute(PERMISSIONS_ATTRIBUTE).setVisible(false).setReadOnly(true);
 		}
 
 		@Override
