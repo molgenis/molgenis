@@ -36,7 +36,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class RebuildIndexServiceImplTest
+public class ReindexServiceImplTest
 {
 	public static final int FIVE_MINUTES = 5 * 60 * 1000;
 	public static final int ONE_SECOND = 1000;
@@ -68,7 +68,7 @@ public class RebuildIndexServiceImplTest
 	private Stream<Entity> jobExecutions;
 
 	@InjectMocks
-	private RebuildIndexServiceImpl rebuildIndexService;
+	private ReindexServiceImpl rebuildIndexService;
 
 	@Captor
 	private ArgumentCaptor<ReindexJobExecution> reindexJobExecutionCaptor;

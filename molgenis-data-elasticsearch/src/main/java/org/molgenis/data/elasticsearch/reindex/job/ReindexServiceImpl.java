@@ -9,23 +9,29 @@ import static org.molgenis.data.jobs.JobExecution.STATUS;
 import static org.molgenis.data.jobs.JobExecution.Status.SUCCESS;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.user.MolgenisUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 
-public class RebuildIndexServiceImpl implements RebuildIndexService
+public class ReindexServiceImpl implements ReindexService
 {
-	private static final Logger LOG = LoggerFactory.getLogger(RebuildIndexServiceImpl.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ReindexServiceImpl.class);
 
 	private final DataService dataService;
 	private final ReindexJobFactory reindexJobFactory;
@@ -35,7 +41,7 @@ public class RebuildIndexServiceImpl implements RebuildIndexService
 	private final ExecutorService executorService;
 	private final MolgenisUserService molgenisUserService;
 
-	public RebuildIndexServiceImpl(DataService dataService, ReindexJobFactory reindexJobFactory,
+	public ReindexServiceImpl(DataService dataService, ReindexJobFactory reindexJobFactory,
 			MolgenisUserService molgenisUserService, ExecutorService executorService)
 	{
 		this.dataService = requireNonNull(dataService);
@@ -50,7 +56,6 @@ public class RebuildIndexServiceImpl implements RebuildIndexService
 	{
 		LOG.trace("Reindex transaction with id {}...", transactionId);
 		Entity reindexActionJob = dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
-		MolgenisUser admin = molgenisUserService.getUser("admin");
 
 		if (reindexActionJob != null)
 		{
@@ -62,7 +67,7 @@ public class RebuildIndexServiceImpl implements RebuildIndexService
 		}
 		else
 		{
-			LOG.debug("Skipped reindex of transaction with id {}.", transactionId);
+			LOG.debug("No reindex job found for id [{}].", transactionId);
 		}
 	}
 
@@ -85,8 +90,59 @@ public class RebuildIndexServiceImpl implements RebuildIndexService
 					}
 				else
 			{
-				LOG.warn(REINDEX_JOB_EXECUTION + " does not exists");
+				LOG.warn(REINDEX_JOB_EXECUTION + " does not exist");
 			}
 		});
+	}
+
+
+	@Override
+	@RunAsSystem
+	public boolean areAllIndiciesStable()
+	{
+		Long count = dataService
+				.getRepository(ReindexActionMetaData.ENTITY_NAME)
+				.query()
+				.in(ReindexActionMetaData.REINDEX_STATUS,
+						Arrays.asList(
+								// TODO implement mechanism to recover from failure.
+								// ReindexActionMetaData.ReindexStatus.CANCELED.name(),
+								// ReindexActionMetaData.ReindexStatus.FAILED.name(),
+								ReindexActionMetaData.ReindexStatus.PENDING.name(),
+								ReindexActionMetaData.ReindexStatus.STARTED.name())).count();
+		return count == 0L;
+	}
+
+	@Override
+	@RunAsSystem
+	public boolean isIndexStableIncludingReferences(String entityName)
+	{
+		EntityMetaData emd = dataService.getEntityMetaData(entityName);
+		Set<String> refEntityNames = StreamSupport.stream(emd.getAtomicAttributes().spliterator(), false)
+				.map(AttributeMetaData::getRefEntity).filter(e -> e != null).map(EntityMetaData::getName)
+				.collect(Collectors.toSet());
+		refEntityNames.add(entityName);
+		return refEntityNames.stream().allMatch(this::isIndexStable);
+	}
+
+	/**
+	 * Check if the index for entity is stable
+	 * 
+	 * @param entityName
+	 * @return boolean
+	 */
+	private boolean isIndexStable(String entityName)
+	{
+		Long count = dataService
+				.getRepository(ReindexActionMetaData.ENTITY_NAME)
+				.query()
+				.eq(ReindexActionMetaData.ENTITY_FULL_NAME, entityName)
+				.and()
+				.in(ReindexActionMetaData.REINDEX_STATUS,
+						Arrays.asList(ReindexActionMetaData.ReindexStatus.CANCELED.name(),
+								ReindexActionMetaData.ReindexStatus.FAILED.name(),
+								ReindexActionMetaData.ReindexStatus.PENDING.name(),
+								ReindexActionMetaData.ReindexStatus.STARTED.name())).count();
+		return count == 0L;
 	}
 }

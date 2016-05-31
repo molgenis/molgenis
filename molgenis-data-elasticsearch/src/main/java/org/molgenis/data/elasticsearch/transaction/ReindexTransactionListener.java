@@ -1,13 +1,13 @@
 package org.molgenis.data.elasticsearch.transaction;
 
-import org.molgenis.data.elasticsearch.reindex.job.RebuildIndexService;
+import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
 import org.molgenis.data.transaction.MolgenisTransactionListener;
 
 public class ReindexTransactionListener implements MolgenisTransactionListener
 {
-	private RebuildIndexService rebuildIndexService;
+	private ReindexService rebuildIndexService;
 
-	public ReindexTransactionListener(RebuildIndexService rebuildIndexService)
+	public ReindexTransactionListener(ReindexService rebuildIndexService)
 	{
 		this.rebuildIndexService = rebuildIndexService;
 	}
