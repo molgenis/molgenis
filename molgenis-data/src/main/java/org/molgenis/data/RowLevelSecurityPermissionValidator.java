@@ -14,7 +14,7 @@ import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 public class RowLevelSecurityPermissionValidator
 {
-	private DataService dataService;
+	private final DataService dataService;
 
 	public RowLevelSecurityPermissionValidator(DataService dataService)
 	{
@@ -23,7 +23,7 @@ public class RowLevelSecurityPermissionValidator
 
 	public boolean validatePermission(Entity entity, Permission permission)
 	{
-		if (!hasPermission(entity, permission))
+		if (!hasPermission(entity))
 		{
 			throw new MolgenisDataAccessException(
 					"No " + permission.toString() + " permission on entity with id " + entity.getIdValue());
@@ -33,7 +33,7 @@ public class RowLevelSecurityPermissionValidator
 
 	public boolean validatePermissionById(Object id, EntityMetaData entityMetaData, Permission permission)
 	{
-		if (!hasPermissionById(id, entityMetaData, permission))
+		if (!hasPermissionById(id, entityMetaData))
 		{
 			throw new MolgenisDataAccessException(
 					"No " + permission.toString() + " permission on entity with id " + id);
@@ -41,12 +41,12 @@ public class RowLevelSecurityPermissionValidator
 		return true;
 	}
 
-	public boolean hasPermission(Entity entity, Permission permission)
+	public boolean hasPermission(Entity entity)
 	{
-		return hasPermissionById(entity.getIdValue(), entity.getEntityMetaData(), permission);
+		return hasPermissionById(entity.getIdValue(), entity.getEntityMetaData());
 	}
 
-	private boolean hasPermissionById(Object id, EntityMetaData entityMetaData, Permission permission)
+	private boolean hasPermissionById(Object id, EntityMetaData entityMetaData)
 	{
 		if (currentUserIsSu() || currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM)) return true;
 
@@ -54,7 +54,7 @@ public class RowLevelSecurityPermissionValidator
 		return runAsSystem(() -> {
 			Iterable<Entity> users = dataService.findOne(entityMetaData.getName(), id).getEntities(UPDATE_ATTRIBUTE);
 
-			if (users != null || !isEmpty(users))
+			if (users != null && !isEmpty(users))
 			{
 				for (Entity user : users)
 				{
