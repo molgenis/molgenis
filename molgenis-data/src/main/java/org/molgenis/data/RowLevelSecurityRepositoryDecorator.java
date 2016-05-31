@@ -204,7 +204,10 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 					.map(this::getCompleteEntity);
 			runAsSystem(() -> decoratedRepository.update(completeEntities));
 		}
-		decoratedRepository.update(entities);
+		else
+		{
+			decoratedRepository.update(entities);
+		}
 	}
 
 	@Override
@@ -377,7 +380,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		}
 	}
 
-	private class RowLevelSecurityEntityMetaDataDecorator implements EntityMetaData
+	public class RowLevelSecurityEntityMetaDataDecorator implements EntityMetaData
 	{
 		private EntityMetaData entityMetaData;
 
