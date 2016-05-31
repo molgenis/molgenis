@@ -110,6 +110,19 @@ public class VcfWriterUtils
 	}
 
 	/**
+	 * Overload of writeToVcf to support a simpler call with only Entity and Writer.
+	 *
+	 * @param vcfEntity
+	 * @param writer
+	 * @throws MolgenisDataException
+	 * @throws IOException
+	 */
+	public static void writeToVcf(Entity vcfEntity, BufferedWriter writer) throws MolgenisDataException, IOException
+	{
+		writeToVcf(vcfEntity, new ArrayList<AttributeMetaData>(), new ArrayList<String>(), writer);
+	}
+
+	/**
 	 * Convert an vcfEntity to a VCF line Only output attributes that are in the attributesToInclude list, or all if
 	 * attributesToInclude is empty
 	 *
