@@ -59,7 +59,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		Repository decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
 
 		// 1. Row level security decorator
-		decoratedRepository = new RowLevelSecurityRepositoryDecorator(decoratedRepository, dataService,
+		decoratedRepository = new RowLevelSecurityRepositoryDecorator(decoratedRepository,
 				rowLevelSecurityPermissionValidator);
 
 		if (decoratedRepository.getName().equals(MolgenisUserMetaData.ENTITY_NAME))

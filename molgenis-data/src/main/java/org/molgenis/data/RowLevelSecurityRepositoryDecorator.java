@@ -1,15 +1,8 @@
 package org.molgenis.data;
 
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.runas.SystemSecurityToken;
-import org.molgenis.security.core.utils.SecurityUtils;
+import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -20,25 +13,25 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import org.apache.commons.lang3.StringUtils;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.runas.SystemSecurityToken;
+import org.molgenis.security.core.utils.SecurityUtils;
 
 public class RowLevelSecurityRepositoryDecorator implements Repository
 {
 	public static final String UPDATE_ATTRIBUTE = "_" + Permission.UPDATE.toString();
 	private static final List<String> ROW_LEVEL_SECURITY_ATTRIBUTES = Collections.singletonList(UPDATE_ATTRIBUTE);
-	private static final String PERMISSIONS_ATTRIBUTE = "_PERMISSIONS";
+	public static final String PERMISSIONS_ATTRIBUTE = "_PERMISSIONS";
 
 	private final Repository decoratedRepository;
-	private final DataService dataService;
 	private final RowLevelSecurityPermissionValidator permissionValidator;
 
-	public RowLevelSecurityRepositoryDecorator(Repository decoratedRepository, DataService dataService,
+	public RowLevelSecurityRepositoryDecorator(Repository decoratedRepository,
 			RowLevelSecurityPermissionValidator rowLevelSecurityPermissionValidator)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
-		this.dataService = requireNonNull(dataService);
 		this.permissionValidator = requireNonNull(rowLevelSecurityPermissionValidator);
 	}
 
@@ -71,7 +64,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			return new RowLevelSecurityEntityMetaDataDecorator(decoratedRepository.getEntityMetaData());
+			return new RowLevelSecurityEntityMetaData(decoratedRepository.getEntityMetaData());
 		}
 		else
 		{
@@ -88,6 +81,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	@Override
 	public Iterator<Entity> iterator()
 	{
+		// TODO
 		return decoratedRepository.iterator();
 	}
 
@@ -192,7 +186,8 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			permissionValidator.validatePermission(entity, Permission.UPDATE);
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			permissionValidator.validatePermission(entity, Permission.UPDATE, currentUsername);
 			Entity completeEntity = getCompleteEntity(entity);
 			runAsSystem(() -> decoratedRepository.update(completeEntity));
 		}
@@ -207,12 +202,16 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			Stream<? extends Entity> completeEntities = entities
-					.filter(entity -> permissionValidator.validatePermission(entity, Permission.UPDATE))
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			Stream<? extends Entity> completeEntities = entities.filter(
+					entity -> permissionValidator.validatePermission(entity, Permission.UPDATE, currentUsername))
 					.map(this::getCompleteEntity);
 			runAsSystem(() -> decoratedRepository.update(completeEntities));
 		}
-		decoratedRepository.update(entities);
+		else
+		{
+			decoratedRepository.update(entities);
+		}
 	}
 
 	@Override
@@ -220,7 +219,8 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			permissionValidator.validatePermission(entity, Permission.UPDATE);
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			permissionValidator.validatePermission(entity, Permission.UPDATE, currentUsername);
 			runAsSystem(() -> decoratedRepository.delete(entity));
 		}
 		else
@@ -234,8 +234,9 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			Stream<? extends Entity> filteredEntities = entities
-					.filter(entity -> permissionValidator.validatePermission(entity, Permission.UPDATE));
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			Stream<? extends Entity> filteredEntities = entities.filter(
+					entity -> permissionValidator.validatePermission(entity, Permission.UPDATE, currentUsername));
 			runAsSystem(() -> decoratedRepository.delete(filteredEntities));
 		}
 		else
@@ -249,7 +250,8 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			permissionValidator.validatePermissionById(id, getEntityMetaData(), Permission.UPDATE);
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			permissionValidator.validatePermissionById(id, getEntityMetaData(), Permission.UPDATE, currentUsername);
 			runAsSystem(() -> decoratedRepository.deleteById(id));
 		}
 		else
@@ -263,8 +265,9 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			Stream<Object> filteredIds = ids.filter(
-					id -> permissionValidator.validatePermissionById(id, getEntityMetaData(), Permission.UPDATE));
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			Stream<Object> filteredIds = ids.filter(id -> permissionValidator.validatePermissionById(id,
+					getEntityMetaData(), Permission.UPDATE, currentUsername));
 			runAsSystem(() -> decoratedRepository.deleteById(filteredIds));
 		}
 		else
@@ -278,7 +281,9 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			stream().forEach(entity -> permissionValidator.validatePermission(entity, Permission.UPDATE));
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			stream().forEach(
+					entity -> permissionValidator.validatePermission(entity, Permission.UPDATE, currentUsername));
 			runAsSystem(decoratedRepository::deleteAll);
 		}
 		else
@@ -353,15 +358,15 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 
 	private Entity injectPermissions(Entity entity)
 	{
+		String currentUsername = SecurityUtils.getCurrentUsername();
 		List<String> permissions = newArrayList();
-		if (permissionValidator.hasPermission(entity))
+		if (permissionValidator.hasPermission(entity, Permission.UPDATE, currentUsername))
 		{
 			permissions.add(UPDATE_ATTRIBUTE);
 		}
 
-		Entity permissionEntity = new MapEntity(entity, getEntityMetaData());
-		permissionEntity.set(PERMISSIONS_ATTRIBUTE, StringUtils.join(permissions, ','));
-		return permissionEntity;
+		entity.set(PERMISSIONS_ATTRIBUTE, StringUtils.join(permissions, ','));
+		return entity;
 	}
 
 	private Entity getCompleteEntity(Entity entity)
@@ -375,12 +380,11 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		return entity;
 	}
 
-	private class RowLevelSecurityEntityMetaDataDecorator extends DefaultEntityMetaData implements EntityMetaData
+	private class RowLevelSecurityEntityMetaData extends DefaultEntityMetaData implements EntityMetaData
 	{
-		public RowLevelSecurityEntityMetaDataDecorator(EntityMetaData entityMetaData)
+		public RowLevelSecurityEntityMetaData(EntityMetaData entityMetaData)
 		{
 			super(entityMetaData);
-			this.addAttribute(PERMISSIONS_ATTRIBUTE).setVisible(false).setReadOnly(true);
 		}
 
 		@Override

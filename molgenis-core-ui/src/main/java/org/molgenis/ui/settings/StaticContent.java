@@ -19,7 +19,7 @@ public class StaticContent extends DefaultEntity
 	{
 		super(META_DATA, dataService);
 	}
-
+	
 	public StaticContent(String key, DataService dataService)
 	{
 		super(META_DATA, dataService);
