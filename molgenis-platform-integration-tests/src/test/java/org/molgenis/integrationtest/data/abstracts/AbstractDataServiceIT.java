@@ -130,11 +130,11 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	public void testAdd()
 	{
 		List<Entity> entities = create(9);
-		assertCountElasticsearch(0);
+		assertEquals(searchService.count(entityMetaData), 9);
 		dataService.add(ENTITY_NAME, entities.stream());
 		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
-		assertCountElasticsearch(9);
-		assertCount(9);
+		assertEquals(searchService.count(entityMetaData), 9);
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 3);
 		assertPresent(entities);
 	}
 
@@ -179,7 +179,9 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(3);
 		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 3);
+		assertEquals(searchService.count(entityMetaData), 3);
 		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>().eq(ATTR_ID, entities.get(0).getIdValue())), 1);
 	}
 
@@ -679,16 +681,6 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	private void assertPresent(Entity entity)
 	{
 		assertNotNull(dataService.findOneById(entityMetaData.getName(), entity.getIdValue()));
-	}
-
-	private void assertCount(int count)
-	{
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), count);
-	}
-
-	private void assertCountElasticsearch(int count)
-	{
-		assertEquals(searchService.count(entityMetaData), count);
 	}
 
 	public abstract List<RepositoryCapability> getExpectedCapabilities();
