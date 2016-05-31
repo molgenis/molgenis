@@ -1,26 +1,23 @@
 package org.molgenis.data;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.*;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.*;
+
+import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 public class RowLevelSecurityRepositoryDecorator implements Repository
 {
 	public static final String UPDATE_ATTRIBUTE = "_" + Permission.UPDATE.toString();
 	public static final List<String> ROW_LEVEL_SECURITY_ATTRIBUTES = Arrays.asList(UPDATE_ATTRIBUTE);
+	public static final String PERMISSIONS_ATTRIBUTE = "_PERMISSIONS";
 
 	private final Repository decoratedRepository;
 	private final DataService dataService;
@@ -63,7 +60,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured())
 		{
-			return new RowLevelSecurityEntityMetaDataDecorator(decoratedRepository.getEntityMetaData());
+			return new RowLevelSecurityEntityMetaDataDecorator(decoratedRepository.getEntityMetaData(), true);
 		}
 		else
 		{
@@ -350,8 +347,16 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 
 	private Entity injectPermissions(Entity entity)
 	{
-		// TODO
-		return entity;
+		// TODO Add more types of permissions e.g. MANAGE, DELETE etc...
+		List<String> permissions = newArrayList();
+		if(permissionValidator.hasPermission(entity, Permission.UPDATE))
+		{
+			permissions.add(UPDATE_ATTRIBUTE);
+		}
+
+		Entity permissionEntity = new MapEntity(entity, getEntityMetaData());
+		permissionEntity.set(PERMISSIONS_ATTRIBUTE, permissions);
+		return permissionEntity;
 	}
 
 	private Entity getCompleteEntity(Entity entity)
@@ -381,9 +386,11 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		private EntityMetaData entityMetaData;
 
-		public RowLevelSecurityEntityMetaDataDecorator(EntityMetaData entityMetaData)
+		public RowLevelSecurityEntityMetaDataDecorator(EntityMetaData entityMetaData, boolean addPermissions)
 		{
-			this.entityMetaData = entityMetaData;
+			DefaultEntityMetaData permissionMetaData = new DefaultEntityMetaData(entityMetaData);
+			permissionMetaData.addAttribute(PERMISSIONS_ATTRIBUTE).setVisible(false).setReadOnly(true);
+			this.entityMetaData = permissionMetaData;
 		}
 
 		@Override

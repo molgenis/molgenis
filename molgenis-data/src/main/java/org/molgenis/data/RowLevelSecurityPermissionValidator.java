@@ -1,14 +1,16 @@
 package org.molgenis.data;
 
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.runas.SystemSecurityToken;
+
 import static autovalue.shaded.com.google.common.common.collect.Iterables.isEmpty;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.MolgenisUser.USERNAME;
 import static org.molgenis.data.RowLevelSecurityRepositoryDecorator.UPDATE_ATTRIBUTE;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
-
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.utils.SecurityUtils;
+import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 public class RowLevelSecurityPermissionValidator
 {
@@ -46,9 +48,9 @@ public class RowLevelSecurityPermissionValidator
 
 	private boolean hasPermissionById(Object id, EntityMetaData entityMetaData, Permission permission)
 	{
-		if (currentUserIsSu()) return true;
+		if (currentUserIsSu() || currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM)) return true;
 
-		String currentUsername = SecurityUtils.getCurrentUsername();
+		String currentUsername = getCurrentUsername();
 		return runAsSystem(() -> {
 			Iterable<Entity> users = dataService.findOne(entityMetaData.getName(), id).getEntities(UPDATE_ATTRIBUTE);
 
