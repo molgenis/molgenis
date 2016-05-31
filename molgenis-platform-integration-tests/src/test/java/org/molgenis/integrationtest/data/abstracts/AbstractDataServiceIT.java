@@ -130,11 +130,11 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	public void testAdd()
 	{
 		List<Entity> entities = create(9);
-		assertEquals(searchService.count(entityMetaData), 9);
+		assertEquals(searchService.count(entityMetaData), 0);
 		dataService.add(ENTITY_NAME, entities.stream());
 		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 9);
 		assertEquals(searchService.count(entityMetaData), 9);
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 3);
 		assertPresent(entities);
 	}
 
