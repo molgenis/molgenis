@@ -10,7 +10,8 @@ var configuration = {
             'i18n': 'modules/i18n',
             'jquery-ui': 'plugins/jquery-ui-1.9.2.custom.min',
             'jq-edit-rangeslider': 'plugins/jQEditRangeSlider-min',
-            'select2': 'plugins/select2-patched'
+            'select2': 'plugins/select2-patched',
+            'utils' : 'modules/utils'
         }
     },
     context: __dirname,
