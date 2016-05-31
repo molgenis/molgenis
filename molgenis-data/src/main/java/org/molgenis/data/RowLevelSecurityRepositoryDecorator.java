@@ -1,6 +1,10 @@
 package org.molgenis.data;
 
 import org.apache.commons.lang3.StringUtils;
+import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.security.core.Permission;
