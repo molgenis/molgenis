@@ -54,10 +54,8 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		entity = mock(Entity.class);
 		when(entity.getEntityMetaData()).thenReturn(entityMetaData);
 
-		DataService dataService = mock(DataService.class);
 		permissionValidator = mock(RowLevelSecurityPermissionValidator.class);
-		repositoryDecorator = new RowLevelSecurityRepositoryDecorator(decoratedRepository, dataService,
-				permissionValidator);
+		repositoryDecorator = new RowLevelSecurityRepositoryDecorator(decoratedRepository, permissionValidator);
 
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null);
 		authentication.setAuthenticated(false);
