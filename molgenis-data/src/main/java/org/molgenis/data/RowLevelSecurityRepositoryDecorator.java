@@ -274,7 +274,6 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			// TODO use DELETE permission when implemented
 			stream().forEach(entity -> permissionValidator.validatePermission(entity, Permission.UPDATE));
 			runAsSystem(decoratedRepository::deleteAll);
 		}
