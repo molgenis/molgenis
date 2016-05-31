@@ -28,7 +28,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 {
 	public static final String UPDATE_ATTRIBUTE = "_" + Permission.UPDATE.toString();
 	private static final List<String> ROW_LEVEL_SECURITY_ATTRIBUTES = Collections.singletonList(UPDATE_ATTRIBUTE);
-	private static final String PERMISSIONS_ATTRIBUTE = "_PERMISSIONS";
+	public static final String PERMISSIONS_ATTRIBUTE = "_PERMISSIONS";
 
 	private final Repository decoratedRepository;
 	private final DataService dataService;
@@ -359,9 +359,8 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 			permissions.add(UPDATE_ATTRIBUTE);
 		}
 
-		Entity permissionEntity = new MapEntity(entity, getEntityMetaData());
-		permissionEntity.set(PERMISSIONS_ATTRIBUTE, StringUtils.join(permissions, ','));
-		return permissionEntity;
+		entity.set(PERMISSIONS_ATTRIBUTE, StringUtils.join(permissions, ','));
+		return entity;
 	}
 
 	private Entity getCompleteEntity(Entity entity)
@@ -380,7 +379,6 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		public RowLevelSecurityEntityMetaDataDecorator(EntityMetaData entityMetaData)
 		{
 			super(entityMetaData);
-			this.addAttribute(PERMISSIONS_ATTRIBUTE).setVisible(false).setReadOnly(true);
 		}
 
 		@Override
