@@ -4,12 +4,9 @@ import static autovalue.shaded.com.google.common.common.collect.Iterables.isEmpt
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.MolgenisUser.USERNAME;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
-import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.runas.SystemSecurityToken;
 
 public class RowLevelSecurityPermissionValidator
 {
@@ -20,9 +17,9 @@ public class RowLevelSecurityPermissionValidator
 		this.dataService = requireNonNull(dataService);
 	}
 
-	public boolean validatePermission(Entity entity, Permission permission)
+	public boolean validatePermission(Entity entity, Permission permission, String username)
 	{
-		if (!hasPermission(entity, permission))
+		if (!hasPermission(entity, permission, username))
 		{
 			throw new MolgenisDataAccessException(
 					"No " + permission.toString() + " permission on entity with id " + entity.getIdValue());
@@ -30,9 +27,10 @@ public class RowLevelSecurityPermissionValidator
 		return true;
 	}
 
-	public boolean validatePermissionById(Object id, EntityMetaData entityMetaData, Permission permission)
+	public boolean validatePermissionById(Object id, EntityMetaData entityMetaData, Permission permission,
+			String username)
 	{
-		if (!hasPermissionById(id, entityMetaData, permission))
+		if (!hasPermissionById(id, entityMetaData, permission, username))
 		{
 			throw new MolgenisDataAccessException(
 					"No " + permission.toString() + " permission on entity with id " + id);
@@ -40,16 +38,15 @@ public class RowLevelSecurityPermissionValidator
 		return true;
 	}
 
-	public boolean hasPermission(Entity entity, Permission permission)
+	public boolean hasPermission(Entity entity, Permission permission, String username)
 	{
-		return hasPermissionById(entity.getIdValue(), entity.getEntityMetaData(), permission);
+		return hasPermissionById(entity.getIdValue(), entity.getEntityMetaData(), permission, username);
 	}
 
-	private boolean hasPermissionById(Object id, EntityMetaData entityMetaData, Permission permission)
+	private boolean hasPermissionById(Object id, EntityMetaData entityMetaData, Permission permission, String username)
 	{
-		if (currentUserIsSu() || currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM)) return true;
+		if (currentUserIsSu()) return true;
 
-		String currentUsername = getCurrentUsername();
 		return runAsSystem(() -> {
 			Iterable<Entity> users = dataService.findOne(entityMetaData.getName(), id)
 					.getEntities("_" + permission.toString());
@@ -58,7 +55,7 @@ public class RowLevelSecurityPermissionValidator
 			{
 				for (Entity user : users)
 				{
-					if (user.getString(USERNAME).equals(currentUsername))
+					if (user.getString(USERNAME).equals(username))
 					{
 						return true;
 					}

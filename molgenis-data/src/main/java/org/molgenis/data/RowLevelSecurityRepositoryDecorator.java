@@ -23,8 +23,8 @@ import org.molgenis.security.core.utils.SecurityUtils;
 public class RowLevelSecurityRepositoryDecorator implements Repository
 {
 	public static final String UPDATE_ATTRIBUTE = "_" + Permission.UPDATE.toString();
-	private static final List<String> ROW_LEVEL_SECURITY_ATTRIBUTES = Collections.singletonList(UPDATE_ATTRIBUTE);
-	private static final String PERMISSIONS_ATTRIBUTE = "_PERMISSIONS";
+	public static final List<String> ROW_LEVEL_SECURITY_ATTRIBUTES = Collections.singletonList(UPDATE_ATTRIBUTE);
+	public static final String PERMISSIONS_ATTRIBUTE = "_PERMISSIONS";
 
 	private final Repository decoratedRepository;
 	private final RowLevelSecurityPermissionValidator permissionValidator;
@@ -186,7 +186,8 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			permissionValidator.validatePermission(entity, Permission.UPDATE);
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			permissionValidator.validatePermission(entity, Permission.UPDATE, currentUsername);
 			Entity completeEntity = getCompleteEntity(entity);
 			runAsSystem(() -> decoratedRepository.update(completeEntity));
 		}
@@ -201,8 +202,9 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			Stream<? extends Entity> completeEntities = entities
-					.filter(entity -> permissionValidator.validatePermission(entity, Permission.UPDATE))
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			Stream<? extends Entity> completeEntities = entities.filter(
+					entity -> permissionValidator.validatePermission(entity, Permission.UPDATE, currentUsername))
 					.map(this::getCompleteEntity);
 			runAsSystem(() -> decoratedRepository.update(completeEntities));
 		}
@@ -217,7 +219,8 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			permissionValidator.validatePermission(entity, Permission.UPDATE);
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			permissionValidator.validatePermission(entity, Permission.UPDATE, currentUsername);
 			runAsSystem(() -> decoratedRepository.delete(entity));
 		}
 		else
@@ -231,8 +234,9 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			Stream<? extends Entity> filteredEntities = entities
-					.filter(entity -> permissionValidator.validatePermission(entity, Permission.UPDATE));
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			Stream<? extends Entity> filteredEntities = entities.filter(
+					entity -> permissionValidator.validatePermission(entity, Permission.UPDATE, currentUsername));
 			runAsSystem(() -> decoratedRepository.delete(filteredEntities));
 		}
 		else
@@ -246,7 +250,8 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			permissionValidator.validatePermissionById(id, getEntityMetaData(), Permission.UPDATE);
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			permissionValidator.validatePermissionById(id, getEntityMetaData(), Permission.UPDATE, currentUsername);
 			runAsSystem(() -> decoratedRepository.deleteById(id));
 		}
 		else
@@ -260,8 +265,9 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			Stream<Object> filteredIds = ids.filter(
-					id -> permissionValidator.validatePermissionById(id, getEntityMetaData(), Permission.UPDATE));
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			Stream<Object> filteredIds = ids.filter(id -> permissionValidator.validatePermissionById(id,
+					getEntityMetaData(), Permission.UPDATE, currentUsername));
 			runAsSystem(() -> decoratedRepository.deleteById(filteredIds));
 		}
 		else
@@ -275,7 +281,9 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			stream().forEach(entity -> permissionValidator.validatePermission(entity, Permission.UPDATE));
+			String currentUsername = SecurityUtils.getCurrentUsername();
+			stream().forEach(
+					entity -> permissionValidator.validatePermission(entity, Permission.UPDATE, currentUsername));
 			runAsSystem(decoratedRepository::deleteAll);
 		}
 		else
@@ -350,8 +358,9 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 
 	private Entity injectPermissions(Entity entity)
 	{
+		String currentUsername = SecurityUtils.getCurrentUsername();
 		List<String> permissions = newArrayList();
-		if (permissionValidator.hasPermission(entity, Permission.UPDATE))
+		if (permissionValidator.hasPermission(entity, Permission.UPDATE, currentUsername))
 		{
 			permissions.add(UPDATE_ATTRIBUTE);
 		}
