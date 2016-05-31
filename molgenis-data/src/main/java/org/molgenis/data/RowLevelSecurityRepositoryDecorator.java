@@ -4,6 +4,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
+import org.apache.commons.lang3.StringUtils;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -275,7 +278,6 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			// TODO use DELETE permission when implemented
 			stream().forEach(entity -> permissionValidator.validatePermission(entity, Permission.UPDATE));
 			runAsSystem(decoratedRepository::deleteAll);
 		}
@@ -369,12 +371,8 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 			Entity currentEntity = runAsSystem(() -> findOne(entity.getIdValue()));
 			Iterable<Entity> users = runAsSystem(() -> currentEntity.getEntities(UPDATE_ATTRIBUTE));
 			entity.set(UPDATE_ATTRIBUTE, users);
-			return new DefaultEntity(currentEntity.getEntityMetaData(), dataService, entity);
 		}
-		else
-		{
-			return entity;
-		}
+		return entity;
 	}
 
 	private class RowLevelSecurityEntityMetaDataDecorator extends DefaultEntityMetaData implements EntityMetaData
