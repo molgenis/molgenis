@@ -37,6 +37,7 @@ import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 
@@ -44,8 +45,8 @@ import com.google.common.collect.Iterators;
 
 public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 {
-	private static final String ENTITY_NAME = "test_TestEntity";
-	private static final String REF_ENTITY_NAME = "test_TestRefEntity";
+	public static final String ENTITY_NAME = "test_TestEntity";
+	public static final String REF_ENTITY_NAME = "test_TestRefEntity";
 	private EditableEntityMetaData entityMetaData;
 	private DefaultEntityMetaData refEntityMetaData;
 
@@ -123,23 +124,16 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	public void afterMethod()
 	{
 		dataService.deleteAll(ENTITY_NAME);
+		waitForIndexToBeStable(ENTITY_NAME, 1, 60);
 	}
 
 	public void testAdd()
 	{
 		List<Entity> entities = create(9);
-
-		// 1
 		assertCountElasticsearch(0);
-
 		dataService.add(ENTITY_NAME, entities.stream());
-
-		// wachten tot het klaar is
 		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
-
-		// 2
 		assertCountElasticsearch(9);
-
 		assertCount(9);
 		assertPresent(entities);
 	}
@@ -293,8 +287,10 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 
 	public void testFindQueryLimit2_Offset2_sortOnInt()
 	{
-		dataService.add(REF_ENTITY_NAME, createTestRefEntities().stream());
-		dataService.add(ENTITY_NAME, createTestEntities().stream());
+		RunAsSystemProxy.runAsSystem(() -> {
+			dataService.add(REF_ENTITY_NAME, createTestRefEntities().stream());
+			dataService.add(ENTITY_NAME, createTestEntities().stream());
+		});
 		Supplier<Stream<Entity>> found = () -> dataService.findAll(ENTITY_NAME,
 				new QueryImpl<>().pageSize(2).offset(2).sort(new Sort(ATTR_INT)));
 		assertEquals(found.get().count(), 2);

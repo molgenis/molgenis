@@ -67,7 +67,7 @@ import com.google.common.io.Files;
 { DatabaseConfig.class, EmbeddedElasticSearchConfig.class,
  GsonConfig.class, ElasticsearchEntityFactory.class,
 		ElasticsearchRepositoryCollection.class, RunAsSystemBeanPostProcessor.class, FileMetaMetaData.class,
-		OwnedEntityMetaData.class, MolgenisUserServiceImpl.class, RhinoConfig.class, DatabaseConfig.class,
+		OwnedEntityMetaData.class, MolgenisUserServiceImpl.class, RhinoConfig.class,
 		UuidGenerator.class, ExpressionValidator.class, LanguageService.class })
 public abstract class AbstractDataApiTestConfig
 {
@@ -107,7 +107,6 @@ public abstract class AbstractDataApiTestConfig
 	@PostConstruct
 	public void init()
 	{
-		SecuritySupport.login();
 		dataService.setMeta(metaDataService());
 		metaDataService.setDefaultBackend(getBackend());
 	}
@@ -197,6 +196,11 @@ public abstract class AbstractDataApiTestConfig
 		return new MolgenisPasswordEncoder(new BCryptPasswordEncoder());
 	}
 
+	@Bean
+	public SecuritySupportService securitySupportService()
+	{
+		return new SecuritySupportService();
+	}
 	@Value("${mail.host:smtp.gmail.com}")
 	private String mailHost;
 	@Value("${mail.port:587}")

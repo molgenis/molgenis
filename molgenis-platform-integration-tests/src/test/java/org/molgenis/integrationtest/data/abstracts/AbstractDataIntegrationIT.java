@@ -10,7 +10,7 @@ import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.integrationtest.data.SecuritySupport;
+import org.molgenis.integrationtest.data.SecuritySupportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,11 +42,13 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 
 	@Autowired
 	protected ReindexService reindexService;
+
+	@Autowired
+	protected SecuritySupportService securitySupportService;
 	
 	@BeforeClass
 	public void init()
 	{
-		SecuritySupport.login();
 	}
 
 	@AfterClass
@@ -63,7 +65,7 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 		}
 
 		applicationContext.close();
-		SecuritySupport.logout();
+		securitySupportService.logout();
 
 		try
 		{
@@ -76,6 +78,12 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 		}
 	}
 
+	/**
+	 * Wait till the whole index is stable. Reindex job is done a-synchronized.
+	 * 
+	 * @param pollInterval
+	 * @param maxTimeout
+	 */
 	protected void waitForWholeIndexToBeStable(long pollInterval, long maxTimeout)
 	{
 		Awaitility.waitAtMost(maxTimeout, TimeUnit.SECONDS).pollInterval(pollInterval, TimeUnit.SECONDS)
@@ -83,6 +91,13 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 		logger.debug("<---- Whole index is stable ---->");
 	}
 
+	/**
+	 * Wait till the index is stable. Reindex job is done a-synchronized.
+	 * 
+	 * @param entityName
+	 * @param pollInterval
+	 * @param maxTimeout
+	 */
 	protected void waitForIndexToBeStable(String entityName, long pollInterval, long maxTimeout)
 	{
 		Awaitility.waitAtMost(maxTimeout, TimeUnit.SECONDS).pollInterval(pollInterval, TimeUnit.SECONDS)

@@ -87,4 +87,15 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	
+	<build>
+		<resources>
+			<resource>
+				<directory>${project.basedir}/src/test/resources/postgresql</directory>
+				<excludes>
+					<exclude>**molgenis.properties</exclude>
+				</excludes>
+			</resource>
+		</resources>
+	</build>
 </project>

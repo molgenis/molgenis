@@ -17,7 +17,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -57,7 +56,6 @@ public class ReindexServiceImpl implements ReindexService
 	{
 		LOG.trace("Reindex transaction with id {}...", transactionId);
 		Entity reindexActionJob = dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
-		MolgenisUser admin = molgenisUserService.getUser("admin");
 
 		if (reindexActionJob != null)
 		{
@@ -106,8 +104,10 @@ public class ReindexServiceImpl implements ReindexService
 				.getRepository(ReindexActionMetaData.ENTITY_NAME)
 				.query()
 				.in(ReindexActionMetaData.REINDEX_STATUS,
-						Arrays.asList(ReindexActionMetaData.ReindexStatus.CANCELED.name(),
-								ReindexActionMetaData.ReindexStatus.FAILED.name(),
+						Arrays.asList(
+								// TODO implement mechanism to recover from failure.
+								// ReindexActionMetaData.ReindexStatus.CANCELED.name(),
+								// ReindexActionMetaData.ReindexStatus.FAILED.name(),
 								ReindexActionMetaData.ReindexStatus.PENDING.name(),
 								ReindexActionMetaData.ReindexStatus.STARTED.name())).count();
 		return count == 0L;
