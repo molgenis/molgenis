@@ -6,8 +6,6 @@ import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
 
 import java.io.IOException;
-import java.sql.Date;
-import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.*;
 
@@ -597,98 +595,5 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 				return amd;
 			}
 		}
-	}
-
-	private class RowLevelSecurityEntityDecorator implements Entity
-	{
-		Entity entity;
-		EntityMetaData entityMetaData;
-
-		public RowLevelSecurityEntityDecorator(Entity entity, EntityMetaData entityMetaData)
-		{
-			this.entity = entity;
-			this.entityMetaData = entityMetaData;
-		}
-
-		@Override public EntityMetaData getEntityMetaData() { return entityMetaData; }
-
-		@Override public Iterable<String> getAttributeNames()
-		{
-			return entity.getAttributeNames();
-		}
-
-		@Override public Object getIdValue()
-		{
-			return entity.getIdValue();
-		}
-
-		@Override public String getLabelValue()
-		{
-			return entity.getLabelValue();
-		}
-
-		@Override public Object get(String attributeName) { return entity.get(attributeName); }
-
-		@Override public String getString(String attributeName)
-		{
-			return entity.getString(attributeName);
-		}
-
-		@Override public Integer getInt(String attributeName)
-		{
-			return entity.getInt(attributeName);
-		}
-
-		@Override public Long getLong(String attributeName)
-		{
-			return entity.getLong(attributeName);
-		}
-
-		@Override public Boolean getBoolean(String attributeName)
-		{
-			return entity.getBoolean(attributeName);
-		}
-
-		@Override public Double getDouble(String attributeName)
-		{
-			return entity.getDouble(attributeName);
-		}
-
-		@Override public Date getDate(String attributeName)	{ return entity.getDate(attributeName); }
-
-		@Override public java.util.Date getUtilDate(String attributeName) {	return entity.getUtilDate(attributeName); }
-
-		@Override public Timestamp getTimestamp(String attributeName)
-		{
-			return entity.getTimestamp(attributeName);
-		}
-
-		@Override public Entity getEntity(String attributeName)
-		{
-			return entity.getEntity(attributeName);
-		}
-
-		@Override public <E extends Entity> E getEntity(String attributeName, Class<E> clazz) {	return entity.getEntity(attributeName, clazz);	}
-
-		@Override public Iterable<Entity> getEntities(String attributeName)
-		{
-			return entity.getEntities(attributeName);
-		}
-
-		@Override public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz) { return entity.getEntities(attributeName, clazz); }
-
-		@Override public List<String> getList(String attributeName)
-		{
-			return entity.getList(attributeName);
-		}
-
-		@Override public List<Integer> getIntList(String attributeName)
-		{
-			return entity.getIntList(attributeName);
-		}
-
-		@Override public void set(String attributeName, Object value) { entity.set(attributeName, value); }
-
-		@Override public void set(Entity values) { entity.set(values); }
 	}
 }

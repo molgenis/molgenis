@@ -500,7 +500,12 @@ import "./css/Table.css";
 					id : item[entity.idAttribute],
 					onEdit: this.props.onEdit
 				});
-				Cols.push(td({className: 'compact', key: 'edit'}, EntityEditBtn));
+				if(item._PERMISSIONS !== undefined) {
+					Cols.push(td({className: 'compact', key: 'edit'}, item._PERMISSIONS.indexOf('UPDATE') !== -1 ? EntityEditBtn : null));
+				} else {
+					Cols.push(td({className: 'compact', key: 'edit'}, EntityEditBtn));
+				}
+
 			}
 			if(this.props.enableDelete === true) {
 				var EntityDeleteBtn = EntityDeleteBtnFactory({
@@ -508,7 +513,11 @@ import "./css/Table.css";
 					id : item[entity.idAttribute],
 					onDelete: this.props.onDelete
 				});
-				Cols.push(td({className: 'compact', key: 'delete'}, EntityDeleteBtn));
+				if(item._PERMISSIONS !== undefined) {
+					Cols.push(td({className: 'compact', key: 'delete'},  item._PERMISSIONS.indexOf('UPDATE') !== -1 ? EntityDeleteBtn : null));
+				} else {
+					Cols.push(td({className: 'compact', key: 'delete'},  EntityDeleteBtn ));
+				}
 			}
 			if(this.props.enableInspect === true && this.props.onRowInspect !== null) {
 				var EntityInspectBtn = EntityInspectBtnFactory({
