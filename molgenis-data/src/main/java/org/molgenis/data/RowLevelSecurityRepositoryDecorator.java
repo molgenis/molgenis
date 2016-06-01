@@ -89,7 +89,28 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		return decoratedRepository.iterator();
+		if (isRowLevelSecured())
+		{
+			final Iterator<Entity> iterator = decoratedRepository.iterator();
+			return new Iterator<Entity>()
+			{
+				@Override
+				public boolean hasNext()
+				{
+					return iterator.hasNext();
+				}
+
+				@Override
+				public Entity next()
+				{
+					return injectPermissions(iterator.next());
+				}
+			};
+		}
+		else
+		{
+			return decoratedRepository.iterator();
+		}
 	}
 
 	@Override
