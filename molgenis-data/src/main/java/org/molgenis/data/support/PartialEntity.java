@@ -10,7 +10,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.RowLevelSecurityRepositoryDecorator;
 
 /**
  * Entity with partially loaded attributes based on a fetch. Requesting attributes not included in the fetch are
@@ -58,7 +57,7 @@ public class PartialEntity implements Entity
 	@Override
 	public Object get(String attributeName)
 	{
-		if (fetch.hasField(attributeName) || attributeName.equals(RowLevelSecurityRepositoryDecorator.PERMISSIONS_ATTRIBUTE))
+		if (fetch.hasField(attributeName))
 		{
 			return decoratedEntity.get(attributeName);
 		}
@@ -71,7 +70,7 @@ public class PartialEntity implements Entity
 	@Override
 	public String getString(String attributeName)
 	{
-		if (fetch.hasField(attributeName) || attributeName.equals(RowLevelSecurityRepositoryDecorator.PERMISSIONS_ATTRIBUTE))
+		if (fetch.hasField(attributeName))
 		{
 			return decoratedEntity.getString(attributeName);
 		}
