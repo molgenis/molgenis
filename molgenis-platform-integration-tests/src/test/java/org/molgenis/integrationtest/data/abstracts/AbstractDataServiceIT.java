@@ -28,6 +28,7 @@ import org.molgenis.data.EntityListener;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Package;
+import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
@@ -129,12 +130,12 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 
 	public void testAdd()
 	{
-		List<Entity> entities = create(9);
+		List<Entity> entities = create(2);
 		assertEquals(searchService.count(entityMetaData), 0);
 		dataService.add(ENTITY_NAME, entities.stream());
 		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 9);
-		assertEquals(searchService.count(entityMetaData), 9);
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 2);
+		assertEquals(searchService.count(entityMetaData), 2);
 		assertPresent(entities);
 	}
 
@@ -142,6 +143,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(2);
 		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 
 		AtomicInteger updateCalled = new AtomicInteger(0);
 		EntityListener listener = new EntityListener()
@@ -165,6 +167,8 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 			dataService.addEntityListener(ENTITY_NAME, listener);
 			dataService.update(ENTITY_NAME, entities.stream());
 			assertEquals(updateCalled.get(), 1);
+			waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+			assertPresent(entities);
 		}
 		finally
 		{
@@ -172,46 +176,54 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 			updateCalled.set(0);
 			dataService.update(ENTITY_NAME, entities.stream());
 			assertEquals(updateCalled.get(), 0);
+			waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+			assertPresent(entities);
 		}
 	}
 
 	public void testCount()
 	{
-		List<Entity> entities = create(3);
+		List<Entity> entities = create(2);
 		dataService.add(ENTITY_NAME, entities.stream());
 		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 3);
-		assertEquals(searchService.count(entityMetaData), 3);
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>().eq(ATTR_ID, entities.get(0).getIdValue())), 1);
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 2);
+		assertEquals(searchService.count(entityMetaData), 2);
+		assertPresent(entities);
 	}
 
 	public void testDelete()
 	{
 		Entity entity = create();
 		dataService.add(ENTITY_NAME, entity);
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		assertPresent(entity);
 
 		dataService.delete(ENTITY_NAME, entity);
-		assertNull(dataService.findOneById(ENTITY_NAME, entity.getIdValue()));
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		assertNotPresent(entity);
 	}
 
 	public void testDeleteById()
 	{
 		Entity entity = create();
 		dataService.add(ENTITY_NAME, entity);
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		assertPresent(entity);
 
 		dataService.deleteById(ENTITY_NAME, entity.getIdValue());
-		assertNull(dataService.findOneById(ENTITY_NAME, entity.getIdValue()));
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		assertNotPresent(entity);
 	}
 
 	public void testDeleteStream()
 	{
-		List<Entity> entities = create(5);
+		List<Entity> entities = create(2);
 		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), entities.size());
 
 		dataService.delete(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 0);
 	}
 
@@ -219,9 +231,11 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), entities.size());
 
 		dataService.deleteAll(ENTITY_NAME);
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 0);
 	}
 
@@ -235,6 +249,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		Stream<Entity> retrieved = dataService.findAll(ENTITY_NAME);
 		assertEquals(retrieved.count(), entities.size());
 	}
@@ -243,6 +258,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		Supplier<Stream<TestEntity>> retrieved = () -> dataService.findAll(ENTITY_NAME, TestEntity.class);
 		assertEquals(retrieved.get().count(), 1);
 		assertEquals(retrieved.get().iterator().next().getId(), entities.get(0).getIdValue());
@@ -252,6 +268,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		Stream<Object> ids = Stream.concat(entities.stream().map(Entity::getIdValue), of("bogus"));
 		Stream<Entity> retrieved = dataService.findAll(ENTITY_NAME, ids);
 		assertEquals(retrieved.count(), entities.size());
@@ -261,6 +278,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 
 		Supplier<Stream<TestEntity>> retrieved = () -> dataService.findAll(ENTITY_NAME,
 				Stream.concat(entities.stream().map(Entity::getIdValue), of("bogus")), TestEntity.class);
@@ -272,6 +290,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		Stream<Object> ids = concat(entities.stream().map(Entity::getIdValue), of("bogus"));
 		Stream<Entity> retrieved = dataService.findAll(ENTITY_NAME, ids, new Fetch().field(ATTR_ID));
 		assertEquals(retrieved.count(), entities.size());
@@ -281,6 +300,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		Supplier<Stream<Entity>> found = () -> dataService.findAll(ENTITY_NAME,
 				new QueryImpl<>().eq(ATTR_ID, entities.get(0).getIdValue()));
 		assertEquals(found.get().count(), 1);
@@ -293,6 +313,8 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 			dataService.add(REF_ENTITY_NAME, createTestRefEntities().stream());
 			dataService.add(ENTITY_NAME, createTestEntities().stream());
 		});
+		waitForIndexToBeStable(REF_ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		Supplier<Stream<Entity>> found = () -> dataService.findAll(ENTITY_NAME,
 				new QueryImpl<>().pageSize(2).offset(2).sort(new Sort(ATTR_INT)));
 		assertEquals(found.get().count(), 2);
@@ -303,6 +325,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		Supplier<Stream<TestEntity>> found = () -> dataService.findAll(ENTITY_NAME,
 				new QueryImpl<TestEntity>().eq(ATTR_ID, entities.get(0).getIdValue()), TestEntity.class);
 		assertEquals(found.get().count(), 1);
@@ -313,6 +336,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		assertNotNull(dataService.findOneById(ENTITY_NAME, entities.get(0).getIdValue()));
 	}
 
@@ -320,6 +344,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		TestEntity testEntity = dataService.findOneById(ENTITY_NAME, entities.get(0).getIdValue(), TestEntity.class);
 		assertNotNull(testEntity);
 		assertEquals(testEntity.getId(), entities.get(0).getIdValue());
@@ -329,6 +354,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		assertNotNull(dataService.findOneById(ENTITY_NAME, entities.get(0).getIdValue(), new Fetch().field(ATTR_ID)));
 	}
 
@@ -336,6 +362,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		TestEntity testEntity = dataService.findOneById(ENTITY_NAME, entities.get(0).getIdValue(),
 				new Fetch().field(ATTR_ID), TestEntity.class);
 		assertNotNull(testEntity);
@@ -346,6 +373,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		Entity entity = dataService.findOne(ENTITY_NAME, new QueryImpl<>().eq(ATTR_ID, entities.get(0).getIdValue()));
 		assertNotNull(entity);
 	}
@@ -354,6 +382,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 		TestEntity entity = dataService.findOne(ENTITY_NAME, new QueryImpl<TestEntity>().eq(ATTR_ID, entities.get(0).getIdValue()),
 				TestEntity.class);
 		assertNotNull(entity);
@@ -388,7 +417,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 
 	public void testGetRepository()
 	{
-		Repository repo = dataService.getRepository(ENTITY_NAME);
+		Repository<Entity> repo = dataService.getRepository(ENTITY_NAME);
 		assertNotNull(repo);
 		assertEquals(repo.getName(), ENTITY_NAME);
 
@@ -433,12 +462,18 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	{
 		Entity entity = create(1).get(0);
 		dataService.add(ENTITY_NAME, entity);
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+
 		entity = dataService.findOneById(ENTITY_NAME, entity.getIdValue());
 		assertNotNull(entity);
 		assertNull(entity.get(ATTR_STRING));
 
 		entity.set(ATTR_STRING, "qwerty");
+
 		dataService.update(ENTITY_NAME, entity);
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		assertPresent(entity);
+
 		entity = dataService.findOneById(ENTITY_NAME, entity.getIdValue());
 		assertNotNull(entity.get(ATTR_STRING));
 		assertEquals(entity.get(ATTR_STRING), "qwerty");
@@ -447,13 +482,21 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	public void testUpdateStream()
 	{
 		Entity entity = create(1).get(0);
+
 		dataService.add(ENTITY_NAME, entity);
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		assertPresent(entity);
+
 		entity = dataService.findOneById(ENTITY_NAME, entity.getIdValue());
 		assertNotNull(entity);
 		assertNull(entity.get(ATTR_STRING));
 
 		entity.set(ATTR_STRING, "qwerty");
+
 		dataService.update(ENTITY_NAME, of(entity));
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		assertPresent(entity);
+
 		entity = dataService.findOneById(ENTITY_NAME, entity.getIdValue());
 		assertNotNull(entity.get(ATTR_STRING));
 		assertEquals(entity.get(ATTR_STRING), "qwerty");
@@ -680,7 +723,24 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 
 	private void assertPresent(Entity entity)
 	{
+		// Found in PostgreSQL
 		assertNotNull(dataService.findOneById(entityMetaData.getName(), entity.getIdValue()));
+
+		// Found in index Elasticsearch
+		Query<Entity> q = new QueryImpl<Entity>();
+		q.eq(entityMetaData.getIdAttribute().getName(), entity.getIdValue());
+		assertEquals(searchService.count(q, entityMetaData), 1);
+	}
+
+	private void assertNotPresent(Entity entity)
+	{
+		// Found in PostgreSQL
+		assertNull(dataService.findOneById(entityMetaData.getName(), entity.getIdValue()));
+
+		// Not found in index Elasticsearch
+		Query<Entity> q = new QueryImpl<Entity>();
+		q.eq(entityMetaData.getIdAttribute().getName(), entity.getIdValue());
+		assertEquals(searchService.count(q, entityMetaData), 0);
 	}
 
 	public abstract List<RepositoryCapability> getExpectedCapabilities();
