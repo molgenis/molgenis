@@ -63,6 +63,11 @@ public class SecurityUtils
 		if (roles == null || roles.length == 0) return false;
 
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		return userHasRole(authentication, roles);
+	}
+
+	public static boolean userHasRole(Authentication authentication, String... roles)
+	{
 		if (authentication != null)
 		{
 			Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
@@ -86,6 +91,11 @@ public class SecurityUtils
 	public static boolean currentUserIsSu()
 	{
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		return userIsSu(authentication);
+	}
+
+	public static boolean userIsSu(Authentication authentication)
+	{
 		if (authentication == null) return false;
 
 		Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
