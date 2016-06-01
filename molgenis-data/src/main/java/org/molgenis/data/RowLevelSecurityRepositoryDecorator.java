@@ -1,24 +1,14 @@
 package org.molgenis.data;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
+import java.util.*;
+import java.util.stream.*;
 
 import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
@@ -212,7 +202,10 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 					.map(this::getCompleteEntity);
 			runAsSystem(() -> decoratedRepository.update(completeEntities));
 		}
-		decoratedRepository.update(entities);
+		else
+		{
+			decoratedRepository.update(entities);
+		}
 	}
 
 	@Override
