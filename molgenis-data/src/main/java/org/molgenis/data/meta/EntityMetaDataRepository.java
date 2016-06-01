@@ -1,5 +1,29 @@
 package org.molgenis.data.meta;
 
+import com.google.common.collect.Lists;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.Repository;
+import org.molgenis.data.i18n.I18nStringMetaData;
+import org.molgenis.data.i18n.LanguageMetaData;
+import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.system.ImportRunMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.util.DependencyResolver;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
@@ -17,31 +41,6 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.LOOKUP_ATTRIBUTES;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ROW_LEVEL_SECURED;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.SIMPLE_NAME;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.ManageableRepositoryCollection;
-import org.molgenis.data.Repository;
-import org.molgenis.data.i18n.I18nStringMetaData;
-import org.molgenis.data.i18n.LanguageMetaData;
-import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.system.ImportRunMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.util.DependencyResolver;
-
-import com.google.common.collect.Lists;
 
 /**
  * Helper class around the {@link EntityMetaDataMetaData} repository. Caches the metadata in
@@ -112,14 +111,8 @@ class EntityMetaDataRepository
 			entityMetaData.setLabel(entity.getString(LABEL));
 			entityMetaData.setDescription(entity.getString(DESCRIPTION));
 			entityMetaData.setBackend(entity.getString(BACKEND));
-			entityMetaData.setRowLevelSecured(Boolean.parseBoolean(entity.getString(ROW_LEVEL_SECURED)));// not
-																											// entity.getBoolean
-																											// because
-																											// of a
-																											// nullpointer
-																											// when the
-																											// value is
-																											// missing
+			// not entity.getBoolean because of a nullpointer when the value is missing
+			entityMetaData.setRowLevelSecured(Boolean.parseBoolean(entity.getString(ROW_LEVEL_SECURED)));
 
 			// Language attributes
 			for (String languageCode : languageService.getLanguageCodes())
