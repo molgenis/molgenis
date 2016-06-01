@@ -35,6 +35,3 @@ window.top.molgenis.isXrefAttr = isXrefAttr;
 window.top.molgenis.isMrefAttr = isMrefAttr;
 window.top.molgenis.isCompoundAttr = isCompoundAttr;
 
-import { htmlEscape } from 'utils/HtmlUtils';
-
-window.htmlEscape = htmlEscape;

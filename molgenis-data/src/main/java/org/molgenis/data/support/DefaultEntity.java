@@ -1,20 +1,7 @@
 package org.molgenis.data.support;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataConverter;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.RowLevelSecurityRepositoryDecorator;
-import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.UnknownEntityException;
-import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.fieldtypes.MrefField;
-import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.util.MolgenisDateFormat;
-import org.springframework.util.LinkedCaseInsensitiveMap;
+import static com.google.common.collect.FluentIterable.from;
+import static java.util.stream.StreamSupport.stream;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -24,8 +11,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.google.common.collect.FluentIterable.from;
-import static java.util.stream.StreamSupport.stream;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataConverter;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.UnknownEntityException;
+import org.molgenis.fieldtypes.FieldType;
+import org.molgenis.fieldtypes.MrefField;
+import org.molgenis.fieldtypes.XrefField;
+import org.molgenis.util.MolgenisDateFormat;
+import org.springframework.util.LinkedCaseInsensitiveMap;
 
 public class DefaultEntity implements Entity
 {
@@ -84,54 +83,42 @@ public class DefaultEntity implements Entity
 	public Object get(String attributeName)
 	{
 		AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
-		if (attribute != null)
+		if (attribute == null) throw new UnknownAttributeException(attributeName);
+
+		FieldTypeEnum dataType = attribute.getDataType().getEnumType();
+		switch (dataType)
 		{
-			FieldTypeEnum dataType = attribute.getDataType().getEnumType();
-			switch (dataType)
-			{
-				case BOOL:
-					return getBoolean(attributeName);
-				case CATEGORICAL:
-				case XREF:
-				case FILE:
-					return getEntity(attributeName);
-				case COMPOUND:
-					throw new UnsupportedOperationException();
-				case DATE:
-					return getDate(attributeName);
-				case DATE_TIME:
-					return getUtilDate(attributeName);
-				case DECIMAL:
-					return getDouble(attributeName);
-				case EMAIL:
-				case ENUM:
-				case HTML:
-				case HYPERLINK:
-				case SCRIPT:
-				case STRING:
-				case TEXT:
-					return getString(attributeName);
-				case INT:
-					return getInt(attributeName);
-				case LONG:
-					return getLong(attributeName);
-				case CATEGORICAL_MREF:
-				case MREF:
-					return getEntities(attributeName);
-				default:
-					throw new RuntimeException("Unknown data type [" + dataType + "]");
-			}
-		}
-		else
-		{
-			if (attributeName.equals(RowLevelSecurityRepositoryDecorator.PERMISSIONS_ATTRIBUTE))
-			{
+			case BOOL:
+				return getBoolean(attributeName);
+			case CATEGORICAL:
+			case XREF:
+			case FILE:
+				return getEntity(attributeName);
+			case COMPOUND:
+				throw new UnsupportedOperationException();
+			case DATE:
+				return getDate(attributeName);
+			case DATE_TIME:
+				return getUtilDate(attributeName);
+			case DECIMAL:
+				return getDouble(attributeName);
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
 				return getString(attributeName);
-			}
-			else
-			{
-				throw new UnknownAttributeException(attributeName);
-			}
+			case INT:
+				return getInt(attributeName);
+			case LONG:
+				return getLong(attributeName);
+			case CATEGORICAL_MREF:
+			case MREF:
+				return getEntities(attributeName);
+			default:
+				throw new RuntimeException("Unknown data type [" + dataType + "]");
 		}
 	}
 

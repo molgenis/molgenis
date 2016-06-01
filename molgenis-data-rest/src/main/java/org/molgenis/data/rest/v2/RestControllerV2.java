@@ -49,7 +49,6 @@ import org.molgenis.data.MolgenisRepositoryCapabilitiesException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.RowLevelSecurityRepositoryDecorator;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.i18n.LanguageService;
@@ -715,8 +714,6 @@ class RestControllerV2
 	{
 		Iterable<AttributeMetaData> attrs = entity.getEntityMetaData().getAtomicAttributes();
 		createEntityValuesResponseRec(entity, attrs, fetch, responseData);
-		if(entity.getEntityMetaData().isRowLevelSecured())
-			responseData.put(RowLevelSecurityRepositoryDecorator.PERMISSIONS_ATTRIBUTE.toLowerCase(), entity.getString(RowLevelSecurityRepositoryDecorator.PERMISSIONS_ATTRIBUTE));
 	}
 
 	private void createEntityValuesResponseRec(Entity entity, Iterable<AttributeMetaData> attrs, Fetch fetch,

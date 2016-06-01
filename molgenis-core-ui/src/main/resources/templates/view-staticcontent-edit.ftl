@@ -1,7 +1,7 @@
 <#include "molgenis-header.ftl">
 <#include "molgenis-footer.ftl">
 <#assign css=[]>
-<#assign js=["ckeditor/ckeditor.js"]>
+<#assign js=["tinymce/tinymce.min.js", "staticcontent.edit.js"]>
 <@header css js/>
 <div class="row">
 	<div class="col-md-12">
@@ -29,8 +29,4 @@
 		</form>
 	</div>
 </div>
-
-<script>
-    CKEDITOR.replace( 'elm1' );
-</script>
 <@footer/>
