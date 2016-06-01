@@ -4,9 +4,11 @@ import static autovalue.shaded.com.google.common.common.collect.Iterables.isEmpt
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.MolgenisUser.USERNAME;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 
 import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.runas.SystemSecurityToken;
+import org.molgenis.security.core.utils.SecurityUtils;
+import org.springframework.security.core.Authentication;
 
 public class RowLevelSecurityPermissionValidator
 {
@@ -17,9 +19,9 @@ public class RowLevelSecurityPermissionValidator
 		this.dataService = requireNonNull(dataService);
 	}
 
-	public boolean validatePermission(Entity completeEntity, Permission permission, String username)
+	public boolean validatePermission(Entity completeEntity, Permission permission, Authentication authentication)
 	{
-		if (!hasPermission(completeEntity, permission, username))
+		if (!hasPermission(completeEntity, permission, authentication))
 		{
 			throw new MolgenisDataAccessException(
 					"No " + permission.toString() + " permission on entity with id " + completeEntity.getIdValue());
@@ -27,9 +29,15 @@ public class RowLevelSecurityPermissionValidator
 		return true;
 	}
 
-	public boolean hasPermission(Entity completeEntity, Permission permission, String username)
+	public boolean hasPermission(Entity completeEntity, Permission permission, Authentication authentication)
 	{
-		if (currentUserIsSu()) return true;
+		if (SecurityUtils.userIsSu(authentication)
+				|| SecurityUtils.userHasRole(authentication, SystemSecurityToken.ROLE_SYSTEM))
+		{
+			return true;
+		}
+
+		String username = SecurityUtils.getUsername(authentication);
 
 		return runAsSystem(() -> {
 			Iterable<Entity> users = completeEntity.getEntities("_" + permission.toString());
