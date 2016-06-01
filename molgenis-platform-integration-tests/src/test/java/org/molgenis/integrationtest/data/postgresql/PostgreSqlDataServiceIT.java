@@ -24,12 +24,15 @@ public class PostgreSqlDataServiceIT extends AbstractDataServiceIT
 	@BeforeClass
 	public void beforeClass()
 	{
+		// Permissions AbstractDataServiceIT.ENTITY_NAME
 		String writeTestEntity = "ROLE_ENTITY_WRITE_" + AbstractDataServiceIT.ENTITY_NAME.toUpperCase();
-		// String writeTestRefEntity = "ROLE_ENTITY_WRITE_" + AbstractDataServiceIT.REF_ENTITY_NAME.toUpperCase();
 		String readTestEntity = "ROLE_ENTITY_READ_" + AbstractDataServiceIT.ENTITY_NAME.toUpperCase();
-		String readTestRefEntity = "ROLE_ENTITY_READ_" + AbstractDataServiceIT.REF_ENTITY_NAME.toUpperCase();
 		String countTestEntity = "ROLE_ENTITY_COUNT_" + AbstractDataServiceIT.ENTITY_NAME.toUpperCase();
+
+		// Permissions AbstractDataServiceIT.REF_ENTITY_NAME
+		String readTestRefEntity = "ROLE_ENTITY_READ_" + AbstractDataServiceIT.REF_ENTITY_NAME.toUpperCase();
 		String countTestRefEntity = "ROLE_ENTITY_COUNT_" + AbstractDataServiceIT.REF_ENTITY_NAME.toUpperCase();
+
 		SecurityContextHolder.getContext().setAuthentication(
 				new TestingAuthenticationToken("user", "user", writeTestEntity,
 						readTestEntity, readTestRefEntity, countTestEntity, countTestRefEntity));
