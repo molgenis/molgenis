@@ -10,8 +10,6 @@ import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.EntityMetaDataUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -29,8 +27,6 @@ import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeM
  */
 class ElasticsearchEntityIterable extends BatchingQueryResult<Entity> implements EntityCollection
 {
-	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchEntityIterable.class);
-
 	private static final int BATCH_SIZE = 1000;
 
 	private final EntityMetaData entityMeta;
@@ -60,7 +56,7 @@ class ElasticsearchEntityIterable extends BatchingQueryResult<Entity> implements
 	@Override
 	protected List<Entity> getBatch(Query<Entity> q)
 	{
-		Consumer<SearchRequestBuilder> searchRequestBuilderConsumer = (searchRequestBuilder) -> searchRequestGenerator
+		Consumer<SearchRequestBuilder> searchRequestBuilderConsumer = searchRequestBuilder -> searchRequestGenerator
 				.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH, q, null, null, null,
 						entityMeta);
 		Stream<Entity> results;

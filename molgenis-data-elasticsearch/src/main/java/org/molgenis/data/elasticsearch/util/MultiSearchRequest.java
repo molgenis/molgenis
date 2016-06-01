@@ -12,7 +12,7 @@ public class MultiSearchRequest
 {
 	private List<String> documentTypes;
 	private QueryImpl<Entity> query;
-	private List<String> fieldsToReturn = new ArrayList<String>();
+	private List<String> fieldsToReturn = new ArrayList<>();
 
 	public MultiSearchRequest()
 	{
@@ -21,7 +21,7 @@ public class MultiSearchRequest
 	public MultiSearchRequest(List<String> documentTypes, Query<Entity> query, List<String> fieldsToReturn)
 	{
 		this.documentTypes = documentTypes;
-		this.query = new QueryImpl<Entity>(query);
+		this.query = new QueryImpl<>(query);
 		this.fieldsToReturn = fieldsToReturn;
 	}
 

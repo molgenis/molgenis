@@ -1,13 +1,15 @@
 package org.molgenis.data.elasticsearch.reindex.job;
 
-import static java.time.OffsetDateTime.now;
-import static java.util.Date.from;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMeta.REINDEX_JOB_EXECUTION;
-import static org.molgenis.data.jobs.JobExecution.END_DATE;
-import static org.molgenis.data.jobs.JobExecution.STATUS;
-import static org.molgenis.data.jobs.JobExecution.Status.SUCCESS;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData;
+import org.molgenis.security.core.runas.RunAsSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -17,17 +19,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
-import org.molgenis.data.reindex.meta.ReindexActionMetaData;
-import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.security.user.MolgenisUserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
+import static java.time.OffsetDateTime.now;
+import static java.util.Date.from;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMeta.REINDEX_JOB_EXECUTION;
+import static org.molgenis.data.jobs.JobExecution.END_DATE;
+import static org.molgenis.data.jobs.JobExecution.STATUS;
+import static org.molgenis.data.jobs.JobExecution.Status.SUCCESS;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 public class ReindexServiceImpl implements ReindexService
 {
@@ -39,14 +38,11 @@ public class ReindexServiceImpl implements ReindexService
 	 * The {@link ReindexJob}s are executed on this thread.
 	 */
 	private final ExecutorService executorService;
-	private final MolgenisUserService molgenisUserService;
 
-	public ReindexServiceImpl(DataService dataService, ReindexJobFactory reindexJobFactory,
-			MolgenisUserService molgenisUserService, ExecutorService executorService)
+	public ReindexServiceImpl(DataService dataService, ReindexJobFactory reindexJobFactory, ExecutorService executorService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.reindexJobFactory = requireNonNull(reindexJobFactory);
-		this.molgenisUserService = requireNonNull(molgenisUserService);
 		this.executorService = requireNonNull(executorService);
 	}
 

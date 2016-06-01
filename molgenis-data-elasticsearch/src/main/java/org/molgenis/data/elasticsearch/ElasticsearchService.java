@@ -9,6 +9,7 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.collect.Iterators;
 import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
 import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
@@ -34,7 +35,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.StreamSupport.stream;
@@ -63,7 +63,7 @@ public class ElasticsearchService implements SearchService
 	{
 		ADD, UPDATE
 	}
-	
+
 	private final DataService dataService;
 	private final ElasticsearchEntityFactory elasticsearchEntityFactory;
 	private final String indexName;
@@ -96,6 +96,9 @@ public class ElasticsearchService implements SearchService
 		return () -> elasticsearchFacade.getMappings(indexName).keysIt();
 	}
 
+	/**
+	 * @deprecated see search(Query, EntityMetaData) or aggregate(AggregateQuery, EntityMetaData)
+	 */
 	@Override
 	@Deprecated
 	public SearchResult search(SearchRequest request)
@@ -127,10 +130,9 @@ public class ElasticsearchService implements SearchService
 	private void createMappings(String index, EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
 			boolean createAllIndex)
 	{
-		try
+		try (XContentBuilder jsonBuilder = XContentFactory.jsonBuilder())
 		{
-			XContentBuilder jsonBuilder = MappingsBuilder
-					.buildMapping(entityMetaData, storeSource, enableNorms, createAllIndex);
+			MappingsBuilder.buildMapping(jsonBuilder, entityMetaData, storeSource, enableNorms, createAllIndex);
 			elasticsearchFacade.putMapping(index, jsonBuilder, entityMetaData.getName());
 		}
 		catch (IOException e)
@@ -297,8 +299,14 @@ public class ElasticsearchService implements SearchService
 		QueryImpl<Entity> q = null;
 		for (AttributeMetaData attributeMetaData : referringAttributes)
 		{
-			if (q == null) q = new QueryImpl<>();
-			else q.or();
+			if (q == null)
+			{
+				q = new QueryImpl<>();
+			}
+			else
+			{
+				q.or();
+			}
 			q.eq(attributeMetaData.getName(), referredEntity);
 		}
 		return searchInternal(q, referringEntityMetaData).stream();
@@ -363,12 +371,9 @@ public class ElasticsearchService implements SearchService
 	{
 		String type = sanitizeMapperType(entityName);
 
-		if (elasticsearchFacade.isTypeExists(type, indexName))
+		if (elasticsearchFacade.isTypeExists(type, indexName) && !elasticsearchFacade.deleteMapping(type, indexName))
 		{
-			if (!elasticsearchFacade.deleteMapping(type, indexName))
-			{
-				throw new ElasticsearchException("Delete of mapping for type '" + type + "' failed.");
-			}
+			throw new ElasticsearchException("Delete of mapping for type '" + type + "' failed.");
 		}
 
 		if (!elasticsearchFacade.deleteAllDocumentsOfType(type, indexName))
@@ -475,7 +480,7 @@ public class ElasticsearchService implements SearchService
 		AttributeMetaData xAttr = aggregateQuery.getAttributeX();
 		AttributeMetaData yAttr = aggregateQuery.getAttributeY();
 		AttributeMetaData distinctAttr = aggregateQuery.getAttributeDistinct();
-		SearchRequest searchRequest = new SearchRequest(entityMetaData.getName(), q, emptyList(), xAttr, yAttr,
+		SearchRequest searchRequest = new SearchRequest(entityMetaData.getName(), q, xAttr, yAttr,
 				distinctAttr);
 		SearchResult searchResults = search(searchRequest);
 		return searchResults.getAggregate();
@@ -552,17 +557,18 @@ public class ElasticsearchService implements SearchService
 	 */
 	private void rebuildIndexGeneric(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
+		Iterable<? extends Entity> entitiesToIndex = entities;
 		if (DependencyResolver.hasSelfReferences(entityMetaData))
 		{
 			Iterable<Entity> iterable = Iterables.transform(entities, input -> input);
-			entities = new DependencyResolver().resolveSelfReferences(iterable, entityMetaData);
+			entitiesToIndex = new DependencyResolver().resolveSelfReferences(iterable, entityMetaData);
 		}
 		if (hasMapping(entityMetaData))
 		{
 			delete(entityMetaData.getName());
 		}
 		createMappings(entityMetaData);
-		index(entities, entityMetaData, IndexingMode.ADD);
+		index(entitiesToIndex, entityMetaData, IndexingMode.ADD);
 	}
 
 	@Override

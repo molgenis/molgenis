@@ -148,6 +148,7 @@ class ReindexJob extends Job
 		}
 		catch (Exception ex)
 		{
+			LOG.error("Reindex job failed", ex);
 			setStatus(reindexActionEntity, FAILED);
 			return false;
 		}
@@ -186,10 +187,10 @@ class ReindexJob extends Job
 				searchService.index(entityU, entityU.getEntityMetaData(), IndexingMode.UPDATE);
 				break;
 			case DELETE:
-				// TODO This calls the version that checks for references! But to prevent race conditions the reindexer
-				// must delete the document even if references exist
 				searchService.deleteById(entityId, dataService.getMeta().getEntityMetaData(entityFullName));
 				break;
+			default:
+				throw new IllegalStateException("Unknown CudType");
 		}
 		LOG.info("Reindexed [{}].[{}].", entityFullName, entityId);
 	}
