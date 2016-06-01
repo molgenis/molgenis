@@ -1,20 +1,5 @@
 package org.molgenis.data;
 
-import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.RowLevelSecurityUtils.hasPermission;
-import static org.molgenis.data.RowLevelSecurityUtils.validatePermission;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.security.core.Permission;
@@ -22,6 +7,16 @@ import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.*;
+
+import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.RowLevelSecurityUtils.hasPermission;
+import static org.molgenis.data.RowLevelSecurityUtils.validatePermission;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 public class RowLevelSecurityRepositoryDecorator implements Repository
 {
@@ -82,7 +77,23 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		return decoratedRepository.iterator();
+		final Iterator<Entity> iterator = decoratedRepository.iterator();
+		return new Iterator<Entity>()
+		{
+			@Override
+			public boolean hasNext()
+			{
+				return iterator.hasNext();
+			}
+
+			@Override
+			public Entity next()
+			{
+				Entity entity = iterator.next();
+				injectPermissions(entity);
+				return entity;
+			}
+		};
 	}
 
 	@Override
