@@ -11,7 +11,6 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.RepositorySecurityDecorator;
-import org.molgenis.data.RowLevelSecurityPermissionValidator;
 import org.molgenis.data.RowLevelSecurityRepositoryDecorator;
 import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.settings.AppSettings;
@@ -35,7 +34,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final DataService dataService;
 	private final ExpressionValidator expressionValidator;
 	private final RepositoryDecoratorRegistry repositoryDecoratorRegistry;
-	private final RowLevelSecurityPermissionValidator rowLevelSecurityPermissionValidator;
 
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager, TransactionLogService transactionLogService,
 			EntityAttributesValidator entityAttributesValidator, IdGenerator idGenerator, AppSettings appSettings,
@@ -50,7 +48,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.dataService = dataService;
 		this.expressionValidator = expressionValidator;
 		this.repositoryDecoratorRegistry = repositoryDecoratorRegistry;
-		this.rowLevelSecurityPermissionValidator = new RowLevelSecurityPermissionValidator();
 	}
 
 	@Override
@@ -59,8 +56,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		Repository decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
 
 		// 10. Row level security decorator
-		decoratedRepository = new RowLevelSecurityRepositoryDecorator(decoratedRepository,
-				rowLevelSecurityPermissionValidator);
+		decoratedRepository = new RowLevelSecurityRepositoryDecorator(decoratedRepository);
 
 		if (decoratedRepository.getName().equals(MolgenisUserMetaData.ENTITY_NAME))
 		{

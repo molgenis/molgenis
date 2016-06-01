@@ -1,7 +1,9 @@
 package org.molgenis.data;
 
+import static autovalue.shaded.com.google.common.common.collect.Iterables.isEmpty;
 import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.MolgenisUser.USERNAME;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.io.IOException;
@@ -28,19 +30,23 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	public static final String PERMISSIONS_ATTRIBUTE = "_PERMISSIONS";
 
 	private final Repository decoratedRepository;
-	private final RowLevelSecurityPermissionValidator permissionValidator;
 
-	public RowLevelSecurityRepositoryDecorator(Repository decoratedRepository,
-			RowLevelSecurityPermissionValidator rowLevelSecurityPermissionValidator)
+	public RowLevelSecurityRepositoryDecorator(Repository decoratedRepository)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
-		this.permissionValidator = requireNonNull(rowLevelSecurityPermissionValidator);
 	}
 
 	@Override
 	public Stream<Entity> stream(Fetch fetch)
 	{
-		return decoratedRepository.stream(fetch).map(this::injectPermissions);
+		if (isRowLevelSecured())
+		{
+			return decoratedRepository.stream(fetch).map(this::injectPermissions);
+		}
+		else
+		{
+			return decoratedRepository.stream(fetch);
+		}
 	}
 
 	@Override
@@ -83,7 +89,28 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		return decoratedRepository.iterator();
+		if (isRowLevelSecured())
+		{
+			final Iterator<Entity> iterator = decoratedRepository.iterator();
+			return new Iterator<Entity>()
+			{
+				@Override
+				public boolean hasNext()
+				{
+					return iterator.hasNext();
+				}
+
+				@Override
+				public Entity next()
+				{
+					return injectPermissions(iterator.next());
+				}
+			};
+		}
+		else
+		{
+			return decoratedRepository.iterator();
+		}
 	}
 
 	@Override
@@ -183,7 +210,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		{
 			Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
 			Entity completeEntity = getCompleteEntity(entity);
-			permissionValidator.validatePermission(completeEntity, Permission.UPDATE, currentAuthentication);
+			validatePermission(completeEntity, Permission.UPDATE, currentAuthentication);
 			runAsSystem(() -> decoratedRepository.update(completeEntity));
 		}
 		else
@@ -198,8 +225,8 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
 			Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
-			Stream<? extends Entity> completeEntities = entities.map(this::getCompleteEntity).filter(
-					entity -> permissionValidator.validatePermission(entity, Permission.UPDATE, currentAuthentication));
+			Stream<? extends Entity> completeEntities = entities.map(this::getCompleteEntity)
+					.filter(entity -> validatePermission(entity, Permission.UPDATE, currentAuthentication));
 			runAsSystem(() -> decoratedRepository.update(completeEntities));
 		}
 		else
@@ -213,8 +240,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			permissionValidator.validatePermission(entity, Permission.UPDATE,
-					SecurityContextHolder.getContext().getAuthentication());
+			validatePermission(entity, Permission.UPDATE, SecurityContextHolder.getContext().getAuthentication());
 			runAsSystem(() -> decoratedRepository.delete(entity));
 		}
 		else
@@ -229,8 +255,8 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
 			Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
-			Stream<? extends Entity> filteredEntities = entities.map(this::getCompleteEntity).filter(
-					entity -> permissionValidator.validatePermission(entity, Permission.UPDATE, currentAuthentication));
+			Stream<? extends Entity> filteredEntities = entities.map(this::getCompleteEntity)
+					.filter(entity -> validatePermission(entity, Permission.UPDATE, currentAuthentication));
 			runAsSystem(() -> decoratedRepository.delete(filteredEntities));
 		}
 		else
@@ -244,9 +270,17 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			permissionValidator.validatePermission(runAsSystem(() -> findOne(id)), Permission.UPDATE,
-					SecurityContextHolder.getContext().getAuthentication());
-			runAsSystem(() -> decoratedRepository.deleteById(id));
+			Entity entity = runAsSystem(() -> findOne(id));
+			if (entity != null)
+			{
+				validatePermission(entity, Permission.UPDATE, SecurityContextHolder.getContext().getAuthentication());
+				runAsSystem(() -> decoratedRepository.deleteById(id));
+			}
+			else
+			{
+				throw new UnknownEntityException(
+						"The entity you are trying to delete with id [" + id.toString() + "] doesn't exist");
+			}
 		}
 		else
 		{
@@ -260,8 +294,13 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
 			Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
-			Stream<Object> filteredIds = ids.filter(id -> permissionValidator
-					.validatePermission(runAsSystem(() -> findOne(id)), Permission.UPDATE, currentAuthentication));
+			Stream<Object> filteredIds = ids.filter(id -> {
+				Entity entity = runAsSystem(() -> findOne(id));
+				if (entity == null) throw new UnknownEntityException(
+						"The entity you are trying to delete with id [" + id.toString() + "] doesn't exist");
+
+				return validatePermission(runAsSystem(() -> findOne(id)), Permission.UPDATE, currentAuthentication);
+			});
 			runAsSystem(() -> decoratedRepository.deleteById(filteredIds));
 		}
 		else
@@ -276,8 +315,8 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
 			Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
-			stream().map(this::getCompleteEntity).forEach(
-					entity -> permissionValidator.validatePermission(entity, Permission.UPDATE, currentAuthentication));
+			stream().map(this::getCompleteEntity)
+					.forEach(entity -> validatePermission(entity, Permission.UPDATE, currentAuthentication));
 			runAsSystem(decoratedRepository::deleteAll);
 		}
 		else
@@ -353,8 +392,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	private Entity injectPermissions(Entity entity)
 	{
 		List<String> permissions = newArrayList();
-		if (permissionValidator.hasPermission(entity, Permission.UPDATE,
-				SecurityContextHolder.getContext().getAuthentication()))
+		if (hasPermission(entity, Permission.UPDATE, SecurityContextHolder.getContext().getAuthentication()))
 		{
 			permissions.add(UPDATE_ATTRIBUTE);
 		}
@@ -372,6 +410,43 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 			entity.set(UPDATE_ATTRIBUTE, users);
 		}
 		return entity;
+	}
+
+	private boolean validatePermission(Entity completeEntity, Permission permission, Authentication authentication)
+	{
+		if (!hasPermission(completeEntity, permission, authentication))
+		{
+			throw new MolgenisDataAccessException(
+					"No " + permission.toString() + " permission on entity with id " + completeEntity.getIdValue());
+		}
+		return true;
+	}
+
+	private boolean hasPermission(Entity completeEntity, Permission permission, Authentication authentication)
+	{
+		if (SecurityUtils.userIsSu(authentication)
+				|| SecurityUtils.userHasRole(authentication, SystemSecurityToken.ROLE_SYSTEM))
+		{
+			return true;
+		}
+
+		String username = SecurityUtils.getUsername(authentication);
+
+		return runAsSystem(() -> {
+			Iterable<Entity> users = completeEntity.getEntities("_" + permission.toString());
+
+			if (users != null && !isEmpty(users))
+			{
+				for (Entity user : users)
+				{
+					if (user.getString(USERNAME).equals(username))
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		});
 	}
 
 	private class RowLevelSecurityEntityMetaData extends DefaultEntityMetaData implements EntityMetaData
