@@ -1,9 +1,9 @@
 package org.molgenis.data;
 
+import static autovalue.shaded.com.google.common.common.collect.Iterables.isEmpty;
 import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.RowLevelSecurityUtils.hasPermission;
-import static org.molgenis.data.RowLevelSecurityUtils.validatePermission;
+import static org.molgenis.auth.MolgenisUser.USERNAME;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.io.IOException;
@@ -39,7 +39,14 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	@Override
 	public Stream<Entity> stream(Fetch fetch)
 	{
-		return decoratedRepository.stream(fetch).map(this::injectPermissions);
+		if (isRowLevelSecured())
+		{
+			return decoratedRepository.stream(fetch).map(this::injectPermissions);
+		}
+		else
+		{
+			return decoratedRepository.stream(fetch);
+		}
 	}
 
 	@Override
@@ -382,6 +389,43 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 			entity.set(UPDATE_ATTRIBUTE, users);
 		}
 		return entity;
+	}
+
+	private boolean validatePermission(Entity completeEntity, Permission permission, Authentication authentication)
+	{
+		if (!hasPermission(completeEntity, permission, authentication))
+		{
+			throw new MolgenisDataAccessException(
+					"No " + permission.toString() + " permission on entity with id " + completeEntity.getIdValue());
+		}
+		return true;
+	}
+
+	private boolean hasPermission(Entity completeEntity, Permission permission, Authentication authentication)
+	{
+		if (SecurityUtils.userIsSu(authentication)
+				|| SecurityUtils.userHasRole(authentication, SystemSecurityToken.ROLE_SYSTEM))
+		{
+			return true;
+		}
+
+		String username = SecurityUtils.getUsername(authentication);
+
+		return runAsSystem(() -> {
+			Iterable<Entity> users = completeEntity.getEntities("_" + permission.toString());
+
+			if (users != null && !isEmpty(users))
+			{
+				for (Entity user : users)
+				{
+					if (user.getString(USERNAME).equals(username))
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		});
 	}
 
 	private class RowLevelSecurityEntityMetaData extends DefaultEntityMetaData implements EntityMetaData
