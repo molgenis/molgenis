@@ -1,11 +1,5 @@
 package org.molgenis.data.elasticsearch.index;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.Iterator;
-import java.util.Map;
-import java.util.stream.StreamSupport;
-
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
@@ -20,6 +14,12 @@ import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Iterator;
+import java.util.Map;
+import java.util.stream.StreamSupport;
+
+import static java.util.Objects.requireNonNull;
 
 @Component
 public class SourceToEntityConverter
@@ -44,6 +44,8 @@ public class SourceToEntityConverter
 				// this entity was retrieved from a transaction index, ignore 'meta' crud type attribute
 				return;
 			}
+			// Run as system because otherwise the row level secured enities throw an exception because of a lack of
+			// permissions on the referenced MolgenisUser in the "_UPDATE" column
 			AttributeMetaData attr = RunAsSystemProxy.runAsSystem(() -> {
 				return entityMeta.getAttribute(attrName);
 			});

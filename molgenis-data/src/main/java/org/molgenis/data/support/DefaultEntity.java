@@ -124,7 +124,11 @@ public class DefaultEntity implements Entity
 		}
 		else
 		{
-			if (attributeName.equals(RowLevelSecurityRepositoryDecorator.PERMISSIONS_ATTRIBUTE))
+			// The PERMISSIONs attribute is not actually in the backend, however it is added in code to the responses
+			// So even though the attribute cannot be found in the metadata it should be treated as a valid attribute,
+			// but only in the case of a row level secured entity.
+			if (attributeName.equals(RowLevelSecurityRepositoryDecorator.PERMISSIONS_ATTRIBUTE)
+					&& entityMetaData.isRowLevelSecured())
 			{
 				return getString(attributeName);
 			}

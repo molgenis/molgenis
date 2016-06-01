@@ -1,16 +1,16 @@
 package org.molgenis.data.support;
 
-import static java.util.Objects.requireNonNull;
-
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.util.List;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.RowLevelSecurityRepositoryDecorator;
+
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Entity with partially loaded attributes based on a fetch. Requesting attributes not included in the fetch are
@@ -58,7 +58,11 @@ public class PartialEntity implements Entity
 	@Override
 	public Object get(String attributeName)
 	{
-		if (fetch.hasField(attributeName) || attributeName.equals(RowLevelSecurityRepositoryDecorator.PERMISSIONS_ATTRIBUTE))
+		// The PERMISSIONs attribute is not actually in the backend, however it is added in code to the responses
+		// So even though the attribute cannot be found in the metadata it should be treated as a valid attribute,
+		// but only in the case of a row level secured entity.
+		if (fetch.hasField(attributeName)|| (attributeName.equals(RowLevelSecurityRepositoryDecorator.PERMISSIONS_ATTRIBUTE)
+				&& getEntityMetaData().isRowLevelSecured()))
 		{
 			return decoratedEntity.get(attributeName);
 		}
@@ -71,7 +75,12 @@ public class PartialEntity implements Entity
 	@Override
 	public String getString(String attributeName)
 	{
-		if (fetch.hasField(attributeName) || attributeName.equals(RowLevelSecurityRepositoryDecorator.PERMISSIONS_ATTRIBUTE))
+		// The PERMISSIONs attribute is not actually in the backend, however it is added in code to the responses
+		// So even though the attribute cannot be found in the metadata it should be treated as a valid attribute,
+		// but only in the case of a row level secured entity.
+		if (fetch.hasField(attributeName)
+				|| (attributeName.equals(RowLevelSecurityRepositoryDecorator.PERMISSIONS_ATTRIBUTE)
+						&& getEntityMetaData().isRowLevelSecured()))
 		{
 			return decoratedEntity.getString(attributeName);
 		}

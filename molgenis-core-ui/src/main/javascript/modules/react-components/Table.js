@@ -500,7 +500,7 @@ import "./css/Table.css";
 					id : item[entity.idAttribute],
 					onEdit: this.props.onEdit
 				});
-				if(item._permissions !== undefined) {
+				if(item._permissions !== undefined) {//is this item row level secured?
 					Cols.push(td({className: 'compact', key: 'edit'}, item._permissions.indexOf('UPDATE') !== -1 ? EntityEditBtn : null));
 				} else {
 					Cols.push(td({className: 'compact', key: 'edit'}, EntityEditBtn));
@@ -513,7 +513,7 @@ import "./css/Table.css";
 					id : item[entity.idAttribute],
 					onDelete: this.props.onDelete
 				});
-				if(item._permissions !== undefined) {
+				if(item._permissions !== undefined) {//is this item row level secured?
 					Cols.push(td({className: 'compact', key: 'delete'},  item._permissions.indexOf('UPDATE') !== -1 ? EntityDeleteBtn : null));
 				} else {
 					Cols.push(td({className: 'compact', key: 'delete'},  EntityDeleteBtn ));
