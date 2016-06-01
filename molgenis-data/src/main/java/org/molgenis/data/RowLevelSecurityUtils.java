@@ -1,7 +1,6 @@
 package org.molgenis.data;
 
 import static autovalue.shaded.com.google.common.common.collect.Iterables.isEmpty;
-import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.MolgenisUser.USERNAME;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
@@ -10,16 +9,10 @@ import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.core.Authentication;
 
-public class RowLevelSecurityPermissionValidator
+public class RowLevelSecurityUtils
 {
-	private final DataService dataService;
-
-	public RowLevelSecurityPermissionValidator(DataService dataService)
-	{
-		this.dataService = requireNonNull(dataService);
-	}
-
-	public boolean validatePermission(Entity completeEntity, Permission permission, Authentication authentication)
+	public static boolean validatePermission(Entity completeEntity, Permission permission,
+			Authentication authentication)
 	{
 		if (!hasPermission(completeEntity, permission, authentication))
 		{
@@ -29,7 +22,7 @@ public class RowLevelSecurityPermissionValidator
 		return true;
 	}
 
-	public boolean hasPermission(Entity completeEntity, Permission permission, Authentication authentication)
+	public static boolean hasPermission(Entity completeEntity, Permission permission, Authentication authentication)
 	{
 		if (SecurityUtils.userIsSu(authentication)
 				|| SecurityUtils.userHasRole(authentication, SystemSecurityToken.ROLE_SYSTEM))
