@@ -178,25 +178,6 @@ function getCurrentTimezoneOffset() {
 	return offset;
 }
 
-(function() {
-	var entityMap = {
-		"&" : "&amp;",
-		"<" : "&lt;",
-		"\u2264": "&lte;",
-		">" : "&gt;",
-		"\u2265": "&gte;",
-		'"' : '&quot;',
-		"'" : '&#39;',
-		"/" : '&#x2F;'
-	};
-
-	window.htmlEscape = function(string) {
-		return String(string).replace(/[&<>"'\/]/g, function(s) {
-			return entityMap[s];
-		});
-	};
-}(window));
-
 /*
  * Create a table cell to show data of a certain type Is used by the
  * dataexplorer and the forms plugin
