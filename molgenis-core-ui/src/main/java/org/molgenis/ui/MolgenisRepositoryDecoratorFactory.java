@@ -55,9 +55,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	{
 		Repository decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
 
-		// 11. Row level security decorator
-		decoratedRepository = new RowLevelSecurityRepositoryDecorator(decoratedRepository);
-
 		// 10. Row level security decorator
 		decoratedRepository = new RowLevelSecurityRepositoryDecorator(decoratedRepository);
 
