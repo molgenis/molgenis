@@ -65,7 +65,6 @@ import org.molgenis.util.MolgenisDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Function;
@@ -106,14 +105,11 @@ public class ImportWriter
 		this.molgenisPermissionService = molgenisPermissionService;
 	}
 
-	// Use transaction isolation level SERIALIZABLE to prevent problems with the async template, to do ddl statements
-	// without influencing on the current transaction
-	@Transactional(isolation = Isolation.SERIALIZABLE)
+	@Transactional
 	public EntityImportReport doImport(EmxImportJob job)
 	{
 		// languages first
 		importLanguages(job.report, job.parsedMetaData.getLanguages(), job.dbAction, job.metaDataChanges);
-
 		runAsSystem(() -> importTags(job.source));
 		importPackages(job.parsedMetaData);
 		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges);

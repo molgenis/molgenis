@@ -13,7 +13,6 @@ import static org.molgenis.data.QueryRule.Operator.IN;
 import static org.molgenis.data.QueryRule.Operator.LESS;
 import static org.molgenis.data.QueryRule.Operator.OR;
 import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
-import static org.molgenis.data.RepositoryCapability.INDEXABLE;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT;
@@ -410,7 +409,7 @@ public class IndexedRepositoryDecoratorTest
 	public void getCapabilities()
 	{
 		assertEquals(indexedRepositoryDecorator.getCapabilities(),
-				EnumSet.of(AGGREGATEABLE, QUERYABLE, MANAGABLE, INDEXABLE, VALIDATE_NOTNULL_CONSTRAINT));
+				EnumSet.of(AGGREGATEABLE, QUERYABLE, MANAGABLE, VALIDATE_NOTNULL_CONSTRAINT));
 	}
 
 	@Test

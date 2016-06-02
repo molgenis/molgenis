@@ -22,6 +22,10 @@ import ch.qos.logback.classic.spi.StackTraceElementProxy;
 import ch.qos.logback.core.AppenderBase;
 import ch.qos.logback.core.CoreConstants;
 
+/**
+ * Logback appender that logs {@link ILoggingEvent}s as documents of type {@link LoggingEventMetaData} into
+ * the molgenis index.
+ */
 public class MolgenisAppender extends AppenderBase<ILoggingEvent>
 {
 	private static final String TRACE_PREFIX = CoreConstants.LINE_SEPARATOR + "    ";

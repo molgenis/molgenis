@@ -42,6 +42,9 @@ import org.molgenis.data.mem.InMemoryRepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.reindex.ReindexActionRegisterService;
+import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DataServiceImpl;
@@ -582,6 +585,12 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		public LanguageService languageService()
 		{
 			return new LanguageService(dataService(), new AppDbSettings());
+		}
+
+		@Bean
+		public ReindexActionRegisterService reindexActionRegisterService()
+		{
+			return new ReindexActionRegisterService();
 		}
 
 		@Bean

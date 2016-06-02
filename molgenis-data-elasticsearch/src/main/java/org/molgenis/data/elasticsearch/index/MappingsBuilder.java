@@ -1,16 +1,13 @@
 package org.molgenis.data.elasticsearch.index;
 
-import java.io.IOException;
-
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
+
+import java.io.IOException;
 
 /**
  * Builds mappings for a documentType. For each column a multi_field is created, one analyzed for searching and one
@@ -24,62 +21,23 @@ public class MappingsBuilder
 	public static final String FIELD_NOT_ANALYZED = "raw";
 	public static final String FIELD_NGRAM_ANALYZED = "ngram";
 
-	/**
-	 * Creates entity meta data for the given repository, documents are stored in the index
-	 * 
-	 * @param repository
-	 * @return
-	 * @throws IOException
-	 */
-	public static XContentBuilder buildMapping(Repository<Entity> repository) throws IOException
-	{
-		return buildMapping(repository.getEntityMetaData());
-	}
-
-	/**
-	 * Creates entity meta data for the given repository
-	 * 
-	 * @deprecated see buildMapping(EntityMetaData)
-	 * 
-	 * @param repository
-	 * @param storeSource
-	 *            whether or not documents are stored in the index
-	 * @return
-	 * @throws IOException
-	 */
-	@Deprecated
-	public static XContentBuilder buildMapping(Repository<Entity> repository, boolean storeSource, boolean enableNorms,
-			boolean createAllIndex) throws IOException
-	{
-		return buildMapping(repository.getEntityMetaData(), storeSource, enableNorms, createAllIndex);
-	}
-
-	/**
-	 * Creates a Elasticsearch mapping for the given entity meta data, documents are stored in the index
-	 * 
-	 * @param entityMetaData
-	 * @return
-	 * @throws IOException
-	 */
-	public static XContentBuilder buildMapping(EntityMetaData entityMetaData) throws IOException
-	{
-		return buildMapping(entityMetaData, true, true, true);
-	}
+	private MappingsBuilder(){}
 
 	/**
 	 * Creates a Elasticsearch mapping for the given entity meta data
-	 * 
-	 * @param entityMetaData
+	 *
+	 * @param jsonBuilder {@link XContentBuilder} to write the mapping to
+	 * @param entityMetaData {@link EntityMetaData} for the entity to map
 	 * @param storeSource
 	 *            whether or not documents are stored in the index
 	 * @return
 	 * @throws IOException
 	 */
-	public static XContentBuilder buildMapping(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
+	public static void buildMapping(XContentBuilder jsonBuilder, EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
 			boolean createAllIndex) throws IOException
 	{
 		String documentType = MapperTypeSanitizer.sanitizeMapperType(entityMetaData.getName());
-		XContentBuilder jsonBuilder = XContentFactory.jsonBuilder().startObject().startObject(documentType);
+		jsonBuilder.startObject().startObject(documentType);
 
 		jsonBuilder.startObject("_source").field("enabled", storeSource).endObject();
 
@@ -96,8 +54,6 @@ public class MappingsBuilder
 		jsonBuilder.endObject();
 
 		jsonBuilder.endObject().endObject();
-
-		return jsonBuilder;
 	}
 
 	// TODO discuss: use null_value for nillable attributes?

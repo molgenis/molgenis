@@ -1,5 +1,6 @@
 package org.molgenis.data.meta;
 
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
@@ -11,7 +12,11 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
@@ -20,6 +25,9 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.mem.InMemoryRepositoryCollection;
+import org.molgenis.data.reindex.ReindexActionRegisterService;
+import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DefaultAttributeMetaData;
@@ -75,7 +83,9 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 		personEntity.set(EntityMetaDataMetaData.ABSTRACT, true);
 
 		DataServiceImpl dataService = new DataServiceImpl();
+
 		metaDataServiceImpl = new MetaDataServiceImpl(dataService);
+		metaDataServiceImpl.setReindexActionRegisterService(mock(ReindexActionRegisterService.class));
 
 		AppSettings appSettings = Mockito.mock(AppSettings.class);
 		metaDataServiceImpl.setLanguageService(new LanguageService(dataService, appSettings));
@@ -87,8 +97,6 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testAddAndGetEntity()
 	{
-		readPackageTree();
-
 		PackageImpl defaultPackage = (PackageImpl) PackageImpl.defaultPackage;
 		DefaultEntityMetaData coderMetaData = new DefaultEntityMetaData("Coder");
 		coderMetaData.setDescription("A coder");
@@ -111,6 +119,7 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 
 		DataServiceImpl dataService = new DataServiceImpl();
 		metaDataServiceImpl = new MetaDataServiceImpl(dataService);
+		metaDataServiceImpl.setReindexActionRegisterService(mock(ReindexActionRegisterService.class));
 		AppSettings appSettings = Mockito.mock(AppSettings.class);
 		metaDataServiceImpl.setLanguageService(new LanguageService(dataService, appSettings));
 		metaDataServiceImpl.setDefaultBackend(manageableCrudRepositoryCollection);
@@ -161,6 +170,7 @@ public class MetaDataServiceImplTest extends AbstractTestNGSpringContextTests
 
 		when(dataServiceImpl.getEntityMetaData(entityName)).thenReturn(existingEntityMetaData);
 		MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(dataServiceImpl);
+		metaDataServiceImpl.setReindexActionRegisterService(mock(ReindexActionRegisterService.class));
 
 		assertTrue(metaDataService.canIntegrateEntityMetadataCheck(newEntityMetaData));
 	}
