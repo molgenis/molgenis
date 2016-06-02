@@ -28,6 +28,8 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.QueryUtils;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Sets;
@@ -38,6 +40,10 @@ import com.google.common.collect.Sets;
  */
 public class IndexedRepositoryDecorator implements Repository<Entity>
 {
+	private static final Logger LOG = LoggerFactory.getLogger(IndexedRepositoryDecorator.class);
+	private static final String INDEX_REPOSITORY = "Index Repository";
+	private static final String DECORATED_REPOSITORY = "Decorated Repository";
+
 	private static final int BATCH_SIZE = 1000;
 
 	private final Repository<Entity> decoratedRepository;
@@ -169,10 +175,15 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	{
 		if (querySupported(q))
 		{
+			LOG.debug("public Entity findOne({}) entityName: [{}] repository: [{}]", q,
+					getEntityMetaData().getName(),
+					DECORATED_REPOSITORY);
 			return decoratedRepository.findOne(q);
 		}
 		else
 		{
+			LOG.debug("public Entity findOne({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
+					INDEX_REPOSITORY);
 			return indexRepository.findOne(q);
 		}
 
@@ -195,10 +206,14 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	{
 		if (querySupported(q))
 		{
+			LOG.debug("public Entity findAll({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
+					DECORATED_REPOSITORY);
 			return decoratedRepository.findAll(q);
 		}
 		else
 		{
+			LOG.debug("public Entity findAll({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
+					INDEX_REPOSITORY);
 			return indexRepository.findAll(q);
 		}
 	}
@@ -290,13 +305,17 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	@Override
 	public long count(Query<Entity> q)
 	{
-		// TODO add check is index stable ask question to index and not original backend. Optimization step!
+		// TODO check if the index is stable. If index is stable you can better check index for count results
 		if (querySupported(q))
 		{
+			LOG.debug("public long count({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
+					DECORATED_REPOSITORY);
 			return decoratedRepository.count(q);
 		}
 		else
 		{
+			LOG.debug("public long count({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
+					INDEX_REPOSITORY);
 			return indexRepository.count(q);
 		}
 	}
