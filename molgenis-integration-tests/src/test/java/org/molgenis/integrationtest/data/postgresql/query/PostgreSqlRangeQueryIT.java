@@ -21,7 +21,6 @@ public class PostgreSqlRangeQueryIT extends AbstractRangeQueryIT
 	@Test
 	public void testIt() throws ParseException
 	{
-		// TODO implement RANGE query in PostgreSQL
-		// super.testIt();
+		super.testIt();
 	}
 }
