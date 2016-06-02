@@ -1,5 +1,6 @@
 package org.molgenis.ui.admin.permission;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.ui.admin.permission.PermissionManagerController.URI;
 
 import java.util.ArrayList;
@@ -8,8 +9,10 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.auth.GroupAuthority;
+import org.molgenis.auth.GroupAuthorityFactory;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
+import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -44,14 +47,17 @@ public class PermissionManagerController extends MolgenisPluginController
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + "permissionmanager";
 
 	private final PermissionManagerService pluginPermissionManagerService;
+	private final UserAuthorityFactory userAuthorityFactory;
+	private final GroupAuthorityFactory groupAuthorityFactory;
 
 	@Autowired
-	public PermissionManagerController(PermissionManagerService pluginPermissionManagerService)
+	public PermissionManagerController(PermissionManagerService pluginPermissionManagerService,
+			UserAuthorityFactory userAuthorityFactory, GroupAuthorityFactory groupAuthorityFactory)
 	{
 		super(URI);
-		if (pluginPermissionManagerService == null) throw new IllegalArgumentException(
-				"PluginPermissionManagerService is null");
-		this.pluginPermissionManagerService = pluginPermissionManagerService;
+		this.pluginPermissionManagerService = requireNonNull(pluginPermissionManagerService);
+		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
+		this.groupAuthorityFactory = requireNonNull(groupAuthorityFactory);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
@@ -114,7 +120,7 @@ public class PermissionManagerController extends MolgenisPluginController
 					|| value.equalsIgnoreCase(Permission.WRITE.toString())
 					|| value.equalsIgnoreCase(Permission.WRITEMETA.toString()))
 			{
-				GroupAuthority authority = new GroupAuthority();
+				GroupAuthority authority = groupAuthorityFactory.create();
 				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_"
 						+ plugin.getId().toUpperCase());
 				authorities.add(authority);
@@ -137,7 +143,7 @@ public class PermissionManagerController extends MolgenisPluginController
 					|| value.equalsIgnoreCase(Permission.WRITE.toString())
 					|| value.equalsIgnoreCase(Permission.WRITEMETA.toString()))
 			{
-				GroupAuthority authority = new GroupAuthority();
+				GroupAuthority authority = groupAuthorityFactory.create();
 				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
 						+ entityClassId.toUpperCase());
 				authorities.add(authority);
@@ -160,7 +166,7 @@ public class PermissionManagerController extends MolgenisPluginController
 					|| value.equalsIgnoreCase(Permission.WRITE.toString())
 					|| value.equalsIgnoreCase(Permission.WRITEMETA.toString()))
 			{
-				UserAuthority authority = new UserAuthority();
+				UserAuthority authority = userAuthorityFactory.create();
 				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_"
 						+ plugin.getId().toUpperCase());
 				authorities.add(authority);
@@ -183,7 +189,7 @@ public class PermissionManagerController extends MolgenisPluginController
 					|| value.equalsIgnoreCase(Permission.WRITE.toString())
 					|| value.equalsIgnoreCase(Permission.WRITEMETA.toString()))
 			{
-				UserAuthority authority = new UserAuthority();
+				UserAuthority authority = userAuthorityFactory.create();
 				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
 						+ entityClassId.toUpperCase());
 				authorities.add(authority);

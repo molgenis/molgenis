@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData.MOLGENIS_TRANSACTION_LOG_ENTRY;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -52,7 +53,7 @@ public class TransactionLogRepositoryDecoratorTest
 	@Test
 	public void addStreamExcludedEntity()
 	{
-		when(decoratedRepo.getName()).thenReturn(MolgenisTransactionLogEntryMetaData.ENTITY_NAME);
+		when(decoratedRepo.getName()).thenReturn(MOLGENIS_TRANSACTION_LOG_ENTRY);
 
 		Stream<Entity> entities = Stream.empty();
 		when(decoratedRepo.add(entities)).thenReturn(123);
@@ -72,7 +73,7 @@ public class TransactionLogRepositoryDecoratorTest
 	@Test
 	public void deleteStreamExcludedEntity()
 	{
-		when(decoratedRepo.getName()).thenReturn(MolgenisTransactionLogEntryMetaData.ENTITY_NAME);
+		when(decoratedRepo.getName()).thenReturn(MOLGENIS_TRANSACTION_LOG_ENTRY);
 
 		Stream<Entity> entities = Stream.empty();
 		transactionLogRepositoryDecorator.delete(entities);
@@ -99,7 +100,7 @@ public class TransactionLogRepositoryDecoratorTest
 	@Test
 	public void updateStreamExcludedEntity()
 	{
-		when(decoratedRepo.getName()).thenReturn(MolgenisTransactionLogEntryMetaData.ENTITY_NAME);
+		when(decoratedRepo.getName()).thenReturn(MOLGENIS_TRANSACTION_LOG_ENTRY);
 
 		Entity entity0 = mock(Entity.class);
 		Stream<Entity> entities = Stream.of(entity0);

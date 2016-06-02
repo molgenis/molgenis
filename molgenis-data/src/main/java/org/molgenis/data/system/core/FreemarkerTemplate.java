@@ -1,154 +1,58 @@
 package org.molgenis.data.system.core;
 
-import java.util.LinkedHashSet;
-import java.util.Set;
+import static org.molgenis.data.meta.system.FreemarkerTemplateMetaData.ID;
+import static org.molgenis.data.meta.system.FreemarkerTemplateMetaData.NAME;
+import static org.molgenis.data.meta.system.FreemarkerTemplateMetaData.VALUE;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.SystemEntity;
 import org.molgenis.data.meta.system.FreemarkerTemplateMetaData;
 
-import com.google.auto.value.AutoValue;
+public class FreemarkerTemplate extends SystemEntity
+{
+	public FreemarkerTemplate(Entity entity)
+	{
+		super(entity);
+	}
 
-@AutoValue
-public class FreemarkerTemplate  extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity{
-    public static final String ENTITY_NAME = "FreemarkerTemplate";
-    String id;
-    String name;
-    String value;
+	public FreemarkerTemplate(FreemarkerTemplateMetaData freemarkerTemplateMetaData)
+	{
+		super(freemarkerTemplateMetaData);
+	}
 
-    public String getId() {
-        return id;
-    }
+	public FreemarkerTemplate(String id, FreemarkerTemplateMetaData freemarkerTemplateMetaData)
+	{
+		super(freemarkerTemplateMetaData);
+		setId(id);
+	}
 
-    public void setId(String id) {
-        this.id = id;
-    }
+	public String getId()
+	{
+		return getString(ID);
+	}
 
-    public String getName() {
-        return name;
-    }
+	public void setId(String id)
+	{
+		set(ID, id);
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public String getName()
+	{
+		return getString(NAME);
+	}
 
-    public String getValue() {
-        return value;
-    }
+	public void setName(String name)
+	{
+		set(NAME, name);
+	}
 
-    public void setValue(String value) {
-        this.value = value;
-    }
+	public String getValue()
+	{
+		return getString(VALUE);
+	}
 
-    @Override
-    public Object get(String name)
-    {
-        name = name.toLowerCase();
-        if (name.equals("id"))
-            return getId();
-        if (name.equals("name"))
-            return getName();
-        if (name.equals("value"))
-            return getValue();
-        return null;
-    }
-
-    @Override
-    public void set(Entity entity)
-    {
-        set(entity, true);
-    }
-
-    public void set(org.molgenis.data.Entity entity, boolean strict)
-    {
-        if(entity.getString("id") != null) this.setId(entity.getString("id"));
-        if( entity.getString("FreemarkerTemplate_id") != null) this.setId(entity.getString("FreemarkerTemplate_id"));
-        if(entity.getString("Name") != null) this.setName(entity.getString("Name"));
-        if( entity.getString("FreemarkerTemplate_Name") != null) this.setName(entity.getString("FreemarkerTemplate_Name"));
-        if(entity.getString("Value") != null) this.setValue(entity.getString("Value"));
-        if( entity.getString("FreemarkerTemplate_Value") != null) this.setValue(entity.getString("FreemarkerTemplate_Value"));
-    }
-
-    @Override
-    public String toString()
-    {
-        return this.toString(false);
-    }
-
-    public String toString(boolean verbose)
-    {
-        StringBuilder sb = new StringBuilder("FreemarkerTemplate(");
-        sb.append("id='" + getId()+"' ");
-        sb.append("name='" + getName()+"' ");
-        sb.append("value='" + getValue()+"'");
-        sb.append(");");
-        return sb.toString();
-    }
-
-    @Override
-    public String getIdValue()
-    {
-        return getId();
-    }
-
-
-    @Override
-    public Iterable<String> getAttributeNames()
-    {
-        Set<String> attributeNames = new LinkedHashSet<String>();
-        for (AttributeMetaData attr : new FreemarkerTemplateMetaData().getAttributes())
-        {
-            attributeNames.add(attr.getName());
-        }
-
-        return attributeNames;
-    }
-
-    @Override
-    public void set(String attributeName, Object value)
-    {
-        if("id".equals(attributeName)) {
-            this.setId((String)value);
-            return;
-        }
-        if("Name".equals(attributeName)) {
-            this.setName((String)value);
-            return;
-        }
-        if("Value".equals(attributeName)) {
-            this.setValue((String)value);
-            return;
-        }
-    }
-
-    @Override
-    public boolean equals(Object obj)
-    {
-        if (this == obj) return true;
-        if (obj == null) return false;
-        if (getClass() != obj.getClass()) return false;
-        FreemarkerTemplate other = (FreemarkerTemplate) obj;
-        if (name == null)
-        {
-            if (other.name != null) return false;
-        }
-        else if (!name.equals(other.name)) return false;
-        return true;
-    }
-
-    @Override
-    public int hashCode()
-    {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((name == null) ? 0 : name.hashCode());
-        return result;
-    }
-
-    @Override
-    public EntityMetaData getEntityMetaData()
-    {
-        return new FreemarkerTemplateMetaData();
-    }
+	public void setValue(String value)
+	{
+		set(VALUE, value);
+	}
 }

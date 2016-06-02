@@ -1,5 +1,7 @@
 package org.molgenis.data.vcf;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -10,7 +12,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.FileRepositoryCollection;
 
 import com.google.common.collect.ImmutableSet;
@@ -29,8 +30,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	public VcfRepositoryCollection(File file) throws IOException
 	{
 		super(EXTENSIONS);
-		if (file == null) throw new IllegalArgumentException("file is null");
-		this.file = file;
+		this.file = requireNonNull(file);
 
 		String name = file.getName();
 		if (name.endsWith(EXTENSION_VCF))
@@ -49,6 +49,12 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 		{
 			throw new IllegalArgumentException("Not a VCF file [" + file.getName() + "]");
 		}
+	}
+
+	@Override
+	public void init() throws IOException
+	{
+		// no operation
 	}
 
 	@Override
@@ -75,12 +81,6 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	public String getName()
 	{
 		return NAME;
-	}
-
-	@Override
-	public Repository<Entity> createRepository(EntityMetaData entityMeta)
-	{
-		return getRepository(entityMeta.getName());
 	}
 
 	@Override
@@ -121,11 +121,5 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	public boolean hasRepository(EntityMetaData entityMeta)
 	{
 		return hasRepository(entityMeta.getName());
-	}
-
-	@Override
-	public void deleteRepository(String name)
-	{
-		throw new UnsupportedOperationException(); // FIXME implement
 	}
 }

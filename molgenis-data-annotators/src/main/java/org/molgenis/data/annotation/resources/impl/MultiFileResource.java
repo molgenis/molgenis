@@ -12,7 +12,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.ResourceConfig;
-import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.VcfAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,7 +82,7 @@ public class MultiFileResource implements Resource {
     public Iterable<Entity> findAll(Query<Entity> q) {
         // initialize after autowiring is complete and resources is empty
         isAvailable();
-        Object chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q);
+        Object chromValue = getFirstEqualsValueFor(VcfAttributes.CHROM, q);
         Iterable<Entity> result = new ArrayList<Entity>();
 
         if (chromValue != null) {

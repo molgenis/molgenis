@@ -2,6 +2,7 @@ package org.molgenis.data.semanticsearch.service.impl;
 
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -231,7 +232,7 @@ public class SemanticSearchServiceHelper
 	 */
 	public List<String> getAttributeIdentifiers(EntityMetaData sourceEntityMetaData)
 	{
-		Entity entityMetaDataEntity = dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME,
+		Entity entityMetaDataEntity = dataService.findOne(ENTITY_META_DATA,
 				new QueryImpl<Entity>().eq(EntityMetaDataMetaData.FULL_NAME, sourceEntityMetaData.getName()));
 
 		if (entityMetaDataEntity == null) throw new MolgenisDataAccessException(

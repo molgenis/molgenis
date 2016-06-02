@@ -3,9 +3,10 @@ package org.molgenis.file.ingest.meta;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.fieldtypes.EnumField;
@@ -18,7 +19,9 @@ import com.google.common.collect.ImmutableList;
 @Component
 public class FileIngestMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String ENTITY_NAME = "FileIngest";
+	public static final String SIMPLE_NAME = "FileIngest";
+	public static final String FILE_INGEST = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
+
 	public static final String ID = "id";
 	public static final String NAME = "name";
 	public static final String DESCRIPTION = "description";
@@ -29,17 +32,14 @@ public class FileIngestMetaData extends SystemEntityMetaDataImpl
 	public static final String ACTIVE = "active";
 	public static final String FAILURE_EMAIL = "failureEmail";
 
-	private static FileIngestMetaData INSTANCE;
-
 	public static final ImmutableList<String> LOADERS = ImmutableList.of("CSV");
 	private final EntityMetaDataMetaData entityMetaDataMetaData;
 
 	@Autowired
 	public FileIngestMetaData(EntityMetaDataMetaData entityMetaDataMetaData)
 	{
-		super(ENTITY_NAME);
+		super(SIMPLE_NAME, PACKAGE_SYSTEM);
 		this.entityMetaDataMetaData = entityMetaDataMetaData;
-		INSTANCE = this;
 	}
 
 	@Override
@@ -59,10 +59,5 @@ public class FileIngestMetaData extends SystemEntityMetaDataImpl
 		addAttribute(FAILURE_EMAIL).setDataType(MolgenisFieldTypes.EMAIL).setLabel("Failure email")
 				.setDescription("Leave blank if you don't want to receive emails if the jobs failed.")
 				.setNillable(true);
-	}
-
-	// access bean from classes other than spring-managed beans
-	public static FileIngestMetaData get() {
-		return INSTANCE;
 	}
 }

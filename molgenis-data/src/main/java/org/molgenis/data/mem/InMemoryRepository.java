@@ -251,20 +251,6 @@ public class InMemoryRepository implements Repository<Entity>
 	}
 
 	@Override
-	public void create()
-	{
-		// Repo is not MANAGABLE
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void drop()
-	{
-		// Repo is not MANAGABLE
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public void rebuildIndex()
 	{
 		// Repo is not INDEXABLE

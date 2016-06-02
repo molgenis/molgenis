@@ -12,7 +12,7 @@
 
 		IdcardBiobankIndexerComponent = React.render(molgenis.ui.IdcardBiobankIndexerComponent({
 			biobankEntity: 'rdconnect_regbb',
-			indexEntity: 'IdCardIndexingEvent',
+			indexEntity: 'sys_idc_IdCardIndexingEvent',
 			buttonDisabled: false,
 			onButtonClick: onButtonClick
 		}), $('#idCardBiobankIndexer-container')[0]);

@@ -1,10 +1,18 @@
 package org.molgenis.app;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.data.i18n.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
+import static org.molgenis.data.i18n.LanguageMetaData.DEFAULT_LANGUAGE_NAME;
+import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
+
 import org.molgenis.app.controller.HomeController;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
+import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;
-import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.i18n.LanguageFactory;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulatorService;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -18,18 +26,19 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 {
 	private final DataService dataService;
 	private final MolgenisSecurityWebAppDatabasePopulatorService molgenisSecurityWebAppDatabasePopulatorService;
+	private final UserAuthorityFactory userAuthorityFactory;
+	private final LanguageFactory languageFactory;
 
 	@Autowired
 	public WebAppDatabasePopulatorServiceImpl(DataService dataService,
-			MolgenisSecurityWebAppDatabasePopulatorService molgenisSecurityWebAppDatabasePopulatorService)
+			MolgenisSecurityWebAppDatabasePopulatorService molgenisSecurityWebAppDatabasePopulatorService,
+			UserAuthorityFactory userAuthorityFactory, LanguageFactory langaugeFactory)
 	{
-		if (dataService == null) throw new IllegalArgumentException("DataService is null");
-		this.dataService = dataService;
-
-		if (molgenisSecurityWebAppDatabasePopulatorService == null) throw new IllegalArgumentException(
-				"MolgenisSecurityWebAppDatabasePopulator is null");
-		this.molgenisSecurityWebAppDatabasePopulatorService = molgenisSecurityWebAppDatabasePopulatorService;
-
+		this.dataService = requireNonNull(dataService);
+		this.molgenisSecurityWebAppDatabasePopulatorService = requireNonNull(
+				molgenisSecurityWebAppDatabasePopulatorService);
+		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
+		this.languageFactory = requireNonNull(langaugeFactory);
 	}
 
 	@Override
@@ -37,24 +46,16 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	@RunAsSystem
 	public void populateDatabase()
 	{
-//		dataService.getMeta().createRepository(new AuthorityMetaData());
-//		dataService.getMeta().createRepository(new RuntimePropertyMetaData());
-//		dataService.getMeta().createRepository(new FreemarkerTemplateMetaData());
-//		dataService.getMeta().createRepository(new GroupAuthorityMetaData());
-//		dataService.getMeta().createRepository(new UserAuthorityMetaData());
-//		dataService.getMeta().createRepository(new MolgenisUserMetaData());
-//		dataService.getMeta().createRepository(new MolgenisGroupMetaData());
-//		dataService.getMeta().createRepository(new MolgenisGroupMemberMetaData());
-//		dataService.getMeta().createRepository(new ImportRunMetaData());
-//		dataService.getMeta().createRepository(new JobExecutionMetaData());
-
 		molgenisSecurityWebAppDatabasePopulatorService.populateDatabase(this.dataService, HomeController.ID);
 
 		MolgenisUser anonymousUser = molgenisSecurityWebAppDatabasePopulatorService.getAnonymousUser();
-		UserAuthority anonymousHomeAuthority = new UserAuthority();
+		UserAuthority anonymousHomeAuthority = userAuthorityFactory.create();
 		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
 		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + HomeController.ID.toUpperCase());
-		dataService.add(UserAuthority.ENTITY_NAME, anonymousHomeAuthority);
+		dataService.add(USER_AUTHORITY, anonymousHomeAuthority);
+
+		// add default language
+		dataService.add(LANGUAGE, languageFactory.create(DEFAULT_LANGUAGE_CODE, DEFAULT_LANGUAGE_NAME));
 	}
 
 	@Override
@@ -62,7 +63,6 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	@RunAsSystem
 	public boolean isDatabasePopulated()
 	{
-		return true;
-		//return dataService.count(MolgenisUser.ENTITY_NAME, new QueryImpl<>()) > 0;
+		return dataService.count(MOLGENIS_USER) > 0;
 	}
 }

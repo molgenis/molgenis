@@ -1,11 +1,11 @@
 package org.molgenis.data;
 
+import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 
 /**
  * Repository collection
@@ -26,7 +26,18 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	}
 
 	/**
-	 * Create and add a new CrudRepository for an EntityMetaData
+	 * Returns the capabilities of this repository collection
+	 *
+	 * @return repository collection capabilities
+	 */
+	Set<RepositoryCollectionCapability> getCapabilities();
+
+	/**
+	 * Creates a new {@link Repository} within this repository collection for the given entity meta data.
+	 *
+	 * @param entityMeta entity meta data
+	 * @return the created repository
+	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#WRITABLE}
 	 */
 	Repository<Entity> createRepository(EntityMetaData entityMeta);
 
@@ -37,7 +48,7 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 
 	/**
 	 * Get a repository by entity name
-	 * 
+	 *
 	 * @throws UnknownEntityException
 	 */
 	Repository<Entity> getRepository(String name);
@@ -51,34 +62,55 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	Repository<Entity> getRepository(EntityMetaData entityMeta);
 
 	/**
-	 * Check if a repository exists by entity name
+	 * Get a typed repository for the given entity meta data
 	 *
+	 * @param entityMeta
+	 * @param clazz
+	 * @param <E>
+	 * @return
+	 */
+	<E extends Entity> Repository<E> getRepository(EntityMetaData entityMeta, Class<E> clazz);
+
+	/**
+	 * Check if a repository exists by entity name
 	 */
 	boolean hasRepository(String name);
 
 	boolean hasRepository(EntityMetaData entityMeta);
 
 	/**
-	 * Removes an entity definition from this ManageableCrudRepositoryCollection
+	 * Deletes the {@link Repository} with the given entity name from this repository collection.
 	 *
-	 * @param entityName
+	 *
+	 * @param entityMeta@throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#WRITABLE}
 	 */
-	void deleteRepository(String entityName);
+	void deleteRepository(EntityMetaData entityMeta);
 
 	/**
 	 * Adds an Attribute to an EntityMeta
 	 *
 	 * @param entityName
 	 * @param attribute
+	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#UPDATABLE}
 	 */
 	void addAttribute(String entityName, AttributeMetaData attribute);
+
+	/**
+	 * Updates {@link Repository repositories} for the given updated attribute.
+	 *
+	 * @param entityMetaData entity meta data
+	 * @param attr           attribute
+	 * @param updatedAttr
+	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#UPDATABLE}
+	 */
+	void updateAttribute(EntityMetaData entityMetaData, AttributeMetaData attr, AttributeMetaData updatedAttr);
 
 	/**
 	 * Removes an attribute from an entity
 	 *
 	 * @param entityName
 	 * @param attributeName
+	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#UPDATABLE}
 	 */
 	void deleteAttribute(String entityName, String attributeName);
-
 }

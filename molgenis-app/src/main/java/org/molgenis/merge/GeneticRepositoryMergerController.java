@@ -1,8 +1,9 @@
 package org.molgenis.merge;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.LONG;
+import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.merge.GeneticRepositoryMergerController.URI;
 
 import java.io.IOException;
@@ -14,6 +15,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.merge.RepositoryMerger;
 import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
@@ -42,47 +44,55 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 	public static final String ID = "geneticrepositorymerger";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
 
-	public static final AttributeMetaData CHROM = null; //FIXME new AttributeMetaData("#CHROM", STRING);
-	public static final AttributeMetaData POS = null;//FIXME new AttributeMetaData("POS", LONG);
-	public static final AttributeMetaData REF = null;//FIXME new AttributeMetaData("REF", TEXT);
-	public static final AttributeMetaData ALT = null;//FIXME new AttributeMetaData("ALT", TEXT);
+	public final AttributeMetaData chromAttr;
+	public final AttributeMetaData posAttr;
+	public final AttributeMetaData refAttr;
+	public final AttributeMetaData altAttr;
 
-	private final ArrayList<AttributeMetaData> commonAttributes;
+	private final List<AttributeMetaData> commonAttributes;
 	private final RepositoryMerger repositoryMerger;
 	private final DataService dataService;
+	private final AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
-	public GeneticRepositoryMergerController(RepositoryMerger repositoryMerger, DataService dataService)
+	public GeneticRepositoryMergerController(RepositoryMerger repositoryMerger, DataService dataService,
+			AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		super(URI);
 
-		this.repositoryMerger = repositoryMerger;
-		this.dataService = dataService;
+		this.repositoryMerger = requireNonNull(repositoryMerger);
+		this.dataService = requireNonNull(dataService);
+		this.attributeMetaDataFactory = requireNonNull(attributeMetaDataFactory);
 
-		commonAttributes = new ArrayList<AttributeMetaData>();
-		commonAttributes.add(CHROM);
-		commonAttributes.add(POS);
-		commonAttributes.add(REF);
-		commonAttributes.add(ALT);
+		chromAttr = attributeMetaDataFactory.create().setName("#CHROM").setDataType(STRING);
+		posAttr = attributeMetaDataFactory.create().setName("POS").setDataType(LONG);
+		refAttr = attributeMetaDataFactory.create().setName("REF").setDataType(TEXT);
+		altAttr = attributeMetaDataFactory.create().setName("ALT").setDataType(TEXT);
+
+		commonAttributes = new ArrayList<>();
+		commonAttributes.add(chromAttr);
+		commonAttributes.add(posAttr);
+		commonAttributes.add(refAttr);
+		commonAttributes.add(altAttr);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model) throws Exception
 	{
-		dataService.getEntityNames();
-		List<String> geneticRepositories = new ArrayList<String>();
+		List<String> geneticRepositories = new ArrayList<>();
 		dataService.getEntityNames().forEach(name -> {
-			if (dataService.getEntityMetaData(name).getAttribute(CHROM.getName()) != null
-					&& dataService.getEntityMetaData(name).getAttribute(POS.getName()) != null
-					&& dataService.getEntityMetaData(name).getAttribute(REF.getName()) != null
-					&& dataService.getEntityMetaData(name).getAttribute(ALT.getName()) != null)
+			EntityMetaData entityMetaData = dataService.getEntityMetaData(name);
+			if (entityMetaData.getAttribute(chromAttr.getName()) != null
+					&& entityMetaData.getAttribute(posAttr.getName()) != null
+					&& entityMetaData.getAttribute(refAttr.getName()) != null
+					&& entityMetaData.getAttribute(altAttr.getName()) != null)
 			{
 				geneticRepositories.add(name);
 			}
 		});
 
-		Iterable<EntityMetaData> entitiesMeta = Iterables.transform(geneticRepositories,
-				new Function<String, EntityMetaData>()
+		Iterable<EntityMetaData> entitiesMeta = Iterables
+				.transform(geneticRepositories, new Function<String, EntityMetaData>()
 				{
 					@Override
 					public EntityMetaData apply(String entityName)
@@ -128,8 +138,8 @@ public class GeneticRepositoryMergerController extends MolgenisPluginController
 				}
 			}
 
-			EntityMetaData mergedEntityMetaData = repositoryMerger.mergeMetaData(geneticRepositories, commonAttributes,
-					null, resultSet);
+			EntityMetaData mergedEntityMetaData = repositoryMerger
+					.mergeMetaData(geneticRepositories, commonAttributes, null, resultSet);
 			Repository<Entity> mergedRepository = dataService.getMeta().addEntityMeta(mergedEntityMetaData);
 			repositoryMerger.merge(geneticRepositories, commonAttributes, mergedRepository);
 		}

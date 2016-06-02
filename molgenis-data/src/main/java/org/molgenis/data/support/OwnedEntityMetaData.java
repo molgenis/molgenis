@@ -1,8 +1,13 @@
 package org.molgenis.data.support;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
+import org.molgenis.auth.SecurityPackage;
 import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,13 +21,25 @@ import org.springframework.stereotype.Component;
 @Component
 public class OwnedEntityMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String ENTITY_NAME = "Owned";
+	public static final String SIMPLE_NAME = "Owned";
+	public static final String OWNED = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+
 	public static final String ATTR_OWNER_USERNAME = "ownerUsername";
+
+	private final SecurityPackage securityPackage;
+
+	@Autowired
+	public OwnedEntityMetaData(SecurityPackage securityPackage)
+	{
+		super(SIMPLE_NAME, PACKAGE_SECURITY);
+		this.securityPackage = requireNonNull(securityPackage);
+	}
 
 	@Override
 	public void init()
 	{
-		setName(ENTITY_NAME);
+		setPackage(securityPackage);
+
 		setAbstract(true);
 		addAttribute(ATTR_OWNER_USERNAME).setDataType(STRING).setVisible(false);
 	}

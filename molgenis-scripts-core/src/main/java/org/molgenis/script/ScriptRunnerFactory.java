@@ -1,9 +1,12 @@
 package org.molgenis.script;
 
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.script.ScriptTypeMetaData.SCRIPT_TYPE;
+
 import java.util.Map;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
@@ -15,31 +18,36 @@ import com.google.common.collect.Maps;
 
 /**
  * Register script types.
- * 
+ * <p>
  * Get a concrete ScriptRunner for a script type
  */
 @Component
 public class ScriptRunnerFactory
 {
-	private final Map<String, ScriptRunner> scriptRunners = Maps.newHashMap();
-	private final DataService dataService;
 	private static final Logger LOG = LoggerFactory.getLogger(ScriptRunnerFactory.class);
 
+	private final DataService dataService;
+	private final ScriptTypeFactory scriptTypeFactory;
+
+	private final Map<String, ScriptRunner> scriptRunners = Maps.newHashMap();
+
 	@Autowired
-	public ScriptRunnerFactory(DataService dataService)
+	public ScriptRunnerFactory(DataService dataService, ScriptTypeFactory scriptTypeFactory)
 	{
-		this.dataService = dataService;
+		this.dataService = requireNonNull(dataService);
+		this.scriptTypeFactory = requireNonNull(scriptTypeFactory);
 	}
 
 	@RunAsSystem
-	public void registerScriptExecutor(String type, ScriptRunner scriptExecutor)
+	public void registerScriptExecutor(ScriptRunner scriptExecutor)
 	{
-		scriptRunners.put(type, scriptExecutor);
+		scriptRunners.put(scriptExecutor.getName(), scriptExecutor);
 
-		if (dataService.count(ScriptType.ENTITY_NAME, new QueryImpl<Entity>().eq(ScriptType.NAME, type)) == 0)
+		if (dataService.count(SCRIPT_TYPE, new QueryImpl<>().eq(ScriptTypeMetaData.NAME, scriptExecutor.getName()))
+				== 0)
 		{
-			LOG.info("Registering Script type {}.", type);
-			dataService.add(ScriptType.ENTITY_NAME, new ScriptType(type, dataService));
+			LOG.info("Registering Script type {}.", scriptExecutor.getName());
+			dataService.add(SCRIPT_TYPE, scriptTypeFactory.create(scriptExecutor.getName()));
 		}
 	}
 
@@ -48,7 +56,7 @@ public class ScriptRunnerFactory
 		ScriptRunner scriptRunner = scriptRunners.get(type);
 		if (scriptRunner == null)
 		{
-			throw new ScriptException("Unknown script type [" + type + "]");
+			throw new ScriptException(format("Unknown script type [%s]", type));
 		}
 
 		return scriptRunner;

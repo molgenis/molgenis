@@ -19,7 +19,7 @@
 		};
 		
 		var EntitySelectBox = React.render(molgenis.ui.EntitySelectBox({
-			entity: 'entities',
+			entity: 'sys_md_entities',
 			query : {
 				operator : 'NESTED',
 				nestedRules : [
@@ -40,7 +40,7 @@
 		// initialize with application settings
 		onValueChange({
 			value: {
-				fullName: 'settings_app',
+				fullName: 'sys_set_app',
 				simpleName: 'app'
 			}
 		});

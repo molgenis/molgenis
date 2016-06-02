@@ -4,6 +4,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.data.mapper.algorithmgenerator.service.impl.AlgorithmGeneratorServiceImpl;
+import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.mapper.repository.impl.AttributeMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.EntityMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl;
@@ -56,6 +57,9 @@ public class MappingConfig
 	@Autowired
 	OntologyTermRepository ontologyTermRepository;
 
+	@Autowired
+	AttributeMappingMetaData attributeMappingMetaData;
+
 	@Bean
 	public MappingService mappingService()
 	{
@@ -103,7 +107,7 @@ public class MappingConfig
 	@Bean
 	public AttributeMappingRepositoryImpl attributeMappingRepository()
 	{
-		return new AttributeMappingRepositoryImpl(dataService);
+		return new AttributeMappingRepositoryImpl(dataService, attributeMappingMetaData);
 	}
 
 	@Bean

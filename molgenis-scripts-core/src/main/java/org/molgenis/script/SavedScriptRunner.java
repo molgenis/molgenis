@@ -1,5 +1,7 @@
 package org.molgenis.script;
 
+import static org.molgenis.script.ScriptMetaData.SCRIPT;
+
 import java.util.Map;
 import java.util.UUID;
 
@@ -55,7 +57,7 @@ public class SavedScriptRunner
 	 */
 	public ScriptResult runScript(String scriptName, Map<String, Object> parameters)
 	{
-		Script script = dataService.findOne(Script.ENTITY_NAME, new QueryImpl<Script>().eq(Script.NAME, scriptName),
+		Script script = dataService.findOne(SCRIPT, new QueryImpl<Script>().eq(ScriptMetaData.NAME, scriptName),
 				Script.class);
 
 		if (script == null)

@@ -22,8 +22,8 @@ import com.google.common.collect.Lists;
 
 public class MappingTargetRepositoryImpl implements MappingTargetRepository
 {
-	// FIXME remove
-	public static final EntityMetaData META_DATA = new MappingTargetMetaData();
+	@Autowired
+	private MappingTargetMetaData mappingTargetMetaData;
 
 	@Autowired
 	private IdGenerator idGenerator;
@@ -52,12 +52,12 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 		{
 			mappingTarget.setIdentifier(idGenerator.generateId());
 			mappingTargetEntity = toMappingTargetEntity(mappingTarget, entityMappingEntities);
-			dataService.add(META_DATA.getName(), mappingTargetEntity);
+			dataService.add(mappingTargetMetaData.getName(), mappingTargetEntity);
 		}
 		else
 		{
 			mappingTargetEntity = toMappingTargetEntity(mappingTarget, entityMappingEntities);
-			dataService.update(META_DATA.getName(), mappingTargetEntity);
+			dataService.update(mappingTargetMetaData.getName(), mappingTargetEntity);
 		}
 		return mappingTargetEntity;
 	}
@@ -67,7 +67,7 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 	 */
 	private Entity toMappingTargetEntity(MappingTarget mappingTarget, List<Entity> entityMappingEntities)
 	{
-		Entity mappingTargetEntity = new MapEntity(META_DATA);
+		Entity mappingTargetEntity = new MapEntity(mappingTargetMetaData);
 		mappingTargetEntity.set(MappingProjectMetaData.IDENTIFIER, mappingTarget.getIdentifier());
 		mappingTargetEntity.set(MappingTargetMetaData.TARGET, mappingTarget.getTarget().getName());
 		mappingTargetEntity.set(MappingTargetMetaData.ENTITYMAPPINGS, entityMappingEntities);

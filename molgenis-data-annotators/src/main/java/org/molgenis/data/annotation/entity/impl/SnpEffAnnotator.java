@@ -3,6 +3,7 @@ package org.molgenis.data.annotation.entity.impl;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -27,8 +28,6 @@ import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
-import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
-import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.utils.JarRunner;
 import org.molgenis.data.annotation.utils.JarRunnerImpl;
@@ -37,7 +36,7 @@ import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.VcfAttributes;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -275,13 +274,13 @@ public class SnpEffAnnotator
 				for (Entity entity : source)
 				{
 					StringBuilder builder = new StringBuilder();
-					builder.append(entity.getString(VcfRepository.CHROM));
+					builder.append(entity.getString(VcfAttributes.CHROM));
 					builder.append("\t");
-					builder.append(entity.getString(VcfRepository.POS));
+					builder.append(entity.getString(VcfAttributes.POS));
 					builder.append("\t.\t");
-					builder.append(entity.getString(VcfRepository.REF));
+					builder.append(entity.getString(VcfAttributes.REF));
 					builder.append("\t");
-					builder.append(entity.getString(VcfRepository.ALT));
+					builder.append(entity.getString(VcfAttributes.ALT));
 					builder.append("\n");
 					bw.write(builder.toString());
 				}
@@ -347,9 +346,9 @@ public class SnpEffAnnotator
 				}
 				else
 				{
-					LOG.info("No results for CHROM:{} POS:{} REF:{} ALT:{} ", entity.getString(VcfRepository.CHROM),
-							entity.getString(VcfRepository.POS), entity.getString(VcfRepository.REF),
-							entity.getString(VcfRepository.ALT));
+					LOG.info("No results for CHROM:{} POS:{} REF:{} ALT:{} ", entity.getString(VcfAttributes.CHROM),
+							entity.getString(VcfAttributes.POS), entity.getString(VcfAttributes.REF),
+							entity.getString(VcfAttributes.ALT));
 				}
 			}
 		}
@@ -463,11 +462,13 @@ public class SnpEffAnnotator
 		@Override
 		public List<AttributeMetaData> getRequiredAttributes()
 		{
+			VcfAttributes vcfAttributes = getApplicationContext().getBean(VcfAttributes.class); // FIXME remove
+
 			List<AttributeMetaData> attributes = new ArrayList<>();
-			attributes.add(VcfRepository.CHROM_META);
-			attributes.add(VcfRepository.POS_META);
-			attributes.add(VcfRepository.REF_META);
-			attributes.add(VcfRepository.ALT_META);
+			attributes.add(vcfAttributes.getChromAttribute());
+			attributes.add(vcfAttributes.getPosAttribute());
+			attributes.add(vcfAttributes.getRefAttribute());
+			attributes.add(vcfAttributes.getAltAttribute());
 
 			return attributes;
 		}

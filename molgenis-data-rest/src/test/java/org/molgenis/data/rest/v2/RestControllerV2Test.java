@@ -244,12 +244,11 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		entityMetaData.addAttribute(attrInt).setDataType(INT);
 		entityMetaData.addAttribute(attrLong).setDataType(LONG);
 		entityMetaData.addAttribute(attrMref).setDataType(MREF).setRefEntity(refEntityMetaData);
-		;
 		entityMetaData.addAttribute(attrScript).setDataType(SCRIPT);
 		entityMetaData.addAttribute(attrString).setDataType(STRING);
 		entityMetaData.addAttribute(attrText).setDataType(TEXT);
 		entityMetaData.addAttribute(attrXref).setDataType(XREF).setRefEntity(refEntityMetaData);
-		;
+
 		// optional
 		entityMetaData.addAttribute(attrBoolOptional).setDataType(BOOL).setNillable(true);
 		entityMetaData.addAttribute(attrCategoricalOptional).setDataType(CATEGORICAL).setRefEntity(refEntityMetaData)
@@ -989,7 +988,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		public RestControllerV2 restController()
 		{
 			return new RestControllerV2(dataService(), molgenisPermissionService(), new RestService(dataService(),
-					idGenerator(), fileStore()), languageService(), permissionSystemService());
+					idGenerator(), fileStore(), null), languageService(), permissionSystemService()); // FIXME
 		}
 
 	}

@@ -15,7 +15,6 @@ import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -66,13 +65,13 @@ public class AppConfig
 	@Bean
 	public SearchService searchService()
 	{
-		return embeddedElasticSearchServiceFactory().create(dataService(), elasticsearchEntityFactory());
+		return embeddedElasticSearchServiceFactory().create(dataService(), elasticsearchEntityFactory(), null);
 	}
 
 	@Bean
 	public DataService dataService()
 	{
-		return new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory());
+		return new DataServiceImpl();
 	}
 
 	@Bean

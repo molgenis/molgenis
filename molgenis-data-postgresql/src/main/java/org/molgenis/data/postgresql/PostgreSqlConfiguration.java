@@ -2,6 +2,7 @@ package org.molgenis.data.postgresql;
 
 import javax.sql.DataSource;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +18,9 @@ public class PostgreSqlConfiguration
 
 	@Autowired
 	private DataSource dataSource;
+
+	@Autowired
+	private DataService dataService;
 
 	@Bean
 	@Scope("prototype")
@@ -37,7 +41,8 @@ public class PostgreSqlConfiguration
 	{ "PostgreSqlRepositoryCollection" })
 	public RepositoryCollection postgreSqlRepositoryCollection()
 	{
-		PostgreSqlRepositoryCollection postgreSqlRepositoryCollection = new PostgreSqlRepositoryCollection(dataSource)
+		PostgreSqlRepositoryCollection postgreSqlRepositoryCollection = new PostgreSqlRepositoryCollection(dataSource,
+				jdbcTemplate(), dataService)
 		{
 			@Override
 			public boolean hasRepository(String name)

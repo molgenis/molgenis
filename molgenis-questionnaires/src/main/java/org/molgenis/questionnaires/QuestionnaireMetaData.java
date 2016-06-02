@@ -1,12 +1,12 @@
 package org.molgenis.questionnaires;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.data.jobs.JobExecutionMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
@@ -19,19 +19,25 @@ import org.springframework.stereotype.Component;
 @Component
 public class QuestionnaireMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String ENTITY_NAME = "Questionnaire";
+	public static final String SIMPLE_NAME = "Questionnaire";
+	public static final String QUESTIONNAIRE = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
+
 	public static final String ATTR_STATUS = "status";
 
 	private OwnedEntityMetaData ownedEntityMetaData;
 
+	QuestionnaireMetaData()
+	{
+		super(SIMPLE_NAME, PACKAGE_SYSTEM);
+	}
+
 	@Override
 	public void init()
 	{
-		setName(ENTITY_NAME);
 		setAbstract(true);
 		setExtends(ownedEntityMetaData);
 
-		List<String> enumOptions = new ArrayList<String>();
+		List<String> enumOptions = new ArrayList<>();
 		for (QuestionnaireStatus questionnaireStatus : QuestionnaireStatus.values())
 		{
 			enumOptions.add(questionnaireStatus.toString());

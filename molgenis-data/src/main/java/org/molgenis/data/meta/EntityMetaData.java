@@ -1,11 +1,7 @@
 package org.molgenis.data.meta;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.semantic.Tag;
 
-/**
- * Created by Dennis on 4/22/2016.
- */
 public interface EntityMetaData extends Entity
 {
 	String getName();
@@ -80,6 +76,8 @@ public interface EntityMetaData extends Entity
 
 	Iterable<AttributeMetaData> getAtomicAttributes();
 
+	Iterable<AttributeMetaData> getAllAttributes();
+
 	AttributeMetaData getAttribute(String attrName);
 
 	void addAttribute(AttributeMetaData attr, AttributeRole... attrTypes);
@@ -103,6 +101,8 @@ public interface EntityMetaData extends Entity
 	void removeTag(Tag tag);
 
 	Iterable<AttributeMetaData> getOwnAtomicAttributes();
+
+	Iterable<AttributeMetaData> getOwnAllAttributes();
 
 	enum AttributeRole
 	{

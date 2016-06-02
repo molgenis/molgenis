@@ -1,16 +1,16 @@
 package org.molgenis.data.vcf.utils;
 
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.FILTER;
-import static org.molgenis.data.vcf.VcfRepository.FORMAT_GT;
-import static org.molgenis.data.vcf.VcfRepository.ID;
-import static org.molgenis.data.vcf.VcfRepository.INFO;
+import static org.molgenis.data.vcf.VcfAttributes.ALT;
+import static org.molgenis.data.vcf.VcfAttributes.CHROM;
+import static org.molgenis.data.vcf.VcfAttributes.FILTER;
+import static org.molgenis.data.vcf.VcfAttributes.FORMAT_GT;
+import static org.molgenis.data.vcf.VcfAttributes.ID;
+import static org.molgenis.data.vcf.VcfAttributes.INFO;
+import static org.molgenis.data.vcf.VcfAttributes.POS;
+import static org.molgenis.data.vcf.VcfAttributes.QUAL;
+import static org.molgenis.data.vcf.VcfAttributes.REF;
+import static org.molgenis.data.vcf.VcfAttributes.SAMPLES;
 import static org.molgenis.data.vcf.VcfRepository.NAME;
-import static org.molgenis.data.vcf.VcfRepository.POS;
-import static org.molgenis.data.vcf.VcfRepository.QUAL;
-import static org.molgenis.data.vcf.VcfRepository.REF;
-import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
 
 import java.io.BufferedWriter;
 import java.io.File;

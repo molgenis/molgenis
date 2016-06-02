@@ -3,6 +3,7 @@ package org.molgenis.data.semanticsearch.service.impl;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -162,7 +163,7 @@ public class SemanticSearchServiceHelperTest extends AbstractTestNGSpringContext
 		EntityMetaData sourceEntityMetaData = new EntityMetaDataImpl("sourceEntityMetaData");
 		Entity entityMetaDataEntity = mock(DefaultEntity.class);
 
-		when(dataService.findOne(EntityMetaDataMetaData.ENTITY_NAME,
+		when(dataService.findOne(ENTITY_META_DATA,
 				new QueryImpl<Entity>().eq(EntityMetaDataMetaData.FULL_NAME, sourceEntityMetaData.getName())))
 						.thenReturn(entityMetaDataEntity);
 

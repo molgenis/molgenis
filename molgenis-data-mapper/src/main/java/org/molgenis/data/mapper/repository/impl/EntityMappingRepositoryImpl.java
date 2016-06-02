@@ -29,13 +29,14 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceController.class);
 
-	public static final EntityMetaData META_DATA = new EntityMappingMetaData();
-
 	@Autowired
 	private DataService dataService;
 
 	@Autowired
 	private IdGenerator idGenerator;
+
+	@Autowired
+	private EntityMappingMetaData entityMappingMetaData;
 
 	private final AttributeMappingRepository attributeMappingRepository;
 
@@ -100,19 +101,19 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		{
 			entityMapping.setIdentifier(idGenerator.generateId());
 			entityMappingEntity = toEntityMappingEntity(entityMapping, attributeMappingEntities);
-			dataService.add(EntityMappingRepositoryImpl.META_DATA.getName(), entityMappingEntity);
+			dataService.add(entityMappingMetaData.getName(), entityMappingEntity);
 		}
 		else
 		{
 			entityMappingEntity = toEntityMappingEntity(entityMapping, attributeMappingEntities);
-			dataService.update(EntityMappingRepositoryImpl.META_DATA.getName(), entityMappingEntity);
+			dataService.update(entityMappingMetaData.getName(), entityMappingEntity);
 		}
 		return entityMappingEntity;
 	}
 
 	private Entity toEntityMappingEntity(EntityMapping entityMapping, List<Entity> attributeMappingEntities)
 	{
-		Entity entityMappingEntity = new MapEntity(META_DATA);
+		Entity entityMappingEntity = new MapEntity(entityMappingMetaData);
 		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, entityMapping.getIdentifier());
 		entityMappingEntity.set(EntityMappingMetaData.SOURCEENTITYMETADATA, entityMapping.getName());
 		entityMappingEntity

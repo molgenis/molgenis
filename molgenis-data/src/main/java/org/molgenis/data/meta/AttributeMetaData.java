@@ -11,11 +11,11 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AUTO;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DEFAULT_VALUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENTITY_NAME;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.IDENTIFIER;
@@ -32,16 +32,18 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VALIDATION_EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE_EXPRESSION;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistrySingleton;
-import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.fieldtypes.FieldType;
@@ -56,8 +58,11 @@ public class AttributeMetaData extends AbstractEntity
 	public AttributeMetaData(Entity entity)
 	{
 		this.entity = requireNonNull(entity);
-		if(!entity.getEntityMetaData().getName().equals(ENTITY_NAME)) {
-			throw new IllegalArgumentException(format("Entity must be of type [%s] instead of [%s]", ENTITY_NAME, entity.getEntityMetaData().getName()));
+		if (!entity.getEntityMetaData().getName().equals(ATTRIBUTE_META_DATA))
+		{
+			throw new IllegalArgumentException(
+					format("Entity must be of type [%s] instead of [%s]", ATTRIBUTE_META_DATA,
+							entity.getEntityMetaData().getName()));
 		}
 	}
 
@@ -67,9 +72,9 @@ public class AttributeMetaData extends AbstractEntity
 
 		// FIXME use default value for this
 		set(DATA_TYPE, toDataTypeString(MolgenisFieldTypes.getType(requireNonNull(STRING).toString().toLowerCase())));
-		set(NILLABLE, false);
+		set(NILLABLE, true);
 		set(AUTO, false);
-		set(VISIBLE, false);
+		set(VISIBLE, true);
 		set(AGGREGATEABLE, false);
 		set(READ_ONLY, false);
 		set(UNIQUE, false);
@@ -88,6 +93,14 @@ public class AttributeMetaData extends AbstractEntity
 		FieldType dataType = MolgenisFieldTypes.getType(requireNonNull(fieldType).toString().toLowerCase());
 		set(NAME, name);
 		set(DATA_TYPE, toDataTypeString(dataType));
+
+		// FIXME use default value for this
+		set(NILLABLE, true);
+		set(AUTO, false);
+		set(VISIBLE, true);
+		set(AGGREGATEABLE, false);
+		set(READ_ONLY, false);
+		set(UNIQUE, false);
 	}
 
 	/**
@@ -105,7 +118,7 @@ public class AttributeMetaData extends AbstractEntity
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(ENTITY_NAME);
+		return SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(ATTRIBUTE_META_DATA);
 	}
 
 	@Override
@@ -160,7 +173,8 @@ public class AttributeMetaData extends AbstractEntity
 	 */
 	public String getLabel()
 	{
-		return getString(LABEL);
+		String label = getString(LABEL);
+		return label != null ? label : getName();
 	}
 
 	/**
@@ -170,7 +184,8 @@ public class AttributeMetaData extends AbstractEntity
 	 */
 	public String getLabel(String languageCode)
 	{
-		return getString(getI18nAttributeName(LABEL, languageCode));
+		String i18nString = getString(getI18nAttributeName(LABEL, languageCode));
+		return i18nString != null ? i18nString : getLabel();
 	}
 
 	public AttributeMetaData setLabel(String label)
@@ -202,7 +217,8 @@ public class AttributeMetaData extends AbstractEntity
 	 */
 	public String getDescription(String languageCode)
 	{
-		return getString(getI18nAttributeName(DESCRIPTION, languageCode));
+		String i18nDescription = getString(getI18nAttributeName(DESCRIPTION, languageCode));
+		return i18nDescription != null ? i18nDescription : getDescription();
 	}
 
 	public AttributeMetaData setDescription(String description)
@@ -257,12 +273,31 @@ public class AttributeMetaData extends AbstractEntity
 	 */
 	public EntityMetaData getRefEntity()
 	{
-		return getEntity(REF_ENTITY, EntityMetaDataImpl.class);
+		String refEntityName = getString(REF_ENTITY);
+		if (refEntityName != null)
+		{
+			SystemEntityMetaData systemEntityMetaData = SystemEntityMetaDataRegistrySingleton.INSTANCE
+					.getSystemEntityMetaData(refEntityName);
+			if (systemEntityMetaData != null)
+			{
+				return systemEntityMetaData;
+			}
+			else
+			{
+				// FIXME get rid of static getApplicationContext reference
+				return getApplicationContext().getBean(DataService.class)
+						.findOneById(ENTITY_META_DATA, refEntityName, EntityMetaDataImpl.class);
+			}
+		}
+		else
+		{
+			return null;
+		}
 	}
 
 	public AttributeMetaData setRefEntity(EntityMetaData refEntity)
 	{
-		set(REF_ENTITY, refEntity);
+		set(REF_ENTITY, refEntity != null ? refEntity.getName() : null);
 		return this;
 	}
 

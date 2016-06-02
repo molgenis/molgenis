@@ -5,6 +5,8 @@ import static org.molgenis.MolgenisFieldTypes.DATETIME;
 import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
 import java.util.Arrays;
 
@@ -15,7 +17,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ImportRunMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String ENTITY_NAME = "ImportRun";
+	public static final String SIMPLE_NAME = "ImportRun";
+	public static final String IMPORT_RUN = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
+
 	public static final String ID = "id";
 	public static final String STARTDATE = "startDate";
 	public static final String ENDDATE = "endDate";
@@ -26,14 +30,14 @@ public class ImportRunMetaData extends SystemEntityMetaDataImpl
 	public static final String IMPORTEDENTITIES = "importedEntities";
 	public static final String NOTIFY = "notify";
 
-	private ImportRunMetaData()
+	ImportRunMetaData()
 	{
+		super(SIMPLE_NAME, PACKAGE_SYSTEM);
 	}
 
 	@Override
 	public void init()
 	{
-		setName(ENTITY_NAME);
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false)
 				.setDescription("automatically generated internal id, only for internal use.");
 		addAttribute(STARTDATE).setDataType(DATETIME).setNillable(false).setDescription("");

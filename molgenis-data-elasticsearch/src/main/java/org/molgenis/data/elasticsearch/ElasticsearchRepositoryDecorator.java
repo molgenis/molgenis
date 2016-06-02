@@ -15,14 +15,12 @@ import java.util.stream.Stream;
 import org.elasticsearch.common.collect.Iterators;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Sets;
@@ -256,30 +254,6 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 	public void rebuildIndex()
 	{
 		elasticSearchService.rebuildIndex(decoratedRepo, getEntityMetaData());
-	}
-
-	@Override
-	public void create()
-	{
-		if (!decoratedRepo.getCapabilities().contains(MANAGABLE))
-		{
-			throw new MolgenisDataAccessException("Repository '" + decoratedRepo.getName() + "' is not Manageable");
-		}
-		decoratedRepo.create();
-
-		super.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		if (!decoratedRepo.getCapabilities().contains(MANAGABLE))
-		{
-			throw new MolgenisDataAccessException("Repository '" + decoratedRepo.getName() + "' is not Manageable");
-		}
-		decoratedRepo.drop();
-
-		super.drop();
 	}
 
 	@Override

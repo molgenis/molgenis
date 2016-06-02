@@ -1,8 +1,8 @@
 package org.molgenis.ontology.core.repository;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ENTITY_NAME;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_IRI;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_NAME;
 
@@ -65,7 +65,7 @@ public class OntologyTermRepository
 			@Override
 			public Iterator<Entity> iterator()
 			{
-				return dataService.findAll(ENTITY_NAME, termNameQuery).iterator();
+				return dataService.findAll(ONTOLOGY_TERM, termNameQuery).iterator();
 			}
 		};
 
@@ -77,7 +77,7 @@ public class OntologyTermRepository
 				@Override
 				public Iterator<Entity> iterator()
 				{
-					return dataService.findAll(ENTITY_NAME, termsQuery).iterator();
+					return dataService.findAll(ONTOLOGY_TERM, termsQuery).iterator();
 				}
 			};
 		}
@@ -150,7 +150,8 @@ public class OntologyTermRepository
 			@Override
 			public Iterator<Entity> iterator()
 			{
-				return dataService.findAll(ENTITY_NAME, new QueryImpl<Entity>(finalRules).pageSize(pageSize)).iterator();
+				return dataService.findAll(ONTOLOGY_TERM, new QueryImpl<Entity>(finalRules).pageSize(pageSize))
+						.iterator();
 			}
 		};
 
@@ -159,7 +160,7 @@ public class OntologyTermRepository
 
 	public List<OntologyTerm> getAllOntologyTerms(String ontologyId)
 	{
-		Entity ontologyEntity = dataService.findOne(OntologyMetaData.ENTITY_NAME,
+		Entity ontologyEntity = dataService.findOne(OntologyMetaData.ONTOLOGY,
 				new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyId));
 
 		if (ontologyEntity != null)
@@ -170,8 +171,7 @@ public class OntologyTermRepository
 				@Override
 				public Iterator<Entity> iterator()
 				{
-					return dataService
-							.findAll(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<Entity>()
+					return dataService.findAll(OntologyTermMetaData.ONTOLOGY_TERM, new QueryImpl<Entity>()
 									.eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity).pageSize(Integer.MAX_VALUE))
 							.iterator();
 				}
@@ -197,7 +197,7 @@ public class OntologyTermRepository
 		for (String iri : iris)
 		{
 			OntologyTerm ontologyTerm = toOntologyTerm(
-					dataService.findOne(ENTITY_NAME, QueryImpl.EQ(ONTOLOGY_TERM_IRI, iri)));
+					dataService.findOne(ONTOLOGY_TERM, QueryImpl.EQ(ONTOLOGY_TERM_IRI, iri)));
 			if (ontologyTerm == null)
 			{
 				return null;
@@ -236,7 +236,7 @@ public class OntologyTermRepository
 
 	private String getOntologyTermNodePath(OntologyTerm ontologyTerm)
 	{
-		Entity ontologyTermEntity = dataService.findOne(ENTITY_NAME,
+		Entity ontologyTermEntity = dataService.findOne(ONTOLOGY_TERM,
 				new QueryImpl<Entity>().eq(ONTOLOGY_TERM_IRI, ontologyTerm.getIRI()));
 
 		Iterable<Entity> ontologyTermNodePathEntities = ontologyTermEntity
@@ -244,7 +244,7 @@ public class OntologyTermRepository
 
 		for (Entity ontologyTermNodePathEntity : ontologyTermNodePathEntities)
 		{
-			return ontologyTermNodePathEntity.getString(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH);
+			return ontologyTermNodePathEntity.getString(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR);
 		}
 
 		return null;
@@ -286,7 +286,7 @@ public class OntologyTermRepository
 			@Override
 			public Iterator<Entity> iterator()
 			{
-				return dataService.findAll(ENTITY_NAME, QueryImpl.EQ(ONTOLOGY_TERM_IRI, ontologyTerm.getIRI()))
+				return dataService.findAll(ONTOLOGY_TERM, QueryImpl.EQ(ONTOLOGY_TERM_IRI, ontologyTerm.getIRI()))
 						.iterator();
 			}
 		};
@@ -304,7 +304,7 @@ public class OntologyTermRepository
 
 	public List<OntologyTerm> getChildOntologyTermsByNodePath(Entity ontologyEntity, Entity nodePathEntity)
 	{
-		String nodePath = nodePathEntity.getString(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH);
+		String nodePath = nodePathEntity.getString(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR);
 
 		Iterable<Entity> relatedOntologyTermEntities = new Iterable<Entity>()
 		{
@@ -312,7 +312,7 @@ public class OntologyTermRepository
 			@Override
 			public Iterator<Entity> iterator()
 			{
-				return dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
+				return dataService.findAll(OntologyTermMetaData.ONTOLOGY_TERM,
 						new QueryImpl<Entity>(new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Operator.FUZZY_MATCH,
 								"\"" + nodePath + "\"")).and().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))
 						.iterator();
@@ -330,7 +330,7 @@ public class OntologyTermRepository
 	{
 		Iterable<Entity> nodePathEntities = entity.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH);
 		return Lists.newArrayList(nodePathEntities).stream().anyMatch(nodePathEntity -> {
-			String childNodePath = nodePathEntity.getString(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH);
+			String childNodePath = nodePathEntity.getString(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR);
 			return !StringUtils.equals(nodePath, childNodePath) && childNodePath.startsWith(nodePath);
 		});
 	}
@@ -348,7 +348,7 @@ public class OntologyTermRepository
 		if (ontologyTermSynonymEntities != null)
 		{
 			ontologyTermSynonymEntities.forEach(synonymEntity -> synonyms
-					.add(synonymEntity.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM)));
+					.add(synonymEntity.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR)));
 		}
 		if (!synonyms.contains(entity.getString(ONTOLOGY_TERM_NAME)))
 		{

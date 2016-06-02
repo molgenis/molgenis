@@ -1,11 +1,17 @@
 package org.molgenis.util;
 
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -14,6 +20,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.Package;
 import org.molgenis.fieldtypes.XrefField;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -29,7 +36,7 @@ public class DependencyResolver
 
 	/**
 	 * Determine the entity import order
-	 * 
+	 *
 	 * @param repos
 	 * @return
 	 */
@@ -47,7 +54,7 @@ public class DependencyResolver
 
 	/**
 	 * Determine the entity import order
-	 * 
+	 *
 	 * @param coll
 	 * @return
 	 */
@@ -73,7 +80,8 @@ public class DependencyResolver
 
 			for (AttributeMetaData attr : meta.getAtomicAttributes())
 			{
-				if ((attr.getRefEntity() != null) && !attr.getRefEntity().equals(meta))// self reference
+				if ((attr.getRefEntity() != null) && !attr.getRefEntity().getName()
+						.equals(meta.getName()))// self reference
 				{
 					dependencies.add(attr.getRefEntity().getName());
 				}
@@ -100,8 +108,11 @@ public class DependencyResolver
 			// When there aren't any we got a non resolvable
 			if (ready.isEmpty())
 			{
-				throw new MolgenisDataException("Could not resolve dependencies of entities "
-						+ dependenciesByName.keySet() + " are there circular dependencies?");
+				// FIXME dependency resolving fails if input is missing dependencies
+				return Lists.newArrayList(coll);
+				//				throw new MolgenisDataException(
+				//						"Could not resolve dependencies of entities " + dependenciesByName.keySet()
+				//								+ " are there circular dependencies?");
 			}
 
 			// Remove found metadata from dependency graph
@@ -137,7 +148,7 @@ public class DependencyResolver
 
 	/**
 	 * Determine the import order of entities that have a self reference
-	 * 
+	 *
 	 * @param entities
 	 * @param emd
 	 * @return
@@ -211,13 +222,14 @@ public class DependencyResolver
 						}
 						else
 						{
-							Entity refEntity = dataService.getRepository(
-									emd.getAttribute(attr.getName()).getRefEntity().getName()).findOneById(refId);
+							Entity refEntity = dataService
+									.getRepository(emd.getAttribute(attr.getName()).getRefEntity().getName())
+									.findOneById(refId);
 							if (refEntity == null)
 							{
-								throw new UnknownEntityException(attr.getRefEntity().getName() + " with "
-										+ attr.getRefEntity().getIdAttribute().getName() + " [" + refId
-										+ "] does not exist");
+								throw new UnknownEntityException(
+										attr.getRefEntity().getName() + " with " + attr.getRefEntity().getIdAttribute()
+												.getName() + " [" + refId + "] does not exist");
 							}
 						}
 					}
@@ -265,4 +277,36 @@ public class DependencyResolver
 		return resolved;
 	}
 
+	/**
+	 * Resolved package dependencies in database insertion order
+	 *
+	 * @param packageStream
+	 * @return package dependencies in database insertion order
+	 */
+	public static Stream<Package> resolve(Stream<Package> packageStream)
+	{
+		Map<String, Package> packageMap = packageStream.collect(toMap(Package::getName, identity()));
+		if (packageMap.isEmpty())
+		{
+			return Stream.empty();
+		}
+
+		Map<String, Package> resolvedPackages = new LinkedHashMap<>();
+		while (resolvedPackages.size() < packageMap.size())
+		{
+			AtomicInteger nrResolvedPackages = new AtomicInteger(0);
+			packageMap.forEach((name, package_) -> {
+				if (package_.getParent() == null || resolvedPackages.containsKey(package_.getParent().getName()))
+				{
+					resolvedPackages.put(name, package_);
+					nrResolvedPackages.incrementAndGet();
+				}
+			});
+			if (nrResolvedPackages.get() == 0)
+			{
+				throw new RuntimeException("Unable to resolve packages, circular dependency?");
+			}
+		}
+		return resolvedPackages.values().stream();
+	}
 }

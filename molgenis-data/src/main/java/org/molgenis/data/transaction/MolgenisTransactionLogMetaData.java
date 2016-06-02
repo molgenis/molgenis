@@ -5,15 +5,13 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.PostConstruct;
-
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.fieldtypes.EnumField;
 
 public class MolgenisTransactionLogMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String ENTITY_NAME = "MolgenisTransactionLog";
+	public static final String MOLGENIS_TRANSACTION_LOG = "MolgenisTransactionLog";
 
 	public static final String TRANSACTION_ID = "transactionId";
 	public static final String USER_NAME = "userName";
@@ -23,13 +21,13 @@ public class MolgenisTransactionLogMetaData extends SystemEntityMetaDataImpl
 
 	private final String transactionLogBackend;
 
-	public MolgenisTransactionLogMetaData(String transactionLogBackend)
+	MolgenisTransactionLogMetaData(String transactionLogBackend)
 	{
+		super(MOLGENIS_TRANSACTION_LOG);
 		this.transactionLogBackend = transactionLogBackend;
 	}
 
 	public void init() {
-		setSimpleName(ENTITY_NAME);
 		setBackend(transactionLogBackend);
 		addAttribute(TRANSACTION_ID, ROLE_ID);
 		addAttribute(USER_NAME).setNillable(true);

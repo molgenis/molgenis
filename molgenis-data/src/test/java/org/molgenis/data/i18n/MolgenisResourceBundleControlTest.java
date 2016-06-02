@@ -3,6 +3,8 @@ package org.molgenis.data.i18n;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
@@ -34,7 +36,7 @@ public class MolgenisResourceBundleControlTest
 		dataServiceMock = mock(DataService.class);
 		queryMock = mock(Query.class);
 		when(queryMock.eq(any(), any())).thenReturn(queryMock);
-		when(dataServiceMock.query(LanguageMetaData.ENTITY_NAME)).thenReturn(queryMock);
+		when(dataServiceMock.query(LANGUAGE)).thenReturn(queryMock);
 
 		AppSettings settings = mock(AppSettings.class);
 		when(settings.getLanguageCode()).thenReturn(null);
@@ -53,7 +55,7 @@ public class MolgenisResourceBundleControlTest
 	public void newBundleWithUnknownLanguage() throws IllegalAccessException, InstantiationException, IOException
 	{
 		when(queryMock.count()).thenReturn(0L);
-		assertNull(molgenisResourceBundleControl.newBundle(I18nStringMetaData.ENTITY_NAME, new Locale("nl"),
+		assertNull(molgenisResourceBundleControl.newBundle(I18N_STRING, new Locale("nl"),
 				"java.class", getClass().getClassLoader(), true));
 	}
 
@@ -70,9 +72,9 @@ public class MolgenisResourceBundleControlTest
 		entity1.set("en", "testen");
 
 		when(queryMock.count()).thenReturn(1L);
-		when(dataServiceMock.findAll(I18nStringMetaData.ENTITY_NAME)).thenReturn(Stream.of(entity, entity1));
+		when(dataServiceMock.findAll(I18N_STRING)).thenReturn(Stream.of(entity, entity1));
 
-		ResourceBundle bundle = molgenisResourceBundleControl.newBundle(I18nStringMetaData.ENTITY_NAME,
+		ResourceBundle bundle = molgenisResourceBundleControl.newBundle(I18N_STRING,
 				new Locale("nl"), "java.class", getClass().getClassLoader(), true);
 		assertNotNull(bundle);
 

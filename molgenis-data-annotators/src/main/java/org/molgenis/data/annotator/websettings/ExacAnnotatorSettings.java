@@ -29,6 +29,7 @@ public class ExacAnnotatorSettings extends DefaultSettingsEntity
 		@Override
 		public void init()
 		{
+			super.init();
 			setLabel("Exac annotator settings");
 			addAttribute(EXAC_LOCATION).setLabel("Exac file location");
 		}

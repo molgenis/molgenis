@@ -51,25 +51,25 @@ public class VcfRepositoryTest
 			assertEquals(vcfRepository.getName(), "testdata");
 			Iterator<AttributeMetaData> it = vcfRepository.getEntityMetaData().getAttributes().iterator();
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfRepository.CHROM, MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), VcfAttributes.CHROM, MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
 			// TEXT to handle large insertions/deletions
-			testAttribute(it.next(), VcfRepository.ALT, MolgenisFieldTypes.TEXT);
+			testAttribute(it.next(), VcfAttributes.ALT, MolgenisFieldTypes.TEXT);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfRepository.POS, MolgenisFieldTypes.LONG);
+			testAttribute(it.next(), VcfAttributes.POS, MolgenisFieldTypes.LONG);
 			assertTrue(it.hasNext());
 			// TEXT to handle large insertions/deletions
-			testAttribute(it.next(), VcfRepository.REF, MolgenisFieldTypes.TEXT);
+			testAttribute(it.next(), VcfAttributes.REF, MolgenisFieldTypes.TEXT);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfRepository.FILTER, MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), VcfAttributes.FILTER, MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfRepository.QUAL, MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), VcfAttributes.QUAL, MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfRepository.ID, MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), VcfAttributes.ID, MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfRepository.INTERNAL_ID, MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), VcfAttributes.INTERNAL_ID, MolgenisFieldTypes.STRING);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfRepository.INFO, MolgenisFieldTypes.COMPOUND);
+			testAttribute(it.next(), VcfAttributes.INFO, MolgenisFieldTypes.COMPOUND);
 			assertTrue(it.hasNext());
 		}
 		finally
@@ -96,40 +96,40 @@ public class VcfRepositoryTest
 
 			assertTrue(it.hasNext());
 			Entity entity = it.next();
-			assertEquals(entity.get(VcfRepository.CHROM), "1");
-			assertEquals(entity.get(VcfRepository.POS), 565286);
+			assertEquals(entity.get(VcfAttributes.CHROM), "1");
+			assertEquals(entity.get(VcfAttributes.POS), 565286);
 
 			assertTrue(it.hasNext());
 			entity = it.next();
-			assertEquals(entity.get(VcfRepository.CHROM), "1");
-			assertEquals(entity.get(VcfRepository.POS), 2243618);
-			assertTrue(it.hasNext());
-
-			assertTrue(it.hasNext());
-			entity = it.next();
-			assertEquals(entity.get(VcfRepository.CHROM), "1");
-			assertEquals(entity.get(VcfRepository.POS), 3171929);
+			assertEquals(entity.get(VcfAttributes.CHROM), "1");
+			assertEquals(entity.get(VcfAttributes.POS), 2243618);
 			assertTrue(it.hasNext());
 
 			assertTrue(it.hasNext());
 			entity = it.next();
-			assertEquals(entity.get(VcfRepository.CHROM), "1");
-			assertEquals(entity.get(VcfRepository.POS), 3172062);
+			assertEquals(entity.get(VcfAttributes.CHROM), "1");
+			assertEquals(entity.get(VcfAttributes.POS), 3171929);
+			assertTrue(it.hasNext());
 
 			assertTrue(it.hasNext());
 			entity = it.next();
-			assertEquals(entity.get(VcfRepository.CHROM), "1");
-			assertEquals(entity.get(VcfRepository.POS), 3172273);
+			assertEquals(entity.get(VcfAttributes.CHROM), "1");
+			assertEquals(entity.get(VcfAttributes.POS), 3172062);
 
 			assertTrue(it.hasNext());
 			entity = it.next();
-			assertEquals(entity.get(VcfRepository.CHROM), "1");
-			assertEquals(entity.get(VcfRepository.POS), 6097450);
+			assertEquals(entity.get(VcfAttributes.CHROM), "1");
+			assertEquals(entity.get(VcfAttributes.POS), 3172273);
 
 			assertTrue(it.hasNext());
 			entity = it.next();
-			assertEquals(entity.get(VcfRepository.CHROM), "1");
-			assertEquals(entity.get(VcfRepository.POS), 7569187);
+			assertEquals(entity.get(VcfAttributes.CHROM), "1");
+			assertEquals(entity.get(VcfAttributes.POS), 6097450);
+
+			assertTrue(it.hasNext());
+			entity = it.next();
+			assertEquals(entity.get(VcfAttributes.CHROM), "1");
+			assertEquals(entity.get(VcfAttributes.POS), 7569187);
 
 			assertFalse(it.hasNext());
 		}

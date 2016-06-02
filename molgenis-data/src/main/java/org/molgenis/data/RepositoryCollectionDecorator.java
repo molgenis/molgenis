@@ -5,6 +5,7 @@ import static java.util.Spliterator.ORDERED;
 import static java.util.Spliterators.spliteratorUnknownSize;
 
 import java.util.Iterator;
+import java.util.Set;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.data.meta.AttributeMetaData;
@@ -39,6 +40,12 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	}
 
 	@Override
+	public Set<RepositoryCollectionCapability> getCapabilities()
+	{
+		return decoratedRepositoryCollection.getCapabilities();
+	}
+
+	@Override
 	public Repository<Entity> createRepository(EntityMetaData entityMeta)
 	{
 		return repositoryDecoratorFactory
@@ -59,10 +66,17 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	}
 
 	@Override
-	public Repository getRepository(EntityMetaData entityMeta)
+	public Repository<Entity> getRepository(EntityMetaData entityMeta)
 	{
-		Repository repository = decoratedRepositoryCollection.getRepository(entityMeta);
+		Repository<Entity> repository = decoratedRepositoryCollection.getRepository(entityMeta);
 		return repository != null ? repositoryDecoratorFactory.createDecoratedRepository(repository) : null;
+	}
+
+	@Override
+	public <E extends Entity> Repository<E> getRepository(EntityMetaData entityMeta, Class<E> clazz)
+	{
+		Repository<E> repository = decoratedRepositoryCollection.getRepository(entityMeta, clazz);
+		return repository != null ? repositoryDecoratorFactory.createDecoratedRepository(repository, clazz) : null;
 	}
 
 	@Override
@@ -78,15 +92,21 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	}
 
 	@Override
-	public void deleteRepository(String name)
+	public void deleteRepository(EntityMetaData entityMeta)
 	{
-		decoratedRepositoryCollection.deleteRepository(name);
+		decoratedRepositoryCollection.deleteRepository(entityMeta);
 	}
 
 	@Override
 	public void addAttribute(String entityName, AttributeMetaData attribute)
 	{
 		decoratedRepositoryCollection.addAttribute(entityName, attribute);
+	}
+
+	@Override
+	public void updateAttribute(EntityMetaData entityMetaData, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	{
+		decoratedRepositoryCollection.updateAttribute(entityMetaData, attr, updatedAttr);
 	}
 
 	@Override

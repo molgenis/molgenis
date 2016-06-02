@@ -1,9 +1,10 @@
 package org.molgenis.data.annotation.filter;
 
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.POS;
+import static org.molgenis.data.vcf.VcfAttributes.CHROM;
+import static org.molgenis.data.vcf.VcfAttributes.POS;
 
 import org.molgenis.data.Entity;
+
 import com.google.auto.value.AutoValue;
 
 /**

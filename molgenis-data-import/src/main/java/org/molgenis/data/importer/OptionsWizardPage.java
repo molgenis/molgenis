@@ -1,5 +1,7 @@
 package org.molgenis.data.importer;
 
+import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -138,7 +140,7 @@ public class OptionsWizardPage extends AbstractWizardPage
 		wizard.setEntitiesInDefaultPackage(entitiesInDefaultPackage);
 
 		List<String> packages = new ArrayList<>(validationReport.getPackages());
-		packages.add(0, Package.DEFAULT_PACKAGE_NAME);
+		packages.add(0, PACKAGE_DEFAULT);
 		wizard.setPackages(packages);
 
 		String msg = null;

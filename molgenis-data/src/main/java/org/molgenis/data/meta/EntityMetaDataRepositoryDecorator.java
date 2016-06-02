@@ -2,8 +2,12 @@ package org.molgenis.data.meta;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toMap;
+import static org.molgenis.auth.AuthorityMetaData.ROLE;
+import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.TagMetaData.TAG;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 import java.io.IOException;
@@ -15,6 +19,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import javax.annotation.Nonnull;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
@@ -29,9 +35,9 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
-import org.molgenis.data.semantic.Tag;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.util.EntityUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Sets;
@@ -183,7 +189,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		if (entityMetaData == null)
 		{
 			throw new UnknownEntityException(
-					format("Unknown entityMetaData [%s] with id [%s]", getName(), id.toString()));
+					format("Unknown entity meta data [%s] with id [%s]", getName(), id.toString()));
 		}
 		deleteEntityMetaData(entityMetaData);
 	}
@@ -234,18 +240,6 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 	}
 
 	@Override
-	public void create()
-	{
-		decoratedRepo.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		decoratedRepo.drop();
-	}
-
-	@Override
 	public void rebuildIndex()
 	{
 		decoratedRepo.rebuildIndex();
@@ -267,19 +261,17 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 	{
 		validateAddAllowed(entityMetaData);
 
+		if (entityMetaData.getBackend() == null)
+		{
+			entityMetaData.setBackend(dataService.getMeta().getDefaultBackend().getName());
+		}
+
 		// add row to entities table
 		decoratedRepo.add(entityMetaData);
-
-		// create entityMetaData table
-		// FIXME remove commented code
-		//		if (!dataService.getMeta().isMetaRepository(entityMetaData.getString(EntityMetaDataMetaData.FULL_NAME)))
-		//		{
-		if (!entityMetaData.isAbstract())
+		if (!entityMetaData.isAbstract() && !dataService.getMeta().isMetaEntityMetaData(entityMetaData))
 		{
 			dataService.getMeta().getBackend(entityMetaData.getBackend()).createRepository(entityMetaData);
-			//			((DataServiceImpl) dataService).addRepository(entityRepo); // FIXME remove cast
 		}
-		//		}
 	}
 
 	private void validateAddAllowed(EntityMetaData entityMetaData)
@@ -288,11 +280,11 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		validatePermission(entityName, Permission.WRITEMETA);
 
 		// TODO replace with exists() once Repository.exists has been implemented
-		EntityMetaData existingEntityMetaData = findOneById(entityMetaData.getIdValue(),
+		EntityMetaData existingEntityMetaData = findOneById(entityName,
 				new Fetch().field(EntityMetaDataMetaData.FULL_NAME));
 		if (existingEntityMetaData != null)
 		{
-			throw new MolgenisDataException(format("Adding existing entityMetaData [%s] is not allowed", entityName));
+			throw new MolgenisDataException(format("Adding existing entity meta data [%s] is not allowed", entityName));
 		}
 
 		MetaValidationUtils.validateEntityMetaData(entityMetaData);
@@ -306,10 +298,10 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		EntityMetaData existingEntityMetaData = findOneById(entityMetaData.getIdValue());
 		if (existingEntityMetaData == null)
 		{
-			throw new UnknownEntityException(format("Unknown entityMetaData [%s] with id [%s]", getName(),
+			throw new UnknownEntityException(format("Unknown entity meta data [%s] with id [%s]", getName(),
 					entityMetaData.getIdValue().toString()));
 		}
-		updateEntityAttributes(entityMetaData, existingEntityMetaData);
+		updateEntityAttributes(entityMetaData);
 
 		decoratedRepo.update(entityMetaData);
 	}
@@ -319,100 +311,78 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 	 * only allowed if the meta data defined in Java differs from the meta data stored in the database (in other words
 	 * the Java code was updated).
 	 *
-	 * @param entityMetaData
+	 * @param entityMetaData entity meta data
 	 */
 	private void validateUpdateAllowed(EntityMetaData entityMetaData)
 	{
 		String entityName = entityMetaData.getName();
 		validatePermission(entityName, Permission.WRITEMETA);
 
-		EntityMetaData existingEntityMetaData = systemEntityMetaDataRegistry.getSystemEntityMetaData(entityName);
-		if (entityMetaData
-				!= null /*&& !MetaUtils.equals(entityMetaData, existingEntityMetaData, dataService.getMeta())*/) // FIXME reenable equals check
+		SystemEntityMetaData systemEntityMeta = systemEntityMetaDataRegistry.getSystemEntityMetaData(entityName);
+		if (systemEntityMeta != null && !EntityUtils.equals(entityMetaData, systemEntityMeta))
 		{
-			throw new MolgenisDataException(format("Updating system entityMetaData [%s] is not allowed", entityName));
+			throw new MolgenisDataException(format("Updating system entity meta data [%s] is not allowed", entityName));
 		}
 
 		MetaValidationUtils.validateEntityMetaData(entityMetaData);
 	}
 
-	private void updateEntityAttributes(EntityMetaData entityMetaData, EntityMetaData existingEntity)
+	private void updateEntityAttributes(EntityMetaData entityMetaData)
 	{
 		EntityMetaData currentEntityMetaData = findOneById(entityMetaData.getIdValue(),
 				new Fetch().field(EntityMetaDataMetaData.FULL_NAME)
 						.field(EntityMetaDataMetaData.ATTRIBUTES, new Fetch().field(AttributeMetaDataMetaData.NAME)));
 		Map<String, AttributeMetaData> currentAttrMap = StreamSupport
 				.stream(currentEntityMetaData.getOwnAttributes().spliterator(), false)
-				.collect(toMap(attrEntity -> attrEntity.getName(), Function.identity()));
+				.collect(toMap(AttributeMetaData::getName, Function.identity()));
 		Map<String, AttributeMetaData> updateAttrMap = StreamSupport
 				.stream(entityMetaData.getOwnAttributes().spliterator(), false)
-				.collect(toMap(attrEntity -> attrEntity.getName(), Function.identity()));
+				.collect(toMap(AttributeMetaData::getName, Function.identity()));
 
 		Set<String> deletedAttrNames = Sets.difference(currentAttrMap.keySet(), updateAttrMap.keySet());
 		Set<String> addedAttrNames = Sets.difference(updateAttrMap.keySet(), currentAttrMap.keySet());
-		Set<String> existingAttrNames = Sets.intersection(currentAttrMap.keySet(), updateAttrMap.keySet());
 
-		if (!deletedAttrNames.isEmpty() || !addedAttrNames.isEmpty() || !existingAttrNames.isEmpty())
+		if (!deletedAttrNames.isEmpty() || !addedAttrNames.isEmpty())
 		{
 			String entityName = entityMetaData.getName();
 			String backend = entityMetaData.getBackend();
 			RepositoryCollection repoCollection = dataService.getMeta().getBackend(backend);
-			if (!(repoCollection instanceof RepositoryCollection))
-			{
-				throw new MolgenisDataException(
-						format("Modifying attributes not allowed for entityMetaData [%s]", entityName));
-			}
-			RepositoryCollection manageableRepoCollection = repoCollection;
 
 			if (!deletedAttrNames.isEmpty())
 			{
-				deletedAttrNames.forEach(deletedAttrName -> {
-					manageableRepoCollection.deleteAttribute(entityName, deletedAttrName);
-				});
+				deletedAttrNames
+						.forEach(deletedAttrName -> repoCollection.deleteAttribute(entityName, deletedAttrName));
 			}
 
 			if (!addedAttrNames.isEmpty())
 			{
-				addedAttrNames.stream().map(updateAttrMap::get).forEach(addedAttrEntity -> {
-					manageableRepoCollection.addAttribute(entityName, addedAttrEntity);
-				});
-			}
-
-			if (!existingAttrNames.isEmpty())
-			{
-				existingAttrNames.stream().filter(existingAttrName -> {
-					Entity currentAttr = currentAttrMap.get(existingAttrName);
-					Entity updatedAttr = updateAttrMap.get(existingAttrName);
-					return false; // FIXME
-					// return !MetaUtils.equals(entityMetaEntity, entityMeta, this);
-				}).map(existingAttrName -> {
-					throw new UnsupportedOperationException(
-							format("Cannot update attribute(s) [%s] of entityMetaData [%s]",
-									existingAttrNames.stream().collect(joining(",")), entityName));
-				});
-
+				addedAttrNames.stream().map(updateAttrMap::get)
+						.forEach(addedAttrEntity -> repoCollection.addAttribute(entityName, addedAttrEntity));
 			}
 		}
 	}
 
-	private void deleteEntityMetaData(EntityMetaData entityEntity)
+	private void deleteEntityMetaData(EntityMetaData entityMeta)
 	{
-		validateDeleteAllowed(entityEntity);
-
-		// delete row from entities table
-		decoratedRepo.delete(entityEntity);
-
-		// delete rows from attributes table
-		deleteEntityAttributes(entityEntity);
-
-		// delete rows from tags table
-		deleteEntityTags(entityEntity);
+		validateDeleteAllowed(entityMeta);
 
 		// delete entityMetaData table
-		deleteEntityInstances(entityEntity);
+		if (!entityMeta.isAbstract())
+		{
+			deleteEntityRepository(entityMeta);
+		}
 
 		// delete entityMetaData permissions
-		deleteEntityPermissions(entityEntity);
+		deleteEntityPermissions(entityMeta);
+
+		// delete row from entities table
+		decoratedRepo.delete(entityMeta);
+
+		// delete rows from attributes table
+		deleteEntityAttributes(entityMeta);
+
+		// delete rows from tags table
+		deleteEntityTags(entityMeta);
 	}
 
 	private void validateDeleteAllowed(EntityMetaData entityMetaData)
@@ -423,37 +393,31 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		boolean isSystem = systemEntityMetaDataRegistry.hasSystemEntityMetaData(entityName);
 		if (isSystem)
 		{
-			throw new MolgenisDataException(format("Deleting system entityMetaData [%s] is not allowed", entityName));
+			throw new MolgenisDataException(format("Deleting system entity meta data [%s] is not allowed", entityName));
 		}
 	}
 
 	private void deleteEntityAttributes(EntityMetaData entityMetaData)
 	{
 		Iterable<AttributeMetaData> rootAttrs = entityMetaData.getOwnAttributes();
-		Stream<AttributeMetaData> allAttrs = StreamSupport.stream(rootAttrs.spliterator(), false)
-				.flatMap(attrEntity -> StreamSupport.stream(new TreeTraverser<AttributeMetaData>()
-				{
-					@Override
-					public Iterable<AttributeMetaData> children(AttributeMetaData attr)
-					{
-						return attr.getAttributeParts();
-					}
-				}.postOrderTraversal(attrEntity).spliterator(), false));
-		dataService.delete(AttributeMetaDataMetaData.ENTITY_NAME, allAttrs);
+		Stream<AttributeMetaData> allAttrs = StreamSupport.stream(rootAttrs.spliterator(), false).flatMap(
+				attrEntity -> StreamSupport
+						.stream(new AttributeMetaDataTreeTraverser().postOrderTraversal(attrEntity).spliterator(),
+								false));
+		dataService.delete(ATTRIBUTE_META_DATA, allAttrs);
 	}
 
 	private void deleteEntityTags(EntityMetaData entityMetaData)
 	{
 		Iterable<Tag> tags = entityMetaData.getTags();
-		dataService.delete(TagMetaData.ENTITY_NAME, StreamSupport.stream(tags.spliterator(), false));
+		dataService.delete(TAG, StreamSupport.stream(tags.spliterator(), false));
 	}
 
-	private void deleteEntityInstances(EntityMetaData entityMetaData)
+	private void deleteEntityRepository(EntityMetaData entityMetaData)
 	{
-		String entityName = entityMetaData.getName();
 		String backend = entityMetaData.getBackend();
 		dataService.getMeta().getBackend(backend)
-				.deleteRepository(entityName); // FIXME call deleteRepo directly on metadataservice
+				.deleteRepository(entityMetaData); // FIXME call deleteRepo directly on metadataservice
 	}
 
 	private void deleteEntityPermissions(EntityMetaData entityMetaData)
@@ -462,17 +426,26 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		List<String> authorities = SecurityUtils.getEntityAuthorities(entityName);
 
 		// User permissions
-		if (dataService.hasRepository("UserAuthority"))
+		if (dataService.hasRepository(USER_AUTHORITY))
 		{
-			Stream<Entity> userPermissions = dataService.query("UserAuthority").in("role", authorities).findAll();
-			dataService.delete("UserAuthority", userPermissions);
+			Stream<Entity> userPermissions = dataService.query(USER_AUTHORITY).in(ROLE, authorities).findAll();
+			dataService.delete(USER_AUTHORITY, userPermissions);
 		}
 
 		// Group permissions
-		if (dataService.hasRepository("GroupAuthority"))
+		if (dataService.hasRepository(GROUP_AUTHORITY))
 		{
-			Stream<Entity> groupPermissions = dataService.query("GroupAuthority").in("role", authorities).findAll();
-			dataService.delete("GroupAuthority", groupPermissions);
+			Stream<Entity> groupPermissions = dataService.query(GROUP_AUTHORITY).in(ROLE, authorities).findAll();
+			dataService.delete(GROUP_AUTHORITY, groupPermissions);
+		}
+	}
+
+	private static class AttributeMetaDataTreeTraverser extends TreeTraverser<AttributeMetaData>
+	{
+		@Override
+		public Iterable<AttributeMetaData> children(@Nonnull AttributeMetaData attr)
+		{
+			return attr.getAttributeParts();
 		}
 	}
 }

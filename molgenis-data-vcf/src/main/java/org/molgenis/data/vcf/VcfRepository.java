@@ -1,9 +1,6 @@
 package org.molgenis.data.vcf;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,9 +10,7 @@ import java.util.Set;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.vcf.format.VcfToEntity;
 import org.molgenis.vcf.VcfReader;
@@ -39,30 +34,9 @@ public class VcfRepository extends AbstractRepository
 	private static final Logger LOG = LoggerFactory.getLogger(VcfRepository.class);
 	public static final String DEFAULT_ATTRIBUTE_DESCRIPTION = "Description not provided";
 
-	public static final String CHROM = "#CHROM";
-	public static final String ALT = "ALT";
-	public static final String POS = "POS";
-	public static final String REF = "REF";
-	public static final String FILTER = "FILTER";
-	public static final String QUAL = "QUAL";
-	public static final String ID = "ID";
-	public static final String INTERNAL_ID = "INTERNAL_ID";
-	public static final String INFO = "INFO";
-	public static final String FORMAT_GT = "GT";
-	public static final String SAMPLES = "SAMPLES_ENTITIES";
 	public static final String NAME = "NAME";
 	public static final String ORIGINAL_NAME = "ORIGINAL_NAME";
 	public static final String PREFIX = "##";
-
-	public static final AttributeMetaData CHROM_META = null; // FIXME new AttributeMetaData(CHROM, STRING).setAggregatable(true).setNillable(false).setDescription("The chromosome on which the variant is observed");
-	// TEXT instead of STRING to handle large insertions/deletions
-	public static final AttributeMetaData ALT_META = null; // FIXME new AttributeMetaData(ALT, TEXT).setAggregatable(true).setNillable(false).setDescription("The alternative allele observed");
-	public static final AttributeMetaData POS_META = null; // FIXME new AttributeMetaData(POS, LONG).setAggregatable(true).setNillable(false).setDescription("The position on the chromosome which the variant is observed");
-	// TEXT instead of STRING to handle large insertions/deletions
-	public static final AttributeMetaData REF_META = null; // FIXME new AttributeMetaData(REF, TEXT).setAggregatable(true).setNillable(false).setDescription("The reference allele");
-	public static final AttributeMetaData FILTER_META = null; // FIXME new AttributeMetaData(FILTER,STRING).setAggregatable(true).setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
-	public static final AttributeMetaData QUAL_META = null; // FIXME new AttributeMetaData(QUAL,STRING).setAggregatable(true).setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
-	public static final AttributeMetaData ID_META = null; // FIXME new AttributeMetaData(ID, STRING).setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 
 	private final String entityName;
 	protected Supplier<VcfToEntity> vcfToEntitySupplier;

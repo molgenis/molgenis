@@ -6,6 +6,9 @@ import static org.molgenis.data.elasticsearch.request.SourceFilteringGenerator.t
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
 import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData.MOLGENIS_TRANSACTION_LOG_ENTRY;
 import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 
 import java.io.IOException;
@@ -67,16 +70,13 @@ import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataImpl;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.meta.Package;
+import org.molgenis.data.meta.PackageFactory;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.transaction.MolgenisTransactionListener;
-import org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData;
 import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.EntityUtils;
@@ -102,8 +102,9 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 
 	public static final String CRUD_TYPE_FIELD_NAME = "MolgenisCrudType";
 	private static BulkProcessorFactory BULK_PROCESSOR_FACTORY = new BulkProcessorFactory();
-	private static List<String> NON_TRANSACTIONAL_ENTITIES = Arrays.asList(MolgenisTransactionLogMetaData.ENTITY_NAME,
-			MolgenisTransactionLogEntryMetaData.ENTITY_NAME);
+	private static List<String> NON_TRANSACTIONAL_ENTITIES = Arrays
+			.asList(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG, MOLGENIS_TRANSACTION_LOG_ENTRY);
+	private final PackageFactory packageFactory;
 
 	public static enum IndexingMode
 	{
@@ -124,9 +125,9 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	private final ElasticsearchUtils elasticsearchUtils;
 
 	public ElasticsearchService(Client client, String indexName, DataService dataService,
-			ElasticsearchEntityFactory elasticsearchEntityFactory)
+			ElasticsearchEntityFactory elasticsearchEntityFactory, PackageFactory packageFactory)
 	{
-		this(client, indexName, dataService, elasticsearchEntityFactory, true);
+		this(client, indexName, dataService, elasticsearchEntityFactory, true, packageFactory);
 	}
 
 	/**
@@ -139,13 +140,15 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 	 * @param createIndexIfNotExists
 	 */
 	ElasticsearchService(Client client, String indexName, DataService dataService,
-			ElasticsearchEntityFactory elasticsearchEntityFactory, boolean createIndexIfNotExists)
+			ElasticsearchEntityFactory elasticsearchEntityFactory, boolean createIndexIfNotExists,
+			PackageFactory packageFactory)
 	{
 		this.client = requireNonNull(client);
 		this.indexName = requireNonNull(indexName);
 		this.dataService = requireNonNull(dataService);
 		this.elasticsearchEntityFactory = requireNonNull(elasticsearchEntityFactory);
 		this.elasticsearchUtils = new ElasticsearchUtils(client);
+		this.packageFactory = requireNonNull(packageFactory);
 
 		if (createIndexIfNotExists)
 		{
@@ -943,7 +946,7 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 			UuidGenerator uuidg = new UuidGenerator();
 			EntityMetaData tempEntityMetaData = EntityMetaDataImpl.newInstance(entityMetaData);
 			tempEntityMetaData.setName(uuidg.generateId());
-			tempEntityMetaData.setPackage(new Package("elasticsearch_temporary_entity",
+			tempEntityMetaData.setPackage(packageFactory.create("elasticsearch_temporary_entity",
 					"This entity (Original: " + entityMetaData.getName()
 							+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
 
@@ -1132,8 +1135,8 @@ public class ElasticsearchService implements SearchService, MolgenisTransactionL
 		{
 			EntityMetaData refEntityMetaData = pair.getA();
 
-			if (!refEntityMetaData.getName().equals(EntityMetaDataMetaData.ENTITY_NAME)
-					&& !refEntityMetaData.getName().equals(AttributeMetaDataMetaData.ENTITY_NAME))
+			if (!refEntityMetaData.getName().equals(ENTITY_META_DATA) && !refEntityMetaData.getName()
+					.equals(ATTRIBUTE_META_DATA))
 			{
 				QueryImpl<Entity> q = null;
 				for (AttributeMetaData attributeMetaData : pair.getB())

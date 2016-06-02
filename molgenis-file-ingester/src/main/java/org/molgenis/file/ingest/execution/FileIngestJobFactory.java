@@ -1,6 +1,7 @@
 package org.molgenis.file.ingest.execution;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_EXECUTION;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -9,7 +10,6 @@ import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
-import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +46,7 @@ public class FileIngestJobFactory
 	@RunAsSystem
 	public FileIngestJob createJob(FileIngestJobExecution fileIngestJobExecution)
 	{
-		dataService.add(FileIngestJobExecutionMetaData.ENTITY_NAME, fileIngestJobExecution);
+		dataService.add(FILE_INGEST_JOB_EXECUTION, fileIngestJobExecution);
 		String username = fileIngestJobExecution.getUser().getUsername();
 		Progress progress = new ProgressImpl(fileIngestJobExecution, jobExecutionUpdater, mailSender);
 		TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);

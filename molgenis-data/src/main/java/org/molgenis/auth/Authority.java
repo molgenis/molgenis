@@ -1,11 +1,30 @@
 package org.molgenis.auth;
 
-public interface Authority extends org.molgenis.data.Entity
+import static org.molgenis.auth.AuthorityMetaData.ROLE;
+
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.SystemEntity;
+
+public abstract class Authority extends SystemEntity
 {
+	public Authority(Entity entity)
+	{
+		super(entity);
+	}
 
-	String ROLE = "role";
+	public Authority(EntityMetaData entityMetaData)
+	{
+		super(entityMetaData);
+	}
 
-	public String getRole();
+	public String getRole()
+	{
+		return getString(ROLE);
+	}
 
-	public void setRole(String role);
+	public void setRole(String role)
+	{
+		set(ROLE, role);
+	}
 }

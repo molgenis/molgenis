@@ -1,51 +1,50 @@
 package org.molgenis.data.jobs;
 
+import static org.molgenis.data.jobs.JobExecutionMetaData.END_DATE;
+import static org.molgenis.data.jobs.JobExecutionMetaData.FAILURE_EMAIL;
+import static org.molgenis.data.jobs.JobExecutionMetaData.IDENTIFIER;
+import static org.molgenis.data.jobs.JobExecutionMetaData.LOG;
+import static org.molgenis.data.jobs.JobExecutionMetaData.PROGRESS_INT;
+import static org.molgenis.data.jobs.JobExecutionMetaData.PROGRESS_MAX;
+import static org.molgenis.data.jobs.JobExecutionMetaData.PROGRESS_MESSAGE;
+import static org.molgenis.data.jobs.JobExecutionMetaData.RESULT_URL;
+import static org.molgenis.data.jobs.JobExecutionMetaData.START_DATE;
+import static org.molgenis.data.jobs.JobExecutionMetaData.STATUS;
+import static org.molgenis.data.jobs.JobExecutionMetaData.SUBMISSION_DATE;
+import static org.molgenis.data.jobs.JobExecutionMetaData.SUCCESS_EMAIL;
+import static org.molgenis.data.jobs.JobExecutionMetaData.TYPE;
+import static org.molgenis.data.jobs.JobExecutionMetaData.USER;
+
 import java.util.Date;
 
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.meta.SystemEntity;
 import org.springframework.util.StringUtils;
 
 /**
  * Superclass that represents a job execution.
  */
-public class JobExecution extends DefaultEntity
+public abstract class JobExecution extends SystemEntity
 {
-	private static final long serialVersionUID = -4064249548140446038L;
-
-	public static final String ENTITY_NAME = "JobExecution";
-	public static final String IDENTIFIER = "identifier"; // Job ID
-	public static final String USER = "user"; // Owner of the job
-	public static final String STATUS = "status"; // Job status like running or failed
-	public static final String TYPE = "type"; // Job type like ImportJob
-	public static final String SUBMISSION_DATE = "submissionDate";
-	public static final String START_DATE = "startDate";
-	public static final String END_DATE = "endDate";
-	public static final String PROGRESS_INT = "progressInt"; // Number of processed entities
-	public static final String PROGRESS_MESSAGE = "progressMessage";
-	public static final String PROGRESS_MAX = "progressMax"; // Max number of entities to process
-	public static final String LOG = "log";
-	public static final String RESULT_URL = "resultUrl";
-	public static final String SUCCESS_EMAIL = "successEmail";
-	public static final String FAILURE_EMAIL = "failureEmail";
-
-	public static enum Status
+	public JobExecution(Entity entity)
 	{
-		PENDING, RUNNING, SUCCESS, FAILED, CANCELED
+		super(entity);
 	}
 
-	public JobExecution(DataService dataService)
+	public JobExecution(EntityMetaData entityMetaData)
 	{
-		this(dataService, new JobExecutionMetaData());
+		super(entityMetaData);
+		setDefaultValues();
 	}
 
-	public JobExecution(DataService dataService, EntityMetaData emd)
+	public JobExecution(String identifier, EntityMetaData entityMetaData)
 	{
-		super(emd, dataService);
-		setSubmissionDate(new Date());
-		setStatus(Status.PENDING);
+		super(entityMetaData);
+		setDefaultValues();
+
+		setIdentifier(identifier);
 	}
 
 	public String getIdentifier()
@@ -178,8 +177,7 @@ public class JobExecution extends DefaultEntity
 		String email = getString(SUCCESS_EMAIL);
 		if (StringUtils.isEmpty(email))
 		{
-			return new String[]
-			{};
+			return new String[] {};
 		}
 		return email.split(",");
 	}
@@ -189,8 +187,7 @@ public class JobExecution extends DefaultEntity
 		String email = getString(FAILURE_EMAIL);
 		if (StringUtils.isEmpty(email))
 		{
-			return new String[]
-			{};
+			return new String[] {};
 		}
 		return email.split(",");
 	}
@@ -203,5 +200,16 @@ public class JobExecution extends DefaultEntity
 	public void setFailureEmail(String failureEmail)
 	{
 		set(FAILURE_EMAIL, failureEmail);
+	}
+
+	public enum Status
+	{
+		PENDING, RUNNING, SUCCESS, FAILED, CANCELED;
+	}
+
+	private void setDefaultValues()
+	{
+		setSubmissionDate(new Date());
+		setStatus(Status.PENDING);
 	}
 }

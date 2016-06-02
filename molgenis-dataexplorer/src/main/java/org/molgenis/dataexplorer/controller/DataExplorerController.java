@@ -1,5 +1,6 @@
 package org.molgenis.dataexplorer.controller;
 
+import static org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.ATTR_GALAXY_API_KEY;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.ATTR_GALAXY_URL;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
@@ -28,8 +29,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
-import org.molgenis.data.annotation.meta.AnnotationJobExecution;
+import org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.jobs.JobExecutionMetaData;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.settings.AppSettings;
@@ -187,9 +189,9 @@ public class DataExplorerController extends MolgenisPluginController
 				throw new MolgenisDataAccessException("No " + Permission.WRITEMETA + " permission on entity ["
 						+ entityName + "], this permission is necessary run the annotators.");
 			}
-			Entity annotationRun = dataService.findOne(AnnotationJobExecution.ENTITY_NAME,
-					new QueryImpl<Entity>().eq(AnnotationJobExecution.TARGET_NAME, entityName)
-							.sort(new Sort(AnnotationJobExecution.START_DATE, Sort.Direction.DESC)));
+			Entity annotationRun = dataService.findOne(ANNOTATION_JOB_EXECUTION,
+					new QueryImpl<Entity>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityName)
+							.sort(new Sort(JobExecutionMetaData.START_DATE, Sort.Direction.DESC)));
 			model.addAttribute("annotationRun", annotationRun);
 			model.addAttribute("entityName", entityName);
 		}

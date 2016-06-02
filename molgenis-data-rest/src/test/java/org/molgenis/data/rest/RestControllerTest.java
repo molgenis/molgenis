@@ -608,7 +608,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		{
 			return new RestController(dataService(), tokenService(), authenticationManager(),
 					molgenisPermissionService(), new ResourceFingerprintRegistry(), new MolgenisRSQL(),
-					new RestService(dataService(), idGenerator(), fileStore()), languageService());
+					new RestService(dataService(), idGenerator(), fileStore(), null), languageService()); // FIXME
 		}
 	}
 

@@ -1,5 +1,8 @@
 package org.molgenis.data.meta.system;
 
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
+
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.molgenis.data.meta.AttributeMetaData;
@@ -34,8 +37,45 @@ public class SystemEntityMetaDataRegistry
 		SystemEntityMetaDataRegistrySingleton.INSTANCE.addSystemEntityMetaData(systemEntityMetaData);
 	}
 
+	public boolean hasSystemAttributeMetaData(String attrIdentifier)
+	{
+		return getSystemAttributeMetaData(attrIdentifier) != null;
+	}
+
 	public AttributeMetaData getSystemAttributeMetaData(String attrIdentifier)
 	{
-		throw new UnsupportedOperationException(); // FIXME implement
+		return getSystemEntityMetaDatas()
+				.map(systemEntityMetaData -> getSystemAttributeMetaData(systemEntityMetaData, attrIdentifier))
+				.filter(Objects::nonNull).findFirst().orElse(null);
+	}
+
+	private AttributeMetaData getSystemAttributeMetaData(SystemEntityMetaData systemEntityMetaData,
+			String attrIdentifier)
+	{
+		return getSystemAttributeMetaDataRec(systemEntityMetaData.getAllAttributes(), attrIdentifier);
+	}
+
+	private AttributeMetaData getSystemAttributeMetaDataRec(Iterable<AttributeMetaData> attrs, String attrIdentifier)
+	{
+		for (AttributeMetaData attr : attrs)
+		{
+			if (attr.getIdentifier() == null)
+			{
+				continue; // FIXME this happens for EntityMetaDataMetaData i18n attrs
+			}
+
+			if (attr.getIdentifier().equals(attrIdentifier))
+			{
+				return attr;
+			}
+			else
+			{
+				if (attr.getDataType().getEnumType() == COMPOUND)
+				{
+					return getSystemAttributeMetaDataRec(attr.getAttributeParts(), attrIdentifier);
+				}
+			}
+		}
+		return null;
 	}
 }

@@ -8,25 +8,19 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.ALT_META;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
-import static org.molgenis.data.vcf.VcfRepository.FILTER;
-import static org.molgenis.data.vcf.VcfRepository.FILTER_META;
-import static org.molgenis.data.vcf.VcfRepository.ID;
-import static org.molgenis.data.vcf.VcfRepository.ID_META;
-import static org.molgenis.data.vcf.VcfRepository.INFO;
-import static org.molgenis.data.vcf.VcfRepository.INTERNAL_ID;
+import static org.molgenis.data.vcf.VcfAttributes.ALT;
+import static org.molgenis.data.vcf.VcfAttributes.CHROM;
+import static org.molgenis.data.vcf.VcfAttributes.FILTER;
+import static org.molgenis.data.vcf.VcfAttributes.ID;
+import static org.molgenis.data.vcf.VcfAttributes.INFO;
+import static org.molgenis.data.vcf.VcfAttributes.INTERNAL_ID;
+import static org.molgenis.data.vcf.VcfAttributes.POS;
+import static org.molgenis.data.vcf.VcfAttributes.QUAL;
+import static org.molgenis.data.vcf.VcfAttributes.REF;
+import static org.molgenis.data.vcf.VcfAttributes.SAMPLES;
 import static org.molgenis.data.vcf.VcfRepository.NAME;
 import static org.molgenis.data.vcf.VcfRepository.ORIGINAL_NAME;
-import static org.molgenis.data.vcf.VcfRepository.POS;
-import static org.molgenis.data.vcf.VcfRepository.POS_META;
-import static org.molgenis.data.vcf.VcfRepository.QUAL;
-import static org.molgenis.data.vcf.VcfRepository.QUAL_META;
-import static org.molgenis.data.vcf.VcfRepository.REF;
-import static org.molgenis.data.vcf.VcfRepository.REF_META;
-import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -41,6 +35,7 @@ import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.vcf.VcfAttributes;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.genotype.Allele;
@@ -83,14 +78,13 @@ public class VcfToEntity
 			for (VcfMetaFormat meta : formatMetaData)
 			{
 				String name = meta.getId();
-				if (MetaValidationUtils.KEYWORDS.contains(name)
-						|| MetaValidationUtils.KEYWORDS.contains(name.toUpperCase()))
+				if (MetaValidationUtils.KEYWORDS.contains(name) || MetaValidationUtils.KEYWORDS
+						.contains(name.toUpperCase()))
 				{
 					name = name + "_";
 				}
 				AttributeMetaData attributeMetaData = new AttributeMetaData(name.replaceAll("[-.*$&%^()#!@?]", "_"),
-						vcfFieldTypeToMolgenisFieldType(meta))
-								.setAggregatable(true).setLabel(meta.getId());
+						vcfFieldTypeToMolgenisFieldType(meta)).setAggregatable(true).setLabel(meta.getId());
 
 				result.addAttribute(attributeMetaData);
 			}
@@ -100,16 +94,19 @@ public class VcfToEntity
 
 	private EntityMetaDataImpl createEntityMetaData(String entityName, VcfMeta vcfMeta)
 	{
+		VcfAttributes vcfAttributes = getApplicationContext()
+				.getBean(VcfAttributes.class); // FIXME do not use application context
+
 		EntityMetaDataImpl entityMetaData = new EntityMetaDataImpl(entityName);
-		entityMetaData.addAttribute(CHROM_META);
-		entityMetaData.addAttribute(ALT_META);
-		entityMetaData.addAttribute(POS_META);
-		entityMetaData.addAttribute(REF_META);
-		entityMetaData.addAttribute(FILTER_META);
-		entityMetaData.addAttribute(QUAL_META);
-		entityMetaData.addAttribute(ID_META);
-		AttributeMetaData idAttributeMetaData = new AttributeMetaData(INTERNAL_ID,
-				STRING);
+		entityMetaData.addAttribute(vcfAttributes.getChromAttribute());
+		entityMetaData.addAttribute(vcfAttributes.getAltAttribute());
+		entityMetaData.addAttribute(vcfAttributes.getPosAttribute());
+		entityMetaData.addAttribute(vcfAttributes.getRefAttribute());
+		entityMetaData.addAttribute(vcfAttributes.getFilterAttribute());
+		entityMetaData.addAttribute(vcfAttributes.getQualAttribute());
+		entityMetaData.addAttribute(vcfAttributes.getIdAttribute());
+
+		AttributeMetaData idAttributeMetaData = new AttributeMetaData(INTERNAL_ID, STRING);
 		idAttributeMetaData.setVisible(false);
 		entityMetaData.addAttribute(idAttributeMetaData, ROLE_ID);
 		AttributeMetaData infoMetaData = new AttributeMetaData(INFO, COMPOUND).setNillable(true);
@@ -125,24 +122,25 @@ public class VcfToEntity
 				}
 			}
 			String name = info.getId();
-			if (MetaValidationUtils.KEYWORDS.contains(name)
-					|| MetaValidationUtils.KEYWORDS.contains(name.toUpperCase()))
+			if (MetaValidationUtils.KEYWORDS.contains(name) || MetaValidationUtils.KEYWORDS
+					.contains(name.toUpperCase()))
 			{
 				name = name + "_";
 			}
 			AttributeMetaData attributeMetaData = new AttributeMetaData(name + postFix,
 					vcfReaderFormatToMolgenisType(info)).setAggregatable(true);
 
-			attributeMetaData.setDescription(StringUtils.isBlank(info.getDescription())
-					? VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION : info.getDescription());
+			attributeMetaData.setDescription(
+					StringUtils.isBlank(info.getDescription()) ? VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION : info
+							.getDescription());
 			metadataInfoField.add(attributeMetaData);
 		}
 		infoMetaData.setAttributeParts(metadataInfoField);
 		entityMetaData.addAttribute(infoMetaData);
 		if (sampleEntityMetaData != null)
 		{
-			AttributeMetaData samplesAttributeMeta = new AttributeMetaData(SAMPLES,
-					MREF).setRefEntity(sampleEntityMetaData).setLabel("SAMPLES");
+			AttributeMetaData samplesAttributeMeta = new AttributeMetaData(SAMPLES, MREF)
+					.setRefEntity(sampleEntityMetaData).setLabel("SAMPLES");
 			entityMetaData.addAttribute(samplesAttributeMeta);
 		}
 		return entityMetaData;
@@ -360,9 +358,9 @@ public class VcfToEntity
 					postFix = "_" + entity.getEntityMetaData().getName();
 				}
 				if (!(vcfInfo.getKey() + postFix).equals(".")
-						&& entityMetaData.getAttribute(vcfInfo.getKey() + postFix) != null
-						&& entityMetaData.getAttribute(vcfInfo.getKey() + postFix).getDataType().getEnumType()
-								.equals(MolgenisFieldTypes.FieldTypeEnum.BOOL))
+						&& entityMetaData.getAttribute(vcfInfo.getKey() + postFix) != null && entityMetaData
+						.getAttribute(vcfInfo.getKey() + postFix).getDataType().getEnumType()
+						.equals(MolgenisFieldTypes.FieldTypeEnum.BOOL))
 				{
 					val = true;
 				}

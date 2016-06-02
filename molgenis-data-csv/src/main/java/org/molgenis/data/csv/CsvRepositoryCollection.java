@@ -14,7 +14,6 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
@@ -48,6 +47,12 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 		this.file = file;
 
 		loadEntityNames();
+	}
+
+	@Override
+	public void init() throws IOException
+	{
+		// no operation
 	}
 
 	@Override
@@ -116,12 +121,6 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	public String getName()
 	{
 		return NAME;
-	}
-
-	@Override
-	public Repository<Entity> createRepository(EntityMetaData entityMeta)
-	{
-		return getRepository(entityMeta.getName());
 	}
 
 	@Override

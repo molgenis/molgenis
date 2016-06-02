@@ -12,6 +12,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_REFERENCE_CONSTRAINT;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_UNIQUE_CONSTRAINT;
+import static org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData.MOLGENIS_TRANSACTION_LOG_ENTRY;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,9 +41,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData;
 import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -53,7 +52,7 @@ import org.molgenis.util.HugeSet;
 public class RepositoryValidationDecorator implements Repository<Entity>
 {
 	private static List<String> ENTITIES_THAT_DO_NOT_NEED_VALIDATION = Arrays
-			.asList(MolgenisTransactionLogMetaData.ENTITY_NAME, MolgenisTransactionLogEntryMetaData.ENTITY_NAME);
+			.asList(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG, MOLGENIS_TRANSACTION_LOG_ENTRY);
 
 	private enum ValidationMode
 	{
@@ -250,19 +249,6 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		return decoratedRepository.getCapabilities();
-	}
-
-	@Override
-	public void create()
-	{
-		decoratedRepository.create();
-
-	}
-
-	@Override
-	public void drop()
-	{
-		decoratedRepository.drop();
 	}
 
 	@Override

@@ -16,13 +16,16 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.TAGS;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VALIDATION_EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
+import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,6 +56,7 @@ import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.meta.Package;
+import org.molgenis.data.meta.PackageFactory;
 import org.molgenis.data.meta.PackageMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.SemanticTag;
@@ -83,20 +87,33 @@ public class EmxMetaDataParser implements MetaDataParser
 	private static final String LOOKUP_ATTRIBUTE = "lookupAttribute";
 	private static final String LABEL_ATTRIBUTE = "labelAttribute";
 
-	// Sheet names
-	public static final String ENTITIES = EntityMetaDataMetaData.ENTITY_NAME;
-	public static final String PACKAGES = PackageMetaData.ENTITY_NAME;
-	public static final String TAGS = TagMetaData.ENTITY_NAME;
-	public static final String ATTRIBUTES = AttributeMetaDataMetaData.ENTITY_NAME;
-	public static final String LANGUAGES = LanguageMetaData.ENTITY_NAME;
-	public static final String I18NSTRINGS = I18nStringMetaData.ENTITY_NAME;
+	// Table names in the source
+	public static final String EMX_ENTITIES = "entities";
+	public static final String EMX_PACKAGES = "packages";
+	public static final String EMX_TAGS = "tags";
+	public static final String EMX_ATTRIBUTES = "attributes";
+	public static final String EMX_LANGUAGES = "languages";
+	public static final String EMX_I18NSTRINGS = "i18nstrings";
+
+	public static final Map<String, String> EMX_NAME_TO_REPO_NAME_MAP;
+
+	static
+	{
+		EMX_NAME_TO_REPO_NAME_MAP = new HashMap<>();
+		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_ENTITIES, EntityMetaDataMetaData.ENTITY_META_DATA);
+		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_PACKAGES, PackageMetaData.PACKAGE);
+		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_TAGS, TagMetaData.TAG);
+		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_ATTRIBUTES, AttributeMetaDataMetaData.ATTRIBUTE_META_DATA);
+		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_LANGUAGES, LanguageMetaData.LANGUAGE);
+		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_I18NSTRINGS, I18nStringMetaData.I18N_STRING);
+	}
+
 
 	public static final String ENTITY = "entity";
 	public static final String PART_OF_ATTRIBUTE = "partOfAttribute";
 
-	static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(
-			org.molgenis.data.meta.EntityMetaDataMetaData.LABEL.toLowerCase(),
-			org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name", ABSTRACT.toLowerCase(),
+	static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays.asList(EntityMetaDataMetaData.LABEL.toLowerCase(),
+			EntityMetaDataMetaData.DESCRIPTION.toLowerCase(), "name", ABSTRACT.toLowerCase(),
 			EXTENDS.toLowerCase(), "package", EntityMetaDataMetaData.TAGS, BACKEND);
 
 	static final List<String> SUPPORTED_ATTRIBUTE_ATTRIBUTES = Arrays.asList(AGGREGATEABLE.toLowerCase(),
@@ -110,10 +127,12 @@ public class EmxMetaDataParser implements MetaDataParser
 	static final String AUTO = "auto";
 
 	private final DataService dataService;
+	private final PackageFactory packageFactory;
 
-	public EmxMetaDataParser(DataService dataService)
+	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory)
 	{
-		this.dataService = dataService;
+		this.dataService = requireNonNull(dataService);
+		this.packageFactory = requireNonNull(packageFactory);
 	}
 
 	/**
@@ -127,24 +146,24 @@ public class EmxMetaDataParser implements MetaDataParser
 	{
 		// TODO: this task is actually a 'merge' instead of 'import'
 		// so we need to consider both new metadata and existing ...
-		IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepository(TAGS));
+		IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepository(EMX_TAGS));
 
-		parsePackagesSheet(source.getRepository(PACKAGES), intermediateResults);
-		parsePackageTags(source.getRepository(PACKAGES), intermediateResults);
-		parseEntitiesSheet(source.getRepository(ENTITIES), intermediateResults);
-		parseAttributesSheet(source.getRepository(ATTRIBUTES), intermediateResults);
-		reiterateToMapRefEntity(source.getRepository(ATTRIBUTES), intermediateResults);
+		parsePackagesSheet(source.getRepository(EMX_PACKAGES), intermediateResults);
+		parsePackageTags(source.getRepository(EMX_PACKAGES), intermediateResults);
+		parseEntitiesSheet(source.getRepository(EMX_ENTITIES), intermediateResults);
+		parseAttributesSheet(source.getRepository(EMX_ATTRIBUTES), intermediateResults);
+		reiterateToMapRefEntity(source.getRepository(EMX_ATTRIBUTES), intermediateResults);
 
 		// languages tab
-		if (source.hasRepository(LANGUAGES))
+		if (source.hasRepository(EMX_LANGUAGES))
 		{
-			parseLanguages(source.getRepository(LANGUAGES), intermediateResults);
+			parseLanguages(source.getRepository(EMX_LANGUAGES), intermediateResults);
 		}
 
 		// i18nstrings tab
-		if (source.hasRepository(I18NSTRINGS))
+		if (source.hasRepository(EMX_I18NSTRINGS))
 		{
-			parseI18nStrings(source.getRepository(I18NSTRINGS), intermediateResults);
+			parseI18nStrings(source.getRepository(EMX_I18NSTRINGS), intermediateResults);
 		}
 
 		return intermediateResults;
@@ -437,7 +456,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					{
 						throw new MolgenisDataException(
 								"Unknown tag: " + tagId + " for attribute [" + attribute.getName() + "] of entity ["
-										+ entityName + "]). Please specify on the " + TAGS + " sheet.");
+										+ entityName + "]). Please specify on the " + EMX_TAGS + " sheet.");
 					}
 					intermediateResults.addAttributeTag(entityName,
 							SemanticTag.<AttributeMetaData>asTag(attribute, tagEntity));
@@ -532,9 +551,8 @@ public class EmxMetaDataParser implements MetaDataParser
 			for (AttributeMetaData attr : entitiesRepo.getEntityMetaData().getAtomicAttributes())
 			{
 				if (!EmxMetaDataParser.SUPPORTED_ENTITY_ATTRIBUTES.contains(attr.getName().toLowerCase()) && !(I18nUtils
-						.isI18n(attr.getName())
-						&& (attr.getName().startsWith(org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION)
-								|| attr.getName().startsWith(org.molgenis.data.meta.EntityMetaDataMetaData.LABEL))))
+						.isI18n(attr.getName()) && (attr.getName().startsWith(EntityMetaDataMetaData.DESCRIPTION)
+						|| attr.getName().startsWith(EntityMetaDataMetaData.LABEL))))
 				{
 					throw new IllegalArgumentException("Unsupported entity metadata: entities." + attr.getName());
 				}
@@ -550,9 +568,9 @@ public class EmxMetaDataParser implements MetaDataParser
 				if (entityName == null) throw new IllegalArgumentException("entity.name is missing on line " + i);
 
 				String packageName = entity.getString(PACKAGE);
-				if (packageName != null && !Package.DEFAULT_PACKAGE_NAME.equals(packageName))
+				if (packageName != null && !PACKAGE_DEFAULT.equals(packageName))
 				{
-					entityName = packageName + Package.PACKAGE_SEPARATOR + entityName;
+					entityName = packageName + PACKAGE_SEPARATOR + entityName;
 				}
 
 				EntityMetaData md = intermediateResults.getEntityMetaData(entityName);
@@ -568,29 +586,33 @@ public class EmxMetaDataParser implements MetaDataParser
 					{
 						throw new MolgenisDataException("Unknown backend '" + backend + "'");
 					}
-					md.setBackend(backend);
 				}
+				else
+				{
+					backend = dataService.getMeta().getDefaultBackend().getName();
+				}
+				md.setBackend(backend);
 
 				if (packageName != null)
 				{
 					Package p = intermediateResults.getPackage(packageName);
 					if (p == null)
 					{
-						throw new MolgenisDataException("Unknown package: '" + packageName + "' for entity '"
-								+ entity.getString("name") + "'. Please specify the package on the " + PACKAGES
+						throw new MolgenisDataException("Unknown package: '" + packageName + "' for entity '" + entity
+								.getString("name") + "'. Please specify the package on the " + EMX_PACKAGES
 								+ " sheet and use the fully qualified package and entity names.");
 					}
 					md.setPackage(p);
 				}
 
-				md.setLabel(entity.getString(org.molgenis.data.meta.EntityMetaDataMetaData.LABEL));
-				md.setDescription(entity.getString(org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION));
+				md.setLabel(entity.getString(EntityMetaDataMetaData.LABEL));
+				md.setDescription(entity.getString(EntityMetaDataMetaData.DESCRIPTION));
 
 				for (String attributeName : entity.getAttributeNames())
 				{
 					if (isI18n(attributeName))
 					{
-						if (attributeName.startsWith(org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION))
+						if (attributeName.startsWith(EntityMetaDataMetaData.DESCRIPTION))
 						{
 							String description = entity.getString(attributeName);
 							if (description != null)
@@ -599,7 +621,7 @@ public class EmxMetaDataParser implements MetaDataParser
 								md.setDescription(languageCode, description);
 							}
 						}
-						else if (attributeName.startsWith(org.molgenis.data.meta.EntityMetaDataMetaData.LABEL))
+						else if (attributeName.startsWith(EntityMetaDataMetaData.LABEL))
 						{
 							String label = entity.getString(attributeName);
 							if (label != null)
@@ -612,7 +634,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				}
 
 				if (entity.getBoolean(ABSTRACT) != null) md.setAbstract(entity.getBoolean(ABSTRACT));
-				List<String> tagIds = entity.getList(TAGS);
+				List<String> tagIds = entity.getList(EntityMetaDataMetaData.TAGS);
 
 				String extendsEntityName = entity.getString(EXTENDS);
 				if (extendsEntityName != null)
@@ -647,7 +669,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				//						if (tagEntity == null)
 				//						{
 				//							throw new MolgenisDataException("Unknown tag: " + tagId + " for entity [" + entityName
-				//									+ "]). Please specify on the " + TAGS + " sheet.");
+				//									+ "]). Please specify on the " + EMX_TAGS + " sheet.");
 				//						}
 				//						intermediateResults.addEntityTag(Tag.<EntityMetaData> asTag(md, tagEntity));
 				//					}
@@ -690,7 +712,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				parent = intermediateResults.getPackage(parentName);
 			}
 
-			intermediateResults.addPackage(name, new Package(simpleName, description, parent));
+			intermediateResults.addPackage(name, packageFactory.create(simpleName, description, parent));
 		}
 	}
 
@@ -834,11 +856,11 @@ public class EmxMetaDataParser implements MetaDataParser
 	@Override
 	public ParsedMetaData parse(final RepositoryCollection source, String defaultPackage)
 	{
-		if (source.getRepository(EmxMetaDataParser.ATTRIBUTES) != null)
+		if (source.getRepository(EmxMetaDataParser.EMX_ATTRIBUTES) != null)
 		{
 			IntermediateParseResults intermediateResults = getEntityMetaDataFromSource(source);
 			List<EntityMetaData> entities;
-			if ((defaultPackage == null) || Package.DEFAULT_PACKAGE_NAME.equalsIgnoreCase(defaultPackage))
+			if ((defaultPackage == null) || PACKAGE_DEFAULT.equalsIgnoreCase(defaultPackage))
 			{
 				entities = intermediateResults.getEntities();
 			}
@@ -854,22 +876,23 @@ public class EmxMetaDataParser implements MetaDataParser
 		else
 		{
 			List<EntityMetaData> metadataList = new ArrayList<EntityMetaData>();
-			for (String name : source.getEntityNames())
+			for (String emxName : source.getEntityNames())
 			{
-				metadataList.add(dataService.getRepository(name).getEntityMetaData());
+				String repoName = EMX_NAME_TO_REPO_NAME_MAP.get(emxName);
+				metadataList.add(dataService.getRepository(repoName).getEntityMetaData());
 			}
-			IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepository(TAGS));
-			parsePackagesSheet(source.getRepository(PACKAGES), intermediateResults);
-			parsePackageTags(source.getRepository(PACKAGES), intermediateResults);
+			IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepository(EMX_TAGS));
+			parsePackagesSheet(source.getRepository(EMX_PACKAGES), intermediateResults);
+			parsePackageTags(source.getRepository(EMX_PACKAGES), intermediateResults);
 
-			if (source.hasRepository(LANGUAGES))
+			if (source.hasRepository(EMX_LANGUAGES))
 			{
-				parseLanguages(source.getRepository(LANGUAGES), intermediateResults);
+				parseLanguages(source.getRepository(EMX_LANGUAGES), intermediateResults);
 			}
 
-			if (source.hasRepository(I18NSTRINGS))
+			if (source.hasRepository(EMX_I18NSTRINGS))
 			{
-				parseI18nStrings(source.getRepository(I18NSTRINGS), intermediateResults);
+				parseI18nStrings(source.getRepository(EMX_I18NSTRINGS), intermediateResults);
 			}
 
 			return new ParsedMetaData(resolveEntityDependencies(metadataList), intermediateResults.getPackages(),
@@ -930,7 +953,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private ImmutableMap<String, EntityMetaData> getEntityMetaDataMap(DataService dataService,
 			RepositoryCollection source)
 	{
-		if (source.getRepository(EmxMetaDataParser.ATTRIBUTES) != null)
+		if (source.getRepository(EmxMetaDataParser.EMX_ATTRIBUTES) != null)
 		{
 			return getEntityMetaDataFromSource(source).getEntityMap();
 		}
@@ -941,12 +964,13 @@ public class EmxMetaDataParser implements MetaDataParser
 	}
 
 	private ImmutableMap<String, EntityMetaData> getEntityMetaDataFromDataService(DataService dataService,
-			Iterable<String> entityNames)
+			Iterable<String> emxEntityNames)
 	{
 		ImmutableMap.Builder<String, EntityMetaData> builder = ImmutableMap.builder();
-		for (String name : entityNames)
+		for (String emxName : emxEntityNames)
 		{
-			builder.put(name, dataService.getRepository(name).getEntityMetaData());
+			String repoName = EMX_NAME_TO_REPO_NAME_MAP.get(emxName);
+			builder.put(emxName, dataService.getRepository(repoName).getEntityMetaData());
 		}
 		return builder.build();
 	}
@@ -965,7 +989,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 		for (String sheet : source.getEntityNames())
 		{
-			if (PACKAGES.equals(sheet))
+			if (EMX_PACKAGES.equals(sheet))
 			{
 				IntermediateParseResults parseResult = new IntermediateParseResults();
 				parsePackagesSheet(source.getRepository(sheet), parseResult);
@@ -974,8 +998,8 @@ public class EmxMetaDataParser implements MetaDataParser
 					report.addPackage(packageName);
 				}
 			}
-			else if (!ENTITIES.equals(sheet) && !ATTRIBUTES.equals(sheet) && !TAGS.equals(sheet)
-					&& !LANGUAGES.equals(sheet) && !I18NSTRINGS.equals(sheet))
+			else if (!EMX_ENTITIES.equals(sheet) && !EMX_ATTRIBUTES.equals(sheet) && !EMX_TAGS.equals(sheet)
+					&& !EMX_LANGUAGES.equals(sheet) && !EMX_I18NSTRINGS.equals(sheet))
 			{
 				// check if sheet is known
 				report = report.addEntity(sheet, metaDataMap.containsKey(sheet));

@@ -25,7 +25,7 @@ public class EntityLogAppender extends AppenderBase<ILoggingEvent>
 	{
 		String formattedMessage = layout.doLayout(eventObject);
 		buffer.append(formattedMessage);
-		jobExecution.set(JobExecution.LOG, buffer.toString());
+		jobExecution.set(JobExecutionMetaData.LOG, buffer.toString());
 	}
 
 }

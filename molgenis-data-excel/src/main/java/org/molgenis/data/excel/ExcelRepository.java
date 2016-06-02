@@ -46,7 +46,7 @@ public class ExcelRepository extends AbstractRepository
 	private List<CellProcessor> cellProcessors;
 	/** column names index */
 	private Map<String, Integer> colNamesMap;
-	private EntityMetaDataImpl entityMetaData;
+	private EntityMetaData entityMetaData;
 
 	public ExcelRepository(String fileName, Sheet sheet)
 	{
@@ -162,7 +162,7 @@ public class ExcelRepository extends AbstractRepository
 							.addAttribute(new AttributeMetaData(colName, STRING));
 				}
 			}
-			entityMetaData = entityMetaData;
+			this.entityMetaData = entityMetaData;
 		}
 
 		return entityMetaData;

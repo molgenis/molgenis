@@ -1,5 +1,8 @@
 package org.molgenis.ontology.ic;
 
+import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM;
+import static org.molgenis.ontology.ic.TermFrequencyEntityMetaData.TERM_FREQUENCY;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,7 +45,7 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 
 	public String getAttributeValue(String term, String attributeName)
 	{
-		Entity entity = dataService.findOne(TermFrequencyEntityMetaData.ENTITY_NAME,
+		Entity entity = dataService.findOne(TERM_FREQUENCY,
 				new QueryImpl<Entity>().eq(TermFrequencyEntityMetaData.TERM, term));
 
 		if (entity == null)
@@ -61,7 +64,7 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 		mapEntity.set(TermFrequencyEntityMetaData.TERM, term);
 		mapEntity.set(TermFrequencyEntityMetaData.FREQUENCY, pubMedTFEntity.getFrequency());
 		mapEntity.set(TermFrequencyEntityMetaData.OCCURRENCE, pubMedTFEntity.getOccurrence());
-		dataService.add(TermFrequencyEntityMetaData.ENTITY_NAME, mapEntity);
+		dataService.add(TERM_FREQUENCY, mapEntity);
 		return mapEntity;
 	}
 
@@ -71,12 +74,12 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 	public void updateTermFrequency()
 	{
 		// Remove all the existing term frequency records
-		dataService.deleteAll(TermFrequencyEntityMetaData.ENTITY_NAME);
+		dataService.deleteAll(TERM_FREQUENCY);
 
 		List<Entity> entitiesToAdd = new ArrayList<Entity>();
 		// Create new term frequency records
-		dataService.findAll(OntologyTermSynonymMetaData.ENTITY_NAME).forEach(entity -> {
-			String ontologyTermSynonym = entity.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM);
+		dataService.findAll(ONTOLOGY_TERM_SYNONYM).forEach(entity -> {
+			String ontologyTermSynonym = entity.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR);
 			PubMedTFEntity pubMedTFEntity = pubMedTermFrequencyService.getTermFrequency(ontologyTermSynonym);
 
 			if (pubMedTFEntity != null)
@@ -89,7 +92,7 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 
 				if (entitiesToAdd.size() > BATCH_SIZE)
 				{
-					dataService.add(TermFrequencyEntityMetaData.ENTITY_NAME, entitiesToAdd.stream());
+					dataService.add(TERM_FREQUENCY, entitiesToAdd.stream());
 					entitiesToAdd.clear();
 				}
 			}
@@ -97,7 +100,7 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 
 		if (entitiesToAdd.size() != 0)
 		{
-			dataService.add(TermFrequencyEntityMetaData.ENTITY_NAME, entitiesToAdd.stream());
+			dataService.add(TERM_FREQUENCY, entitiesToAdd.stream());
 		}
 	}
 }

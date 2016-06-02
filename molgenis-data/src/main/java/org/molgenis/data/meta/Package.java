@@ -3,10 +3,11 @@ package org.molgenis.data.meta;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static java.util.Collections.singletonList;
-import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.PackageMetaData.DESCRIPTION;
-import static org.molgenis.data.meta.PackageMetaData.ENTITY_NAME;
 import static org.molgenis.data.meta.PackageMetaData.FULL_NAME;
+import static org.molgenis.data.meta.PackageMetaData.LABEL;
+import static org.molgenis.data.meta.PackageMetaData.PACKAGE;
 import static org.molgenis.data.meta.PackageMetaData.PARENT;
 import static org.molgenis.data.meta.PackageMetaData.SIMPLE_NAME;
 import static org.molgenis.data.meta.PackageMetaData.TAGS;
@@ -14,89 +15,47 @@ import static org.molgenis.data.meta.PackageMetaData.TAGS;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.semantic.Tag;
-import org.molgenis.data.support.AbstractEntity;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.ApplicationContextProvider;
 
 /**
  * Package defines the structure and attributes of a Package. Attributes are unique. Other software components can use
  * this to interact with Packages and/or to configure backends and frontends, including Repository instances.
  */
-public class Package extends AbstractEntity
+public class Package extends SystemEntity
 {
-	private final Entity entity;
-
-	public static final String DEFAULT_PACKAGE_NAME = "base";
 	public static final String PACKAGE_SEPARATOR = "_";
 
+	/**
+	 * Constructs a package based on the given entity
+	 *
+	 * @param entity decorated entity
+	 */
 	public Package(Entity entity)
 	{
-		this.entity = requireNonNull(entity);
-	}
-
-	public Package(String simpleName)
-	{
-		this(simpleName, null);
-	}
-
-	public Package(String simpleName, String description)
-	{
-		this(simpleName, description, null);
-	}
-
-	public Package(String simpleName, String description, Package parent)
-	{
-		this.entity = new MapEntity(getEntityMetaData());
-		String fullName;
-		if (parent != null)
-		{
-			fullName = parent.getName() + PACKAGE_SEPARATOR + simpleName;
-		}
-		else
-		{
-			fullName = simpleName;
-		}
-		set(FULL_NAME, fullName);
-		set(SIMPLE_NAME, simpleName);
-		set(DESCRIPTION, description);
-		set(PARENT, parent);
+		super(entity);
 	}
 
 	/**
-	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #Package(Entity)})
+	 * Constructs a package with the given meta data
 	 *
-	 * @param package_ package
-	 * @return deep copy of package
+	 * @param packageMetaData package meta data
 	 */
-	public static Package newInstance(Package package_)
+	public Package(PackageMetaData packageMetaData)
 	{
-		Entity entityCopy = MapEntity.newInstance(package_.entity);
-		return new Package(entityCopy);
+		super(packageMetaData);
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	/**
+	 * Constructs a package with the given type code and meta data
+	 *
+	 * @param simpleName      package name
+	 * @param packageMetaData language meta data
+	 */
+	public Package(String simpleName, PackageMetaData packageMetaData)
 	{
-		return ApplicationContextProvider.getApplicationContext().getBean(PackageMetaData.class);
-	}
-
-	@Override
-	public Object get(String attributeName)
-	{
-		return entity.get(attributeName);
-	}
-
-	@Override
-	public void set(String attributeName, Object value)
-	{
-		entity.set(attributeName, value);
-	}
-
-	@Override
-	public void set(Entity values)
-	{
-		entity.set(values);
+		super(packageMetaData);
+		setSimpleName(simpleName);
+		setName(simpleName);
 	}
 
 	/**
@@ -112,6 +71,7 @@ public class Package extends AbstractEntity
 	public Package setSimpleName(String simpleName)
 	{
 		set(SIMPLE_NAME, simpleName);
+		updateFullName();
 		return this;
 	}
 
@@ -128,6 +88,7 @@ public class Package extends AbstractEntity
 	public Package setParent(Package parentPackage)
 	{
 		set(PARENT, parentPackage);
+		updateFullName();
 		return this;
 	}
 
@@ -144,6 +105,22 @@ public class Package extends AbstractEntity
 	public Package setName(String fullName)
 	{
 		set(FULL_NAME, fullName);
+		return this;
+	}
+
+	/**
+	 * The label of this package
+	 *
+	 * @return package label or <tt>null</tt>
+	 */
+	public String getLabel()
+	{
+		return getString(LABEL);
+	}
+
+	public Package setLabel(String label)
+	{
+		set(LABEL, label);
 		return this;
 	}
 
@@ -192,7 +169,7 @@ public class Package extends AbstractEntity
 	 */
 	public void addTag(Tag tag)
 	{
-		entity.set(TAGS, concat(getTags(), singletonList(tag)));
+		set(TAGS, concat(getTags(), singletonList(tag)));
 	}
 
 	/**
@@ -204,7 +181,7 @@ public class Package extends AbstractEntity
 	{
 		Iterable<Tag> tags = getTags();
 		removeAll(tags, singletonList(tag));
-		entity.set(TAGS, tag);
+		set(TAGS, tag);
 	}
 
 	/**
@@ -216,7 +193,7 @@ public class Package extends AbstractEntity
 	{
 		// TODO Use one-to-many relationship for EntityMetaData.package
 		DataService dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
-		Query<EntityMetaDataImpl> query = dataService.query(EntityMetaDataMetaData.ENTITY_NAME, EntityMetaDataImpl.class)
+		Query<EntityMetaDataImpl> query = dataService.query(ENTITY_META_DATA, EntityMetaDataImpl.class)
 				.eq(EntityMetaDataMetaData.PACKAGE, getName());
 		return () -> query.findAll().iterator();
 	}
@@ -230,8 +207,7 @@ public class Package extends AbstractEntity
 	{
 		// TODO use one-to-many relationship for Package.parent
 		DataService dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
-		Query<Package> query = dataService.query(ENTITY_NAME, Package.class)
-				.eq(PARENT, this);
+		Query<Package> query = dataService.query(PACKAGE, Package.class).eq(PARENT, this);
 		return () -> query.findAll().iterator();
 	}
 
@@ -250,29 +226,22 @@ public class Package extends AbstractEntity
 		return package_;
 	}
 
-	@Override
-	public boolean equals(Object o)
+	private void updateFullName()
 	{
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		Package aPackage = (Package) o;
-
-		return entity.equals(aPackage.entity);
-
-	}
-
-	@Override
-	public int hashCode()
-	{
-		return entity.hashCode();
-	}
-
-	@Override
-	public String toString()
-	{
-		return "Package{" +
-				"entity=" + entity +
-				'}';
+		String simpleName = getSimpleName();
+		if (simpleName != null)
+		{
+			String fullName;
+			Package parentPackage = getParent();
+			if (parentPackage != null)
+			{
+				fullName = parentPackage.getName() + PACKAGE_SEPARATOR + simpleName;
+			}
+			else
+			{
+				fullName = simpleName;
+			}
+			set(EntityMetaDataMetaData.FULL_NAME, fullName);
+		}
 	}
 }

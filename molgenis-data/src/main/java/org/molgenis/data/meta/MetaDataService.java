@@ -6,7 +6,6 @@ import java.util.List;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.RepositoryDecoratorFactory;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -159,4 +158,13 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @return
 	 */
 	boolean hasBackend(String backendName);
+
+	/**
+	 * Returns whether the given {@link EntityMetaData} defines a meta entity such as {@link EntityMetaDataMetaData} or
+	 * {@link AttributeMetaData}.
+	 *
+	 * @param entityMetaData
+	 * @return
+	 */
+	boolean isMetaEntityMetaData(EntityMetaData entityMetaData);
 }

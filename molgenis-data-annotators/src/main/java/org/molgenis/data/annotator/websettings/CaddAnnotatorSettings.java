@@ -30,6 +30,7 @@ public class CaddAnnotatorSettings extends DefaultSettingsEntity
 		@Override
 		public void init()
 		{
+			super.init();
 			setLabel("Cadd annotator settings");
 
 			String defaultLocation = AnnotatorUtils.getAnnotatorResourceDir() + "/CADD/1000G.vcf.gz";

@@ -32,6 +32,6 @@ public class ScriptRunnerRegistrar
 
 	private void register(ScriptRunner scriptRunner)
 	{
-		scriptRunnerFactory.registerScriptExecutor("", scriptRunner); // FIXME script type "JavaScript", "JavaScript (Magma)", "Python", "R"
+		scriptRunnerFactory.registerScriptExecutor(scriptRunner);
 	}
 }

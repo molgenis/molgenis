@@ -2,9 +2,12 @@ package org.molgenis.security.google;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.MolgenisGroup.NAME;
-import static org.molgenis.auth.MolgenisUser.EMAIL;
-import static org.molgenis.auth.MolgenisUser.GOOGLEACCOUNTID;
+import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
+import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
+import static org.molgenis.auth.MolgenisGroupMetaData.NAME;
+import static org.molgenis.auth.MolgenisUserMetaData.EMAIL;
+import static org.molgenis.auth.MolgenisUserMetaData.GOOGLEACCOUNTID;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
 import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.springframework.http.HttpMethod.POST;
@@ -22,7 +25,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.auth.MolgenisGroupMember;
+import org.molgenis.auth.MolgenisGroupMemberFactory;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.token.UnknownTokenException;
@@ -60,12 +65,17 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 	private final DataService dataService;
 	private final MolgenisUserDetailsService molgenisUserDetailsService;
 	private final AppSettings appSettings;
+	private final MolgenisUserFactory molgenisUserFactory;
+	private final MolgenisGroupMemberFactory molgenisGroupMemberFactory;
 
 	@Autowired
 	public GoogleAuthenticationProcessingFilter(GooglePublicKeysManager googlePublicKeysManager,
-			DataService dataService, MolgenisUserDetailsService molgenisUserDetailsService, AppSettings appSettings)
+			DataService dataService, MolgenisUserDetailsService molgenisUserDetailsService, AppSettings appSettings,
+			MolgenisUserFactory molgenisUserFactory, MolgenisGroupMemberFactory molgenisGroupMemberFactory)
 	{
 		super(new AntPathRequestMatcher(GOOGLE_AUTHENTICATION_URL, POST.toString()));
+		this.molgenisUserFactory = requireNonNull(molgenisUserFactory);
+		this.molgenisGroupMemberFactory = requireNonNull(molgenisGroupMemberFactory);
 
 		setAuthenticationFailureHandler(new SimpleUrlAuthenticationFailureHandler("/login?error"));
 
@@ -139,16 +149,16 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 		return runAsSystem(() -> {
 			MolgenisUser user;
 
-			user = dataService.query(MolgenisUser.ENTITY_NAME, MolgenisUser.class).eq(GOOGLEACCOUNTID, principal).findOne();
+			user = dataService.query(MOLGENIS_USER, MolgenisUser.class).eq(GOOGLEACCOUNTID, principal).findOne();
 			if (user == null)
 			{
 				// no user with google account
-				user = dataService.query(MolgenisUser.ENTITY_NAME, MolgenisUser.class).eq(EMAIL, email).findOne();
+				user = dataService.query(MOLGENIS_USER, MolgenisUser.class).eq(EMAIL, email).findOne();
 				if (user != null)
 				{
 					// connect google account to user
 					user.setGoogleAccountId(principal);
-					dataService.update(MolgenisUser.ENTITY_NAME, user);
+					dataService.update(MOLGENIS_USER, user);
 				}
 				else
 				{
@@ -185,7 +195,7 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 
 		// create user
 		LOG.info("first login for [{}], creating MOLGENIS user", username);
-		MolgenisUser user = new MolgenisUser();
+		MolgenisUser user = molgenisUserFactory.create();
 		user.setUsername(username);
 		user.setPassword(UUID.randomUUID().toString());
 		user.setEmail(email);
@@ -201,14 +211,14 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 			user.setLastName(familyName);
 		}
 		user.setGoogleAccountId(googleAccountId);
-		dataService.add(MolgenisUser.ENTITY_NAME, user);
+		dataService.add(MOLGENIS_USER, user);
 
 		// add user to all-users group
-		MolgenisGroupMember groupMember = new MolgenisGroupMember();
-		MolgenisGroup group = dataService.query(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class).eq(NAME, ALL_USER_GROUP).findOne();
+		MolgenisGroupMember groupMember = molgenisGroupMemberFactory.create();
+		MolgenisGroup group = dataService.query(MOLGENIS_GROUP, MolgenisGroup.class).eq(NAME, ALL_USER_GROUP).findOne();
 		groupMember.setMolgenisGroup(group);
 		groupMember.setMolgenisUser(user);
-		dataService.add(MolgenisGroupMember.ENTITY_NAME, groupMember);
+		dataService.add(MOLGENIS_GROUP_MEMBER, groupMember);
 
 		return user;
 	}

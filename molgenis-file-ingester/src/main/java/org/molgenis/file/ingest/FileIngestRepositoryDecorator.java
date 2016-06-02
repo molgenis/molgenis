@@ -1,5 +1,7 @@
 package org.molgenis.file.ingest;
 
+import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_EXECUTION;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
@@ -15,7 +17,6 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 
@@ -141,8 +142,9 @@ public class FileIngestRepositoryDecorator implements Repository<Entity>
 
 	private void removeJobExecutions(String entityId)
 	{
-		Query<Entity> query = dataService.query(FileIngestJobExecutionMetaData.ENTITY_NAME).eq(FileIngestJobExecutionMetaData.FILE_INGEST, entityId);
-		dataService.delete(FileIngestJobExecutionMetaData.ENTITY_NAME, dataService.findAll(FileIngestJobExecutionMetaData.ENTITY_NAME, query));
+		Query<Entity> query = dataService.query(FILE_INGEST_JOB_EXECUTION)
+				.eq(FileIngestJobExecutionMetaData.FILE_INGEST, entityId);
+		dataService.delete(FILE_INGEST_JOB_EXECUTION, dataService.findAll(FILE_INGEST_JOB_EXECUTION, query));
 	}
 
 	@Override
@@ -229,18 +231,6 @@ public class FileIngestRepositoryDecorator implements Repository<Entity>
 	public void clearCache()
 	{
 		decorated.clearCache();
-	}
-
-	@Override
-	public void create()
-	{
-		decorated.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		decorated.drop();
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -102,7 +103,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			finalQueryRules.addAll(Arrays.asList(new QueryRule(Operator.AND), disMaxQueryRule));
 		}
 
-		Stream<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
+		Stream<Entity> attributeMetaDataEntities = dataService.findAll(ATTRIBUTE_META_DATA,
 				new QueryImpl<>(finalQueryRules));
 
 		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper.collectExpandedQueryMap(queryTerms,
@@ -255,7 +256,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 					+ " does not exsit in EntityMetaData : " + sourceEntityMetaData.getName());
 		}
 		Explanation explanation = elasticSearchExplainService.explain(new QueryImpl<Entity>(finalQueryRules),
-				dataService.getEntityMetaData(AttributeMetaDataMetaData.ENTITY_NAME), attributeId);
+				dataService.getEntityMetaData(ATTRIBUTE_META_DATA), attributeId);
 
 		Set<ExplainedQueryString> detectedQueryStrings = elasticSearchExplainService
 				.findQueriesFromExplanation(collectExpanedQueryMap, explanation);

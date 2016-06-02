@@ -15,7 +15,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.springframework.beans.BeanUtils;
 
 public abstract class AbstractEntity implements Entity
 {
@@ -25,6 +24,11 @@ public abstract class AbstractEntity implements Entity
 	public String getLabelValue()
 	{
 		AttributeMetaData labelAttribute = getEntityMetaData().getLabelAttribute();
+		if (labelAttribute == null && getEntityMetaData().isAbstract())
+		{
+			return null;
+		}
+
 		String labelAttributeName = labelAttribute.getName();
 		FieldTypeEnum dataType = labelAttribute.getDataType().getEnumType();
 		switch (dataType)
@@ -198,36 +202,5 @@ public abstract class AbstractEntity implements Entity
 				return String.format("%s=%s", attrName, this.get(attrName));
 			}
 		}).collect(Collectors.joining(","));
-	}
-
-	public static boolean isObjectRepresentation(String objStr)
-	{
-		int left = objStr.indexOf('(');
-		int right = objStr.lastIndexOf(')');
-		return (left == -1 || right == -1) ? false : true;
-	}
-
-	public static <T extends Entity> T setValuesFromString(String objStr, Class<T> klass)
-	{
-		T result = BeanUtils.instantiateClass(klass);
-
-		int left = objStr.indexOf('(');
-		int right = objStr.lastIndexOf(')');
-
-		String content = objStr.substring(left + 1, right);
-
-		String[] attrValues = content.split(" ");
-		for (String attrValue : attrValues)
-		{
-			String[] av = attrValue.split("=");
-			String attr = av[0];
-			String value = av[1];
-			if (value.charAt(0) == '\'' && value.charAt(value.length() - 1) == '\'')
-			{
-				value = value.substring(1, value.length() - 1);
-			}
-			result.set(attr, value);
-		}
-		return result;
 	}
 }

@@ -85,7 +85,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	@BeforeClass
 	public void setUp()
 	{
-		Package p = new Package("test");
+		Package p = null; //new Package("test"); // FIXME
 		refEntityMetaData = new EntityMetaDataImpl("TestRefEntity", p);
 		refEntityMetaData.addAttribute(ATTR_REF_ID, ROLE_ID).setNillable(false);
 		refEntityMetaData.addAttribute(ATTR_REF_STRING).setNillable(true).setDataType(MolgenisFieldTypes.STRING);

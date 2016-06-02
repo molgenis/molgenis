@@ -2,9 +2,8 @@ package org.molgenis.data.mapper.algorithmgenerator.service.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.js.magma.JsMagmaScriptRegistrator.SCRIPT_TYPE_JAVASCRIPT_MAGMA;
-import static org.molgenis.script.Script.ENTITY_NAME;
-import static org.molgenis.script.Script.TYPE;
+import static org.molgenis.script.ScriptMetaData.SCRIPT;
+import static org.molgenis.script.ScriptMetaData.TYPE;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -26,6 +25,7 @@ import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.js.magma.JsMagmaScriptRunner;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.script.Script;
@@ -99,7 +99,7 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractTestNGSpringConte
 		when(script.getParameters()).thenReturn(Arrays.asList(heightParameter, weightParameter));
 		when(script.getContent()).thenReturn("$('weight').div($('height').pow(2)).value()");
 
-		when(dataService.findAll(ENTITY_NAME, new QueryImpl<Script>().eq(TYPE, SCRIPT_TYPE_JAVASCRIPT_MAGMA), Script.class))
+		when(dataService.findAll(SCRIPT, new QueryImpl<Script>().eq(TYPE, JsMagmaScriptRunner.NAME), Script.class))
 				.thenReturn(Stream.of(script));
 
 		GeneratedAlgorithm generate = algorithmGeneratorService.generate(targetBMIAttribute, sourceAttributes,

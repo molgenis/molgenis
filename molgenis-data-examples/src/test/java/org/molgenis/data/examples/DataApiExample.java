@@ -1,5 +1,6 @@
 package org.molgenis.data.examples;
 
+import static org.molgenis.data.examples.UserMetaData.USER;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import java.io.File;
@@ -28,43 +29,43 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 	public void testStatic()
 	{
 		// Add some users
-		dataService.add(UserMetaData.ENTITY_NAME, new User("Piet", true));
-		dataService.add(UserMetaData.ENTITY_NAME, new User("Klaas", false));
+		dataService.add(USER, new User("Piet", true));
+		dataService.add(USER, new User("Klaas", false));
 
 		// Retrieve them and print
 		printUsers();
 
 		// Find Klaas
-		User klaas = dataService.findOneById(UserMetaData.ENTITY_NAME, "Klaas", User.class);
+		User klaas = dataService.findOneById(USER, "Klaas", User.class);
 		System.out.println(klaas);
 
 		// Make klaas active
 		klaas.setActive(true);
-		dataService.update(UserMetaData.ENTITY_NAME, klaas);
+		dataService.update(USER, klaas);
 
 		// Find all active
-		dataService.query(UserMetaData.ENTITY_NAME, User.class).eq(UserMetaData.ACTIVE, true).findAll()
+		dataService.query(USER, User.class).eq(UserMetaData.ACTIVE, true).findAll()
 				.forEach(System.out::println);
 		// OR ??
-		dataService.getRepository(UserMetaData.ENTITY_NAME).query().eq(UserMetaData.ACTIVE, true)
+		dataService.getRepository(USER).query().eq(UserMetaData.ACTIVE, true)
 				.forEach(System.out::println);
 
 		// Delete one
-		dataService.deleteById(UserMetaData.ENTITY_NAME, "Piet");
+		dataService.deleteById(USER, "Piet");
 		printUsers();
 
 		// Discover capabilities of repo
-		dataService.getCapabilities(UserMetaData.ENTITY_NAME).forEach(System.out::println);
+		dataService.getCapabilities(USER).forEach(System.out::println);
 
 		// Add streaming
 		File usersCsv = ResourceUtils.getFile("users.csv");
-		dataService.add(UserMetaData.ENTITY_NAME, new CsvRepository(usersCsv, null).stream());
+		dataService.add(USER, new CsvRepository(usersCsv, null).stream());
 		printUsers();
 	}
 
 	private void printUsers()
 	{
-		dataService.findAll(UserMetaData.ENTITY_NAME, User.class).forEach(System.out::println);
+		dataService.findAll(USER, User.class).forEach(System.out::println);
 	}
 
 	// @Test

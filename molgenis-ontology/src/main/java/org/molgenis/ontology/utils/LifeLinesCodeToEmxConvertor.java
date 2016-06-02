@@ -1,5 +1,10 @@
 package org.molgenis.ontology.utils;
 
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
+import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH;
+import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -58,21 +63,18 @@ public class LifeLinesCodeToEmxConvertor
 
 		ExcelWriter excelWriter = new ExcelWriter(lifeLinesCodeEmxFile);
 
-		ExcelSheetWriter ontologyExcelSheet = excelWriter.createWritable(OntologyMetaData.ENTITY_NAME, FluentIterable
+		ExcelSheetWriter ontologyExcelSheet = excelWriter.createWritable(ONTOLOGY, FluentIterable
 				.from(new OntologyMetaData().getAtomicAttributes()).transform(attr -> attr.getName()).toList());
 
-		ExcelSheetWriter ontologyTermExcelSheet = excelWriter.createWritable(
-				OntologyTermMetaData.ENTITY_NAME,
+		ExcelSheetWriter ontologyTermExcelSheet = excelWriter.createWritable(ONTOLOGY_TERM,
 				FluentIterable.from(new OntologyTermMetaData().getAtomicAttributes())
 						.transform(attr -> attr.getName()).toList());
 
-		ExcelSheetWriter ontologyTermSynonymExcelSheet = excelWriter.createWritable(
-				OntologyTermSynonymMetaData.ENTITY_NAME,
+		ExcelSheetWriter ontologyTermSynonymExcelSheet = excelWriter.createWritable(ONTOLOGY_TERM_SYNONYM,
 				FluentIterable.from(new OntologyTermSynonymMetaData().getAtomicAttributes())
 						.transform(attr -> attr.getName()).toList());
 
-		ExcelSheetWriter ontologyTermNodePathExcelSheet = excelWriter.createWritable(
-				OntologyTermNodePathMetaData.ENTITY_NAME,
+		ExcelSheetWriter ontologyTermNodePathExcelSheet = excelWriter.createWritable(ONTOLOGY_TERM_NODE_PATH,
 				FluentIterable.from(new OntologyTermNodePathMetaData().getAtomicAttributes())
 						.transform(attr -> attr.getName()).toList());
 
@@ -172,7 +174,7 @@ public class LifeLinesCodeToEmxConvertor
 	private static Entity createOntologyNodePathEntity(String nodePath, boolean isTop, String generatedId)
 	{
 		MapEntity mapEntity = new MapEntity();
-		mapEntity.set(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH, nodePath);
+		mapEntity.set(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR, nodePath);
 		mapEntity.set(OntologyTermNodePathMetaData.ROOT, isTop);
 		mapEntity.set(OntologyTermNodePathMetaData.ID, generatedId);
 		return mapEntity;
@@ -181,7 +183,7 @@ public class LifeLinesCodeToEmxConvertor
 	private static Entity createOntologyTermSynonymEntity(String synonym, String generatedId)
 	{
 		MapEntity mapEntity = new MapEntity();
-		mapEntity.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, synonym);
+		mapEntity.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR, synonym);
 		mapEntity.set(OntologyTermSynonymMetaData.ID, generatedId);
 		return mapEntity;
 	}

@@ -154,10 +154,11 @@ public class EntityAttributesValidator
 		{
 			return null;
 		}
-		if (!refEntity.getEntityMetaData().equals(attr.getRefEntity()))
-		{
-			return createConstraintViolation(entity, attr, meta, "Not a valid entity type.");
-		}
+		// FIXME
+		//		if (!refEntity.getEntityMetaData().equals(attr.getRefEntity()))
+		//		{
+		//			return createConstraintViolation(entity, attr, meta, "Not a valid entity type.");
+		//		}
 		return null;
 	}
 

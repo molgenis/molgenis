@@ -7,14 +7,19 @@ import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 
 public class UserMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String ENTITY_NAME = "User";
+	public static final String USER = "User";
+
 	public static final String USERNAME = "username";
 	public static final String ACTIVE = "active";
+
+	UserMetaData()
+	{
+		super(USER);
+	}
 
 	@Override
 	public void init()
 	{
-		setName(ENTITY_NAME);
 		addAttribute(USERNAME, ROLE_ID);
 		addAttribute(ACTIVE).setDataType(MolgenisFieldTypes.BOOL);
 	}

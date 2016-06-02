@@ -16,7 +16,6 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
@@ -209,18 +208,6 @@ public class EntityListenerRepositoryDecorator implements Repository<Entity>
 	public void clearCache()
 	{
 		decoratedRepository.clearCache();
-	}
-
-	@Override
-	public void create()
-	{
-		decoratedRepository.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		decoratedRepository.drop();
 	}
 
 	@Override

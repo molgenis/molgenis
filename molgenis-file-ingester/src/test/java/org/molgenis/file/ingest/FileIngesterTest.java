@@ -2,20 +2,21 @@ package org.molgenis.file.ingest;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
+import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 
 import java.io.File;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.meta.Package;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.MapEntity;
+import org.molgenis.file.FileMetaFactory;
 import org.molgenis.file.ingest.execution.FileIngester;
 import org.molgenis.file.ingest.execution.FileStoreDownload;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
@@ -54,9 +55,10 @@ public class FileIngesterTest
 		importServiceMock = mock(ImportService.class);
 		dataService = mock(DataService.class);
 		progress = mock(Progress.class);
+		FileMetaFactory fileMetaFactory = mock(FileMetaFactory.class);
 
 		fileIngester = new FileIngester(fileStoreDownloadMock, importServiceFactoryMock,
-				fileRepositoryCollectionFactoryMock, dataService);
+				fileRepositoryCollectionFactoryMock, fileMetaFactory);
 
 		entityMetaData = new MapEntity(EntityMetaDataMetaData.FULL_NAME, entityName);
 		fileIngest = new MapEntity();
@@ -72,8 +74,8 @@ public class FileIngesterTest
 		when(fileRepositoryCollectionFactoryMock.createFileRepositoryCollection(f))
 				.thenReturn(fileRepositoryCollectionMock);
 		when(importServiceFactoryMock.getImportService(f, fileRepositoryCollectionMock)).thenReturn(importServiceMock);
-		when(importServiceMock.doImport(fileRepositoryCollectionMock, DatabaseAction.ADD_UPDATE_EXISTING,
-				Package.DEFAULT_PACKAGE_NAME)).thenReturn(report);
+		when(importServiceMock.doImport(fileRepositoryCollectionMock, ADD_UPDATE_EXISTING, PACKAGE_DEFAULT))
+				.thenReturn(report);
 
 		fileIngester.ingest(entityName, url, "CSV", identifier, progress, "a@b.com,x@y.com");
 

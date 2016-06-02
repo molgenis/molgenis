@@ -125,7 +125,7 @@ class AttributeFilter implements Iterable<Entry<String, AttributeFilter>>
 
 	private String normalize(String name)
 	{
-		return name.toLowerCase();
+		return name;//.toLowerCase();
 	}
 
 	@Override

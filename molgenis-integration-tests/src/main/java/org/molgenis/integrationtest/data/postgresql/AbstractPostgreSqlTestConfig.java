@@ -52,7 +52,7 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 	@Override
 	protected RepositoryCollection getBackend()
 	{
-		return new PostgreSqlRepositoryCollection(dataSource)
+		return new PostgreSqlRepositoryCollection(dataSource, jdbcTemplate, dataService)
 		{
 			@Override
 			protected PostgreSqlRepository createPostgreSqlRepository()

@@ -104,14 +104,6 @@ public class EntityReferenceResolverDecoratorTest
 	}
 
 	@Test
-	public void create()
-	{
-		entityReferenceResolverDecorator.create();
-		verify(decoratedRepo, times(1)).create();
-		verifyZeroInteractions(entityManager);
-	}
-
-	@Test
 	public void deleteEntity()
 	{
 		Entity entity = mock(Entity.class);
@@ -154,14 +146,6 @@ public class EntityReferenceResolverDecoratorTest
 		Iterable<Object> ids = mock(Iterable.class);
 		entityReferenceResolverDecorator.deleteById(ids);
 		verify(decoratedRepo, times(1)).deleteById(ids);
-		verifyZeroInteractions(entityManager);
-	}
-
-	@Test
-	public void drop()
-	{
-		entityReferenceResolverDecorator.drop();
-		verify(decoratedRepo, times(1)).drop();
 		verifyZeroInteractions(entityManager);
 	}
 

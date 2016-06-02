@@ -24,14 +24,14 @@ public abstract class AbstractMetaDataIT extends AbstractDataIntegrationIT
 
 		// Create test_test1 package
 
-		Package testPackage = new Package("test");
+		Package testPackage = null; //new Package("test"); // FIXME
 		metaDataService.addPackage(testPackage);
 		Package retrievedPackage = metaDataService.getPackage("test");
 		assertNotNull(retrievedPackage);
 		assertNotNull(retrievedPackage.getRootPackage());
 		assertEquals(retrievedPackage.getRootPackage().getName(), "test");
 
-		Package testPackage1 = new Package("test1", "description", testPackage);
+		Package testPackage1 = null; // new Package("test1", "description", testPackage); // FIXME
 		metaDataService.addPackage(testPackage1);
 		retrievedPackage = metaDataService.getPackage("test_test1");
 		assertNotNull(retrievedPackage);

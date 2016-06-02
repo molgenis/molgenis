@@ -12,7 +12,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataImpl;
@@ -179,7 +178,6 @@ public class RepositoryMerger
 			AttributeMetaData commonIdAttr, String outRepositoryName)
 	{
 		EntityMetaData mergedMetaData = new EntityMetaDataImpl(outRepositoryName);
-		mergedMetaData.setBackend(ElasticsearchRepositoryCollection.NAME);
 		mergedMetaData.addAttribute(ID, ROLE_ID).setVisible(false);
 
 		for (AttributeMetaData commonAttr : commonAttrs)

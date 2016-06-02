@@ -19,7 +19,6 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.util.EntityUtils;
 
 /**
@@ -156,7 +155,7 @@ public class TypedRepositoryDecorator<E extends Entity> implements Repository<E>
 	}
 
 	@Override
-	public void delete(Entity entity)
+	public void delete(E entity)
 	{
 		untypedRepo.delete(entity);
 	}
@@ -186,7 +185,7 @@ public class TypedRepositoryDecorator<E extends Entity> implements Repository<E>
 	}
 
 	@Override
-	public void add(Entity entity)
+	public void add(E entity)
 	{
 		untypedRepo.add(entity);
 	}
@@ -207,18 +206,6 @@ public class TypedRepositoryDecorator<E extends Entity> implements Repository<E>
 	public void clearCache()
 	{
 		untypedRepo.clearCache();
-	}
-
-	@Override
-	public void create()
-	{
-		untypedRepo.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		untypedRepo.drop();
 	}
 
 	@Override
@@ -272,7 +259,13 @@ public class TypedRepositoryDecorator<E extends Entity> implements Repository<E>
 
 	private Query<E> asTypedQuery(Query<Entity> untypedQuery)
 	{
-		return new QueryImpl<>(untypedQuery.getRules());
+		QueryImpl<E> typedQuery = new QueryImpl<>(untypedQuery.getRules());
+		typedQuery.setPageSize(untypedQuery.getPageSize());
+		typedQuery.setOffset(untypedQuery.getOffset());
+		typedQuery.setSort(untypedQuery.getSort());
+		typedQuery.setFetch(untypedQuery.getFetch());
+		typedQuery.setRepository(this);
+		return typedQuery;
 	}
 
 	@SuppressWarnings("unchecked")

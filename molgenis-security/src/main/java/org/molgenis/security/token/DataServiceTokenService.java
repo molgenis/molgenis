@@ -1,10 +1,17 @@
 package org.molgenis.security.token;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.MolgenisTokenMetaData.MOLGENIS_TOKEN;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+
 import java.util.Date;
 
 import org.apache.commons.lang3.time.DateUtils;
 import org.molgenis.auth.MolgenisToken;
+import org.molgenis.auth.MolgenisTokenFactory;
+import org.molgenis.auth.MolgenisTokenMetaData;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -22,13 +29,15 @@ public class DataServiceTokenService implements TokenService
 	private final TokenGenerator tokenGenerator;
 	private final DataService dataService;
 	private final UserDetailsService userDetailsService;
+	private final MolgenisTokenFactory molgenisTokenFactory;
 
 	public DataServiceTokenService(TokenGenerator tokenGenerator, DataService dataService,
-			UserDetailsService userDetailsService)
+			UserDetailsService userDetailsService, MolgenisTokenFactory molgenisTokenFactory)
 	{
-		this.tokenGenerator = tokenGenerator;
-		this.dataService = dataService;
-		this.userDetailsService = userDetailsService;
+		this.tokenGenerator = requireNonNull(tokenGenerator);
+		this.dataService = requireNonNull(dataService);
+		this.userDetailsService = requireNonNull(userDetailsService);
+		this.molgenisTokenFactory = requireNonNull(molgenisTokenFactory);
 	}
 
 	/**
@@ -60,19 +69,20 @@ public class DataServiceTokenService implements TokenService
 	@RunAsSystem
 	public String generateAndStoreToken(String username, String description)
 	{
-		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
-				new QueryImpl<MolgenisUser>().eq(MolgenisUser.USERNAME, username), MolgenisUser.class);
+		MolgenisUser user = dataService
+				.findOne(MOLGENIS_USER, new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.USERNAME, username),
+						MolgenisUser.class);
 
 		if (user == null) throw new IllegalArgumentException("Unknown username [" + username + "]");
 
 		String token = tokenGenerator.generateToken();
 
-		MolgenisToken molgenisToken = new MolgenisToken();
+		MolgenisToken molgenisToken = molgenisTokenFactory.create();
 		molgenisToken.setMolgenisUser(user);
 		molgenisToken.setToken(token);
 		molgenisToken.setDescription(description);
 		molgenisToken.setExpirationDate(DateUtils.addHours(new Date(), 2));
-		dataService.add(MolgenisToken.ENTITY_NAME, molgenisToken);
+		dataService.add(MOLGENIS_TOKEN, molgenisToken);
 
 		return token;
 	}
@@ -83,13 +93,14 @@ public class DataServiceTokenService implements TokenService
 	public void removeToken(String token) throws UnknownTokenException
 	{
 		MolgenisToken molgenisToken = getMolgenisToken(token);
-		dataService.delete(MolgenisToken.ENTITY_NAME, molgenisToken);
+		dataService.delete(MOLGENIS_TOKEN, molgenisToken);
 	}
 
 	private MolgenisToken getMolgenisToken(String token) throws UnknownTokenException
 	{
-		MolgenisToken molgenisToken = dataService.findOne(MolgenisToken.ENTITY_NAME,
-				new QueryImpl<MolgenisToken>().eq(MolgenisToken.TOKEN, token), MolgenisToken.class);
+		MolgenisToken molgenisToken = dataService
+				.findOne(MOLGENIS_TOKEN, new QueryImpl<MolgenisToken>().eq(MolgenisTokenMetaData.TOKEN, token),
+						MolgenisToken.class);
 
 		if ((molgenisToken == null)
 				|| ((molgenisToken.getExpirationDate() != null) && new Date().after(molgenisToken.getExpirationDate())))

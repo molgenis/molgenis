@@ -39,7 +39,7 @@ import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.VcfAttributes;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -142,13 +142,13 @@ public class VcfImporterServiceTest
 		when(metaDataService.addEntityMeta(argThat(eqName(sampleEntityMeta0)))).thenReturn(outSampleRepo0);
 
 		AttributeMetaData sampleAttr = mock(AttributeMetaData.class);
-		when(sampleAttr.getName()).thenReturn(VcfRepository.SAMPLES);
+		when(sampleAttr.getName()).thenReturn(VcfAttributes.SAMPLES);
 		when(sampleAttr.getRefEntity()).thenReturn(sampleEntityMeta0);
 		when(sampleAttr.getDataType()).thenReturn(MREF);
 		EntityMetaData entityMeta0 = mock(EntityMetaDataImpl.class);
 		when(entityMeta0.getName()).thenReturn(entityName0);
 		when(entityMeta0.getSimpleName()).thenReturn(entityName0);
-		when(entityMeta0.getAttribute(VcfRepository.SAMPLES)).thenReturn(sampleAttr);
+		when(entityMeta0.getAttribute(VcfAttributes.SAMPLES)).thenReturn(sampleAttr);
 		when(entityMeta0.getOwnAttributes()).thenReturn(singletonList(sampleAttr));
 		when(entityMeta0.getOwnLookupAttributes()).thenReturn(emptyList());
 		Entity entity0Sample0 = mock(Entity.class);
@@ -156,9 +156,9 @@ public class VcfImporterServiceTest
 		Entity entity1Sample0 = mock(Entity.class);
 		Entity entity1Sample1 = mock(Entity.class);
 		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntities(VcfRepository.SAMPLES)).thenReturn(Arrays.asList(entity0Sample0, entity0Sample1));
+		when(entity0.getEntities(VcfAttributes.SAMPLES)).thenReturn(Arrays.asList(entity0Sample0, entity0Sample1));
 		Entity entity1 = mock(Entity.class);
-		when(entity1.getEntities(VcfRepository.SAMPLES)).thenReturn(Arrays.asList(entity1Sample0, entity1Sample1));
+		when(entity1.getEntities(VcfAttributes.SAMPLES)).thenReturn(Arrays.asList(entity1Sample0, entity1Sample1));
 		List<Entity> entities = Arrays.asList(entity0, entity1);
 		Repository<Entity> repo0 = mock(Repository.class);
 		when(repo0.getName()).thenReturn(entityName0);
@@ -349,14 +349,14 @@ public class VcfImporterServiceTest
 		when(sampleEntityMeta0.getOwnLookupAttributes()).thenReturn(emptyList());
 
 		AttributeMetaData sampleAttr = mock(AttributeMetaData.class);
-		when(sampleAttr.getName()).thenReturn(VcfRepository.SAMPLES);
+		when(sampleAttr.getName()).thenReturn(VcfAttributes.SAMPLES);
 		when(sampleAttr.getRefEntity()).thenReturn(sampleEntityMeta0);
 		when(sampleAttr.getDataType()).thenReturn(MREF);
 
 		EntityMetaData entityMeta0 = mock(EntityMetaDataImpl.class);
 		when(entityMeta0.getName()).thenReturn(entityName0);
 		when(entityMeta0.getSimpleName()).thenReturn(entityName0);
-		when(entityMeta0.getAttribute(VcfRepository.SAMPLES)).thenReturn(sampleAttr);
+		when(entityMeta0.getAttribute(VcfAttributes.SAMPLES)).thenReturn(sampleAttr);
 		when(entityMeta0.getOwnAttributes()).thenReturn(singletonList(sampleAttr));
 		when(entityMeta0.getAtomicAttributes()).thenReturn(singletonList(sampleAttr));
 		when(entityMeta0.getOwnLookupAttributes()).thenReturn(emptyList());
@@ -372,7 +372,7 @@ public class VcfImporterServiceTest
 		assertTrue(entitiesValidationReport.valid());
 		assertEquals(entitiesValidationReport.getFieldsAvailable(), emptyMap());
 		Map<String, List<String>> importableFields = new HashMap<String, List<String>>();
-		importableFields.put(entityName0, singletonList(VcfRepository.SAMPLES));
+		importableFields.put(entityName0, singletonList(VcfAttributes.SAMPLES));
 		importableFields.put(sampleEntityName0, singletonList(sampleAttrName0));
 		assertEquals(entitiesValidationReport.getFieldsImportable(), importableFields);
 		assertEquals(entitiesValidationReport.getFieldsRequired(), emptyMap());
@@ -413,14 +413,14 @@ public class VcfImporterServiceTest
 		when(sampleEntityMeta0.getOwnLookupAttributes()).thenReturn(emptyList());
 
 		AttributeMetaData sampleAttr = mock(AttributeMetaData.class);
-		when(sampleAttr.getName()).thenReturn(VcfRepository.SAMPLES);
+		when(sampleAttr.getName()).thenReturn(VcfAttributes.SAMPLES);
 		when(sampleAttr.getRefEntity()).thenReturn(sampleEntityMeta0);
 		when(sampleAttr.getDataType()).thenReturn(MREF);
 
 		EntityMetaData entityMeta0 = mock(EntityMetaDataImpl.class);
 		when(entityMeta0.getName()).thenReturn(entityName0);
 		when(entityMeta0.getSimpleName()).thenReturn(entityName0);
-		when(entityMeta0.getAttribute(VcfRepository.SAMPLES)).thenReturn(sampleAttr);
+		when(entityMeta0.getAttribute(VcfAttributes.SAMPLES)).thenReturn(sampleAttr);
 		when(entityMeta0.getOwnAttributes()).thenReturn(singletonList(sampleAttr));
 		when(entityMeta0.getAtomicAttributes()).thenReturn(singletonList(sampleAttr));
 		when(entityMeta0.getOwnLookupAttributes()).thenReturn(emptyList());
@@ -438,7 +438,7 @@ public class VcfImporterServiceTest
 		assertFalse(entitiesValidationReport.valid());
 		assertEquals(entitiesValidationReport.getFieldsAvailable(), emptyMap());
 		Map<String, List<String>> importableFields = new HashMap<String, List<String>>();
-		importableFields.put(entityName0, singletonList(VcfRepository.SAMPLES));
+		importableFields.put(entityName0, singletonList(VcfAttributes.SAMPLES));
 		importableFields.put(sampleEntityName0, singletonList(sampleAttrName0));
 		assertEquals(entitiesValidationReport.getFieldsImportable(), importableFields);
 		assertEquals(entitiesValidationReport.getFieldsRequired(), emptyMap());

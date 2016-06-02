@@ -15,7 +15,6 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 
 /**
  * Decorator for the I18nString respository.
@@ -202,19 +201,6 @@ public class I18nStringDecorator implements Repository<Entity>
 	public void clearCache()
 	{
 		decorated.clearCache();
-		ResourceBundle.clearCache();
-	}
-
-	@Override
-	public void create()
-	{
-		decorated.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		decorated.drop();
 		ResourceBundle.clearCache();
 	}
 

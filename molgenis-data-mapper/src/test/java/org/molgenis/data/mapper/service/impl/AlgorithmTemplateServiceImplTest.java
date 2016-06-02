@@ -2,8 +2,9 @@ package org.molgenis.data.mapper.service.impl;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.js.magma.JsMagmaScriptRegistrator.SCRIPT_TYPE_JAVASCRIPT_MAGMA;
-import static org.molgenis.script.Script.TYPE;
+import static org.molgenis.script.ScriptMetaData.SCRIPT;
+import static org.molgenis.script.ScriptMetaData.TYPE;
+import static org.molgenis.script.ScriptParameterMetaData.SCRIPT_PARAMETER;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -21,6 +22,7 @@ import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.script.Script;
+import org.molgenis.script.ScriptMetaData;
 import org.molgenis.script.ScriptParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -45,21 +47,21 @@ public class AlgorithmTemplateServiceImplTest extends AbstractTestNGSpringContex
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		ScriptParameter param0 = new ScriptParameter(dataService);
+		ScriptParameter param0 = null; // new ScriptParameter(dataService); // FIXME
 		param0.setName(param0Name);
 
-		ScriptParameter param1 = new ScriptParameter(dataService);
+		ScriptParameter param1 = null; // new ScriptParameter(dataService); // FIXME
 		param1.setName(param1Name);
 
-		script0 = new Script(dataService);
+		script0 = null; // FIXME new Script(dataService);
 		script0.setName("name");
 		script0.setContent(String.format("$('%s'),$('%s')", param0, param1));
-		script0.set(Script.PARAMETERS, Arrays.asList(param0, param1));
+		script0.set(ScriptMetaData.PARAMETERS, Arrays.asList(param0, param1));
 
-		Query<Script> q = new QueryImpl<Script>().eq(TYPE, SCRIPT_TYPE_JAVASCRIPT_MAGMA);
-		when(dataService.findAll(Script.ENTITY_NAME, q, Script.class)).thenReturn(Stream.of(script0));
-		when(dataService.findOneById(ScriptParameter.ENTITY_NAME, param0Name)).thenReturn(param0);
-		when(dataService.findOneById(ScriptParameter.ENTITY_NAME, param1Name)).thenReturn(param1);
+		Query<Script> q = new QueryImpl<Script>().eq(TYPE, "type"); // FIXME
+		when(dataService.findAll(SCRIPT, q, Script.class)).thenReturn(Stream.of(script0));
+		when(dataService.findOneById(SCRIPT_PARAMETER, param0Name)).thenReturn(param0);
+		when(dataService.findOneById(SCRIPT_PARAMETER, param1Name)).thenReturn(param1);
 	}
 
 	@Test

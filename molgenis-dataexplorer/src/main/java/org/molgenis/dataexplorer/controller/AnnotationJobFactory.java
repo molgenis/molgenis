@@ -1,6 +1,7 @@
 package org.molgenis.dataexplorer.controller;
 
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 
 import java.util.Arrays;
 import java.util.List;
@@ -61,7 +62,7 @@ public class AnnotationJobFactory
 	@RunAsSystem
 	public AnnotationJob createJob(AnnotationJobExecution metaData)
 	{
-		dataService.add(AnnotationJobExecution.ENTITY_NAME, metaData);
+		dataService.add(ANNOTATION_JOB_EXECUTION, metaData);
 		String annotatorNames = metaData.getAnnotators();
 		String targetName = metaData.getTargetName();
 		String username = metaData.getUser().getUsername();

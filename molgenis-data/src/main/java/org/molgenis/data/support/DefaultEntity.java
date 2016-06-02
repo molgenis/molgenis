@@ -23,6 +23,7 @@ import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
+import org.molgenis.util.EntityUtils;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
@@ -83,7 +84,10 @@ public class DefaultEntity implements Entity
 	public Object get(String attributeName)
 	{
 		AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
-		if (attribute == null) throw new UnknownAttributeException(attributeName);
+		if (attribute == null)
+		{
+			throw new UnknownAttributeException(attributeName);
+		}
 
 		FieldTypeEnum dataType = attribute.getDataType().getEnumType();
 		switch (dataType)
@@ -242,8 +246,9 @@ public class DefaultEntity implements Entity
 
 		value = dataType.convert(value);
 		Entity refEntity = dataService.findOneById(attribute.getRefEntity().getName(), value);
-		if (refEntity == null) throw new UnknownEntityException(attribute.getRefEntity().getName() + " with "
-				+ attribute.getRefEntity().getIdAttribute().getName() + " [" + value + "] does not exist");
+		if (refEntity == null) throw new UnknownEntityException(
+				attribute.getRefEntity().getName() + " with " + attribute.getRefEntity().getIdAttribute().getName()
+						+ " [" + value + "] does not exist");
 
 		return refEntity;
 	}
@@ -252,8 +257,8 @@ public class DefaultEntity implements Entity
 	public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
 	{
 		Entity entity = getEntity(attributeName);
-		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity), dataService).iterator().next()
-				: null;
+		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity), dataService).iterator()
+				.next() : null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -315,39 +320,23 @@ public class DefaultEntity implements Entity
 	}
 
 	@Override
-	public String toString()
+	public boolean equals(Object o)
 	{
-		return getLabelValue();
+		if (this == o) return true;
+		if (!(o instanceof Entity)) return false;
+		return EntityUtils.equals(this, (Entity) o);
 	}
 
 	@Override
 	public int hashCode()
 	{
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((entityMetaData == null) ? 0 : entityMetaData.hashCode());
-		result = prime * result + ((getIdValue() == null) ? 0 : getIdValue().hashCode());
-		return result;
+		return EntityUtils.hashCode(this);
 	}
 
 	@Override
-	public boolean equals(Object obj)
+	public String toString()
 	{
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (!(obj instanceof Entity)) return false;
-		Entity other = (Entity) obj;
-
-		if (entityMetaData == null)
-		{
-			if (other.getEntityMetaData() != null) return false;
-		}
-		else if (!entityMetaData.equals(other.getEntityMetaData())) return false;
-		if (getIdValue() == null)
-		{
-			if (other.getIdValue() != null) return false;
-		}
-		else if (!getIdValue().equals(other.getIdValue())) return false;
-		return true;
+		return new StringBuilder().append(getEntityMetaData().getName()).append("{").append("values=").append(values)
+				.append('}').toString();
 	}
 }

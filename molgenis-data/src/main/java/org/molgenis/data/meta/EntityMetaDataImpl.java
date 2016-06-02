@@ -20,6 +20,7 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.LOOKUP_ATTRIBUTES;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.SIMPLE_NAME;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.TAGS;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
 
 import java.util.ArrayList;
@@ -27,11 +28,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.semantic.Tag;
 import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.data.support.MapEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Iterables;
 
 /**
  * EntityMetaData defines the structure and attributes of an Entity. Attributes are unique. Other software components
@@ -43,14 +45,17 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 
 	private final Entity entity;
 
-	protected EntityMetaDataImpl()
-	{
-		this.entity = new MapEntity(this);
-	}
-
 	public EntityMetaDataImpl(Entity entity)
 	{
 		this.entity = requireNonNull(entity);
+	}
+
+	public EntityMetaDataImpl(String entityName, String packageName, EntityMetaDataMetaData entityMetaDataMetaData)
+	{
+		this.entity = new MapEntity(entityMetaDataMetaData);
+		set(SIMPLE_NAME, entityName);
+		set(FULL_NAME, packageName != null ? packageName + PACKAGE_SEPARATOR + entityName : entityName);
+		setAbstract(false);
 	}
 
 	public EntityMetaDataImpl(String simpleName)
@@ -74,7 +79,7 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 		String fullName;
 		if (package_ != null)
 		{
-			fullName = package_.getName() + Package.PACKAGE_SEPARATOR + simpleName;
+			fullName = package_.getName() + PACKAGE_SEPARATOR + simpleName;
 		}
 		else
 		{
@@ -83,6 +88,7 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 		set(SIMPLE_NAME, simpleName);
 		set(FULL_NAME, fullName);
 		set(PACKAGE, package_);
+		setAbstract(false);
 	}
 
 	/**
@@ -100,8 +106,11 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
+		return entity != null ? entity.getEntityMetaData() : this;
 		//		return EntityMetaDataMetaData.get();
-		return this;
+		//		return this; // FIXME the entity meta data of EntityMetaData is always EntityMetaDataMetaData
+		// TODO store entityName and packageName in SystemEntityMetaDataImpl fields and call init() to create EntityMetaDataImpl
+		// all meta data instances must call super.init in their init
 	}
 
 	@Override
@@ -155,6 +164,7 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 	public EntityMetaData setSimpleName(String simpleName)
 	{
 		set(SIMPLE_NAME, simpleName);
+		updateFullName();
 		return this;
 	}
 
@@ -166,7 +176,8 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 	@Override
 	public String getLabel()
 	{
-		return getString(LABEL);
+		String label = getString(LABEL);
+		return label != null ? label : getString(FULL_NAME);
 	}
 
 	/**
@@ -177,7 +188,8 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 	@Override
 	public String getLabel(String languageCode)
 	{
-		return getString(getI18nAttributeName(LABEL, languageCode));
+		String i18nLabel = getString(getI18nAttributeName(LABEL, languageCode));
+		return i18nLabel != null ? i18nLabel : getLabel();
 	}
 
 	@Override
@@ -213,7 +225,8 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 	@Override
 	public String getDescription(String languageCode)
 	{
-		return getString(getI18nAttributeName(DESCRIPTION, languageCode));
+		String i18nDescription = getString(getI18nAttributeName(DESCRIPTION, languageCode));
+		return i18nDescription != null ? i18nDescription : getDescription();
 	}
 
 	@Override
@@ -263,6 +276,7 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 	public EntityMetaData setPackage(Package package_)
 	{
 		set(PACKAGE, package_);
+		updateFullName();
 		return this;
 	}
 
@@ -301,6 +315,10 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 	public EntityMetaData setIdAttribute(AttributeMetaData idAttr)
 	{
 		set(ID_ATTRIBUTE, idAttr);
+		idAttr.setReadOnly(true);
+		idAttr.setUnique(true);
+		idAttr.setNillable(false);
+
 		if (getLabelAttribute() == null)
 		{
 			setLabelAttribute(idAttr);
@@ -340,16 +358,17 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 	@Override
 	public AttributeMetaData getLabelAttribute(String languageCode)
 	{
-		AttributeMetaData labelAttr = getOwnLabelAttribute(languageCode);
-		if (labelAttr == null)
-		{
-			EntityMetaData extends_ = getExtends();
-			if (extends_ != null)
-			{
-				labelAttr = extends_.getLabelAttribute(languageCode);
-			}
-		}
-		return labelAttr;
+		return getLabelAttribute(); // FIXME what to do here?
+		//		AttributeMetaData labelAttr = getOwnLabelAttribute(languageCode);
+		//		if (labelAttr == null)
+		//		{
+		//			EntityMetaData extends_ = getExtends();
+		//			if (extends_ != null)
+		//			{
+		//				labelAttr = extends_.getLabelAttribute(languageCode);
+		//			}
+		//		}
+		//		return labelAttr != null ? labelAttr : getLabelAttribute();
 	}
 
 	/**
@@ -438,7 +457,8 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 	@Override
 	public boolean isAbstract()
 	{
-		return requireNonNull(getBoolean(ABSTRACT));
+		Boolean abstract_ = getBoolean(ABSTRACT);
+		return abstract_ != null ? abstract_ : false;
 	}
 
 	@Override
@@ -528,6 +548,26 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 		return atomicAttrs;
 	}
 
+	@Override
+	public Iterable<AttributeMetaData> getAllAttributes()
+	{
+		Iterable<AttributeMetaData> allAttrs = getOwnAllAttributes();
+		EntityMetaData extends_ = getExtends();
+		if (extends_ != null)
+		{
+			allAttrs = concat(allAttrs, extends_.getAllAttributes());
+		}
+		return allAttrs;
+	}
+
+	@Override
+	public Iterable<AttributeMetaData> getOwnAllAttributes()
+	{
+		List<AttributeMetaData> allAttrs = new ArrayList<>();
+		getOwnAllAttributesRec(getOwnAttributes(), allAttrs);
+		return allAttrs;
+	}
+
 	/**
 	 * Get attribute by name (case insensitive), returns null if not found
 	 *
@@ -605,7 +645,10 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 	public void addLookupAttribute(AttributeMetaData lookupAttr)
 	{
 		Iterable<AttributeMetaData> lookupAttrs = entity.getEntities(LOOKUP_ATTRIBUTES, AttributeMetaData.class);
-		entity.set(LOOKUP_ATTRIBUTES, concat(lookupAttrs, singletonList(lookupAttr)));
+		if (!Iterables.contains(lookupAttrs, lookupAttr))
+		{
+			entity.set(LOOKUP_ATTRIBUTES, concat(lookupAttrs, singletonList(lookupAttr)));
+		}
 	}
 
 	/**
@@ -664,22 +707,20 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 
 		EntityMetaDataImpl that = (EntityMetaDataImpl) o;
 
-		return entity.equals(that.entity);
+		return getName().equals(that.getName());
 
 	}
 
 	@Override
 	public int hashCode()
 	{
-		return entity.hashCode();
+		return getName().hashCode();
 	}
 
 	@Override
 	public String toString()
 	{
-		return "EntityMetaData{" +
-				"entity=" + entity +
-				'}';
+		return entity.toString();
 	}
 
 	private AttributeMetaData getAttributeRec(String attrName, Iterable<AttributeMetaData> attrs)
@@ -692,7 +733,11 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 			}
 			if (attr.getDataType().getEnumType() == COMPOUND)
 			{
-				getAttributeRec(attrName, attr.getAttributeParts());
+				AttributeMetaData attributeRec = getAttributeRec(attrName, attr.getAttributeParts());
+				if (attributeRec != null)
+				{
+					return attributeRec;
+				}
 			}
 		}
 		return null;
@@ -727,5 +772,35 @@ public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
 				atomicAttrs.add(attr);
 			}
 		});
+	}
+
+	private void getOwnAllAttributesRec(Iterable<AttributeMetaData> attrs, List<AttributeMetaData> allAttrs)
+	{
+		attrs.forEach(attr -> {
+			if (attr.getDataType().getEnumType() == COMPOUND)
+			{
+				getOwnAllAttributesRec(attr.getAttributeParts(), allAttrs);
+			}
+			allAttrs.add(attr);
+		});
+	}
+
+	private void updateFullName()
+	{
+		String simpleName = getSimpleName();
+		if (simpleName != null)
+		{
+			String fullName;
+			Package package_ = getPackage();
+			if (package_ != null)
+			{
+				fullName = package_.getName() + PACKAGE_SEPARATOR + simpleName;
+			}
+			else
+			{
+				fullName = simpleName;
+			}
+			set(FULL_NAME, fullName);
+		}
 	}
 }

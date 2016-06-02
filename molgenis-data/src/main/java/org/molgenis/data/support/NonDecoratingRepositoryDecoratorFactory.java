@@ -16,4 +16,10 @@ public class NonDecoratingRepositoryDecoratorFactory implements RepositoryDecora
 	{
 		return repository;
 	}
+
+	@Override
+	public <E extends Entity> Repository<E> createDecoratedRepository(Repository<E> repository, Class<E> clazz)
+	{
+		return repository;
+	}
 }

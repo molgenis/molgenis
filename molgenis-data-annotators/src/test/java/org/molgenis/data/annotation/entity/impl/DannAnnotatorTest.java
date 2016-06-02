@@ -5,10 +5,10 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.POS;
-import static org.molgenis.data.vcf.VcfRepository.REF;
+import static org.molgenis.data.vcf.VcfAttributes.ALT;
+import static org.molgenis.data.vcf.VcfAttributes.CHROM;
+import static org.molgenis.data.vcf.VcfAttributes.POS;
+import static org.molgenis.data.vcf.VcfAttributes.REF;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
@@ -29,7 +29,7 @@ import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.VcfAttributes;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -115,31 +115,31 @@ public class DannAnnotatorTest extends AbstractTestNGSpringContextTests
 
 		setValues();
 
-		entity1.set(VcfRepository.CHROM, "1");
-		entity1.set(VcfRepository.POS, 10001L);
-		entity1.set(VcfRepository.REF, "T");
-		entity1.set(VcfRepository.ALT, "A");
+		entity1.set(VcfAttributes.CHROM, "1");
+		entity1.set(VcfAttributes.POS, 10001L);
+		entity1.set(VcfAttributes.REF, "T");
+		entity1.set(VcfAttributes.ALT, "A");
 
 		input1.add(entity1);
 
-		entity2.set(VcfRepository.CHROM, "1");
-		entity2.set(VcfRepository.POS, 10001L);
-		entity2.set(VcfRepository.REF, "T");
-		entity2.set(VcfRepository.ALT, "X");
+		entity2.set(VcfAttributes.CHROM, "1");
+		entity2.set(VcfAttributes.POS, 10001L);
+		entity2.set(VcfAttributes.REF, "T");
+		entity2.set(VcfAttributes.ALT, "X");
 
 		input2.add(entity2);
 
-		entity3.set(VcfRepository.CHROM, "3");
-		entity3.set(VcfRepository.POS, 10001L);
-		entity3.set(VcfRepository.REF, "T");
-		entity3.set(VcfRepository.ALT, "G");
+		entity3.set(VcfAttributes.CHROM, "3");
+		entity3.set(VcfAttributes.POS, 10001L);
+		entity3.set(VcfAttributes.REF, "T");
+		entity3.set(VcfAttributes.ALT, "G");
 
 		input3.add(entity3);
 
-		entity4.set(VcfRepository.CHROM, "1");
-		entity4.set(VcfRepository.POS, 10001L);
-		entity4.set(VcfRepository.REF, "T");
-		entity4.set(VcfRepository.ALT, "G");
+		entity4.set(VcfAttributes.CHROM, "1");
+		entity4.set(VcfAttributes.POS, 10001L);
+		entity4.set(VcfAttributes.REF, "T");
+		entity4.set(VcfAttributes.ALT, "G");
 
 		input4.add(entity4);
 	}

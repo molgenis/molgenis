@@ -1,5 +1,7 @@
 package org.molgenis.data.semanticsearch.repository;
 
+import static org.molgenis.data.meta.TagMetaData.TAG;
+
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Query;
@@ -45,7 +47,7 @@ public class TagRepository
 		Entity result = repository.findOne(q);
 		if (result == null)
 		{
-			MapEntity mapEntity = new MapEntity(TagMetaData.ENTITY_NAME);
+			MapEntity mapEntity = new MapEntity(TAG);
 			mapEntity.set(TagMetaData.IDENTIFIER, idGenerator.generateId());
 			mapEntity.set(TagMetaData.OBJECT_IRI, objectIRI);
 			mapEntity.set(TagMetaData.LABEL, label);

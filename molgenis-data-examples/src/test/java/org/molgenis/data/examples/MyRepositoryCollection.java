@@ -1,16 +1,21 @@
 package org.molgenis.data.examples;
 
+import static autovalue.shaded.com.google.common.common.collect.Sets.immutableEnumSet;
+import static org.molgenis.data.RepositoryCollectionCapability.WRITABLE;
+
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.RepositoryCollectionCapability;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.support.AbstractRepositoryCollection;
 
-public class MyRepositoryCollection implements RepositoryCollection
+public class MyRepositoryCollection extends AbstractRepositoryCollection
 {
 	private final Map<String, Repository<Entity>> repositories = new LinkedHashMap<>();
 
@@ -24,6 +29,12 @@ public class MyRepositoryCollection implements RepositoryCollection
 	public String getName()
 	{
 		return "MyRepos";
+	}
+
+	@Override
+	public Set<RepositoryCollectionCapability> getCapabilities()
+	{
+		return immutableEnumSet(EnumSet.of(WRITABLE));
 	}
 
 	@Override
@@ -69,5 +80,11 @@ public class MyRepositoryCollection implements RepositoryCollection
 	public boolean hasRepository(EntityMetaData entityMeta)
 	{
 		return hasRepository(entityMeta.getName());
+	}
+
+	@Override
+	public void deleteRepository(EntityMetaData entityMeta)
+	{
+		repositories.remove(entityMeta.getName());
 	}
 }

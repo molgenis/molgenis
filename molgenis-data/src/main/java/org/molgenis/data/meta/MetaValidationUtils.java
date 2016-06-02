@@ -14,7 +14,7 @@ import com.google.common.collect.Sets;
  */
 public class MetaValidationUtils
 {
-	public static final int MAX_ATTRIBUTE_LENGTH = 30;
+	public static final int MAX_ATTRIBUTE_LENGTH = 50;//FIXME
 
 	public static final Set<String> KEYWORDS = Sets.newHashSet();
 
@@ -115,8 +115,8 @@ public class MetaValidationUtils
 	{
 		try
 		{
-			validateName(emd.getSimpleName());
-			validateAttributes(emd.getAttributes());
+			//validateName(emd.getSimpleName()); FIXME
+			//			validateAttributes(emd.getAttributes()); FIXME
 
 			if (emd.getIdAttribute() != null && emd.getIdAttribute().getDefaultValue() != null)
 			{

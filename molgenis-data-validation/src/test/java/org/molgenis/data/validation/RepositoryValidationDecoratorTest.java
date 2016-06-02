@@ -220,8 +220,8 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void addEntityDoesNotRequireValidation()
 	{
-		when(entityMeta.getName()).thenReturn(MolgenisTransactionLogMetaData.ENTITY_NAME);
-		when(decoratedRepo.getName()).thenReturn(MolgenisTransactionLogMetaData.ENTITY_NAME);
+		when(entityMeta.getName()).thenReturn(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG);
+		when(decoratedRepo.getName()).thenReturn(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG);
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -1026,8 +1026,8 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void addStreamEntityDoesNotRequireValidation()
 	{
-		when(entityMeta.getName()).thenReturn(MolgenisTransactionLogMetaData.ENTITY_NAME);
-		when(decoratedRepo.getName()).thenReturn(MolgenisTransactionLogMetaData.ENTITY_NAME);
+		when(entityMeta.getName()).thenReturn(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG);
+		when(decoratedRepo.getName()).thenReturn(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG);
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -2096,8 +2096,8 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void updateEntityDoesNotRequireValidation()
 	{
-		when(entityMeta.getName()).thenReturn(MolgenisTransactionLogMetaData.ENTITY_NAME);
-		when(decoratedRepo.getName()).thenReturn(MolgenisTransactionLogMetaData.ENTITY_NAME);
+		when(entityMeta.getName()).thenReturn(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG);
+		when(decoratedRepo.getName()).thenReturn(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG);
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -3166,8 +3166,8 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void updateStreamEntityDoesNotRequireValidation()
 	{
-		when(entityMeta.getName()).thenReturn(MolgenisTransactionLogMetaData.ENTITY_NAME);
-		when(decoratedRepo.getName()).thenReturn(MolgenisTransactionLogMetaData.ENTITY_NAME);
+		when(entityMeta.getName()).thenReturn(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG);
+		when(decoratedRepo.getName()).thenReturn(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG);
 
 		// entities
 		Entity entity0 = mock(Entity.class);

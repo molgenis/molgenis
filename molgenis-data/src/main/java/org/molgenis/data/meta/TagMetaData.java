@@ -3,6 +3,8 @@ package org.molgenis.data.meta;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.MetaPackage.PACKAGE_META;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.springframework.stereotype.Component;
@@ -10,7 +12,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class TagMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String ENTITY_NAME = "tags";
+	public static final String SIMPLE_NAME = "tags";
+	public static final String TAG = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME;
+
 	public static final String IDENTIFIER = "identifier";
 	public static final String OBJECT_IRI = "objectIRI";
 	public static final String LABEL = "label";
@@ -20,12 +24,12 @@ public class TagMetaData extends SystemEntityMetaDataImpl
 
 	TagMetaData()
 	{
+		super(SIMPLE_NAME, PACKAGE_META);
 	}
 
 	@Override
 	public void init()
 	{
-		setName(ENTITY_NAME);
 		addAttribute(IDENTIFIER, ROLE_ID);
 		addAttribute(OBJECT_IRI, ROLE_LOOKUP).setDataType(MolgenisFieldTypes.TEXT);
 		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false);

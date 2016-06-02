@@ -3,6 +3,7 @@ package org.molgenis.data.semanticsearch.service.impl;
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -244,7 +245,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		sourceEntityMetaData.addAttribute(attributeWeight);
 
 		// Case 1
-		when(dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, new QueryImpl<>(disMaxQueryRules)))
+		when(dataService.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(disMaxQueryRules)))
 				.thenReturn(Stream.of(entity1));
 
 		Map<AttributeMetaData, ExplainedAttributeMetaData> termsActual1 = semanticSearchService
@@ -256,7 +257,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		assertEquals(termsActual1.toString(), termsExpected1.toString());
 
 		// Case 2
-		when(dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, new QueryImpl<>(disMaxQueryRules)))
+		when(dataService.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(disMaxQueryRules)))
 				.thenReturn(Stream.empty());
 
 		Map<AttributeMetaData, ExplainedAttributeMetaData> termsActual2 = semanticSearchService

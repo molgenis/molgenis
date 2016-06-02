@@ -4,19 +4,23 @@ import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 
 import org.molgenis.DatabaseConfig;
+import org.molgenis.auth.MolgenisUserFactory;
+import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.OwnedEntityMetaData;
+import org.molgenis.data.support.TypedRepositoryDecorator;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.transaction.TransactionConfig;
 import org.molgenis.data.transaction.TransactionLogService;
@@ -66,6 +70,18 @@ public abstract class AbstractDataApiTestConfig
 	@Autowired
 	public IdGenerator idGenerator;
 
+	@Autowired
+	public SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
+
+	@Autowired
+	public LanguageService languageService;
+
+	@Autowired
+	public UserAuthorityFactory userAuthorityFactory;
+
+	@Autowired
+	public MolgenisUserFactory molgenisUserFactory;
+
 	protected AbstractDataApiTestConfig()
 	{
 		System.setProperty("molgenis.home", Files.createTempDir().getAbsolutePath());
@@ -104,7 +120,7 @@ public abstract class AbstractDataApiTestConfig
 	@Bean
 	public DataServiceImpl dataService()
 	{
-		return new DataServiceImpl(repositoryDecoratorFactory());
+		return new DataServiceImpl(); // FIXME
 	}
 
 	@Bean
@@ -116,7 +132,7 @@ public abstract class AbstractDataApiTestConfig
 	@Bean
 	public PermissionSystemService permissionSystemService()
 	{
-		return new PermissionSystemService(dataService());
+		return new PermissionSystemService(dataService(), userAuthorityFactory);
 	}
 
 	@Bean
@@ -145,9 +161,17 @@ public abstract class AbstractDataApiTestConfig
 			@Override
 			public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 			{
-				return new MolgenisRepositoryDecoratorFactory(entityManager(), transactionLogService,
-						entityAttributesValidator(), idGenerator(), appSettings(), dataService(), expressionValidator,
-						repositoryDecoratorRegistry()).createDecoratedRepository(repository);
+				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(),
+						idGenerator(), appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry(),
+						systemEntityMetaDataRegistry, molgenisUserFactory, userAuthorityFactory)
+						.createDecoratedRepository(repository);
+			}
+
+			@Override
+			public <E extends Entity> Repository<E> createDecoratedRepository(Repository<E> repository, Class<E> clazz)
+			{
+				Repository<Entity> decoratedRepository = createDecoratedRepository((Repository<Entity>) repository);
+				return new TypedRepositoryDecorator<>(decoratedRepository, clazz);
 			}
 		};
 	}

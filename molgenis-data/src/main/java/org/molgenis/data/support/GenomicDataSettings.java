@@ -80,6 +80,7 @@ public class GenomicDataSettings extends DefaultSettingsEntity
 		@Override
 		public void init()
 		{
+			super.init();
 			setLabel("Genomic data settings");
 			setDescription("Settings for genomic data sets.");
 

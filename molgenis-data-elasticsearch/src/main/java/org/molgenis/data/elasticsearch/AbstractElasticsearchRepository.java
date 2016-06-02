@@ -23,7 +23,6 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -57,7 +56,7 @@ public abstract class AbstractElasticsearchRepository implements Repository<Enti
 	@Override
 	public Query<Entity> query()
 	{
-		return new QueryImpl<Entity>(this);
+		return new QueryImpl<>(this);
 	}
 
 	@Override
@@ -114,7 +113,7 @@ public abstract class AbstractElasticsearchRepository implements Repository<Enti
 	@Override
 	public Stream<Entity> stream(Fetch fetch)
 	{
-		Query<Entity> q = new QueryImpl<Entity>().fetch(fetch);
+		Query<Entity> q = new QueryImpl<>().fetch(fetch);
 		return elasticSearchService.searchAsStream(q, getEntityMetaData());
 	}
 
@@ -219,18 +218,6 @@ public abstract class AbstractElasticsearchRepository implements Repository<Enti
 		elasticSearchService.delete(getEntityMetaData().getName());
 		createMappings();
 		elasticSearchService.refresh(getEntityMetaData());
-	}
-
-	@Override
-	public void create()
-	{
-		createMappings();
-	}
-
-	@Override
-	public void drop()
-	{
-		elasticSearchService.delete(getEntityMetaData().getName());
 	}
 
 	@Override

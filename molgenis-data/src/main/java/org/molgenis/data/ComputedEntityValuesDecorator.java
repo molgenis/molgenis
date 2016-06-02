@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 
 public class ComputedEntityValuesDecorator implements Repository<Entity>
@@ -197,18 +196,6 @@ public class ComputedEntityValuesDecorator implements Repository<Entity>
 	public void clearCache()
 	{
 		decoratedRepo.clearCache();
-	}
-
-	@Override
-	public void create()
-	{
-		decoratedRepo.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		decoratedRepo.drop();
 	}
 
 	@Override

@@ -1,17 +1,24 @@
 package org.molgenis.data.elasticsearch;
 
+import static autovalue.shaded.com.google.common.common.collect.Sets.immutableEnumSet;
+import static org.molgenis.data.RepositoryCollectionCapability.UPDATABLE;
+import static org.molgenis.data.RepositoryCollectionCapability.WRITABLE;
+
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollectionCapability;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.support.AbstractRepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -20,7 +27,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
 
 @Component("ElasticsearchRepositoryCollection")
-public class ElasticsearchRepositoryCollection implements RepositoryCollection
+public class ElasticsearchRepositoryCollection extends AbstractRepositoryCollection
 {
 	public static final String NAME = "ElasticSearch";
 	private final SearchService searchService;
@@ -38,7 +45,10 @@ public class ElasticsearchRepositoryCollection implements RepositoryCollection
 	public Repository<Entity> createRepository(EntityMetaData entityMeta)
 	{
 		ElasticsearchRepository repo = new ElasticsearchRepository(entityMeta, searchService);
-		if (!searchService.hasMapping(entityMeta)) repo.create();
+		if (!searchService.hasMapping(entityMeta))
+		{
+			searchService.createMappings(entityMeta);
+		}
 		repositories.put(entityMeta.getName(), repo);
 
 		return repo;
@@ -48,6 +58,12 @@ public class ElasticsearchRepositoryCollection implements RepositoryCollection
 	public String getName()
 	{
 		return NAME;
+	}
+
+	@Override
+	public Set<RepositoryCollectionCapability> getCapabilities()
+	{
+		return immutableEnumSet(EnumSet.of(WRITABLE, UPDATABLE));
 	}
 
 	@Override
@@ -83,14 +99,14 @@ public class ElasticsearchRepositoryCollection implements RepositoryCollection
 	}
 
 	@Override
-	public void deleteRepository(String entityName)
+	public void deleteRepository(EntityMetaData entityMeta)
 	{
 		// remove the repo
-		AbstractElasticsearchRepository r = repositories.get(entityName);
+		AbstractElasticsearchRepository r = repositories.get(entityMeta);
 		if (r != null)
 		{
-			r.drop();
-			repositories.remove(entityName);
+			searchService.delete(entityMeta.getName());
+			repositories.remove(entityMeta.getName());
 		}
 	}
 
@@ -110,6 +126,12 @@ public class ElasticsearchRepositoryCollection implements RepositoryCollection
 
 		entityMetaData.addAttribute(attribute);
 		searchService.createMappings(entityMetaData);
+	}
+
+	@Override
+	public void updateAttribute(EntityMetaData entityMetaData, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	{
+		throw new UnsupportedOperationException(); // FIXME
 	}
 
 	@Override

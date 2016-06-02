@@ -21,7 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -634,14 +633,7 @@ class RestControllerV2
 			Iterable<Entity> it;
 			if (count > 0)
 			{
-				it = new Iterable<Entity>()
-				{
-					@Override
-					public Iterator<Entity> iterator()
-					{
-						return dataService.findAll(entityName, q).iterator();
-					}
-				};
+				it = () -> dataService.findAll(entityName, q).iterator();
 			}
 			else
 			{

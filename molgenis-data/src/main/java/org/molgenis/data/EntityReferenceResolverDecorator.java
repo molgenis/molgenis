@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.QueryImpl;
 
 public class EntityReferenceResolverDecorator implements Repository<Entity>
@@ -198,18 +197,6 @@ public class EntityReferenceResolverDecorator implements Repository<Entity>
 	public void clearCache()
 	{
 		decoratedRepo.clearCache();
-	}
-
-	@Override
-	public void create()
-	{
-		decoratedRepo.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		decoratedRepo.drop();
 	}
 
 	@Override

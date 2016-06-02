@@ -13,6 +13,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.util.EntityUtils;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 import com.google.common.base.Function;
@@ -68,7 +69,8 @@ public class MapEntity extends AbstractEntity
 	 * @param entity entity to copy
 	 * @return deep copy of entity
 	 */
-	public static Entity newInstance(Entity entity) {
+	public static Entity newInstance(Entity entity)
+	{
 		EntityMetaData entityMeta = entity.getEntityMetaData();
 		Entity entityCopy = new MapEntity(entityMeta);
 		// include atomic attributes from the 'extends' hierarchy
@@ -76,7 +78,8 @@ public class MapEntity extends AbstractEntity
 			Object value;
 			String attrName = attr.getName();
 			FieldTypeEnum attrType = attr.getDataType().getEnumType();
-			switch(attrType) {
+			switch (attrType)
+			{
 				case BOOL:
 					value = entity.getBoolean(attrName);
 					break;
@@ -181,14 +184,19 @@ public class MapEntity extends AbstractEntity
 	public String getIdAttributeName()
 	{
 		String idAttributeName;
-		if(this.idAttributeName != null) {
+		if (this.idAttributeName != null)
+		{
 			return this.idAttributeName;
-		} else {
+		}
+		else
+		{
 			AttributeMetaData idAttribute = entityMetaData.getIdAttribute();
-			if(idAttribute != null) {
+			if (idAttribute != null)
+			{
 				idAttributeName = idAttribute.getName();
 			}
-			else {
+			else
+			{
 				idAttributeName = null;
 			}
 		}
@@ -219,38 +227,23 @@ public class MapEntity extends AbstractEntity
 	}
 
 	@Override
-	public int hashCode()
+	public boolean equals(Object o)
 	{
-		final int prime = 31;
-		int result = 1;
-//		result = prime * result + ((entityMetaData == null) ? 0 : entityMetaData.getName().hashCode());
-		result = prime * result + ((idAttributeName == null) ? 0 : idAttributeName.hashCode());
-		result = prime * result + ((values == null) ? 0 : values.hashCode());
-		return result;
+		if (this == o) return true;
+		if (!(o instanceof Entity)) return false;
+		return EntityUtils.equals(this, (Entity) o);
 	}
 
 	@Override
-	public boolean equals(Object obj)
+	public int hashCode()
 	{
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		MapEntity other = (MapEntity) obj;
-		if (entityMetaData == null)
-		{
-			if (other.entityMetaData != null) return false;
-		}
-		else if (!entityMetaData.equals(other.entityMetaData)) return false;
-		if (idAttributeName == null)
-		{
-			if (other.idAttributeName != null) return false;
-		}
-		else if (!idAttributeName.equals(other.idAttributeName)) return false;
-		if (values == null)
-		{
-			if (other.values != null) return false;
-		}
-		else if (!values.equals(other.values)) return false;
-		return true;
+		return EntityUtils.hashCode(this);
+	}
+
+	@Override
+	public String toString()
+	{
+		return new StringBuilder().append(getEntityMetaData().getName()).append("{").append("values=").append(values)
+				.append('}').toString();
 	}
 }

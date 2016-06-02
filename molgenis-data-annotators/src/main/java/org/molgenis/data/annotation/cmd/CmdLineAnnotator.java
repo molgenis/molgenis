@@ -18,6 +18,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.vcf.VcfAttributes;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.slf4j.LoggerFactory;
@@ -252,7 +253,7 @@ public class CmdLineAnnotator
 			System.out.println("Now starting to process the data.");
 
 			EntityMetaData emd = (EntityMetaData) vcfRepo.getEntityMetaData();
-			AttributeMetaData infoAttribute = (AttributeMetaData) emd.getAttribute(VcfRepository.INFO);
+			AttributeMetaData infoAttribute = (AttributeMetaData) emd.getAttribute(VcfAttributes.INFO);
 			for (AttributeMetaData attribute : annotator.getOutputMetaData())
 			{
 				for (AttributeMetaData atomicAttribute : attribute.getAttributeParts())

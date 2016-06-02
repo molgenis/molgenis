@@ -83,6 +83,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		@Override
 		public void init()
 		{
+			super.init();
 			setLabel("Application settings");
 			setDescription("General application settings.");
 

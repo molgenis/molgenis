@@ -1,9 +1,15 @@
 package org.molgenis.migrate.version.v1_15;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
+import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
+
 import org.molgenis.auth.GroupAuthority;
+import org.molgenis.auth.GroupAuthorityFactory;
 import org.molgenis.auth.MolgenisGroup;
+import org.molgenis.auth.MolgenisGroupMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.framework.MolgenisUpgrade;
 import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -20,6 +26,7 @@ public class Step25LanguagesPermissions extends MolgenisUpgrade implements Appli
 {
 	private static final Logger LOG = LoggerFactory.getLogger(Step25LanguagesPermissions.class);
 	private final DataService dataService;
+	private final GroupAuthorityFactory groupAuthorityFactory;
 
 	/**
 	 * Whether or not this migrator is enabled
@@ -27,10 +34,11 @@ public class Step25LanguagesPermissions extends MolgenisUpgrade implements Appli
 	private boolean enabled;
 
 	@Autowired
-	public Step25LanguagesPermissions(DataService dataService)
+	public Step25LanguagesPermissions(DataService dataService, GroupAuthorityFactory groupAuthorityFactory)
 	{
 		super(24, 25);
 		this.dataService = dataService;
+		this.groupAuthorityFactory = requireNonNull(groupAuthorityFactory);
 	}
 
 	@Override
@@ -47,17 +55,18 @@ public class Step25LanguagesPermissions extends MolgenisUpgrade implements Appli
 		{
 			RunAsSystemProxy.runAsSystem(() -> {
 				// allow all users to read the app languages
-				MolgenisGroup allUsersGroup = dataService.query(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class).eq(MolgenisGroup.NAME, AccountService.ALL_USER_GROUP).findOne();
+				MolgenisGroup allUsersGroup = dataService.query(MOLGENIS_GROUP, MolgenisGroup.class)
+						.eq(MolgenisGroupMetaData.NAME, AccountService.ALL_USER_GROUP).findOne();
 
-					if (allUsersGroup != null)
-					{
-						GroupAuthority usersGroupLanguagesAuthority = new GroupAuthority();
-						usersGroupLanguagesAuthority.setMolgenisGroup(allUsersGroup);
-						usersGroupLanguagesAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX
-								+ LanguageMetaData.ENTITY_NAME.toUpperCase());
-						dataService.add(GroupAuthority.ENTITY_NAME, usersGroupLanguagesAuthority);
-					}
-				});
+				if (allUsersGroup != null)
+				{
+					GroupAuthority usersGroupLanguagesAuthority = groupAuthorityFactory.create();
+					usersGroupLanguagesAuthority.setMolgenisGroup(allUsersGroup);
+					usersGroupLanguagesAuthority
+							.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + LANGUAGE.toUpperCase());
+					dataService.add(GROUP_AUTHORITY, usersGroupLanguagesAuthority);
+				}
+			});
 		}
 	}
 }

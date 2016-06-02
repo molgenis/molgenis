@@ -1,39 +1,55 @@
 package org.molgenis.file.ingest.meta;
 
-import org.molgenis.data.DataService;
+import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE;
+import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST;
+import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_TYPE;
+
 import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.JobExecution;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistrySingleton;
 import org.molgenis.file.FileMeta;
 
 public class FileIngestJobExecution extends JobExecution
 {
-	private static final long serialVersionUID = 1L;
-
-	public FileIngestJobExecution(DataService dataService)
+	public FileIngestJobExecution(Entity entity)
 	{
-		super(dataService, SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(FileIngestJobExecutionMetaData.ENTITY_NAME));
-		setType("FileIngesterJob");
+		super(entity);
+		setDefaultValues();
+	}
+
+	public FileIngestJobExecution(FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData)
+	{
+		super(fileIngestJobExecutionMetaData);
+		setDefaultValues();
+	}
+
+	public FileIngestJobExecution(String identifier, FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData)
+	{
+		super(identifier, fileIngestJobExecutionMetaData);
+		setDefaultValues();
 	}
 
 	public FileMeta getFile()
 	{
-		return getEntity(FileIngestJobExecutionMetaData.FILE, FileMeta.class);
+		return getEntity(FILE, FileMeta.class);
 	}
 
 	public void setFile(FileMeta value)
 	{
-		set(FileIngestJobExecutionMetaData.FILE, value);
+		set(FILE, value);
 	}
 
 	public Entity getFileIngest()
 	{
-		return getEntity(FileIngestJobExecutionMetaData.FILE_INGEST);
+		return getEntity(FILE_INGEST);
 	}
 
 	public void setFileIngest(FileIngest fileIngest)
 	{
-		set(FileIngestJobExecutionMetaData.FILE_INGEST, fileIngest);
+		set(FILE_INGEST, fileIngest);
 	}
 
+	private void setDefaultValues()
+	{
+		setType(FILE_INGEST_JOB_TYPE);
+	}
 }

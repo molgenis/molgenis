@@ -5,10 +5,10 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.POS;
-import static org.molgenis.data.vcf.VcfRepository.REF;
+import static org.molgenis.data.vcf.VcfAttributes.ALT;
+import static org.molgenis.data.vcf.VcfAttributes.CHROM;
+import static org.molgenis.data.vcf.VcfAttributes.POS;
+import static org.molgenis.data.vcf.VcfAttributes.REF;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -29,7 +29,7 @@ import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.VcfAttributes;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -42,7 +42,7 @@ import com.google.common.collect.Iterators;
 { SnpEffAnnotatorTest.Config.class, SnpEffAnnotator.class })
 public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 {
-	private final ArrayList<Entity> entities = new ArrayList<>();;
+	private final ArrayList<Entity> entities = new ArrayList<>();
 	private EntityMetaData metaDataCanAnnotate;
 	private SnpEffAnnotator.SnpEffRepositoryAnnotator snpEffRepositoryAnnotator;
 	private JarRunner jarRunner;
@@ -69,88 +69,88 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 		metaDataCanAnnotate.addAttribute(attributeMetaDataAlt);
 
 		Entity entity1 = new MapEntity(metaDataCanAnnotate);
-		entity1.set(VcfRepository.CHROM, "1");
-		entity1.set(VcfRepository.POS, 13380);
-		entity1.set(VcfRepository.REF, "C");
-		entity1.set(VcfRepository.ALT, "G");
+		entity1.set(VcfAttributes.CHROM, "1");
+		entity1.set(VcfAttributes.POS, 13380);
+		entity1.set(VcfAttributes.REF, "C");
+		entity1.set(VcfAttributes.ALT, "G");
 
 		Entity entity2 = new MapEntity(metaDataCanAnnotate);
-		entity2.set(VcfRepository.CHROM, "1");
-		entity2.set(VcfRepository.POS, 13980);
-		entity2.set(VcfRepository.REF, "T");
-		entity2.set(VcfRepository.ALT, "C");
+		entity2.set(VcfAttributes.CHROM, "1");
+		entity2.set(VcfAttributes.POS, 13980);
+		entity2.set(VcfAttributes.REF, "T");
+		entity2.set(VcfAttributes.ALT, "C");
 
 		Entity entity3 = new MapEntity(metaDataCanAnnotate);
-		entity3.set(VcfRepository.CHROM, "1");
-		entity3.set(VcfRepository.POS, 78383467);
-		entity3.set(VcfRepository.REF, "G");
-		entity3.set(VcfRepository.ALT, "A");
+		entity3.set(VcfAttributes.CHROM, "1");
+		entity3.set(VcfAttributes.POS, 78383467);
+		entity3.set(VcfAttributes.REF, "G");
+		entity3.set(VcfAttributes.ALT, "A");
 
 		Entity entity4 = new MapEntity(metaDataCanAnnotate);
-		entity4.set(VcfRepository.CHROM, "1");
-		entity4.set(VcfRepository.POS, 231094050);
-		entity4.set(VcfRepository.REF, "GAA");
-		entity4.set(VcfRepository.ALT, "G,GAAA,GA");
+		entity4.set(VcfAttributes.CHROM, "1");
+		entity4.set(VcfAttributes.POS, 231094050);
+		entity4.set(VcfAttributes.REF, "GAA");
+		entity4.set(VcfAttributes.ALT, "G,GAAA,GA");
 
 		Entity entity5 = new MapEntity(metaDataCanAnnotate);
-		entity5.set(VcfRepository.CHROM, "2");
-		entity5.set(VcfRepository.POS, 171570151);
-		entity5.set(VcfRepository.REF, "C");
-		entity5.set(VcfRepository.ALT, "T");
+		entity5.set(VcfAttributes.CHROM, "2");
+		entity5.set(VcfAttributes.POS, 171570151);
+		entity5.set(VcfAttributes.REF, "C");
+		entity5.set(VcfAttributes.ALT, "T");
 
 		Entity entity6 = new MapEntity(metaDataCanAnnotate);
-		entity6.set(VcfRepository.CHROM, "4");
-		entity6.set(VcfRepository.POS, 69964234);
-		entity6.set(VcfRepository.REF, "CT");
-		entity6.set(VcfRepository.ALT, "CTT,CTTT,C");
+		entity6.set(VcfAttributes.CHROM, "4");
+		entity6.set(VcfAttributes.POS, 69964234);
+		entity6.set(VcfAttributes.REF, "CT");
+		entity6.set(VcfAttributes.ALT, "CTT,CTTT,C");
 
 		Entity entity7 = new MapEntity(metaDataCanAnnotate);
-		entity7.set(VcfRepository.CHROM, "15");
-		entity7.set(VcfRepository.POS, 66641732);
-		entity7.set(VcfRepository.REF, "G");
-		entity7.set(VcfRepository.ALT, "A,C,T");
+		entity7.set(VcfAttributes.CHROM, "15");
+		entity7.set(VcfAttributes.POS, 66641732);
+		entity7.set(VcfAttributes.REF, "G");
+		entity7.set(VcfAttributes.ALT, "A,C,T");
 
 		Entity entity8 = new MapEntity(metaDataCanAnnotate);
-		entity8.set(VcfRepository.CHROM, "21");
-		entity8.set(VcfRepository.POS, 46924425);
-		entity8.set(VcfRepository.REF, "CGGCCCCCCA");
-		entity8.set(VcfRepository.ALT, "C");
+		entity8.set(VcfAttributes.CHROM, "21");
+		entity8.set(VcfAttributes.POS, 46924425);
+		entity8.set(VcfAttributes.REF, "CGGCCCCCCA");
+		entity8.set(VcfAttributes.ALT, "C");
 
 		Entity entity9 = new MapEntity(metaDataCanAnnotate);
-		entity9.set(VcfRepository.CHROM, "X");
-		entity9.set(VcfRepository.POS, 79943569);
-		entity9.set(VcfRepository.REF, "T");
-		entity9.set(VcfRepository.ALT, "C");
+		entity9.set(VcfAttributes.CHROM, "X");
+		entity9.set(VcfAttributes.POS, 79943569);
+		entity9.set(VcfAttributes.REF, "T");
+		entity9.set(VcfAttributes.ALT, "C");
 
 		Entity entity10 = new MapEntity(metaDataCanAnnotate);
-		entity10.set(VcfRepository.CHROM, "2");
-		entity10.set(VcfRepository.POS, 191904021);
-		entity10.set(VcfRepository.REF, "G");
-		entity10.set(VcfRepository.ALT, "T");
+		entity10.set(VcfAttributes.CHROM, "2");
+		entity10.set(VcfAttributes.POS, 191904021);
+		entity10.set(VcfAttributes.REF, "G");
+		entity10.set(VcfAttributes.ALT, "T");
 
 		Entity entity11 = new MapEntity(metaDataCanAnnotate);
-		entity11.set(VcfRepository.CHROM, "3");
-		entity11.set(VcfRepository.POS, 53219680);
-		entity11.set(VcfRepository.REF, "G");
-		entity11.set(VcfRepository.ALT, "C");
+		entity11.set(VcfAttributes.CHROM, "3");
+		entity11.set(VcfAttributes.POS, 53219680);
+		entity11.set(VcfAttributes.REF, "G");
+		entity11.set(VcfAttributes.ALT, "C");
 
 		Entity entity12 = new MapEntity(metaDataCanAnnotate);
-		entity12.set(VcfRepository.CHROM, "2");
-		entity12.set(VcfRepository.POS, 219142023);
-		entity12.set(VcfRepository.REF, "G");
-		entity12.set(VcfRepository.ALT, "A");
+		entity12.set(VcfAttributes.CHROM, "2");
+		entity12.set(VcfAttributes.POS, 219142023);
+		entity12.set(VcfAttributes.REF, "G");
+		entity12.set(VcfAttributes.ALT, "A");
 
 		Entity entity13 = new MapEntity(metaDataCanAnnotate);
-		entity13.set(VcfRepository.CHROM, "1");
-		entity13.set(VcfRepository.POS, 1115548);
-		entity13.set(VcfRepository.REF, "G");
-		entity13.set(VcfRepository.ALT, "A");
+		entity13.set(VcfAttributes.CHROM, "1");
+		entity13.set(VcfAttributes.POS, 1115548);
+		entity13.set(VcfAttributes.REF, "G");
+		entity13.set(VcfAttributes.ALT, "A");
 
 		Entity entity14 = new MapEntity(metaDataCanAnnotate);
-		entity14.set(VcfRepository.CHROM, "21");
-		entity14.set(VcfRepository.POS, 45650009);
-		entity14.set(VcfRepository.REF, "T");
-		entity14.set(VcfRepository.ALT, "TG, A, G");
+		entity14.set(VcfAttributes.CHROM, "21");
+		entity14.set(VcfAttributes.POS, 45650009);
+		entity14.set(VcfAttributes.REF, "T");
+		entity14.set(VcfAttributes.ALT, "TG, A, G");
 
 		entities.add(entity1);
 		entities.add(entity2);

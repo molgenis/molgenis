@@ -2,6 +2,8 @@ package org.molgenis.gaf;
 
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -25,14 +27,19 @@ public class GafListDbSettings implements GafListSettings
 	@Component
 	public static class Meta extends SystemEntityMetaDataImpl
 	{
-		private static final String ENTITY_NAME = "GafListSettings";
+		private static final String SIMPLE_NAME = "GafListSettings";
+		public static final String ENTITY_NAME = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 		private static final String NAME = "Name";
 		private static final String VALUE = "Value";
+
+		Meta()
+		{
+			super(SIMPLE_NAME);
+		}
 
 		@Override
 		public void init()
 		{
-			setName(ENTITY_NAME);
 			addAttribute(NAME, ROLE_ID);
 			addAttribute(VALUE).setNillable(false).setDataType(TEXT);
 		}

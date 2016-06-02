@@ -6,6 +6,7 @@ import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -69,15 +70,15 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 	{
 		MapEntity synonymEntity1 = new MapEntity(ontologyTermSynonymMetaData);
 		synonymEntity1.set(OntologyTermSynonymMetaData.ID, "synonym-1");
-		synonymEntity1.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, "Weight Reduction Diet");
+		synonymEntity1.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR, "Weight Reduction Diet");
 
 		MapEntity synonymEntity2 = new MapEntity(ontologyTermSynonymMetaData);
 		synonymEntity2.set(OntologyTermSynonymMetaData.ID, "synonym-2");
-		synonymEntity2.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, "Weight loss Diet");
+		synonymEntity2.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR, "Weight loss Diet");
 
 		MapEntity synonymEntity3 = new MapEntity(ontologyTermSynonymMetaData);
 		synonymEntity3.set(OntologyTermSynonymMetaData.ID, "synonym-3");
-		synonymEntity3.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, "Diet, Reducing");
+		synonymEntity3.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR, "Diet, Reducing");
 
 		MapEntity ontologyTermEntity1 = new MapEntity(ontologyTermMetaData);
 		ontologyTermEntity1.set(OntologyTermMetaData.ID, "1");
@@ -89,7 +90,7 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 
 		MapEntity synonymEntity4 = new MapEntity(ontologyTermSynonymMetaData);
 		synonymEntity4.set(OntologyTermSynonymMetaData.ID, "synonym-4");
-		synonymEntity4.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, "Weight");
+		synonymEntity4.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR, "Weight");
 
 		MapEntity ontologyTermEntity2 = new MapEntity(ontologyTermMetaData);
 		ontologyTermEntity2.set(OntologyTermMetaData.ID, "12");
@@ -99,7 +100,7 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		ontologyTermEntity2.set(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Arrays.asList(synonymEntity4));
 
 		ArgumentCaptor<Query<Entity>> queryCaptor = forClass((Class) Query.class);
-		when(dataService.findAll(eq(OntologyTermMetaData.ENTITY_NAME), queryCaptor.capture()))
+		when(dataService.findAll(eq(ONTOLOGY_TERM), queryCaptor.capture()))
 				.thenReturn(Stream.of(ontologyTermEntity1, ontologyTermEntity2));
 
 		List<OntologyTerm> exactOntologyTerms = ontologyTermRepository
@@ -113,7 +114,7 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 	public void testFindOntologyTerms()
 	{
 		ArgumentCaptor<Query<Entity>> queryCaptor = forClass((Class) Query.class);
-		when(dataService.findAll(eq(OntologyTermMetaData.ENTITY_NAME), queryCaptor.capture()))
+		when(dataService.findAll(eq(ONTOLOGY_TERM), queryCaptor.capture()))
 				.thenReturn(Stream.of(ontologyTermEntity));
 
 		List<OntologyTerm> terms = ontologyTermRepository
@@ -133,11 +134,11 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 						"molgenis"));
 
 		Entity nodePathEntity_1 = new MapEntity(
-				ImmutableMap.of(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH, "0[0].1[1]"));
+				ImmutableMap.of(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR, "0[0].1[1]"));
 		Entity nodePathEntity_2 = new MapEntity(
-				ImmutableMap.of(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH, "0[0].1[1].0[2]"));
+				ImmutableMap.of(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR, "0[0].1[1].0[2]"));
 		Entity nodePathEntity_3 = new MapEntity(
-				ImmutableMap.of(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH, "0[0].1[1].1[2]"));
+				ImmutableMap.of(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR, "0[0].1[1].1[2]"));
 
 		MapEntity ontologyTerm_2 = new MapEntity();
 		ontologyTerm_2.set(OntologyTermMetaData.ONTOLOGY, ontologyEntity);
@@ -154,7 +155,7 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		ontologyTerm_3.set(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Arrays.asList(nodePathEntity_3));
 		ontologyTerm_3.set(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Collections.emptyList());
 
-		when(dataService.findAll(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<Entity>(
+		when(dataService.findAll(ONTOLOGY_TERM, new QueryImpl<Entity>(
 				new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, Operator.FUZZY_MATCH, "\"0[0].1[1]\""))
 				.and().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity)))
 				.thenReturn(Stream.of(ontologyTerm_2, ontologyTerm_3));
@@ -191,7 +192,7 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testGetOntologyTerm()
 	{
-		when(dataService.findOne(OntologyTermMetaData.ENTITY_NAME,
+		when(dataService.findOne(ONTOLOGY_TERM,
 				QueryImpl.EQ(OntologyTermMetaData.ONTOLOGY_TERM_IRI, "http://www.test.nl/iri")))
 				.thenReturn(ontologyTermEntity);
 

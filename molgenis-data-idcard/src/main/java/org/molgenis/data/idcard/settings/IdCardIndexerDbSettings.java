@@ -55,6 +55,7 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 		@Override
 		public void init()
 		{
+			super.init();
 			setLabel("ID-Card biobank indexer settings");
 			addAttribute(API_BASE_URI).setDataType(STRING).setLabel("API base URI")
 					.setDefaultValue(DEFAULT_API_BASE_URI);

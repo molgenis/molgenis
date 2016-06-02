@@ -3,17 +3,17 @@ package org.molgenis.data.idcard.indexer;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.idcard.indexer.IdCardIndexerJob.JOB_USERNAME;
+import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.ID_CARD_INDEXING_EVENT;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.UUID;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.idcard.model.IdCardIndexingEvent;
+import org.molgenis.data.idcard.model.IdCardIndexingEventFactory;
 import org.molgenis.data.idcard.model.IdCardIndexingEventStatus;
 import org.molgenis.data.idcard.settings.IdCardIndexerSettings;
-import org.molgenis.data.settings.SettingsEntityListener;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.quartz.CronScheduleBuilder;
@@ -31,15 +31,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Service;
 
 import com.google.common.io.BaseEncoding;
 
 @Service
-public class IdCardIndexerServiceImpl
-		implements IdCardIndexerService, DisposableBean, ApplicationListener<ContextRefreshedEvent>
+public class IdCardIndexerServiceImpl implements IdCardIndexerService, DisposableBean
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IdCardIndexerServiceImpl.class);
 
@@ -50,6 +47,7 @@ public class IdCardIndexerServiceImpl
 	private final DataService dataService;
 	private final IdCardIndexerSettings idCardIndexerSettings;
 	private final Scheduler scheduler;
+	private final IdCardIndexingEventFactory idCardIndexingEventFactory;
 	/**
 	 * Salt used to compute trigger name for user scheduled index rebuild jobs
 	 */
@@ -61,44 +59,15 @@ public class IdCardIndexerServiceImpl
 
 	@Autowired
 	public IdCardIndexerServiceImpl(DataService dataService, IdCardIndexerSettings idCardBiobankIndexerSettings,
-			Scheduler scheduler)
+			Scheduler scheduler, IdCardIndexingEventFactory idCardIndexingEventFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.idCardIndexerSettings = requireNonNull(idCardBiobankIndexerSettings);
 		this.scheduler = requireNonNull(scheduler);
+		this.idCardIndexingEventFactory = idCardIndexingEventFactory;
 
 		this.triggerNameSalt = UUID.randomUUID().toString();
 		this.triggerNameScheduled = UUID.randomUUID().toString();
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		// FIXME
-//		idCardIndexerSettings.addListener(new SettingsEntityListener()
-//		{
-//			@Override
-//			public void postUpdate(Entity entity)
-//			{
-//				try
-//				{
-//					updateIndexerScheduler(false);
-//				}
-//				catch (SchedulerException e)
-//				{
-//					throw new RuntimeException(e);
-//				}
-//			}
-//		});
-//
-//		try
-//		{
-//			updateIndexerScheduler(true);
-//		}
-//		catch (SchedulerException e)
-//		{
-//			throw new RuntimeException(e);
-//		}
 	}
 
 	@Override
@@ -181,7 +150,8 @@ public class IdCardIndexerServiceImpl
 		return jobKey;
 	}
 
-	private void updateIndexerScheduler(boolean initScheduler) throws SchedulerException
+	@Override
+	public void updateIndexerScheduler(boolean initScheduler) throws SchedulerException
 	{
 		JobKey jobKey = getIndexRebuildJobKey();
 		if (idCardIndexerSettings.getBiobankIndexingEnabled())
@@ -207,7 +177,7 @@ public class IdCardIndexerServiceImpl
 				// trigger.equals(oldTrigger) doesn't return true when the cron expressions are equal
 				if (trigger instanceof CronTriggerImpl && oldTrigger instanceof CronTriggerImpl
 						&& !((CronTriggerImpl) trigger).getCronExpression()
-								.equals(((CronTriggerImpl) oldTrigger).getCronExpression()))
+						.equals(((CronTriggerImpl) oldTrigger).getCronExpression()))
 				{
 					LOG.info("Rescheduling index rebuild job with cron [{}]", biobankIndexingFrequency);
 					scheduler.rescheduleJob(triggerKey, trigger);
@@ -249,11 +219,11 @@ public class IdCardIndexerServiceImpl
 	private void onIndexConfigurationUpdate(String updateMessage)
 	{
 		// write log event to db
-		IdCardIndexingEvent idCardIndexingEvent = new IdCardIndexingEvent(dataService);
+		IdCardIndexingEvent idCardIndexingEvent = idCardIndexingEventFactory.create();
 		idCardIndexingEvent.setStatus(IdCardIndexingEventStatus.CONFIGURATION_CHANGE);
 		idCardIndexingEvent.setMessage(updateMessage);
 		RunAsSystemProxy.runAsSystem(() -> {
-			dataService.add(IdCardIndexingEvent.ENTITY_NAME, idCardIndexingEvent);
+			dataService.add(ID_CARD_INDEXING_EVENT, idCardIndexingEvent);
 		});
 	}
 }

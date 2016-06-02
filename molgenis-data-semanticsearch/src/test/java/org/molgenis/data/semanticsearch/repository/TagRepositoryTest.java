@@ -4,6 +4,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.TagMetaData.TAG;
 import static org.testng.Assert.assertEquals;
 
 import java.util.UUID;
@@ -52,7 +53,7 @@ public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testGetTagEntity()
 	{
-		MapEntity expected = new MapEntity(TagMetaData.ENTITY_NAME);
+		MapEntity expected = new MapEntity(TAG);
 		expected.set(TagMetaData.IDENTIFIER, uuid.toString());
 		expected.set(TagMetaData.OBJECT_IRI, "http://edamontology.org/data_3031");
 		expected.set(TagMetaData.LABEL, "Core data");

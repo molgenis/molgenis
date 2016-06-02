@@ -3,7 +3,9 @@ package org.molgenis.bootstrap;
 import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.RepositoryCollectionRegistrar;
+import org.molgenis.data.idcard.IdCardBootstrapper;
 import org.molgenis.data.importer.ImportServiceRegistrar;
+import org.molgenis.data.jobs.JobBootstrapper;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.system.SystemEntityMetaDataInitializer;
 import org.molgenis.data.meta.system.SystemEntityMetaDataPersister;
@@ -44,6 +46,8 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	private final MetaDataService metaDataService;
 	private final PostgreSqlRepositoryCollection postgreSqlRepositoryCollection;
 	private final RepositoryCollectionRegistrar repositoryCollectionRegistrar;
+	private final JobBootstrapper jobBootstrapper;
+	private final IdCardBootstrapper idCardBootstrapper;
 
 	@Autowired
 	public MolgenisBootstrapper(SystemEntityMetaDataInitializer systemEntityMetaDataInitializer,
@@ -53,7 +57,8 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 			FileIngesterJobRegistrar fileIngesterJobRegistrar, ImportServiceRegistrar importServiceRegistrar,
 			WebAppDatabasePopulator webAppDatabasePopulator, MetaDataService metaDataService,
 			PostgreSqlRepositoryCollection postgreSqlRepositoryCollection,
-			RepositoryCollectionRegistrar repositoryCollectionRegistrar)
+			RepositoryCollectionRegistrar repositoryCollectionRegistrar, JobBootstrapper jobBootstrapper,
+			IdCardBootstrapper idCardBootstrapper)
 	{
 
 		this.systemEntityMetaDataInitializer = requireNonNull(systemEntityMetaDataInitializer);
@@ -65,9 +70,11 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		this.fileIngesterJobRegistrar = requireNonNull(fileIngesterJobRegistrar);
 		this.importServiceRegistrar = requireNonNull(importServiceRegistrar);
 		this.webAppDatabasePopulator = requireNonNull(webAppDatabasePopulator);
-		this.metaDataService = metaDataService;
-		this.postgreSqlRepositoryCollection = postgreSqlRepositoryCollection;
-		this.repositoryCollectionRegistrar = repositoryCollectionRegistrar;
+		this.metaDataService = requireNonNull(metaDataService);
+		this.postgreSqlRepositoryCollection = requireNonNull(postgreSqlRepositoryCollection);
+		this.repositoryCollectionRegistrar = requireNonNull(repositoryCollectionRegistrar);
+		this.jobBootstrapper = requireNonNull(jobBootstrapper);
+		this.idCardBootstrapper = requireNonNull(idCardBootstrapper);
 	}
 
 	@Transactional
@@ -77,6 +84,8 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	{
 		// TODO migration
 		// TODO index rebuilding
+		// TODO job framework: mark running jobs as failed
+		// TODO onApplicationEvent idcard
 
 		LOG.info("Bootstrapping application ...");
 
@@ -97,32 +106,40 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		LOG.debug("Registered system entity meta data");
 
 		LOG.trace("Persisting system entity meta data ...");
-		systemEntityMetaDataPersister.persist();
+		systemEntityMetaDataPersister.persist(event);
 		LOG.debug("Persisted system entity meta data");
 
 		LOG.trace("Populating database ...");
 		webAppDatabasePopulator.populateDatabase();
 		LOG.debug("Populated database");
 
-		//		LOG.trace("Initializing settings entities ...");
-		//		settingsInitializer.initialize(event);
-		//		LOG.debug("Initialized settings entities");
+		LOG.trace("Initializing settings entities ...");
+		settingsInitializer.initialize(event);
+		LOG.debug("Initialized settings entities");
 
-		LOG.trace("Scheduling importers ...");
+		LOG.trace("Registering importers ...");
 		importServiceRegistrar.register(event);
-		LOG.debug("Scheduled importers");
+		LOG.debug("Registered importers");
 
-		//		LOG.trace("Populating database with I18N strings ...");
-		//		i18nStringsPopulator.populate();
-		//		LOG.debug("Populated database with I18N strings");
+		LOG.trace("Populating database with I18N strings ...");
+		i18nStringsPopulator.populate();
+		LOG.debug("Populated database with I18N strings");
 
-		//		LOG.trace("Registering script runners ...");
-		//		scriptRunnerRegistrar.register(event);
-		//		LOG.debug("Registered script runners");
+		LOG.trace("Registering script runners ...");
+		scriptRunnerRegistrar.register(event);
+		LOG.debug("Registered script runners");
 
-		//		LOG.trace("Scheduling file ingest jobs ...");
-		//		fileIngesterJobRegistrar.scheduleJobs();
-		//		LOG.debug("Scheduled file ingest jobs");
+		LOG.trace("Bootstrapping jobs ...");
+		jobBootstrapper.bootstrap();
+		LOG.debug("Bootstrapped jobs");
+
+		LOG.trace("Scheduling file ingest jobs ...");
+		fileIngesterJobRegistrar.scheduleJobs();
+		LOG.debug("Scheduled file ingest jobs");
+
+		LOG.trace("Bootstrapping ID Card scheduler ...");
+		idCardBootstrapper.bootstrap();
+		LOG.debug("Bootstrapped ID Card scheduler");
 
 		LOG.info("Bootstrapping application completed");
 	}

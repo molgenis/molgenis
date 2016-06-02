@@ -117,7 +117,7 @@ public final class IntermediateParseResults
 
 		EntityMetaData emd = new EntityMetaDataImpl(simpleName);
 		entities.put(name, emd);
-
+		//		emd.setBackend("PostgreSQL"); // FIXME remove hardcoded reference
 		return emd;
 	}
 

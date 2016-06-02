@@ -15,12 +15,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class JsScriptRunner implements ScriptRunner
 {
+	private static final String NAME = "JavaScript";
+
 	private final JsScriptExecutor jsScriptExecutor;
 
 	@Autowired
 	public JsScriptRunner(JsScriptExecutor jsScriptExecutor)
 	{
 		this.jsScriptExecutor = requireNonNull(jsScriptExecutor);
+	}
+
+	@Override
+	public String getName()
+	{
+		return NAME;
 	}
 
 	@Override

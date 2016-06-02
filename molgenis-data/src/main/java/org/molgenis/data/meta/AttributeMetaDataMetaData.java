@@ -8,6 +8,8 @@ import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.MetaPackage.PACKAGE_META;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.fieldtypes.EnumField;
@@ -18,7 +20,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class AttributeMetaDataMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String ENTITY_NAME = "attributes";
+	public static final String SIMPLE_NAME = "attributes";
+	public static final String ATTRIBUTE_META_DATA = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME;
+
 	public static final String IDENTIFIER = "identifier";
 	public static final String NAME = "name";
 	public static final String DATA_TYPE = "dataType";
@@ -45,17 +49,17 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaDataImpl
 
 	AttributeMetaDataMetaData()
 	{
+		super(SIMPLE_NAME, PACKAGE_META);
 	}
 
 	public void init()
 	{
-		setName(ENTITY_NAME);
 		addAttribute(IDENTIFIER, ROLE_ID).setVisible(false).setAuto(true);
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false);
 		addAttribute(DATA_TYPE).setDataType(new EnumField()).setEnumOptions(FieldTypeEnum.getOptionsLowercase())
 				.setNillable(false);
 		addAttribute(PARTS).setDataType(MREF).setRefEntity(this);
-		addAttribute(REF_ENTITY);
+		addAttribute(REF_ENTITY); // TODO xref instead of string
 		addAttribute(EXPRESSION).setNillable(true);
 		addAttribute(NILLABLE).setDataType(BOOL).setNillable(false);
 		addAttribute(AUTO).setDataType(BOOL).setNillable(false);
@@ -72,6 +76,9 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaDataImpl
 		addAttribute(VISIBLE_EXPRESSION).setDataType(SCRIPT).setNillable(true);
 		addAttribute(VALIDATION_EXPRESSION).setDataType(SCRIPT).setNillable(true);
 		addAttribute(DEFAULT_VALUE).setDataType(TEXT).setNillable(true);
+
+		addAttribute(LABEL + '-' + "en").setNillable(true);
+		addAttribute(DESCRIPTION + '-' + "en").setNillable(true);
 	}
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies

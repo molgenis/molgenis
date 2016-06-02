@@ -2,8 +2,8 @@ package org.molgenis.data.annotator.tabix;
 
 import static java.util.stream.Collectors.toList;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.POS;
+import static org.molgenis.data.vcf.VcfAttributes.CHROM;
+import static org.molgenis.data.vcf.VcfAttributes.POS;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;

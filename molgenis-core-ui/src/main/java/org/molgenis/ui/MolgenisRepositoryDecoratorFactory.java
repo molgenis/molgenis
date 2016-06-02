@@ -1,7 +1,18 @@
 package org.molgenis.ui;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.PackageMetaData.PACKAGE;
+import static org.molgenis.data.support.OwnedEntityMetaData.OWNED;
+
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserDecorator;
-import org.molgenis.auth.MolgenisUserMetaData;
+import org.molgenis.auth.MolgenisUserFactory;
+import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.AutoValueRepositoryDecorator;
 import org.molgenis.data.ComputedEntityValuesDecorator;
 import org.molgenis.data.DataService;
@@ -12,17 +23,20 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.RepositorySecurityDecorator;
-import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.i18n.I18nStringDecorator;
+import org.molgenis.data.i18n.Language;
+import org.molgenis.data.i18n.LanguageRepositoryDecorator;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataRepositoryDecorator;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.EntityMetaDataRepositoryDecorator;
+import org.molgenis.data.meta.Package;
+import org.molgenis.data.meta.PackageRepositoryDecorator;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.support.TypedRepositoryDecorator;
-import org.molgenis.data.transaction.TransactionLogService;
+import org.molgenis.data.support.UntypedRepositoryDecorator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
@@ -35,7 +49,6 @@ import org.springframework.stereotype.Component;
 public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFactory
 {
 	private final EntityManager entityManager;
-	private final TransactionLogService transactionLogService;
 	private final EntityAttributesValidator entityAttributesValidator;
 	private final IdGenerator idGenerator;
 	private final AppSettings appSettings;
@@ -43,24 +56,27 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final ExpressionValidator expressionValidator;
 	private final RepositoryDecoratorRegistry repositoryDecoratorRegistry;
 	private final SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
-	private final LanguageService languageService;
+	private final MolgenisUserFactory molgenisUserFactory;
+	private final UserAuthorityFactory userAuthorityFactory;
 
 	@Autowired
-	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager, TransactionLogService transactionLogService,
+	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
 			EntityAttributesValidator entityAttributesValidator, IdGenerator idGenerator, AppSettings appSettings,
 			DataService dataService, ExpressionValidator expressionValidator,
-			RepositoryDecoratorRegistry repositoryDecoratorRegistry, SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, LanguageService languageService)
+			RepositoryDecoratorRegistry repositoryDecoratorRegistry,
+			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, MolgenisUserFactory molgenisUserFactory,
+			UserAuthorityFactory userAuthorityFactory)
 	{
-		this.entityManager = entityManager;
-		this.transactionLogService = transactionLogService;
-		this.entityAttributesValidator = entityAttributesValidator;
-		this.idGenerator = idGenerator;
-		this.appSettings = appSettings;
-		this.dataService = dataService;
-		this.expressionValidator = expressionValidator;
-		this.repositoryDecoratorRegistry = repositoryDecoratorRegistry;
-		this.systemEntityMetaDataRegistry = systemEntityMetaDataRegistry;
-		this.languageService = languageService;
+		this.entityManager = requireNonNull(entityManager);
+		this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
+		this.idGenerator = requireNonNull(idGenerator);
+		this.appSettings = requireNonNull(appSettings);
+		this.dataService = requireNonNull(dataService);
+		this.expressionValidator = requireNonNull(expressionValidator);
+		this.repositoryDecoratorRegistry = requireNonNull(repositoryDecoratorRegistry);
+		this.systemEntityMetaDataRegistry = requireNonNull(systemEntityMetaDataRegistry);
+		this.molgenisUserFactory = requireNonNull(molgenisUserFactory);
+		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
 	}
 
 	@Override
@@ -72,7 +88,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		decoratedRepository = applyCustomRepositoryDecorators(decoratedRepository);
 
 		// 8. Owned decorator
-		if (EntityUtils.doesExtend(decoratedRepository.getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME))
+		if (EntityUtils.doesExtend(decoratedRepository.getEntityMetaData(), OWNED))
 		{
 			decoratedRepository = new OwnedEntityRepositoryDecorator(decoratedRepository);
 		}
@@ -87,7 +103,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
 
 		// 4. Transaction log decorator
-//		decoratedRepository = new TransactionLogRepositoryDecorator(decoratedRepository, transactionLogService);
+		//		decoratedRepository = new TransactionLogRepositoryDecorator(decoratedRepository, transactionLogService);
 
 		// 3. validation decorator
 		decoratedRepository = new RepositoryValidationDecorator(dataService, decoratedRepository,
@@ -102,42 +118,58 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		return decoratedRepository;
 	}
 
+	@Override
+	public <E extends Entity> Repository<E> createDecoratedRepository(Repository<E> repository, Class<E> clazz)
+	{
+		Repository<Entity> decoratedRepository = createDecoratedRepository((Repository<Entity>) repository);
+		return new TypedRepositoryDecorator<>(decoratedRepository, clazz);
+	}
+
 	/**
 	 * Apply custom repository decorators based on entity meta data
 	 *
 	 * @param repository
 	 * @return
 	 */
-	private Repository applyCustomRepositoryDecorators(Repository repository)
+	private Repository applyCustomRepositoryDecorators(Repository<Entity> repository)
 	{
-		if (repository.getName().equals(MolgenisUserMetaData.ENTITY_NAME))
+		if (repository.getName().equals(MOLGENIS_USER))
 		{
-			repository = new MolgenisUserDecorator(repository);
+			repository = new UntypedRepositoryDecorator<>(
+					new MolgenisUserDecorator(new TypedRepositoryDecorator<>(repository, MolgenisUser.class),
+							molgenisUserFactory, userAuthorityFactory), MolgenisUser.class);
 		}
-		else if (repository.getName().equals(AttributeMetaDataMetaData.ENTITY_NAME))
+		else if (repository.getName().equals(ATTRIBUTE_META_DATA))
 		{
-			repository = new AttributeMetaDataRepositoryDecorator(repository, systemEntityMetaDataRegistry);
+			repository = new UntypedRepositoryDecorator<>(new AttributeMetaDataRepositoryDecorator(
+					new TypedRepositoryDecorator<>(repository, AttributeMetaData.class), systemEntityMetaDataRegistry,
+					dataService), AttributeMetaData.class);
 		}
-		else if (repository.getName().equals(EntityMetaDataMetaData.ENTITY_NAME))
+		else if (repository.getName().equals(ENTITY_META_DATA))
 		{
-			repository = new EntityMetaDataRepositoryDecorator(new TypedRepositoryDecorator<>(repository, EntityMetaData.class), dataService, systemEntityMetaDataRegistry);
+			// FIXME hacky, remove EntityMetaData interface?
+			repository = new UntypedRepositoryDecorator<>(
+					(Repository<EntityMetaDataImpl>) (Repository<? extends Entity>) new EntityMetaDataRepositoryDecorator(
+							(TypedRepositoryDecorator<EntityMetaData>) (TypedRepositoryDecorator<? extends EntityMetaData>) new TypedRepositoryDecorator<>(
+									repository, EntityMetaDataImpl.class), dataService, systemEntityMetaDataRegistry),
+					EntityMetaDataImpl.class);
 		}
-//		else if (repository.getName().equals(PackageMetaData.ENTITY_NAME))
-//		{
-//			repository = new PackageRepositoryDecorator(repository, dataService, systemEntityMetaDataRegistry);
-//		}
-//		else if (repository.getName().equals(LanguageMetaData.ENTITY_NAME))
-//		{
-//			repository = new LanguageRepositoryDecorator(repository, dataService);
-//		}
-//		else if (repository.getName().equals(I18nStringMetaData.ENTITY_NAME))
-//		{
-//			repository = new I18nStringDecorator(repository);
-//		}
-//		else if (repository.getName().equals(TagMetaData.ENTITY_NAME))
-//		{
-//			// do nothing
-//		}
+		else if (repository.getName().equals(PACKAGE))
+		{
+			repository = new UntypedRepositoryDecorator<>(
+					new PackageRepositoryDecorator(new TypedRepositoryDecorator<>(repository, Package.class),
+							dataService), Package.class);
+		}
+		else if (repository.getName().equals(LANGUAGE))
+		{
+			repository = new UntypedRepositoryDecorator<>(
+					new LanguageRepositoryDecorator(new TypedRepositoryDecorator<>(repository, Language.class),
+							dataService, systemEntityMetaDataRegistry), Language.class);
+		}
+		else if (repository.getName().equals(I18N_STRING))
+		{
+			repository = new I18nStringDecorator(repository);
+		}
 		return repository;
 	}
 }

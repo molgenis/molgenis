@@ -29,6 +29,7 @@ public class HPOAnnotatorSettings extends DefaultSettingsEntity
 		@Override
 		public void init()
 		{
+			super.init();
 			setLabel("HPO annotator settings");
 			addAttribute(HPO_LOCATION).setLabel("HPO file location");
 		}

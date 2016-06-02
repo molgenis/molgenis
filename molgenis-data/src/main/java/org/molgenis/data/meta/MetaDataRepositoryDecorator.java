@@ -196,18 +196,6 @@ public class MetaDataRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public void create()
-	{
-		decorated.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		decorated.drop();
-	}
-
-	@Override
 	public void rebuildIndex()
 	{
 		decorated.rebuildIndex();

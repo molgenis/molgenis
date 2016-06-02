@@ -1,19 +1,14 @@
 package org.molgenis.data.settings;
 
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.core.Ordered;
-import org.springframework.transaction.annotation.Transactional;
 
 public abstract class DefaultSettingsEntityMetaData extends SystemEntityMetaDataImpl
 {
@@ -27,7 +22,7 @@ public abstract class DefaultSettingsEntityMetaData extends SystemEntityMetaData
 
 	public DefaultSettingsEntityMetaData(String id)
 	{
-		super(id);
+		super(id, PACKAGE_SETTINGS);
 	}
 
 	@Override
@@ -35,7 +30,6 @@ public abstract class DefaultSettingsEntityMetaData extends SystemEntityMetaData
 	{
 		setExtends(settingsEntityMeta);
 		setPackage(settingsEntityMeta.getPackage());
-		addAttribute(ATTR_ID, ROLE_ID).setLabel("Id").setVisible(false);
 	}
 
 	@RunAsSystem
@@ -46,7 +40,7 @@ public abstract class DefaultSettingsEntityMetaData extends SystemEntityMetaData
 
 	public static String getSettingsEntityName(String id)
 	{
-		return SettingsEntityMeta.PACKAGE_NAME + '_' + id;
+		return PACKAGE_SETTINGS + '_' + id;
 	}
 
 	Entity getDefaultSettings()

@@ -1,10 +1,13 @@
 package org.molgenis.data.elasticsearch;
 
 import java.util.Iterator;
+import java.util.Set;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.RepositoryCollectionCapability;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 
 /**
@@ -65,6 +68,12 @@ public class IndexedRepositoryCollectionDecorator implements RepositoryCollectio
 	}
 
 	@Override
+	public Set<RepositoryCollectionCapability> getCapabilities()
+	{
+		return delegate.getCapabilities();
+	}
+
+	@Override
 	public Repository<Entity> createRepository(EntityMetaData entityMeta)
 	{
 		Repository<Entity> repo = delegate.createRepository(entityMeta);
@@ -91,9 +100,15 @@ public class IndexedRepositoryCollectionDecorator implements RepositoryCollectio
 		return getRepository(entityMetaData.getName());
 	}
 
+	@Override
+	public <E extends Entity> Repository<E> getRepository(EntityMetaData entityMeta, Class<E> clazz)
+	{
+		throw new UnsupportedOperationException(); // FIXME implement
+	}
+
 	/**
 	 * Get undelying not indexed repository
-	 * 
+	 *
 	 * @param name
 	 * @return
 	 */
@@ -123,5 +138,29 @@ public class IndexedRepositoryCollectionDecorator implements RepositoryCollectio
 	public boolean hasRepository(EntityMetaData entityMeta)
 	{
 		return hasRepository(entityMeta.getName());
+	}
+
+	@Override
+	public void addAttribute(String entityName, AttributeMetaData attribute)
+	{
+		throw new UnsupportedOperationException(); // FIXME implement
+	}
+
+	@Override
+	public void updateAttribute(EntityMetaData entityMetaData, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	{
+		throw new UnsupportedOperationException(); // FIXME
+	}
+
+	@Override
+	public void deleteRepository(EntityMetaData entityMeta)
+	{
+		throw new UnsupportedOperationException(); // FIXME implement
+	}
+
+	@Override
+	public void deleteAttribute(String entityName, String attributeName)
+	{
+		throw new UnsupportedOperationException(); // FIXME implement
 	}
 }

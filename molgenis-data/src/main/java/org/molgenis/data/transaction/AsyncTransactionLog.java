@@ -1,5 +1,6 @@
 package org.molgenis.data.transaction;
 
+import static org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData.MOLGENIS_TRANSACTION_LOG_ENTRY;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.util.concurrent.ArrayBlockingQueue;
@@ -72,13 +73,13 @@ public class AsyncTransactionLog
 
 						// Do not call dataService.add because that method is transactional resulting in an infinite
 						// loop.
-						if (type.equals(MolgenisTransactionLogEntryMetaData.ENTITY_NAME))
+						if (type.equals(MOLGENIS_TRANSACTION_LOG_ENTRY))
 						{
-							dataService.getRepository(MolgenisTransactionLogEntryMetaData.ENTITY_NAME).add(entity);
+							dataService.getRepository(MOLGENIS_TRANSACTION_LOG_ENTRY).add(entity);
 						}
-						else if (type.equals(MolgenisTransactionLogMetaData.ENTITY_NAME))
+						else if (type.equals(MOLGENIS_TRANSACTION_LOG_ENTRY))
 						{
-							dataService.getRepository(MolgenisTransactionLogMetaData.ENTITY_NAME).update(entity);
+							dataService.getRepository(MOLGENIS_TRANSACTION_LOG_ENTRY).update(entity);
 						}
 
 						return null;

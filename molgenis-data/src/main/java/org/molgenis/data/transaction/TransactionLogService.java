@@ -1,5 +1,7 @@
 package org.molgenis.data.transaction;
 
+import static org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData.MOLGENIS_TRANSACTION_LOG_ENTRY;
+import static org.molgenis.data.transaction.MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG;
 import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
@@ -17,8 +19,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 public class TransactionLogService implements MolgenisTransactionListener
 {
-	public static final List<String> EXCLUDED_ENTITIES = Arrays.asList(MolgenisTransactionLogEntryMetaData.ENTITY_NAME,
-			MolgenisTransactionLogMetaData.ENTITY_NAME);
+	public static final List<String> EXCLUDED_ENTITIES = Arrays
+			.asList(MOLGENIS_TRANSACTION_LOG_ENTRY, MOLGENIS_TRANSACTION_LOG);
 
 	private final DataService dataService;
 	private final MolgenisTransactionLogMetaData molgenisTransactionLogMetaData;
@@ -45,7 +47,7 @@ public class TransactionLogService implements MolgenisTransactionListener
 		trans.set(MolgenisTransactionLogMetaData.START_TIME, new Date());
 
 		RunAsSystemProxy.runAsSystem(() -> {
-			dataService.add(MolgenisTransactionLogMetaData.ENTITY_NAME, trans);
+			dataService.add(MOLGENIS_TRANSACTION_LOG_ENTRY, trans);
 			return null;
 		});
 	}
@@ -74,7 +76,7 @@ public class TransactionLogService implements MolgenisTransactionListener
 		if (transactionId != null)
 		{
 			runAsSystem(() -> {
-				Entity log = dataService.findOneById(MolgenisTransactionLogMetaData.ENTITY_NAME, transactionId);
+				Entity log = dataService.findOneById(MOLGENIS_TRANSACTION_LOG_ENTRY, transactionId);
 				if (log != null)
 				{
 					Entity logEntry = new DefaultEntity(molgenisTransactionLogEntryMetaData, dataService);
@@ -91,7 +93,7 @@ public class TransactionLogService implements MolgenisTransactionListener
 	private synchronized void finishTransaction(String transactionId, MolgenisTransactionLogMetaData.Status status)
 	{
 		RunAsSystemProxy.runAsSystem(() -> {
-			Entity log = dataService.findOneById(MolgenisTransactionLogMetaData.ENTITY_NAME, transactionId);
+			Entity log = dataService.findOneById(MOLGENIS_TRANSACTION_LOG_ENTRY, transactionId);
 			log.set(MolgenisTransactionLogMetaData.END_TIME, new Date());
 			log.set(MolgenisTransactionLogMetaData.STATUS, status.name());
 

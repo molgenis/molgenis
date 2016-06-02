@@ -1,20 +1,24 @@
 package org.molgenis.data.mem;
 
+import static autovalue.shaded.com.google.common.common.collect.Sets.immutableEnumSet;
+import static org.molgenis.data.RepositoryCollectionCapability.WRITABLE;
+
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.RepositoryCollectionCapability;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.support.AbstractRepositoryCollection;
 
 /**
  * For testing purposis
  */
-public class InMemoryRepositoryCollection implements RepositoryCollection
+public class InMemoryRepositoryCollection extends AbstractRepositoryCollection
 {
 	private final Map<String, Repository<Entity>> repos = new HashMap<>();
 	private String name = "Memory";
@@ -65,15 +69,9 @@ public class InMemoryRepositoryCollection implements RepositoryCollection
 	}
 
 	@Override
-	public void deleteAttribute(String entityName, String attributeName)
+	public void deleteRepository(EntityMetaData entityMeta)
 	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void deleteRepository(String entityName)
-	{
-		repos.remove(entityName);
+		repos.remove(entityMeta.getName());
 	}
 
 	@Override
@@ -83,9 +81,9 @@ public class InMemoryRepositoryCollection implements RepositoryCollection
 	}
 
 	@Override
-	public void addAttribute(String entityName, AttributeMetaData attribute)
+	public Set<RepositoryCollectionCapability> getCapabilities()
 	{
-		throw new UnsupportedOperationException();
+		return immutableEnumSet(EnumSet.of(WRITABLE));
 	}
 
 	@Override

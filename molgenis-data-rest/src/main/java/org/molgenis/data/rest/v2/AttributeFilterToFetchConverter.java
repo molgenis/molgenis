@@ -11,7 +11,7 @@ import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.file.FileMeta;
+import org.molgenis.file.FileMetaMetaData;
 
 /**
  * Converts {@link AttributeFilter} to {@link Fetch}.
@@ -191,7 +191,7 @@ public class AttributeFilterToFetchConverter
 
 			if (attr.getDataType().getEnumType() == FILE)
 			{
-				fetch.field(FileMeta.URL);
+				fetch.field(FileMetaMetaData.URL);
 			}
 		}
 		else

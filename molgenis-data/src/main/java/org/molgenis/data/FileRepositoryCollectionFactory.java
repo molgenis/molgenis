@@ -1,6 +1,9 @@
 package org.molgenis.data;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.util.Map;
 import java.util.Set;
@@ -8,6 +11,8 @@ import java.util.Set;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.util.FileExtensionUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Maps;
@@ -26,16 +31,17 @@ import com.google.common.collect.Maps;
 public class FileRepositoryCollectionFactory
 {
 	private final Map<String, Class<? extends FileRepositoryCollection>> fileRepositoryCollection;
+	private final AutowireCapableBeanFactory autowireCapableBeanFactory;
 
-	public FileRepositoryCollectionFactory()
+	@Autowired
+	public FileRepositoryCollectionFactory(AutowireCapableBeanFactory autowireCapableBeanFactory)
 	{
+		this.autowireCapableBeanFactory = requireNonNull(autowireCapableBeanFactory);
 		this.fileRepositoryCollection = Maps.newHashMap();
 	}
 
 	/**
 	 * Add a FileRepositorySource so it can be used by the 'createFileRepositySource' factory method
-	 * 
-	 * @param fileRepositorySource
 	 */
 	public void addFileRepositoryCollectionClass(Class<? extends FileRepositoryCollection> clazz,
 			Set<String> fileExtensions)
@@ -56,7 +62,7 @@ public class FileRepositoryCollectionFactory
 	 */
 	public FileRepositoryCollection createFileRepositoryCollection(File file)
 	{
-		Class<? extends FileRepositoryCollection> clazz = null;
+		Class<? extends FileRepositoryCollection> clazz;
 		
 		String extension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
 				fileRepositoryCollection.keySet());
@@ -79,7 +85,18 @@ public class FileRepositoryCollectionFactory
 					+ "]  missing constructor FileRepositorySource(File file)");
 		}
 
-		return BeanUtils.instantiateClass(ctor, file);
+		FileRepositoryCollection fileRepositoryCollection = BeanUtils.instantiateClass(ctor, file);
+		autowireCapableBeanFactory
+				.autowireBeanProperties(fileRepositoryCollection, AutowireCapableBeanFactory.AUTOWIRE_BY_TYPE, false);
+		try
+		{
+			fileRepositoryCollection.init();
+		}
+		catch (IOException e)
+		{
+			throw new RuntimeException(e);
+		}
+		return fileRepositoryCollection;
 	}
 
 }

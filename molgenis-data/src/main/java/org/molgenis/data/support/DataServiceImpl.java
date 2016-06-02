@@ -1,6 +1,9 @@
 package org.molgenis.data.support;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 import java.util.Iterator;
@@ -16,10 +19,10 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +38,7 @@ public class DataServiceImpl implements DataService
 	private static final Logger LOG = LoggerFactory.getLogger(DataServiceImpl.class);
 
 	private MetaDataService metaDataService;
+	private SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
 
 	@Autowired
 	public void setMetaDataService(MetaDataService metaDataService)
@@ -42,19 +46,27 @@ public class DataServiceImpl implements DataService
 		this.metaDataService = requireNonNull(metaDataService);
 	}
 
+	@Autowired
+	public void setSystemEntityMetaDataRegistry(SystemEntityMetaDataRegistry systemEntityMetaDataRegistry)
+	{
+		this.systemEntityMetaDataRegistry = requireNonNull(systemEntityMetaDataRegistry);
+	}
+
 	@Override
 	public EntityMetaData getEntityMetaData(String entityName)
 	{
-		Repository<Entity> repository = getRepository(entityName);
-		return repository.getEntityMetaData();
+		EntityMetaData entityMetaData = systemEntityMetaDataRegistry.getSystemEntityMetaData(entityName);
+		if (entityMetaData == null)
+		{
+			entityMetaData = query(ENTITY_META_DATA, EntityMetaDataImpl.class).eq(FULL_NAME, entityName).findOne();
+		}
+		return entityMetaData;
 	}
 
 	@Override
 	public synchronized Stream<String> getEntityNames()
 	{
-		throw new UnsupportedOperationException(); // FIXME
-		//		return Lists.newArrayList(repositoryNames).stream().filter(entityName -> currentUserHasRole("ROLE_SU",
-		//				"ROLE_SYSTEM", "ROLE_ENTITY_COUNT_" + entityName.toUpperCase()));
+		return query(ENTITY_META_DATA, EntityMetaDataImpl.class).findAll().map(EntityMetaDataImpl::getName);
 	}
 
 	// FIXME remove
@@ -72,7 +84,13 @@ public class DataServiceImpl implements DataService
 	@Override
 	public boolean hasRepository(String entityName)
 	{
-		throw new UnsupportedOperationException(); // FIXME return repositories.containsKey(entityName.toLowerCase());
+		return query(ENTITY_META_DATA).eq(FULL_NAME, entityName).and().eq(ABSTRACT, false).findOne() != null;
+	}
+
+	@Override
+	public long count(String entityName)
+	{
+		return getRepository(entityName).count();
 	}
 
 	@Override
@@ -307,9 +325,7 @@ public class DataServiceImpl implements DataService
 	public <E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Fetch fetch, Class<E> clazz)
 	{
 		Stream<Entity> entities = getRepository(entityName).findAll(ids, fetch);
-		return entities.map(entity -> {
-			return EntityUtils.convert(entity, clazz, this);
-		});
+		return entities.map(entity -> EntityUtils.convert(entity, clazz, this));
 	}
 
 	@Override

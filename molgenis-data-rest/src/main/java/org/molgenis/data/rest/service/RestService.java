@@ -6,6 +6,7 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL_MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
+import static org.molgenis.file.FileMetaMetaData.FILE_META;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -26,6 +27,7 @@ import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileMeta;
+import org.molgenis.file.FileMetaFactory;
 import org.molgenis.file.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,13 +40,16 @@ public class RestService
 	private final DataService dataService;
 	private final IdGenerator idGenerator;
 	private final FileStore fileStore;
+	private final FileMetaFactory fileMetaFactory;
 
 	@Autowired
-	public RestService(DataService dataService, IdGenerator idGenerator, FileStore fileStore)
+	public RestService(DataService dataService, IdGenerator idGenerator, FileStore fileStore,
+			FileMetaFactory fileMetaFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.idGenerator = requireNonNull(idGenerator);
 		this.fileStore = requireNonNull(fileStore);
+		this.fileMetaFactory = fileMetaFactory;
 	}
 
 	/**
@@ -115,14 +120,13 @@ public class RestService
 					throw new MolgenisDataException(e);
 				}
 
-				FileMeta fileEntity = new FileMeta(dataService);
-				fileEntity.setId(id);
+				FileMeta fileEntity = fileMetaFactory.create(id);
 				fileEntity.setFilename(multipartFile.getOriginalFilename());
 				fileEntity.setContentType(multipartFile.getContentType());
 				fileEntity.setSize(multipartFile.getSize());
 				fileEntity.setUrl(ServletUriComponentsBuilder.fromCurrentRequest()
 						.replacePath(FileDownloadController.URI + "/" + id).replaceQuery(null).build().toUriString());
-				dataService.add(FileMeta.ENTITY_NAME, fileEntity);
+				dataService.add(FILE_META, fileEntity);
 
 				return fileEntity;
 			}

@@ -8,6 +8,8 @@ import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.MetaPackage.PACKAGE_META;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,7 +17,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class EntityMetaDataMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String ENTITY_NAME = "entities";
+	public static final String SIMPLE_NAME_ = "entities";
+	public static final String ENTITY_META_DATA = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;
+
 	public static final String SIMPLE_NAME = "simpleName";
 	public static final String BACKEND = "backend";
 	public static final String FULL_NAME = "fullName";
@@ -36,11 +40,11 @@ public class EntityMetaDataMetaData extends SystemEntityMetaDataImpl
 
 	EntityMetaDataMetaData()
 	{
+		super(SIMPLE_NAME_, PACKAGE_META);
 	}
 
 	public void init()
 	{
-		setName(ENTITY_NAME);
 		addAttribute(FULL_NAME, ROLE_ID).setUnique(true);
 		addAttribute(SIMPLE_NAME, ROLE_LABEL).setNillable(false);
 		addAttribute(BACKEND);
@@ -55,6 +59,9 @@ public class EntityMetaDataMetaData extends SystemEntityMetaDataImpl
 		addAttribute(DESCRIPTION).setDataType(TEXT);
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData);
 		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(attributeMetaDataMetaData);
+
+		addAttribute(LABEL + '-' + "en").setNillable(true);
+		addAttribute(DESCRIPTION + '-' + "en").setNillable(true);
 	}
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies

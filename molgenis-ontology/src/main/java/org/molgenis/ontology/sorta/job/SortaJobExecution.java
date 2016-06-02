@@ -1,28 +1,35 @@
 package org.molgenis.ontology.sorta.job;
 
-import org.molgenis.data.DataService;
+import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.DELETE_URL;
+import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.NAME;
+import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.ONTOLOGY_IRI;
+import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.RESULT_ENTITY;
+import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.SORTA_MATCH_JOB_TYPE;
+import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.SOURCE_ENTITY;
+import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.THRESHOLD;
+
+import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.JobExecution;
 import org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData;
 
 public class SortaJobExecution extends JobExecution
 {
-	private static final long serialVersionUID = -4666467854597087122L;
-
-	public final static String ENTITY_NAME = "SortaJobExecution";
-	public final static String ONTOLOGY_IRI = "ontologyIri";
-	public final static String NAME = "name";
-	public final static String DELETE_URL = "deleteUrl";
-	public final static String SOURCE_ENTITY = "sourceEntity";
-	public final static String RESULT_ENTITY = "resultEntity";
-	public final static String THRESHOLD = "Threshold";
-
-	private static final String SORTA_MATCH_JOB_TYPE = "SORTA";
-
-	public SortaJobExecution(SortaJobExecutionMetaData sortaJobExecutionMetaData, DataService dataService)
+	public SortaJobExecution(Entity entity)
 	{
-		super(dataService, sortaJobExecutionMetaData);
+		super(entity);
+		setDefaultValues();
+	}
 
-		setType(SORTA_MATCH_JOB_TYPE);
+	public SortaJobExecution(SortaJobExecutionMetaData sortaJobExecutionMetaData)
+	{
+		super(sortaJobExecutionMetaData);
+		setDefaultValues();
+	}
+
+	public SortaJobExecution(String identifier, SortaJobExecutionMetaData sortaJobExecutionMetaData)
+	{
+		super(identifier, sortaJobExecutionMetaData);
+		setDefaultValues();
 	}
 	
 	public String getName()
@@ -83,5 +90,10 @@ public class SortaJobExecution extends JobExecution
 	public double getThreshold()
 	{
 		return getDouble(THRESHOLD).doubleValue();
+	}
+
+	private void setDefaultValues()
+	{
+		setType(SORTA_MATCH_JOB_TYPE);
 	}
 }

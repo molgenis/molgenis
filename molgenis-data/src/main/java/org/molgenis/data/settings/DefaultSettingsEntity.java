@@ -1,5 +1,7 @@
 package org.molgenis.data.settings;
 
+import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
+
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
@@ -10,6 +12,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -28,7 +31,7 @@ public abstract class DefaultSettingsEntity implements Entity
 
 	public DefaultSettingsEntity(String entityId)
 	{
-		this.entityName = SettingsEntityMeta.PACKAGE_NAME + '_' + entityId;
+		this.entityName = PACKAGE_SETTINGS + '_' + entityId;
 	}
 
 	@Override
@@ -214,6 +217,20 @@ public abstract class DefaultSettingsEntity implements Entity
 				}
 			});
 		});
+	}
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if (this == o) return true;
+		if (!(o instanceof Entity)) return false;
+		return EntityUtils.equals(this, (Entity) o);
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return EntityUtils.hashCode(this);
 	}
 
 	private Entity getEntity()

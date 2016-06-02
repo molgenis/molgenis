@@ -1,5 +1,7 @@
 package org.molgenis.dataexplorer.controller;
 
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
 
 import java.util.HashMap;
@@ -17,10 +19,9 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.meta.AnnotationJobExecution;
+import org.molgenis.data.annotation.meta.AnnotationJobExecutionFactory;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.Package;
-import org.molgenis.data.settings.SettingsEntityMeta;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -54,12 +55,13 @@ public class AnnotatorController
 	private final UserAccountService userAccountService;
 	private final AnnotationJobFactory annotationJobFactory;
 	private final ExecutorService taskExecutor;
+	private final AnnotationJobExecutionFactory annotationJobExecutionFactory;
 
 	@Autowired
 	public AnnotatorController(DataService dataService, AnnotationService annotationService,
 			MolgenisPermissionService molgenisPermissionService, PermissionSystemService permissionSystemService,
 			UserAccountService userAccountService, AnnotationJobFactory annotationJobFactory,
-			ExecutorService taskExecutor)
+			ExecutorService taskExecutor, AnnotationJobExecutionFactory annotationJobExecutionFactory)
 	{
 		this.dataService = dataService;
 		this.annotationService = annotationService;
@@ -67,6 +69,7 @@ public class AnnotatorController
 		this.userAccountService = userAccountService;
 		this.annotationJobFactory = annotationJobFactory;
 		this.taskExecutor = taskExecutor;
+		this.annotationJobExecutionFactory = annotationJobExecutionFactory;
 	}
 
 	/**
@@ -109,7 +112,7 @@ public class AnnotatorController
 
 	public String scheduleAnnotatorRun(String entityName, String[] annotatorNames)
 	{
-		AnnotationJobExecution annotationJobExecution = new AnnotationJobExecution(dataService);
+		AnnotationJobExecution annotationJobExecution = annotationJobExecutionFactory.create();
 		annotationJobExecution.setUser(userAccountService.getCurrentUser());
 		annotationJobExecution.setTargetName(entityName);
 		annotationJobExecution.setAnnotators(String.join(",", annotatorNames));
@@ -145,8 +148,7 @@ public class AnnotatorController
 				map.put("outputAttributes", createAttrsResponse(outputAttrs));
 				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData()));
 
-				String settingsEntityName = SettingsEntityMeta.PACKAGE_NAME
-						+ Package.PACKAGE_SEPARATOR + annotator.getInfo().getCode();
+				String settingsEntityName = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + annotator.getInfo().getCode();
 				map.put("showSettingsButton",
 						molgenisPermissionService.hasPermissionOnEntity(settingsEntityName, Permission.WRITE));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);

@@ -17,6 +17,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.vcf.VcfAttributes;
 import org.molgenis.data.vcf.VcfReaderFactory;
 import org.molgenis.data.vcf.VcfRepository;
 import org.slf4j.Logger;
@@ -71,8 +72,8 @@ public class TabixVcfRepository extends VcfRepository
 	@Override
 	public Stream<Entity> findAll(Query<Entity> q)
 	{
-		Object posValue = getFirstEqualsValueFor(VcfRepository.POS, q);
-		Object chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q);
+		Object posValue = getFirstEqualsValueFor(VcfAttributes.POS, q);
+		Object chromValue = getFirstEqualsValueFor(VcfAttributes.CHROM, q);
 		List<Entity> result = new ArrayList<Entity>();
 
 		// if one of both required attributes is null, skip the query and return an empty list
@@ -137,7 +138,7 @@ public class TabixVcfRepository extends VcfRepository
 	 */
 	private boolean positionMatches(Entity entity, long posFrom, long posTo)
 	{
-		long entityPos = entity.getLong(VcfRepository.POS);
+		long entityPos = entity.getLong(VcfAttributes.POS);
 		return entityPos >= posFrom && entityPos <= posTo;
 	}
 

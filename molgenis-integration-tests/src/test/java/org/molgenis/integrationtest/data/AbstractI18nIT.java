@@ -1,5 +1,8 @@
 package org.molgenis.integrationtest.data;
 
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
@@ -10,10 +13,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUserFactory;
 import org.molgenis.data.Entity;
 import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.I18nUtils;
-import org.molgenis.data.i18n.LanguageMetaData;
+import org.molgenis.data.i18n.LanguageFactory;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
@@ -42,7 +46,10 @@ public abstract class AbstractI18nIT extends AbstractDataIntegrationIT
 	private I18nStringMetaData i18nStringMetaData;
 
 	@Autowired
-	private LanguageMetaData languageMetaData;
+	private LanguageFactory languageFactory;
+
+	@Autowired
+	private MolgenisUserFactory molgenisUserFactory;
 
 	@BeforeClass
 	public void setUp()
@@ -88,7 +95,7 @@ public abstract class AbstractI18nIT extends AbstractDataIntegrationIT
 		car.set(I18nStringMetaData.MSGID, "car");
 		car.set("en", "car");
 		car.set("nl", "auto");
-		dataService.add(I18nStringMetaData.ENTITY_NAME, car);
+		dataService.add(I18N_STRING, car);
 
 		assertEquals(languageService.getBundle("en").getString("car"), "car");
 		assertEquals(languageService.getBundle("nl").getString("car"), "auto");
@@ -134,7 +141,7 @@ public abstract class AbstractI18nIT extends AbstractDataIntegrationIT
 
 	protected void createAdminUser()
 	{
-		MolgenisUser admin = new MolgenisUser();
+		MolgenisUser admin = molgenisUserFactory.create();
 		admin.setUsername("admin");
 		admin.setActive(true);
 		admin.setEmail("admin@molgenis.org");
@@ -142,19 +149,12 @@ public abstract class AbstractI18nIT extends AbstractDataIntegrationIT
 		admin.setSuperuser(true);
 		admin.setChangePassword(false);
 		admin.setPassword("molgenis");
-		dataService.add(MolgenisUser.ENTITY_NAME, admin);
+		dataService.add(MOLGENIS_USER, admin);
 	}
 
 	protected void createLanguages()
 	{
-		Entity en = new DefaultEntity(languageMetaData, dataService);
-		en.set(LanguageMetaData.CODE, "en");
-		en.set(LanguageMetaData.NAME, "English");
-		dataService.add(LanguageMetaData.ENTITY_NAME, en);
-
-		Entity nl = new DefaultEntity(languageMetaData, dataService);
-		nl.set(LanguageMetaData.CODE, "nl");
-		nl.set(LanguageMetaData.NAME, "Nederlands");
-		dataService.add(LanguageMetaData.ENTITY_NAME, nl);
+		dataService.add(LANGUAGE, languageFactory.create("en", "English"));
+		dataService.add(LANGUAGE, languageFactory.create("nl", "Nederlands"));
 	}
 }

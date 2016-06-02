@@ -1,13 +1,16 @@
 package org.molgenis.security.user;
 
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
 
 import java.util.List;
 import java.util.stream.Stream;
 
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.auth.MolgenisGroupMember;
+import org.molgenis.auth.MolgenisGroupMemberMetaData;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -33,8 +36,9 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	@RunAsSystem
 	public List<String> getSuEmailAddresses()
 	{
-		Stream<MolgenisUser> superUsers = dataService.findAll(MolgenisUser.ENTITY_NAME,
-				new QueryImpl<MolgenisUser>().eq(MolgenisUser.SUPERUSER, true), MolgenisUser.class);
+		Stream<MolgenisUser> superUsers = dataService
+				.findAll(MOLGENIS_USER, new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.SUPERUSER, true),
+						MolgenisUser.class);
 		return superUsers.map(MolgenisUser::getEmail).collect(toList());
 	}
 
@@ -42,7 +46,8 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	@RunAsSystem
 	public MolgenisUser getUser(String username)
 	{
-		return dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl<MolgenisUser>().eq(MolgenisUser.USERNAME, username),
+		return dataService
+				.findOne(MOLGENIS_USER, new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.USERNAME, username),
 				MolgenisUser.class);
 	}
 
@@ -50,8 +55,9 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	@RunAsSystem
 	public Iterable<MolgenisGroup> getUserGroups(String username)
 	{
-		Stream<MolgenisGroupMember> molgenisGroupMembers = dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMember.MOLGENISUSER, getUser(username)), MolgenisGroupMember.class);
+		Stream<MolgenisGroupMember> molgenisGroupMembers = dataService
+				.findAll(MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER, new QueryImpl<MolgenisGroupMember>()
+						.eq(MolgenisGroupMemberMetaData.MOLGENISUSER, getUser(username)), MolgenisGroupMember.class);
 		// N.B. Must collect the results in a list before yielding up the RunAsSystem privileges!
 		return molgenisGroupMembers.map(MolgenisGroupMember::getMolgenisGroup).collect(toList());
 	}
@@ -60,14 +66,14 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	@RunAsSystem
 	public void update(MolgenisUser user)
 	{
-		dataService.update(MolgenisUser.ENTITY_NAME, user);
+		dataService.update(MOLGENIS_USER, user);
 	}
 
 	@Override
 	@RunAsSystem
 	public MolgenisUser getUserByEmail(String email)
 	{
-		return dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl<MolgenisUser>().eq(MolgenisUser.EMAIL, email),
+		return dataService.findOne(MOLGENIS_USER, new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.EMAIL, email),
 				MolgenisUser.class);
 	}
 }

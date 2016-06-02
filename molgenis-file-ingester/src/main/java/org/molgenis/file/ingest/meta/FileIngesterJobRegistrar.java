@@ -1,6 +1,7 @@
 package org.molgenis.file.ingest.meta;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
 
 import org.molgenis.data.DataService;
 import org.molgenis.file.ingest.FileIngesterJobScheduler;
@@ -23,6 +24,6 @@ public class FileIngesterJobRegistrar
 	}
 
 	public void scheduleJobs() {
-		dataService.findAll(FileIngestMetaData.ENTITY_NAME, FileIngest.class).forEach(fileIngesterJobScheduler::schedule);
+		dataService.findAll(FILE_INGEST, FileIngest.class).forEach(fileIngesterJobScheduler::schedule);
 	}
 }

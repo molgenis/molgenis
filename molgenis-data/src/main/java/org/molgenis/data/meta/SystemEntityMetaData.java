@@ -1,13 +1,11 @@
 package org.molgenis.data.meta;
 
-import org.springframework.context.ApplicationEventPublisher;
-
 /**
  * Created by Dennis on 4/22/2016.
  */
 public interface SystemEntityMetaData extends EntityMetaData
 {
-	void init();
+	void bootstrap(EntityMetaDataMetaData entityMetaDataMetaData);
 
 	@Deprecated
 	void addAttribute(AttributeMetaData attr, EntityMetaDataImpl.AttributeRole... attrTypes);

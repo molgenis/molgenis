@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.molgenis.CommandLineOnlyConfiguration;
 import org.molgenis.DatabaseConfig;
+import org.molgenis.auth.GroupAuthorityFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.config.HttpClientConfig;
@@ -76,6 +77,9 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Autowired
 	private Step23RebuildElasticsearchIndex step23RebuildElasticsearchIndex;
 
+	@Autowired
+	private GroupAuthorityFactory groupAuthorityFactory;
+
 	@Override
 	public RepositoryCollection getBackend()
 	{
@@ -90,7 +94,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step22RemoveDiseaseMatcher(dataSource));
 		upgradeService.addUpgrade(step23RebuildElasticsearchIndex);
 		upgradeService.addUpgrade(new Step24UpdateApplicationSettings(dataSource, idGenerator));
-		upgradeService.addUpgrade(new Step25LanguagesPermissions(dataService));
+		upgradeService.addUpgrade(new Step25LanguagesPermissions(dataService, groupAuthorityFactory));
 		upgradeService.addUpgrade(new Step26migrateJpaBackend(dataSource, "MySQL", idGenerator));
 		upgradeService.addUpgrade(new Step27MetaDataAttributeRoles(dataSource));
 		upgradeService.addUpgrade(new Step28MigrateSorta(dataSource));
