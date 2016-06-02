@@ -1,11 +1,12 @@
 package org.molgenis.data.elasticsearch;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
-import static org.molgenis.data.RepositoryCapability.INDEXABLE;
-import static org.molgenis.data.RepositoryCapability.MANAGABLE;
-import static org.molgenis.data.RepositoryCapability.QUERYABLE;
-import static org.molgenis.data.RepositoryCapability.WRITABLE;
+import com.google.common.collect.Sets;
+import org.elasticsearch.common.primitives.Ints;
+import org.molgenis.data.*;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
+import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
+import org.molgenis.data.support.QueryImpl;
 
 import java.io.IOException;
 import java.util.EnumSet;
@@ -13,22 +14,8 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.elasticsearch.common.primitives.Ints;
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
-import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
-import org.molgenis.data.support.QueryImpl;
-
-import com.google.common.collect.Sets;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.RepositoryCapability.*;
 
 public abstract class AbstractElasticsearchRepository implements Repository<Entity>
 {
@@ -52,9 +39,6 @@ public abstract class AbstractElasticsearchRepository implements Repository<Enti
 	}
 
 	@Override
-	public abstract EntityMetaData getEntityMetaData();
-
-	@Override
 	public long count()
 	{
 		return elasticSearchService.count(getEntityMetaData());
@@ -63,7 +47,7 @@ public abstract class AbstractElasticsearchRepository implements Repository<Enti
 	@Override
 	public Query<Entity> query()
 	{
-		return new QueryImpl<Entity>(this);
+		return new QueryImpl<>(this);
 	}
 
 	@Override
@@ -120,7 +104,7 @@ public abstract class AbstractElasticsearchRepository implements Repository<Enti
 	@Override
 	public Stream<Entity> stream(Fetch fetch)
 	{
-		Query<Entity> q = new QueryImpl<Entity>().fetch(fetch);
+		Query<Entity> q = new QueryImpl<>().fetch(fetch);
 		return elasticSearchService.searchAsStream(q, getEntityMetaData());
 	}
 

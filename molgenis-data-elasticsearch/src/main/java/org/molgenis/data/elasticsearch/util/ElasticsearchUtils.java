@@ -97,6 +97,7 @@ public class ElasticsearchUtils
 		}
 		catch (InterruptedException e)
 		{
+			Thread.currentThread().interrupt();
 			throw new RuntimeException(e);
 		}
 	}

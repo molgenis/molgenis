@@ -107,7 +107,6 @@ public class EmbeddedElasticSearchConfig
 	@Bean
 	public ReindexService rebuildIndexService()
 	{
-		return new ReindexServiceImpl(dataService, reindexJobFactory(), molgenisUserService,
-				newSingleThreadExecutor());
+		return new ReindexServiceImpl(dataService, reindexJobFactory(), newSingleThreadExecutor());
 	}
 }

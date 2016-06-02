@@ -1,9 +1,8 @@
 package org.molgenis.data.elasticsearch.transaction;
 
 import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
-import org.molgenis.data.transaction.MolgenisTransactionListener;
 
-public class ReindexTransactionListener implements MolgenisTransactionListener
+public class ReindexTransactionListener extends DefaultMolgenisTransactionListener
 {
 	private ReindexService rebuildIndexService;
 
@@ -13,28 +12,9 @@ public class ReindexTransactionListener implements MolgenisTransactionListener
 	}
 
 	@Override
-	public void transactionStarted(String transactionId)
-	{
-	}
-
-	@Override
-	public void commitTransaction(String transactionId)
-	{
-	}
-
-	@Override
-	public void afterCommitTransaction(String transactionId)
-	{
-	}
-
-	@Override
-	public void rollbackTransaction(String transactionId)
-	{
-	}
-
-	@Override
 	public void doCleanupAfterCompletion(String transactionId)
 	{
+		// if the transaction was rolled back, so has the insert of the ReindexJob
 		rebuildIndexService.rebuildIndex(transactionId);
 	}
 }

@@ -138,7 +138,7 @@ public class ReindexServiceImplTest
 		assertEquals(date.toString(), dateString);
 		long ago = System.currentTimeMillis() - date.getTime();
 		assertTrue(ago > MINUTES.toMillis(5));
-		assertTrue(ago < MINUTES.toMillis(5) + SECONDS.toMillis(1));
+		assertTrue(ago < MINUTES.toMillis(5) + SECONDS.toMillis(3));
 	}
 
 }
