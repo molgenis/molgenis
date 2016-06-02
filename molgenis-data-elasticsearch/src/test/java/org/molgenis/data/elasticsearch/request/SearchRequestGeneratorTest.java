@@ -69,7 +69,7 @@ public class SearchRequestGeneratorTest
 	@Test
 	public void testBuildSearchRequestNoFetchBackendElasticsearch()
 	{
-		when(entityMeta.getBackend()).thenReturn("notElasticsearch");
+		when(entityMeta.getBackend()).thenReturn(ElasticsearchRepositoryCollection.NAME);
 		SearchRequestGenerator gen = new SearchRequestGenerator();
 		String entityName = "test";
 		SearchType searchType = SearchType.COUNT;

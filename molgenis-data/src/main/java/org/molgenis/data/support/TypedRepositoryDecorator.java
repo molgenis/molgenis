@@ -16,6 +16,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
@@ -43,7 +44,7 @@ public class TypedRepositoryDecorator<E extends Entity> implements Repository<E>
 	{
 		return asTypedStream(StreamSupport
 				.stream(Spliterators.spliteratorUnknownSize(untypedRepo.iterator(), Spliterator.ORDERED), false))
-				.iterator();
+						.iterator();
 	}
 
 	@Override
@@ -68,6 +69,12 @@ public class TypedRepositoryDecorator<E extends Entity> implements Repository<E>
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		return untypedRepo.getCapabilities();
+	}
+
+	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return untypedRepo.getQueryOperators();
 	}
 
 	@Override

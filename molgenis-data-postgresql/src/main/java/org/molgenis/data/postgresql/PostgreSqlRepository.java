@@ -1,9 +1,20 @@
 package org.molgenis.data.postgresql;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.QueryRule.Operator.AND;
+import static org.molgenis.data.QueryRule.Operator.EQUALS;
+import static org.molgenis.data.QueryRule.Operator.GREATER;
+import static org.molgenis.data.QueryRule.Operator.GREATER_EQUAL;
+import static org.molgenis.data.QueryRule.Operator.IN;
+import static org.molgenis.data.QueryRule.Operator.LESS;
+import static org.molgenis.data.QueryRule.Operator.LESS_EQUAL;
+import static org.molgenis.data.QueryRule.Operator.LIKE;
+import static org.molgenis.data.QueryRule.Operator.NESTED;
+import static org.molgenis.data.QueryRule.Operator.NOT;
+import static org.molgenis.data.QueryRule.Operator.OR;
+import static org.molgenis.data.QueryRule.Operator.RANGE;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT;
@@ -24,8 +35,8 @@ import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttr
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -38,6 +49,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
@@ -122,6 +134,12 @@ public class PostgreSqlRepository extends AbstractRepository
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		return REPO_CAPABILITIES;
+	}
+
+	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return QUERY_OPERATORS;
 	}
 
 	@Override
@@ -383,10 +401,7 @@ public class PostgreSqlRepository extends AbstractRepository
 					// create the mref records
 					for (AttributeMetaData attr : persistedMrefAttrs)
 					{
-						if (mrefs.get(attr.getName()) == null)
-						{
-							mrefs.put(attr.getName(), new ArrayList<>());
-						}
+						mrefs.putIfAbsent(attr.getName(), new ArrayList<>());
 						if (entity.get(attr.getName()) != null)
 						{
 							AtomicInteger seqNr = new AtomicInteger();
@@ -499,10 +514,7 @@ public class PostgreSqlRepository extends AbstractRepository
 					// create the mref records
 					for (AttributeMetaData attr : persistedMrefAttrs)
 					{
-						if (mrefs.get(attr.getName()) == null)
-						{
-							mrefs.put(attr.getName(), new ArrayList<>());
-						}
+						mrefs.putIfAbsent(attr.getName(), new ArrayList<>());
 						if (entity.get(attr.getName()) != null)
 						{
 							AtomicInteger seqNr = new AtomicInteger();

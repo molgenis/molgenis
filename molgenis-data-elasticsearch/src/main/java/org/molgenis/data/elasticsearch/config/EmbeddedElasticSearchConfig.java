@@ -39,9 +39,6 @@ public class EmbeddedElasticSearchConfig
 	private ElasticsearchEntityFactory elasticsearchEntityFactory;
 
 	@Autowired
-	public MolgenisTransactionManager molgenisTransactionManager;
-
-	@Autowired
 	private PackageFactory packageFactory;
 
 	@Bean(destroyMethod = "close")
@@ -74,7 +71,6 @@ public class EmbeddedElasticSearchConfig
 	{
 		ElasticsearchService elasticSearchService = embeddedElasticSearchServiceFactory().create(dataService,
 				elasticsearchEntityFactory, packageFactory);
-		molgenisTransactionManager.addTransactionListener(elasticSearchService);
 
 		return elasticSearchService;
 	}

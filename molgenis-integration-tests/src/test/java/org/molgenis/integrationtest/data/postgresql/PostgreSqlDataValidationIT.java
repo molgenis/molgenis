@@ -1,6 +1,6 @@
 package org.molgenis.integrationtest.data.postgresql;
 
-import org.molgenis.integrationtest.data.AbstractDataValidationIT;
+import org.molgenis.integrationtest.data.abstracts.AbstractDataValidationIT;
 import org.molgenis.integrationtest.data.postgresql.PostgreSqlDataValidationIT.DataValidationPostgreSqlTestConfig;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -81,7 +81,6 @@ public class PostgreSqlDataValidationIT extends AbstractDataValidationIT
 	@Test
 	public void testNotNillable()
 	{
-		//FIXME: reactivate once the transaction mechanism is fixed
-		//super.testNotNillable();
+		// super.testNotNillable();
 	}
 }

@@ -3,6 +3,7 @@ package org.molgenis.data.postgresql;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 
+import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -75,19 +76,24 @@ public class PostgreSqlEntityFactory
 						// In case there are no MREF attribute values the ResulSet is:
 						// [[null,null]]
 						EntityMetaData refEntityMeta = att.getRefEntity();
-						String[][] mrefIdsAndOrder = (String[][]) resultSet.getArray(att.getName()).getArray();
-						if (mrefIdsAndOrder.length > 0 && mrefIdsAndOrder[0][0] != null)
+						Array resultSetArray = resultSet.getArray(att.getName());
+						if (!resultSet.wasNull())
 						{
-							Object[] mrefIds = new Object[mrefIdsAndOrder.length];
-							for (String[] mrefIdAndOrder : mrefIdsAndOrder)
+							String[][] mrefIdsAndOrder = (String[][]) resultSetArray.getArray();
+							if (mrefIdsAndOrder.length > 0 && mrefIdsAndOrder[0][0] != null)
 							{
-								Integer seqNr = Integer.valueOf(mrefIdAndOrder[0]);
-								Object mrefId = refEntityMeta.getIdAttribute().getDataType().convert(mrefIdAndOrder[1]);
-								mrefIds[seqNr] = mrefId;
-							}
+								Object[] mrefIds = new Object[mrefIdsAndOrder.length];
+								for (String[] mrefIdAndOrder : mrefIdsAndOrder)
+								{
+									Integer seqNr = Integer.valueOf(mrefIdAndOrder[0]);
+									Object mrefId = refEntityMeta.getIdAttribute().getDataType()
+											.convert(mrefIdAndOrder[1]);
+									mrefIds[seqNr] = mrefId;
+								}
 
-							// convert ids to (lazy) entities
-							e.set(att.getName(), entityManager.getReferences(refEntityMeta, asList(mrefIds)));
+								// convert ids to (lazy) entities
+								e.set(att.getName(), entityManager.getReferences(refEntityMeta, asList(mrefIds)));
+							}
 						}
 					}
 					else if (att.getDataType() instanceof XrefField)

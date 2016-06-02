@@ -16,7 +16,6 @@ import static org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData.
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
@@ -37,6 +36,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaData;
@@ -51,9 +51,6 @@ import org.molgenis.util.HugeSet;
 
 public class RepositoryValidationDecorator implements Repository<Entity>
 {
-	private static List<String> ENTITIES_THAT_DO_NOT_NEED_VALIDATION = Arrays
-			.asList(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG, MOLGENIS_TRANSACTION_LOG_ENTRY);
-
 	private enum ValidationMode
 	{
 		ADD, UPDATE
@@ -252,6 +249,12 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	}
 
 	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return decoratedRepository.getQueryOperators();
+	}
+
+	@Override
 	public void rebuildIndex()
 	{
 		decoratedRepository.rebuildIndex();
@@ -272,11 +275,6 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	private Stream<Entity> validate(Stream<Entity> entities, ValidationResource validationResource,
 			ValidationMode validationMode)
 	{
-		if (ENTITIES_THAT_DO_NOT_NEED_VALIDATION.contains(getName()))
-		{
-			return entities;
-		}
-
 		// prepare validation
 		initValidation(validationResource, validationMode);
 

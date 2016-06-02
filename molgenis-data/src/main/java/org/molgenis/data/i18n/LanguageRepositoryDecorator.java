@@ -21,6 +21,7 @@ import org.molgenis.data.EntityListener;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaData;
@@ -64,6 +65,12 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		return decorated.getCapabilities();
+	}
+
+	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return decorated.getQueryOperators();
 	}
 
 	@Override

@@ -12,6 +12,9 @@ import org.molgenis.data.config.HttpClientConfig;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionRegisterConfig;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionRegisterService;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionRepositoryCollectionDecorator;
 import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
 import org.molgenis.migrate.version.v1_11.Step20RebuildElasticsearchIndex;
@@ -50,7 +53,7 @@ import freemarker.template.TemplateException;
 @ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class))
 @Import(
 { WebAppSecurityConfig.class, DatabaseConfig.class, HttpClientConfig.class, EmbeddedElasticSearchConfig.class,
-		GsonConfig.class })
+		GsonConfig.class, ReindexActionRegisterConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
 {
 	private static final Logger LOG = LoggerFactory.getLogger(WebAppConfig.class);
@@ -64,6 +67,9 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 	@Autowired
 	private ElasticsearchRepositoryCollection elasticsearchRepositoryCollection;
+
+	@Autowired
+	private ReindexActionRegisterService reindexActionRegisterService;
 
 	@Autowired
 	private EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
@@ -83,7 +89,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Override
 	public RepositoryCollection getBackend()
 	{
-		return postgreSqlRepositoryCollection;
+		return new ReindexActionRepositoryCollectionDecorator(postgreSqlRepositoryCollection,
+				reindexActionRegisterService);
 	}
 
 	@Override

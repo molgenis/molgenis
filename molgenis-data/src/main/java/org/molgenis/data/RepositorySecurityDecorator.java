@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.AggregateAnonymizerImpl;
 import org.molgenis.data.support.QueryImpl;
@@ -218,6 +219,12 @@ public class RepositorySecurityDecorator implements Repository<Entity>
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		return decoratedRepository.getCapabilities();
+	}
+
+	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return decoratedRepository.getQueryOperators();
 	}
 
 	@Override

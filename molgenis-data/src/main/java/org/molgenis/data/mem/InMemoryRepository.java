@@ -1,6 +1,7 @@
 package org.molgenis.data.mem;
 
 import java.io.IOException;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -242,6 +243,12 @@ public class InMemoryRepository implements Repository<Entity>
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		return Sets.newHashSet(RepositoryCapability.QUERYABLE, RepositoryCapability.WRITABLE);
+	}
+
+	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return EnumSet.allOf(Operator.class);
 	}
 
 	@Override

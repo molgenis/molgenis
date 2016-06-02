@@ -14,6 +14,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
@@ -72,6 +73,12 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		return decoratedRepo.getCapabilities();
+	}
+
+	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return decoratedRepo.getQueryOperators();
 	}
 
 	@Override

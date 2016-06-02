@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 
@@ -24,6 +25,12 @@ public class ComputedEntityValuesDecorator implements Repository<Entity>
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		return decoratedRepo.getCapabilities();
+	}
+
+	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return decoratedRepo.getQueryOperators();
 	}
 
 	@Override

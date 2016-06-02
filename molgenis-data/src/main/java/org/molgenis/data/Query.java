@@ -125,9 +125,9 @@ public interface Query<E extends Entity> extends Iterable<E>
 	Query<E> unnestAll();
 
 	/**
-	 * Range (including smaller and bigger)
+	 * Range (including from and to)
 	 */
-	Query<E> rng(String field, Object smaller, Object bigger);
+	Query<E> rng(String field, Object from, Object to);
 
 	Query<E> pageSize(int pageSize);
 

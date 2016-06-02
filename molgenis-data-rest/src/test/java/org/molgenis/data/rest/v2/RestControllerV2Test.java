@@ -475,7 +475,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				.andExpect(status().isCreated()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(responseBody));
 
-		verify(dataService).add(eq(ENTITY_NAME), any(Stream.class));
+		verify(dataService).add(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 	}
 
 	@Test
@@ -636,7 +636,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testCreateEntitiesSystemException() throws Exception
 	{
 		Exception e = new MolgenisDataException("Check if this exception is not swallowed by the system");
-		doThrow(e).when(dataService).add(eq(ENTITY_NAME), any(Stream.class));
+		doThrow(e).when(dataService).add(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
 		String content = "{entities:[{id:'p1', name:'Example data'}]}";
 		ResultActions resultActions = mockMvc
@@ -655,7 +655,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		mockMvc.perform(put(HREF_ENTITY_COLLECTION).content(content).contentType(APPLICATION_JSON)).andExpect(
 				status().isOk());
 
-		verify(dataService, times(1)).update(eq(ENTITY_NAME), any(Stream.class));
+		verify(dataService, times(1)).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -663,7 +663,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void testUpdateEntitiesMolgenisDataException() throws Exception
 	{
 		Exception e = new MolgenisDataException("Check if this exception is not swallowed by the system");
-		doThrow(e).when(dataService).update(Matchers.eq(ENTITY_NAME), any(Stream.class));
+		doThrow(e).when(dataService).update(Matchers.eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
 		String content = "{entities:[{id:'p1', name:'Example data'}]}";
 		ResultActions resultActions = mockMvc
@@ -680,7 +680,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	{
 		Exception e = new MolgenisValidationException(Collections.singleton(new ConstraintViolation("Message", Long
 				.valueOf(5L))));
-		doThrow(e).when(dataService).update(eq(ENTITY_NAME), any(Stream.class));
+		doThrow(e).when(dataService).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
 		String content = "{entities:[{id:'p1', name:'Example data'}]}";
 		ResultActions resultActions = mockMvc
@@ -736,7 +736,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		mockMvc.perform(put(HREF_ENTITY_COLLECTION + "/date_time").content(content).contentType(APPLICATION_JSON))
 				.andExpect(status().isOk());
 
-		verify(dataService, times(1)).update(eq(ENTITY_NAME), any(Stream.class));
+		verify(dataService, times(1)).update(eq(ENTITY_NAME), (Stream<Entity>) any(Stream.class));
 
 		Entity entity = dataService.findOneById(ENTITY_NAME, ENTITY_ID);
 		assertEquals((new SimpleDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)).format(entity.get("date_time")),

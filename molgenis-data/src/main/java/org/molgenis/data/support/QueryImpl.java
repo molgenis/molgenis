@@ -283,9 +283,9 @@ public class QueryImpl<E extends Entity> implements Query<E>
 	}
 
 	@Override
-	public Query<E> rng(String field, Object smaller, Object bigger)
+	public Query<E> rng(String field, Object from, Object to)
 	{
-		rules.get(this.rules.size() - 1).add(new QueryRule(field, Operator.RANGE, Arrays.asList(smaller, bigger)));
+		rules.get(this.rules.size() - 1).add(new QueryRule(field, Operator.RANGE, Arrays.asList(from, to)));
 		return this;
 	}
 

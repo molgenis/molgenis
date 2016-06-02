@@ -102,8 +102,9 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		// 5. Entity listener
 		decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
 
-		// 4. Transaction log decorator
-		//		decoratedRepository = new TransactionLogRepositoryDecorator(decoratedRepository, transactionLogService);
+		// 4. Index Transaction log decorator
+		decoratedRepository = new ReindexActionRepositoryDecorator(decoratedRepository,
+				indexTransactionLogService);
 
 		// 3. validation decorator
 		decoratedRepository = new RepositoryValidationDecorator(dataService, decoratedRepository,
@@ -171,5 +172,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			repository = new I18nStringDecorator(repository);
 		}
 		return repository;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionRegisterService;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionRepositoryDecorator;
 	}
 }
