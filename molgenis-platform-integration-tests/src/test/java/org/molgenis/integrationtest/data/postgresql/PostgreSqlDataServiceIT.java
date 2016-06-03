@@ -34,8 +34,8 @@ public class PostgreSqlDataServiceIT extends AbstractDataServiceIT
 		String countTestRefEntity = "ROLE_ENTITY_COUNT_" + AbstractDataServiceIT.REF_ENTITY_NAME.toUpperCase();
 
 		SecurityContextHolder.getContext().setAuthentication(
-				new TestingAuthenticationToken("user", "user", writeTestEntity,
-						readTestEntity, readTestRefEntity, countTestEntity, countTestRefEntity));
+				new TestingAuthenticationToken("user", "user", writeTestEntity, readTestEntity, readTestRefEntity,
+						countTestEntity, countTestRefEntity));
 	}
 
 	@Test
@@ -265,7 +265,7 @@ public class PostgreSqlDataServiceIT extends AbstractDataServiceIT
 	@Override
 	public List<RepositoryCapability> getExpectedCapabilities()
 	{
-		return Arrays.asList(RepositoryCapability.MANAGABLE, RepositoryCapability.QUERYABLE,
-				RepositoryCapability.WRITABLE);
+		return Arrays
+				.asList(RepositoryCapability.MANAGABLE, RepositoryCapability.QUERYABLE, RepositoryCapability.WRITABLE);
 	}
 }

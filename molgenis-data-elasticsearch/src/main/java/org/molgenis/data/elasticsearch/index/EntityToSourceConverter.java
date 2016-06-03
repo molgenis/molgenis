@@ -12,7 +12,6 @@ import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
@@ -128,10 +127,14 @@ public class EntityToSourceConverter
 				{
 					final EntityMetaData refEntityMetaData = attributeMetaData.getRefEntity();
 					value = Lists.newArrayList(Iterables.transform(refEntities, refEntity -> {
-						if(refEntity != null) {
-							if (nestRefs) {
+						if (refEntity != null)
+						{
+							if (nestRefs)
+							{
 								return convert(refEntity, refEntityMetaData, false);
-							} else {
+							}
+							else
+							{
 								return convertAttribute(refEntity, refEntityMetaData.getIdAttribute(), false);
 							}
 						}

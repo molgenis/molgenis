@@ -56,8 +56,8 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	//	@Test
 	//	public void getRegisterForm() throws Exception
 	//	{
-	//		this.mockMvc.perform(get("/account/register")).andExpect(status().isOk())
-	//				.andExpect(view().name("register-modal")).andExpect(model().attributeExists("countries"));
+	//		this.mockMvc.perform(get("/account/bootstrap")).andExpect(status().isOk())
+	//				.andExpect(view().name("bootstrap-modal")).andExpect(model().attributeExists("countries"));
 	//	}
 	//
 	//	@Test
@@ -74,7 +74,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	//		when(appSettings.getSignUpModeration()).thenReturn(false);
 	//
 	//		this.mockMvc
-	//				.perform(post("/account/register").header("X-Forwarded-Host", "website.com").param("username", "admin")
+	//				.perform(post("/account/bootstrap").header("X-Forwarded-Host", "website.com").param("username", "admin")
 	//						.param("password", "adminpw-invalid").param("confirmPassword", "adminpw-invalid")
 	//						.param("email", "admin@molgenis.org").param("lastname", "min").param("firstname", "ad")
 	//						.param("captcha", "validCaptcha").contentType(MediaType.APPLICATION_FORM_URLENCODED))
@@ -93,7 +93,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	//		when(appSettings.getSignUpModeration()).thenReturn(false);
 	//
 	//		this.mockMvc
-	//				.perform(post("/account/register").header("X-Forwarded-Proto", "https")
+	//				.perform(post("/account/bootstrap").header("X-Forwarded-Proto", "https")
 	//						.header("X-Forwarded-Host", "website.com").param("username", "admin")
 	//						.param("password", "adminpw-invalid").param("confirmPassword", "adminpw-invalid")
 	//						.param("email", "admin@molgenis.org").param("lastname", "min").param("firstname", "ad")
@@ -113,7 +113,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	//		when(appSettings.getSignUpModeration()).thenReturn(false);
 	//
 	//		this.mockMvc
-	//				.perform(post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
+	//				.perform(post("/account/bootstrap").param("username", "admin").param("password", "adminpw-invalid")
 	//						.param("confirmPassword", "adminpw-invalid").param("email", "admin@molgenis.org")
 	//						.param("lastname", "min").param("firstname", "ad").param("captcha", "validCaptcha")
 	//						.contentType(MediaType.APPLICATION_FORM_URLENCODED))
@@ -129,7 +129,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	//		when(appSettings.getSignUpModeration()).thenReturn(true);
 	//
 	//		this.mockMvc
-	//				.perform(post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
+	//				.perform(post("/account/bootstrap").param("username", "admin").param("password", "adminpw-invalid")
 	//						.param("confirmPassword", "adminpw-invalid").param("email", "admin@molgenis.org")
 	//						.param("lastname", "min").param("firstname", "ad").param("captcha", "validCaptcha")
 	//						.contentType(MediaType.APPLICATION_FORM_URLENCODED))
@@ -143,7 +143,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	//	{
 	//		// when(accountService.isSelfRegistrationEnabled()).thenReturn(true);
 	//		this.mockMvc
-	//				.perform(post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
+	//				.perform(post("/account/bootstrap").param("username", "admin").param("password", "adminpw-invalid")
 	//						.param("confirmPassword", "adminpw-invalid").param("lastname", "min").param("firstname", "ad")
 	//						.param("captcha", "validCaptcha").contentType(MediaType.APPLICATION_FORM_URLENCODED))
 	//				.andExpect(status().isBadRequest());
@@ -154,7 +154,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	//	public void registerUser_passwordNotEqualsConfirmPassword() throws Exception
 	//	{
 	//		when(appSettings.getSignUp()).thenReturn(true);
-	//		this.mockMvc.perform(post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
+	//		this.mockMvc.perform(post("/account/bootstrap").param("username", "admin").param("password", "adminpw-invalid")
 	//				.param("confirmPassword", "adminpw-invalid-typo").param("email", "admin@molgenis.org")
 	//				.param("lastname", "min").param("firstname", "ad").param("captcha", "validCaptcha")
 	//				.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isBadRequest());
@@ -165,7 +165,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	//	public void registerUser_invalidCaptcha() throws Exception
 	//	{
 	//		when(appSettings.getSignUp()).thenReturn(true);
-	//		this.mockMvc.perform(post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
+	//		this.mockMvc.perform(post("/account/bootstrap").param("username", "admin").param("password", "adminpw-invalid")
 	//				.param("confirmPassword", "adminpw-invalid").param("email", "admin@molgenis.org")
 	//				.param("lastname", "min").param("firstname", "ad").param("captcha", "invalidCaptcha")
 	//				.contentType(MediaType.APPLICATION_FORM_URLENCODED)).andExpect(status().isBadRequest());
@@ -183,7 +183,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 	//	// public void registerUser_invalidUserField() throws Exception
 	//	// {
 	//	// this.mockMvc.perform(
-	//	// post("/account/register").param("username", "admin").param("password", "adminpw-invalid")
+	//	// post("/account/bootstrap").param("username", "admin").param("password", "adminpw-invalid")
 	//	// .param("email", "admin@molgenis.org").param("lastname", "min").param("firstname", "ad")
 	//	// .param("captcha", "validCaptcha").contentType(MediaType.APPLICATION_FORM_URLENCODED))
 	//	// .andExpect(status().isNoContent());

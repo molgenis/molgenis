@@ -9,9 +9,9 @@ import org.elasticsearch.common.logging.ESLoggerFactory;
 import org.elasticsearch.common.logging.slf4j.Slf4jESLoggerFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
-import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
+import org.molgenis.data.elasticsearch.reindex.job.ReindexJobExecutionFactory;
 import org.molgenis.data.elasticsearch.reindex.job.ReindexJobFactory;
 import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
 import org.molgenis.data.elasticsearch.reindex.job.ReindexServiceImpl;
@@ -48,6 +48,9 @@ public class EmbeddedElasticSearchConfig
 
 	@Autowired
 	public MolgenisTransactionManager molgenisTransactionManager;
+
+	@Autowired
+	public ReindexJobExecutionFactory reindexJobExecutionFactory;
 
 	@Bean(destroyMethod = "close")
 	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory()
@@ -104,6 +107,7 @@ public class EmbeddedElasticSearchConfig
 	@Bean
 	public ReindexService rebuildIndexService()
 	{
-		return new ReindexServiceImpl(dataService, reindexJobFactory(), newSingleThreadExecutor());
+		return new ReindexServiceImpl(dataService, reindexJobFactory(), reindexJobExecutionFactory,
+				newSingleThreadExecutor());
 	}
 }

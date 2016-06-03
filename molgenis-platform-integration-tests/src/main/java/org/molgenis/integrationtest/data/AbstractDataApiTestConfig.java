@@ -11,8 +11,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
@@ -57,18 +57,12 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import com.google.common.io.Files;
 
 @EnableTransactionManagement(proxyTargetClass = true)
-@ComponentScan(
-{ "org.molgenis.data.meta", "org.molgenis.data.reindex",
-		"org.molgenis.data.elasticsearch.index",
-		"org.molgenis.data.jobs",
-		"org.molgenis.data.elasticsearch.reindex",
-		"org.molgenis.auth" })
-@Import(
-{ DatabaseConfig.class, EmbeddedElasticSearchConfig.class,
- GsonConfig.class, ElasticsearchEntityFactory.class,
+@ComponentScan({ "org.molgenis.data.meta", "org.molgenis.data.reindex", "org.molgenis.data.elasticsearch.index",
+		"org.molgenis.data.jobs", "org.molgenis.data.elasticsearch.reindex", "org.molgenis.auth" })
+@Import({ DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class, ElasticsearchEntityFactory.class,
 		ElasticsearchRepositoryCollection.class, RunAsSystemBeanPostProcessor.class, FileMetaMetaData.class,
-		OwnedEntityMetaData.class, MolgenisUserServiceImpl.class, RhinoConfig.class,
-		UuidGenerator.class, ExpressionValidator.class, LanguageService.class })
+		OwnedEntityMetaData.class, MolgenisUserServiceImpl.class, RhinoConfig.class, UuidGenerator.class,
+		ExpressionValidator.class, LanguageService.class })
 public abstract class AbstractDataApiTestConfig
 {
 	@Autowired
@@ -107,13 +101,13 @@ public abstract class AbstractDataApiTestConfig
 	@PostConstruct
 	public void init()
 	{
-		dataService.setMeta(metaDataService());
-		metaDataService.setDefaultBackend(getBackend());
+		//		dataService.setMeta(metaDataService()); // FIXME
+		//		metaDataService.setDefaultBackend(getBackend()); // FIXME
 	}
 
 	protected abstract void setUp();
 
-	protected abstract ManageableRepositoryCollection getBackend();
+	protected abstract RepositoryCollection getBackend();
 
 	@Bean
 	public MetaDataService metaDataService()
@@ -124,7 +118,7 @@ public abstract class AbstractDataApiTestConfig
 	@Bean
 	public DataServiceImpl dataService()
 	{
-		return new DataServiceImpl(repositoryDecoratorFactory());
+		return new DataServiceImpl();
 	}
 
 	@Bean
@@ -136,7 +130,7 @@ public abstract class AbstractDataApiTestConfig
 	@Bean
 	public PermissionSystemService permissionSystemService()
 	{
-		return new PermissionSystemService(dataService());
+		return new PermissionSystemService(dataService(), null); // FIXME
 	}
 
 	@Bean
@@ -165,9 +159,16 @@ public abstract class AbstractDataApiTestConfig
 			@Override
 			public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 			{
-				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(),
-						idGenerator, appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry(),
-						reindexActionRegisterService, searchService).createDecoratedRepository(repository);
+				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(), idGenerator,
+						appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry(), null, null,
+						null, reindexActionRegisterService, searchService)
+						.createDecoratedRepository(repository); // FIXME
+			}
+
+			@Override
+			public <E extends Entity> Repository<E> createDecoratedRepository(Repository<E> repository, Class<E> clazz)
+			{
+				return null; // FIXME
 			}
 		};
 	}
@@ -201,6 +202,7 @@ public abstract class AbstractDataApiTestConfig
 	{
 		return new SecuritySupportService();
 	}
+
 	@Value("${mail.host:smtp.gmail.com}")
 	private String mailHost;
 	@Value("${mail.port:587}")

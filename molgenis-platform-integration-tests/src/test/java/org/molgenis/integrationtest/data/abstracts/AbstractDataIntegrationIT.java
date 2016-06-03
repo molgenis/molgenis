@@ -45,7 +45,7 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 
 	@Autowired
 	protected SecuritySupportService securitySupportService;
-	
+
 	@BeforeClass
 	public void init()
 	{
@@ -80,7 +80,7 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 
 	/**
 	 * Wait till the whole index is stable. Reindex job is done a-synchronized.
-	 * 
+	 *
 	 * @param pollInterval
 	 * @param maxTimeout
 	 */
@@ -93,7 +93,7 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 
 	/**
 	 * Wait till the index is stable. Reindex job is done a-synchronized.
-	 * 
+	 *
 	 * @param entityName
 	 * @param pollInterval
 	 * @param maxTimeout

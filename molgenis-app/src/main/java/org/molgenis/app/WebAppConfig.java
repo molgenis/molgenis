@@ -52,7 +52,7 @@ import freemarker.template.TemplateException;
 @ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class))
 @Import(
 { WebAppSecurityConfig.class, DatabaseConfig.class, HttpClientConfig.class, EmbeddedElasticSearchConfig.class,
-		GsonConfig.class})
+		GsonConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
 {
 	private static final Logger LOG = LoggerFactory.getLogger(WebAppConfig.class);
@@ -135,11 +135,11 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	// {
 	// if (!emd.isAbstract() && !localDataService.hasRepository(emd.getName()))
 	// {
-	// if (MysqlRepositoryCollection.NAME.equals(emd.getBackend()))
+	// if (MysqlRepositoryCollection.POSTGRESQL.equals(emd.getBackend()))
 	// {
 	// localDataService.addRepository(description.createRepository(emd));
 	// }
-	// else if (ElasticsearchRepositoryCollection.NAME.equals(emd.getBackend()))
+	// else if (ElasticsearchRepositoryCollection.POSTGRESQL.equals(emd.getBackend()))
 	// {
 	// localDataService.addRepository(elasticsearchRepositoryCollection.createRepository(emd));
 	// }

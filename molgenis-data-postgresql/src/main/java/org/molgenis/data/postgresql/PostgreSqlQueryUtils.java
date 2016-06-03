@@ -122,6 +122,6 @@ class PostgreSqlQueryUtils
 				return true;
 			}
 		}
-		return backend.equals(PostgreSqlRepositoryCollection.NAME);
+		return backend.equals(PostgreSqlRepositoryCollection.POSTGRESQL);
 	}
 }

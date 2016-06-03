@@ -1,20 +1,20 @@
 package org.molgenis.file.ingest;
 
+import static org.molgenis.file.FileMetaMetaData.FILE_META;
+import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_EXECUTION;
 import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
-import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.file.FileMeta;
 import org.molgenis.file.ingest.execution.FileIngestJob;
 import org.molgenis.file.ingest.execution.FileIngestJobFactory;
 import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
-import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
-import org.molgenis.file.ingest.meta.FileIngestMetaData;
+import org.molgenis.file.ingest.meta.FileIngestJobExecutionFactory;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -36,6 +36,10 @@ public class FileIngesterQuartzJob implements Job
 
 	@Autowired
 	private FileIngestJobFactory fileIngestJobFactory;
+
+	@Autowired
+	private FileIngestJobExecutionFactory fileIngestJobExecutionFactory;
+
 	@Autowired
 	private DataService dataService;
 
@@ -59,7 +63,7 @@ public class FileIngesterQuartzJob implements Job
 	private void run(Object fileIngestId)
 	{
 		FileIngest fileIngest = dataService.findOneById(FILE_INGEST, fileIngestId, FileIngest.class);
-		FileIngestJobExecution jobExecution = new FileIngestJobExecution(dataService);
+		FileIngestJobExecution jobExecution = fileIngestJobExecutionFactory.create();
 		jobExecution.setUser("admin");// TODO system
 		jobExecution.setFileIngest(fileIngest);
 		jobExecution.setFailureEmail(fileIngest.getFailureEmail());
@@ -74,8 +78,8 @@ public class FileIngesterQuartzJob implements Job
 		}
 		FileIngestJob job = fileIngestJobFactory.createJob(jobExecution);
 		FileMeta fileMeta = job.call();
-		dataService.add(FileMeta.ENTITY_NAME, fileMeta);
+		dataService.add(FILE_META, fileMeta);
 		jobExecution.setFile(fileMeta);
-		dataService.update(FileIngestJobExecutionMetaData.ENTITY_NAME, jobExecution);
+		dataService.update(FILE_INGEST_JOB_EXECUTION, jobExecution);
 	}
 }

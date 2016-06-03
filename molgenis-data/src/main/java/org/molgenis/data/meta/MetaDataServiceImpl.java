@@ -126,7 +126,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public RepositoryCollection getDefaultBackend()
 	{
-		return getBackend(defaultBackend.getName());
+		return repositoryCollectionRegistry.getDefaultRepoCollection();
 	}
 
 	@Override

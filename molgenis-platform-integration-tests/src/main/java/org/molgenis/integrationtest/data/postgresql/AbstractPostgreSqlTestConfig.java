@@ -13,7 +13,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.PostgreSqlEntityFactory;
@@ -33,8 +33,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-@Import(
-{ PostgreSqlEntityFactory.class, PostgreSqlConfiguration.class })
+@Import({ PostgreSqlEntityFactory.class, PostgreSqlConfiguration.class })
 public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestConfig
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractPostgreSqlTestConfig.class);
@@ -53,9 +52,9 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 	JdbcTemplate jdbcTemplate;
 
 	@Override
-	protected ManageableRepositoryCollection getBackend()
+	protected RepositoryCollection getBackend()
 	{
-		return new PostgreSqlRepositoryCollection(dataSource)
+		return new PostgreSqlRepositoryCollection(dataSource, null, null) // FIXME
 		{
 			@Override
 			protected PostgreSqlRepository createPostgreSqlRepository()
@@ -136,8 +135,7 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 	public static PropertySourcesPlaceholderConfigurer properties()
 	{
 		PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
-		Resource[] resources = new Resource[]
-		{ new ClassPathResource("/postgresql/molgenis.properties") };
+		Resource[] resources = new Resource[] { new ClassPathResource("/postgresql/molgenis.properties") };
 		pspc.setLocations(resources);
 		pspc.setFileEncoding("UTF-8");
 		pspc.setIgnoreUnresolvablePlaceholders(true);

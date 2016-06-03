@@ -1,24 +1,24 @@
 package org.molgenis.data.elasticsearch;
 
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchType;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityCollection;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Query;
-import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
-import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
-import org.molgenis.data.support.BatchingQueryResult;
-import org.molgenis.data.support.EntityMetaDataUtils;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.DataConverter.convert;
+import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.DataConverter.convert;
-import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.action.search.SearchType;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityCollection;
+import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
+import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.support.BatchingQueryResult;
+import org.molgenis.data.support.EntityMetaDataUtils;
 
 /**
  * Retrieve search results in batches. Note: We do not use Elasticsearch scan & scroll, because scrolling is not

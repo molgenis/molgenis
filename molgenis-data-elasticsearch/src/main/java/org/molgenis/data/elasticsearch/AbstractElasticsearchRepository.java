@@ -25,7 +25,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
-import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 
 import com.google.common.collect.Sets;
@@ -214,18 +213,6 @@ public abstract class AbstractElasticsearchRepository implements Repository<Enti
 		elasticSearchService.delete(getEntityMetaData().getName());
 		createMappings();
 		elasticSearchService.refresh();
-	}
-
-	@Override
-	public void create()
-	{
-		createMappings();
-	}
-
-	@Override
-	public void drop()
-	{
-		elasticSearchService.delete(getEntityMetaData().getName());
 	}
 
 	@Override

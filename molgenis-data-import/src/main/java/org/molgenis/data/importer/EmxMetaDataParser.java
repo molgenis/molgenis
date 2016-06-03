@@ -478,7 +478,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			String attributeName = attributeEntity.getString(NAME);
 			AttributeMetaData attribute = entityMap.get(attributeName).getAttr();
 
-			// register attribute parent-children relations for compound attributes
+			// bootstrap attribute parent-children relations for compound attributes
 			String partOfAttribute = attributeEntity.getString(PART_OF_ATTRIBUTE);
 			if (partOfAttribute != null && !partOfAttribute.isEmpty())
 			{

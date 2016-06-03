@@ -1,4 +1,3 @@
-
 package org.molgenis.integrationtest.data;
 
 import org.springframework.security.core.context.SecurityContextHolder;

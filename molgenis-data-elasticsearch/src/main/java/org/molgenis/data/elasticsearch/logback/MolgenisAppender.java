@@ -1,20 +1,13 @@
 package org.molgenis.data.elasticsearch.logback;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 
 import org.elasticsearch.action.bulk.BulkProcessor;
-import org.elasticsearch.action.bulk.BulkRequest;
-import org.elasticsearch.action.bulk.BulkResponse;
-import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.common.unit.TimeValue;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
-import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.util.ApplicationContextProvider;
-import org.springframework.context.ApplicationContext;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.classic.spi.IThrowableProxy;
@@ -39,58 +32,59 @@ public class MolgenisAppender extends AppenderBase<ILoggingEvent>
 	@Override
 	protected void append(ILoggingEvent eventObject)
 	{
-		try
-		{
-			if (bulkProcessor == null)
-			{
-				ApplicationContext ctx = ApplicationContextProvider.getApplicationContext();
-				if (ctx == null) return;
-
-				EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory = ctx
-						.getBean(EmbeddedElasticSearchServiceFactory.class);
-
-				bulkProcessor = BulkProcessor
-						.builder(embeddedElasticSearchServiceFactory.getClient(), new BulkProcessor.Listener()
-						{
-							@Override
-							public void beforeBulk(long executionId, BulkRequest request)
-							{
-							}
-
-							@Override
-							public void afterBulk(long executionId, BulkRequest request, BulkResponse response)
-							{
-							}
-
-							@Override
-							public void afterBulk(long executionId, BulkRequest request, Throwable failure)
-							{
-							}
-						}).setFlushInterval(FLUSH_INTERVAL).build();
-
-			}
-			if (elasticsearchEntityFactory == null)
-			{
-				ApplicationContext ctx = ApplicationContextProvider.getApplicationContext();
-				elasticsearchEntityFactory = ctx.getBean(ElasticsearchEntityFactory.class);
-			}
-
-			if (loggingEventMetaData == null)
-			{
-				ApplicationContext ctx = ApplicationContextProvider.getApplicationContext();
-				loggingEventMetaData = ctx.getBean(LoggingEventMetaData.class);
-			}
-
-			Entity entity = toEntity(eventObject);
-			String id = entity.getString(LoggingEventMetaData.IDENTIFIER);
-			Map<String, Object> source = elasticsearchEntityFactory.create(loggingEventMetaData, entity);
-
-			bulkProcessor.add(new IndexRequest(INDEX_NAME, loggingEventMetaData.getName(), id).source(source));
-		}
-		catch (Throwable t)
-		{
-			t.printStackTrace();
-		}
+		// FIXME enable logging
+		//		try
+		//		{
+		//			if (bulkProcessor == null)
+		//			{
+		//				ApplicationContext ctx = ApplicationContextProvider.getApplicationContext();
+		//				if (ctx == null) return;
+		//
+		//				EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory = ctx
+		//						.getBean(EmbeddedElasticSearchServiceFactory.class);
+		//
+		//				bulkProcessor = BulkProcessor
+		//						.builder(embeddedElasticSearchServiceFactory.getClient(), new BulkProcessor.Listener()
+		//						{
+		//							@Override
+		//							public void beforeBulk(long executionId, BulkRequest request)
+		//							{
+		//							}
+		//
+		//							@Override
+		//							public void afterBulk(long executionId, BulkRequest request, BulkResponse response)
+		//							{
+		//							}
+		//
+		//							@Override
+		//							public void afterBulk(long executionId, BulkRequest request, Throwable failure)
+		//							{
+		//							}
+		//						}).setFlushInterval(FLUSH_INTERVAL).build();
+		//
+		//			}
+		//			if (elasticsearchEntityFactory == null)
+		//			{
+		//				ApplicationContext ctx = ApplicationContextProvider.getApplicationContext();
+		//				elasticsearchEntityFactory = ctx.getBean(ElasticsearchEntityFactory.class);
+		//			}
+		//
+		//			if (loggingEventMetaData == null)
+		//			{
+		//				ApplicationContext ctx = ApplicationContextProvider.getApplicationContext();
+		//				loggingEventMetaData = ctx.getBean(LoggingEventMetaData.class);
+		//			}
+		//
+		//			Entity entity = toEntity(eventObject);
+		//			String id = entity.getString(LoggingEventMetaData.IDENTIFIER);
+		//			Map<String, Object> source = elasticsearchEntityFactory.create(loggingEventMetaData, entity);
+		//
+		//			bulkProcessor.add(new IndexRequest(INDEX_NAME, loggingEventMetaData.getName(), id).source(source));
+		//		}
+		//		catch (Throwable t)
+		//		{
+		//			t.printStackTrace();
+		//		}
 	}
 
 	private Entity toEntity(ILoggingEvent eventObject)

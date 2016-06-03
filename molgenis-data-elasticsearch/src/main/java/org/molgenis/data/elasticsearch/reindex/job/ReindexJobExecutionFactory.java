@@ -6,7 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ReindexJobExecutionFactory extends AbstractEntityFactory<ReindexJobExecution, ReindexJobExecutionMeta, String>
+public class ReindexJobExecutionFactory
+		extends AbstractEntityFactory<ReindexJobExecution, ReindexJobExecutionMeta, String>
 {
 	@Autowired
 	ReindexJobExecutionFactory(ReindexJobExecutionMeta reindexJobExecutionMeta)

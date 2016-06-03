@@ -58,7 +58,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 {
 	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlRepositoryCollection.class);
 
-	public static final String NAME = "PostgreSQL";
+	public static final String POSTGRESQL = "PostgreSQL";
 
 	private final DataSource dataSource;
 	private final JdbcTemplate jdbcTemplate;
@@ -74,7 +74,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 	@Override
 	public String getName()
 	{
-		return NAME;
+		return POSTGRESQL;
 	}
 
 	@Override
@@ -104,14 +104,15 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 	@Override
 	public Iterable<String> getEntityNames()
 	{
-		return dataService.query(ENTITY_META_DATA, EntityMetaDataImpl.class).eq(BACKEND, NAME).findAll()
+		return dataService.query(ENTITY_META_DATA, EntityMetaDataImpl.class).eq(BACKEND, POSTGRESQL).findAll()
 				.map(EntityMetaDataImpl::getName)::iterator;
 	}
 
 	@Override
 	public Repository<Entity> getRepository(String name)
 	{
-		EntityMetaData entityMetaData = dataService.query(ENTITY_META_DATA, EntityMetaDataImpl.class).eq(BACKEND, NAME)
+		EntityMetaData entityMetaData = dataService.query(ENTITY_META_DATA, EntityMetaDataImpl.class)
+				.eq(BACKEND, POSTGRESQL)
 				.and().eq(FULL_NAME, name).and().eq(ABSTRACT, false).findOne();
 		return getRepository(entityMetaData);
 	}
@@ -127,7 +128,8 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 	@Override
 	public Iterator<Repository<Entity>> iterator()
 	{
-		return dataService.query(ENTITY_META_DATA, EntityMetaDataImpl.class).eq(BACKEND, NAME).and().eq(ABSTRACT, false)
+		return dataService.query(ENTITY_META_DATA, EntityMetaDataImpl.class).eq(BACKEND, POSTGRESQL).and()
+				.eq(ABSTRACT, false)
 				.findAll().map(this::getRepository).iterator();
 	}
 

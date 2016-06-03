@@ -62,6 +62,11 @@ public abstract class JobExecution extends SystemEntity
 		return getString(USER);
 	}
 
+	public void setUser(String username)
+	{
+		set(USER, username);
+	}
+
 	public void setUser(MolgenisUser value)
 	{
 		set(USER, value.getUsername());

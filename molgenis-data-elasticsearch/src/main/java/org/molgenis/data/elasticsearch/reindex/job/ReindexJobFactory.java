@@ -33,8 +33,8 @@ public class ReindexJobFactory
 	 */
 	ReindexJob createJob(ReindexJobExecution reindexJobExecution)
 	{
-		RunAsSystemProxy.runAsSystem(() -> dataService.add(ReindexJobExecutionMeta.REINDEX_JOB_EXECUTION,
-				reindexJobExecution));
+		RunAsSystemProxy
+				.runAsSystem(() -> dataService.add(ReindexJobExecutionMeta.REINDEX_JOB_EXECUTION, reindexJobExecution));
 		ProgressImpl progress = new ProgressImpl(reindexJobExecution, jobExecutionUpdater, mailSender);
 		return new ReindexJob(progress, new SystemSecurityToken(), reindexJobExecution.getReindexActionJobID(),
 				dataService, searchService);

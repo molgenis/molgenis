@@ -4,10 +4,12 @@ import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
@@ -391,6 +393,11 @@ public class AttributeMetaData extends AbstractEntity
 	{
 		String enumOptionsStr = getString(ENUM_OPTIONS);
 		return enumOptionsStr != null ? asList(enumOptionsStr.split(",")) : emptyList();
+	}
+
+	public AttributeMetaData setEnumOptions(Class<? extends Enum<?>> e)
+	{
+		return setEnumOptions(stream(e.getEnumConstants()).map(Enum::name).collect(toList()));
 	}
 
 	public AttributeMetaData setEnumOptions(List<String> enumOptions)

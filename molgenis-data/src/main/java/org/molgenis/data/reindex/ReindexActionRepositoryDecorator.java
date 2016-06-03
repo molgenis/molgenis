@@ -53,8 +53,7 @@ public class ReindexActionRepositoryDecorator extends AbstractRepositoryDecorato
 	@Override
 	public void deleteById(Object id)
 	{
-		reindexActionRegisterService.register(getName(), CudType.DELETE, DataType.DATA,
-				id.toString());
+		reindexActionRegisterService.register(getName(), CudType.DELETE, DataType.DATA, id.toString());
 		decorated.deleteById(id);
 	}
 
@@ -69,8 +68,7 @@ public class ReindexActionRepositoryDecorator extends AbstractRepositoryDecorato
 	public void add(Entity entity)
 	{
 		decorated.add(entity);
-		reindexActionRegisterService.register(getName(), CudType.CREATE, DataType.DATA, entity
-				.getIdValue().toString());
+		reindexActionRegisterService.register(getName(), CudType.CREATE, DataType.DATA, entity.getIdValue().toString());
 	}
 
 	@Override

@@ -1,14 +1,16 @@
 package org.molgenis.data.elasticsearch;
 
+import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.QueryUtils.containsAnyOperator;
+import static org.molgenis.data.QueryUtils.containsComputedAttribute;
 import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
-import static org.molgenis.data.RepositoryCapability.INDEXABLE;
-import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 
 import java.io.IOException;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,26 +21,17 @@ import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.QueryUtils;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.EntityMetaData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
-
-import static java.util.Collections.unmodifiableSet;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.QueryUtils.containsAnyOperator;
-import static org.molgenis.data.QueryUtils.containsComputedAttribute;
-import static org.molgenis.data.RepositoryCapability.*;
+import com.google.common.collect.Sets;
 
 /**
  * Decorator for indexed repositories. Sends all queries with operators that are not supported by the decorated
@@ -415,18 +408,6 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 
 		@Override
 		public void deleteAll()
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void create()
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void drop()
 		{
 			throw new UnsupportedOperationException();
 		}

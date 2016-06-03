@@ -1,32 +1,12 @@
 package org.molgenis.data.elasticsearch;
 
-import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.AtomicLongMap;
-import org.elasticsearch.ElasticsearchException;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchType;
-import org.elasticsearch.client.Client;
-import org.elasticsearch.common.collect.Iterators;
-import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.elasticsearch.common.xcontent.XContentFactory;
-import org.molgenis.data.*;
-import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
-import org.molgenis.data.elasticsearch.index.MappingsBuilder;
-import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
-import org.molgenis.data.elasticsearch.response.ResponseParser;
-import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
-import org.molgenis.data.elasticsearch.util.SearchRequest;
-import org.molgenis.data.elasticsearch.util.SearchResult;
-import org.molgenis.data.meta.PackageImpl;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.support.UuidGenerator;
-import org.molgenis.util.DependencyResolver;
-import org.molgenis.util.EntityUtils;
-import org.molgenis.util.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.elasticsearch.request.SourceFilteringGenerator.toFetchFields;
+import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
+import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
+import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -35,13 +15,39 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Stream.concat;
-import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.elasticsearch.request.SourceFilteringGenerator.toFetchFields;
-import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
-import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
-import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
+import org.elasticsearch.ElasticsearchException;
+import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.SearchType;
+import org.elasticsearch.client.Client;
+import org.elasticsearch.common.collect.Iterators;
+import org.elasticsearch.common.xcontent.XContentBuilder;
+import org.elasticsearch.common.xcontent.XContentFactory;
+import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.AggregateResult;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityStream;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
+import org.molgenis.data.elasticsearch.index.MappingsBuilder;
+import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
+import org.molgenis.data.elasticsearch.response.ResponseParser;
+import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
+import org.molgenis.data.elasticsearch.util.SearchRequest;
+import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.util.DependencyResolver;
+import org.molgenis.util.EntityUtils;
+import org.molgenis.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.AtomicLongMap;
 
 /**
  * ElasticSearch implementation of the SearchService interface.
@@ -497,55 +503,11 @@ public class ElasticsearchService implements SearchService
 	{
 		if (storeSource(entityMetaData))
 		{
-			this.rebuildIndexElasticSearchEntity(entities, entityMetaData);
+			throw new UnsupportedOperationException("Elasticsearch does not store data"); // FIXME
 		}
 		else
 		{
 			this.rebuildIndexGeneric(entities, entityMetaData);
-		}
-	}
-
-	/**
-	 * Rebuild Elasticsearch index when the source is living in Elasticearch itself. This operation requires a way to
-	 * temporary save the data so we can drop and rebuild the index for this document.
-	 *
-	 * @param entities
-	 * @param entityMetaData
-	 */
-	private void rebuildIndexElasticSearchEntity(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
-	{
-		if (dataService.getMeta().hasBackend(ElasticsearchRepositoryCollection.NAME))
-		{
-			UuidGenerator uuidg = new UuidGenerator();
-			DefaultEntityMetaData tempEntityMetaData = new DefaultEntityMetaData(uuidg.generateId(), entityMetaData);
-			tempEntityMetaData.setPackage(new PackageImpl("elasticsearch_temporary_entity",
-					"This entity (Original: " + entityMetaData.getName()
-							+ ") is temporary build to make rebuilding of Elasticsearch entities possible."));
-
-			// Add temporary repository into Elasticsearch
-			Repository<Entity> tempRepository = dataService.getMeta().addEntityMeta(tempEntityMetaData);
-
-			// Add temporary repository entities into Elasticsearch
-			dataService.add(tempRepository.getName(), stream(entities.spliterator(), false));
-
-			// Find the temporary saved entities
-			Iterable<? extends Entity> tempEntities = (Iterable<Entity>) () -> dataService
-					.findAll(tempEntityMetaData.getName()).iterator();
-
-			this.rebuildIndexGeneric(tempEntities, entityMetaData);
-
-			// Remove temporary entity
-			dataService.delete(tempEntityMetaData.getName(), stream(tempEntities.spliterator(), false));
-
-			// Remove temporary repository from Elasticsearch
-			dataService.getMeta().deleteEntityMeta(tempEntityMetaData.getName());
-
-			LOG.info("Finished rebuilding index of entity: [{}] with backend ElasticSearch", entityMetaData.getName());
-		}
-		else
-		{
-			LOG.debug("Rebuild index of entity: [{}] is skipped because the {} backend is unknown",
-					entityMetaData.getName(), ElasticsearchRepositoryCollection.NAME);
 		}
 	}
 

@@ -10,7 +10,6 @@ import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
-import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;

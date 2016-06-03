@@ -86,7 +86,7 @@ public class AccountController
 	@RequestMapping(value = "/register", method = RequestMethod.GET)
 	public ModelAndView getRegisterForm()
 	{
-		ModelAndView model = new ModelAndView("register-modal");
+		ModelAndView model = new ModelAndView("bootstrap-modal");
 		model.addObject("countries", CountryCodes.get());
 		model.addObject("min_password_length", MIN_PASSWORD_LENGTH);
 		return model;

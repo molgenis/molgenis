@@ -1,27 +1,31 @@
 package org.molgenis.data.reindex;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.CREATE;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.DELETE;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.UPDATE;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType.METADATA;
 
 import java.util.Iterator;
+import java.util.Set;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Repository;
-import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
-import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.RepositoryCollectionCapability;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 /**
  * Decorator around a {@link Repository} that registers changes made to its data with the
  * {@link ReindexActionRegisterService}.
  */
-public class ReindexActionRepositoryCollectionDecorator implements ManageableRepositoryCollection
+public class ReindexActionRepositoryCollectionDecorator implements RepositoryCollection
 {
-	private final ManageableRepositoryCollection decorated;
+	private final RepositoryCollection decorated;
 	private final ReindexActionRegisterService reindexActionRegisterService;
 
-	public ReindexActionRepositoryCollectionDecorator(ManageableRepositoryCollection decorated,
+	public ReindexActionRepositoryCollectionDecorator(RepositoryCollection decorated,
 			ReindexActionRegisterService reindexActionRegisterService)
 	{
 		this.decorated = requireNonNull(decorated);
@@ -42,21 +46,21 @@ public class ReindexActionRepositoryCollectionDecorator implements ManageableRep
 	@Override
 	public void deleteRepository(EntityMetaData entityMeta)
 	{
-		this.decorated.deleteEntityMeta(entityMeta);
-		this.reindexActionRegisterService.register(entityMeta, CudType.DELETE, DataType.METADATA, null);
+		this.decorated.deleteRepository(entityMeta);
+		this.reindexActionRegisterService.register(entityMeta.getName(), DELETE, METADATA, null);
 	}
 
 	@Override
 	public void addAttribute(String entityFullName, AttributeMetaData attribute)
 	{
 		this.decorated.addAttribute(entityFullName, attribute);
-		this.reindexActionRegisterService.register(entityFullName, CudType.UPDATE, DataType.METADATA, null);
+		this.reindexActionRegisterService.register(entityFullName, UPDATE, METADATA, null);
 	}
 
 	@Override
 	public void updateAttribute(EntityMetaData entityMetaData, AttributeMetaData attr, AttributeMetaData updatedAttr)
 	{
-		this.reindexActionRegisterService.register(entityMetaData, UPDATE, DataType.METADATA, null);
+		this.reindexActionRegisterService.register(entityMetaData.getName(), UPDATE, METADATA, null);
 		this.decorated.updateAttribute(entityMetaData, attr, updatedAttr);
 	}
 
@@ -64,7 +68,7 @@ public class ReindexActionRepositoryCollectionDecorator implements ManageableRep
 	public void deleteAttribute(String entityFullName, String attributeName)
 	{
 		this.decorated.deleteAttribute(entityFullName, attributeName);
-		this.reindexActionRegisterService.register(entityFullName, CudType.UPDATE, DataType.METADATA, null);
+		this.reindexActionRegisterService.register(entityFullName, UPDATE, METADATA, null);
 	}
 
 	@Override
@@ -74,10 +78,10 @@ public class ReindexActionRepositoryCollectionDecorator implements ManageableRep
 	}
 
 	@Override
-	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
+	public Repository<Entity> createRepository(EntityMetaData entityMeta)
 	{
-		this.reindexActionRegisterService.register(entityMeta.getName(), CudType.CREATE, DataType.METADATA, null);
-		return this.decorated.addEntityMeta(entityMeta);
+		this.reindexActionRegisterService.register(entityMeta.getName(), CREATE, METADATA, null);
+		return this.decorated.createRepository(entityMeta);
 	}
 
 	@Override

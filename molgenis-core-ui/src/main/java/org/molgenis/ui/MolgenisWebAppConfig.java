@@ -166,8 +166,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		 * See https://jira.spring.io/browse/SPR-10655
 		 */
 		String corsInterceptPattern = "/api/**";
-		return new MappedInterceptor(new String[]
-				{ corsInterceptPattern }, corsInterceptor());
+		return new MappedInterceptor(new String[] { corsInterceptPattern }, corsInterceptor());
 	}
 
 	@Override
@@ -207,9 +206,9 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public static PropertySourcesPlaceholderConfigurer properties()
 	{
 		PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
-		Resource[] resources = new Resource[]
-				{ new FileSystemResource(System.getProperty("molgenis.home") + "/molgenis-server.properties"),
-						new ClassPathResource("/molgenis.properties") };
+		Resource[] resources = new Resource[] {
+				new FileSystemResource(System.getProperty("molgenis.home") + "/molgenis-server.properties"),
+				new ClassPathResource("/molgenis.properties") };
 		pspc.setLocations(resources);
 		pspc.setFileEncoding("UTF-8");
 		pspc.setIgnoreUnresolvablePlaceholders(true);

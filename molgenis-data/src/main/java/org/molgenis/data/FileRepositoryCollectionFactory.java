@@ -19,8 +19,8 @@ import com.google.common.collect.Maps;
 
 /**
  * Factory for creating a RepositoryCollections from a file.
- * 
- * You can register a new FileRepositoryCollection class for a set of file extension by calling
+ *
+ * You can bootstrap a new FileRepositoryCollection class for a set of file extension by calling
  * addFileRepositoryCollectionClass
  * 
  * For example ExcelFileRepositoryCollection class can be registered, then when you call

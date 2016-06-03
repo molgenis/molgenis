@@ -24,8 +24,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.RepositorySecurityDecorator;
 import org.molgenis.data.elasticsearch.IndexedRepositoryDecorator;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionRegisterService;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionRepositoryDecorator;
+import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.i18n.I18nStringDecorator;
 import org.molgenis.data.i18n.Language;
 import org.molgenis.data.i18n.LanguageRepositoryDecorator;
@@ -37,6 +36,8 @@ import org.molgenis.data.meta.EntityMetaDataRepositoryDecorator;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.meta.PackageRepositoryDecorator;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
+import org.molgenis.data.reindex.ReindexActionRegisterService;
+import org.molgenis.data.reindex.ReindexActionRepositoryDecorator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.TypedRepositoryDecorator;
 import org.molgenis.data.support.UntypedRepositoryDecorator;
@@ -62,6 +63,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final MolgenisUserFactory molgenisUserFactory;
 	private final UserAuthorityFactory userAuthorityFactory;
 	private final ReindexActionRegisterService reindexActionRegisterService;
+	private final SearchService searchService;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -69,7 +71,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			DataService dataService, ExpressionValidator expressionValidator,
 			RepositoryDecoratorRegistry repositoryDecoratorRegistry,
 			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, MolgenisUserFactory molgenisUserFactory,
-			UserAuthorityFactory userAuthorityFactory, ReindexActionRegisterService reindexActionRegisterService)
+			UserAuthorityFactory userAuthorityFactory, ReindexActionRegisterService reindexActionRegisterService,
+			SearchService searchService)
 	{
 		this.entityManager = requireNonNull(entityManager);
 		this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
@@ -82,6 +85,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.molgenisUserFactory = requireNonNull(molgenisUserFactory);
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
 		this.reindexActionRegisterService = requireNonNull(reindexActionRegisterService);
+		this.searchService = requireNonNull(searchService);
 	}
 
 	@Override
@@ -89,11 +93,11 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	{
 		Repository<Entity> decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
 
-			// 10. Route specific queries to the index
-			decoratedRepository = new IndexedRepositoryDecorator(decoratedRepository, searchService);
+		// 10. Route specific queries to the index
+		decoratedRepository = new IndexedRepositoryDecorator(decoratedRepository, searchService);
 
-			// 9. Register the cud action needed to reindex indexed repositories
-			decoratedRepository = new ReindexActionRepositoryDecorator(decoratedRepository, reindexActionRegisterService);
+		// 9. Register the cud action needed to reindex indexed repositories
+		decoratedRepository = new ReindexActionRepositoryDecorator(decoratedRepository, reindexActionRegisterService);
 
 		// 8. Custom decorators
 		decoratedRepository = applyCustomRepositoryDecorators(decoratedRepository);

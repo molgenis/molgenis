@@ -15,37 +15,48 @@ import org.springframework.stereotype.Component;
 @Component
 public class RepositoryCollectionRegistry
 {
-	private final RepositoryCollectionDecoratorFactory repositoryCollectionDecoratorFactory;
+	private final RepositoryCollectionDecoratorFactory repoCollectionDecoratorFactory;
 
-	private Map<String, RepositoryCollection> repositoryCollectionMap;
+	private Map<String, RepositoryCollection> repoCollectionMap;
+	private RepositoryCollection defaultRepoCollection;
 
 	@Autowired
-	public RepositoryCollectionRegistry(RepositoryCollectionDecoratorFactory repositoryCollectionDecoratorFactory)
+	public RepositoryCollectionRegistry(RepositoryCollectionDecoratorFactory repoCollectionDecoratorFactory)
 	{
-		this.repositoryCollectionDecoratorFactory = requireNonNull(repositoryCollectionDecoratorFactory);
-		repositoryCollectionMap = new HashMap<>();
+		this.repoCollectionDecoratorFactory = requireNonNull(repoCollectionDecoratorFactory);
+		repoCollectionMap = new HashMap<>();
 	}
 
 	public Stream<RepositoryCollection> getRepositoryCollections()
 	{
-		return repositoryCollectionMap.values().stream()
-				.map(repositoryCollectionDecoratorFactory::createDecoratedRepositoryCollection);
+		return repoCollectionMap.values().stream()
+				.map(repoCollectionDecoratorFactory::createDecoratedRepositoryCollection);
 	}
 
-	public void addRepositoryCollection(RepositoryCollection repositoryCollection)
+	public void addRepositoryCollection(RepositoryCollection repoCollection)
 	{
-		repositoryCollectionMap.put(repositoryCollection.getName(), repositoryCollection);
+		repoCollectionMap.put(repoCollection.getName(), repoCollection);
 	}
 
 	public RepositoryCollection getRepositoryCollection(String name)
 	{
-		RepositoryCollection repositoryCollection = repositoryCollectionMap.get(name);
-		return repositoryCollection != null ? repositoryCollectionDecoratorFactory
-				.createDecoratedRepositoryCollection(repositoryCollection) : null;
+		RepositoryCollection repoCollection = repoCollectionMap.get(name);
+		return repoCollection != null ? repoCollectionDecoratorFactory
+				.createDecoratedRepositoryCollection(repoCollection) : null;
 	}
 
 	public boolean hasRepositoryCollection(String name)
 	{
-		return repositoryCollectionMap.containsKey(name);
+		return repoCollectionMap.containsKey(name);
+	}
+
+	public RepositoryCollection getDefaultRepoCollection()
+	{
+		return repoCollectionDecoratorFactory.createDecoratedRepositoryCollection(defaultRepoCollection);
+	}
+
+	public void setDefaultRepoCollection(RepositoryCollection defaultRepoCollection)
+	{
+		this.defaultRepoCollection = requireNonNull(defaultRepoCollection);
 	}
 }

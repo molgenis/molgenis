@@ -1,13 +1,11 @@
 package org.molgenis.data.jobs;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.DATETIME;
 import static org.molgenis.MolgenisFieldTypes.HYPERLINK;
 import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
@@ -15,10 +13,8 @@ import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.fieldtypes.EnumField;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
