@@ -1,18 +1,11 @@
 package org.molgenis.data.examples;
 
 import static org.molgenis.data.examples.UserMetaData.USER;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import java.io.File;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
 import org.molgenis.data.csv.CsvRepository;
-import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -71,69 +64,69 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 	// @Test
 	public void testDynamic()
 	{
-		// Create new dynamic repo
-		EntityMetaData emd = new EntityMetaDataImpl("City");
-		emd.addAttribute("name", ROLE_ID);
-		emd.addAttribute("population").setDataType(MolgenisFieldTypes.INT);
-
-		Repository<Entity> repo = dataService.getMeta().addEntityMeta(emd);
-
-		// Add entities to it
-		Entity amsterdam = new MapEntity();
-		amsterdam.set("name", "Amsterdam");
-		amsterdam.set("population", 813562);
-		repo.add(amsterdam);
-
-		Entity london = new MapEntity();
-		london.set("name", "London");
-		london.set("population", 8416535);
-		repo.add(london);
-
-		// Retrieve all entities of repo
-		dataService.findAll("City").forEach((entity) -> System.out.println(entity.get("name")));
-
-		// Add attribute
-		emd.addAttribute("country");
-		dataService.getMeta().updateEntityMeta(emd);
-
-		// Print attributes
-		dataService.getEntityMetaData("City").getAtomicAttributes()
-				.forEach((attr) -> System.out.println(attr.getName()));
-
-		// Update entity
-		amsterdam.set("country", "Netherlands");
-		dataService.update("City", amsterdam);
-		Entity entity = dataService.findOneById("City", "Amsterdam");
-		System.out.println(entity.get("name") + ": " + entity.get("country"));
+		//		// Create new dynamic repo
+		//		EntityMetaData emd = new EntityMetaDataImpl("City");
+		//		emd.addAttribute("name", ROLE_ID);
+		//		emd.addAttribute("population").setDataType(MolgenisFieldTypes.INT);
+		//
+		//		Repository<Entity> repo = dataService.getMeta().addEntityMeta(emd);
+		//
+		//		// Add entities to it
+		//		Entity amsterdam = new MapEntity();
+		//		amsterdam.set("name", "Amsterdam");
+		//		amsterdam.set("population", 813562);
+		//		repo.add(amsterdam);
+		//
+		//		Entity london = new MapEntity();
+		//		london.set("name", "London");
+		//		london.set("population", 8416535);
+		//		repo.add(london);
+		//
+		//		// Retrieve all entities of repo
+		//		dataService.findAll("City").forEach((entity) -> System.out.println(entity.get("name")));
+		//
+		//		// Add attribute
+		//		emd.addAttribute("country");
+		//		dataService.getMeta().updateEntityMeta(emd);
+		//
+		//		// Print attributes
+		//		dataService.getEntityMetaData("City").getAtomicAttributes()
+		//				.forEach((attr) -> System.out.println(attr.getName()));
+		//
+		//		// Update entity
+		//		amsterdam.set("country", "Netherlands");
+		//		dataService.update("City", amsterdam);
+		//		Entity entity = dataService.findOneById("City", "Amsterdam");
+		//		System.out.println(entity.get("name") + ": " + entity.get("country"));
 	}
 
 	@Test
 	public void testRepositoryCollections()
 	{
-		// Print all available backends
-		dataService.getMeta().forEach((backend) -> System.out.println(backend.getName()));
-
-		// Add cities to MyRepo
-		EntityMetaData emd = new EntityMetaDataImpl("City1");
-		emd.setBackend("MyRepos");
-		emd.addAttribute("name", ROLE_ID);
-		emd.addAttribute("population").setDataType(MolgenisFieldTypes.INT);
-
-		Repository<Entity> repo = dataService.getMeta().addEntityMeta(emd);
-		System.out.println(repo);
-
-		// Add entities to it
-		Entity amsterdam = new MapEntity();
-		amsterdam.set("name", "Amsterdam");
-		amsterdam.set("population", 813562);
-		repo.add(amsterdam);
-
-		Entity london = new MapEntity();
-		london.set("name", "London");
-		london.set("population", 8416535);
-		repo.add(london);
-
-		// Retrieve all entities of repo
-		repo.forEach((entity) -> System.out.println(entity.get("name")));
+		//		// Print all available backends
+		//		dataService.getMeta().forEach((backend) -> System.out.println(backend.getName()));
+		//
+		//		// Add cities to MyRepo
+		//		EntityMetaData emd = new EntityMetaDataImpl("City1");
+		//		emd.setBackend("MyRepos");
+		//		emd.addAttribute("name", ROLE_ID);
+		//		emd.addAttribute("population").setDataType(MolgenisFieldTypes.INT);
+		//
+		//		Repository<Entity> repo = dataService.getMeta().addEntityMeta(emd);
+		//		System.out.println(repo);
+		//
+		//		// Add entities to it
+		//		Entity amsterdam = new MapEntity();
+		//		amsterdam.set("name", "Amsterdam");
+		//		amsterdam.set("population", 813562);
+		//		repo.add(amsterdam);
+		//
+		//		Entity london = new MapEntity();
+		//		london.set("name", "London");
+		//		london.set("population", 8416535);
+		//		repo.add(london);
+		//
+		//		// Retrieve all entities of repo
+		//		repo.forEach((entity) -> System.out.println(entity.get("name")));
 	}
 }

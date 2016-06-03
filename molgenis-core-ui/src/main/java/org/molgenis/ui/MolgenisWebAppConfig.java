@@ -19,7 +19,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.elasticsearch.SearchService;
@@ -49,7 +48,6 @@ import org.molgenis.ui.menu.MenuReaderServiceImpl;
 import org.molgenis.ui.menumanager.MenuManagerService;
 import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.molgenis.ui.security.MolgenisUiPermissionDecorator;
-import org.molgenis.ui.settings.AppDbSettings;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.ResourceFingerprintRegistry;
@@ -84,9 +82,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Autowired
 	private AppSettings appSettings;
-
-	@Autowired
-	private AppDbSettings appDbSettings;
 
 	@Autowired
 	private MolgenisPermissionService molgenisPermissionService;
@@ -377,45 +372,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		return new CorsInterceptor();
 	}
 
-	protected abstract RepositoryCollection getBackend();
-
 	// protected abstract void addReposToReindex(DataServiceImpl localDataService,
 	// MySqlEntityFactory localMySqlEntityFactory);
-
-	protected void reindex()
-	{
-		// FIXME reindexing should not depend on MySQL
-		// // Create local dataservice and metadataservice
-		// DataServiceImpl localDataService = new DataServiceImpl();
-		// EntityManager localEntityManager = new EntityManagerImpl(localDataService);
-		// MySqlEntityFactory localMySqlEntityFactory = new MySqlEntityFactory(localEntityManager, localDataService);
-		//
-		// MetaDataServiceImpl metaDataService = new MetaDataServiceImpl(localDataService);
-		// metaDataService.setLanguageService(new LanguageService(localDataService, appDbSettings));
-		// localDataService.setMetaDataService(metaDataService);
-		//
-		// addReposToReindex(localDataService, localMySqlEntityFactory);
-		//
-		// SourceToEntityConverter sourceToEntityConverter = new SourceToEntityConverter(localDataService,
-		// localEntityManager);
-		// EntityToSourceConverter entityToSourceConverter = new EntityToSourceConverter();
-		// SearchService localSearchService = embeddedElasticSearchServiceFactory.create(localDataService,
-		// new ElasticsearchEntityFactory(localEntityManager, sourceToEntityConverter, entityToSourceConverter));
-		//
-		// List<EntityMetaData> metas = DependencyResolver.resolve(Sets.newHashSet(localDataService.getMeta()
-		// .getEntityMetaDatas()));
-		//
-		// // Sort repos to the same sequence as the resolves metas
-		// List<Repository> repos = Lists.newArrayList(localDataService);
-		// repos.sort((r1, r2) -> Integer.compare(metas.indexOf(r1.getEntityMetaData()),
-		// metas.indexOf(r2.getEntityMetaData())));
-		//
-		// repos.forEach(repo -> {
-		// localSearchService.rebuildIndex(repo, repo.getEntityMetaData());
-		// });
-		//
-		// localSearchService.optimizeIndex();
-	}
 
 	@PostConstruct
 	public void validateMolgenisServerProperties()
@@ -434,39 +392,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		}
 	}
 
-	//	@PostConstruct
-	//	public void initRepositories()
-	//	{
-	//		addUpgrades();
-	//		boolean didUpgrade = upgradeService.upgrade();
-	//		dataService().setMetaDataService(metaDataService());
-	//		if (didUpgrade)
-	//		{
-	//			LOG.info("Reindexing repositories due to MOLGENIS upgrade...");
-	//			reindex();
-	//			LOG.info("Reindexing done.");
-	//		}
-	//		else if (!indexExists())
-	//		{
-	//			LOG.info("Reindexing repositories due to missing Elasticsearch index...");
-	//			reindex();
-	//			LOG.info("Reindexing done.");
-	//		}
-	//		else
-	//		{
-	//			LOG.debug("Elasticsearch index exists, no need to reindex.");
-	//		}
-	//
-	//		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
-	//	}
-
 	@Autowired
 	private EntityMetaDataMetaData entityMetaDataMetaData;
-
-	private boolean indexExists()
-	{
-		return searchService.hasMapping(entityMetaDataMetaData);
-	}
 
 	@Bean
 	public DataService dataService()
@@ -491,10 +418,4 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	{
 		return new RepositoryDecoratorRegistry();
 	}
-
-
-	/**
-	 * Adds the upgrade steps to the {@link MolgenisUpgradeService}.
-	 */
-	public abstract void addUpgrades();
 }

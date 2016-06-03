@@ -4,7 +4,6 @@ import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
@@ -22,16 +21,14 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.SIMPLE_NAME;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.TAGS;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.data.support.MapEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.google.common.collect.Iterables;
 
@@ -39,43 +36,53 @@ import com.google.common.collect.Iterables;
  * EntityMetaData defines the structure and attributes of an Entity. Attributes are unique. Other software components
  * can use this to interact with Entity and/or to configure backends and frontends, including Repository instances.
  */
-public class EntityMetaDataImpl extends AbstractEntity implements EntityMetaData
+public class EntityMetaDataImpl extends SystemEntity implements EntityMetaData
 {
-	private static final Logger LOG = LoggerFactory.getLogger(EntityMetaDataImpl.class);
-
-	private final Entity entity;
-
 	public EntityMetaDataImpl(Entity entity)
 	{
-		this.entity = requireNonNull(entity);
+		super(entity);
+	}
+
+	public EntityMetaDataImpl(EntityMetaDataMetaData entityMetaDataMetaData)
+	{
+		super(entityMetaDataMetaData);
+	}
+
+	public EntityMetaDataImpl(String name, EntityMetaDataMetaData entityMetaDataMetaData)
+	{
+		this(name, null, entityMetaDataMetaData);
 	}
 
 	public EntityMetaDataImpl(String entityName, String packageName, EntityMetaDataMetaData entityMetaDataMetaData)
 	{
-		this.entity = new MapEntity(entityMetaDataMetaData);
+		super(new MapEntity(entityMetaDataMetaData));
 		set(SIMPLE_NAME, entityName);
 		set(FULL_NAME, packageName != null ? packageName + PACKAGE_SEPARATOR + entityName : entityName);
 		setAbstract(false);
 	}
 
+	@Deprecated
 	public EntityMetaDataImpl(String simpleName)
 	{
 		this(simpleName, Entity.class);
 	}
 
+	@Deprecated
 	public EntityMetaDataImpl(String simpleName, Package package_)
 	{
 		this(simpleName, Entity.class, package_);
 	}
 
+	@Deprecated
 	public EntityMetaDataImpl(String simpleName, Class<? extends Entity> entityClass)
 	{
 		this(simpleName, entityClass, null);
 	}
 
+	@Deprecated
 	public EntityMetaDataImpl(String simpleName, Class<? extends Entity> entityClass, Package package_)
 	{
-		this.entity = new MapEntity(getEntityMetaData());
+		super(new MapEntity(getApplicationContext().getBean(EntityMetaDataMetaData.class)));
 		String fullName;
 		if (package_ != null)
 		{

@@ -11,7 +11,7 @@ import org.molgenis.data.support.MapEntity;
  */
 public abstract class SystemEntity extends AbstractEntity
 {
-	private final Entity entity;
+	protected final Entity entity;
 
 	/**
 	 * Constructs a system entity that wraps an existing {@link Entity}

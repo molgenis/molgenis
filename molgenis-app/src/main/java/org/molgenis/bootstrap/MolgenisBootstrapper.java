@@ -24,6 +24,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MolgenisBootstrapper.class);
 
+	private final MolgenisUpgradeBootstrapper upgradeBootstrapper;
 	private final RegistryBootstrapper registryBootstrapper;
 	private final SystemEntityMetaDataBootstrapper systemEntityMetaDataBootstrapper;
 	private final RepositoryPopulator repositoryPopulator;
@@ -32,11 +33,13 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	private final IdCardBootstrapper idCardBootstrapper;
 
 	@Autowired
-	public MolgenisBootstrapper(RegistryBootstrapper registryBootstrapper,
+	public MolgenisBootstrapper(MolgenisUpgradeBootstrapper upgradeBootstrapper,
+			RegistryBootstrapper registryBootstrapper,
 			SystemEntityMetaDataBootstrapper systemEntityMetaDataBootstrapper,
 			RepositoryPopulator repositoryPopulator, FileIngesterJobRegistrar fileIngesterJobRegistrar,
 			JobBootstrapper jobBootstrapper, IdCardBootstrapper idCardBootstrapper)
 	{
+		this.upgradeBootstrapper = requireNonNull(upgradeBootstrapper);
 		this.registryBootstrapper = requireNonNull(registryBootstrapper);
 		this.systemEntityMetaDataBootstrapper = requireNonNull(systemEntityMetaDataBootstrapper);
 		this.repositoryPopulator = requireNonNull(repositoryPopulator);
@@ -54,6 +57,10 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		// TODO index rebuilding
 
 		LOG.info("Bootstrapping application ...");
+
+		LOG.trace("Updating MOLGENIS ...");
+		upgradeBootstrapper.bootstrap();
+		LOG.debug("Updated MOLGENIS");
 
 		LOG.trace("Bootstrapping registries ...");
 		registryBootstrapper.bootstrap(event);

@@ -1,5 +1,7 @@
 package org.molgenis.data.importer;
 
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -12,6 +14,7 @@ import org.molgenis.data.importer.EmxMetaDataParser.EmxAttribute;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
@@ -115,9 +118,9 @@ public final class IntermediateParseResults
 			}
 		}
 
-		EntityMetaData emd = new EntityMetaDataImpl(simpleName);
+		EntityMetaData emd = new EntityMetaDataImpl(simpleName,
+				getApplicationContext().getBean(EntityMetaDataMetaData.class));
 		entities.put(name, emd);
-		//		emd.setBackend("PostgreSQL"); // FIXME remove hardcoded reference
 		return emd;
 	}
 
