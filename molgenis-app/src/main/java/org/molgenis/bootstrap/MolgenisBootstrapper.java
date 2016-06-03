@@ -53,7 +53,6 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		// TODO migration
 		// TODO index rebuilding
 
 		LOG.info("Bootstrapping application ...");
