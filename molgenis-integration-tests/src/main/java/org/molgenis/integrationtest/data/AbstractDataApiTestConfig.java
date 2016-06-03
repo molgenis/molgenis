@@ -29,7 +29,10 @@ import org.molgenis.mysql.embed.EmbeddedMysqlDatabaseBuilder;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
 import org.molgenis.security.permission.PermissionSystemService;
+import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.security.user.MolgenisUserServiceImpl;
 import org.molgenis.security.user.UserAccountService;
+import org.molgenis.security.user.UserAccountServiceImpl;
 import org.molgenis.ui.MolgenisRepositoryDecoratorFactory;
 import org.molgenis.ui.RepositoryDecoratorRegistry;
 import org.molgenis.util.ApplicationContextProvider;
@@ -68,9 +71,6 @@ public abstract class AbstractDataApiTestConfig
 
 	@Autowired
 	public ExpressionValidator expressionValidator;
-
-	@Autowired
-	public UserAccountService userAccountService;
 
 	protected AbstractDataApiTestConfig()
 	{
@@ -156,9 +156,21 @@ public abstract class AbstractDataApiTestConfig
 			{
 				return new MolgenisRepositoryDecoratorFactory(entityManager(), transactionLogService,
 						entityAttributesValidator(), idGenerator(), appSettings(), dataService(), expressionValidator,
-						repositoryDecoratorRegistry(), userAccountService).createDecoratedRepository(repository);
+						repositoryDecoratorRegistry(), userAccountService()).createDecoratedRepository(repository);
 			}
 		};
+	}
+
+	@Bean
+	public UserAccountService userAccountService()
+	{
+		return new UserAccountServiceImpl();
+	}
+
+	@Bean
+	public MolgenisUserService userService()
+	{
+		return new MolgenisUserServiceImpl(dataService());
 	}
 
 	@Bean(destroyMethod = "shutdown")

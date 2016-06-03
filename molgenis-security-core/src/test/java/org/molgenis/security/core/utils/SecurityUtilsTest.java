@@ -1,5 +1,19 @@
 package org.molgenis.security.core.utils;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.testng.Assert;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
@@ -10,20 +24,6 @@ import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.testng.Assert;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 public class SecurityUtilsTest
 {
@@ -52,11 +52,11 @@ public class SecurityUtilsTest
 		userDetails = mock(UserDetails.class);
 		when(userDetails.getUsername()).thenReturn("username");
 		when(userDetails.getPassword()).thenReturn("encoded-password");
-		when((Collection<GrantedAuthority>) userDetails.getAuthorities()).thenReturn(
-				Arrays.<GrantedAuthority> asList(authority1, authority2));
+		when((Collection<GrantedAuthority>) userDetails.getAuthorities())
+				.thenReturn(Arrays.<GrantedAuthority> asList(authority1, authority2));
 		when(authentication.getPrincipal()).thenReturn(userDetails);
-		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
-				Arrays.<GrantedAuthority> asList(authority1, authority2));
+		when((Collection<GrantedAuthority>) authentication.getAuthorities())
+				.thenReturn(Arrays.<GrantedAuthority> asList(authority1, authority2));
 	}
 
 	@AfterClass
@@ -99,8 +99,8 @@ public class SecurityUtilsTest
 	{
 		GrantedAuthority authoritySu = when(mock(GrantedAuthority.class).getAuthority()).thenReturn(AUTHORITY_SU)
 				.getMock();
-		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
-				Arrays.<GrantedAuthority> asList(authoritySu));
+		when((Collection<GrantedAuthority>) authentication.getAuthorities())
+				.thenReturn(Arrays.<GrantedAuthority> asList(authoritySu));
 		assertTrue(SecurityUtils.currentUserIsSu());
 	}
 
@@ -109,10 +109,9 @@ public class SecurityUtilsTest
 	{
 		String pluginId = "plugin1";
 		String[] defaultPluginAuthorities = SecurityUtils.defaultPluginAuthorities(pluginId);
-		assertEquals(defaultPluginAuthorities,
-				new String[]
-				{ AUTHORITY_SU, AUTHORITY_PLUGIN_READ_PREFIX + pluginId.toUpperCase(),
-						AUTHORITY_PLUGIN_WRITE_PREFIX + pluginId.toUpperCase() });
+		assertEquals(defaultPluginAuthorities, new String[]
+		{ AUTHORITY_SU, AUTHORITY_PLUGIN_READ_PREFIX + pluginId.toUpperCase(),
+				AUTHORITY_PLUGIN_WRITE_PREFIX + pluginId.toUpperCase() });
 	}
 
 	@Test
@@ -136,7 +135,8 @@ public class SecurityUtilsTest
 	{
 		List<String> authorities = SecurityUtils.getEntityAuthorities("test");
 		List<String> expected = Arrays.asList("ROLE_ENTITY_READ_TEST", "ROLE_ENTITY_WRITE_TEST",
-				"ROLE_ENTITY_COUNT_TEST", "ROLE_ENTITY_NONE_TEST", "ROLE_ENTITY_WRITEMETA_TEST");
+				"ROLE_ENTITY_COUNT_TEST", "ROLE_ENTITY_NONE_TEST", "ROLE_ENTITY_WRITEMETA_TEST",
+				"ROLE_ENTITY_UPDATE_TEST");
 
 		Assert.assertEqualsNoOrder(authorities.toArray(), expected.toArray());
 	}
