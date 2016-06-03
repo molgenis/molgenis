@@ -1,5 +1,16 @@
 package org.molgenis.data.support;
 
+import com.google.common.collect.Iterables;
+import org.molgenis.data.*;
+import org.molgenis.data.Package;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.util.LinkedCaseInsensitiveMap;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
@@ -8,28 +19,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import org.molgenis.data.AttributeChangeListener;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EditableEntityMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Package;
-import org.molgenis.data.PackageChangeListener;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.util.LinkedCaseInsensitiveMap;
-
-import com.google.common.collect.Iterables;
 
 public class DefaultEntityMetaData implements EditableEntityMetaData
 {
@@ -683,9 +672,9 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	@Override
 	public AttributeMetaData getLabelAttribute(String languageCode)
 	{
-		AttributeMetaData labelAttr = getLabelAttribute();
-		AttributeMetaData i18nLabelAttr = getCachedAllAttrs().get(labelAttr.getName() + '-' + languageCode);
-		return i18nLabelAttr != null ? i18nLabelAttr : labelAttr;
+		String i18nLabelAttrName = getCachedAllAttrs().keySet().stream().filter(
+				attributeName -> attributeName.endsWith('-' + languageCode)).findFirst().orElse(null);
+		return i18nLabelAttrName != null ? getCachedAllAttrs().get(i18nLabelAttrName) : getLabelAttribute();
 	}
 
 	@Override
