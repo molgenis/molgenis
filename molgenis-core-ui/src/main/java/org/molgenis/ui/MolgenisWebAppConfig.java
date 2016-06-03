@@ -13,27 +13,18 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
-import org.molgenis.data.IdGenerator;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
-import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.validation.EntityAttributesValidator;
-import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.file.FileStore;
-import org.molgenis.framework.MolgenisUpgradeService;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
@@ -87,35 +78,10 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	private MolgenisPermissionService molgenisPermissionService;
 
 	@Autowired
-	public SearchService searchService;
+	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
 	@Autowired
-	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
-
-	@Autowired
-	public MolgenisUpgradeService upgradeService;
-
-	// used by classes that extend from this class
-	@Autowired
-	public DataSource dataSource;
-
-	@Autowired
-	public ReindexActionRegisterService reindexActionRegisterService;
-
-	@Autowired
-	public IdGenerator idGenerator;
-
-	@Autowired
-	public GsonHttpMessageConverter gsonHttpMessageConverter;
-
-	@Autowired
-	public EntityAttributesValidator entityAttributesValidator;
-
-	@Autowired
-	public ExpressionValidator expressionValidator;
-
-	@Autowired
-	public LanguageService languageService;
+	private LanguageService languageService;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -372,9 +338,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		return new CorsInterceptor();
 	}
 
-	// protected abstract void addReposToReindex(DataServiceImpl localDataService,
-	// MySqlEntityFactory localMySqlEntityFactory);
-
 	@PostConstruct
 	public void validateMolgenisServerProperties()
 	{
@@ -391,9 +354,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 					+ ", allowed values are [development, production].");
 		}
 	}
-
-	@Autowired
-	private EntityMetaDataMetaData entityMetaDataMetaData;
 
 	@Bean
 	public DataService dataService()
