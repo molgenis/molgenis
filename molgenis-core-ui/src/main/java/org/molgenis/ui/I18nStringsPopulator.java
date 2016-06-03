@@ -53,7 +53,7 @@ public class I18nStringsPopulator
 		try
 		{
 			File fileInTempDir = fileStore.store(is, i18nFileName);
-			LOG.info("Create temp file for {} : {}", i18nFileName, fileInTempDir);
+			LOG.trace("Create temp file for {} : {}", i18nFileName, fileInTempDir);
 
 			FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory
 					.createFileRepositoryCollection(fileInTempDir);
@@ -63,7 +63,7 @@ public class I18nStringsPopulator
 
 			if (fileInTempDir.exists())
 			{
-				LOG.info("Delete temp file for {} : {}", i18nFileName, fileInTempDir);
+				LOG.trace("Delete temp file for {} : {}", i18nFileName, fileInTempDir);
 				fileInTempDir.delete();
 			}
 		}
