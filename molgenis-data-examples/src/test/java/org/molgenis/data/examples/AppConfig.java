@@ -65,7 +65,7 @@ public class AppConfig
 	@Bean
 	public SearchService searchService()
 	{
-		return embeddedElasticSearchServiceFactory().create(dataService(), elasticsearchEntityFactory(), null);
+		return embeddedElasticSearchServiceFactory().create(dataService(), elasticsearchEntityFactory());
 	}
 
 	@Bean

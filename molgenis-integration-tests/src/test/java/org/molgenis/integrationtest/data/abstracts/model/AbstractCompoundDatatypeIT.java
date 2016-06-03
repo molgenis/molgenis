@@ -11,6 +11,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.integrationtest.data.abstracts.model.AbstractDatatypeIT;
 
 public abstract class AbstractCompoundDatatypeIT extends AbstractDatatypeIT
 {

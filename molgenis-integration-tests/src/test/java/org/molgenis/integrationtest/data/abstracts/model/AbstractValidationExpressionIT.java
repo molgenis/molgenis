@@ -9,6 +9,7 @@ import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.integrationtest.data.abstracts.AbstractDataIntegrationIT;
 
 public abstract class AbstractValidationExpressionIT extends AbstractDataIntegrationIT
 {

@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 public class QueryUtils
 {

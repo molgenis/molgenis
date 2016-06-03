@@ -44,7 +44,7 @@ public class TypedRepositoryDecorator<E extends Entity> implements Repository<E>
 	{
 		return asTypedStream(StreamSupport
 				.stream(Spliterators.spliteratorUnknownSize(untypedRepo.iterator(), Spliterator.ORDERED), false))
-						.iterator();
+				.iterator();
 	}
 
 	@Override

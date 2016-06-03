@@ -1,5 +1,6 @@
 package org.molgenis.data.postgresql;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -37,6 +38,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +95,12 @@ public class PostgreSqlRepository extends AbstractRepository
 	private static final Set<RepositoryCapability> REPO_CAPABILITIES = unmodifiableSet(new HashSet<>(
 			asList(WRITABLE, MANAGABLE, QUERYABLE, VALIDATE_REFERENCE_CONSTRAINT, VALIDATE_UNIQUE_CONSTRAINT,
 					VALIDATE_NOTNULL_CONSTRAINT)));
+
+	/**
+	 * Supported query operators
+	 */
+	private static final Set<Operator> QUERY_OPERATORS = unmodifiableSet(
+			EnumSet.of(EQUALS, IN, LESS, LESS_EQUAL, GREATER, GREATER_EQUAL, RANGE, LIKE, NOT, AND, OR, NESTED));
 
 	private final PostgreSqlEntityFactory postgreSqlEntityFactory;
 	private final JdbcTemplate jdbcTemplate;

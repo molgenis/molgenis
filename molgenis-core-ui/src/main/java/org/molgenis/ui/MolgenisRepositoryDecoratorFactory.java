@@ -23,6 +23,8 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.RepositorySecurityDecorator;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionRegisterService;
+import org.molgenis.data.elasticsearch.reindex.ReindexActionRepositoryDecorator;
 import org.molgenis.data.i18n.I18nStringDecorator;
 import org.molgenis.data.i18n.Language;
 import org.molgenis.data.i18n.LanguageRepositoryDecorator;
@@ -58,6 +60,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
 	private final MolgenisUserFactory molgenisUserFactory;
 	private final UserAuthorityFactory userAuthorityFactory;
+	private final ReindexActionRegisterService reindexActionRegisterService;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -65,7 +68,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			DataService dataService, ExpressionValidator expressionValidator,
 			RepositoryDecoratorRegistry repositoryDecoratorRegistry,
 			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, MolgenisUserFactory molgenisUserFactory,
-			UserAuthorityFactory userAuthorityFactory)
+			UserAuthorityFactory userAuthorityFactory, ReindexActionRegisterService reindexActionRegisterService)
 	{
 		this.entityManager = requireNonNull(entityManager);
 		this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
@@ -77,6 +80,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.systemEntityMetaDataRegistry = requireNonNull(systemEntityMetaDataRegistry);
 		this.molgenisUserFactory = requireNonNull(molgenisUserFactory);
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
+		this.reindexActionRegisterService = requireNonNull(reindexActionRegisterService);
 	}
 
 	@Override
@@ -103,8 +107,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
 
 		// 4. Index Transaction log decorator
-		decoratedRepository = new ReindexActionRepositoryDecorator(decoratedRepository,
-				indexTransactionLogService);
+		decoratedRepository = new ReindexActionRepositoryDecorator(decoratedRepository, reindexActionRegisterService);
 
 		// 3. validation decorator
 		decoratedRepository = new RepositoryValidationDecorator(dataService, decoratedRepository,
@@ -172,7 +175,5 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			repository = new I18nStringDecorator(repository);
 		}
 		return repository;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionRegisterService;
-import org.molgenis.data.elasticsearch.reindex.ReindexActionRepositoryDecorator;
 	}
 }

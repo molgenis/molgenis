@@ -33,6 +33,7 @@ import org.molgenis.data.EntityListener;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
@@ -69,6 +70,12 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	public String getName()
 	{
 		return decoratedRepo.getName();
+	}
+
+	@Override
+	public Set<QueryRule.Operator> getQueryOperators()
+	{
+		return decoratedRepo.getQueryOperators();
 	}
 
 	@Override

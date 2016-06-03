@@ -12,7 +12,6 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_REFERENCE_CONSTRAINT;
 import static org.molgenis.data.RepositoryCapability.VALIDATE_UNIQUE_CONSTRAINT;
-import static org.molgenis.data.transaction.MolgenisTransactionLogEntryMetaData.MOLGENIS_TRANSACTION_LOG_ENTRY;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -42,7 +41,6 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.EntityUtils;

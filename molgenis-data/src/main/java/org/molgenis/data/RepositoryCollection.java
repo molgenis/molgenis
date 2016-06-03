@@ -81,7 +81,6 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	/**
 	 * Deletes the {@link Repository} with the given entity name from this repository collection.
 	 *
-	 *
 	 * @param entityMeta@throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#WRITABLE}
 	 */
 	void deleteRepository(EntityMetaData entityMeta);

@@ -9,10 +9,10 @@ import static org.testng.Assert.assertEquals;
 import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.CudType;
 import org.molgenis.data.elasticsearch.reindex.ReindexActionMetaData.DataType;
+import org.molgenis.data.meta.EntityMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 

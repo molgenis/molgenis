@@ -3,7 +3,6 @@ package org.molgenis.data.elasticsearch;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
 import static org.molgenis.data.RepositoryCapability.INDEXABLE;
-import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 
 import java.io.IOException;
@@ -19,14 +18,13 @@ import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.QueryUtils;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -219,32 +217,10 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		elasticSearchService.rebuildIndex(decoratedRepository, getEntityMetaData());
 	}
 
-	@Override
-	public void create()
-	{
-		if (!decoratedRepository.getCapabilities().contains(MANAGABLE))
-		{
-			throw new MolgenisDataAccessException(
-					"Repository '" + decoratedRepository.getName() + "' is not Manageable");
-		}
-		decoratedRepository.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		if (!decoratedRepository.getCapabilities().contains(MANAGABLE))
-		{
-			throw new MolgenisDataAccessException(
-					"Repository '" + decoratedRepository.getName() + "' is not Manageable");
-		}
-		decoratedRepository.drop();
-	}
-
 	/**
 	 * Gets the capabilities of the underlying repository and adds three read capabilities provided by the index:
-	 * {@link #INDEXABLE}, {@link #QUERYABLE} and {@link #AGGREGATEABLE}. Does not add other index capabilities like
-	 * {@link #WRITABLE} because those might conflict with the underlying repository.
+	 * {@link RepositoryCapability#INDEXABLE}, {@link RepositoryCapability#QUERYABLE} and {@link RepositoryCapability#AGGREGATEABLE}. Does not add other index capabilities like
+	 * {@link RepositoryCapability#WRITABLE} because those might conflict with the underlying repository.
 	 */
 	@Override
 	public Set<RepositoryCapability> getCapabilities()

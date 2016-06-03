@@ -20,6 +20,7 @@ import org.molgenis.data.EntityListener;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.util.DependencyResolver;
@@ -54,6 +55,12 @@ public class PackageRepositoryDecorator implements Repository<Package>
 	public String getName()
 	{
 		return decoratedRepo.getName();
+	}
+
+	@Override
+	public Set<QueryRule.Operator> getQueryOperators()
+	{
+		return decoratedRepo.getQueryOperators();
 	}
 
 	@Override

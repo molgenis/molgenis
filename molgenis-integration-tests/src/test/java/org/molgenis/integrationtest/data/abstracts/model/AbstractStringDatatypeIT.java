@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.data;
+package org.molgenis.integrationtest.data.abstracts.model;
 
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;

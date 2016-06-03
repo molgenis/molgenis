@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.data;
+package org.molgenis.integrationtest.data.abstracts.model;
 
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
@@ -13,6 +13,8 @@ import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.Package;
+import org.molgenis.integrationtest.data.SecuritySupport;
+import org.molgenis.integrationtest.data.abstracts.AbstractDataIntegrationIT;
 
 import com.google.common.collect.Iterables;
 

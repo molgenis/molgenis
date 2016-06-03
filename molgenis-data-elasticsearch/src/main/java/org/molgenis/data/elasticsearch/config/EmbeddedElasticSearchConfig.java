@@ -10,8 +10,6 @@ import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
-import org.molgenis.data.meta.PackageFactory;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,9 +17,8 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Spring config for embedded elastic search server. Use this in your own app by importing this in your spring config:
  * <code> @Import(EmbeddedElasticSearchConfig.class)</code>
- * 
+ *
  * @author erwin
- * 
  */
 @Configuration
 public class EmbeddedElasticSearchConfig
@@ -37,9 +34,6 @@ public class EmbeddedElasticSearchConfig
 
 	@Autowired
 	private ElasticsearchEntityFactory elasticsearchEntityFactory;
-
-	@Autowired
-	private PackageFactory packageFactory;
 
 	@Bean(destroyMethod = "close")
 	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory()
@@ -69,8 +63,8 @@ public class EmbeddedElasticSearchConfig
 	@Bean
 	public SearchService searchService()
 	{
-		ElasticsearchService elasticSearchService = embeddedElasticSearchServiceFactory().create(dataService,
-				elasticsearchEntityFactory, packageFactory);
+		ElasticsearchService elasticSearchService = embeddedElasticSearchServiceFactory()
+				.create(dataService, elasticsearchEntityFactory);
 
 		return elasticSearchService;
 	}

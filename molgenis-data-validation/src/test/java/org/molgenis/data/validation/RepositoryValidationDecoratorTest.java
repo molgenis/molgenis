@@ -29,7 +29,6 @@ import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.transaction.MolgenisTransactionLogMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -220,9 +219,6 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void addEntityDoesNotRequireValidation()
 	{
-		when(entityMeta.getName()).thenReturn(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG);
-		when(decoratedRepo.getName()).thenReturn(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG);
-
 		// entities
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
@@ -1026,9 +1022,6 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void addStreamEntityDoesNotRequireValidation()
 	{
-		when(entityMeta.getName()).thenReturn(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG);
-		when(decoratedRepo.getName()).thenReturn(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG);
-
 		// entities
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
@@ -2096,9 +2089,6 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void updateEntityDoesNotRequireValidation()
 	{
-		when(entityMeta.getName()).thenReturn(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG);
-		when(decoratedRepo.getName()).thenReturn(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG);
-
 		// entities
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
@@ -3166,9 +3156,6 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void updateStreamEntityDoesNotRequireValidation()
 	{
-		when(entityMeta.getName()).thenReturn(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG);
-		when(decoratedRepo.getName()).thenReturn(MolgenisTransactionLogMetaData.MOLGENIS_TRANSACTION_LOG);
-
 		// entities
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);

@@ -89,6 +89,12 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
+	public Set<QueryRule.Operator> getQueryOperators()
+	{
+		return decoratedRepository.getQueryOperators();
+	}
+
+	@Override
 	public String getName()
 	{
 		return decoratedRepository.getName();

@@ -232,11 +232,11 @@ class PostgreSqlQueryGenerator
 				{
 					// TODO retrieve mref values in seperate queries to allow specifying limit and offset after nested
 					// MOLGENIS queries are implemented as sub-queries instead of query rules
-					String mrefSelect = MessageFormat.format(
-							"(SELECT array_agg(DISTINCT ARRAY[{0}.{1}::TEXT,{0}.{0}::TEXT]) "
-									+ "FROM {2} AS {0} WHERE this.{3} = {0}.{3}) AS {0}",
-							getColumnName(attr), getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME),
-							getJunctionTableName(entityMeta, attr), getColumnName(idAttribute));
+					String mrefSelect = MessageFormat
+							.format("(SELECT array_agg(DISTINCT ARRAY[{0}.{1}::TEXT,{0}.{0}::TEXT]) "
+											+ "FROM {2} AS {0} WHERE this.{3} = {0}.{3}) AS {0}", getColumnName(attr),
+									getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME),
+									getJunctionTableName(entityMeta, attr), getColumnName(idAttribute));
 					select.append(mrefSelect);
 				}
 				else
@@ -527,7 +527,7 @@ class PostgreSqlQueryGenerator
 					parameters.add(rangeValues.next()); // to
 
 					StringBuilder column = new StringBuilder();
-					if (attr.getDataType() instanceof  MrefField)
+					if (attr.getDataType() instanceof MrefField)
 					{
 						column.append(getFilterColumnName(attr, mrefFilterIndex));
 					}
@@ -620,8 +620,8 @@ class PostgreSqlQueryGenerator
 					}
 					parameters.add(convertedVal);
 
-					if (result.length() > 0 && !result.toString().endsWith(" OR ")
-							&& !result.toString().endsWith(" AND ") && !result.toString().endsWith(" NOT "))
+					if (result.length() > 0 && !result.toString().endsWith(" OR ") && !result.toString()
+							.endsWith(" AND ") && !result.toString().endsWith(" NOT "))
 					{
 						result.append(" AND ");
 					}

@@ -1,16 +1,24 @@
 package org.molgenis.data.elasticsearch.reindex;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.elasticsearch.reindex.IndexPackage.PACKAGE_INDEX;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * This entity is used to groups the reindex actions.
  */
-public class ReindexActionJobMetaData extends DefaultEntityMetaData
+@Component
+public class ReindexActionJobMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String ENTITY_NAME = "ReindexActionJob";
+	public static final String SIMPLE_NAME = "ReindexActionJob";
+	public static final String REINDEX_ACTION_JOB = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	/**
 	 * Example: Transaction id can be used to group all actions into one transaction.
@@ -22,10 +30,20 @@ public class ReindexActionJobMetaData extends DefaultEntityMetaData
 	 */
 	public static final String COUNT = "count";
 
-	public ReindexActionJobMetaData(String backend)
+	private final IndexPackage indexPackage;
+
+	@Autowired
+	public ReindexActionJobMetaData(IndexPackage indexPackage)
 	{
-		super(ENTITY_NAME);
-		setBackend(backend);
+		super(SIMPLE_NAME, PACKAGE_INDEX);
+		this.indexPackage = requireNonNull(indexPackage);
+	}
+
+	@Override
+	public void init()
+	{
+		setPackage(indexPackage);
+
 		addAttribute(ID, ROLE_ID);
 		addAttribute(COUNT).setDataType(MolgenisFieldTypes.INT).setNillable(false);
 	}

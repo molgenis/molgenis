@@ -11,24 +11,15 @@ public class ReindexActionRegisterConfig
 	@Autowired
 	private DataService dataService;
 
-	public static final String BACKEND = "PostgreSQL";
+	@Autowired
+	private ReindexActionJobMetaData reindexActionJobMetaData;
 
-	@Bean
-	public ReindexActionJobMetaData reindexActionJobMetaData()
-	{
-		return new ReindexActionJobMetaData(BACKEND);
-	}
-
-	@Bean
-	public ReindexActionMetaData reindexActionMetaData()
-	{
-		return new ReindexActionMetaData(reindexActionJobMetaData(), BACKEND);
-	}
+	@Autowired
+	private ReindexActionMetaData reindexActionMetaData;
 
 	@Bean
 	public ReindexActionRegisterService reindexActionRegisterService()
 	{
-		return new ReindexActionRegisterService(dataService, reindexActionJobMetaData(),
- reindexActionMetaData());
+		return new ReindexActionRegisterService(dataService, reindexActionJobMetaData, reindexActionMetaData);
 	}
 }

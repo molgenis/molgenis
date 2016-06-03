@@ -1,21 +1,29 @@
 package org.molgenis.data.elasticsearch.reindex;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.elasticsearch.reindex.IndexPackage.PACKAGE_INDEX;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.SystemEntityMetaDataImpl;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.TextField;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 /**
  * The reindex action is used to describe the action that need to be done to get the index consistent again.
  */
-public class ReindexActionMetaData extends DefaultEntityMetaData
+@Component
+public class ReindexActionMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String ENTITY_NAME = "ReindexAction";
+	public static final String SIMPLE_NAME = "ReindexAction";
+	public static final String REINDEX_ACTION = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	/**
 	 * Is auto generated
@@ -54,19 +62,32 @@ public class ReindexActionMetaData extends DefaultEntityMetaData
 
 	/**
 	 * Enum: the status of reindex action
-	 * 
+	 * <p>
 	 * FINISHED: reindex action is finished. CANCELED: reindex action is canceled FAILED: reindex action failed STARTED:
 	 * reindex action is started pending: reindex action is just created and is not proced
 	 */
 	public static final String REINDEX_STATUS = "reindexStatus";
 
-	public ReindexActionMetaData(ReindexActionJobMetaData indexTransactionLogMetaData, String backend)
+	private final IndexPackage indexPackage;
+	private final ReindexActionJobMetaData indexTransactionLogMetaData;
+
+	@Autowired
+	public ReindexActionMetaData(IndexPackage indexPackage, ReindexActionJobMetaData indexTransactionLogMetaData)
 	{
-		super(ENTITY_NAME);
-		setBackend(backend);
+		super(SIMPLE_NAME, PACKAGE_INDEX);
+
+		this.indexPackage = requireNonNull(indexPackage);
+		this.indexTransactionLogMetaData = requireNonNull(indexTransactionLogMetaData);
+	}
+
+	@Override
+	public void init()
+	{
+		setPackage(indexPackage);
+
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
-		addAttribute(REINDEX_ACTION_GROUP).setDataType(MolgenisFieldTypes.XREF).setRefEntity(
-				indexTransactionLogMetaData);
+		addAttribute(REINDEX_ACTION_GROUP).setDataType(MolgenisFieldTypes.XREF)
+				.setRefEntity(indexTransactionLogMetaData);
 		addAttribute(ACTION_ORDER).setNillable(false);
 		addAttribute(ENTITY_FULL_NAME).setNillable(false);
 		addAttribute(ENTITY_ID).setDataType(new TextField()).setNillable(true);
@@ -76,7 +97,7 @@ public class ReindexActionMetaData extends DefaultEntityMetaData
 				.setNillable(false);
 	}
 
-	public static enum CudType
+	public enum CudType
 	{
 		ADD, UPDATE, DELETE;
 
@@ -90,9 +111,9 @@ public class ReindexActionMetaData extends DefaultEntityMetaData
 
 			return options;
 		}
-	};
+	}
 
-	public static enum DataType
+	public enum DataType
 	{
 		DATA, METADATA;
 
@@ -106,12 +127,12 @@ public class ReindexActionMetaData extends DefaultEntityMetaData
 
 			return options;
 		}
-	};
+	}
 
 	/**
 	 * Indexing transaction status
 	 */
-	public static enum ReindexStatus
+	public enum ReindexStatus
 	{
 		FINISHED, CANCELED, FAILED, STARTED, PENDING;
 
@@ -125,5 +146,5 @@ public class ReindexActionMetaData extends DefaultEntityMetaData
 
 			return options;
 		}
-	};
+	}
 }

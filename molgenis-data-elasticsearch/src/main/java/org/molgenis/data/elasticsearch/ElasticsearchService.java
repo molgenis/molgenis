@@ -6,6 +6,8 @@ import static org.molgenis.data.elasticsearch.request.SourceFilteringGenerator.t
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
 import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -15,7 +17,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsResponse;
@@ -46,15 +47,12 @@ import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.fetch.source.FetchSourceContext;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.EntityStream;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
@@ -62,13 +60,10 @@ import org.molgenis.data.elasticsearch.response.ResponseParser;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.Pair;
@@ -81,7 +76,7 @@ import com.google.common.collect.Iterables;
 /**
  * ElasticSearch implementation of the SearchService interface. TODO use scroll-scan where possible:
  * http://www.elasticsearch.org/guide/en/elasticsearch /reference/current/search-request-scroll.html#scroll-scans
- * 
+ *
  * @author erwin
  */
 public class ElasticsearchService implements SearchService
@@ -93,12 +88,12 @@ public class ElasticsearchService implements SearchService
 	public static final String CRUD_TYPE_FIELD_NAME = "MolgenisCrudType";
 	private static BulkProcessorFactory BULK_PROCESSOR_FACTORY = new BulkProcessorFactory();
 
-	public static enum IndexingMode
+	public enum IndexingMode
 	{
 		ADD, UPDATE
-	};
+	}
 
-	static enum CrudType
+	enum CrudType
 	{
 		ADD, UPDATE, DELETE
 	}
@@ -119,7 +114,7 @@ public class ElasticsearchService implements SearchService
 
 	/**
 	 * Testability
-	 * 
+	 *
 	 * @param client
 	 * @param indexName
 	 * @param dataService
@@ -155,15 +150,7 @@ public class ElasticsearchService implements SearchService
 		}
 
 		final ImmutableOpenMap<String, MappingMetaData> indexMappings = mappingsResponse.getMappings().get(indexName);
-		return new Iterable<String>()
-		{
-
-			@Override
-			public Iterator<String> iterator()
-			{
-				return indexMappings.keysIt();
-			}
-		};
+		return () -> indexMappings.keysIt();
 	}
 
 	@Override
@@ -179,17 +166,17 @@ public class ElasticsearchService implements SearchService
 		// TODO : A quick fix now! Need to find a better way to get
 		// EntityMetaData in ElasticSearchService, because ElasticSearchService should not be
 		// aware of DataService. E.g. Put EntityMetaData in the SearchRequest object
-		EntityMetaData entityMetaData = (request.getDocumentType() != null && dataService != null
-				&& dataService.hasRepository(request.getDocumentType()))
-						? dataService.getEntityMetaData(request.getDocumentType()) : null;
+		EntityMetaData entityMetaData = (request.getDocumentType() != null && dataService != null && dataService
+				.hasRepository(request.getDocumentType())) ? dataService
+				.getEntityMetaData(request.getDocumentType()) : null;
 		String documentType = request.getDocumentType() == null ? null : sanitizeMapperType(request.getDocumentType());
 		if (LOG.isTraceEnabled())
 		{
 			LOG.trace("*** REQUEST\n" + builder);
 		}
-		generator.buildSearchRequest(builder, documentType, searchType, request.getQuery(),
-				request.getAggregateField1(), request.getAggregateField2(), request.getAggregateFieldDistinct(),
-				entityMetaData);
+		generator
+				.buildSearchRequest(builder, documentType, searchType, request.getQuery(), request.getAggregateField1(),
+						request.getAggregateField2(), request.getAggregateFieldDistinct(), entityMetaData);
 		SearchResponse response = builder.get();
 		if (LOG.isTraceEnabled())
 		{
@@ -211,18 +198,6 @@ public class ElasticsearchService implements SearchService
 		return indexMappings.containsKey(docType);
 	}
 
-	public boolean hasMapping(String index, EntityMetaData entityMetaData)
-	{
-		String docType = sanitizeMapperType(entityMetaData.getName());
-
-		GetMappingsResponse getMappingsResponse = client.admin().indices().prepareGetMappings(index).execute()
-				.actionGet();
-		ImmutableOpenMap<String, ImmutableOpenMap<String, MappingMetaData>> allMappings = getMappingsResponse
-				.getMappings();
-		final ImmutableOpenMap<String, MappingMetaData> indexMappings = allMappings.get(index);
-		return indexMappings.containsKey(docType);
-	}
-
 	@Override
 	public void createMappings(EntityMetaData entityMetaData)
 	{
@@ -230,19 +205,13 @@ public class ElasticsearchService implements SearchService
 		createMappings(entityMetaData, storeSource, true, true);
 	}
 
-	public void createMappings(String index, EntityMetaData entityMetaData)
-	{
-		boolean storeSource = storeSource(entityMetaData);
-		createMappings(index, entityMetaData, storeSource, true, true);
-	}
-
 	private void createMappings(String index, EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
 			boolean createAllIndex)
 	{
 		try
 		{
-			XContentBuilder jsonBuilder = MappingsBuilder.buildMapping(entityMetaData, storeSource, enableNorms,
-					createAllIndex);
+			XContentBuilder jsonBuilder = MappingsBuilder
+					.buildMapping(entityMetaData, storeSource, enableNorms, createAllIndex);
 			if (LOG.isTraceEnabled()) LOG.trace("Creating Elasticsearch mapping [{}] ...", jsonBuilder.string());
 			String entityName = entityMetaData.getName();
 
@@ -556,8 +525,8 @@ public class ElasticsearchService implements SearchService
 			}
 		}
 
-		return response.isExists() ? elasticsearchEntityFactory.create(entityMetaData, response.getSource(), fetch)
-				: null;
+		return response.isExists() ? elasticsearchEntityFactory
+				.create(entityMetaData, response.getSource(), fetch) : null;
 
 	}
 
@@ -573,15 +542,9 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public Iterable<Entity> get(Iterable<Object> entityIds, final EntityMetaData entityMetaData, Fetch fetch)
 	{
-		return new Iterable<Entity>()
-		{
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				Stream<Object> stream = stream(entityIds.spliterator(), false);
-				return get(stream, entityMetaData, fetch).iterator();
-			}
-
+		return () -> {
+			Stream<Object> stream = stream(entityIds.spliterator(), false);
+			return get(stream, entityMetaData, fetch).iterator();
 		};
 	}
 
@@ -614,13 +577,11 @@ public class ElasticsearchService implements SearchService
 		}
 
 		MultiGetRequestBuilder request = client.prepareMultiGet();
-		entityIds.forEach(id -> {
-			request.add(createMultiGetItem(indexName, type, id, fetch));
-		});
+		entityIds.forEach(id -> request.add(createMultiGetItem(indexName, type, id, fetch)));
 
 		if (request.request().getItems().isEmpty())
 		{
-			return Stream.<Entity> empty();
+			return Stream.<Entity>empty();
 		}
 
 		MultiGetResponse response = request.get();
@@ -651,7 +612,7 @@ public class ElasticsearchService implements SearchService
 			}
 			else
 			{
-				return Stream.<Entity> empty();
+				return Stream.<Entity>empty();
 			}
 		});
 	}
@@ -681,8 +642,7 @@ public class ElasticsearchService implements SearchService
 
 	private ElasticsearchEntityIterable searchInternal(Query<Entity> q, EntityMetaData entityMetaData)
 	{
-		String[] indexNames = new String[]
-		{ indexName };
+		String[] indexNames = new String[] { indexName };
 
 		return new ElasticsearchEntityIterable(q, entityMetaData, client, elasticsearchEntityFactory, generator,
 				indexNames);
@@ -695,7 +655,7 @@ public class ElasticsearchService implements SearchService
 		AttributeMetaData xAttr = aggregateQuery.getAttributeX();
 		AttributeMetaData yAttr = aggregateQuery.getAttributeY();
 		AttributeMetaData distinctAttr = aggregateQuery.getAttributeDistinct();
-		SearchRequest searchRequest = new SearchRequest(entityMetaData.getName(), q, Collections.<String> emptyList(),
+		SearchRequest searchRequest = new SearchRequest(entityMetaData.getName(), q, Collections.<String>emptyList(),
 				xAttr, yAttr, distinctAttr);
 		SearchResult searchResults = search(searchRequest);
 		return searchResults.getAggregate();
@@ -714,7 +674,7 @@ public class ElasticsearchService implements SearchService
 	{
 		if (storeSource(entityMetaData))
 		{
-			this.rebuildIndexElasticSearchEntity(entities, entityMetaData);
+			throw new UnsupportedOperationException("Elasticsearch is not used for data storage!");
 		}
 		else
 		{
@@ -723,66 +683,10 @@ public class ElasticsearchService implements SearchService
 	}
 
 	/**
-	 * Rebuild Elasticsearch index when the source is living in Elasticearch itself. This operation requires a way to
-	 * temporary save the data so we can drop and rebuild the index for this document.
-	 * 
-	 * @param entities
-	 * @param entityMetaData
-	 */
-	void rebuildIndexElasticSearchEntity(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
-	{
-		if (dataService.getMeta().hasBackend(ElasticsearchRepositoryCollection.NAME))
-		{
-			UuidGenerator uuidg = new UuidGenerator();
-			DefaultEntityMetaData tempEntityMetaData = new DefaultEntityMetaData(uuidg.generateId(), entityMetaData);
-			tempEntityMetaData
-					.setPackage(
-							new PackageImpl("elasticsearch_temporary_entity",
-									"This entity (Original: " + entityMetaData
-											.getName()
-									+ ") is temporary build to make rebuilding of Elasticsearch entities posible."));
-
-			// Add temporary repository into Elasticsearch
-			Repository<Entity> tempRepository = dataService.getMeta().addEntityMeta(tempEntityMetaData);
-
-			// Add temporary repository entities into Elasticsearch
-			dataService.add(tempRepository.getName(), stream(entities.spliterator(), false));
-
-			// Find the temporary saved entities
-			Iterable<? extends Entity> tempEntities = new Iterable<Entity>()
-			{
-				@Override
-				public Iterator<Entity> iterator()
-				{
-					return dataService.findAll(tempEntityMetaData.getName()).iterator();
-				}
-			};
-
-			this.rebuildIndexGeneric(tempEntities, entityMetaData);
-
-			// Remove temporary entity
-			dataService.delete(tempEntityMetaData.getName(), StreamSupport.stream(tempEntities.spliterator(), false));
-
-			// Remove temporary repository from Elasticsearch
-			dataService.getMeta().deleteEntityMeta(tempEntityMetaData.getName());
-
-			if (LOG.isInfoEnabled()) LOG.info("Finished rebuilding index of entity: [" + entityMetaData.getName()
-					+ "] with backend ElasticSearch");
-		}
-		else
-		{
-			if (LOG.isDebugEnabled()) LOG.debug("Rebuild index of entity: [" + entityMetaData.getName()
-					+ "] is skipped because the " + ElasticsearchRepositoryCollection.NAME + " backend is unknown");
-		}
-	}
-
-	/**
 	 * Rebuild Elasticsearch index when the source is living in another backend than the Elasticsearch itself.
-	 * 
-	 * @param entities
-	 *            entities that will be reindexed.
-	 * @param entityMetaData
-	 *            meta data information about the entities that will be reindexed.
+	 *
+	 * @param entities       entities that will be reindexed.
+	 * @param entityMetaData meta data information about the entities that will be reindexed.
 	 */
 	private void rebuildIndexGeneric(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
 	{
@@ -850,8 +754,7 @@ public class ElasticsearchService implements SearchService
 			}
 
 			Iterable<Entity> entities = new ElasticsearchEntityIterable(q, entityMetaData, client,
-					elasticsearchEntityFactory, generator, new String[]
-			{ indexName });
+					elasticsearchEntityFactory, generator, new String[] { indexName });
 
 			// TODO discuss whether this is still required
 			// Don't use cached ref entities but make new ones
@@ -870,7 +773,7 @@ public class ElasticsearchService implements SearchService
 
 	/**
 	 * Testability, using the real Elasticsearch BulkProcessor results in infinite waits on close
-	 * 
+	 *
 	 * @param bulkProcessorFactory
 	 */
 	static void setBulkProcessorFactory(BulkProcessorFactory bulkProcessorFactory)
@@ -927,8 +830,8 @@ public class ElasticsearchService implements SearchService
 		{
 			EntityMetaData refEntityMetaData = pair.getA();
 
-			if (!refEntityMetaData.getName().equals(EntityMetaDataMetaData.ENTITY_NAME)
-					&& !refEntityMetaData.getName().equals(AttributeMetaDataMetaData.ENTITY_NAME))
+			if (!refEntityMetaData.getName().equals(ENTITY_META_DATA) && !refEntityMetaData.getName()
+					.equals(ATTRIBUTE_META_DATA))
 			{
 				QueryImpl<Entity> q = null;
 				for (AttributeMetaData attributeMetaData : pair.getB())
@@ -947,7 +850,7 @@ public class ElasticsearchService implements SearchService
 
 	/**
 	 * Entities are stored (in addition to indexed) in Elasticsearch only if the entity backend is Elasticsearch
-	 * 
+	 *
 	 * @param entityMeta
 	 * @return whether or not this entity class is stored in Elasticsearch
 	 */

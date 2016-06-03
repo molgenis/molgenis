@@ -21,6 +21,7 @@ import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.EnumField;
+import org.molgenis.integrationtest.data.abstracts.AbstractDataIntegrationIT;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 

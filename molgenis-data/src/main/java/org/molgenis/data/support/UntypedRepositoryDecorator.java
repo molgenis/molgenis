@@ -13,6 +13,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
@@ -48,6 +49,12 @@ public class UntypedRepositoryDecorator<E extends Entity> implements Repository<
 	public String getName()
 	{
 		return typedRepo.getName();
+	}
+
+	@Override
+	public Set<QueryRule.Operator> getQueryOperators()
+	{
+		return typedRepo.getQueryOperators();
 	}
 
 	@Override
