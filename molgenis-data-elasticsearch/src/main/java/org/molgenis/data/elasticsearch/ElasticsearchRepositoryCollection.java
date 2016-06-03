@@ -23,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Maps;
 
@@ -87,15 +88,7 @@ public class ElasticsearchRepositoryCollection extends AbstractRepositoryCollect
 	@Override
 	public Iterator<Repository<Entity>> iterator()
 	{
-		return Iterators.transform(repositories.values().iterator(),
-				new Function<AbstractElasticsearchRepository, Repository<Entity>>()
-				{
-					@Override
-					public Repository<Entity> apply(AbstractElasticsearchRepository input)
-					{
-						return input;
-					}
-				});
+		return Iterators.transform(repositories.values().iterator(), input -> input);
 	}
 
 	@Override
@@ -152,13 +145,7 @@ public class ElasticsearchRepositoryCollection extends AbstractRepositoryCollect
 	@Override
 	public boolean hasRepository(String name)
 	{
-		if (null == name) return false;
-		Iterator<String> entityNames = getEntityNames().iterator();
-		while (entityNames.hasNext())
-		{
-			if (entityNames.next().equals(name)) return true;
-		}
-		return false;
+		return name != null && Iterables.contains(getEntityNames(), name);
 	}
 
 	@Override

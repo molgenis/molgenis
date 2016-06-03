@@ -111,8 +111,16 @@ class PostgreSqlQueryUtils
 		if (backend == null)
 		{
 			// TODO remove this check after getBackend always returns the backend
-			DataService dataService = getApplicationContext().getBean(DataService.class);
-			backend = dataService.getMeta().getDefaultBackend().getName();
+			if (null != getApplicationContext())
+			{
+				DataService dataService = getApplicationContext().getBean(DataService.class);
+				backend = dataService.getMeta().getDefaultBackend().getName();
+			}
+			else
+			{
+				// A workaround for the integration tests. getApplicationContext() should not be null
+				return true;
+			}
 		}
 		return backend.equals(PostgreSqlRepositoryCollection.NAME);
 	}

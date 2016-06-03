@@ -1,8 +1,5 @@
 package org.molgenis.file.ingest;
 
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.file.FileMetaMetaData.FILE_META;
-import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_EXECUTION;
 import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
@@ -10,14 +7,14 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.file.FileMeta;
 import org.molgenis.file.ingest.execution.FileIngestJob;
 import org.molgenis.file.ingest.execution.FileIngestJobFactory;
 import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
-import org.molgenis.file.ingest.meta.FileIngestJobExecutionFactory;
+import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
+import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;
@@ -41,19 +38,15 @@ public class FileIngesterQuartzJob implements Job
 	private FileIngestJobFactory fileIngestJobFactory;
 	@Autowired
 	private DataService dataService;
-	@Autowired
-	private FileIngestJobExecutionFactory fileIngestJobExecutionFactory;
 
 	public FileIngesterQuartzJob()
 	{
 	}
 
-	public FileIngesterQuartzJob(FileIngestJobFactory fileIngestJobFactory, DataService dataService,
-			FileIngestJobExecutionFactory fileIngestJobExecutionFactory)
+	public FileIngesterQuartzJob(FileIngestJobFactory fileIngestJobFactory, DataService dataService)
 	{
 		this.fileIngestJobFactory = fileIngestJobFactory;
 		this.dataService = dataService;
-		this.fileIngestJobExecutionFactory = fileIngestJobExecutionFactory;
 	}
 
 	@Override
@@ -66,10 +59,8 @@ public class FileIngesterQuartzJob implements Job
 	private void run(Object fileIngestId)
 	{
 		FileIngest fileIngest = dataService.findOneById(FILE_INGEST, fileIngestId, FileIngest.class);
-		MolgenisUser admin = dataService.query(MOLGENIS_USER, MolgenisUser.class)
-				.eq(MolgenisUserMetaData.USERNAME, "admin").findOne();
-		FileIngestJobExecution jobExecution = fileIngestJobExecutionFactory.create();
-		jobExecution.setUser(admin);// TODO system
+		FileIngestJobExecution jobExecution = new FileIngestJobExecution(dataService);
+		jobExecution.setUser("admin");// TODO system
 		jobExecution.setFileIngest(fileIngest);
 		jobExecution.setFailureEmail(fileIngest.getFailureEmail());
 		try
@@ -83,8 +74,8 @@ public class FileIngesterQuartzJob implements Job
 		}
 		FileIngestJob job = fileIngestJobFactory.createJob(jobExecution);
 		FileMeta fileMeta = job.call();
-		dataService.add(FILE_META, fileMeta);
+		dataService.add(FileMeta.ENTITY_NAME, fileMeta);
 		jobExecution.setFile(fileMeta);
-		dataService.update(FILE_INGEST_JOB_EXECUTION, jobExecution);
+		dataService.update(FileIngestJobExecutionMetaData.ENTITY_NAME, jobExecution);
 	}
 }

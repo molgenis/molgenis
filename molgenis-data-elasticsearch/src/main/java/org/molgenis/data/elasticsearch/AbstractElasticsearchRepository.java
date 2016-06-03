@@ -52,9 +52,6 @@ public abstract class AbstractElasticsearchRepository implements Repository<Enti
 	}
 
 	@Override
-	public abstract EntityMetaData getEntityMetaData();
-
-	@Override
 	public long count()
 	{
 		return elasticSearchService.count(getEntityMetaData());
@@ -217,6 +214,18 @@ public abstract class AbstractElasticsearchRepository implements Repository<Enti
 		elasticSearchService.delete(getEntityMetaData().getName());
 		createMappings();
 		elasticSearchService.refresh();
+	}
+
+	@Override
+	public void create()
+	{
+		createMappings();
+	}
+
+	@Override
+	public void drop()
+	{
+		elasticSearchService.delete(getEntityMetaData().getName());
 	}
 
 	@Override

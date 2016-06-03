@@ -71,15 +71,8 @@ public class EntityManagerImpl implements EntityManager
 		if (entities instanceof EntityCollection && ((EntityCollection) entities).isLazy())
 		{
 			// TODO remove cast after updating DataService/Repository interfaces to return EntityCollections
-			return new Iterable<Entity>()
-			{
-				@Override
-				public Iterator<Entity> iterator()
-				{
-					return dataService.findAll(entityMeta.getName(), new EntityIdIterable(entities).stream(), fetch)
-							.iterator();
-				}
-			};
+			return () -> dataService.findAll(entityMeta.getName(), new EntityIdIterable(entities).stream(), fetch)
+					.iterator();
 		}
 
 		// no fetch exists that described what to resolve
@@ -375,15 +368,8 @@ public class EntityManagerImpl implements EntityManager
 	@Override
 	public <E extends Entity> Iterable<E> convert(Iterable<Entity> entities, Class<E> entityClass)
 	{
-		return new Iterable<E>()
-		{
-			@Override
-			public Iterator<E> iterator()
-			{
-				return stream(entities.spliterator(), false)
-						.map(entity -> EntityUtils.convert(entity, entityClass, dataService)).iterator();
-			}
-		};
+		return () -> stream(entities.spliterator(), false)
+				.map(entity -> EntityUtils.convert(entity, entityClass, dataService)).iterator();
 	}
 
 	@Override

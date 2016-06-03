@@ -5,8 +5,6 @@ import java.beans.PropertyVetoException;
 import javax.sql.DataSource;
 
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.jobs.JobExecutionUpdater;
-import org.molgenis.data.jobs.JobExecutionUpdaterImpl;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -74,11 +72,5 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	public PlatformTransactionManager annotationDrivenTransactionManager()
 	{
 		return transactionManager();
-	}
-
-	@Bean
-	public JobExecutionUpdater jobExecutionUpdater()
-	{
-		return new JobExecutionUpdaterImpl();
 	}
 }

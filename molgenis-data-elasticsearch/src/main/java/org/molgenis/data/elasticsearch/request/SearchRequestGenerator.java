@@ -29,10 +29,10 @@ public class SearchRequestGenerator
 	}
 
 	/**
-	 * Add the 'searchType', 'fields', 'types' and 'query' of the SearchRequestBuilder
+	 * Writes a query to a {@link SearchRequestBuilder}.
 	 * 
 	 * @param searchRequestBuilder
-	 * @param entityNames
+	 * @param entityName
 	 * @param searchType
 	 * @param query
 	 * @param aggAttr1
@@ -41,16 +41,16 @@ public class SearchRequestGenerator
 	 *            Second Field to aggregate on
 	 * @param entityMetaData
 	 */
-	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, List<String> entityNames,
+	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, String entityName,
 			SearchType searchType, Query<Entity> query, AttributeMetaData aggAttr1, AttributeMetaData aggAttr2,
 			AttributeMetaData aggAttrDistinct, EntityMetaData entityMetaData)
 	{
 		searchRequestBuilder.setSearchType(searchType);
 
 		// Document type
-		if (entityNames != null)
+		if (entityName != null)
 		{
-			searchRequestBuilder.setTypes(entityNames.toArray(new String[entityNames.size()]));
+			searchRequestBuilder.setTypes(entityName);
 		}
 
 		// Generate query
@@ -68,13 +68,5 @@ public class SearchRequestGenerator
 			aggregateQueryGenerator.generate(searchRequestBuilder, aggAttr1, aggAttr2, aggAttrDistinct);
 		}
 
-	}
-
-	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, String entityName, SearchType searchType,
-			Query<Entity> query, AttributeMetaData aggregateField1, AttributeMetaData aggregateField2,
-			AttributeMetaData aggregateFieldDistinct, EntityMetaData entityMetaData)
-	{
-		buildSearchRequest(searchRequestBuilder, entityName == null ? null : Arrays.asList(entityName), searchType,
-				query, aggregateField1, aggregateField2, aggregateFieldDistinct, entityMetaData);
 	}
 }

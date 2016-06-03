@@ -23,6 +23,7 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.RepositorySecurityDecorator;
+import org.molgenis.data.elasticsearch.IndexedRepositoryDecorator;
 import org.molgenis.data.elasticsearch.reindex.ReindexActionRegisterService;
 import org.molgenis.data.elasticsearch.reindex.ReindexActionRepositoryDecorator;
 import org.molgenis.data.i18n.I18nStringDecorator;
@@ -88,26 +89,29 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	{
 		Repository<Entity> decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
 
-		// 9. Custom decorators
+			// 10. Route specific queries to the index
+			decoratedRepository = new IndexedRepositoryDecorator(decoratedRepository, searchService);
+
+			// 9. Register the cud action needed to reindex indexed repositories
+			decoratedRepository = new ReindexActionRepositoryDecorator(decoratedRepository, reindexActionRegisterService);
+
+		// 8. Custom decorators
 		decoratedRepository = applyCustomRepositoryDecorators(decoratedRepository);
 
-		// 8. Owned decorator
+		// 7. Owned decorator
 		if (EntityUtils.doesExtend(decoratedRepository.getEntityMetaData(), OWNED))
 		{
 			decoratedRepository = new OwnedEntityRepositoryDecorator(decoratedRepository);
 		}
 
-		// 7. Entity reference resolver decorator
+		// 6. Entity reference resolver decorator
 		decoratedRepository = new EntityReferenceResolverDecorator(decoratedRepository, entityManager);
 
-		// 6. Computed entity values decorator
+		// 5. Computed entity values decorator
 		decoratedRepository = new ComputedEntityValuesDecorator(decoratedRepository);
 
-		// 5. Entity listener
+		// 4. Entity listener
 		decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
-
-		// 4. Index Transaction log decorator
-		decoratedRepository = new ReindexActionRepositoryDecorator(decoratedRepository, reindexActionRegisterService);
 
 		// 3. validation decorator
 		decoratedRepository = new RepositoryValidationDecorator(dataService, decoratedRepository,

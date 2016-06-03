@@ -28,6 +28,7 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.validation.EntityAttributesValidator;
@@ -103,8 +104,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Autowired
 	public DataSource dataSource;
 
-//	@Autowired
-//	public TransactionLogService transactionLogService;
+	@Autowired
+	public ReindexActionRegisterService reindexActionRegisterService;
 
 	@Autowired
 	public IdGenerator idGenerator;
@@ -161,12 +162,12 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	{
 		/*
 		 * This way, the cors interceptor is added to the resource handlers as well, if the patterns overlap.
-		 * 
+		 *
 		 * See https://jira.spring.io/browse/SPR-10655
 		 */
 		String corsInterceptPattern = "/api/**";
 		return new MappedInterceptor(new String[]
-		{ corsInterceptPattern }, corsInterceptor());
+				{ corsInterceptPattern }, corsInterceptor());
 	}
 
 	@Override
@@ -207,8 +208,8 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	{
 		PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
 		Resource[] resources = new Resource[]
-		{ new FileSystemResource(System.getProperty("molgenis.home") + "/molgenis-server.properties"),
-				new ClassPathResource("/molgenis.properties") };
+				{ new FileSystemResource(System.getProperty("molgenis.home") + "/molgenis-server.properties"),
+						new ClassPathResource("/molgenis.properties") };
 		pspc.setLocations(resources);
 		pspc.setFileEncoding("UTF-8");
 		pspc.setIgnoreUnresolvablePlaceholders(true);
@@ -278,7 +279,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	/**
 	 * Bean that allows referencing Spring managed beans from Java code which is not managed by Spring
-	 * 
+	 *
 	 * @return
 	 */
 	@Bean
@@ -302,7 +303,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	/**
 	 * Configure freemarker. All freemarker templates should be on the classpath in a package called 'freemarker'
-	 * 
+	 *
 	 * @throws TemplateException
 	 * @throws IOException
 	 */
@@ -434,31 +435,31 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		}
 	}
 
-//	@PostConstruct
-//	public void initRepositories()
-//	{
-//		addUpgrades();
-//		boolean didUpgrade = upgradeService.upgrade();
-//		dataService().setMetaDataService(metaDataService());
-//		if (didUpgrade)
-//		{
-//			LOG.info("Reindexing repositories due to MOLGENIS upgrade...");
-//			reindex();
-//			LOG.info("Reindexing done.");
-//		}
-//		else if (!indexExists())
-//		{
-//			LOG.info("Reindexing repositories due to missing Elasticsearch index...");
-//			reindex();
-//			LOG.info("Reindexing done.");
-//		}
-//		else
-//		{
-//			LOG.debug("Elasticsearch index exists, no need to reindex.");
-//		}
-//
-//		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
-//	}
+	//	@PostConstruct
+	//	public void initRepositories()
+	//	{
+	//		addUpgrades();
+	//		boolean didUpgrade = upgradeService.upgrade();
+	//		dataService().setMetaDataService(metaDataService());
+	//		if (didUpgrade)
+	//		{
+	//			LOG.info("Reindexing repositories due to MOLGENIS upgrade...");
+	//			reindex();
+	//			LOG.info("Reindexing done.");
+	//		}
+	//		else if (!indexExists())
+	//		{
+	//			LOG.info("Reindexing repositories due to missing Elasticsearch index...");
+	//			reindex();
+	//			LOG.info("Reindexing done.");
+	//		}
+	//		else
+	//		{
+	//			LOG.debug("Elasticsearch index exists, no need to reindex.");
+	//		}
+	//
+	//		runAsSystem(() -> metaDataService().setDefaultBackend(getBackend()));
+	//	}
 
 	@Autowired
 	private EntityMetaDataMetaData entityMetaDataMetaData;

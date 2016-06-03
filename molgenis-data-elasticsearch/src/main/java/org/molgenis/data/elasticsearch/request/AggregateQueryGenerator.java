@@ -38,7 +38,7 @@ public class AggregateQueryGenerator
 		{
 			throw new IllegalArgumentException("Aggregation requires at least one aggregateable attribute");
 		}
-		if (aggAttr1 != null && !aggAttr1.isAggregatable())
+		if (!aggAttr1.isAggregateable())
 		{
 			throw new IllegalArgumentException("Attribute is not aggregateable [ " + aggAttr1.getName() + "]");
 		}

@@ -76,10 +76,4 @@ public class ElasticsearchEntityFactoryTest
 		when(entityToSourceConverter.convert(entity, entityMeta)).thenReturn(source);
 		assertEquals(elasticsearchEntityFactory.create(entityMeta, entity), source);
 	}
-
-	@Test
-	public void getEntityManager()
-	{
-		assertEquals(entityManager, elasticsearchEntityFactory.getEntityManager());
-	}
 }

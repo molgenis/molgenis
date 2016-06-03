@@ -3,6 +3,7 @@ package org.molgenis.ui.jobs;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.jobs.JobExecutionMetaData.SUBMISSION_DATE;
+import static org.molgenis.data.jobs.JobExecutionMetaData.USER;
 import static org.molgenis.ui.jobs.JobsController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -78,7 +79,7 @@ public class JobsController extends MolgenisPluginController
 					Query<Entity> q = dataService.query(e.getName()).ge(JobExecutionMetaData.SUBMISSION_DATE, weekAgo);
 					if (!currentUser.isSuperuser())
 					{
-						q.and().eq(JobExecutionMetaData.USER, currentUser);
+						q.and().eq(USER, currentUser.getUsername());
 					}
 					dataService.findAll(e.getName(), q).forEach(jobs::add);
 				});
