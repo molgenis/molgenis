@@ -1,15 +1,11 @@
 package org.molgenis.bootstrap;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
 
-import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.idcard.IdCardBootstrapper;
-import org.molgenis.data.importer.ImportServiceRegistrar;
 import org.molgenis.data.jobs.JobBootstrapper;
 import org.molgenis.data.meta.system.SystemEntityMetaDataBootstrapper;
 import org.molgenis.file.ingest.meta.FileIngesterJobRegistrar;
-import org.molgenis.script.ScriptRunnerRegistrar;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,26 +24,21 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MolgenisBootstrapper.class);
 
-	private final RepositoryCollectionBootstrapper repoCollectionBootstrapper;
+	private final RegistryBootstrapper registryBootstrapper;
 	private final SystemEntityMetaDataBootstrapper systemEntityMetaDataBootstrapper;
-	private final ImportServiceRegistrar importServiceRegistrar;
-	private final ScriptRunnerRegistrar scriptRunnerRegistrar;
 	private final RepositoryPopulator repositoryPopulator;
 	private final FileIngesterJobRegistrar fileIngesterJobRegistrar;
 	private final JobBootstrapper jobBootstrapper;
 	private final IdCardBootstrapper idCardBootstrapper;
 
 	@Autowired
-	public MolgenisBootstrapper(RepositoryCollectionBootstrapper repoCollectionBootstrapper,
+	public MolgenisBootstrapper(RegistryBootstrapper registryBootstrapper,
 			SystemEntityMetaDataBootstrapper systemEntityMetaDataBootstrapper,
-			ImportServiceRegistrar importServiceRegistrar, ScriptRunnerRegistrar scriptRunnerRegistrar,
 			RepositoryPopulator repositoryPopulator, FileIngesterJobRegistrar fileIngesterJobRegistrar,
 			JobBootstrapper jobBootstrapper, IdCardBootstrapper idCardBootstrapper)
 	{
-		this.repoCollectionBootstrapper = requireNonNull(repoCollectionBootstrapper);
+		this.registryBootstrapper = requireNonNull(registryBootstrapper);
 		this.systemEntityMetaDataBootstrapper = requireNonNull(systemEntityMetaDataBootstrapper);
-		this.importServiceRegistrar = requireNonNull(importServiceRegistrar);
-		this.scriptRunnerRegistrar = requireNonNull(scriptRunnerRegistrar);
 		this.repositoryPopulator = requireNonNull(repositoryPopulator);
 		this.fileIngesterJobRegistrar = requireNonNull(fileIngesterJobRegistrar);
 		this.jobBootstrapper = requireNonNull(jobBootstrapper);
@@ -64,21 +55,13 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 
 		LOG.info("Bootstrapping application ...");
 
-		LOG.trace("Registering repository collections ...");
-		repoCollectionBootstrapper.bootstrap(event, POSTGRESQL);
-		LOG.debug("Registered repository collections");
+		LOG.trace("Bootstrapping registries ...");
+		registryBootstrapper.bootstrap(event);
+		LOG.debug("Bootstrapped registries");
 
 		LOG.trace("Bootstrapping system entity meta data ...");
 		systemEntityMetaDataBootstrapper.bootstrap(event);
 		LOG.debug("Bootstrapped system entity meta data");
-
-		LOG.trace("Registering importers ...");
-		importServiceRegistrar.register(event);
-		LOG.debug("Registered importers");
-
-		LOG.trace("Registering script runners ...");
-		scriptRunnerRegistrar.register(event);
-		LOG.debug("Registered script runners");
 
 		LOG.trace("Populating repositories ...");
 		repositoryPopulator.populate(event);

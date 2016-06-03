@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.settings.SettingsPopulator;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
+import org.molgenis.script.ScriptTypePopulator;
 import org.molgenis.ui.I18nStringsPopulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,14 +23,16 @@ public class RepositoryPopulator
 	private final WebAppDatabasePopulator webAppDatabasePopulator;
 	private final SettingsPopulator settingsPopulator;
 	private final I18nStringsPopulator i18nStringsPopulator;
+	private final ScriptTypePopulator scriptTypePopulator;
 
 	@Autowired
 	public RepositoryPopulator(WebAppDatabasePopulator webAppDatabasePopulator, SettingsPopulator settingsPopulator,
-			I18nStringsPopulator i18nStringsPopulator)
+			I18nStringsPopulator i18nStringsPopulator, ScriptTypePopulator scriptTypePopulator)
 	{
 		this.webAppDatabasePopulator = requireNonNull(webAppDatabasePopulator);
 		this.settingsPopulator = requireNonNull(settingsPopulator);
 		this.i18nStringsPopulator = requireNonNull(i18nStringsPopulator);
+		this.scriptTypePopulator = requireNonNull(scriptTypePopulator);
 	}
 
 	public void populate(ContextRefreshedEvent event)
@@ -38,12 +41,16 @@ public class RepositoryPopulator
 		webAppDatabasePopulator.populateDatabase();
 		LOG.trace("Populated database");
 
-		LOG.trace("Initializing settings entities ...");
+		LOG.trace("Populating settings entities ...");
 		settingsPopulator.initialize(event);
-		LOG.trace("Initialized settings entities");
+		LOG.trace("Populated settings entities");
 
 		LOG.trace("Populating database with I18N strings ...");
 		i18nStringsPopulator.populate();
 		LOG.trace("Populated database with I18N strings");
+
+		LOG.trace("Populating script type entities ...");
+		scriptTypePopulator.populate();
+		LOG.trace("Populated script type entities");
 	}
 }
