@@ -1,37 +1,23 @@
 package org.molgenis.das.impl;
 
-import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
-
-import javax.servlet.ServletContext;
-
+import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.das.RangeHandlingDataSource;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
+import org.molgenis.data.*;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
-
-import com.google.common.collect.Iterables;
-
 import uk.ac.ebi.mydas.configuration.DataSourceConfiguration;
 import uk.ac.ebi.mydas.configuration.PropertyType;
 import uk.ac.ebi.mydas.datasource.RangeHandlingAnnotationDataSource;
 import uk.ac.ebi.mydas.exceptions.BadReferenceObjectException;
 import uk.ac.ebi.mydas.exceptions.DataSourceException;
-import uk.ac.ebi.mydas.model.DasAnnotatedSegment;
-import uk.ac.ebi.mydas.model.DasFeature;
-import uk.ac.ebi.mydas.model.DasMethod;
-import uk.ac.ebi.mydas.model.DasType;
+import uk.ac.ebi.mydas.model.*;
+
+import javax.servlet.ServletContext;
+import java.util.*;
+import java.util.stream.Stream;
+
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 		implements RangeHandlingAnnotationDataSource
