@@ -1,39 +1,8 @@
 package org.molgenis.data.importer;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.i18n.I18nUtils.getLanguageCode;
-import static org.molgenis.data.i18n.I18nUtils.isI18n;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.DEFAULT_VALUE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.VALIDATION_EXPRESSION;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ROW_LEVEL_SECURED;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUserMetaData;
@@ -74,9 +43,39 @@ import org.molgenis.util.DependencyResolver;
 import org.springframework.core.convert.ConversionFailedException;
 import org.springframework.util.StringUtils;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.i18n.I18nUtils.getLanguageCode;
+import static org.molgenis.data.i18n.I18nUtils.isI18n;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.DEFAULT_VALUE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.VALIDATION_EXPRESSION;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ROW_LEVEL_SECURED;
 
 /**
  * Parser for the EMX metadata. This class is stateless, but it passes state between methods using
@@ -1003,7 +1002,9 @@ public class EmxMetaDataParser implements MetaDataParser
 					for (AttributeMetaData att : s.getEntityMetaData().getAttributes())
 					{
 						AttributeMetaData attribute = target.getAttribute(att.getName());
-						boolean known = attribute != null && attribute.getExpression() == null;
+						boolean known = (attribute != null && attribute.getExpression() == null)
+								|| (target.isRowLevelSecured()
+										&& att.getName().equals(RowLevelSecurityRepositoryDecorator.UPDATE_ATTRIBUTE));
 						report = report.addAttribute(att.getName(),
 								known ? AttributeState.IMPORTABLE : AttributeState.UNKNOWN);
 					}

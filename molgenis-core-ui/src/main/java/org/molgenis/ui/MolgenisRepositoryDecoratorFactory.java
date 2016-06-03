@@ -21,6 +21,7 @@ import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.MySqlRepositoryExceptionTranslatorDecorator;
 
@@ -34,11 +35,12 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final DataService dataService;
 	private final ExpressionValidator expressionValidator;
 	private final RepositoryDecoratorRegistry repositoryDecoratorRegistry;
+	private final UserAccountService userAccountService;
 
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager, TransactionLogService transactionLogService,
 			EntityAttributesValidator entityAttributesValidator, IdGenerator idGenerator, AppSettings appSettings,
 			DataService dataService, ExpressionValidator expressionValidator,
-			RepositoryDecoratorRegistry repositoryDecoratorRegistry)
+			RepositoryDecoratorRegistry repositoryDecoratorRegistry, UserAccountService userAccountService)
 	{
 		this.entityManager = entityManager;
 		this.transactionLogService = transactionLogService;
@@ -48,6 +50,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.dataService = dataService;
 		this.expressionValidator = expressionValidator;
 		this.repositoryDecoratorRegistry = repositoryDecoratorRegistry;
+		this.userAccountService = userAccountService;
 	}
 
 	@Override
@@ -56,7 +59,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		Repository decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
 
 		// 10. Row level security decorator
-		decoratedRepository = new RowLevelSecurityRepositoryDecorator(decoratedRepository);
+		decoratedRepository = new RowLevelSecurityRepositoryDecorator(decoratedRepository, dataService);
 
 		if (decoratedRepository.getName().equals(MolgenisUserMetaData.ENTITY_NAME))
 		{

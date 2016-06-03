@@ -1,8 +1,6 @@
 package org.molgenis.integrationtest.data;
 
-import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
-
+import com.google.common.io.Files;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.IdGenerator;
@@ -31,6 +29,7 @@ import org.molgenis.mysql.embed.EmbeddedMysqlDatabaseBuilder;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
 import org.molgenis.security.permission.PermissionSystemService;
+import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisRepositoryDecoratorFactory;
 import org.molgenis.ui.RepositoryDecoratorRegistry;
 import org.molgenis.util.ApplicationContextProvider;
@@ -49,7 +48,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
-import com.google.common.io.Files;
+import javax.annotation.PostConstruct;
+import javax.sql.DataSource;
 
 @EnableTransactionManagement(proxyTargetClass = true)
 @ComponentScan(
@@ -68,6 +68,9 @@ public abstract class AbstractDataApiTestConfig
 
 	@Autowired
 	public ExpressionValidator expressionValidator;
+
+	@Autowired
+	public UserAccountService userAccountService;
 
 	protected AbstractDataApiTestConfig()
 	{
@@ -153,7 +156,7 @@ public abstract class AbstractDataApiTestConfig
 			{
 				return new MolgenisRepositoryDecoratorFactory(entityManager(), transactionLogService,
 						entityAttributesValidator(), idGenerator(), appSettings(), dataService(), expressionValidator,
-						repositoryDecoratorRegistry()).createDecoratedRepository(repository);
+						repositoryDecoratorRegistry(), userAccountService).createDecoratedRepository(repository);
 			}
 		};
 	}
