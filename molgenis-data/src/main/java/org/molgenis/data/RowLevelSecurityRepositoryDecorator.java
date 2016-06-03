@@ -240,8 +240,9 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			validatePermission(entity, Permission.UPDATE, SecurityContextHolder.getContext().getAuthentication());
-			runAsSystem(() -> decoratedRepository.delete(entity));
+			Entity completeEntity = getCompleteEntity(entity);
+			validatePermission(completeEntity, Permission.UPDATE, SecurityContextHolder.getContext().getAuthentication());
+			runAsSystem(() -> decoratedRepository.delete(completeEntity));
 		}
 		else
 		{
@@ -270,7 +271,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	{
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
-			Entity entity = runAsSystem(() -> findOne(id));
+			Entity entity = runAsSystem(() -> decoratedRepository.findOne(id));
 			if (entity != null)
 			{
 				validatePermission(entity, Permission.UPDATE, SecurityContextHolder.getContext().getAuthentication());
@@ -295,11 +296,11 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		{
 			Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
 			Stream<Object> filteredIds = ids.filter(id -> {
-				Entity entity = runAsSystem(() -> findOne(id));
+				Entity entity = runAsSystem(() -> decoratedRepository.findOne(id));
 				if (entity == null) throw new UnknownEntityException(
 						"The entity you are trying to delete with id [" + id.toString() + "] doesn't exist");
 
-				return validatePermission(runAsSystem(() -> findOne(id)), Permission.UPDATE, currentAuthentication);
+				return validatePermission(runAsSystem(() -> decoratedRepository.findOne(id)), Permission.UPDATE, currentAuthentication);
 			});
 			runAsSystem(() -> decoratedRepository.deleteById(filteredIds));
 		}
@@ -315,7 +316,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
 			Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
-			stream().map(this::getCompleteEntity)
+			decoratedRepository.stream().map(this::getCompleteEntity)
 					.forEach(entity -> validatePermission(entity, Permission.UPDATE, currentAuthentication));
 			runAsSystem(decoratedRepository::deleteAll);
 		}
@@ -403,12 +404,9 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 
 	private Entity getCompleteEntity(Entity entity)
 	{
-		if (entity.getEntityMetaData().getAttribute(UPDATE_ATTRIBUTE) == null)
-		{
-			Entity currentEntity = runAsSystem(() -> findOne(entity.getIdValue()));
-			Iterable<Entity> users = runAsSystem(() -> currentEntity.getEntities(UPDATE_ATTRIBUTE));
-			entity.set(UPDATE_ATTRIBUTE, users);
-		}
+		Entity currentEntity = runAsSystem(() -> decoratedRepository.findOne(entity.getIdValue()));
+		Iterable<Entity> users = runAsSystem(() -> currentEntity.getEntities(UPDATE_ATTRIBUTE));
+		entity.set(UPDATE_ATTRIBUTE, users);
 		return entity;
 	}
 
@@ -451,7 +449,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 
 	private class RowLevelSecurityEntityMetaData extends DefaultEntityMetaData implements EntityMetaData
 	{
-		public RowLevelSecurityEntityMetaData(EntityMetaData entityMetaData)
+		RowLevelSecurityEntityMetaData(EntityMetaData entityMetaData)
 		{
 			super(entityMetaData);
 		}
