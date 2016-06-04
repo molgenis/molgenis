@@ -9,6 +9,8 @@ import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailSender;
 
+import java.util.function.Supplier;
+
 /**
  * Creates {@link IndexJob}s. Injects the beans they need to do their work.
  */
@@ -19,7 +21,7 @@ public class IndexJobFactory
 	@Autowired
 	private JobExecutionUpdater jobExecutionUpdater;
 	@Autowired
-	private MailSender mailSender;
+	private Supplier<MailSender> mailSender;
 
 	public IndexJobFactory(DataService dataService, SearchService searchService)
 	{

@@ -7,6 +7,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.config.HttpClientConfig;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
+import org.molgenis.mail.MailConfig;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.ui.freemarker.RepositoryTemplateLoader;
 import org.molgenis.util.GsonConfig;
@@ -30,7 +31,7 @@ import java.util.Map;
 @EnableAsync
 @ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class))
 @Import({ WebAppSecurityConfig.class, DatabaseConfig.class, HttpClientConfig.class, EmbeddedElasticSearchConfig.class,
-		GsonConfig.class })
+		GsonConfig.class, MailConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
 {
 	@Autowired

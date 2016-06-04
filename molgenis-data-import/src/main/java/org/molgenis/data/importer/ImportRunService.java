@@ -13,6 +13,7 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.importer.ImportRunMetaData.IMPORT_RUN;
@@ -23,12 +24,12 @@ public class ImportRunService
 	private static final Logger LOG = LoggerFactory.getLogger(ImportRunService.class);
 
 	private final DataService dataService;
-	private final MailSender mailSender;
+	private final Supplier<MailSender> mailSender;
 	private final UserService userService;
 	private final ImportRunFactory importRunFactory;
 
 	@Autowired
-	public ImportRunService(DataService dataService, MailSender mailSender, UserService userService,
+	public ImportRunService(DataService dataService, Supplier<MailSender> mailSender, UserService userService,
 			ImportRunFactory importRunFactory)
 	{
 		this.dataService = requireNonNull(dataService);
@@ -82,7 +83,7 @@ public class ImportRunService
 			mailMessage.setTo(userService.getUser(importRun.getUsername()).getEmail());
 			mailMessage.setSubject(createMailTitle(importRun));
 			mailMessage.setText(createMailText(importRun));
-			mailSender.send(mailMessage);
+			mailSender.get().send(mailMessage);
 		}
 		catch (MailException mce)
 		{

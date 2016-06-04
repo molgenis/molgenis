@@ -55,5 +55,10 @@
             <artifactId>protonpack</artifactId>
             <version>1.8</version>
         </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-mail</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 </project>

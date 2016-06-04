@@ -1,5 +1,6 @@
 package org.molgenis.dataexplorer.controller;
 
+import java.util.function.Supplier;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -57,7 +58,7 @@ public class AnnotationJobFactory
 	private JobExecutionUpdater jobExecutionUpdater;
 
 	@Autowired
-	private MailSender mailSender;
+	private Supplier<MailSender> mailSender;
 
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;

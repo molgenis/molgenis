@@ -253,12 +253,6 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		public JavaMailSender mailSender()
-		{
-			return mock(JavaMailSender.class);
-		}
-
-		@Bean
 		public DataService dataService()
 		{
 			DataService dataService = mock(DataService.class);

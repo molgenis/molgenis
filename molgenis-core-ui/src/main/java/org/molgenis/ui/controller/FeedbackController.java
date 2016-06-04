@@ -15,8 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailAuthenticationException;
 import org.springframework.mail.MailSendException;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.mail.MailSender;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
@@ -25,10 +25,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static java.util.Objects.requireNonNull;
 
@@ -51,17 +51,17 @@ public class FeedbackController extends AbstractStaticContentController
 	private final UserService userService;
 	private final AppSettings appSettings;
 	private final CaptchaService captchaService;
-	private final JavaMailSender mailSender;
+	private final Supplier<MailSender> mailSenderSupplier;
 
 	@Autowired
-	public FeedbackController(UserService userService, AppSettings appSettings,
-			CaptchaService captchaService, JavaMailSender mailSender)
+	public FeedbackController(UserService userService, AppSettings appSettings, CaptchaService captchaService,
+			Supplier<MailSender> mailSenderSupplier)
 	{
 		super(ID, URI);
 		this.userService = requireNonNull(userService);
 		this.appSettings = requireNonNull(appSettings);
 		this.captchaService = requireNonNull(captchaService);
-		this.mailSender = requireNonNull(mailSender);
+		this.mailSenderSupplier = requireNonNull(mailSenderSupplier);
 	}
 
 	/**
@@ -99,8 +99,8 @@ public class FeedbackController extends AbstractStaticContentController
 		try
 		{
 			LOG.info("Sending feedback:" + form);
-			MimeMessage message = createFeedbackMessage(form);
-			mailSender.send(message);
+			SimpleMailMessage message = createFeedbackMessage(form);
+			mailSenderSupplier.get().send(message);
 			form.setSubmitted(true);
 			captchaService.removeCaptcha();
 		}
@@ -125,23 +125,22 @@ public class FeedbackController extends AbstractStaticContentController
 	/**
 	 * Creates a MimeMessage based on a FeedbackForm.
 	 */
-	private MimeMessage createFeedbackMessage(FeedbackForm form) throws MessagingException
+	private SimpleMailMessage createFeedbackMessage(FeedbackForm form) throws MessagingException
 	{
-		MimeMessage message = mailSender.createMimeMessage();
-		MimeMessageHelper helper = new MimeMessageHelper(message, false);
-		helper.setTo(userService.getSuEmailAddresses().toArray(new String[0]));
+		SimpleMailMessage message = new SimpleMailMessage();
+		message.setTo(userService.getSuEmailAddresses().toArray(new String[] {}));
 		if (form.hasEmail())
 		{
-			helper.setCc(form.getEmail());
-			helper.setReplyTo(form.getEmail());
+			message.setCc(form.getEmail());
+			message.setReplyTo(form.getEmail());
 		}
 		else
 		{
-			helper.setReplyTo("no-reply@molgenis.org");
+			message.setReplyTo("no-reply@molgenis.org");
 		}
 		String appName = appSettings.getTitle();
-		helper.setSubject(String.format("[feedback-%s] %s", appName, form.getSubject()));
-		helper.setText(String.format("Feedback from %s:\n\n%s", form.getFrom(), form.getFeedback()));
+		message.setSubject(String.format("[feedback-%s] %s", appName, form.getSubject()));
+		message.setText(String.format("Feedback from %s:\n\n%s", form.getFrom(), form.getFeedback()));
 		return message;
 	}
 
@@ -152,7 +151,7 @@ public class FeedbackController extends AbstractStaticContentController
 	 */
 	private static String getFormattedName(User user)
 	{
-		List<String> parts = new ArrayList<String>();
+		List<String> parts = new ArrayList<>();
 		if (user.getTitle() != null)
 		{
 			parts.add(user.getTitle());

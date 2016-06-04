@@ -8,6 +8,7 @@ import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.security.core.SecureIdGenerator;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.UserService;
@@ -15,14 +16,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
+import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URI;
 import java.util.List;
-import java.util.UUID;
+import java.util.function.Supplier;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -38,20 +39,21 @@ public class AccountServiceImpl implements AccountService
 	private static final Logger LOG = LoggerFactory.getLogger(AccountServiceImpl.class);
 
 	private final DataService dataService;
-	private final JavaMailSender mailSender;
+	private final Supplier<MailSender> mailSender;
 	private final UserService userService;
 	private final AppSettings appSettings;
+	private final SecureIdGenerator secureIdGenerator;
 	private final GroupMemberFactory groupMemberFactory;
 
 	@Autowired
-	public AccountServiceImpl(DataService dataService, JavaMailSender mailSender,
-			UserService userService, AppSettings appSettings,
-			GroupMemberFactory groupMemberFactory)
+	public AccountServiceImpl(DataService dataService, Supplier<MailSender> mailSender, UserService userService,
+			AppSettings appSettings, SecureIdGenerator secureIdGenerator, GroupMemberFactory groupMemberFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.mailSender = requireNonNull(mailSender);
 		this.userService = requireNonNull(userService);
 		this.appSettings = requireNonNull(appSettings);
+		this.secureIdGenerator = requireNonNull(secureIdGenerator);
 		this.groupMemberFactory = requireNonNull(groupMemberFactory);
 	}
 
@@ -74,7 +76,7 @@ public class AccountServiceImpl implements AccountService
 		}
 
 		// collect activation info
-		String activationCode = UUID.randomUUID().toString();
+		String activationCode = secureIdGenerator.generateActivationCode();
 		List<String> activationEmailAddresses;
 		if (appSettings.getSignUpModeration())
 		{
@@ -85,8 +87,8 @@ public class AccountServiceImpl implements AccountService
 		else
 		{
 			String activationEmailAddress = user.getEmail();
-			if (activationEmailAddress == null || activationEmailAddress.isEmpty()) throw new MolgenisDataException(
-					"User '" + user.getUsername() + "' is missing required email address");
+			if (activationEmailAddress == null || activationEmailAddress.isEmpty())
+				throw new MolgenisDataException("User '" + user.getUsername() + "' is missing required email address");
 			activationEmailAddresses = asList(activationEmailAddress);
 		}
 
@@ -116,7 +118,7 @@ public class AccountServiceImpl implements AccountService
 			mailMessage.setTo(activationEmailAddresses.toArray(new String[] {}));
 			mailMessage.setSubject("User registration for " + appSettings.getTitle());
 			mailMessage.setText(createActivationEmailText(user, activationUri));
-			mailSender.send(mailMessage);
+			mailSender.get().send(mailMessage);
 		}
 		catch (MailException mce)
 		{
@@ -141,8 +143,8 @@ public class AccountServiceImpl implements AccountService
 	@RunAsSystem
 	public void activateUser(String activationCode)
 	{
-		User user = dataService.query(USER, User.class).eq(ACTIVE, false).and()
-				.eq(ACTIVATIONCODE, activationCode).findOne();
+		User user = dataService.query(USER, User.class).eq(ACTIVE, false).and().eq(ACTIVATIONCODE, activationCode)
+				.findOne();
 
 		if (user != null)
 		{
@@ -154,7 +156,7 @@ public class AccountServiceImpl implements AccountService
 			mailMessage.setTo(user.getEmail());
 			mailMessage.setSubject("Your registration request for " + appSettings.getTitle());
 			mailMessage.setText(createActivatedEmailText(user, appSettings.getTitle()));
-			mailSender.send(mailMessage);
+			mailSender.get().send(mailMessage);
 		}
 		else
 		{
@@ -187,7 +189,7 @@ public class AccountServiceImpl implements AccountService
 
 		if (user != null)
 		{
-			String newPassword = UUID.randomUUID().toString().substring(0, 8);
+			String newPassword = secureIdGenerator.generatePassword();
 			user.setPassword(newPassword);
 			user.setChangePassword(true);
 			dataService.update(USER, user);
@@ -197,7 +199,7 @@ public class AccountServiceImpl implements AccountService
 			mailMessage.setTo(user.getEmail());
 			mailMessage.setSubject("Your new password request");
 			mailMessage.setText(createPasswordResettedEmailText(newPassword));
-			mailSender.send(mailMessage);
+			mailSender.get().send(mailMessage);
 		}
 		else
 		{

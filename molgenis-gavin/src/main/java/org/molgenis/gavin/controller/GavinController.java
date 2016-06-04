@@ -6,6 +6,7 @@ import org.molgenis.gavin.job.GavinJobExecution;
 import org.molgenis.gavin.job.GavinJobFactory;
 import org.molgenis.gavin.job.JobNotFoundException;
 import org.molgenis.gavin.job.meta.GavinJobExecutionFactory;
+import org.molgenis.security.core.SecureIdGenerator;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.controller.AbstractStaticContentController;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -69,7 +70,8 @@ public class GavinController extends AbstractStaticContentController
 	@Autowired
 	public GavinController(@Qualifier("gavinExecutors") ExecutorService executorService,
 			GavinJobFactory gavinJobFactory, GavinJobExecutionFactory gavinJobExecutionFactory, FileStore fileStore,
-			UserAccountService userAccountService, MenuReaderService menuReaderService)
+			UserAccountService userAccountService, MenuReaderService menuReaderService,
+			SecureIdGenerator secureIdGenerator)
 	{
 		super(GAVIN_APP, URI);
 		this.executorService = requireNonNull(executorService);
@@ -78,7 +80,7 @@ public class GavinController extends AbstractStaticContentController
 		this.fileStore = requireNonNull(fileStore);
 		this.userAccountService = requireNonNull(userAccountService);
 		this.menuReaderService = menuReaderService;
-		secureIdGenerator = new SecureIdGenerator();
+		this.secureIdGenerator = secureIdGenerator;
 	}
 
 	/**

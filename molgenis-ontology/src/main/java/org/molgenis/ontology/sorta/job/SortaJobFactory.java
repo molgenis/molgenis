@@ -15,6 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.function.Supplier;
+
 @Component
 public class SortaJobFactory
 {
@@ -34,7 +36,7 @@ public class SortaJobFactory
 	private IdGenerator idGenerator;
 
 	@Autowired
-	private MailSender mailSender;
+	private Supplier<MailSender> mailSender;
 
 	@Autowired
 	private UserDetailsService userDetailsService;
