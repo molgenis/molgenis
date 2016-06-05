@@ -1,16 +1,17 @@
 package org.molgenis.data.elasticsearch.transaction;
 
+import static java.util.Objects.requireNonNull;
+
 import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
-
-import static java.util.Objects.requireNonNull;
 
 public class ReindexTransactionListener extends DefaultMolgenisTransactionListener
 {
 	private ReindexService rebuildIndexService;
 	private ReindexActionRegisterService reindexActionRegisterService;
 
-	public ReindexTransactionListener(ReindexService rebuildIndexService, ReindexActionRegisterService reindexActionRegisterService)
+	public ReindexTransactionListener(ReindexService rebuildIndexService,
+			ReindexActionRegisterService reindexActionRegisterService)
 	{
 		this.rebuildIndexService = requireNonNull(rebuildIndexService);
 		this.reindexActionRegisterService = requireNonNull(reindexActionRegisterService);

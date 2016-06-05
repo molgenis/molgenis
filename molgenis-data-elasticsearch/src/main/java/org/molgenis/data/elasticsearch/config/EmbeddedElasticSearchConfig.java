@@ -15,13 +15,11 @@ import org.molgenis.data.elasticsearch.reindex.job.ReindexJobExecutionFactory;
 import org.molgenis.data.elasticsearch.reindex.job.ReindexJobFactory;
 import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
 import org.molgenis.data.elasticsearch.reindex.job.ReindexServiceImpl;
-import org.molgenis.data.elasticsearch.reindex.job.ReindexJobFactory;
 import org.molgenis.data.elasticsearch.transaction.ReindexTransactionListener;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.JobExecutionUpdaterImpl;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
-import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -53,7 +51,7 @@ public class EmbeddedElasticSearchConfig
 	private MolgenisTransactionManager molgenisTransactionManager;
 
 	@Autowired
-	public ReindexJobExecutionFactory reindexJobExecutionFactory;
+	private ReindexJobExecutionFactory reindexJobExecutionFactory;
 
 	@Autowired
 	private ReindexActionRegisterService reindexActionRegisterService;
@@ -113,6 +111,7 @@ public class EmbeddedElasticSearchConfig
 	@Bean
 	public ReindexService rebuildIndexService()
 	{
-		return new ReindexServiceImpl(dataService, reindexJobFactory(), reindexJobExecutionFactory, newSingleThreadExecutor());
+		return new ReindexServiceImpl(dataService, reindexJobFactory(), reindexJobExecutionFactory,
+				newSingleThreadExecutor());
 	}
 }

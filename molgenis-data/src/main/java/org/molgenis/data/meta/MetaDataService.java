@@ -2,6 +2,7 @@ package org.molgenis.data.meta;
 
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -14,6 +15,14 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	Repository getRepository(String entityName);
 
 	Repository getRepository(EntityMetaData entityMeta);
+
+	/**
+	 * Returns whether a {@link Repository} exists for the given entity name. Always returns false for abstract entities.
+	 *
+	 * @param entityName entity name
+	 * @return true if non-abstract entity meta data exists for the given entity name
+	 */
+	boolean hasRepository(String entityName);
 
 	/**
 	 * Sets the backend, in wich the meta data and the user data is saved
@@ -82,7 +91,20 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 */
 	EntityMetaData getEntityMetaData(String name);
 
-	Iterable<EntityMetaData> getEntityMetaDatas();
+	/**
+	 * Returns whether {@link EntityMetaData entity meta data} exists for the given entity name.
+	 *
+	 * @param entityName entity name
+	 * @return true if entity meta data exists for the given entity name
+	 */
+	boolean hasEntityMetaData(String entityName);
+
+	/**
+	 * Returns a stream of all {@link EntityMetaData entity meta data}.
+	 *
+	 * @return all entity meta data
+	 */
+	Stream<EntityMetaData> getEntityMetaDatas();
 
 	/**
 	 * Adds new EntityMeta and creates a new Repository

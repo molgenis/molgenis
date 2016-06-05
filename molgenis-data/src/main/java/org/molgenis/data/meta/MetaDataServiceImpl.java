@@ -6,13 +6,14 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
 import static org.molgenis.data.meta.PackageMetaData.PACKAGE;
 import static org.molgenis.data.meta.PackageMetaData.PARENT;
 import static org.molgenis.data.meta.TagMetaData.TAG;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -117,6 +118,20 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
+	public boolean hasRepository(String entityName)
+	{
+		SystemEntityMetaData systemEntityMeta = systemEntityMetaDataRegistry.getSystemEntityMetaData(entityName);
+		if (systemEntityMeta != null)
+		{
+			return !systemEntityMeta.isAbstract();
+		}
+		else
+		{
+			return getEntityRepository().query().eq(FULL_NAME, entityName).and().eq(ABSTRACT, false).findOne() != null;
+		}
+	}
+
+	@Override
 	public MetaDataService setDefaultBackend(RepositoryCollection backend)
 	{
 		this.defaultBackend = backend;
@@ -214,6 +229,20 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
+	public boolean hasEntityMetaData(String entityName)
+	{
+		if (systemEntityMetaDataRegistry.hasSystemEntityMetaData(entityName))
+		{
+			return true;
+		}
+		else
+		{
+			// TODO replace findOneId with exists once available in Repository
+			return getEntityRepository().findOneById(entityName) != null;
+		}
+	}
+
+	@Override
 	public void addPackage(Package p)
 	{
 		getPackageRepository().add(p);
@@ -238,9 +267,9 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public Collection<EntityMetaData> getEntityMetaDatas()
+	public Stream<EntityMetaData> getEntityMetaDatas()
 	{
-		return getEntityRepository().stream().collect(toList());
+		return getEntityRepository().stream();
 	}
 
 	@Transactional

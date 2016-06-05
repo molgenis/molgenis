@@ -1,7 +1,6 @@
 package org.molgenis.ui.jobs;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.jobs.JobExecutionMetaData.SUBMISSION_DATE;
 import static org.molgenis.data.jobs.JobExecutionMetaData.USER;
 import static org.molgenis.ui.jobs.JobsController.URI;
@@ -73,7 +72,7 @@ public class JobsController extends MolgenisPluginController
 		Date weekAgo = cal.getTime();
 		MolgenisUser currentUser = userAccountService.getCurrentUser();
 
-		stream(dataService.getMeta().getEntityMetaDatas().spliterator(), false)
+		dataService.getMeta().getEntityMetaDatas()
 				.filter(e -> e.getExtends() != null && e.getExtends().getName().equals(jobMetaDataMetaData.getName()))
 				.forEach(e -> {
 					Query<Entity> q = dataService.query(e.getName()).ge(JobExecutionMetaData.SUBMISSION_DATE, weekAgo);

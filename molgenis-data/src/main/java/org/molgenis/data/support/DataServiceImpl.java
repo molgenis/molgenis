@@ -1,7 +1,6 @@
 package org.molgenis.data.support;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
@@ -84,7 +83,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public boolean hasRepository(String entityName)
 	{
-		return query(ENTITY_META_DATA).eq(FULL_NAME, entityName).and().eq(ABSTRACT, false).findOne() != null;
+		return metaDataService.hasRepository(entityName);
 	}
 
 	@Override

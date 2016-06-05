@@ -938,7 +938,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private List<EntityMetaData> resolveEntityDependencies(List<? extends EntityMetaData> metaDataList)
 	{
 		Set<EntityMetaData> allMetaData = Sets.newLinkedHashSet(metaDataList);
-		Iterable<EntityMetaData> existingMetaData = dataService.getMeta().getEntityMetaDatas();
+		Iterable<EntityMetaData> existingMetaData = dataService.getMeta().getEntityMetaDatas()::iterator;
 		Iterables.addAll(allMetaData, existingMetaData);
 
 		// Use all metadata for dependency resolving
