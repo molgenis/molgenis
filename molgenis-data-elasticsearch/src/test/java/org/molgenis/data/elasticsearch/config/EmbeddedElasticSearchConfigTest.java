@@ -16,6 +16,7 @@ import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFacto
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
 import org.molgenis.data.jobs.JobExecutionUpdater;
+import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.security.user.MolgenisUserService;
@@ -96,6 +97,12 @@ public class EmbeddedElasticSearchConfigTest
 		public MolgenisUserService molgenisUserService()
 		{
 			return mock(MolgenisUserService.class);
+		}
+
+		@Bean
+		public ReindexActionRegisterService reindexActionRegisterService()
+		{
+			return mock(ReindexActionRegisterService.class);
 		}
 	}
 

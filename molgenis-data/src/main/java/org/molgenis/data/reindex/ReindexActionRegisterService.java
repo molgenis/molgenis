@@ -1,22 +1,23 @@
 package org.molgenis.data.reindex;
 
-import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.COUNT;
-import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.REINDEX_ACTION_JOB;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
+import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
+import java.util.Collection;
 import java.util.Set;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.reindex.meta.ReindexAction;
-import org.molgenis.data.reindex.meta.ReindexActionFactory;
-import org.molgenis.data.reindex.meta.ReindexActionJob;
-import org.molgenis.data.reindex.meta.ReindexActionJobFactory;
+import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
+import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,22 +34,20 @@ import com.google.common.collect.Sets;
 public class ReindexActionRegisterService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ReindexActionRegisterService.class);
+	private static final int LOG_EVERY = 1000;
 
 	private final Set<String> excludedEntities = Sets.newConcurrentHashSet();
+
+	private final Multimap<String, Entity> reindexActionsPerTransaction = synchronizedListMultimap(
+			ArrayListMultimap.create());
 
 	@Autowired
 	private DataService dataService;
 
-	@Autowired
-	private ReindexActionFactory reindexActionFactory;
-
-	@Autowired
-	private ReindexActionJobFactory reindexActionJobFactory;
-
 	public ReindexActionRegisterService()
 	{
-		addExcludedEntity(REINDEX_ACTION_JOB);
-		addExcludedEntity(REINDEX_ACTION);
+		addExcludedEntity(ReindexActionJobMetaData.ENTITY_NAME);
+		addExcludedEntity(ReindexActionMetaData.ENTITY_NAME);
 	}
 
 	/**
@@ -76,24 +75,17 @@ public class ReindexActionRegisterService
 			String transactionId = (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);
 			if (transactionId != null)
 			{
-				LOG.debug("bootstrap(entityFullName: [{}], cudType [{}], dataType: [{}], entityId: [{}])",
+				LOG.debug("register(entityFullName: [{}], cudType [{}], dataType: [{}], entityId: [{}])",
 						entityFullName, cudType, dataType, entityId);
-				runAsSystem(() -> {
-					ReindexActionJob reindexActionJob = dataService
-							.findOneById(REINDEX_ACTION_JOB, transactionId, ReindexActionJob.class);
-
-					if (reindexActionJob == null)
-					{
-						reindexActionJob = this.createReindexActionJob(transactionId);
-						dataService.add(REINDEX_ACTION_JOB, reindexActionJob);
-					}
-
-					int actionOrder = increaseCountReindexActionJob(reindexActionJob);
-					Entity reindexAction = this
-							.createReindexAction(reindexActionJob, entityFullName, cudType, dataType, entityId,
-									actionOrder);
-					dataService.add(REINDEX_ACTION, reindexAction);
-				});
+				final int actionOrder = reindexActionsPerTransaction.get(transactionId).size();
+				if (actionOrder % LOG_EVERY == 0 && actionOrder / LOG_EVERY > 0)
+				{
+					LOG.warn(
+							"Transaction {} has caused {} ReindexActions to be created. Consider streaming your data manipulations.",
+							transactionId, actionOrder);
+				}
+				reindexActionsPerTransaction.put(transactionId,
+						createReindexAction(transactionId, entityFullName, cudType, dataType, entityId, actionOrder));
 			}
 			else
 			{
@@ -102,28 +94,55 @@ public class ReindexActionRegisterService
 		}
 	}
 
-	public int increaseCountReindexActionJob(Entity reindexActionJob)
+	/**
+	 * Stores the reindex actions in the repository.
+	 * Creates a ReindesActionJob to group them by.
+	 *
+	 * @param transactionId ID for the transaction the reindex actions were registered under
+	 */
+	@RunAsSystem
+	public void storeReindexActions(String transactionId)
 	{
-		int count = reindexActionJob.getInt(COUNT) + 1;
-		reindexActionJob.set(COUNT, count);
-		dataService.update(REINDEX_ACTION_JOB, reindexActionJob);
-		return count;
+		Collection<Entity> entities = reindexActionsPerTransaction.removeAll(transactionId);
+		if (!entities.isEmpty())
+		{
+			LOG.debug("Store reindex actions for transaction {}", transactionId);
+			dataService
+					.add(ReindexActionJobMetaData.ENTITY_NAME, createReindexActionJob(transactionId, entities.size()));
+			dataService.add(ReindexActionMetaData.ENTITY_NAME, entities.stream());
+		}
 	}
 
-	public ReindexActionJob createReindexActionJob(String id)
+	/**
+	 * Removes all reindex actions registered for a transaction.
+	 *
+	 * @param transactionId ID for the transaction the reindex actions were registered under
+	 */
+	public void forgetReindexActions(String transactionId)
 	{
-		ReindexActionJob reindexActionJob = reindexActionJobFactory.create(id);
-		reindexActionJob.setCount(0);
+		LOG.debug("Forget reindex actions for transaction {}", transactionId);
+		reindexActionsPerTransaction.removeAll(transactionId);
+	}
+
+	public DefaultEntity createReindexActionJob(String id, int count)
+	{
+		DefaultEntity reindexActionJob = new DefaultEntity(new ReindexActionJobMetaData(), dataService);
+		reindexActionJob.set(ReindexActionJobMetaData.ID, id);
+		reindexActionJob.set(ReindexActionJobMetaData.COUNT, count);
 		return reindexActionJob;
 	}
 
-	public ReindexAction createReindexAction(ReindexActionJob reindexActionGroup, String entityFullName,
-			CudType cudType, DataType dataType, String entityId, int actionOrder)
+	public DefaultEntity createReindexAction(String reindexActionGroup, String entityFullName, CudType cudType,
+			DataType dataType, String entityId, int actionOrder)
 	{
-		ReindexAction reindexAction = reindexActionFactory.create();
-		reindexAction.setReindexActionGroup(reindexActionGroup).setEntityFullName(entityFullName).setCudType(cudType)
-				.setDataType(dataType).setEntityId(entityId).setActionOrder(String.valueOf(actionOrder))
-				.setReindexStatus(ReindexActionMetaData.ReindexStatus.PENDING);
+		DefaultEntity reindexAction = new DefaultEntity(new ReindexActionMetaData(), this.dataService);
+		reindexAction.set(ReindexActionMetaData.REINDEX_ACTION_GROUP, reindexActionGroup);
+		reindexAction.set(ReindexActionMetaData.ENTITY_FULL_NAME, entityFullName);
+		reindexAction.set(ReindexActionMetaData.CUD_TYPE, cudType);
+		reindexAction.set(ReindexActionMetaData.DATA_TYPE, dataType);
+		reindexAction.set(ReindexActionMetaData.ENTITY_ID, entityId);
+		reindexAction.set(ReindexActionMetaData.ACTION_ORDER, actionOrder);
+		reindexAction.set(ReindexActionMetaData.REINDEX_STATUS, ReindexActionMetaData.ReindexStatus.PENDING);
 		return reindexAction;
 	}
 }
