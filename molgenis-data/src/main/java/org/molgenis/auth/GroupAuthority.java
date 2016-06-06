@@ -1,7 +1,7 @@
 package org.molgenis.auth;
 
 import static org.molgenis.auth.GroupAuthorityMetaData.ID;
-import static org.molgenis.auth.GroupAuthorityMetaData.MOLGENISGROUP;
+import static org.molgenis.auth.GroupAuthorityMetaData.MOLGENIS_GROUP;
 
 import org.molgenis.data.Entity;
 
@@ -35,11 +35,11 @@ public class GroupAuthority extends Authority
 
 	public MolgenisGroup getMolgenisGroup()
 	{
-		return getEntity(MOLGENISGROUP, MolgenisGroup.class);
+		return getEntity(MOLGENIS_GROUP, MolgenisGroup.class);
 	}
 
 	public void setMolgenisGroup(MolgenisGroup molgenisGroup)
 	{
-		set(MOLGENISGROUP, molgenisGroup);
+		set(MOLGENIS_GROUP, molgenisGroup);
 	}
 }

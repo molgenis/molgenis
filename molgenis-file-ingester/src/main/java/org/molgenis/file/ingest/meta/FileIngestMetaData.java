@@ -19,7 +19,7 @@ import com.google.common.collect.ImmutableList;
 @Component
 public class FileIngestMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "FileIngest";
+	private static final String SIMPLE_NAME = "FileIngest";
 	public static final String FILE_INGEST = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";

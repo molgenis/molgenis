@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AnnotationJobExecutionMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "AnnotationJobExecution";
+	private static final String SIMPLE_NAME = "AnnotationJobExecution";
 	public static final String ANNOTATION_JOB_EXECUTION = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String TARGET_NAME = "targetName";

@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MolgenisUserMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "MolgenisUser";
+	private static final String SIMPLE_NAME = "MolgenisUser";
 	public static final String MOLGENIS_USER = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String USERNAME = "username";

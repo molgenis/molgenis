@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class IdCardBiobankMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "rdconnect_regbb";
+	private static final String SIMPLE_NAME = "rdconnect_regbb";
 	public static final String ID_CARD_BIOBANK = PACKAGE_ID_CARD + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ORGANIZATION_ID = "OrganizationID";

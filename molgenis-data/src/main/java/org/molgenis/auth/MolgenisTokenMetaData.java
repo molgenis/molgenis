@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MolgenisTokenMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "MolgenisToken";
+	private static final String SIMPLE_NAME = "MolgenisToken";
 	public static final String MOLGENIS_TOKEN = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String TOKEN = "token";

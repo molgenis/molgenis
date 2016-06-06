@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MappingTargetMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "MappingTarget";
+	private static final String SIMPLE_NAME = "MappingTarget";
 	public static final String MAPPING_TARGET = PACKAGE_MAPPER + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String IDENTIFIER = "identifier";

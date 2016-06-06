@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReindexActionMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "ReindexAction";
+	private static final String SIMPLE_NAME = "ReindexAction";
 	public static final String REINDEX_ACTION = PACKAGE_INDEX + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	/**

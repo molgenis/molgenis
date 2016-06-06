@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class IdCardIndexingEventMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "IdCardIndexingEvent";
+	private static final String SIMPLE_NAME = "IdCardIndexingEvent";
 	public static final String ID_CARD_INDEXING_EVENT = PACKAGE_ID_CARD + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";

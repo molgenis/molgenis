@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class FileMetaMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "FileMeta";
+	private static final String SIMPLE_NAME = "FileMeta";
 	public static final String FILE_META = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";

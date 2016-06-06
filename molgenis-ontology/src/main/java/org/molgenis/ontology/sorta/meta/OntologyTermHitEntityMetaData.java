@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class OntologyTermHitEntityMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "OntologyTermHit";
+	private static final String SIMPLE_NAME = "OntologyTermHit";
 	public static final String ONTOLOGY_TERM_HIT = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";

@@ -21,7 +21,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class OwnedEntityMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "Owned";
+	private static final String SIMPLE_NAME = "Owned";
 	public static final String OWNED = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ATTR_OWNER_USERNAME = "ownerUsername";

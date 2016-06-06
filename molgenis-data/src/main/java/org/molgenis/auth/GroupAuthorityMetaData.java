@@ -13,10 +13,10 @@ import org.springframework.stereotype.Component;
 @Component
 public class GroupAuthorityMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "GroupAuthority";
+	private static final String SIMPLE_NAME = "GroupAuthority";
 	public static final String GROUP_AUTHORITY = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public static final String MOLGENISGROUP = "molgenisGroup";
+	public static final String MOLGENIS_GROUP = "molgenisGroup";
 	public static final String ROLE = "role";
 	public static final String ID = "id";
 
@@ -39,7 +39,7 @@ public class GroupAuthorityMetaData extends SystemEntityMetaDataImpl
 
 		setExtends(authorityMetaData);
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
-		addAttribute(MOLGENISGROUP).setDataType(XREF).setRefEntity(molgenisGroupMetaData).setAggregatable(true)
+		addAttribute(MOLGENIS_GROUP).setDataType(XREF).setRefEntity(molgenisGroupMetaData).setAggregatable(true)
 				.setDescription("").setNillable(false);
 	}
 

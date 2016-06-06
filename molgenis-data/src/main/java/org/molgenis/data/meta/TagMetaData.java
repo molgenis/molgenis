@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class TagMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "tags";
+	private static final String SIMPLE_NAME = "tags";
 	public static final String TAG = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String IDENTIFIER = "identifier";

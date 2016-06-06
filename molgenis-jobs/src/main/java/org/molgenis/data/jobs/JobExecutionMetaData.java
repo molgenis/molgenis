@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class JobExecutionMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "JobExecution";
+	private static final String SIMPLE_NAME = "JobExecution";
 	public static final String JOB_EXECUTION = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String IDENTIFIER = "identifier"; // Job ID

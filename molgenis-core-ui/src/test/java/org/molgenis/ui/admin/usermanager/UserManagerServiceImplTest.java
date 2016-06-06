@@ -211,7 +211,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	//						});
 	//
 	//		when(dataService.findAll(MolgenisGroupMemberMetaData.TAG,
-	//				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENISGROUP, group22), MolgenisGroupMember.class))
+	//				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_GROUP, group22), MolgenisGroupMember.class))
 	//						.thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
 	//						{
 	//							@Override
@@ -287,7 +287,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	//		when(dataService.findOneById(MolgenisGroupMetaData.TAG, "22", MolgenisGroup.class)).thenReturn(group22);
 	//
 	//		Query<MolgenisGroupMember> q = new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENISUSER, user1).and()
-	//				.eq(MolgenisGroupMemberMetaData.MOLGENISGROUP, group22);
+	//				.eq(MolgenisGroupMemberMetaData.MOLGENIS_GROUP, group22);
 	//
 	//		when(dataService.findAll(MolgenisGroupMemberMetaData.TAG, q, MolgenisGroupMember.class))
 	//				.thenReturn(Stream.of(molgenisGroupMember));

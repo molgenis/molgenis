@@ -271,7 +271,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	private List<Authority> getGroupPermissions(List<MolgenisGroup> molgenisGroups, final String authorityPrefix)
 	{
 		Stream<GroupAuthority> authorities = dataService.findAll(GROUP_AUTHORITY,
-				new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.MOLGENISGROUP, molgenisGroups),
+				new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.MOLGENIS_GROUP, molgenisGroups),
 				GroupAuthority.class);
 
 		return authorities.filter(authority -> {

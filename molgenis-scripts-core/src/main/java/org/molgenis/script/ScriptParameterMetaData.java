@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ScriptParameterMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "ScriptParameter";
+	private static final String SIMPLE_NAME = "ScriptParameter";
 	public static final String SCRIPT_PARAMETER = PACKAGE_SCRIPT + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String NAME = "name";

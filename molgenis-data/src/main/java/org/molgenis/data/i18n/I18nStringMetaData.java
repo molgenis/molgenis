@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class I18nStringMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "i18nstrings";
+	private static final String SIMPLE_NAME = "i18nstrings";
 	public static final String I18N_STRING = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String MSGID = "msgid";

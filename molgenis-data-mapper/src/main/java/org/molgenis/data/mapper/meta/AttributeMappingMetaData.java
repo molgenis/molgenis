@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AttributeMappingMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "AttributeMapping";
+	private static final String SIMPLE_NAME = "AttributeMapping";
 	public static final String ATTRIBUTE_MAPPING = PACKAGE_MAPPER + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String IDENTIFIER = "identifier";

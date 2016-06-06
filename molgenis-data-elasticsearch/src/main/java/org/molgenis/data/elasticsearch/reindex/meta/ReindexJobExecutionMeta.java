@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class ReindexJobExecutionMeta extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "ReindexJobExecution";
+	private static final String SIMPLE_NAME = "ReindexJobExecution";
 	public static final String REINDEX_JOB_EXECUTION = PACKAGE_INDEX + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	/**

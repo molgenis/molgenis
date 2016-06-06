@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class FileIngestJobExecutionMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "FileIngestJobExecution";
+	private static final String SIMPLE_NAME = "FileIngestJobExecution";
 	public static final String FILE_INGEST_JOB_EXECUTION = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String FILE = "file";

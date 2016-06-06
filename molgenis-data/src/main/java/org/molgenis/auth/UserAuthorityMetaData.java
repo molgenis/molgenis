@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class UserAuthorityMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "UserAuthority";
+	private static final String SIMPLE_NAME = "UserAuthority";
 	public static final String USER_AUTHORITY = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String MOLGENISUSER = "molgenisUser";

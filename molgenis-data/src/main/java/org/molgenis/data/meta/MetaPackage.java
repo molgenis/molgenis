@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MetaPackage extends SystemPackage
 {
-	public static final String SIMPLE_NAME = "md";
+	private static final String SIMPLE_NAME = "md";
 	public static final String PACKAGE_META = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	private RootSystemPackage rootSystemPackage;

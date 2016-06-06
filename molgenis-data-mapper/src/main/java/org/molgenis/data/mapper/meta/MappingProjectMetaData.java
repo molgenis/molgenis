@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class MappingProjectMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "MappingProject";
+	private static final String SIMPLE_NAME = "MappingProject";
 	public static final String MAPPING_PROJECT = PACKAGE_MAPPER + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String IDENTIFIER = "identifier";

@@ -112,25 +112,25 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 	//
 	//		MapEntity entity1 = new MapEntity("Entity1");
 	//		entity1.set(GroupAuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY1");
-	//		entity1.set(GroupAuthorityMetaData.MOLGENISGROUP, group1);
+	//		entity1.set(GroupAuthorityMetaData.MOLGENIS_GROUP, group1);
 	//		GroupAuthority authority1 = new GroupAuthority();
 	//		authority1.set(entity1);
 	//
 	//		MapEntity entity2 = new MapEntity("Entity2");
 	//		entity2.set(GroupAuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY2");
-	//		entity2.set(GroupAuthorityMetaData.MOLGENISGROUP, group1);
+	//		entity2.set(GroupAuthorityMetaData.MOLGENIS_GROUP, group1);
 	//		GroupAuthority authority2 = new GroupAuthority();
 	//		authority2.set(entity2);
 	//
 	//		MapEntity entity3 = new MapEntity("Entity2");
 	//		entity3.set(GroupAuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY3");
-	//		entity3.set(GroupAuthorityMetaData.MOLGENISGROUP, group1);
+	//		entity3.set(GroupAuthorityMetaData.MOLGENIS_GROUP, group1);
 	//		GroupAuthority authority3 = new GroupAuthority();
 	//		authority3.set(entity3);
 	//
 	//		MapEntity entity4 = new MapEntity("Entity2");
 	//		entity4.set(GroupAuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + "ENTITY4");
-	//		entity4.set(GroupAuthorityMetaData.MOLGENISGROUP, group1);
+	//		entity4.set(GroupAuthorityMetaData.MOLGENIS_GROUP, group1);
 	//		GroupAuthority authority4 = new GroupAuthority();
 	//		authority4.set(entity4);
 	//
@@ -143,7 +143,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 	//		when(webRequest.getParameter("entityIds")).thenReturn("entity1,entity2");
 	//		when(dataService.findOneById(MolgenisGroupMetaData.TAG, "ID", MolgenisGroup.class)).thenReturn(group1);
 	//		when(dataService.findAll(GroupAuthorityMetaData.TAG, new QueryImpl<GroupAuthority>().eq(
-	//				GroupAuthorityMetaData.MOLGENISGROUP, group1),
+	//				GroupAuthorityMetaData.MOLGENIS_GROUP, group1),
 	//				GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
 	//				{
 	//					@Override
@@ -153,7 +153,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 	//					}
 	//				});
 	//		when(dataService.findAll(GroupAuthorityMetaData.TAG, new QueryImpl<GroupAuthority>().eq(
-	//				GroupAuthorityMetaData.MOLGENISGROUP, "ID"),
+	//				GroupAuthorityMetaData.MOLGENIS_GROUP, "ID"),
 	//				GroupAuthority.class)).thenAnswer(new Answer<Stream<GroupAuthority>>()
 	//				{
 	//					@Override

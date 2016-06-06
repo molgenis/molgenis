@@ -154,8 +154,8 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		when(dataService.findOneById(MOLGENIS_USER, user2Id, MolgenisUser.class)).thenReturn(user2);
 		when(dataService.findOneById(MOLGENIS_USER, user3Id, MolgenisUser.class)).thenReturn(user3);
 
-		when(dataService.findAll(GROUP_AUTHORITY,
-				new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.MOLGENISGROUP, Arrays.<Entity>asList(group1)),
+		when(dataService.findAll(GROUP_AUTHORITY, new QueryImpl<GroupAuthority>()
+						.in(GroupAuthorityMetaData.MOLGENIS_GROUP, Arrays.<Entity>asList(group1)),
 						GroupAuthority.class)).thenReturn(
 				Stream.of(groupPlugin1Authority, groupPlugin2Authority, groupEntity1Authority, groupEntity2Authority));
 

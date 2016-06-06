@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class FreemarkerTemplateMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "FreemarkerTemplate";
+	private static final String SIMPLE_NAME = "FreemarkerTemplate";
 	public static final String FREEMARKER_TEMPLATE = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";

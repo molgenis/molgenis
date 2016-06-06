@@ -136,7 +136,7 @@ public class MolgenisUserDetailsService implements UserDetailsService
 					});
 
 			return dataService.findAll(GROUP_AUTHORITY,
-					new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.MOLGENISGROUP, molgenisGroups),
+					new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.MOLGENIS_GROUP, molgenisGroups),
 					GroupAuthority.class)
 					.collect(toList());
 		}

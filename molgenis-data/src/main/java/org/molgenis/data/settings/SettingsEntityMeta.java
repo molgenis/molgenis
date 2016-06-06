@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class SettingsEntityMeta extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "settings";
+	private static final String SIMPLE_NAME = "settings";
 	public static final String SETTINGS = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";

@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class QuestionnaireMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "Questionnaire";
+	private static final String SIMPLE_NAME = "Questionnaire";
 	public static final String QUESTIONNAIRE = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ATTR_STATUS = "status";
