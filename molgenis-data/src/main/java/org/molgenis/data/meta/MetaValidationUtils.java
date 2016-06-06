@@ -1,11 +1,15 @@
 package org.molgenis.data.meta;
 
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.PackageMetaData.PACKAGE;
+
 import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.ReservedKeywords;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.fieldtypes.CompoundField;
-import org.molgenis.model.ReservedKeywords;
 
 import com.google.common.collect.Sets;
 
@@ -14,17 +18,14 @@ import com.google.common.collect.Sets;
  */
 public class MetaValidationUtils
 {
-	public static final int MAX_ATTRIBUTE_LENGTH = 50;//FIXME
+	public static final int MAX_ATTRIBUTE_LENGTH = 30;
 
 	public static final Set<String> KEYWORDS = Sets.newHashSet();
 
 	static
 	{
 		// we can generate java(script) files with freemarker, so prevent use of reserved words
-		KEYWORDS.addAll(ReservedKeywords.JAVA_KEYWORDS);
 		KEYWORDS.addAll(ReservedKeywords.JAVASCRIPT_KEYWORDS);
-
-		KEYWORDS.addAll(ReservedKeywords.MYSQL_KEYWORDS);
 
 		// some words are reserved for the RestAPI and default packages/entities/attributes, etc.
 		KEYWORDS.addAll(ReservedKeywords.MOLGENIS_KEYWORDS);
@@ -115,8 +116,12 @@ public class MetaValidationUtils
 	{
 		try
 		{
-			//validateName(emd.getSimpleName()); FIXME
-			//			validateAttributes(emd.getAttributes()); FIXME
+			if (!emd.getName().equals(ATTRIBUTE_META_DATA) && !emd.getName().equals(ENTITY_META_DATA) && !emd.getName()
+					.equals(PACKAGE))
+			{
+				validateName(emd.getSimpleName());
+				validateAttributes(emd.getAttributes());
+			}
 
 			if (emd.getIdAttribute() != null && emd.getIdAttribute().getDefaultValue() != null)
 			{
