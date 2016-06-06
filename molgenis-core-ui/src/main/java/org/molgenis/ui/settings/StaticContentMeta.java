@@ -11,13 +11,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class StaticContentMeta extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "StaticContent";
+	private static final String SIMPLE_NAME = "StaticContent";
 	public static final String STATIC_CONTENT = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	static final String KEY = "key_";
 	static final String CONTENT = "content";
 
-	public StaticContentMeta()
+	StaticContentMeta()
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
 	}

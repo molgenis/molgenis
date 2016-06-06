@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class AuthorityMetaData extends SystemEntityMetaDataImpl
 {
-	public static final String SIMPLE_NAME = "authority";
+	private static final String SIMPLE_NAME = "authority";
 	public static final String AUTHORITY = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ROLE = "role";

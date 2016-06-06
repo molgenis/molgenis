@@ -130,7 +130,7 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		@Bean
 		public StaticContentMeta staticContentMeta()
 		{
-			return new StaticContentMeta();
+			return null; // new StaticContentMeta(); // FIXME
 		}
 
 		@Bean
