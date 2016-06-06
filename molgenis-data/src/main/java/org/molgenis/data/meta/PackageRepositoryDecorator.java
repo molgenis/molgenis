@@ -288,41 +288,11 @@ public class PackageRepositoryDecorator implements Repository<Package>
 	 */
 	private static void validateDeleteAllowed(Package package_)
 	{
-		// 1. This package and descending packages do not contain a system package
+		// This package and descending packages do not contain a system package
 		if (isSystemPackage(package_))
 		{
 			throw new MolgenisDataException(format("Deleting system package [%s] is not allowed", package_.getName()));
 		}
-
-		// FIXME
-		//		Repository<EntityMetaData> entityRepo = dataService.getRepository(EntityMetaDataMetaData.MOLGENIS_GROUP_MEMBER, EntityMetaDataImpl.class);
-		//
-		//		// 2. This package and descending packages do not contain a system package_
-		//		List<Entity> systemEntityEntities = entityRepo.query().eq(EntityMetaDataMetaData.SYSTEM, true).and()
-		//				.in(EntityMetaDataMetaData.PACKAGE, packageEntities).findAll().collect(toList());
-		//		if (!systemEntityEntities.isEmpty())
-		//		{
-		//			throw new MolgenisDataException(
-		//					format("Deleting package [%s] is not allowed, because package contains system entities [%s]",
-		//							rootPackageName, systemEntityEntities.stream().map(Entity::getIdValue).map(Object::toString)
-		//									.collect(joining(", "))));
-		//		}
-
-		// FIXME
-		//		// 3. User has write meta data permission on all entities in this package and descending packages
-		//		entityRepo.query().in(EntityMetaDataMetaData.PACKAGE, packageEntities).findAll().forEach(entityEntity -> {
-		//			String entityName = entityEntity.getString(EntityMetaDataMetaData.FULL_NAME);
-		//			if (!isPermissionValid(entityName, Permission.WRITEMETA))
-		//			{
-		//				throw new MolgenisDataException(
-		//						format("Deleting package [%s] is not allowed, because you don't have permission to delete package_ [%s]",
-		//								rootPackageName, entityName));
-		//			}
-		//		});
-
-		// 4. There are no dependencies to entities in this package and descendant packages from entities in other
-		// packages
-		// TODO
 	}
 
 	private Stream<Package> getPackageTreeTraversal(Package package_)
