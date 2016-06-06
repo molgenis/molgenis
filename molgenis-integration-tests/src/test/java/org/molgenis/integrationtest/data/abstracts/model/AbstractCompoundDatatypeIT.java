@@ -1,13 +1,8 @@
 package org.molgenis.integrationtest.data;
 
-import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.MolgenisFieldTypes.COMPOUND;
 import static org.testng.Assert.assertEquals;
 
-import java.util.Arrays;
-
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.integrationtest.data.abstracts.model.AbstractDatatypeIT;
 
@@ -19,10 +14,10 @@ public abstract class AbstractCompoundDatatypeIT extends AbstractDatatypeIT
 		EntityMetaData entityMetaData = new EntityMetaData("CompoundTest");
 		//		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(BOOL).setNillable(false); // FIXME
 
-		AttributeMetaData attributePart1 = new AttributeMetaData("col2").setDataType(BOOL);
-		AttributeMetaData attributePart2 = new AttributeMetaData("compound1").setDataType(COMPOUND);
-		attributePart2.setAttributeParts(
-				Arrays.<AttributeMetaData> asList(new AttributeMetaData("col3").setDataType(BOOL)));
+		//		AttributeMetaData attributePart1 = new AttributeMetaData("col2").setDataType(BOOL);
+		//		AttributeMetaData attributePart2 = new AttributeMetaData("compound1").setDataType(COMPOUND);
+		//		attributePart2.setAttributeParts(
+		//				Arrays.<AttributeMetaData> asList(new AttributeMetaData("col3").setDataType(BOOL)));
 
 		//		entityMetaData.addAttribute("compound").setDataType(COMPOUND)
 		//				.setAttributeParts(Arrays.<AttributeMetaData> asList(attributePart1, attributePart2)); // FIXME

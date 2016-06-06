@@ -11,7 +11,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AUTO;
@@ -34,18 +33,15 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VALIDATION_EXPRESSION;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE_EXPRESSION;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistrySingleton;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.fieldtypes.FieldType;
 
@@ -54,6 +50,11 @@ import org.molgenis.fieldtypes.FieldType;
  */
 public class AttributeMetaData extends SystemEntity
 {
+	/**
+	 * Creates a new attribute based on the given entity
+	 *
+	 * @param entity decorated entity
+	 */
 	public AttributeMetaData(Entity entity)
 	{
 		super(entity);
@@ -65,41 +66,28 @@ public class AttributeMetaData extends SystemEntity
 		}
 	}
 
+	/**
+	 * Creates a new attribute. Normally called by its {@link AttributeMetaDataFactory entity factory}.
+	 *
+	 * @param attrMetaDataMetaData attribute meta data
+	 */
 	public AttributeMetaData(AttributeMetaDataMetaData attrMetaDataMetaData)
 	{
 		super(attrMetaDataMetaData);
-
-		// FIXME use default value for this
-		set(DATA_TYPE, toDataTypeString(MolgenisFieldTypes.getType(requireNonNull(STRING).toString().toLowerCase())));
-		set(NILLABLE, true);
-		set(AUTO, false);
-		set(VISIBLE, true);
-		set(AGGREGATEABLE, false);
-		set(READ_ONLY, false);
-		set(UNIQUE, false);
+		setDefaultValues();
 	}
 
-	@Deprecated
-	public AttributeMetaData(String name)
+	/**
+	 * Creates a new attribute with the given identifier. Normally called by its {@link AttributeMetaDataFactory entity factory}.
+	 *
+	 * @param attrId               attribute identifier (not the attribute name)
+	 * @param attrMetaDataMetaData attribute meta data
+	 */
+	public AttributeMetaData(String attrId, AttributeMetaDataMetaData attrMetaDataMetaData)
 	{
-		this(name, STRING);
-	}
-
-	@Deprecated
-	public AttributeMetaData(String name, FieldTypeEnum fieldType)
-	{
-		super(SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(ATTRIBUTE_META_DATA));
-		FieldType dataType = MolgenisFieldTypes.getType(requireNonNull(fieldType).toString().toLowerCase());
-		set(NAME, name);
-		set(DATA_TYPE, toDataTypeString(dataType));
-
-		// FIXME use default value for this
-		set(NILLABLE, true);
-		set(AUTO, false);
-		set(VISIBLE, true);
-		set(AGGREGATEABLE, false);
-		set(READ_ONLY, false);
-		set(UNIQUE, false);
+		super(attrMetaDataMetaData);
+		setIdentifier(attrId);
+		setDefaultValues();
 	}
 
 	/**
@@ -112,12 +100,6 @@ public class AttributeMetaData extends SystemEntity
 	{
 		Entity entityCopy = MapEntity.newInstance(attr);
 		return new AttributeMetaData(entityCopy);
-	}
-
-	@Override
-	public EntityMetaData getEntityMetaData()
-	{
-		return SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(ATTRIBUTE_META_DATA);
 	}
 
 	public String getIdentifier()
@@ -257,18 +239,8 @@ public class AttributeMetaData extends SystemEntity
 		String refEntityName = getString(REF_ENTITY);
 		if (refEntityName != null)
 		{
-			SystemEntityMetaData systemEntityMetaData = SystemEntityMetaDataRegistrySingleton.INSTANCE
-					.getSystemEntityMetaData(refEntityName);
-			if (systemEntityMetaData != null)
-			{
-				return systemEntityMetaData;
-			}
-			else
-			{
-				// FIXME get rid of static getApplicationContext reference
-				return getApplicationContext().getBean(DataService.class)
-						.findOneById(ENTITY_META_DATA, refEntityName, EntityMetaData.class);
-			}
+			// FIXME change ref entity data type from string to xref
+			return getApplicationContext().getBean(DataService.class).getEntityMetaData(refEntityName);
 		}
 		else
 		{
@@ -278,6 +250,7 @@ public class AttributeMetaData extends SystemEntity
 
 	public AttributeMetaData setRefEntity(EntityMetaData refEntity)
 	{
+		// FIXME change ref entity data type from string to xref
 		set(REF_ENTITY, refEntity != null ? refEntity.getName() : null);
 		return this;
 	}
@@ -563,6 +536,17 @@ public class AttributeMetaData extends SystemEntity
 		Iterable<Tag> tags = getTags();
 		removeAll(tags, singletonList(tag));
 		set(TAGS, tag);
+	}
+
+	private void setDefaultValues()
+	{
+		setDataType(MolgenisFieldTypes.STRING);
+		setNillable(true);
+		setAuto(false);
+		setVisible(true);
+		setAggregatable(false);
+		setReadOnly(false);
+		setUnique(false);
 	}
 
 	private static String toDataTypeString(FieldType dataType)

@@ -1,6 +1,7 @@
 package org.molgenis.googlespreadsheet;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -12,7 +13,9 @@ import java.util.Set;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataFactory;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
 
@@ -129,6 +132,9 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
+			EntityMetaDataFactory entityMetaFactory = getApplicationContext().getBean(EntityMetaDataFactory.class);
+			AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
+
 			// ListFeed does not give you the true column names, use CellFeed instead
 			CellFeed feed;
 			try
@@ -151,17 +157,17 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 				throw new RuntimeException(e);
 			}
 
-			EntityMetaData entityMetaData = new EntityMetaData(feed.getTitle().getPlainText(), MapEntity.class);
+			EntityMetaData entityMetaData = entityMetaFactory.create().setSimpleName(feed.getTitle().getPlainText());
 
 			for (CellEntry cellEntry : feed.getEntries())
 			{
 				Cell cell = cellEntry.getCell();
 				if (cell.getRow() == 1)
 				{
-					entityMetaData.addAttribute(new AttributeMetaData(cell.getValue(), STRING));
+					entityMetaData.addAttribute(attrMetaFactory.create().setName(cell.getValue()).setDataType(STRING));
 				}
 			}
-			entityMetaData = entityMetaData;
+			this.entityMetaData = entityMetaData;
 		}
 
 		return entityMetaData;

@@ -1,6 +1,6 @@
 package org.molgenis.data.merge;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
+import static java.util.Objects.requireNonNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,6 +12,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.data.support.MapEntity;
@@ -27,11 +28,13 @@ public class RepositoryMerger
 {
 	private final static String ID = "ID";
 	private final DataService dataService;
+	private final AttributeMetaDataFactory attrMetaFactory;
 
 	@Autowired
-	public RepositoryMerger(DataService dataService)
+	public RepositoryMerger(DataService dataService, AttributeMetaDataFactory attrMetaFactory)
 	{
-		this.dataService = dataService;
+		this.dataService = requireNonNull(dataService);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 	}
 
 	/**
@@ -209,8 +212,8 @@ public class RepositoryMerger
 			Repository<Entity> repository)
 	{
 		EntityMetaData originalRepositoryMetaData = repository.getEntityMetaData();
-		AttributeMetaData repositoryCompoundAttribute = new AttributeMetaData(repository.getName(),
-				COMPOUND);
+		AttributeMetaData repositoryCompoundAttribute = attrMetaFactory.create().setName(repository.getName())
+				.setDataType(MolgenisFieldTypes.COMPOUND);
 		List<AttributeMetaData> attributeParts = new ArrayList<>();
 		for (AttributeMetaData originalRepositoryAttr : originalRepositoryMetaData.getAttributes())
 		{
@@ -291,7 +294,7 @@ public class RepositoryMerger
 
 	private AttributeMetaData copyAndRename(AttributeMetaData attributeMetaData, String name, String label)
 	{
-		AttributeMetaData result = new AttributeMetaData(name, attributeMetaData.getDataType().getEnumType());
+		AttributeMetaData result = attrMetaFactory.create().setName(name).setDataType(attributeMetaData.getDataType());
 		result.setDescription(attributeMetaData.getDescription());
 		result.setNillable(true);// We got a problem if a attr is required in one entitymeta and missing in another
 		result.setReadOnly(false);

@@ -1,5 +1,7 @@
 package org.molgenis.data.excel;
 
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -16,6 +18,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.WritableFactory;
 import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
 
@@ -58,7 +61,7 @@ public class ExcelWriter implements WritableFactory
 
 	public void addCellProcessor(CellProcessor cellProcessor)
 	{
-		if (cellProcessors == null) cellProcessors = new ArrayList<CellProcessor>();
+		if (cellProcessors == null) cellProcessors = new ArrayList<>();
 		cellProcessors.add(cellProcessor);
 	}
 
@@ -87,10 +90,10 @@ public class ExcelWriter implements WritableFactory
 	@Override
 	public ExcelSheetWriter createWritable(String entityName, List<String> attributeNames)
 	{
-		List<AttributeMetaData> attributes = attributeNames != null ? attributeNames.stream()
-				.<AttributeMetaData> map(attr -> new AttributeMetaData(attr)).collect(Collectors.toList()) : null;
+		AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
+		List<AttributeMetaData> attributes = attributeNames != null ? attributeNames.stream().<AttributeMetaData>map(
+				attrName -> attrMetaFactory.create().setName(attrName)).collect(Collectors.toList()) : null;
 
 		return createWritable(entityName, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);
 	}
-
 }

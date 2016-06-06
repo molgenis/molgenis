@@ -2,6 +2,7 @@ package org.molgenis.data.importer;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.I18nStringMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.PackageFactory;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
@@ -39,6 +40,9 @@ public class ImporterConfiguration
 	@Autowired
 	private PackageFactory packageFactory;
 
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
 	@Bean
 	public ImportService emxImportService()
 	{
@@ -55,6 +59,6 @@ public class ImporterConfiguration
 	@Bean
 	public MetaDataParser emxMetaDataParser()
 	{
-		return new EmxMetaDataParser(dataService, packageFactory);
+		return new EmxMetaDataParser(dataService, packageFactory, attrMetaFactory);
 	}
 }

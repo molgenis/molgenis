@@ -81,10 +81,10 @@ public abstract class AbstractMetaDataIT extends AbstractDataIntegrationIT
 		assertEquals(attrs.next().getName(), "intAttr");
 
 		// Add attribute
-		metaDataService.addAttribute("test_test1_TestEntity", new AttributeMetaData("strAttr"));
-		retrievedEntityMetaData = metaDataService.getEntityMetaData("test_test1_TestEntity");
-		assertNotNull(retrievedEntityMetaData.getAttribute("strAttr"));
-		assertEquals(Iterables.size(retrievedEntityMetaData.getAtomicAttributes()), 3);
+		//		metaDataService.addAttribute("test_test1_TestEntity", new AttributeMetaData("strAttr"));
+		//		retrievedEntityMetaData = metaDataService.getEntityMetaData("test_test1_TestEntity");
+		//		assertNotNull(retrievedEntityMetaData.getAttribute("strAttr"));
+		//		assertEquals(Iterables.size(retrievedEntityMetaData.getAtomicAttributes()), 3);
 
 		// TODO, fails -> fix deleteAttribute
 		// Delete attribute

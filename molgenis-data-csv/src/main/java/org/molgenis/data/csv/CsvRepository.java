@@ -1,6 +1,7 @@
 package org.molgenis.data.csv;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -14,7 +15,9 @@ import javax.annotation.Nullable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.springframework.util.StringUtils;
@@ -68,11 +71,14 @@ public class CsvRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			entityMetaData = new EntityMetaData(sheetName);
+			EntityMetaDataFactory entityMetaFactory = getApplicationContext().getBean(EntityMetaDataFactory.class);
+			AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
+
+			entityMetaData = entityMetaFactory.create().setSimpleName(sheetName);
 
 			for (String attrName : new CsvIterator(file, sheetName, null, separator).getColNamesMap().keySet())
 			{
-				AttributeMetaData attr = new AttributeMetaData(attrName, STRING);
+				AttributeMetaData attr = attrMetaFactory.create().setName(attrName).setDataType(STRING);
 				entityMetaData.addAttribute(attr);
 			}
 		}

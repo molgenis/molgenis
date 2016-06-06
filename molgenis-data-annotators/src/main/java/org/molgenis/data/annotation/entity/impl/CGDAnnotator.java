@@ -1,7 +1,7 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
+import static org.molgenis.MolgenisFieldTypes.LONG;
+import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.AGE_GROUP;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.ALLELIC_CONDITIONS;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.COMMENTS;
@@ -40,15 +40,14 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.entity.ResultFilter;
-import org.molgenis.data.annotation.filter.FirstResultFilter;
 import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.data.annotation.query.AttributeEqualsQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -82,6 +81,9 @@ public class CGDAnnotator
 
 	@Autowired
 	private Resources resources;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
 
 	public static enum GeneralizedInheritance
 	{
@@ -170,19 +172,22 @@ public class CGDAnnotator
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
 
-		attributes.add(new AttributeMetaData(HGNC_ID.getAttributeName(), LONG));
-		attributes.add(new AttributeMetaData(ENTREZ_GENE_ID.getAttributeName(), TEXT));
-		attributes.add(new AttributeMetaData(CONDITION.getAttributeName(), TEXT).setLabel(CONDITION_LABEL));
-		attributes.add(new AttributeMetaData(INHERITANCE.getAttributeName(), TEXT).setLabel(INHERITANCE_LABEL));
-		attributes.add(new AttributeMetaData(GENERALIZED_INHERITANCE.getAttributeName(), TEXT)
+		attributes.add(attrMetaFactory.create().setName(HGNC_ID.getAttributeName()).setDataType(LONG));
+		attributes.add(attrMetaFactory.create().setName(ENTREZ_GENE_ID.getAttributeName()).setDataType(TEXT));
+		attributes.add(attrMetaFactory.create().setName(CONDITION.getAttributeName()).setDataType(TEXT)
+				.setLabel(CONDITION_LABEL));
+		attributes.add(attrMetaFactory.create().setName(INHERITANCE.getAttributeName()).setDataType(TEXT)
+				.setLabel(INHERITANCE_LABEL));
+		attributes.add(attrMetaFactory.create().setName(GENERALIZED_INHERITANCE.getAttributeName()).setDataType(TEXT)
 				.setLabel(GENERALIZED_INHERITANCE_LABEL));
-		attributes.add(new AttributeMetaData(AGE_GROUP.getAttributeName(), TEXT).setLabel(AGE_GROUP_LABEL));
-		attributes.add(new AttributeMetaData(ALLELIC_CONDITIONS.getAttributeName(), TEXT));
-		attributes.add(new AttributeMetaData(MANIFESTATION_CATEGORIES.getAttributeName(), TEXT));
-		attributes.add(new AttributeMetaData(INTERVENTION_CATEGORIES.getAttributeName(), TEXT));
-		attributes.add(new AttributeMetaData(COMMENTS.getAttributeName(), TEXT));
-		attributes.add(new AttributeMetaData(INTERVENTION_RATIONALE.getAttributeName(), TEXT));
-		attributes.add(new AttributeMetaData(REFERENCES.getAttributeName(), TEXT));
+		attributes.add(attrMetaFactory.create().setName(AGE_GROUP.getAttributeName()).setDataType(TEXT)
+				.setLabel(AGE_GROUP_LABEL));
+		attributes.add(attrMetaFactory.create().setName(ALLELIC_CONDITIONS.getAttributeName()).setDataType(TEXT));
+		attributes.add(attrMetaFactory.create().setName(MANIFESTATION_CATEGORIES.getAttributeName()).setDataType(TEXT));
+		attributes.add(attrMetaFactory.create().setName(INTERVENTION_CATEGORIES.getAttributeName()).setDataType(TEXT));
+		attributes.add(attrMetaFactory.create().setName(COMMENTS.getAttributeName()).setDataType(TEXT));
+		attributes.add(attrMetaFactory.create().setName(INTERVENTION_RATIONALE.getAttributeName()).setDataType(TEXT));
+		attributes.add(attrMetaFactory.create().setName(REFERENCES.getAttributeName()).setDataType(TEXT));
 
 		return attributes;
 	}

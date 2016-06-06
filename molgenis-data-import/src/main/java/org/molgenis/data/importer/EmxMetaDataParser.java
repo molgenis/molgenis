@@ -50,6 +50,7 @@ import org.molgenis.data.i18n.I18nUtils;
 import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
 import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
@@ -127,11 +128,14 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	private final DataService dataService;
 	private final PackageFactory packageFactory;
+	private final AttributeMetaDataFactory attrMetaFactory;
 
-	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory)
+	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory,
+			AttributeMetaDataFactory attrMetaFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.packageFactory = requireNonNull(packageFactory);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 	}
 
 	/**
@@ -228,7 +232,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					"attributes.entity is missing for attribute named: " + attributeName + " on line " + i);
 
 			// create attribute
-			AttributeMetaData attribute = new AttributeMetaData(attributeName);
+			AttributeMetaData attribute = attrMetaFactory.create().setName(attributeName);
 
 			Map<String, EmxAttribute> entitiesMap = attributesMap.get(entityName);
 			if (entitiesMap == null)

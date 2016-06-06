@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.QueryRule.Operator.AND;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.QueryRule.Operator.GREATER_EQUAL;
@@ -44,7 +45,6 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -59,6 +59,7 @@ import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.JobExecutionMetaData;
 import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
@@ -124,6 +125,7 @@ public class SortaServiceController extends MolgenisPluginController
 	private final SortaJobExecutionMetaData sortaJobExecutionMetaData;
 	private final OntologyTermMetaData ontologyTermMetaData;
 	private final SortaJobExecutionFactory sortaJobExecutionFactory;
+	private final AttributeMetaDataFactory attrMetaFactory;
 
 	public static final String MATCH_VIEW_NAME = "sorta-match-view";
 	public static final String ID = "sortaservice";
@@ -140,7 +142,7 @@ public class SortaServiceController extends MolgenisPluginController
 			PermissionSystemService permissionSystemService,
 			MatchingTaskContentEntityMetaData matchingTaskContentEntityMetaData,
 			SortaJobExecutionMetaData sortaJobExecutionMetaData, OntologyTermMetaData ontologyTermMetaData,
-			SortaJobExecutionFactory sortaJobExecutionFactory)
+			SortaJobExecutionFactory sortaJobExecutionFactory, AttributeMetaDataFactory attrMetaFactory)
 	{
 		super(URI);
 		this.ontologyService = requireNonNull(ontologyService);
@@ -159,6 +161,7 @@ public class SortaServiceController extends MolgenisPluginController
 		this.sortaJobExecutionMetaData = requireNonNull(sortaJobExecutionMetaData);
 		this.ontologyTermMetaData = requireNonNull(ontologyTermMetaData);
 		this.sortaJobExecutionFactory = sortaJobExecutionFactory;
+		this.attrMetaFactory = attrMetaFactory;
 	}
 
 	@RequestMapping(method = GET)
@@ -568,7 +571,7 @@ public class SortaServiceController extends MolgenisPluginController
 		EntityMetaData resultEntityMetaData = EntityMetaData.newInstance(matchingTaskContentEntityMetaData);
 		resultEntityMetaData.setName(resultEntityName);
 		resultEntityMetaData.setAbstract(false);
-		resultEntityMetaData.addAttribute(new AttributeMetaData(INPUT_TERM, FieldTypeEnum.XREF)
+		resultEntityMetaData.addAttribute(attrMetaFactory.create().setName(INPUT_TERM).setDataType(XREF)
 				.setRefEntity(sourceMetaData).setDescription("Reference to the input term").setNillable(false));
 		resultEntityMetaData.setLabel(jobName + " output");
 		dataService.getMeta().addEntityMeta(resultEntityMetaData);

@@ -1,7 +1,8 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
+import static org.molgenis.MolgenisFieldTypes.COMPOUND;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 
@@ -58,7 +60,9 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	@Override
 	public AttributeMetaData getAnnotationAttributeMetaData()
 	{
-		AttributeMetaData result = new AttributeMetaData(ANNOTATORPREFIX + info.getCode(), COMPOUND).setLabel(info.getCode());
+		AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
+		AttributeMetaData result = attrMetaFactory.create().setName(ANNOTATORPREFIX + info.getCode())
+				.setDataType(COMPOUND).setLabel(info.getCode());
 		getInfo().getOutputAttributes().forEach(result::addAttributePart);
 
 		return result;
