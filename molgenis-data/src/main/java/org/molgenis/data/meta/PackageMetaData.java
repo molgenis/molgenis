@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PackageMetaData extends SystemEntityMetaDataImpl
+public class PackageMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME_ = "packages";
 	public static final String PACKAGE = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;

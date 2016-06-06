@@ -61,7 +61,7 @@ public class MolgenisUserDetailsServiceTest
 			}
 		};
 		when(dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENISUSER, userUser),
+				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, userUser),
 				UserAuthority.class)).thenAnswer(new Answer<Stream<UserAuthority>>()
 				{
 					@Override
@@ -71,7 +71,7 @@ public class MolgenisUserDetailsServiceTest
 					}
 				});
 		when(dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENISUSER, adminUser),
+				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, adminUser),
 				UserAuthority.class)).thenAnswer(new Answer<Stream<UserAuthority>>()
 				{
 					@Override
@@ -81,7 +81,7 @@ public class MolgenisUserDetailsServiceTest
 					}
 				});
 		when(dataService.findAll(MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENISUSER, userUser),
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, userUser),
 				MolgenisGroupMember.class))
 						.thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
 						{
@@ -92,7 +92,7 @@ public class MolgenisUserDetailsServiceTest
 							}
 						});
 		when(dataService.findAll(MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENISUSER, adminUser),
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, adminUser),
 				MolgenisGroupMember.class))
 						.thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
 						{

@@ -107,7 +107,7 @@ public class UserManagerServiceImpl implements UserManagerService
 		}
 
 		final List<MolgenisGroupMember> groupMembers = dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENISUSER, molgenisUser),
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser),
 				MolgenisGroupMember.class)
 				.collect(toList());
 
@@ -125,7 +125,7 @@ public class UserManagerServiceImpl implements UserManagerService
 		}
 
 		final List<MolgenisGroupMember> groupMembers = dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENISGROUP, molgenisGroup),
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_GROUP, molgenisGroup),
 				MolgenisGroupMember.class)
 				.collect(toList());
 
@@ -145,7 +145,7 @@ public class UserManagerServiceImpl implements UserManagerService
 		}
 
 		final List<MolgenisGroupMember> groupMembers = dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENISUSER, molgenisUser),
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser),
 				MolgenisGroupMember.class)
 				.collect(toList());
 
@@ -193,8 +193,8 @@ public class UserManagerServiceImpl implements UserManagerService
 		}
 
 		Query<MolgenisGroupMember> q = new QueryImpl<MolgenisGroupMember>()
-				.eq(MolgenisGroupMemberMetaData.MOLGENISUSER, molgenisUser).and()
-				.eq(MolgenisGroupMemberMetaData.MOLGENISGROUP, molgenisGroup);
+				.eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser).and()
+				.eq(MolgenisGroupMemberMetaData.MOLGENIS_GROUP, molgenisGroup);
 
 		final List<MolgenisGroupMember> molgenisGroupMembers = dataService
 				.findAll(MOLGENIS_GROUP_MEMBER, q, MolgenisGroupMember.class).collect(toList());

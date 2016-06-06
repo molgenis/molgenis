@@ -6,29 +6,32 @@ import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MolgenisGroupMemberMetaData extends SystemEntityMetaDataImpl
+public class MolgenisGroupMemberMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "MolgenisGroupMember";
 	public static final String MOLGENIS_GROUP_MEMBER = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public static final String MOLGENISUSER = "molgenisUser";
-	public static final String MOLGENISGROUP = "molgenisGroup";
 	public static final String ID = "id";
+	public static final String MOLGENIS_USER = "molgenisUser";
+	public static final String MOLGENIS_GROUP = "molgenisGroup";
 
-	private MolgenisUserMetaData molgenisUserMetaData;
-	private MolgenisGroupMetaData MolgenisGroupMetaData;
-	private SecurityPackage securityPackage;
+	private final SecurityPackage securityPackage;
+	private final MolgenisUserMetaData molgenisUserMetaData;
+	private final MolgenisGroupMetaData molgenisGroupMetaData;
 
 	@Autowired
-	MolgenisGroupMemberMetaData(SecurityPackage securityPackage)
+	MolgenisGroupMemberMetaData(SecurityPackage securityPackage, MolgenisUserMetaData molgenisUserMetaData,
+			MolgenisGroupMetaData molgenisGroupMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
 		this.securityPackage = requireNonNull(securityPackage);
+		this.molgenisUserMetaData = requireNonNull(molgenisUserMetaData);
+		this.molgenisGroupMetaData = requireNonNull(molgenisGroupMetaData);
 	}
 
 	@Override
@@ -37,22 +40,9 @@ public class MolgenisGroupMemberMetaData extends SystemEntityMetaDataImpl
 		setPackage(securityPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
-		addAttribute(MOLGENISUSER).setDataType(XREF).setRefEntity(molgenisUserMetaData)
+		addAttribute(MOLGENIS_USER).setDataType(XREF).setRefEntity(molgenisUserMetaData)
 				.setAggregatable(true).setDescription("").setNillable(false);
-		addAttribute(MOLGENISGROUP).setDataType(XREF).setRefEntity(MolgenisGroupMetaData)
+		addAttribute(MOLGENIS_GROUP).setDataType(XREF).setRefEntity(molgenisGroupMetaData)
 				.setAggregatable(true).setDescription("").setNillable(false);
-	}
-
-	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
-	@Autowired
-	public void setMolgenisUserMetaData(MolgenisUserMetaData molgenisUserMetaData)
-	{
-		this.molgenisUserMetaData = requireNonNull(molgenisUserMetaData);
-	}
-
-	@Autowired
-	public void setMolgenisGroupMetaData(MolgenisGroupMetaData molgenisGroupMetaData)
-	{
-		this.MolgenisGroupMetaData = requireNonNull(molgenisGroupMetaData);
 	}
 }

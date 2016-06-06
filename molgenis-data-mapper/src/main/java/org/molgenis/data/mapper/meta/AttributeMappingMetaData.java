@@ -11,13 +11,13 @@ import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AttributeMappingMetaData extends SystemEntityMetaDataImpl
+public class AttributeMappingMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "AttributeMapping";
 	public static final String ATTRIBUTE_MAPPING = PACKAGE_MAPPER + PACKAGE_SEPARATOR + SIMPLE_NAME;

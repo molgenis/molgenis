@@ -8,12 +8,12 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
 import org.molgenis.auth.MolgenisUserMetaData;
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MappingProjectMetaData extends SystemEntityMetaDataImpl
+public class MappingProjectMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "MappingProject";
 	public static final String MAPPING_PROJECT = PACKAGE_MAPPER + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -21,17 +21,20 @@ public class MappingProjectMetaData extends SystemEntityMetaDataImpl
 	public static final String IDENTIFIER = "identifier";
 	public static final String NAME = "name";
 	public static final String OWNER = "owner";
-	public static final String MAPPINGTARGETS = "mappingtargets";
+	public static final String MAPPING_TARGETS = "mappingtargets";
 
 	private final MapperPackage mapperPackage;
-	private MolgenisUserMetaData molgenisUserMetaData;
-	private MappingTargetMetaData mappingTargetMetaData;
+	private final MolgenisUserMetaData molgenisUserMetaData;
+	private final MappingTargetMetaData mappingTargetMetaData;
 
 	@Autowired
-	public MappingProjectMetaData(MapperPackage mapperPackage)
+	public MappingProjectMetaData(MapperPackage mapperPackage, MolgenisUserMetaData molgenisUserMetaData,
+			MappingTargetMetaData mappingTargetMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_MAPPER);
 		this.mapperPackage = requireNonNull(mapperPackage);
+		this.molgenisUserMetaData = requireNonNull(molgenisUserMetaData);
+		this.mappingTargetMetaData = requireNonNull(mappingTargetMetaData);
 	}
 
 	@Override
@@ -42,19 +45,6 @@ public class MappingProjectMetaData extends SystemEntityMetaDataImpl
 		addAttribute(IDENTIFIER, ROLE_ID);
 		addAttribute(NAME).setNillable(false);
 		addAttribute(OWNER).setDataType(XREF).setRefEntity(molgenisUserMetaData);
-		addAttribute(MAPPINGTARGETS).setDataType(MREF).setRefEntity(mappingTargetMetaData);
-	}
-
-	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
-	@Autowired
-	public void setMolgenisUserMetaData(MolgenisUserMetaData molgenisUserMetaData)
-	{
-		this.molgenisUserMetaData = requireNonNull(molgenisUserMetaData);
-	}
-
-	@Autowired
-	public void setMappingTargetMetaData(MappingTargetMetaData mappingTargetMetaData)
-	{
-		this.mappingTargetMetaData = requireNonNull(mappingTargetMetaData);
+		addAttribute(MAPPING_TARGETS).setDataType(MREF).setRefEntity(mappingTargetMetaData);
 	}
 }

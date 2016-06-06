@@ -127,7 +127,7 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 
 		Repository<UserAuthority> userAuthorityRepository = getUserAuthorityRepository();
 		Entity suAuthorityEntity = userAuthorityRepository.findOne(
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENISUSER, molgenisUser).and()
+				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, molgenisUser).and()
 						.eq(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_SU));
 
 		Boolean isSuperuser = entity.getBoolean(MolgenisUserMetaData.SUPERUSER);

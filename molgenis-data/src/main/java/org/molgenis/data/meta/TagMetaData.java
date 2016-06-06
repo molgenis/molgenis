@@ -10,7 +10,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TagMetaData extends SystemEntityMetaDataImpl
+public class TagMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "tags";
 	public static final String TAG = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME;

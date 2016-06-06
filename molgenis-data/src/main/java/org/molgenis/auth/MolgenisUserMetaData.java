@@ -10,12 +10,12 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MolgenisUserMetaData extends SystemEntityMetaDataImpl
+public class MolgenisUserMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "MolgenisUser";
 	public static final String MOLGENIS_USER = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;

@@ -6,12 +6,12 @@ import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.script.ScriptPackage.PACKAGE_SCRIPT;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ScriptMetaData extends SystemEntityMetaDataImpl
+public class ScriptMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "Script";
 	public static final String SCRIPT = PACKAGE_SCRIPT + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -28,14 +28,17 @@ public class ScriptMetaData extends SystemEntityMetaDataImpl
 	public static final String PARAMETERS = "parameters";// The names of the parameters required by this script
 
 	private final ScriptPackage scriptPackage;
-	private ScriptParameterMetaData scriptParameterMetaData;
-	private ScriptTypeMetaData scriptTypeMetaData;
+	private final ScriptParameterMetaData scriptParameterMetaData;
+	private final ScriptTypeMetaData scriptTypeMetaData;
 
 	@Autowired
-	ScriptMetaData(ScriptPackage scriptPackage)
+	ScriptMetaData(ScriptPackage scriptPackage, ScriptParameterMetaData scriptParameterMetaData,
+			ScriptTypeMetaData scriptTypeMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_SCRIPT);
 		this.scriptPackage = requireNonNull(scriptPackage);
+		this.scriptParameterMetaData = requireNonNull(scriptParameterMetaData);
+		this.scriptTypeMetaData = requireNonNull(scriptTypeMetaData);
 	}
 
 	@Override
@@ -52,18 +55,5 @@ public class ScriptMetaData extends SystemEntityMetaDataImpl
 		addAttribute(RESULT_FILE_EXTENSION).setNillable(true).setLabel("Result file extension");
 		addAttribute(PARAMETERS).setNillable(true).setLabel("Parameters").setDataType(MolgenisFieldTypes.MREF)
 				.setRefEntity(scriptParameterMetaData);
-	}
-
-	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
-	@Autowired
-	public void setScriptParameterMetaData(ScriptParameterMetaData scriptParameterMetaData)
-	{
-		this.scriptParameterMetaData = requireNonNull(scriptParameterMetaData);
-	}
-
-	@Autowired
-	public void setScriptTypeMetaData(ScriptTypeMetaData scriptTypeMetaData)
-	{
-		this.scriptTypeMetaData = requireNonNull(scriptTypeMetaData);
 	}
 }

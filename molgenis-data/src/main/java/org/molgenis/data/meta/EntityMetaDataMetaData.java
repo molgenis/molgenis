@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EntityMetaDataMetaData extends SystemEntityMetaDataImpl
+public class EntityMetaDataMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME_ = "entities";
 	public static final String ENTITY_META_DATA = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;

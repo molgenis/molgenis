@@ -5,11 +5,11 @@ import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class LoggingEventMetaData extends SystemEntityMetaDataImpl
+public class LoggingEventMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "LoggingEvent";
 	public static final String LOGGING_EVENT = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;

@@ -63,7 +63,7 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 	//
 	//		mappingProjectEntity = new MapEntity(new MappingProjectMetaData());
 	//		mappingProjectEntity.set(IDENTIFIER, "mappingProjectID");
-	//		mappingProjectEntity.set(MAPPINGTARGETS, mappingTargetEntities);
+	//		mappingProjectEntity.set(MAPPING_TARGETS, mappingTargetEntities);
 	//		mappingProjectEntity.set(OWNER, owner);
 	//		mappingProjectEntity.set(NAME, "My first mapping project");
 	//	}

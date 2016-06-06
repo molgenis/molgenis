@@ -6,7 +6,7 @@ import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
 import org.molgenis.auth.SecurityPackage;
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
  * inherit this behavior.
  */
 @Component
-public class OwnedEntityMetaData extends SystemEntityMetaDataImpl
+public class OwnedEntityMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "Owned";
 	public static final String OWNED = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;

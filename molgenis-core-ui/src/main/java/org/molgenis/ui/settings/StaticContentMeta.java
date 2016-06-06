@@ -5,11 +5,11 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class StaticContentMeta extends SystemEntityMetaDataImpl
+public class StaticContentMeta extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "StaticContent";
 	public static final String STATIC_CONTENT = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;

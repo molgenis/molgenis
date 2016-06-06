@@ -7,7 +7,7 @@ import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -25,7 +25,7 @@ public class GafListDbSettings implements GafListSettings
 	}
 
 	@Component
-	public static class Meta extends SystemEntityMetaDataImpl
+	public static class Meta extends SystemEntityMetaData
 	{
 		private static final String SIMPLE_NAME = "GafListSettings";
 		public static final String ENTITY_NAME = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;

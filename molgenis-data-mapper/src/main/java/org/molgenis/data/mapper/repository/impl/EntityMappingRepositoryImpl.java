@@ -59,7 +59,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		try
 		{
 			targetEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
-					.getString(EntityMappingMetaData.TARGETENTITYMETADATA));
+					.getString(EntityMappingMetaData.TARGET_ENTITY_META_DATA));
 		}
 		catch (UnknownEntityException uee)
 		{
@@ -71,7 +71,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		try
 		{
 			sourceEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
-					.getString(EntityMappingMetaData.SOURCEENTITYMETADATA));
+					.getString(EntityMappingMetaData.SOURCE_ENTITY_META_DATA));
 		}
 		catch (UnknownEntityException uee)
 		{
@@ -80,7 +80,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		}
 
 		List<Entity> attributeMappingEntities = Lists.<Entity> newArrayList(entityMappingEntity
-				.getEntities(EntityMappingMetaData.ATTRIBUTEMAPPINGS));
+				.getEntities(EntityMappingMetaData.ATTRIBUTE_MAPPINGS));
 		List<AttributeMapping> attributeMappings = attributeMappingRepository.getAttributeMappings(
 				attributeMappingEntities, sourceEntityMetaData, targetEntityMetaData);
 
@@ -115,12 +115,11 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 	{
 		Entity entityMappingEntity = new MapEntity(entityMappingMetaData);
 		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, entityMapping.getIdentifier());
-		entityMappingEntity.set(EntityMappingMetaData.SOURCEENTITYMETADATA, entityMapping.getName());
-		entityMappingEntity
-				.set(EntityMappingMetaData.TARGETENTITYMETADATA,
+		entityMappingEntity.set(EntityMappingMetaData.SOURCE_ENTITY_META_DATA, entityMapping.getName());
+		entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_META_DATA,
 						entityMapping.getTargetEntityMetaData() != null ? entityMapping.getTargetEntityMetaData()
 								.getName() : null);
-		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTEMAPPINGS, attributeMappingEntities);
+		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
 		return entityMappingEntity;
 	}
 }

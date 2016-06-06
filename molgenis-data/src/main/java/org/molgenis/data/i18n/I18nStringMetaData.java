@@ -6,11 +6,11 @@ import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class I18nStringMetaData extends SystemEntityMetaDataImpl
+public class I18nStringMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "i18nstrings";
 	public static final String I18N_STRING = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;

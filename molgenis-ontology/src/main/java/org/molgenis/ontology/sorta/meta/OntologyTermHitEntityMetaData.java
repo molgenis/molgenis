@@ -6,13 +6,13 @@ import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OntologyTermHitEntityMetaData extends SystemEntityMetaDataImpl
+public class OntologyTermHitEntityMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "OntologyTermHit";
 	public static final String ONTOLOGY_TERM_HIT = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;

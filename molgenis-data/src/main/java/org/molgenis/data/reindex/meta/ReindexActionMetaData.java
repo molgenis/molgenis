@@ -6,7 +6,7 @@ import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.reindex.meta.IndexPackage.PACKAGE_INDEX;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.TextField;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
  * {@link org.molgenis.data.Repository}'s index consistent again.
  */
 @Component
-public class ReindexActionMetaData extends SystemEntityMetaDataImpl
+public class ReindexActionMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "ReindexAction";
 	public static final String REINDEX_ACTION = PACKAGE_INDEX + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -72,10 +72,11 @@ public class ReindexActionMetaData extends SystemEntityMetaDataImpl
 	private ReindexActionJobMetaData reindexActionJobMetaData;
 
 	@Autowired
-	public ReindexActionMetaData(IndexPackage indexPackage)
+	public ReindexActionMetaData(IndexPackage indexPackage, ReindexActionJobMetaData reindexActionJobMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_INDEX);
 		this.indexPackage = requireNonNull(indexPackage);
+		this.reindexActionJobMetaData = requireNonNull(reindexActionJobMetaData);
 	}
 
 	@Override
@@ -102,13 +103,6 @@ public class ReindexActionMetaData extends SystemEntityMetaDataImpl
 				.setDataType(new EnumField()).setEnumOptions(DataType.class).setNillable(false);
 		addAttribute(REINDEX_STATUS).setDescription("The status of reindex action").setDataType(new EnumField())
 				.setEnumOptions(ReindexStatus.class).setNillable(false);
-	}
-
-	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
-	@Autowired
-	public void setReindexActionJobMetaData(ReindexActionJobMetaData reindexActionJobMetaData)
-	{
-		this.reindexActionJobMetaData = requireNonNull(reindexActionJobMetaData);
 	}
 
 	/**

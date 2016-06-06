@@ -12,13 +12,13 @@ import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class IdCardIndexingEventMetaData extends SystemEntityMetaDataImpl
+public class IdCardIndexingEventMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "IdCardIndexingEvent";
 	public static final String ID_CARD_INDEXING_EVENT = PACKAGE_ID_CARD + PACKAGE_SEPARATOR + SIMPLE_NAME;

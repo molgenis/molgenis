@@ -6,7 +6,7 @@ import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.reindex.meta.IndexPackage.PACKAGE_INDEX;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  * This entity is used to group the reindex actions.
  */
 @Component
-public class ReindexActionJobMetaData extends SystemEntityMetaDataImpl
+public class ReindexActionJobMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "ReindexActionJob";
 	public static final String REINDEX_ACTION_JOB = PACKAGE_INDEX + PACKAGE_SEPARATOR + SIMPLE_NAME;

@@ -108,7 +108,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 		String name = mappingProjectEntity.getString(MappingProjectMetaData.NAME);
 		MolgenisUser owner = molgenisUserService.getUser(mappingProjectEntity.getString(MappingProjectMetaData.OWNER));
 		List<Entity> mappingTargetEntities = Lists
-				.newArrayList(mappingProjectEntity.getEntities(MappingProjectMetaData.MAPPINGTARGETS));
+				.newArrayList(mappingProjectEntity.getEntities(MappingProjectMetaData.MAPPING_TARGETS));
 		List<MappingTarget> mappingTargets = mappingTargetRepository.toMappingTargets(mappingTargetEntities);
 
 		return new MappingProject(identifier, name, owner, mappingTargets);
@@ -133,7 +133,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 		result.set(MappingProjectMetaData.OWNER, mappingProject.getOwner());
 		result.set(MappingProjectMetaData.NAME, mappingProject.getName());
 		List<Entity> mappingTargetEntities = mappingTargetRepository.upsert(mappingProject.getMappingTargets());
-		result.set(MappingProjectMetaData.MAPPINGTARGETS, mappingTargetEntities);
+		result.set(MappingProjectMetaData.MAPPING_TARGETS, mappingTargetEntities);
 		return result;
 	}
 

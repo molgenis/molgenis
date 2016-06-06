@@ -8,15 +8,15 @@ import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
 import org.molgenis.data.jobs.JobExecutionMetaData;
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class SortaJobExecutionMetaData extends SystemEntityMetaDataImpl
+public class SortaJobExecutionMetaData extends SystemEntityMetaData
 {
-	public final static String SIMPLE_NAME = "SortaJobExecution";
+	public static final String SIMPLE_NAME = "SortaJobExecution";
 	public static final String SORTA_JOB_EXECUTION = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public final static String ONTOLOGY_IRI = "ontologyIri";
@@ -29,13 +29,14 @@ public class SortaJobExecutionMetaData extends SystemEntityMetaDataImpl
 	public static final String SORTA_MATCH_JOB_TYPE = "SORTA";
 
 	private final OntologyPackage ontologyPackage;
-	private JobExecutionMetaData jobExecutionMetaData;
+	private final JobExecutionMetaData jobExecutionMetaData;
 
 	@Autowired
-	SortaJobExecutionMetaData(OntologyPackage ontologyPackage)
+	SortaJobExecutionMetaData(OntologyPackage ontologyPackage, JobExecutionMetaData jobExecutionMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_ONTOLOGY);
 		this.ontologyPackage = requireNonNull(ontologyPackage);
+		this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);
 	}
 
 	@Override
@@ -50,12 +51,5 @@ public class SortaJobExecutionMetaData extends SystemEntityMetaDataImpl
 		addAttribute(ONTOLOGY_IRI).setDataType(STRING).setNillable(false);
 		addAttribute(DELETE_URL).setDataType(HYPERLINK).setNillable(false);
 		addAttribute(THRESHOLD).setDataType(DECIMAL).setNillable(false);
-	}
-
-	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
-	@Autowired
-	public void setJobExecutionMetaData(JobExecutionMetaData jobExecutionMetaData)
-	{
-		this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);
 	}
 }

@@ -5,12 +5,12 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.script.ScriptPackage.PACKAGE_SCRIPT;
 
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ScriptTypeMetaData extends SystemEntityMetaDataImpl
+public class ScriptTypeMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "ScriptType";
 	public static final String SCRIPT_TYPE = PACKAGE_SCRIPT + PACKAGE_SEPARATOR + SIMPLE_NAME;

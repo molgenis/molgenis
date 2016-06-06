@@ -7,7 +7,7 @@ import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,18 +17,20 @@ import org.springframework.stereotype.Component;
  * Base EntityMetaData for 'questionnaire' entities
  */
 @Component
-public class QuestionnaireMetaData extends SystemEntityMetaDataImpl
+public class QuestionnaireMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "Questionnaire";
 	public static final String QUESTIONNAIRE = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ATTR_STATUS = "status";
 
-	private OwnedEntityMetaData ownedEntityMetaData;
+	private final OwnedEntityMetaData ownedEntityMetaData;
 
-	QuestionnaireMetaData()
+	@Autowired
+	QuestionnaireMetaData(OwnedEntityMetaData ownedEntityMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
+		this.ownedEntityMetaData = requireNonNull(ownedEntityMetaData);
 	}
 
 	@Override
@@ -44,12 +46,5 @@ public class QuestionnaireMetaData extends SystemEntityMetaDataImpl
 		}
 		addAttribute(ATTR_STATUS).setDataType(new EnumField()).setEnumOptions(enumOptions).setVisible(false)
 				.setNillable(false);
-	}
-
-	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
-	@Autowired
-	public void setOwnedEntityMetaData(OwnedEntityMetaData ownedEntityMetaData)
-	{
-		this.ownedEntityMetaData = requireNonNull(ownedEntityMetaData);
 	}
 }

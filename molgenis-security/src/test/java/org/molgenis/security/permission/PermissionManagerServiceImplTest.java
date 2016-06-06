@@ -110,12 +110,12 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 		when(molgenisGroupMember1.getMolgenisGroup()).thenReturn(group1);
 
 		when(dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENISUSER, user2),
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user2),
 				MolgenisGroupMember.class))
 				.thenReturn(Stream.of(molgenisGroupMember1));
 
 		when(dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENISUSER, user1),
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user1),
 				MolgenisGroupMember.class))
 				.thenReturn(Stream.of(molgenisGroupMember1));
 
@@ -160,16 +160,16 @@ public class PermissionManagerServiceImplTest extends AbstractTestNGSpringContex
 				Stream.of(groupPlugin1Authority, groupPlugin2Authority, groupEntity1Authority, groupEntity2Authority));
 
 		when(dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().in(UserAuthorityMetaData.MOLGENISUSER, Arrays.<Entity>asList(user1)),
+				new QueryImpl<UserAuthority>().in(UserAuthorityMetaData.MOLGENIS_USER, Arrays.<Entity>asList(user1)),
 						UserAuthority.class)).thenReturn(
 				Stream.of(userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority));
 
 		when(dataService
-				.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENISUSER, user1),
+				.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, user1),
 						UserAuthority.class)).thenReturn(
 				Stream.of(userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority));
 		when(dataService
-				.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENISUSER, user2),
+				.findAll(USER_AUTHORITY, new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, user2),
 						UserAuthority.class)).thenReturn(
 				Stream.of(userPlugin2Authority, userPlugin3Authority, userEntity2Authority, userEntity3Authority));
 

@@ -8,7 +8,7 @@ import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.StringField;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.ImmutableList;
 
 @Component
-public class FileIngestMetaData extends SystemEntityMetaDataImpl
+public class FileIngestMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "FileIngest";
 	public static final String FILE_INGEST = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;

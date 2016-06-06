@@ -14,12 +14,12 @@ import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.idcard.IdCardRepositoryCollection;
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class IdCardBiobankMetaData extends SystemEntityMetaDataImpl
+public class IdCardBiobankMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "rdconnect_regbb";
 	public static final String ID_CARD_BIOBANK = PACKAGE_ID_CARD + PACKAGE_SEPARATOR + SIMPLE_NAME;

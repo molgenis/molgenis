@@ -9,12 +9,12 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MolgenisTokenMetaData extends SystemEntityMetaDataImpl
+public class MolgenisTokenMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "MolgenisToken";
 	public static final String MOLGENIS_TOKEN = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -27,14 +27,14 @@ public class MolgenisTokenMetaData extends SystemEntityMetaDataImpl
 	public static final String DESCRIPTION = "description";
 
 	private final SecurityPackage securityPackage;
-
-	private MolgenisUserMetaData molgenisUserMetaData;
+	private final MolgenisUserMetaData molgenisUserMetaData;
 
 	@Autowired
-	MolgenisTokenMetaData(SecurityPackage securityPackage)
+	MolgenisTokenMetaData(SecurityPackage securityPackage, MolgenisUserMetaData molgenisUserMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
 		this.securityPackage = requireNonNull(securityPackage);
+		this.molgenisUserMetaData = requireNonNull(molgenisUserMetaData);
 	}
 
 	@Override
@@ -53,12 +53,5 @@ public class MolgenisTokenMetaData extends SystemEntityMetaDataImpl
 				.setReadOnly(true).setDescription("").setNillable(false);
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description").setNillable(true)
 				.setDescription("");
-	}
-
-	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
-	@Autowired
-	public void setMolgenisUserMetaData(MolgenisUserMetaData molgenisUserMetaData)
-	{
-		this.molgenisUserMetaData = requireNonNull(molgenisUserMetaData);
 	}
 }

@@ -12,12 +12,13 @@ public class MetaPackage extends SystemPackage
 	private static final String SIMPLE_NAME = "md";
 	public static final String PACKAGE_META = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	private RootSystemPackage rootSystemPackage;
+	private final RootSystemPackage rootSystemPackage;
 
 	@Autowired
-	public MetaPackage(PackageMetaData packageMetaData)
+	public MetaPackage(PackageMetaData packageMetaData, RootSystemPackage rootSystemPackage)
 	{
 		super(SIMPLE_NAME, packageMetaData);
+		this.rootSystemPackage = requireNonNull(rootSystemPackage);
 	}
 
 	@Override
@@ -26,12 +27,5 @@ public class MetaPackage extends SystemPackage
 		setLabel("Meta");
 		setDescription("Package containing all meta data entities");
 		setParent(rootSystemPackage);
-	}
-
-	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
-	@Autowired
-	public void setRootSystemPackage(RootSystemPackage rootSystemPackage)
-	{
-		this.rootSystemPackage = requireNonNull(rootSystemPackage);
 	}
 }

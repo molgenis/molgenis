@@ -5,12 +5,12 @@ import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public abstract class DefaultSettingsEntityMetaData extends SystemEntityMetaDataImpl
+public abstract class DefaultSettingsEntityMetaData extends SystemEntityMetaData
 {
 	public static final String ATTR_ID = "id";
 

@@ -1,8 +1,8 @@
 package org.molgenis.auth;
 
 import static org.molgenis.auth.MolgenisGroupMemberMetaData.ID;
-import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENISGROUP;
-import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENISUSER;
+import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP;
+import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_USER;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.SystemEntity;
@@ -37,21 +37,21 @@ public class MolgenisGroupMember extends SystemEntity
 
 	public MolgenisUser getMolgenisUser()
 	{
-		return getEntity(MOLGENISUSER, MolgenisUser.class);
+		return getEntity(MOLGENIS_USER, MolgenisUser.class);
 	}
 
 	public void setMolgenisUser(MolgenisUser molgenisUser)
 	{
-		set(MOLGENISUSER, molgenisUser);
+		set(MOLGENIS_USER, molgenisUser);
 	}
 
 	public MolgenisGroup getMolgenisGroup()
 	{
-		return getEntity(MOLGENISGROUP, MolgenisGroup.class);
+		return getEntity(MOLGENIS_GROUP, MolgenisGroup.class);
 	}
 
 	public void setMolgenisGroup(MolgenisGroup molgenisGroup)
 	{
-		set(MOLGENISGROUP, molgenisGroup);
+		set(MOLGENIS_GROUP, molgenisGroup);
 	}
 }

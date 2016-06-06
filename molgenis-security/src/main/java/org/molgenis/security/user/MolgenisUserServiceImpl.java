@@ -57,7 +57,7 @@ public class MolgenisUserServiceImpl implements MolgenisUserService
 	{
 		Stream<MolgenisGroupMember> molgenisGroupMembers = dataService
 				.findAll(MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER, new QueryImpl<MolgenisGroupMember>()
-						.eq(MolgenisGroupMemberMetaData.MOLGENISUSER, getUser(username)), MolgenisGroupMember.class);
+						.eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, getUser(username)), MolgenisGroupMember.class);
 		// N.B. Must collect the results in a list before yielding up the RunAsSystem privileges!
 		return molgenisGroupMembers.map(MolgenisGroupMember::getMolgenisGroup).collect(toList());
 	}

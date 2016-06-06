@@ -45,15 +45,15 @@ public class EntityMappingRepositoryImplTest extends AbstractTestNGSpringContext
 	//		List<Entity> entityMappingEntities = new ArrayList<Entity>();
 	//		Entity entityMappingEntity = new MapEntity(new EntityMappingMetaData());
 	//		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
-	//		entityMappingEntity.set(EntityMappingMetaData.TARGETENTITYMETADATA, "targetAttribute");
+	//		entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_META_DATA, "targetAttribute");
 	//		entityMappingEntity.set(AttributeMappingMetaData.ALGORITHM, "algorithm");
-	//		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTEMAPPINGS, attributeMappingEntities);
+	//		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
 	//
 	//		entityMappingEntities.add(entityMappingEntity);
 	//
-	//		when(dataService.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.TARGETENTITYMETADATA)))
+	//		when(dataService.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.TARGET_ENTITY_META_DATA)))
 	//				.thenReturn(targetEntityMetaData);
-	//		when(dataService.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.SOURCEENTITYMETADATA)))
+	//		when(dataService.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.SOURCE_ENTITY_META_DATA)))
 	//				.thenReturn(sourceEntityMetaData);
 	//
 	//		assertEquals(entityMappingRepository.toEntityMappings(entityMappingEntities), entityMappings);
@@ -88,9 +88,9 @@ public class EntityMappingRepositoryImplTest extends AbstractTestNGSpringContext
 	//		List<Entity> entityMappingEntities = new ArrayList<Entity>();
 	//		Entity entityMappingEntity = new MapEntity(new EntityMappingMetaData());
 	//		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
-	//		entityMappingEntity.set(EntityMappingMetaData.SOURCEENTITYMETADATA, "source");
-	//		entityMappingEntity.set(EntityMappingMetaData.TARGETENTITYMETADATA, "target");
-	//		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTEMAPPINGS, attributeMappingEntities);
+	//		entityMappingEntity.set(EntityMappingMetaData.SOURCE_ENTITY_META_DATA, "source");
+	//		entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_META_DATA, "target");
+	//		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
 	//		entityMappingEntities.add(entityMappingEntity);
 	//
 	//		assertEquals(entityMappingRepository.upsert(entityMappings).get(0), entityMappingEntities.get(0));

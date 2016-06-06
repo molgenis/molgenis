@@ -6,15 +6,15 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OntologyTermSynonymMetaData extends SystemEntityMetaDataImpl
+public class OntologyTermSynonymMetaData extends SystemEntityMetaData
 {
-	public final static String SIMPLE_NAME = "OntologyTermSynonym";
+	public static final String SIMPLE_NAME = "OntologyTermSynonym";
 	public final static String ONTOLOGY_TERM_SYNONYM = PACKAGE_ONTOLOGY + "_" + SIMPLE_NAME;
 
 	public final static String ID = "id";

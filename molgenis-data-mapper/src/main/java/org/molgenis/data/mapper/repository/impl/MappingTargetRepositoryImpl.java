@@ -70,7 +70,7 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 		Entity mappingTargetEntity = new MapEntity(mappingTargetMetaData);
 		mappingTargetEntity.set(MappingProjectMetaData.IDENTIFIER, mappingTarget.getIdentifier());
 		mappingTargetEntity.set(MappingTargetMetaData.TARGET, mappingTarget.getTarget().getName());
-		mappingTargetEntity.set(MappingTargetMetaData.ENTITYMAPPINGS, entityMappingEntities);
+		mappingTargetEntity.set(MappingTargetMetaData.ENTITY_MAPPINGS, entityMappingEntities);
 		return mappingTargetEntity;
 	}
 
@@ -100,10 +100,10 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 		EntityMetaData target = dataService.getEntityMetaData(mappingTargetEntity
 				.getString(MappingTargetMetaData.TARGET));
 
-		if (mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITYMAPPINGS) != null)
+		if (mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITY_MAPPINGS) != null)
 		{
 			List<Entity> entityMappingEntities = Lists.newArrayList(mappingTargetEntity
-					.getEntities(MappingTargetMetaData.ENTITYMAPPINGS));
+					.getEntities(MappingTargetMetaData.ENTITY_MAPPINGS));
 			entityMappings = entityMappingRepository.toEntityMappings(entityMappingEntities);
 		}
 

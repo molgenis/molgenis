@@ -6,12 +6,12 @@ import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class GroupAuthorityMetaData extends SystemEntityMetaDataImpl
+public class GroupAuthorityMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "GroupAuthority";
 	public static final String GROUP_AUTHORITY = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -21,15 +21,17 @@ public class GroupAuthorityMetaData extends SystemEntityMetaDataImpl
 	public static final String ID = "id";
 
 	private final SecurityPackage securityPackage;
-
-	private MolgenisGroupMetaData molgenisGroupMetaData;
-	private AuthorityMetaData authorityMetaData;
+	private final MolgenisGroupMetaData molgenisGroupMetaData;
+	private final AuthorityMetaData authorityMetaData;
 
 	@Autowired
-	GroupAuthorityMetaData(SecurityPackage securityPackage)
+	GroupAuthorityMetaData(SecurityPackage securityPackage, MolgenisGroupMetaData molgenisGroupMetaData,
+			AuthorityMetaData authorityMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
 		this.securityPackage = requireNonNull(securityPackage);
+		this.molgenisGroupMetaData = requireNonNull(molgenisGroupMetaData);
+		this.authorityMetaData = requireNonNull(authorityMetaData);
 	}
 
 	@Override
@@ -41,18 +43,5 @@ public class GroupAuthorityMetaData extends SystemEntityMetaDataImpl
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
 		addAttribute(MOLGENIS_GROUP).setDataType(XREF).setRefEntity(molgenisGroupMetaData).setAggregatable(true)
 				.setDescription("").setNillable(false);
-	}
-
-	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
-	@Autowired
-	public void setMolgenisGroupMetaData(MolgenisGroupMetaData molgenisGroupMetaData)
-	{
-		this.molgenisGroupMetaData = requireNonNull(molgenisGroupMetaData);
-	}
-
-	@Autowired
-	public void setAuthorityMetaData(AuthorityMetaData authorityMetaData)
-	{
-		this.authorityMetaData = requireNonNull(authorityMetaData);
 	}
 }

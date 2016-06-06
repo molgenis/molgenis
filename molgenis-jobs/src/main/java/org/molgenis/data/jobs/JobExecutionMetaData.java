@@ -13,12 +13,12 @@ import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JobExecutionMetaData extends SystemEntityMetaDataImpl
+public class JobExecutionMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "JobExecution";
 	public static final String JOB_EXECUTION = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;

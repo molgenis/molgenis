@@ -9,15 +9,15 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OntologyTermMetaData extends SystemEntityMetaDataImpl
+public class OntologyTermMetaData extends SystemEntityMetaData
 {
-	public final static String SIMPLE_NAME = "OntologyTerm";
+	public static final String SIMPLE_NAME = "OntologyTerm";
 	public final static String ONTOLOGY_TERM = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public final static String ID = "id";
@@ -28,16 +28,24 @@ public class OntologyTermMetaData extends SystemEntityMetaDataImpl
 	public final static String ONTOLOGY_TERM_NODE_PATH = "nodePath";
 	public final static String ONTOLOGY = "ontology";
 
-	private OntologyTermSynonymMetaData ontologyTermSynonymMetaData;
-	private OntologyTermDynamicAnnotationMetaData ontologyTermDynamicAnnotationMetaData;
-	private OntologyTermNodePathMetaData ontologyTermNodePathMetaData;
-	private OntologyMetaData ontologyMetaData;
+	private final OntologyPackage ontologyPackage;
+	private final OntologyTermSynonymMetaData ontologyTermSynonymMetaData;
+	private final OntologyTermDynamicAnnotationMetaData ontologyTermDynamicAnnotationMetaData;
+	private final OntologyTermNodePathMetaData ontologyTermNodePathMetaData;
+	private final OntologyMetaData ontologyMetaData;
 
-	private OntologyPackage ontologyPackage;
-
-	public OntologyTermMetaData()
+	@Autowired
+	public OntologyTermMetaData(OntologyPackage ontologyPackage,
+			OntologyTermSynonymMetaData ontologyTermSynonymMetaData,
+			OntologyTermDynamicAnnotationMetaData ontologyTermDynamicAnnotationMetaData,
+			OntologyTermNodePathMetaData ontologyTermNodePathMetaData, OntologyMetaData ontologyMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_ONTOLOGY);
+		this.ontologyPackage = requireNonNull(ontologyPackage);
+		this.ontologyTermSynonymMetaData = requireNonNull(ontologyTermSynonymMetaData);
+		this.ontologyTermDynamicAnnotationMetaData = requireNonNull(ontologyTermDynamicAnnotationMetaData);
+		this.ontologyTermNodePathMetaData = requireNonNull(ontologyTermNodePathMetaData);
+		this.ontologyMetaData = requireNonNull(ontologyMetaData);
 	}
 
 	@Override
@@ -48,39 +56,12 @@ public class OntologyTermMetaData extends SystemEntityMetaDataImpl
 		addAttribute(ID, ROLE_ID).setVisible(false);
 		addAttribute(ONTOLOGY_TERM_IRI).setNillable(false);
 		addAttribute(ONTOLOGY_TERM_NAME, ROLE_LABEL).setDataType(TEXT).setNillable(false);
-		addAttribute(ONTOLOGY_TERM_SYNONYM).setDataType(MREF).setNillable(true).setRefEntity(ontologyTermSynonymMetaData);
-		addAttribute(ONTOLOGY_TERM_DYNAMIC_ANNOTATION).setDataType(MREF)
-				.setNillable(true).setRefEntity(ontologyTermDynamicAnnotationMetaData);
+		addAttribute(ONTOLOGY_TERM_SYNONYM).setDataType(MREF).setNillable(true)
+				.setRefEntity(ontologyTermSynonymMetaData);
+		addAttribute(ONTOLOGY_TERM_DYNAMIC_ANNOTATION).setDataType(MREF).setNillable(true)
+				.setRefEntity(ontologyTermDynamicAnnotationMetaData);
 		addAttribute(ONTOLOGY_TERM_NODE_PATH).setDataType(MREF).setNillable(true)
 				.setRefEntity(ontologyTermNodePathMetaData);
-		addAttribute(ONTOLOGY).setDataType(XREF).setNillable(false)
-				.setRefEntity(ontologyMetaData);
-	}
-
-	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
-	@Autowired
-	public void setOntologyTermSynonymMetaData(OntologyTermSynonymMetaData ontologyTermSynonymMetaData) {
-		this.ontologyTermSynonymMetaData = requireNonNull(ontologyTermSynonymMetaData);
-	}
-
-	@Autowired
-	public void setOntologyTermDynamicAnnotationMetaData(OntologyTermDynamicAnnotationMetaData ontologyTermDynamicAnnotationMetaData) {
-		this.ontologyTermDynamicAnnotationMetaData = requireNonNull(ontologyTermDynamicAnnotationMetaData);
-	}
-
-	@Autowired
-	public void setOntologyTermNodePathMetaData(OntologyTermNodePathMetaData ontologyTermNodePathMetaData) {
-		this.ontologyTermNodePathMetaData = requireNonNull(ontologyTermNodePathMetaData);
-	}
-
-	@Autowired
-	public void setOntologyMetaData(OntologyMetaData ontologyMetaData) {
-		this.ontologyMetaData = requireNonNull(ontologyMetaData);
-	}
-
-	@Autowired
-	public void setOntologyPackage(OntologyPackage ontologyPackage)
-	{
-		this.ontologyPackage = requireNonNull(ontologyPackage);
+		addAttribute(ONTOLOGY).setDataType(XREF).setNillable(false).setRefEntity(ontologyMetaData);
 	}
 }

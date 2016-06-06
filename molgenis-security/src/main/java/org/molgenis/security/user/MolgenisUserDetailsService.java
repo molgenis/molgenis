@@ -112,14 +112,14 @@ public class MolgenisUserDetailsService implements UserDetailsService
 	private List<UserAuthority> getUserAuthorities(MolgenisUser molgenisUser)
 	{
 		return dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENISUSER, molgenisUser),
+				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, molgenisUser),
 				UserAuthority.class).collect(toList());
 	}
 
 	private List<GroupAuthority> getGroupAuthorities(MolgenisUser molgenisUser)
 	{
 		List<MolgenisGroupMember> groupMembers = dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENISUSER, molgenisUser),
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser),
 				MolgenisGroupMember.class)
 				.collect(toList());
 

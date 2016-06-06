@@ -103,10 +103,10 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	//		MolgenisGroup molgenisGroup1 = mock(MolgenisGroup.class);
 	//		when(molgenisGroupMember1.getMolgenisGroup()).thenReturn(molgenisGroup1);
 	//		when(dataService.findAll(MolgenisGroupMemberMetaData.TAG,
-	//				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENISUSER, molgenisUser0), MolgenisGroupMember.class))
+	//				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser0), MolgenisGroupMember.class))
 	//						.thenReturn(Stream.of(molgenisGroupMember0));
 	//		when(dataService.findAll(MolgenisGroupMemberMetaData.TAG,
-	//				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENISUSER, molgenisUser1), MolgenisGroupMember.class))
+	//				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser1), MolgenisGroupMember.class))
 	//						.thenReturn(Stream.of(molgenisGroupMember1));
 	//		this.setSecurityContextSuperUser();
 	//		assertEquals(userManagerService.getAllMolgenisUsers(),
@@ -165,7 +165,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	//
 	//		when(dataService.findOneById(MolgenisUserMetaData.TAG, "1", MolgenisUser.class)).thenReturn(user1);
 	//		when(dataService.findAll(MolgenisGroupMemberMetaData.TAG,
-	//				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENISUSER, user1), MolgenisGroupMember.class))
+	//				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user1), MolgenisGroupMember.class))
 	//						.thenReturn(Stream.of(molgenisGroupMemberOne, molgenisGroupMemberTwo));
 	//		List<MolgenisGroup> groups = this.userManagerService.getGroupsWhereUserIsMember("1");
 	//
@@ -200,7 +200,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	//		when(dataService.findOneById(MolgenisGroupMetaData.TAG, "22", MolgenisGroup.class)).thenReturn(group22);
 	//
 	//		when(dataService.findAll(MolgenisGroupMemberMetaData.TAG,
-	//				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENISUSER, user1), MolgenisGroupMember.class))
+	//				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user1), MolgenisGroupMember.class))
 	//						.thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
 	//						{
 	//							@Override
@@ -249,7 +249,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	//		when(dataService.findOneById(MolgenisUserMetaData.TAG, "1", MolgenisUser.class)).thenReturn(user1);
 	//
 	//		when(dataService.findAll(MolgenisGroupMemberMetaData.TAG,
-	//				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENISUSER, user1), MolgenisGroupMember.class))
+	//				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user1), MolgenisGroupMember.class))
 	//						.thenReturn(Stream.of(molgenisGroupMember));
 	//		when(dataService.findAll(MolgenisGroupMetaData.TAG, MolgenisGroup.class))
 	//				.thenReturn(Stream.of(group22, group33, group44));
@@ -286,7 +286,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	//		when(dataService.findOneById(MolgenisUserMetaData.TAG, "1", MolgenisUser.class)).thenReturn(user1);
 	//		when(dataService.findOneById(MolgenisGroupMetaData.TAG, "22", MolgenisGroup.class)).thenReturn(group22);
 	//
-	//		Query<MolgenisGroupMember> q = new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENISUSER, user1).and()
+	//		Query<MolgenisGroupMember> q = new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user1).and()
 	//				.eq(MolgenisGroupMemberMetaData.MOLGENIS_GROUP, group22);
 	//
 	//		when(dataService.findAll(MolgenisGroupMemberMetaData.TAG, q, MolgenisGroupMember.class))

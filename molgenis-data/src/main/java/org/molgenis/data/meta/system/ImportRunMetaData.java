@@ -10,12 +10,12 @@ import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
 import java.util.Arrays;
 
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ImportRunMetaData extends SystemEntityMetaDataImpl
+public class ImportRunMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "ImportRun";
 	public static final String IMPORT_RUN = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;

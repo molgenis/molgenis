@@ -51,15 +51,15 @@ public class MappingTargetRepositoryImplTest extends AbstractTestNGSpringContext
 	//		// Entities
 	//		Entity entityMappingEntity = new MapEntity(new EntityMappingMetaData());
 	//		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, "entityMappingID");
-	//		entityMappingEntity.set(EntityMappingMetaData.SOURCEENTITYMETADATA, "source");
-	//		entityMappingEntity.set(EntityMappingMetaData.TARGETENTITYMETADATA, "target");
-	//		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTEMAPPINGS, emptyList());
+	//		entityMappingEntity.set(EntityMappingMetaData.SOURCE_ENTITY_META_DATA, "source");
+	//		entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_META_DATA, "target");
+	//		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, emptyList());
 	//		Entity mappingTargetEntity = new MapEntity(new MappingTargetMetaData());
 	//		mappingTargetEntity.set(IDENTIFIER, "mappingTargetID");
 	//		mappingTargetEntity.set(TARGET, "target");
 	//
 	//		entityMappingEntities = asList(entityMappingEntity);
-	//		mappingTargetEntity.set(ENTITYMAPPINGS, entityMappingEntities);
+	//		mappingTargetEntity.set(ENTITY_MAPPINGS, entityMappingEntities);
 	//
 	//		mappingTargetEntities = asList(mappingTargetEntity);
 	//	}

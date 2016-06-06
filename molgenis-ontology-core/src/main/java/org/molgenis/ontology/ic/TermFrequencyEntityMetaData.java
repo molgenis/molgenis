@@ -6,15 +6,15 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TermFrequencyEntityMetaData extends SystemEntityMetaDataImpl
+public class TermFrequencyEntityMetaData extends SystemEntityMetaData
 {
-	public final static String SIMPLE_NAME = "TermFrequency";
+	public static final String SIMPLE_NAME = "TermFrequency";
 	public static final String TERM_FREQUENCY = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public final static String ID = "id";

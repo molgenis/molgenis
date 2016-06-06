@@ -4,11 +4,11 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MyEntityMetaData extends SystemEntityMetaDataImpl
+public class MyEntityMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "MyEntity";
 	public static final String SCRIPT_PARAMETER = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;

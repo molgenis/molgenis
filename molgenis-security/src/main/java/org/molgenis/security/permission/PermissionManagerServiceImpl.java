@@ -153,7 +153,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 		List<Authority> userPermissions = getUserPermissions(molgenisUser, authorityPrefix);
 
 		List<MolgenisGroupMember> groupMembers = dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENISUSER, molgenisUser),
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser),
 				MolgenisGroupMember.class).collect(
 				toList());
 
@@ -245,7 +245,7 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 	private List<Authority> getUserPermissions(MolgenisUser molgenisUser, final String authorityPrefix)
 	{
 		Stream<UserAuthority> authorities = dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENISUSER, molgenisUser),
+				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, molgenisUser),
 				UserAuthority.class);
 
 		return authorities.filter(authority -> {

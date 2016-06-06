@@ -116,7 +116,7 @@ public class EntityMetaDataImpl extends SystemEntity implements EntityMetaData
 		return entity != null ? entity.getEntityMetaData() : this;
 		//		return EntityMetaDataMetaData.get();
 		//		return this; // FIXME the entity meta data of EntityMetaData is always EntityMetaDataMetaData
-		// TODO store entityName and packageName in SystemEntityMetaDataImpl fields and call init() to create EntityMetaDataImpl
+		// TODO store entityName and packageName in SystemEntityMetaData fields and call init() to create EntityMetaDataImpl
 		// all meta data instances must call super.init in their init
 	}
 
@@ -366,7 +366,8 @@ public class EntityMetaDataImpl extends SystemEntity implements EntityMetaData
 	public AttributeMetaData getLabelAttribute(String languageCode)
 	{
 		AttributeMetaData labelAttr = getLabelAttribute();
-		return labelAttr != null ? getAttribute(labelAttr.getName() + '-' + languageCode) : null;
+		AttributeMetaData i18nLabelAttr = getAttribute(labelAttr.getName() + '-' + languageCode);
+		return i18nLabelAttr != null ? i18nLabelAttr : labelAttr;
 	}
 
 	/**

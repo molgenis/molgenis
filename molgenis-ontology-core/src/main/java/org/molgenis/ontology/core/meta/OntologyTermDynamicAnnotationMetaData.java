@@ -6,15 +6,15 @@ import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
-import org.molgenis.data.meta.SystemEntityMetaDataImpl;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OntologyTermDynamicAnnotationMetaData extends SystemEntityMetaDataImpl
+public class OntologyTermDynamicAnnotationMetaData extends SystemEntityMetaData
 {
-	public final static String SIMPLE_NAME = "OntologyTermDynamicAnnotation";
+	public static final String SIMPLE_NAME = "OntologyTermDynamicAnnotation";
 	public final static String ONTOLOGY_TERM_DYNAMIC_ANNOTATION = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public final static String ID = "id";
@@ -22,11 +22,13 @@ public class OntologyTermDynamicAnnotationMetaData extends SystemEntityMetaDataI
 	public final static String VALUE = "value";
 	public final static String LABEL = "label";
 
-	private OntologyPackage ontologyPackage;
+	private final OntologyPackage ontologyPackage;
 
-	public OntologyTermDynamicAnnotationMetaData()
+	@Autowired
+	public OntologyTermDynamicAnnotationMetaData(OntologyPackage ontologyPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_ONTOLOGY);
+		this.ontologyPackage = requireNonNull(ontologyPackage);
 	}
 
 	@Override
@@ -38,12 +40,5 @@ public class OntologyTermDynamicAnnotationMetaData extends SystemEntityMetaDataI
 		addAttribute(NAME).setNillable(false);
 		addAttribute(VALUE).setNillable(false);
 		addAttribute(LABEL, ROLE_LABEL).setNillable(false);
-	}
-
-	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
-	@Autowired
-	public void setOntologyPackage(OntologyPackage ontologyPackage)
-	{
-		this.ontologyPackage = requireNonNull(ontologyPackage);
 	}
 }
