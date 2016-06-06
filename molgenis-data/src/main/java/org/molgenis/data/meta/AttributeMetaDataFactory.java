@@ -3,6 +3,7 @@ package org.molgenis.data.meta;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.IDENTIFIER;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.EntityFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -28,6 +29,12 @@ public class AttributeMetaDataFactory implements EntityFactory<AttributeMetaData
 		AttributeMetaData attrMeta = create();
 		attrMeta.set(IDENTIFIER, entityId);
 		return attrMeta;
+	}
+
+	@Override
+	public AttributeMetaData create(Entity entity)
+	{
+		return new AttributeMetaData(entity);
 	}
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies

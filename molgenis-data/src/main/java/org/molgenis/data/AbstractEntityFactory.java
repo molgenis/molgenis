@@ -20,35 +20,34 @@ public abstract class AbstractEntityFactory<E extends SystemEntity, M extends Sy
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractEntityFactory.class);
 
-	private final Constructor<E> entityConstructor;
-	private final Constructor<E> entityConstructorWithId;
+	private final Constructor<E> entityConstructorWithEntity;
+	private final Constructor<E> entityConstructorWithEntityMeta;
+	private final Constructor<E> entityConstructorWithIdAndEntityMeta;
 	private final M systemEntityMetaData;
 
 	/**
 	 * Constructs a new entity factory that creates entities of the given type, meta data type and id type
 	 *
-	 * @param entityClass          entity type
-	 * @param systemEntityMetaData entity meta data type
-	 * @param entityIdClass        entity id type
+	 * @param entityClass      entity type
+	 * @param systemEntityMeta entity meta data type
+	 * @param entityIdClass    entity id type
 	 */
-	protected AbstractEntityFactory(Class<E> entityClass, M systemEntityMetaData, Class<P> entityIdClass)
+	protected AbstractEntityFactory(Class<E> entityClass, M systemEntityMeta, Class<P> entityIdClass)
 	{
-		this.entityConstructor = getConstructor(entityClass, systemEntityMetaData.getClass());
-		this.entityConstructorWithId = getConstructor(entityClass, systemEntityMetaData.getClass(), entityIdClass);
-		this.systemEntityMetaData = systemEntityMetaData;
+		// determining constructors at creation time validates that required constructors exist on start-up
+		this.entityConstructorWithEntity = getConstructor(entityClass);
+		this.entityConstructorWithEntityMeta = getConstructor(entityClass, systemEntityMeta.getClass());
+		this.entityConstructorWithIdAndEntityMeta = getConstructor(entityClass, systemEntityMeta.getClass(),
+				entityIdClass);
+		this.systemEntityMetaData = systemEntityMeta;
 	}
 
-	/**
-	 * Creates a new entity
-	 *
-	 * @return new entity
-	 */
 	@Override
 	public E create()
 	{
 		try
 		{
-			return entityConstructor.newInstance(systemEntityMetaData);
+			return entityConstructorWithEntityMeta.newInstance(systemEntityMetaData);
 		}
 		catch (InstantiationException | IllegalAccessException | InvocationTargetException e)
 		{
@@ -56,18 +55,12 @@ public abstract class AbstractEntityFactory<E extends SystemEntity, M extends Sy
 		}
 	}
 
-	/**
-	 * Creates a new entity with the given id
-	 *
-	 * @param id entity id
-	 * @return new entity
-	 */
 	@Override
 	public E create(P id)
 	{
 		try
 		{
-			return entityConstructorWithId.newInstance(id, systemEntityMetaData);
+			return entityConstructorWithIdAndEntityMeta.newInstance(id, systemEntityMetaData);
 		}
 		catch (InstantiationException | IllegalAccessException | InvocationTargetException e)
 		{
@@ -75,32 +68,59 @@ public abstract class AbstractEntityFactory<E extends SystemEntity, M extends Sy
 		}
 	}
 
-	private Constructor<E> getConstructor(Class<E> entityClass,
-			Class<? extends SystemEntityMetaData> entityMetaDataClass)
+	@Override
+	public E create(Entity entity)
 	{
 		try
 		{
-			return entityClass.getConstructor(entityMetaDataClass);
+			return entityConstructorWithEntity.newInstance(entity);
+		}
+		catch (InstantiationException | IllegalAccessException | InvocationTargetException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+
+	private Constructor<E> getConstructor(Class<E> entityClass)
+	{
+		try
+		{
+			return entityClass.getConstructor(Entity.class);
 		}
 		catch (NoSuchMethodException e)
 		{
 			LOG.error("[{}] is missing the required constructor [public {}({})", entityClass.getName(),
-					entityClass.getSimpleName(), entityMetaDataClass.getSimpleName());
+					entityClass.getSimpleName(), Entity.class.getSimpleName());
 			throw new RuntimeException(e);
 		}
 	}
 
 	private Constructor<E> getConstructor(Class<E> entityClass,
-			Class<? extends SystemEntityMetaData> entityMetaDataClass, Class<?> idType)
+			Class<? extends SystemEntityMetaData> entityMetaArgClass)
 	{
 		try
 		{
-			return entityClass.getConstructor(idType, entityMetaDataClass);
+			return entityClass.getConstructor(entityMetaArgClass);
+		}
+		catch (NoSuchMethodException e)
+		{
+			LOG.error("[{}] is missing the required constructor [public {}({})", entityClass.getName(),
+					entityClass.getSimpleName(), entityMetaArgClass.getSimpleName());
+			throw new RuntimeException(e);
+		}
+	}
+
+	private Constructor<E> getConstructor(Class<E> entityClass,
+			Class<? extends SystemEntityMetaData> entityMetaArgClass, Class<?> idArgType)
+	{
+		try
+		{
+			return entityClass.getConstructor(idArgType, entityMetaArgClass);
 		}
 		catch (NoSuchMethodException e)
 		{
 			LOG.error("[{}] is missing the required constructor [public {}({}, {})", entityClass.getName(),
-					entityClass.getSimpleName(), idType.getSimpleName(), entityMetaDataClass.getSimpleName());
+					entityClass.getSimpleName(), idArgType.getSimpleName(), entityMetaArgClass.getSimpleName());
 			throw new RuntimeException(e);
 		}
 	}

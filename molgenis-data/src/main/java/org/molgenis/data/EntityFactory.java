@@ -11,17 +11,25 @@ import org.molgenis.data.meta.SystemEntity;
 public interface EntityFactory<E extends SystemEntity, P>
 {
 	/**
-	 * Creates an entity
+	 * Creates an entity.
 	 *
 	 * @return new entity
 	 */
 	E create();
 
 	/**
-	 * Creates an entity with the given id
+	 * Creates an entity with the given id.
 	 *
 	 * @param entityId entity id
 	 * @return new entity with id
 	 */
 	E create(P entityId);
+
+	/**
+	 * Creates an entity based on the given untyped entity.
+	 *
+	 * @param entity untyped entity
+	 * @return typed entity
+	 */
+	E create(Entity entity);
 }
