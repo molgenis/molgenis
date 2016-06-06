@@ -22,7 +22,9 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
@@ -47,6 +49,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
 	private TestingAuthenticationToken systemAuthentication;
 	private TestingAuthenticationToken user1Authentication;
 	private TestingAuthenticationToken user2Authentication;
+	private DataService dataService;
 
 	private ArgumentCaptor<Entity> entityArgumentCaptor;
 	private ArgumentCaptor<String> attributeArgumentCaptor;
@@ -90,8 +93,10 @@ public class RowLevelSecurityRepositoryDecoratorTest
 
 		user1 = mock(Entity.class);
 		when(user1.getString(USERNAME)).thenReturn("user1");
+		when(user1.getIdValue()).thenReturn("user1");
 		user2 = mock(Entity.class);
 		when(user2.getString(USERNAME)).thenReturn("user2");
+		when(user2.getIdValue()).thenReturn("user2");
 
 		usersEntity1 = newArrayList(user1);
 		usersEntity2 = newArrayList(user1, user2);
@@ -128,7 +133,9 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		when(decoratedRepository.findOne("entity2")).thenReturn(entity2);
 		when(decoratedRepository.findOne("entity3")).thenReturn(entity3);
 
-		repositoryDecorator = new RowLevelSecurityRepositoryDecorator(decoratedRepository);
+		dataService = mock(DataService.class);
+		when(dataService.findOne(eq(MolgenisUser.ENTITY_NAME), any(QueryImpl.class))).thenReturn(user1);
+		repositoryDecorator = new RowLevelSecurityRepositoryDecorator(decoratedRepository, dataService);
 
 		streamConsumer = (invocation) -> {
 			Stream<Entity> entities = (Stream<Entity>) invocation.getArguments()[0];
@@ -630,6 +637,69 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(systemAuthentication);
 		repositoryDecorator.deleteAll();
 		verify(decoratedRepository, times(1)).deleteAll();
+	}
+
+	@Test
+	public void addEntityAsUser()
+	{
+		SecurityContextHolder.getContext().setAuthentication(user1Authentication);
+		repositoryDecorator.add(entity3);
+		verify(decoratedRepository, times(1)).add(any(Entity.class));
+		verify(entity3, times(1)).set(UPDATE_ATTRIBUTE, "user1");
+	}
+
+	@Test
+	public void addEntityAsSu()
+	{
+		SecurityContextHolder.getContext().setAuthentication(adminAuthentication);
+		repositoryDecorator.add(entity3);
+		verify(decoratedRepository, times(1)).add(entity3);
+		verify(entity3, never()).set(eq(UPDATE_ATTRIBUTE), anyObject());
+	}
+
+	@Test
+	public void addEntityAsSystem()
+	{
+		SecurityContextHolder.getContext().setAuthentication(systemAuthentication);
+		repositoryDecorator.add(entity3);
+		verify(decoratedRepository, times(1)).add(entity3);
+		verify(entity3, never()).set(eq(UPDATE_ATTRIBUTE), anyObject());
+	}
+
+	@Test
+	public void addStreamAsUser()
+	{
+		SecurityContextHolder.getContext().setAuthentication(user1Authentication);
+		Stream<Entity> entities = Stream.of(entity2, entity3);
+		doAnswer(streamConsumer).when(decoratedRepository).add(any(Stream.class));
+		repositoryDecorator.add(entities);
+		verify(decoratedRepository, times(1)).add(any(Stream.class));
+		verify(entity2, times(1)).set(UPDATE_ATTRIBUTE, "user1");
+		verify(entity3, times(1)).set(UPDATE_ATTRIBUTE, "user1");
+	}
+
+	@Test
+	public void addStreamAsSu()
+	{
+		SecurityContextHolder.getContext().setAuthentication(adminAuthentication);
+		testAddStreamAsSuOrSystem();
+	}
+
+	@Test
+	public void addStreamAsSystem()
+	{
+		SecurityContextHolder.getContext().setAuthentication(systemAuthentication);
+		testAddStreamAsSuOrSystem();
+	}
+
+	private void testAddStreamAsSuOrSystem()
+	{
+		Stream<Entity> entities = Stream.of(entity2, entity3);
+		doAnswer(streamConsumer).when(decoratedRepository).add(any(Stream.class));
+		repositoryDecorator.add(entities);
+		verify(decoratedRepository, times(1)).add(any(Stream.class));
+		verify(entity2, never()).set(eq(UPDATE_ATTRIBUTE), anyObject());
+		verify(entity3, never()).set(eq(UPDATE_ATTRIBUTE), anyObject());
 	}
 
 	private void testUpdateStream()

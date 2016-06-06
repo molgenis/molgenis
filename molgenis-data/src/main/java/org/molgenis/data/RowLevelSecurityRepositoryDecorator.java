@@ -345,21 +345,6 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		}
 	}
 
-	private Entity createEntityWithNewMetadata(Entity entity)
-	{
-		return new DefaultEntity(getEntityMetaData(), dataService, entity);
-	}
-
-	private Entity addCurrentUserToEntity(Entity entity)
-	{
-		Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
-
-		Entity currentUser = runAsSystem(() -> dataService.findOne(MolgenisUser.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisUser.USERNAME, SecurityUtils.getUsername(currentAuthentication))));
-		entity.set(UPDATE_ATTRIBUTE, currentUser.getIdValue());
-		return entity;
-	}
-
 	@Override
 	public Integer add(Stream<? extends Entity> entities)
 	{
@@ -414,6 +399,21 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	public void removeEntityListener(EntityListener entityListener)
 	{
 		decoratedRepository.removeEntityListener(entityListener);
+	}
+
+	private Entity createEntityWithNewMetadata(Entity entity)
+	{
+		return new DefaultEntity(getEntityMetaData(), dataService, entity);
+	}
+
+	private Entity addCurrentUserToEntity(Entity entity)
+	{
+		Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
+
+		Entity currentUser = runAsSystem(() -> dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.USERNAME, SecurityUtils.getUsername(currentAuthentication))));
+		entity.set(UPDATE_ATTRIBUTE, currentUser.getIdValue());
+		return entity;
 	}
 
 	private boolean isRowLevelSecured()
