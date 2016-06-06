@@ -17,6 +17,7 @@ import org.molgenis.data.elasticsearch.reindex.job.ReindexJobFactory;
 import org.molgenis.data.elasticsearch.transaction.ReindexTransactionListener;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.JobExecutionUpdaterImpl;
+import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,10 +48,10 @@ public class EmbeddedElasticSearchConfig
 	private ElasticsearchEntityFactory elasticsearchEntityFactory;
 
 	@Autowired
-	public MolgenisTransactionManager molgenisTransactionManager;
+	private MolgenisTransactionManager molgenisTransactionManager;
 
 	@Autowired
-	private MolgenisUserService molgenisUserService;
+	private ReindexActionRegisterService reindexActionRegisterService;
 
 	@Bean(destroyMethod = "close")
 	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory()
@@ -87,7 +88,7 @@ public class EmbeddedElasticSearchConfig
 	public ReindexTransactionListener reindexTransactionListener()
 	{
 		final ReindexTransactionListener reindexTransactionListener = new ReindexTransactionListener(
-				rebuildIndexService());
+				rebuildIndexService(), reindexActionRegisterService);
 		molgenisTransactionManager.addTransactionListener(reindexTransactionListener);
 		return reindexTransactionListener;
 	}
