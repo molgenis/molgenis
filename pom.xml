@@ -671,7 +671,6 @@
         <module>molgenis-charts</module>
         <module>molgenis-js</module>
         <module>molgenis-model-registry</module>
-        <module>molgenis-data-examples</module>
         <module>molgenis-scripts</module>
         <module>molgenis-scripts-core</module>
         <module>molgenis-data-import</module>
