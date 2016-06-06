@@ -52,7 +52,6 @@ import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
-import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.ui.menu.MenuMolgenisUi;
 import org.molgenis.ui.menu.MenuReaderService;
