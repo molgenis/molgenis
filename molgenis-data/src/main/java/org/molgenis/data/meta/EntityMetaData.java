@@ -43,7 +43,6 @@ public class EntityMetaData extends SystemEntity
 	 */
 	protected EntityMetaData()
 	{
-
 	}
 
 	/**

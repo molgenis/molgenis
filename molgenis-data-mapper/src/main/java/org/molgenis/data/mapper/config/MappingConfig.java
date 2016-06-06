@@ -17,6 +17,7 @@ import org.molgenis.data.mapper.service.impl.AlgorithmTemplateService;
 import org.molgenis.data.mapper.service.impl.AlgorithmTemplateServiceImpl;
 import org.molgenis.data.mapper.service.impl.MappingServiceImpl;
 import org.molgenis.data.mapper.service.impl.UnitResolverImpl;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.ontology.core.config.OntologyConfig;
@@ -60,11 +61,14 @@ public class MappingConfig
 	@Autowired
 	AttributeMappingMetaData attributeMappingMetaData;
 
+	@Autowired
+	AttributeMetaDataFactory attrMetaFactory;
+
 	@Bean
 	public MappingService mappingService()
 	{
 		return new MappingServiceImpl(dataService, algorithmServiceImpl(), idGenerator, mappingProjectRepository(),
-				permissionSystemService);
+				permissionSystemService, attrMetaFactory);
 	}
 
 	@Bean

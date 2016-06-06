@@ -1,6 +1,8 @@
 package org.molgenis.ontology.sorta.repo;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.io.File;
 import java.util.Arrays;
@@ -14,6 +16,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
@@ -51,10 +54,13 @@ public class SortaCsvRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
+			AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
+
 			entityMetaData = EntityMetaData.newInstance(csvRepository.getEntityMetaData());
-			//			entityMetaData.setName(entityName);
-			//			entityMetaData.setLabel(entityLabel);
-			//			entityMetaData.addAttribute(ALLOWED_IDENTIFIER, ROLE_ID).setNillable(false); // FIXME
+			entityMetaData.setName(entityName);
+			entityMetaData.setLabel(entityLabel);
+			entityMetaData
+					.addAttribute(attrMetaFactory.create().setName(ALLOWED_IDENTIFIER).setNillable(false), ROLE_ID);
 			AttributeMetaData nameAttribute = entityMetaData.getAttribute(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
 			if (nameAttribute != null)
 			{

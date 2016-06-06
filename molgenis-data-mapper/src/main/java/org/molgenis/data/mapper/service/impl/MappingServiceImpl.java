@@ -27,6 +27,7 @@ import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -49,24 +50,23 @@ public class MappingServiceImpl implements MappingService
 	private static final int BATCH_SIZE = 1000;
 
 	private final DataService dataService;
-
 	private final AlgorithmService algorithmService;
-
 	private final IdGenerator idGenerator;
-
 	private final MappingProjectRepository mappingProjectRepository;
-
 	private final PermissionSystemService permissionSystemService;
+	private final AttributeMetaDataFactory attrMetaFactory;
 
 	@Autowired
 	public MappingServiceImpl(DataService dataService, AlgorithmService algorithmService, IdGenerator idGenerator,
-			MappingProjectRepository mappingProjectRepository, PermissionSystemService permissionSystemService)
+			MappingProjectRepository mappingProjectRepository, PermissionSystemService permissionSystemService,
+			AttributeMetaDataFactory attrMetaFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.algorithmService = requireNonNull(algorithmService);
 		this.idGenerator = requireNonNull(idGenerator);
 		this.mappingProjectRepository = requireNonNull(mappingProjectRepository);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 	}
 
 	@Override
@@ -170,8 +170,8 @@ public class MappingServiceImpl implements MappingService
 		EntityMetaData targetMetaData = EntityMetaData.newInstance(mappingTarget.getTarget());
 		targetMetaData.setName(entityName);
 //		targetMetaData.setPackage(Package.defaultPackage);
-		targetMetaData.setLabel(entityName); // FIXME
-		//		targetMetaData.addAttribute("source"); // FIXME
+		targetMetaData.setLabel(entityName);
+		targetMetaData.addAttribute(attrMetaFactory.create().setName("source"));
 
 		// add a new repository if the target repo doesn't exist, or check if the target repository is compatible with
 		// the result of the mappings

@@ -11,7 +11,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 /**
- * Discovers and registers {@link SystemEntityMetaData} beans with the {@link SystemEntityMetaDataRegistrySingleton}
+ * Discovers and registers {@link SystemEntityMetaData} beans with the {@link SystemEntityMetaDataRegistry}.
  */
 @Component
 public class SystemEntityMetaDataRegistrar

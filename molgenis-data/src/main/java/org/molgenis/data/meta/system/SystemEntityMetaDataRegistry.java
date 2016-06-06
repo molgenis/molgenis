@@ -1,40 +1,60 @@
 package org.molgenis.data.meta.system;
 
+import static java.lang.String.format;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.SystemEntityMetaData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
  * Registry containing all {@link SystemEntityMetaData}.
- *
- * @see SystemEntityMetaDataRegistrySingleton
  */
 @Component
 public class SystemEntityMetaDataRegistry
 {
+	private final Logger LOG = LoggerFactory.getLogger(SystemEntityMetaDataRegistry.class);
+
+	private final Map<String, SystemEntityMetaData> systemEntityMetaDataMap;
+
+	public SystemEntityMetaDataRegistry()
+	{
+		systemEntityMetaDataMap = new HashMap<>();
+	}
+
 	public SystemEntityMetaData getSystemEntityMetaData(String entityName)
 	{
-		return SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(entityName);
+		return systemEntityMetaDataMap.get(entityName);
 	}
 
 	public Stream<SystemEntityMetaData> getSystemEntityMetaDatas()
 	{
-		return SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaDatas();
+		return systemEntityMetaDataMap.values().stream();
 	}
 
 	public boolean hasSystemEntityMetaData(String entityName)
 	{
-		return SystemEntityMetaDataRegistrySingleton.INSTANCE.hasSystemEntityMetaData(entityName);
+		return systemEntityMetaDataMap.containsKey(entityName);
 	}
 
 	public void addSystemEntityMetaData(SystemEntityMetaData systemEntityMetaData)
 	{
-		SystemEntityMetaDataRegistrySingleton.INSTANCE.addSystemEntityMetaData(systemEntityMetaData);
+		String systemEntityMetaDataName = systemEntityMetaData.getName();
+		if (systemEntityMetaDataName == null)
+		{
+			throw new IllegalArgumentException(format("[%s] is missing name, did you forget to call setName()?",
+					systemEntityMetaData.getClass().getSimpleName()));
+		}
+
+		LOG.trace("Registering system entity [{}] ...", systemEntityMetaDataName);
+		systemEntityMetaDataMap.put(systemEntityMetaDataName, systemEntityMetaData);
 	}
 
 	public boolean hasSystemAttributeMetaData(String attrIdentifier)

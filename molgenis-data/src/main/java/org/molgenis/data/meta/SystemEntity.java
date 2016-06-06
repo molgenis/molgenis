@@ -14,9 +14,11 @@ public abstract class SystemEntity extends AbstractEntity
 {
 	private Entity entity;
 
+	/**
+	 * Creates a new system entity. Call {@link #init(EntityMetaData)} to initialize the created entity.
+	 */
 	protected SystemEntity()
 	{
-
 	}
 
 	/**
@@ -42,9 +44,14 @@ public abstract class SystemEntity extends AbstractEntity
 		init(entityMeta);
 	}
 
-	protected void init(EntityMetaData entityMetaData)
+	/**
+	 * Initialize this entity created with {@link #SystemEntity()}.
+	 *
+	 * @param entityMeta entity meta data
+	 */
+	protected void init(EntityMetaData entityMeta)
 	{
-		this.entity = new MapEntity(requireNonNull(entityMetaData));
+		this.entity = new MapEntity(requireNonNull(entityMeta));
 	}
 
 	@Override
