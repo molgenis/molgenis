@@ -21,7 +21,6 @@ import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
-import org.molgenis.security.user.UserAccountService;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.MySqlRepositoryExceptionTranslatorDecorator;
 
@@ -35,12 +34,11 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final DataService dataService;
 	private final ExpressionValidator expressionValidator;
 	private final RepositoryDecoratorRegistry repositoryDecoratorRegistry;
-	private final UserAccountService userAccountService;
 
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager, TransactionLogService transactionLogService,
 			EntityAttributesValidator entityAttributesValidator, IdGenerator idGenerator, AppSettings appSettings,
 			DataService dataService, ExpressionValidator expressionValidator,
-			RepositoryDecoratorRegistry repositoryDecoratorRegistry, UserAccountService userAccountService)
+			RepositoryDecoratorRegistry repositoryDecoratorRegistry)
 	{
 		this.entityManager = entityManager;
 		this.transactionLogService = transactionLogService;
@@ -50,7 +48,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.dataService = dataService;
 		this.expressionValidator = expressionValidator;
 		this.repositoryDecoratorRegistry = repositoryDecoratorRegistry;
-		this.userAccountService = userAccountService;
 	}
 
 	@Override
