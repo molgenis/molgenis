@@ -55,7 +55,9 @@ public class RowLevelSecurityRepositoryDecoratorTest
 	private ArgumentCaptor<Object> idArgumentCaptor;
 	private Answer<Void> streamConsumer;
 
-	@SuppressWarnings("unchecked") @BeforeMethod public void beforeMethod()
+	@SuppressWarnings("unchecked")
+	@BeforeMethod
+	public void beforeMethod()
 	{
 		entityName = "entity";
 		entityMetaData = mock(EntityMetaData.class);
@@ -141,37 +143,43 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		idArgumentCaptor = ArgumentCaptor.forClass(Object.class);
 	}
 
-	@Test public void streamAsUser()
+	@Test
+	public void streamAsUser()
 	{
 		SecurityContextHolder.getContext().setAuthentication(user1Authentication);
 		testStream(UPDATE_ATTRIBUTE, UPDATE_ATTRIBUTE, "");
 	}
 
-	@Test public void streamAsSu()
+	@Test
+	public void streamAsSu()
 	{
 		SecurityContextHolder.getContext().setAuthentication(adminAuthentication);
 		testStream(UPDATE_ATTRIBUTE, UPDATE_ATTRIBUTE, UPDATE_ATTRIBUTE);
 	}
 
-	@Test public void streamAsSystem()
+	@Test
+	public void streamAsSystem()
 	{
 		SecurityContextHolder.getContext().setAuthentication(systemAuthentication);
 		testStream(UPDATE_ATTRIBUTE, UPDATE_ATTRIBUTE, UPDATE_ATTRIBUTE);
 	}
 
-	@Test public void getEntityMetaDataAsUser()
+	@Test
+	public void getEntityMetaDataAsUser()
 	{
 		SecurityContextHolder.getContext().setAuthentication(user2Authentication);
 		assertEquals(repositoryDecorator.getEntityMetaData().getAttribute(UPDATE_ATTRIBUTE), null);
 	}
 
-	@Test public void getEntityMetaDataAsSu()
+	@Test
+	public void getEntityMetaDataAsSu()
 	{
 		SecurityContextHolder.getContext().setAuthentication(adminAuthentication);
 		assertEquals(repositoryDecorator.getEntityMetaData().getAttribute(UPDATE_ATTRIBUTE), updatePermissionAttribute);
 	}
 
-	@Test public void getEntityMetaDataAsSystem()
+	@Test
+	public void getEntityMetaDataAsSystem()
 	{
 		SecurityContextHolder.getContext().setAuthentication(systemAuthentication);
 		assertEquals(repositoryDecorator.getEntityMetaData().getAttribute(UPDATE_ATTRIBUTE), updatePermissionAttribute);
@@ -196,21 +204,24 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		}
 	}
 
-	@Test public void updateEntityAsSu()
+	@Test
+	public void updateEntityAsSu()
 	{
 		SecurityContextHolder.getContext().setAuthentication(adminAuthentication);
 		repositoryDecorator.update(entity1);
 		verify(decoratedRepository, times(1)).update(entity1);
 	}
 
-	@Test public void updateEntityAsSystem()
+	@Test
+	public void updateEntityAsSystem()
 	{
 		SecurityContextHolder.getContext().setAuthentication(systemAuthentication);
 		repositoryDecorator.update(entity1);
 		verify(decoratedRepository, times(1)).update(entity1);
 	}
 
-	@Test public void updateEntityAsUser()
+	@Test
+	public void updateEntityAsUser()
 	{
 		SecurityContextHolder.getContext().setAuthentication(user1Authentication);
 		repositoryDecorator.update(entity2);
@@ -221,7 +232,8 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		verifyAddUpdateAttribute(entity2, usersEntity2);
 	}
 
-	@SuppressWarnings("unchecked") @Test(expectedExceptions = MolgenisDataAccessException.class)
+	@SuppressWarnings("unchecked")
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void updateStreamNoPermission()
 	{
 		SecurityContextHolder.getContext().setAuthentication(user1Authentication);
@@ -241,7 +253,8 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		}
 	}
 
-	@SuppressWarnings("unchecked") @Test
+	@SuppressWarnings("unchecked")
+	@Test
 	public void updateStreamAsUser()
 	{
 		SecurityContextHolder.getContext().setAuthentication(user1Authentication);
@@ -265,37 +278,43 @@ public class RowLevelSecurityRepositoryDecoratorTest
 	}
 
 	@Test
-	public void iteratorAsUser(){
+	public void iteratorAsUser()
+	{
 		SecurityContextHolder.getContext().setAuthentication(user1Authentication);
 		testIterator(UPDATE_ATTRIBUTE, UPDATE_ATTRIBUTE, "");
 	}
 
 	@Test
-	public void iteratorAsSu(){
+	public void iteratorAsSu()
+	{
 		SecurityContextHolder.getContext().setAuthentication(adminAuthentication);
 		testIterator(UPDATE_ATTRIBUTE, UPDATE_ATTRIBUTE, UPDATE_ATTRIBUTE);
 	}
 
 	@Test
-	public void iteratorAsSystem(){
+	public void iteratorAsSystem()
+	{
 		SecurityContextHolder.getContext().setAuthentication(systemAuthentication);
 		testIterator(UPDATE_ATTRIBUTE, UPDATE_ATTRIBUTE, UPDATE_ATTRIBUTE);
 	}
 
 	@Test
-	public void findAllQueryAsUser(){
+	public void findAllQueryAsUser()
+	{
 		SecurityContextHolder.getContext().setAuthentication(user2Authentication);
 		testFindAllQuery("", UPDATE_ATTRIBUTE);
 	}
 
 	@Test
-	public void findAllQueryAsSu(){
+	public void findAllQueryAsSu()
+	{
 		SecurityContextHolder.getContext().setAuthentication(adminAuthentication);
 		testFindAllQuery(UPDATE_ATTRIBUTE, UPDATE_ATTRIBUTE);
 	}
 
 	@Test
-	public void findAllQueryAsSystem(){
+	public void findAllQueryAsSystem()
+	{
 		SecurityContextHolder.getContext().setAuthentication(systemAuthentication);
 		testFindAllQuery(UPDATE_ATTRIBUTE, UPDATE_ATTRIBUTE);
 	}
@@ -313,6 +332,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(adminAuthentication);
 		testFindOneQuery(UPDATE_ATTRIBUTE);
 	}
+
 	@Test
 	public void findOneQueryAsSystem()
 	{
@@ -363,37 +383,43 @@ public class RowLevelSecurityRepositoryDecoratorTest
 	}
 
 	@Test
-	public void findAllStreamAsUser(){
+	public void findAllStreamAsUser()
+	{
 		SecurityContextHolder.getContext().setAuthentication(user2Authentication);
 		testFindAllStream("", UPDATE_ATTRIBUTE);
 	}
 
 	@Test
-	public void findAllStreamAsSu(){
+	public void findAllStreamAsSu()
+	{
 		SecurityContextHolder.getContext().setAuthentication(adminAuthentication);
 		testFindAllStream(UPDATE_ATTRIBUTE, UPDATE_ATTRIBUTE);
 	}
 
 	@Test
-	public void findAllStreamAsSystem(){
+	public void findAllStreamAsSystem()
+	{
 		SecurityContextHolder.getContext().setAuthentication(systemAuthentication);
 		testFindAllStream(UPDATE_ATTRIBUTE, UPDATE_ATTRIBUTE);
 	}
 
 	@Test
-	public void findAllStreamFetchAsUser(){
+	public void findAllStreamFetchAsUser()
+	{
 		SecurityContextHolder.getContext().setAuthentication(user2Authentication);
 		testFindAllStreamFetch("", UPDATE_ATTRIBUTE);
 	}
 
 	@Test
-	public void findAllStreamFetchAsSu(){
+	public void findAllStreamFetchAsSu()
+	{
 		SecurityContextHolder.getContext().setAuthentication(adminAuthentication);
 		testFindAllStreamFetch(UPDATE_ATTRIBUTE, UPDATE_ATTRIBUTE);
 	}
 
 	@Test
-	public void findAllStreamFetchAsSystem(){
+	public void findAllStreamFetchAsSystem()
+	{
 		SecurityContextHolder.getContext().setAuthentication(systemAuthentication);
 		testFindAllStreamFetch(UPDATE_ATTRIBUTE, UPDATE_ATTRIBUTE);
 	}
@@ -417,21 +443,24 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		}
 	}
 
-	@Test public void deleteEntityAsSu()
+	@Test
+	public void deleteEntityAsSu()
 	{
 		SecurityContextHolder.getContext().setAuthentication(adminAuthentication);
 		repositoryDecorator.delete(entity1);
 		verify(decoratedRepository, times(1)).delete(entity1);
 	}
 
-	@Test public void deleteEntityAsSystem()
+	@Test
+	public void deleteEntityAsSystem()
 	{
 		SecurityContextHolder.getContext().setAuthentication(systemAuthentication);
 		repositoryDecorator.delete(entity1);
 		verify(decoratedRepository, times(1)).delete(entity1);
 	}
 
-	@Test public void deleteEntityAsUser()
+	@Test
+	public void deleteEntityAsUser()
 	{
 		SecurityContextHolder.getContext().setAuthentication(user1Authentication);
 		repositoryDecorator.delete(entity2);
@@ -442,7 +471,8 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		verifyAddUpdateAttribute(entity2, usersEntity2);
 	}
 
-	@SuppressWarnings("unchecked") @Test(expectedExceptions = MolgenisDataAccessException.class)
+	@SuppressWarnings("unchecked")
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void deleteStreamNoPermission()
 	{
 		SecurityContextHolder.getContext().setAuthentication(user1Authentication);
@@ -461,7 +491,8 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		}
 	}
 
-	@SuppressWarnings("unchecked") @Test
+	@SuppressWarnings("unchecked")
+	@Test
 	public void deleteStreamAsUser()
 	{
 		SecurityContextHolder.getContext().setAuthentication(user1Authentication);
@@ -501,21 +532,24 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		}
 	}
 
-	@Test public void deleteByIdAsSu()
+	@Test
+	public void deleteByIdAsSu()
 	{
 		SecurityContextHolder.getContext().setAuthentication(adminAuthentication);
 		repositoryDecorator.deleteById("entity1");
 		verify(decoratedRepository, times(1)).deleteById("entity1");
 	}
 
-	@Test public void deleteByIdSystem()
+	@Test
+	public void deleteByIdSystem()
 	{
 		SecurityContextHolder.getContext().setAuthentication(systemAuthentication);
 		repositoryDecorator.deleteById("entity1");
 		verify(decoratedRepository, times(1)).deleteById("entity1");
 	}
 
-	@Test public void deleteByIdUser()
+	@Test
+	public void deleteByIdUser()
 	{
 		SecurityContextHolder.getContext().setAuthentication(user1Authentication);
 		repositoryDecorator.deleteById("entity2");
@@ -523,7 +557,8 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		assertEquals(idArgumentCaptor.getValue(), "entity2");
 	}
 
-	@SuppressWarnings("unchecked") @Test(expectedExceptions = MolgenisDataAccessException.class)
+	@SuppressWarnings("unchecked")
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void deleteByIdStreamNoPermission()
 	{
 		SecurityContextHolder.getContext().setAuthentication(user1Authentication);
@@ -541,7 +576,8 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		}
 	}
 
-	@SuppressWarnings("unchecked") @Test
+	@SuppressWarnings("unchecked")
+	@Test
 	public void deleteByIdStreamAsUser()
 	{
 		SecurityContextHolder.getContext().setAuthentication(user1Authentication);
@@ -562,7 +598,8 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		testDeleteByIdStream();
 	}
 
-	@SuppressWarnings("unchecked") @Test(expectedExceptions = MolgenisDataAccessException.class)
+	@SuppressWarnings("unchecked")
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void deleteAllNoPermission()
 	{
 		SecurityContextHolder.getContext().setAuthentication(user1Authentication);
@@ -595,21 +632,24 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		verify(decoratedRepository, times(1)).deleteAll();
 	}
 
-	private void testUpdateStream(){
+	private void testUpdateStream()
+	{
 		doAnswer(streamConsumer).when(decoratedRepository).update(any(Stream.class));
 		repositoryDecorator.update(Stream.of(entity1, entity2));
 		verify(decoratedRepository, times(1)).getEntityMetaData();
 		verify(decoratedRepository, times(1)).update(any(Stream.class));
 	}
 
-	private void testDeleteStream(){
+	private void testDeleteStream()
+	{
 		doAnswer(streamConsumer).when(decoratedRepository).delete(any(Stream.class));
 		repositoryDecorator.delete(Stream.of(entity1, entity2));
 		verify(decoratedRepository, times(1)).getEntityMetaData();
 		verify(decoratedRepository, times(1)).delete(any(Stream.class));
 	}
 
-	private void testDeleteByIdStream(){
+	private void testDeleteByIdStream()
+	{
 		doAnswer(streamConsumer).when(decoratedRepository).deleteById(any(Stream.class));
 		repositoryDecorator.deleteById(Stream.of("entity1", "entity2"));
 		verify(decoratedRepository, times(1)).getEntityMetaData();
@@ -635,7 +675,8 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		verifyAddPermissionsAttribute(entity1, permission);
 	}
 
-	private void testFindOneQuery(String permission){
+	private void testFindOneQuery(String permission)
+	{
 		Query q = mock(QueryImpl.class);
 		when(decoratedRepository.findOne(q)).thenReturn(entity3);
 		repositoryDecorator.findOne(q);
@@ -643,7 +684,8 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		verifyAddPermissionsAttribute(entity3, permission);
 	}
 
-	private void testFindAllQuery(String permission1, String permission2){
+	private void testFindAllQuery(String permission1, String permission2)
+	{
 		Query q = mock(QueryImpl.class);
 		when(decoratedRepository.findAll(q)).thenReturn(Stream.of(entity1, entity2));
 		repositoryDecorator.findAll(q).collect(Collectors.toList());
@@ -652,7 +694,8 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		verifyAddPermissionsAttribute(entity2, permission2);
 	}
 
-	private void testFindAllStream(String permission1, String permission2){
+	private void testFindAllStream(String permission1, String permission2)
+	{
 		Stream<Object> ids = (Stream<Object>) mock(Stream.class);
 		when(decoratedRepository.findAll(ids)).thenReturn(Stream.of(entity1, entity2));
 		repositoryDecorator.findAll(ids).collect(Collectors.toList());
@@ -661,7 +704,8 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		verifyAddPermissionsAttribute(entity2, permission2);
 	}
 
-	private void testFindAllStreamFetch(String permission1, String permission2){
+	private void testFindAllStreamFetch(String permission1, String permission2)
+	{
 		Stream<Object> ids = (Stream<Object>) mock(Stream.class);
 		Fetch fetch = mock(Fetch.class);
 		when(decoratedRepository.findAll(ids, fetch)).thenReturn(Stream.of(entity1, entity2));
@@ -671,10 +715,12 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		verifyAddPermissionsAttribute(entity2, permission2);
 	}
 
-	private void testIterator(String permission1, String permission2, String permission3){
+	private void testIterator(String permission1, String permission2, String permission3)
+	{
 		when(decoratedRepository.iterator()).thenReturn(newArrayList(entity1, entity2, entity3).iterator());
 		Iterator<Entity> entityIterator = repositoryDecorator.iterator();
-		entityIterator.forEachRemaining(e -> {});
+		entityIterator.forEachRemaining(e -> {
+		});
 		verify(decoratedRepository, times(1)).iterator();
 		verifyAddPermissionsAttribute(entity1, permission1);
 		verifyAddPermissionsAttribute(entity2, permission2);
