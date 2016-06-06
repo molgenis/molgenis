@@ -40,7 +40,7 @@ public abstract class AbstractMetaDataIT extends AbstractDataIntegrationIT
 		// assertEquals(retrieved.getRootPackage().getName(), "test");
 
 		// Create EntityMetaData
-		EntityMetaData entityMetaData = new EntityMetaData("TestEntity", testPackage1);
+		EntityMetaData entityMetaData = null; //new EntityMetaData("TestEntity", testPackage1);
 		//		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false); // FIXME
 		//		AttributeMetaData compound1 = entityMetaData.addAttribute("compoundAttr1").setDataType(
 		//				MolgenisFieldTypes.COMPOUND);

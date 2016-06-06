@@ -10,7 +10,7 @@ public class AbstractComputedAttributesIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("CalculatedAttrTest");
+		EntityMetaData entityMetaData = null; //new EntityMetaData("CalculatedAttrTest");
 		//		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false); // FIXME
 		//		entityMetaData.addAttribute("intAttr").setDataType(MolgenisFieldTypes.INT);
 		//		entityMetaData.addAttribute("computedAttr").setDataType(MolgenisFieldTypes.INT).setExpression("intAttr");

@@ -22,7 +22,6 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.SIMPLE_NAME;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.TAGS;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
-import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,69 +38,44 @@ import com.google.common.collect.Iterables;
  */
 public class EntityMetaData extends SystemEntity
 {
+	/**
+	 * Creates a new entity meta data. Call {@link #init(EntityMetaData)} to initialize the created entity meta data.
+	 */
 	protected EntityMetaData()
 	{
 
 	}
 
+	/**
+	 * Creates new entity meta data based on the given entity.
+	 *
+	 * @param entity decorated entity
+	 */
 	public EntityMetaData(Entity entity)
 	{
 		super(entity, ENTITY_META_DATA);
 	}
 
-	public EntityMetaData(EntityMetaDataMetaData entityMetaDataMetaData)
+	/**
+	 * Creates a new entity meta data. Normally called by its {@link EntityMetaDataFactory entity factory}.
+	 *
+	 * @param entityMetaMeta
+	 */
+	public EntityMetaData(EntityMetaDataMetaData entityMetaMeta)
 	{
-		init(entityMetaDataMetaData);
+		super(entityMetaMeta);
 	}
 
-	public EntityMetaData(String simpleName, EntityMetaDataMetaData entityMetaDataMetaData)
+	/**
+	 * Creates a new entity meta data with the given identifier. Normally called by its {@link EntityMetaDataFactory entity factory}.
+	 *
+	 * @param entityId       entity identifier (fully qualified entity name)
+	 * @param entityMetaMeta entity meta data
+	 */
+	public EntityMetaData(String entityId, EntityMetaDataMetaData entityMetaMeta)
 	{
-		this(simpleName, null, entityMetaDataMetaData);
-	}
-
-	public EntityMetaData(String simpleName, String packageName, EntityMetaDataMetaData entityMetaDataMetaData)
-	{
-		init(entityMetaDataMetaData);
-		set(SIMPLE_NAME, simpleName);
-		set(FULL_NAME, packageName != null ? packageName + PACKAGE_SEPARATOR + simpleName : simpleName);
-		setAbstract(false);
-	}
-
-	@Deprecated
-	public EntityMetaData(String simpleName)
-	{
-		this(simpleName, Entity.class);
-	}
-
-	@Deprecated
-	public EntityMetaData(String simpleName, Package package_)
-	{
-		this(simpleName, Entity.class, package_);
-	}
-
-	@Deprecated
-	public EntityMetaData(String simpleName, Class<? extends Entity> entityClass)
-	{
-		this(simpleName, entityClass, null);
-	}
-
-	@Deprecated
-	public EntityMetaData(String simpleName, Class<? extends Entity> entityClass, Package package_)
-	{
-		init(getApplicationContext().getBean(EntityMetaDataMetaData.class));
-		String fullName;
-		if (package_ != null)
-		{
-			fullName = package_.getName() + PACKAGE_SEPARATOR + simpleName;
-		}
-		else
-		{
-			fullName = simpleName;
-		}
-		set(SIMPLE_NAME, simpleName);
-		set(FULL_NAME, fullName);
-		set(PACKAGE, package_);
-		setAbstract(false);
+		super(entityMetaMeta);
+		setSimpleName(entityId);
 	}
 
 	/**

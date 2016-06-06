@@ -11,7 +11,7 @@ public abstract class AbstractCompoundDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("CompoundTest");
+		EntityMetaData entityMetaData = null; //new EntityMetaData("CompoundTest");
 		//		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(BOOL).setNillable(false); // FIXME
 
 		//		AttributeMetaData attributePart1 = new AttributeMetaData("col2").setDataType(BOOL);

@@ -12,7 +12,7 @@ public class AbstractFileDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("FileTest");
+		EntityMetaData entityMetaData = null; //new EntityMetaData("FileTest");
 		//		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false);
 		//		entityMetaData.addAttribute("file").setDataType(FILE).setRefEntity(FileMeta.META_DATA); // FIXME
 

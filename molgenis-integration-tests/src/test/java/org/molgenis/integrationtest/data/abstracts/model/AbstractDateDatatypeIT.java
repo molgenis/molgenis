@@ -14,7 +14,7 @@ public abstract class AbstractDateDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("DateTest");
+		EntityMetaData entityMetaData = null; //new EntityMetaData("DateTest");
 		//		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(DATE).setNillable(false);
 		//		entityMetaData.addAttribute("col2").setDataType(DATE);
 		//		entityMetaData.addAttribute("col3").setDataType(DATE); // FIXME

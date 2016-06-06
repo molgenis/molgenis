@@ -50,7 +50,7 @@ import org.molgenis.fieldtypes.FieldType;
 public class AttributeMetaData extends SystemEntity
 {
 	/**
-	 * Creates a new attribute based on the given entity
+	 * Creates a new attribute based on the given entity.
 	 *
 	 * @param entity decorated entity
 	 */
@@ -62,23 +62,23 @@ public class AttributeMetaData extends SystemEntity
 	/**
 	 * Creates a new attribute. Normally called by its {@link AttributeMetaDataFactory entity factory}.
 	 *
-	 * @param attrMetaDataMetaData attribute meta data
+	 * @param attrMetaMeta attribute meta data
 	 */
-	public AttributeMetaData(AttributeMetaDataMetaData attrMetaDataMetaData)
+	public AttributeMetaData(AttributeMetaDataMetaData attrMetaMeta)
 	{
-		super(attrMetaDataMetaData);
+		super(attrMetaMeta);
 		setDefaultValues();
 	}
 
 	/**
 	 * Creates a new attribute with the given identifier. Normally called by its {@link AttributeMetaDataFactory entity factory}.
 	 *
-	 * @param attrId               attribute identifier (not the attribute name)
-	 * @param attrMetaDataMetaData attribute meta data
+	 * @param attrId       attribute identifier (not the attribute name)
+	 * @param attrMetaMeta attribute meta data
 	 */
-	public AttributeMetaData(String attrId, AttributeMetaDataMetaData attrMetaDataMetaData)
+	public AttributeMetaData(String attrId, AttributeMetaDataMetaData attrMetaMeta)
 	{
-		super(attrMetaDataMetaData);
+		super(attrMetaMeta);
 		setIdentifier(attrId);
 		setDefaultValues();
 	}

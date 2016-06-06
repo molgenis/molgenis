@@ -70,11 +70,12 @@ public class VcfToEntity
 
 	private EntityMetaData createSampleEntityMetaData(String entityName, Iterable<VcfMetaFormat> formatMetaData)
 	{
+		EntityMetaDataFactory entityMetaFactory = getApplicationContext().getBean(EntityMetaDataFactory.class);
 		AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
 		EntityMetaData result = null;
 		if (formatMetaData.iterator().hasNext())
 		{
-			result = new EntityMetaData(entityName + "_Sample");
+			result = entityMetaFactory.create().setSimpleName(entityName + "_Sample");
 			AttributeMetaData idAttributeMetaData = attrMetaFactory.create().setName(ID).setDataType(STRING)
 					.setAggregatable(true);
 			idAttributeMetaData.setVisible(false);

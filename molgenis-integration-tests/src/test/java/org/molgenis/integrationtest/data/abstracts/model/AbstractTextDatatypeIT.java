@@ -10,7 +10,7 @@ public class AbstractTextDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("TextTest");
+		EntityMetaData entityMetaData = null; //new EntityMetaData("TextTest");
 		//		entityMetaData.addAttribute("identifier", ROLE_ID).setDataType(INT).setNillable(false);// Cannot use
 		//																								// TEXT as
 		//																								// id

@@ -12,7 +12,7 @@ public abstract class AbstractValidationExpressionIT extends AbstractDataIntegra
 {
 	public void testIt()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("ValidationExpressionTest");
+		EntityMetaData entityMetaData = null; //new EntityMetaData("ValidationExpressionTest");
 		//		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false).setAuto(true);
 		//		entityMetaData.addAttribute("intAttr").setDataType(INT);
 		//		entityMetaData.addAttribute("validationExpressionAttr").setDataType(INT) // FIXME

@@ -1,6 +1,8 @@
 package org.molgenis.data.merge;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +16,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataFactory;
 import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -178,8 +181,11 @@ public class RepositoryMerger
 	public EntityMetaData mergeMetaData(List<Repository<Entity>> repositoryList, List<AttributeMetaData> commonAttrs,
 			AttributeMetaData commonIdAttr, String outRepositoryName)
 	{
-		EntityMetaData mergedMetaData = new EntityMetaData(outRepositoryName);
-		/** mergedMetaData.addAttribute(ID, ROLE_ID).setVisible(false); */ // FIXME
+		EntityMetaDataFactory entityMetaFactory = getApplicationContext().getBean(EntityMetaDataFactory.class);
+		AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
+
+		EntityMetaData mergedMetaData = entityMetaFactory.create().setSimpleName(outRepositoryName);
+		mergedMetaData.addAttribute(attrMetaFactory.create().setName(ID).setVisible(false), ROLE_ID);
 
 		for (AttributeMetaData commonAttr : commonAttrs)
 		{

@@ -10,7 +10,7 @@ public class AbstractStringDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("StringTest");
+		EntityMetaData entityMetaData = null; //new EntityMetaData("StringTest");
 		//		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(STRING).setNillable(false); // FIXME
 		//		entityMetaData.addAttribute("col2").setDataType(STRING);
 

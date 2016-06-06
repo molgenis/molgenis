@@ -10,7 +10,7 @@ public class AbstractDecimalDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("DecimalTest");
+		EntityMetaData entityMetaData = null; //new EntityMetaData("DecimalTest");
 		//		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(DECIMAL).setNillable(false); // FIXME
 		//		entityMetaData.addAttribute("col2").setDataType(DECIMAL);
 		//		entityMetaData.addAttribute("col3").setDataType(DECIMAL);

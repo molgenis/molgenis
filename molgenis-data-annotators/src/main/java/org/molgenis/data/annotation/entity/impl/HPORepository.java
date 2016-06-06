@@ -1,5 +1,8 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -20,7 +23,9 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataFactory;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
 
@@ -52,11 +57,14 @@ public class HPORepository extends AbstractRepository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		EntityMetaData entityMeta = new EntityMetaData("HPO");
-		//		entityMeta.addAttribute(HPO_DISEASE_ID_COL_NAME); // FIXME
-		//		entityMeta.addAttribute(HPO_GENE_SYMBOL_COL_NAME);
-		//		entityMeta.addAttribute(HPO_ID_COL_NAME, ROLE_ID);
-		//		entityMeta.addAttribute(HPO_TERM_COL_NAME);
+		EntityMetaDataFactory entityMetaFactory = getApplicationContext().getBean(EntityMetaDataFactory.class);
+		AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
+
+		EntityMetaData entityMeta = entityMetaFactory.create().setSimpleName("HPO");
+		entityMeta.addAttribute(attrMetaFactory.create().setName(HPO_DISEASE_ID_COL_NAME));
+		entityMeta.addAttribute(attrMetaFactory.create().setName(HPO_GENE_SYMBOL_COL_NAME));
+		entityMeta.addAttribute(attrMetaFactory.create().setName(HPO_ID_COL_NAME), ROLE_ID);
+		entityMeta.addAttribute(attrMetaFactory.create().setName(HPO_TERM_COL_NAME));
 		return entityMeta;
 	}
 

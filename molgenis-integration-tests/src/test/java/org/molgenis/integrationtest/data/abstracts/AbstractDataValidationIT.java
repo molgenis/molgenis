@@ -112,7 +112,7 @@ public abstract class AbstractDataValidationIT extends AbstractDataIntegrationIT
 
 	public void testNotNillable()
 	{
-		EntityMetaData entityMetaData1 = new EntityMetaData("NotNillableTest");
+		EntityMetaData entityMetaData1 = null; // new EntityMetaData("NotNillableTest"); // FIXME
 		//		entityMetaData1.addAttribute("identifier", ROLE_ID).setNillable(false);
 		//		entityMetaData1.addAttribute("stringAttr").setNillable(false);
 		metaDataService.addEntityMeta(entityMetaData1);

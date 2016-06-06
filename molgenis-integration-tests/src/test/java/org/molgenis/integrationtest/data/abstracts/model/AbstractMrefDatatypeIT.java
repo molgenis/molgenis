@@ -20,17 +20,17 @@ public class AbstractMrefDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		refEntityMetaData = new EntityMetaData("StringTarget");
+		refEntityMetaData = null; //new EntityMetaData("StringTarget");
 		//		refEntityMetaData.addAttribute("label", ROLE_LABEL); // FIXME
 		//		refEntityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false);
 		//		refEntityMetaData.addAttribute("label");
 		metaDataService.addEntityMeta(refEntityMetaData);
 
-		refEntity2MetaData = new EntityMetaData("IntTarget");
+		refEntity2MetaData = null; //new EntityMetaData("IntTarget");
 		//		refEntity2MetaData.addAttribute("identifier", ROLE_ID).setDataType(INT).setNillable(false); // FIXME
 		metaDataService.addEntityMeta(refEntity2MetaData);
 
-		EntityMetaData entityMetaData = new EntityMetaData("MrefTest");
+		EntityMetaData entityMetaData = null; //new EntityMetaData("MrefTest");
 		//		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false); // FIXME
 		//		entityMetaData.addAttribute("stringRef").setDataType(MREF).setRefEntity(refEntityMetaData).setNillable(false);
 		//		entityMetaData.addAttribute("intRef").setDataType(MREF).setRefEntity(refEntity2MetaData).setNillable(true);

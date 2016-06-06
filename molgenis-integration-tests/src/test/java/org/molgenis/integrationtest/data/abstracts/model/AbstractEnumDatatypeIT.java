@@ -13,7 +13,7 @@ public class AbstractEnumDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("EnumTest");
+		EntityMetaData entityMetaData = null; //new EntityMetaData("EnumTest");
 
 		EnumField enumField = new EnumField();
 		enumField.setEnumOptions(Arrays.asList("ONE", "TWO"));

@@ -11,7 +11,7 @@ public class AbstractIntDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaData("IntegerTest");
+		EntityMetaData entityMetaData = null; //new EntityMetaData("IntegerTest");
 		//		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(INT).setNillable(false);
 		//		entityMetaData.addAttribute("col2").setDataType(INT);
 		//		entityMetaData.addAttribute("col3").setDataType(INT); // FIXME

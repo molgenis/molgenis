@@ -11,16 +11,15 @@ public class AbstractExtendsIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData superclass2 = new EntityMetaData("super0").setAbstract(true);
+		EntityMetaData superclass2 = null; //new EntityMetaData("super0").setAbstract(true);
 		//		superclass2.addAttribute("col1", ROLE_ID).setDataType(BOOL).setNillable(false); // FIXME
 		metaDataService.addEntityMeta(superclass2);
 
-		EntityMetaData superclass = new EntityMetaData("super1").setExtends(superclass2).setAbstract(
-				true);
+		EntityMetaData superclass = null; //new EntityMetaData("super1").setExtends(superclass2).setAbstract(true);
 		//		superclass.addAttribute("col2").setDataType(BOOL); // FIXME
 		metaDataService.addEntityMeta(superclass);
 
-		EntityMetaData subclass = new EntityMetaData("ExtendsTest").setExtends(superclass);
+		EntityMetaData subclass = null; //new EntityMetaData("ExtendsTest").setExtends(superclass);
 		//		subclass.addAttribute("col3").setDataType(BOOL).setNillable(true).setDefaultValue("true"); // FIXME
 		metaDataService.addEntityMeta(subclass);
 
