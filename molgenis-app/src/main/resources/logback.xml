@@ -4,7 +4,6 @@
 			<pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
 		</encoder>
 	</appender>
-	<appender name="MOLGENIS" class="org.molgenis.data.elasticsearch.logback.MolgenisAppender"/>
 	<appender name="jobExecutionLogAppender" class="org.molgenis.data.jobs.JobExecutionLogAppender"/>
 	<logger name="org.molgenis" level="INFO"/>
 	<root level="WARN">
