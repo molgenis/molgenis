@@ -59,11 +59,6 @@ public class SystemEntityMetaDataRegistry
 	{
 		for (AttributeMetaData attr : attrs)
 		{
-			if (attr.getIdentifier() == null)
-			{
-				continue; // FIXME this happens for EntityMetaDataMetaData i18n attrs
-			}
-
 			if (attr.getIdentifier().equals(attrIdentifier))
 			{
 				return attr;
