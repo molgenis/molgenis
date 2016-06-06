@@ -46,20 +46,17 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistrySingleton;
-import org.molgenis.data.support.AbstractEntity;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.fieldtypes.FieldType;
 
 /**
  * Attribute defines the properties of an entity. Synonyms: feature, column, data item.
  */
-public class AttributeMetaData extends AbstractEntity
+public class AttributeMetaData extends SystemEntity
 {
-	private final Entity entity;
-
 	public AttributeMetaData(Entity entity)
 	{
-		this.entity = requireNonNull(entity);
+		super(entity);
 		if (!entity.getEntityMetaData().getName().equals(ATTRIBUTE_META_DATA))
 		{
 			throw new IllegalArgumentException(
@@ -68,9 +65,9 @@ public class AttributeMetaData extends AbstractEntity
 		}
 	}
 
-	public AttributeMetaData(EntityMetaData attrMetaDataMetaData)
+	public AttributeMetaData(AttributeMetaDataMetaData attrMetaDataMetaData)
 	{
-		this.entity = new MapEntity(attrMetaDataMetaData);
+		super(attrMetaDataMetaData);
 
 		// FIXME use default value for this
 		set(DATA_TYPE, toDataTypeString(MolgenisFieldTypes.getType(requireNonNull(STRING).toString().toLowerCase())));
@@ -91,7 +88,7 @@ public class AttributeMetaData extends AbstractEntity
 	@Deprecated
 	public AttributeMetaData(String name, FieldTypeEnum fieldType)
 	{
-		this.entity = new MapEntity(getEntityMetaData());
+		super(SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(ATTRIBUTE_META_DATA));
 		FieldType dataType = MolgenisFieldTypes.getType(requireNonNull(fieldType).toString().toLowerCase());
 		set(NAME, name);
 		set(DATA_TYPE, toDataTypeString(dataType));
@@ -113,7 +110,7 @@ public class AttributeMetaData extends AbstractEntity
 	 */
 	public static AttributeMetaData newInstance(AttributeMetaData attr)
 	{
-		Entity entityCopy = MapEntity.newInstance(attr.entity);
+		Entity entityCopy = MapEntity.newInstance(attr);
 		return new AttributeMetaData(entityCopy);
 	}
 
@@ -121,24 +118,6 @@ public class AttributeMetaData extends AbstractEntity
 	public EntityMetaData getEntityMetaData()
 	{
 		return SystemEntityMetaDataRegistrySingleton.INSTANCE.getSystemEntityMetaData(ATTRIBUTE_META_DATA);
-	}
-
-	@Override
-	public Object get(String attributeName)
-	{
-		return entity.get(attributeName);
-	}
-
-	@Override
-	public void set(String attributeName, Object value)
-	{
-		entity.set(attributeName, value);
-	}
-
-	@Override
-	public void set(Entity values)
-	{
-		entity.set(values);
 	}
 
 	public String getIdentifier()
@@ -288,7 +267,7 @@ public class AttributeMetaData extends AbstractEntity
 			{
 				// FIXME get rid of static getApplicationContext reference
 				return getApplicationContext().getBean(DataService.class)
-						.findOneById(ENTITY_META_DATA, refEntityName, EntityMetaDataImpl.class);
+						.findOneById(ENTITY_META_DATA, refEntityName, EntityMetaData.class);
 			}
 		}
 		else
@@ -460,8 +439,6 @@ public class AttributeMetaData extends AbstractEntity
 		return this;
 	}
 
-	// FIXME add getter/setter for tags
-
 	/**
 	 * Javascript expression to determine at runtime if the attribute must be visible or not in the form
 	 *
@@ -573,7 +550,7 @@ public class AttributeMetaData extends AbstractEntity
 	 */
 	public void addTag(Tag tag)
 	{
-		entity.set(TAGS, concat(getTags(), singletonList(tag)));
+		set(TAGS, concat(getTags(), singletonList(tag)));
 	}
 
 	/**
@@ -585,33 +562,7 @@ public class AttributeMetaData extends AbstractEntity
 	{
 		Iterable<Tag> tags = getTags();
 		removeAll(tags, singletonList(tag));
-		entity.set(TAGS, tag);
-	}
-
-	@Override
-	public boolean equals(Object o)
-	{
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		AttributeMetaData that = (AttributeMetaData) o;
-
-		return entity.equals(that.entity);
-
-	}
-
-	@Override
-	public int hashCode()
-	{
-		return entity.hashCode();
-	}
-
-	@Override
-	public String toString()
-	{
-		return "AttributeMetaData{" +
-				"entity=" + entity +
-				'}';
+		set(TAGS, tag);
 	}
 
 	private static String toDataTypeString(FieldType dataType)

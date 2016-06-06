@@ -11,7 +11,7 @@ import org.molgenis.data.support.MapEntity;
  */
 public abstract class SystemEntity extends AbstractEntity
 {
-	protected Entity entity;
+	private Entity entity;
 
 	protected SystemEntity()
 	{

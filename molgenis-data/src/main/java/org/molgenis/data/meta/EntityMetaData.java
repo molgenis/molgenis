@@ -4,7 +4,6 @@ import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
-import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
@@ -39,8 +38,6 @@ import com.google.common.collect.Iterables;
  */
 public class EntityMetaData extends SystemEntity
 {
-	private Entity entity;
-
 	protected EntityMetaData()
 	{
 
@@ -48,7 +45,7 @@ public class EntityMetaData extends SystemEntity
 
 	public EntityMetaData(Entity entity)
 	{
-		this.entity = requireNonNull(entity);
+		super(entity);
 	}
 
 	public EntityMetaData(EntityMetaDataMetaData entityMetaDataMetaData)
@@ -67,11 +64,6 @@ public class EntityMetaData extends SystemEntity
 		set(SIMPLE_NAME, simpleName);
 		set(FULL_NAME, packageName != null ? packageName + PACKAGE_SEPARATOR + simpleName : simpleName);
 		setAbstract(false);
-	}
-
-	protected void init(EntityMetaDataMetaData entityMetaDataMetaData)
-	{
-		this.entity = new MapEntity(requireNonNull(entityMetaDataMetaData));
 	}
 
 	@Deprecated
@@ -121,34 +113,6 @@ public class EntityMetaData extends SystemEntity
 	{
 		Entity entityCopy = MapEntity.newInstance(entityMeta);
 		return new EntityMetaData(entityCopy);
-	}
-
-	@Override
-	public EntityMetaData getEntityMetaData()
-	{
-		return entity != null ? entity.getEntityMetaData() : this;
-		//		return EntityMetaDataMetaData.get();
-		//		return this; // FIXME the entity meta data of EntityMetaData is always EntityMetaDataMetaData
-		// TODO store entityName and packageName in SystemEntityMetaData fields and call init() to create EntityMetaDataImpl
-		// all meta data instances must call super.init in their init
-	}
-
-	@Override
-	public Object get(String attributeName)
-	{
-		return entity.get(attributeName);
-	}
-
-	@Override
-	public void set(String attributeName, Object value)
-	{
-		entity.set(attributeName, value);
-	}
-
-	@Override
-	public void set(Entity values)
-	{
-		entity.set(values);
 	}
 
 	/**
@@ -554,8 +518,8 @@ public class EntityMetaData extends SystemEntity
 
 	public void addAttribute(AttributeMetaData attr, AttributeRole... attrTypes)
 	{
-		Iterable<AttributeMetaData> attrs = entity.getEntities(ATTRIBUTES, AttributeMetaData.class);
-		entity.set(ATTRIBUTES, concat(attrs, singletonList(attr)));
+		Iterable<AttributeMetaData> attrs = getEntities(ATTRIBUTES, AttributeMetaData.class);
+		set(ATTRIBUTES, concat(attrs, singletonList(attr)));
 		if (attrTypes != null)
 		{
 			for (AttributeRole attrType : attrTypes)
@@ -596,18 +560,18 @@ public class EntityMetaData extends SystemEntity
 	public void removeAttribute(AttributeMetaData attr)
 	{
 		// FIXME does not remove attr if attr is located in a compound attr
-		Iterable<AttributeMetaData> existingAttrs = entity.getEntities(ATTRIBUTES, AttributeMetaData.class);
+		Iterable<AttributeMetaData> existingAttrs = getEntities(ATTRIBUTES, AttributeMetaData.class);
 		List<AttributeMetaData> filteredAttrs = stream(existingAttrs.spliterator(), false)
 				.filter(existingAttr -> !existingAttr.getName().equals(attr.getName())).collect(Collectors.toList());
-		entity.set(ATTRIBUTES, filteredAttrs);
+		set(ATTRIBUTES, filteredAttrs);
 	}
 
 	public void addLookupAttribute(AttributeMetaData lookupAttr)
 	{
-		Iterable<AttributeMetaData> lookupAttrs = entity.getEntities(LOOKUP_ATTRIBUTES, AttributeMetaData.class);
+		Iterable<AttributeMetaData> lookupAttrs = getEntities(LOOKUP_ATTRIBUTES, AttributeMetaData.class);
 		if (!Iterables.contains(lookupAttrs, lookupAttr))
 		{
-			entity.set(LOOKUP_ATTRIBUTES, concat(lookupAttrs, singletonList(lookupAttr)));
+			set(LOOKUP_ATTRIBUTES, concat(lookupAttrs, singletonList(lookupAttr)));
 		}
 	}
 
@@ -640,7 +604,7 @@ public class EntityMetaData extends SystemEntity
 	 */
 	public void addTag(Tag tag)
 	{
-		entity.set(TAGS, concat(getTags(), singletonList(tag)));
+		set(TAGS, concat(getTags(), singletonList(tag)));
 	}
 
 	/**
@@ -652,31 +616,23 @@ public class EntityMetaData extends SystemEntity
 	{
 		Iterable<Tag> tags = getTags();
 		removeAll(tags, singletonList(tag));
-		entity.set(TAGS, tag);
+		set(TAGS, tag);
 	}
 
-	@Override
-	public boolean equals(Object o)
+	/**
+	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of atomic attributes) only
+	 * the descendant atomic attributes are returned. The compound attribute itself is not returned.
+	 * <p>
+	 * In case EntityMetaData extends other EntityMetaData then the attributes of this EntityMetaData as well as its
+	 * parent class are returned.
+	 *
+	 * @return atomic attributes without extended entity atomic attributes
+	 */
+	public Iterable<AttributeMetaData> getOwnAtomicAttributes()
 	{
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		EntityMetaData that = (EntityMetaData) o;
-
-		return getName().equals(that.getName());
-
-	}
-
-	@Override
-	public int hashCode()
-	{
-		return getName().hashCode();
-	}
-
-	@Override
-	public String toString()
-	{
-		return entity.toString();
+		List<AttributeMetaData> atomicAttrs = new ArrayList<>();
+		getOwnAtomicAttributesRec(getOwnAttributes(), atomicAttrs);
+		return atomicAttrs;
 	}
 
 	private AttributeMetaData getAttributeRec(String attrName, Iterable<AttributeMetaData> attrs)
@@ -697,22 +653,6 @@ public class EntityMetaData extends SystemEntity
 			}
 		}
 		return null;
-	}
-
-	/**
-	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of atomic attributes) only
-	 * the descendant atomic attributes are returned. The compound attribute itself is not returned.
-	 * <p>
-	 * In case EntityMetaData extends other EntityMetaData then the attributes of this EntityMetaData as well as its
-	 * parent class are returned.
-	 *
-	 * @return atomic attributes without extended entity atomic attributes
-	 */
-	public Iterable<AttributeMetaData> getOwnAtomicAttributes()
-	{
-		List<AttributeMetaData> atomicAttrs = new ArrayList<>();
-		getOwnAtomicAttributesRec(getOwnAttributes(), atomicAttrs);
-		return atomicAttrs;
 	}
 
 	private void getOwnAtomicAttributesRec(Iterable<AttributeMetaData> attrs, List<AttributeMetaData> atomicAttrs)
