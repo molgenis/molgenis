@@ -533,7 +533,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			{
 				return new MolgenisRepositoryDecoratorFactory(entityManager(), transactionLogService,
 						entityAttributesValidator, idGenerator, appSettings, dataService(), expressionValidator,
-						repositoryDecoratorRegistry(), userAccountService).createDecoratedRepository(repository);
+						repositoryDecoratorRegistry()).createDecoratedRepository(repository);
 			}
 		};
 	}
