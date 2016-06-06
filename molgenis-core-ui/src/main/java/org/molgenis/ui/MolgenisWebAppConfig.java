@@ -145,9 +145,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Autowired
 	public LanguageService languageService;
 
-	@Autowired
-	public UserAccountService userAccountService;
-
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
 	{
