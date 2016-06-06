@@ -80,5 +80,5 @@ public class ReservedKeywords
 
 	// Case sensitive
 	public static final Set<String> MOLGENIS_KEYWORDS = Sets.newHashSet("login", "logout", "csv", "entities",
-			"attributes", "base", "exist", "meta", "_UPDATE");
+			"attributes", "base", "exist", "meta");
 }

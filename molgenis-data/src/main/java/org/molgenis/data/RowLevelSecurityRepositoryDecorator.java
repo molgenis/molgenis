@@ -1,10 +1,15 @@
 package org.molgenis.data;
 
-import static autovalue.shaded.com.google.common.common.collect.Iterables.isEmpty;
-import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.MolgenisUser.USERNAME;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import org.apache.commons.lang3.StringUtils;
+import org.molgenis.auth.MolgenisUser;
+import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.runas.SystemSecurityToken;
+import org.molgenis.security.core.utils.SecurityUtils;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -15,13 +20,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.runas.SystemSecurityToken;
-import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import static autovalue.shaded.com.google.common.common.collect.Iterables.isEmpty;
+import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.MolgenisUser.USERNAME;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 public class RowLevelSecurityRepositoryDecorator implements Repository
 {
@@ -30,10 +33,12 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	public static final String PERMISSIONS_ATTRIBUTE = "_PERMISSIONS";
 
 	private final Repository decoratedRepository;
+	private final DataService dataService;
 
-	public RowLevelSecurityRepositoryDecorator(Repository decoratedRepository)
+	public RowLevelSecurityRepositoryDecorator(Repository decoratedRepository, DataService dataService)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	@Override
@@ -329,13 +334,44 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	@Override
 	public void add(Entity entity)
 	{
-		decoratedRepository.add(entity);
+		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
+		{
+			addCurrentUserToEntity(entity);
+			runAsSystem(() -> decoratedRepository.add(createEntityWithNewMetadata(entity)));
+		}
+		else
+		{
+			decoratedRepository.add(entity);
+		}
+	}
+
+	private Entity createEntityWithNewMetadata(Entity entity)
+	{
+		return new DefaultEntity(getEntityMetaData(), dataService, entity);
+	}
+
+	private Entity addCurrentUserToEntity(Entity entity)
+	{
+		Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
+
+		Entity currentUser = runAsSystem(() -> dataService.findOne(MolgenisUser.ENTITY_NAME,
+				new QueryImpl().eq(MolgenisUser.USERNAME, SecurityUtils.getUsername(currentAuthentication))));
+		entity.set(UPDATE_ATTRIBUTE, currentUser.getIdValue());
+		return entity;
 	}
 
 	@Override
 	public Integer add(Stream<? extends Entity> entities)
 	{
-		return decoratedRepository.add(entities);
+		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
+		{
+			Stream<? extends Entity> completeEntities = entities.map(this::addCurrentUserToEntity);
+			return runAsSystem(() -> decoratedRepository.add(completeEntities.map(this::createEntityWithNewMetadata)));
+		}
+		else
+		{
+			return decoratedRepository.add(entities);
+		}
 	}
 
 	@Override
