@@ -1,5 +1,20 @@
 package org.molgenis.data;
 
+import org.mockito.ArgumentCaptor;
+import org.mockito.stubbing.Answer;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.auth.MolgenisUser;
+import org.molgenis.data.support.QueryImpl;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
@@ -7,28 +22,6 @@ import static org.molgenis.auth.MolgenisUser.USERNAME;
 import static org.molgenis.data.RowLevelSecurityRepositoryDecorator.PERMISSIONS_ATTRIBUTE;
 import static org.molgenis.data.RowLevelSecurityRepositoryDecorator.UPDATE_ATTRIBUTE;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.junit.Before;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 public class RowLevelSecurityRepositoryDecoratorTest
 {
