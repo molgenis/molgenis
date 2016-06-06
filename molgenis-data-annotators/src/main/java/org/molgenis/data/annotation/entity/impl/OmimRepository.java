@@ -8,7 +8,6 @@ import static java.util.Collections.emptySet;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.NAME;
 import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.SEPARATOR;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -31,7 +30,6 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
 
@@ -67,13 +65,13 @@ public class OmimRepository extends AbstractRepository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		EntityMetaDataImpl entityMetaData = new EntityMetaDataImpl(NAME);
-		entityMetaData.addAttribute(OMIM_GENE_SYMBOLS_COL_NAME, ROLE_ID);
-		entityMetaData.addAttribute(OMIM_PHENOTYPE_COL_NAME);
-		entityMetaData.addAttribute(OMIM_MIM_NUMBER_COL_NAME);
-		entityMetaData.addAttribute(OMIM_CYTO_LOCATION_COL_NAME);
-		entityMetaData.addAttribute(OMIM_ENTRY_COL_NAME);
-		entityMetaData.addAttribute(OMIM_TYPE_COL_NAME);
+		EntityMetaData entityMetaData = new EntityMetaData(NAME);
+		//		entityMetaData.addAttribute(OMIM_GENE_SYMBOLS_COL_NAME, ROLE_ID); // FIXME
+		//		entityMetaData.addAttribute(OMIM_PHENOTYPE_COL_NAME);
+		//		entityMetaData.addAttribute(OMIM_MIM_NUMBER_COL_NAME);
+		//		entityMetaData.addAttribute(OMIM_CYTO_LOCATION_COL_NAME);
+		//		entityMetaData.addAttribute(OMIM_ENTRY_COL_NAME);
+		//		entityMetaData.addAttribute(OMIM_TYPE_COL_NAME);
 		return entityMetaData;
 	}
 

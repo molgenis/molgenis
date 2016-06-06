@@ -1,26 +1,22 @@
 package org.molgenis.integrationtest.data.abstracts.model;
 
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 
 public class AbstractTextDatatypeIT extends AbstractDatatypeIT
 {
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaDataImpl("TextTest");
-		entityMetaData.addAttribute("identifier", ROLE_ID).setDataType(INT).setNillable(false);// Cannot use
-																								// TEXT as
-																								// id
-																								// attribute
-		entityMetaData.addAttribute("col1").setDataType(TEXT).setNillable(false);
-		entityMetaData.addAttribute("col2").setDataType(TEXT);
+		EntityMetaData entityMetaData = new EntityMetaData("TextTest");
+		//		entityMetaData.addAttribute("identifier", ROLE_ID).setDataType(INT).setNillable(false);// Cannot use
+		//																								// TEXT as
+		//																								// id
+		//																								// attribute
+		//		entityMetaData.addAttribute("col1").setDataType(TEXT).setNillable(false);
+		//		entityMetaData.addAttribute("col2").setDataType(TEXT); // FIXME
 
 		return entityMetaData;
 	}

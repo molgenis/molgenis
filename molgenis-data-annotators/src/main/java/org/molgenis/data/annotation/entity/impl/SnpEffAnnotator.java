@@ -34,7 +34,6 @@ import org.molgenis.data.annotation.utils.JarRunnerImpl;
 import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfAttributes;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -226,7 +225,7 @@ public class SnpEffAnnotator
 					public Entity next()
 					{
 						Entity entity = it.next();
-						EntityMetaData meta = new EntityMetaDataImpl(entity.getEntityMetaData());
+						EntityMetaData meta = new EntityMetaData(entity.getEntityMetaData());
 						info.getOutputAttributes().forEach(meta::addAttribute);
 						Entity copy = new MapEntity(entity, meta);
 						try

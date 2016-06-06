@@ -6,7 +6,6 @@ import java.util.Map;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;

@@ -16,7 +16,7 @@ public class MetaUtilsTest
 	@Test
 	public void toExistingAttributeMetaData()
 	{
-		EntityMetaData entityMetaData = new EntityMetaDataImpl("entityMetaData");
+		EntityMetaData entityMetaData = new EntityMetaData("entityMetaData");
 		AttributeMetaData attributeHeight = new AttributeMetaData("height_0");
 		AttributeMetaData attributeWeight = new AttributeMetaData("weight_0");
 		entityMetaData.addAttribute(attributeHeight);
@@ -37,7 +37,7 @@ public class MetaUtilsTest
 	{ MolgenisDataAccessException.class })
 	public void toExistingAttributeMetaData_MolgenisDataAccessException()
 	{
-		EntityMetaData entityMetaData = new EntityMetaDataImpl("entityMetaData");
+		EntityMetaData entityMetaData = new EntityMetaData("entityMetaData");
 		AttributeMetaData attributeHeight = new AttributeMetaData("height_0");
 		AttributeMetaData attributeWeight = new AttributeMetaData("weight_0");
 		entityMetaData.addAttribute(attributeHeight);

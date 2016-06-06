@@ -16,7 +16,6 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.meta.PackageMetaData;
@@ -141,7 +140,7 @@ public class SystemEntityMetaDataPersister
 
 	private void removeNonExistingSystemEntities()
 	{
-		Stream<EntityMetaDataImpl> removedEntityMetas = dataService.findAll(ENTITY_META_DATA, EntityMetaDataImpl.class)
+		Stream<EntityMetaData> removedEntityMetas = dataService.findAll(ENTITY_META_DATA, EntityMetaData.class)
 				.filter(this::isSystemEntity).filter(this::isNotExists);
 		dataService.delete(ENTITY_META_DATA, removedEntityMetas); // FIXME dependency resolving?
 	}

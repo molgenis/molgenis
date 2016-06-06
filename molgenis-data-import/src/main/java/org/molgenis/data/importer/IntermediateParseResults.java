@@ -13,7 +13,6 @@ import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.importer.EmxMetaDataParser.EmxAttribute;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.semantic.LabeledResource;
@@ -118,7 +117,7 @@ public final class IntermediateParseResults
 			}
 		}
 
-		EntityMetaData emd = new EntityMetaDataImpl(simpleName,
+		EntityMetaData emd = new EntityMetaData(simpleName,
 				getApplicationContext().getBean(EntityMetaDataMetaData.class));
 		entities.put(name, emd);
 		return emd;

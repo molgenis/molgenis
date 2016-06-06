@@ -11,7 +11,6 @@ import static org.testng.Assert.fail;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
@@ -26,14 +25,14 @@ public class MapOfStringsExpressionEvaluatorTest
 	@BeforeTest
 	public void createEntity()
 	{
-		emd = new EntityMetaDataImpl("Source");
+		emd = new EntityMetaData("Source");
 		emd.addAttribute(new AttributeMetaData("Identifier").setDataType(INT), ROLE_ID);
 		emd.addAttribute(new AttributeMetaData("Int").setDataType(INT));
 		emd.addAttribute(new AttributeMetaData("String").setDataType(STRING));
 		emd.addAttribute(new AttributeMetaData("NonNumericString").setDataType(STRING));
 		emd.addAttribute(new AttributeMetaData("Long").setDataType(STRING));
 
-		refEmd = new EntityMetaDataImpl("RefEntity");
+		refEmd = new EntityMetaData("RefEntity");
 		refEmd.addAttribute(new AttributeMetaData("Identifier"), ROLE_ID);
 		refEmd.addAttribute(new AttributeMetaData("Chromosome"));
 		refEmd.addAttribute(new AttributeMetaData("Position").setDataType(LONG));

@@ -34,7 +34,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.pathways.model.Impact;
 import org.molgenis.pathways.model.Pathway;
 import org.molgenis.pathways.service.WikiPathwaysService;
@@ -99,8 +98,8 @@ public class WikiPathwaysController extends MolgenisPluginController
 
 	/**
 	 * Retrieves the list of VCF entities. They are recognized by the fact that they have an effect attribute.
-	 * 
-	 * @return {@link List} of {@link EntityMetaDataImpl} for the VCF entities
+	 *
+	 * @return {@link List} of {@link EntityMetaData} for the VCF entities
 	 */
 	private List<EntityMetaData> getVCFEntities()
 	{
@@ -112,7 +111,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 * Determines if an entity has an effect attribute.
 	 * 
 	 * @param emd
-	 *            {@link EntityMetaDataImpl} of the entity
+	 *            {@link EntityMetaData} of the entity
 	 * @return boolean indicating if the entity has an effect column
 	 */
 	private boolean hasEffectAttribute(EntityMetaData emd)

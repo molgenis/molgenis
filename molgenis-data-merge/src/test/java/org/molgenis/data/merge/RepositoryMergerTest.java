@@ -25,7 +25,6 @@ import org.molgenis.data.elasticsearch.ElasticsearchRepository;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.stereotype.Component;
@@ -58,9 +57,9 @@ public class RepositoryMergerTest
 		repository1 = mock(Repository.class);
 		elasticSearchRepository = mock(ElasticsearchRepository.class);
 
-		entityMetaData1 = new EntityMetaDataImpl("meta1");
-		entityMetaData2 = new EntityMetaDataImpl("meta2");
-		entityMetaDataMerged = new EntityMetaDataImpl("mergedRepo");
+		entityMetaData1 = new EntityMetaData("meta1");
+		entityMetaData2 = new EntityMetaData("meta2");
+		entityMetaDataMerged = new EntityMetaData("mergedRepo");
 
 		// input metadata
 		metaDataa = new AttributeMetaData("a");

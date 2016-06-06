@@ -16,7 +16,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.util.CloseableIterator;
 
@@ -35,13 +34,13 @@ import au.com.bytecode.opencsv.CSVReader;
  */
 public class TypedCsvRepository<T extends Entity> extends AbstractRepository
 {
-	private final EntityMetaDataImpl entityMetaData;
+	private final EntityMetaData entityMetaData;
 	private final File file;
 	private final char separatorChar;
 	private final int skipLines;
 	private final LineMapper<T> lineMapper;
 
-	public TypedCsvRepository(File file, EntityMetaDataImpl entityMetaData, char separatorChar, int skipLines,
+	public TypedCsvRepository(File file, EntityMetaData entityMetaData, char separatorChar, int skipLines,
 			LineMapper<T> lineMapper)
 	{
 		this.entityMetaData = entityMetaData;

@@ -11,7 +11,12 @@ import org.molgenis.data.support.MapEntity;
  */
 public abstract class SystemEntity extends AbstractEntity
 {
-	protected final Entity entity;
+	protected Entity entity;
+
+	protected SystemEntity()
+	{
+
+	}
 
 	/**
 	 * Constructs a system entity that wraps an existing {@link Entity}
@@ -22,13 +27,17 @@ public abstract class SystemEntity extends AbstractEntity
 	{
 		this.entity = requireNonNull(entity);
 	}
-
 	/**
 	 * Constructs a system entity based on the given {@link EntityMetaData}
 	 *
 	 * @param entityMetaData system entity meta data
 	 */
 	protected SystemEntity(EntityMetaData entityMetaData)
+	{
+		init(entityMetaData);
+	}
+
+	protected void init(EntityMetaData entityMetaData)
 	{
 		this.entity = new MapEntity(requireNonNull(entityMetaData));
 	}

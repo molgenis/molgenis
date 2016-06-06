@@ -11,7 +11,6 @@ import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -26,7 +25,7 @@ public class EntityCollectionResponseTest
 	@BeforeMethod
 	public void setUp()
 	{
-		entityMetaData = Mockito.mock(EntityMetaDataImpl.class);
+		entityMetaData = Mockito.mock(EntityMetaData.class);
 		when(entityMetaData.getAttributes()).thenReturn(Collections.emptyList());
 		permissionService = mock(MolgenisPermissionService.class);
 		dataService = mock(DataService.class);

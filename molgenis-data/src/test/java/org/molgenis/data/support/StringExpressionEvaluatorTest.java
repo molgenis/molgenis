@@ -7,7 +7,6 @@ import static org.testng.Assert.fail;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.LongField;
 import org.molgenis.fieldtypes.StringField;
@@ -25,7 +24,7 @@ public class StringExpressionEvaluatorTest
 	@BeforeTest
 	public void createEntity()
 	{
-		emd = new EntityMetaDataImpl("Source");
+		emd = new EntityMetaData("Source");
 		emd.addAttribute(new AttributeMetaData("Identifier").setDataType(new IntField()), ROLE_ID);
 		emd.addAttribute(new AttributeMetaData("Int").setDataType(new IntField()));
 		emd.addAttribute(new AttributeMetaData("String").setDataType(new StringField()));

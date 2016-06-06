@@ -24,7 +24,6 @@ import org.mockito.Mockito;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.QueryImpl;
@@ -289,7 +288,7 @@ public class DataServiceImplTest
 
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
-		EntityMetaDataImpl emd = mock(EntityMetaDataImpl.class);
+		EntityMetaData emd = mock(EntityMetaData.class);
 		MetaDataService metaDataService = mock(MetaDataService.class);
 
 		when(repo1.findAll(query)).thenReturn(Stream.of(entity0, entity1));
@@ -299,7 +298,7 @@ public class DataServiceImplTest
 
 		dataService.setMetaDataService(metaDataService);
 
-		EntityMetaData emd2 = EntityMetaDataImpl.newInstance(emd);
+		EntityMetaData emd2 = EntityMetaData.newInstance(emd);
 		emd2.setName("Entity2");
 		when(repo2.getEntityMetaData()).thenReturn(emd2);
 		when(metaDataService.addEntityMeta(emd2)).thenReturn(repo2);
@@ -327,7 +326,7 @@ public class DataServiceImplTest
 
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
-		EntityMetaDataImpl emd = mock(EntityMetaDataImpl.class);
+		EntityMetaData emd = mock(EntityMetaData.class);
 		MetaDataService metaDataService = mock(MetaDataService.class);
 
 		when(repo1.findAll(query)).thenReturn(Stream.of(entity0, entity1));
@@ -337,7 +336,7 @@ public class DataServiceImplTest
 
 		dataService.setMetaDataService(metaDataService);
 
-		EntityMetaData emd2 = EntityMetaDataImpl.newInstance(emd);
+		EntityMetaData emd2 = EntityMetaData.newInstance(emd);
 		emd2.setName("Entity2");
 		when(repo2.getEntityMetaData()).thenReturn(emd2);
 		when(metaDataService.addEntityMeta(emd2)).thenReturn(repo2);

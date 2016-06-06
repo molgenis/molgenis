@@ -17,7 +17,6 @@ import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.AbstractRepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -132,7 +131,7 @@ public class ElasticsearchRepositoryCollection extends AbstractRepositoryCollect
 		EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(entityName);
 		if (entityMetaData == null) throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
 
-		EntityMetaData EntityMetaData = new EntityMetaDataImpl(dataService.getMeta().getEntityMetaData(entityName));
+		EntityMetaData EntityMetaData = new EntityMetaData(dataService.getMeta().getEntityMetaData(entityName));
 		AttributeMetaData attr = entityMetaData.getAttribute(attributeName);
 		if (attr == null) throw new UnknownAttributeException(String.format("Unknown attribute '%s' of entity '%s'",
 				attributeName, entityName));

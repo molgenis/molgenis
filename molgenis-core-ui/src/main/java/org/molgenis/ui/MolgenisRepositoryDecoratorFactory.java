@@ -31,7 +31,6 @@ import org.molgenis.data.i18n.LanguageRepositoryDecorator;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataRepositoryDecorator;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.EntityMetaDataRepositoryDecorator;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.meta.PackageRepositoryDecorator;
@@ -159,12 +158,9 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		}
 		else if (repository.getName().equals(ENTITY_META_DATA))
 		{
-			// FIXME hacky, remove EntityMetaData interface?
-			repository = new UntypedRepositoryDecorator<>(
-					(Repository<EntityMetaDataImpl>) (Repository<? extends Entity>) new EntityMetaDataRepositoryDecorator(
-							(TypedRepositoryDecorator<EntityMetaData>) (TypedRepositoryDecorator<? extends EntityMetaData>) new TypedRepositoryDecorator<>(
-									repository, EntityMetaDataImpl.class), dataService, systemEntityMetaDataRegistry),
-					EntityMetaDataImpl.class);
+			repository = new UntypedRepositoryDecorator<>(new EntityMetaDataRepositoryDecorator(
+					new TypedRepositoryDecorator<>(repository, EntityMetaData.class), dataService,
+					systemEntityMetaDataRegistry), EntityMetaData.class);
 		}
 		else if (repository.getName().equals(PACKAGE))
 		{

@@ -9,7 +9,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.settings.SettingsEntityMeta;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -33,7 +32,7 @@ public class GenomicDataSettingsTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void getAttributeMetadataForAttributeNameArray()
 	{
-		EntityMetaData emd = new EntityMetaDataImpl("settings_genomicdata");
+		EntityMetaData emd = new EntityMetaData("settings_genomicdata");
 		emd.addAttribute(new AttributeMetaData("start"));
 		emd.addAttribute(new AttributeMetaData("chromosome"));
 		Entity entity = new DefaultEntity(emd, dataService);
@@ -43,7 +42,7 @@ public class GenomicDataSettingsTest extends AbstractTestNGSpringContextTests
 		when(dataService.getEntityMetaData("settings_genomicdata")).thenReturn(emd);
 		when(dataService.findOneById("settings_genomicdata", "settings_genomicdata")).thenReturn(entity);
 
-		EntityMetaData entityMetaData = new EntityMetaDataImpl("entity");
+		EntityMetaData entityMetaData = new EntityMetaData("entity");
 		AttributeMetaData posAttributeMetaData = new AttributeMetaData("POS");
 		AttributeMetaData chromAttributeMetaData = new AttributeMetaData("#CHROM");
 		AttributeMetaData compoundAttributeMetaData = new AttributeMetaData("compound",

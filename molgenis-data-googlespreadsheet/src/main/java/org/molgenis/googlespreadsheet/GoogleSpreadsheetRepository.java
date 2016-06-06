@@ -13,7 +13,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.MapEntity;
 
@@ -152,7 +151,7 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 				throw new RuntimeException(e);
 			}
 
-			EntityMetaData entityMetaData = new EntityMetaDataImpl(feed.getTitle().getPlainText(), MapEntity.class);
+			EntityMetaData entityMetaData = new EntityMetaData(feed.getTitle().getPlainText(), MapEntity.class);
 
 			for (CellEntry cellEntry : feed.getEntries())
 			{

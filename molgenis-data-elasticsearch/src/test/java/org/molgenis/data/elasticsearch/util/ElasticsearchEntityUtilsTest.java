@@ -12,7 +12,6 @@ import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.testng.annotations.Test;
 
 public class ElasticsearchEntityUtilsTest
@@ -57,7 +56,7 @@ public class ElasticsearchEntityUtilsTest
 		String idAttributeName = "id";
 		Entity entity = mock(Entity.class);
 		when(entity.get(idAttributeName)).thenReturn(id);
-		EntityMetaData entityMetaData = mock(EntityMetaDataImpl.class);
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		AttributeMetaData idAttribute = mock(AttributeMetaData.class);
 		when(idAttribute.getName()).thenReturn(idAttributeName);
 		when(entityMetaData.getIdAttribute()).thenReturn(idAttribute);

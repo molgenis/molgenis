@@ -6,16 +6,16 @@ import java.io.IOException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotator.tabix.TabixRepository;
-import org.molgenis.data.meta.EntityMetaDataImpl;
+import org.molgenis.data.meta.EntityMetaData;
 
 /**
  * Factory that can instantiate a TabixRepository. The metadata for the repository are configured in the factory.
  */
 public class TabixRepositoryFactory implements RepositoryFactory
 {
-	private EntityMetaDataImpl emd;
+	private EntityMetaData emd;
 
-	public TabixRepositoryFactory(EntityMetaDataImpl emd)
+	public TabixRepositoryFactory(EntityMetaData emd)
 	{
 		this.emd = emd;
 	}

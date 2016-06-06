@@ -372,9 +372,7 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 
 	private Stream<EntityMetaData> getEntities(AttributeMetaData attr)
 	{
-		// FIXME compound attrs
-		return (Stream<EntityMetaData>) (Stream<? extends EntityMetaData>) dataService
-				.query(ENTITY_META_DATA, EntityMetaDataImpl.class).eq(ATTRIBUTES, attr).findAll();
+		return dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(ATTRIBUTES, attr).findAll();
 	}
 
 	private void validateAndUpdate(AttributeMetaData attr)

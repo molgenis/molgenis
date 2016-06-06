@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import javax.annotation.Nonnull;
+
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
@@ -308,15 +310,13 @@ public class PackageRepositoryDecorator implements Repository<Package>
 
 	private Repository<EntityMetaData> getEntityRepository()
 	{
-		// FIXME hacky
-		return (Repository<EntityMetaData>) (Repository<? extends EntityMetaData>) dataService
-				.getRepository(ENTITY_META_DATA, EntityMetaDataImpl.class);
+		return dataService.getRepository(ENTITY_META_DATA, EntityMetaData.class);
 	}
 
 	private class PackageTreeTraverser extends TreeTraverser<Package>
 	{
 		@Override
-		public Iterable<Package> children(Package packageEntity)
+		public Iterable<Package> children(@Nonnull Package packageEntity)
 		{
 			return () -> query().eq(PackageMetaData.PARENT, packageEntity).findAll().iterator();
 		}

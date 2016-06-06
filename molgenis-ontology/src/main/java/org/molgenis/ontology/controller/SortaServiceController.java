@@ -60,7 +60,6 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.JobExecutionMetaData;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.MapEntity;
@@ -566,7 +565,7 @@ public class SortaServiceController extends MolgenisPluginController
 
 	private void createEmptyResultRepository(String jobName, String resultEntityName, EntityMetaData sourceMetaData)
 	{
-		EntityMetaData resultEntityMetaData = EntityMetaDataImpl.newInstance(matchingTaskContentEntityMetaData);
+		EntityMetaData resultEntityMetaData = EntityMetaData.newInstance(matchingTaskContentEntityMetaData);
 		resultEntityMetaData.setName(resultEntityName);
 		resultEntityMetaData.setAbstract(false);
 		resultEntityMetaData.addAttribute(new AttributeMetaData(INPUT_TERM, FieldTypeEnum.XREF)

@@ -189,11 +189,11 @@ public class Package extends SystemEntity
 	 *
 	 * @return package entities
 	 */
-	public Iterable<EntityMetaDataImpl> getEntityMetaDatas()
+	public Iterable<EntityMetaData> getEntityMetaDatas()
 	{
 		// TODO Use one-to-many relationship for EntityMetaData.package
 		DataService dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
-		Query<EntityMetaDataImpl> query = dataService.query(ENTITY_META_DATA, EntityMetaDataImpl.class)
+		Query<EntityMetaData> query = dataService.query(ENTITY_META_DATA, EntityMetaData.class)
 				.eq(EntityMetaDataMetaData.PACKAGE, getName());
 		return () -> query.findAll().iterator();
 	}

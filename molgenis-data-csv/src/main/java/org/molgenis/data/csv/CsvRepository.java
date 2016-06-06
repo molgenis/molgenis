@@ -15,7 +15,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.springframework.util.StringUtils;
@@ -32,7 +31,7 @@ public class CsvRepository extends AbstractRepository
 	private final String sheetName;
 	private final File file;
 	private List<CellProcessor> cellProcessors;
-	private EntityMetaDataImpl entityMetaData;
+	private EntityMetaData entityMetaData;
 	private Character separator = null;
 
 	public CsvRepository(String file)
@@ -69,7 +68,7 @@ public class CsvRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			entityMetaData = new EntityMetaDataImpl(sheetName);
+			entityMetaData = new EntityMetaData(sheetName);
 
 			for (String attrName : new CsvIterator(file, sheetName, null, separator).getColNamesMap().keySet())
 			{

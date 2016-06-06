@@ -46,7 +46,6 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.UnknownRepositoryException;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.AbstractRepositoryCollection;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -104,14 +103,14 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 	@Override
 	public Iterable<String> getEntityNames()
 	{
-		return dataService.query(ENTITY_META_DATA, EntityMetaDataImpl.class).eq(BACKEND, POSTGRESQL).findAll()
-				.map(EntityMetaDataImpl::getName)::iterator;
+		return dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(BACKEND, POSTGRESQL).findAll()
+				.map(EntityMetaData::getName)::iterator;
 	}
 
 	@Override
 	public Repository<Entity> getRepository(String name)
 	{
-		EntityMetaData entityMetaData = dataService.query(ENTITY_META_DATA, EntityMetaDataImpl.class)
+		EntityMetaData entityMetaData = dataService.query(ENTITY_META_DATA, EntityMetaData.class)
 				.eq(BACKEND, POSTGRESQL)
 				.and().eq(FULL_NAME, name).and().eq(ABSTRACT, false).findOne();
 		return getRepository(entityMetaData);
@@ -128,7 +127,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 	@Override
 	public Iterator<Repository<Entity>> iterator()
 	{
-		return dataService.query(ENTITY_META_DATA, EntityMetaDataImpl.class).eq(BACKEND, POSTGRESQL).and()
+		return dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(BACKEND, POSTGRESQL).and()
 				.eq(ABSTRACT, false)
 				.findAll().map(this::getRepository).iterator();
 	}

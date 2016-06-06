@@ -16,7 +16,6 @@ import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,7 +34,7 @@ public class RepositorySecurityDecoratorTest
 	public void setUp()
 	{
 		entityName = "entity";
-		entityMeta = mock(EntityMetaDataImpl.class);
+		entityMeta = mock(EntityMetaData.class);
 		when(entityMeta.getName()).thenReturn(entityName);
 		decoratedRepository = mock(Repository.class);
 		when(decoratedRepository.getName()).thenReturn(entityName);

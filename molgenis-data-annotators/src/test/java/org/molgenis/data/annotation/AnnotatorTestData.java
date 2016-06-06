@@ -13,13 +13,12 @@ import java.util.ArrayList;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 
 public abstract class AnnotatorTestData
 {
-	public EntityMetaData metaDataCanAnnotate = new EntityMetaDataImpl("test");
-	public EntityMetaData metaDataCantAnnotate = new EntityMetaDataImpl("test");
+	public EntityMetaData metaDataCanAnnotate = new EntityMetaData("test");
+	public EntityMetaData metaDataCantAnnotate = new EntityMetaData("test");
 
 	public AttributeMetaData attributeMetaDataChrom = new AttributeMetaData(CHROM, STRING);
 	public AttributeMetaData attributeMetaDataPos = new AttributeMetaData(POS, LONG);

@@ -16,7 +16,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -37,7 +36,7 @@ public class LazyEntityTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		entityMeta = mock(EntityMetaDataImpl.class);
+		entityMeta = mock(EntityMetaData.class);
 		when(entityMeta.getName()).thenReturn(ENTITY_NAME);
 		idAttr = mock(AttributeMetaData.class);
 		when(idAttr.getName()).thenReturn(ID_ATTR_NAME);

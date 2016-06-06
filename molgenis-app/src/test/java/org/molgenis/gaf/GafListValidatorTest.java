@@ -24,7 +24,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.file.FileStore;
@@ -121,7 +120,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 	private Repository<Entity> getDefaultValidSettingRepositoryMock()
 	{
 		Repository<Entity> repository = mock(Repository.class);
-		EntityMetaData entityMetaData = mock(EntityMetaDataImpl.class);
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 
 		// INTERNAL_SAMPLE_ID
 		AttributeMetaData internalSampleID = new AttributeMetaData(INTERNAL_SAMPLE_ID.toString(),

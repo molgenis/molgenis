@@ -27,7 +27,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -75,7 +74,7 @@ public class RepositoryValidationDecoratorTest
 		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(refAttrIdName).getMock();
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 
-		refEntityMeta = mock(EntityMetaDataImpl.class);
+		refEntityMeta = mock(EntityMetaData.class);
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(refEntityMeta.getLabel()).thenReturn(refEntityName);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
@@ -124,7 +123,7 @@ public class RepositoryValidationDecoratorTest
 		when(uniqueXrefAttr.getDataType()).thenReturn(XREF);
 		when(uniqueXrefAttr.isUnique()).thenReturn(true);
 
-		entityMeta = mock(EntityMetaDataImpl.class);
+		entityMeta = mock(EntityMetaData.class);
 		when(entityMeta.getName()).thenReturn(entityName);
 		when(entityMeta.getLabel()).thenReturn(entityName);
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
@@ -539,7 +538,7 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void addRequiredQuestionnaireNotSubmitted()
 	{
-		EntityMetaData questionnaireEntityMeta = mock(EntityMetaDataImpl.class);
+		EntityMetaData questionnaireEntityMeta = mock(EntityMetaData.class);
 		when(questionnaireEntityMeta.getName()).thenReturn("Questionnaire");
 		when(entityMeta.getExtends()).thenReturn(questionnaireEntityMeta);
 
@@ -574,7 +573,7 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void addRequiredQuestionnaireSubmittedValidationError()
 	{
-		EntityMetaData questionnaireEntityMeta = mock(EntityMetaDataImpl.class);
+		EntityMetaData questionnaireEntityMeta = mock(EntityMetaData.class);
 		when(questionnaireEntityMeta.getName()).thenReturn("Questionnaire");
 		when(entityMeta.getExtends()).thenReturn(questionnaireEntityMeta);
 
@@ -1338,7 +1337,7 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void addStreamRequiredQuestionnaireNotSubmitted()
 	{
-		EntityMetaData questionnaireEntityMeta = mock(EntityMetaDataImpl.class);
+		EntityMetaData questionnaireEntityMeta = mock(EntityMetaData.class);
 		when(questionnaireEntityMeta.getName()).thenReturn("Questionnaire");
 		when(entityMeta.getExtends()).thenReturn(questionnaireEntityMeta);
 
@@ -1381,7 +1380,7 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void addStreamRequiredQuestionnaireSubmittedValidationError()
 	{
-		EntityMetaData questionnaireEntityMeta = mock(EntityMetaDataImpl.class);
+		EntityMetaData questionnaireEntityMeta = mock(EntityMetaData.class);
 		when(questionnaireEntityMeta.getName()).thenReturn("Questionnaire");
 		when(entityMeta.getExtends()).thenReturn(questionnaireEntityMeta);
 
@@ -2327,7 +2326,7 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void updateRequiredQuestionnaireNotSubmitted()
 	{
-		EntityMetaData questionnaireEntityMeta = mock(EntityMetaDataImpl.class);
+		EntityMetaData questionnaireEntityMeta = mock(EntityMetaData.class);
 		when(questionnaireEntityMeta.getName()).thenReturn("Questionnaire");
 		when(entityMeta.getExtends()).thenReturn(questionnaireEntityMeta);
 
@@ -2362,7 +2361,7 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void updateRequiredQuestionnaireSubmittedValidationError()
 	{
-		EntityMetaData questionnaireEntityMeta = mock(EntityMetaDataImpl.class);
+		EntityMetaData questionnaireEntityMeta = mock(EntityMetaData.class);
 		when(questionnaireEntityMeta.getName()).thenReturn("Questionnaire");
 		when(entityMeta.getExtends()).thenReturn(questionnaireEntityMeta);
 
@@ -3472,7 +3471,7 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void updateStreamRequiredQuestionnaireNotSubmitted()
 	{
-		EntityMetaData questionnaireEntityMeta = mock(EntityMetaDataImpl.class);
+		EntityMetaData questionnaireEntityMeta = mock(EntityMetaData.class);
 		when(questionnaireEntityMeta.getName()).thenReturn("Questionnaire");
 		when(entityMeta.getExtends()).thenReturn(questionnaireEntityMeta);
 
@@ -3515,7 +3514,7 @@ public class RepositoryValidationDecoratorTest
 	@Test
 	public void updateStreamRequiredQuestionnaireSubmittedValidationError()
 	{
-		EntityMetaData questionnaireEntityMeta = mock(EntityMetaDataImpl.class);
+		EntityMetaData questionnaireEntityMeta = mock(EntityMetaData.class);
 		when(questionnaireEntityMeta.getName()).thenReturn("Questionnaire");
 		when(entityMeta.getExtends()).thenReturn(questionnaireEntityMeta);
 
@@ -4605,7 +4604,7 @@ public class RepositoryValidationDecoratorTest
 	public void findOneObjectFetch()
 	{
 		DataService dataService = mock(DataService.class);
-		EntityMetaData entityMeta = mock(EntityMetaDataImpl.class);
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
 		Repository<Entity> decoratedRepository = mock(Repository.class);
 		when(decoratedRepository.getEntityMetaData()).thenReturn(entityMeta);
 		EntityAttributesValidator entityAttributesValidator = mock(EntityAttributesValidator.class);

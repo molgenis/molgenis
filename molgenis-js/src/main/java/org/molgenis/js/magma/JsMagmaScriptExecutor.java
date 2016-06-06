@@ -3,7 +3,6 @@ package org.molgenis.js.magma;
 import java.util.Map;
 
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.js.ScriptEvaluator;
 import org.springframework.stereotype.Service;
@@ -23,9 +22,9 @@ public class JsMagmaScriptExecutor
 	 */
 	public Object executeScript(String jsScript, Map<String, Object> parameters)
 	{
-		EntityMetaData entityMeta = new EntityMetaDataImpl("entity");
+		EntityMetaData entityMeta = new EntityMetaData("entity");
 		parameters.keySet().stream().forEach(key -> {
-			entityMeta.addAttribute(key);
+			entityMeta.addAttribute(null); // FIXME
 		});
 		MapEntity entity = new MapEntity(parameters);
 		return ScriptEvaluator.eval(jsScript, entity, entityMeta);

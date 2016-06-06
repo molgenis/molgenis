@@ -15,7 +15,6 @@ import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -31,7 +30,7 @@ public class EntityReferenceResolverDecoratorTest
 	public void setUpBeforeMethod()
 	{
 		decoratedRepo = mock(Repository.class);
-		entityMeta = mock(EntityMetaDataImpl.class);
+		entityMeta = mock(EntityMetaData.class);
 		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
 		entityManager = mock(EntityManager.class);
 		entityReferenceResolverDecorator = new EntityReferenceResolverDecorator(decoratedRepo, entityManager);

@@ -27,7 +27,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.utils.JarRunner;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfAttributes;
 import org.springframework.context.annotation.Bean;
@@ -54,7 +53,7 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 
 		snpEffRepositoryAnnotator = new SnpEffAnnotator.SnpEffRepositoryAnnotator(new MapEntity(), jarRunner);
 
-		metaDataCanAnnotate = new EntityMetaDataImpl("test");
+		metaDataCanAnnotate = new EntityMetaData("test");
 		AttributeMetaData attributeMetaDataChrom = new AttributeMetaData(CHROM,
 				STRING);
 		AttributeMetaData attributeMetaDataPos = new AttributeMetaData(POS,

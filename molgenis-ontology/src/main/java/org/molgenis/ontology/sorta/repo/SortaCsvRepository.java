@@ -1,7 +1,6 @@
 package org.molgenis.ontology.sorta.repo;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 
 import java.io.File;
 import java.util.Arrays;
@@ -16,7 +15,6 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
@@ -26,7 +24,7 @@ import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 
 public class SortaCsvRepository extends AbstractRepository
 {
-	private EntityMetaDataImpl entityMetaData = null;
+	private EntityMetaData entityMetaData = null;
 	private final CsvRepository csvRepository;
 	private final String entityName;
 	private final String entityLabel;
@@ -53,10 +51,10 @@ public class SortaCsvRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			entityMetaData = EntityMetaDataImpl.newInstance(csvRepository.getEntityMetaData());
-			entityMetaData.setName(entityName);
-			entityMetaData.setLabel(entityLabel);
-			entityMetaData.addAttribute(ALLOWED_IDENTIFIER, ROLE_ID).setNillable(false);
+			entityMetaData = EntityMetaData.newInstance(csvRepository.getEntityMetaData());
+			//			entityMetaData.setName(entityName);
+			//			entityMetaData.setLabel(entityLabel);
+			//			entityMetaData.addAttribute(ALLOWED_IDENTIFIER, ROLE_ID).setNillable(false); // FIXME
 			AttributeMetaData nameAttribute = entityMetaData.getAttribute(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
 			if (nameAttribute != null)
 			{

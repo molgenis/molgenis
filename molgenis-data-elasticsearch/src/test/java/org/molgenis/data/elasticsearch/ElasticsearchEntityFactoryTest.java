@@ -14,7 +14,6 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.PartialEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -45,7 +44,7 @@ public class ElasticsearchEntityFactoryTest
 	@Test
 	public void createEntityMetaDataMapStringObjectFetch()
 	{
-		EntityMetaData entityMeta = mock(EntityMetaDataImpl.class);
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
 		Map<String, Object> source = new HashMap<String, Object>();
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
@@ -58,7 +57,7 @@ public class ElasticsearchEntityFactoryTest
 	@Test
 	public void createEntityMetaDataMapStringObjectNoFetch()
 	{
-		EntityMetaData entityMeta = mock(EntityMetaDataImpl.class);
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
 		Map<String, Object> source = new HashMap<String, Object>();
 		Fetch fetch = null;
 		Entity entity = mock(Entity.class);
@@ -70,7 +69,7 @@ public class ElasticsearchEntityFactoryTest
 	@Test
 	public void createEntityMetaDataEntity()
 	{
-		EntityMetaData entityMeta = mock(EntityMetaDataImpl.class);
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
 		Entity entity = mock(Entity.class);
 		Map<String, Object> source = new HashMap<String, Object>();
 		when(entityToSourceConverter.convert(entity, entityMeta)).thenReturn(source);

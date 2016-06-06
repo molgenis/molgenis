@@ -10,7 +10,6 @@ import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 
 /**
  * O/R Mapping between {@link EntityMappingMetaData} Entities and {@link EntityMapping} s.
@@ -23,10 +22,10 @@ public interface AttributeMappingRepository
 	 * @param attributeMappingEntities
 	 *            List of {@link Entity}s with {@link AttributeMappingMetaData} metadata
 	 * @param sourceEntityMetaData
-	 *            {@link EntityMetaDataImpl} of the source entity of the attribute mapping, used to look up the
+	 *            {@link EntityMetaData} of the source entity of the attribute mapping, used to look up the
 	 *            {@link AttributeMetaData}
 	 * @param targetEntityMetaData
-	 *            {@link EntityMetaDataImpl} of the target entity of the attribute mapping, used to look up the
+	 *            {@link EntityMetaData} of the target entity of the attribute mapping, used to look up the
 	 *            {@link AttributeMetaData}
 	 * @return a list of {@link AttributeMapping}s.
 	 */
@@ -43,7 +42,7 @@ public interface AttributeMappingRepository
 
 	/**
 	 * Translates an algorithm to a list of {@link AttributeMetaData} based on the algorithm, and the
-	 * {@link EntityMetaDataImpl} of the source entity
+	 * {@link EntityMetaData} of the source entity
 	 * 
 	 * @param algorithm
 	 * @param sourceEntityMetaData

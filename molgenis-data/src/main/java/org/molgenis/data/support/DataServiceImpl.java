@@ -19,7 +19,6 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.util.EntityUtils;
@@ -57,7 +56,7 @@ public class DataServiceImpl implements DataService
 		EntityMetaData entityMetaData = systemEntityMetaDataRegistry.getSystemEntityMetaData(entityName);
 		if (entityMetaData == null)
 		{
-			entityMetaData = query(ENTITY_META_DATA, EntityMetaDataImpl.class).eq(FULL_NAME, entityName).findOne();
+			entityMetaData = query(ENTITY_META_DATA, EntityMetaData.class).eq(FULL_NAME, entityName).findOne();
 		}
 		return entityMetaData;
 	}
@@ -65,7 +64,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public synchronized Stream<String> getEntityNames()
 	{
-		return query(ENTITY_META_DATA, EntityMetaDataImpl.class).findAll().map(EntityMetaDataImpl::getName);
+		return query(ENTITY_META_DATA, EntityMetaData.class).findAll().map(EntityMetaData::getName);
 	}
 
 	// FIXME remove
@@ -340,7 +339,7 @@ public class DataServiceImpl implements DataService
 	{
 		LOG.info("Creating a copy of " + repository.getName() + " repository, with ID: " + newRepositoryId
 				+ ", and label: " + newRepositoryLabel);
-		EntityMetaData emd = EntityMetaDataImpl.newInstance(repository.getEntityMetaData());
+		EntityMetaData emd = EntityMetaData.newInstance(repository.getEntityMetaData());
 		emd.setName(newRepositoryId);
 		emd.setLabel(newRepositoryLabel);
 		Repository<Entity> repositoryCopy = metaDataService.addEntityMeta(emd);

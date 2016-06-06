@@ -12,7 +12,6 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -107,14 +106,14 @@ public class CrudRepositoryAnnotator
 	 * Adds a new compound attribute to an existing CrudRepository
 	 *
 	 * @param entityMetaData
-	 *            {@link EntityMetaDataImpl} for the existing repository
+	 *            {@link EntityMetaData} for the existing repository
 	 * @param compoundAttributeMetaData
 	 */
 	private void addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, AttributeMetaData compoundAttributeMetaData)
 	{
 		if (entityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
 		{
-			EntityMetaData newEntityMetaData = new EntityMetaDataImpl(entityMetaData);
+			EntityMetaData newEntityMetaData = new EntityMetaData(entityMetaData);
 			newEntityMetaData.addAttribute(compoundAttributeMetaData);
 			dataService.getMeta().updateEntityMeta(newEntityMetaData);
 		}

@@ -20,21 +20,20 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class AbstractElasticsearchRepositoryTest
 {
-	private EntityMetaDataImpl entityMeta;
+	private EntityMetaData entityMeta;
 	private SearchService searchService;
 	private AbstractElasticsearchRepository repository;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		entityMeta = mock(EntityMetaDataImpl.class);
+		entityMeta = mock(EntityMetaData.class);
 		searchService = mock(SearchService.class);
 		repository = new AbstractElasticsearchRepository(searchService)
 		{

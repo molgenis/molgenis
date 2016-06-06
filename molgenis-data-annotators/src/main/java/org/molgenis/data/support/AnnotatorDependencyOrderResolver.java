@@ -12,7 +12,6 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 
 import autovalue.shaded.com.google.common.common.collect.Lists;
 
@@ -40,7 +39,7 @@ public class AnnotatorDependencyOrderResolver
 	private Queue<RepositoryAnnotator> getSingleAnnotatorDependencyList(RepositoryAnnotator selectedAnnotator,
 			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> queue, EntityMetaData emd)
 	{
-		EntityMetaData entityMetaData = new EntityMetaDataImpl(emd); // create a copy because we do not want to
+		EntityMetaData entityMetaData = new EntityMetaData(emd); // create a copy because we do not want to
 																		// change the actual metadata of the entity
 		resolveAnnotatorDependencies(selectedAnnotator, annotatorList, queue, entityMetaData);
 		return queue;

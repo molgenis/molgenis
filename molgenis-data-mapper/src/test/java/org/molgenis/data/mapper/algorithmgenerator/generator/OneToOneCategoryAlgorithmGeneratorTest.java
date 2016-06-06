@@ -13,7 +13,6 @@ import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.support.MapEntity;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
@@ -57,7 +56,7 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 		Mockito.when(dataService.findAll(targetRefEntityMetaData.getName()))
 				.thenReturn(Stream.of(targetEntity1, targetEntity2, targetEntity3, targetEntity4, targetEntity5));
 
-		targetEntityMetaData = new EntityMetaDataImpl("target");
+		targetEntityMetaData = new EntityMetaData("target");
 		targetEntityMetaData.addAttribute(targetAttributeMetaData);
 
 		EntityMetaData sourceRefEntityMetaData = createCategoricalRefEntityMetaData("LifeLines_POTATO_REF");
@@ -79,7 +78,7 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 				.thenReturn(Stream.of(sourceEntity1, sourceEntity2, sourceEntity3, sourceEntity4, sourceEntity5,
 						sourceEntity6, sourceEntity7, sourceEntity8));
 
-		sourceEntityMetaData = new EntityMetaDataImpl("source");
+		sourceEntityMetaData = new EntityMetaData("source");
 		sourceEntityMetaData.addAttributes(Lists.newArrayList(sourceAttributeMetaData));
 	}
 
@@ -132,7 +131,7 @@ public class OneToOneCategoryAlgorithmGeneratorTest
 
 	private EntityMetaData createCategoricalRefEntityMetaData(String entityName)
 	{
-		EntityMetaData targetRefEntityMetaData = new EntityMetaDataImpl(entityName);
+		EntityMetaData targetRefEntityMetaData = new EntityMetaData(entityName);
 		AttributeMetaData targetCodeAttributeMetaData = new AttributeMetaData("code", INT);
 		AttributeMetaData targetLabelAttributeMetaData = new AttributeMetaData("label", STRING);
 		targetRefEntityMetaData.addAttribute(targetCodeAttributeMetaData, ROLE_ID);

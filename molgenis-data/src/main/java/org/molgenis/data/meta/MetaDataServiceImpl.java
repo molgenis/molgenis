@@ -276,7 +276,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public List<AttributeMetaData> updateEntityMeta(EntityMetaData entityMeta)
 	{
-		EntityMetaData otherEntityMeta = dataService.query(ENTITY_META_DATA, EntityMetaDataImpl.class)
+		EntityMetaData otherEntityMeta = dataService.query(ENTITY_META_DATA, EntityMetaData.class)
 				.eq(EntityMetaDataMetaData.FULL_NAME, entityMeta.getName()).findOne();
 		if (otherEntityMeta == null)
 		{
@@ -401,9 +401,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	private Repository<EntityMetaData> getEntityRepository()
 	{
-		// FIXME hacky
-		return (Repository<EntityMetaData>) (Repository<? extends EntityMetaData>) getDefaultBackend()
-				.getRepository(entityMetaDataMetaData, EntityMetaDataImpl.class);
+		return getDefaultBackend().getRepository(entityMetaDataMetaData, EntityMetaData.class);
 	}
 
 	private Repository<AttributeMetaData> getAttributeRepository()

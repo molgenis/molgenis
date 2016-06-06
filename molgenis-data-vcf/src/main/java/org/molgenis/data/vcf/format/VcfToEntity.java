@@ -32,7 +32,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfAttributes;
@@ -51,7 +50,7 @@ import com.google.common.collect.Lists;
 
 public class VcfToEntity
 {
-	private final EntityMetaDataImpl entityMetaData;
+	private final EntityMetaData entityMetaData;
 	private final EntityMetaData sampleEntityMetaData;
 	private final VcfMeta vcfMeta;
 
@@ -68,7 +67,7 @@ public class VcfToEntity
 		EntityMetaData result = null;
 		if (formatMetaData.iterator().hasNext())
 		{
-			result = new EntityMetaDataImpl(entityName + "_Sample");
+			result = new EntityMetaData(entityName + "_Sample");
 			AttributeMetaData idAttributeMetaData = new AttributeMetaData(ID, STRING).setAggregatable(true);
 			idAttributeMetaData.setVisible(false);
 
@@ -92,12 +91,12 @@ public class VcfToEntity
 		return result;
 	}
 
-	private EntityMetaDataImpl createEntityMetaData(String entityName, VcfMeta vcfMeta)
+	private EntityMetaData createEntityMetaData(String entityName, VcfMeta vcfMeta)
 	{
 		VcfAttributes vcfAttributes = getApplicationContext()
 				.getBean(VcfAttributes.class); // FIXME do not use application context
 
-		EntityMetaDataImpl entityMetaData = new EntityMetaDataImpl(entityName);
+		EntityMetaData entityMetaData = new EntityMetaData(entityName);
 		entityMetaData.addAttribute(vcfAttributes.getChromAttribute());
 		entityMetaData.addAttribute(vcfAttributes.getAltAttribute());
 		entityMetaData.addAttribute(vcfAttributes.getPosAttribute());
@@ -372,7 +371,7 @@ public class VcfToEntity
 		}
 	}
 
-	public EntityMetaDataImpl getEntityMetaData()
+	public EntityMetaData getEntityMetaData()
 	{
 		return entityMetaData;
 	}

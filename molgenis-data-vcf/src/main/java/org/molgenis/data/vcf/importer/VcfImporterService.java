@@ -22,7 +22,6 @@ import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataImpl;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.vcf.VcfAttributes;
@@ -164,12 +163,12 @@ public class VcfImporterService implements ImportService
 			throw new MolgenisDataException("Can't overwrite existing " + entityName);
 		}
 
-		EntityMetaData entityMetaData = new EntityMetaDataImpl(inRepository.getEntityMetaData());
+		EntityMetaData entityMetaData = new EntityMetaData(inRepository.getEntityMetaData());
 
 		AttributeMetaData sampleAttribute = entityMetaData.getAttribute(VcfAttributes.SAMPLES);
 		if (sampleAttribute != null)
 		{
-			EntityMetaData samplesEntityMetaData = new EntityMetaDataImpl(sampleAttribute.getRefEntity());
+			EntityMetaData samplesEntityMetaData = new EntityMetaData(sampleAttribute.getRefEntity());
 			sampleRepository = dataService.getMeta().addEntityMeta(samplesEntityMetaData);
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Collections.singletonList(samplesEntityMetaData.getName()));
