@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * Attribute data type validator.
- * 
+ * <p>
  * Does not check if xref,mref, categorical values are present. That happens in the EntityValidator.
  */
 @Component
@@ -154,11 +154,10 @@ public class EntityAttributesValidator
 		{
 			return null;
 		}
-		// FIXME
-		//		if (!refEntity.getEntityMetaData().equals(attr.getRefEntity()))
-		//		{
-		//			return createConstraintViolation(entity, attr, meta, "Not a valid entity type.");
-		//		}
+		if (!refEntity.getEntityMetaData().equals(attr.getRefEntity()))
+		{
+			return createConstraintViolation(entity, attr, meta, "Not a valid entity type.");
+		}
 		return null;
 	}
 
@@ -327,8 +326,8 @@ public class EntityAttributesValidator
 	{
 		Range range = attribute.getRange();
 		Long value = entity.getLong(attribute.getName());
-		if ((value != null) && ((range.getMin() != null && value < range.getMin())
-				|| (range.getMax() != null && value > range.getMax())))
+		if ((value != null) && ((range.getMin() != null && value < range.getMin()) || (range.getMax() != null
+				&& value > range.getMax())))
 		{
 			return createConstraintViolation(entity, attribute, meta);
 		}
