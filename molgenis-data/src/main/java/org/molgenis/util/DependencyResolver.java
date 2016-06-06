@@ -108,11 +108,9 @@ public class DependencyResolver
 			// When there aren't any we got a non resolvable
 			if (ready.isEmpty())
 			{
-				// FIXME dependency resolving fails if input is missing dependencies
-				return Lists.newArrayList(coll);
-				//				throw new MolgenisDataException(
-				//						"Could not resolve dependencies of entities " + dependenciesByName.keySet()
-				//								+ " are there circular dependencies?");
+				throw new MolgenisDataException(
+						"Could not resolve dependencies of entities " + dependenciesByName.keySet()
+								+ " are there circular dependencies?");
 			}
 
 			// Remove found metadata from dependency graph
