@@ -365,17 +365,8 @@ public class EntityMetaDataImpl extends SystemEntity implements EntityMetaData
 	@Override
 	public AttributeMetaData getLabelAttribute(String languageCode)
 	{
-		return getLabelAttribute(); // FIXME what to do here?
-		//		AttributeMetaData labelAttr = getOwnLabelAttribute(languageCode);
-		//		if (labelAttr == null)
-		//		{
-		//			EntityMetaData extends_ = getExtends();
-		//			if (extends_ != null)
-		//			{
-		//				labelAttr = extends_.getLabelAttribute(languageCode);
-		//			}
-		//		}
-		//		return labelAttr != null ? labelAttr : getLabelAttribute();
+		AttributeMetaData labelAttr = getLabelAttribute();
+		return labelAttr != null ? getAttribute(labelAttr.getName() + '-' + languageCode) : null;
 	}
 
 	/**
