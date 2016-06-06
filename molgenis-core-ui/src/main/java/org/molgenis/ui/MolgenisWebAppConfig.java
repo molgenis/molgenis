@@ -52,7 +52,6 @@ import org.molgenis.security.CorsInterceptor;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.freemarker.HasPermissionDirective;
 import org.molgenis.security.freemarker.NotHasPermissionDirective;
-import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.freemarker.LimitMethod;
 import org.molgenis.ui.menu.MenuMolgenisUi;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -144,9 +143,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 	@Autowired
 	public LanguageService languageService;
-
-	@Autowired
-	public UserAccountService userAccountService;
 
 	@Override
 	public void addResourceHandlers(ResourceHandlerRegistry registry)
@@ -533,7 +529,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			{
 				return new MolgenisRepositoryDecoratorFactory(entityManager(), transactionLogService,
 						entityAttributesValidator, idGenerator, appSettings, dataService(), expressionValidator,
-						repositoryDecoratorRegistry(), userAccountService).createDecoratedRepository(repository);
+						repositoryDecoratorRegistry()).createDecoratedRepository(repository);
 			}
 		};
 	}
