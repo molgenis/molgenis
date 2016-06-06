@@ -1,6 +1,7 @@
 package org.molgenis.data.i18n;
 
 import static org.molgenis.data.i18n.LanguageMetaData.CODE;
+import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.i18n.LanguageMetaData.NAME;
 
 import org.molgenis.data.Entity;
@@ -18,7 +19,7 @@ public class Language extends SystemEntity
 	 */
 	public Language(Entity entity)
 	{
-		super(entity);
+		super(entity, LANGUAGE);
 	}
 
 	/**

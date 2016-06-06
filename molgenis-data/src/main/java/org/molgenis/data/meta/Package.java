@@ -32,7 +32,7 @@ public class Package extends SystemEntity
 	 */
 	public Package(Entity entity)
 	{
-		super(entity);
+		super(entity, PACKAGE);
 	}
 
 	/**

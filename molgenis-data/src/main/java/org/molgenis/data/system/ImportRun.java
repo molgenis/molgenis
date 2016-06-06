@@ -3,6 +3,7 @@ package org.molgenis.data.system;
 import static org.molgenis.data.meta.system.ImportRunMetaData.ENDDATE;
 import static org.molgenis.data.meta.system.ImportRunMetaData.ID;
 import static org.molgenis.data.meta.system.ImportRunMetaData.IMPORTEDENTITIES;
+import static org.molgenis.data.meta.system.ImportRunMetaData.IMPORT_RUN;
 import static org.molgenis.data.meta.system.ImportRunMetaData.MESSAGE;
 import static org.molgenis.data.meta.system.ImportRunMetaData.NOTIFY;
 import static org.molgenis.data.meta.system.ImportRunMetaData.PROGRESS;
@@ -38,7 +39,7 @@ public class ImportRun extends SystemEntity
 
 	public ImportRun(Entity entity)
 	{
-		super(entity);
+		super(entity, IMPORT_RUN);
 	}
 
 	public ImportRun(ImportRunMetaData importRunMetaData)

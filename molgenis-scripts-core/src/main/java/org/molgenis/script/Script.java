@@ -6,6 +6,7 @@ import static org.molgenis.script.ScriptMetaData.GENERATE_TOKEN;
 import static org.molgenis.script.ScriptMetaData.NAME;
 import static org.molgenis.script.ScriptMetaData.PARAMETERS;
 import static org.molgenis.script.ScriptMetaData.RESULT_FILE_EXTENSION;
+import static org.molgenis.script.ScriptMetaData.SCRIPT;
 import static org.molgenis.script.ScriptMetaData.TYPE;
 
 import java.io.File;
@@ -34,7 +35,7 @@ public class Script extends SystemEntity
 {
 	public Script(Entity entity)
 	{
-		super(entity);
+		super(entity, SCRIPT);
 	}
 
 	public Script(ScriptMetaData scriptMetaData)

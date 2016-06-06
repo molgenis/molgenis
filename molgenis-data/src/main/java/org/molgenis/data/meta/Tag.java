@@ -6,6 +6,7 @@ import static org.molgenis.data.meta.TagMetaData.LABEL;
 import static org.molgenis.data.meta.TagMetaData.OBJECT_IRI;
 import static org.molgenis.data.meta.TagMetaData.RELATION_IRI;
 import static org.molgenis.data.meta.TagMetaData.RELATION_LABEL;
+import static org.molgenis.data.meta.TagMetaData.TAG;
 
 import org.molgenis.data.Entity;
 
@@ -15,7 +16,7 @@ public class Tag extends SystemEntity
 {
 	public Tag(Entity entity)
 	{
-		super(entity);
+		super(entity, TAG);
 	}
 
 	public Tag(TagMetaData tagMetaData)

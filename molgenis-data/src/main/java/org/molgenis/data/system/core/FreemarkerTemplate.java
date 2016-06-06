@@ -1,5 +1,6 @@
 package org.molgenis.data.system.core;
 
+import static org.molgenis.data.meta.system.FreemarkerTemplateMetaData.FREEMARKER_TEMPLATE;
 import static org.molgenis.data.meta.system.FreemarkerTemplateMetaData.ID;
 import static org.molgenis.data.meta.system.FreemarkerTemplateMetaData.NAME;
 import static org.molgenis.data.meta.system.FreemarkerTemplateMetaData.VALUE;
@@ -12,7 +13,7 @@ public class FreemarkerTemplate extends SystemEntity
 {
 	public FreemarkerTemplate(Entity entity)
 	{
-		super(entity);
+		super(entity, FREEMARKER_TEMPLATE);
 	}
 
 	public FreemarkerTemplate(FreemarkerTemplateMetaData freemarkerTemplateMetaData)

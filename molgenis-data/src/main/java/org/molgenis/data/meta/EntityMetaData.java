@@ -11,6 +11,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ID_ATTRIBUTE;
@@ -45,7 +46,7 @@ public class EntityMetaData extends SystemEntity
 
 	public EntityMetaData(Entity entity)
 	{
-		super(entity);
+		super(entity, ENTITY_META_DATA);
 	}
 
 	public EntityMetaData(EntityMetaDataMetaData entityMetaDataMetaData)

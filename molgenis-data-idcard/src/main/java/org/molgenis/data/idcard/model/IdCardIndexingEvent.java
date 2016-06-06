@@ -1,6 +1,7 @@
 package org.molgenis.data.idcard.model;
 
 import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.ID;
+import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.ID_CARD_INDEXING_EVENT;
 import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.MESSAGE;
 import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.STATUS;
 
@@ -11,7 +12,7 @@ public class IdCardIndexingEvent extends SystemEntity
 {
 	public IdCardIndexingEvent(Entity entity)
 	{
-		super(entity);
+		super(entity, ID_CARD_INDEXING_EVENT);
 	}
 
 	public IdCardIndexingEvent(IdCardIndexingEventMetaData idCardIndexingEventMetaData)

@@ -2,7 +2,6 @@ package org.molgenis.data.meta;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
-import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.Collections.emptyList;
@@ -57,13 +56,7 @@ public class AttributeMetaData extends SystemEntity
 	 */
 	public AttributeMetaData(Entity entity)
 	{
-		super(entity);
-		if (!entity.getEntityMetaData().getName().equals(ATTRIBUTE_META_DATA))
-		{
-			throw new IllegalArgumentException(
-					format("Entity must be of type [%s] instead of [%s]", ATTRIBUTE_META_DATA,
-							entity.getEntityMetaData().getName()));
-		}
+		super(entity, ATTRIBUTE_META_DATA);
 	}
 
 	/**

@@ -2,6 +2,7 @@ package org.molgenis.auth;
 
 import static org.molgenis.auth.MolgenisGroupMetaData.ACTIVE;
 import static org.molgenis.auth.MolgenisGroupMetaData.ID;
+import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
 import static org.molgenis.auth.MolgenisGroupMetaData.NAME;
 
 import org.molgenis.data.Entity;
@@ -11,7 +12,7 @@ public class MolgenisGroup extends SystemEntity
 {
 	public MolgenisGroup(Entity entity)
 	{
-		super(entity);
+		super(entity, MOLGENIS_GROUP);
 	}
 
 	public MolgenisGroup(MolgenisGroupMetaData molgenisGroupMetaData)

@@ -4,6 +4,7 @@ import static org.molgenis.auth.MolgenisTokenMetaData.CREATIONDATE;
 import static org.molgenis.auth.MolgenisTokenMetaData.DESCRIPTION;
 import static org.molgenis.auth.MolgenisTokenMetaData.EXPIRATIONDATE;
 import static org.molgenis.auth.MolgenisTokenMetaData.ID;
+import static org.molgenis.auth.MolgenisTokenMetaData.MOLGENIS_TOKEN;
 import static org.molgenis.auth.MolgenisTokenMetaData.MOLGENIS_USER;
 import static org.molgenis.auth.MolgenisTokenMetaData.TOKEN;
 
@@ -16,7 +17,7 @@ public class MolgenisToken extends SystemEntity
 {
 	public MolgenisToken(Entity entity)
 	{
-		super(entity);
+		super(entity, MOLGENIS_TOKEN);
 	}
 
 	public MolgenisToken(MolgenisTokenMetaData molgenisTokenMetaData)

@@ -3,6 +3,7 @@ package org.molgenis.data.jobs;
 import static org.molgenis.data.jobs.JobExecutionMetaData.END_DATE;
 import static org.molgenis.data.jobs.JobExecutionMetaData.FAILURE_EMAIL;
 import static org.molgenis.data.jobs.JobExecutionMetaData.IDENTIFIER;
+import static org.molgenis.data.jobs.JobExecutionMetaData.JOB_EXECUTION;
 import static org.molgenis.data.jobs.JobExecutionMetaData.LOG;
 import static org.molgenis.data.jobs.JobExecutionMetaData.PROGRESS_INT;
 import static org.molgenis.data.jobs.JobExecutionMetaData.PROGRESS_MAX;
@@ -30,7 +31,7 @@ public abstract class JobExecution extends SystemEntity
 {
 	public JobExecution(Entity entity)
 	{
-		super(entity);
+		super(entity, JOB_EXECUTION);
 	}
 
 	public JobExecution(EntityMetaData entityMetaData)

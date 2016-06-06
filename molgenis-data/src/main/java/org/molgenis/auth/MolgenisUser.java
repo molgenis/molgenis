@@ -16,6 +16,7 @@ import static org.molgenis.auth.MolgenisUserMetaData.ID;
 import static org.molgenis.auth.MolgenisUserMetaData.LANGUAGECODE;
 import static org.molgenis.auth.MolgenisUserMetaData.LASTNAME;
 import static org.molgenis.auth.MolgenisUserMetaData.MIDDLENAMES;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
 import static org.molgenis.auth.MolgenisUserMetaData.PASSWORD_;
 import static org.molgenis.auth.MolgenisUserMetaData.PHONE;
 import static org.molgenis.auth.MolgenisUserMetaData.ROLE;
@@ -31,7 +32,7 @@ public class MolgenisUser extends SystemEntity
 {
 	public MolgenisUser(Entity entity)
 	{
-		super(entity);
+		super(entity, MOLGENIS_USER);
 	}
 
 	public MolgenisUser(MolgenisUserMetaData molgenisUserMetaData)

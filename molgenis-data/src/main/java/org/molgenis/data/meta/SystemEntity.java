@@ -1,5 +1,6 @@
 package org.molgenis.data.meta;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.Entity;
@@ -19,22 +20,26 @@ public abstract class SystemEntity extends AbstractEntity
 	}
 
 	/**
-	 * Constructs a system entity that wraps an existing {@link Entity}
+	 * Constructs a system entity that wraps an existing {@link Entity}.
 	 *
-	 * @param entity decorated entity
+	 * @param entity     decorated entity
+	 * @param entityName entity name
 	 */
-	protected SystemEntity(Entity entity)
+	protected SystemEntity(Entity entity, String entityName)
 	{
+		validateEntityName(entity.getEntityMetaData().getName(), entityName);
+
 		this.entity = requireNonNull(entity);
 	}
+
 	/**
-	 * Constructs a system entity based on the given {@link EntityMetaData}
+	 * Constructs a system entity based on the given {@link EntityMetaData meta data}.
 	 *
-	 * @param entityMetaData system entity meta data
+	 * @param entityMeta system entity meta data
 	 */
-	protected SystemEntity(EntityMetaData entityMetaData)
+	protected SystemEntity(EntityMetaData entityMeta)
 	{
-		init(entityMetaData);
+		init(entityMeta);
 	}
 
 	protected void init(EntityMetaData entityMetaData)
@@ -88,5 +93,14 @@ public abstract class SystemEntity extends AbstractEntity
 	public String toString()
 	{
 		return entity.toString();
+	}
+
+	private void validateEntityName(String entityName, String expectedEntityName)
+	{
+		if (!expectedEntityName.equals(entityName))
+		{
+			throw new IllegalArgumentException(
+					format("Entity must be of type [%s] instead of [%s]", expectedEntityName, entityName));
+		}
 	}
 }

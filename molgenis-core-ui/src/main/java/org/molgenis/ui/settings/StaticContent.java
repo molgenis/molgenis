@@ -2,6 +2,7 @@ package org.molgenis.ui.settings;
 
 import static org.molgenis.ui.settings.StaticContentMeta.CONTENT;
 import static org.molgenis.ui.settings.StaticContentMeta.KEY;
+import static org.molgenis.ui.settings.StaticContentMeta.STATIC_CONTENT;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.SystemEntity;
@@ -10,7 +11,7 @@ public class StaticContent extends SystemEntity
 {
 	public StaticContent(Entity entity)
 	{
-		super(entity);
+		super(entity, STATIC_CONTENT);
 	}
 
 	public StaticContent(StaticContentMeta staticContentMeta)

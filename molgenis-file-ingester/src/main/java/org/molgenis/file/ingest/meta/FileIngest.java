@@ -5,6 +5,7 @@ import static org.molgenis.file.ingest.meta.FileIngestMetaData.CRONEXPRESSION;
 import static org.molgenis.file.ingest.meta.FileIngestMetaData.DESCRIPTION;
 import static org.molgenis.file.ingest.meta.FileIngestMetaData.ENTITY_META_DATA;
 import static org.molgenis.file.ingest.meta.FileIngestMetaData.FAILURE_EMAIL;
+import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
 import static org.molgenis.file.ingest.meta.FileIngestMetaData.ID;
 import static org.molgenis.file.ingest.meta.FileIngestMetaData.LOADER;
 import static org.molgenis.file.ingest.meta.FileIngestMetaData.NAME;
@@ -20,7 +21,7 @@ public class FileIngest extends SystemEntity
 {
 	public FileIngest(Entity entity)
 	{
-		super(entity);
+		super(entity, FILE_INGEST);
 	}
 
 	public FileIngest(FileIngestMetaData fileIngestMetaData)

@@ -2,6 +2,7 @@ package org.molgenis.file;
 
 import static org.molgenis.file.FileMetaMetaData.CONTENT_TYPE;
 import static org.molgenis.file.FileMetaMetaData.FILENAME;
+import static org.molgenis.file.FileMetaMetaData.FILE_META;
 import static org.molgenis.file.FileMetaMetaData.ID;
 import static org.molgenis.file.FileMetaMetaData.SIZE;
 import static org.molgenis.file.FileMetaMetaData.URL;
@@ -14,7 +15,7 @@ public class FileMeta extends SystemEntity
 {
 	public FileMeta(Entity entity)
 	{
-		super(entity);
+		super(entity, FILE_META);
 	}
 
 	public FileMeta(FileMetaMetaData fileMetaMetaData)

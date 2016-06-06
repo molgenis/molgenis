@@ -1,6 +1,7 @@
 package org.molgenis.script;
 
 import static org.molgenis.script.ScriptTypeMetaData.NAME;
+import static org.molgenis.script.ScriptTypeMetaData.SCRIPT_TYPE;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.SystemEntity;
@@ -17,7 +18,7 @@ public class ScriptType extends SystemEntity
 	 */
 	public ScriptType(Entity entity)
 	{
-		super(entity);
+		super(entity, SCRIPT_TYPE);
 	}
 
 	/**

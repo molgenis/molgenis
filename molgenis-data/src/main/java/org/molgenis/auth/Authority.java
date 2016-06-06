@@ -8,9 +8,9 @@ import org.molgenis.data.meta.SystemEntity;
 
 public abstract class Authority extends SystemEntity
 {
-	public Authority(Entity entity)
+	public Authority(Entity entity, String entityName)
 	{
-		super(entity);
+		super(entity, entityName);
 	}
 
 	public Authority(EntityMetaData entityMetaData)
