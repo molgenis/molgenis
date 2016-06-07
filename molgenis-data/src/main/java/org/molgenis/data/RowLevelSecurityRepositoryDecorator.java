@@ -519,7 +519,8 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		@Override
 		public AttributeMetaData getAttribute(String attributeName)
 		{
-			return filterPermissionAttribute(super.getAttribute(attributeName));
+			AttributeMetaData attr = super.getAttribute(attributeName);
+			return attr == null ? null : filterPermissionAttribute(attr);
 		}
 
 		private List<AttributeMetaData> filterPermissionAttributes(Iterable<AttributeMetaData> attributes)
