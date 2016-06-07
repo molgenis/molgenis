@@ -10,6 +10,7 @@ import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -117,7 +118,7 @@ public class EntitiesHarness
 		entity1.set(ATTR_INT, 18);
 		entity1.set(ATTR_SCRIPT, "/bin/blaat/script.sh");
 		entity1.set(ATTR_XREF, refId);
-		entity1.set(ATTR_MREF, refId);
+		entity1.set(ATTR_MREF, Collections.singletonList(refId));
 		return entity1;
 	}
 }

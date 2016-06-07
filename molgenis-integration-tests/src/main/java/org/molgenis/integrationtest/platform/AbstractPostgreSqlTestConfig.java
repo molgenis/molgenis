@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.data.postgresql;
+package org.molgenis.integrationtest.platform;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -14,7 +14,6 @@ import javax.annotation.PreDestroy;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.ManageableRepositoryCollection;
-import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.PostgreSqlEntityFactory;
 import org.molgenis.data.postgresql.PostgreSqlRepository;
@@ -28,6 +27,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -45,9 +45,6 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 
 	@Autowired
 	PostgreSqlEntityFactory postgreSqlEntityFactory;
-
-	@Autowired
-	EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
 
 	@Autowired
 	JdbcTemplate jdbcTemplate;
@@ -77,6 +74,7 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 		try
 		{
 			Connection conn = getConnection();
+
 			Statement statement = conn.createStatement();
 			statement.executeUpdate("DROP DATABASE IF EXISTS \"" + INTEGRATION_DATABASE + "\"");
 			statement.executeUpdate("CREATE DATABASE \"" + INTEGRATION_DATABASE + "\"");
@@ -85,7 +83,7 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 		}
 		catch (Exception e)
 		{
-			throw new RuntimeException(e);
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -99,8 +97,7 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 		int slashIndex = db_uri.lastIndexOf('/');
 
 		// remove the, not yet created, database from the connection url
-		String adminDbUri = db_uri.substring(0, slashIndex + 1);
-		return DriverManager.getConnection(adminDbUri, properties.getProperty("db_user"),
+		return DriverManager.getConnection(db_uri.substring(0, slashIndex + 1), properties.getProperty("db_user"),
 				properties.getProperty("db_password"));
 	}
 
@@ -112,11 +109,6 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 
 	@PreDestroy
 	public void cleanup()
-	{
-		cleanUpPostgreSQL();
-	}
-
-	private void cleanUpPostgreSQL()
 	{
 		try
 		{
@@ -138,7 +130,8 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 	{
 		PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
 		Resource[] resources = new Resource[]
-		{ new ClassPathResource("/postgresql/molgenis.properties") };
+		{ new FileSystemResource(System.getProperty("molgenis.home") + "/molgenis-server.properties"),
+				new ClassPathResource("/postgresql/molgenis.properties") };
 		pspc.setLocations(resources);
 		pspc.setFileEncoding("UTF-8");
 		pspc.setIgnoreUnresolvablePlaceholders(true);

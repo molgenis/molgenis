@@ -1,58 +1,125 @@
-package org.molgenis.integrationtest.data.abstracts;
+package org.molgenis.integrationtest.platform;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Stream.concat;
-import static java.util.stream.Stream.generate;
-import static java.util.stream.Stream.of;
-import static org.molgenis.integrationtest.data.harness.EntitiesHarness.ATTR_ID;
-import static org.molgenis.integrationtest.data.harness.EntitiesHarness.ATTR_INT;
-import static org.molgenis.integrationtest.data.harness.EntitiesHarness.ATTR_STRING;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import com.google.common.collect.Iterators;
+import com.jayway.awaitility.Awaitility;
+import org.apache.commons.io.FileUtils;
+import org.molgenis.data.*;
+import org.molgenis.data.Package;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
+import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.integrationtest.data.harness.EntitiesHarness;
+import org.molgenis.integrationtest.data.harness.TestEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
-import java.util.Arrays;
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.molgenis.data.EditableEntityMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Package;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.Sort;
-import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.PackageImpl;
-import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.integrationtest.data.harness.EntitiesHarness;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.*;
+import static org.molgenis.data.RepositoryCapability.*;
+import static org.molgenis.integrationtest.data.harness.EntitiesHarness.*;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.testng.Assert.*;
 
-import com.google.common.collect.Iterators;
-
-public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
+@ContextConfiguration(classes = { PlatformITConfig.class })
+public class PlatformIT extends AbstractTestNGSpringContextTests
 {
-	public static final String ENTITY_NAME = "test_TestEntity";
-	public static final String REF_ENTITY_NAME = "test_TestRefEntity";
+	private final Logger LOG = LoggerFactory.getLogger(PlatformIT.class);
+
+	private static final String ENTITY_NAME = "test_TestEntity";
+	private static final String REF_ENTITY_NAME = "test_TestRefEntity";
 	private EntityMetaData entityMetaData;
 	private EntityMetaData refEntityMetaData;
+
+	@Autowired
+	private ReindexService reindexService;
 	@Autowired
 	private EntitiesHarness testHarness;
+	@Autowired
+	private DataService dataService;
+	@Autowired
+	private SearchService searchService;
+	@Autowired
+	private MetaDataServiceImpl metaDataService;
+	@Autowired
+	private ConfigurableApplicationContext applicationContext;
+
+	/**
+	 * Wait till the whole index is stable. Reindex job is done a-synchronized.
+	 *
+	 * @param pollInterval
+	 * @param maxTimeout
+	 */
+	protected void waitForWholeIndexToBeStable(long pollInterval, long maxTimeout)
+	{
+		Awaitility.waitAtMost(maxTimeout, TimeUnit.SECONDS).pollInterval(pollInterval, TimeUnit.SECONDS)
+				.until(reindexService::areAllIndiciesStable);
+		LOG.info("<---- Whole index is stable ---->");
+	}
+
+	/**
+	 * Wait till the index is stable. Reindex job is done a-synchronized.
+	 *
+	 * @param entityName
+	 * @param pollInterval
+	 * @param maxTimeout
+	 */
+	protected void waitForIndexToBeStable(String entityName, long pollInterval, long maxTimeout)
+	{
+		Awaitility.waitAtMost(maxTimeout, TimeUnit.SECONDS).pollInterval(pollInterval, TimeUnit.SECONDS)
+				.until(() -> reindexService.isIndexStableIncludingReferences(entityName));
+		LOG.info("<---- index for entity [{}] incl. references is stable ---->", entityName);
+	}
+
+	@AfterClass
+	public void cleanUp()
+	{
+		try
+		{
+			// Give asyncTransactionLog time to stop gracefully
+			TimeUnit.SECONDS.sleep(1);
+		}
+		catch (InterruptedException e)
+		{
+			LOG.error("InterruptedException sleeping 1 second", e);
+		}
+
+		applicationContext.close();
+		SecurityContextHolder.getContext().setAuthentication(null);
+
+		try
+		{
+			// Delete molgenis home folder
+			FileUtils.deleteDirectory(new File(System.getProperty("molgenis.home")));
+		}
+		catch (IOException e)
+		{
+			LOG.error("Error removing molgenis home directory", e);
+		}
+	}
 
 	@BeforeClass
 	public void setUp()
@@ -64,6 +131,19 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		metaDataService.addEntityMeta(refEntityMetaData);
 		metaDataService.addEntityMeta(entityMetaData);
 		this.waitForWholeIndexToBeStable(1, 10);
+
+		// Permissions ENTITY_NAME
+		String writeTestEntity = "ROLE_ENTITY_WRITE_" + ENTITY_NAME.toUpperCase();
+		String readTestEntity = "ROLE_ENTITY_READ_" + ENTITY_NAME.toUpperCase();
+		String countTestEntity = "ROLE_ENTITY_COUNT_" + ENTITY_NAME.toUpperCase();
+
+		// Permissions REF_ENTITY_NAME
+		String readTestRefEntity = "ROLE_ENTITY_READ_" + REF_ENTITY_NAME.toUpperCase();
+		String countTestRefEntity = "ROLE_ENTITY_COUNT_" + REF_ENTITY_NAME.toUpperCase();
+
+		SecurityContextHolder.getContext().setAuthentication(
+				new TestingAuthenticationToken("user", "user", writeTestEntity, readTestEntity, readTestRefEntity,
+						countTestEntity, countTestRefEntity));
 	}
 
 	@AfterMethod
@@ -73,21 +153,15 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		waitForIndexToBeStable(ENTITY_NAME, 1, 60);
 	}
 
-	public void testAdd()
-	{
-		List<Entity> entities = create(2);
-		assertEquals(searchService.count(entityMetaData), 0);
-		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 2);
-		assertEquals(searchService.count(entityMetaData), 2);
-		assertPresent(entities);
-	}
-
+	@Test
 	public void testEntityListener()
 	{
+		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityMetaData, 6);
 		List<Entity> entities = testHarness.createTestEntities(entityMetaData, 2, 6);
-		dataService.add(ENTITY_NAME, entities.stream());
+		runAsSystem(() -> {
+			dataService.add(REF_ENTITY_NAME, refEntities.stream());
+			dataService.add(ENTITY_NAME, entities.stream());
+		});
 		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
 
 		AtomicInteger updateCalled = new AtomicInteger(0);
@@ -126,6 +200,19 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		}
 	}
 
+	@Test
+	public void testAdd()
+	{
+		List<Entity> entities = create(2);
+		assertEquals(searchService.count(entityMetaData), 0);
+		dataService.add(ENTITY_NAME, entities.stream());
+		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 2);
+		assertEquals(searchService.count(entityMetaData), 2);
+		assertPresent(entities);
+	}
+
+	@Test
 	public void testCount()
 	{
 		List<Entity> entities = create(2);
@@ -136,6 +223,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertPresent(entities);
 	}
 
+	@Test
 	public void testDelete()
 	{
 		Entity entity = create();
@@ -148,6 +236,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertNotPresent(entity);
 	}
 
+	@Test
 	public void testDeleteById()
 	{
 		Entity entity = create();
@@ -160,6 +249,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertNotPresent(entity);
 	}
 
+	@Test
 	public void testDeleteStream()
 	{
 		List<Entity> entities = create(2);
@@ -172,6 +262,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 0);
 	}
 
+	@Test
 	public void testDeleteAll()
 	{
 		List<Entity> entities = create(5);
@@ -184,12 +275,14 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 0);
 	}
 
+	@Test
 	public void testFindAllEmpty()
 	{
 		Stream<Entity> retrieved = dataService.findAll(ENTITY_NAME);
 		assertEquals(retrieved.count(), 0);
 	}
 
+	@Test
 	public void testFindAll()
 	{
 		List<Entity> entities = create(5);
@@ -199,6 +292,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertEquals(retrieved.count(), entities.size());
 	}
 
+	@Test
 	public void testFindAllTyped()
 	{
 		List<Entity> entities = create(1);
@@ -209,6 +303,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertEquals(retrieved.get().iterator().next().getId(), entities.get(0).getIdValue());
 	}
 
+	@Test
 	public void testFindAllByIds()
 	{
 		List<Entity> entities = create(5);
@@ -219,6 +314,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertEquals(retrieved.count(), entities.size());
 	}
 
+	@Test
 	public void testFindAllByIdsTyped()
 	{
 		List<Entity> entities = create(5);
@@ -232,6 +328,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertEquals(retrieved.get().iterator().next().getId(), entities.get(0).getIdValue());
 	}
 
+	@Test
 	public void testFindAllStreamFetch()
 	{
 		List<Entity> entities = create(5);
@@ -242,44 +339,48 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertEquals(retrieved.count(), entities.size());
 	}
 
+	@Test
 	public void testFindQuery()
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
 		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
-		Supplier<Stream<Entity>> found = () -> dataService.findAll(ENTITY_NAME,
-				new QueryImpl<>().eq(ATTR_ID, entities.get(0).getIdValue()));
+		Supplier<Stream<Entity>> found = () -> dataService
+				.findAll(ENTITY_NAME, new QueryImpl<>().eq(ATTR_ID, entities.get(0).getIdValue()));
 		assertEquals(found.get().count(), 1);
 		assertEquals(found.get().findFirst().get().getIdValue(), entities.get(0).getIdValue());
 	}
 
+	@Test
 	public void testFindQueryLimit2_Offset2_sortOnInt()
 	{
 		List<Entity> testRefEntities = testHarness.createTestRefEntities(refEntityMetaData, 6);
-		RunAsSystemProxy.runAsSystem(() -> {
+		runAsSystem(() -> {
 			dataService.add(REF_ENTITY_NAME, testRefEntities.stream());
 			dataService.add(ENTITY_NAME, testHarness.createTestEntities(entityMetaData, 10, 6).stream());
 		});
 		waitForIndexToBeStable(REF_ENTITY_NAME, 1, 10);
 		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
-		Supplier<Stream<Entity>> found = () -> dataService.findAll(ENTITY_NAME,
-				new QueryImpl<>().pageSize(2).offset(2).sort(new Sort(ATTR_INT)));
+		Supplier<Stream<Entity>> found = () -> dataService
+				.findAll(ENTITY_NAME, new QueryImpl<>().pageSize(2).offset(2).sort(new Sort(ATTR_INT)));
 		assertEquals(found.get().count(), 2);
 		assertTrue(found.get().collect(Collectors.toList()).containsAll(testRefEntities.subList(0, 2)));
 	}
 
+	@Test
 	public void testFindQueryTyped()
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
 		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
-		Supplier<Stream<TestEntity>> found = () -> dataService.findAll(ENTITY_NAME,
-				new QueryImpl<TestEntity>().eq(ATTR_ID, entities.get(0).getIdValue()),
-				TestEntity.class);
+		Supplier<Stream<TestEntity>> found = () -> dataService
+				.findAll(ENTITY_NAME, new QueryImpl<TestEntity>().eq(ATTR_ID, entities.get(0).getIdValue()),
+						TestEntity.class);
 		assertEquals(found.get().count(), 1);
 		assertEquals(found.get().findFirst().get().getId(), entities.get(0).getIdValue());
 	}
 
+	@Test
 	public void testFindOne()
 	{
 		List<Entity> entities = create(1);
@@ -288,6 +389,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertNotNull(dataService.findOneById(ENTITY_NAME, entities.get(0).getIdValue()));
 	}
 
+	@Test
 	public void testFindOneTyped()
 	{
 		List<Entity> entities = create(1);
@@ -298,6 +400,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertEquals(testEntity.getId(), entities.get(0).getIdValue());
 	}
 
+	@Test
 	public void testFindOneFetch()
 	{
 		List<Entity> entities = create(1);
@@ -306,17 +409,19 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertNotNull(dataService.findOneById(ENTITY_NAME, entities.get(0).getIdValue(), new Fetch().field(ATTR_ID)));
 	}
 
+	@Test
 	public void testFindOneFetchTyped()
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
 		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
-		TestEntity testEntity = dataService.findOneById(ENTITY_NAME, entities.get(0).getIdValue(),
-				new Fetch().field(ATTR_ID), TestEntity.class);
+		TestEntity testEntity = dataService
+				.findOneById(ENTITY_NAME, entities.get(0).getIdValue(), new Fetch().field(ATTR_ID), TestEntity.class);
 		assertNotNull(testEntity);
 		assertEquals(testEntity.getId(), entities.get(0).getIdValue());
 	}
 
+	@Test
 	public void testFindOneQuery()
 	{
 		List<Entity> entities = create(1);
@@ -326,24 +431,28 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertNotNull(entity);
 	}
 
+	@Test
 	public void testFindOneQueryTyped()
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
 		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
-		TestEntity entity = dataService.findOne(ENTITY_NAME, new QueryImpl<TestEntity>().eq(ATTR_ID, entities.get(0).getIdValue()),
-				TestEntity.class);
+		TestEntity entity = dataService
+				.findOne(ENTITY_NAME, new QueryImpl<TestEntity>().eq(ATTR_ID, entities.get(0).getIdValue()),
+						TestEntity.class);
 		assertNotNull(entity);
 		assertEquals(entity.getId(), entities.get(0).getIdValue());
 	}
 
+	@Test
 	public void testGetCapabilities()
 	{
 		Set<RepositoryCapability> capabilities = dataService.getCapabilities(ENTITY_NAME);
 		assertNotNull(capabilities);
-		assertTrue(capabilities.containsAll(getExpectedCapabilities()));
+		assertTrue(capabilities.containsAll(asList(MANAGABLE, QUERYABLE, WRITABLE)));
 	}
 
+	@Test
 	public void testGetEntityMetaData()
 	{
 		EntityMetaData emd = dataService.getEntityMetaData(ENTITY_NAME);
@@ -351,6 +460,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertEquals(emd, entityMetaData);
 	}
 
+	@Test
 	public void testGetEntityNames()
 	{
 		Stream<String> names = dataService.getEntityNames();
@@ -358,11 +468,13 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertTrue(names.filter(ENTITY_NAME::equals).findFirst().isPresent());
 	}
 
+	@Test
 	public void testGetMeta()
 	{
 		assertNotNull(dataService.getMeta());
 	}
 
+	@Test
 	public void testGetRepository()
 	{
 		Repository<Entity> repo = dataService.getRepository(ENTITY_NAME);
@@ -380,18 +492,21 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		}
 	}
 
+	@Test
 	public void testHasRepository()
 	{
 		assertTrue(dataService.hasRepository(ENTITY_NAME));
 		assertFalse(dataService.hasRepository("bogus"));
 	}
 
+	@Test
 	public void testIterator()
 	{
 		assertNotNull(dataService.iterator());
 		assertTrue(Iterators.contains(dataService.iterator(), dataService.getRepository(ENTITY_NAME)));
 	}
 
+	@Test
 	public void testQuery()
 	{
 		assertNotNull(dataService.query(ENTITY_NAME));
@@ -406,6 +521,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		}
 	}
 
+	@Test
 	public void testUpdate()
 	{
 		Entity entity = create(1).get(0);
@@ -427,6 +543,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertEquals(entity.get(ATTR_STRING), "qwerty");
 	}
 
+	@Test
 	public void testUpdateStream()
 	{
 		Entity entity = create(1).get(0);
@@ -452,7 +569,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 
 	private List<Entity> create(int count)
 	{
-		return generate(() -> create()).limit(count).collect(toList());
+		return generate(this::create).limit(count).collect(toList());
 	}
 
 	private Entity create()
@@ -471,7 +588,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertNotNull(dataService.findOneById(entityMetaData.getName(), entity.getIdValue()));
 
 		// Found in index Elasticsearch
-		Query<Entity> q = new QueryImpl<Entity>();
+		Query<Entity> q = new QueryImpl<>();
 		q.eq(entityMetaData.getIdAttribute().getName(), entity.getIdValue());
 		assertEquals(searchService.count(q, entityMetaData), 1);
 	}
@@ -482,25 +599,8 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		assertNull(dataService.findOneById(entityMetaData.getName(), entity.getIdValue()));
 
 		// Not found in index Elasticsearch
-		Query<Entity> q = new QueryImpl<Entity>();
+		Query<Entity> q = new QueryImpl<>();
 		q.eq(entityMetaData.getIdAttribute().getName(), entity.getIdValue());
 		assertEquals(searchService.count(q, entityMetaData), 0);
-	}
-
-	public abstract List<RepositoryCapability> getExpectedCapabilities();
-
-	public static class TestEntity extends MapEntity
-	{
-		private static final long serialVersionUID = 1L;
-
-		public String getId()
-		{
-			return getString(ATTR_ID);
-		}
-
-		public void setId(String id)
-		{
-			set(ATTR_ID, id);
-		}
 	}
 }
