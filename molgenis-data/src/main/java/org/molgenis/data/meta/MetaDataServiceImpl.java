@@ -100,7 +100,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public Repository getRepository(String entityName)
+	public Repository<Entity> getRepository(String entityName)
 	{
 		EntityMetaData entityMeta = getEntityMetaData(entityName);
 		if (entityMeta == null)
@@ -111,7 +111,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public Repository getRepository(EntityMetaData entityMeta)
+	public Repository<Entity> getRepository(EntityMetaData entityMeta)
 	{
 		String backendName = entityMeta.getBackend();
 		RepositoryCollection backend = getBackend(backendName);

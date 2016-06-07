@@ -129,8 +129,10 @@ public class EntityUtils
 	 * @param entityClass
 	 * @param dataService
 	 * @return
+	 * @deprecated use {@link org.molgenis.data.SystemEntityFactory} instead
 	 */
 	@SuppressWarnings("unchecked")
+	@Deprecated
 	public static <E extends Entity> E convert(Entity entity, Class<E> entityClass, DataService dataService)
 	{
 		if (entityClass.isAssignableFrom(entity.getClass())) return (E) entity;

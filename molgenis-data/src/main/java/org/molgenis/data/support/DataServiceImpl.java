@@ -23,7 +23,6 @@ import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.SystemEntity;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
-import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,6 @@ import org.springframework.transaction.annotation.Transactional;
 /**
  * Implementation of the DataService interface
  */
-
 public class DataServiceImpl implements DataService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(DataServiceImpl.class);
@@ -67,18 +65,6 @@ public class DataServiceImpl implements DataService
 	public synchronized Stream<String> getEntityNames()
 	{
 		return query(ENTITY_META_DATA, EntityMetaData.class).findAll().map(EntityMetaData::getName);
-	}
-
-	// FIXME remove
-	public void addRepository(Repository<Entity> repo)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	// FIXME remove
-	public void removeRepository(String entityName)
-	{
-		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -227,7 +213,7 @@ public class DataServiceImpl implements DataService
 	{
 		Entity entity = getRepository(entityName, clazz).findOne(q);
 		if (entity == null) return null;
-		return EntityUtils.convert(entity, clazz, this);
+		return getSystemEntityFactory(clazz).create(entity);
 	}
 
 	@Override
@@ -265,9 +251,8 @@ public class DataServiceImpl implements DataService
 	public <E extends SystemEntity> Stream<E> stream(String entityName, Fetch fetch, Class<E> clazz)
 	{
 		Stream<Entity> entities = getRepository(entityName).stream(fetch);
-		return entities.map(entity -> {
-			return EntityUtils.convert(entity, clazz, this);
-		});
+		SystemEntityFactory<E, Object> systemEntityFactory = getSystemEntityFactory(clazz);
+		return entities.map(systemEntityFactory::create);
 	}
 
 	@Override
@@ -287,7 +272,7 @@ public class DataServiceImpl implements DataService
 	{
 		Entity entity = getRepository(entityName).findOneById(id, fetch);
 		if (entity == null) return null;
-		return EntityUtils.convert(entity, clazz, this);
+		return getSystemEntityFactory(clazz).create(entity);
 	}
 
 	@Override
@@ -312,9 +297,8 @@ public class DataServiceImpl implements DataService
 	public <E extends SystemEntity> Stream<E> findAll(String entityName, Stream<Object> ids, Class<E> clazz)
 	{
 		Stream<Entity> entities = getRepository(entityName).findAll(ids);
-		return entities.map(entity -> {
-			return EntityUtils.convert(entity, clazz, this);
-		});
+		SystemEntityFactory<E, Object> systemEntityFactory = getSystemEntityFactory(clazz);
+		return entities.map(systemEntityFactory::create);
 	}
 
 	@Override
@@ -328,14 +312,15 @@ public class DataServiceImpl implements DataService
 			Class<E> clazz)
 	{
 		Stream<Entity> entities = getRepository(entityName).findAll(ids, fetch);
-		return entities.map(entity -> EntityUtils.convert(entity, clazz, this));
+		SystemEntityFactory<E, Object> systemEntityFactory = getSystemEntityFactory(clazz);
+		return entities.map(systemEntityFactory::create);
 	}
 
 	@Override
 	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId,
 			String newRepositoryLabel)
 	{
-		return copyRepository(repository, newRepositoryId, newRepositoryLabel, new QueryImpl<Entity>());
+		return copyRepository(repository, newRepositoryId, newRepositoryLabel, new QueryImpl<>());
 	}
 
 	@Override
@@ -362,5 +347,10 @@ public class DataServiceImpl implements DataService
 			}
 			throw e;
 		}
+	}
+
+	private <E extends SystemEntity> SystemEntityFactory<E, Object> getSystemEntityFactory(Class<E> entityClass)
+	{
+		return systemEntityMetaDataRegistry.getSystemEntityFactory(entityClass);
 	}
 }

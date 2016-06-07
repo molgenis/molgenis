@@ -16,21 +16,22 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.SystemEntityFactory;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.util.EntityUtils;
+import org.molgenis.data.meta.SystemEntity;
 
 /**
  * Created by Dennis on 5/25/2016.
  */
-public class UntypedRepositoryDecorator<E extends Entity> implements Repository<Entity>
+public class UntypedRepositoryDecorator<E extends SystemEntity> implements Repository<Entity>
 {
 	private final Repository<E> typedRepo;
-	private final Class<E> entityClass;
+	private final SystemEntityFactory<E, Object> systemEntityFactory;
 
-	public UntypedRepositoryDecorator(Repository<E> typedRepo, Class<E> entityClass)
+	public UntypedRepositoryDecorator(Repository<E> typedRepo, SystemEntityFactory<E, Object> systemEntityFactory)
 	{
 		this.typedRepo = requireNonNull(typedRepo);
-		this.entityClass = requireNonNull(entityClass);
+		this.systemEntityFactory = requireNonNull(systemEntityFactory);
 	}
 
 	@Override
@@ -223,21 +224,7 @@ public class UntypedRepositoryDecorator<E extends Entity> implements Repository<
 	@SuppressWarnings("unchecked")
 	private E asTypedEntity(Entity untypedEntity)
 	{
-		E typedEntity;
-		if (untypedEntity == null)
-		{
-			typedEntity = null;
-		}
-		else if (untypedEntity.getClass().equals(entityClass))
-		{
-			typedEntity = (E) untypedEntity;
-		}
-		else
-		{
-			// FIXME adapt EntityUtils such that it can wrap an untypedEntity in a typed entity
-			typedEntity = EntityUtils.convert(untypedEntity, entityClass, null);
-		}
-		return typedEntity;
+		return systemEntityFactory.create(untypedEntity);
 	}
 
 	private Stream<E> asTypedStream(Stream<Entity> untypedEntities)
@@ -248,7 +235,7 @@ public class UntypedRepositoryDecorator<E extends Entity> implements Repository<
 	@SuppressWarnings("unchecked")
 	private Stream<Entity> asUntypedStream(Stream<E> typedEntities)
 	{
-		return (Stream<Entity>) typedEntities;
+		return (Stream<Entity>) (Stream<? extends Entity>) typedEntities;
 	}
 
 	private Query<E> asTypedQuery(Query<Entity> untypedQuery)
@@ -265,12 +252,12 @@ public class UntypedRepositoryDecorator<E extends Entity> implements Repository<
 	@SuppressWarnings("unchecked")
 	private Query<Entity> asUntypedQuery(Query<E> typedQuery)
 	{
-		return (Query<Entity>) typedQuery;
+		return (Query<Entity>) (Query<? extends Entity>) typedQuery;
 	}
 
 	@SuppressWarnings("unchecked")
 	private Iterator<Entity> asUntypedIterator(Iterator<E> typedEntities)
 	{
-		return (Iterator<Entity>) typedEntities;
+		return (Iterator<Entity>) (Iterator<? extends Entity>) typedEntities;
 	}
 }

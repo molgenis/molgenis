@@ -12,9 +12,9 @@ import com.google.common.collect.ImmutableMap;
 
 public interface MetaDataService extends Iterable<RepositoryCollection>
 {
-	Repository getRepository(String entityName);
+	Repository<Entity> getRepository(String entityName);
 
-	Repository getRepository(EntityMetaData entityMeta);
+	Repository<Entity> getRepository(EntityMetaData entityMeta);
 
 	/**
 	 * Returns whether a {@link Repository} exists for the given entity name. Always returns false for abstract entities.
