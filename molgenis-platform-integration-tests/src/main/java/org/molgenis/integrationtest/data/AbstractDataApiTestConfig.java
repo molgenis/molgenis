@@ -62,7 +62,7 @@ import com.google.common.io.Files;
 		"org.molgenis.data.elasticsearch.index",
 		"org.molgenis.data.jobs",
 		"org.molgenis.data.elasticsearch.reindex",
-		"org.molgenis.auth" })
+		"org.molgenis.auth", "org.molgenis.integrationtest.data.harness" })
 @Import(
 { DatabaseConfig.class, EmbeddedElasticSearchConfig.class,
  GsonConfig.class, ElasticsearchEntityFactory.class,
@@ -196,11 +196,6 @@ public abstract class AbstractDataApiTestConfig
 		return new MolgenisPasswordEncoder(new BCryptPasswordEncoder());
 	}
 
-	@Bean
-	public SecuritySupportService securitySupportService()
-	{
-		return new SecuritySupportService();
-	}
 	@Value("${mail.host:smtp.gmail.com}")
 	private String mailHost;
 	@Value("${mail.port:587}")

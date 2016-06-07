@@ -99,7 +99,8 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 		int slashIndex = db_uri.lastIndexOf('/');
 
 		// remove the, not yet created, database from the connection url
-		return DriverManager.getConnection(db_uri.substring(0, slashIndex + 1), properties.getProperty("db_user"),
+		String adminDbUri = db_uri.substring(0, slashIndex + 1);
+		return DriverManager.getConnection(adminDbUri, properties.getProperty("db_user"),
 				properties.getProperty("db_password"));
 	}
 

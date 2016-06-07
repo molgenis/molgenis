@@ -10,11 +10,11 @@ import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.integrationtest.data.SecuritySupportService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -43,9 +43,6 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 	@Autowired
 	protected ReindexService reindexService;
 
-	@Autowired
-	protected SecuritySupportService securitySupportService;
-	
 	@BeforeClass
 	public void init()
 	{
@@ -65,7 +62,7 @@ public abstract class AbstractDataIntegrationIT extends AbstractTestNGSpringCont
 		}
 
 		applicationContext.close();
-		securitySupportService.logout();
+		SecurityContextHolder.getContext().setAuthentication(null);
 
 		try
 		{
