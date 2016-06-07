@@ -40,7 +40,15 @@
     							<#if feedbackRow.value?is_date_like>
     								<td>${feedbackRow.value?datetime}</td>
     							<#else>
-    								<td>${feedbackRow.value?html}</td>
+									<#if feedbackRow.value?is_sequence>
+										<td>
+											<#list feedbackRow.value as row>
+												${row?html}<#if row?has_next>, </#if>
+											</#list>
+										</td>
+    								<#else>
+										<td>${feedbackRow.value?html}</td>
+									</#if>
     							</#if>
     						<#else>	
     							<td><i>null</i></td>
