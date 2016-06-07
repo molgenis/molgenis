@@ -25,9 +25,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryCollectionRegistry;
+import org.molgenis.data.SystemEntityFactory;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.support.TypedRepositoryDecorator;
 import org.molgenis.fieldtypes.CompoundField;
 import org.molgenis.security.core.Permission;
 import org.molgenis.util.DependencyResolver;
@@ -50,7 +52,6 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	private final DataServiceImpl dataService;
 	private RepositoryCollectionRegistry repositoryCollectionRegistry;
-	private RepositoryCollection defaultBackend;
 	private SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
 	private PackageMetaData packageMetaData;
 	private EntityMetaDataMetaData entityMetaDataMetaData;
@@ -129,13 +130,6 @@ public class MetaDataServiceImpl implements MetaDataService
 		{
 			return getEntityRepository().query().eq(FULL_NAME, entityName).and().eq(ABSTRACT, false).findOne() != null;
 		}
-	}
-
-	@Override
-	public MetaDataService setDefaultBackend(RepositoryCollection backend)
-	{
-		this.defaultBackend = backend;
-		return this;
 	}
 
 	@Override
@@ -396,22 +390,33 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	private Repository<Package> getPackageRepository()
 	{
-		return getDefaultBackend().getRepository(packageMetaData, Package.class);
+		SystemEntityFactory<Package, Object> packageFactory = systemEntityMetaDataRegistry
+				.getSystemEntityFactory(Package.class);
+		Repository<Entity> packageRepo = getDefaultBackend().getRepository(packageMetaData);
+		return new TypedRepositoryDecorator<>(packageRepo, packageFactory);
 	}
 
 	private Repository<EntityMetaData> getEntityRepository()
 	{
-		return getDefaultBackend().getRepository(entityMetaDataMetaData, EntityMetaData.class);
+		SystemEntityFactory<EntityMetaData, Object> entityMetaFactory = systemEntityMetaDataRegistry
+				.getSystemEntityFactory(EntityMetaData.class);
+		Repository<Entity> entityMetaRepo = getDefaultBackend().getRepository(entityMetaDataMetaData);
+		return new TypedRepositoryDecorator<>(entityMetaRepo, entityMetaFactory);
 	}
 
 	private Repository<AttributeMetaData> getAttributeRepository()
 	{
-		return getDefaultBackend().getRepository(attributeMetaDataMetaData, AttributeMetaData.class);
+		SystemEntityFactory<AttributeMetaData, Object> attrFactory = systemEntityMetaDataRegistry
+				.getSystemEntityFactory(AttributeMetaData.class);
+		Repository<Entity> attrRepo = getDefaultBackend().getRepository(attributeMetaDataMetaData);
+		return new TypedRepositoryDecorator<>(attrRepo, attrFactory);
 	}
 
 	private Repository<Tag> getTagRepository()
 	{
-		return getDefaultBackend().getRepository(tagMetaData, Tag.class);
+		SystemEntityFactory<Tag, Object> tagFactory = systemEntityMetaDataRegistry.getSystemEntityFactory(Tag.class);
+		Repository<Entity> tagRepo = getDefaultBackend().getRepository(attributeMetaDataMetaData);
+		return new TypedRepositoryDecorator<>(tagRepo, tagFactory);
 	}
 
 	/**

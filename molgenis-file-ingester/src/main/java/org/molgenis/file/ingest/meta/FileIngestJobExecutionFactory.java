@@ -1,12 +1,12 @@
 package org.molgenis.file.ingest.meta;
 
-import org.molgenis.data.AbstractEntityFactory;
+import org.molgenis.data.AbstractSystemEntityFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class FileIngestJobExecutionFactory
-		extends AbstractEntityFactory<FileIngestJobExecution, FileIngestJobExecutionMetaData, String>
+		extends AbstractSystemEntityFactory<FileIngestJobExecution, FileIngestJobExecutionMetaData, String>
 {
 	@Autowired
 	FileIngestJobExecutionFactory(FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData)

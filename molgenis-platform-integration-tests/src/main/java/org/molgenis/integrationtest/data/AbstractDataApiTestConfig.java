@@ -164,12 +164,6 @@ public abstract class AbstractDataApiTestConfig
 						null, reindexActionRegisterService, searchService)
 						.createDecoratedRepository(repository); // FIXME
 			}
-
-			@Override
-			public <E extends Entity> Repository<E> createDecoratedRepository(Repository<E> repository, Class<E> clazz)
-			{
-				return null; // FIXME
-			}
 		};
 	}
 

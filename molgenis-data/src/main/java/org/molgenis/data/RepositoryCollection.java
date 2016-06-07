@@ -62,16 +62,6 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	Repository<Entity> getRepository(EntityMetaData entityMeta);
 
 	/**
-	 * Get a typed repository for the given entity meta data
-	 *
-	 * @param entityMeta
-	 * @param clazz
-	 * @param <E>
-	 * @return
-	 */
-	<E extends Entity> Repository<E> getRepository(EntityMetaData entityMeta, Class<E> clazz);
-
-	/**
 	 * Check if a repository exists by entity name
 	 */
 	boolean hasRepository(String name);

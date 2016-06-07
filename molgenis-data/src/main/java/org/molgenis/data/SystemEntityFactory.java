@@ -3,13 +3,20 @@ package org.molgenis.data;
 import org.molgenis.data.meta.SystemEntity;
 
 /**
- * Entity factory that creates {@link Entity} instances.
+ * Entity factory that creates {@link SystemEntity} instances.
  *
  * @param <E> entity type
  * @param <P> entity id type
  */
-public interface EntityFactory<E extends SystemEntity, P>
+public interface SystemEntityFactory<E extends SystemEntity, P>
 {
+	/**
+	 * Returns entity class
+	 *
+	 * @return entity class
+	 */
+	Class<E> getEntityClass();
+
 	/**
 	 * Creates an entity.
 	 *

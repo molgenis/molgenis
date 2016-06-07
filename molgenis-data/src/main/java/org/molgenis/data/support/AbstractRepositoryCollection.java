@@ -60,10 +60,4 @@ public abstract class AbstractRepositoryCollection implements RepositoryCollecti
 		return getRepository(entityMetaData.getName());
 	}
 
-	@Override
-	public <E extends Entity> Repository<E> getRepository(EntityMetaData entityMeta, Class<E> clazz)
-	{
-		Repository<Entity> repository = getRepository(entityMeta);
-		return repository != null ? new TypedRepositoryDecorator<>(repository, clazz) : null;
-	}
 }

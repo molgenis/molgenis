@@ -73,13 +73,6 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	}
 
 	@Override
-	public <E extends Entity> Repository<E> getRepository(EntityMetaData entityMeta, Class<E> clazz)
-	{
-		Repository<E> repository = decoratedRepositoryCollection.getRepository(entityMeta, clazz);
-		return repository != null ? repositoryDecoratorFactory.createDecoratedRepository(repository, clazz) : null;
-	}
-
-	@Override
 	public boolean hasRepository(String name)
 	{
 		return decoratedRepositoryCollection.hasRepository(name);

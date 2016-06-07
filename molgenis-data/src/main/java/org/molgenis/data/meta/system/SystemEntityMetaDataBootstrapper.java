@@ -15,17 +15,14 @@ public class SystemEntityMetaDataBootstrapper
 
 	private final SystemEntityMetaDataInitializer systemEntityMetaDataInitializer;
 	private final SystemEntityMetaDataPersister systemEntityMetaDataPersister;
-	private final SystemEntityMetaDataRegistrar systemEntityMetaDataRegistrar;
 
 	@Autowired
 	SystemEntityMetaDataBootstrapper(SystemEntityMetaDataInitializer systemEntityMetaDataInitializer,
-			SystemEntityMetaDataPersister systemEntityMetaDataPersister,
-			SystemEntityMetaDataRegistrar systemEntityMetaDataRegistrar)
+			SystemEntityMetaDataPersister systemEntityMetaDataPersister)
 	{
 
 		this.systemEntityMetaDataInitializer = requireNonNull(systemEntityMetaDataInitializer);
 		this.systemEntityMetaDataPersister = requireNonNull(systemEntityMetaDataPersister);
-		this.systemEntityMetaDataRegistrar = requireNonNull(systemEntityMetaDataRegistrar);
 	}
 
 	public void bootstrap(ContextRefreshedEvent event)
@@ -33,10 +30,6 @@ public class SystemEntityMetaDataBootstrapper
 		LOG.trace("Initializing system entity meta data ...");
 		systemEntityMetaDataInitializer.initialize(event);
 		LOG.trace("Initialized system entity meta data");
-
-		LOG.trace("Registering system entity meta data ...");
-		systemEntityMetaDataRegistrar.register(event);
-		LOG.trace("Registered system entity meta data");
 
 		LOG.trace("Persisting system entity meta data ...");
 		systemEntityMetaDataPersister.persist(event);

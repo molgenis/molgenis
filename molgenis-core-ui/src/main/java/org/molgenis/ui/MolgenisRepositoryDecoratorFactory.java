@@ -1,5 +1,6 @@
 package org.molgenis.ui;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
 import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
@@ -23,6 +24,7 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.RepositorySecurityDecorator;
+import org.molgenis.data.SystemEntityFactory;
 import org.molgenis.data.elasticsearch.IndexedRepositoryDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.i18n.I18nStringDecorator;
@@ -34,6 +36,7 @@ import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataRepositoryDecorator;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.meta.PackageRepositoryDecorator;
+import org.molgenis.data.meta.SystemEntity;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.data.reindex.ReindexActionRepositoryDecorator;
@@ -129,13 +132,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		return decoratedRepository;
 	}
 
-	@Override
-	public <E extends Entity> Repository<E> createDecoratedRepository(Repository<E> repository, Class<E> clazz)
-	{
-		Repository<Entity> decoratedRepository = createDecoratedRepository((Repository<Entity>) repository);
-		return new TypedRepositoryDecorator<>(decoratedRepository, clazz);
-	}
-
 	/**
 	 * Apply custom repository decorators based on entity meta data
 	 *
@@ -147,37 +143,50 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		if (repository.getName().equals(MOLGENIS_USER))
 		{
 			repository = new UntypedRepositoryDecorator<>(
-					new MolgenisUserDecorator(new TypedRepositoryDecorator<>(repository, MolgenisUser.class),
-							molgenisUserFactory, userAuthorityFactory), MolgenisUser.class);
+					new MolgenisUserDecorator(getTypedRepository(repository, MolgenisUser.class), molgenisUserFactory,
+							userAuthorityFactory), MolgenisUser.class);
 		}
 		else if (repository.getName().equals(ATTRIBUTE_META_DATA))
 		{
-			repository = new UntypedRepositoryDecorator<>(new AttributeMetaDataRepositoryDecorator(
-					new TypedRepositoryDecorator<>(repository, AttributeMetaData.class), systemEntityMetaDataRegistry,
-					dataService), AttributeMetaData.class);
+			repository = new UntypedRepositoryDecorator<>(
+					new AttributeMetaDataRepositoryDecorator(getTypedRepository(repository, AttributeMetaData.class),
+							systemEntityMetaDataRegistry, dataService), AttributeMetaData.class);
 		}
 		else if (repository.getName().equals(ENTITY_META_DATA))
 		{
-			repository = new UntypedRepositoryDecorator<>(new EntityMetaDataRepositoryDecorator(
-					new TypedRepositoryDecorator<>(repository, EntityMetaData.class), dataService,
-					systemEntityMetaDataRegistry), EntityMetaData.class);
+			repository = new UntypedRepositoryDecorator<>(
+					new EntityMetaDataRepositoryDecorator(getTypedRepository(repository, EntityMetaData.class),
+							dataService, systemEntityMetaDataRegistry), EntityMetaData.class);
 		}
 		else if (repository.getName().equals(PACKAGE))
 		{
 			repository = new UntypedRepositoryDecorator<>(
-					new PackageRepositoryDecorator(new TypedRepositoryDecorator<>(repository, Package.class),
-							dataService), Package.class);
+					new PackageRepositoryDecorator(getTypedRepository(repository, Package.class), dataService),
+					Package.class);
 		}
 		else if (repository.getName().equals(LANGUAGE))
 		{
 			repository = new UntypedRepositoryDecorator<>(
-					new LanguageRepositoryDecorator(new TypedRepositoryDecorator<>(repository, Language.class),
-							dataService, systemEntityMetaDataRegistry), Language.class);
+					new LanguageRepositoryDecorator(getTypedRepository(repository, Language.class), dataService,
+							systemEntityMetaDataRegistry), Language.class);
 		}
 		else if (repository.getName().equals(I18N_STRING))
 		{
 			repository = new I18nStringDecorator(repository);
 		}
 		return repository;
+	}
+
+	private <E extends SystemEntity> Repository<E> getTypedRepository(Repository<Entity> untypedRepo,
+			Class<E> entityClass)
+	{
+		SystemEntityFactory<E, Object> systemEntityFactory = systemEntityMetaDataRegistry
+				.getSystemEntityFactory(entityClass);
+		if (systemEntityFactory == null)
+		{
+			throw new IllegalArgumentException(
+					format("Unknown entity factory for class [%s]", entityClass.getSimpleName()));
+		}
+		return new TypedRepositoryDecorator<>(untypedRepo, systemEntityFactory);
 	}
 }

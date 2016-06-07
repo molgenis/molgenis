@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import org.molgenis.data.SystemEntityFactory;
 import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.SystemEntity;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,10 +25,12 @@ public class SystemEntityMetaDataRegistry
 	private final Logger LOG = LoggerFactory.getLogger(SystemEntityMetaDataRegistry.class);
 
 	private final Map<String, SystemEntityMetaData> systemEntityMetaDataMap;
+	private final Map<String, SystemEntityFactory> systemEntityFactoryMap;
 
 	public SystemEntityMetaDataRegistry()
 	{
 		systemEntityMetaDataMap = new HashMap<>();
+		systemEntityFactoryMap = new HashMap<>();
 	}
 
 	public SystemEntityMetaData getSystemEntityMetaData(String entityName)
@@ -92,5 +96,22 @@ public class SystemEntityMetaDataRegistry
 			}
 		}
 		return null;
+	}
+
+	public void addSystemEntityFactory(SystemEntityFactory systemEntityFactory)
+	{
+		String entityClassName = systemEntityFactory.getEntityClass().getName();
+		systemEntityFactoryMap.put(entityClassName, systemEntityFactory);
+	}
+
+	public <E extends SystemEntity> SystemEntityFactory<E, Object> getSystemEntityFactory(Class<E> entityClass)
+	{
+		return getSystemEntityFactory(entityClass, Object.class);
+	}
+
+	public <E extends SystemEntity, P> SystemEntityFactory<E, P> getSystemEntityFactory(Class<E> entityClass,
+			Class<P> entityIdClass)
+	{
+		return (SystemEntityFactory<E, P>) systemEntityFactoryMap.get(entityClass.getName());
 	}
 }

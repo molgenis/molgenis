@@ -1,11 +1,11 @@
 package org.molgenis.auth;
 
-import org.molgenis.data.AbstractEntityFactory;
+import org.molgenis.data.AbstractSystemEntityFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MolgenisTokenFactory extends AbstractEntityFactory<MolgenisToken, MolgenisTokenMetaData, String>
+public class MolgenisTokenFactory extends AbstractSystemEntityFactory<MolgenisToken, MolgenisTokenMetaData, String>
 {
 	@Autowired
 	MolgenisTokenFactory(MolgenisTokenMetaData molgenisTokenMetaData)

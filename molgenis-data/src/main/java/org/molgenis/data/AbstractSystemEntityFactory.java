@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import static java.util.Objects.requireNonNull;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
@@ -15,11 +17,12 @@ import org.slf4j.LoggerFactory;
  * @param <M> entity meta data type
  * @param <P> entity id type
  */
-public abstract class AbstractEntityFactory<E extends SystemEntity, M extends SystemEntityMetaData, P>
-		implements EntityFactory<E, P>
+public abstract class AbstractSystemEntityFactory<E extends SystemEntity, M extends SystemEntityMetaData, P>
+		implements SystemEntityFactory<E, P>
 {
-	private static final Logger LOG = LoggerFactory.getLogger(AbstractEntityFactory.class);
+	private static final Logger LOG = LoggerFactory.getLogger(AbstractSystemEntityFactory.class);
 
+	private final Class<E> entityClass;
 	private final Constructor<E> entityConstructorWithEntity;
 	private final Constructor<E> entityConstructorWithEntityMeta;
 	private final Constructor<E> entityConstructorWithIdAndEntityMeta;
@@ -32,14 +35,22 @@ public abstract class AbstractEntityFactory<E extends SystemEntity, M extends Sy
 	 * @param systemEntityMeta entity meta data type
 	 * @param entityIdClass    entity id type
 	 */
-	protected AbstractEntityFactory(Class<E> entityClass, M systemEntityMeta, Class<P> entityIdClass)
+	protected AbstractSystemEntityFactory(Class<E> entityClass, M systemEntityMeta, Class<P> entityIdClass)
 	{
+		this.entityClass = requireNonNull(entityClass);
+
 		// determining constructors at creation time validates that required constructors exist on start-up
 		this.entityConstructorWithEntity = getConstructor(entityClass);
 		this.entityConstructorWithEntityMeta = getConstructor(entityClass, systemEntityMeta.getClass());
 		this.entityConstructorWithIdAndEntityMeta = getConstructor(entityClass, systemEntityMeta.getClass(),
 				entityIdClass);
 		this.systemEntityMetaData = systemEntityMeta;
+	}
+
+	@Override
+	public Class<E> getEntityClass()
+	{
+		return entityClass;
 	}
 
 	@Override
@@ -71,6 +82,15 @@ public abstract class AbstractEntityFactory<E extends SystemEntity, M extends Sy
 	@Override
 	public E create(Entity entity)
 	{
+		if (entity == null)
+		{
+			return null;
+		}
+		if (entity.getClass().equals(entityClass))
+		{
+			return (E) entity;
+		}
+
 		try
 		{
 			return entityConstructorWithEntity.newInstance(entity);

@@ -5,6 +5,7 @@ import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGR
 
 import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.importer.ImportServiceRegistrar;
+import org.molgenis.data.meta.system.SystemEntityMetaDataRegistrar;
 import org.molgenis.script.ScriptRunnerRegistrar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,14 +23,17 @@ public class RegistryBootstrapper
 	private static final Logger LOG = LoggerFactory.getLogger(RegistryBootstrapper.class);
 
 	private final RepositoryCollectionBootstrapper repoCollectionBootstrapper;
+	private final SystemEntityMetaDataRegistrar systemEntityMetaRegistrar;
 	private final ImportServiceRegistrar importServiceRegistrar;
 	private final ScriptRunnerRegistrar scriptRunnerRegistrar;
 
 	@Autowired
 	public RegistryBootstrapper(RepositoryCollectionBootstrapper repoCollectionBootstrapper,
-			ImportServiceRegistrar importServiceRegistrar, ScriptRunnerRegistrar scriptRunnerRegistrar)
+			SystemEntityMetaDataRegistrar systemEntityMetaRegistrar, ImportServiceRegistrar importServiceRegistrar,
+			ScriptRunnerRegistrar scriptRunnerRegistrar)
 	{
 		this.repoCollectionBootstrapper = requireNonNull(repoCollectionBootstrapper);
+		this.systemEntityMetaRegistrar = systemEntityMetaRegistrar;
 		this.importServiceRegistrar = requireNonNull(importServiceRegistrar);
 		this.scriptRunnerRegistrar = requireNonNull(scriptRunnerRegistrar);
 	}
@@ -39,6 +43,10 @@ public class RegistryBootstrapper
 		LOG.trace("Registering repository collections ...");
 		repoCollectionBootstrapper.bootstrap(event, POSTGRESQL);
 		LOG.trace("Registered repository collections");
+
+		LOG.trace("Registering system entity meta data ...");
+		systemEntityMetaRegistrar.register(event);
+		LOG.trace("Registered system entity meta data");
 
 		LOG.trace("Registering importers ...");
 		importServiceRegistrar.register(event);

@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 
+import org.molgenis.data.SystemEntityFactory;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -29,10 +30,18 @@ public class SystemEntityMetaDataRegistrar
 		ApplicationContext ctx = event.getApplicationContext();
 		Map<String, SystemEntityMetaData> systemEntityMetaDataMap = ctx.getBeansOfType(SystemEntityMetaData.class);
 		systemEntityMetaDataMap.values().forEach(this::register);
+
+		Map<String, SystemEntityFactory> entityFactoryMap = ctx.getBeansOfType(SystemEntityFactory.class);
+		entityFactoryMap.values().forEach(this::register);
 	}
 
 	private void register(SystemEntityMetaData systemEntityMetaData)
 	{
 		systemEntityMetaDataRegistry.addSystemEntityMetaData(systemEntityMetaData);
+	}
+
+	private void register(SystemEntityFactory systemEntityFactory)
+	{
+		systemEntityMetaDataRegistry.addSystemEntityFactory(systemEntityFactory);
 	}
 }

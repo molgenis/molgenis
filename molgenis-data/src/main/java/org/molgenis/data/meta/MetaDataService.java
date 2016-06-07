@@ -25,13 +25,6 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	boolean hasRepository(String entityName);
 
 	/**
-	 * Sets the backend, in wich the meta data and the user data is saved
-	 *
-	 * @param backend
-	 */
-	MetaDataService setDefaultBackend(RepositoryCollection backend);
-
-	/**
 	 * Get a backend by name or null if it does not exists
 	 *
 	 * @param name

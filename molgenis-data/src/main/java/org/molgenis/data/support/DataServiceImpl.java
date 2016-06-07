@@ -18,8 +18,10 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.SystemEntityFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.SystemEntity;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
@@ -188,10 +190,12 @@ public class DataServiceImpl implements DataService
 	}
 
 	@SuppressWarnings("unchecked")
-	public <E extends Entity> Repository<E> getRepository(String entityName, Class<E> entityClass)
+	public <E extends SystemEntity> Repository<E> getRepository(String entityName, Class<E> entityClass)
 	{
 		Repository<Entity> untypedRepo = getRepository(entityName);
-		return new TypedRepositoryDecorator<>(untypedRepo, entityClass);
+		SystemEntityFactory<E, Object> systemEntityFactory = systemEntityMetaDataRegistry
+				.getSystemEntityFactory(entityClass);
+		return new TypedRepositoryDecorator<>(untypedRepo, systemEntityFactory);
 	}
 
 	@Override
@@ -201,25 +205,25 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public <E extends Entity> Query<E> query(String entityName, Class<E> entityClass)
+	public <E extends SystemEntity> Query<E> query(String entityName, Class<E> entityClass)
 	{
 		return new QueryImpl<>(getRepository(entityName, entityClass));
 	}
 
 	@Override
-	public <E extends Entity> Stream<E> findAll(String entityName, Query<E> q, Class<E> clazz)
+	public <E extends SystemEntity> Stream<E> findAll(String entityName, Query<E> q, Class<E> clazz)
 	{
 		return getRepository(entityName, clazz).findAll(q);
 	}
 
 	@Override
-	public <E extends Entity> E findOneById(String entityName, Object id, Class<E> clazz)
+	public <E extends SystemEntity> E findOneById(String entityName, Object id, Class<E> clazz)
 	{
 		return getRepository(entityName, clazz).findOneById(id);
 	}
 
 	@Override
-	public <E extends Entity> E findOne(String entityName, Query<E> q, Class<E> clazz)
+	public <E extends SystemEntity> E findOne(String entityName, Query<E> q, Class<E> clazz)
 	{
 		Entity entity = getRepository(entityName, clazz).findOne(q);
 		if (entity == null) return null;
@@ -227,7 +231,7 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public <E extends Entity> Stream<E> findAll(String entityName, Class<E> clazz)
+	public <E extends SystemEntity> Stream<E> findAll(String entityName, Class<E> clazz)
 	{
 		return findAll(entityName, query(entityName, clazz), clazz);
 	}
@@ -258,7 +262,7 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public <E extends Entity> Stream<E> stream(String entityName, Fetch fetch, Class<E> clazz)
+	public <E extends SystemEntity> Stream<E> stream(String entityName, Fetch fetch, Class<E> clazz)
 	{
 		Stream<Entity> entities = getRepository(entityName).stream(fetch);
 		return entities.map(entity -> {
@@ -279,7 +283,7 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public <E extends Entity> E findOneById(String entityName, Object id, Fetch fetch, Class<E> clazz)
+	public <E extends SystemEntity> E findOneById(String entityName, Object id, Fetch fetch, Class<E> clazz)
 	{
 		Entity entity = getRepository(entityName).findOneById(id, fetch);
 		if (entity == null) return null;
@@ -305,7 +309,7 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public <E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Class<E> clazz)
+	public <E extends SystemEntity> Stream<E> findAll(String entityName, Stream<Object> ids, Class<E> clazz)
 	{
 		Stream<Entity> entities = getRepository(entityName).findAll(ids);
 		return entities.map(entity -> {
@@ -320,7 +324,8 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public <E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Fetch fetch, Class<E> clazz)
+	public <E extends SystemEntity> Stream<E> findAll(String entityName, Stream<Object> ids, Fetch fetch,
+			Class<E> clazz)
 	{
 		Stream<Entity> entities = getRepository(entityName).findAll(ids, fetch);
 		return entities.map(entity -> EntityUtils.convert(entity, clazz, this));

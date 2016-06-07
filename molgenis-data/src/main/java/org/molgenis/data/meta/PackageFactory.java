@@ -1,11 +1,11 @@
 package org.molgenis.data.meta;
 
-import org.molgenis.data.AbstractEntityFactory;
+import org.molgenis.data.AbstractSystemEntityFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class PackageFactory extends AbstractEntityFactory<Package, PackageMetaData, String>
+public class PackageFactory extends AbstractSystemEntityFactory<Package, PackageMetaData, String>
 {
 	@Autowired
 	PackageFactory(PackageMetaData packageMetaData)

@@ -1,11 +1,11 @@
 package org.molgenis.script;
 
-import org.molgenis.data.AbstractEntityFactory;
+import org.molgenis.data.AbstractSystemEntityFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ScriptFactory extends AbstractEntityFactory<Script, ScriptMetaData, String>
+public class ScriptFactory extends AbstractSystemEntityFactory<Script, ScriptMetaData, String>
 {
 	@Autowired
 	ScriptFactory(ScriptMetaData scriptMetaData)

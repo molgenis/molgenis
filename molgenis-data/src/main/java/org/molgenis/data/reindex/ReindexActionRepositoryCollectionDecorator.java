@@ -103,12 +103,6 @@ public class ReindexActionRepositoryCollectionDecorator implements RepositoryCol
 	}
 
 	@Override
-	public <E extends Entity> Repository<E> getRepository(EntityMetaData entityMeta, Class<E> clazz)
-	{
-		return decorated.getRepository(entityMeta, clazz);
-	}
-
-	@Override
 	public boolean hasRepository(EntityMetaData entityMeta)
 	{
 		return decorated.hasRepository(entityMeta);
