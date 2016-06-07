@@ -120,14 +120,27 @@ var EntitySelectBox = React.createClass({
 			for(var i = 0; i < attrs.length; ++i) {
 				var operator = 'LIKE';
 				switch(this.state.entity.attributes[attrs[i]].fieldType) {
-					case 'INT':
-					case 'LONG':
+					case 'CATEGORICAL':
+					case 'CATEGORICAL_MREF':
+					case 'MREF':
+					case 'XREF':
+					case 'FILE':
+					case 'SCRIPT': // due to size would result in large amount of ngrams
+					case 'TEXT': // due to size would result in large amount of ngrams
+					case 'HTML': // due to size would result in large amount of ngrams
 					case 'BOOL':
 					case 'DATE':
 					case 'DATE_TIME':
 					case 'DECIMAL':
+					case 'COMPOUND':
+					case 'INT':
+					case 'LONG':
 						operator = 'EQUALS';
 						break;
+					case 'EMAIL':
+					case 'ENUM':
+					case 'HYPERLINK':
+					case 'STRING':
 					case 'COMPOUND':
 						continue;
 				}
