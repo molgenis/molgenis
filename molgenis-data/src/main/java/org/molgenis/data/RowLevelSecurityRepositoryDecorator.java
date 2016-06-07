@@ -1,5 +1,6 @@
 package org.molgenis.data;
 
+import autovalue.shaded.com.google.common.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.support.DefaultEntity;
@@ -211,7 +212,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	@Override
 	public void update(Entity entity)
 	{
-		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
+		if (isRowLevelSecured())
 		{
 			Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
 			Entity completeEntity = getCompleteEntity(entity);
@@ -227,7 +228,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	@Override
 	public void update(Stream<? extends Entity> entities)
 	{
-		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
+		if (isRowLevelSecured())
 		{
 			Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
 			Stream<? extends Entity> completeEntities = entities.map(this::getCompleteEntity)
@@ -440,6 +441,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 
 	private Entity getCompleteEntity(Entity entity)
 	{
+		if (isCurrentUserSuOrSystem() && !isEmpty(entity.getEntities(UPDATE_ATTRIBUTE))) return entity;
 		Entity currentEntity = runAsSystem(() -> decoratedRepository.findOne(entity.getIdValue()));
 		Iterable<Entity> users = runAsSystem(() -> currentEntity.getEntities(UPDATE_ATTRIBUTE));
 		entity.set(UPDATE_ATTRIBUTE, users);
