@@ -1,7 +1,6 @@
 package org.molgenis.integrationtest.platform;
 
 import com.google.common.collect.Iterators;
-import com.jayway.awaitility.Awaitility;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.*;
 import org.molgenis.data.Package;
@@ -70,42 +69,45 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	/**
 	 * Wait till the whole index is stable. Reindex job is done a-synchronized.
 	 *
-	 * @param pollInterval
-	 * @param maxTimeout
 	 */
-	protected void waitForWholeIndexToBeStable(long pollInterval, long maxTimeout)
+	private void waitForWorkToBeFinished()
 	{
-		Awaitility.waitAtMost(maxTimeout, TimeUnit.SECONDS).pollInterval(pollInterval, TimeUnit.SECONDS)
-				.until(reindexService::areAllIndiciesStable);
-		LOG.info("<---- Whole index is stable ---->");
+		try
+		{
+			reindexService.waitForAllIndicesStable();
+			LOG.info("<---- All work finished ---->");
+		}
+		catch (InterruptedException e)
+		{
+			LOG.warn("Interrupted while waiting for index to become stable!", e);
+			fail("Interrupted while waiting for index to become stable!");
+		}
 	}
 
 	/**
 	 * Wait till the index is stable. Reindex job is done a-synchronized.
+	 *  @param entityName
 	 *
-	 * @param entityName
-	 * @param pollInterval
-	 * @param maxTimeout
 	 */
-	protected void waitForIndexToBeStable(String entityName, long pollInterval, long maxTimeout)
-	{
-		Awaitility.waitAtMost(maxTimeout, TimeUnit.SECONDS).pollInterval(pollInterval, TimeUnit.SECONDS)
-				.until(() -> reindexService.isIndexStableIncludingReferences(entityName));
-		LOG.info("<---- index for entity [{}] incl. references is stable ---->", entityName);
-	}
-
-	@AfterClass
-	public void cleanUp()
+	private void waitForIndexToBeStable(String entityName)
 	{
 		try
 		{
-			// Give asyncTransactionLog time to stop gracefully
-			TimeUnit.SECONDS.sleep(1);
+			reindexService.waitForIndexToBeStableIncludingReferences(entityName);
+			LOG.info("<---- index for entity [{}] incl. references is stable ---->", entityName);
 		}
 		catch (InterruptedException e)
 		{
-			LOG.error("InterruptedException sleeping 1 second", e);
+			LOG.info("Interrupted waiting for [{}] incl. references to become stable", entityName, e);
 		}
+
+	}
+
+	@AfterClass
+	public void cleanUp() throws InterruptedException
+	{
+		// Give asyncTransactionLog time to stop gracefully
+		TimeUnit.SECONDS.sleep(1);
 
 		applicationContext.close();
 		SecurityContextHolder.getContext().setAuthentication(null);
@@ -130,8 +132,12 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		metaDataService.addEntityMeta(refEntityMetaData);
 		metaDataService.addEntityMeta(entityMetaData);
-		this.waitForWholeIndexToBeStable(1, 10);
+		this.waitForWorkToBeFinished();
+		setAuthentication();
+	}
 
+	private void setAuthentication()
+	{
 		// Permissions ENTITY_NAME
 		String writeTestEntity = "ROLE_ENTITY_WRITE_" + ENTITY_NAME.toUpperCase();
 		String readTestEntity = "ROLE_ENTITY_READ_" + ENTITY_NAME.toUpperCase();
@@ -149,8 +155,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@AfterMethod
 	public void afterMethod()
 	{
-		dataService.deleteAll(ENTITY_NAME);
-		waitForIndexToBeStable(ENTITY_NAME, 1, 60);
+		runAsSystem(() -> {
+			dataService.deleteAll(ENTITY_NAME);
+			dataService.deleteAll(REF_ENTITY_NAME);
+		});
+		waitForIndexToBeStable(ENTITY_NAME);
 	}
 
 	@Test
@@ -162,7 +171,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			dataService.add(REF_ENTITY_NAME, refEntities.stream());
 			dataService.add(ENTITY_NAME, entities.stream());
 		});
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 
 		AtomicInteger updateCalled = new AtomicInteger(0);
 		EntityListener listener = new EntityListener()
@@ -186,7 +195,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			dataService.addEntityListener(ENTITY_NAME, listener);
 			dataService.update(ENTITY_NAME, entities.stream());
 			assertEquals(updateCalled.get(), 1);
-			waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+			waitForIndexToBeStable(ENTITY_NAME);
 			assertPresent(entities);
 		}
 		finally
@@ -195,7 +204,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			updateCalled.set(0);
 			dataService.update(ENTITY_NAME, entities.stream());
 			assertEquals(updateCalled.get(), 0);
-			waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+			waitForIndexToBeStable(ENTITY_NAME);
 			assertPresent(entities);
 		}
 	}
@@ -206,7 +215,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> entities = create(2);
 		assertEquals(searchService.count(entityMetaData), 0);
 		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 2);
 		assertEquals(searchService.count(entityMetaData), 2);
 		assertPresent(entities);
@@ -217,7 +226,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = create(2);
 		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 2);
 		assertEquals(searchService.count(entityMetaData), 2);
 		assertPresent(entities);
@@ -228,11 +237,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		Entity entity = create();
 		dataService.add(ENTITY_NAME, entity);
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		assertPresent(entity);
 
 		dataService.delete(ENTITY_NAME, entity);
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		assertNotPresent(entity);
 	}
 
@@ -241,11 +250,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		Entity entity = create();
 		dataService.add(ENTITY_NAME, entity);
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		assertPresent(entity);
 
 		dataService.deleteById(ENTITY_NAME, entity.getIdValue());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		assertNotPresent(entity);
 	}
 
@@ -254,11 +263,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = create(2);
 		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), entities.size());
 
 		dataService.delete(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 0);
 	}
 
@@ -267,11 +276,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), entities.size());
 
 		dataService.deleteAll(ENTITY_NAME);
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 0);
 	}
 
@@ -287,7 +296,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		Stream<Entity> retrieved = dataService.findAll(ENTITY_NAME);
 		assertEquals(retrieved.count(), entities.size());
 	}
@@ -297,7 +306,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		Supplier<Stream<TestEntity>> retrieved = () -> dataService.findAll(ENTITY_NAME, TestEntity.class);
 		assertEquals(retrieved.get().count(), 1);
 		assertEquals(retrieved.get().iterator().next().getId(), entities.get(0).getIdValue());
@@ -308,7 +317,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		Stream<Object> ids = Stream.concat(entities.stream().map(Entity::getIdValue), of("bogus"));
 		Stream<Entity> retrieved = dataService.findAll(ENTITY_NAME, ids);
 		assertEquals(retrieved.count(), entities.size());
@@ -319,7 +328,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 
 		Supplier<Stream<TestEntity>> retrieved = () -> dataService
 				.findAll(ENTITY_NAME, Stream.concat(entities.stream().map(Entity::getIdValue), of("bogus")),
@@ -333,7 +342,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		Stream<Object> ids = concat(entities.stream().map(Entity::getIdValue), of("bogus"));
 		Stream<Entity> retrieved = dataService.findAll(ENTITY_NAME, ids, new Fetch().field(ATTR_ID));
 		assertEquals(retrieved.count(), entities.size());
@@ -344,7 +353,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		Supplier<Stream<Entity>> found = () -> dataService
 				.findAll(ENTITY_NAME, new QueryImpl<>().eq(ATTR_ID, entities.get(0).getIdValue()));
 		assertEquals(found.get().count(), 1);
@@ -359,8 +368,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			dataService.add(REF_ENTITY_NAME, testRefEntities.stream());
 			dataService.add(ENTITY_NAME, testHarness.createTestEntities(entityMetaData, 10, 6).stream());
 		});
-		waitForIndexToBeStable(REF_ENTITY_NAME, 1, 10);
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(REF_ENTITY_NAME);
+		waitForIndexToBeStable(ENTITY_NAME);
 		Supplier<Stream<Entity>> found = () -> dataService
 				.findAll(ENTITY_NAME, new QueryImpl<>().pageSize(2).offset(2).sort(new Sort(ATTR_INT)));
 		assertEquals(found.get().count(), 2);
@@ -372,7 +381,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = create(5);
 		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		Supplier<Stream<TestEntity>> found = () -> dataService
 				.findAll(ENTITY_NAME, new QueryImpl<TestEntity>().eq(ATTR_ID, entities.get(0).getIdValue()),
 						TestEntity.class);
@@ -385,7 +394,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		assertNotNull(dataService.findOneById(ENTITY_NAME, entities.get(0).getIdValue()));
 	}
 
@@ -394,7 +403,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		TestEntity testEntity = dataService.findOneById(ENTITY_NAME, entities.get(0).getIdValue(), TestEntity.class);
 		assertNotNull(testEntity);
 		assertEquals(testEntity.getId(), entities.get(0).getIdValue());
@@ -405,7 +414,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		assertNotNull(dataService.findOneById(ENTITY_NAME, entities.get(0).getIdValue(), new Fetch().field(ATTR_ID)));
 	}
 
@@ -414,7 +423,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		TestEntity testEntity = dataService
 				.findOneById(ENTITY_NAME, entities.get(0).getIdValue(), new Fetch().field(ATTR_ID), TestEntity.class);
 		assertNotNull(testEntity);
@@ -426,7 +435,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		Entity entity = dataService.findOne(ENTITY_NAME, new QueryImpl<>().eq(ATTR_ID, entities.get(0).getIdValue()));
 		assertNotNull(entity);
 	}
@@ -436,7 +445,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = create(1);
 		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		TestEntity entity = dataService
 				.findOne(ENTITY_NAME, new QueryImpl<TestEntity>().eq(ATTR_ID, entities.get(0).getIdValue()),
 						TestEntity.class);
@@ -526,7 +535,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		Entity entity = create(1).get(0);
 		dataService.add(ENTITY_NAME, entity);
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 
 		entity = dataService.findOneById(ENTITY_NAME, entity.getIdValue());
 		assertNotNull(entity);
@@ -535,7 +544,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		entity.set(ATTR_STRING, "qwerty");
 
 		dataService.update(ENTITY_NAME, entity);
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		assertPresent(entity);
 
 		entity = dataService.findOneById(ENTITY_NAME, entity.getIdValue());
@@ -549,7 +558,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		Entity entity = create(1).get(0);
 
 		dataService.add(ENTITY_NAME, entity);
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		assertPresent(entity);
 
 		entity = dataService.findOneById(ENTITY_NAME, entity.getIdValue());
@@ -559,7 +568,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		entity.set(ATTR_STRING, "qwerty");
 
 		dataService.update(ENTITY_NAME, of(entity));
-		waitForIndexToBeStable(ENTITY_NAME, 1, 10);
+		waitForIndexToBeStable(ENTITY_NAME);
 		assertPresent(entity);
 
 		entity = dataService.findOneById(ENTITY_NAME, entity.getIdValue());
