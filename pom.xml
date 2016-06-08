@@ -82,6 +82,22 @@
                     <artifactId>maven-war-plugin</artifactId>
                     <version>2.4</version>
                     <configuration>
+                        <!--
+                            Copy the jdas and mydas jars to the molgenis-app WEB-INF/lib folder
+                            So Tomcat can use them.
+
+                            Including them with scope:system and systemPath only works @ compile time, not at runtime
+                          -->
+                        <webResources>
+                            <resource>
+                                <directory>../molgenis-das/src/main/resources</directory>
+                                <includes>
+                                    <include>**/*.jar</include>
+                                </includes>
+                                <targetPath>WEB-INF/lib</targetPath>
+                            </resource>
+                        </webResources>
+
                         <failOnMissingWebXml>false</failOnMissingWebXml>
                         <!--
                             Exclude JCL and LOG4J since all logging should go through SLF4J.
@@ -131,11 +147,11 @@
                                 </resources>
                             </configuration>
                         </execution>                    
-					<!-- 
-						Copying the das server config to the war ROOT
-						the uk.ac.ebi.mydas.controller.MydasServlet cannot find the file if
-						its placed in the normal WEB-INF/classes folder
-					-->
+                        <!--
+                            Copying the das server config to the war ROOT
+                            the uk.ac.ebi.mydas.controller.MydasServlet cannot find the file if
+                            its placed in the normal WEB-INF/classes folder
+                        -->
 						<execution>
 							<id>copy-resources</id>
 							<phase>validate</phase>
