@@ -76,9 +76,6 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(VISIBLE_EXPRESSION).setDataType(SCRIPT).setNillable(true);
 		addAttribute(VALIDATION_EXPRESSION).setDataType(SCRIPT).setNillable(true);
 		addAttribute(DEFAULT_VALUE).setDataType(TEXT).setNillable(true);
-
-		addAttribute(LABEL + '-' + "en").setNillable(true);
-		addAttribute(DESCRIPTION + '-' + "en").setNillable(true);
 	}
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies

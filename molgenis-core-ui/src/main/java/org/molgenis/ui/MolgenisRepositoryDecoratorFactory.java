@@ -31,6 +31,7 @@ import org.molgenis.data.i18n.I18nStringDecorator;
 import org.molgenis.data.i18n.Language;
 import org.molgenis.data.i18n.LanguageRepositoryDecorator;
 import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.AttributeMetaDataRepositoryDecorator;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataRepositoryDecorator;
@@ -66,6 +67,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final UserAuthorityFactory userAuthorityFactory;
 	private final ReindexActionRegisterService reindexActionRegisterService;
 	private final SearchService searchService;
+	private final AttributeMetaDataFactory attrMetaFactory;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -74,7 +76,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			RepositoryDecoratorRegistry repositoryDecoratorRegistry,
 			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, MolgenisUserFactory molgenisUserFactory,
 			UserAuthorityFactory userAuthorityFactory, ReindexActionRegisterService reindexActionRegisterService,
-			SearchService searchService)
+			SearchService searchService, AttributeMetaDataFactory attrMetaFactory)
 	{
 		this.entityManager = requireNonNull(entityManager);
 		this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
@@ -88,6 +90,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
 		this.reindexActionRegisterService = requireNonNull(reindexActionRegisterService);
 		this.searchService = requireNonNull(searchService);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 	}
 
 	@Override
@@ -168,7 +171,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		{
 			repo = getUntypedRepository(
 					new LanguageRepositoryDecorator(getTypedRepository(repo, Language.class), dataService,
-							systemEntityMetaDataRegistry), Language.class);
+							systemEntityMetaDataRegistry, attrMetaFactory), Language.class);
 		}
 		else if (repo.getName().equals(I18N_STRING))
 		{

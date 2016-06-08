@@ -3,8 +3,12 @@ package org.molgenis.data.postgresql;
 import static autovalue.shaded.com.google.common.common.collect.Sets.immutableEnumSet;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.RepositoryCollectionCapability.META_DATA_PERSISTABLE;
 import static org.molgenis.data.RepositoryCollectionCapability.UPDATABLE;
 import static org.molgenis.data.RepositoryCollectionCapability.WRITABLE;
+import static org.molgenis.data.i18n.LanguageMetaData.CODE;
+import static org.molgenis.data.i18n.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
+import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
@@ -33,6 +37,7 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import javax.sql.DataSource;
 
@@ -79,7 +84,32 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 	@Override
 	public Set<RepositoryCollectionCapability> getCapabilities()
 	{
-		return immutableEnumSet(EnumSet.of(WRITABLE, UPDATABLE));
+		return immutableEnumSet(EnumSet.of(WRITABLE, UPDATABLE, META_DATA_PERSISTABLE));
+	}
+
+	@Override
+	public Stream<String> getLanguageCodes()
+	{
+		if (isTableExists(LANGUAGE))
+		{
+			String sql = new StringBuilder("SELECT \"").append(CODE).append("\" FROM \"").append(LANGUAGE).append('"')
+					.toString();
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Fetching [{}] languages");
+				if (LOG.isTraceEnabled())
+				{
+					LOG.trace("SQL: {}", sql);
+				}
+			}
+			return jdbcTemplate.query(sql, (rs, rowNum) -> {
+				return rs.getString(CODE);
+			}).stream();
+		}
+		else
+		{
+			return Stream.of(DEFAULT_LANGUAGE_CODE);
+		}
 	}
 
 	@Override
@@ -111,8 +141,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 	public Repository<Entity> getRepository(String name)
 	{
 		EntityMetaData entityMetaData = dataService.query(ENTITY_META_DATA, EntityMetaData.class)
-				.eq(BACKEND, POSTGRESQL)
-				.and().eq(FULL_NAME, name).and().eq(ABSTRACT, false).findOne();
+				.eq(BACKEND, POSTGRESQL).and().eq(FULL_NAME, name).and().eq(ABSTRACT, false).findOne();
 		return getRepository(entityMetaData);
 	}
 
@@ -128,8 +157,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 	public Iterator<Repository<Entity>> iterator()
 	{
 		return dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(BACKEND, POSTGRESQL).and()
-				.eq(ABSTRACT, false)
-				.findAll().map(this::getRepository).iterator();
+				.eq(ABSTRACT, false).findAll().map(this::getRepository).iterator();
 	}
 
 	@Override
@@ -372,6 +400,11 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 
 	private boolean isTableExists(EntityMetaData entityMeta)
 	{
+		return isTableExists(getTableName(entityMeta, false));
+	}
+
+	private boolean isTableExists(String tableName)
+	{
 		Connection conn = null;
 		try
 		{
@@ -379,7 +412,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 			DatabaseMetaData dbm = conn.getMetaData();
 			// DatabaseMetaData.getTables() requires table name without double quotes, only search TABLE table type to
 			// avoid matches with system tables
-			ResultSet tables = dbm.getTables(null, null, getTableName(entityMeta, false), new String[] { "TABLE" });
+			ResultSet tables = dbm.getTables(null, null, tableName, new String[] { "TABLE" });
 			return tables.next();
 		}
 		catch (Exception e)

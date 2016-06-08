@@ -6,6 +6,7 @@ import static java.util.Spliterators.spliteratorUnknownSize;
 
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.data.meta.AttributeMetaData;
@@ -106,5 +107,11 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	public void deleteAttribute(String entityName, String attributeName)
 	{
 		decoratedRepositoryCollection.deleteAttribute(entityName, attributeName);
+	}
+
+	@Override
+	public Stream<String> getLanguageCodes()
+	{
+		return decoratedRepositoryCollection.getLanguageCodes();
 	}
 }

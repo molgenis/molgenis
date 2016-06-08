@@ -25,6 +25,7 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
@@ -34,13 +35,15 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	private final Repository<Language> decorated;
 	private final DataService dataService;
 	private final SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
+	private final AttributeMetaDataFactory attrMetaFactory;
 
 	public LanguageRepositoryDecorator(Repository<Language> decorated, DataService dataService,
-			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry)
+			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, AttributeMetaDataFactory attrMetaFactory)
 	{
 		this.decorated = requireNonNull(decorated);
 		this.dataService = requireNonNull(dataService);
 		this.systemEntityMetaDataRegistry = requireNonNull(systemEntityMetaDataRegistry);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 	}
 
 	@Override
@@ -243,8 +246,8 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 			String languageCode = language.getCode();
 
 			// Attribute label
-			AttributeMetaData attrLabel = new AttributeMetaData(getAttributeMetaDataMetaData());
-			attrLabel.setName(LABEL + '-' + languageCode).setNillable(true);
+			AttributeMetaData attrLabel = attrMetaFactory.create().setName(LABEL + '-' + languageCode)
+					.setNillable(true);
 
 			// Add the attribute to the attributes table
 			dataService.getMeta().getDefaultBackend().addAttribute(ATTRIBUTE_META_DATA, attrLabel);
@@ -253,22 +256,22 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 			getAttributeMetaDataMetaData().addAttribute(attrLabel);
 
 			// Attribute description
-			AttributeMetaData attrDescription = new AttributeMetaData(getAttributeMetaDataMetaData());
-			attrDescription.setName(DESCRIPTION + '-' + languageCode).setNillable(true);
+			AttributeMetaData attrDescription = attrMetaFactory.create().setName(DESCRIPTION + '-' + languageCode)
+					.setNillable(true);
 
 			dataService.getMeta().getDefaultBackend().addAttribute(ATTRIBUTE_META_DATA, attrDescription);
 			getAttributeMetaDataMetaData().addAttribute(attrDescription);
 
 			// EntityMeta description
-			AttributeMetaData entityDescription = new AttributeMetaData(getAttributeMetaDataMetaData());
-			entityDescription.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true);
+			AttributeMetaData entityDescription = attrMetaFactory.create()
+					.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true);
 
 			dataService.getMeta().getDefaultBackend().addAttribute(ENTITY_META_DATA, entityDescription);
 			getEntityMetaDataMetaData().addAttribute(entityDescription);
 
 			// EntityMeta label
-			AttributeMetaData entityLabel = new AttributeMetaData(getAttributeMetaDataMetaData());
-			entityLabel.setName(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true);
+			AttributeMetaData entityLabel = attrMetaFactory.create()
+					.setName(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true);
 
 			dataService.getMeta().getDefaultBackend().addAttribute(ENTITY_META_DATA, entityLabel);
 			getEntityMetaDataMetaData().addAttribute(entityLabel);

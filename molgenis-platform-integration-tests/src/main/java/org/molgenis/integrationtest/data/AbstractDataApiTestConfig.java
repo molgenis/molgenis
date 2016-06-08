@@ -161,7 +161,7 @@ public abstract class AbstractDataApiTestConfig
 			{
 				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(), idGenerator,
 						appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry(), null, null,
-						null, reindexActionRegisterService, searchService)
+						null, reindexActionRegisterService, searchService, null)
 						.createDecoratedRepository(repository); // FIXME
 			}
 		};

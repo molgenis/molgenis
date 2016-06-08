@@ -17,7 +17,7 @@ public class LanguageMetaData extends SystemEntityMetaData
 	public static final String DEFAULT_LANGUAGE_NAME = "English";
 
 	public static final String CODE = "code";
-	static final String NAME = "name";
+	public static final String NAME = "name";
 
 	LanguageMetaData()
 	{

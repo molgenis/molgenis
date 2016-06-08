@@ -4,7 +4,9 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
+import java.util.stream.Stream;
 
+import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
@@ -47,6 +49,30 @@ public class SystemEntityMetaDataInitializer
 		Map<String, SystemEntityMetaData> systemEntityMetaDataMap = ctx.getBeansOfType(SystemEntityMetaData.class);
 		systemEntityMetaDataMap.values()
 				.forEach(systemEntityMetaData -> initialize(systemEntityMetaData, entityMetaDataMetaData));
+
+		initializeI18N(ctx);
+	}
+
+	/**
+	 * Initialize internationalization attributes
+	 *
+	 * @param ctx application context
+	 */
+	private void initializeI18N(ApplicationContext ctx)
+	{
+		Stream<String> languageCodes = metaDataService.getDefaultBackend().getLanguageCodes();
+
+		EntityMetaDataMetaData entityMetaMeta = ctx.getBean(EntityMetaDataMetaData.class);
+		AttributeMetaDataMetaData attrMetaMeta = ctx.getBean(AttributeMetaDataMetaData.class);
+		I18nStringMetaData i18nStringMeta = ctx.getBean(I18nStringMetaData.class);
+
+		languageCodes.forEach(languageCode -> {
+			entityMetaMeta.addAttribute(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true);
+			entityMetaMeta.addAttribute(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true);
+			attrMetaMeta.addAttribute(AttributeMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true);
+			attrMetaMeta.addAttribute(AttributeMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true);
+			i18nStringMeta.addLanguage(languageCode);
+		});
 	}
 
 	private void initialize(SystemEntityMetaData systemEntityMetaData, EntityMetaDataMetaData entityMetaDataMetaData)

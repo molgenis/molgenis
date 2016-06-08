@@ -8,6 +8,7 @@ import static org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType.META
 
 import java.util.Iterator;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -69,6 +70,12 @@ public class ReindexActionRepositoryCollectionDecorator implements RepositoryCol
 	{
 		this.decorated.deleteAttribute(entityFullName, attributeName);
 		this.reindexActionRegisterService.register(entityFullName, UPDATE, METADATA, null);
+	}
+
+	@Override
+	public Stream<String> getLanguageCodes()
+	{
+		return this.decorated.getLanguageCodes();
 	}
 
 	@Override

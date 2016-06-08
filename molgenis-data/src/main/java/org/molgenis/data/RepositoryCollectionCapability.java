@@ -4,5 +4,7 @@ public enum RepositoryCollectionCapability
 {
 	WRITABLE,
 
-	UPDATABLE
+	UPDATABLE,
+
+	META_DATA_PERSISTABLE
 }

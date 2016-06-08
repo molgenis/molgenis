@@ -4,6 +4,7 @@ import static autovalue.shaded.com.google.common.common.collect.Sets.immutableEn
 
 import java.util.EnumSet;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -60,4 +61,9 @@ public abstract class AbstractRepositoryCollection implements RepositoryCollecti
 		return getRepository(entityMetaData.getName());
 	}
 
+	@Override
+	public Stream<String> getLanguageCodes()
+	{
+		throw new UnsupportedOperationException();
+	}
 }

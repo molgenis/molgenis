@@ -7,13 +7,34 @@ import java.util.stream.Stream;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.UnknownEntityException;
 
 import com.google.common.collect.ImmutableMap;
 
 public interface MetaDataService extends Iterable<RepositoryCollection>
 {
+	/**
+	 * Returns the application language codes
+	 *
+	 * @return the application language codes
+	 */
+	Stream<String> getLanguageCodes();
+
+	/**
+	 * Returns the repository for the given entity name
+	 *
+	 * @param entityName entity name
+	 * @return entity repository or null if no repository exists for the entity (e.g. the entity is abstract)
+	 * @throws UnknownEntityException if no entity with the given name exists
+	 */
 	Repository<Entity> getRepository(String entityName);
 
+	/**
+	 * Returns the repository for the given entity meta data
+	 *
+	 * @param entityMeta entity meta data
+	 * @return entity repository or null if no repository exists for the entity (e.g. the entity is abstract)
+	 */
 	Repository<Entity> getRepository(EntityMetaData entityMeta);
 
 	/**

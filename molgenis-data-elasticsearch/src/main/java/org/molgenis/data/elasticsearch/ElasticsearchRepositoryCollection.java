@@ -104,16 +104,11 @@ public class ElasticsearchRepositoryCollection extends AbstractRepositoryCollect
 	@Override
 	public void addAttribute(String entityName, AttributeMetaData attribute)
 	{
-		EntityMetaData entityMetaData;
-		try
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+		if (entityMetaData == null)
 		{
-			entityMetaData = (EntityMetaData) dataService.getEntityMetaData(entityName);
+			throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
 		}
-		catch (ClassCastException ex)
-		{
-			throw new RuntimeException("Cannot cast EntityMetaData to EntityMetaData " + ex);
-		}
-		if (entityMetaData == null) throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
 
 		entityMetaData.addAttribute(attribute);
 		searchService.createMappings(entityMetaData);
@@ -133,8 +128,8 @@ public class ElasticsearchRepositoryCollection extends AbstractRepositoryCollect
 
 		EntityMetaData EntityMetaData = new EntityMetaData(dataService.getMeta().getEntityMetaData(entityName));
 		AttributeMetaData attr = entityMetaData.getAttribute(attributeName);
-		if (attr == null) throw new UnknownAttributeException(String.format("Unknown attribute '%s' of entity '%s'",
-				attributeName, entityName));
+		if (attr == null) throw new UnknownAttributeException(
+				String.format("Unknown attribute '%s' of entity '%s'", attributeName, entityName));
 
 		EntityMetaData.removeAttribute(attr);
 		searchService.createMappings(entityMetaData);

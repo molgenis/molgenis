@@ -59,9 +59,6 @@ public class EntityMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(DESCRIPTION).setDataType(TEXT);
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData);
 		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(attributeMetaDataMetaData);
-
-		addAttribute(LABEL + '-' + "en").setNillable(true);
-		addAttribute(DESCRIPTION + '-' + "en").setNillable(true);
 	}
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies

@@ -102,4 +102,12 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#UPDATABLE}
 	 */
 	void deleteAttribute(String entityName, String attributeName);
+
+	/**
+	 * Returns the language codes defined in the meta data stored in this repository collection.
+	 *
+	 * @return
+	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#META_DATA_PERSISTABLE}
+	 */
+	Stream<String> getLanguageCodes();
 }
