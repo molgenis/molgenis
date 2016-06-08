@@ -27,6 +27,7 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -39,6 +40,7 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.*;
 import static org.molgenis.data.RepositoryCapability.*;
+import static org.molgenis.data.Sort.Direction.DESC;
 import static org.molgenis.integrationtest.data.harness.EntitiesHarness.*;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.testng.Assert.*;
@@ -364,16 +366,17 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	public void testFindQueryLimit2_Offset2_sortOnInt()
 	{
 		List<Entity> testRefEntities = testHarness.createTestRefEntities(refEntityMetaData, 6);
+		List<Entity> testEntities = testHarness.createTestEntities(entityMetaData, 10, 6);
 		runAsSystem(() -> {
 			dataService.add(REF_ENTITY_NAME, testRefEntities.stream());
-			dataService.add(ENTITY_NAME, testHarness.createTestEntities(entityMetaData, 10, 6).stream());
+			dataService.add(ENTITY_NAME, testEntities.stream());
 		});
 		waitForIndexToBeStable(REF_ENTITY_NAME);
 		waitForIndexToBeStable(ENTITY_NAME);
 		Supplier<Stream<Entity>> found = () -> dataService
-				.findAll(ENTITY_NAME, new QueryImpl<>().pageSize(2).offset(2).sort(new Sort(ATTR_INT)));
+				.findAll(ENTITY_NAME, new QueryImpl<>().pageSize(2).offset(2).sort(new Sort(ATTR_ID, DESC)));
 		assertEquals(found.get().count(), 2);
-		assertTrue(found.get().collect(Collectors.toList()).containsAll(testRefEntities.subList(0, 2)));
+		assertEquals(found.get().collect(toList()), Arrays.asList(testEntities.get(7), testEntities.get(6)));
 	}
 
 	@Test
