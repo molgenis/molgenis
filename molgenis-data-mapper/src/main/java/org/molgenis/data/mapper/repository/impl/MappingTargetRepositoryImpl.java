@@ -15,6 +15,8 @@ import org.molgenis.data.mapper.meta.MappingProjectMetaData;
 import org.molgenis.data.mapper.meta.MappingTargetMetaData;
 import org.molgenis.data.mapper.repository.EntityMappingRepository;
 import org.molgenis.data.mapper.repository.MappingTargetRepository;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -98,6 +100,12 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 
 		EntityMetaData target = dataService.getEntityMetaData(mappingTargetEntity
 				.getString(MappingTargetMetaData.TARGET));
+
+		if (target.isRowLevelSecured()){
+			DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(target);
+			defaultEntityMetaData.removeAttributeMetaData(new DefaultAttributeMetaData("_UPDATE"));
+			target = defaultEntityMetaData;
+		}
 
 		if (mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITYMAPPINGS) != null)
 		{

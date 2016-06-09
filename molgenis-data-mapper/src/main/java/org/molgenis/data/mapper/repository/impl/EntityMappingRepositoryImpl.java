@@ -15,6 +15,8 @@ import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
 import org.molgenis.data.mapper.repository.AttributeMappingRepository;
 import org.molgenis.data.mapper.repository.EntityMappingRepository;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,6 +61,12 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		{
 			targetEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
 					.getString(EntityMappingMetaData.TARGETENTITYMETADATA));
+
+			if (targetEntityMetaData.isRowLevelSecured()){
+				DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(targetEntityMetaData);
+				defaultEntityMetaData.removeAttributeMetaData(new DefaultAttributeMetaData("_UPDATE"));
+				targetEntityMetaData = defaultEntityMetaData;
+			}
 		}
 		catch (UnknownEntityException uee)
 		{
@@ -71,6 +79,12 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		{
 			sourceEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
 					.getString(EntityMappingMetaData.SOURCEENTITYMETADATA));
+
+			if (sourceEntityMetaData.isRowLevelSecured()){
+				DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(sourceEntityMetaData);
+				defaultEntityMetaData.removeAttributeMetaData(new DefaultAttributeMetaData("_UPDATE"));
+				sourceEntityMetaData = defaultEntityMetaData;
+			}
 		}
 		catch (UnknownEntityException uee)
 		{

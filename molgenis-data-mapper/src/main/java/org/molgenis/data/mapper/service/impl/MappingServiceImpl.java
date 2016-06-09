@@ -13,14 +13,8 @@ import java.util.stream.Collectors;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.auth.MolgenisUserMetaData;
+import org.molgenis.data.*;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
@@ -29,6 +23,7 @@ import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -60,9 +55,9 @@ public class MappingServiceImpl implements MappingService
 
 	private final PermissionSystemService permissionSystemService;
 
-	@Autowired
-	public MappingServiceImpl(DataService dataService, AlgorithmService algorithmService, IdGenerator idGenerator,
-			MappingProjectRepository mappingProjectRepository, PermissionSystemService permissionSystemService)
+	@Autowired public MappingServiceImpl(DataService dataService, AlgorithmService algorithmService,
+			IdGenerator idGenerator, MappingProjectRepository mappingProjectRepository,
+			PermissionSystemService permissionSystemService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.algorithmService = requireNonNull(algorithmService);
@@ -71,38 +66,41 @@ public class MappingServiceImpl implements MappingService
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 	}
 
-	@Override
-	@RunAsSystem
-	public MappingProject addMappingProject(String projectName, MolgenisUser owner, String target)
+	@Override @RunAsSystem public MappingProject addMappingProject(String projectName, MolgenisUser owner,
+			String target)
 	{
 		MappingProject mappingProject = new MappingProject(projectName, owner);
-		mappingProject.addTarget(dataService.getEntityMetaData(target));
+
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(target);
+		if (entityMetaData.isRowLevelSecured())
+		{
+			DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(entityMetaData);
+			defaultEntityMetaData.removeAttributeMetaData(new DefaultAttributeMetaData("_UPDATE"));
+			entityMetaData = defaultEntityMetaData;
+		}
+		mappingProject.addTarget(entityMetaData);
 		mappingProjectRepository.add(mappingProject);
 		return mappingProject;
 	}
 
-	@Override
-	@RunAsSystem
-	public void deleteMappingProject(String mappingProjectId)
+	@Override @RunAsSystem public void deleteMappingProject(String mappingProjectId)
 	{
 		mappingProjectRepository.delete(mappingProjectId);
 	}
 
-	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')")
-	@Transactional
-	public MappingProject cloneMappingProject(String mappingProjectId)
+	@Override @PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')") @Transactional public MappingProject cloneMappingProject(
+			String mappingProjectId)
 	{
 		MappingProject mappingProject = mappingProjectRepository.getMappingProject(mappingProjectId);
 		if (mappingProject == null)
 		{
 			throw new UnknownEntityException("Mapping project [" + mappingProjectId + "] does not exist");
 		}
-		String mappingProjectName = mappingProject.getName();
 
+		String mappingProjectName = mappingProject.getName();
 		// determine cloned mapping project name (use Windows 7 naming strategy):
 		String clonedMappingProjectName;
-		for (int i = 1;; ++i)
+		for (int i = 1; ; ++i)
 		{
 			if (i == 1)
 			{
@@ -123,10 +121,8 @@ public class MappingServiceImpl implements MappingService
 		return cloneMappingProject(mappingProject, clonedMappingProjectName);
 	}
 
-	@Override
-	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')")
-	@Transactional
-	public MappingProject cloneMappingProject(String mappingProjectId, String clonedMappingProjectName)
+	@Override @PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')") @Transactional public MappingProject cloneMappingProject(
+			String mappingProjectId, String clonedMappingProjectName)
 	{
 		MappingProject mappingProject = mappingProjectRepository.getMappingProject(mappingProjectId);
 		if (mappingProject == null)
@@ -145,29 +141,22 @@ public class MappingServiceImpl implements MappingService
 		return mappingProject;
 	}
 
-	@Override
-	@RunAsSystem
-	public List<MappingProject> getAllMappingProjects()
+	@Override @RunAsSystem public List<MappingProject> getAllMappingProjects()
 	{
 		return mappingProjectRepository.getAllMappingProjects();
 	}
 
-	@Override
-	@RunAsSystem
-	public void updateMappingProject(MappingProject mappingProject)
+	@Override @RunAsSystem public void updateMappingProject(MappingProject mappingProject)
 	{
 		mappingProjectRepository.update(mappingProject);
 	}
 
-	@Override
-	@RunAsSystem
-	public MappingProject getMappingProject(String identifier)
+	@Override @RunAsSystem public MappingProject getMappingProject(String identifier)
 	{
 		return mappingProjectRepository.getMappingProject(identifier);
 	}
 
-	@Override
-	public String applyMappings(MappingTarget mappingTarget, String entityName)
+	@Override public String applyMappings(MappingTarget mappingTarget, String entityName)
 	{
 		DefaultEntityMetaData targetMetaData = new DefaultEntityMetaData(entityName, mappingTarget.getTarget());
 		targetMetaData.setPackage(PackageImpl.defaultPackage);
@@ -179,6 +168,14 @@ public class MappingServiceImpl implements MappingService
 		Repository targetRepo;
 		if (!dataService.hasRepository(entityName))
 		{
+			if (targetMetaData.isRowLevelSecured())
+			{
+				DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(targetMetaData);
+				defaultEntityMetaData.addAttributeMetaData(
+						new DefaultAttributeMetaData(RowLevelSecurityRepositoryDecorator.UPDATE_ATTRIBUTE)
+								.setDataType(MolgenisFieldTypes.MREF).setRefEntity(new MolgenisUserMetaData()));
+				targetMetaData = defaultEntityMetaData;
+			}
 			targetRepo = dataService.getMeta().addEntityMeta(targetMetaData);
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Collections.singletonList(targetRepo.getName()));
@@ -212,24 +209,30 @@ public class MappingServiceImpl implements MappingService
 	/**
 	 * Compares the attributes of the target repository with the results of the mapping and sees if they're compatible.
 	 * The repository is compatible when all attributes resulting from the mapping can be written to it.
-	 * 
-	 * @param targetRepository
-	 *            the target repository
-	 * @param mappingTargetMetaData
-	 *            the metadata of the mapping result entity
+	 *
+	 * @param targetRepository      the target repository
+	 * @param mappingTargetMetaData the metadata of the mapping result entity
 	 * @return true if the mapping can be written to the target repository
 	 */
 	private boolean isTargetMetaCompatible(Repository targetRepository, EntityMetaData mappingTargetMetaData)
 	{
 		Map<String, AttributeMetaData> targetRepoAttributeMap = Maps.newHashMap();
-		targetRepository.getEntityMetaData().getAtomicAttributes()
-				.forEach(attr -> targetRepoAttributeMap.put(attr.getName(), attr));
+
+		EntityMetaData targetRepoMetaData = targetRepository.getEntityMetaData();
+		if (targetRepoMetaData.isRowLevelSecured())
+		{
+			DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(targetRepoMetaData);
+			defaultEntityMetaData.removeAttributeMetaData(new DefaultAttributeMetaData("_UPDATE"));
+			targetRepoMetaData = defaultEntityMetaData;
+		}
+
+		targetRepoMetaData.getAtomicAttributes().forEach(attr -> targetRepoAttributeMap.put(attr.getName(), attr));
 
 		for (AttributeMetaData mappingTargetAttr : mappingTargetMetaData.getAtomicAttributes())
 		{
 			String mappingTargetAttrName = mappingTargetAttr.getName();
-			if (targetRepoAttributeMap.containsKey(mappingTargetAttrName)
-					&& targetRepoAttributeMap.get(mappingTargetAttrName).isSameAs(mappingTargetAttr))
+			if (targetRepoAttributeMap.containsKey(mappingTargetAttrName) && targetRepoAttributeMap
+					.get(mappingTargetAttrName).isSameAs(mappingTargetAttr))
 			{
 				continue;
 			}
@@ -282,17 +285,17 @@ public class MappingServiceImpl implements MappingService
 		MapEntity target = new MapEntity(targetMetaData);
 		target.set("source", sourceMapping.getName());
 
-		sourceMapping.getAttributeMappings().forEach(attributeMapping -> applyMappingToAttribute(attributeMapping,
-				sourceEntity, target, sourceEntityMetaData));
+		sourceMapping.getAttributeMappings().forEach(
+				attributeMapping -> applyMappingToAttribute(attributeMapping, sourceEntity, target,
+						sourceEntityMetaData));
 		return target;
 	}
 
-	@Override
-	public String generateId(FieldType dataType, Long count)
+	@Override public String generateId(FieldType dataType, Long count)
 	{
 		Object id;
-		if (dataType.equals(MolgenisFieldTypes.INT) || dataType.equals(MolgenisFieldTypes.LONG)
-				|| dataType.equals(MolgenisFieldTypes.DECIMAL))
+		if (dataType.equals(MolgenisFieldTypes.INT) || dataType.equals(MolgenisFieldTypes.LONG) || dataType
+				.equals(MolgenisFieldTypes.DECIMAL))
 		{
 			id = count + 1;
 		}
