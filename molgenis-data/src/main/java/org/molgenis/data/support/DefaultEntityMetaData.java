@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
+import static org.molgenis.data.i18n.LanguageService.FALLBACK_LANGUAGE;
 
 public class DefaultEntityMetaData implements EditableEntityMetaData
 {
@@ -674,7 +675,7 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	{
 		AttributeMetaData labelAttr = getLabelAttribute();
 		String labelAttributeName = labelAttr.getName();
-		if(labelAttributeName.endsWith("-en"))
+		if(labelAttributeName.endsWith(FALLBACK_LANGUAGE))
 		{
 			labelAttributeName = labelAttributeName.substring(0, labelAttributeName.length() - 3);
 		}
