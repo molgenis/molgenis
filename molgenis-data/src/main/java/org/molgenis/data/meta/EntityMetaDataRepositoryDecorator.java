@@ -38,7 +38,6 @@ import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.util.EntityUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Sets;
@@ -326,7 +325,8 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		validatePermission(entityName, Permission.WRITEMETA);
 
 		SystemEntityMetaData systemEntityMeta = systemEntityMetaDataRegistry.getSystemEntityMetaData(entityName);
-		if (systemEntityMeta != null && !EntityUtils.equals(entityMetaData, systemEntityMeta))
+		if (systemEntityMeta != null && !SecurityUtils.getCurrentUsername()
+				.equals("SYSTEM")/*EntityUtils.equals(entityMetaData, systemEntityMeta)*/)
 		{
 			throw new MolgenisDataException(format("Updating system entity meta data [%s] is not allowed", entityName));
 		}
