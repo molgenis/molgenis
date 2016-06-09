@@ -21,7 +21,6 @@ import org.springframework.security.core.Authentication;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -49,7 +48,6 @@ public class ReindexJobTest
 	@Captor
 	private ArgumentCaptor<Stream<Entity>> streamCaptor;
 
-
 	private final String transactionId = "aabbcc";
 
 	@InjectMocks
@@ -63,7 +61,7 @@ public class ReindexJobTest
 	{
 		initMocks(this);
 		reindexJob = new ReindexJob(progress, authentication, transactionId, dataService, searchService);
-		reindexActionJob = reindexActionRegisterService.createReindexActionJob(transactionId);
+		reindexActionJob = reindexActionRegisterService.createReindexActionJob(transactionId, 0);
 		when(dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, transactionId)).thenReturn(reindexActionJob);
 		when(dataService.getMeta()).thenReturn(mds);
 		testEntityMetaData = new DefaultEntityMetaData("test");
@@ -111,9 +109,9 @@ public class ReindexJobTest
 	public void rebuildIndexDeleteSingleEntityTest()
 	{
 		Entity reindexAction = reindexActionRegisterService
-				.createReindexAction(reindexActionJob, "test", CudType.DELETE, DataType.DATA, "entityId",
-						reindexActionRegisterService.increaseCountReindexActionJob(reindexActionJob));
+				.createReindexAction(transactionId, "test", CudType.DELETE, DataType.DATA, "entityId", 0);
 		mockGetAllReindexActions(this.transactionId, Stream.of(reindexAction));
+		reindexActionJob.set(ReindexActionJobMetaData.COUNT, 1);
 
 		Entity toReindexEntity = new DefaultEntity(testEntityMetaData, dataService);
 		when(dataService.findOneById("test", "entityId")).thenReturn(toReindexEntity);
@@ -151,9 +149,9 @@ public class ReindexJobTest
 	private void rebuildIndexSingleEntityTest(CudType cudType, IndexingMode indexingMode)
 	{
 		Entity reindexAction = reindexActionRegisterService
-				.createReindexAction(reindexActionJob, "test", cudType, DataType.DATA, "entityId",
-						reindexActionRegisterService.increaseCountReindexActionJob(reindexActionJob));
+				.createReindexAction(transactionId, "test", cudType, DataType.DATA, "entityId", 0);
 		mockGetAllReindexActions(this.transactionId, Stream.of(reindexAction));
+		reindexActionJob.set(ReindexActionJobMetaData.COUNT, 1);
 
 		MetaDataService mds = mock(MetaDataService.class);
 		when(dataService.getMeta()).thenReturn(mds);
@@ -200,9 +198,9 @@ public class ReindexJobTest
 	private void rebuildIndexBatchEntitiesTest(CudType cudType)
 	{
 		Entity reindexAction = reindexActionRegisterService
-				.createReindexAction(reindexActionJob, "test", cudType, DataType.DATA, null,
-						reindexActionRegisterService.increaseCountReindexActionJob(reindexActionJob));
+				.createReindexAction(transactionId, "test", cudType, DataType.DATA, null, 0);
 		mockGetAllReindexActions(this.transactionId, Stream.of(reindexAction));
+		reindexActionJob.set(ReindexActionJobMetaData.COUNT, 1);
 
 		MetaDataService mds = mock(MetaDataService.class);
 		when(dataService.getMeta()).thenReturn(mds);
@@ -214,7 +212,6 @@ public class ReindexJobTest
 
 		verify(this.searchService)
 				.rebuildIndex(this.dataService.getRepository("any"), new DefaultEntityMetaData("test"));
-
 
 		verify(progress).status("######## START Reindex transaction id: [aabbcc] ########");
 		verify(progress).setProgressMax(1);
@@ -242,10 +239,9 @@ public class ReindexJobTest
 	private void rebuildIndexMetaDataTest(CudType cudType)
 	{
 		Entity reindexAction = reindexActionRegisterService
-				.createReindexAction(reindexActionJob, "test", cudType, DataType.METADATA, null,
-						reindexActionRegisterService.increaseCountReindexActionJob(reindexActionJob));
+				.createReindexAction(transactionId, "test", cudType, DataType.METADATA, null, 0);
 		mockGetAllReindexActions(this.transactionId, Stream.of(reindexAction));
-
+		reindexActionJob.set(ReindexActionJobMetaData.COUNT, 1);
 
 		reindexJob.call(this.progress);
 		assertEquals(reindexAction.get(REINDEX_STATUS), FINISHED.name());
@@ -275,9 +271,9 @@ public class ReindexJobTest
 	public void rebuildIndexDeleteMetaDataEntityTest()
 	{
 		Entity reindexAction = reindexActionRegisterService
-				.createReindexAction(reindexActionJob, "test", CudType.DELETE, DataType.METADATA, null,
-						reindexActionRegisterService.increaseCountReindexActionJob(reindexActionJob));
+				.createReindexAction(transactionId, "test", CudType.DELETE, DataType.METADATA, null, 0);
 		mockGetAllReindexActions(this.transactionId, Stream.of(reindexAction));
+		reindexActionJob.set(ReindexActionJobMetaData.COUNT, 1);
 
 		MetaDataService mds = mock(MetaDataService.class);
 		when(dataService.getMeta()).thenReturn(mds);
@@ -304,18 +300,16 @@ public class ReindexJobTest
 	public void reindexSingleEntitySearchServiceThrowsExceptionOnSecondEntityId()
 	{
 		Entity reindexAction1 = reindexActionRegisterService
-				.createReindexAction(reindexActionJob, "test", CudType.DELETE, DataType.DATA, "entityId1",
-						reindexActionRegisterService.increaseCountReindexActionJob(reindexActionJob));
+				.createReindexAction(transactionId, "test", CudType.DELETE, DataType.DATA, "entityId1", 0);
 
 		Entity reindexAction2 = reindexActionRegisterService
-				.createReindexAction(reindexActionJob, "test", CudType.DELETE, DataType.DATA, "entityId2",
-						reindexActionRegisterService.increaseCountReindexActionJob(reindexActionJob));
+				.createReindexAction(transactionId, "test", CudType.DELETE, DataType.DATA, "entityId2", 1);
 
 		Entity reindexAction3 = reindexActionRegisterService
-				.createReindexAction(reindexActionJob, "test", CudType.DELETE, DataType.DATA, "entityId3",
-						reindexActionRegisterService.increaseCountReindexActionJob(reindexActionJob));
+				.createReindexAction(transactionId, "test", CudType.DELETE, DataType.DATA, "entityId3", 2);
 
 		mockGetAllReindexActions(this.transactionId, Stream.of(reindexAction1, reindexAction2, reindexAction3));
+		reindexActionJob.set(ReindexActionJobMetaData.COUNT, 3);
 
 		//TODO: move to beforeMethod block
 		MetaDataService mds = mock(MetaDataService.class);

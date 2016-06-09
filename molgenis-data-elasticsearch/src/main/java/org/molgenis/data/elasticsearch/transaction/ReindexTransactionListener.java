@@ -11,14 +11,26 @@ public class ReindexTransactionListener extends DefaultMolgenisTransactionListen
 {
 	private ReindexService rebuildIndexService;
 	private ReindexActionRegisterService reindexActionRegisterService;
-
-	private static final Logger LOG = LoggerFactory.getLogger(DefaultMolgenisTransactionListener.class);
+	private static final Logger LOG = LoggerFactory.getLogger(ReindexTransactionListener.class);
 
 	public ReindexTransactionListener(ReindexService rebuildIndexService,
 			ReindexActionRegisterService reindexActionRegisterService)
 	{
 		this.rebuildIndexService = requireNonNull(rebuildIndexService);
 		this.reindexActionRegisterService = requireNonNull(reindexActionRegisterService);
+	}
+
+	@Override
+	public void commitTransaction(String transactionId)
+	{
+		try
+		{
+			reindexActionRegisterService.storeReindexActions(transactionId);
+		}
+		catch (Exception ex)
+		{
+			LOG.error("Error storing reindex actions for transaction id {}", transactionId);
+		}
 	}
 
 	@Override
