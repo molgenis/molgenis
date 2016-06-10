@@ -2,6 +2,7 @@ package org.molgenis.data.mapper.service.impl;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RowLevelSecurityRepositoryDecorator.UPDATE_ATTRIBUTE;
+import static org.molgenis.data.RowLevelSecurityUtils.removeUpdateAttributeIfRowLevelSecured;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 
 import java.util.Collections;
@@ -42,8 +43,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Maps;
 
-import javax.annotation.security.RunAs;
-
 public class MappingServiceImpl implements MappingService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceImpl.class);
@@ -78,12 +77,7 @@ public class MappingServiceImpl implements MappingService
 		MappingProject mappingProject = new MappingProject(projectName, owner);
 
 		EntityMetaData entityMetaData = dataService.getEntityMetaData(target);
-		if (entityMetaData.isRowLevelSecured())
-		{
-			DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(entityMetaData);
-			defaultEntityMetaData.removeAttributeMetaData(new DefaultAttributeMetaData("_UPDATE"));
-			entityMetaData = defaultEntityMetaData;
-		}
+		entityMetaData = removeUpdateAttributeIfRowLevelSecured(entityMetaData);
 		mappingProject.addTarget(entityMetaData);
 		mappingProjectRepository.add(mappingProject);
 		return mappingProject;
@@ -238,12 +232,7 @@ public class MappingServiceImpl implements MappingService
 		Map<String, AttributeMetaData> targetRepoAttributeMap = Maps.newHashMap();
 
 		EntityMetaData targetRepoMetaData = targetRepository.getEntityMetaData();
-		if (targetRepoMetaData.isRowLevelSecured())
-		{
-			DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(targetRepoMetaData);
-			defaultEntityMetaData.removeAttributeMetaData(new DefaultAttributeMetaData("_UPDATE"));
-			targetRepoMetaData = defaultEntityMetaData;
-		}
+		targetRepoMetaData = removeUpdateAttributeIfRowLevelSecured(targetRepoMetaData);
 
 		targetRepoMetaData.getAtomicAttributes().forEach(attr -> targetRepoAttributeMap.put(attr.getName(), attr));
 

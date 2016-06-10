@@ -4,25 +4,21 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.*;
 import org.molgenis.data.mapper.controller.MappingServiceController;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
 import org.molgenis.data.mapper.repository.AttributeMappingRepository;
 import org.molgenis.data.mapper.repository.EntityMappingRepository;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Lists;
+
+import static org.molgenis.data.RowLevelSecurityUtils.removeUpdateAttributeIfRowLevelSecured;
 
 /**
  * O/R mapping between EntityMapping Entity and EntityMapping POJO
@@ -62,12 +58,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 			targetEntityMetaData = dataService
 					.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.TARGETENTITYMETADATA));
 
-			if (targetEntityMetaData.isRowLevelSecured())
-			{
-				DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(targetEntityMetaData);
-				defaultEntityMetaData.removeAttributeMetaData(new DefaultAttributeMetaData("_UPDATE"));
-				targetEntityMetaData = defaultEntityMetaData;
-			}
+			targetEntityMetaData = removeUpdateAttributeIfRowLevelSecured(targetEntityMetaData);
 		}
 		catch (UnknownEntityException uee)
 		{
@@ -81,12 +72,7 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 			sourceEntityMetaData = dataService
 					.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.SOURCEENTITYMETADATA));
 
-			if (sourceEntityMetaData.isRowLevelSecured())
-			{
-				DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(sourceEntityMetaData);
-				defaultEntityMetaData.removeAttributeMetaData(new DefaultAttributeMetaData("_UPDATE"));
-				sourceEntityMetaData = defaultEntityMetaData;
-			}
+			sourceEntityMetaData = removeUpdateAttributeIfRowLevelSecured(sourceEntityMetaData);
 		}
 		catch (UnknownEntityException uee)
 		{
