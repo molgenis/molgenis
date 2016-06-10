@@ -9,15 +9,6 @@
 	<artifactId>molgenis-das</artifactId>
 	<packaging>jar</packaging>
 
-	<repositories>
-        <repository>
-            <id>google-code-mydas</id>
-            <name>google-code-mydas</name>
-            <layout>default</layout>
-            <url>http://mydas.googlecode.com/svn/repository/</url>
-        </repository>
-    </repositories>
-
 	<dependencies>
         <dependency>
         	<groupId>org.molgenis</groupId>
@@ -34,44 +25,58 @@
            	<artifactId>molgenis-data-elasticsearch</artifactId>
             <version>${project.version}</version>
         </dependency>
-		<dependency>
-		    <groupId>uk.ac.ebi.mydas</groupId>
-		    <artifactId>mydas</artifactId>
-		    <version>1.6.7</version>
+        <dependency>
+            <groupId>uk.ac.ebi.das</groupId>
+            <artifactId>jdas</artifactId>
+            <version>1.0.4</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/jdas-1.0.4.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>uk.ac.ebi.mydas</groupId>
+            <artifactId>mydas</artifactId>
+            <version>1.6.7</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/src/main/resources/mydas-1.6.7.jar</systemPath>
 		    <exclusions>
 		        <exclusion>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </exclusion>
-        <exclusion>
-            <groupId>commons-collections</groupId>
-            <artifactId>commons-collections</artifactId>
-        </exclusion>
-        <exclusion>
-            <groupId>javax.servlet</groupId>
-            <artifactId>servlet-api</artifactId>
-        </exclusion>
-        <exclusion>
-            <groupId>xerces</groupId>
-            <artifactId>xercesImpl</artifactId>
-        </exclusion>
-        <exclusion>
-            <groupId>commons-logging</groupId>
-            <artifactId>commons-logging</artifactId>
-        </exclusion>
-		<exclusion>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-		</exclusion>
-        <exclusion>
-          <groupId>org.slf4j</groupId>
-          <artifactId>slf4j-nop</artifactId>
-        </exclusion>
-		<exclusion>
-			<groupId>org.apache.lucene</groupId>
-			<artifactId>lucene-core</artifactId>
-		</exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-collections</groupId>
+                    <artifactId>commons-collections</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>javax.servlet</groupId>
+                    <artifactId>servlet-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>xerces</groupId>
+                    <artifactId>xercesImpl</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                  <groupId>org.slf4j</groupId>
+                  <artifactId>slf4j-nop</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.lucene</groupId>
+                    <artifactId>lucene-core</artifactId>
+                </exclusion>
 	       	</exclusions>
 		</dependency>
+        <dependency>
+            <groupId>xpp3</groupId>
+            <artifactId>xpp3</artifactId>
+            <version>1.1.4c</version>
+        </dependency>
     </dependencies>
 </project>
