@@ -30,7 +30,7 @@ import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 public class RowLevelSecurityRepositoryDecorator implements Repository
 {
 	public static final String UPDATE_ATTRIBUTE = "_" + Permission.UPDATE.toString();
-	private static final List<String> ROW_LEVEL_SECURITY_ATTRIBUTES = Collections.singletonList(UPDATE_ATTRIBUTE);
+	public static final List<String> ROW_LEVEL_SECURITY_ATTRIBUTES = Collections.singletonList(UPDATE_ATTRIBUTE);
 	public static final String PERMISSIONS_ATTRIBUTE = "_PERMISSIONS";
 
 	private final Repository decoratedRepository;
@@ -423,12 +423,12 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		return decoratedRepository.getEntityMetaData().isRowLevelSecured();
 	}
 
-	private boolean isCurrentUserSuOrSystem()
+	public static boolean isCurrentUserSuOrSystem()
 	{
 		return isSuOrSystem(SecurityContextHolder.getContext().getAuthentication());
 	}
 
-	private boolean isSuOrSystem(Authentication authentication)
+	private static boolean isSuOrSystem(Authentication authentication)
 	{
 		return SecurityUtils.userIsSu(authentication) || SecurityUtils.userHasRole(authentication, SystemSecurityToken.ROLE_SYSTEM);
 	}
@@ -489,59 +489,5 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 			}
 			return false;
 		});
-	}
-
-	private class RowLevelSecurityEntityMetaData extends DefaultEntityMetaData implements EntityMetaData
-	{
-		RowLevelSecurityEntityMetaData(EntityMetaData entityMetaData)
-		{
-			super(entityMetaData);
-		}
-
-		@Override
-		public Iterable<AttributeMetaData> getAttributes()
-		{
-			return filterPermissionAttributes(super.getAttributes());
-		}
-
-		@Override
-		public Iterable<AttributeMetaData> getOwnAttributes()
-		{
-			return filterPermissionAttributes(super.getOwnAttributes());
-		}
-
-		@Override
-		public Iterable<AttributeMetaData> getAtomicAttributes()
-		{
-			return filterPermissionAttributes(super.getAtomicAttributes());
-		}
-
-		@Override
-		public Iterable<AttributeMetaData> getOwnAtomicAttributes()
-		{
-			return filterPermissionAttributes(super.getOwnAtomicAttributes());
-		}
-
-		@Override
-		public AttributeMetaData getAttribute(String attributeName)
-		{
-			AttributeMetaData attr = super.getAttribute(attributeName);
-			return attr == null ? null : filterPermissionAttribute(attr);
-		}
-
-		private List<AttributeMetaData> filterPermissionAttributes(Iterable<AttributeMetaData> attributes)
-		{
-			return StreamSupport.stream(attributes.spliterator(), false)
-					.filter(attr -> !ROW_LEVEL_SECURITY_ATTRIBUTES.contains(attr.getName())
-							|| SecurityUtils.currentUserIsSu()
-							|| SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
-					.collect(Collectors.toList());
-		}
-
-		private AttributeMetaData filterPermissionAttribute(AttributeMetaData amd)
-		{
-			if (!ROW_LEVEL_SECURITY_ATTRIBUTES.contains(amd.getName()) || isCurrentUserSuOrSystem()) return amd;
-			return null;
-		}
 	}
 }

@@ -17,16 +17,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.ManageableRepositoryCollection;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.*;
 import org.molgenis.data.Package;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.i18n.I18nStringDecorator;
 import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.LanguageMetaData;
@@ -308,7 +300,12 @@ public class MetaDataServiceImpl implements MetaDataService
 		addToEntityMetaDataRepository(emd);
 		if (emd.isAbstract()) return null;
 
-		Repository repo = backend.addEntityMeta(getEntityMetaData(emd.getName()));
+		DefaultEntityMetaData entityMetaData = getEntityMetaData(emd.getName());
+		if (entityMetaData.isRowLevelSecured()){
+			entityMetaData = new RowLevelSecurityEntityMetaData(entityMetaData);
+		}
+
+		Repository repo = backend.addEntityMeta(entityMetaData);
 		Repository decoratedRepo = decoratorFactory.createDecoratedRepository(repo);
 
 		dataService.addRepository(decoratedRepo);
@@ -459,6 +456,9 @@ public class MetaDataServiceImpl implements MetaDataService
 			{
 				RepositoryCollection col = backends.get(emd.getBackend());
 				if (col == null) throw new MolgenisDataException("Unknown backend [" + emd.getBackend() + "]");
+				if (emd.isRowLevelSecured()){
+					emd = new RowLevelSecurityEntityMetaData(emd);
+				}
 				Repository repo = col.addEntityMeta(emd);
 				dataService.addRepository(repo);
 			}
