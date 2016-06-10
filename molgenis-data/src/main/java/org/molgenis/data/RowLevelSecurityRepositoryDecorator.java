@@ -447,7 +447,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 
 	private Entity getCompleteEntity(Entity entity, Authentication authentication)
 	{
-		if (isSuOrSystem(authentication) && !isEmpty(entity.getEntities(UPDATE_ATTRIBUTE))) return entity;
+		if (isSuOrSystem(authentication) && entity.getString(UPDATE_ATTRIBUTE) != null) return entity;
 		Entity currentEntity = runAsSystem(() -> decoratedRepository.findOne(entity.getIdValue()));
 		Iterable<Entity> users = runAsSystem(() -> currentEntity.getEntities(UPDATE_ATTRIBUTE));
 		entity.set(UPDATE_ATTRIBUTE, users);
