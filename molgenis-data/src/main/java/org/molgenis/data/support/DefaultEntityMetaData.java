@@ -19,6 +19,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
+import static org.molgenis.data.i18n.LanguageService.FALLBACK_LANGUAGE;
 
 public class DefaultEntityMetaData implements EditableEntityMetaData
 {
@@ -672,9 +673,14 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	@Override
 	public AttributeMetaData getLabelAttribute(String languageCode)
 	{
-		String i18nLabelAttrName = getCachedAllAttrs().keySet().stream().filter(
-				attributeName -> attributeName.endsWith('-' + languageCode)).findFirst().orElse(null);
-		return i18nLabelAttrName != null ? getCachedAllAttrs().get(i18nLabelAttrName) : getLabelAttribute();
+		AttributeMetaData labelAttr = getLabelAttribute();
+		String labelAttributeName = labelAttr.getName();
+		if(labelAttributeName.endsWith("-" + FALLBACK_LANGUAGE))
+		{
+			labelAttributeName = labelAttributeName.substring(0, labelAttributeName.length() - 3);
+		}
+		AttributeMetaData i18nLabelAttr = getCachedAllAttrs().get(labelAttributeName + '-' + languageCode);
+		return i18nLabelAttr != null ? i18nLabelAttr : labelAttr;
 	}
 
 	@Override
