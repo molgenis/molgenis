@@ -60,9 +60,9 @@ public class MappingServiceImpl implements MappingService
 
 	private final PermissionSystemService permissionSystemService;
 
-	@Autowired public MappingServiceImpl(DataService dataService, AlgorithmService algorithmService,
-			IdGenerator idGenerator, MappingProjectRepository mappingProjectRepository,
-			PermissionSystemService permissionSystemService)
+	@Autowired
+	public MappingServiceImpl(DataService dataService, AlgorithmService algorithmService, IdGenerator idGenerator,
+			MappingProjectRepository mappingProjectRepository, PermissionSystemService permissionSystemService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.algorithmService = requireNonNull(algorithmService);
@@ -71,8 +71,9 @@ public class MappingServiceImpl implements MappingService
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 	}
 
-	@Override @RunAsSystem public MappingProject addMappingProject(String projectName, MolgenisUser owner,
-			String target)
+	@Override
+	@RunAsSystem
+	public MappingProject addMappingProject(String projectName, MolgenisUser owner, String target)
 	{
 		MappingProject mappingProject = new MappingProject(projectName, owner);
 
@@ -88,13 +89,17 @@ public class MappingServiceImpl implements MappingService
 		return mappingProject;
 	}
 
-	@Override @RunAsSystem public void deleteMappingProject(String mappingProjectId)
+	@Override
+	@RunAsSystem
+	public void deleteMappingProject(String mappingProjectId)
 	{
 		mappingProjectRepository.delete(mappingProjectId);
 	}
 
-	@Override @PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')") @Transactional public MappingProject cloneMappingProject(
-			String mappingProjectId)
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')")
+	@Transactional
+	public MappingProject cloneMappingProject(String mappingProjectId)
 	{
 		MappingProject mappingProject = mappingProjectRepository.getMappingProject(mappingProjectId);
 		if (mappingProject == null)
@@ -126,8 +131,10 @@ public class MappingServiceImpl implements MappingService
 		return cloneMappingProject(mappingProject, clonedMappingProjectName);
 	}
 
-	@Override @PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')") @Transactional public MappingProject cloneMappingProject(
-			String mappingProjectId, String clonedMappingProjectName)
+	@Override
+	@PreAuthorize("hasAnyRole('ROLE_SYSTEM, ROLE_SU, ROLE_PLUGIN_WRITE_MENUMANAGER')")
+	@Transactional
+	public MappingProject cloneMappingProject(String mappingProjectId, String clonedMappingProjectName)
 	{
 		MappingProject mappingProject = mappingProjectRepository.getMappingProject(mappingProjectId);
 		if (mappingProject == null)
@@ -146,22 +153,29 @@ public class MappingServiceImpl implements MappingService
 		return mappingProject;
 	}
 
-	@Override @RunAsSystem public List<MappingProject> getAllMappingProjects()
+	@Override
+	@RunAsSystem
+	public List<MappingProject> getAllMappingProjects()
 	{
 		return mappingProjectRepository.getAllMappingProjects();
 	}
 
-	@Override @RunAsSystem public void updateMappingProject(MappingProject mappingProject)
+	@Override
+	@RunAsSystem
+	public void updateMappingProject(MappingProject mappingProject)
 	{
 		mappingProjectRepository.update(mappingProject);
 	}
 
-	@Override @RunAsSystem public MappingProject getMappingProject(String identifier)
+	@Override
+	@RunAsSystem
+	public MappingProject getMappingProject(String identifier)
 	{
 		return mappingProjectRepository.getMappingProject(identifier);
 	}
 
-	@Override public String applyMappings(MappingTarget mappingTarget, String entityName)
+	@Override
+	public String applyMappings(MappingTarget mappingTarget, String entityName)
 	{
 		DefaultEntityMetaData targetMetaData = new DefaultEntityMetaData(entityName, mappingTarget.getTarget());
 		targetMetaData.setPackage(PackageImpl.defaultPackage);
@@ -313,7 +327,8 @@ public class MappingServiceImpl implements MappingService
 		return target;
 	}
 
-	@Override public String generateId(FieldType dataType, Long count)
+	@Override
+	public String generateId(FieldType dataType, Long count)
 	{
 		Object id;
 		if (dataType.equals(MolgenisFieldTypes.INT) || dataType.equals(MolgenisFieldTypes.LONG) || dataType

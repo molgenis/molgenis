@@ -59,10 +59,11 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		EntityMetaData targetEntityMetaData;
 		try
 		{
-			targetEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
-					.getString(EntityMappingMetaData.TARGETENTITYMETADATA));
+			targetEntityMetaData = dataService
+					.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.TARGETENTITYMETADATA));
 
-			if (targetEntityMetaData.isRowLevelSecured()){
+			if (targetEntityMetaData.isRowLevelSecured())
+			{
 				DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(targetEntityMetaData);
 				defaultEntityMetaData.removeAttributeMetaData(new DefaultAttributeMetaData("_UPDATE"));
 				targetEntityMetaData = defaultEntityMetaData;
@@ -77,10 +78,11 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		EntityMetaData sourceEntityMetaData;
 		try
 		{
-			sourceEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
-					.getString(EntityMappingMetaData.SOURCEENTITYMETADATA));
+			sourceEntityMetaData = dataService
+					.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.SOURCEENTITYMETADATA));
 
-			if (sourceEntityMetaData.isRowLevelSecured()){
+			if (sourceEntityMetaData.isRowLevelSecured())
+			{
 				DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(sourceEntityMetaData);
 				defaultEntityMetaData.removeAttributeMetaData(new DefaultAttributeMetaData("_UPDATE"));
 				sourceEntityMetaData = defaultEntityMetaData;
@@ -92,10 +94,10 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 			sourceEntityMetaData = null;
 		}
 
-		List<Entity> attributeMappingEntities = Lists.<Entity> newArrayList(entityMappingEntity
-				.getEntities(EntityMappingMetaData.ATTRIBUTEMAPPINGS));
-		List<AttributeMapping> attributeMappings = attributeMappingRepository.getAttributeMappings(
-				attributeMappingEntities, sourceEntityMetaData, targetEntityMetaData);
+		List<Entity> attributeMappingEntities = Lists.<Entity>newArrayList(
+				entityMappingEntity.getEntities(EntityMappingMetaData.ATTRIBUTEMAPPINGS));
+		List<AttributeMapping> attributeMappings = attributeMappingRepository
+				.getAttributeMappings(attributeMappingEntities, sourceEntityMetaData, targetEntityMetaData);
 
 		return new EntityMapping(identifier, sourceEntityMetaData, targetEntityMetaData, attributeMappings);
 	}
@@ -129,10 +131,9 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		Entity entityMappingEntity = new MapEntity(META_DATA);
 		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, entityMapping.getIdentifier());
 		entityMappingEntity.set(EntityMappingMetaData.SOURCEENTITYMETADATA, entityMapping.getName());
-		entityMappingEntity
-				.set(EntityMappingMetaData.TARGETENTITYMETADATA,
-						entityMapping.getTargetEntityMetaData() != null ? entityMapping.getTargetEntityMetaData()
-								.getName() : null);
+		entityMappingEntity.set(EntityMappingMetaData.TARGETENTITYMETADATA,
+				entityMapping.getTargetEntityMetaData() != null ? entityMapping.getTargetEntityMetaData()
+						.getName() : null);
 		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTEMAPPINGS, attributeMappingEntities);
 		return entityMappingEntity;
 	}

@@ -83,9 +83,8 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 
 	/**
 	 * Creates a fully reconstructed MappingProject from an Entity retrieved from the repository.
-	 * 
-	 * @param mappingTargetEntity
-	 *            Entity with {@link MappingProjectMetaData} metadata
+	 *
+	 * @param mappingTargetEntity Entity with {@link MappingProjectMetaData} metadata
 	 * @return fully reconstructed MappingProject
 	 */
 	private MappingTarget toMappingTarget(Entity mappingTargetEntity)
@@ -98,10 +97,11 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 			return null;
 		}
 
-		EntityMetaData target = dataService.getEntityMetaData(mappingTargetEntity
-				.getString(MappingTargetMetaData.TARGET));
+		EntityMetaData target = dataService
+				.getEntityMetaData(mappingTargetEntity.getString(MappingTargetMetaData.TARGET));
 
-		if (target.isRowLevelSecured()){
+		if (target.isRowLevelSecured())
+		{
 			DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(target);
 			defaultEntityMetaData.removeAttributeMetaData(new DefaultAttributeMetaData("_UPDATE"));
 			target = defaultEntityMetaData;
@@ -109,8 +109,8 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 
 		if (mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITYMAPPINGS) != null)
 		{
-			List<Entity> entityMappingEntities = Lists.newArrayList(mappingTargetEntity
-					.getEntities(MappingTargetMetaData.ENTITYMAPPINGS));
+			List<Entity> entityMappingEntities = Lists
+					.newArrayList(mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITYMAPPINGS));
 			entityMappings = entityMappingRepository.toEntityMappings(entityMappingEntities);
 		}
 

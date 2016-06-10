@@ -51,11 +51,11 @@ import com.google.common.collect.Sets;
 /**
  * MetaData service. Administration of the {@link Package}, {@link EntityMetaData} and {@link AttributeMetaData} of the
  * metadata of the repositories.
- * 
+ * <p>
  * TODO: This class smells. It started out as a simple administration but taken on a new role: to bootstrap the
  * repositories and orchestrate changes in metadata. There's a second, higher level, class in here that needs to be
  * refactored out. See also {@link MetaValidationUtils} which does some of this work now already.
- * 
+ * <p>
  * <img src="http://yuml.me/041e5382.png" alt="Metadata entities" width="640"/>
  */
 public class MetaDataServiceImpl implements MetaDataService
@@ -90,10 +90,10 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	/**
 	 * Sets the Backend, in wich the meta data and the user data is saved
-	 * 
+	 * <p>
 	 * Setter for the ManageableCrudRepositoryCollection, to be called after it's created. This resolves the circular
 	 * dependency {@link MysqlRepositoryCollection} => decorated {@link MetaDataService} => {@link RepositoryCreator}
-	 * 
+	 *
 	 * @param ManageableRepositoryCollection
 	 */
 	@Override
@@ -130,13 +130,13 @@ public class MetaDataServiceImpl implements MetaDataService
 				.forEach(AttributeMetaDataMetaData.INSTANCE::addAttribute);
 
 		// Add description attributes to the AttributeMetaDataMetaData
-		languageCodes.get().map(code -> AttributeMetaDataMetaData.DESCRIPTION + '-' + code)
-				.forEach(attrName -> AttributeMetaDataMetaData.INSTANCE.addAttribute(attrName)
+		languageCodes.get().map(code -> AttributeMetaDataMetaData.DESCRIPTION + '-' + code).forEach(
+				attrName -> AttributeMetaDataMetaData.INSTANCE.addAttribute(attrName)
 						.setDataType(MolgenisFieldTypes.TEXT));
 
 		// Add description attributes to the EntityMetaDataMetaData
-		languageCodes.get().map(code -> EntityMetaDataMetaData.DESCRIPTION + '-' + code)
-				.forEach(attrName -> EntityMetaDataMetaData.INSTANCE.addAttribute(attrName)
+		languageCodes.get().map(code -> EntityMetaDataMetaData.DESCRIPTION + '-' + code).forEach(
+				attrName -> EntityMetaDataMetaData.INSTANCE.addAttribute(attrName)
 						.setDataType(MolgenisFieldTypes.TEXT));
 
 		// Add language attributes to the EntityMetaDataMetaData
@@ -301,7 +301,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		if (emd.isAbstract()) return null;
 
 		DefaultEntityMetaData entityMetaData = getEntityMetaData(emd.getName());
-		if (entityMetaData.isRowLevelSecured()){
+		if (entityMetaData.isRowLevelSecured())
+		{
 			entityMetaData = new RowLevelSecurityEntityMetaData(entityMetaData);
 		}
 
@@ -456,7 +457,8 @@ public class MetaDataServiceImpl implements MetaDataService
 			{
 				RepositoryCollection col = backends.get(emd.getBackend());
 				if (col == null) throw new MolgenisDataException("Unknown backend [" + emd.getBackend() + "]");
-				if (emd.isRowLevelSecured()){
+				if (emd.isRowLevelSecured())
+				{
 					emd = new RowLevelSecurityEntityMetaData(emd);
 				}
 				Repository repo = col.addEntityMeta(emd);
@@ -511,8 +513,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	public LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection)
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<String, Boolean>();
-		StreamSupport.stream(repositoryCollection.getEntityNames().spliterator(), false)
-				.forEach(entityName -> entitiesImportable.put(entityName, this.canIntegrateEntityMetadataCheck(
+		StreamSupport.stream(repositoryCollection.getEntityNames().spliterator(), false).forEach(
+				entityName -> entitiesImportable.put(entityName, this.canIntegrateEntityMetadataCheck(
 						repositoryCollection.getRepository(entityName).getEntityMetaData())));
 
 		return entitiesImportable;
@@ -525,9 +527,9 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<String, Boolean>();
 
-		StreamSupport.stream(newEntitiesMetaDataMap.keySet().spliterator(), false)
-				.forEach(entityName -> entitiesImportable.put(entityName, skipEntities.contains(entityName)
-						|| this.canIntegrateEntityMetadataCheck(newEntitiesMetaDataMap.get(entityName))));
+		StreamSupport.stream(newEntitiesMetaDataMap.keySet().spliterator(), false).forEach(
+				entityName -> entitiesImportable.put(entityName, skipEntities.contains(entityName) || this
+						.canIntegrateEntityMetadataCheck(newEntitiesMetaDataMap.get(entityName))));
 
 		return entitiesImportable;
 	}
@@ -542,7 +544,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 			List<AttributeMetaData> oldAtomicAttributes = StreamSupport
 					.stream(oldEntity.getAtomicAttributes().spliterator(), false)
-					.collect(Collectors.<AttributeMetaData> toList());
+					.collect(Collectors.<AttributeMetaData>toList());
 
 			LinkedHashMap<String, AttributeMetaData> newAtomicAttributesMap = new LinkedHashMap<String, AttributeMetaData>();
 			StreamSupport.stream(newEntity.getAtomicAttributes().spliterator(), false)

@@ -52,9 +52,8 @@ public class RowLevelSecurityEntityMetaData extends DefaultEntityMetaData implem
 	private List<AttributeMetaData> filterPermissionAttributes(Iterable<AttributeMetaData> attributes)
 	{
 		return StreamSupport.stream(attributes.spliterator(), false)
-				.filter(attr -> !ROW_LEVEL_SECURITY_ATTRIBUTES.contains(attr.getName())
-						|| SecurityUtils.currentUserIsSu()
-						|| SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
+				.filter(attr -> !ROW_LEVEL_SECURITY_ATTRIBUTES.contains(attr.getName()) || SecurityUtils
+						.currentUserIsSu() || SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
 				.collect(Collectors.toList());
 	}
 

@@ -99,19 +99,26 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 	private static final String VIEW_CATEGORY_MAPPING_EDITOR = "view-advanced-mapping-editor";
 	private static final String VIEW_ATTRIBUTE_MAPPING_FEEDBACK = "view-attribute-mapping-feedback";
 
-	@Autowired private MolgenisUserService molgenisUserService;
+	@Autowired
+	private MolgenisUserService molgenisUserService;
 
-	@Autowired private MappingService mappingService;
+	@Autowired
+	private MappingService mappingService;
 
-	@Autowired private AlgorithmService algorithmService;
+	@Autowired
+	private AlgorithmService algorithmService;
 
-	@Autowired private DataService dataService;
+	@Autowired
+	private DataService dataService;
 
-	@Autowired private OntologyTagService ontologyTagService;
+	@Autowired
+	private OntologyTagService ontologyTagService;
 
-	@Autowired private SemanticSearchService semanticSearchService;
+	@Autowired
+	private SemanticSearchService semanticSearchService;
 
-	@Autowired private MenuReaderService menuReaderService;
+	@Autowired
+	private MenuReaderService menuReaderService;
 
 	public MappingServiceController()
 	{
@@ -124,7 +131,8 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 	 * @param model the model to initialized
 	 * @return view name of the mapping projects list
 	 */
-	@RequestMapping public String viewMappingProjects(Model model)
+	@RequestMapping
+	public String viewMappingProjects(Model model)
 	{
 		model.addAttribute("mappingProjects", mappingService.getAllMappingProjects());
 		model.addAttribute("entityMetaDatas", getWritableEntityMetaDatas());
@@ -141,8 +149,9 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 	 * @param targetEntity name of the project's first {@link MappingTarget}'s target entity
 	 * @return redirect URL for the newly created mapping project
 	 */
-	@RequestMapping(value = "/addMappingProject", method = RequestMethod.POST) public String addMappingProject(
-			@RequestParam("mapping-project-name") String name, @RequestParam("target-entity") String targetEntity)
+	@RequestMapping(value = "/addMappingProject", method = RequestMethod.POST)
+	public String addMappingProject(@RequestParam("mapping-project-name") String name,
+			@RequestParam("target-entity") String targetEntity)
 	{
 		MappingProject newMappingProject = mappingService.addMappingProject(name, getCurrentUser(), targetEntity);
 		return "redirect:" + getMappingServiceMenuUrl() + "/mappingproject/" + newMappingProject.getIdentifier();
@@ -154,8 +163,8 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 	 * @param mappingProjectId the ID of the mapping project
 	 * @return redirect url to the same page to force a refresh
 	 */
-	@RequestMapping(value = "/removeMappingProject", method = RequestMethod.POST) public String deleteMappingProject(
-			@RequestParam(required = true) String mappingProjectId)
+	@RequestMapping(value = "/removeMappingProject", method = RequestMethod.POST)
+	public String deleteMappingProject(@RequestParam(required = true) String mappingProjectId)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 		if (hasWritePermission(project))
@@ -175,9 +184,10 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 	 * @param attribute        the attribute that is mapped
 	 * @return
 	 */
-	@RequestMapping(value = "/removeAttributeMapping", method = RequestMethod.POST) public String removeAttributeMapping(
-			@RequestParam(required = true) String mappingProjectId, @RequestParam(required = true) String target,
-			@RequestParam(required = true) String source, @RequestParam(required = true) String attribute)
+	@RequestMapping(value = "/removeAttributeMapping", method = RequestMethod.POST)
+	public String removeAttributeMapping(@RequestParam(required = true) String mappingProjectId,
+			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
+			@RequestParam(required = true) String attribute)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 		if (hasWritePermission(project))
@@ -196,8 +206,8 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 	 * @param mappingProjectId the ID of the {@link MappingTarget}'s {@link MappingProject}
 	 * @return redirect URL for the mapping project
 	 */
-	@RequestMapping(value = "/addEntityMapping", method = RequestMethod.POST) public String addEntityMapping(
-			@RequestParam String mappingProjectId, String target, String source)
+	@RequestMapping(value = "/addEntityMapping", method = RequestMethod.POST)
+	public String addEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
 		EntityMetaData sourceEntityMetaData = dataService.getEntityMetaData(source);
 		EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(target);
@@ -224,8 +234,8 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 	 * @param source           entity name of the mapping source
 	 * @return redirect url of the mapping project's page
 	 */
-	@RequestMapping(value = "/removeEntityMapping", method = RequestMethod.POST) public String removeEntityMapping(
-			@RequestParam String mappingProjectId, String target, String source)
+	@RequestMapping(value = "/removeEntityMapping", method = RequestMethod.POST)
+	public String removeEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 		if (hasWritePermission(project))
@@ -236,7 +246,9 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 		return "redirect:" + getMappingServiceMenuUrl() + "/mappingproject/" + mappingProjectId;
 	}
 
-	@RequestMapping(value = "/validateAttrMapping", method = RequestMethod.POST) @ResponseBody public AttributeMappingValidationReport validateAttributeMapping(
+	@RequestMapping(value = "/validateAttrMapping", method = RequestMethod.POST)
+	@ResponseBody
+	public AttributeMappingValidationReport validateAttributeMapping(
 			@Valid @RequestBody MappingServiceRequest mappingServiceRequest)
 	{
 		String targetEntityName = mappingServiceRequest.getTargetEntityName();
@@ -256,7 +268,8 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 		String sourceEntityName = mappingServiceRequest.getSourceEntityName();
 		Iterable<Entity> sourceEntities = new Iterable<Entity>()
 		{
-			@Override public Iterator<Entity> iterator()
+			@Override
+			public Iterator<Entity> iterator()
 			{
 				return dataService.findAll(sourceEntityName, query).iterator();
 			}
@@ -297,22 +310,26 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 			this.errorMessages = errorMessages;
 		}
 
-		@SuppressWarnings("unused") public Long getTotal()
+		@SuppressWarnings("unused")
+		public Long getTotal()
 		{
 			return total;
 		}
 
-		@SuppressWarnings("unused") public Long getNrSuccess()
+		@SuppressWarnings("unused")
+		public Long getNrSuccess()
 		{
 			return nrSuccess;
 		}
 
-		@SuppressWarnings("unused") public Long getNrErrors()
+		@SuppressWarnings("unused")
+		public Long getNrErrors()
 		{
 			return nrErrors;
 		}
 
-		@SuppressWarnings("unused") public Map<String, String> getErrorMessages()
+		@SuppressWarnings("unused")
+		public Map<String, String> getErrorMessages()
 		{
 			return errorMessages;
 		}
@@ -328,10 +345,10 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 	 * @param algorithm        the mapping algorithm
 	 * @return redirect URL for the attributemapping
 	 */
-	@RequestMapping(value = "/saveattributemapping", method = RequestMethod.POST) public String saveAttributeMapping(
-			@RequestParam(required = true) String mappingProjectId, @RequestParam(required = true) String target,
-			@RequestParam(required = true) String source, @RequestParam(required = true) String targetAttribute,
-			@RequestParam(required = true) String algorithm,
+	@RequestMapping(value = "/saveattributemapping", method = RequestMethod.POST)
+	public String saveAttributeMapping(@RequestParam(required = true) String mappingProjectId,
+			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
+			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm,
 			@RequestParam(required = true) AlgorithmState algorithmState)
 	{
 		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
@@ -366,7 +383,9 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 	 * @param target           name of the target entity
 	 * @param algorithmStates  the mapping algorithm states that should skip
 	 */
-	@RequestMapping(value = "/firstattributemapping", method = RequestMethod.POST) @ResponseBody public FirstAttributeMappingInfo getFirstAttributeMappingInfo(
+	@RequestMapping(value = "/firstattributemapping", method = RequestMethod.POST)
+	@ResponseBody
+	public FirstAttributeMappingInfo getFirstAttributeMappingInfo(
 			@RequestParam(required = true) String mappingProjectId, @RequestParam(required = true) String target,
 			@RequestParam(required = true, value = "skipAlgorithmStates[]") List<AlgorithmState> skipAlgorithmStates,
 			Model model)
@@ -420,7 +439,8 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 	 * @param model      the model
 	 * @return View name of the
 	 */
-	@RequestMapping("/mappingproject/{id}") public String viewMappingProject(@PathVariable("id") String identifier,
+	@RequestMapping("/mappingproject/{id}")
+	public String viewMappingProject(@PathVariable("id") String identifier,
 			@RequestParam(value = "target", required = false) String target, Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(identifier);
@@ -438,8 +458,8 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 		return VIEW_SINGLE_MAPPING_PROJECT;
 	}
 
-	@RequestMapping(value = "/mappingproject/clone", method = RequestMethod.POST) public String cloneMappingProject(
-			@RequestParam("mappingProjectId") String mappingProjectId)
+	@RequestMapping(value = "/mappingproject/clone", method = RequestMethod.POST)
+	public String cloneMappingProject(@RequestParam("mappingProjectId") String mappingProjectId)
 	{
 		mappingService.cloneMappingProject(mappingProjectId);
 		return "forward:" + URI;
@@ -457,7 +477,9 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 	 * @param requestBody
 	 * @return
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/attributeMapping/semanticsearch", consumes = APPLICATION_JSON_VALUE) @ResponseBody public List<ExplainedAttributeMetaData> getSemanticSearchAttributeMapping(
+	@RequestMapping(method = RequestMethod.POST, value = "/attributeMapping/semanticsearch", consumes = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public List<ExplainedAttributeMetaData> getSemanticSearchAttributeMapping(
 			@RequestBody Map<String, String> requestBody)
 	{
 		String mappingProjectId = requestBody.get("mappingProjectId");
@@ -491,8 +513,9 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 		return Lists.newArrayList(relevantAttributes.values());
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/attributemapping/algorithm", consumes = APPLICATION_JSON_VALUE) @ResponseBody public String getSuggestedAlgorithm(
-			@RequestBody GenerateAlgorithmRequest generateAlgorithmRequest)
+	@RequestMapping(method = RequestMethod.POST, value = "/attributemapping/algorithm", consumes = APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public String getSuggestedAlgorithm(@RequestBody GenerateAlgorithmRequest generateAlgorithmRequest)
 	{
 		EntityMetaData targetEntityMetaData = dataService
 				.getEntityMetaData(generateAlgorithmRequest.getTargetEntityName());
@@ -520,9 +543,9 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 	 * @param newEntityName    name of the new entity to create
 	 * @return redirect URL to the data explorer displaying the newly generated entity
 	 */
-	@RequestMapping("/createIntegratedEntity") public String createIntegratedEntity(
-			@RequestParam String mappingProjectId, @RequestParam String target, @RequestParam() String newEntityName,
-			Model model)
+	@RequestMapping("/createIntegratedEntity")
+	public String createIntegratedEntity(@RequestParam String mappingProjectId, @RequestParam String target,
+			@RequestParam() String newEntityName, Model model)
 	{
 		try
 		{
@@ -548,10 +571,10 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 	 * @param source           name of the source entity
 	 * @param targetAttribute  name of the target attribute
 	 */
-	@RequestMapping("/attributeMapping") public String viewAttributeMapping(
-			@RequestParam(required = true) String mappingProjectId, @RequestParam(required = true) String target,
-			@RequestParam(required = true) String source, @RequestParam(required = true) String targetAttribute,
-			Model model)
+	@RequestMapping("/attributeMapping")
+	public String viewAttributeMapping(@RequestParam(required = true) String mappingProjectId,
+			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
+			@RequestParam(required = true) String targetAttribute, Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 		MappingTarget mappingTarget = project.getMappingTarget(target);
@@ -568,7 +591,8 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 		{
 			Iterable<Entity> refEntities = new Iterable<Entity>()
 			{
-				@Override public Iterator<Entity> iterator()
+				@Override
+				public Iterator<Entity> iterator()
 				{
 					return dataService.findAll(refEntityMetaData.getName()).iterator();
 				}
@@ -594,10 +618,11 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 		return VIEW_ATTRIBUTE_MAPPING;
 	}
 
-	@RequestMapping(value = "/attributemappingfeedback", method = RequestMethod.POST) public String attributeMappingFeedback(
-			@RequestParam(required = true) String mappingProjectId, @RequestParam(required = true) String target,
-			@RequestParam(required = true) String source, @RequestParam(required = true) String targetAttribute,
-			@RequestParam(required = true) String algorithm, Model model)
+	@RequestMapping(value = "/attributemappingfeedback", method = RequestMethod.POST)
+	public String attributeMappingFeedback(@RequestParam(required = true) String mappingProjectId,
+			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
+			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm,
+			Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
 
@@ -640,7 +665,8 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 
 		FluentIterable<Entity> sourceEntities = FluentIterable.from(new Iterable<Entity>()
 		{
-			@Override public Iterator<Entity> iterator()
+			@Override
+			public Iterator<Entity> iterator()
 			{
 				return dataService.findAll(source).iterator();
 			}
@@ -680,9 +706,10 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 	 * @param sourceAttribute
 	 * @param model
 	 */
-	@RequestMapping(value = "/advancedmappingeditor", method = RequestMethod.POST) public String advancedMappingEditor(
-			@RequestParam(required = true) String mappingProjectId, @RequestParam(required = true) String target,
-			@RequestParam(required = true) String source, @RequestParam(required = true) String targetAttribute,
+	@RequestMapping(value = "/advancedmappingeditor", method = RequestMethod.POST)
+	public String advancedMappingEditor(@RequestParam(required = true) String mappingProjectId,
+			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
+			@RequestParam(required = true) String targetAttribute,
 			@RequestParam(required = true) String sourceAttribute, @RequestParam String algorithm, Model model)
 	{
 		MappingProject project = mappingService.getMappingProject(mappingProjectId);
@@ -723,7 +750,8 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 
 		model.addAttribute("targetAttributeEntities", new Iterable<Entity>()
 		{
-			@Override public Iterator<Entity> iterator()
+			@Override
+			public Iterator<Entity> iterator()
 			{
 				return targetAttributeEntities.iterator();
 			}
@@ -808,10 +836,12 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 		return VIEW_CATEGORY_MAPPING_EDITOR;
 	}
 
-	@RequestMapping(value = "/savecategorymapping", method = RequestMethod.POST) public @ResponseBody void saveCategoryMapping(
-			@RequestParam(required = true) String mappingProjectId, @RequestParam(required = true) String target,
-			@RequestParam(required = true) String source, @RequestParam(required = true) String targetAttribute,
-			@RequestParam(required = true) String algorithm)
+	@RequestMapping(value = "/savecategorymapping", method = RequestMethod.POST)
+	public
+	@ResponseBody
+	void saveCategoryMapping(@RequestParam(required = true) String mappingProjectId,
+			@RequestParam(required = true) String target, @RequestParam(required = true) String source,
+			@RequestParam(required = true) String targetAttribute, @RequestParam(required = true) String algorithm)
 	{
 		MappingProject mappingProject = mappingService.getMappingProject(mappingProjectId);
 		if (hasWritePermission(mappingProject))
@@ -835,8 +865,10 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 	 * @param mappingServiceRequest the {@link MappingServiceRequest} sent by the client
 	 * @return Map with the results and size of the source
 	 */
-	@RequestMapping(method = RequestMethod.POST, value = "/mappingattribute/testscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE) public @ResponseBody Map<String, Object> testScript(
-			@RequestBody MappingServiceRequest mappingServiceRequest)
+	@RequestMapping(method = RequestMethod.POST, value = "/mappingattribute/testscript", consumes = APPLICATION_JSON_VALUE, produces = APPLICATION_JSON_VALUE)
+	public
+	@ResponseBody
+	Map<String, Object> testScript(@RequestBody MappingServiceRequest mappingServiceRequest)
 	{
 		EntityMetaData targetEntityMetaData = dataService
 				.getEntityMetaData(mappingServiceRequest.getTargetEntityName());
@@ -851,7 +883,8 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 				.newArrayList(Iterables.transform(algorithmEvaluations, new Function<AlgorithmEvaluation, Object>()
 				{
 
-					@Override public Object apply(AlgorithmEvaluation algorithmEvaluation)
+					@Override
+					public Object apply(AlgorithmEvaluation algorithmEvaluation)
 					{
 						return algorithmEvaluation.getValue();
 					}
@@ -860,8 +893,10 @@ import autovalue.shaded.com.google.common.common.collect.Sets;
 		return ImmutableMap.<String, Object>of("results", calculatedValues, "totalCount", Iterables.size(sourceRepo));
 	}
 
-	@ExceptionHandler(RuntimeException.class) @ResponseBody @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR) public ErrorMessageResponse handleRuntimeException(
-			RuntimeException e)
+	@ExceptionHandler(RuntimeException.class)
+	@ResponseBody
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public ErrorMessageResponse handleRuntimeException(RuntimeException e)
 	{
 		LOG.error(e.getMessage(), e);
 		return new ErrorMessageResponse(new ErrorMessageResponse.ErrorMessage(
