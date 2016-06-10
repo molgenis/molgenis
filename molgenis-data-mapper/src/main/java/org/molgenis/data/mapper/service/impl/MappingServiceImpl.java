@@ -1,6 +1,7 @@
 package org.molgenis.data.mapper.service.impl;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.RowLevelSecurityRepositoryDecorator.UPDATE_ATTRIBUTE;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 
 import java.util.Collections;
@@ -29,7 +30,9 @@ import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.permission.PermissionSystemService;
+import org.molgenis.util.HugeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +41,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Maps;
+
+import javax.annotation.security.RunAs;
 
 public class MappingServiceImpl implements MappingService
 {
@@ -172,8 +177,8 @@ public class MappingServiceImpl implements MappingService
 			{
 				DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(targetMetaData);
 				defaultEntityMetaData.addAttributeMetaData(
-						new DefaultAttributeMetaData(RowLevelSecurityRepositoryDecorator.UPDATE_ATTRIBUTE)
-								.setDataType(MolgenisFieldTypes.MREF).setRefEntity(new MolgenisUserMetaData()));
+						new DefaultAttributeMetaData(UPDATE_ATTRIBUTE).setDataType(MolgenisFieldTypes.MREF)
+								.setRefEntity(new MolgenisUserMetaData()));
 				targetMetaData = defaultEntityMetaData;
 			}
 			targetRepo = dataService.getMeta().addEntityMeta(targetMetaData);
@@ -257,9 +262,19 @@ public class MappingServiceImpl implements MappingService
 		EntityMetaData targetMetaData = targetRepo.getEntityMetaData();
 		Repository sourceRepo = dataService.getRepository(sourceMapping.getName());
 
-		// delete all target entities from this source
+		// collect the entities to delete
 		List<Entity> deleteEntities = targetRepo.findAll(new QueryImpl().eq("source", sourceRepo.getName()))
 				.filter(Objects::nonNull).collect(Collectors.toList());
+
+		HugeMap<Object, Iterable<Entity>> updatePermissions = new HugeMap<>();
+		if (targetMetaData.isRowLevelSecured())
+		{
+			// collect all the row level security permissions so we can apply them later
+			RunAsSystemProxy.runAsSystem(() -> deleteEntities.forEach(
+					entity -> updatePermissions.put(entity.getIdValue(), entity.getEntities(UPDATE_ATTRIBUTE))));
+		}
+
+		// remove all target entities from this source so we 'keep track of' deletes, inserts and updates
 		targetRepo.delete(deleteEntities.stream());
 
 		Iterator<Entity> sourceEntities = sourceRepo.iterator();
@@ -269,6 +284,13 @@ public class MappingServiceImpl implements MappingService
 			Entity sourceEntity = sourceEntities.next();
 			MapEntity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
 					sourceMapping.getSourceEntityMetaData(), targetRepo);
+
+			if (targetMetaData.isRowLevelSecured())
+			{
+				// re-apply the permissions to each entity
+				mappedEntity.set(UPDATE_ATTRIBUTE, updatePermissions.get(mappedEntity.getIdValue()));
+			}
+
 			mappedEntities.add(mappedEntity);
 
 			if (mappedEntities.size() == BATCH_SIZE || !sourceEntities.hasNext())
