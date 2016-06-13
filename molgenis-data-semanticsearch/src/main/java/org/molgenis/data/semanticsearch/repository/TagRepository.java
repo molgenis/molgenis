@@ -16,6 +16,7 @@ import org.molgenis.data.support.QueryImpl;
  * Helper class around the {@link TagMetaData} repository. Internal implementation class, use
  * {@link MetaDataServiceImpl} instead.
  */
+
 public class TagRepository
 {
 	private final IdGenerator idGenerator;

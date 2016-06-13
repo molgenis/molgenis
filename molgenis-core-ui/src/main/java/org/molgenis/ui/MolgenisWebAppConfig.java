@@ -20,8 +20,6 @@ import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.file.FileStore;
@@ -359,12 +357,6 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	public DataService dataService()
 	{
 		return new DataServiceImpl();
-	}
-
-	@Bean
-	public MetaDataService metaDataService()
-	{
-		return new MetaDataServiceImpl((DataServiceImpl) dataService());
 	}
 
 	@Bean

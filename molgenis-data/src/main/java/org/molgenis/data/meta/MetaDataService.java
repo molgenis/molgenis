@@ -121,6 +121,13 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	Stream<EntityMetaData> getEntityMetaDatas();
 
 	/**
+	 * Returns a stream of all {@link Repository repositories}.
+	 *
+	 * @return all repositories
+	 */
+	Stream<Repository<Entity>> getRepositories();
+
+	/**
 	 * Adds new EntityMeta and creates a new Repository
 	 *
 	 * @param entityMeta

@@ -17,10 +17,12 @@ import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import javax.annotation.Nonnull;
+
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
@@ -28,15 +30,13 @@ import org.molgenis.data.RepositoryCollectionRegistry;
 import org.molgenis.data.SystemEntityFactory;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
-import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.TypedRepositoryDecorator;
 import org.molgenis.fieldtypes.CompoundField;
 import org.molgenis.security.core.Permission;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.ImmutableMap;
@@ -44,59 +44,22 @@ import com.google.common.collect.Sets;
 import com.google.common.collect.TreeTraverser;
 
 /**
- * TODO add docs
+ * Meta data service for retrieving and editing meta data.
  */
+@Component
 public class MetaDataServiceImpl implements MetaDataService
 {
-	private static final Logger LOG = LoggerFactory.getLogger(MetaDataServiceImpl.class);
+	private final DataService dataService;
+	private final RepositoryCollectionRegistry repoCollectionRegistry;
+	private final SystemEntityMetaDataRegistry systemEntityMetaRegistry;
 
-	private final DataServiceImpl dataService;
-	private RepositoryCollectionRegistry repositoryCollectionRegistry;
-	private SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
-	private PackageMetaData packageMetaData;
-	private EntityMetaDataMetaData entityMetaDataMetaData;
-	private AttributeMetaDataMetaData attributeMetaDataMetaData;
-	private TagMetaData tagMetaData;
-
-	public MetaDataServiceImpl(DataServiceImpl dataService)
+	@Autowired
+	public MetaDataServiceImpl(DataService dataService, RepositoryCollectionRegistry repoCollectionRegistry,
+			SystemEntityMetaDataRegistry systemEntityMetaRegistry)
 	{
 		this.dataService = requireNonNull(dataService);
-	}
-
-	@Autowired
-	public void setSystemEntityMetaDataRegistry(SystemEntityMetaDataRegistry systemEntityMetaDataRegistry)
-	{
-		this.systemEntityMetaDataRegistry = requireNonNull(systemEntityMetaDataRegistry);
-	}
-
-	@Autowired
-	public void setRepositoryCollectionRegistry(RepositoryCollectionRegistry repositoryCollectionRegistry)
-	{
-		this.repositoryCollectionRegistry = requireNonNull(repositoryCollectionRegistry);
-	}
-
-	@Autowired
-	public void setPackageMetaData(PackageMetaData packageMetaData)
-	{
-		this.packageMetaData = requireNonNull(packageMetaData);
-	}
-
-	@Autowired
-	public void setEntityMetaDataMetaData(EntityMetaDataMetaData entityMetaDataMetaData)
-	{
-		this.entityMetaDataMetaData = requireNonNull(entityMetaDataMetaData);
-	}
-
-	@Autowired
-	public void setAttributeMetaDataMetaData(AttributeMetaDataMetaData attributeMetaDataMetaData)
-	{
-		this.attributeMetaDataMetaData = requireNonNull(attributeMetaDataMetaData);
-	}
-
-	@Autowired
-	public void setTagMetaData(TagMetaData tagMetaData)
-	{
-		this.tagMetaData = requireNonNull(tagMetaData);
+		this.repoCollectionRegistry = requireNonNull(repoCollectionRegistry);
+		this.systemEntityMetaRegistry = requireNonNull(systemEntityMetaRegistry);
 	}
 
 	@Override
@@ -127,7 +90,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public boolean hasRepository(String entityName)
 	{
-		SystemEntityMetaData systemEntityMeta = systemEntityMetaDataRegistry.getSystemEntityMetaData(entityName);
+		SystemEntityMetaData systemEntityMeta = systemEntityMetaRegistry.getSystemEntityMetaData(entityName);
 		if (systemEntityMeta != null)
 		{
 			return !systemEntityMeta.isAbstract();
@@ -141,13 +104,13 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public RepositoryCollection getDefaultBackend()
 	{
-		return repositoryCollectionRegistry.getDefaultRepoCollection();
+		return repoCollectionRegistry.getDefaultRepoCollection();
 	}
 
 	@Override
 	public RepositoryCollection getBackend(String name)
 	{
-		return repositoryCollectionRegistry.getRepositoryCollection(name);
+		return repoCollectionRegistry.getRepositoryCollection(name);
 	}
 
 	/**
@@ -183,7 +146,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	public RepositoryCollection getBackend(EntityMetaData emd)
 	{
 		String backendName = emd.getBackend() == null ? getDefaultBackend().getName() : emd.getBackend();
-		RepositoryCollection backend = repositoryCollectionRegistry.getRepositoryCollection(backendName);
+		RepositoryCollection backend = repoCollectionRegistry.getRepositoryCollection(backendName);
 		if (backend == null) throw new RuntimeException(format("Unknown backend [%s]", backendName));
 
 		return backend;
@@ -195,7 +158,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		// create attributes
 		Stream<AttributeMetaData> attrEntities = StreamSupport
-				.stream(entityMeta.getOwnAttributes().spliterator(), false).flatMap(this::getAttributesPostOrder);
+				.stream(entityMeta.getOwnAttributes().spliterator(), false)
+				.flatMap(MetaDataServiceImpl::getAttributesPostOrder);
 		getAttributeRepository().add(attrEntities);
 
 		// create tags
@@ -217,7 +181,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public EntityMetaData getEntityMetaData(String fullyQualifiedEntityName)
 	{
-		EntityMetaData systemEntity = systemEntityMetaDataRegistry.getSystemEntityMetaData(fullyQualifiedEntityName);
+		EntityMetaData systemEntity = systemEntityMetaRegistry.getSystemEntityMetaData(fullyQualifiedEntityName);
 		if (systemEntity != null)
 		{
 			return systemEntity;
@@ -231,15 +195,9 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public boolean hasEntityMetaData(String entityName)
 	{
-		if (systemEntityMetaDataRegistry.hasSystemEntityMetaData(entityName))
-		{
-			return true;
-		}
-		else
-		{
-			// TODO replace findOneId with exists once available in Repository
-			return getEntityRepository().findOneById(entityName) != null;
-		}
+		// TODO replace findOneId with exists once available in Repository
+		return systemEntityMetaRegistry.hasSystemEntityMetaData(entityName)
+				|| getEntityRepository().findOneById(entityName) != null;
 	}
 
 	@Override
@@ -270,6 +228,12 @@ public class MetaDataServiceImpl implements MetaDataService
 	public Stream<EntityMetaData> getEntityMetaDatas()
 	{
 		return getEntityRepository().stream();
+	}
+
+	@Override
+	public Stream<Repository<Entity>> getRepositories()
+	{
+		return getEntityRepository().query().eq(ABSTRACT, false).findAll().map(this::getRepository);
 	}
 
 	@Transactional
@@ -315,7 +279,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public Iterator<RepositoryCollection> iterator()
 	{
-		return repositoryCollectionRegistry.getRepositoryCollections().iterator();
+		return repoCollectionRegistry.getRepositoryCollections().iterator();
 	}
 
 	@Override
@@ -343,7 +307,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		return entitiesImportable;
 	}
 
-	boolean canIntegrateEntityMetadataCheck(EntityMetaData newEntityMetaData)
+	private boolean canIntegrateEntityMetadataCheck(EntityMetaData newEntityMetaData)
 	{
 		String entityName = newEntityMetaData.getName();
 		if (dataService.hasRepository(entityName))
@@ -351,8 +315,7 @@ public class MetaDataServiceImpl implements MetaDataService
 			EntityMetaData oldEntity = dataService.getEntityMetaData(entityName);
 
 			List<AttributeMetaData> oldAtomicAttributes = StreamSupport
-					.stream(oldEntity.getAtomicAttributes().spliterator(), false)
-					.collect(Collectors.<AttributeMetaData>toList());
+					.stream(oldEntity.getAtomicAttributes().spliterator(), false).collect(toList());
 
 			LinkedHashMap<String, AttributeMetaData> newAtomicAttributesMap = new LinkedHashMap<>();
 			StreamSupport.stream(newEntityMetaData.getAtomicAttributes().spliterator(), false)
@@ -376,7 +339,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public boolean hasBackend(String backendName)
 	{
-		return repositoryCollectionRegistry.hasRepositoryCollection(backendName);
+		return repoCollectionRegistry.hasRepositoryCollection(backendName);
 	}
 
 	@Override
@@ -396,47 +359,44 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	private Repository<Package> getPackageRepository()
 	{
-		SystemEntityFactory<Package, Object> packageFactory = systemEntityMetaDataRegistry
+
+		SystemEntityFactory<Package, Object> packageFactory = systemEntityMetaRegistry
 				.getSystemEntityFactory(Package.class);
-		Repository<Entity> packageRepo = getDefaultBackend().getRepository(packageMetaData);
-		return new TypedRepositoryDecorator<>(packageRepo, packageFactory);
+		return new TypedRepositoryDecorator<>(getRepository(PACKAGE), packageFactory);
 	}
 
 	private Repository<EntityMetaData> getEntityRepository()
 	{
-		SystemEntityFactory<EntityMetaData, Object> entityMetaFactory = systemEntityMetaDataRegistry
+		SystemEntityFactory<EntityMetaData, Object> entityMetaFactory = systemEntityMetaRegistry
 				.getSystemEntityFactory(EntityMetaData.class);
-		Repository<Entity> entityMetaRepo = getDefaultBackend().getRepository(entityMetaDataMetaData);
-		return new TypedRepositoryDecorator<>(entityMetaRepo, entityMetaFactory);
+		return new TypedRepositoryDecorator<>(getRepository(ENTITY_META_DATA), entityMetaFactory);
 	}
 
 	private Repository<AttributeMetaData> getAttributeRepository()
 	{
-		SystemEntityFactory<AttributeMetaData, Object> attrFactory = systemEntityMetaDataRegistry
+		SystemEntityFactory<AttributeMetaData, Object> attrFactory = systemEntityMetaRegistry
 				.getSystemEntityFactory(AttributeMetaData.class);
-		Repository<Entity> attrRepo = getDefaultBackend().getRepository(attributeMetaDataMetaData);
-		return new TypedRepositoryDecorator<>(attrRepo, attrFactory);
+		return new TypedRepositoryDecorator<>(getRepository(ATTRIBUTE_META_DATA), attrFactory);
 	}
 
 	private Repository<Tag> getTagRepository()
 	{
-		SystemEntityFactory<Tag, Object> tagFactory = systemEntityMetaDataRegistry.getSystemEntityFactory(Tag.class);
-		Repository<Entity> tagRepo = getDefaultBackend().getRepository(attributeMetaDataMetaData);
-		return new TypedRepositoryDecorator<>(tagRepo, tagFactory);
+		SystemEntityFactory<Tag, Object> tagFactory = systemEntityMetaRegistry.getSystemEntityFactory(Tag.class);
+		return new TypedRepositoryDecorator<>(getRepository(TAG), tagFactory);
 	}
 
 	/**
 	 * Returns child attributes of the given attribute in post-order
 	 *
-	 * @param attr
-	 * @return
+	 * @param attr attribute
+	 * @return descendant attributes of the given attribute
 	 */
-	private Stream<AttributeMetaData> getAttributesPostOrder(AttributeMetaData attr)
+	private static Stream<AttributeMetaData> getAttributesPostOrder(AttributeMetaData attr)
 	{
 		return StreamSupport.stream(new TreeTraverser<AttributeMetaData>()
 		{
 			@Override
-			public Iterable<AttributeMetaData> children(AttributeMetaData attr)
+			public Iterable<AttributeMetaData> children(@Nonnull AttributeMetaData attr)
 			{
 				return attr.getDataType() instanceof CompoundField ? attr.getAttributeParts() : emptyList();
 			}

@@ -237,8 +237,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public synchronized Iterator<Repository<Entity>> iterator()
 	{
-		throw new UnsupportedOperationException(); // FIXME
-		//		return Lists.newArrayList(repositories.values()).iterator();
+		return metaDataService.getRepositories().iterator();
 	}
 
 	@Override

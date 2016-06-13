@@ -112,8 +112,8 @@ public abstract class AbstractDataApiTestConfig
 	@Bean
 	public MetaDataService metaDataService()
 	{
-		return new MetaDataServiceImpl(dataService());
-	}
+		return new MetaDataServiceImpl(dataService(), null, null);
+	} // FIXME
 
 	@Bean
 	public DataServiceImpl dataService()
