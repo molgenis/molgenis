@@ -83,7 +83,7 @@ public class SystemEntityMetaDataRegistry
 	{
 		for (AttributeMetaData attr : attrs)
 		{
-			if (attr.getIdentifier().equals(attrIdentifier))
+			if (attr.getIdentifier() != null && attr.getIdentifier().equals(attrIdentifier))
 			{
 				return attr;
 			}

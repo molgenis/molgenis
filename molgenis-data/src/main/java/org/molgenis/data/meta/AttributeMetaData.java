@@ -79,8 +79,8 @@ public class AttributeMetaData extends SystemEntity
 	public AttributeMetaData(String attrId, AttributeMetaDataMetaData attrMetaMeta)
 	{
 		super(attrMetaMeta);
-		setIdentifier(attrId);
 		setDefaultValues();
+		setIdentifier(attrId);
 	}
 
 	/**
