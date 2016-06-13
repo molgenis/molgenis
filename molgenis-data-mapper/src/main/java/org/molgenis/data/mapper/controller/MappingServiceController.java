@@ -23,15 +23,7 @@ import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.*;
 import org.molgenis.data.importer.ImportWizardController;
 import org.molgenis.data.mapper.data.request.GenerateAlgorithmRequest;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
@@ -223,6 +215,7 @@ public class MappingServiceController extends MolgenisPluginController
 	public String addEntityMapping(@RequestParam String mappingProjectId, String target, String source)
 	{
 		EntityMetaData sourceEntityMetaData = dataService.getEntityMetaData(source);
+		sourceEntityMetaData = RowLevelSecurityUtils.removeUpdateAttributeIfRowLevelSecured(sourceEntityMetaData);
 		EntityMetaData targetEntityMetaData = dataService.getEntityMetaData(target);
 
 		Iterable<AttributeMetaData> attributes = targetEntityMetaData.getAtomicAttributes();

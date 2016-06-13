@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.RowLevelSecurityUtils;
 
 public class MappingTarget
 {
