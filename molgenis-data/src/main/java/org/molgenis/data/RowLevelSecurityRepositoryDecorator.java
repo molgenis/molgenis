@@ -436,7 +436,8 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	private Entity injectPermissions(Entity entity)
 	{
 		List<String> permissions = newArrayList();
-		if (hasPermission(entity, Permission.UPDATE, SecurityContextHolder.getContext().getAuthentication()))
+		Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
+		if (hasPermission(getCompleteEntity(entity, currentAuthentication), Permission.UPDATE, currentAuthentication))
 		{
 			permissions.add(UPDATE_ATTRIBUTE);
 		}
