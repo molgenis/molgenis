@@ -7,7 +7,9 @@ import static org.molgenis.auth.AuthorityMetaData.ROLE;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.TagMetaData.TAG;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserisSystem;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 import java.io.IOException;
@@ -325,8 +327,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		validatePermission(entityName, Permission.WRITEMETA);
 
 		SystemEntityMetaData systemEntityMeta = systemEntityMetaDataRegistry.getSystemEntityMetaData(entityName);
-		if (systemEntityMeta != null && !SecurityUtils.getCurrentUsername()
-				.equals("SYSTEM")/*EntityUtils.equals(entityMetaData, systemEntityMeta)*/)
+		if (systemEntityMeta != null && !currentUserisSystem())
 		{
 			throw new MolgenisDataException(format("Updating system entity meta data [%s] is not allowed", entityName));
 		}
@@ -357,14 +358,30 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 
 			if (!deletedAttrNames.isEmpty())
 			{
-				deletedAttrNames
-						.forEach(deletedAttrName -> repoCollection.deleteAttribute(entityName, deletedAttrName));
+				deletedAttrNames.forEach(deletedAttrName -> {
+					repoCollection.deleteAttribute(entityName, deletedAttrName);
+
+					if (entityMetaData.getName().equals(ENTITY_META_DATA))
+					{
+						// update system entity meta data
+						systemEntityMetaDataRegistry.getSystemEntityMetaData(ENTITY_META_DATA)
+								.removeAttribute(currentAttrMap.get(deletedAttrName));
+					}
+				});
 			}
 
 			if (!addedAttrNames.isEmpty())
 			{
-				addedAttrNames.stream().map(updateAttrMap::get)
-						.forEach(addedAttrEntity -> repoCollection.addAttribute(entityName, addedAttrEntity));
+				addedAttrNames.stream().map(updateAttrMap::get).forEach(addedAttrEntity -> {
+					repoCollection.addAttribute(entityName, addedAttrEntity);
+
+					if (entityMetaData.getName().equals(ENTITY_META_DATA))
+					{
+						// update system entity meta data
+						systemEntityMetaDataRegistry.getSystemEntityMetaData(ENTITY_META_DATA)
+								.addAttribute(addedAttrEntity);
+					}
+				});
 			}
 		}
 	}
