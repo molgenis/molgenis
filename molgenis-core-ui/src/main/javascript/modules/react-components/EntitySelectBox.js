@@ -128,6 +128,9 @@ var EntitySelectBox = React.createClass({
 					case 'DECIMAL':
 						operator = 'EQUALS';
 						break;
+					case 'TEXT':
+						operator = 'SEARCH'
+						break;
 					case 'COMPOUND':
 						continue;
 				}
