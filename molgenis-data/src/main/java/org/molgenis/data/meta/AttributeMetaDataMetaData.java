@@ -1,10 +1,7 @@
 package org.molgenis.data.meta;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.MolgenisFieldTypes.MREF;
-import static org.molgenis.MolgenisFieldTypes.SCRIPT;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
+import static org.molgenis.MolgenisFieldTypes.*;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
@@ -59,7 +56,7 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(DATA_TYPE).setDataType(new EnumField()).setEnumOptions(FieldTypeEnum.getOptionsLowercase())
 				.setNillable(false);
 		addAttribute(PARTS).setDataType(MREF).setRefEntity(this);
-		addAttribute(REF_ENTITY); // TODO xref instead of string
+		addAttribute(REF_ENTITY); // during bootstrapping the data type is set to XREF and the ref entity to entity meta
 		addAttribute(EXPRESSION).setNillable(true);
 		addAttribute(NILLABLE).setDataType(BOOL).setNillable(false);
 		addAttribute(AUTO).setDataType(BOOL).setNillable(false);

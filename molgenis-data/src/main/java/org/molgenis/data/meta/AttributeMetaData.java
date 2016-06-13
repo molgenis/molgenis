@@ -229,22 +229,12 @@ public class AttributeMetaData extends SystemEntity
 	 */
 	public EntityMetaData getRefEntity()
 	{
-		String refEntityName = getString(REF_ENTITY);
-		if (refEntityName != null)
-		{
-			// FIXME change ref entity data type from string to xref
-			return getApplicationContext().getBean(DataService.class).getEntityMetaData(refEntityName);
-		}
-		else
-		{
-			return null;
-		}
+		return getEntity(REF_ENTITY, EntityMetaData.class);
 	}
 
 	public AttributeMetaData setRefEntity(EntityMetaData refEntity)
 	{
-		// FIXME change ref entity data type from string to xref
-		set(REF_ENTITY, refEntity != null ? refEntity.getName() : null);
+		set(REF_ENTITY, refEntity);
 		return this;
 	}
 

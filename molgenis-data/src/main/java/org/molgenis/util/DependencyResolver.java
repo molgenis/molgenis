@@ -1,38 +1,30 @@
 package org.molgenis.util;
 
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
-
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
-import org.molgenis.data.UnknownEntityException;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.Package;
 import org.molgenis.fieldtypes.XrefField;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Sets;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
 
 public class DependencyResolver
 {
-	@Autowired
-	private DataService dataService;
+	@Autowired private DataService dataService;
 
 	/**
 	 * Determine the entity import order
@@ -108,9 +100,22 @@ public class DependencyResolver
 			// When there aren't any we got a non resolvable
 			if (ready.isEmpty())
 			{
-				throw new MolgenisDataException(
-						"Could not resolve dependencies of entities " + dependenciesByName.keySet()
-								+ " are there circular dependencies?");
+				// accept the cyclic dependency between entity meta <--> attribute meta which is dealt with during
+				// bootstrapping, see SystemEntityMetaDataPersister.
+				if (dependenciesByName.containsKey(ENTITY_META_DATA) && dependenciesByName
+						.containsKey(ATTRIBUTE_META_DATA))
+				{
+					ready.add(ENTITY_META_DATA);
+					ready.add(ATTRIBUTE_META_DATA);
+					resolved.add(metaDataByName.get(ENTITY_META_DATA));
+					resolved.add(metaDataByName.get(ATTRIBUTE_META_DATA));
+				}
+				else
+				{
+					throw new MolgenisDataException(
+							"Could not resolve dependencies of entities " + dependenciesByName.keySet()
+									+ " are there circular dependencies?");
+				}
 			}
 
 			// Remove found metadata from dependency graph
