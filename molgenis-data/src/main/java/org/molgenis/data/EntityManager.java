@@ -3,6 +3,7 @@ package org.molgenis.data;
 import java.util.stream.Stream;
 
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.SystemEntity;
 
 /**
  * Entity manager responsible for creating entity references and resolving references of reference attributes.
@@ -58,16 +59,16 @@ public interface EntityManager
 	 * @param entityClass
 	 * @return
 	 */
-	<E extends Entity> E convert(Entity entity, Class<E> entityClass);
+	<E extends SystemEntity> E convert(Entity entity, Class<E> entityClass);
 
 	/**
 	 * Converts entities to entities of the given class
 	 * 
-	 * @param entity
+	 * @param entities
 	 * @param entityClass
 	 * @return
 	 */
-	<E extends Entity> Iterable<E> convert(Iterable<Entity> entities, Class<E> entityClass);
+	<E extends SystemEntity> Iterable<E> convert(Iterable<Entity> entities, Class<E> entityClass);
 
 	/**
 	 * @param partialEntity

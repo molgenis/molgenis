@@ -961,7 +961,7 @@ public class ImportWriter
 		{
 			Entity entity = getEntity(attributeName);
 			return entity != null
-					? new ConvertingIterable<E>(clazz, Arrays.asList(entity), dataService).iterator().next() : null;
+					? new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator().next() : null;
 		}
 
 		@Override
@@ -1057,7 +1057,7 @@ public class ImportWriter
 		public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz)
 		{
 			Iterable<Entity> entities = getEntities(attributeName);
-			return entities != null ? new ConvertingIterable<E>(clazz, entities, dataService) : null;
+			return entities != null ? new ConvertingIterable<E>(clazz, entities) : null;
 		}
 
 		@Override

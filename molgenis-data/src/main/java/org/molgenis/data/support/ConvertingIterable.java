@@ -5,17 +5,17 @@ import java.util.Iterator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 
+import static java.util.Objects.requireNonNull;
+
 public class ConvertingIterable<E extends Entity> implements Iterable<E>
 {
 	private final Class<E> entityClass;
 	private final Iterable<Entity> iterable;
-	private final DataService dataService;
 
-	public ConvertingIterable(Class<E> entityClass, Iterable<Entity> iterable, DataService dataService)
+	public ConvertingIterable(Class<E> entityClass, Iterable<Entity> iterable)
 	{
-		this.iterable = iterable;
-		this.entityClass = entityClass;
-		this.dataService = dataService;
+		this.entityClass = requireNonNull(entityClass);
+		this.iterable = requireNonNull(iterable);
 	}
 
 	@SuppressWarnings(
@@ -23,6 +23,6 @@ public class ConvertingIterable<E extends Entity> implements Iterable<E>
 	@Override
 	public Iterator<E> iterator()
 	{
-		return new ConvertingIterator(entityClass, iterable.iterator(), dataService);
+		return new ConvertingIterator(entityClass, iterable.iterator());
 	}
 }

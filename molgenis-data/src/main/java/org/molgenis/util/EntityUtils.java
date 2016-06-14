@@ -120,54 +120,6 @@ public class EntityUtils
 	}
 
 	/**
-	 * Convert a untyped entity to a typed entity.
-	 * <p>
-	 * If the entity is of the correct class it simply returns it. If entity of other class it tries to convert it, the
-	 * entity class should have a constructor with dataservice as single arg or a arg less constructor
-	 *
-	 * @param entity
-	 * @param entityClass
-	 * @param dataService
-	 * @return
-	 * @deprecated use {@link org.molgenis.data.SystemEntityFactory} instead
-	 */
-	@SuppressWarnings("unchecked")
-	@Deprecated
-	public static <E extends Entity> E convert(Entity entity, Class<E> entityClass, DataService dataService)
-	{
-		if (entityClass.isAssignableFrom(entity.getClass())) return (E) entity;
-		E convertedEntity;
-
-		// Find constructor with DataService as single arg
-		Constructor<E> ctor = ConstructorUtils.getAccessibleConstructor(entityClass, Entity.class);
-		if (ctor != null)
-		{
-			convertedEntity = BeanUtils.instantiateClass(ctor, entity);
-		}
-		else
-		{
-			ctor = ConstructorUtils.getAccessibleConstructor(entityClass, DataService.class);
-			if (ctor != null)
-			{
-				convertedEntity = BeanUtils.instantiateClass(ctor, dataService);
-			}
-			else
-			{
-				// Find arg less constructor
-				ctor = ConstructorUtils.getAccessibleConstructor(entityClass);
-				if (ctor == null) throw new RuntimeException(
-						"No usable constructor found for entity class [" + entityClass.getName()
-								+ "]. Entity class should have a constructor with dataservice as single arg or a constructor without arguments");
-
-				convertedEntity = BeanUtils.instantiateClass(ctor);
-			}
-			convertedEntity.set(entity);
-		}
-
-		return convertedEntity;
-	}
-
-	/**
 	 * Checks if an entity has another entity as one of its parents
 	 *
 	 * @param entityMetaData
