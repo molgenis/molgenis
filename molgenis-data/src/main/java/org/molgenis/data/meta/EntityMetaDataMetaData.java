@@ -3,14 +3,15 @@ package org.molgenis.data.meta;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static java.lang.Boolean.TRUE;
+import static java.lang.Boolean.FALSE;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.*;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.*;
 import static org.molgenis.data.meta.MetaPackage.PACKAGE_META;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
-@Component public class EntityMetaDataMetaData extends SystemEntityMetaData
+@Component
+public class EntityMetaDataMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME_ = "entities";
 	public static final String ENTITY_META_DATA = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;
@@ -52,7 +53,8 @@ import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 		addAttribute(ID_ATTRIBUTE).setDataType(XREF).setRefEntity(attrMetaMeta).setLabel("ID attribute");
 		addAttribute(LABEL_ATTRIBUTE).setDataType(XREF).setRefEntity(attrMetaMeta).setLabel("Label attribute");
 		addAttribute(LOOKUP_ATTRIBUTES).setDataType(MREF).setRefEntity(attrMetaMeta).setLabel("Lookup attributes");
-		addAttribute(ABSTRACT).setDataType(BOOL).setNillable(false).setLabel("Abstract").setDefaultValue(TRUE.toString());
+		addAttribute(ABSTRACT).setDataType(BOOL).setNillable(false).setLabel("Abstract")
+				.setDefaultValue(FALSE.toString());
 		// TODO replace with autowired self-reference after update to Spring 4.3
 		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this).setLabel("Extends");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData).setLabel("Tags");
@@ -60,17 +62,20 @@ import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 	}
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
-	@Autowired public void setAttributeMetaDataMetaData(AttributeMetaDataMetaData attrMetaMeta)
+	@Autowired
+	public void setAttributeMetaDataMetaData(AttributeMetaDataMetaData attrMetaMeta)
 	{
 		this.attrMetaMeta = requireNonNull(attrMetaMeta);
 	}
 
-	@Autowired public void setPackageMetaData(PackageMetaData packageMetaData)
+	@Autowired
+	public void setPackageMetaData(PackageMetaData packageMetaData)
 	{
 		this.packageMetaData = requireNonNull(packageMetaData);
 	}
 
-	@Autowired public void setTagMetaData(TagMetaData tagMetaData)
+	@Autowired
+	public void setTagMetaData(TagMetaData tagMetaData)
 	{
 		this.tagMetaData = requireNonNull(tagMetaData);
 	}
