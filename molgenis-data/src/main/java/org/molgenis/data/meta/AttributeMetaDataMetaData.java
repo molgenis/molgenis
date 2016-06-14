@@ -54,7 +54,7 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 		setLabel("Attribute");
 		setDescription("Meta data for attributes");
 
-		addAttribute(IDENTIFIER, ROLE_ID).setVisible(false).setAuto(true);
+		addAttribute(IDENTIFIER, ROLE_ID).setVisible(false).setAuto(true).setLabel("Identifier");
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Name");
 		addAttribute(DATA_TYPE).setDataType(new EnumField()).setEnumOptions(FieldTypeEnum.getOptionsLowercase())
 				.setNillable(false).setLabel("Data type");

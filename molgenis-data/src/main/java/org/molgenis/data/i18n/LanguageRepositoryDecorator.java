@@ -258,9 +258,11 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 
 			// Add language attributes for attribute meta data
 			AttributeMetaData attrLabel = attrMetaFactory.create().setName(LABEL + '-' + languageCode)
-					.setNillable(true);
+					.setNillable(true).setLabel(
+							new StringBuilder().append("Label (").append(languageCode).append(")").toString());
 			AttributeMetaData attrDescription = attrMetaFactory.create().setName(DESCRIPTION + '-' + languageCode)
-					.setNillable(true);
+					.setNillable(true).setLabel(
+							new StringBuilder().append("Description (").append(languageCode).append(")").toString());
 			dataService.add(ATTRIBUTE_META_DATA, Stream.of(attrLabel, attrDescription));
 
 			EntityMetaData attrMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(ATTRIBUTE_META_DATA));
@@ -275,10 +277,12 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 			attrMetaUpdated.addAttribute(attrDescription);
 
 			// Add language attributes for entity meta data
-			AttributeMetaData entityDescription = attrMetaFactory.create()
-					.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true);
 			AttributeMetaData entityLabel = attrMetaFactory.create()
-					.setName(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true);
+					.setName(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true).setLabel(
+							new StringBuilder().append("Label (").append(languageCode).append(')').toString());
+			AttributeMetaData entityDescription = attrMetaFactory.create()
+					.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true).setLabel(
+							new StringBuilder().append("Description (").append(languageCode).append(')').toString());
 			dataService.add(ATTRIBUTE_META_DATA, Stream.of(entityLabel, entityDescription));
 
 			EntityMetaData entityMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(ENTITY_META_DATA));

@@ -35,12 +35,14 @@ public class PackageMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
-		addAttribute(FULL_NAME, ROLE_ID, ROLE_LABEL).setNillable(false);
-		addAttribute(SIMPLE_NAME);
-		addAttribute(LABEL);
-		addAttribute(DESCRIPTION).setDataType(TEXT);
-		addAttribute(PARENT).setDataType(XREF).setRefEntity(this);
-		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData);
+		setLabel("Package");
+		setDescription("Grouping of related entities");
+		addAttribute(FULL_NAME, ROLE_ID, ROLE_LABEL).setLabel("Qualified name");
+		addAttribute(SIMPLE_NAME).setLabel("Name");
+		addAttribute(LABEL).setLabel("Label");
+		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
+		addAttribute(PARENT).setDataType(XREF).setRefEntity(this).setLabel("Parent");
+		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData).setLabel("Tags");
 	}
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies

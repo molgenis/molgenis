@@ -43,7 +43,7 @@ import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 		setLabel("Entity");
 		setDescription("Meta data for entity classes");
 
-		addAttribute(FULL_NAME, ROLE_ID).setVisible(false);
+		addAttribute(FULL_NAME, ROLE_ID).setVisible(false).setLabel("Qualified name");
 		addAttribute(SIMPLE_NAME, ROLE_LABEL).setNillable(false).setReadOnly(true).setLabel("Name");
 		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetaData).setLabel("Package").setReadOnly(true);
 		addAttribute(LABEL, ROLE_LOOKUP).setLabel("Label");
