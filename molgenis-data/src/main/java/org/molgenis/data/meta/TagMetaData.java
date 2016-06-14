@@ -1,13 +1,11 @@
 package org.molgenis.data.meta;
 
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import org.springframework.stereotype.Component;
+
+import static org.molgenis.MolgenisFieldTypes.TEXT;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.*;
 import static org.molgenis.data.meta.MetaPackage.PACKAGE_META;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
-
-import org.molgenis.MolgenisFieldTypes;
-import org.springframework.stereotype.Component;
 
 @Component
 public class TagMetaData extends SystemEntityMetaData
@@ -30,11 +28,11 @@ public class TagMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
-		addAttribute(IDENTIFIER, ROLE_ID);
-		addAttribute(OBJECT_IRI, ROLE_LOOKUP).setDataType(MolgenisFieldTypes.TEXT);
-		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false);
-		addAttribute(RELATION_IRI).setNillable(false);
-		addAttribute(RELATION_LABEL).setNillable(false);
-		addAttribute(CODE_SYSTEM);
+		addAttribute(IDENTIFIER, ROLE_ID).setLabel("Identifier");
+		addAttribute(OBJECT_IRI, ROLE_LOOKUP).setDataType(TEXT).setLabel("Object IRI");
+		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
+		addAttribute(RELATION_IRI).setNillable(false).setLabel("Relation IRI");
+		addAttribute(RELATION_LABEL).setNillable(false).setLabel("Relation label");
+		addAttribute(CODE_SYSTEM).setLabel("Code system");
 	}
 }
