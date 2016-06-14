@@ -7,9 +7,7 @@ import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 import java.util.Arrays;
 
@@ -348,6 +346,21 @@ public class DefaultEntityMetaDataTest
 		String lookupAttrName = "lookupAttr";
 		DefaultAttributeMetaData lookupAttr = entityMeta.addAttribute(lookupAttrName, ROLE_LOOKUP);
 		assertEquals(entityMeta.getLookupAttribute(lookupAttrName), lookupAttr);
+	}
+
+	@Test
+	public void getLabelAttributeLanguageCode()
+	{
+		DefaultEntityMetaData entityMeta = new DefaultEntityMetaData("entity");
+		String labelDefault = "label";
+		String labelEn = "label-en";
+		String labelPt = "label-pt";
+		DefaultAttributeMetaData labelDefaultAttr = entityMeta.addAttribute(labelDefault, ROLE_LABEL);
+		DefaultAttributeMetaData labelEnAttr = entityMeta.addAttribute(labelEn);
+		DefaultAttributeMetaData labelPtAttr = entityMeta.addAttribute(labelPt);
+		assertEquals(entityMeta.getLabelAttribute("en"), labelEnAttr);
+		assertEquals(entityMeta.getLabelAttribute("pt"), labelPtAttr);
+		assertEquals(entityMeta.getLabelAttribute("xx"), labelDefaultAttr);
 	}
 
 	private void assertEntityMetaEquals(EntityMetaData actualEntityMeta, EntityMetaData expectedEntityMeta)
