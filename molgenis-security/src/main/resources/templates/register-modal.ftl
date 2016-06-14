@@ -7,7 +7,7 @@
                 <h4 class="modal-title" id="register-modal-label">Sign up</h4>
             </div>
             <div class="modal-body">
-            <#-- bootstrap form -->
+                <#-- register form -->
                 <form id="register-form" class="form-horizontal" role="form">
                     <div class="form-group">
                         <label class="col-md-4 control-label" for="reg-username">Username *</label>
@@ -124,9 +124,9 @@
 </div>
 <script type="text/javascript">
     $(function() {
-        var modal = $('#bootstrap-modal');
-        var submitBtn = $('#bootstrap-btn');
-        var form = $('#bootstrap-form');
+        var modal = $('#register-modal');
+        var submitBtn = $('#register-btn');
+        var form = $('#register-form');
         form.validate();
         
         $('#reg-password').rules('add', {
@@ -160,7 +160,7 @@
             form[0].reset();
             $('.alert', modal).remove();
         });
-        $('#bootstrap-btn-close').click(function () {
+        $('#register-btn-close').click(function() {
             modal.modal('hide');
         });
     
@@ -175,7 +175,7 @@
                 
                 $.ajax({
                     type: 'POST',
-                    url: '/account/bootstrap',
+                    url:  '/account/register',
                     data: form.serialize(),
                     global: false, // do not trigger default molgenis error handler
                     success: function (data) {
