@@ -130,6 +130,9 @@ import _ from "underscore";
 						case 'DECIMAL':
 							operator = 'EQUALS';
 							break;
+						case 'TEXT':
+							operator = 'SEARCH';
+							break;
 						case 'COMPOUND':
 							continue;
 					}

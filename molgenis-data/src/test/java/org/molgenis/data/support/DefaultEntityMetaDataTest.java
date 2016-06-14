@@ -1,18 +1,6 @@
 package org.molgenis.data.support;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.COMPOUND;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Arrays;
-
+import com.google.common.collect.Lists;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Package;
@@ -20,7 +8,14 @@ import org.molgenis.data.meta.PackageImpl;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Lists;
+import java.util.Arrays;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.COMPOUND;
+import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.data.EntityMetaData.AttributeRole.*;
+import static org.testng.Assert.*;
 
 public class DefaultEntityMetaDataTest
 {
@@ -348,6 +343,21 @@ public class DefaultEntityMetaDataTest
 		String lookupAttrName = "lookupAttr";
 		DefaultAttributeMetaData lookupAttr = entityMeta.addAttribute(lookupAttrName, ROLE_LOOKUP);
 		assertEquals(entityMeta.getLookupAttribute(lookupAttrName), lookupAttr);
+	}
+
+	@Test
+	public void getLabelAttributeLanguageCode()
+	{
+		DefaultEntityMetaData entityMeta = new DefaultEntityMetaData("entity");
+		String labelDefault = "label";
+		String labelEn = "label-en";
+		String labelPt = "label-pt";
+		DefaultAttributeMetaData labelDefaultAttr = entityMeta.addAttribute(labelDefault, ROLE_LABEL);
+		DefaultAttributeMetaData labelEnAttr = entityMeta.addAttribute(labelEn);
+		DefaultAttributeMetaData labelPtAttr = entityMeta.addAttribute(labelPt);
+		assertEquals(entityMeta.getLabelAttribute("en"), labelEnAttr);
+		assertEquals(entityMeta.getLabelAttribute("pt"), labelPtAttr);
+		assertEquals(entityMeta.getLabelAttribute("xx"), labelDefaultAttr);
 	}
 
 	private void assertEntityMetaEquals(EntityMetaData actualEntityMeta, EntityMetaData expectedEntityMeta)
