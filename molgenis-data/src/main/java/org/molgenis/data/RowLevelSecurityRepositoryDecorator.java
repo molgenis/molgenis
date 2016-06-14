@@ -451,8 +451,9 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		if (isSuOrSystem(authentication) && entity.getString(UPDATE_ATTRIBUTE) != null) return entity;
 		Entity currentEntity = runAsSystem(() -> decoratedRepository.findOne(entity.getIdValue()));
 		Iterable<Entity> users = runAsSystem(() -> currentEntity.getEntities(UPDATE_ATTRIBUTE));
-		entity.set(UPDATE_ATTRIBUTE, users);
-		return entity;
+		Entity copy = runAsSystem(() -> new DefaultEntity(getEntityMetaData(), dataService, entity));
+		copy.set(UPDATE_ATTRIBUTE, users);
+		return copy;
 	}
 
 	private boolean validatePermission(Entity completeEntity, Permission permission, Authentication authentication)

@@ -46,9 +46,7 @@ public class SourceToEntityConverter
 			}
 			// Run as system because otherwise the row level secured enities throw an exception because of a lack of
 			// permissions on the referenced MolgenisUser in the "_UPDATE" column
-			AttributeMetaData attr = RunAsSystemProxy.runAsSystem(() -> {
-				return entityMeta.getAttribute(attrName);
-			});
+			AttributeMetaData attr = RunAsSystemProxy.runAsSystem(() -> dataService.getEntityMetaData(entityMeta.getName()).getAttribute(attrName));
 			if (attr == null)
 			{
 				throw new UnknownAttributeException(
