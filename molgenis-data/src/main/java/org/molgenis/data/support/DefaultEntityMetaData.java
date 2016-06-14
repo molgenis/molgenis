@@ -675,11 +675,16 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	{
 		AttributeMetaData labelAttr = getLabelAttribute();
 		String labelAttributeName = labelAttr.getName();
-		if(labelAttributeName.endsWith("-" + FALLBACK_LANGUAGE))
+
+		if (labelAttributeName.contains("-"))
 		{
 			labelAttributeName = labelAttributeName.substring(0, labelAttributeName.length() - 3);
 		}
 		AttributeMetaData i18nLabelAttr = getCachedAllAttrs().get(labelAttributeName + '-' + languageCode);
+		if (i18nLabelAttr == null){
+			i18nLabelAttr = getCachedAllAttrs().get(labelAttributeName);
+		}
+
 		return i18nLabelAttr != null ? i18nLabelAttr : labelAttr;
 	}
 
