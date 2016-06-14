@@ -1,6 +1,8 @@
 package org.molgenis.data.mapper.service.impl;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.RowLevelSecurityRepositoryDecorator.UPDATE_ATTRIBUTE;
+import static org.molgenis.data.RowLevelSecurityUtils.removeUpdateAttributeIfRowLevelSecured;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 
 import java.util.Collections;
@@ -13,14 +15,8 @@ import java.util.stream.Collectors;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.auth.MolgenisUserMetaData;
+import org.molgenis.data.*;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
@@ -29,12 +25,15 @@ import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.PackageImpl;
+import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.permission.PermissionSystemService;
+import org.molgenis.util.HugeMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -76,7 +75,10 @@ public class MappingServiceImpl implements MappingService
 	public MappingProject addMappingProject(String projectName, MolgenisUser owner, String target)
 	{
 		MappingProject mappingProject = new MappingProject(projectName, owner);
-		mappingProject.addTarget(dataService.getEntityMetaData(target));
+
+		EntityMetaData entityMetaData = dataService.getEntityMetaData(target);
+		entityMetaData = removeUpdateAttributeIfRowLevelSecured(entityMetaData);
+		mappingProject.addTarget(entityMetaData);
 		mappingProjectRepository.add(mappingProject);
 		return mappingProject;
 	}
@@ -98,11 +100,11 @@ public class MappingServiceImpl implements MappingService
 		{
 			throw new UnknownEntityException("Mapping project [" + mappingProjectId + "] does not exist");
 		}
-		String mappingProjectName = mappingProject.getName();
 
+		String mappingProjectName = mappingProject.getName();
 		// determine cloned mapping project name (use Windows 7 naming strategy):
 		String clonedMappingProjectName;
-		for (int i = 1;; ++i)
+		for (int i = 1; ; ++i)
 		{
 			if (i == 1)
 			{
@@ -179,6 +181,14 @@ public class MappingServiceImpl implements MappingService
 		Repository targetRepo;
 		if (!dataService.hasRepository(entityName))
 		{
+			if (targetMetaData.isRowLevelSecured())
+			{
+				DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(targetMetaData);
+				defaultEntityMetaData.addAttributeMetaData(
+						new DefaultAttributeMetaData(UPDATE_ATTRIBUTE).setDataType(MolgenisFieldTypes.MREF)
+								.setRefEntity(new MolgenisUserMetaData()));
+				targetMetaData = defaultEntityMetaData;
+			}
 			targetRepo = dataService.getMeta().addEntityMeta(targetMetaData);
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Collections.singletonList(targetRepo.getName()));
@@ -212,24 +222,25 @@ public class MappingServiceImpl implements MappingService
 	/**
 	 * Compares the attributes of the target repository with the results of the mapping and sees if they're compatible.
 	 * The repository is compatible when all attributes resulting from the mapping can be written to it.
-	 * 
-	 * @param targetRepository
-	 *            the target repository
-	 * @param mappingTargetMetaData
-	 *            the metadata of the mapping result entity
+	 *
+	 * @param targetRepository      the target repository
+	 * @param mappingTargetMetaData the metadata of the mapping result entity
 	 * @return true if the mapping can be written to the target repository
 	 */
 	private boolean isTargetMetaCompatible(Repository targetRepository, EntityMetaData mappingTargetMetaData)
 	{
 		Map<String, AttributeMetaData> targetRepoAttributeMap = Maps.newHashMap();
-		targetRepository.getEntityMetaData().getAtomicAttributes()
-				.forEach(attr -> targetRepoAttributeMap.put(attr.getName(), attr));
+
+		EntityMetaData targetRepoMetaData = targetRepository.getEntityMetaData();
+		targetRepoMetaData = removeUpdateAttributeIfRowLevelSecured(targetRepoMetaData);
+
+		targetRepoMetaData.getAtomicAttributes().forEach(attr -> targetRepoAttributeMap.put(attr.getName(), attr));
 
 		for (AttributeMetaData mappingTargetAttr : mappingTargetMetaData.getAtomicAttributes())
 		{
 			String mappingTargetAttrName = mappingTargetAttr.getName();
-			if (targetRepoAttributeMap.containsKey(mappingTargetAttrName)
-					&& targetRepoAttributeMap.get(mappingTargetAttrName).isSameAs(mappingTargetAttr))
+			if (targetRepoAttributeMap.containsKey(mappingTargetAttrName) && targetRepoAttributeMap
+					.get(mappingTargetAttrName).isSameAs(mappingTargetAttr))
 			{
 				continue;
 			}
@@ -254,9 +265,19 @@ public class MappingServiceImpl implements MappingService
 		EntityMetaData targetMetaData = targetRepo.getEntityMetaData();
 		Repository sourceRepo = dataService.getRepository(sourceMapping.getName());
 
-		// delete all target entities from this source
+		// collect the entities to delete
 		List<Entity> deleteEntities = targetRepo.findAll(new QueryImpl().eq("source", sourceRepo.getName()))
 				.filter(Objects::nonNull).collect(Collectors.toList());
+
+		HugeMap<Object, Iterable<Entity>> updatePermissions = new HugeMap<>();
+		if (targetMetaData.isRowLevelSecured())
+		{
+			// collect all the row level security permissions so we can apply them later
+			RunAsSystemProxy.runAsSystem(() -> deleteEntities.forEach(
+					entity -> updatePermissions.put(entity.getIdValue(), entity.getEntities(UPDATE_ATTRIBUTE))));
+		}
+
+		// remove all target entities from this source so we 'keep track of' deletes, inserts and updates
 		targetRepo.delete(deleteEntities.stream());
 
 		Iterator<Entity> sourceEntities = sourceRepo.iterator();
@@ -266,6 +287,13 @@ public class MappingServiceImpl implements MappingService
 			Entity sourceEntity = sourceEntities.next();
 			MapEntity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
 					sourceMapping.getSourceEntityMetaData(), targetRepo);
+
+			if (targetMetaData.isRowLevelSecured())
+			{
+				// re-apply the permissions to each entity
+				mappedEntity.set(UPDATE_ATTRIBUTE, updatePermissions.get(mappedEntity.getIdValue()));
+			}
+
 			mappedEntities.add(mappedEntity);
 
 			if (mappedEntities.size() == BATCH_SIZE || !sourceEntities.hasNext())
@@ -282,8 +310,9 @@ public class MappingServiceImpl implements MappingService
 		MapEntity target = new MapEntity(targetMetaData);
 		target.set("source", sourceMapping.getName());
 
-		sourceMapping.getAttributeMappings().forEach(attributeMapping -> applyMappingToAttribute(attributeMapping,
-				sourceEntity, target, sourceEntityMetaData));
+		sourceMapping.getAttributeMappings().forEach(
+				attributeMapping -> applyMappingToAttribute(attributeMapping, sourceEntity, target,
+						sourceEntityMetaData));
 		return target;
 	}
 
@@ -291,8 +320,8 @@ public class MappingServiceImpl implements MappingService
 	public String generateId(FieldType dataType, Long count)
 	{
 		Object id;
-		if (dataType.equals(MolgenisFieldTypes.INT) || dataType.equals(MolgenisFieldTypes.LONG)
-				|| dataType.equals(MolgenisFieldTypes.DECIMAL))
+		if (dataType.equals(MolgenisFieldTypes.INT) || dataType.equals(MolgenisFieldTypes.LONG) || dataType
+				.equals(MolgenisFieldTypes.DECIMAL))
 		{
 			id = count + 1;
 		}
