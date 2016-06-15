@@ -1,18 +1,14 @@
 package org.molgenis.data.meta;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.MolgenisFieldTypes.MREF;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
-import static org.molgenis.data.meta.MetaPackage.PACKAGE_META;
-import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static java.lang.Boolean.FALSE;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.*;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.*;
+import static org.molgenis.data.meta.MetaPackage.PACKAGE_META;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
 @Component
 public class EntityMetaDataMetaData extends SystemEntityMetaData
@@ -20,21 +16,21 @@ public class EntityMetaDataMetaData extends SystemEntityMetaData
 	private static final String SIMPLE_NAME_ = "entities";
 	public static final String ENTITY_META_DATA = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;
 
-	public static final String SIMPLE_NAME = "simpleName";
-	public static final String BACKEND = "backend";
 	public static final String FULL_NAME = "fullName";
+	public static final String SIMPLE_NAME = "simpleName";
+	public static final String PACKAGE = "package";
+	public static final String LABEL = "label";
+	public static final String DESCRIPTION = "description";
+	public static final String ATTRIBUTES = "attributes";
 	public static final String ID_ATTRIBUTE = "idAttribute";
 	public static final String LABEL_ATTRIBUTE = "labelAttribute";
 	public static final String LOOKUP_ATTRIBUTES = "lookupAttributes";
 	public static final String ABSTRACT = "abstract";
-	public static final String LABEL = "label";
 	public static final String EXTENDS = "extends";
-	public static final String DESCRIPTION = "description";
-	public static final String PACKAGE = "package";
 	public static final String TAGS = "tags";
-	public static final String ATTRIBUTES = "attributes";
+	public static final String BACKEND = "backend";
 
-	private AttributeMetaDataMetaData attributeMetaDataMetaData;
+	private AttributeMetaDataMetaData attrMetaMeta;
 	private PackageMetaData packageMetaData;
 	private TagMetaData tagMetaData;
 
@@ -45,27 +41,31 @@ public class EntityMetaDataMetaData extends SystemEntityMetaData
 
 	public void init()
 	{
-		addAttribute(FULL_NAME, ROLE_ID).setUnique(true);
-		addAttribute(SIMPLE_NAME, ROLE_LABEL).setNillable(false);
-		addAttribute(BACKEND);
-		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetaData);
-		addAttribute(ID_ATTRIBUTE).setDataType(XREF).setRefEntity(attributeMetaDataMetaData);
-		addAttribute(LABEL_ATTRIBUTE).setDataType(XREF).setRefEntity(attributeMetaDataMetaData);
-		addAttribute(LOOKUP_ATTRIBUTES).setDataType(MREF).setRefEntity(attributeMetaDataMetaData);
-		addAttribute(ABSTRACT).setDataType(BOOL);
-		addAttribute(LABEL, ROLE_LOOKUP);
-		addAttribute(EXTENDS).setDataType(XREF)
-				.setRefEntity(this); // TODO replace with autowired self-reference after update to Spring 4.3
-		addAttribute(DESCRIPTION).setDataType(TEXT);
-		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData);
-		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(attributeMetaDataMetaData);
+		setLabel("Entity");
+		setDescription("Meta data for entity classes");
+
+		addAttribute(FULL_NAME, ROLE_ID).setVisible(false).setLabel("Qualified name");
+		addAttribute(SIMPLE_NAME, ROLE_LABEL).setNillable(false).setReadOnly(true).setLabel("Name");
+		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetaData).setLabel("Package").setReadOnly(true);
+		addAttribute(LABEL, ROLE_LOOKUP).setLabel("Label");
+		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
+		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(attrMetaMeta).setNillable(false).setLabel("Attributes");
+		addAttribute(ID_ATTRIBUTE).setDataType(XREF).setRefEntity(attrMetaMeta).setLabel("ID attribute");
+		addAttribute(LABEL_ATTRIBUTE).setDataType(XREF).setRefEntity(attrMetaMeta).setLabel("Label attribute");
+		addAttribute(LOOKUP_ATTRIBUTES).setDataType(MREF).setRefEntity(attrMetaMeta).setLabel("Lookup attributes");
+		addAttribute(ABSTRACT).setDataType(BOOL).setNillable(false).setLabel("Abstract")
+				.setDefaultValue(FALSE.toString());
+		// TODO replace with autowired self-reference after update to Spring 4.3
+		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this).setLabel("Extends");
+		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData).setLabel("Tags");
+		addAttribute(BACKEND).setNillable(false).setLabel("Backend").setDescription("Backend data store");
 	}
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
 	@Autowired
-	public void setAttributeMetaDataMetaData(AttributeMetaDataMetaData attributeMetaDataMetaData)
+	public void setAttributeMetaDataMetaData(AttributeMetaDataMetaData attrMetaMeta)
 	{
-		this.attributeMetaDataMetaData = requireNonNull(attributeMetaDataMetaData);
+		this.attrMetaMeta = requireNonNull(attrMetaMeta);
 	}
 
 	@Autowired

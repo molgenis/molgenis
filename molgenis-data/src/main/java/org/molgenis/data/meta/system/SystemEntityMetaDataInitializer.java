@@ -67,10 +67,14 @@ public class SystemEntityMetaDataInitializer
 		I18nStringMetaData i18nStringMeta = ctx.getBean(I18nStringMetaData.class);
 
 		languageCodes.forEach(languageCode -> {
-			entityMetaMeta.addAttribute(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true);
-			entityMetaMeta.addAttribute(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true);
-			attrMetaMeta.addAttribute(AttributeMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true);
-			attrMetaMeta.addAttribute(AttributeMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true);
+			entityMetaMeta.addAttribute(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true).setLabel(
+					new StringBuilder().append("Label (").append(languageCode).append(")").toString());
+			entityMetaMeta.addAttribute(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true).setLabel(
+					new StringBuilder().append("Description (").append(languageCode).append(")").toString());
+			attrMetaMeta.addAttribute(AttributeMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true).setLabel(
+					new StringBuilder().append("Label (").append(languageCode).append(")").toString());
+			attrMetaMeta.addAttribute(AttributeMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true).setLabel(
+					new StringBuilder().append("Description (").append(languageCode).append(")").toString());
 			i18nStringMeta.addLanguage(languageCode);
 		});
 	}

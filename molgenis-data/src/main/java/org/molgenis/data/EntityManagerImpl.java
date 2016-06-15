@@ -1,35 +1,30 @@
 package org.molgenis.data;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.SetMultimap;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.SystemEntity;
+import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.support.LazyEntity;
 import org.molgenis.data.support.PartialEntity;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.BatchingIterable;
-import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.SetMultimap;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.StreamSupport.stream;
 
 /**
  * Entity manager responsible for creating entity references and resolving references of reference attributes.
@@ -39,11 +34,18 @@ public class EntityManagerImpl implements EntityManager
 	private static final int BATCH_SIZE = 100;
 
 	private final DataService dataService;
+	private SystemEntityMetaDataRegistry systemEntityMetaRegistry;
 
 	@Autowired
 	public EntityManagerImpl(DataService dataService)
 	{
 		this.dataService = requireNonNull(dataService);
+
+	}
+
+	@Autowired
+	public void setSystemEntityMetaRegistry(SystemEntityMetaDataRegistry systemEntityMetaRegistry) {
+		this.systemEntityMetaRegistry = requireNonNull(systemEntityMetaRegistry);
 	}
 
 	@Override
@@ -152,11 +154,11 @@ public class EntityManagerImpl implements EntityManager
 	private List<Entity> resolveReferences(List<AttributeMetaData> resolvableAttrs, List<Entity> entities, Fetch fetch)
 	{
 		// entity name --> entity ids
-		SetMultimap<String, Object> lazyRefEntityIdsMap = HashMultimap.<String, Object> create(resolvableAttrs.size(),
+		SetMultimap<String, Object> lazyRefEntityIdsMap = HashMultimap.<String, Object>create(resolvableAttrs.size(),
 				16);
 		// entity name --> attributes referring to this entity
-		SetMultimap<String, AttributeMetaData> refEntityAttrsMap = HashMultimap
-				.<String, AttributeMetaData> create(resolvableAttrs.size(), 2);
+		SetMultimap<String, AttributeMetaData> refEntityAttrsMap = HashMultimap.<String, AttributeMetaData>create(
+				resolvableAttrs.size(), 2);
 
 		// fill maps
 		for (AttributeMetaData attr : resolvableAttrs)
@@ -306,7 +308,7 @@ public class EntityManagerImpl implements EntityManager
 
 	/**
 	 * Return all resolvable attributes: non-computed reference attributes defined in fetch
-	 * 
+	 *
 	 * @param entityMeta
 	 * @param fetch
 	 * @return
@@ -360,16 +362,16 @@ public class EntityManagerImpl implements EntityManager
 	}
 
 	@Override
-	public <E extends Entity> E convert(Entity entity, Class<E> entityClass)
+	public <E extends SystemEntity> E convert(Entity entity, Class<E> entityClass)
 	{
-		return entity != null ? EntityUtils.convert(entity, entityClass, dataService) : null;
+		return entity != null ? getEntityFactory(entityClass).create(entity) : null;
 	}
 
 	@Override
-	public <E extends Entity> Iterable<E> convert(Iterable<Entity> entities, Class<E> entityClass)
+	public <E extends SystemEntity> Iterable<E> convert(Iterable<Entity> entities, Class<E> entityClass)
 	{
-		return () -> stream(entities.spliterator(), false)
-				.map(entity -> EntityUtils.convert(entity, entityClass, dataService)).iterator();
+		return () -> stream(entities.spliterator(), false).map(entity -> getEntityFactory(entityClass).create(entity))
+				.iterator();
 	}
 
 	@Override
@@ -383,5 +385,15 @@ public class EntityManagerImpl implements EntityManager
 		{
 			return new PartialEntity(partialEntity, fetch, this);
 		}
+	}
+
+	private <E extends SystemEntity> SystemEntityFactory<E, Object> getEntityFactory(Class<E> entityClass)
+	{
+		SystemEntityFactory<E, Object> entityFactory = systemEntityMetaRegistry.getSystemEntityFactory(entityClass);
+		if (entityFactory == null)
+		{
+			throw new RuntimeException(format("Unknown entity factory for entity [%s]", entityClass.getSimpleName()));
+		}
+		return entityFactory;
 	}
 }

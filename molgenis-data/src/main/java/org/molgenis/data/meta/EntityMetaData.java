@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.MapEntity;
 
@@ -63,6 +64,7 @@ public class EntityMetaData extends SystemEntity
 	public EntityMetaData(EntityMetaDataMetaData entityMetaMeta)
 	{
 		super(entityMetaMeta);
+		setDefaultValues();
 	}
 
 	/**
@@ -74,6 +76,7 @@ public class EntityMetaData extends SystemEntity
 	public EntityMetaData(String entityId, EntityMetaDataMetaData entityMetaMeta)
 	{
 		super(entityMetaMeta);
+		setDefaultValues();
 		setSimpleName(entityId);
 	}
 
@@ -671,6 +674,11 @@ public class EntityMetaData extends SystemEntity
 			}
 			set(FULL_NAME, fullName);
 		}
+	}
+
+	private void setDefaultValues()
+	{
+		setAbstract(false);
 	}
 
 	public enum AttributeRole

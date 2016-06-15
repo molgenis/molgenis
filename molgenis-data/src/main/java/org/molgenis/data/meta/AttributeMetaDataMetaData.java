@@ -1,10 +1,7 @@
 package org.molgenis.data.meta;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.MolgenisFieldTypes.MREF;
-import static org.molgenis.MolgenisFieldTypes.SCRIPT;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
+import static org.molgenis.MolgenisFieldTypes.*;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
@@ -54,28 +51,32 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 
 	public void init()
 	{
-		addAttribute(IDENTIFIER, ROLE_ID).setVisible(false).setAuto(true);
-		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false);
+		setLabel("Attribute");
+		setDescription("Meta data for attributes");
+
+		addAttribute(IDENTIFIER, ROLE_ID).setVisible(false).setAuto(true).setLabel("Identifier");
+		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Name");
 		addAttribute(DATA_TYPE).setDataType(new EnumField()).setEnumOptions(FieldTypeEnum.getOptionsLowercase())
-				.setNillable(false);
-		addAttribute(PARTS).setDataType(MREF).setRefEntity(this);
-		addAttribute(REF_ENTITY); // TODO xref instead of string
-		addAttribute(EXPRESSION).setNillable(true);
-		addAttribute(NILLABLE).setDataType(BOOL).setNillable(false);
-		addAttribute(AUTO).setDataType(BOOL).setNillable(false);
-		addAttribute(VISIBLE).setDataType(BOOL).setNillable(false);
-		addAttribute(LABEL, ROLE_LOOKUP);
-		addAttribute(DESCRIPTION).setDataType(TEXT);
-		addAttribute(AGGREGATEABLE).setDataType(BOOL).setNillable(false);
-		addAttribute(ENUM_OPTIONS).setDataType(TEXT);
-		addAttribute(RANGE_MIN).setDataType(new LongField());
-		addAttribute(RANGE_MAX).setDataType(new LongField());
-		addAttribute(READ_ONLY).setDataType(BOOL).setNillable(false);
-		addAttribute(UNIQUE).setDataType(BOOL).setNillable(false);
-		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData);
-		addAttribute(VISIBLE_EXPRESSION).setDataType(SCRIPT).setNillable(true);
-		addAttribute(VALIDATION_EXPRESSION).setDataType(SCRIPT).setNillable(true);
-		addAttribute(DEFAULT_VALUE).setDataType(TEXT).setNillable(true);
+				.setNillable(false).setLabel("Data type");
+		addAttribute(PARTS).setDataType(MREF).setRefEntity(this).setLabel("Attribute parts");
+		// during bootstrapping the data type is set to XREF and the ref entity to entity meta
+		addAttribute(REF_ENTITY).setLabel("Referenced entity");
+		addAttribute(EXPRESSION).setNillable(true).setLabel("Expression").setDescription("Computed value expression in Magma JavaScript");
+		addAttribute(NILLABLE).setDataType(BOOL).setNillable(false).setLabel("Nillable");
+		addAttribute(AUTO).setDataType(BOOL).setNillable(false).setLabel("Auto").setDescription("Auto generated values");
+		addAttribute(VISIBLE).setDataType(BOOL).setNillable(false).setLabel("Visible");
+		addAttribute(LABEL, ROLE_LOOKUP).setLabel("Label");
+		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
+		addAttribute(AGGREGATEABLE).setDataType(BOOL).setNillable(false).setLabel("Aggregatable");
+		addAttribute(ENUM_OPTIONS).setDataType(TEXT).setLabel("Enum values").setDescription("For data type ENUM");
+		addAttribute(RANGE_MIN).setDataType(new LongField()).setLabel("Range min");
+		addAttribute(RANGE_MAX).setDataType(new LongField()).setLabel("Range max");
+		addAttribute(READ_ONLY).setDataType(BOOL).setNillable(false).setLabel("Read-only");
+		addAttribute(UNIQUE).setDataType(BOOL).setNillable(false).setLabel("Unique");
+		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData).setLabel("Tags");
+		addAttribute(VISIBLE_EXPRESSION).setDataType(SCRIPT).setNillable(true).setLabel("Visible expression");
+		addAttribute(VALIDATION_EXPRESSION).setDataType(SCRIPT).setNillable(true).setLabel("Validation expression");
+		addAttribute(DEFAULT_VALUE).setDataType(TEXT).setNillable(true).setLabel("Default value");
 	}
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies

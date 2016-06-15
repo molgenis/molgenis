@@ -134,7 +134,7 @@ public abstract class AbstractEntity implements Entity
 	public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
 	{
 		Entity entity = getEntity(attributeName);
-		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity), null).iterator().next() : null;
+		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator().next() : null;
 	}
 
 	@Override
@@ -148,7 +148,7 @@ public abstract class AbstractEntity implements Entity
 	public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz)
 	{
 		Iterable<Entity> entities = getEntities(attributeName);
-		return entities != null ? new ConvertingIterable<E>(clazz, entities, null) : emptyList();
+		return entities != null ? new ConvertingIterable<E>(clazz, entities) : emptyList();
 	}
 
 	@Override

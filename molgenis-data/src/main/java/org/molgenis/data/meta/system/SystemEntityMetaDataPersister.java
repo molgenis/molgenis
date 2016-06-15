@@ -4,6 +4,8 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.MolgenisFieldTypes.XREF;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
@@ -77,6 +79,11 @@ public class SystemEntityMetaDataPersister
 		{
 			repositoryCollection.createRepository(entityMetaMeta);
 		}
+
+		// workaround for a cyclic dependency entity meta <--> attribute meta:
+		// first create attribute meta and entity meta table, then change data type.
+		// see the note in AttributeMetaDataMetaData and the exception in DependencyResolver
+		attributeMetaMeta.getAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityMetaMeta);
 
 		// add default meta entities
 		ApplicationContext ctx = event.getApplicationContext();

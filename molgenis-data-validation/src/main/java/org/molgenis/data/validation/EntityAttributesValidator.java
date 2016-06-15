@@ -130,7 +130,7 @@ public class EntityAttributesValidator
 			{
 				return createConstraintViolation(entity, attr, meta, "Not a valid entity, null is not allowed");
 			}
-			if (!refEntity.getEntityMetaData().equals(attr.getRefEntity()))
+			if (!refEntity.getEntityMetaData().getName().equals(attr.getRefEntity().getName()))
 			{
 				return createConstraintViolation(entity, attr, meta, "Not a valid entity type.");
 			}
@@ -154,7 +154,7 @@ public class EntityAttributesValidator
 		{
 			return null;
 		}
-		if (!refEntity.getEntityMetaData().equals(attr.getRefEntity()))
+		if (!refEntity.getEntityMetaData().getName().equals(attr.getRefEntity().getName()))
 		{
 			return createConstraintViolation(entity, attr, meta, "Not a valid entity type.");
 		}
