@@ -5,7 +5,6 @@ import static org.molgenis.file.ingest.meta.FileIngestMetaData.CRONEXPRESSION;
 import static org.molgenis.file.ingest.meta.FileIngestMetaData.DESCRIPTION;
 import static org.molgenis.file.ingest.meta.FileIngestMetaData.ENTITY_META_DATA;
 import static org.molgenis.file.ingest.meta.FileIngestMetaData.FAILURE_EMAIL;
-import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
 import static org.molgenis.file.ingest.meta.FileIngestMetaData.ID;
 import static org.molgenis.file.ingest.meta.FileIngestMetaData.LOADER;
 import static org.molgenis.file.ingest.meta.FileIngestMetaData.NAME;
@@ -15,13 +14,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntity;
+import org.molgenis.data.support.StaticEntity;
 
-public class FileIngest extends SystemEntity
+public class FileIngest extends StaticEntity
 {
 	public FileIngest(Entity entity)
 	{
-		super(entity, FILE_INGEST);
+		super(entity);
 	}
 
 	public FileIngest(FileIngestMetaData fileIngestMetaData)

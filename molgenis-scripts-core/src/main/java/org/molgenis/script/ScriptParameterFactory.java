@@ -11,6 +11,6 @@ public class ScriptParameterFactory
 	@Autowired
 	ScriptParameterFactory(ScriptParameterMetaData scriptParameterMetaData)
 	{
-		super(ScriptParameter.class, scriptParameterMetaData, String.class);
+		super(ScriptParameter.class, scriptParameterMetaData);
 	}
 }

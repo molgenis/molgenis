@@ -6,17 +6,17 @@ import static org.molgenis.data.meta.TagMetaData.LABEL;
 import static org.molgenis.data.meta.TagMetaData.OBJECT_IRI;
 import static org.molgenis.data.meta.TagMetaData.RELATION_IRI;
 import static org.molgenis.data.meta.TagMetaData.RELATION_LABEL;
-import static org.molgenis.data.meta.TagMetaData.TAG;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.support.StaticEntity;
 
 // TODO validate IRI
 // TODO extends typed entity that stores entity and handles get/sets, also apply to other meta data entities
-public class Tag extends SystemEntity
+public class Tag extends StaticEntity
 {
 	public Tag(Entity entity)
 	{
-		super(entity, TAG);
+		super(entity);
 	}
 
 	public Tag(TagMetaData tagMetaData)

@@ -10,6 +10,6 @@ public class EntityMetaDataFactory extends AbstractSystemEntityFactory<EntityMet
 	@Autowired
 	EntityMetaDataFactory(EntityMetaDataMetaData entityMetaMeta)
 	{
-		super(EntityMetaData.class, entityMetaMeta, String.class);
+		super(EntityMetaData.class, entityMetaMeta);
 	}
 }

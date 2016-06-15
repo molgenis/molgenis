@@ -39,7 +39,7 @@ public class AnnotatorDependencyOrderResolver
 	private Queue<RepositoryAnnotator> getSingleAnnotatorDependencyList(RepositoryAnnotator selectedAnnotator,
 			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> queue, EntityMetaData emd)
 	{
-		EntityMetaData entityMetaData = new EntityMetaData(emd); // create a copy because we do not want to
+		EntityMetaData entityMetaData = null; // FIXME new EntityMetaData(emd); // create a copy because we do not want to
 																		// change the actual metadata of the entity
 		resolveAnnotatorDependencies(selectedAnnotator, annotatorList, queue, entityMetaData);
 		return queue;

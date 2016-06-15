@@ -11,6 +11,6 @@ public class AnnotationJobExecutionFactory
 	@Autowired
 	AnnotationJobExecutionFactory(AnnotationJobExecutionMetaData annotationJobExecutionMetaData)
 	{
-		super(AnnotationJobExecution.class, annotationJobExecutionMetaData, String.class);
+		super(AnnotationJobExecution.class, annotationJobExecutionMetaData);
 	}
 }

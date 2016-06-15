@@ -17,7 +17,6 @@ public class SortaJobExecution extends JobExecution
 	public SortaJobExecution(Entity entity)
 	{
 		super(entity);
-		setDefaultValues();
 	}
 
 	public SortaJobExecution(SortaJobExecutionMetaData sortaJobExecutionMetaData)

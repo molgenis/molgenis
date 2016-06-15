@@ -27,10 +27,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryCollectionRegistry;
-import org.molgenis.data.SystemEntityFactory;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
-import org.molgenis.data.support.TypedRepositoryDecorator;
 import org.molgenis.fieldtypes.CompoundField;
 import org.molgenis.security.core.Permission;
 import org.molgenis.util.DependencyResolver;
@@ -360,29 +358,33 @@ public class MetaDataServiceImpl implements MetaDataService
 	private Repository<Package> getPackageRepository()
 	{
 
-		SystemEntityFactory<Package, Object> packageFactory = systemEntityMetaRegistry
-				.getSystemEntityFactory(Package.class);
-		return new TypedRepositoryDecorator<>(getRepository(PACKAGE), packageFactory);
+		//		SystemEntityFactory<Package, Object> packageFactory = systemEntityMetaRegistry
+		//				.getSystemEntityFactory(Package.class);
+		//		return new TypedRepositoryDecorator<>(getRepository(PACKAGE), packageFactory);
+		return (Repository<Package>) (Repository<? extends Entity>) getRepository(PACKAGE);
 	}
 
 	private Repository<EntityMetaData> getEntityRepository()
 	{
-		SystemEntityFactory<EntityMetaData, Object> entityMetaFactory = systemEntityMetaRegistry
-				.getSystemEntityFactory(EntityMetaData.class);
-		return new TypedRepositoryDecorator<>(getRepository(ENTITY_META_DATA), entityMetaFactory);
+		//		SystemEntityFactory<EntityMetaData, Object> entityMetaFactory = systemEntityMetaRegistry
+		//				.getSystemEntityFactory(EntityMetaData.class);
+		//		return new TypedRepositoryDecorator<>(getRepository(ENTITY_META_DATA), entityMetaFactory);
+		return (Repository<EntityMetaData>) (Repository<? extends Entity>) getRepository(ENTITY_META_DATA);
 	}
 
 	private Repository<AttributeMetaData> getAttributeRepository()
 	{
-		SystemEntityFactory<AttributeMetaData, Object> attrFactory = systemEntityMetaRegistry
-				.getSystemEntityFactory(AttributeMetaData.class);
-		return new TypedRepositoryDecorator<>(getRepository(ATTRIBUTE_META_DATA), attrFactory);
+		//		SystemEntityFactory<AttributeMetaData, Object> attrFactory = systemEntityMetaRegistry
+		//				.getSystemEntityFactory(AttributeMetaData.class);
+		//		return new TypedRepositoryDecorator<>(getRepository(ATTRIBUTE_META_DATA), attrFactory);
+		return (Repository<AttributeMetaData>) (Repository<? extends Entity>) getRepository(ATTRIBUTE_META_DATA);
 	}
 
 	private Repository<Tag> getTagRepository()
 	{
-		SystemEntityFactory<Tag, Object> tagFactory = systemEntityMetaRegistry.getSystemEntityFactory(Tag.class);
-		return new TypedRepositoryDecorator<>(getRepository(TAG), tagFactory);
+		//		SystemEntityFactory<Tag, Object> tagFactory = systemEntityMetaRegistry.getSystemEntityFactory(Tag.class);
+		//		return new TypedRepositoryDecorator<>(getRepository(TAG), tagFactory);
+		return (Repository<Tag>) (Repository<? extends Entity>) getRepository(TAG);
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package org.molgenis.data.support;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
 import java.sql.Timestamp;
@@ -167,6 +168,17 @@ public abstract class AbstractEntity implements Entity
 	public Object getIdValue()
 	{
 		return get(getEntityMetaData().getIdAttribute().getName());
+	}
+
+	@Override
+	public void setIdValue(Object id)
+	{
+		AttributeMetaData idAttr = getEntityMetaData().getIdAttribute();
+		if (idAttr == null)
+		{
+			throw new IllegalArgumentException(format("Entity [%s] doesn't have an id attribute"));
+		}
+		set(idAttr.getName(), id);
 	}
 
 	@Override

@@ -10,6 +10,6 @@ public class FileIngestEntityFactory extends AbstractSystemEntityFactory<FileIng
 	@Autowired
 	FileIngestEntityFactory(FileIngestMetaData fileIngestMeta)
 	{
-		super(FileIngest.class, fileIngestMeta, String.class);
+		super(FileIngest.class, fileIngestMeta);
 	}
 }

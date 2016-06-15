@@ -10,6 +10,6 @@ public class TagFactory extends AbstractSystemEntityFactory<Tag, TagMetaData, St
 	@Autowired
 	TagFactory(TagMetaData tagMetaData)
 	{
-		super(Tag.class, tagMetaData, String.class);
+		super(Tag.class, tagMetaData);
 	}
 }

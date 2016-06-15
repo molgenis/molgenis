@@ -4,20 +4,19 @@ import static org.molgenis.auth.MolgenisTokenMetaData.CREATIONDATE;
 import static org.molgenis.auth.MolgenisTokenMetaData.DESCRIPTION;
 import static org.molgenis.auth.MolgenisTokenMetaData.EXPIRATIONDATE;
 import static org.molgenis.auth.MolgenisTokenMetaData.ID;
-import static org.molgenis.auth.MolgenisTokenMetaData.MOLGENIS_TOKEN;
 import static org.molgenis.auth.MolgenisTokenMetaData.MOLGENIS_USER;
 import static org.molgenis.auth.MolgenisTokenMetaData.TOKEN;
 
 import java.util.Date;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntity;
+import org.molgenis.data.support.StaticEntity;
 
-public class MolgenisToken extends SystemEntity
+public class MolgenisToken extends StaticEntity
 {
 	public MolgenisToken(Entity entity)
 	{
-		super(entity, MOLGENIS_TOKEN);
+		super(entity);
 	}
 
 	public MolgenisToken(MolgenisTokenMetaData molgenisTokenMetaData)

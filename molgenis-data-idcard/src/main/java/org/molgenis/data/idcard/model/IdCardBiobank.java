@@ -1,16 +1,15 @@
 package org.molgenis.data.idcard.model;
 
-import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.ID_CARD_BIOBANK;
 import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.ORGANIZATION_ID;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntity;
+import org.molgenis.data.support.StaticEntity;
 
-public class IdCardBiobank extends SystemEntity
+public class IdCardBiobank extends StaticEntity
 {
 	public IdCardBiobank(Entity entity)
 	{
-		super(entity, ID_CARD_BIOBANK);
+		super(entity);
 	}
 
 	public IdCardBiobank(IdCardBiobankMetaData idCardBiobankMetaData)

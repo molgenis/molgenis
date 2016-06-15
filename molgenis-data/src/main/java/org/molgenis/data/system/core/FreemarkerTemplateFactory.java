@@ -12,6 +12,6 @@ public class FreemarkerTemplateFactory
 	@Autowired
 	FreemarkerTemplateFactory(FreemarkerTemplateMetaData freemarkerTemplate)
 	{
-		super(FreemarkerTemplate.class, freemarkerTemplate, String.class);
+		super(FreemarkerTemplate.class, freemarkerTemplate);
 	}
 }

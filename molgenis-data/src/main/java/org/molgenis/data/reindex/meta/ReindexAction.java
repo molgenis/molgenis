@@ -8,19 +8,18 @@ import static org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ENTITY_FULL_NAME;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ENTITY_ID;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ID;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_STATUS;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntity;
+import org.molgenis.data.support.StaticEntity;
 
-public class ReindexAction extends SystemEntity
+public class ReindexAction extends StaticEntity
 {
 	public ReindexAction(Entity entity)
 	{
-		super(entity, REINDEX_ACTION);
+		super(entity);
 	}
 
 	public ReindexAction(ReindexActionMetaData reindexActionMetaData)

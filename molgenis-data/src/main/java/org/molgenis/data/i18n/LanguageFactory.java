@@ -10,7 +10,7 @@ public class LanguageFactory extends AbstractSystemEntityFactory<Language, Langu
 	@Autowired
 	LanguageFactory(LanguageMetaData languageMetaData)
 	{
-		super(Language.class, languageMetaData, String.class);
+		super(Language.class, languageMetaData);
 	}
 
 	/**

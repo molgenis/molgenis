@@ -102,7 +102,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 				}
 			};
 		}
-		EntityMetaData meta = new EntityMetaData(entity.getEntityMetaData());
+		EntityMetaData meta = null; // FIXME new EntityMetaData(entity.getEntityMetaData());
 		info.getOutputAttributes().forEach(meta::addAttribute);
 		Entity resultEntity = new MapEntity(entity, meta);
 		processQueryResults(entity, annotatationSourceEntities, resultEntity);

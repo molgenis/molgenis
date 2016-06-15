@@ -2,7 +2,6 @@ package org.molgenis.auth;
 
 import static org.molgenis.auth.UserAuthorityMetaData.ID;
 import static org.molgenis.auth.UserAuthorityMetaData.MOLGENIS_USER;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 
 import org.molgenis.data.Entity;
 
@@ -10,7 +9,7 @@ public class UserAuthority extends Authority
 {
 	public UserAuthority(Entity entity)
 	{
-		super(entity, USER_AUTHORITY);
+		super(entity);
 	}
 
 	public UserAuthority(UserAuthorityMetaData userAuthorityMetaData)

@@ -11,7 +11,6 @@ public class AnnotationJobExecution extends JobExecution
 	public AnnotationJobExecution(Entity entity)
 	{
 		super(entity);
-		setDefaultValues();
 	}
 
 	public AnnotationJobExecution(AnnotationJobExecutionMetaData annotationJobExecutionMetaData)

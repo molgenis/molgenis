@@ -37,6 +37,12 @@ public class LazyEntity implements Entity
 	}
 
 	@Override
+	public void setIdValue(Object id)
+	{
+		throw new UnsupportedOperationException("Identifier of a lazy entity cannot be modified");
+	}
+
+	@Override
 	public EntityMetaData getEntityMetaData()
 	{
 		return entityMetaData;

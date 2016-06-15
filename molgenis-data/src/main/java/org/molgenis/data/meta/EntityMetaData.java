@@ -11,7 +11,6 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ID_ATTRIBUTE;
@@ -27,9 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.StaticEntity;
 
 import com.google.common.collect.Iterables;
 
@@ -37,23 +35,18 @@ import com.google.common.collect.Iterables;
  * EntityMetaData defines the structure and attributes of an Entity. Attributes are unique. Other software components
  * can use this to interact with Entity and/or to configure backends and frontends, including Repository instances.
  */
-public class EntityMetaData extends SystemEntity
+public class EntityMetaData extends StaticEntity
 {
+	public EntityMetaData(Entity entity)
+	{
+		super(entity);
+	}
+
 	/**
 	 * Creates a new entity meta data. Call {@link #init(EntityMetaData)} to initialize the created entity meta data.
 	 */
 	protected EntityMetaData()
 	{
-	}
-
-	/**
-	 * Creates new entity meta data based on the given entity.
-	 *
-	 * @param entity decorated entity
-	 */
-	public EntityMetaData(Entity entity)
-	{
-		super(entity, ENTITY_META_DATA);
 	}
 
 	/**
@@ -81,15 +74,16 @@ public class EntityMetaData extends SystemEntity
 	}
 
 	/**
-	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #EntityMetaData(Entity)})
+	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #EntityMetaData(EntityMetaDataMetaData)})
 	 *
 	 * @param entityMeta entity meta data
 	 * @return deep copy of entity meta data
 	 */
 	public static EntityMetaData newInstance(EntityMetaData entityMeta)
 	{
-		Entity entityCopy = MapEntity.newInstance(entityMeta);
-		return new EntityMetaData(entityCopy);
+		throw new RuntimeException("FIXME"); // FIXME
+		//		Entity entityCopy = MapEntity.newInstance(entityMeta);
+		//		return new EntityMetaData(entityCopy);
 	}
 
 	/**

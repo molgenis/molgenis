@@ -11,6 +11,6 @@ public class ReindexActionJobFactory
 	@Autowired
 	ReindexActionJobFactory(ReindexActionJobMetaData reindexActionJobMetaData)
 	{
-		super(ReindexActionJob.class, reindexActionJobMetaData, String.class);
+		super(ReindexActionJob.class, reindexActionJobMetaData);
 	}
 }

@@ -3,7 +3,6 @@ package org.molgenis.data.jobs;
 import static org.molgenis.data.jobs.JobExecutionMetaData.END_DATE;
 import static org.molgenis.data.jobs.JobExecutionMetaData.FAILURE_EMAIL;
 import static org.molgenis.data.jobs.JobExecutionMetaData.IDENTIFIER;
-import static org.molgenis.data.jobs.JobExecutionMetaData.JOB_EXECUTION;
 import static org.molgenis.data.jobs.JobExecutionMetaData.LOG;
 import static org.molgenis.data.jobs.JobExecutionMetaData.PROGRESS_INT;
 import static org.molgenis.data.jobs.JobExecutionMetaData.PROGRESS_MAX;
@@ -21,17 +20,17 @@ import java.util.Date;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.SystemEntity;
+import org.molgenis.data.support.StaticEntity;
 import org.springframework.util.StringUtils;
 
 /**
  * Superclass that represents a job execution.
  */
-public abstract class JobExecution extends SystemEntity
+public abstract class JobExecution extends StaticEntity
 {
 	public JobExecution(Entity entity)
 	{
-		super(entity, JOB_EXECUTION);
+		super(entity);
 	}
 
 	public JobExecution(EntityMetaData entityMetaData)

@@ -21,14 +21,13 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.SystemEntityFactory;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.SystemEntity;
 
 /**
  * Adapts a {@link Repository} with untyped entities to a Repository with typed entities
  *
  * @param <E> the type of entity
  */
-public class TypedRepositoryDecorator<E extends SystemEntity> implements Repository<E>
+public class TypedRepositoryDecorator<E extends Entity> implements Repository<E>
 {
 	private final Repository<Entity> untypedRepo;
 	private final SystemEntityFactory<E, Object> systemEntityFactory;

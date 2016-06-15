@@ -2,17 +2,17 @@ package org.molgenis.auth;
 
 import static org.molgenis.auth.MolgenisGroupMemberMetaData.ID;
 import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP;
-import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
 import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_USER;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntity;
+import org.molgenis.data.SystemEntityFactory;
+import org.molgenis.data.support.StaticEntity;
 
-public class MolgenisGroupMember extends SystemEntity
+public class MolgenisGroupMember extends StaticEntity
 {
 	public MolgenisGroupMember(Entity entity)
 	{
-		super(entity, MOLGENIS_GROUP_MEMBER);
+		super(entity);
 	}
 
 	public MolgenisGroupMember(MolgenisGroupMemberMetaData molgenisGroupMemberMetaData)
@@ -21,6 +21,13 @@ public class MolgenisGroupMember extends SystemEntity
 	}
 
 	public MolgenisGroupMember(String id, MolgenisGroupMemberMetaData molgenisGroupMemberMetaData)
+	{
+		super(molgenisGroupMemberMetaData);
+		setId(id);
+	}
+
+	public MolgenisGroupMember(String id, MolgenisGroupMemberMetaData molgenisGroupMemberMetaData,
+			SystemEntityFactory entityFactory)
 	{
 		super(molgenisGroupMemberMetaData);
 		setId(id);

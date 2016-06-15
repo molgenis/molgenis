@@ -10,7 +10,7 @@ public class PackageFactory extends AbstractSystemEntityFactory<Package, Package
 	@Autowired
 	PackageFactory(PackageMetaData packageMetaData)
 	{
-		super(Package.class, packageMetaData, String.class);
+		super(Package.class, packageMetaData);
 	}
 
 	public Package create(String id, String description)

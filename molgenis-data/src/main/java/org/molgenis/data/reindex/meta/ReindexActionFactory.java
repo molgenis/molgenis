@@ -10,6 +10,6 @@ public class ReindexActionFactory extends AbstractSystemEntityFactory<ReindexAct
 	@Autowired
 	ReindexActionFactory(ReindexActionMetaData reindexActionMetaData)
 	{
-		super(ReindexAction.class, reindexActionMetaData, String.class);
+		super(ReindexAction.class, reindexActionMetaData);
 	}
 }

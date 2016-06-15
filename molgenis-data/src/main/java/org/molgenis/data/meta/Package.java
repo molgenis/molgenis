@@ -15,24 +15,20 @@ import static org.molgenis.data.meta.PackageMetaData.TAGS;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.support.StaticEntity;
 import org.molgenis.util.ApplicationContextProvider;
 
 /**
  * Package defines the structure and attributes of a Package. Attributes are unique. Other software components can use
  * this to interact with Packages and/or to configure backends and frontends, including Repository instances.
  */
-public class Package extends SystemEntity
+public class Package extends StaticEntity
 {
 	public static final String PACKAGE_SEPARATOR = "_";
 
-	/**
-	 * Constructs a package based on the given entity
-	 *
-	 * @param entity decorated entity
-	 */
 	public Package(Entity entity)
 	{
-		super(entity, PACKAGE);
+		super(entity);
 	}
 
 	/**

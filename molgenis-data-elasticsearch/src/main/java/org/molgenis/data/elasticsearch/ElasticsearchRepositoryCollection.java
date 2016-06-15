@@ -126,7 +126,7 @@ public class ElasticsearchRepositoryCollection extends AbstractRepositoryCollect
 		EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(entityName);
 		if (entityMetaData == null) throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
 
-		EntityMetaData EntityMetaData = new EntityMetaData(dataService.getMeta().getEntityMetaData(entityName));
+		EntityMetaData EntityMetaData = null; // new EntityMetaData(dataService.getMeta().getEntityMetaData(entityName)); // FIXME
 		AttributeMetaData attr = entityMetaData.getAttribute(attributeName);
 		if (attr == null) throw new UnknownAttributeException(
 				String.format("Unknown attribute '%s' of entity '%s'", attributeName, entityName));

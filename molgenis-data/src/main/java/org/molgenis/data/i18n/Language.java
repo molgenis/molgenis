@@ -1,25 +1,19 @@
 package org.molgenis.data.i18n;
 
 import static org.molgenis.data.i18n.LanguageMetaData.CODE;
-import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.i18n.LanguageMetaData.NAME;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntity;
+import org.molgenis.data.support.StaticEntity;
 
 /**
  * Language entity
  */
-public class Language extends SystemEntity
+public class Language extends StaticEntity
 {
-	/**
-	 * Constructs a language based on the given entity
-	 *
-	 * @param entity decorated entity
-	 */
 	public Language(Entity entity)
 	{
-		super(entity, LANGUAGE);
+		super(entity);
 	}
 
 	/**

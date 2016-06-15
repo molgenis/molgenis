@@ -1,6 +1,7 @@
 package org.molgenis.data.meta;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.IDENTIFIER;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
@@ -19,9 +20,9 @@ public class AttributeMetaDataFactory implements SystemEntityFactory<AttributeMe
 	private AttributeMetaDataMetaData attrMetaMeta;
 
 	@Override
-	public Class<AttributeMetaData> getEntityClass()
+	public String getEntityName()
 	{
-		return AttributeMetaData.class;
+		return ATTRIBUTE_META_DATA;
 	}
 
 	@Override

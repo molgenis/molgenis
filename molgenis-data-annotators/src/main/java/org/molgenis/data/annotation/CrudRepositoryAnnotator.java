@@ -113,7 +113,7 @@ public class CrudRepositoryAnnotator
 	{
 		if (entityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
 		{
-			EntityMetaData newEntityMetaData = new EntityMetaData(entityMetaData);
+			EntityMetaData newEntityMetaData = null; // FIXME new EntityMetaData(entityMetaData);
 			newEntityMetaData.addAttribute(compoundAttributeMetaData);
 			dataService.getMeta().updateEntityMeta(newEntityMetaData);
 		}

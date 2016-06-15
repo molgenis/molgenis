@@ -16,7 +16,6 @@ import static org.molgenis.auth.MolgenisUserMetaData.ID;
 import static org.molgenis.auth.MolgenisUserMetaData.LANGUAGECODE;
 import static org.molgenis.auth.MolgenisUserMetaData.LASTNAME;
 import static org.molgenis.auth.MolgenisUserMetaData.MIDDLENAMES;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
 import static org.molgenis.auth.MolgenisUserMetaData.PASSWORD_;
 import static org.molgenis.auth.MolgenisUserMetaData.PHONE;
 import static org.molgenis.auth.MolgenisUserMetaData.ROLE;
@@ -26,13 +25,13 @@ import static org.molgenis.auth.MolgenisUserMetaData.TOLLFREEPHONE;
 import static org.molgenis.auth.MolgenisUserMetaData.USERNAME;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntity;
+import org.molgenis.data.support.StaticEntity;
 
-public class MolgenisUser extends SystemEntity
+public class MolgenisUser extends StaticEntity
 {
 	public MolgenisUser(Entity entity)
 	{
-		super(entity, MOLGENIS_USER);
+		super(entity);
 	}
 
 	public MolgenisUser(MolgenisUserMetaData molgenisUserMetaData)

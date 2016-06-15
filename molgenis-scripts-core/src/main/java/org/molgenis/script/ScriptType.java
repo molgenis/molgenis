@@ -1,24 +1,18 @@
 package org.molgenis.script;
 
 import static org.molgenis.script.ScriptTypeMetaData.NAME;
-import static org.molgenis.script.ScriptTypeMetaData.SCRIPT_TYPE;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntity;
+import org.molgenis.data.support.StaticEntity;
 
 /**
  * Script type entity
  */
-public class ScriptType extends SystemEntity
+public class ScriptType extends StaticEntity
 {
-	/**
-	 * Constructs a script type based on the given entity
-	 *
-	 * @param entity decorated entity
-	 */
 	public ScriptType(Entity entity)
 	{
-		super(entity, SCRIPT_TYPE);
+		super(entity);
 	}
 
 	/**
