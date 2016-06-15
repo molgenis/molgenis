@@ -2,6 +2,7 @@ package org.molgenis.data.importer;
 
 import static com.google.common.base.Predicates.notNull;
 import static com.google.common.collect.FluentIterable.from;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
@@ -735,6 +736,17 @@ public class ImportWriter
 		public Object getIdValue()
 		{
 			return get(entityMetaData.getIdAttribute().getName());
+		}
+
+		@Override
+		public void setIdValue(Object id)
+		{
+			AttributeMetaData idAttr = entityMetaData.getIdAttribute();
+			if (idAttr == null)
+			{
+				throw new IllegalArgumentException(format("Entity [%s] doesn't have an id attribute"));
+			}
+			set(idAttr.getName(), id);
 		}
 
 		@Override

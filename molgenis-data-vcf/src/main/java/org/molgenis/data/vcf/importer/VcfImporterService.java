@@ -163,12 +163,12 @@ public class VcfImporterService implements ImportService
 			throw new MolgenisDataException("Can't overwrite existing " + entityName);
 		}
 
-		EntityMetaData entityMetaData = new EntityMetaData(inRepository.getEntityMetaData());
+		EntityMetaData entityMetaData = null; //new EntityMetaData(inRepository.getEntityMetaData()); // FIXME
 
 		AttributeMetaData sampleAttribute = entityMetaData.getAttribute(VcfAttributes.SAMPLES);
 		if (sampleAttribute != null)
 		{
-			EntityMetaData samplesEntityMetaData = new EntityMetaData(sampleAttribute.getRefEntity());
+			EntityMetaData samplesEntityMetaData = null; // new EntityMetaData(sampleAttribute.getRefEntity()); // FIXME
 			sampleRepository = dataService.getMeta().addEntityMeta(samplesEntityMetaData);
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Collections.singletonList(samplesEntityMetaData.getName()));

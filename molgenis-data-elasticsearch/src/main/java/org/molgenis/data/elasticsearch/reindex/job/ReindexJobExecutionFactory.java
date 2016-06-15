@@ -12,6 +12,6 @@ public class ReindexJobExecutionFactory
 	@Autowired
 	ReindexJobExecutionFactory(ReindexJobExecutionMeta reindexJobExecutionMeta)
 	{
-		super(ReindexJobExecution.class, reindexJobExecutionMeta, String.class);
+		super(ReindexJobExecution.class, reindexJobExecutionMeta);
 	}
 }

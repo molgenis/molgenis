@@ -8,14 +8,14 @@ import org.molgenis.data.meta.SystemEntity;
  * @param <E> entity type
  * @param <P> entity id type
  */
-public interface SystemEntityFactory<E extends SystemEntity, P>
+public interface SystemEntityFactory<E extends Entity, P>
 {
 	/**
-	 * Returns entity class
+	 * Returns entity type name
 	 *
-	 * @return entity class
+	 * @return entity type name
 	 */
-	Class<E> getEntityClass();
+	String getEntityName();
 
 	/**
 	 * Creates an entity.

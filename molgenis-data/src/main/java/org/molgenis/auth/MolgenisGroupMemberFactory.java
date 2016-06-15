@@ -11,6 +11,6 @@ public class MolgenisGroupMemberFactory
 	@Autowired
 	MolgenisGroupMemberFactory(MolgenisGroupMemberMetaData molgenisGroupMemberMetaData)
 	{
-		super(MolgenisGroupMember.class, molgenisGroupMemberMetaData, String.class);
+		super(MolgenisGroupMember.class, molgenisGroupMemberMetaData);
 	}
 }

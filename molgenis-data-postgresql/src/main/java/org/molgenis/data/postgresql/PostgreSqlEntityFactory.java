@@ -13,7 +13,6 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.slf4j.Logger;
@@ -57,7 +56,7 @@ public class PostgreSqlEntityFactory
 		@Override
 		public Entity mapRow(ResultSet resultSet, int i) throws SQLException
 		{
-			Entity e = new DefaultEntity(entityMetaData, dataService);
+			Entity e = entityManager.create(entityMetaData);
 
 			// TODO performance, iterate over fetch if available
 			for (AttributeMetaData att : entityMetaData.getAtomicAttributes())

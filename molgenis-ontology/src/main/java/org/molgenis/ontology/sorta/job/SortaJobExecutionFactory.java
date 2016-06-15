@@ -12,6 +12,6 @@ public class SortaJobExecutionFactory
 	@Autowired
 	SortaJobExecutionFactory(SortaJobExecutionMetaData sortaJobExecutionMetaData)
 	{
-		super(SortaJobExecution.class, sortaJobExecutionMetaData, String.class);
+		super(SortaJobExecution.class, sortaJobExecutionMetaData);
 	}
 }

@@ -6,7 +6,6 @@ import static org.molgenis.script.ScriptMetaData.GENERATE_TOKEN;
 import static org.molgenis.script.ScriptMetaData.NAME;
 import static org.molgenis.script.ScriptMetaData.PARAMETERS;
 import static org.molgenis.script.ScriptMetaData.RESULT_FILE_EXTENSION;
-import static org.molgenis.script.ScriptMetaData.SCRIPT;
 import static org.molgenis.script.ScriptMetaData.TYPE;
 
 import java.io.File;
@@ -22,7 +21,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntity;
+import org.molgenis.data.support.StaticEntity;
 import org.molgenis.file.FileStore;
 
 import com.google.common.collect.Lists;
@@ -31,11 +30,11 @@ import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
-public class Script extends SystemEntity
+public class Script extends StaticEntity
 {
 	public Script(Entity entity)
 	{
-		super(entity, SCRIPT);
+		super(entity);
 	}
 
 	public Script(ScriptMetaData scriptMetaData)

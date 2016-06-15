@@ -6,7 +6,6 @@ import java.util.stream.StreamSupport;
 
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.SystemEntity;
 
 /**
  * DataService is a facade that manages data sources Entity names should be unique over all data sources.
@@ -40,7 +39,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * @param clazz      typed entity class
 	 * @return Stream of all entities of the give type
 	 */
-	<E extends SystemEntity> Stream<E> stream(String entityName, Fetch fetch, Class<E> clazz);
+	<E extends Entity> Stream<E> stream(String entityName, Fetch fetch, Class<E> clazz);
 
 	void setMetaDataService(MetaDataService metaDataService);
 
@@ -84,7 +83,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * @param <E>         entity type
 	 * @return typed entity {@link Repository}
 	 */
-	<E extends SystemEntity> Repository<E> getRepository(String entityName, Class<E> entityClass);
+	<E extends Entity> Repository<E> getRepository(String entityName, Class<E> entityClass);
 
 	/**
 	 * Returns the meta data for the given entity
@@ -127,7 +126,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * @param entityName entity name (case insensitive)
 	 * @throws MolgenisDataAccessException
 	 */
-	<E extends SystemEntity> Stream<E> findAll(String entityName, Class<E> clazz);
+	<E extends Entity> Stream<E> findAll(String entityName, Class<E> clazz);
 
 	/**
 	 * Find entities that match a query. Returns empty stream if no matches.
@@ -146,7 +145,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * @param q          query
 	 * @throws MolgenisDataAccessException
 	 */
-	<E extends SystemEntity> Stream<E> findAll(String entityName, Query<E> q, Class<E> clazz);
+	<E extends Entity> Stream<E> findAll(String entityName, Query<E> q, Class<E> clazz);
 
 	/**
 	 * Finds all entities with the given IDs. Returns empty stream if no matches.
@@ -165,7 +164,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * @return (empty) Stream where the order of entities matches the order of ids, never null
 	 * @throws MolgenisDataAccessException
 	 */
-	<E extends SystemEntity> Stream<E> findAll(String entityName, Stream<Object> ids, Class<E> clazz);
+	<E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Class<E> clazz);
 
 	/**
 	 * Finds all entities with the given IDs, with a fetch. Returns empty stream if no matches.
@@ -189,7 +188,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * null
 	 * @throws MolgenisDataAccessException
 	 */
-	<E extends SystemEntity> Stream<E> findAll(String entityName, Stream<Object> ids, Fetch fetch, Class<E> clazz);
+	<E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Fetch fetch, Class<E> clazz);
 
 	/**
 	 * Find one entity based on id. Returns null if not exists
@@ -208,7 +207,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * @return typed entity
 	 * @throws MolgenisDataAccessException
 	 */
-	<E extends SystemEntity> E findOneById(String entityName, Object id, Class<E> clazz);
+	<E extends Entity> E findOneById(String entityName, Object id, Class<E> clazz);
 
 	/**
 	 * Find one entity based on id. Returns null if not exists
@@ -242,7 +241,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * @return entity of the given type or null
 	 * @throws MolgenisDataAccessException
 	 */
-	<E extends SystemEntity> E findOneById(String entityName, Object id, Fetch fetch, Class<E> clazz);
+	<E extends Entity> E findOneById(String entityName, Object id, Fetch fetch, Class<E> clazz);
 
 	/**
 	 * Find one entity based on id. Returns null if not exists
@@ -260,7 +259,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * @param q query
 	 * @throws MolgenisDataAccessException
 	 */
-	<E extends SystemEntity> E findOne(String entityName, Query<E> q, Class<E> clazz);
+	<E extends Entity> E findOne(String entityName, Query<E> q, Class<E> clazz);
 
 	/**
 	 * Adds an entity to it's repository
@@ -345,7 +344,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * @param <E>         entity type
 	 * @return a typed query
 	 */
-	<E extends SystemEntity> Query<E> query(String entityName, Class<E> entityClass);
+	<E extends Entity> Query<E> query(String entityName, Class<E> entityClass);
 
 	/**
 	 * Creates counts off all possible combinations of xAttr and yAttr attributes of an entity

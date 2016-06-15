@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import org.molgenis.data.meta.SystemEntity;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +16,7 @@ import org.slf4j.LoggerFactory;
  * @param <M> entity meta data type
  * @param <P> entity id type
  */
-public abstract class AbstractSystemEntityFactory<E extends SystemEntity, M extends SystemEntityMetaData, P>
+public abstract class AbstractSystemEntityFactory<E extends Entity, M extends SystemEntityMetaData, P>
 		implements SystemEntityFactory<E, P>
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractSystemEntityFactory.class);
@@ -25,7 +24,6 @@ public abstract class AbstractSystemEntityFactory<E extends SystemEntity, M exte
 	private final Class<E> entityClass;
 	private final Constructor<E> entityConstructorWithEntity;
 	private final Constructor<E> entityConstructorWithEntityMeta;
-	private final Constructor<E> entityConstructorWithIdAndEntityMeta;
 	private final M systemEntityMetaData;
 
 	/**
@@ -33,24 +31,21 @@ public abstract class AbstractSystemEntityFactory<E extends SystemEntity, M exte
 	 *
 	 * @param entityClass      entity type
 	 * @param systemEntityMeta entity meta data type
-	 * @param entityIdClass    entity id type
 	 */
-	protected AbstractSystemEntityFactory(Class<E> entityClass, M systemEntityMeta, Class<P> entityIdClass)
+	protected AbstractSystemEntityFactory(Class<E> entityClass, M systemEntityMeta)
 	{
 		this.entityClass = requireNonNull(entityClass);
 
 		// determining constructors at creation time validates that required constructors exist on start-up
 		this.entityConstructorWithEntity = getConstructor(entityClass);
 		this.entityConstructorWithEntityMeta = getConstructor(entityClass, systemEntityMeta.getClass());
-		this.entityConstructorWithIdAndEntityMeta = getConstructor(entityClass, systemEntityMeta.getClass(),
-				entityIdClass);
 		this.systemEntityMetaData = systemEntityMeta;
 	}
 
 	@Override
-	public Class<E> getEntityClass()
+	public String getEntityName()
 	{
-		return entityClass;
+		return systemEntityMetaData.getName();
 	}
 
 	@Override
@@ -69,14 +64,9 @@ public abstract class AbstractSystemEntityFactory<E extends SystemEntity, M exte
 	@Override
 	public E create(P id)
 	{
-		try
-		{
-			return entityConstructorWithIdAndEntityMeta.newInstance(id, systemEntityMetaData);
-		}
-		catch (InstantiationException | IllegalAccessException | InvocationTargetException e)
-		{
-			throw new RuntimeException(e);
-		}
+		E entity = create();
+		entity.setIdValue(id);
+		return entity;
 	}
 
 	@Override

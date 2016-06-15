@@ -11,7 +11,6 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.AUTO;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DEFAULT_VALUE;
@@ -33,30 +32,23 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.VALIDATION_EXPRES
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE_EXPRESSION;
 import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
-import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.StaticEntity;
 import org.molgenis.fieldtypes.FieldType;
 
 /**
  * Attribute defines the properties of an entity. Synonyms: feature, column, data item.
  */
-public class AttributeMetaData extends SystemEntity
+public class AttributeMetaData extends StaticEntity
 {
-	/**
-	 * Creates a new attribute based on the given entity.
-	 *
-	 * @param entity decorated entity
-	 */
 	public AttributeMetaData(Entity entity)
 	{
-		super(entity, ATTRIBUTE_META_DATA);
+		super(entity);
 	}
 
 	/**
@@ -84,15 +76,16 @@ public class AttributeMetaData extends SystemEntity
 	}
 
 	/**
-	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #AttributeMetaData(Entity)})
+	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #AttributeMetaData(AttributeMetaDataMetaData)})
 	 *
 	 * @param attr attribute
 	 * @return deep copy of attribute
 	 */
 	public static AttributeMetaData newInstance(AttributeMetaData attr)
 	{
-		Entity entityCopy = MapEntity.newInstance(attr);
-		return new AttributeMetaData(entityCopy);
+		throw new RuntimeException("FIXME"); // FIXME
+		//		Entity entityCopy = MapEntity.newInstance(attr);
+		//		return new AttributeMetaData(entityCopy);
 	}
 
 	public String getIdentifier()

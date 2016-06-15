@@ -26,6 +26,13 @@ public interface Entity extends Serializable
 	Object getIdValue();
 
 	/**
+	 * Sets the identifier value of this entity. The class type of the id is based on the id attribute data type.
+	 *
+	 * @param id identifier value
+	 */
+	void setIdValue(Object id);
+
+	/**
 	 * Optional human readable label to recognize this Entity. Otherwise return null
 	 */
 	String getLabelValue();

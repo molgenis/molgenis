@@ -10,6 +10,6 @@ public class ScriptTypeFactory extends AbstractSystemEntityFactory<ScriptType, S
 	@Autowired
 	ScriptTypeFactory(ScriptTypeMetaData scriptTypeMetaData)
 	{
-		super(ScriptType.class, scriptTypeMetaData, String.class);
+		super(ScriptType.class, scriptTypeMetaData);
 	}
 }

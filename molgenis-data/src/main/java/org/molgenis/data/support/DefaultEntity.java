@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import static com.google.common.collect.FluentIterable.from;
+import static java.lang.String.format;
 import static java.util.stream.StreamSupport.stream;
 
 import java.sql.Timestamp;
@@ -72,6 +73,17 @@ public class DefaultEntity implements Entity
 	public Object getIdValue()
 	{
 		return get(entityMetaData.getIdAttribute().getName());
+	}
+
+	@Override
+	public void setIdValue(Object id)
+	{
+		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
+		if (idAttr == null)
+		{
+			throw new IllegalArgumentException(format("Entity [%s] doesn't have an id attribute"));
+		}
+		set(idAttr.getName(), id);
 	}
 
 	@Override

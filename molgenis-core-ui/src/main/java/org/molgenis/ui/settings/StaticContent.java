@@ -2,16 +2,15 @@ package org.molgenis.ui.settings;
 
 import static org.molgenis.ui.settings.StaticContentMeta.CONTENT;
 import static org.molgenis.ui.settings.StaticContentMeta.KEY;
-import static org.molgenis.ui.settings.StaticContentMeta.STATIC_CONTENT;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntity;
+import org.molgenis.data.support.StaticEntity;
 
-public class StaticContent extends SystemEntity
+public class StaticContent extends StaticEntity
 {
 	public StaticContent(Entity entity)
 	{
-		super(entity, STATIC_CONTENT);
+		super(entity);
 	}
 
 	public StaticContent(StaticContentMeta staticContentMeta)

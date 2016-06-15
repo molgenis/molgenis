@@ -11,6 +11,6 @@ public class ImportRunFactory extends AbstractSystemEntityFactory<ImportRun, Imp
 	@Autowired
 	ImportRunFactory(ImportRunMetaData importRunMetaData)
 	{
-		super(ImportRun.class, importRunMetaData, String.class);
+		super(ImportRun.class, importRunMetaData);
 	}
 }

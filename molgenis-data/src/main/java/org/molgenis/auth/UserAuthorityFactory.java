@@ -10,6 +10,6 @@ public class UserAuthorityFactory extends AbstractSystemEntityFactory<UserAuthor
 	@Autowired
 	UserAuthorityFactory(UserAuthorityMetaData userAuthorityMetaData)
 	{
-		super(UserAuthority.class, userAuthorityMetaData, String.class);
+		super(UserAuthority.class, userAuthorityMetaData);
 	}
 }

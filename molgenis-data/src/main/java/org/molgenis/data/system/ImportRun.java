@@ -3,7 +3,6 @@ package org.molgenis.data.system;
 import static org.molgenis.data.meta.system.ImportRunMetaData.ENDDATE;
 import static org.molgenis.data.meta.system.ImportRunMetaData.ID;
 import static org.molgenis.data.meta.system.ImportRunMetaData.IMPORTEDENTITIES;
-import static org.molgenis.data.meta.system.ImportRunMetaData.IMPORT_RUN;
 import static org.molgenis.data.meta.system.ImportRunMetaData.MESSAGE;
 import static org.molgenis.data.meta.system.ImportRunMetaData.NOTIFY;
 import static org.molgenis.data.meta.system.ImportRunMetaData.PROGRESS;
@@ -16,11 +15,11 @@ import java.util.Date;
 import java.util.List;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntity;
 import org.molgenis.data.meta.system.ImportRunMetaData;
+import org.molgenis.data.support.StaticEntity;
 import org.molgenis.util.ValueLabel;
 
-public class ImportRun extends SystemEntity
+public class ImportRun extends StaticEntity
 {
 	private static final List<ValueLabel> status_options;
 	private static final List<ValueLabel> notify_options;
@@ -39,7 +38,7 @@ public class ImportRun extends SystemEntity
 
 	public ImportRun(Entity entity)
 	{
-		super(entity, IMPORT_RUN);
+		super(entity);
 	}
 
 	public ImportRun(ImportRunMetaData importRunMetaData)

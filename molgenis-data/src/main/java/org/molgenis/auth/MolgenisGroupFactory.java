@@ -10,6 +10,6 @@ public class MolgenisGroupFactory extends AbstractSystemEntityFactory<MolgenisGr
 	@Autowired
 	MolgenisGroupFactory(MolgenisGroupMetaData molgenisGroupMetaData)
 	{
-		super(MolgenisGroup.class, molgenisGroupMetaData, String.class);
+		super(MolgenisGroup.class, molgenisGroupMetaData);
 	}
 }

@@ -49,6 +49,12 @@ public class PartialEntity implements Entity
 	}
 
 	@Override
+	public void setIdValue(Object id)
+	{
+		decoratedEntity.setIdValue(id);
+	}
+
+	@Override
 	public String getLabelValue()
 	{
 		return decoratedEntity.getLabelValue();

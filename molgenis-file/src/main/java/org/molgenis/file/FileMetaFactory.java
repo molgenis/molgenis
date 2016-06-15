@@ -10,6 +10,6 @@ public class FileMetaFactory extends AbstractSystemEntityFactory<FileMeta, FileM
 	@Autowired
 	FileMetaFactory(FileMetaMetaData fileMetaMetaData)
 	{
-		super(FileMeta.class, fileMetaMetaData, String.class);
+		super(FileMeta.class, fileMetaMetaData);
 	}
 }

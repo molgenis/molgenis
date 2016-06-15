@@ -1,12 +1,27 @@
 package org.molgenis.data;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.SetMultimap;
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.StreamSupport.stream;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.SystemEntity;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
+import org.molgenis.data.support.EntityImpl;
 import org.molgenis.data.support.LazyEntity;
 import org.molgenis.data.support.PartialEntity;
 import org.molgenis.fieldtypes.FieldType;
@@ -15,16 +30,9 @@ import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.BatchingIterable;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
-import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.SetMultimap;
 
 /**
  * Entity manager responsible for creating entity references and resolving references of reference attributes.
@@ -49,15 +57,24 @@ public class EntityManagerImpl implements EntityManager
 	}
 
 	@Override
+	public Entity create(EntityMetaData entityMeta)
+	{
+		SystemEntityFactory<Entity, Object> systemEntityFactory = systemEntityMetaRegistry
+				.getSystemEntityFactory(entityMeta.getName());
+		return systemEntityFactory != null ? systemEntityFactory.create() : new EntityImpl(entityMeta);
+	}
+
+	@Override
 	public Entity getReference(EntityMetaData entityMeta, Object id)
 	{
-		return new LazyEntity(entityMeta, dataService, id);
+		LazyEntity lazyEntity = new LazyEntity(entityMeta, dataService, id);
+		return systemEntityMetaRegistry.getSystemEntityFactory(entityMeta.getName()).create(lazyEntity);
 	}
 
 	@Override
 	public Iterable<Entity> getReferences(EntityMetaData entityMeta, Iterable<?> ids)
 	{
-		return new LazyEntityIterable(entityMeta, ids);
+		return () -> stream(ids.spliterator(), false).map(id -> getReference(entityMeta, id)).iterator();
 	}
 
 	@Override

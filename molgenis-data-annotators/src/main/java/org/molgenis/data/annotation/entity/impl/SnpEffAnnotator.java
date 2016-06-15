@@ -232,7 +232,7 @@ public class SnpEffAnnotator
 					public Entity next()
 					{
 						Entity entity = it.next();
-						EntityMetaData meta = new EntityMetaData(entity.getEntityMetaData());
+						EntityMetaData meta = null; // FIXME new EntityMetaData(entity.getEntityMetaData());
 						info.getOutputAttributes().forEach(meta::addAttribute);
 						Entity copy = new MapEntity(entity, meta);
 						try

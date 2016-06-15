@@ -8,9 +8,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.SystemEntityFactory;
 import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.SystemEntity;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +25,7 @@ public class SystemEntityMetaDataRegistry
 	private final Logger LOG = LoggerFactory.getLogger(SystemEntityMetaDataRegistry.class);
 
 	private final Map<String, SystemEntityMetaData> systemEntityMetaDataMap;
-	private final Map<String, SystemEntityFactory> systemEntityFactoryMap;
+	private final Map<String, SystemEntityFactory<Entity, Object>> systemEntityFactoryMap;
 
 	public SystemEntityMetaDataRegistry()
 	{
@@ -100,16 +100,21 @@ public class SystemEntityMetaDataRegistry
 
 	public void addSystemEntityFactory(SystemEntityFactory systemEntityFactory)
 	{
-		String entityClassName = systemEntityFactory.getEntityClass().getName();
-		systemEntityFactoryMap.put(entityClassName, systemEntityFactory);
+		String entityName = systemEntityFactory.getEntityName();
+		systemEntityFactoryMap.put(entityName, systemEntityFactory);
 	}
 
-	public <E extends SystemEntity> SystemEntityFactory<E, Object> getSystemEntityFactory(Class<E> entityClass)
+	public SystemEntityFactory<Entity, Object> getSystemEntityFactory(String entityName)
+	{
+		return systemEntityFactoryMap.get(entityName);
+	}
+
+	public <E extends Entity> SystemEntityFactory<E, Object> getSystemEntityFactory(Class<E> entityClass)
 	{
 		return getSystemEntityFactory(entityClass, Object.class);
 	}
 
-	public <E extends SystemEntity, P> SystemEntityFactory<E, P> getSystemEntityFactory(Class<E> entityClass,
+	public <E extends Entity, P> SystemEntityFactory<E, P> getSystemEntityFactory(Class<E> entityClass,
 			Class<P> entityIdClass)
 	{
 		return (SystemEntityFactory<E, P>) systemEntityFactoryMap.get(entityClass.getName());

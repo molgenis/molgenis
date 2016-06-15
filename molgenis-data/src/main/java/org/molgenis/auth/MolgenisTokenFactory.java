@@ -10,6 +10,6 @@ public class MolgenisTokenFactory extends AbstractSystemEntityFactory<MolgenisTo
 	@Autowired
 	MolgenisTokenFactory(MolgenisTokenMetaData molgenisTokenMetaData)
 	{
-		super(MolgenisToken.class, molgenisTokenMetaData, String.class);
+		super(MolgenisToken.class, molgenisTokenMetaData);
 	}
 }

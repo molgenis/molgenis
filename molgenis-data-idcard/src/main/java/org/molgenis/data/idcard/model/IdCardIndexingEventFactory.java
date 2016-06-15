@@ -11,6 +11,6 @@ public class IdCardIndexingEventFactory
 	@Autowired
 	IdCardIndexingEventFactory(IdCardIndexingEventMetaData idCardIndexingEventMetaData)
 	{
-		super(IdCardIndexingEvent.class, idCardIndexingEventMetaData, String.class);
+		super(IdCardIndexingEvent.class, idCardIndexingEventMetaData);
 	}
 }

@@ -12,7 +12,6 @@ public class ReindexJobExecution extends JobExecution
 	public ReindexJobExecution(Entity entity)
 	{
 		super(entity);
-		setDefaultValues();
 	}
 
 	public ReindexJobExecution(ReindexJobExecutionMeta reindexJobExecutionMeta)

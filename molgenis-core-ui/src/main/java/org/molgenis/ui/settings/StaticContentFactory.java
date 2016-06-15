@@ -10,6 +10,6 @@ public class StaticContentFactory extends AbstractSystemEntityFactory<StaticCont
 	@Autowired
 	public StaticContentFactory(StaticContentMeta staticContentMeta)
 	{
-		super(StaticContent.class, staticContentMeta, String.class);
+		super(StaticContent.class, staticContentMeta);
 	}
 }

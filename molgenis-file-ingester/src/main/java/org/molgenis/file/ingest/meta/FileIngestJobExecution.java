@@ -13,7 +13,6 @@ public class FileIngestJobExecution extends JobExecution
 	public FileIngestJobExecution(Entity entity)
 	{
 		super(entity);
-		setDefaultValues();
 	}
 
 	public FileIngestJobExecution(FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData)

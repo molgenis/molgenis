@@ -18,12 +18,11 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.SystemEntityFactory;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.SystemEntity;
 
 /**
  * Created by Dennis on 5/25/2016.
  */
-public class UntypedRepositoryDecorator<E extends SystemEntity> implements Repository<Entity>
+public class UntypedRepositoryDecorator<E extends Entity> implements Repository<Entity>
 {
 	private final Repository<E> typedRepo;
 	private final SystemEntityFactory<E, Object> systemEntityFactory;

@@ -11,6 +11,6 @@ public class FileIngestJobExecutionFactory
 	@Autowired
 	FileIngestJobExecutionFactory(FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData)
 	{
-		super(FileIngestJobExecution.class, fileIngestJobExecutionMetaData, String.class);
+		super(FileIngestJobExecution.class, fileIngestJobExecutionMetaData);
 	}
 }

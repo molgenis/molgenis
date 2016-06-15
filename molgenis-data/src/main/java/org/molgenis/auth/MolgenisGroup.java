@@ -2,17 +2,16 @@ package org.molgenis.auth;
 
 import static org.molgenis.auth.MolgenisGroupMetaData.ACTIVE;
 import static org.molgenis.auth.MolgenisGroupMetaData.ID;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
 import static org.molgenis.auth.MolgenisGroupMetaData.NAME;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntity;
+import org.molgenis.data.support.StaticEntity;
 
-public class MolgenisGroup extends SystemEntity
+public class MolgenisGroup extends StaticEntity
 {
 	public MolgenisGroup(Entity entity)
 	{
-		super(entity, MOLGENIS_GROUP);
+		super(entity);
 	}
 
 	public MolgenisGroup(MolgenisGroupMetaData molgenisGroupMetaData)

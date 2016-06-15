@@ -10,6 +10,6 @@ public class GroupAuthorityFactory extends AbstractSystemEntityFactory<GroupAuth
 	@Autowired
 	GroupAuthorityFactory(GroupAuthorityMetaData groupAuthorityMetaData)
 	{
-		super(GroupAuthority.class, groupAuthorityMetaData, String.class);
+		super(GroupAuthority.class, groupAuthorityMetaData);
 	}
 }

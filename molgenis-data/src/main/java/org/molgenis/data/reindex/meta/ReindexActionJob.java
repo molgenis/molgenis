@@ -1,17 +1,16 @@
 package org.molgenis.data.reindex.meta;
 
 import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.COUNT;
-import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.REINDEX_ACTION_JOB;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ID;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntity;
+import org.molgenis.data.support.StaticEntity;
 
-public class ReindexActionJob extends SystemEntity
+public class ReindexActionJob extends StaticEntity
 {
 	public ReindexActionJob(Entity entity)
 	{
-		super(entity, REINDEX_ACTION_JOB);
+		super(entity);
 	}
 
 	public ReindexActionJob(ReindexActionJobMetaData reindexActionJobMetaData)

@@ -10,6 +10,6 @@ public class MolgenisUserFactory extends AbstractSystemEntityFactory<MolgenisUse
 	@Autowired
 	MolgenisUserFactory(MolgenisUserMetaData molgenisUserMetaData)
 	{
-		super(MolgenisUser.class, molgenisUserMetaData, String.class);
+		super(MolgenisUser.class, molgenisUserMetaData);
 	}
 }

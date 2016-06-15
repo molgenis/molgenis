@@ -11,6 +11,13 @@ import org.molgenis.data.meta.SystemEntity;
 public interface EntityManager
 {
 	/**
+	 * Creates an entity.
+	 *
+	 * @return new entity
+	 */
+	Entity create(EntityMetaData entityMeta);
+
+	/**
 	 * Get an instance, whose state may be lazily fetched. If the requested instance does not exist in the repository,
 	 * an <code>UnknownEntityException</code> is thrown when the instance state is first accessed.
 	 * 

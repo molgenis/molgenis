@@ -55,6 +55,12 @@ public abstract class DefaultSettingsEntity implements Entity
 	}
 
 	@Override
+	public void setIdValue(Object id)
+	{
+		getEntity().setIdValue(id);
+	}
+
+	@Override
 	public String getLabelValue()
 	{
 		return getEntity().getLabelValue();

@@ -10,6 +10,6 @@ public class IdCardBiobankFactory extends AbstractSystemEntityFactory<IdCardBiob
 	@Autowired
 	IdCardBiobankFactory(IdCardBiobankMetaData idCardBiobankMetaData)
 	{
-		super(IdCardBiobank.class, idCardBiobankMetaData, Integer.class);
+		super(IdCardBiobank.class, idCardBiobankMetaData);
 	}
 }
