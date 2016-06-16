@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -132,7 +133,7 @@ public class TypedRepositoryDecoratorTest
 		// the test
 		repositoryDecorator.forEachBatched(fetch, typedConsumer, 234);
 
-		verify(decoratedRepository, times(1)).forEachBatched(fetch, untypedConsumerArgumentCaptor.capture(), 234);
+		verify(decoratedRepository, times(1)).forEachBatched(eq(fetch), untypedConsumerArgumentCaptor.capture(), eq(234));
 
 		Consumer<List<Entity>> untypedConsumer = untypedConsumerArgumentCaptor.getValue();
 		DataService dataService = mock(DataService.class);
