@@ -56,7 +56,7 @@ public class PostgreSqlEntityFactory
 		@Override
 		public Entity mapRow(ResultSet resultSet, int i) throws SQLException
 		{
-			Entity e = entityManager.create(entityMetaData);
+			Entity e = entityManager.create(entityMetaData, fetch);
 
 			// TODO performance, iterate over fetch if available
 			for (AttributeMetaData att : entityMetaData.getAtomicAttributes())
@@ -110,15 +110,7 @@ public class PostgreSqlEntityFactory
 					}
 				}
 			}
-
-			if (fetch != null)
-			{
-				return entityManager.createEntityForPartialEntity(e, fetch);
-			}
-			else
-			{
-				return e;
-			}
+			return e;
 		}
 	}
 }

@@ -17,7 +17,7 @@ import org.slf4j.LoggerFactory;
  * @param <P> entity id type
  */
 public abstract class AbstractSystemEntityFactory<E extends Entity, M extends SystemEntityMetaData, P>
-		implements SystemEntityFactory<E, P>
+		implements EntityFactory<E, P>
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractSystemEntityFactory.class);
 

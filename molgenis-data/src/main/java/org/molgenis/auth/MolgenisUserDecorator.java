@@ -104,14 +104,11 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 		entity.set(MolgenisUserMetaData.PASSWORD_, encodedPassword);
 	}
 
-	private void addSuperuserAuthority(MolgenisUser entity)
+	private void addSuperuserAuthority(MolgenisUser molgenisUser)
 	{
-		Boolean isSuperuser = entity.getBoolean(MolgenisUserMetaData.SUPERUSER);
+		Boolean isSuperuser = molgenisUser.isSuperuser();
 		if (isSuperuser != null && isSuperuser == true)
 		{
-			MolgenisUser molgenisUser = molgenisUserFactory.create();
-			molgenisUser.set(findOneById(entity.getIdValue()));
-
 			UserAuthority userAuthority = userAuthorityFactory.create();
 			userAuthority.setMolgenisUser(molgenisUser);
 			userAuthority.setRole(SecurityUtils.AUTHORITY_SU);

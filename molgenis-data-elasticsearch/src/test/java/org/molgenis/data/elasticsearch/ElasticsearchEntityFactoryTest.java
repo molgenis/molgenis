@@ -50,7 +50,7 @@ public class ElasticsearchEntityFactoryTest
 		Entity entity = mock(Entity.class);
 		PartialEntity partialEntity = mock(PartialEntity.class);
 		when(sourceToEntityConverter.convert(source, entityMeta)).thenReturn(entity);
-		when(entityManager.createEntityForPartialEntity(entity, fetch)).thenReturn(partialEntity);
+		//		when(entityManager.createEntityForPartialEntity(entity, fetch)).thenReturn(partialEntity); // FIXME
 		assertEquals(elasticsearchEntityFactory.create(entityMeta, source, fetch), partialEntity);
 	}
 

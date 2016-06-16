@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
@@ -60,6 +61,11 @@ public class SystemEntityMetaDataPersister
 	public void persist(ContextRefreshedEvent event)
 	{
 		RepositoryCollection repositoryCollection = dataService.getMeta().getDefaultBackend();
+
+		// workaround for a cyclic dependency entity meta <--> attribute meta:
+		// first create attribute meta and entity meta table, then change data type.
+		// see the note in AttributeMetaDataMetaData and the exception in DependencyResolver
+		attributeMetaMeta.getAttribute(REF_ENTITY).setDataType(STRING).setRefEntity(null);
 
 		// create meta entity tables
 		// TODO make generic with dependency resolving, use MetaDataService.isMetaEntityMetaData
@@ -118,6 +124,7 @@ public class SystemEntityMetaDataPersister
 
 	private void persist(EntityMetaData entityMeta)
 	{
+		// TODO improve performance by supplying Fetch (How to define Fetch exactly? We want all entityMeta fields and expand attributes attribute)
 		EntityMetaData existingEntityMeta = dataService
 				.findOneById(ENTITY_META_DATA, entityMeta.getName(), EntityMetaData.class);
 		if (existingEntityMeta == null)

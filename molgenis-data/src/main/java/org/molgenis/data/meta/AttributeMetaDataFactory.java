@@ -6,7 +6,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.IDENTIFIER;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.Entity;
-import org.molgenis.data.SystemEntityFactory;
+import org.molgenis.data.EntityFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
  * {@link AbstractSystemEntityFactory} to prevent a circular bean dependency.
  */
 @Component
-public class AttributeMetaDataFactory implements SystemEntityFactory<AttributeMetaData, String>
+public class AttributeMetaDataFactory implements EntityFactory<AttributeMetaData, String>
 {
 	private AttributeMetaDataMetaData attrMetaMeta;
 

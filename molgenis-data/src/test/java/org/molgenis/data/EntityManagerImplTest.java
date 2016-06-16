@@ -29,13 +29,13 @@ public class EntityManagerImplTest
 	public void setUpBeforeMethod()
 	{
 		dataService = mock(DataService.class);
-		entityManagerImpl = new EntityManagerImpl(dataService);
+		entityManagerImpl = new EntityManagerImpl(dataService, null);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void EntityManagerImpl()
 	{
-		new EntityManagerImpl(null);
+		new EntityManagerImpl(null, null);
 	}
 
 	@Test

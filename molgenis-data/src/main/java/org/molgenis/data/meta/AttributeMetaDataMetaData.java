@@ -1,7 +1,11 @@
 package org.molgenis.data.meta;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.*;
+import static org.molgenis.MolgenisFieldTypes.BOOL;
+import static org.molgenis.MolgenisFieldTypes.MREF;
+import static org.molgenis.MolgenisFieldTypes.SCRIPT;
+import static org.molgenis.MolgenisFieldTypes.TEXT;
+import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
@@ -43,6 +47,7 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 	public static final String DEFAULT_VALUE = "defaultValue";
 
 	private TagMetaData tagMetaData;
+	private EntityMetaDataMetaData entityMetaMeta;
 
 	AttributeMetaDataMetaData()
 	{
@@ -59,8 +64,7 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(DATA_TYPE).setDataType(new EnumField()).setEnumOptions(FieldTypeEnum.getOptionsLowercase())
 				.setNillable(false).setLabel("Data type");
 		addAttribute(PARTS).setDataType(MREF).setRefEntity(this).setLabel("Attribute parts");
-		// during bootstrapping the data type is set to XREF and the ref entity to entity meta
-		addAttribute(REF_ENTITY).setLabel("Referenced entity");
+		addAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityMetaMeta).setLabel("Referenced entity");
 		addAttribute(EXPRESSION).setNillable(true).setLabel("Expression").setDescription("Computed value expression in Magma JavaScript");
 		addAttribute(NILLABLE).setDataType(BOOL).setNillable(false).setLabel("Nillable");
 		addAttribute(AUTO).setDataType(BOOL).setNillable(false).setLabel("Auto").setDescription("Auto generated values");
@@ -84,5 +88,11 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 	public void setTagMetaData(TagMetaData tagMetaData)
 	{
 		this.tagMetaData = requireNonNull(tagMetaData);
+	}
+
+	@Autowired
+	public void setEntityMetaDataMetaData(EntityMetaDataMetaData entityMetaMeta)
+	{
+		this.entityMetaMeta = requireNonNull(entityMetaMeta);
 	}
 }

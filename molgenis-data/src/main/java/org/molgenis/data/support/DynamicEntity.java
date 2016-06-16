@@ -13,11 +13,16 @@ import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 
-public class EntityImpl implements Entity
+/**
+ * @see StaticEntity
+ */
+public class DynamicEntity implements Entity
 {
 	private static final long serialVersionUID = 1L;
 
@@ -34,7 +39,7 @@ public class EntityImpl implements Entity
 	private Map<String, Object> values;
 
 	// TODO remove constructor
-	protected EntityImpl()
+	protected DynamicEntity()
 	{
 		this.values = newHashMap();
 	}
@@ -44,7 +49,7 @@ public class EntityImpl implements Entity
 	 *
 	 * @param entityMeta entity meta
 	 */
-	public EntityImpl(EntityMetaData entityMeta)
+	public DynamicEntity(EntityMetaData entityMeta)
 	{
 		this.entityMeta = requireNonNull(entityMeta);
 		this.values = newHashMap();
@@ -100,6 +105,7 @@ public class EntityImpl implements Entity
 		return labelAttr != null ? getLabelValueAsString(labelAttr) : null;
 	}
 
+	// FIXME return empty list in case attr is a (categorical)mref and value is null
 	@Override
 	public Object get(String attrName)
 	{
@@ -200,6 +206,7 @@ public class EntityImpl implements Entity
 	@Override
 	public void set(String attrName, Object value)
 	{
+		validateValueType(attrName, value);
 		values.put(attrName, value);
 	}
 
@@ -256,6 +263,113 @@ public class EntityImpl implements Entity
 				throw new RuntimeException("invalid label data type " + dataType);
 			default:
 				throw new RuntimeException("unsupported label data type " + dataType);
+		}
+	}
+
+	private void validateValueType(String attrName, Object value)
+	{
+		if (value == null)
+		{
+			return;
+		}
+
+		// FIXME remove try-catch that deals with bootstrapping exceptions
+		AttributeMetaData attr;
+		try
+		{
+			attr = getEntityMetaData().getAttribute(attrName);
+			if (attr == null)
+			{
+				throw new UnknownAttributeException(format("Unknown attribute [%s]", attrName));
+			}
+		}
+		catch (Exception e)
+		{
+			return;
+		}
+		MolgenisFieldTypes.FieldTypeEnum dataType = attr.getDataType().getEnumType();
+		switch (dataType)
+		{
+
+			case BOOL:
+				if (!(value instanceof Boolean))
+				{
+					throw new MolgenisDataException(
+							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
+									value.getClass().getSimpleName(), Boolean.class.getSimpleName()));
+				}
+				break;
+			case CATEGORICAL:
+				// expected type is FileMeta. validation is not possible because molgenis-data does not depend on molgenis-file
+			case FILE:
+			case XREF:
+				if (!(value instanceof Entity))
+				{
+					throw new MolgenisDataException(
+							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
+									value.getClass().getSimpleName(), Entity.class.getSimpleName()));
+				}
+				break;
+			case CATEGORICAL_MREF:
+			case MREF:
+				if (!(value instanceof Iterable))
+				{
+					throw new MolgenisDataException(
+							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
+									value.getClass().getSimpleName(), Iterable.class.getSimpleName()));
+				}
+				break;
+			case COMPOUND:
+				throw new IllegalArgumentException(format("Unexpected data type [%s]", dataType.toString()));
+			case DATE:
+			case DATE_TIME:
+				if (!(value instanceof java.util.Date))
+				{
+					throw new MolgenisDataException(
+							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
+									value.getClass().getSimpleName(), java.util.Date.class.getSimpleName()));
+				}
+				break;
+			case DECIMAL:
+				if (!(value instanceof Double))
+				{
+					throw new MolgenisDataException(
+							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
+									value.getClass().getSimpleName(), Double.class.getSimpleName()));
+				}
+				break;
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				if (!(value instanceof String))
+				{
+					throw new MolgenisDataException(
+							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
+									value.getClass().getSimpleName(), String.class.getSimpleName()));
+				}
+				break;
+			case INT:
+				if (!(value instanceof Integer))
+				{
+					throw new MolgenisDataException(
+							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
+									value.getClass().getSimpleName(), Double.class.getSimpleName()));
+				}
+				break;
+			case LONG:
+				if (!(value instanceof Long))
+				{
+					throw new MolgenisDataException(
+							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
+									value.getClass().getSimpleName(), Double.class.getSimpleName()));
+				}
+				break;
+			default:
+				throw new RuntimeException(format("Unknown data type [%s]", dataType.toString()));
 		}
 	}
 }

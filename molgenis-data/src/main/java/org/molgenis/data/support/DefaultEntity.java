@@ -6,7 +6,6 @@ import static java.util.stream.StreamSupport.stream;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -268,9 +267,10 @@ public class DefaultEntity implements Entity
 	@Override
 	public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
 	{
-		Entity entity = getEntity(attributeName);
-		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator()
-				.next() : null;
+		throw new UnsupportedOperationException("FIXME"); // FIXME
+		//		Entity entity = getEntity(attributeName);
+		//		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator()
+		//				.next() : null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -315,8 +315,9 @@ public class DefaultEntity implements Entity
 	@Override
 	public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz)
 	{
-		Iterable<Entity> entities = getEntities(attributeName);
-		return entities != null ? new ConvertingIterable<E>(clazz, entities) : null;
+		throw new UnsupportedOperationException("FIXME"); // FIXME
+		//		Iterable<Entity> entities = getEntities(attributeName);
+		//		return entities != null ? new ConvertingIterable<E>(clazz, entities) : null;
 	}
 
 	@Override

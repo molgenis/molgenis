@@ -1,6 +1,5 @@
 package org.molgenis.data;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 
@@ -19,9 +18,7 @@ import java.util.stream.StreamSupport;
 
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.SystemEntity;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
-import org.molgenis.data.support.EntityImpl;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.LazyEntity;
 import org.molgenis.data.support.PartialEntity;
 import org.molgenis.fieldtypes.FieldType;
@@ -35,46 +32,75 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.SetMultimap;
 
 /**
- * Entity manager responsible for creating entity references and resolving references of reference attributes.
+ * Entity manager responsible for creating entities, entity references and resolving references of reference attributes.
  */
 public class EntityManagerImpl implements EntityManager
 {
 	private static final int BATCH_SIZE = 100;
 
 	private final DataService dataService;
-	private SystemEntityMetaDataRegistry systemEntityMetaRegistry;
+	private final EntityFactoryRegistry entityFactoryRegistry;
 
 	@Autowired
-	public EntityManagerImpl(DataService dataService)
+	public EntityManagerImpl(DataService dataService, EntityFactoryRegistry entityFactoryRegistry)
 	{
 		this.dataService = requireNonNull(dataService);
-
-	}
-
-	@Autowired
-	public void setSystemEntityMetaRegistry(SystemEntityMetaDataRegistry systemEntityMetaRegistry) {
-		this.systemEntityMetaRegistry = requireNonNull(systemEntityMetaRegistry);
+		this.entityFactoryRegistry = requireNonNull(entityFactoryRegistry);
 	}
 
 	@Override
 	public Entity create(EntityMetaData entityMeta)
 	{
-		SystemEntityFactory<Entity, Object> systemEntityFactory = systemEntityMetaRegistry
-				.getSystemEntityFactory(entityMeta.getName());
-		return systemEntityFactory != null ? systemEntityFactory.create() : new EntityImpl(entityMeta);
+		return create(entityMeta, null);
+	}
+
+	@Override
+	public Entity create(EntityMetaData entityMeta, Fetch fetch)
+	{
+		Entity entity = new DynamicEntity(entityMeta);
+		if (fetch != null)
+		{
+			// create partial entity that loads attribute values not contained in the fetch on demand.
+			entity = new PartialEntity(entity, fetch, this);
+		}
+
+		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityMeta);
+		if (entityFactory != null)
+		{
+			// create static entity (e.g. Tag, Language, Package) that wraps the constructed dynamic or partial entity.
+			return entityFactory.create(entity);
+		}
+		return entity;
 	}
 
 	@Override
 	public Entity getReference(EntityMetaData entityMeta, Object id)
 	{
-		LazyEntity lazyEntity = new LazyEntity(entityMeta, dataService, id);
-		return systemEntityMetaRegistry.getSystemEntityFactory(entityMeta.getName()).create(lazyEntity);
+		Entity lazyEntity = new LazyEntity(entityMeta, dataService, id);
+
+		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityMeta);
+		if (entityFactory != null)
+		{
+			// create static entity (e.g. Tag, Language, Package) that wraps the constructed dynamic or partial entity.
+			lazyEntity = entityFactory.create(lazyEntity);
+		}
+
+		return lazyEntity;
 	}
 
 	@Override
 	public Iterable<Entity> getReferences(EntityMetaData entityMeta, Iterable<?> ids)
 	{
-		return () -> stream(ids.spliterator(), false).map(id -> getReference(entityMeta, id)).iterator();
+		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityMeta);
+		return () -> stream(ids.spliterator(), false).map(id -> {
+			Entity lazyEntity = getReference(entityMeta, id);
+			if (entityFactory != null)
+			{
+				// create static entity (e.g. Tag, Language, Package) that wraps the constructed dynamic or partial entity.
+				lazyEntity = entityFactory.create(lazyEntity);
+			}
+			return lazyEntity;
+		}).iterator();
 	}
 
 	@Override
@@ -338,25 +364,6 @@ public class EntityManagerImpl implements EntityManager
 				.collect(Collectors.toList());
 	}
 
-	private class LazyEntityIterable implements Iterable<Entity>
-	{
-		private final EntityMetaData entityMeta;
-		private final Iterable<?> entityIds;
-
-		public LazyEntityIterable(EntityMetaData entityMeta, Iterable<?> ids)
-		{
-			this.entityMeta = requireNonNull(entityMeta);
-			this.entityIds = requireNonNull(ids);
-		}
-
-		@Override
-		public Iterator<Entity> iterator()
-		{
-			Stream<?> stream = stream(entityIds.spliterator(), false);
-			return stream.map(id -> getReference(entityMeta, id)).collect(Collectors.toList()).iterator();
-		}
-	}
-
 	private class EntityIdIterable implements Iterable<Object>
 	{
 		private final Iterable<Entity> entities;
@@ -376,41 +383,5 @@ public class EntityManagerImpl implements EntityManager
 		{
 			return StreamSupport.stream(entities.spliterator(), false).map(Entity::getIdValue);
 		}
-	}
-
-	@Override
-	public <E extends SystemEntity> E convert(Entity entity, Class<E> entityClass)
-	{
-		return entity != null ? getEntityFactory(entityClass).create(entity) : null;
-	}
-
-	@Override
-	public <E extends SystemEntity> Iterable<E> convert(Iterable<Entity> entities, Class<E> entityClass)
-	{
-		return () -> stream(entities.spliterator(), false).map(entity -> getEntityFactory(entityClass).create(entity))
-				.iterator();
-	}
-
-	@Override
-	public Entity createEntityForPartialEntity(Entity partialEntity, Fetch fetch)
-	{
-		if (fetch == null)
-		{
-			return partialEntity;
-		}
-		else
-		{
-			return new PartialEntity(partialEntity, fetch, this);
-		}
-	}
-
-	private <E extends SystemEntity> SystemEntityFactory<E, Object> getEntityFactory(Class<E> entityClass)
-	{
-		SystemEntityFactory<E, Object> entityFactory = systemEntityMetaRegistry.getSystemEntityFactory(entityClass);
-		if (entityFactory == null)
-		{
-			throw new RuntimeException(format("Unknown entity factory for entity [%s]", entityClass.getSimpleName()));
-		}
-		return entityFactory;
 	}
 }

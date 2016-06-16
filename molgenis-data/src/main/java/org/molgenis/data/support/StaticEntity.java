@@ -23,7 +23,7 @@ public abstract class StaticEntity implements Entity
 
 	public StaticEntity(EntityMetaData entityMeta)
 	{
-		this.entity = new EntityImpl(entityMeta);
+		this.entity = new DynamicEntity(entityMeta);
 	}
 
 	public StaticEntity(Object id, EntityMetaData entityMeta)
@@ -39,7 +39,7 @@ public abstract class StaticEntity implements Entity
 
 	protected void init(EntityMetaData entityMeta)
 	{
-		entity = new EntityImpl(entityMeta);
+		entity = new DynamicEntity(entityMeta);
 	}
 
 	@Override

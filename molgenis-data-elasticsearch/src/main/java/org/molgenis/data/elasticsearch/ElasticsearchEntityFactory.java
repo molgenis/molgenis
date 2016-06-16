@@ -49,7 +49,8 @@ public class ElasticsearchEntityFactory
 		Entity entity = sourceToEntityConverter.convert(source, entityMeta);
 		if (fetch != null)
 		{
-			return entityManager.createEntityForPartialEntity(entity, fetch);
+			// FIXME create entity through entity manager
+			throw new UnsupportedOperationException();
 		}
 		else
 		{
