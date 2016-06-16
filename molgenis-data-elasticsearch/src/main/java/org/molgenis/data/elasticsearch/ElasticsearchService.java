@@ -44,9 +44,6 @@ import static org.molgenis.data.support.EntityMetaDataUtils.createFetchForReinde
 
 /**
  * ElasticSearch implementation of the SearchService interface.
- * <p>
- * TODO use scroll-scan where possible:
- * http://www.elasticsearch.org/guide/en/elasticsearch /reference/current/search-request-scroll.html#scroll-scans
  *
  * @author erwin
  */
@@ -260,7 +257,8 @@ public class ElasticsearchService implements SearchService
 
 	/**
 	 * Searches the index for documents of a certain type that contain a reference to a specific entity.
-	 * Uses searchInternal to create a batched stream.
+	 * Uses {@link #searchInternalWithScanScroll(Query, EntityMetaData)} to scroll through the existing referring
+	 * entities in a context that remains valid even when the documents are getting updated.
 	 *
 	 * @param referredEntity          the entity that should be referred to in the documents
 	 * @param referringEntityMetaData {@link EntityMetaData} of the referring documents
@@ -285,7 +283,7 @@ public class ElasticsearchService implements SearchService
 			}
 			q.eq(attributeMetaData.getName(), referredEntity);
 		}
-		return searchInternal(q, referringEntityMetaData).stream();
+		return searchInternalWithScanScroll(q, referringEntityMetaData);
 	}
 
 	/**
@@ -447,6 +445,19 @@ public class ElasticsearchService implements SearchService
 	{
 		return new ElasticsearchEntityIterable(q, entityMetaData, elasticsearchFacade, elasticsearchEntityFactory,
 				searchRequestGenerator, indexName);
+	}
+
+	private Stream<Entity> searchInternalWithScanScroll(Query<Entity> query, EntityMetaData entityMetaData)
+	{
+		String type = sanitizeMapperType(entityMetaData.getName());
+		Consumer<SearchRequestBuilder> searchRequestBuilderConsumer = searchRequestBuilder -> searchRequestGenerator
+				.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH, query, null, null, null,
+						entityMetaData);
+
+		return elasticsearchFacade
+				.searchForIdsWithScanScroll(searchRequestBuilderConsumer, query.toString(), type, indexName)
+				.map(idString -> convert(idString, entityMetaData.getIdAttribute()))
+				.map(idObject -> elasticsearchEntityFactory.getReference(entityMetaData, idObject));
 	}
 
 	@Override

@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import com.codepoetics.protonpack.StreamUtils;
 import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.exists.types.TypesExistsResponse;
@@ -36,6 +37,7 @@ import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.cluster.metadata.MappingMetaData;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
@@ -54,6 +56,8 @@ import javax.annotation.Nonnull;
 public class ElasticsearchUtils
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchUtils.class);
+	private static final TimeValue SCROLL_KEEP_ALIVE = new TimeValue(5, TimeUnit.MINUTES);
+	private static final int SCROLL_SIZE = 1000;
 	private final Client client;
 	private final SearchRequestGenerator generator = new SearchRequestGenerator();
 	private final BulkProcessorFactory bulkProcessorFactory;
@@ -87,6 +91,7 @@ public class ElasticsearchUtils
 
 	void waitForCompletion(BulkProcessor bulkProcessor)
 	{
+		LOG.trace("waitForCompletion...");
 		try
 		{
 			boolean isCompleted = bulkProcessor.awaitClose(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
@@ -99,6 +104,10 @@ public class ElasticsearchUtils
 		{
 			Thread.currentThread().interrupt();
 			throw new RuntimeException(e);
+		}
+		finally
+		{
+			LOG.debug("bulkProcessor closed.");
 		}
 	}
 
@@ -358,6 +367,29 @@ public class ElasticsearchUtils
 	{
 		SearchHits searchHits = search(queryBuilder, queryToString, type, indexName);
 		return Arrays.stream(searchHits.hits()).map(SearchHit::getId);
+	}
+
+	/**
+	 * Performs a search query and returns the result as a {@link Stream} of ID strings.
+	 */
+	public Stream<String> searchForIdsWithScanScroll(Consumer<SearchRequestBuilder> queryBuilder, String queryToString,
+			String type, String indexName)
+	{
+		LOG.trace("Searching Elasticsearch '{}' docs using query [{}] ...", type, queryToString);
+		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);
+		queryBuilder.accept(searchRequestBuilder);
+		searchRequestBuilder.setScroll(SCROLL_KEEP_ALIVE).setSize(SCROLL_SIZE);
+		LOG.trace("SearchRequest: {}", searchRequestBuilder);
+		SearchResponse originalSearchResponse = searchRequestBuilder.execute().actionGet();
+
+		LOG.debug("Searched Elasticsearch '{}' docs using query [{}] in {}ms", type, queryToString,
+				originalSearchResponse.getTookInMillis());
+
+		Stream<SearchResponse> infiniteResponses = Stream.iterate(originalSearchResponse,
+				searchResponse -> client.prepareSearchScroll(searchResponse.getScrollId()).setScroll(SCROLL_KEEP_ALIVE)
+						.execute().actionGet());
+		return StreamUtils.takeWhile(infiniteResponses, searchResponse -> searchResponse.getHits().getHits().length > 0)
+				.flatMap(searchResponse -> Arrays.stream(searchResponse.getHits().getHits())).map(SearchHit::getId);
 	}
 
 	/**
