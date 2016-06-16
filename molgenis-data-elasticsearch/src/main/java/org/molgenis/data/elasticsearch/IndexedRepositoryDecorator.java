@@ -208,7 +208,7 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		decoratedRepository.forEachBatched(fetch, consumer, 1000);
+		decoratedRepository.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override
