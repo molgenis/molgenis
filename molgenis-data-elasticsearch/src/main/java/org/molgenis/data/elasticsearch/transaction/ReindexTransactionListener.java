@@ -34,11 +34,27 @@ public class ReindexTransactionListener extends DefaultMolgenisTransactionListen
 	}
 
 	@Override
+	public void rollbackTransaction(String transactionId)
+	{
+		try
+		{
+			reindexActionRegisterService.forgetReindexActions(transactionId);
+		}
+		catch(Exception ex)
+		{
+			LOG.error("Error forgetting actions for transaction id {}", transactionId);
+		}
+	}
+
+	@Override
 	public void doCleanupAfterCompletion(String transactionId)
 	{
 		try
 		{
-			rebuildIndexService.rebuildIndex(transactionId);
+			if (reindexActionRegisterService.forgetReindexActions(transactionId))
+			{
+				rebuildIndexService.rebuildIndex(transactionId);
+			}
 		}
 		catch (Exception ex)
 		{

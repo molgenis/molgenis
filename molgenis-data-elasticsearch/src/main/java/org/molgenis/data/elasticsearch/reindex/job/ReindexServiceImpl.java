@@ -70,7 +70,7 @@ public class ReindexServiceImpl implements ReindexService
 			reindexJobExecution.setReindexActionJobID(transactionId);
 			ReindexJob job = reindexJobFactory.createJob(reindexJobExecution);
 			CompletableFuture.runAsync(job::call, executorService)
-					.thenRun(() -> indexStatus.removeActionCounts(numberOfActionsPerEntity));
+					.whenComplete((a, b) -> indexStatus.removeActionCounts(numberOfActionsPerEntity));
 		}
 		else
 		{
