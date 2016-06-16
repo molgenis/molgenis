@@ -8,7 +8,6 @@ import static java.util.stream.StreamSupport.stream;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.List;
 import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -19,6 +18,8 @@ import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 
 /**
+ * Class for entities not defined in pre-existing Java classes
+ *
  * @see StaticEntity
  */
 public class DynamicEntity implements Entity
@@ -77,7 +78,8 @@ public class DynamicEntity implements Entity
 		AttributeMetaData idAttr = entityMeta.getIdAttribute();
 		if (idAttr == null)
 		{
-			throw new IllegalArgumentException(format("Entity [%s] doesn't have an id attribute"));
+			throw new IllegalArgumentException(
+					format("Entity [%s] doesn't have an id attribute", entityMeta.getName()));
 		}
 		set(idAttr.getName(), id);
 	}
@@ -174,18 +176,6 @@ public class DynamicEntity implements Entity
 		return value != null ? (Iterable<E>) value : emptyList();
 	}
 
-	// TODO remove method, move to utility class
-	public List<String> getList(String attrName)
-	{
-		throw new RuntimeException("TODO implement");
-	}
-
-	// TODO remove method, move to utility class
-	public List<Integer> getIntList(String attrName)
-	{
-		throw new RuntimeException("TODO implement");
-	}
-
 	@Override
 	public void set(String attrName, Object value)
 	{
@@ -211,7 +201,7 @@ public class DynamicEntity implements Entity
 		AttributeMetaData attr;
 		try
 		{
-			attr = getEntityMetaData().getAttribute(attrName);
+			attr = entityMeta.getAttribute(attrName);
 			if (attr == null)
 			{
 				throw new UnknownAttributeException(format("Unknown attribute [%s]", attrName));

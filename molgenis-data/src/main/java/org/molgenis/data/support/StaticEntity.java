@@ -13,6 +13,8 @@ import org.molgenis.data.meta.EntityMetaData;
  */
 public abstract class StaticEntity implements Entity
 {
+	private static final long serialVersionUID = 1L;
+
 	private Entity entity;
 
 	public StaticEntity(Entity entity)

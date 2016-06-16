@@ -5,7 +5,6 @@ import static java.util.Collections.emptyList;
 
 import java.sql.Timestamp;
 import java.util.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -151,16 +150,6 @@ public abstract class AbstractEntity implements Entity
 		throw new UnsupportedOperationException("FIXME"); // FIXME
 		//		Iterable<Entity> entities = getEntities(attributeName);
 		//		return entities != null ? new ConvertingIterable<E>(clazz, entities) : emptyList();
-	}
-
-	public List<String> getList(String attributeName)
-	{
-		return DataConverter.toList(get(attributeName));
-	}
-
-	public List<Integer> getIntList(String attributeName)
-	{
-		return DataConverter.toIntList(get(attributeName));
 	}
 
 	@Override
