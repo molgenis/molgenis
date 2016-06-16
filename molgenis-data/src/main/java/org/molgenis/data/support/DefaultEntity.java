@@ -27,6 +27,10 @@ import org.molgenis.util.EntityUtils;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
+/**
+ * @deprecated see {@link DynamicEntity}
+ */
+@Deprecated
 public class DefaultEntity implements Entity
 {
 	private static final long serialVersionUID = 1L;
