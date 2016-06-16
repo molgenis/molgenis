@@ -97,6 +97,11 @@ class ReindexJob extends Job
 				progress.progress(count, "Cleaned up the actions.");
 			}
 		}
+		catch (Exception ex)
+		{
+			LOG.error("Error performing reindexActions", ex);
+			throw ex;
+		}
 		finally
 		{
 			progress.status("refreshIndex...");

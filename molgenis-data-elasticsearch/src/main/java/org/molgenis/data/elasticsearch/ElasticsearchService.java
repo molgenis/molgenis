@@ -173,18 +173,21 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void index(Entity entity, EntityMetaData entityMetaData, IndexingMode indexingMode)
 	{
+		LOG.debug("Indexing single {}.{} entity ...", entityMetaData.getName(), entity.getIdValue());
 		index(Stream.of(entity), entityMetaData, indexingMode == IndexingMode.UPDATE);
 	}
 
 	@Override
 	public long index(Iterable<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode)
 	{
+		LOG.debug("Indexing multiple {} entities...", entityMetaData.getName());
 		return index(stream(entities.spliterator(), false), entityMetaData, indexingMode == IndexingMode.UPDATE);
 	}
 
 	@Override
 	public long index(Stream<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode)
 	{
+		LOG.debug("Indexing multiple {} entities...", entityMetaData.getName());
 		return index(entities, entityMetaData, indexingMode == IndexingMode.UPDATE);
 	}
 
@@ -297,7 +300,7 @@ public class ElasticsearchService implements SearchService
 	{
 		String id = toElasticsearchId(entity, entityMetaData);
 		Map<String, Object> source = elasticsearchEntityFactory.create(entityMetaData, entity);
-		LOG.debug("Indexing [{}] with id [{}] in index [{}]...", type, id, indexName);
+		LOG.trace("Indexing [{}] with id [{}] in index [{}]...", type, id, indexName);
 		return new IndexRequest().index(indexName).type(type).id(id).source(source);
 	}
 
