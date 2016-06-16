@@ -68,7 +68,7 @@ public class ElasticsearchService implements SearchService
 	private final String indexName;
 	private final ResponseParser responseParser = new ResponseParser();
 	private final ElasticsearchUtils elasticsearchFacade;
-	private final SearchRequestGenerator generator = new SearchRequestGenerator();
+	private final SearchRequestGenerator searchRequestGenerator = new SearchRequestGenerator();
 
 	public ElasticsearchService(Client client, String indexName, DataService dataService,
 			ElasticsearchEntityFactory elasticsearchEntityFactory)
@@ -446,7 +446,7 @@ public class ElasticsearchService implements SearchService
 	private ElasticsearchEntityIterable searchInternal(Query<Entity> q, EntityMetaData entityMetaData)
 	{
 		return new ElasticsearchEntityIterable(q, entityMetaData, elasticsearchFacade, elasticsearchEntityFactory,
-				generator, indexName);
+				searchRequestGenerator, indexName);
 	}
 
 	@Override
