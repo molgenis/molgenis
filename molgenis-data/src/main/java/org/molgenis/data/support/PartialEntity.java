@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -55,7 +54,7 @@ public class PartialEntity implements Entity
 	}
 
 	@Override
-	public String getLabelValue()
+	public Object getLabelValue()
 	{
 		return decoratedEntity.getLabelValue();
 	}
@@ -227,32 +226,6 @@ public class PartialEntity implements Entity
 		else
 		{
 			return entityManager.getReference(getEntityMetaData(), getIdValue()).getEntities(attributeName, clazz);
-		}
-	}
-
-	@Override
-	public List<String> getList(String attributeName)
-	{
-		if (fetch.hasField(attributeName))
-		{
-			return decoratedEntity.getList(attributeName);
-		}
-		else
-		{
-			return entityManager.getReference(getEntityMetaData(), getIdValue()).getList(attributeName);
-		}
-	}
-
-	@Override
-	public List<Integer> getIntList(String attributeName)
-	{
-		if (fetch.hasField(attributeName))
-		{
-			return decoratedEntity.getIntList(attributeName);
-		}
-		else
-		{
-			return entityManager.getReference(getEntityMetaData(), getIdValue()).getIntList(attributeName);
 		}
 	}
 

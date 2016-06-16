@@ -21,7 +21,7 @@ public abstract class AbstractEntity implements Entity
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public String getLabelValue()
+	public Object getLabelValue()
 	{
 		AttributeMetaData labelAttribute = getEntityMetaData().getLabelAttribute();
 		if (labelAttribute == null && getEntityMetaData().isAbstract())
@@ -153,13 +153,11 @@ public abstract class AbstractEntity implements Entity
 		//		return entities != null ? new ConvertingIterable<E>(clazz, entities) : emptyList();
 	}
 
-	@Override
 	public List<String> getList(String attributeName)
 	{
 		return DataConverter.toList(get(attributeName));
 	}
 
-	@Override
 	public List<Integer> getIntList(String attributeName)
 	{
 		return DataConverter.toIntList(get(attributeName));

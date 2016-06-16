@@ -86,7 +86,7 @@ public class DefaultEntity implements Entity
 	}
 
 	@Override
-	public String getLabelValue()
+	public Object getLabelValue()
 	{
 		return getString(entityMetaData.getLabelAttribute().getName());
 	}
@@ -176,13 +176,11 @@ public class DefaultEntity implements Entity
 		return DataConverter.toDouble(values.get(attributeName));
 	}
 
-	@Override
 	public List<String> getList(String attributeName)
 	{
 		return DataConverter.toList(values.get(attributeName));
 	}
 
-	@Override
 	public List<Integer> getIntList(String attributeName)
 	{
 		return DataConverter.toIntList(values.get(attributeName));
@@ -293,7 +291,10 @@ public class DefaultEntity implements Entity
 		Iterable<?> ids;
 
 		Object value = values.get(attributeName);
-		if (value instanceof String) ids = getList(attributeName);
+		if (value instanceof String)
+		{
+			throw new RuntimeException("FIXME"); // FIXME
+		}
 		else if (value instanceof Entity) return Collections.singletonList((Entity) value);
 		else ids = (Iterable<?>) value;
 

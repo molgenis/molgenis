@@ -90,7 +90,11 @@ public class DataConverter
 		if (source == null) return null;
 		if (source instanceof String) return (String) source;
 		if (source instanceof FieldType) return source.toString();
-		if (source instanceof Entity) return ((Entity) source).getLabelValue();
+		if (source instanceof Entity)
+		{
+			Object labelValue = ((Entity) source).getLabelValue();
+			return labelValue != null ? labelValue.toString() : null;
+		}
 		if (source instanceof List)
 		{
 			StringBuilder sb = new StringBuilder();

@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
@@ -115,21 +114,9 @@ public abstract class StaticEntity implements Entity
 	}
 
 	@Override
-	public List<Integer> getIntList(String attributeName)
-	{
-		return entity.getIntList(attributeName);
-	}
-
-	@Override
-	public String getLabelValue()
+	public Object getLabelValue()
 	{
 		return entity.getLabelValue();
-	}
-
-	@Override
-	public List<String> getList(String attributeName)
-	{
-		return entity.getList(attributeName);
 	}
 
 	@Override

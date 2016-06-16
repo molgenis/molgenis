@@ -15,7 +15,6 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 
@@ -26,23 +25,15 @@ public class DynamicEntity implements Entity
 {
 	private static final long serialVersionUID = 1L;
 
-	// TODO add final modifier
 	/**
 	 * Entity meta data
 	 */
-	private EntityMetaData entityMeta;
+	private final EntityMetaData entityMeta;
 
-	// TODO add final modifier
 	/**
 	 * Maps attribute names to values. Value class types are determined by attribute data type.
 	 */
-	private Map<String, Object> values;
-
-	// TODO remove constructor
-	protected DynamicEntity()
-	{
-		this.values = newHashMap();
-	}
+	private final Map<String, Object> values;
 
 	/**
 	 * Constructs an entity with the given entity meta data.
@@ -57,16 +48,11 @@ public class DynamicEntity implements Entity
 		//this.values = newHashMapWithExpectedSize(Iterables.size(entityMeta.getAtomicAttributes()));
 	}
 
-	// TODO remove method
-	protected void init(EntityMetaData entityMeta)
-	{
-		this.entityMeta = requireNonNull(entityMeta);
-	}
-
+	// TODO should we return immutable meta data?
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return entityMeta; // TODO should we return immutable meta data?
+		return entityMeta;
 	}
 
 	// TODO remove, use getEntityMetaData to retrieve entity meta data
@@ -96,13 +82,12 @@ public class DynamicEntity implements Entity
 		set(idAttr.getName(), id);
 	}
 
-	// TODO getLabelValue should return Object
 	@Override
-	public String getLabelValue()
+	public Object getLabelValue()
 	{
 		// abstract entities might not have an label attribute
 		AttributeMetaData labelAttr = entityMeta.getLabelAttribute();
-		return labelAttr != null ? getLabelValueAsString(labelAttr) : null;
+		return labelAttr != null ? get(labelAttr.getName()) : null;
 	}
 
 	// FIXME return empty list in case attr is a (categorical)mref and value is null
@@ -190,14 +175,12 @@ public class DynamicEntity implements Entity
 	}
 
 	// TODO remove method, move to utility class
-	@Override
 	public List<String> getList(String attrName)
 	{
 		throw new RuntimeException("TODO implement");
 	}
 
 	// TODO remove method, move to utility class
-	@Override
 	public List<Integer> getIntList(String attrName)
 	{
 		throw new RuntimeException("TODO implement");
@@ -215,55 +198,6 @@ public class DynamicEntity implements Entity
 	public void set(Entity values)
 	{
 		throw new RuntimeException("TODO implement");
-	}
-
-	private String getLabelValueAsString(AttributeMetaData labelAttr)
-	{
-		String labelAttributeName = labelAttr.getName();
-		MolgenisFieldTypes.FieldTypeEnum dataType = labelAttr.getDataType().getEnumType();
-		switch (dataType)
-		{
-			case BOOL:
-			case DECIMAL:
-			case EMAIL:
-			case ENUM:
-			case HTML:
-			case HYPERLINK:
-			case INT:
-			case LONG:
-			case SCRIPT:
-			case STRING:
-			case TEXT:
-				Object obj = get(labelAttributeName);
-				return obj != null ? obj.toString() : null;
-			case DATE:
-			case DATE_TIME:
-				java.util.Date date = getUtilDate(labelAttributeName);
-				return new DateToStringConverter().convert(date);
-			case CATEGORICAL:
-			case XREF:
-			case FILE:
-				Entity refEntity = getEntity(labelAttributeName);
-				return refEntity != null ? refEntity.getLabelValue() : null;
-			case CATEGORICAL_MREF:
-			case MREF:
-				Iterable<Entity> refEntities = getEntities(labelAttributeName);
-				if (refEntities != null)
-				{
-					StringBuilder strBuilder = new StringBuilder();
-					for (Entity mrefEntity : refEntities)
-					{
-						if (strBuilder.length() > 0) strBuilder.append(',');
-						strBuilder.append(mrefEntity.getLabelValue());
-					}
-					return strBuilder.toString();
-				}
-				return null;
-			case COMPOUND:
-				throw new RuntimeException("invalid label data type " + dataType);
-			default:
-				throw new RuntimeException("unsupported label data type " + dataType);
-		}
 	}
 
 	private void validateValueType(String attrName, Object value)

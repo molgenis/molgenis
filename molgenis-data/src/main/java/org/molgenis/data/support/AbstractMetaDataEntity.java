@@ -42,7 +42,7 @@ public abstract class AbstractMetaDataEntity extends AbstractEntity
 	}
 
 	@Override
-	public String getLabelValue()
+	public Object getLabelValue()
 	{
 		AttributeMetaData labelAttribute = metaData.getLabelAttribute();
 		if (labelAttribute == null)

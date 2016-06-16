@@ -176,7 +176,7 @@ public class MapEntity extends AbstractEntity
 	}
 
 	@Override
-	public String getLabelValue()
+	public Object getLabelValue()
 	{
 		return null;
 	}

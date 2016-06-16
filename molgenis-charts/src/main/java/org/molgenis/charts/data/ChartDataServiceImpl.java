@@ -151,7 +151,8 @@ public class ChartDataServiceImpl implements ChartDataService
 		Object o = entity.get(split);
 		if (o instanceof Entity)
 		{
-			return ((Entity) o).getLabelValue();
+			Object labelValue = ((Entity) o).getLabelValue();
+			return labelValue != null ? labelValue.toString() : null;
 		}
 		else if (o instanceof List)
 		{
@@ -167,7 +168,8 @@ public class ChartDataServiceImpl implements ChartDataService
 
 				if (ob instanceof Entity)
 				{
-					strBuilder.append(((Entity) ob).getLabelValue());
+					Object labelValue = ((Entity) ob).getLabelValue();
+					strBuilder.append(labelValue != null ? labelValue.toString() : null);
 				}
 				else
 				{
@@ -364,7 +366,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	 * 
 	 * @param entity
 	 * @param attributeName
-	 * @param attributeJavaType
+	 * @param attributeFieldTypeEnum
 	 * @return value (Object)
 	 */
 	private Object getJavaValue(Entity entity, String attributeName, FieldTypeEnum attributeFieldTypeEnum)

@@ -2,7 +2,6 @@ package org.molgenis.data;
 
 import java.io.Serializable;
 import java.sql.Timestamp;
-import java.util.List;
 
 import org.molgenis.data.meta.EntityMetaData;
 
@@ -35,7 +34,7 @@ public interface Entity extends Serializable
 	/**
 	 * Optional human readable label to recognize this Entity. Otherwise return null
 	 */
-	String getLabelValue();
+	Object getLabelValue();
 
 	/**
 	 * Get attribute value
@@ -101,16 +100,6 @@ public interface Entity extends Serializable
 	 * Retrieves the value of the designated column as a entity of the given type iterable
 	 */
 	<E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz);
-
-	/**
-	 * Retrieves the value of the designated column as List<String>.
-	 */
-	List<String> getList(String attributeName);
-
-	/**
-	 * Retrieves the value of the designated column as List<Integer>
-	 */
-	List<Integer> getIntList(String attributeName);
 
 	/**
 	 * Change attribute value
