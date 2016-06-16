@@ -292,7 +292,7 @@ public class SnpEffAnnotator
 		}
 
 		// FIXME: can be multiple? even when using canonical!
-		// entry.g.
+		// e.g.
 		// ANN=G|intron_variant|MODIFIER|LOC101926913|LOC101926913|transcript|NR_110185.1|Noncoding|5/5|n.376+9526G>C||||||,G|non_coding_exon_variant|MODIFIER|LINC01124|LINC01124|transcript|NR_027433.1|Noncoding|1/1|n.590G>C||||||;
 		public void parseOutputLineToEntity(String line, Entity entity)
 		{
