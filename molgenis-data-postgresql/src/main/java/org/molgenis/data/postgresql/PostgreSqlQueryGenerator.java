@@ -132,6 +132,14 @@ class PostgreSqlQueryGenerator
 		return sql.toString();
 	}
 
+	static String getSqlCreateJunctionTableIndex(EntityMetaData entityMeta, AttributeMetaData attr)
+	{
+		String junctionTableName = getJunctionTableName(entityMeta, attr);
+		return "CREATE INDEX " + junctionTableName.substring(0, junctionTableName.length() - 1) + "_" + entityMeta
+				.getIdAttribute().getName() + "_index\" ON " + junctionTableName + " (" + getColumnName(
+				entityMeta.getIdAttribute()) + ")";
+	}
+
 	public static String getSqlDropJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		return getSqlDropTable(getJunctionTableName(entityMeta, attr));

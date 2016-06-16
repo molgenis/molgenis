@@ -291,6 +291,10 @@ public class PostgreSqlRepository extends AbstractRepository
 					}
 				}
 				jdbcTemplate.execute(createJunctionTableSql);
+				String createIndexJunctionTableSql = getSqlCreateJunctionTableIndex(getEntityMetaData(), attr);
+				LOG.debug("Creating index on junction table for entity [{}] attribute [{}]", getName(), attr.getName());
+				LOG.trace("SQL: {}", createIndexJunctionTableSql);
+				jdbcTemplate.execute(createIndexJunctionTableSql);
 			}
 			else if (attr.getDataType() instanceof XrefField && isPersistedInPostgreSql(attr.getRefEntity()))
 			{
@@ -413,6 +417,10 @@ public class PostgreSqlRepository extends AbstractRepository
 					}
 				}
 				jdbcTemplate.execute(createJunctionTableSql);
+				String createIndexJunctionTableSql = getSqlCreateJunctionTableIndex(getEntityMetaData(), attr);
+				LOG.debug("Creating index on junction table for entity [{}] attribute [{}]", getName(), attr.getName());
+				LOG.trace("SQL: {}", createIndexJunctionTableSql);
+				jdbcTemplate.execute(createIndexJunctionTableSql);
 			}
 			else if (!attr.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 			{
