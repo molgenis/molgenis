@@ -1,5 +1,6 @@
 package org.molgenis.data;
 
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -248,19 +249,21 @@ public class EntityReferenceResolverDecoratorTest
 		Entity entity0WithRefs = mock(Entity.class);
 		Entity entity1WithRefs = mock(Entity.class);
 		List<Entity> entities = Arrays.asList(entity0, entity1);
+		List<Entity> entitiesWithRefs = Arrays.asList(entity0WithRefs, entity1WithRefs);
+
+		when(entityManager.resolveReferences(eq(entityMeta), streamArgumentCaptor.capture(), eq(fetch)))
+				.thenReturn(entitiesWithRefs.stream());
 
 		// the test
-		entityReferenceResolverDecorator.forEachBatched(fetch, consumer, 1000);
+		entityReferenceResolverDecorator.forEachBatched(fetch, consumer, 123);
 
-		verify(decoratedRepo).forEachBatched(fetch, consumerArgumentCaptor.capture(), 1000);
-
+		verify(decoratedRepo).forEachBatched(eq(fetch), consumerArgumentCaptor.capture(), eq(123));
 		consumerArgumentCaptor.getValue().accept(entities);
 
-		verify(entityManager).resolveReferences(entityMeta, streamArgumentCaptor.capture(), fetch);
+		Stream<Entity> entitiesToDecorate = streamArgumentCaptor.getValue();
 
-		Stream<Entity> actualStream = streamArgumentCaptor.getValue();
-
-		assertEquals(actualStream.collect(Collectors.toList()), Arrays.asList(entity0WithRefs, entity1WithRefs));
+		assertEquals(entitiesToDecorate.collect(Collectors.toList()), entities);
+		verify(consumer).accept(entitiesWithRefs);
 	}
 
 	@Test

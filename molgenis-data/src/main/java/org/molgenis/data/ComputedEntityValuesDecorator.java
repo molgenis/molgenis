@@ -98,8 +98,16 @@ public class ComputedEntityValuesDecorator implements Repository<Entity>
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		decoratedRepo.forEachBatched(fetch, entities -> consumer
-				.accept(Lists.transform(entities, EntityWithComputedAttributes::new)), batchSize);
+		if(getEntityMetaData().hasAttributeWithExpression())
+		{
+			decoratedRepo.forEachBatched(fetch, entities -> consumer
+					.accept(Lists.transform(entities, EntityWithComputedAttributes::new)), batchSize);
+		}
+		else
+		{
+			decoratedRepo.forEachBatched(fetch, consumer, batchSize);
+		}
+
 	}
 
 	@Override

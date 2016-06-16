@@ -27,6 +27,8 @@ public class ComputedEntityValuesDecoratorTest
 {
 	@Mock
 	private Repository<Entity> decoratedRepo;
+	@Mock
+	private Consumer<List<Entity>> consumer;
 	private ComputedEntityValuesDecorator computedEntityValuesDecorator;
 	@Captor
 	private ArgumentCaptor<Consumer<List<Entity>>> consumerArgumentCaptor;
@@ -208,7 +210,7 @@ public class ComputedEntityValuesDecoratorTest
 		consumerArgumentCaptor.getValue().accept(asList(entity0, entity1));
 
 		verify(consumer).accept(listArgumentCaptor.capture());
-		assertTrue(listArgumentCaptor.getValue().stream().allMatch(e -> e instanceof EntityWithComputedAttributes));
+		assertEquals(listArgumentCaptor.getValue(), asList(entity0, entity1));
 	}
 
 	@Test
@@ -225,13 +227,12 @@ public class ComputedEntityValuesDecoratorTest
 		Entity entity1 = mock(Entity.class);
 		when(entity1.getEntityMetaData()).thenReturn(entityMeta);
 
-		Consumer<List<Entity>> consumer = mock(Consumer.class);
 		computedEntityValuesDecorator.forEachBatched(fetch, consumer, 1234);
-		verify(decoratedRepo).forEachBatched(fetch, consumerArgumentCaptor.capture(), 1234);
+		verify(decoratedRepo).forEachBatched(eq(fetch), consumerArgumentCaptor.capture(), eq(1234));
 
 		consumerArgumentCaptor.getValue().accept(asList(entity0, entity1));
 
-		verify(consumer)
-				.accept(asList(new EntityWithComputedAttributes(entity0), new EntityWithComputedAttributes(entity1)));
+		verify(consumer).accept(listArgumentCaptor.capture());
+		assertTrue(listArgumentCaptor.getValue().stream().allMatch(e -> e instanceof EntityWithComputedAttributes));
 	}
 }
