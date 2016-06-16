@@ -369,11 +369,11 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		{
 			// validate cross-repository collection reference constraints. the decorated repository takes care of
 			// validating other reference constraints
-			String backend = getEntityMetaData().getBackend();
+			String backend = dataService.getMeta().getBackend(getEntityMetaData()).getName();
 			refAttrs = StreamSupport.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
 							&& attr.getExpression() == null
-							&& !Objects.equals(attr.getRefEntity().getBackend(), backend))
+							&& isDifferentBackend(backend, attr))
 					.collect(Collectors.toList());
 		}
 
@@ -404,6 +404,13 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		validationResource.setSelfReferencing(refAttrs.stream()
 				.anyMatch(refAttr -> refAttr.getRefEntity().getName().equals(getEntityMetaData().getName())));
 		validationResource.setRefAttrs(refAttrs);
+	}
+
+	private boolean isDifferentBackend(String backend, AttributeMetaData attr)
+	{
+		EntityMetaData refEntity = attr.getRefEntity();
+		String refEntityBackend = dataService.getMeta().getBackend(refEntity).getName();
+		return !backend.equals(refEntityBackend);
 	}
 
 	private void initUniqueValidation(ValidationResource validationResource)
