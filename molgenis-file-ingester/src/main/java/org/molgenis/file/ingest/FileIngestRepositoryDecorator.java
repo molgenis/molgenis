@@ -2,7 +2,9 @@ package org.molgenis.file.ingest;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
@@ -270,9 +272,9 @@ public class FileIngestRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public Stream<Entity> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		return decorated.stream(fetch);
+		decorated.forEachBatched(fetch, consumer, 1000);
 	}
 
 }

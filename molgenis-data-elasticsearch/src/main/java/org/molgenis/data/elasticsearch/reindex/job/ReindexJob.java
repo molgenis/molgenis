@@ -14,12 +14,9 @@ import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.STARTED;
 
 import java.util.List;
+import java.util.stream.Stream;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.Sort;
+import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.jobs.Job;
@@ -29,6 +26,7 @@ import org.molgenis.data.reindex.meta.ReindexActionMetaData;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus;
+import org.molgenis.data.support.EntityMetaDataUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -203,8 +201,9 @@ class ReindexJob extends Job
 	private void rebuildIndexBatchEntities(String entityFullName)
 	{
 		LOG.debug("Reindexing [{}]...", entityFullName);
-		searchService.rebuildIndex(dataService.getRepository(entityFullName),
-				dataService.getMeta().getEntityMetaData(entityFullName));
+		//FIXME: Deze is gedecorate, kan in foute gevallen dus de IDs uit de index halen
+		final Repository<Entity> repository = dataService.getRepository(entityFullName);
+		searchService.rebuildIndex(repository);
 		LOG.info("Reindexed [{}].", entityFullName);
 	}
 

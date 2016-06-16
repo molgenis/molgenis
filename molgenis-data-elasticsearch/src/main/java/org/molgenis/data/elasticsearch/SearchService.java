@@ -2,12 +2,7 @@ package org.molgenis.data.elasticsearch;
 
 import java.util.stream.Stream;
 
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
+import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
@@ -166,7 +161,7 @@ public interface SearchService
 	 */
 	void flush();
 
-	void rebuildIndex(Iterable<? extends Entity> entities, EntityMetaData entityMetaData);
+	void rebuildIndex(Repository<? extends Entity> repository);
 
 	/**
 	 * Optimize the index for faster search operations, remove documents that are marked as deleted.

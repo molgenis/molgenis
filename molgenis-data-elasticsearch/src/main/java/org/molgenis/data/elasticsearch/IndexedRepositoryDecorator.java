@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.util.Collections.unmodifiableSet;
@@ -205,15 +206,15 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public Stream<Entity> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		return decoratedRepository.stream(fetch);
+		decoratedRepository.forEachBatched(fetch, consumer, 1000);
 	}
 
 	@Override
 	public void rebuildIndex()
 	{
-		elasticSearchService.rebuildIndex(decoratedRepository, getEntityMetaData());
+		elasticSearchService.rebuildIndex(decoratedRepository);
 	}
 
 	@Override

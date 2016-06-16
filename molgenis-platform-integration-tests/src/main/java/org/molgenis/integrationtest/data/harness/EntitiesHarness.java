@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
@@ -86,10 +87,11 @@ public class EntitiesHarness
 				.collect(Collectors.toList());
 	}
 
-	public List<Entity> createTestEntities(EntityMetaData entityMetaData, int numberOfEntities, int numberOfRefEntities)
+	public Stream<Entity> createTestEntities(EntityMetaData entityMetaData, int numberOfEntities,
+			List<Entity> refEntities)
 	{
-		return IntStream.range(0, numberOfEntities).mapToObj(i -> createEntity(entityMetaData, i, i % numberOfRefEntities))
-				.collect(Collectors.toList());
+		return IntStream.range(0, numberOfEntities+1)
+				.mapToObj(i -> createEntity(entityMetaData, i, refEntities.get(i % refEntities.size())));
 	}
 
 	private DefaultEntity createRefEntity(EntityMetaData refEntityMetaData, int id)
@@ -100,14 +102,14 @@ public class EntitiesHarness
 		return refEntity;
 	}
 
-	private DefaultEntity createEntity(EntityMetaData entityMetaData, int id, int refId)
+	private DefaultEntity createEntity(EntityMetaData entityMetaData, int id, Entity refEntity)
 	{
 		DefaultEntity entity1 = new DefaultEntity(entityMetaData, dataService);
 		entity1.set(ATTR_ID, id);
 		entity1.set(ATTR_STRING, "string1");
 		entity1.set(ATTR_BOOL, true);
-		entity1.set(ATTR_CATEGORICAL, "" + refId);
-		entity1.set(ATTR_CATEGORICAL_MREF, "" + refId);
+		entity1.set(ATTR_CATEGORICAL, refEntity);
+		entity1.set(ATTR_CATEGORICAL_MREF, Collections.singletonList(refEntity));
 		entity1.set(ATTR_DATE, "21-12-2012");
 		entity1.set(ATTR_DATETIME, "1985-08-12T11:12:13+0500");
 		entity1.set(ATTR_EMAIL, "this.is@mail.address");
@@ -117,8 +119,8 @@ public class EntitiesHarness
 		entity1.set(ATTR_LONG, 1000000);
 		entity1.set(ATTR_INT, 18);
 		entity1.set(ATTR_SCRIPT, "/bin/blaat/script.sh");
-		entity1.set(ATTR_XREF, refId);
-		entity1.set(ATTR_MREF, Collections.singletonList(refId));
+		entity1.set(ATTR_XREF, refEntity);
+		entity1.set(ATTR_MREF, Collections.singletonList(refEntity));
 		return entity1;
 	}
 }

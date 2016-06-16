@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -4506,10 +4507,11 @@ public class RepositoryValidationDecoratorTest
 	}
 
 	@Test
-	public void streamFetch()
+	public void forEachBatchedFetch()
 	{
 		Fetch fetch = new Fetch();
-		repositoryValidationDecorator.stream(fetch);
-		verify(decoratedRepo, times(1)).stream(fetch);
+		Consumer<List<Entity>> consumer = mock(Consumer.class);
+		repositoryValidationDecorator.forEachBatched(fetch, consumer, 234);
+		verify(decoratedRepo, times(1)).forEachBatched(fetch, consumer, 234);
 	}
 }

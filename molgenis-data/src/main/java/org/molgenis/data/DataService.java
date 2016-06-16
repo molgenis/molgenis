@@ -13,39 +13,6 @@ import org.molgenis.data.meta.MetaDataService;
  */
 public interface DataService extends Iterable<Repository<Entity>>
 {
-	/**
-	 * Streams the {@link Repository}s
-	 */
-	default Stream<Repository<Entity>> stream()
-	{
-		return StreamSupport.stream(spliterator(), false);
-	}
-
-	/**
-	 * Streams the {@link Entity}s
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param fetch
-	 *            fetch defining which attributes to retrieve
-	 * @return Stream of all entities
-	 */
-	Stream<Entity> stream(String entityName, Fetch fetch);
-
-	/**
-	 * Streams the {@link Entity}s
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param fetch
-	 *            fetch defining which attributes to retrieve
-	 * @param clazz
-	 *            typed entity class
-	 * 
-	 * @return Stream of all entities of the give type
-	 */
-	<E extends Entity> Stream<E> stream(String entityName, Fetch fetch, Class<E> clazz);
-
 	void setMeta(MetaDataService metaDataService);
 
 	/**

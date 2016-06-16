@@ -107,6 +107,7 @@ import com.google.common.collect.ImmutableMap;
 @RequestMapping(URI)
 public class SortaServiceController extends MolgenisPluginController
 {
+	static final int BATCH_SIZE = 1000;
 	private final OntologyService ontologyService;
 	private final SortaService sortaService;
 	private final DataService dataService;
@@ -566,7 +567,9 @@ public class SortaServiceController extends MolgenisPluginController
 	{
 		// Add the original input dataset to database
 		dataService.getMeta().addEntityMeta(inputRepository.getEntityMetaData());
-		dataService.getRepository(inputRepository.getName()).add(inputRepository.stream());
+
+		Repository<Entity> target = dataService.getRepository(inputRepository.getName());
+		inputRepository.forEachBatched(entities -> target.add(entities.stream()), BATCH_SIZE);
 	}
 
 	private long countMatchedEntities(SortaJobExecution sortaJobExecution, boolean isMatched)
