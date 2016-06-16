@@ -168,6 +168,7 @@ public class ElasticsearchServiceTest
 		});
 		dataService.addRepository(repo);
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData("entity");
+		when(dataService.getEntityMetaData("entity")).thenReturn(entityMetaData);
 		entityMetaData.setBackend(ElasticsearchRepositoryCollection.NAME);
 		entityMetaData.addAttribute(idAttrName, ROLE_ID).setDataType(MolgenisFieldTypes.INT);
 		Query q = new QueryImpl();

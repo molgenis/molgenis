@@ -61,7 +61,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
 
 		updatePermissionAttribute = mock(AttributeMetaData.class);
 		when(updatePermissionAttribute.getName()).thenReturn(UPDATE_ATTRIBUTE);
-		when(updatePermissionAttribute.getDataType()).thenReturn(MolgenisFieldTypes.STRING);
+		when(updatePermissionAttribute.getDataType()).thenReturn(MolgenisFieldTypes.MREF);
 
 		AttributeMetaData idAttribute = mock(AttributeMetaData.class);
 		when(idAttribute.getName()).thenReturn("id");
@@ -75,6 +75,7 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		when(entityMetaData.getName()).thenReturn(entityName);
 		when(entityMetaData.isRowLevelSecured()).thenReturn(true);
 		when(entityMetaData.getIdAttribute()).thenReturn(idAttribute);
+		when(entityMetaData.getLabelAttribute()).thenReturn(valueAttribute);
 		when(entityMetaData.getAttribute(UPDATE_ATTRIBUTE)).thenReturn(updatePermissionAttribute);
 		when(entityMetaData.getOwnAttributes())
 				.thenReturn(newArrayList(idAttribute, valueAttribute, updatePermissionAttribute));
@@ -99,6 +100,9 @@ public class RowLevelSecurityRepositoryDecoratorTest
 		when(entity1.getIdValue()).thenReturn("entity1");
 		when(entity1.getEntityMetaData()).thenReturn(entityMetaData);
 		when(entity1.getEntities(UPDATE_ATTRIBUTE)).thenReturn(newArrayList(user1));
+		when(entity1.get("id")).thenReturn("entity1");
+		when(entity1.get("value")).thenReturn("value1");
+		when(entity1.get(UPDATE_ATTRIBUTE)).thenReturn(newArrayList(user1));
 		entity2 = mock(Entity.class);
 		when(entity2.getIdValue()).thenReturn("entity2");
 		when(entity2.getEntityMetaData()).thenReturn(entityMetaData);

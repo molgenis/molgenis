@@ -211,9 +211,9 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		if (isRowLevelSecured())
 		{
 			Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
-			Entity completeEntity = getCompleteEntity(entity, currentAuthentication);
-			validatePermission(completeEntity, Permission.UPDATE, currentAuthentication);
-			runAsSystem(() -> decoratedRepository.update(completeEntity));
+			addAndSetUpdateAttribute(entity, currentAuthentication);
+			validatePermission(entity, Permission.UPDATE, currentAuthentication);
+			runAsSystem(() -> decoratedRepository.update(entity));
 		}
 		else
 		{
@@ -228,7 +228,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		{
 			Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
 			Stream<? extends Entity> completeEntities = entities
-					.map(entity -> getCompleteEntity(entity, currentAuthentication))
+					.map(entity -> addAndSetUpdateAttribute(entity, currentAuthentication))
 					.filter(entity -> validatePermission(entity, Permission.UPDATE, currentAuthentication));
 			runAsSystem(() -> decoratedRepository.update(completeEntities));
 		}
@@ -244,9 +244,9 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
 			Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
-			Entity completeEntity = getCompleteEntity(entity, currentAuthentication);
-			validatePermission(completeEntity, Permission.UPDATE, currentAuthentication);
-			runAsSystem(() -> decoratedRepository.delete(completeEntity));
+			addAndSetUpdateAttribute(entity, currentAuthentication);
+			validatePermission(entity, Permission.UPDATE, currentAuthentication);
+			runAsSystem(() -> decoratedRepository.delete(entity));
 		}
 		else
 		{
@@ -261,7 +261,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		{
 			Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
 			Stream<? extends Entity> filteredEntities = entities
-					.map(entity -> getCompleteEntity(entity, currentAuthentication))
+					.map(entity -> addAndSetUpdateAttribute(entity, currentAuthentication))
 					.filter(entity -> validatePermission(entity, Permission.UPDATE, currentAuthentication));
 			runAsSystem(() -> decoratedRepository.delete(filteredEntities));
 		}
@@ -322,7 +322,7 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		if (isRowLevelSecured() && !isCurrentUserSuOrSystem())
 		{
 			Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
-			decoratedRepository.stream().map(entity -> getCompleteEntity(entity, currentAuthentication))
+			decoratedRepository.stream().map(entity -> addAndSetUpdateAttribute(entity, currentAuthentication))
 					.forEach(entity -> validatePermission(entity, Permission.UPDATE, currentAuthentication));
 			runAsSystem(decoratedRepository::deleteAll);
 		}
@@ -436,7 +436,8 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 	private Entity injectPermissions(Entity entity)
 	{
 		List<String> permissions = newArrayList();
-		if (hasPermission(entity, Permission.UPDATE, SecurityContextHolder.getContext().getAuthentication()))
+		Authentication currentAuthentication = SecurityContextHolder.getContext().getAuthentication();
+		if (hasPermission(getCompleteEntityAsCopy(entity, currentAuthentication), Permission.UPDATE, currentAuthentication))
 		{
 			permissions.add(UPDATE_ATTRIBUTE);
 		}
@@ -445,13 +446,23 @@ public class RowLevelSecurityRepositoryDecorator implements Repository
 		return entity;
 	}
 
-	private Entity getCompleteEntity(Entity entity, Authentication authentication)
+	private Entity addAndSetUpdateAttribute(Entity entity, Authentication authentication)
 	{
 		if (isSuOrSystem(authentication) && entity.getString(UPDATE_ATTRIBUTE) != null) return entity;
 		Entity currentEntity = runAsSystem(() -> decoratedRepository.findOne(entity.getIdValue()));
 		Iterable<Entity> users = runAsSystem(() -> currentEntity.getEntities(UPDATE_ATTRIBUTE));
 		entity.set(UPDATE_ATTRIBUTE, users);
 		return entity;
+	}
+
+	private Entity getCompleteEntityAsCopy(Entity entity, Authentication authentication)
+	{
+		if (isSuOrSystem(authentication) && entity.getString(UPDATE_ATTRIBUTE) != null) return entity;
+		Entity currentEntity = runAsSystem(() -> decoratedRepository.findOne(entity.getIdValue()));
+		Iterable<Entity> users = runAsSystem(() -> currentEntity.getEntities(UPDATE_ATTRIBUTE));
+		Entity copy = runAsSystem(() -> new DefaultEntity(getEntityMetaData(), dataService, entity));
+		copy.set(UPDATE_ATTRIBUTE, users);
+		return copy;
 	}
 
 	private boolean validatePermission(Entity completeEntity, Permission permission, Authentication authentication)
