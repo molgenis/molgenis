@@ -5,6 +5,8 @@ import static java.util.stream.StreamSupport.stream;
 import java.util.Iterator;
 
 import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Package;
 
 public class EntityMetaDataUtils
@@ -51,5 +53,28 @@ public class EntityMetaDataUtils
 		{
 			return simpleName;
 		}
+	}
+
+	public static Fetch createFetchForReindexing(EntityMetaData refEntityMetaData)
+	{
+		Fetch fetch = new Fetch();
+		for (AttributeMetaData attr : refEntityMetaData.getAtomicAttributes())
+		{
+			if (attr.getRefEntity() != null)
+			{
+				Fetch attributeFetch = new Fetch();
+				for (AttributeMetaData refAttr : attr.getRefEntity().getAtomicAttributes())
+				{
+					attributeFetch.field(refAttr.getName());
+				}
+				fetch.field(attr.getName(), attributeFetch);
+			}
+			else
+			{
+				fetch.field(attr.getName());
+			}
+
+		}
+		return fetch;
 	}
 }

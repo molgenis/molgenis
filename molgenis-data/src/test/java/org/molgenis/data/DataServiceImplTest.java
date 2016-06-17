@@ -356,25 +356,4 @@ public class DataServiceImplTest
 			verify(metaDataService).deleteEntityMeta("Entity2");
 		}
 	}
-
-	@Test
-	public void streamStringFetch()
-	{
-		Entity entity0 = mock(Entity.class);
-		Fetch fetch = new Fetch();
-		when(repo1.stream(fetch)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = dataService.stream("Entity1", fetch);
-		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
-	}
-
-	@Test
-	public void streamStringFetchClass()
-	{
-		Entity entity0 = mock(Entity.class);
-		Class<Entity> clazz = Entity.class;
-		Fetch fetch = new Fetch();
-		when(repo1.stream(fetch)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = dataService.stream("Entity1", fetch, clazz);
-		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
-	}
 }

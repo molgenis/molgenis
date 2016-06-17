@@ -10,6 +10,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -70,9 +71,9 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public Stream<Entity> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		return decoratedRepository.stream(fetch);
+		decoratedRepository.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override

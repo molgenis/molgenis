@@ -2,7 +2,9 @@ package org.molgenis.data;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -27,9 +29,9 @@ public abstract class AbstractRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public Stream<Entity> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		return decorated.stream(fetch);
+		decorated.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override

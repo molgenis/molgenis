@@ -103,7 +103,7 @@ public class ReindexActionRegisterService
 	@RunAsSystem
 	public void storeReindexActions(String transactionId)
 	{
-		Collection<Entity> entities = reindexActionsPerTransaction.removeAll(transactionId);
+		Collection<Entity> entities = reindexActionsPerTransaction.get(transactionId);
 		if (!entities.isEmpty())
 		{
 			LOG.debug("Store reindex actions for transaction {}", transactionId);
@@ -117,11 +117,12 @@ public class ReindexActionRegisterService
 	 * Removes all reindex actions registered for a transaction.
 	 *
 	 * @param transactionId ID for the transaction the reindex actions were registered under
+	 * @return boolean indicating if any work was present
 	 */
-	public void forgetReindexActions(String transactionId)
+	public boolean forgetReindexActions(String transactionId)
 	{
 		LOG.debug("Forget reindex actions for transaction {}", transactionId);
-		reindexActionsPerTransaction.removeAll(transactionId);
+		return !reindexActionsPerTransaction.removeAll(transactionId).isEmpty();
 	}
 
 	public DefaultEntity createReindexActionJob(String id, int count)

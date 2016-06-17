@@ -1,15 +1,13 @@
 package org.molgenis.data.mem;
 
 import java.io.IOException;
-import java.util.EnumSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
@@ -24,6 +22,8 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.support.QueryImpl;
 
 import com.google.common.collect.Sets;
+
+import static com.google.common.collect.Iterables.partition;
 
 /**
  * Repository that uses a hashmap as store.
@@ -59,9 +59,12 @@ public class InMemoryRepository implements Repository<Entity>
 	}
 
 	@Override
-	public Stream<Entity> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		return entities.values().stream();
+		for(List<Entity> batch: partition(entities.values(), batchSize))
+		{
+			consumer.accept(batch);
+		}
 	}
 
 	@Override

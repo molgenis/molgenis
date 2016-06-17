@@ -1,12 +1,17 @@
 package org.molgenis.security.owned;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.google.common.collect.Lists;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
@@ -48,18 +53,23 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public Stream<Entity> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
 		if (fetch != null)
 		{
 			fetch.field(OwnedEntityMetaData.ATTR_OWNER_USERNAME);
 		}
-		Stream<Entity> entities = decoratedRepo.stream(fetch);
-		if (mustAddRowLevelSecurity())
-		{
-			entities = entities.filter(this::currentUserIsOwner);
-		}
-		return entities;
+		decoratedRepo.forEachBatched(fetch, entities -> {
+			if (mustAddRowLevelSecurity())
+			{
+				//TODO: This results in smaller batches! Should do a findAll instead!
+				consumer.accept(entities.stream().filter(this::currentUserIsOwner).collect(toList()));
+			}
+			else
+			{
+				consumer.accept(entities);
+			}
+		}, batchSize);
 	}
 
 	@Override
@@ -268,7 +278,7 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	{
 		if (mustAddRowLevelSecurity())
 		{
-			delete(decoratedRepo.stream());
+			decoratedRepo.forEachBatched(entities -> delete(entities.stream()), 1000);
 		}
 		else
 		{

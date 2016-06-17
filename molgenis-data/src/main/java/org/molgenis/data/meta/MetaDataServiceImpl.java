@@ -1,6 +1,7 @@
 package org.molgenis.data.meta;
 
 import static com.google.common.collect.Lists.reverse;
+import static com.google.common.collect.Lists.transform;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
@@ -16,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import com.google.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
@@ -401,11 +403,11 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Transactional
 	public void recreateMetaDataRepositories()
 	{
-		List<EntityMetaData> metas = getDefaultBackend().getRepository(EntityMetaDataMetaData.ENTITY_NAME).stream()
-				.map(e -> getEntityMetaData(e.getString(EntityMetaDataMetaData.FULL_NAME)))
-				.collect(Collectors.toList());
-		delete(metas);
-
+		getDefaultBackend().getRepository(EntityMetaDataMetaData.ENTITY_NAME).forEachBatched(entities -> {
+			List<EntityMetaData> entityMetaDatas = transform(entities,
+					e -> getEntityMetaData(e.getString(EntityMetaDataMetaData.FULL_NAME)));
+			delete(entityMetaDatas);
+		}, 1000);
 		attributeMetaDataRepository.deleteAll();
 		entityMetaDataRepository.deleteAll();
 		packageRepository.deleteAll();

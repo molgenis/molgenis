@@ -13,6 +13,7 @@ import static org.testng.Assert.assertNull;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -188,11 +189,12 @@ public class AutoValueRepositoryDecoratorTest
 	}
 
 	@Test
-	public void streamFetch()
+	public void forEachBatchedFetch()
 	{
 		Fetch fetch = new Fetch();
-		repositoryDecorator.stream(fetch);
-		verify(decoratedRepository, times(1)).stream(fetch);
+		Consumer<List<Entity>> consumer = mock(Consumer.class);
+		repositoryDecorator.forEachBatched(fetch, consumer, 234);
+		verify(decoratedRepository, times(1)).forEachBatched(fetch, consumer, 234);
 	}
 
 	private void validateEntity(Entity entity)

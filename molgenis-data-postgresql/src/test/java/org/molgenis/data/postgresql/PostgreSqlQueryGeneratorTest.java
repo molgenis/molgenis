@@ -40,7 +40,7 @@ public class PostgreSqlQueryGeneratorTest
 
 		List<Object> parameters = Lists.newArrayList();
 
-		String sqlSelect = PostgreSqlQueryGenerator.getSqlSelect(entityMeta, q, parameters);
+		String sqlSelect = PostgreSqlQueryGenerator.getSqlSelect(entityMeta, q, parameters, true);
 		Assert.assertEquals(sqlSelect,
 				"SELECT this.\"masterId\", "
 						+ "(SELECT array_agg(DISTINCT ARRAY[\"mref1\".\"order\"::TEXT,\"mref1\".\"mref1\"::TEXT]) "

@@ -1,16 +1,13 @@
 package org.molgenis.data;
 
 import static java.util.stream.Collectors.toList;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -383,11 +380,10 @@ public class RepositorySecurityDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		Fetch fetch = new Fetch();
-		Entity entity0 = mock(Entity.class);
-		Entity entity1 = mock(Entity.class);
-		when(decoratedRepository.stream(fetch)).thenReturn(Stream.of(entity0, entity1));
-		Stream<Entity> expectedEntities = repositorySecurityDecorator.stream(fetch);
-		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+		Consumer<List<Entity>> consumer = mock(Consumer.class);
+		repositorySecurityDecorator.forEachBatched(fetch, consumer, 1000);
+
+		verify(decoratedRepository).forEachBatched(fetch, consumer, 1000);
 	}
 
 	@Test(expectedExceptions = MolgenisDataAccessException.class)
@@ -398,9 +394,9 @@ public class RepositorySecurityDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		Fetch fetch = new Fetch();
-		Entity entity0 = mock(Entity.class);
-		Entity entity1 = mock(Entity.class);
-		when(decoratedRepository.stream(fetch)).thenReturn(Stream.of(entity0, entity1));
-		repositorySecurityDecorator.stream(fetch);
+		Consumer<List<Entity>> consumer = mock(Consumer.class);
+		repositorySecurityDecorator.forEachBatched(fetch, consumer, 1000);
+
+		verifyZeroInteractions(decoratedRepository);
 	}
 }
