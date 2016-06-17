@@ -56,7 +56,7 @@ public class Package extends StaticEntity
 	}
 
 	/**
-	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #Package(PackageMetaData)})
+	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #Package(EntityMetaData)})
 	 *
 	 * @param package_ package
 	 * @return deep copy of package

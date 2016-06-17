@@ -1,14 +1,19 @@
 package org.molgenis.data.meta;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import static java.lang.Boolean.FALSE;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.*;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.*;
+import static org.molgenis.MolgenisFieldTypes.BOOL;
+import static org.molgenis.MolgenisFieldTypes.MREF;
+import static org.molgenis.MolgenisFieldTypes.TEXT;
+import static org.molgenis.MolgenisFieldTypes.XREF;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 import static org.molgenis.data.meta.MetaPackage.PACKAGE_META;
 import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 @Component
 public class EntityMetaDataMetaData extends SystemEntityMetaData
@@ -46,6 +51,7 @@ public class EntityMetaDataMetaData extends SystemEntityMetaData
 
 		addAttribute(FULL_NAME, ROLE_ID).setVisible(false).setLabel("Qualified name");
 		addAttribute(SIMPLE_NAME, ROLE_LABEL).setNillable(false).setReadOnly(true).setLabel("Name");
+		// TODO discuss whether package should be nillable
 		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetaData).setLabel("Package").setReadOnly(true);
 		addAttribute(LABEL, ROLE_LOOKUP).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");

@@ -76,7 +76,7 @@ public class AttributeMetaData extends StaticEntity
 	}
 
 	/**
-	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #AttributeMetaData(AttributeMetaDataMetaData)})
+	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #AttributeMetaData(EntityMetaData)})
 	 *
 	 * @param attrMeta attribute
 	 * @return deep copy of attribute

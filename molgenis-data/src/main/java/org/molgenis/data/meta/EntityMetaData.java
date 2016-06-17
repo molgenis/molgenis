@@ -74,7 +74,7 @@ public class EntityMetaData extends StaticEntity
 	}
 
 	/**
-	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #EntityMetaData(EntityMetaDataMetaData)})
+	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #EntityMetaData(EntityMetaData)})
 	 *
 	 * @param entityMeta entity meta data
 	 * @return deep copy of entity meta data
@@ -84,7 +84,8 @@ public class EntityMetaData extends StaticEntity
 		EntityMetaData entityMetaCopy = new EntityMetaData(entityMeta.getEntityMetaData());
 		entityMetaCopy.setName(entityMeta.getName());
 		entityMetaCopy.setSimpleName(entityMeta.getSimpleName());
-		entityMetaCopy.setPackage(Package.newInstance(entityMetaCopy.getPackage()));
+		Package package_ = entityMetaCopy.getPackage();
+		entityMetaCopy.setPackage(package_ != null ? Package.newInstance(package_) : null);
 		entityMetaCopy.setLabel(entityMeta.getLabel());
 		entityMetaCopy.setDescription(entityMeta.getDescription());
 		AttributeMetaData idAttr = entityMeta.getIdAttribute();
