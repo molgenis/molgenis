@@ -86,12 +86,12 @@ public class EntityAttributesValidator
 					break;
 				case CATEGORICAL:
 				case XREF:
-//					violation = checkXref(entity, attr, meta);
+					violation = checkXref(entity, attr, meta);
 					break;
 				case CATEGORICAL_MREF:
 				case FILE:
 				case MREF:
-//					violation = checkMref(entity, attr, meta);
+					violation = checkMref(entity, attr, meta);
 					break;
 				case COMPOUND:
 					// no op
