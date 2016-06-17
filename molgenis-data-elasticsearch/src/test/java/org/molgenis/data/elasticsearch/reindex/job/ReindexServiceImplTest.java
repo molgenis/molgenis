@@ -9,11 +9,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMeta.REINDEX_JOB_EXECUTION;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ENTITY_FULL_NAME;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
@@ -30,6 +33,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData;
+import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.user.MolgenisUserService;
 import org.testng.annotations.AfterMethod;
@@ -38,8 +43,6 @@ import org.testng.annotations.Test;
 
 public class ReindexServiceImplTest
 {
-	public static final int FIVE_MINUTES = 5 * 60 * 1000;
-	public static final int ONE_SECOND = 1000;
 	@Mock
 	private DataService dataService;
 
@@ -57,6 +60,11 @@ public class ReindexServiceImplTest
 
 	@Mock
 	private Entity reindexActionJobEntity;
+
+	@Captor
+	private ArgumentCaptor<Runnable> runnableArgumentCaptor;
+
+	private Entity reindexActionEntity;
 
 	@Mock
 	private ExecutorService executorService;
@@ -80,6 +88,8 @@ public class ReindexServiceImplTest
 	public void setUp() throws Exception
 	{
 		initMocks(this);
+		reindexActionEntity = new DefaultEntity(new ReindexActionJobMetaData(), dataService);
+		reindexActionEntity.set(ENTITY_FULL_NAME, "test_TestEntity");
 	}
 
 	@AfterMethod
@@ -93,6 +103,11 @@ public class ReindexServiceImplTest
 	public void testRebuildIndex() throws Exception
 	{
 		when(dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, "abcde")).thenReturn(reindexActionJobEntity);
+
+		when(dataService.findAll(ReindexActionMetaData.ENTITY_NAME,
+				new QueryImpl<>().eq(REINDEX_ACTION_GROUP, reindexActionJobEntity)))
+				.thenReturn(Stream.of(reindexActionEntity));
+
 		when(reindexJobFactory.createJob(reindexJobExecutionCaptor.capture())).thenReturn(reindexJob);
 		when(molgenisUserService.getUser("admin")).thenReturn(admin);
 
@@ -101,7 +116,13 @@ public class ReindexServiceImplTest
 		ReindexJobExecution reindexJobExecution = reindexJobExecutionCaptor.getValue();
 		assertEquals(reindexJobExecution.getReindexActionJobID(), "abcde");
 		assertEquals(reindexJobExecution.getUser(), "admin");
-		verify(executorService).submit(reindexJob);
+
+		verify(executorService).execute(runnableArgumentCaptor.capture());
+		verify(reindexJob, never()).call();
+
+		runnableArgumentCaptor.getValue().run();
+
+		verify(reindexJob).call();
 	}
 
 	@Test
