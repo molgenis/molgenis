@@ -1,32 +1,44 @@
 package org.molgenis.data;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.mockito.ArgumentCaptor;
+import org.mockito.*;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class ComputedEntityValuesDecoratorTest
 {
+	@Mock
 	private Repository<Entity> decoratedRepo;
+	@Mock
+	private Consumer<List<Entity>> consumer;
 	private ComputedEntityValuesDecorator computedEntityValuesDecorator;
+	@Captor
+	private ArgumentCaptor<Consumer<List<Entity>>> consumerArgumentCaptor;
+	@Captor
+	private ArgumentCaptor<List<Entity>> listArgumentCaptor;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		decoratedRepo = mock(Repository.class);
+		initMocks(this);
 		computedEntityValuesDecorator = new ComputedEntityValuesDecorator(decoratedRepo);
 	}
 
@@ -46,8 +58,7 @@ public class ComputedEntityValuesDecoratorTest
 		verify(decoratedRepo, times(1)).delete(entities);
 	}
 
-	@SuppressWarnings(
-	{ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void updateStream()
 	{
@@ -56,7 +67,7 @@ public class ComputedEntityValuesDecoratorTest
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		doNothing().when(decoratedRepo).update(captor.capture());
 		computedEntityValuesDecorator.update(entities);
-		assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0));
+		assertEquals(captor.getValue().collect(Collectors.toList()), asList(entity0));
 	}
 
 	@Test
@@ -76,7 +87,7 @@ public class ComputedEntityValuesDecoratorTest
 		Stream<Object> entityIds = Stream.of(id0, id1);
 		when(decoratedRepo.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = computedEntityValuesDecorator.findAll(entityIds);
-		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+		assertEquals(expectedEntities.collect(Collectors.toList()), asList(entity0, entity1));
 	}
 
 	@Test
@@ -119,7 +130,7 @@ public class ComputedEntityValuesDecoratorTest
 		Stream<Object> entityIds = Stream.of(id0, id1);
 		when(decoratedRepo.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
 		Stream<Entity> expectedEntities = computedEntityValuesDecorator.findAll(entityIds, fetch);
-		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+		assertEquals(expectedEntities.collect(Collectors.toList()), asList(entity0, entity1));
 	}
 
 	@Test
@@ -158,7 +169,7 @@ public class ComputedEntityValuesDecoratorTest
 		Query<Entity> query = mock(Query.class);
 		when(decoratedRepo.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = computedEntityValuesDecorator.findAll(query);
-		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+		assertEquals(entities.collect(Collectors.toList()), asList(entity0));
 	}
 
 	@Test
@@ -191,9 +202,15 @@ public class ComputedEntityValuesDecoratorTest
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 		Entity entity1 = mock(Entity.class);
 		when(entity1.getEntityMetaData()).thenReturn(entityMeta);
-		when(decoratedRepo.stream(fetch)).thenReturn(Stream.of(entity0, entity1));
-		Stream<Entity> expectedEntities = computedEntityValuesDecorator.stream(fetch);
-		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+
+		Consumer<List<Entity>> consumer = mock(Consumer.class);
+		computedEntityValuesDecorator.forEachBatched(fetch, consumer, 1234);
+		verify(decoratedRepo).forEachBatched(eq(fetch), consumerArgumentCaptor.capture(), eq(1234));
+
+		consumerArgumentCaptor.getValue().accept(asList(entity0, entity1));
+
+		verify(consumer).accept(listArgumentCaptor.capture());
+		assertEquals(listArgumentCaptor.getValue(), asList(entity0, entity1));
 	}
 
 	@Test
@@ -209,10 +226,13 @@ public class ComputedEntityValuesDecoratorTest
 		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
 		Entity entity1 = mock(Entity.class);
 		when(entity1.getEntityMetaData()).thenReturn(entityMeta);
-		when(decoratedRepo.stream(fetch)).thenReturn(Stream.of(entity0, entity1));
-		List<Entity> expectedEntities = computedEntityValuesDecorator.stream(fetch).collect(Collectors.toList());
-		assertEquals(expectedEntities.size(), 2);
-		assertEquals(expectedEntities.get(0).getClass(), EntityWithComputedAttributes.class);
-		assertEquals(expectedEntities.get(1).getClass(), EntityWithComputedAttributes.class);
+
+		computedEntityValuesDecorator.forEachBatched(fetch, consumer, 1234);
+		verify(decoratedRepo).forEachBatched(eq(fetch), consumerArgumentCaptor.capture(), eq(1234));
+
+		consumerArgumentCaptor.getValue().accept(asList(entity0, entity1));
+
+		verify(consumer).accept(listArgumentCaptor.capture());
+		assertTrue(listArgumentCaptor.getValue().stream().allMatch(e -> e instanceof EntityWithComputedAttributes));
 	}
 }

@@ -15,18 +15,13 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.*;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -55,6 +50,7 @@ public class RepositoryValidationDecoratorTest
 	private Repository<Entity> decoratedRepo;
 	private Repository<Entity> refRepo;
 	private DataService dataService;
+	private MetaDataService metaDataService;
 	private EntityAttributesValidator entityAttributesValidator;
 	private ExpressionValidator expressionValidator;
 	private RepositoryValidationDecorator repositoryValidationDecorator;
@@ -180,6 +176,9 @@ public class RepositoryValidationDecoratorTest
 		when(dataService.findAll(refEntityName, new QueryImpl<Entity>().fetch(new Fetch().field(refAttrIdName))))
 				.thenReturn(Stream.of(refEntity0, refEntity1));
 
+		metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+
 		expressionValidator = mock(ExpressionValidator.class);
 		entityAttributesValidator = mock(EntityAttributesValidator.class);
 		repositoryValidationDecorator = new RepositoryValidationDecorator(dataService, decoratedRepo,
@@ -251,9 +250,14 @@ public class RepositoryValidationDecoratorTest
 	{
 		when(decoratedRepo.getCapabilities())
 				.thenReturn(new HashSet<>(Arrays.asList(RepositoryCapability.VALIDATE_REFERENCE_CONSTRAINT)));
+		when(dataService.getMeta()).thenReturn(metaDataService);
 		// references need to be validated because they are stored in another repository collection
-		when(entityMeta.getBackend()).thenReturn("thisBackend");
-		when(refEntityMeta.getBackend()).thenReturn("otherBackend");
+		RepositoryCollection thisBackend = mock(RepositoryCollection.class);
+		when(thisBackend.getName()).thenReturn("thisBackend");
+		RepositoryCollection otherBackend = mock(RepositoryCollection.class);
+		when(otherBackend.getName()).thenReturn("otherBackend");
+		when(metaDataService.getBackend(entityMeta)).thenReturn(thisBackend);
+		when(metaDataService.getBackend(refEntityMeta)).thenReturn(otherBackend);
 
 		String refEntityDoesNotExistId = "id1";
 		Entity refEntityDoesNotExist = mock(Entity.class);
@@ -4506,10 +4510,11 @@ public class RepositoryValidationDecoratorTest
 	}
 
 	@Test
-	public void streamFetch()
+	public void forEachBatchedFetch()
 	{
 		Fetch fetch = new Fetch();
-		repositoryValidationDecorator.stream(fetch);
-		verify(decoratedRepo, times(1)).stream(fetch);
+		Consumer<List<Entity>> consumer = mock(Consumer.class);
+		repositoryValidationDecorator.forEachBatched(fetch, consumer, 234);
+		verify(decoratedRepo, times(1)).forEachBatched(fetch, consumer, 234);
 	}
 }

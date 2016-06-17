@@ -1,6 +1,7 @@
 package org.molgenis.ontology.importer;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.StreamSupport.stream;
 
 import java.io.File;
 import java.util.Iterator;
@@ -8,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.DataService;
@@ -73,7 +75,7 @@ public class OntologyImportService implements ImportService
 
 					Repository<Entity> crudRepository = dataService.getRepository(entityNameToImport);
 
-					crudRepository.add(repo.stream());
+					crudRepository.add(stream(repo.spliterator(), false));
 
 					List<String> entityNames = addedEntities.stream().map(emd -> emd.getName())
 							.collect(Collectors.toList());

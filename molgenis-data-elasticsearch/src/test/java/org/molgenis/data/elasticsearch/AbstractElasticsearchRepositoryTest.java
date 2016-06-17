@@ -11,6 +11,8 @@ import static org.testng.Assert.assertNull;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -167,15 +169,16 @@ public class AbstractElasticsearchRepositoryTest
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
 	}
 
-	@Test
+	@Test(expectedExceptions = UnsupportedOperationException.class)
 	public void streamFetch()
 	{
 		Fetch fetch = new Fetch();
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
-		when(searchService.searchAsStream(new QueryImpl<Entity>().fetch(fetch), entityMeta))
+		when(searchService.searchAsStream(new QueryImpl<>().fetch(fetch), entityMeta))
 				.thenReturn(Stream.of(entity0, entity1));
-		Stream<Entity> expectedEntities = repository.stream(fetch);
-		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+		Consumer<List<Entity>> consumer = mock(Consumer.class);
+		//TODO: implement
+		repository.forEachBatched(fetch, consumer, 1000);
 	}
 }

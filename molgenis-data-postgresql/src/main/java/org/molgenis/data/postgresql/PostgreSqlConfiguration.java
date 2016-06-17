@@ -22,7 +22,7 @@ public class PostgreSqlConfiguration
 	@Scope("prototype")
 	public PostgreSqlRepository postgreSqlRepository()
 	{
-		return new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate());
+		return new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate(), dataSource);
 	}
 
 	@Bean

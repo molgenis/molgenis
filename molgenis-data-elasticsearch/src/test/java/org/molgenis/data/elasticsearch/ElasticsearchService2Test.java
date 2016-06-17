@@ -149,9 +149,9 @@ public class ElasticsearchService2Test
 		counts.put("TypeTest", 1);
 		when(elasticSearchFacade.index(indexRequestsCaptor.capture(), eq(true))).thenReturn(counts);
 
-		when(elasticSearchFacade
-				.searchForIds(any(Consumer.class), eq("rules=['xref' = 'Label 1'], pageSize=1000"), eq("TypeTest"),
-						eq("molgenis"))).thenReturn(Stream.of("FGHIJ"));
+		when(elasticSearchFacade.searchForIdsWithScanScroll(any(Consumer.class),
+				eq("rules=['xref' = 'Label 1']"), eq("TypeTest"),
+				eq("molgenis"))).thenReturn(Stream.of("FGHIJ"));
 
 		Fetch fetch = new Fetch().field("id").field("xref", new Fetch().field("id").field("label"));
 		when(dataService.findAll(eq("TypeTest"), idObjectStreamCaptor.capture(), eq(fetch)))

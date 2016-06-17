@@ -1,12 +1,11 @@
 package org.molgenis.data.support;
 
+import static com.google.common.collect.Lists.transform;
 import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.Spliterator;
-import java.util.Spliterators;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -48,15 +47,10 @@ public class TypedRepositoryDecorator<E extends Entity> implements Repository<E>
 	}
 
 	@Override
-	public Stream<E> stream()
+	public void forEachBatched(Fetch fetch, Consumer<List<E>> consumer, int batchSize)
 	{
-		return asTypedStream(untypedRepo.stream());
-	}
-
-	@Override
-	public Stream<E> stream(Fetch fetch)
-	{
-		return asTypedStream(untypedRepo.stream(fetch));
+		untypedRepo.forEachBatched(fetch, entities -> consumer.accept(transform(entities, this::asTypedEntity)),
+				batchSize);
 	}
 
 	@Override

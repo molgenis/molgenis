@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -325,7 +326,7 @@ public class IndexedRepositoryDecoratorTest
 	public void rebuildIndex()
 	{
 		indexedRepositoryDecorator.rebuildIndex();
-		verify(elasticSearchService).rebuildIndex(decoratedRepo, repositoryEntityMetaData);
+		verify(elasticSearchService).rebuildIndex(decoratedRepo);
 	}
 
 	@Test
@@ -374,11 +375,12 @@ public class IndexedRepositoryDecoratorTest
 	}
 
 	@Test
-	public void streamFetch()
+	public void forEachBatched()
 	{
 		Fetch fetch = new Fetch();
-		indexedRepositoryDecorator.stream(fetch);
-		verify(decoratedRepo, times(1)).stream(fetch);
+		Consumer<List<Entity>> consumer = mock(Consumer.class);
+		indexedRepositoryDecorator.forEachBatched(fetch, consumer, 12);
+		verify(decoratedRepo, times(1)).forEachBatched(fetch, consumer, 12);
 	}
 
 	@Test

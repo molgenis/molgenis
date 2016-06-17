@@ -1,8 +1,10 @@
 package org.molgenis.data.examples;
 
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 import java.io.File;
+import java.util.stream.StreamSupport;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
@@ -57,7 +59,7 @@ public class DataApiExample extends AbstractTestNGSpringContextTests
 
 		// Add streaming
 		File usersCsv = ResourceUtils.getFile("users.csv");
-		dataService.add(UserMetaData.ENTITY_NAME, new CsvRepository(usersCsv, null).stream());
+		dataService.add(UserMetaData.ENTITY_NAME, stream(new CsvRepository(usersCsv, null).spliterator(), false));
 		printUsers();
 	}
 

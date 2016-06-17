@@ -210,8 +210,7 @@ public class ReindexJobTest
 		reindexJob.call(this.progress);
 		assertEquals(reindexAction.get(REINDEX_STATUS), FINISHED.name());
 
-		verify(this.searchService)
-				.rebuildIndex(this.dataService.getRepository("any"), new DefaultEntityMetaData("test"));
+		verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"));
 
 		verify(progress).status("######## START Reindex transaction id: [aabbcc] ########");
 		verify(progress).setProgressMax(1);
@@ -246,8 +245,7 @@ public class ReindexJobTest
 		reindexJob.call(this.progress);
 		assertEquals(reindexAction.get(REINDEX_STATUS), FINISHED.name());
 
-		verify(this.searchService)
-				.rebuildIndex(this.dataService.getRepository("any"), new DefaultEntityMetaData("test"));
+		verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"));
 
 		verify(progress).status("######## START Reindex transaction id: [aabbcc] ########");
 		verify(progress).setProgressMax(1);
