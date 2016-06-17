@@ -13,9 +13,9 @@ public abstract class Authority extends StaticEntity
 		super(entity);
 	}
 
-	public Authority(EntityMetaData entityMetaData)
+	public Authority(EntityMetaData entityMeta)
 	{
-		super(entityMetaData);
+		super(entityMeta);
 	}
 
 	public String getRole()

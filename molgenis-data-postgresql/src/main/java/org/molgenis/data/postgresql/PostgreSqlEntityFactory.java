@@ -7,7 +7,6 @@ import java.sql.Array;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
@@ -28,16 +27,14 @@ public class PostgreSqlEntityFactory
 	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlEntityFactory.class);
 
 	private final EntityManager entityManager;
-	private final DataService dataService;
 
 	@Autowired
-	public PostgreSqlEntityFactory(EntityManager entityManager, DataService dataService)
+	public PostgreSqlEntityFactory(EntityManager entityManager)
 	{
 		this.entityManager = requireNonNull(entityManager);
-		this.dataService = requireNonNull(dataService);
 	}
 
-	public RowMapper<Entity> createRowMapper(EntityMetaData entityMeta, Fetch fetch)
+	RowMapper<Entity> createRowMapper(EntityMetaData entityMeta, Fetch fetch)
 	{
 		return new EntityMapper(entityMeta, fetch);
 	}

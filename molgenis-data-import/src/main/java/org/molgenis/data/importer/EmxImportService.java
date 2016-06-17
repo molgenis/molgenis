@@ -84,15 +84,6 @@ public class EmxImportService implements ImportService
 		catch (Exception e)
 		{
 			LOG.error("Error handling EmxImportJob", e);
-			try
-			{
-				// TODO rollback of languages
-				writer.rollbackSchemaChanges(job);
-			}
-			catch (Exception ignore)
-			{
-				LOG.error("Error rolling back schema changes", ignore);
-			}
 			throw e;
 		}
 	}

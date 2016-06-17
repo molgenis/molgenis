@@ -4,6 +4,7 @@ import static org.molgenis.auth.UserAuthorityMetaData.ID;
 import static org.molgenis.auth.UserAuthorityMetaData.MOLGENIS_USER;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.EntityMetaData;
 
 public class UserAuthority extends Authority
 {
@@ -12,14 +13,14 @@ public class UserAuthority extends Authority
 		super(entity);
 	}
 
-	public UserAuthority(UserAuthorityMetaData userAuthorityMetaData)
+	public UserAuthority(EntityMetaData entityMeta)
 	{
-		super(userAuthorityMetaData);
+		super(entityMeta);
 	}
 
-	public UserAuthority(String id, UserAuthorityMetaData userAuthorityMetaData)
+	public UserAuthority(String id, EntityMetaData entityMeta)
 	{
-		super(userAuthorityMetaData);
+		super(entityMeta);
 		setId(id);
 	}
 

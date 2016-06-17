@@ -7,6 +7,7 @@ import static org.molgenis.file.FileMetaMetaData.SIZE;
 import static org.molgenis.file.FileMetaMetaData.URL;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
@@ -17,14 +18,14 @@ public class FileMeta extends StaticEntity
 		super(entity);
 	}
 
-	public FileMeta(FileMetaMetaData fileMetaMetaData)
+	public FileMeta(EntityMetaData entityMeta)
 	{
-		super(fileMetaMetaData);
+		super(entityMeta);
 	}
 
-	public FileMeta(String id, FileMetaMetaData fileMetaMetaData)
+	public FileMeta(String id, EntityMetaData entityMeta)
 	{
-		super(fileMetaMetaData);
+		super(entityMeta);
 		setId(id);
 	}
 

@@ -13,6 +13,7 @@ import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_STATU
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
 public class ReindexAction extends StaticEntity
@@ -22,14 +23,14 @@ public class ReindexAction extends StaticEntity
 		super(entity);
 	}
 
-	public ReindexAction(ReindexActionMetaData reindexActionMetaData)
+	public ReindexAction(EntityMetaData entityMeta)
 	{
-		super(reindexActionMetaData);
+		super(entityMeta);
 	}
 
-	public ReindexAction(String id, ReindexActionMetaData reindexActionMetaData)
+	public ReindexAction(String id, EntityMetaData entityMeta)
 	{
-		super(reindexActionMetaData);
+		super(entityMeta);
 		set(ID, id);
 	}
 

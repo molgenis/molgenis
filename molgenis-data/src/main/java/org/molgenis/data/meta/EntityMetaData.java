@@ -4,6 +4,7 @@ import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
@@ -24,7 +25,6 @@ import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeN
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.StaticEntity;
@@ -52,23 +52,23 @@ public class EntityMetaData extends StaticEntity
 	/**
 	 * Creates a new entity meta data. Normally called by its {@link EntityMetaDataFactory entity factory}.
 	 *
-	 * @param entityMetaMeta
+	 * @param entityMeta entity meta data
 	 */
-	public EntityMetaData(EntityMetaDataMetaData entityMetaMeta)
+	public EntityMetaData(EntityMetaData entityMeta)
 	{
-		super(entityMetaMeta);
+		super(entityMeta);
 		setDefaultValues();
 	}
 
 	/**
 	 * Creates a new entity meta data with the given identifier. Normally called by its {@link EntityMetaDataFactory entity factory}.
 	 *
-	 * @param entityId       entity identifier (fully qualified entity name)
-	 * @param entityMetaMeta entity meta data
+	 * @param entityId   entity identifier (fully qualified entity name)
+	 * @param entityMeta entity meta data
 	 */
-	public EntityMetaData(String entityId, EntityMetaDataMetaData entityMetaMeta)
+	public EntityMetaData(String entityId, EntityMetaData entityMeta)
 	{
-		super(entityMetaMeta);
+		super(entityMeta);
 		setDefaultValues();
 		setSimpleName(entityId);
 	}
@@ -81,9 +81,26 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public static EntityMetaData newInstance(EntityMetaData entityMeta)
 	{
-		throw new RuntimeException("FIXME"); // FIXME
-		//		Entity entityCopy = MapEntity.newInstance(entityMeta);
-		//		return new EntityMetaData(entityCopy);
+		EntityMetaData entityMetaCopy = new EntityMetaData(entityMeta.getEntityMetaData());
+		entityMetaCopy.setName(entityMeta.getName());
+		entityMetaCopy.setSimpleName(entityMeta.getSimpleName());
+		entityMetaCopy.setPackage(Package.newInstance(entityMetaCopy.getPackage()));
+		entityMetaCopy.setLabel(entityMeta.getLabel());
+		entityMetaCopy.setDescription(entityMeta.getDescription());
+		AttributeMetaData idAttr = entityMeta.getIdAttribute();
+		entityMetaCopy.setIdAttribute(idAttr != null ? AttributeMetaData.newInstance(idAttr) : null);
+		AttributeMetaData labelAttr = entityMeta.getLabelAttribute();
+		entityMetaCopy.setLabelAttribute(idAttr != null ? AttributeMetaData.newInstance(labelAttr) : null);
+		Iterable<AttributeMetaData> lookupAttrs = entityMeta.getLookupAttributes();
+		entityMetaCopy.setLookupAttributes(
+				stream(lookupAttrs.spliterator(), false).map(AttributeMetaData::newInstance).collect(toList()));
+		entityMetaCopy.setAbstract(entityMetaCopy.isAbstract());
+		EntityMetaData extends_ = entityMetaCopy.getExtends();
+		entityMetaCopy.setExtends(extends_ != null ? EntityMetaData.newInstance(extends_) : null);
+		Iterable<Tag> tags = entityMeta.getTags();
+		entityMeta.setTags(stream(tags.spliterator(), false).map(Tag::newInstance).collect(toList()));
+		entityMetaCopy.setBackend(entityMeta.getBackend());
+		return entityMetaCopy;
 	}
 
 	/**
@@ -363,7 +380,7 @@ public class EntityMetaData extends StaticEntity
 
 	public EntityMetaData setLookupAttributes(Iterable<AttributeMetaData> lookupAttrs)
 	{
-		set(LABEL_ATTRIBUTE, lookupAttrs);
+		set(LOOKUP_ATTRIBUTES, lookupAttrs);
 		return this;
 	}
 
@@ -533,7 +550,7 @@ public class EntityMetaData extends StaticEntity
 		// FIXME does not remove attr if attr is located in a compound attr
 		Iterable<AttributeMetaData> existingAttrs = getEntities(ATTRIBUTES, AttributeMetaData.class);
 		List<AttributeMetaData> filteredAttrs = stream(existingAttrs.spliterator(), false)
-				.filter(existingAttr -> !existingAttr.getName().equals(attr.getName())).collect(Collectors.toList());
+				.filter(existingAttr -> !existingAttr.getName().equals(attr.getName())).collect(toList());
 		set(ATTRIBUTES, filteredAttrs);
 	}
 

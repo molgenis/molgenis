@@ -3,6 +3,8 @@ package org.molgenis.data.meta;
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.PackageMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.PackageMetaData.FULL_NAME;
@@ -34,24 +36,43 @@ public class Package extends StaticEntity
 	/**
 	 * Constructs a package with the given meta data
 	 *
-	 * @param packageMetaData package meta data
+	 * @param entityMeta package meta data
 	 */
-	public Package(PackageMetaData packageMetaData)
+	public Package(EntityMetaData entityMeta)
 	{
-		super(packageMetaData);
+		super(entityMeta);
 	}
 
 	/**
 	 * Constructs a package with the given type code and meta data
 	 *
-	 * @param simpleName      package name
-	 * @param packageMetaData language meta data
+	 * @param packageId  package identifier (fully qualified package name)
+	 * @param entityMeta language meta data
 	 */
-	public Package(String simpleName, PackageMetaData packageMetaData)
+	public Package(String packageId, EntityMetaData entityMeta)
 	{
-		super(packageMetaData);
-		setSimpleName(simpleName);
-		setName(simpleName);
+		super(entityMeta);
+		setSimpleName(packageId);
+	}
+
+	/**
+	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #Package(PackageMetaData)})
+	 *
+	 * @param package_ package
+	 * @return deep copy of package
+	 */
+	public static Package newInstance(Package package_)
+	{
+		Package packageCopy = new Package(package_.getEntityMetaData());
+		packageCopy.setName(package_.getName());
+		packageCopy.setSimpleName(package_.getSimpleName());
+		packageCopy.setLabel(package_.getLabel());
+		packageCopy.setDescription(package_.getDescription());
+		Package parent = package_.getParent();
+		packageCopy.setParent(parent != null ? Package.newInstance(parent) : null);
+		Iterable<Tag> tags = package_.getTags();
+		packageCopy.setTags(stream(tags.spliterator(), false).map(Tag::newInstance).collect(toList()));
+		return packageCopy;
 	}
 
 	/**
@@ -237,7 +258,7 @@ public class Package extends StaticEntity
 			{
 				fullName = simpleName;
 			}
-			set(EntityMetaDataMetaData.FULL_NAME, fullName);
+			set(FULL_NAME, fullName);
 		}
 	}
 }

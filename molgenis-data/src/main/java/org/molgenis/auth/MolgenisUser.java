@@ -25,6 +25,7 @@ import static org.molgenis.auth.MolgenisUserMetaData.TOLLFREEPHONE;
 import static org.molgenis.auth.MolgenisUserMetaData.USERNAME;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
 public class MolgenisUser extends StaticEntity
@@ -34,14 +35,14 @@ public class MolgenisUser extends StaticEntity
 		super(entity);
 	}
 
-	public MolgenisUser(MolgenisUserMetaData molgenisUserMetaData)
+	public MolgenisUser(EntityMetaData entityMeta)
 	{
-		super(molgenisUserMetaData);
+		super(entityMeta);
 	}
 
-	public MolgenisUser(String id, MolgenisUserMetaData molgenisUserMetaData)
+	public MolgenisUser(String id, EntityMetaData entityMeta)
 	{
-		super(molgenisUserMetaData);
+		super(entityMeta);
 		setId(id);
 	}
 

@@ -5,7 +5,7 @@ import static org.molgenis.data.meta.system.FreemarkerTemplateMetaData.NAME;
 import static org.molgenis.data.meta.system.FreemarkerTemplateMetaData.VALUE;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.system.FreemarkerTemplateMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
 public class FreemarkerTemplate extends StaticEntity
@@ -15,14 +15,14 @@ public class FreemarkerTemplate extends StaticEntity
 		super(entity);
 	}
 
-	public FreemarkerTemplate(FreemarkerTemplateMetaData freemarkerTemplateMetaData)
+	public FreemarkerTemplate(EntityMetaData entityMeta)
 	{
-		super(freemarkerTemplateMetaData);
+		super(entityMeta);
 	}
 
-	public FreemarkerTemplate(String id, FreemarkerTemplateMetaData freemarkerTemplateMetaData)
+	public FreemarkerTemplate(String id, EntityMetaData entityMeta)
 	{
-		super(freemarkerTemplateMetaData);
+		super(entityMeta);
 		setId(id);
 	}
 

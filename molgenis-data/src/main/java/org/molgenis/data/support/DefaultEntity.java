@@ -3,6 +3,7 @@ package org.molgenis.data.support;
 import static com.google.common.collect.FluentIterable.from;
 import static java.lang.String.format;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -15,6 +16,7 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
@@ -297,7 +299,9 @@ public class DefaultEntity implements Entity
 		Object value = values.get(attributeName);
 		if (value instanceof String)
 		{
-			throw new RuntimeException("FIXME"); // FIXME
+			List<String> values = DataConverter.toList(value);
+			// FIXME remove dependency on application context
+			return getApplicationContext().getBean(EntityManager.class).getReferences(attribute.getRefEntity(), values);
 		}
 		else if (value instanceof Entity) return Collections.singletonList((Entity) value);
 		else ids = (Iterable<?>) value;

@@ -54,23 +54,23 @@ public class AttributeMetaData extends StaticEntity
 	/**
 	 * Creates a new attribute. Normally called by its {@link AttributeMetaDataFactory entity factory}.
 	 *
-	 * @param attrMetaMeta attribute meta data
+	 * @param entityMeta attribute meta data
 	 */
-	public AttributeMetaData(AttributeMetaDataMetaData attrMetaMeta)
+	public AttributeMetaData(EntityMetaData entityMeta)
 	{
-		super(attrMetaMeta);
+		super(entityMeta);
 		setDefaultValues();
 	}
 
 	/**
 	 * Creates a new attribute with the given identifier. Normally called by its {@link AttributeMetaDataFactory entity factory}.
 	 *
-	 * @param attrId       attribute identifier (not the attribute name)
-	 * @param attrMetaMeta attribute meta data
+	 * @param attrId     attribute identifier (not the attribute name)
+	 * @param entityMeta attribute meta data
 	 */
-	public AttributeMetaData(String attrId, AttributeMetaDataMetaData attrMetaMeta)
+	public AttributeMetaData(String attrId, EntityMetaData entityMeta)
 	{
-		super(attrMetaMeta);
+		super(entityMeta);
 		setDefaultValues();
 		setIdentifier(attrId);
 	}
@@ -78,14 +78,37 @@ public class AttributeMetaData extends StaticEntity
 	/**
 	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #AttributeMetaData(AttributeMetaDataMetaData)})
 	 *
-	 * @param attr attribute
+	 * @param attrMeta attribute
 	 * @return deep copy of attribute
 	 */
-	public static AttributeMetaData newInstance(AttributeMetaData attr)
+	public static AttributeMetaData newInstance(AttributeMetaData attrMeta)
 	{
-		throw new RuntimeException("FIXME"); // FIXME
-		//		Entity entityCopy = MapEntity.newInstance(attr);
-		//		return new AttributeMetaData(entityCopy);
+		EntityMetaData entityMeta = attrMeta.getEntityMetaData();
+		AttributeMetaData attrMetaCopy = new AttributeMetaData(entityMeta);
+		attrMetaCopy.setIdentifier(attrMeta.getIdentifier());
+		attrMetaCopy.setName(attrMeta.getName());
+		attrMetaCopy.setDataType(attrMeta.getDataType());
+		EntityMetaData refEntity = attrMeta.getRefEntity();
+		attrMetaCopy.setRefEntity(refEntity != null ? EntityMetaData.newInstance(refEntity) : null);
+		attrMetaCopy.setExpression(attrMeta.getExpression());
+		attrMetaCopy.setNillable(attrMeta.isNillable());
+		attrMetaCopy.setAuto(attrMeta.isAuto());
+		attrMetaCopy.setLabel(attrMeta.getLabel());
+		attrMetaCopy.setDescription(attrMeta.getDescription());
+		attrMetaCopy.setAggregatable(attrMeta.isAggregatable());
+		attrMetaCopy.setEnumOptions(attrMeta.getEnumOptions());
+		attrMetaCopy.setRangeMin(attrMeta.getRangeMin());
+		attrMetaCopy.setRangeMax(attrMeta.getRangeMax());
+		attrMetaCopy.setReadOnly(attrMeta.isReadOnly());
+		attrMetaCopy.setUnique(attrMeta.isUnique());
+		Iterable<AttributeMetaData> attrParts = attrMeta.getAttributeParts();
+		attrMetaCopy.setAttributeParts(
+				stream(attrParts.spliterator(), false).map(AttributeMetaData::newInstance).collect(toList()));
+		Iterable<Tag> tags = attrMeta.getTags();
+		attrMetaCopy.setTags(stream(tags.spliterator(), false).map(Tag::newInstance).collect(toList()));
+		attrMetaCopy.setVisibleExpression(attrMeta.getVisibleExpression());
+		attrMetaCopy.setDefaultValue(attrMeta.getDefaultValue());
+		return attrMetaCopy;
 	}
 
 	public String getIdentifier()

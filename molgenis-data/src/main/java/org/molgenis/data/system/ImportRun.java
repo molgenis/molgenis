@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.system.ImportRunMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 import org.molgenis.util.ValueLabel;
 
@@ -41,14 +41,14 @@ public class ImportRun extends StaticEntity
 		super(entity);
 	}
 
-	public ImportRun(ImportRunMetaData importRunMetaData)
+	public ImportRun(EntityMetaData entityMeta)
 	{
-		super(importRunMetaData);
+		super(entityMeta);
 	}
 
-	public ImportRun(String id, ImportRunMetaData importRunMetaData)
+	public ImportRun(String id, EntityMetaData entityMeta)
 	{
-		super(importRunMetaData);
+		super(entityMeta);
 		setId(id);
 	}
 

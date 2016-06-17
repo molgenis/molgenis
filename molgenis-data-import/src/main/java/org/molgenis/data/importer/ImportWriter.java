@@ -10,17 +10,16 @@ import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.meta.TagMetaData.TAG;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
@@ -29,11 +28,11 @@ import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
@@ -58,7 +57,6 @@ import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.DependencyResolver;
@@ -71,7 +69,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
@@ -362,85 +359,6 @@ public class ImportWriter
 				}
 			}
 		}
-	}
-
-	/**
-	 * Drops entities and added attributes and reindexes the entities whose attributes were modified.
-	 */
-	@RunAsSystem
-	public void rollbackSchemaChanges(EmxImportJob job)
-	{
-		LOG.info("Rolling back changes.");
-		dataService.delete(LANGUAGE, job.metaDataChanges.getAddedLanguages().stream());
-		dropAddedEntities(job.metaDataChanges.getAddedEntities());
-		List<String> entities = dropAddedAttributes(job.metaDataChanges.getAddedAttributes());
-
-		// FIXME import is not transactional, but uses corrective measures to rollback
-		// Reindex
-		Set<String> entitiesToIndex = Sets.newLinkedHashSet(job.source.getEntityNames());
-		entitiesToIndex.addAll(entities);
-		entitiesToIndex.add("tags");
-		entitiesToIndex.add("packages");
-		entitiesToIndex.add("entities");
-		entitiesToIndex.add("attributes");
-
-		reindex(entitiesToIndex);
-	}
-
-	/**
-	 * Reindexes entities
-	 *
-	 * @param entitiesToIndex Set of entity names
-	 */
-	private void reindex(Set<String> entitiesToIndex)
-	{
-		for (String entity : entitiesToIndex)
-		{
-			if (dataService.hasRepository(entity))
-			{
-				Repository<Entity> repo = dataService.getRepository(entity);
-				if (repo.getCapabilities().contains(RepositoryCapability.INDEXABLE))
-				{
-					repo.rebuildIndex();
-				}
-			}
-		}
-	}
-
-	/**
-	 * Drops attributes from entities
-	 */
-	private List<String> dropAddedAttributes(ImmutableMap<String, Collection<AttributeMetaData>> addedAttributes)
-	{
-		List<String> entities = Lists.newArrayList(addedAttributes.keySet());
-		Collections.reverse(entities);
-
-		for (String entityName : entities)
-		{
-			for (AttributeMetaData attribute : addedAttributes.get(entityName))
-			{
-				dataService.getMeta().deleteAttribute(entityName, attribute.getName());
-			}
-		}
-		return entities;
-	}
-
-	/**
-	 * Drops added entities in the reverse order in which they were created.
-	 */
-	private void dropAddedEntities(List<String> addedEntities)
-	{
-		// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselves
-		Lists.reverse(addedEntities).forEach(entity -> {
-			try
-			{
-				dataService.getMeta().deleteEntityMeta(entity);
-			}
-			catch (Exception ex)
-			{
-				LOG.error("Failed to rollback creation of entity {}", entity);
-			}
-		});
 	}
 
 	/**
@@ -1009,7 +927,10 @@ public class ImportWriter
 			Object value = entity.get(attributeName);
 			if (value instanceof String)
 			{
-				throw new RuntimeException("FIXME"); // FIXME
+				List<String> values = DataConverter.toList(value);
+				// FIXME remove dependency on application context
+				return getApplicationContext().getBean(EntityManager.class)
+						.getReferences(attribute.getRefEntity(), values);
 			}
 			else if (value instanceof Entity) return Collections.singletonList((Entity) value);
 			else ids = (Iterable<?>) value;

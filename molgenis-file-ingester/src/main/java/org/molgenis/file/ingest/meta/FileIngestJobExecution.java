@@ -6,6 +6,7 @@ import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.JobExecution;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.file.FileMeta;
 
 public class FileIngestJobExecution extends JobExecution
@@ -15,15 +16,15 @@ public class FileIngestJobExecution extends JobExecution
 		super(entity);
 	}
 
-	public FileIngestJobExecution(FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData)
+	public FileIngestJobExecution(EntityMetaData entityMeta)
 	{
-		super(fileIngestJobExecutionMetaData);
+		super(entityMeta);
 		setDefaultValues();
 	}
 
-	public FileIngestJobExecution(String identifier, FileIngestJobExecutionMetaData fileIngestJobExecutionMetaData)
+	public FileIngestJobExecution(String identifier, EntityMetaData entityMeta)
 	{
-		super(identifier, fileIngestJobExecutionMetaData);
+		super(identifier, entityMeta);
 		setDefaultValues();
 	}
 

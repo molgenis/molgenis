@@ -716,7 +716,8 @@ public class EmxMetaDataParser implements MetaDataParser
 				parent = intermediateResults.getPackage(parentName);
 			}
 
-			intermediateResults.addPackage(name, packageFactory.create(simpleName, description, parent));
+			intermediateResults.addPackage(name,
+					packageFactory.create().setSimpleName(simpleName).setDescription(description).setParent(parent));
 		}
 	}
 
