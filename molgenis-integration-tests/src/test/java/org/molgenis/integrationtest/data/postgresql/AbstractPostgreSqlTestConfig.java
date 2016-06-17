@@ -1,17 +1,6 @@
 package org.molgenis.integrationtest.data.postgresql;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Properties;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.molgenis.data.DataService;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
@@ -31,7 +20,16 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.Properties;
 
 @Import(
 { PostgreSqlEntityFactory.class, PostgreSqlConfiguration.class })
@@ -57,7 +55,7 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 			@Override
 			protected PostgreSqlRepository createPostgreSqlRepository()
 			{
-				return new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate);
+				return new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate, dataSource);
 			}
 
 			@Override

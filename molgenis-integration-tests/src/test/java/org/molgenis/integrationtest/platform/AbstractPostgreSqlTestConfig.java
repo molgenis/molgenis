@@ -57,7 +57,7 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 			@Override
 			protected PostgreSqlRepository createPostgreSqlRepository()
 			{
-				return new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate);
+				return new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate, dataSource);
 			}
 
 			@Override

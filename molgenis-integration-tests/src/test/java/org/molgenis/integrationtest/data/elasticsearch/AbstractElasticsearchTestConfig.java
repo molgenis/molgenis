@@ -4,10 +4,12 @@ import java.io.IOException;
 
 import javax.sql.DataSource;
 
+import org.mockito.Mockito;
 import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
+import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.integrationtest.data.AbstractDataApiTestConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +19,10 @@ import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.mail.MailSender;
 import org.testng.annotations.AfterClass;
+
+import static org.mockito.Mockito.mock;
 
 public abstract class AbstractElasticsearchTestConfig extends AbstractDataApiTestConfig
 {
@@ -25,6 +30,9 @@ public abstract class AbstractElasticsearchTestConfig extends AbstractDataApiTes
 
 	@Autowired
 	EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
+
+	@Autowired
+	ReindexActionRegisterService reindexActionRegisterService;
 
 	@Autowired
 	protected SearchService searchService;

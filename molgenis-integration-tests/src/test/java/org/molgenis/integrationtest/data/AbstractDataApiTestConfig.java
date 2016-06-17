@@ -39,6 +39,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+import org.springframework.mail.MailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
@@ -46,13 +47,15 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import com.google.common.io.Files;
 
+import static org.mockito.Mockito.mock;
+
 @EnableTransactionManagement(proxyTargetClass = true)
 @ComponentScan(
 { "org.molgenis.data.meta", "org.molgenis.data.elasticsearch.index", "org.molgenis.auth" })
 @Import(
 { EmbeddedElasticSearchConfig.class, ElasticsearchEntityFactory.class, ElasticsearchRepositoryCollection.class,
 		RunAsSystemBeanPostProcessor.class, FileMetaMetaData.class, OwnedEntityMetaData.class, RhinoConfig.class,
-		DatabaseConfig.class, UuidGenerator.class, ExpressionValidator.class, LanguageService.class })
+		DatabaseConfig.class, UuidGenerator.class, ExpressionValidator.class, LanguageService.class, ReindexActionRegisterService.class })
 public abstract class AbstractDataApiTestConfig
 {
 	@Autowired
@@ -125,6 +128,12 @@ public abstract class AbstractDataApiTestConfig
 	public RepositoryDecoratorRegistry repositoryDecoratorRegistry()
 	{
 		return new RepositoryDecoratorRegistry();
+	}
+
+	@Bean
+	public MailSender mailSender()
+	{
+		return mock(MailSender.class);
 	}
 
 	@Autowired
