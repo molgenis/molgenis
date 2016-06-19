@@ -61,36 +61,23 @@ public class VcfImporterService implements ImportService
 
 		List<EntityMetaData> addedEntities = Lists.newArrayList();
 		EntityImportReport report;
-		try
+
+		Iterator<String> it = source.getEntityNames().iterator();
+		if (it.hasNext())
 		{
-			Iterator<String> it = source.getEntityNames().iterator();
-			if (it.hasNext())
+			try (Repository<Entity> repo = source.getRepository(it.next()))
 			{
-				try (Repository<Entity> repo = source.getRepository(it.next());)
-				{
-					report = importVcf(repo, addedEntities);
-				}
+				report = importVcf(repo, addedEntities);
 			}
-			else
+			catch (IOException e)
 			{
-				report = new EntityImportReport();
+				LOG.error("", e);
+				throw new MolgenisDataException(e);
 			}
 		}
-		catch (Exception e)
+		else
 		{
-			LOG.error("Exception importing vcf", e);
-
-			// Remove created repositories
-			try
-			{
-				dataService.getMeta().delete(addedEntities);
-			}
-			catch (Exception e1)
-			{
-				LOG.error("Exception rollback changes", e1);
-			}
-
-			throw new MolgenisDataException(e);
+			report = new EntityImportReport();
 		}
 		return report;
 	}
@@ -152,7 +139,8 @@ public class VcfImporterService implements ImportService
 		return false;
 	}
 
-	private EntityImportReport importVcf(Repository<Entity> inRepository, List<EntityMetaData> addedEntities) throws IOException
+	private EntityImportReport importVcf(Repository<Entity> inRepository, List<EntityMetaData> addedEntities)
+			throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
 		Repository<Entity> sampleRepository = null;
@@ -163,12 +151,12 @@ public class VcfImporterService implements ImportService
 			throw new MolgenisDataException("Can't overwrite existing " + entityName);
 		}
 
-		EntityMetaData entityMetaData = null; //new EntityMetaData(inRepository.getEntityMetaData()); // FIXME
+		EntityMetaData entityMetaData = new EntityMetaData(inRepository.getEntityMetaData());
 
 		AttributeMetaData sampleAttribute = entityMetaData.getAttribute(VcfAttributes.SAMPLES);
 		if (sampleAttribute != null)
 		{
-			EntityMetaData samplesEntityMetaData = null; // new EntityMetaData(sampleAttribute.getRefEntity()); // FIXME
+			EntityMetaData samplesEntityMetaData = new EntityMetaData(sampleAttribute.getRefEntity());
 			sampleRepository = dataService.getMeta().addEntityMeta(samplesEntityMetaData);
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Collections.singletonList(samplesEntityMetaData.getName()));
