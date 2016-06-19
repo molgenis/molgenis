@@ -84,7 +84,7 @@ public class EntityMetaData extends StaticEntity
 		EntityMetaData entityMetaCopy = new EntityMetaData(entityMeta.getEntityMetaData());
 		entityMetaCopy.setName(entityMeta.getName());
 		entityMetaCopy.setSimpleName(entityMeta.getSimpleName());
-		Package package_ = entityMetaCopy.getPackage();
+		Package package_ = entityMeta.getPackage();
 		entityMetaCopy.setPackage(package_ != null ? Package.newInstance(package_) : null);
 		entityMetaCopy.setLabel(entityMeta.getLabel());
 		entityMetaCopy.setDescription(entityMeta.getDescription());
@@ -95,8 +95,8 @@ public class EntityMetaData extends StaticEntity
 		Iterable<AttributeMetaData> lookupAttrs = entityMeta.getLookupAttributes();
 		entityMetaCopy.setLookupAttributes(
 				stream(lookupAttrs.spliterator(), false).map(AttributeMetaData::newInstance).collect(toList()));
-		entityMetaCopy.setAbstract(entityMetaCopy.isAbstract());
-		EntityMetaData extends_ = entityMetaCopy.getExtends();
+		entityMetaCopy.setAbstract(entityMeta.isAbstract());
+		EntityMetaData extends_ = entityMeta.getExtends();
 		entityMetaCopy.setExtends(extends_ != null ? EntityMetaData.newInstance(extends_) : null);
 		Iterable<Tag> tags = entityMeta.getTags();
 		entityMeta.setTags(stream(tags.spliterator(), false).map(Tag::newInstance).collect(toList()));
