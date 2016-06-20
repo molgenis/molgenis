@@ -7,20 +7,8 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ID_ATTRIBUTE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL_ATTRIBUTE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.LOOKUP_ATTRIBUTES;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.SIMPLE_NAME;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.TAGS;
+import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
 import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
 import java.util.Map;
@@ -28,7 +16,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.Fetch;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
@@ -138,13 +125,8 @@ public class SystemEntityMetaDataPersister
 
 	private void persist(EntityMetaData entityMeta)
 	{
-		// TODO improve performance by supplying Fetch (How to define Fetch exactly? We want all entityMeta fields and expand attributes attribute)
-		// TODO once we stop using system entity meta data after bootstrapping this call can be replaced with dataService.getMeta().getEntityMetaData
-		Fetch fetch = new Fetch().field(FULL_NAME).field(SIMPLE_NAME).field(PACKAGE).field(LABEL).field(DESCRIPTION)
-				.field(ATTRIBUTES).field(ID_ATTRIBUTE).field(LABEL_ATTRIBUTE).field(LOOKUP_ATTRIBUTES).field(ABSTRACT)
-				.field(EXTENDS).field(TAGS).field(BACKEND);
 		EntityMetaData existingEntityMeta = dataService
-				.findOneById(ENTITY_META_DATA, entityMeta.getName(), fetch, EntityMetaData.class);
+				.findOneById(ENTITY_META_DATA, entityMeta.getName(), getEntityMetaDataFetch(), EntityMetaData.class);
 		if (existingEntityMeta == null)
 		{
 			dataService.getMeta().addEntityMeta(entityMeta);

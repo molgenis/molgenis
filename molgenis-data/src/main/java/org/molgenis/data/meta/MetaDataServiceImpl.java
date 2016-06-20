@@ -7,18 +7,9 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ID_ATTRIBUTE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL_ATTRIBUTE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.LOOKUP_ATTRIBUTES;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.SIMPLE_NAME;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.TAGS;
+import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
 import static org.molgenis.data.meta.PackageMetaData.PACKAGE;
 import static org.molgenis.data.meta.PackageMetaData.PARENT;
 import static org.molgenis.data.meta.TagMetaData.TAG;
@@ -34,7 +25,6 @@ import javax.annotation.Nonnull;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryCollectionRegistry;
@@ -209,11 +199,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 		else
 		{
-			// TODO simplify fetch creation (in this case *all* attributes and expand xref/mrefs)
-			Fetch fetch = new Fetch().field(FULL_NAME).field(SIMPLE_NAME).field(EntityMetaDataMetaData.PACKAGE)
-					.field(LABEL).field(DESCRIPTION).field(ATTRIBUTES).field(ID_ATTRIBUTE).field(LABEL_ATTRIBUTE)
-					.field(LOOKUP_ATTRIBUTES).field(ABSTRACT).field(EXTENDS).field(TAGS).field(BACKEND);
-			return getEntityRepository().findOneById(fullyQualifiedEntityName, fetch);
+			return getEntityRepository().findOneById(fullyQualifiedEntityName, getEntityMetaDataFetch());
 		}
 	}
 
@@ -252,13 +238,14 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public Stream<EntityMetaData> getEntityMetaDatas()
 	{
-		return getEntityRepository().stream();
+		return getEntityRepository().stream(getEntityMetaDataFetch());
 	}
 
 	@Override
 	public Stream<Repository<Entity>> getRepositories()
 	{
-		return getEntityRepository().query().eq(ABSTRACT, false).findAll().map(this::getRepository);
+		return getEntityRepository().query().eq(ABSTRACT, false).fetch(getEntityMetaDataFetch()).findAll()
+				.map(this::getRepository);
 	}
 
 	@Transactional
