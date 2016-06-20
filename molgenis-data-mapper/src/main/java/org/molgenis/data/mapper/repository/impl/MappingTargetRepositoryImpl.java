@@ -15,7 +15,7 @@ import org.molgenis.data.mapper.meta.MappingTargetMetaData;
 import org.molgenis.data.mapper.repository.EntityMappingRepository;
 import org.molgenis.data.mapper.repository.MappingTargetRepository;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Lists;
@@ -63,11 +63,11 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 	}
 
 	/**
-	 * Creates a new {@link MapEntity} for this MappingProject. Doesn't yet fill the {@link EntityMapping}s.
+	 * Creates a new {@link DynamicEntity} for this MappingProject. Doesn't yet fill the {@link EntityMapping}s.
 	 */
 	private Entity toMappingTargetEntity(MappingTarget mappingTarget, List<Entity> entityMappingEntities)
 	{
-		Entity mappingTargetEntity = new MapEntity(mappingTargetMetaData);
+		Entity mappingTargetEntity = new DynamicEntity(mappingTargetMetaData);
 		mappingTargetEntity.set(MappingProjectMetaData.IDENTIFIER, mappingTarget.getIdentifier());
 		mappingTargetEntity.set(MappingTargetMetaData.TARGET, mappingTarget.getTarget().getName());
 		mappingTargetEntity.set(MappingTargetMetaData.ENTITY_MAPPINGS, entityMappingEntities);
@@ -82,9 +82,8 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 
 	/**
 	 * Creates a fully reconstructed MappingProject from an Entity retrieved from the repository.
-	 * 
-	 * @param mappingTargetEntity
-	 *            Entity with {@link MappingProjectMetaData} metadata
+	 *
+	 * @param mappingTargetEntity Entity with {@link MappingProjectMetaData} metadata
 	 * @return fully reconstructed MappingProject
 	 */
 	private MappingTarget toMappingTarget(Entity mappingTargetEntity)
@@ -97,13 +96,13 @@ public class MappingTargetRepositoryImpl implements MappingTargetRepository
 			return null;
 		}
 
-		EntityMetaData target = dataService.getEntityMetaData(mappingTargetEntity
-				.getString(MappingTargetMetaData.TARGET));
+		EntityMetaData target = dataService
+				.getEntityMetaData(mappingTargetEntity.getString(MappingTargetMetaData.TARGET));
 
 		if (mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITY_MAPPINGS) != null)
 		{
-			List<Entity> entityMappingEntities = Lists.newArrayList(mappingTargetEntity
-					.getEntities(MappingTargetMetaData.ENTITY_MAPPINGS));
+			List<Entity> entityMappingEntities = Lists
+					.newArrayList(mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITY_MAPPINGS));
 			entityMappings = entityMappingRepository.toEntityMappings(entityMappingEntities);
 		}
 

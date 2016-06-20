@@ -15,7 +15,7 @@ import org.molgenis.data.mapper.meta.EntityMappingMetaData;
 import org.molgenis.data.mapper.repository.AttributeMappingRepository;
 import org.molgenis.data.mapper.repository.EntityMappingRepository;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,8 +58,8 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		EntityMetaData targetEntityMetaData;
 		try
 		{
-			targetEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
-					.getString(EntityMappingMetaData.TARGET_ENTITY_META_DATA));
+			targetEntityMetaData = dataService
+					.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.TARGET_ENTITY_META_DATA));
 		}
 		catch (UnknownEntityException uee)
 		{
@@ -70,8 +70,8 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 		EntityMetaData sourceEntityMetaData;
 		try
 		{
-			sourceEntityMetaData = dataService.getEntityMetaData(entityMappingEntity
-					.getString(EntityMappingMetaData.SOURCE_ENTITY_META_DATA));
+			sourceEntityMetaData = dataService
+					.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.SOURCE_ENTITY_META_DATA));
 		}
 		catch (UnknownEntityException uee)
 		{
@@ -79,10 +79,10 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 			sourceEntityMetaData = null;
 		}
 
-		List<Entity> attributeMappingEntities = Lists.<Entity> newArrayList(entityMappingEntity
-				.getEntities(EntityMappingMetaData.ATTRIBUTE_MAPPINGS));
-		List<AttributeMapping> attributeMappings = attributeMappingRepository.getAttributeMappings(
-				attributeMappingEntities, sourceEntityMetaData, targetEntityMetaData);
+		List<Entity> attributeMappingEntities = Lists.<Entity>newArrayList(
+				entityMappingEntity.getEntities(EntityMappingMetaData.ATTRIBUTE_MAPPINGS));
+		List<AttributeMapping> attributeMappings = attributeMappingRepository
+				.getAttributeMappings(attributeMappingEntities, sourceEntityMetaData, targetEntityMetaData);
 
 		return new EntityMapping(identifier, sourceEntityMetaData, targetEntityMetaData, attributeMappings);
 	}
@@ -113,12 +113,12 @@ public class EntityMappingRepositoryImpl implements EntityMappingRepository
 
 	private Entity toEntityMappingEntity(EntityMapping entityMapping, List<Entity> attributeMappingEntities)
 	{
-		Entity entityMappingEntity = new MapEntity(entityMappingMetaData);
+		Entity entityMappingEntity = new DynamicEntity(entityMappingMetaData);
 		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, entityMapping.getIdentifier());
 		entityMappingEntity.set(EntityMappingMetaData.SOURCE_ENTITY_META_DATA, entityMapping.getName());
 		entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_META_DATA,
-						entityMapping.getTargetEntityMetaData() != null ? entityMapping.getTargetEntityMetaData()
-								.getName() : null);
+				entityMapping.getTargetEntityMetaData() != null ? entityMapping.getTargetEntityMetaData()
+						.getName() : null);
 		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
 		return entityMappingEntity;
 	}

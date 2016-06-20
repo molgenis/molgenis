@@ -23,9 +23,9 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mem.InMemoryRepository;
 import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
@@ -146,7 +146,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 */
 	private void createOntology()
 	{
-		ontologyEntity = new MapEntity(ontologyMetaData);
+		ontologyEntity = new DynamicEntity(ontologyMetaData);
 		ontologyEntity.set(OntologyMetaData.ID, idGenerator.generateId());
 		ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, loader.getOntologyIRI());
 		ontologyEntity.set(OntologyMetaData.ONTOLOGY_NAME, loader.getOntologyName());
@@ -211,7 +211,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	{
 		String ontologyTermIRI = ontologyTerm.getIRI().toString();
 		String ontologyTermName = loader.getLabel(ontologyTerm);
-		Entity entity = new MapEntity(ontologyTermMetaData);
+		Entity entity = new DynamicEntity(ontologyTermMetaData);
 		entity.set(OntologyTermMetaData.ID, idGenerator.generateId());
 		entity.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ontologyTermIRI);
 		entity.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, ontologyTermName);
@@ -242,7 +242,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 */
 	private Entity createSynonym(String synonym)
 	{
-		MapEntity entity = new MapEntity(ontologyTermSynonymMetaData);
+		Entity entity = new DynamicEntity(ontologyTermSynonymMetaData);
 		entity.set(OntologyTermSynonymMetaData.ID, idGenerator.generateId());
 		entity.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR, synonym);
 		synonymRepository.add(entity);
@@ -268,7 +268,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 */
 	private Entity createDynamicAnnotation(String label)
 	{
-		Entity entity = new MapEntity(ontologyTermDynamicAnnotationMetaData);
+		Entity entity = new DynamicEntity(ontologyTermDynamicAnnotationMetaData);
 		entity.set(OntologyTermDynamicAnnotationMetaData.ID, idGenerator.generateId());
 		String fragments[] = label.split(":");
 		entity.set(OntologyTermDynamicAnnotationMetaData.NAME, fragments[0]);
@@ -303,7 +303,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 */
 	private Entity createNodePathEntity(OWLClassContainer container, String ontologyTermNodePath)
 	{
-		MapEntity entity = new MapEntity(ontologyTermNodePathMetaData);
+		Entity entity = new DynamicEntity(ontologyTermNodePathMetaData);
 		entity.set(OntologyTermNodePathMetaData.ID, idGenerator.generateId());
 		entity.set(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR, ontologyTermNodePath);
 		entity.set(OntologyTermNodePathMetaData.ROOT, container.isRoot());

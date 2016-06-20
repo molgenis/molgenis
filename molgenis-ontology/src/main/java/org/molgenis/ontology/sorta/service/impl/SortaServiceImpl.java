@@ -13,6 +13,7 @@ import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaD
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.COMBINED_SCORE;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.SCORE;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,7 +32,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.data.semanticsearch.string.Stemmer;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
@@ -107,8 +108,8 @@ public class SortaServiceImpl implements SortaService
 	@Override
 	public Iterable<Entity> findOntologyTermEntities(String ontologyUrl, String queryString)
 	{
-		Entity entity = new MapEntity(
-				Collections.singletonMap(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString));
+		Entity entity = new DynamicEntity(null); // FIXME pass entity meta data instead of null
+		entity.set(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString);
 		return findOntologyTermEntities(ontologyUrl, entity);
 	}
 
@@ -310,14 +311,19 @@ public class SortaServiceImpl implements SortaService
 		Iterable<Entity> entities = ontologyTermEntity.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM);
 		if (Iterables.size(entities) > 0)
 		{
+			// FIXME get rid of getApplicationContext reference
+			OntologyTermSynonymMetaData ontologyTermSynonymMetaData = getApplicationContext()
+					.getBean(OntologyTermSynonymMetaData.class);
+
 			String cleanedQueryString = removeIllegalCharWithSingleWhiteSpace(queryString);
 
 			// Calculate the Ngram silmiarity score for all the synonyms and sort them in descending order
-			List<MapEntity> synonymEntities = FluentIterable.from(entities).transform(new Function<Entity, MapEntity>()
+			List<Entity> synonymEntities = FluentIterable.from(entities).transform(new Function<Entity, Entity>()
 			{
-				public MapEntity apply(Entity ontologyTermSynonymEntity)
+				public Entity apply(Entity ontologyTermSynonymEntity)
 				{
-					MapEntity mapEntity = new MapEntity(ontologyTermSynonymEntity);
+					Entity mapEntity = new DynamicEntity(ontologyTermSynonymMetaData);
+					mapEntity.set(ontologyTermSynonymEntity);
 					String ontologyTermSynonym = removeIllegalCharWithSingleWhiteSpace(ontologyTermSynonymEntity
 							.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR));
 					mapEntity.set(SCORE,
@@ -325,15 +331,16 @@ public class SortaServiceImpl implements SortaService
 					return mapEntity;
 				}
 
-			}).toSortedList(new Comparator<MapEntity>()
+			}).toSortedList(new Comparator<Entity>()
 			{
-				public int compare(MapEntity entity_1, MapEntity entity_2)
+				public int compare(Entity entity_1, Entity entity_2)
 				{
 					return entity_2.getDouble(SCORE).compareTo(entity_1.getDouble(SCORE));
 				}
 			});
 
-			MapEntity firstMatchedSynonymEntity = Iterables.getFirst(synonymEntities, new MapEntity());
+			Entity firstMatchedSynonymEntity = Iterables
+					.getFirst(synonymEntities, new DynamicEntity(ontologyTermSynonymMetaData));
 			double topNgramScore = firstMatchedSynonymEntity.getDouble(SCORE);
 			String topMatchedSynonym = firstMatchedSynonymEntity
 					.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR);

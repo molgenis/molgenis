@@ -6,7 +6,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -45,15 +45,15 @@ public abstract class DefaultSettingsEntityMetaData extends SystemEntityMetaData
 
 	Entity getDefaultSettings()
 	{
-		MapEntity mapEntity = new MapEntity(this);
+		Entity defaultSettingsEntity = new DynamicEntity(this);
 		for (AttributeMetaData attr : this.getAtomicAttributes())
 		{
 			String defaultValue = attr.getDefaultValue();
 			if (defaultValue != null)
 			{
-				mapEntity.set(attr.getName(), defaultValue);
+				defaultSettingsEntity.set(attr.getName(), defaultValue);
 			}
 		}
-		return mapEntity;
+		return defaultSettingsEntity;
 	}
 }

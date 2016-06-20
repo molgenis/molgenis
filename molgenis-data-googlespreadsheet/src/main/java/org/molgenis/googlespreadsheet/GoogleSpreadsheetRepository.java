@@ -17,7 +17,7 @@ import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataFactory;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 
 import com.google.common.collect.Iterables;
 import com.google.gdata.client.spreadsheet.FeedURLFactory;
@@ -56,8 +56,8 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 		this(spreadsheetService, spreadsheetKey, worksheetId, Visibility.PUBLIC);
 	}
 
-	public GoogleSpreadsheetRepository(SpreadsheetService spreadsheetService, String spreadsheetKey,
-			String worksheetId, Visibility visibility) throws IOException, ServiceException
+	public GoogleSpreadsheetRepository(SpreadsheetService spreadsheetService, String spreadsheetKey, String worksheetId,
+			Visibility visibility) throws IOException, ServiceException
 	{
 		if (spreadsheetService == null) throw new IllegalArgumentException("spreadsheetService is null");
 		if (spreadsheetKey == null) throw new IllegalArgumentException("spreadsheetKey is null");
@@ -77,9 +77,8 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 		ListFeed feed;
 		try
 		{
-			feed = spreadsheetService.getFeed(
-					FeedURLFactory.getDefault().getListFeedUrl(spreadsheetKey, worksheetId, visibility.toString(),
-							"full"), ListFeed.class);
+			feed = spreadsheetService.getFeed(FeedURLFactory.getDefault()
+					.getListFeedUrl(spreadsheetKey, worksheetId, visibility.toString(), "full"), ListFeed.class);
 		}
 		catch (MalformedURLException e)
 		{
@@ -106,7 +105,7 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 			@Override
 			public Entity next()
 			{
-				MapEntity entity = new MapEntity();
+				Entity entity = new DynamicEntity(null); // FIXME pass entity meta data instead of null
 				CustomElementCollection customElements = it.next().getCustomElements();
 				for (AttributeMetaData attributeMetaData : entityMetaData.getAttributes())
 				{
@@ -139,8 +138,8 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 			CellFeed feed;
 			try
 			{
-				URL cellFeedUrl = FeedURLFactory.getDefault().getCellFeedUrl(spreadsheetKey, worksheetId,
-						visibility.toString(), "full");
+				URL cellFeedUrl = FeedURLFactory.getDefault()
+						.getCellFeedUrl(spreadsheetKey, worksheetId, visibility.toString(), "full");
 				cellFeedUrl = new URL(cellFeedUrl.toString() + "?min-row=1&max-row=1");
 				feed = spreadsheetService.getFeed(cellFeedUrl, CellFeed.class);
 			}

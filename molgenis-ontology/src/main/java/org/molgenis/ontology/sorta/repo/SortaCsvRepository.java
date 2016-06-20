@@ -22,7 +22,7 @@ import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 
 public class SortaCsvRepository extends AbstractRepository
@@ -89,7 +89,10 @@ public class SortaCsvRepository extends AbstractRepository
 				Entity entity = iterator.next();
 				if (isEmpty(entity.getString(ALLOWED_IDENTIFIER)))
 				{
-					entity = new MapEntity(entity);
+					DynamicEntity dynamicEntity = new DynamicEntity(
+							null); // FIXME pass entity meta data instead of null
+					dynamicEntity.set(entity);
+					entity = dynamicEntity;
 					entity.set(ALLOWED_IDENTIFIER, count.incrementAndGet());
 				}
 				return entity;

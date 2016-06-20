@@ -29,7 +29,7 @@ import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -100,7 +100,7 @@ public class MappingServiceImpl implements MappingService
 
 		// determine cloned mapping project name (use Windows 7 naming strategy):
 		String clonedMappingProjectName;
-		for (int i = 1;; ++i)
+		for (int i = 1; ; ++i)
 		{
 			if (i == 1)
 			{
@@ -169,7 +169,7 @@ public class MappingServiceImpl implements MappingService
 	{
 		EntityMetaData targetMetaData = EntityMetaData.newInstance(mappingTarget.getTarget());
 		targetMetaData.setName(entityName);
-//		targetMetaData.setPackage(Package.defaultPackage);
+		//		targetMetaData.setPackage(Package.defaultPackage);
 		targetMetaData.setLabel(entityName);
 		targetMetaData.addAttribute(attrMetaFactory.create().setName("source"));
 
@@ -211,11 +211,9 @@ public class MappingServiceImpl implements MappingService
 	/**
 	 * Compares the attributes of the target repository with the results of the mapping and sees if they're compatible.
 	 * The repository is compatible when all attributes resulting from the mapping can be written to it.
-	 * 
-	 * @param targetRepository
-	 *            the target repository
-	 * @param mappingTargetMetaData
-	 *            the metadata of the mapping result entity
+	 *
+	 * @param targetRepository      the target repository
+	 * @param mappingTargetMetaData the metadata of the mapping result entity
 	 * @return true if the mapping can be written to the target repository
 	 */
 	private boolean isTargetMetaCompatible(Repository<Entity> targetRepository, EntityMetaData mappingTargetMetaData)
@@ -227,8 +225,8 @@ public class MappingServiceImpl implements MappingService
 		for (AttributeMetaData mappingTargetAttr : mappingTargetMetaData.getAtomicAttributes())
 		{
 			String mappingTargetAttrName = mappingTargetAttr.getName();
-			if (targetRepoAttributeMap.containsKey(mappingTargetAttrName)
-					&& targetRepoAttributeMap.get(mappingTargetAttrName).equals(mappingTargetAttr))
+			if (targetRepoAttributeMap.containsKey(mappingTargetAttrName) && targetRepoAttributeMap
+					.get(mappingTargetAttrName).equals(mappingTargetAttr))
 			{
 				continue;
 			}
@@ -263,7 +261,7 @@ public class MappingServiceImpl implements MappingService
 		while (sourceEntities.hasNext())
 		{
 			Entity sourceEntity = sourceEntities.next();
-			MapEntity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
+			Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
 					sourceMapping.getSourceEntityMetaData(), targetRepo);
 			mappedEntities.add(mappedEntity);
 
@@ -275,14 +273,15 @@ public class MappingServiceImpl implements MappingService
 		}
 	}
 
-	private MapEntity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity,
-			EntityMetaData targetMetaData, EntityMetaData sourceEntityMetaData, Repository<Entity> targetRepository)
+	private Entity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity, EntityMetaData targetMetaData,
+			EntityMetaData sourceEntityMetaData, Repository<Entity> targetRepository)
 	{
-		MapEntity target = new MapEntity(targetMetaData);
+		Entity target = new DynamicEntity(targetMetaData);
 		target.set("source", sourceMapping.getName());
 
-		sourceMapping.getAttributeMappings().forEach(attributeMapping -> applyMappingToAttribute(attributeMapping,
-				sourceEntity, target, sourceEntityMetaData));
+		sourceMapping.getAttributeMappings().forEach(
+				attributeMapping -> applyMappingToAttribute(attributeMapping, sourceEntity, target,
+						sourceEntityMetaData));
 		return target;
 	}
 
@@ -290,8 +289,8 @@ public class MappingServiceImpl implements MappingService
 	public String generateId(FieldType dataType, Long count)
 	{
 		Object id;
-		if (dataType.equals(MolgenisFieldTypes.INT) || dataType.equals(MolgenisFieldTypes.LONG)
-				|| dataType.equals(MolgenisFieldTypes.DECIMAL))
+		if (dataType.equals(MolgenisFieldTypes.INT) || dataType.equals(MolgenisFieldTypes.LONG) || dataType
+				.equals(MolgenisFieldTypes.DECIMAL))
 		{
 			id = count + 1;
 		}
@@ -302,7 +301,7 @@ public class MappingServiceImpl implements MappingService
 		return id.toString();
 	}
 
-	private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity sourceEntity, MapEntity target,
+	private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity sourceEntity, Entity target,
 			EntityMetaData entityMetaData)
 	{
 		target.set(attributeMapping.getTargetAttributeMetaData().getName(),

@@ -16,7 +16,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -38,12 +38,12 @@ public class ChartDataServiceImplTest
 		String entityName = "entity";
 		List<Entity> entities = new ArrayList<Entity>();
 
-		Entity e1 = new MapEntity();
+		Entity e1 = new DynamicEntity(null); // FIXME pass entity meta data instead of null
 		e1.set("patient", "patient1");
 		e1.set("probe", 1.5);
 		entities.add(e1);
 
-		Entity e2 = new MapEntity();
+		Entity e2 = new DynamicEntity(null); // FIXME pass entity meta data instead of null
 		e2.set("patient", "patient2");
 		e2.set("probe", 1.6);
 		entities.add(e2);

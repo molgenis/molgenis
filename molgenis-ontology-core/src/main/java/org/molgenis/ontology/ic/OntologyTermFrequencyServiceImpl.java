@@ -2,6 +2,7 @@ package org.molgenis.ontology.ic;
 
 import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM;
 import static org.molgenis.ontology.ic.TermFrequencyEntityMetaData.TERM_FREQUENCY;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -60,12 +61,15 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 	{
 		if (pubMedTFEntity == null) return null;
 
-		MapEntity mapEntity = new MapEntity();
-		mapEntity.set(TermFrequencyEntityMetaData.TERM, term);
-		mapEntity.set(TermFrequencyEntityMetaData.FREQUENCY, pubMedTFEntity.getFrequency());
-		mapEntity.set(TermFrequencyEntityMetaData.OCCURRENCE, pubMedTFEntity.getOccurrence());
-		dataService.add(TERM_FREQUENCY, mapEntity);
-		return mapEntity;
+		// FIXME remove reference to getApplicationContext
+		TermFrequencyEntityMetaData termFrequencyEntityMeta = getApplicationContext()
+				.getBean(TermFrequencyEntityMetaData.class);
+		Entity entity = new DynamicEntity(termFrequencyEntityMeta);
+		entity.set(TermFrequencyEntityMetaData.TERM, term);
+		entity.set(TermFrequencyEntityMetaData.FREQUENCY, pubMedTFEntity.getFrequency());
+		entity.set(TermFrequencyEntityMetaData.OCCURRENCE, pubMedTFEntity.getOccurrence());
+		dataService.add(TERM_FREQUENCY, entity);
+		return entity;
 	}
 
 	@Override
@@ -84,7 +88,10 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 
 			if (pubMedTFEntity != null)
 			{
-				MapEntity mapEntity = new MapEntity();
+				// FIXME remove reference to getApplicationContext
+				TermFrequencyEntityMetaData termFrequencyEntityMeta = getApplicationContext()
+						.getBean(TermFrequencyEntityMetaData.class);
+				Entity mapEntity = new DynamicEntity(termFrequencyEntityMeta);
 				mapEntity.set(TermFrequencyEntityMetaData.TERM, ontologyTermSynonym);
 				mapEntity.set(TermFrequencyEntityMetaData.FREQUENCY, pubMedTFEntity.getFrequency());
 				mapEntity.set(TermFrequencyEntityMetaData.OCCURRENCE, pubMedTFEntity.getOccurrence());

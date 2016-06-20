@@ -30,7 +30,6 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.testng.annotations.AfterMethod;
@@ -742,18 +741,18 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 
 	public abstract List<RepositoryCapability> getExpectedCapabilities();
 
-	public static class TestEntity extends MapEntity
-	{
-		private static final long serialVersionUID = 1L;
-
-		public String getId()
-		{
-			return getString(ATTR_ID);
-		}
-
-		public void setId(String id)
-		{
-			set(ATTR_ID, id);
-		}
-	}
+	//	public static class TestEntity extends DynamicEntity
+	//	{
+	//		private static final long serialVersionUID = 1L;
+	//
+	//		public String getId()
+	//		{
+	//			return getString(ATTR_ID);
+	//		}
+	//
+	//		public void setId(String id)
+	//		{
+	//			set(ATTR_ID, id);
+	//		}
+	//	}
 }

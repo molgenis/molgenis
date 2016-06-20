@@ -3,14 +3,12 @@ package org.molgenis.data.i18n;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
 import static org.testng.Assert.assertEquals;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.support.MapEntity;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
@@ -38,8 +36,8 @@ public class LanguageServiceTest
 	public void getCurrentUserLanguageCode()
 	{
 		SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("test", "test"));
-		when(queryMock.findOne()).thenReturn(new MapEntity("languageCode", "nl"));
-		when(dataServiceMock.findOneById(LANGUAGE, "nl")).thenReturn(new MapEntity("nl", "Nederlands"));
+		//		when(queryMock.findOne()).thenReturn(new MapEntity("languageCode", "nl")); // FIXME replace with DynamicEntity
+		//		when(dataServiceMock.findOneById(LANGUAGE, "nl")).thenReturn(new MapEntity("nl", "Nederlands")); // FIXME replace with DynamicEntity
 		assertEquals(languageService.getCurrentUserLanguageCode(), "nl");
 	}
 
@@ -47,9 +45,9 @@ public class LanguageServiceTest
 	public void getCurrentUserLanguageAppSettings()
 	{
 		SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("test", "test"));
-		when(queryMock.findOne()).thenReturn(new MapEntity());
+		//		when(queryMock.findOne()).thenReturn(new MapEntity()); // FIXME replace with DynamicEntity
 		when(appSettingsMock.getLanguageCode()).thenReturn("de");
-		when(dataServiceMock.findOneById(LANGUAGE, "de")).thenReturn(new MapEntity("nl", "Nederlands"));
+		//		when(dataServiceMock.findOneById(LANGUAGE, "de")).thenReturn(new MapEntity("nl", "Nederlands")); // FIXME replace with DynamicEntity
 		assertEquals(languageService.getCurrentUserLanguageCode(), "de");
 	}
 }

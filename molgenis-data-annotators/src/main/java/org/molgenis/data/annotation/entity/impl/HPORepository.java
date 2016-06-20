@@ -27,7 +27,7 @@ import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataFactory;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 
 import com.google.common.collect.Iterables;
 
@@ -117,7 +117,7 @@ public class HPORepository extends AbstractRepository
 				{
 					String geneSymbol = values[1];
 
-					Entity entity = new MapEntity(getEntityMetaData());
+					Entity entity = new DynamicEntity(getEntityMetaData());
 					entity.set(HPO_DISEASE_ID_COL_NAME, values[0]);
 					entity.set(HPO_GENE_SYMBOL_COL_NAME, geneSymbol);
 					entity.set(HPO_ID_COL_NAME, values[3]);

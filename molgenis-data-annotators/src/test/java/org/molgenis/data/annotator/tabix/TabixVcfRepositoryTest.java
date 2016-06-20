@@ -16,7 +16,7 @@ import org.mockito.Mockito;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotator.tabix.TabixReader.Iterator;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfReaderFactory;
 import org.molgenis.vcf.VcfReader;
 import org.molgenis.vcf.meta.VcfMeta;
@@ -68,7 +68,7 @@ public class TabixVcfRepositoryTest
 		Stream<Entity> actual = tabixVcfRepository
 				.findAll(tabixVcfRepository.query().eq(CHROM, "13").and().eq(POS, 12));
 
-		Entity e1 = new MapEntity(entityMetaData);
+		Entity e1 = new DynamicEntity(entityMetaData);
 		e1.set("#CHROM", "13");
 		e1.set("ALT", "C");
 		e1.set("POS", 12);
@@ -78,7 +78,7 @@ public class TabixVcfRepositoryTest
 		e1.set("ID", "id2");
 		e1.set("INTERNAL_ID", "1IRDGOK5Lz_D5OTHDCufFA");
 
-		Entity e2 = new MapEntity(entityMetaData);
+		Entity e2 = new DynamicEntity(entityMetaData);
 		e2.set("#CHROM", "13");
 		e2.set("ALT", "G");
 		e2.set("POS", 12);

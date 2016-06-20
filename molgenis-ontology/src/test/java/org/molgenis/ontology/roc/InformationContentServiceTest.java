@@ -12,14 +12,13 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
 public class InformationContentServiceTest
@@ -43,8 +42,8 @@ public class InformationContentServiceTest
 	{
 		String ontologyIri = "http://www.molgenis.org";
 
-		MapEntity ontologyEntity = new MapEntity(ImmutableMap.of(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
-
+		Entity ontologyEntity = new DynamicEntity(null); // FIXME pass entity meta data instead of null
+		ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, ontologyIri);
 		Mockito.when(dataService.findOne(ONTOLOGY,
 				new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri))).thenReturn(ontologyEntity);
 
@@ -81,7 +80,8 @@ public class InformationContentServiceTest
 	{
 		String ontologyIri = "http://www.molgenis.org";
 
-		MapEntity ontologyEntity = new MapEntity(ImmutableMap.of(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
+		Entity ontologyEntity = new DynamicEntity(null);
+		ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, ontologyIri);
 
 		Mockito.when(dataService.findOne(ONTOLOGY,
 				new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri))).thenReturn(ontologyEntity);

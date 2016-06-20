@@ -274,7 +274,7 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 	//		@Bean
 	//		public Entity snpEffAnnotatorSettings()
 	//		{
-	//			return new MapEntity();
+	//			return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	//		}
 	//
 	//		@Bean

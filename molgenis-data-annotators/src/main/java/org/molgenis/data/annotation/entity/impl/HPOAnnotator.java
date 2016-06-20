@@ -6,31 +6,23 @@ import static org.molgenis.data.annotator.websettings.HPOAnnotatorSettings.Meta.
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.entity.AnnotatorInfo;
-import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
-import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.ResultFilter;
-import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.data.annotation.query.GeneNameQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -132,7 +124,7 @@ public class HPOAnnotator
 				terms.append(hpoTerm);
 			}
 
-			Entity aggregated = new MapEntity();
+			Entity aggregated = new DynamicEntity(null); // FIXME pass entity meta data instead of null
 			aggregated.set(HPO_IDS, ids.toString());
 			aggregated.set(HPO_TERMS, terms.toString());
 

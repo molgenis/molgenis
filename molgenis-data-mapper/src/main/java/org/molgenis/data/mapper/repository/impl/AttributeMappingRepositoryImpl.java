@@ -18,7 +18,7 @@ import org.molgenis.data.mapper.meta.EntityMappingMetaData;
 import org.molgenis.data.mapper.repository.AttributeMappingRepository;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Function;
@@ -120,7 +120,7 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 
 	private Entity toAttributeMappingEntity(AttributeMapping attributeMapping)
 	{
-		Entity attributeMappingEntity = new MapEntity(attributeMappingMetaData);
+		Entity attributeMappingEntity = new DynamicEntity(attributeMappingMetaData);
 		attributeMappingEntity.set(AttributeMappingMetaData.IDENTIFIER, attributeMapping.getIdentifier());
 		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA,
 				attributeMapping.getTargetAttributeMetaData() != null ? attributeMapping.getTargetAttributeMetaData()

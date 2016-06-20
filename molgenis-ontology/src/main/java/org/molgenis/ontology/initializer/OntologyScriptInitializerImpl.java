@@ -1,5 +1,6 @@
 package org.molgenis.ontology.initializer;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.script.ScriptMetaData.SCRIPT;
 import static org.molgenis.script.ScriptParameterMetaData.SCRIPT_PARAMETER;
 
@@ -11,9 +12,11 @@ import java.util.Arrays;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.script.Script;
+import org.molgenis.script.ScriptFactory;
 import org.molgenis.script.ScriptMetaData;
+import org.molgenis.script.ScriptParameterFactory;
 import org.molgenis.script.ScriptParameterMetaData;
 import org.molgenis.script.ScriptTypeMetaData;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -25,21 +28,24 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
-import com.google.common.collect.ImmutableMap;
-
 @Service
 public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 {
-	private final DataService dataService;
 	private static final String ROC_CURVE_SCRIPT_NAME = "roc";
 	private static final String ROC_CURVE_SCRIPT_PARAMETER = "filePath";
 	private static final Logger LOG = LoggerFactory.getLogger(OntologyScriptInitializerImpl.class);
 
+	private final DataService dataService;
+	private final ScriptFactory scriptFactory;
+	private final ScriptParameterFactory scriptParameterFactory;
+
 	@Autowired
-	public OntologyScriptInitializerImpl(DataService dataService)
+	public OntologyScriptInitializerImpl(DataService dataService, ScriptFactory scriptFactory,
+			ScriptParameterFactory scriptParameterFactory)
 	{
-		if (dataService == null) throw new IllegalArgumentException("DataService cannot be null");
-		this.dataService = dataService;
+		this.dataService = requireNonNull(dataService);
+		this.scriptFactory = requireNonNull(scriptFactory);
+		this.scriptParameterFactory = requireNonNull(scriptParameterFactory);
 	}
 
 	@Override
@@ -73,21 +79,21 @@ public class OntologyScriptInitializerImpl implements OntologyScriptInitializer
 				if (dataService.count(SCRIPT_PARAMETER,
 						new QueryImpl<Entity>().eq(ScriptParameterMetaData.NAME, ROC_CURVE_SCRIPT_PARAMETER)) == 0)
 				{
-					dataService.add(SCRIPT_PARAMETER,
-							new MapEntity(ImmutableMap.of(ScriptParameterMetaData.NAME, ROC_CURVE_SCRIPT_PARAMETER)));
+					dataService
+							.add(SCRIPT_PARAMETER, scriptParameterFactory.create().setName(ROC_CURVE_SCRIPT_PARAMETER));
 				}
 
 				Entity scriptParameterEntity = dataService.findOne(SCRIPT_PARAMETER,
 						new QueryImpl<Entity>().eq(ScriptParameterMetaData.NAME, ROC_CURVE_SCRIPT_PARAMETER));
 
-				MapEntity scriptEntity = new MapEntity();
-				scriptEntity.set(ScriptMetaData.NAME, ROC_CURVE_SCRIPT_NAME);
-				scriptEntity.set(ScriptMetaData.GENERATE_TOKEN, true);
-				scriptEntity.set(ScriptMetaData.TYPE, scriptType);
-				scriptEntity.set(ScriptMetaData.RESULT_FILE_EXTENSION, "png");
-				scriptEntity.set(ScriptMetaData.CONTENT, scriptContent);
-				scriptEntity.set(ScriptMetaData.PARAMETERS, Arrays.asList(scriptParameterEntity));
-				dataService.add(SCRIPT, scriptEntity);
+				Script script = scriptFactory.create();
+				script.setName(ROC_CURVE_SCRIPT_NAME);
+				script.setGenerateToken(true);
+				script.set(ScriptMetaData.TYPE, scriptType);
+				script.setResultFileExtension("png");
+				script.setContent(scriptContent);
+				script.set(ScriptMetaData.PARAMETERS, Arrays.asList(scriptParameterEntity));
+				dataService.add(SCRIPT, script);
 
 				LOG.info("Script entity \"roc\" has been added to the database!");
 			}

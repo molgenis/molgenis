@@ -35,7 +35,7 @@ import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfAttributes;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
@@ -161,8 +161,8 @@ public class SnpEffAnnotator
 		private String snpEffPath;
 		private final Entity pluginSettings;
 		private final AnnotatorInfo info = null; //FIXME AnnotatorInfo.create(Status.READY, Type.EFFECT_PREDICTION, NAME,
-//				"Genetic variant annotation and effect prediction toolbox. It annotates and predicts the effects of variants on genes (such as amino acid changes). ",
-//				getOutputMetaData());
+		//				"Genetic variant annotation and effect prediction toolbox. It annotates and predicts the effects of variants on genes (such as amino acid changes). ",
+		//				getOutputMetaData());
 		private final JarRunner jarRunner;
 		private final AttributeMetaDataFactory attrMetaFactory;
 
@@ -204,8 +204,9 @@ public class SnpEffAnnotator
 				Iterator<Entity> it = source.iterator();
 				if (!it.hasNext()) return Iterators.emptyIterator();
 
-				List<String> params = Arrays.asList("-Xmx2g", getSnpEffPath(), "hg19", "-noStats", "-noLog", "-lof",
-						"-canon", "-ud", "0", "-spliceSiteSize", "5");
+				List<String> params = Arrays
+						.asList("-Xmx2g", getSnpEffPath(), "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud", "0",
+								"-spliceSiteSize", "5");
 				File outputVcf = jarRunner.runJar(NAME, params, inputVcf);
 				// When vcf reader/writer can handle samples and SnpEff annotations just return a VcfRepository (with
 				// inputVcf as input)
@@ -234,7 +235,8 @@ public class SnpEffAnnotator
 						Entity entity = it.next();
 						EntityMetaData meta = null; // FIXME new EntityMetaData(entity.getEntityMetaData());
 						info.getOutputAttributes().forEach(meta::addAttribute);
-						Entity copy = new MapEntity(entity, meta);
+						Entity copy = new DynamicEntity(meta);
+						copy.set(entity);
 						try
 						{
 							String line = readLine(reader);

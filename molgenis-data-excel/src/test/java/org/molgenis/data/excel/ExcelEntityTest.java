@@ -17,7 +17,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -116,7 +116,7 @@ public class ExcelEntityTest
 	@Test
 	public void setEntity()
 	{
-		Entity entity = new MapEntity();
+		Entity entity = new DynamicEntity(null); // // FIXME pass entity meta data instead of null
 		entity.set("attr1", "test1");
 		entity.set("attr2", "test2");
 

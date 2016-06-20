@@ -24,9 +24,10 @@ public class ScriptParameter extends StaticEntity
 		setName(name);
 	}
 
-	public void setName(String name)
+	public ScriptParameter setName(String name)
 	{
 		set(NAME, name);
+		return this;
 	}
 
 	public String getName()

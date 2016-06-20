@@ -20,7 +20,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -62,12 +62,12 @@ public class MolgenisResourceBundleControlTest
 	@Test
 	public void newBundle() throws IllegalAccessException, InstantiationException, IOException
 	{
-		Entity entity = new MapEntity();
+		Entity entity = new DynamicEntity(null); // // FIXME pass entity meta data instead of null
 		entity.set(I18nStringMetaData.MSGID, "test");
 		entity.set("en", "testen");
 		entity.set("nl", "testnl");
 
-		Entity entity1 = new MapEntity();
+		Entity entity1 = new DynamicEntity(null); // // FIXME pass entity meta data instead of null
 		entity1.set(I18nStringMetaData.MSGID, "testmissingnl");
 		entity1.set("en", "testen");
 

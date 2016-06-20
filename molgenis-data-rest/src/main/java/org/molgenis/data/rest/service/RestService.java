@@ -55,7 +55,7 @@ public class RestService
 	}
 
 	/**
-	 * Creates a new MapEntity based from a HttpServletRequest
+	 * Creates a new entity based from a HttpServletRequest
 	 * 
 	 * @param meta
 	 * @param request
