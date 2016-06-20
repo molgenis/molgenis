@@ -75,8 +75,6 @@ public class GavinAlgorithm
 			}
 		}
 
-		String mafReason = "the variant MAF of " + exacMAF + " is less than a MAF of "+ pathoMAFThreshold + ".";
-
 		// CADD score based classification, calibrated
 		if(caddScaled != null)
 		{
@@ -84,22 +82,22 @@ public class GavinAlgorithm
 			{
 				if(caddScaled > meanPathogenicCADDScore)
 				{
-					return new Judgment(Judgment.Classification.Pathogenic,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is greater than "+meanPathogenicCADDScore+" in a gene for which CADD scores are informative. Also, " + mafReason);
+					return new Judgment(Judgment.Classification.Pathogenic,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is greater than "+meanPathogenicCADDScore+" in a gene for which CADD scores are informative.");
 				}
 				else if(caddScaled < meanPopulationCADDScore)
 				{
-					return new Judgment(Judgment.Classification.Benign,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is less than "+meanPopulationCADDScore+" in a gene for which CADD scores are informative, although " + mafReason);
+					return new Judgment(Judgment.Classification.Benign,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is less than "+meanPopulationCADDScore+" in a gene for which CADD scores are informative.");
 				}
 			}
 			else if((category.equals(Category.C3) || category.equals(Category.C4) || category.equals(Category.C5)))
 			{
 				if(caddScaled > spec95thPerCADDThreshold)
 				{
-					return new Judgment(Judgment.Classification.Pathogenic,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is greater than "+spec95thPerCADDThreshold+" for this gene. Also, " + mafReason);
+					return new Judgment(Judgment.Classification.Pathogenic,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is greater than "+spec95thPerCADDThreshold+" for this gene.");
 				}
 				else if(caddScaled < sens95thPerCADDThreshold)
 				{
-					return new Judgment(Judgment.Classification.Benign,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is less than "+sens95thPerCADDThreshold+" for this gene, although " + mafReason);
+					return new Judgment(Judgment.Classification.Benign,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is less than "+sens95thPerCADDThreshold+" for this gene.");
 				}
 			}
 		}
@@ -109,6 +107,8 @@ public class GavinAlgorithm
 		{
 			return new Judgment(Judgment.Classification.Benign, Method.calibrated, gene, "Variant MAF of " + exacMAF + " is greater than "+pathoMAFThreshold+".");
 		}
+
+		String mafReason = "the variant MAF of " + exacMAF + " is less than a MAF of "+ pathoMAFThreshold + ".";
 
 		// Impact based classification, calibrated
 		if(impact != null)
@@ -160,7 +160,7 @@ public class GavinAlgorithm
 		{
 			if(caddScaled != null && caddScaled > GENOMEWIDE_CADD_THRESHOLD)
 			{
-				return new Judgment(Judgment.Classification.Pathogenic, Method.genomewide, gene, "Variant MAF of "+exacMAF+" is rare enough to be potentially pathogenic and the CADDscore of "+caddScaled+ " is greater than a global threshold of "+GENOMEWIDE_CADD_THRESHOLD+".");
+				return new Judgment(Judgment.Classification.Pathogenic, Method.genomewide, gene, "Variant MAF of "+exacMAF+" is rare enough to be potentially pathogenic and its CADD score of "+caddScaled+ " is greater than a global threshold of "+GENOMEWIDE_CADD_THRESHOLD+".");
 			}
 			else if(caddScaled != null && caddScaled <= GENOMEWIDE_CADD_THRESHOLD)
 			{
@@ -168,7 +168,7 @@ public class GavinAlgorithm
 			}
 			else
 			{
-				return new Judgment(Judgment.Classification.VOUS, Method.genomewide, gene, "Unable to classify variant as benign or pathogenic. The combination of "+impact+" impact, a CADD score "+caddScaled +" and MAF of " + exacMAF + " in " + gene + " is inconclusive.");
+				return new Judgment(Judgment.Classification.VOUS, Method.genomewide, gene, "Unable to classify variant as benign or pathogenic. The combination of "+impact+" impact, a CADD score of "+caddScaled +" and MAF of " + exacMAF + " in " + gene + " is inconclusive.");
 			}
 		}
 	}

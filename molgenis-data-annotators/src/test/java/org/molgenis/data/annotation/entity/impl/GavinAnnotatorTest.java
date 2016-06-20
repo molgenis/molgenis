@@ -121,7 +121,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		Entity expectedEntity = new MapEntity("expected");
 		expectedEntity.set(GavinAnnotator.CLASSIFICATION, "Benign");
 		expectedEntity.set(GavinAnnotator.CONFIDENCE, "genomewide");
-		expectedEntity.set(GavinAnnotator.REASON, "CADDscore of 1.0 is less than a global threshold of 15, although the variant MAF of 1.0E-5 is rare enough to be potentially pathogenic.");
+		expectedEntity.set(GavinAnnotator.REASON, "Variant CADD score of 1.0 is less than a global threshold of 15, although the variant MAF of 1.0E-5 is rare enough to be potentially pathogenic.");
 
 		assertEquals(resultEntity.get(GavinAnnotator.CLASSIFICATION),
 				expectedEntity.get(GavinAnnotator.CLASSIFICATION));
@@ -154,7 +154,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedEntity.set(GavinAnnotator.CLASSIFICATION, "VOUS");
 		expectedEntity.set(GavinAnnotator.CONFIDENCE, "genomewide");
 		expectedEntity.set(GavinAnnotator.REASON,
-				"Unable to classify variant as benign or pathogenic. The combination of HIGH impact, a CADD score null and MAF of 1.0E-5 in TFR2 is inconclusive.");
+				"Unable to classify variant as benign or pathogenic. The combination of HIGH impact, a CADD score of null and MAF of 1.0E-5 in TFR2 is inconclusive.");
 
 		assertEquals(resultEntity.get(GavinAnnotator.CLASSIFICATION),
 				expectedEntity.get(GavinAnnotator.CLASSIFICATION));
@@ -187,7 +187,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedEntity.set(GavinAnnotator.CLASSIFICATION, "Benign");
 		expectedEntity.set(GavinAnnotator.CONFIDENCE, "calibrated");
 		expectedEntity.set(GavinAnnotator.REASON,
-				"Variant CADD score of 6.0 is less than 30.35 for this gene, although the variant MAF of 1.0E-5 is less than a MAF of 0.0019269599999999954.");
+				"Variant CADD score of 6.0 is less than 30.35 for this gene.");
 
 		assertEquals(resultEntity.get(GavinAnnotator.CLASSIFICATION),
 				expectedEntity.get(GavinAnnotator.CLASSIFICATION));
@@ -219,7 +219,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedEntity.set(GavinAnnotator.CLASSIFICATION, "Pathogenic");
 		expectedEntity.set(GavinAnnotator.CONFIDENCE, "calibrated");
 		expectedEntity.set(GavinAnnotator.REASON,
-				"Variant CADD score of 80.0 is greater than 30.35 for this gene. Also, the variant MAF of 1.0E-5 is less than a MAF of 0.0019269599999999954.");
+				"Variant CADD score of 80.0 is greater than 30.35 for this gene.");
 
 		assertEquals(resultEntity.get(GavinAnnotator.CLASSIFICATION),
 				expectedEntity.get(GavinAnnotator.CLASSIFICATION));
