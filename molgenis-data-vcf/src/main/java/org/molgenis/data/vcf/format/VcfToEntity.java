@@ -105,11 +105,10 @@ public class VcfToEntity
 
 	private EntityMetaData createEntityMetaData(String entityName, VcfMeta vcfMeta)
 	{
+		// FIXME do not use application context
 		EntityMetaDataFactory entityMetaFactory = getApplicationContext().getBean(EntityMetaDataFactory.class);
 		AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
-
-		VcfAttributes vcfAttributes = getApplicationContext()
-				.getBean(VcfAttributes.class); // FIXME do not use application context
+		VcfAttributes vcfAttributes = getApplicationContext().getBean(VcfAttributes.class);
 
 		EntityMetaData entityMetaData = entityMetaFactory.create().setSimpleName(entityName);
 		entityMetaData.addAttribute(vcfAttributes.getChromAttribute());

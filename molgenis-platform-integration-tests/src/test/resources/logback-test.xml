@@ -7,7 +7,7 @@
     <appender name="jobExecutionLogAppender" class="org.molgenis.data.jobs.JobExecutionLogAppender"/>
     <logger name="org.molgenis" level="INFO"/>
     <root level="WARN">
-        <appender-ref ref="STDOUT" />
+        <appender-ref ref="STDOUT"/>
     </root>
     <logger name="org.molgenis.data.jobs.JobExecution" level="ALL">
         <appender-ref ref="jobExecutionLogAppender"/>

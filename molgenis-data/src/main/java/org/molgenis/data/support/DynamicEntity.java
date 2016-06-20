@@ -281,7 +281,7 @@ public class DynamicEntity implements Entity
 				{
 					throw new MolgenisDataException(
 							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
-									value.getClass().getSimpleName(), Double.class.getSimpleName()));
+									value.getClass().getSimpleName(), Integer.class.getSimpleName()));
 				}
 				break;
 			case LONG:
@@ -289,7 +289,7 @@ public class DynamicEntity implements Entity
 				{
 					throw new MolgenisDataException(
 							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
-									value.getClass().getSimpleName(), Double.class.getSimpleName()));
+									value.getClass().getSimpleName(), Long.class.getSimpleName()));
 				}
 				break;
 			default:

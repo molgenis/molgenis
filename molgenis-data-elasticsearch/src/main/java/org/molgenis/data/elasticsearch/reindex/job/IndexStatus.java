@@ -1,10 +1,7 @@
 package org.molgenis.data.elasticsearch.reindex.job;
 
-import com.google.common.util.concurrent.AtomicLongMap;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.stream.Collectors.toSet;
+import static java.util.stream.StreamSupport.stream;
 
 import java.util.Map;
 import java.util.Set;
@@ -12,8 +9,12 @@ import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import static java.util.stream.Collectors.toSet;
-import static java.util.stream.StreamSupport.stream;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.util.concurrent.AtomicLongMap;
 
 /**
  * Keeps track of outstanding index actions.
