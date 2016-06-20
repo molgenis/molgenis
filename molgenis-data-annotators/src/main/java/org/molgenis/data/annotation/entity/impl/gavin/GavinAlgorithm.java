@@ -118,19 +118,19 @@ public class GavinAlgorithm
 		// Impact based classification, calibrated
 		if(impact != null)
 		{
-			if(category.equals(Category.I1) && impact.equals(Impact.HIGH))
+			if(category == Category.I1 && impact == Impact.HIGH)
 			{
 				return new Judgment(Judgment.Classification.Pathogenic,  Method.calibrated, gene, "Variant is of high impact, while there are no known high impact variants in the population. Also, " + mafReason);
 			}
-			else if(category.equals(Category.I2) && (impact.equals(Impact.MODERATE) || impact.equals(Impact.HIGH)))
+			else if(category == Category.I2 && (impact == Impact.MODERATE || impact == Impact.HIGH))
 			{
 				return new Judgment(Judgment.Classification.Pathogenic,  Method.calibrated, gene, "Variant is of high/moderate impact, while there are no known high/moderate impact variants in the population. Also, " + mafReason);
 			}
-			else if(category.equals(Category.I3) && (impact.equals(Impact.LOW) || impact.equals(Impact.MODERATE) || impact.equals(Impact.HIGH)))
+			else if(category == Category.I3 && (impact == Impact.LOW || impact == Impact.MODERATE || impact == Impact.HIGH))
 			{
 				return new Judgment(Judgment.Classification.Pathogenic,  Method.calibrated, gene, "Variant is of high/moderate/low impact, while there are no known high/moderate/low impact variants in the population. Also, " + mafReason);
 			}
-			else if(impact.equals(Impact.MODIFIER))
+			else if(impact == Impact.MODIFIER)
 			{
 				return new Judgment(Judgment.Classification.Benign,  Method.calibrated, gene, "Variant is of 'modifier' impact, and therefore unlikely to be pathogenic. However, " + mafReason);
 			}
@@ -157,7 +157,7 @@ public class GavinAlgorithm
 		{
 			return new Judgment(Judgment.Classification.Benign, Method.genomewide, gene, "Variant MAF of "+exacMAF+" is not rare enough to generally be considered pathogenic.");
 		}
-		if(impact.equals(Impact.MODIFIER))
+		if(impact == Impact.MODIFIER)
 		{
 			return new Judgment(Judgment.Classification.Benign, Method.genomewide, gene, "Variant is of 'modifier' impact, and therefore unlikely to be pathogenic.");
 		}
