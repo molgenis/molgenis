@@ -10,7 +10,7 @@ import java.util.Iterator;
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.DynamicEntity;
 
 public class AbstractMrefDatatypeIT extends AbstractDatatypeIT
 {
@@ -41,16 +41,16 @@ public class AbstractMrefDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public void populateTestEntity(Entity entity) throws Exception
 	{
-		Entity refEntity = new DefaultEntity(refEntityMetaData, dataService);
+		Entity refEntity = new DynamicEntity(refEntityMetaData);
 		refEntity.set("identifier", "ref");
 		refEntity.set("label", "refLabel");
 		dataService.add("StringTarget", refEntity);
 
-		Entity refEntity21 = new DefaultEntity(refEntity2MetaData, dataService);
+		Entity refEntity21 = new DynamicEntity(refEntity2MetaData);
 		refEntity21.set("identifier", 1);
 		dataService.add("IntTarget", refEntity21);
 
-		Entity refEntity22 = new DefaultEntity(refEntity2MetaData, dataService);
+		Entity refEntity22 = new DynamicEntity(refEntity2MetaData);
 		refEntity22.set("identifier", 2);
 		dataService.add("IntTarget", refEntity22);
 

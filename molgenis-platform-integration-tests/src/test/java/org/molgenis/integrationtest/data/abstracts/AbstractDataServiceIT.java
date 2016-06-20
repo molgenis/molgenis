@@ -29,7 +29,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -63,22 +63,22 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	private static final String ATTR_MREF = "mref_attr";
 	private static final String ATTR_REF_ID = "ref_id_attr";
 	private static final String ATTR_REF_STRING = "ref_string_attr";
-	private DefaultEntity entity1;
-	private DefaultEntity entity2;
-	private DefaultEntity entity3;
-	private DefaultEntity entity4;
-	private DefaultEntity entity5;
-	private DefaultEntity entity6;
-	private DefaultEntity entity7;
-	private DefaultEntity entity8;
-	private DefaultEntity entity9;
-	private DefaultEntity entity10;
-	private DefaultEntity refEntity1;
-	private DefaultEntity refEntity2;
-	private DefaultEntity refEntity3;
-	private DefaultEntity refEntity4;
-	private DefaultEntity refEntity5;
-	private DefaultEntity refEntity6;
+	private Entity entity1;
+	private Entity entity2;
+	private Entity entity3;
+	private Entity entity4;
+	private Entity entity5;
+	private Entity entity6;
+	private Entity entity7;
+	private Entity entity8;
+	private Entity entity9;
+	private Entity entity10;
+	private Entity refEntity1;
+	private Entity refEntity2;
+	private Entity refEntity3;
+	private Entity refEntity4;
+	private Entity refEntity5;
+	private Entity refEntity6;
 
 	@BeforeClass
 	public void setUp()
@@ -506,28 +506,28 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 
 	private Entity create()
 	{
-		return new DefaultEntity(entityMetaData, dataService);
+		return new DynamicEntity(entityMetaData);
 	}
 
 	private List<Entity> createTestRefEntities()
 	{
 		List<Entity> entities = new ArrayList<>();
-		refEntity1 = new DefaultEntity(refEntityMetaData, dataService);
+		refEntity1 = new DynamicEntity(refEntityMetaData);
 		refEntity1.set(ATTR_REF_ID, "1");
 		refEntity1.set(ATTR_REF_STRING, "refstring1");
-		refEntity2 = new DefaultEntity(refEntityMetaData, dataService);
+		refEntity2 = new DynamicEntity(refEntityMetaData);
 		refEntity2.set(ATTR_REF_ID, "2");
 		refEntity2.set(ATTR_REF_STRING, "refstring2");
-		refEntity3 = new DefaultEntity(refEntityMetaData, dataService);
+		refEntity3 = new DynamicEntity(refEntityMetaData);
 		refEntity3.set(ATTR_REF_ID, "3");
 		refEntity3.set(ATTR_REF_STRING, "refstring3");
-		refEntity4 = new DefaultEntity(refEntityMetaData, dataService);
+		refEntity4 = new DynamicEntity(refEntityMetaData);
 		refEntity4.set(ATTR_REF_ID, "4");
 		refEntity4.set(ATTR_REF_STRING, "refstring4");
-		refEntity5 = new DefaultEntity(refEntityMetaData, dataService);
+		refEntity5 = new DynamicEntity(refEntityMetaData);
 		refEntity5.set(ATTR_REF_ID, "5");
 		refEntity5.set(ATTR_REF_STRING, "refstring5");
-		refEntity6 = new DefaultEntity(refEntityMetaData, dataService);
+		refEntity6 = new DynamicEntity(refEntityMetaData);
 		refEntity6.set(ATTR_REF_ID, "6");
 		refEntity6.set(ATTR_REF_STRING, "refstring6");
 
@@ -539,7 +539,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 	private List<Entity> createTestEntities()
 	{
 		List<Entity> entities = new ArrayList<>();
-		entity1 = new DefaultEntity(entityMetaData, dataService);
+		entity1 = new DynamicEntity(entityMetaData);
 		entity1.set(ATTR_STRING, "string1");
 		entity1.set(ATTR_BOOL, true);
 		entity1.set(ATTR_CATEGORICAL, "1");
@@ -556,7 +556,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		entity1.set(ATTR_XREF, "1");
 		entity1.set(ATTR_MREF, "1");
 
-		entity2 = new DefaultEntity(entityMetaData, dataService);
+		entity2 = new DynamicEntity(entityMetaData);
 		entity2.set(ATTR_STRING, "string1");
 		entity2.set(ATTR_BOOL, true);
 		entity2.set(ATTR_CATEGORICAL, "1");
@@ -573,7 +573,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		entity2.set(ATTR_XREF, "1");
 		entity2.set(ATTR_MREF, "1");
 
-		entity3 = new DefaultEntity(entityMetaData, dataService);
+		entity3 = new DynamicEntity(entityMetaData);
 		entity3.set(ATTR_STRING, "string1");
 		entity3.set(ATTR_BOOL, true);
 		entity3.set(ATTR_CATEGORICAL, "1");
@@ -590,7 +590,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		entity3.set(ATTR_XREF, "1");
 		entity3.set(ATTR_MREF, "1");
 
-		entity4 = new DefaultEntity(entityMetaData, dataService);
+		entity4 = new DynamicEntity(entityMetaData);
 		entity4.set(ATTR_STRING, "string1");
 		entity4.set(ATTR_BOOL, true);
 		entity4.set(ATTR_CATEGORICAL, "1");
@@ -607,7 +607,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		entity4.set(ATTR_XREF, "1");
 		entity4.set(ATTR_MREF, "1");
 
-		entity5 = new DefaultEntity(entityMetaData, dataService);
+		entity5 = new DynamicEntity(entityMetaData);
 		entity5.set(ATTR_STRING, "string1");
 		entity5.set(ATTR_BOOL, true);
 		entity5.set(ATTR_CATEGORICAL, "1");
@@ -624,7 +624,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		entity5.set(ATTR_XREF, "1");
 		entity5.set(ATTR_MREF, "1");
 
-		entity6 = new DefaultEntity(entityMetaData, dataService);
+		entity6 = new DynamicEntity(entityMetaData);
 		entity6.set(ATTR_STRING, "string1");
 		entity6.set(ATTR_BOOL, true);
 		entity6.set(ATTR_CATEGORICAL, "1");
@@ -641,7 +641,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		entity6.set(ATTR_XREF, "1");
 		entity6.set(ATTR_MREF, "1");
 
-		entity7 = new DefaultEntity(entityMetaData, dataService);
+		entity7 = new DynamicEntity(entityMetaData);
 		entity7.set(ATTR_STRING, "string1");
 		entity7.set(ATTR_BOOL, true);
 		entity7.set(ATTR_CATEGORICAL, "1");
@@ -658,7 +658,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		entity7.set(ATTR_XREF, "1");
 		entity7.set(ATTR_MREF, "1");
 
-		entity8 = new DefaultEntity(entityMetaData, dataService);
+		entity8 = new DynamicEntity(entityMetaData);
 		entity8.set(ATTR_STRING, "string1");
 		entity8.set(ATTR_BOOL, true);
 		entity8.set(ATTR_CATEGORICAL, "1");
@@ -675,7 +675,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		entity8.set(ATTR_XREF, "1");
 		entity8.set(ATTR_MREF, "1");
 
-		entity9 = new DefaultEntity(entityMetaData, dataService);
+		entity9 = new DynamicEntity(entityMetaData);
 		entity9.set(ATTR_STRING, "string1");
 		entity9.set(ATTR_BOOL, true);
 		entity9.set(ATTR_CATEGORICAL, "1");
@@ -692,7 +692,7 @@ public abstract class AbstractDataServiceIT extends AbstractDataIntegrationIT
 		entity9.set(ATTR_XREF, "1");
 		entity9.set(ATTR_MREF, "1");
 
-		entity10 = new DefaultEntity(entityMetaData, dataService);
+		entity10 = new DynamicEntity(entityMetaData);
 		entity10.set(ATTR_STRING, "string1");
 		entity10.set(ATTR_BOOL, true);
 		entity10.set(ATTR_CATEGORICAL, "1");

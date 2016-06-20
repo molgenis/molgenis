@@ -1,6 +1,7 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
 import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
@@ -27,6 +28,7 @@ import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.meta.PackageMetaData;
+import org.molgenis.data.meta.Tag;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
@@ -34,7 +36,6 @@ import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.semantic.OntologyTag;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -65,11 +66,11 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	public OntologyTagServiceImpl(DataService dataService, OntologyService ontologyService, TagRepository tagRepository,
 			IdGenerator idGenerator, TagMetaData tagMetaData)
 	{
-		this.dataService = dataService;
-		this.tagRepository = tagRepository;
-		this.ontologyService = ontologyService;
-		this.idGenerator = idGenerator;
-		this.tagMetaData = tagMetaData;
+		this.dataService = requireNonNull(dataService);
+		this.tagRepository = requireNonNull(tagRepository);
+		this.ontologyService = requireNonNull(ontologyService);
+		this.idGenerator = requireNonNull(idGenerator);
+		this.tagMetaData = requireNonNull(tagMetaData);
 	}
 
 	@Override
@@ -107,7 +108,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	public Multimap<Relation, OntologyTerm> getTagsForAttribute(EntityMetaData entityMetaData,
 			AttributeMetaData attributeMetaData)
 	{
-		Multimap<Relation, OntologyTerm> tags = LinkedHashMultimap.<Relation, OntologyTerm> create();
+		Multimap<Relation, OntologyTerm> tags = LinkedHashMultimap.<Relation, OntologyTerm>create();
 		Entity entity = findAttributeEntity(entityMetaData.getName(), attributeMetaData.getName());
 		if (entity == null)
 		{
@@ -125,8 +126,8 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	@Override
 	public Iterable<SemanticTag<Package, OntologyTerm, Ontology>> getTagsForPackage(Package p)
 	{
-		Entity packageEntity = dataService.findOne(PACKAGE,
-				new QueryImpl<Entity>().eq(PackageMetaData.FULL_NAME, p.getName()));
+		Entity packageEntity = dataService
+				.findOne(PACKAGE, new QueryImpl<Entity>().eq(PackageMetaData.FULL_NAME, p.getName()));
 
 		if (packageEntity == null)
 		{
@@ -163,26 +164,26 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	{
 		boolean added = false;
 		Entity attributeEntity = findAttributeEntity(entity, attribute);
-		Entity tagEntity = new DefaultEntity(tagMetaData, dataService);
+		Tag tag = new Tag(tagMetaData);
 		Stream<OntologyTerm> terms = ontologyTermIRIs.stream().map(ontologyService::getOntologyTerm);
 		OntologyTerm combinedOntologyTerm = OntologyTerm.and(terms.toArray(OntologyTerm[]::new));
 		Relation relation = Relation.forIRI(relationIRI);
-		tagEntity.set(TagMetaData.IDENTIFIER, idGenerator.generateId());
-		tagEntity.set(TagMetaData.CODE_SYSTEM, null);
-		tagEntity.set(TagMetaData.RELATION_IRI, relation.getIRI());
-		tagEntity.set(TagMetaData.RELATION_LABEL, relation.getLabel());
-		tagEntity.set(TagMetaData.LABEL, combinedOntologyTerm.getLabel());
-		tagEntity.set(TagMetaData.OBJECT_IRI, combinedOntologyTerm.getIRI());
-		dataService.add(TAG, tagEntity);
+		tag.setIdentifier(idGenerator.generateId());
+		tag.setCodeSystem(null);
+		tag.setRelationIri(relation.getIRI());
+		tag.setRelationLabel(relation.getLabel());
+		tag.setLabel(combinedOntologyTerm.getLabel());
+		tag.setObjectIri(combinedOntologyTerm.getIRI());
+		dataService.add(TAG, tag);
 
-		Map<String, Entity> tags = Maps.<String, Entity> newHashMap();
-		for (Entity tag : attributeEntity.getEntities(AttributeMetaDataMetaData.TAGS))
+		Map<String, Entity> tags = Maps.<String, Entity>newHashMap();
+		for (Entity attrTag : attributeEntity.getEntities(AttributeMetaDataMetaData.TAGS))
+		{
+			tags.put(attrTag.get(TagMetaData.OBJECT_IRI).toString(), attrTag);
+		}
+		if (!tags.containsKey(tag.get(TagMetaData.OBJECT_IRI).toString()))
 		{
 			tags.put(tag.get(TagMetaData.OBJECT_IRI).toString(), tag);
-		}
-		if (!tags.containsKey(tagEntity.get(TagMetaData.OBJECT_IRI).toString()))
-		{
-			tags.put(tagEntity.get(TagMetaData.OBJECT_IRI).toString(), tagEntity);
 			added = true;
 		}
 		attributeEntity.set(AttributeMetaDataMetaData.TAGS, tags.values());
@@ -193,8 +194,8 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 	public Entity getTagEntity(SemanticTag<?, OntologyTerm, Ontology> tag)
 	{
-		return tagRepository.getTagEntity(tag.getObject().getIRI(), tag.getObject().getLabel(), tag.getRelation(), tag
-				.getCodeSystem().getIRI());
+		return tagRepository.getTagEntity(tag.getObject().getIRI(), tag.getObject().getLabel(), tag.getRelation(),
+				tag.getCodeSystem().getIRI());
 	}
 
 	@Override
@@ -252,13 +253,10 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	/**
 	 * The attribute just got updated, but the entity does not know this yet. To reindex this document in elasticsearch,
 	 * update it.
-	 * 
-	 * @param entity
-	 *            name of the entity
-	 * @param attribute
-	 *            the name of the attribute that got changed
-	 * @param attributeEntity
-	 *            the entity of the attribute that got changed
+	 *
+	 * @param entity          name of the entity
+	 * @param attribute       the name of the attribute that got changed
+	 * @param attributeEntity the entity of the attribute that got changed
 	 */
 	private void updateEntityMetaDataEntityWithNewAttributeEntity(String entity, String attribute,
 			Entity attributeEntity)
@@ -272,16 +270,16 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 	private boolean isSameTag(String relationIRI, String ontologyTermIRI, Entity e)
 	{
-		return ontologyTermIRI.equals(e.getString(TagMetaData.OBJECT_IRI))
-				&& relationIRI.equals(e.getString(TagMetaData.RELATION_IRI));
+		return ontologyTermIRI.equals(e.getString(TagMetaData.OBJECT_IRI)) && relationIRI
+				.equals(e.getString(TagMetaData.RELATION_IRI));
 	}
 
 	@RunAsSystem
 	private Entity findAttributeEntity(String entityName, String attributeName)
 	{
 		Entity entityMetaDataEntity = dataService.findOneById(ENTITY_META_DATA, entityName);
-		Optional<Entity> result = stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false).filter(
-				att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst();
+		Optional<Entity> result = stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false)
+				.filter(att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst();
 
 		if (!result.isPresent() && entityMetaDataEntity.get(EntityMetaDataMetaData.EXTENDS) != null)
 		{

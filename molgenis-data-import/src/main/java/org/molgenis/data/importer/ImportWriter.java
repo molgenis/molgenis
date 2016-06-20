@@ -20,7 +20,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -40,11 +39,11 @@ import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.Package;
+import org.molgenis.data.meta.Tag;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.EntityMetaDataUtils;
 import org.molgenis.data.support.LazyEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -346,7 +345,8 @@ public class ImportWriter
 		{
 			for (Entity tag : tagRepo)
 			{
-				Entity transformed = new DefaultEntity(tagMetaData, dataService, tag);
+				Tag transformed = new Tag(tagMetaData);
+				transformed.set(tag);
 				Entity existingTag = dataService.findOneById(TAG, tag.getString(TagMetaData.IDENTIFIER));
 
 				if (existingTag == null)
@@ -822,8 +822,7 @@ public class ImportWriter
 		}
 
 		/**
-		 * Similar to {@link org.molgenis.data.support.DefaultEntity#getEntity(String)} but returns lazy references if
-		 * the decorated entity doesn't have self-references improving import performance.
+		 * Returns lazy references if the decorated entity doesn't have self-references improving import performance.
 		 *
 		 * @param attributeName
 		 * @return
@@ -837,9 +836,6 @@ public class ImportWriter
 			// value represents the id of the referenced entity
 			AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
 			if (attribute == null) throw new UnknownAttributeException(attributeName);
-
-			if (value instanceof Map)
-				return new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) value);
 
 			FieldType dataType = attribute.getDataType();
 			if (!(dataType instanceof XrefField))
@@ -900,8 +896,7 @@ public class ImportWriter
 		}
 
 		/**
-		 * Similar to {@link org.molgenis.data.support.DefaultEntity#getEntities(String)} but returns lazy references if
-		 * the decorated entity doesn't have self-references improving import performance.
+		 * Returns lazy references if the decorated entity doesn't have self-references improving import performance.
 		 *
 		 * @param attributeName
 		 * @return
@@ -940,12 +935,6 @@ public class ImportWriter
 			Object firstItem = ids.iterator().next();
 			if (firstItem instanceof Entity) return (Iterable<Entity>) ids;
 
-			if (firstItem instanceof Map)
-			{
-				return stream(ids.spliterator(), false)
-						.map(id -> new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) id))
-						.collect(Collectors.toList());
-			}
 			if (selfReferencing)
 			{
 				return from(ids).transform(dataType::convert).transform(

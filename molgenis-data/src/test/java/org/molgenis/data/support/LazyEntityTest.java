@@ -73,7 +73,7 @@ public class LazyEntityTest
 	@Test
 	public void getAttributeNames()
 	{
-		DefaultEntity entity = new DefaultEntity(entityMeta, dataService);
+		Entity entity = new DynamicEntity(entityMeta);
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1").getMock();
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(attr0, attr1));

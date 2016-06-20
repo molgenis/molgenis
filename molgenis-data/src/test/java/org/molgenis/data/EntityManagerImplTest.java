@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -105,8 +105,8 @@ public class EntityManagerImplTest
 	{
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
 
-		Entity entity0 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called
-		Entity entity1 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called
+		Entity entity0 = new DynamicEntity(entityMeta); // do not mock, setters will be called
+		Entity entity1 = new DynamicEntity(entityMeta); // do not mock, setters will be called
 		Stream<Entity> entities = Stream.of(entity0, entity1);
 
 		Fetch fetch = null;
@@ -119,8 +119,8 @@ public class EntityManagerImplTest
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
 		AttributeMetaData labelAttr = mock(AttributeMetaData.class);
 		when(entityMeta.getLabelAttribute()).thenReturn(labelAttr);
-		Entity entity0 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called
-		Entity entity1 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called
+		Entity entity0 = new DynamicEntity(entityMeta); // do not mock, setters will be called
+		Entity entity1 = new DynamicEntity(entityMeta); // do not mock, setters will be called
 
 		Fetch fetch = null;
 		Stream<Entity> entities = entityManagerImpl.resolveReferences(entityMeta, Stream.of(entity0, entity1), fetch);
