@@ -1,26 +1,32 @@
 package org.molgenis.file;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultEntity;
+import static org.molgenis.file.FileMetaMetaData.CONTENT_TYPE;
+import static org.molgenis.file.FileMetaMetaData.FILENAME;
+import static org.molgenis.file.FileMetaMetaData.ID;
+import static org.molgenis.file.FileMetaMetaData.SIZE;
+import static org.molgenis.file.FileMetaMetaData.URL;
+
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.OwnedEntityMetaData;
+import org.molgenis.data.support.StaticEntity;
 
-public class FileMeta extends DefaultEntity
+public class FileMeta extends StaticEntity
 {
-	private static final long serialVersionUID = 1L;
-
-	public static final String ENTITY_NAME = "FileMeta";
-	public static final EntityMetaData META_DATA = new FileMetaMetaData();
-
-	public static final String ID = "id";
-	public static final String FILENAME = "filename";
-	public static final String CONTENT_TYPE = "contentType";
-	public static final String SIZE = "size";
-	public static final String URL = "url";
-
-	public FileMeta(DataService dataService)
+	public FileMeta(Entity entity)
 	{
-		super(META_DATA, dataService);
+		super(entity);
+	}
+
+	public FileMeta(EntityMetaData entityMeta)
+	{
+		super(entityMeta);
+	}
+
+	public FileMeta(String id, EntityMetaData entityMeta)
+	{
+		super(entityMeta);
+		setId(id);
 	}
 
 	public String getId()
@@ -76,17 +82,5 @@ public class FileMeta extends DefaultEntity
 	public String getOwnerUsername()
 	{
 		return getString(OwnedEntityMetaData.ATTR_OWNER_USERNAME);
-	}
-
-	@Override
-	public String getIdValue()
-	{
-		return getString(ID);
-	}
-
-	@Override
-	public EntityMetaData getEntityMetaData()
-	{
-		return META_DATA;
 	}
 }

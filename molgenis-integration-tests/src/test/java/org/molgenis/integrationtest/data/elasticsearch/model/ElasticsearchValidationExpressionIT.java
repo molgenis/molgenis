@@ -1,6 +1,6 @@
 package org.molgenis.integrationtest.data.elasticsearch.model;
 
-import org.molgenis.integrationtest.data.abstracts.model.AbstractValidationExpressionIT;
+import org.molgenis.integrationtest.data.AbstractValidationExpressionIT;
 import org.molgenis.integrationtest.data.elasticsearch.AbstractElasticsearchTestConfig;
 import org.molgenis.integrationtest.data.elasticsearch.model.ElasticsearchValidationExpressionIT.ValidationExpressionElasticsearchTestConfig;
 import org.springframework.context.annotation.Configuration;

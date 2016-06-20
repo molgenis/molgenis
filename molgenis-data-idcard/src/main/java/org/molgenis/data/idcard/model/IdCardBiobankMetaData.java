@@ -1,55 +1,94 @@
 package org.molgenis.data.idcard.model;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.DATETIME;
-import static org.molgenis.MolgenisFieldTypes.EMAIL;
 import static org.molgenis.MolgenisFieldTypes.HYPERLINK;
 import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.idcard.model.IdCardPackage.PACKAGE_ID_CARD;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.idcard.IdCardRepositoryCollection;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class IdCardBiobankMetaData extends DefaultEntityMetaData
+public class IdCardBiobankMetaData extends SystemEntityMetaData
 {
-	public IdCardBiobankMetaData()
+	private static final String SIMPLE_NAME = "rdconnect_regbb";
+	public static final String ID_CARD_BIOBANK = PACKAGE_ID_CARD + PACKAGE_SEPARATOR + SIMPLE_NAME;
+
+	public static final String ORGANIZATION_ID = "OrganizationID";
+	public static final String TYPE = "type";
+	public static final String ALSO_LISTED_IN = "also_listed_in";
+	public static final String URL = "url";
+	public static final String SALUTATION = "title";
+	public static final String FIRST_NAME = "first_name";
+	public static final String EMAIL = "email";
+	public static final String LAST_NAME = "last_name";
+	public static final String PHONE = "phone";
+	public static final String LAST_ACTIVITIES = "last_activities";
+	public static final String DATE_OF_INCLUSION = "date_of_inclusion";
+	public static final String STREET2 = "street2";
+	public static final String NAME_OF_HOST_INSTITUTION = "name_of_host_institution";
+	public static final String ZIP = "zip";
+	public static final String STREET1 = "street1";
+	public static final String COUNTRY = "country";
+	public static final String CITY = "city";
+	public static final String NAME = "name";
+	public static final String ID = "ID";
+	public static final String TYPE_OF_HOST_INSTITUTION = "type_of_host_institution";
+	public static final String TARGET_POPULATION = "target_population";
+
+	private final IdCardPackage idCardPackage;
+
+	@Autowired
+	IdCardBiobankMetaData(IdCardPackage idCardPackage)
 	{
-		super(IdCardBiobank.ENTITY_NAME, IdCardBiobank.class);
+		super(SIMPLE_NAME, PACKAGE_ID_CARD);
+		this.idCardPackage = requireNonNull(idCardPackage);
+	}
+
+	@Override
+	public void init()
+	{
+		setPackage(idCardPackage);
+
 		setBackend(IdCardRepositoryCollection.NAME);
 		setLabel("Biobank/Registry");
 		setDescription("Biobank/Registry data from ID-Card");
 
-		addAttribute(IdCardBiobank.NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name");
-		addAttribute(IdCardBiobank.TYPE, ROLE_LOOKUP).setLabel("Type").setAggregateable(true);
-		addAttribute(IdCardBiobank.TARGET_POPULATION).setLabel("Target population").setAggregateable(true);
-		addAttribute(IdCardBiobank.URL).setLabel("Website").setDataType(HYPERLINK);
-		addAttribute(IdCardBiobank.ID).setLabel("ID-Card").setDataType(HYPERLINK);
-		addAttribute(IdCardBiobank.ALSO_LISTED_IN).setLabel("also listed in").setDataType(TEXT).setVisible(false);
+		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name");
+		addAttribute(TYPE, ROLE_LOOKUP).setLabel("Type").setAggregatable(true);
+		addAttribute(TARGET_POPULATION).setLabel("Target population").setAggregatable(true);
+		addAttribute(URL).setLabel("Website").setDataType(HYPERLINK);
+		addAttribute(ID).setLabel("ID-Card").setDataType(HYPERLINK);
+		addAttribute(ALSO_LISTED_IN).setLabel("also listed in").setDataType(TEXT).setVisible(false);
 
-		addAttribute(IdCardBiobank.LAST_ACTIVITIES).setLabel("Last activities").setDataType(DATETIME);
-		addAttribute(IdCardBiobank.DATE_OF_INCLUSION).setLabel("Date of inclusion").setDataType(DATETIME);
+		addAttribute(LAST_ACTIVITIES).setLabel("Last activities").setDataType(DATETIME);
+		addAttribute(DATE_OF_INCLUSION).setLabel("Date of inclusion").setDataType(DATETIME);
 
-		addAttribute(IdCardBiobank.NAME_OF_HOST_INSTITUTION).setLabel("Host institution");
-		addAttribute(IdCardBiobank.TYPE_OF_HOST_INSTITUTION).setLabel("Type of host institution")
-				.setAggregateable(true);
+		addAttribute(NAME_OF_HOST_INSTITUTION).setLabel("Host institution");
+		addAttribute(TYPE_OF_HOST_INSTITUTION).setLabel("Type of host institution").setAggregatable(true);
 		// The salutation for the administrator in ID-Card. This is not relevant data to display in the catalogue.
-		addAttribute(IdCardBiobank.SALUTATION).setLabel("Salutation").setDataType(STRING).setVisible(false);
-		addAttribute(IdCardBiobank.FIRST_NAME).setLabel("First name").setDataType(STRING);
-		addAttribute(IdCardBiobank.LAST_NAME).setLabel("Last name").setDataType(STRING);
-		addAttribute(IdCardBiobank.EMAIL).setLabel("e-mail address").setDataType(EMAIL);
-		addAttribute(IdCardBiobank.PHONE).setLabel("Phone").setDataType(STRING);
-		addAttribute(IdCardBiobank.STREET1).setLabel("Address").setDataType(STRING);
-		addAttribute(IdCardBiobank.STREET2).setLabel("Address (cont.)").setDataType(STRING);
-		addAttribute(IdCardBiobank.ZIP).setLabel("Postal code").setDataType(STRING);
-		addAttribute(IdCardBiobank.CITY).setLabel("City");
-		addAttribute(IdCardBiobank.COUNTRY).setLabel("Country");
+		addAttribute(SALUTATION).setLabel("Salutation").setDataType(STRING).setVisible(false);
+		addAttribute(FIRST_NAME).setLabel("First name").setDataType(STRING);
+		addAttribute(LAST_NAME).setLabel("Last name").setDataType(STRING);
+		addAttribute(EMAIL).setLabel("e-mail address").setDataType(MolgenisFieldTypes.EMAIL);
+		addAttribute(PHONE).setLabel("Phone").setDataType(STRING);
+		addAttribute(STREET1).setLabel("Address").setDataType(STRING);
+		addAttribute(STREET2).setLabel("Address (cont.)").setDataType(STRING);
+		addAttribute(ZIP).setLabel("Postal code").setDataType(STRING);
+		addAttribute(CITY).setLabel("City");
+		addAttribute(COUNTRY).setLabel("Country");
 
-		addAttribute(IdCardBiobank.ORGANIZATION_ID, ROLE_ID).setLabel("OrganizationID").setDataType(INT)
+		addAttribute(ORGANIZATION_ID, ROLE_ID).setLabel("OrganizationID").setDataType(INT)
 				.setVisible(false);
 	}
 }

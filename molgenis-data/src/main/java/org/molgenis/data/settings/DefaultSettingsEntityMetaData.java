@@ -1,21 +1,18 @@
 package org.molgenis.data.settings;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
+import static org.molgenis.util.EntityUtils.getTypedValue;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.core.Ordered;
-import org.springframework.transaction.annotation.Transactional;
 
-public abstract class DefaultSettingsEntityMetaData extends DefaultEntityMetaData
-		implements ApplicationListener<ContextRefreshedEvent>, Ordered
+public abstract class DefaultSettingsEntityMetaData extends SystemEntityMetaData
 {
 	public static final String ATTR_ID = "id";
 
@@ -23,14 +20,21 @@ public abstract class DefaultSettingsEntityMetaData extends DefaultEntityMetaDat
 	private DataService dataService;
 
 	@Autowired
+	private EntityManager entityManager;
+
+	@Autowired
 	public SettingsEntityMeta settingsEntityMeta;
 
 	public DefaultSettingsEntityMetaData(String id)
 	{
-		super(id);
+		super(id, PACKAGE_SETTINGS);
+	}
+
+	@Override
+	public void init()
+	{
 		setExtends(settingsEntityMeta);
-		setPackage(SettingsEntityMeta.PACKAGE_SETTINGS);
-		addAttribute(ATTR_ID, ROLE_ID).setLabel("Id").setVisible(false);
+		setPackage(settingsEntityMeta.getPackage());
 	}
 
 	@RunAsSystem
@@ -41,40 +45,22 @@ public abstract class DefaultSettingsEntityMetaData extends DefaultEntityMetaDat
 
 	public static String getSettingsEntityName(String id)
 	{
-		return SettingsEntityMeta.PACKAGE_SETTINGS.getName() + '_' + id;
+		return PACKAGE_SETTINGS + '_' + id;
 	}
 
-	private Entity getDefaultSettings()
+	Entity getDefaultSettings()
 	{
-		MapEntity mapEntity = new MapEntity(this);
+		Entity defaultSettingsEntity = new DynamicEntity(this);
 		for (AttributeMetaData attr : this.getAtomicAttributes())
 		{
+			// default values are stored/retrieved as strings, so we convert them to the required type here.
 			String defaultValue = attr.getDefaultValue();
 			if (defaultValue != null)
 			{
-				mapEntity.set(attr.getName(), defaultValue);
+				Object typedDefaultValue = getTypedValue(defaultValue, attr, entityManager);
+				defaultSettingsEntity.set(attr.getName(), typedDefaultValue);
 			}
 		}
-		return mapEntity;
-	}
-
-	@Transactional
-	@RunAsSystem
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		Entity settingsEntity = getSettings();
-		if (settingsEntity == null)
-		{
-			Entity defaultSettingsEntity = getDefaultSettings();
-			defaultSettingsEntity.set(ATTR_ID, getSimpleName());
-			dataService.add(getName(), defaultSettingsEntity);
-		}
-	}
-
-	@Override
-	public int getOrder()
-	{
-		return Ordered.HIGHEST_PRECEDENCE + 110;
+		return defaultSettingsEntity;
 	}
 }

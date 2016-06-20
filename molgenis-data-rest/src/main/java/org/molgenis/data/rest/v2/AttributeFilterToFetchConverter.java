@@ -4,13 +4,13 @@ import static java.lang.String.format;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.FILE;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.file.FileMeta;
+import org.molgenis.file.FileMetaMetaData;
 
 /**
  * Converts {@link AttributeFilter} to {@link Fetch}.
@@ -190,7 +190,7 @@ public class AttributeFilterToFetchConverter
 
 			if (attr.getDataType().getEnumType() == FILE)
 			{
-				fetch.field(FileMeta.URL);
+				fetch.field(FileMetaMetaData.URL);
 			}
 		}
 		else

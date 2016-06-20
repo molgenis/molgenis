@@ -33,7 +33,8 @@
 		}
 		
 		function getRootOntologyTerms(ontology){
-			var rootOntologyTerms = restApi.get('/api/v1/' + ontology[ONTOLOGY_NAME], {'expand' : ['attributes'], 'q' : {
+			var rootOntologyTerms = restApi.get('/api/v1/sys_ont_' + ontology[ONTOLOGY_NAME], {
+				'expand': ['attributes'], 'q': {
 				'q' : [{
 					'field' : ROOT,
 					'operator' : 'EQUALS',
@@ -78,7 +79,8 @@
 		}
 		
 		function searchByQuery(ontology, query){
-			var ontologyTermResult = restApi.get('/api/v1/' + ontology[ONTOLOGY_ID], {'expand' : ['attributes'], 'q' : {
+			var ontologyTermResult = restApi.get('/api/v1/sys_ont_' + ontology[ONTOLOGY_ID], {
+				'expand': ['attributes'], 'q': {
 				'q' : [{
 					'field' : SYNONYMS,
 					'operator' : 'EQUALS',
@@ -180,13 +182,14 @@
 					'value' : ontologyIRI
 				}]
 			};
-			return restApi.get("/api/v1/ontologyindex/", {'q' : request}, null);
+			return restApi.get("/api/v1/sys_ont_ontologyindex/", {'q': request}, null);
 		}
 		return null;
 	}
 	
 	function getOntologyTerm(option){
-		var ontologyTerms = restApi.get('/api/v1/' + option[ONTOLOGY_NAME], {'expand' : ['attributes'], 'q' : {
+		var ontologyTerms = restApi.get('/api/v1/sys_ont_' + option[ONTOLOGY_NAME], {
+			'expand': ['attributes'], 'q': {
 			'q' : [{
 				'field' : ONTOLOGY_TERM_IRI,
 				'operator' : 'EQUALS',
@@ -203,7 +206,8 @@
 	}
 	
 	function getParentOntologyTerm(option){
-		var parentOntologyTerms = restApi.get('/api/v1/' + option[ONTOLOGY_NAME], {'expand' : ['attributes'], 'q' : {
+		var parentOntologyTerms = restApi.get('/api/v1/sys_ont_' + option[ONTOLOGY_NAME], {
+			'expand': ['attributes'], 'q': {
 			'q' : [{
 				'field' : ONTOLOGY_TERM_IRI,
 				'operator' : 'EQUALS',

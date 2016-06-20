@@ -46,6 +46,9 @@ public class SemanticSearchConfig
 	@Autowired
 	EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
 
+	@Autowired
+	TagMetaData tagMetaData;
+
 	@Bean
 	public SemanticSearchServiceHelper semanticSearchServiceHelper()
 	{
@@ -55,7 +58,7 @@ public class SemanticSearchConfig
 	@Bean
 	public OntologyTagService ontologyTagService()
 	{
-		return new OntologyTagServiceImpl(dataService, ontologyService, tagRepository(), idGenerator);
+		return new OntologyTagServiceImpl(dataService, ontologyService, tagRepository(), idGenerator, tagMetaData);
 	}
 
 	@Bean
@@ -80,7 +83,7 @@ public class SemanticSearchConfig
 	@Bean
 	TagRepository tagRepository()
 	{
-		Repository<Entity> repo = dataService.getRepository(TagMetaData.ENTITY_NAME);
+		Repository<Entity> repo = null;//FIXME dataService.getRepository(TagMetaData.MOLGENIS_GROUP_MEMBER);
 		return new TagRepository(repo, idGenerator);
 	}
 

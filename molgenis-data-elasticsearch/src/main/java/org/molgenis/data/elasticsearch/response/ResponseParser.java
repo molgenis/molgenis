@@ -14,12 +14,12 @@ import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.suggest.term.TermSuggestion.Score;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 /**
  * Generates a SearchResult from the ElasticSearch SearchResponse object

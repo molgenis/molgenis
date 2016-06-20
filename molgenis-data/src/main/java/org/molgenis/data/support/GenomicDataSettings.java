@@ -2,8 +2,8 @@ package org.molgenis.data.support;
 
 import java.util.Set;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
 import org.springframework.stereotype.Component;
@@ -75,6 +75,12 @@ public class GenomicDataSettings extends DefaultSettingsEntity
 		public Meta()
 		{
 			super(ID);
+		}
+
+		@Override
+		public void init()
+		{
+			super.init();
 			setLabel("Genomic data settings");
 			setDescription("Settings for genomic data sets.");
 

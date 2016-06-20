@@ -9,14 +9,14 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.excel.ExcelSheetWriter;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
 import org.molgenis.data.support.AbstractWritable.EntityWriteMode;
 import org.molgenis.data.support.QueryImpl;

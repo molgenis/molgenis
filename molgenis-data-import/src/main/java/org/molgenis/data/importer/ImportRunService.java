@@ -1,10 +1,14 @@
 package org.molgenis.data.importer;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.system.ImportRunMetaData.IMPORT_RUN;
+
 import java.util.Date;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.system.ImportRun;
+import org.molgenis.data.system.ImportRunFactory;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.user.MolgenisUserService;
 import org.slf4j.Logger;
@@ -23,25 +27,28 @@ public class ImportRunService
 	private final DataService dataService;
 	private final MailSender mailSender;
 	private final MolgenisUserService molgenisUserService;
+	private final ImportRunFactory importRunFactory;
 
 	@Autowired
-	public ImportRunService(DataService dataService, MailSender mailSender, MolgenisUserService molgenisUserService)
+	public ImportRunService(DataService dataService, MailSender mailSender, MolgenisUserService molgenisUserService,
+			ImportRunFactory importRunFactory)
 	{
-		this.dataService = dataService;
-		this.mailSender = mailSender;
-		this.molgenisUserService = molgenisUserService;
+		this.dataService = requireNonNull(dataService);
+		this.mailSender = requireNonNull(mailSender);
+		this.molgenisUserService = requireNonNull(molgenisUserService);
+		this.importRunFactory = requireNonNull(importRunFactory);
 	}
 
 	@RunAsSystem
 	public ImportRun addImportRun(String userName, boolean notify)
 	{
-		ImportRun importRun = new ImportRun();
+		ImportRun importRun = importRunFactory.create();
 		importRun.setStartDate(new Date());
 		importRun.setProgress(0);
 		importRun.setStatus(ImportStatus.RUNNING.toString());
 		importRun.setUserName(userName);
 		importRun.setNotify(notify);
-		dataService.add(ImportRun.ENTITY_NAME, importRun);
+		dataService.add(IMPORT_RUN, importRun);
 
 		return importRun;
 	}
@@ -49,7 +56,7 @@ public class ImportRunService
 	@RunAsSystem
 	public void finishImportRun(String importRunId, String message, String importedEntities)
 	{
-		ImportRun importRun = dataService.findOneById(ImportRun.ENTITY_NAME, importRunId, ImportRun.class);
+		ImportRun importRun = dataService.findOneById(IMPORT_RUN, importRunId, ImportRun.class);
 		try
 		{
 			if (importRun != null)
@@ -58,7 +65,7 @@ public class ImportRunService
 				importRun.setEndDate(new Date());
 				importRun.setMessage(message);
 				importRun.setImportedEntities(importedEntities);
-				dataService.update(ImportRun.ENTITY_NAME, importRun);
+				dataService.update(IMPORT_RUN, importRun);
 			}
 		}
 		catch (Exception e)
@@ -99,7 +106,7 @@ public class ImportRunService
 	@RunAsSystem
 	public void failImportRun(String importRunId, String message)
 	{
-		ImportRun importRun = dataService.findOneById(ImportRun.ENTITY_NAME, importRunId, ImportRun.class);
+		ImportRun importRun = dataService.findOneById(IMPORT_RUN, importRunId, ImportRun.class);
 		try
 		{
 			if (importRun != null)
@@ -107,7 +114,7 @@ public class ImportRunService
 				importRun.setStatus(ImportStatus.FAILED.toString());
 				importRun.setEndDate(new Date());
 				importRun.setMessage(message);
-				dataService.update(ImportRun.ENTITY_NAME, importRun);
+				dataService.update(IMPORT_RUN, importRun);
 			}
 		}
 		catch (Exception e)

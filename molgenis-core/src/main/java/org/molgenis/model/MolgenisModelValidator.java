@@ -10,6 +10,7 @@ import java.util.Vector;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisOptions;
+import org.molgenis.ReservedKeywords;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.IntField;
 import org.molgenis.fieldtypes.MrefField;
@@ -926,10 +927,7 @@ public class MolgenisModelValidator
 	{
 		LOG.debug("check for JAVA and SQL reserved words...");
 		Set<String> keywords = new HashSet<String>();
-		keywords.addAll(ReservedKeywords.JAVA_KEYWORDS);
 		keywords.addAll(ReservedKeywords.JAVASCRIPT_KEYWORDS);
-		keywords.addAll(ReservedKeywords.ORACLE_KEYWORDS);
-		keywords.addAll(ReservedKeywords.MYSQL_KEYWORDS);
 		// keywords.addAll(ReservedKeywords.HSQL_KEYWORDS);
 
 		if (model.getName().contains(" "))

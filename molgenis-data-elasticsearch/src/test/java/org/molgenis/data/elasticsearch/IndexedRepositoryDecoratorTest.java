@@ -30,15 +30,15 @@ import java.util.stream.Stream;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -123,7 +123,7 @@ public class IndexedRepositoryDecoratorTest
 			entities.add(mock(Entity.class));
 		}
 		indexedRepositoryDecorator.add(entities.stream());
-		verify(decoratedRepo, times(2)).add(Matchers.<Stream<Entity>> any());
+		verify(decoratedRepo, times(2)).add(Matchers.<Stream<Entity>>any());
 
 		verifyZeroInteractions(elasticSearchService);
 	}
@@ -137,8 +137,7 @@ public class IndexedRepositoryDecoratorTest
 		AttributeMetaData distinctAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("distinctAttr")
 				.getMock();
 
-		@SuppressWarnings("unchecked")
-		Query<Entity> q = mock(Query.class);
+		@SuppressWarnings("unchecked") Query<Entity> q = mock(Query.class);
 		AggregateQuery aggregateQuery = new AggregateQueryImpl().attrX(xAttr).attrY(yAttr).attrDistinct(distinctAttr)
 				.query(q);
 
@@ -205,7 +204,7 @@ public class IndexedRepositoryDecoratorTest
 			entities.add(mock(Entity.class));
 		}
 		indexedRepositoryDecorator.delete(entities.stream());
-		verify(decoratedRepo, times(2)).delete(Matchers.<Stream<Entity>> any());
+		verify(decoratedRepo, times(2)).delete(Matchers.<Stream<Entity>>any());
 		verifyZeroInteractions(elasticSearchService);
 	}
 
@@ -240,7 +239,7 @@ public class IndexedRepositoryDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		when(elasticSearchService.search(unsupportedQuery, repositoryEntityMetaData))
-				.thenReturn(Arrays.<Entity> asList(entity0, entity1));
+				.thenReturn(Arrays.<Entity>asList(entity0, entity1));
 
 		indexedRepositoryDecorator.findOne(unsupportedQuery);
 		verify(elasticSearchService).search(unsupportedQuery, repositoryEntityMetaData);
@@ -299,8 +298,7 @@ public class IndexedRepositoryDecoratorTest
 		verifyZeroInteractions(elasticSearchService);
 	}
 
-	@SuppressWarnings(
-	{ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void updateStream()
 	{
@@ -390,22 +388,6 @@ public class IndexedRepositoryDecoratorTest
 	}
 
 	@Test
-	public void create()
-	{
-		indexedRepositoryDecorator.create();
-		verify(decoratedRepo, times(1)).create();
-		verifyZeroInteractions(elasticSearchService);
-	}
-
-	@Test
-	public void drop()
-	{
-		indexedRepositoryDecorator.create();
-		verify(decoratedRepo, times(1)).create();
-		verifyZeroInteractions(elasticSearchService);
-	}
-
-	@Test
 	public void getCapabilities()
 	{
 		assertEquals(indexedRepositoryDecorator.getCapabilities(),
@@ -445,8 +427,7 @@ public class IndexedRepositoryDecoratorTest
 	@Test
 	public void unsupportedQueryWithComputedAttributes()
 	{
-		@SuppressWarnings("unchecked")
-		Query<Entity> q = mock(Query.class);
+		@SuppressWarnings("unchecked") Query<Entity> q = mock(Query.class);
 		QueryRule qRule1 = mock(QueryRule.class);
 		QueryRule qRule2 = mock(QueryRule.class);
 

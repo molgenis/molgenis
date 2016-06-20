@@ -16,13 +16,15 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.LazyEntity;
 import org.molgenis.data.support.PartialEntity;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.BatchingIterable;
-import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.HashMultimap;
@@ -30,30 +32,75 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.SetMultimap;
 
 /**
- * Entity manager responsible for creating entity references and resolving references of reference attributes.
+ * Entity manager responsible for creating entities, entity references and resolving references of reference attributes.
  */
 public class EntityManagerImpl implements EntityManager
 {
 	private static final int BATCH_SIZE = 100;
 
 	private final DataService dataService;
+	private final EntityFactoryRegistry entityFactoryRegistry;
 
 	@Autowired
-	public EntityManagerImpl(DataService dataService)
+	public EntityManagerImpl(DataService dataService, EntityFactoryRegistry entityFactoryRegistry)
 	{
 		this.dataService = requireNonNull(dataService);
+		this.entityFactoryRegistry = requireNonNull(entityFactoryRegistry);
+	}
+
+	@Override
+	public Entity create(EntityMetaData entityMeta)
+	{
+		return create(entityMeta, null);
+	}
+
+	@Override
+	public Entity create(EntityMetaData entityMeta, Fetch fetch)
+	{
+		Entity entity = new DynamicEntity(entityMeta);
+		if (fetch != null)
+		{
+			// create partial entity that loads attribute values not contained in the fetch on demand.
+			entity = new PartialEntity(entity, fetch, this);
+		}
+
+		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityMeta);
+		if (entityFactory != null)
+		{
+			// create static entity (e.g. Tag, Language, Package) that wraps the constructed dynamic or partial entity.
+			return entityFactory.create(entity);
+		}
+		return entity;
 	}
 
 	@Override
 	public Entity getReference(EntityMetaData entityMeta, Object id)
 	{
-		return new LazyEntity(entityMeta, dataService, id);
+		Entity lazyEntity = new LazyEntity(entityMeta, dataService, id);
+
+		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityMeta);
+		if (entityFactory != null)
+		{
+			// create static entity (e.g. Tag, Language, Package) that wraps the constructed dynamic or partial entity.
+			lazyEntity = entityFactory.create(lazyEntity);
+		}
+
+		return lazyEntity;
 	}
 
 	@Override
 	public Iterable<Entity> getReferences(EntityMetaData entityMeta, Iterable<?> ids)
 	{
-		return new LazyEntityIterable(entityMeta, ids);
+		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityMeta);
+		return () -> stream(ids.spliterator(), false).map(id -> {
+			Entity lazyEntity = getReference(entityMeta, id);
+			if (entityFactory != null)
+			{
+				// create static entity (e.g. Tag, Language, Package) that wraps the constructed dynamic or partial entity.
+				lazyEntity = entityFactory.create(lazyEntity);
+			}
+			return lazyEntity;
+		}).iterator();
 	}
 
 	@Override
@@ -150,11 +197,11 @@ public class EntityManagerImpl implements EntityManager
 	private List<Entity> resolveReferences(List<AttributeMetaData> resolvableAttrs, List<Entity> entities, Fetch fetch)
 	{
 		// entity name --> entity ids
-		SetMultimap<String, Object> lazyRefEntityIdsMap = HashMultimap.<String, Object> create(resolvableAttrs.size(),
+		SetMultimap<String, Object> lazyRefEntityIdsMap = HashMultimap.<String, Object>create(resolvableAttrs.size(),
 				16);
 		// entity name --> attributes referring to this entity
-		SetMultimap<String, AttributeMetaData> refEntityAttrsMap = HashMultimap
-				.<String, AttributeMetaData> create(resolvableAttrs.size(), 2);
+		SetMultimap<String, AttributeMetaData> refEntityAttrsMap = HashMultimap.<String, AttributeMetaData>create(
+				resolvableAttrs.size(), 2);
 
 		// fill maps
 		for (AttributeMetaData attr : resolvableAttrs)
@@ -304,7 +351,7 @@ public class EntityManagerImpl implements EntityManager
 
 	/**
 	 * Return all resolvable attributes: non-computed reference attributes defined in fetch
-	 * 
+	 *
 	 * @param entityMeta
 	 * @param fetch
 	 * @return
@@ -315,25 +362,6 @@ public class EntityManagerImpl implements EntityManager
 				.filter(attr -> attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
 				.filter(attr -> attr.getExpression() == null).filter(attr -> fetch.hasField(attr.getName()))
 				.collect(Collectors.toList());
-	}
-
-	private class LazyEntityIterable implements Iterable<Entity>
-	{
-		private final EntityMetaData entityMeta;
-		private final Iterable<?> entityIds;
-
-		public LazyEntityIterable(EntityMetaData entityMeta, Iterable<?> ids)
-		{
-			this.entityMeta = requireNonNull(entityMeta);
-			this.entityIds = requireNonNull(ids);
-		}
-
-		@Override
-		public Iterator<Entity> iterator()
-		{
-			Stream<?> stream = stream(entityIds.spliterator(), false);
-			return stream.map(id -> getReference(entityMeta, id)).collect(Collectors.toList()).iterator();
-		}
 	}
 
 	private class EntityIdIterable implements Iterable<Object>
@@ -354,32 +382,6 @@ public class EntityManagerImpl implements EntityManager
 		public Stream<Object> stream()
 		{
 			return StreamSupport.stream(entities.spliterator(), false).map(Entity::getIdValue);
-		}
-	}
-
-	@Override
-	public <E extends Entity> E convert(Entity entity, Class<E> entityClass)
-	{
-		return entity != null ? EntityUtils.convert(entity, entityClass, dataService) : null;
-	}
-
-	@Override
-	public <E extends Entity> Iterable<E> convert(Iterable<Entity> entities, Class<E> entityClass)
-	{
-		return () -> stream(entities.spliterator(), false)
-				.map(entity -> EntityUtils.convert(entity, entityClass, dataService)).iterator();
-	}
-
-	@Override
-	public Entity createEntityForPartialEntity(Entity partialEntity, Fetch fetch)
-	{
-		if (fetch == null)
-		{
-			return partialEntity;
-		}
-		else
-		{
-			return new PartialEntity(partialEntity, fetch, this);
 		}
 	}
 }

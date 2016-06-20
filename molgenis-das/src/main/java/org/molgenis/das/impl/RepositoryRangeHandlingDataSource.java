@@ -176,8 +176,10 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 					++score;
 				}
 
+				Object labelValue = entity.getLabelValue();
 				feature = createDasFeature(valueStart, valueStop, entity.getIdValue().toString(),
-						entity.getLabelValue(), valueDescription, valueLink, type, method, dataSet, valuePatient,
+						labelValue != null ? labelValue.toString() : null, valueDescription, valueLink, type, method,
+						dataSet, valuePatient,
 						notes);
 				features.add(feature);
 			}

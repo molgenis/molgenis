@@ -9,4 +9,6 @@ public interface IdCardIndexerService
 	TriggerKey scheduleIndexRebuild() throws SchedulerException;
 
 	TriggerState getIndexRebuildStatus(TriggerKey triggerKey) throws SchedulerException;
+
+	void updateIndexerScheduler(boolean initScheduler) throws SchedulerException;
 }

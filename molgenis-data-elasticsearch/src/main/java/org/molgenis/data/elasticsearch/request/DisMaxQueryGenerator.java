@@ -12,9 +12,9 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.DisMaxQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.meta.EntityMetaData;
 
 public class DisMaxQueryGenerator implements QueryPartGenerator
 {

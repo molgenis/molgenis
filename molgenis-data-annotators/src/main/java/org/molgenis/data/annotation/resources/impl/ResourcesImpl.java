@@ -30,7 +30,7 @@ public class ResourcesImpl implements Resources
 	@Autowired
 	private void setResources(List<Resource> resources)
 	{
-		this.resources = resources.stream().collect(toMap(r -> r.getName(), r -> r));
+		//FIXME this.resources = resources.stream().collect(toMap(r -> r.getName(), r -> r));
 	}
 
 	@Override

@@ -15,10 +15,9 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -92,14 +91,6 @@ public class GoogleSpreadsheetRepositoryTest
 		{
 			if (repo != null) repo.close();
 		}
-	}
-
-	@SuppressWarnings("unchecked")
-	@Test
-	public void getEntityClass() throws IOException, ServiceException
-	{
-		when(spreadsheetService.getFeed(any(URL.class), (Class<CellFeed>) any(Class.class))).thenReturn(cellFeed);
-		assertEquals(MapEntity.class, spreadsheetRepository.getEntityMetaData().getEntityClass());
 	}
 
 	@SuppressWarnings("unchecked")

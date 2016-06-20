@@ -1,29 +1,48 @@
 package org.molgenis.auth;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MolgenisGroupMetaData extends DefaultEntityMetaData
+public class MolgenisGroupMetaData extends SystemEntityMetaData
 {
+	private static final String SIMPLE_NAME = "MolgenisGroup";
+	public static final String MOLGENIS_GROUP = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public static final String ENTITY_NAME = "MolgenisGroup";
+	public static final String NAME = "name";
+	public static final String ID = "id";
+	public static final String ACTIVE = "active";
 
-	public MolgenisGroupMetaData()
+	private final SecurityPackage securityPackage;
+	private final AuthorityMetaData authorityMetaData;
+
+	@Autowired
+	MolgenisGroupMetaData(SecurityPackage securityPackage, AuthorityMetaData authorityMetaData)
 	{
-		super(ENTITY_NAME);
+		super(SIMPLE_NAME, PACKAGE_SECURITY);
+		this.securityPackage = requireNonNull(securityPackage);
+		this.authorityMetaData = requireNonNull(authorityMetaData);
+	}
 
-		setExtends(new AuthorityMetaData());
-		addAttribute(MolgenisGroup.ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
-		addAttribute(MolgenisGroup.NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setDescription("")
-				.setNillable(false);
-		addAttribute(MolgenisGroup.ACTIVE).setLabel("Active").setDataType(BOOL).setDefaultValue("true")
-				.setDescription("Boolean to indicate whether this group is in use.").setAggregateable(true)
+	@Override
+	public void init()
+	{
+		setPackage(securityPackage);
+
+		setExtends(authorityMetaData);
+		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
+		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setDescription("").setNillable(false);
+		addAttribute(ACTIVE).setLabel("Active").setDataType(BOOL).setDefaultValue("true")
+				.setDescription("Boolean to indicate whether this group is in use.").setAggregatable(true)
 				.setNillable(false);
 	}
 }

@@ -1,5 +1,8 @@
 package org.molgenis.googlespreadsheet;
 
+import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
+
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -7,16 +10,14 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataFactory;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 
 import com.google.common.collect.Iterables;
 import com.google.gdata.client.spreadsheet.FeedURLFactory;
@@ -55,8 +56,8 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 		this(spreadsheetService, spreadsheetKey, worksheetId, Visibility.PUBLIC);
 	}
 
-	public GoogleSpreadsheetRepository(SpreadsheetService spreadsheetService, String spreadsheetKey,
-			String worksheetId, Visibility visibility) throws IOException, ServiceException
+	public GoogleSpreadsheetRepository(SpreadsheetService spreadsheetService, String spreadsheetKey, String worksheetId,
+			Visibility visibility) throws IOException, ServiceException
 	{
 		if (spreadsheetService == null) throw new IllegalArgumentException("spreadsheetService is null");
 		if (spreadsheetKey == null) throw new IllegalArgumentException("spreadsheetKey is null");
@@ -76,9 +77,8 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 		ListFeed feed;
 		try
 		{
-			feed = spreadsheetService.getFeed(
-					FeedURLFactory.getDefault().getListFeedUrl(spreadsheetKey, worksheetId, visibility.toString(),
-							"full"), ListFeed.class);
+			feed = spreadsheetService.getFeed(FeedURLFactory.getDefault()
+					.getListFeedUrl(spreadsheetKey, worksheetId, visibility.toString(), "full"), ListFeed.class);
 		}
 		catch (MalformedURLException e)
 		{
@@ -105,7 +105,7 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 			@Override
 			public Entity next()
 			{
-				MapEntity entity = new MapEntity();
+				Entity entity = new DynamicEntity(null); // FIXME pass entity meta data instead of null
 				CustomElementCollection customElements = it.next().getCustomElements();
 				for (AttributeMetaData attributeMetaData : entityMetaData.getAttributes())
 				{
@@ -131,12 +131,15 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
+			EntityMetaDataFactory entityMetaFactory = getApplicationContext().getBean(EntityMetaDataFactory.class);
+			AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
+
 			// ListFeed does not give you the true column names, use CellFeed instead
 			CellFeed feed;
 			try
 			{
-				URL cellFeedUrl = FeedURLFactory.getDefault().getCellFeedUrl(spreadsheetKey, worksheetId,
-						visibility.toString(), "full");
+				URL cellFeedUrl = FeedURLFactory.getDefault()
+						.getCellFeedUrl(spreadsheetKey, worksheetId, visibility.toString(), "full");
 				cellFeedUrl = new URL(cellFeedUrl.toString() + "?min-row=1&max-row=1");
 				feed = spreadsheetService.getFeed(cellFeedUrl, CellFeed.class);
 			}
@@ -153,19 +156,17 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 				throw new RuntimeException(e);
 			}
 
-			EditableEntityMetaData editableEntityMetaData = new DefaultEntityMetaData(feed.getTitle().getPlainText(),
-					MapEntity.class);
+			EntityMetaData entityMetaData = entityMetaFactory.create().setSimpleName(feed.getTitle().getPlainText());
 
 			for (CellEntry cellEntry : feed.getEntries())
 			{
 				Cell cell = cellEntry.getCell();
 				if (cell.getRow() == 1)
 				{
-					editableEntityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(cell.getValue(),
-							FieldTypeEnum.STRING));
+					entityMetaData.addAttribute(attrMetaFactory.create().setName(cell.getValue()).setDataType(STRING));
 				}
 			}
-			entityMetaData = editableEntityMetaData;
+			this.entityMetaData = entityMetaData;
 		}
 
 		return entityMetaData;

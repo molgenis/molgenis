@@ -1,8 +1,11 @@
 package org.molgenis.dataexplorer.controller;
 
+import static org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.ATTR_GALAXY_API_KEY;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.ATTR_GALAXY_URL;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
+import static org.molgenis.security.core.Permission.READ;
+import static org.molgenis.security.core.Permission.WRITE;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
@@ -23,15 +26,16 @@ import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
-import org.molgenis.data.annotation.meta.AnnotationJobExecution;
+import org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.jobs.JobExecutionMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
@@ -73,8 +77,7 @@ import freemarker.core.ParseException;
  */
 @Controller
 @RequestMapping(URI)
-@SessionAttributes(
-{ ATTR_GALAXY_URL, ATTR_GALAXY_API_KEY })
+@SessionAttributes({ ATTR_GALAXY_URL, ATTR_GALAXY_API_KEY })
 public class DataExplorerController extends MolgenisPluginController
 {
 	private static final Logger LOG = LoggerFactory.getLogger(DataExplorerController.class);
@@ -122,7 +125,7 @@ public class DataExplorerController extends MolgenisPluginController
 
 	/**
 	 * Show the explorer page
-	 * 
+	 *
 	 * @param model
 	 * @return the view name
 	 */
@@ -184,12 +187,13 @@ public class DataExplorerController extends MolgenisPluginController
 			// self-explanatory
 			if (!molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITEMETA))
 			{
-				throw new MolgenisDataAccessException("No " + Permission.WRITEMETA + " permission on entity ["
-						+ entityName + "], this permission is necessary run the annotators.");
+				throw new MolgenisDataAccessException(
+						"No " + Permission.WRITEMETA + " permission on entity [" + entityName
+								+ "], this permission is necessary run the annotators.");
 			}
-			Entity annotationRun = dataService.findOne(AnnotationJobExecution.ENTITY_NAME,
-					new QueryImpl<Entity>().eq(AnnotationJobExecution.TARGET_NAME, entityName)
-							.sort(new Sort(AnnotationJobExecution.START_DATE, Sort.Direction.DESC)));
+			Entity annotationRun = dataService.findOne(ANNOTATION_JOB_EXECUTION,
+					new QueryImpl<Entity>().eq(AnnotationJobExecutionMetaData.TARGET_NAME, entityName)
+							.sort(new Sort(JobExecutionMetaData.START_DATE, Sort.Direction.DESC)));
 			model.addAttribute("annotationRun", annotationRun);
 			model.addAttribute("entityName", entityName);
 		}
@@ -201,14 +205,14 @@ public class DataExplorerController extends MolgenisPluginController
 	@ResponseBody
 	public boolean showCopy(@RequestParam("entity") String entityName)
 	{
-		boolean showCopy = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ)
-				&& dataService.getCapabilities(entityName).contains(RepositoryCapability.WRITABLE);
+		boolean showCopy = molgenisPermissionService.hasPermissionOnEntity(entityName, READ) && dataService
+				.getCapabilities(entityName).contains(RepositoryCapability.WRITABLE);
 		return showCopy;
 	}
 
 	/**
 	 * Returns modules configuration for this entity based on current user permissions.
-	 * 
+	 *
 	 * @param entityName
 	 * @return
 	 */
@@ -229,10 +233,8 @@ public class DataExplorerController extends MolgenisPluginController
 
 		// set data explorer permission
 		Permission pluginPermission = null;
-		if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE))
-			pluginPermission = Permission.WRITE;
-		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ))
-			pluginPermission = Permission.READ;
+		if (molgenisPermissionService.hasPermissionOnEntity(entityName, WRITE)) pluginPermission = WRITE;
+		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, READ)) pluginPermission = READ;
 		else if (molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.COUNT))
 			pluginPermission = Permission.COUNT;
 
@@ -264,7 +266,7 @@ public class DataExplorerController extends MolgenisPluginController
 					{
 						modulesConfig.add(new ModuleConfig("charts", "Charts", "chart-icon.png"));
 					}
-					if (modAnnotators && pluginPermission == Permission.WRITE)
+					if (modAnnotators && pluginPermission == WRITE)
 					{
 						modulesConfig.add(new ModuleConfig("annotators", "Annotators", "annotator-icon.png"));
 					}
@@ -288,23 +290,20 @@ public class DataExplorerController extends MolgenisPluginController
 	}
 
 	/**
+	 * TODO Improve performance by rewriting to query that returns all genomic entities instead of retrieving all entities and determining which one is genomic
 	 * Get readable genome entities
-	 * 
+	 *
 	 * @return
 	 */
 	private Map<String, String> getGenomeBrowserEntities()
 	{
-		Map<String, String> genomeEntities = new HashMap<String, String>();
-		dataService.getEntityNames().forEach(entityName -> {
-			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
-			if (isGenomeBrowserEntity(entityMetaData))
+		Map<String, String> genomeEntities = new HashMap<>();
+		dataService.getMeta().getEntityMetaDatas().filter(this::isGenomeBrowserEntity).forEach(entityMeta -> {
+			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityMeta.getName(), READ);
+			boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityMeta.getName(), WRITE);
+			if (canRead || canWrite)
 			{
-				boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ);
-				boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.WRITE);
-				if (canRead || canWrite)
-				{
-					genomeEntities.put(entityMetaData.getName(), entityMetaData.getLabel());
-				}
+				genomeEntities.put(entityMeta.getName(), entityMeta.getLabel());
 			}
 		});
 		return genomeEntities;
@@ -338,8 +337,8 @@ public class DataExplorerController extends MolgenisPluginController
 		{
 			case DOWNLOAD_TYPE_CSV:
 				response.setContentType("text/csv");
-				fileName = dataRequest.getEntityName() + '_'
-						+ new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss").format(new Date()) + ".csv";
+				fileName = dataRequest.getEntityName() + '_' + new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss")
+						.format(new Date()) + ".csv";
 				response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 
 				outputStream = response.getOutputStream();
@@ -347,8 +346,8 @@ public class DataExplorerController extends MolgenisPluginController
 				break;
 			case DOWNLOAD_TYPE_XLSX:
 				response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-				fileName = dataRequest.getEntityName() + '_'
-						+ new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss").format(new Date()) + ".xlsx";
+				fileName = dataRequest.getEntityName() + '_' + new SimpleDateFormat("yyyy-MM-dd_hh:mm:ss")
+						.format(new Date()) + ".xlsx";
 				response.addHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
 
 				outputStream = response.getOutputStream();
@@ -391,14 +390,13 @@ public class DataExplorerController extends MolgenisPluginController
 
 	/**
 	 * Builds a model containing one entity and returns the entityReport ftl view
-	 * 
-	 * @author mdehaan, fkelpin
+	 *
 	 * @param entityName
 	 * @param entityId
 	 * @param model
 	 * @return entity report view
-	 * @throws Exception
-	 *             if an entity name or id is not found
+	 * @throws Exception if an entity name or id is not found
+	 * @author mdehaan, fkelpin
 	 */
 	@RequestMapping(value = "/details", method = RequestMethod.POST)
 	public String viewEntityDetails(@RequestParam(value = "entityName") String entityName,

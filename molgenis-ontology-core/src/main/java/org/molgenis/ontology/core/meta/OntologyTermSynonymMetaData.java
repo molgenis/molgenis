@@ -1,29 +1,44 @@
 package org.molgenis.ontology.core.meta;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.TEXT;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OntologyTermSynonymMetaData extends DefaultEntityMetaData
+public class OntologyTermSynonymMetaData extends SystemEntityMetaData
 {
-	public final static String ID = "id";
-	public final static String ONTOLOGY_TERM_SYNONYM = "ontologyTermSynonym";
-	public final static String SIMPLE_NAME = "OntologyTermSynonym";
-	public final static String ENTITY_NAME = OntologyPackage.PACKAGE_NAME + "_" + SIMPLE_NAME;
-	public final static OntologyTermSynonymMetaData INSTANCE = new OntologyTermSynonymMetaData();
+	public static final String SIMPLE_NAME = "OntologyTermSynonym";
+	public final static String ONTOLOGY_TERM_SYNONYM = PACKAGE_ONTOLOGY + "_" + SIMPLE_NAME;
 
-	private OntologyTermSynonymMetaData()
+	public final static String ID = "id";
+	public final static String ONTOLOGY_TERM_SYNONYM_ATTR = "ontologyTermSynonym";
+
+	private OntologyPackage ontologyPackage;
+
+	public OntologyTermSynonymMetaData()
 	{
-		super(SIMPLE_NAME, OntologyPackage.getPackageInstance());
-		addAttributeMetaData(new DefaultAttributeMetaData(ID).setVisible(false), ROLE_ID);
-		DefaultAttributeMetaData ontologyTermSynonymAttr = new DefaultAttributeMetaData(ONTOLOGY_TERM_SYNONYM,
-				FieldTypeEnum.TEXT).setNillable(false);
-		addAttributeMetaData(ontologyTermSynonymAttr, ROLE_LABEL);
+		super(SIMPLE_NAME, PACKAGE_ONTOLOGY);
+	}
+
+	@Override
+	public void init()
+	{
+		setPackage(ontologyPackage);
+
+		addAttribute(ID, ROLE_ID).setVisible(false);
+		addAttribute(ONTOLOGY_TERM_SYNONYM_ATTR, ROLE_LABEL).setDataType(TEXT).setNillable(false);
+	}
+
+	@Autowired
+	public void setOntologyPackage(OntologyPackage ontologyPackage)
+	{
+		this.ontologyPackage = requireNonNull(ontologyPackage);
 	}
 }

@@ -1,5 +1,8 @@
 package org.molgenis.data.i18n;
 
+import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
+import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.io.IOException;
@@ -37,10 +40,10 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 		String languageCode = locale.getLanguage();
 
 		// Only handle i18nstrings bundle
-		if (!baseName.equals(I18nStringMetaData.ENTITY_NAME)) return null;
+		if (!baseName.equals(I18N_STRING)) return null;
 
 		// Only handle languages that are present in the languages repository
-		if (runAsSystem(() -> dataService.query(LanguageMetaData.ENTITY_NAME).eq(LanguageMetaData.CODE, languageCode)
+		if (runAsSystem(() -> dataService.query(LANGUAGE).eq(LanguageMetaData.CODE, languageCode)
 				.count()) == 0) return null;
 
 		return new MolgenisResourceBundle(dataService, languageCode, appSettings);
@@ -63,13 +66,13 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 		@Override
 		protected Object[][] getContents()
 		{
-			List<Entity> entities = runAsSystem(() -> dataService.findAll(I18nStringMetaData.ENTITY_NAME).collect(
+			List<Entity> entities = runAsSystem(() -> dataService.findAll(I18N_STRING).collect(
 					Collectors.toList()));
 
 			appLanguageCode = appSettings.getLanguageCode();
 
 			boolean exists = (appLanguageCode != null) && runAsSystem(() -> {
-				return (dataService.findOneById(LanguageMetaData.ENTITY_NAME, appLanguageCode) != null);
+				return (dataService.findOneById(LANGUAGE, appLanguageCode) != null);
 			});
 
 			if (!exists) appLanguageCode = null;
@@ -93,7 +96,7 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 					// Also missing in app language, use default
 					if (msg == null)
 					{
-						msg = entity.getString(LanguageService.FALLBACK_LANGUAGE);
+						msg = entity.getString(DEFAULT_LANGUAGE_CODE);
 					}
 
 					if (msg == null)

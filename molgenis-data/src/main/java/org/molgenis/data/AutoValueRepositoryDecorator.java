@@ -15,7 +15,8 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.fieldtypes.StringField;
 
 import com.google.common.base.Predicate;
@@ -88,7 +89,7 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public Set<Operator> getQueryOperators()
+	public Set<QueryRule.Operator> getQueryOperators()
 	{
 		return decoratedRepository.getQueryOperators();
 	}
@@ -264,18 +265,6 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public void create()
-	{
-		decoratedRepository.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		decoratedRepository.drop();
-	}
-
-	@Override
 	public void rebuildIndex()
 	{
 		decoratedRepository.rebuildIndex();
@@ -308,7 +297,7 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 			String autoAttrName = autoAttr.getName();
 			if (entity.get(autoAttrName) == null)
 			{
-				if (autoAttr.equals(getEntityMetaData().getIdAttribute()))
+				if (autoAttrName.equals(getEntityMetaData().getIdAttribute().getName()))
 				{
 					entity.set(autoAttrName, idGenerator.generateId());
 				}

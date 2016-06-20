@@ -21,7 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,11 +35,9 @@ import javax.validation.Valid;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DuplicateEntityException;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
@@ -52,6 +49,8 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
@@ -458,7 +457,7 @@ class RestControllerV2
 				throw createUnknownAttributeException(entityName, attributeName);
 			}
 
-			if (attr.isReadonly())
+			if (attr.isReadOnly())
 			{
 				throw createMolgenisDataAccessExceptionReadOnlyAttribute(entityName, attributeName);
 			}
@@ -635,14 +634,7 @@ class RestControllerV2
 			Iterable<Entity> it;
 			if (count > 0)
 			{
-				it = new Iterable<Entity>()
-				{
-					@Override
-					public Iterator<Entity> iterator()
-					{
-						return dataService.findAll(entityName, q).iterator();
-					}
-				};
+				it = () -> dataService.findAll(entityName, q).iterator();
 			}
 			else
 			{

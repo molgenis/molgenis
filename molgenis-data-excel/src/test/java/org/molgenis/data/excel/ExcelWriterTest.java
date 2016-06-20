@@ -15,7 +15,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Writable;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
 import org.molgenis.data.processor.CellProcessor;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.Test;
 
 public class ExcelWriterTest
@@ -92,7 +92,7 @@ public class ExcelWriterTest
 		excelWriter.addCellProcessor(processor);
 		try
 		{
-			Entity entity = new MapEntity();
+			Entity entity = new DynamicEntity(null); // // FIXME pass entity meta data instead of null
 			entity.set("col1", "val1");
 			entity.set("col2", "val2");
 			Writable writable = excelWriter.createWritable("test", Arrays.asList("col1", "col2"));

@@ -29,17 +29,17 @@ import java.util.stream.StreamSupport;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
@@ -253,19 +253,6 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public void create()
-	{
-		decoratedRepository.create();
-
-	}
-
-	@Override
-	public void drop()
-	{
-		decoratedRepository.drop();
-	}
-
-	@Override
 	public void rebuildIndex()
 	{
 		decoratedRepository.rebuildIndex();
@@ -453,7 +440,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	{
 		List<AttributeMetaData> readonlyAttrs = StreamSupport
 				.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-				.filter(attr -> attr.isReadonly() && attr.getExpression() == null).collect(Collectors.toList());
+				.filter(attr -> attr.isReadOnly() && attr.getExpression() == null).collect(Collectors.toList());
 
 		validationResource.setReadonlyAttrs(readonlyAttrs);
 	}

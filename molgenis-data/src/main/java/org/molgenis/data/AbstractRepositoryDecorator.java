@@ -1,11 +1,13 @@
 package org.molgenis.data;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
+import org.molgenis.data.meta.EntityMetaData;
 
 /**
  * Abstract superclass for {@link Repository} decorators that delegates everything to the
@@ -96,18 +98,6 @@ public abstract class AbstractRepositoryDecorator implements Repository<Entity>
 	public void clearCache()
 	{
 		decorated.clearCache();
-	}
-
-	@Override
-	public void create()
-	{
-		decorated.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		decorated.drop();
 	}
 
 	@Override

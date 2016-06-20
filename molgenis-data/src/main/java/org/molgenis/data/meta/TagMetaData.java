@@ -1,15 +1,18 @@
 package org.molgenis.data.meta;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import org.springframework.stereotype.Component;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import static org.molgenis.MolgenisFieldTypes.TEXT;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.*;
+import static org.molgenis.data.meta.MetaPackage.PACKAGE_META;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
-public class TagMetaData extends DefaultEntityMetaData
+@Component
+public class TagMetaData extends SystemEntityMetaData
 {
-	public static final String ENTITY_NAME = "tags";
+	private static final String SIMPLE_NAME = "tags";
+	public static final String TAG = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME;
+
 	public static final String IDENTIFIER = "identifier";
 	public static final String OBJECT_IRI = "objectIRI";
 	public static final String LABEL = "label";
@@ -17,16 +20,19 @@ public class TagMetaData extends DefaultEntityMetaData
 	public static final String RELATION_LABEL = "relationLabel";
 	public static final String CODE_SYSTEM = "codeSystem";
 
-	public static final TagMetaData INSTANCE = new TagMetaData();
-
-	private TagMetaData()
+	TagMetaData()
 	{
-		super(ENTITY_NAME);
-		addAttribute(IDENTIFIER, ROLE_ID);
-		addAttribute(OBJECT_IRI, ROLE_LOOKUP).setDataType(MolgenisFieldTypes.TEXT);
-		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false);
-		addAttribute(RELATION_IRI).setNillable(false);
-		addAttribute(RELATION_LABEL).setNillable(false);
-		addAttribute(CODE_SYSTEM);
+		super(SIMPLE_NAME, PACKAGE_META);
+	}
+
+	@Override
+	public void init()
+	{
+		addAttribute(IDENTIFIER, ROLE_ID).setLabel("Identifier");
+		addAttribute(OBJECT_IRI, ROLE_LOOKUP).setDataType(TEXT).setLabel("Object IRI");
+		addAttribute(LABEL, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
+		addAttribute(RELATION_IRI).setNillable(false).setLabel("Relation IRI");
+		addAttribute(RELATION_LABEL).setNillable(false).setLabel("Relation label");
+		addAttribute(CODE_SYSTEM).setLabel("Code system");
 	}
 }

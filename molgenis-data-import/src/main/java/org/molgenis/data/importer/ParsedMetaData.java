@@ -3,12 +3,12 @@ package org.molgenis.data.importer;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Package;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.Package;
 import org.molgenis.data.semantic.LabeledResource;
-import org.molgenis.data.semantic.Tag;
+import org.molgenis.data.semantic.SemanticTag;
 
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -23,14 +23,15 @@ public final class ParsedMetaData
 {
 	private final ImmutableMap<String, EntityMetaData> entities;
 	private final ImmutableMap<String, Package> packages;
-	private final ImmutableSetMultimap<EntityMetaData, Tag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
-	private final ImmutableList<Tag<EntityMetaData, LabeledResource, LabeledResource>> entityTags;
+	private final ImmutableSetMultimap<EntityMetaData, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
+	private final ImmutableList<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> entityTags;
 	private final ImmutableMap<String, Entity> languages;
 	private final ImmutableMap<String, Entity> i18nStrings;
 
 	public ParsedMetaData(List<? extends EntityMetaData> entities, Map<String, ? extends Package> packages,
-			SetMultimap<String, Tag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags,
-			List<Tag<EntityMetaData, LabeledResource, LabeledResource>> entityTags, Map<String, Entity> languages,
+			SetMultimap<String, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags,
+			List<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> entityTags,
+			Map<String, Entity> languages,
 			ImmutableMap<String, Entity> i18nStrings)
 	{
 		if (entities == null)
@@ -38,7 +39,7 @@ public final class ParsedMetaData
 			throw new NullPointerException("Null entities");
 		}
 
-		ImmutableMap.Builder<String, EntityMetaData> builder = ImmutableMap.<String, EntityMetaData> builder();
+		ImmutableMap.Builder<String, EntityMetaData> builder = ImmutableMap.builder();
 		for (EntityMetaData emd : entities)
 		{
 			builder.put(emd.getName(), emd);
@@ -49,8 +50,7 @@ public final class ParsedMetaData
 			throw new NullPointerException("Null packages");
 		}
 		this.packages = ImmutableMap.copyOf(packages);
-		ImmutableSetMultimap.Builder<EntityMetaData, Tag<AttributeMetaData, LabeledResource, LabeledResource>> attrTagBuilder = ImmutableSetMultimap
-				.<EntityMetaData, Tag<AttributeMetaData, LabeledResource, LabeledResource>> builder();
+		ImmutableSetMultimap.Builder<EntityMetaData, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attrTagBuilder = ImmutableSetMultimap.builder();
 		for (String simpleEntityName : attributeTags.keys())
 		{
 			EntityMetaData emd = this.entities.get(simpleEntityName);
@@ -58,7 +58,8 @@ public final class ParsedMetaData
 			{
 				throw new NullPointerException("Unknown entity [" + simpleEntityName + "]");
 			}
-			for (Tag<AttributeMetaData, LabeledResource, LabeledResource> tag : attributeTags.get(simpleEntityName))
+			for (SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> tag : attributeTags
+					.get(simpleEntityName))
 			{
 				attrTagBuilder.put(emd, tag);
 			}
@@ -84,12 +85,12 @@ public final class ParsedMetaData
 		return packages;
 	}
 
-	public SetMultimap<EntityMetaData, Tag<AttributeMetaData, LabeledResource, LabeledResource>> getAttributeTags()
+	public SetMultimap<EntityMetaData, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> getAttributeTags()
 	{
 		return attributeTags;
 	}
 
-	public ImmutableList<Tag<EntityMetaData, LabeledResource, LabeledResource>> getEntityTags()
+	public ImmutableList<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> getEntityTags()
 	{
 		return entityTags;
 	}
@@ -172,7 +173,7 @@ public final class ParsedMetaData
 	 *            the name of the package
 	 * @return
 	 */
-	public org.molgenis.data.Package getPackage(String name)
+	public Package getPackage(String name)
 	{
 		return getPackages().get(name);
 	}

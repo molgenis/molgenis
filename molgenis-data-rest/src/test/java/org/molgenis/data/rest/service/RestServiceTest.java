@@ -17,11 +17,11 @@ import java.util.stream.Stream;
 import org.mockito.ArgumentMatcher;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.file.FileStore;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -37,7 +37,7 @@ public class RestServiceTest
 		dataService = mock(DataService.class);
 		IdGenerator idGenerator = mock(IdGenerator.class);
 		FileStore fileStore = mock(FileStore.class);
-		this.restService = new RestService(dataService, idGenerator, fileStore);
+		this.restService = new RestService(dataService, idGenerator, fileStore, null, null); // FIXME
 	}
 
 	@Test

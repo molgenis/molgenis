@@ -16,15 +16,15 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Package;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataSearchService;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.Package;
 import org.molgenis.data.meta.PackageSearchResultItem;
 import org.molgenis.data.semantic.LabeledResource;
-import org.molgenis.data.semantic.Tag;
+import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -160,7 +160,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 						}
 					}));
 
-			PackageResponse pr = new PackageResponse(p.getSimpleName(), p.getDescription(),
+			PackageResponse pr = new PackageResponse(p.getSimpleName(), p.getLabel(), p.getDescription(),
 					searchResult.getMatchDescription(), entitiesInPackageFiltered, getTagsForPackage(p));
 			packageResponses.add(pr);
 		}
@@ -223,7 +223,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 		Package molgenisPackage = metaDataService.getPackage(packageName);
 		if (molgenisPackage == null) return null;
 
-		return new PackageResponse(molgenisPackage.getName(), molgenisPackage.getDescription(), null,
+		return new PackageResponse(molgenisPackage.getName(), molgenisPackage.getLabel(),
+				molgenisPackage.getDescription(), null,
 				getEntitiesInPackage(molgenisPackage.getName()), getTagsForPackage(molgenisPackage));
 	}
 
@@ -238,11 +239,11 @@ public class StandardsRegistryController extends MolgenisPluginController
 		return Collections.singletonList(createPackageTreeNode(molgenisPackage));
 	}
 
-	private PackageTreeNode createPackageTreeNode(Package selectedPackage)
+	private PackageTreeNode createPackageTreeNode(Package package_)
 	{
-		String title = selectedPackage.getSimpleName();
-		String key = selectedPackage.getName();
-		String tooltip = selectedPackage.getDescription();
+		String title = package_.getLabel() != null ? package_.getLabel() : package_.getSimpleName();
+		String key = package_.getName();
+		String tooltip = package_.getDescription();
 		List<PackageTreeNode> result = new ArrayList<PackageTreeNode>();
 		boolean folder = true;
 		boolean expanded = true;
@@ -250,12 +251,12 @@ public class StandardsRegistryController extends MolgenisPluginController
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("type", "package");
 
-		for (Package subPackage : selectedPackage.getSubPackages())
+		for (Package subPackage : package_.getSubPackages())
 		{
 			result.add(createPackageTreeNode(subPackage));
 		}
 
-		for (EntityMetaData emd : selectedPackage.getEntityMetaDatas())
+		for (EntityMetaData emd : package_.getEntityMetaDatas())
 		{
 			result.add(createPackageTreeNode(emd));
 		}
@@ -318,7 +319,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	{
 		List<PackageResponse.Tag> tags = Lists.newArrayList();
 
-		for (Tag<Package, LabeledResource, LabeledResource> tag : tagService.getTagsForPackage(p))
+		for (SemanticTag<Package, LabeledResource, LabeledResource> tag : tagService.getTagsForPackage(p))
 		{
 			tags.add(new PackageResponse.Tag(tag.getObject().getLabel(), tag.getObject().getIri(), tag.getRelation()
 					.toString()));
@@ -442,15 +443,17 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private static class PackageResponse
 	{
 		private final String name;
+		private final String label;
 		private final String description;
 		private final String matchDescription;
 		private final List<PackageResponse.Entity> entitiesInPackage;
 		private final List<Tag> tags;
 
-		public PackageResponse(String name, String description, String matchDescription,
+		public PackageResponse(String name, String label, String description, String matchDescription,
 				List<PackageResponse.Entity> entitiesInPackage, List<Tag> tags)
 		{
 			this.name = name;
+			this.label = label;
 			this.description = description;
 			this.matchDescription = matchDescription;
 			this.entitiesInPackage = entitiesInPackage;
@@ -461,6 +464,11 @@ public class StandardsRegistryController extends MolgenisPluginController
 		public String getName()
 		{
 			return name;
+		}
+
+		public String getLabel()
+		{
+			return label;
 		}
 
 		@SuppressWarnings("unused")

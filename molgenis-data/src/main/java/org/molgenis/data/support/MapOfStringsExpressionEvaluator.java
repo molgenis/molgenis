@@ -3,9 +3,9 @@ package org.molgenis.data.support;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
@@ -23,7 +23,7 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 	 */
 	public MapOfStringsExpressionEvaluator(AttributeMetaData attributeMetaData, EntityMetaData entityMetaData)
 	{
-		targetAttributeMetaData = new DefaultAttributeMetaData(attributeMetaData);
+		targetAttributeMetaData = AttributeMetaData.newInstance(attributeMetaData);
 		String expression = attributeMetaData.getExpression();
 		if (expression == null)
 		{
@@ -48,7 +48,7 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 				{
 					throw new IllegalArgumentException("Unknown target attribute: " + entry.getKey() + '.');
 				}
-				DefaultAttributeMetaData amd = new DefaultAttributeMetaData(targetAttributeMetaData)
+				AttributeMetaData amd = AttributeMetaData.newInstance(targetAttributeMetaData)
 						.setExpression(entry.getValue());
 				StringExpressionEvaluator evaluator = new StringExpressionEvaluator(amd, entityMetaData);
 				builder.put(entry.getKey(), evaluator);
@@ -66,7 +66,7 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 	@Override
 	public Object evaluate(Entity entity)
 	{
-		MapEntity result = new MapEntity(targetAttributeMetaData.getRefEntity());
+		Entity result = new DynamicEntity(targetAttributeMetaData.getRefEntity());
 		for (Entry<String, ExpressionEvaluator> entry : evaluators.entrySet())
 		{
 			result.set(entry.getKey(), entry.getValue().evaluate(entity));

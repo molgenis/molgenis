@@ -1,23 +1,37 @@
 package org.molgenis.data.elasticsearch;
 
-import com.google.common.collect.Sets;
-import org.elasticsearch.common.collect.Iterators;
-import org.molgenis.data.*;
-import org.molgenis.data.QueryRule.Operator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.io.IOException;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
-
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.QueryUtils.containsAnyOperator;
 import static org.molgenis.data.QueryUtils.containsComputedAttribute;
-import static org.molgenis.data.RepositoryCapability.*;
+import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
+import static org.molgenis.data.RepositoryCapability.QUERYABLE;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
+
+import org.elasticsearch.common.collect.Iterators;
+import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.AggregateResult;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.EntityMetaData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.google.common.collect.Sets;
 
 /**
  * Decorator for indexed repositories. Sends all queries with operators that are not supported by the decorated
@@ -216,28 +230,6 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		elasticSearchService.rebuildIndex(decoratedRepository, getEntityMetaData());
 	}
 
-	@Override
-	public void create()
-	{
-		if (!decoratedRepository.getCapabilities().contains(MANAGABLE))
-		{
-			throw new MolgenisDataAccessException(
-					"Repository '" + decoratedRepository.getName() + "' is not Manageable");
-		}
-		decoratedRepository.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		if (!decoratedRepository.getCapabilities().contains(MANAGABLE))
-		{
-			throw new MolgenisDataAccessException(
-					"Repository '" + decoratedRepository.getName() + "' is not Manageable");
-		}
-		decoratedRepository.drop();
-	}
-
 	/**
 	 * Gets the capabilities of the underlying repository and adds three read capabilities provided by the index:
 	 * {@link RepositoryCapability#INDEXABLE}, {@link RepositoryCapability#QUERYABLE} and {@link RepositoryCapability#AGGREGATEABLE}.
@@ -416,18 +408,6 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 
 		@Override
 		public void deleteAll()
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void create()
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void drop()
 		{
 			throw new UnsupportedOperationException();
 		}

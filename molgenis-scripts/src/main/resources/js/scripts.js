@@ -12,7 +12,10 @@
 				window.open("/scripts/" + encodeURIComponent(script) + "/run");
 			} else {
 				var parametersTemplate = Handlebars.compile($("#parameters-template").html());
-				restApi.getAsync('/api/v1/script', {q:{q:[{field:'name', operator:'EQUALS', value:script}]}, expand:['parameters']}, function(result) {
+				restApi.getAsync('/api/v1/sys_Script', {
+					q: {q: [{field: 'name', operator: 'EQUALS', value: script}]},
+					expand: ['parameters']
+				}, function (result) {
 					$('#parametersForm').html(parametersTemplate({parameters:result.items[0].parameters.items}));
 					$('#parametersModal').modal('show');
 				});
@@ -30,7 +33,7 @@
 		$('#create-script-btn').click(function(e) {
 			React.render(molgenis.ui.Form({
 				mode: 'create',
-				entity : 'Script',
+				entity: 'sys_Script',
 				modal: true,
 				onSubmitSuccess : function() {
 					location.reload();
@@ -43,7 +46,7 @@
 			
 			React.render(molgenis.ui.Form({
 				mode: 'edit',
-				entity : 'script',
+				entity: 'sys_Script',
 				entityInstance: encodeURIComponent(scriptToEdit),
 				modal: true,
 				onSubmitSuccess : function() {
@@ -56,7 +59,7 @@
 			var scriptToDelete = $(this).parent().siblings(".name").text();
 			
 			if (confirm("Delete script named " + scriptToDelete + " ?")){
-				restApi.remove("/api/v1/script/" + encodeURIComponent(scriptToDelete),{
+				restApi.remove("/api/v1/sys_Script/" + encodeURIComponent(scriptToDelete), {
 					success:function(){},
 					error:function(){}
 				});
@@ -68,7 +71,7 @@
 			var scriptParameterToDelete = $(this).parent().siblings(".name").text();
 			
 			if (confirm("Delete script parameter named " + scriptParameterToDelete + " ?")){
-				restApi.remove("/api/v1/scriptParameter/" + encodeURIComponent(scriptParameterToDelete),{
+				restApi.remove("/api/v1/sys_ScriptParameter/" + encodeURIComponent(scriptParameterToDelete), {
 					success:function(){
 						location.reload();						
 					},
@@ -80,7 +83,7 @@
 		$('#create-scriptparameter-btn').click(function() {
 			React.render(molgenis.ui.Form({
 				mode: 'create',
-				entity : 'scriptparameter',
+				entity: 'sys_ScriptParameter',
 				modal: true,
 				onSubmitSuccess : function() {
 					location.reload();

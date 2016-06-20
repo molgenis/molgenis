@@ -1,27 +1,27 @@
 package org.molgenis.data.idcard.mapper;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.idcard.model.IdCardBiobank.ALSO_LISTED_IN;
-import static org.molgenis.data.idcard.model.IdCardBiobank.CITY;
-import static org.molgenis.data.idcard.model.IdCardBiobank.COUNTRY;
-import static org.molgenis.data.idcard.model.IdCardBiobank.DATE_OF_INCLUSION;
-import static org.molgenis.data.idcard.model.IdCardBiobank.EMAIL;
-import static org.molgenis.data.idcard.model.IdCardBiobank.FIRST_NAME;
-import static org.molgenis.data.idcard.model.IdCardBiobank.ID;
-import static org.molgenis.data.idcard.model.IdCardBiobank.LAST_ACTIVITIES;
-import static org.molgenis.data.idcard.model.IdCardBiobank.LAST_NAME;
-import static org.molgenis.data.idcard.model.IdCardBiobank.NAME;
-import static org.molgenis.data.idcard.model.IdCardBiobank.NAME_OF_HOST_INSTITUTION;
-import static org.molgenis.data.idcard.model.IdCardBiobank.ORGANIZATION_ID;
-import static org.molgenis.data.idcard.model.IdCardBiobank.PHONE;
-import static org.molgenis.data.idcard.model.IdCardBiobank.STREET1;
-import static org.molgenis.data.idcard.model.IdCardBiobank.STREET2;
-import static org.molgenis.data.idcard.model.IdCardBiobank.TARGET_POPULATION;
-import static org.molgenis.data.idcard.model.IdCardBiobank.SALUTATION;
-import static org.molgenis.data.idcard.model.IdCardBiobank.TYPE;
-import static org.molgenis.data.idcard.model.IdCardBiobank.TYPE_OF_HOST_INSTITUTION;
-import static org.molgenis.data.idcard.model.IdCardBiobank.URL;
-import static org.molgenis.data.idcard.model.IdCardBiobank.ZIP;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.ALSO_LISTED_IN;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.CITY;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.COUNTRY;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.DATE_OF_INCLUSION;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.EMAIL;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.FIRST_NAME;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.ID;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.LAST_ACTIVITIES;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.LAST_NAME;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.NAME;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.NAME_OF_HOST_INSTITUTION;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.ORGANIZATION_ID;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.PHONE;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.SALUTATION;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.STREET1;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.STREET2;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.TARGET_POPULATION;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.TYPE;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.TYPE_OF_HOST_INSTITUTION;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.URL;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.ZIP;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.idcard.model.IdCardBiobank;
+import org.molgenis.data.idcard.model.IdCardBiobankFactory;
 import org.molgenis.data.idcard.model.IdCardOrganization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,17 +48,19 @@ public class IdCardBiobankMapperImpl implements IdCardBiobankMapper
 	private static final Logger LOG = LoggerFactory.getLogger(IdCardBiobankMapperImpl.class);
 
 	private final DataService dataService;
+	private final IdCardBiobankFactory idCardBiobankFactory;
 
 	@Autowired
-	public IdCardBiobankMapperImpl(DataService dataService)
+	public IdCardBiobankMapperImpl(DataService dataService, IdCardBiobankFactory idCardBiobankFactory)
 	{
 		this.dataService = requireNonNull(dataService);
+		this.idCardBiobankFactory = requireNonNull(idCardBiobankFactory);
 	}
 
 	@Override
 	public IdCardBiobank toIdCardBiobank(JsonReader jsonReader) throws IOException
 	{
-		IdCardBiobank idCardBiobank = new IdCardBiobank(dataService);
+		IdCardBiobank idCardBiobank = idCardBiobankFactory.create();
 
 		// e.g. "Mon Jan 05 18:02:13 GMT 2015"
 		SimpleDateFormat dateTimeFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");

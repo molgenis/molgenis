@@ -4,25 +4,21 @@ import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
 
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
-
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public class AbstractEnumDatatypeIT extends AbstractDatatypeIT
 {
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("EnumTest");
+		EntityMetaData entityMetaData = null; //new EntityMetaData("EnumTest");
 
 		EnumField enumField = new EnumField();
 		enumField.setEnumOptions(Arrays.asList("ONE", "TWO"));
-		entityMetaData.addAttribute("identifier", ROLE_ID).setDataType(enumField).setNillable(false);
-		entityMetaData.addAttribute("col1").setDataType(enumField);
+		//		entityMetaData.addAttribute("identifier", ROLE_ID).setDataType(enumField).setNillable(false);
+		//		entityMetaData.addAttribute("col1").setDataType(enumField); // FIXME
 
 		return entityMetaData;
 	}

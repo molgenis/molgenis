@@ -9,6 +9,7 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE_TIME;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.FILE;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
 import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -46,11 +47,10 @@ import javax.validation.Valid;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.AttributeMetaData;
+import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityCollection;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisReferencedEntityException;
@@ -61,6 +61,8 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultEntityCollection;
@@ -75,7 +77,6 @@ import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.MolgenisDateFormat;
-import org.molgenis.util.ResourceFingerprintRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,8 +141,7 @@ public class RestController
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
 			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService,
-			ResourceFingerprintRegistry resourceFingerprintRegistry, MolgenisRSQL molgenisRSQL,
-			RestService restService, LanguageService languageService)
+			MolgenisRSQL molgenisRSQL, RestService restService, LanguageService languageService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.tokenService = requireNonNull(tokenService);
@@ -675,7 +675,7 @@ public class RestController
 					+ "' does not exist");
 		}
 
-		if (attr.isReadonly())
+		if (attr.isReadOnly())
 		{
 			throw new MolgenisDataAccessException("Attribute '" + attributeName + "' of entity '" + entityName
 					+ "' is readonly");
@@ -879,8 +879,9 @@ public class RestController
 			throw new BadCredentialsException("Unknown username or password");
 		}
 
-		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
-				new QueryImpl<MolgenisUser>().eq(MolgenisUser.USERNAME, authentication.getName()), MolgenisUser.class);
+		MolgenisUser user = dataService.findOne(MOLGENIS_USER,
+				new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.USERNAME, authentication.getName()),
+				MolgenisUser.class);
 
 		// User authenticated, log the user in
 		SecurityContextHolder.getContext().setAuthentication(authentication);

@@ -1,5 +1,7 @@
 package org.molgenis.security.core.utils;
 
+import static org.molgenis.security.core.runas.SystemSecurityToken.USER_SYSTEM;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -97,6 +99,16 @@ public class SecurityUtils
 		}
 
 		return false;
+	}
+
+	/**
+	 * Returns whether the current user is the system user.
+	 *
+	 * @return
+	 */
+	public static boolean currentUserisSystem()
+	{
+		return getCurrentUsername().equals(USER_SYSTEM);
 	}
 
 	/**

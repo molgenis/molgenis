@@ -12,21 +12,19 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.GenericImporterExtensions;
-import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.VcfAttributes;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -43,7 +41,6 @@ public class VcfImporterService implements ImportService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(VcfImporterService.class);
 	private static final int BATCH_SIZE = 10000;
-	private static final String BACKEND = ElasticsearchRepositoryCollection.NAME;
 
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
@@ -64,36 +61,23 @@ public class VcfImporterService implements ImportService
 
 		List<EntityMetaData> addedEntities = Lists.newArrayList();
 		EntityImportReport report;
-		try
+
+		Iterator<String> it = source.getEntityNames().iterator();
+		if (it.hasNext())
 		{
-			Iterator<String> it = source.getEntityNames().iterator();
-			if (it.hasNext())
+			try (Repository<Entity> repo = source.getRepository(it.next()))
 			{
-				try (Repository<Entity> repo = source.getRepository(it.next());)
-				{
-					report = importVcf(repo, addedEntities);
-				}
+				report = importVcf(repo, addedEntities);
 			}
-			else
+			catch (IOException e)
 			{
-				report = new EntityImportReport();
+				LOG.error("", e);
+				throw new MolgenisDataException(e);
 			}
 		}
-		catch (Exception e)
+		else
 		{
-			LOG.error("Exception importing vcf", e);
-
-			// Remove created repositories
-			try
-			{
-				dataService.getMeta().delete(addedEntities);
-			}
-			catch (Exception e1)
-			{
-				LOG.error("Exception rollback changes", e1);
-			}
-
-			throw new MolgenisDataException(e);
+			report = new EntityImportReport();
 		}
 		return report;
 	}
@@ -121,7 +105,7 @@ public class VcfImporterService implements ImportService
 			report.getFieldsImportable().put(entityName, availableAttributeNames);
 
 			// Sample entity
-			AttributeMetaData sampleAttribute = emd.getAttribute(VcfRepository.SAMPLES);
+			AttributeMetaData sampleAttribute = emd.getAttribute(VcfAttributes.SAMPLES);
 			if (sampleAttribute != null)
 			{
 				String sampleEntityName = sampleAttribute.getRefEntity().getName();
@@ -155,7 +139,8 @@ public class VcfImporterService implements ImportService
 		return false;
 	}
 
-	private EntityImportReport importVcf(Repository<Entity> inRepository, List<EntityMetaData> addedEntities) throws IOException
+	private EntityImportReport importVcf(Repository<Entity> inRepository, List<EntityMetaData> addedEntities)
+			throws IOException
 	{
 		EntityImportReport report = new EntityImportReport();
 		Repository<Entity> sampleRepository = null;
@@ -166,14 +151,12 @@ public class VcfImporterService implements ImportService
 			throw new MolgenisDataException("Can't overwrite existing " + entityName);
 		}
 
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(inRepository.getEntityMetaData());
-		entityMetaData.setBackend(BACKEND);
+		EntityMetaData entityMetaData = new EntityMetaData(inRepository.getEntityMetaData());
 
-		AttributeMetaData sampleAttribute = entityMetaData.getAttribute(VcfRepository.SAMPLES);
+		AttributeMetaData sampleAttribute = entityMetaData.getAttribute(VcfAttributes.SAMPLES);
 		if (sampleAttribute != null)
 		{
-			DefaultEntityMetaData samplesEntityMetaData = new DefaultEntityMetaData(sampleAttribute.getRefEntity());
-			samplesEntityMetaData.setBackend(BACKEND);
+			EntityMetaData samplesEntityMetaData = new EntityMetaData(sampleAttribute.getRefEntity());
 			sampleRepository = dataService.getMeta().addEntityMeta(samplesEntityMetaData);
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Collections.singletonList(samplesEntityMetaData.getName()));
@@ -196,7 +179,7 @@ public class VcfImporterService implements ImportService
 				{
 					Entity entity = inIterator.next();
 
-					Iterable<Entity> samples = entity.getEntities(VcfRepository.SAMPLES);
+					Iterable<Entity> samples = entity.getEntities(VcfAttributes.SAMPLES);
 					if (samples != null)
 					{
 						Iterator<Entity> sampleIterator = samples.iterator();

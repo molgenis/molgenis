@@ -6,10 +6,10 @@ import java.util.Set;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
+import org.molgenis.data.meta.EntityMetaData;
 
 /**
  * For entities that (besides indexing) store their data in Elasticsearch select the source attributes to return based

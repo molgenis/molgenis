@@ -19,14 +19,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -213,6 +213,34 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.add(entity0);
 		verify(decoratedRepo, times(1)).add(entity0);
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
+	}
+
+	@Test
+	public void addEntityDoesNotRequireValidation()
+	{
+		// entities
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(entity0.getIdValue()).thenReturn("id0");
+		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because entity does not require validation
+		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
+		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
+		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
+
+		when(entity0.get(attrIdName)).thenReturn("id0");
+		when(entity0.get(attrXrefName)).thenReturn(null); // valid, because entity does not require validation
+		when(entity0.get(attrNillableXrefName)).thenReturn(null);
+		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
+		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
+
+		// actual tests
+		repositoryValidationDecorator.add(entity0);
+		verify(decoratedRepo, times(1)).add(entity0);
 	}
 
 	@Test
@@ -986,6 +1014,41 @@ public class RepositoryValidationDecoratorTest
 		stream.collect(Collectors.toList()); // process stream to enable validation
 
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
+	}
+
+	@SuppressWarnings(
+	{ "rawtypes", "unchecked" })
+	@Test
+	public void addStreamEntityDoesNotRequireValidation()
+	{
+		// entities
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(entity0.getIdValue()).thenReturn("id0");
+		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because entity does not require validation
+		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
+		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
+		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
+
+		when(entity0.get(attrIdName)).thenReturn("id0");
+		when(entity0.get(attrXrefName)).thenReturn(refEntity0);
+		when(entity0.get(attrNillableXrefName)).thenReturn(null);
+		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
+		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
+
+		// actual tests
+		List<Entity> entities = Arrays.asList(entity0);
+		repositoryValidationDecorator.add(entities.stream());
+
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(decoratedRepo, times(1)).add(captor.capture());
+		Stream<Entity> stream = captor.getValue();
+		stream.collect(Collectors.toList()); // process stream to enable validation
 	}
 
 	@SuppressWarnings(
@@ -2023,6 +2086,34 @@ public class RepositoryValidationDecoratorTest
 	}
 
 	@Test
+	public void updateEntityDoesNotRequireValidation()
+	{
+		// entities
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(entity0.getIdValue()).thenReturn("id0");
+		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because entity does not require validation
+		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
+		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
+		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
+
+		when(entity0.get(attrIdName)).thenReturn("id0");
+		when(entity0.get(attrXrefName)).thenReturn(refEntity0);
+		when(entity0.get(attrNillableXrefName)).thenReturn(null);
+		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
+		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
+
+		// actual tests
+		repositoryValidationDecorator.update(entity0);
+		verify(decoratedRepo, times(1)).update(entity0);
+	}
+
+	@Test
 	public void updateEntityAttributesValidationError()
 	{
 		// entities
@@ -2683,7 +2774,7 @@ public class RepositoryValidationDecoratorTest
 		AttributeMetaData readonlyStringAttr = when(mock(AttributeMetaData.class).getName())
 				.thenReturn(attrReadonlyStringName).getMock();
 		when(readonlyStringAttr.getDataType()).thenReturn(STRING);
-		when(readonlyStringAttr.isReadonly()).thenReturn(true);
+		when(readonlyStringAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyStringName)).thenReturn(readonlyStringAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -2755,7 +2846,7 @@ public class RepositoryValidationDecoratorTest
 				.thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(readonlyXrefAttr.isReadonly()).thenReturn(true);
+		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyXrefName)).thenReturn(readonlyXrefAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -2818,7 +2909,7 @@ public class RepositoryValidationDecoratorTest
 				.thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(readonlyXrefAttr.isReadonly()).thenReturn(true);
+		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyXrefName)).thenReturn(readonlyXrefAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -2890,7 +2981,7 @@ public class RepositoryValidationDecoratorTest
 				.thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(readonlyMrefAttr.isReadonly()).thenReturn(true);
+		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyMrefName)).thenReturn(readonlyMrefAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -2956,7 +3047,7 @@ public class RepositoryValidationDecoratorTest
 				.thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(readonlyMrefAttr.isReadonly()).thenReturn(true);
+		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyMrefName)).thenReturn(readonlyMrefAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -3057,6 +3148,41 @@ public class RepositoryValidationDecoratorTest
 		stream.collect(Collectors.toList()); // process stream to enable validation
 
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
+	}
+
+	@SuppressWarnings(
+	{ "rawtypes", "unchecked" })
+	@Test
+	public void updateStreamEntityDoesNotRequireValidation()
+	{
+		// entities
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
+
+		when(entity0.getIdValue()).thenReturn("id0");
+		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because entity does not require validation
+		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
+		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
+		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
+
+		when(entity0.get(attrIdName)).thenReturn("id0");
+		when(entity0.get(attrXrefName)).thenReturn(refEntity0);
+		when(entity0.get(attrNillableXrefName)).thenReturn(null);
+		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
+		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
+		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
+		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
+
+		// actual tests
+		List<Entity> entities = Arrays.asList(entity0);
+		repositoryValidationDecorator.update(entities.stream());
+
+		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(decoratedRepo, times(1)).update(captor.capture());
+		Stream<Entity> stream = captor.getValue();
+		stream.collect(Collectors.toList()); // process stream to enable validation
 	}
 
 	@SuppressWarnings(
@@ -4066,7 +4192,7 @@ public class RepositoryValidationDecoratorTest
 		AttributeMetaData readonlyStringAttr = when(mock(AttributeMetaData.class).getName())
 				.thenReturn(attrReadonlyStringName).getMock();
 		when(readonlyStringAttr.getDataType()).thenReturn(STRING);
-		when(readonlyStringAttr.isReadonly()).thenReturn(true);
+		when(readonlyStringAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyStringName)).thenReturn(readonlyStringAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -4147,7 +4273,7 @@ public class RepositoryValidationDecoratorTest
 				.thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(readonlyXrefAttr.isReadonly()).thenReturn(true);
+		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyXrefName)).thenReturn(readonlyXrefAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -4219,7 +4345,7 @@ public class RepositoryValidationDecoratorTest
 				.thenReturn(attrReadonlyXrefName).getMock();
 		when(readonlyXrefAttr.getDataType()).thenReturn(XREF);
 		when(readonlyXrefAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(readonlyXrefAttr.isReadonly()).thenReturn(true);
+		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyXrefName)).thenReturn(readonlyXrefAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -4300,7 +4426,7 @@ public class RepositoryValidationDecoratorTest
 				.thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(readonlyMrefAttr.isReadonly()).thenReturn(true);
+		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyMrefName)).thenReturn(readonlyMrefAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
@@ -4374,7 +4500,7 @@ public class RepositoryValidationDecoratorTest
 				.thenReturn(attrReadonlyMrefName).getMock();
 		when(readonlyMrefAttr.getDataType()).thenReturn(MREF);
 		when(readonlyMrefAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(readonlyMrefAttr.isReadonly()).thenReturn(true);
+		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyMrefName)).thenReturn(readonlyMrefAttr);
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,

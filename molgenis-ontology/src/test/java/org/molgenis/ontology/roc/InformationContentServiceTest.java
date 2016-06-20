@@ -1,5 +1,8 @@
 package org.molgenis.ontology.roc;
 
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
+
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -9,14 +12,13 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 
 public class InformationContentServiceTest
@@ -40,12 +42,12 @@ public class InformationContentServiceTest
 	{
 		String ontologyIri = "http://www.molgenis.org";
 
-		MapEntity ontologyEntity = new MapEntity(ImmutableMap.of(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
-
-		Mockito.when(dataService.findOne(OntologyMetaData.ENTITY_NAME,
+		Entity ontologyEntity = new DynamicEntity(null); // FIXME pass entity meta data instead of null
+		ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, ontologyIri);
+		Mockito.when(dataService.findOne(ONTOLOGY,
 				new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri))).thenReturn(ontologyEntity);
 
-		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME,
+		Mockito.when(dataService.count(ONTOLOGY_TERM,
 				new QueryImpl<Entity>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn((long) 100);
 
 		QueryRule queryRule = new QueryRule(
@@ -54,7 +56,7 @@ public class InformationContentServiceTest
 		QueryRule finalQuery = new QueryRule(
 				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
 						new QueryRule(Operator.AND), queryRule));
-		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<>(finalQuery)))
+		Mockito.when(dataService.count(ONTOLOGY_TERM, new QueryImpl<>(finalQuery)))
 				.thenReturn((long) 30);
 
 		QueryRule queryRule2 = new QueryRule(Arrays
@@ -63,7 +65,7 @@ public class InformationContentServiceTest
 		QueryRule finalQuery2 = new QueryRule(
 				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
 						new QueryRule(Operator.AND), queryRule2));
-		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<>(finalQuery2)))
+		Mockito.when(dataService.count(ONTOLOGY_TERM, new QueryImpl<>(finalQuery2)))
 				.thenReturn((long) 10);
 
 		Map<String, Double> expectedWordIDF = informationContentService.createWordIDF("hearing impairment",
@@ -78,12 +80,13 @@ public class InformationContentServiceTest
 	{
 		String ontologyIri = "http://www.molgenis.org";
 
-		MapEntity ontologyEntity = new MapEntity(ImmutableMap.of(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
+		Entity ontologyEntity = new DynamicEntity(null);
+		ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, ontologyIri);
 
-		Mockito.when(dataService.findOne(OntologyMetaData.ENTITY_NAME,
+		Mockito.when(dataService.findOne(ONTOLOGY,
 				new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri))).thenReturn(ontologyEntity);
 
-		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME,
+		Mockito.when(dataService.count(ONTOLOGY_TERM,
 				new QueryImpl<Entity>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity))).thenReturn((long) 100);
 
 		QueryRule queryRule = new QueryRule(
@@ -92,7 +95,7 @@ public class InformationContentServiceTest
 		QueryRule finalQuery = new QueryRule(
 				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
 						new QueryRule(Operator.AND), queryRule));
-		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<>(finalQuery)))
+		Mockito.when(dataService.count(ONTOLOGY_TERM, new QueryImpl<>(finalQuery)))
 				.thenReturn((long) 30);
 
 		QueryRule queryRule2 = new QueryRule(Arrays
@@ -101,7 +104,7 @@ public class InformationContentServiceTest
 		QueryRule finalQuery2 = new QueryRule(
 				Arrays.asList(new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
 						new QueryRule(Operator.AND), queryRule2));
-		Mockito.when(dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<>(finalQuery2)))
+		Mockito.when(dataService.count(ONTOLOGY_TERM, new QueryImpl<>(finalQuery2)))
 				.thenReturn((long) 10);
 
 		Map<String, Double> redistributedNGramScore = informationContentService

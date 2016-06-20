@@ -4,9 +4,9 @@ import java.util.Map;
 
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.QueryImpl;
 

@@ -1,17 +1,16 @@
 package org.molgenis.data.mapper.service.impl;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.js.magma.JsMagmaScriptRegistrator.SCRIPT_TYPE_JAVASCRIPT_MAGMA;
-import static org.molgenis.script.Script.ENTITY_NAME;
-import static org.molgenis.script.Script.TYPE;
+import static org.molgenis.script.ScriptMetaData.SCRIPT;
+import static org.molgenis.script.ScriptMetaData.TYPE;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.script.Script;
@@ -34,8 +33,8 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	public Stream<AlgorithmTemplate> find(Map<AttributeMetaData, ExplainedAttributeMetaData> attrMatches)
 	{
 		// get all algorithm templates
-		Stream<Script> jsScripts = dataService.findAll(ENTITY_NAME,
-				new QueryImpl<Script>().eq(TYPE, SCRIPT_TYPE_JAVASCRIPT_MAGMA), Script.class);
+		Stream<Script> jsScripts = dataService.findAll(SCRIPT,
+				new QueryImpl<Script>().eq(TYPE, "FIXME"/*SCRIPT_TYPE_JAVASCRIPT_MAGMA*/), Script.class);
 
 		// select all algorithm templates that can be used with target and sources
 		return jsScripts.flatMap(script -> toAlgorithmTemplate(script, attrMatches));

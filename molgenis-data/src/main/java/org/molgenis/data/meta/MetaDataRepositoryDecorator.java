@@ -10,7 +10,6 @@ import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
@@ -201,18 +200,6 @@ public class MetaDataRepositoryDecorator implements Repository<Entity>
 	public void clearCache()
 	{
 		decorated.clearCache();
-	}
-
-	@Override
-	public void create()
-	{
-		decorated.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		decorated.drop();
 	}
 
 	@Override

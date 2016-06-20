@@ -13,17 +13,18 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Lists;
 
@@ -38,6 +39,9 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 
 	private final String name;
 	private final Workbook workbook;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
 
 	public ExcelRepositoryCollection(File file) throws IOException, MolgenisInvalidFormatException
 	{
@@ -63,6 +67,12 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 		{
 			throw new MolgenisInvalidFormatException(e.getMessage());
 		}
+	}
+
+	@Override
+	public void init() throws IOException
+	{
+		// no operation
 	}
 
 	@Override
@@ -121,8 +131,8 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 
 	public ExcelSheetWriter createWritable(String entityName, List<String> attributeNames)
 	{
-		List<AttributeMetaData> attributes = attributeNames != null ? attributeNames.stream()
-				.<AttributeMetaData> map(attr -> new DefaultAttributeMetaData(attr)).collect(Collectors.toList()) : null;
+		List<AttributeMetaData> attributes = attributeNames != null ? attributeNames.stream().<AttributeMetaData>map(
+				attrName -> attrMetaFactory.create().setName(attrName)).collect(Collectors.toList()) : null;
 
 		return createWritable(entityName, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);
 	}
@@ -136,12 +146,6 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	public String getName()
 	{
 		return NAME;
-	}
-
-	@Override
-	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
-	{
-		return getRepository(entityMeta.getName());
 	}
 
 	@Override
@@ -178,4 +182,9 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 		return false;
 	}
 
+	@Override
+	public boolean hasRepository(EntityMetaData entityMeta)
+	{
+		return hasRepository(entityMeta.getName());
+	}
 }

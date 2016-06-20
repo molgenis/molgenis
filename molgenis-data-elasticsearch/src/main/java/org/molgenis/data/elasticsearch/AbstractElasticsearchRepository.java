@@ -1,12 +1,11 @@
 package org.molgenis.data.elasticsearch;
 
-import com.google.common.collect.Sets;
-import org.elasticsearch.common.primitives.Ints;
-import org.molgenis.data.*;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
-import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
-import org.molgenis.data.support.QueryImpl;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
+import static org.molgenis.data.RepositoryCapability.INDEXABLE;
+import static org.molgenis.data.RepositoryCapability.MANAGABLE;
+import static org.molgenis.data.RepositoryCapability.QUERYABLE;
+import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 import java.io.IOException;
 import java.util.EnumSet;
@@ -14,8 +13,21 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.RepositoryCapability.*;
+import org.elasticsearch.common.primitives.Ints;
+import org.molgenis.data.AggregateQuery;
+import org.molgenis.data.AggregateResult;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityListener;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
+import org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils;
+import org.molgenis.data.support.QueryImpl;
+
+import com.google.common.collect.Sets;
 
 public abstract class AbstractElasticsearchRepository implements Repository<Entity>
 {
@@ -201,18 +213,6 @@ public abstract class AbstractElasticsearchRepository implements Repository<Enti
 		elasticSearchService.delete(getEntityMetaData().getName());
 		createMappings();
 		elasticSearchService.refresh();
-	}
-
-	@Override
-	public void create()
-	{
-		createMappings();
-	}
-
-	@Override
-	public void drop()
-	{
-		elasticSearchService.delete(getEntityMetaData().getName());
 	}
 
 	@Override

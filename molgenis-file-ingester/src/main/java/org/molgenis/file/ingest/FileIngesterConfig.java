@@ -1,12 +1,13 @@
 package org.molgenis.file.ingest;
 
+import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
+
 import javax.annotation.PostConstruct;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.ui.RepositoryDecoratorRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +28,7 @@ public class FileIngesterConfig
 	public void init()
 	{
 		// Decorate FileIngest repository
-		repositoryDecoratorRegistry.addFactory(FileIngestMetaData.ENTITY_NAME, new RepositoryDecoratorFactory()
+		repositoryDecoratorRegistry.addFactory(FILE_INGEST, new RepositoryDecoratorFactory()
 		{
 			@Override
 			public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)

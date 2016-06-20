@@ -1,5 +1,10 @@
 package org.molgenis.ontology.repository;
 
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
+import static org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH;
+import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
@@ -40,12 +45,11 @@ public class OntologyRepositoryCollectionTest
 	{
 		File file = ResourceUtils.getFile("small_test_data_NGtest.owl.zip");
 		OntologyRepositoryCollection collection = new OntologyRepositoryCollection(file);
-		ontologyRepository = collection.getRepository(OntologyMetaData.ENTITY_NAME);
-		ontologyTermDynamicAnnotationRepository = collection
-				.getRepository(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME);
-		ontologyTermNodePathRepository = collection.getRepository(OntologyTermNodePathMetaData.ENTITY_NAME);
-		ontologyTermSynonymRepository = collection.getRepository(OntologyTermSynonymMetaData.ENTITY_NAME);
-		ontologyTermRepository = collection.getRepository(OntologyTermMetaData.ENTITY_NAME);
+		ontologyRepository = collection.getRepository(ONTOLOGY);
+		ontologyTermDynamicAnnotationRepository = collection.getRepository(ONTOLOGY_TERM_DYNAMIC_ANNOTATION);
+		ontologyTermNodePathRepository = collection.getRepository(ONTOLOGY_TERM_NODE_PATH);
+		ontologyTermSynonymRepository = collection.getRepository(ONTOLOGY_TERM_SYNONYM);
+		ontologyTermRepository = collection.getRepository(ONTOLOGY_TERM);
 	}
 
 	@Test
@@ -103,52 +107,52 @@ public class OntologyRepositoryCollectionTest
 		assertTrue(i.hasNext());
 		Entity entity = i.next();
 		assertNotNull(entity.get(OntologyTermNodePathMetaData.ID));
-		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), "0[0]");
+		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), "0[0]");
 		assertTrue(entity.getBoolean(OntologyTermNodePathMetaData.ROOT));
 
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermNodePathMetaData.ID));
-		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), "0[0].0[1]");
+		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), "0[0].0[1]");
 		assertFalse(entity.getBoolean(OntologyTermNodePathMetaData.ROOT));
 
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermNodePathMetaData.ID));
-		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), "0[0].0[1].0[2]");
+		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), "0[0].0[1].0[2]");
 		assertFalse(entity.getBoolean(OntologyTermNodePathMetaData.ROOT));
 
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermNodePathMetaData.ID));
-		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), "0[0].0[1].0[2].0[3]");
+		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), "0[0].0[1].0[2].0[3]");
 		assertFalse(entity.getBoolean(OntologyTermNodePathMetaData.ROOT));
 
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermNodePathMetaData.ID));
-		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), "0[0].1[1]");
+		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), "0[0].1[1]");
 		assertFalse(entity.getBoolean(OntologyTermNodePathMetaData.ROOT));
 
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermNodePathMetaData.ID));
-		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), "0[0].1[1].0[2]");
+		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), "0[0].1[1].0[2]");
 		assertFalse(entity.getBoolean(OntologyTermNodePathMetaData.ROOT));
 
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermNodePathMetaData.ID));
-		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), "0[0].2[1]");
+		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), "0[0].2[1]");
 		assertFalse(entity.getBoolean(OntologyTermNodePathMetaData.ROOT));
 
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermNodePathMetaData.ID));
-		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), "0[0].2[1].0[2]");
+		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), "0[0].2[1].0[2]");
 		assertFalse(entity.getBoolean(OntologyTermNodePathMetaData.ROOT));
 
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermNodePathMetaData.ID));
-		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), "0[0].2[1].1[2]");
+		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), "0[0].2[1].1[2]");
 		assertFalse(entity.getBoolean(OntologyTermNodePathMetaData.ROOT));
 
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermNodePathMetaData.ID));
-		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), "0[0].2[1].1[2].0[3]");
+		assertEquals(entity.get(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), "0[0].2[1].1[2].0[3]");
 		assertFalse(entity.getBoolean(OntologyTermNodePathMetaData.ROOT));
 
 		assertFalse(i.hasNext());
@@ -162,47 +166,48 @@ public class OntologyRepositoryCollectionTest
 		assertTrue(i.hasNext());
 		Entity entity = i.next();
 		assertNotNull(entity.get(OntologyTermSynonymMetaData.ID));
-		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), "organization");
+		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), "organization");
 
 		assertTrue(i.hasNext());
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermSynonymMetaData.ID));
-		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), "team");
+		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), "team");
 
 		assertTrue(i.hasNext());
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermSynonymMetaData.ID));
-		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), "Genomics coordination center");
+		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR),
+				"Genomics coordination center");
 
 		assertTrue(i.hasNext());
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermSynonymMetaData.ID));
-		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), "weight");
+		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), "weight");
 
 		assertTrue(i.hasNext());
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermSynonymMetaData.ID));
-		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), "top");
+		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), "top");
 
 		assertTrue(i.hasNext());
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermSynonymMetaData.ID));
-		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), "measurement");
+		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), "measurement");
 
 		assertTrue(i.hasNext());
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermSynonymMetaData.ID));
-		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), "body length");
+		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), "body length");
 
 		assertTrue(i.hasNext());
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermSynonymMetaData.ID));
-		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), "height");
+		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), "height");
 
 		assertTrue(i.hasNext());
 		entity = i.next();
 		assertNotNull(entity.get(OntologyTermSynonymMetaData.ID));
-		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), "hospital");
+		assertEquals(entity.get(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), "hospital");
 
 		assertFalse(i.hasNext());
 	}
@@ -222,13 +227,13 @@ public class OntologyRepositoryCollectionTest
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "organization");
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), Arrays.asList("organization"));
+						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), Arrays.asList("organization"));
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
 						OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), Arrays.asList("0[0].0[1]"));
+						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), Arrays.asList("0[0].0[1]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
 		// Team
@@ -238,14 +243,14 @@ public class OntologyRepositoryCollectionTest
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "team");
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), Arrays.asList("team"));
+						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), Arrays.asList("team"));
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
 						OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList("friday:2412423",
 						"molgenis:1231424"));
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), Arrays.asList("0[0].1[1]"));
+						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), Arrays.asList("0[0].1[1]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
 		// GCC
@@ -255,14 +260,14 @@ public class OntologyRepositoryCollectionTest
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "Genomics coordination center");
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM),
+						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR),
 				Arrays.asList("Genomics coordination center"));
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
 						OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList("GCC:987654", "GCC:123456"));
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), Arrays.asList("0[0].0[1].0[2].0[3]",
+						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), Arrays.asList("0[0].0[1].0[2].0[3]",
 						"0[0].1[1].0[2]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
@@ -273,13 +278,13 @@ public class OntologyRepositoryCollectionTest
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "weight");
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), Arrays.asList("weight"));
+						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), Arrays.asList("weight"));
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
 						OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), Arrays.asList("0[0].2[1].0[2]"));
+						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), Arrays.asList("0[0].2[1].0[2]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
 		// Top
@@ -289,13 +294,13 @@ public class OntologyRepositoryCollectionTest
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "top");
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), Arrays.asList("top"));
+						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), Arrays.asList("top"));
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
 						OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), Arrays.asList("0[0]"));
+						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), Arrays.asList("0[0]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
 		// Measurement
@@ -305,13 +310,13 @@ public class OntologyRepositoryCollectionTest
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "measurement");
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), Arrays.asList("measurement"));
+						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), Arrays.asList("measurement"));
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
 						OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), Arrays.asList("0[0].2[1]"));
+						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), Arrays.asList("0[0].2[1]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
 		// Body length
@@ -321,13 +326,14 @@ public class OntologyRepositoryCollectionTest
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "body length");
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), Arrays.asList("body length"));
+						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), Arrays.asList("body length"));
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
 						OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), Arrays.asList("0[0].2[1].1[2].0[3]"));
+						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR),
+				Arrays.asList("0[0].2[1].1[2].0[3]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
 		// Height
@@ -337,13 +343,13 @@ public class OntologyRepositoryCollectionTest
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "height");
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), Arrays.asList("height"));
+						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), Arrays.asList("height"));
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
 						OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), Arrays.asList("0[0].2[1].1[2]"));
+						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), Arrays.asList("0[0].2[1].1[2]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
 		// Hospital
@@ -353,13 +359,13 @@ public class OntologyRepositoryCollectionTest
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "hospital");
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM), Arrays.asList("hospital"));
+						OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), Arrays.asList("hospital"));
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
 						OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
 		assertEquals(
 				getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH), Arrays.asList("0[0].0[1].0[2]"));
+						OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR), Arrays.asList("0[0].0[1].0[2]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
 		assertFalse(i.hasNext());

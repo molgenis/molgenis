@@ -7,16 +7,16 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 
 /**
  * Helper class around the {@link TagMetaData} repository. Internal implementation class, use
  * {@link MetaDataServiceImpl} instead.
  */
+
 public class TagRepository
 {
-	public static final TagMetaData META_DATA = TagMetaData.INSTANCE;
 	private final IdGenerator idGenerator;
 	private final Repository<Entity> repository;
 
@@ -28,15 +28,11 @@ public class TagRepository
 
 	/**
 	 * Fetches a tag from the repository. Creates a new one if it does not yet exist.
-	 * 
-	 * @param objectIri
-	 *            IRI of the object
-	 * @param label
-	 *            label of the object
-	 * @param relation
-	 *            {@link Relation} of the tag
-	 * @param codeSystemIRI
-	 *            the IRI of the code system of the tag
+	 *
+	 * @param objectIRI     IRI of the object
+	 * @param label         label of the object
+	 * @param relation      {@link Relation} of the tag
+	 * @param codeSystemIRI the IRI of the code system of the tag
 	 * @return {@link Entity} of type {@link TagMetaData}
 	 */
 	public Entity getTagEntity(String objectIRI, String label, Relation relation, String codeSystemIRI)
@@ -46,15 +42,15 @@ public class TagRepository
 		Entity result = repository.findOne(q);
 		if (result == null)
 		{
-			MapEntity mapEntity = new MapEntity(TagMetaData.ENTITY_NAME);
-			mapEntity.set(TagMetaData.IDENTIFIER, idGenerator.generateId());
-			mapEntity.set(TagMetaData.OBJECT_IRI, objectIRI);
-			mapEntity.set(TagMetaData.LABEL, label);
-			mapEntity.set(TagMetaData.RELATION_IRI, relation.getIRI());
-			mapEntity.set(TagMetaData.RELATION_LABEL, relation.getLabel());
-			mapEntity.set(TagMetaData.CODE_SYSTEM, codeSystemIRI);
-			repository.add(mapEntity);
-			result = mapEntity;
+			Entity entity = new DynamicEntity(null); // FIXME pass entity meta data instead of null
+			entity.set(TagMetaData.IDENTIFIER, idGenerator.generateId());
+			entity.set(TagMetaData.OBJECT_IRI, objectIRI);
+			entity.set(TagMetaData.LABEL, label);
+			entity.set(TagMetaData.RELATION_IRI, relation.getIRI());
+			entity.set(TagMetaData.RELATION_LABEL, relation.getLabel());
+			entity.set(TagMetaData.CODE_SYSTEM, codeSystemIRI);
+			repository.add(entity);
+			result = entity;
 		}
 		return result;
 	}

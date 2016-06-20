@@ -1,23 +1,23 @@
 package org.molgenis.data.merge;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
-import org.molgenis.data.support.AbstractEntity;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataFactory;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -30,25 +30,24 @@ public class RepositoryMerger
 {
 	private final static String ID = "ID";
 	private final DataService dataService;
+	private final AttributeMetaDataFactory attrMetaFactory;
 
 	@Autowired
-	public RepositoryMerger(DataService dataService)
+	public RepositoryMerger(DataService dataService, AttributeMetaDataFactory attrMetaFactory)
 	{
-		this.dataService = dataService;
+		this.dataService = requireNonNull(dataService);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 	}
 
 	/**
 	 * Create a new merged repository Metadata is merged based on the common attributes (those remain at root level) All
 	 * non-common level attributes are organised in 1 compound attribute per repository Data of all repositories is
 	 * merged based on the common columns
-	 * 
-	 * @param repositoryList
-	 *            list of repositories to be merged
-	 * @param commonAttributes
-	 *            list of common attributes, these columns are use to 'join'/'merge' on
-	 * @param mergedRepository
-	 *            the resulting repository default of 1000 for param: batchSize number of records after which the result
-	 *            is added or updated in the repository
+	 *
+	 * @param repositoryList   list of repositories to be merged
+	 * @param commonAttributes list of common attributes, these columns are use to 'join'/'merge' on
+	 * @param mergedRepository the resulting repository default of 1000 for param: batchSize number of records after which the result
+	 *                         is added or updated in the repository
 	 * @return mergedRepository ElasticSearchRepository containing the merged data
 	 */
 	public Repository<Entity> merge(List<Repository<Entity>> repositoryList, List<AttributeMetaData> commonAttributes,
@@ -61,15 +60,11 @@ public class RepositoryMerger
 	 * Create a new merged repository Metadata is merged based on the common attributes (those remain at root level) All
 	 * non-common level attributes are organised in 1 compound attribute per repository Data of all repositories is
 	 * merged based on the common columns
-	 * 
-	 * @param repositoryList
-	 *            list of repositories to be merged
-	 * @param commonAttributes
-	 *            list of common attributes, these columns are use to 'join'/'merge' on
-	 * @param mergedRepository
-	 *            the resulting repository
-	 * @param batchSize
-	 *            number of records after which the result is added or updated in the repository
+	 *
+	 * @param repositoryList   list of repositories to be merged
+	 * @param commonAttributes list of common attributes, these columns are use to 'join'/'merge' on
+	 * @param mergedRepository the resulting repository
+	 * @param batchSize        number of records after which the result is added or updated in the repository
 	 * @return mergedRepository ElasticSearchRepository containing the merged data
 	 */
 	public Repository<Entity> merge(List<Repository<Entity>> repositoryList, List<AttributeMetaData> commonAttributes,
@@ -105,11 +100,11 @@ public class RepositoryMerger
 				EntityMetaData entityMeta = entity.getEntityMetaData();
 				for (AttributeMetaData attr : entityMeta.getAtomicAttributes())
 				{
-					if ((!attr.equals(entityMeta.getIdAttribute()) || attr.isVisible())
-							&& !containsIgnoreCase(attr.getName(), commonAttributes))
+					if ((!attr.equals(entityMeta.getIdAttribute()) || attr.isVisible()) && !containsIgnoreCase(
+							attr.getName(), commonAttributes))
 					{
-						mergedEntity.set(getMergedAttributeName(repository, attr.getName()),
-								entity.get(attr.getName()));
+						mergedEntity
+								.set(getMergedAttributeName(repository, attr.getName()), entity.get(attr.getName()));
 					}
 				}
 				if (newEntity)
@@ -142,9 +137,9 @@ public class RepositoryMerger
 	/**
 	 * create a new entity based on the merged entity metadata
 	 */
-	private AbstractEntity createMergedEntity(List<AttributeMetaData> commonAttributes, Entity entity)
+	private Entity createMergedEntity(List<AttributeMetaData> commonAttributes, Entity entity)
 	{
-		AbstractEntity mergedEntity = new MapEntity(ID);
+		Entity mergedEntity = new DynamicEntity(null); // FIXME pass entity meta data instead of null
 		mergedEntity.set(ID, UUID.randomUUID().toString());
 
 		for (AttributeMetaData attributeMetaData : commonAttributes)
@@ -157,14 +152,15 @@ public class RepositoryMerger
 	/**
 	 * check if an entity for the common attributes already exists and if so, return it
 	 */
-	private Entity getMergedEntity(Repository<Entity> repository, List<AttributeMetaData> commonAttributes, Entity entity)
+	private Entity getMergedEntity(Repository<Entity> repository, List<AttributeMetaData> commonAttributes,
+			Entity entity)
 	{
 		Query<Entity> findMergedEntityQuery = new QueryImpl<Entity>();
 		for (AttributeMetaData attributeMetaData : commonAttributes)
 		{
 			if (!findMergedEntityQuery.getRules().isEmpty()) findMergedEntityQuery = findMergedEntityQuery.and();
-			findMergedEntityQuery = findMergedEntityQuery.eq(attributeMetaData.getName(),
-					entity.get(attributeMetaData.getName()));
+			findMergedEntityQuery = findMergedEntityQuery
+					.eq(attributeMetaData.getName(), entity.get(attributeMetaData.getName()));
 		}
 
 		Entity result = repository.findOne(findMergedEntityQuery);
@@ -178,9 +174,11 @@ public class RepositoryMerger
 	public EntityMetaData mergeMetaData(List<Repository<Entity>> repositoryList, List<AttributeMetaData> commonAttrs,
 			AttributeMetaData commonIdAttr, String outRepositoryName)
 	{
-		DefaultEntityMetaData mergedMetaData = new DefaultEntityMetaData(outRepositoryName);
-		mergedMetaData.setBackend(ElasticsearchRepositoryCollection.NAME);
-		mergedMetaData.addAttribute(ID, ROLE_ID).setVisible(false);
+		EntityMetaDataFactory entityMetaFactory = getApplicationContext().getBean(EntityMetaDataFactory.class);
+		AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
+
+		EntityMetaData mergedMetaData = entityMetaFactory.create().setSimpleName(outRepositoryName);
+		mergedMetaData.addAttribute(attrMetaFactory.create().setName(ID).setVisible(false), ROLE_ID);
 
 		for (AttributeMetaData commonAttr : commonAttrs)
 		{
@@ -190,12 +188,12 @@ public class RepositoryMerger
 				if (commonAttr.isVisible())
 				{
 					// We added a new ID, save old attribute but do not use it as id
-					commonAttr = new DefaultAttributeMetaData(commonAttr);
+					commonAttr = AttributeMetaData.newInstance(commonAttr);
 				}
 			}
 			else
 			{
-				mergedMetaData.addAttributeMetaData(commonAttr);
+				mergedMetaData.addAttribute(commonAttr);
 			}
 		}
 
@@ -209,12 +207,12 @@ public class RepositoryMerger
 	/**
 	 * Add a compound attribute for a repository containing all "non-common" attributes
 	 */
-	private void mergeRepositoryMetaData(List<AttributeMetaData> commonAttributes, DefaultEntityMetaData mergedMetaData,
+	private void mergeRepositoryMetaData(List<AttributeMetaData> commonAttributes, EntityMetaData mergedMetaData,
 			Repository<Entity> repository)
 	{
 		EntityMetaData originalRepositoryMetaData = repository.getEntityMetaData();
-		DefaultAttributeMetaData repositoryCompoundAttribute = new DefaultAttributeMetaData(repository.getName(),
-				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
+		AttributeMetaData repositoryCompoundAttribute = attrMetaFactory.create().setName(repository.getName())
+				.setDataType(MolgenisFieldTypes.COMPOUND);
 		List<AttributeMetaData> attributeParts = new ArrayList<>();
 		for (AttributeMetaData originalRepositoryAttr : originalRepositoryMetaData.getAttributes())
 		{
@@ -223,7 +221,7 @@ public class RepositoryMerger
 				if (!originalRepositoryAttr.equals(originalRepositoryMetaData.getIdAttribute())
 						|| originalRepositoryAttr.isVisible())
 				{
-					DefaultAttributeMetaData attributePartMetaData = copyAndRename(originalRepositoryAttr,
+					AttributeMetaData attributePartMetaData = copyAndRename(originalRepositoryAttr,
 							getMergedAttributeName(repository, originalRepositoryAttr.getName()),
 							getMergedAttributeLabel(repository, originalRepositoryAttr.getLabel()));
 					if (originalRepositoryAttr.getDataType().getEnumType()
@@ -235,21 +233,21 @@ public class RepositoryMerger
 				}
 			}
 		}
-		repositoryCompoundAttribute.setAttributesMetaData(attributeParts);
-		mergedMetaData.addAttributeMetaData(repositoryCompoundAttribute);
+		repositoryCompoundAttribute.setAttributeParts(attributeParts);
+		mergedMetaData.addAttribute(repositoryCompoundAttribute);
 	}
 
 	/**
 	 * Recursively add all the attributes in an compound attribute
 	 */
-	private void addCompoundAttributeParts(Repository<Entity> repository, AttributeMetaData originalRepositoryAttributeMetaData,
-			DefaultAttributeMetaData attributePartMetaData)
+	private void addCompoundAttributeParts(Repository<Entity> repository,
+			AttributeMetaData originalRepositoryAttributeMetaData, AttributeMetaData attributePartMetaData)
 	{
 		List<AttributeMetaData> subAttributeParts = new ArrayList<AttributeMetaData>();
 		for (AttributeMetaData originalRepositorySubAttributeMetaData : originalRepositoryAttributeMetaData
 				.getAttributeParts())
 		{
-			DefaultAttributeMetaData subAttributePartMetaData = copyAndRename(originalRepositorySubAttributeMetaData,
+			AttributeMetaData subAttributePartMetaData = copyAndRename(originalRepositorySubAttributeMetaData,
 					getMergedAttributeName(repository, originalRepositorySubAttributeMetaData.getName()),
 					getMergedAttributeLabel(repository, originalRepositoryAttributeMetaData.getLabel()));
 			subAttributePartMetaData
@@ -260,7 +258,7 @@ public class RepositoryMerger
 			}
 			subAttributeParts.add(subAttributePartMetaData);
 		}
-		attributePartMetaData.setAttributesMetaData(subAttributeParts);
+		attributePartMetaData.setAttributeParts(subAttributeParts);
 	}
 
 	/**
@@ -293,10 +291,9 @@ public class RepositoryMerger
 		return attributeLabel + "(" + repository.getName() + ")";
 	}
 
-	private DefaultAttributeMetaData copyAndRename(AttributeMetaData attributeMetaData, String name, String label)
+	private AttributeMetaData copyAndRename(AttributeMetaData attributeMetaData, String name, String label)
 	{
-		DefaultAttributeMetaData result = new DefaultAttributeMetaData(name,
-				attributeMetaData.getDataType().getEnumType());
+		AttributeMetaData result = attrMetaFactory.create().setName(name).setDataType(attributeMetaData.getDataType());
 		result.setDescription(attributeMetaData.getDescription());
 		result.setNillable(true);// We got a problem if a attr is required in one entitymeta and missing in another
 		result.setReadOnly(false);
@@ -305,7 +302,7 @@ public class RepositoryMerger
 		result.setLabel(label);
 		result.setVisible(attributeMetaData.isVisible());
 		result.setUnique(attributeMetaData.isUnique());
-		result.setAggregateable(attributeMetaData.isAggregateable());
+		result.setAggregatable(attributeMetaData.isAggregatable());
 		result.setRange(attributeMetaData.getRange());
 
 		return result;

@@ -13,12 +13,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.vcf.VcfAttributes;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.slf4j.LoggerFactory;
@@ -252,8 +252,8 @@ public class CmdLineAnnotator
 					annotator.getOutputMetaData(), attributesToInclude);
 			System.out.println("Now starting to process the data.");
 
-			DefaultEntityMetaData emd = (DefaultEntityMetaData) vcfRepo.getEntityMetaData();
-			DefaultAttributeMetaData infoAttribute = (DefaultAttributeMetaData) emd.getAttribute(VcfRepository.INFO);
+			EntityMetaData emd = (EntityMetaData) vcfRepo.getEntityMetaData();
+			AttributeMetaData infoAttribute = (AttributeMetaData) emd.getAttribute(VcfAttributes.INFO);
 			for (AttributeMetaData attribute : annotator.getOutputMetaData())
 			{
 				for (AttributeMetaData atomicAttribute : attribute.getAttributeParts())

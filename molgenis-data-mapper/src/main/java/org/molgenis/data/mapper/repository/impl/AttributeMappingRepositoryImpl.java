@@ -1,5 +1,7 @@
 package org.molgenis.data.mapper.repository.impl;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -7,16 +9,16 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
 import org.molgenis.data.mapper.repository.AttributeMappingRepository;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Function;
@@ -24,16 +26,17 @@ import com.google.common.collect.Lists;
 
 public class AttributeMappingRepositoryImpl implements AttributeMappingRepository
 {
-	public static final EntityMetaData META_DATA = new AttributeMappingMetaData();
+	private final AttributeMappingMetaData attributeMappingMetaData;
 
 	@Autowired
 	private IdGenerator idGenerator;
 
 	private final DataService dataService;
 
-	public AttributeMappingRepositoryImpl(DataService dataService)
+	public AttributeMappingRepositoryImpl(DataService dataService, AttributeMappingMetaData attributeMappingMetaData)
 	{
-		this.dataService = dataService;
+		this.dataService = requireNonNull(dataService);
+		this.attributeMappingMetaData = requireNonNull(attributeMappingMetaData);
 	}
 
 	@Override
@@ -54,12 +57,12 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		{
 			attributeMapping.setIdentifier(idGenerator.generateId());
 			result = toAttributeMappingEntity(attributeMapping);
-			dataService.add(AttributeMappingRepositoryImpl.META_DATA.getName(), result);
+			dataService.add(attributeMappingMetaData.getName(), result);
 		}
 		else
 		{
 			result = toAttributeMappingEntity(attributeMapping);
-			dataService.update(AttributeMappingRepositoryImpl.META_DATA.getName(), result);
+			dataService.update(attributeMappingMetaData.getName(), result);
 		}
 		return result;
 	}
@@ -117,14 +120,15 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 
 	private Entity toAttributeMappingEntity(AttributeMapping attributeMapping)
 	{
-		Entity attributeMappingEntity = new MapEntity(META_DATA);
+		Entity attributeMappingEntity = new DynamicEntity(attributeMappingMetaData);
 		attributeMappingEntity.set(AttributeMappingMetaData.IDENTIFIER, attributeMapping.getIdentifier());
 		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA,
-				attributeMapping.getTargetAttributeMetaData() != null
-						? attributeMapping.getTargetAttributeMetaData().getName() : null);
+				attributeMapping.getTargetAttributeMetaData() != null ? attributeMapping.getTargetAttributeMetaData()
+						.getName() : null);
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, attributeMapping.getAlgorithm());
-		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS, attributeMapping
-				.getSourceAttributeMetaDatas().stream().map(AttributeMetaData::getName).collect(Collectors.toList()));
+		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS,
+				attributeMapping.getSourceAttributeMetaDatas().stream().map(AttributeMetaData::getName)
+						.collect(Collectors.toList()));
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHMSTATE, attributeMapping.getAlgorithmState());
 		return attributeMappingEntity;
 	}

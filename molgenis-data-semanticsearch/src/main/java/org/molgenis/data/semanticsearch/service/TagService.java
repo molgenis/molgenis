@@ -1,11 +1,11 @@
 package org.molgenis.data.semanticsearch.service;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Package;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semantic.Tag;
+import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
 
@@ -30,12 +30,13 @@ public interface TagService<ObjectType, CodeSystemType>
 	/**
 	 * Retrieves all tags for a package
 	 */
-	Iterable<Tag<Package, ObjectType, CodeSystemType>> getTagsForPackage(Package p);
+	Iterable<SemanticTag<Package, ObjectType, CodeSystemType>> getTagsForPackage(Package p);
 
 	/**
 	 * Retrieves all tags for an entity.
 	 */
-	Iterable<Tag<EntityMetaData, LabeledResource, LabeledResource>> getTagsForEntity(EntityMetaData entityMetaData);
+	Iterable<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> getTagsForEntity(
+			EntityMetaData entityMetaData);
 
 	/**
 	 * Tags an attribute.
@@ -45,7 +46,7 @@ public interface TagService<ObjectType, CodeSystemType>
 	 * @param tag
 	 *            the tag to add
 	 */
-	void addAttributeTag(EntityMetaData entityMetaData, Tag<AttributeMetaData, ObjectType, CodeSystemType> tag);
+	void addAttributeTag(EntityMetaData entityMetaData, SemanticTag<AttributeMetaData, ObjectType, CodeSystemType> tag);
 
 	/**
 	 * Removes attribute tag
@@ -55,17 +56,16 @@ public interface TagService<ObjectType, CodeSystemType>
 	 * @param tag
 	 *            the tag to remove
 	 */
-	void removeAttributeTag(EntityMetaData entityMetaData, Tag<AttributeMetaData, ObjectType, CodeSystemType> tag);
+	void removeAttributeTag(EntityMetaData entityMetaData,
+			SemanticTag<AttributeMetaData, ObjectType, CodeSystemType> tag);
 
 	/**
 	 * Tags an entity.
 	 * 
-	 * @param entityMetaData
-	 *            the entity the tagged attribute sits on
 	 * @param tag
 	 *            the tag to add
 	 */
-	void addEntityTag(Tag<EntityMetaData, ObjectType, CodeSystemType> tag);
+	void addEntityTag(SemanticTag<EntityMetaData, ObjectType, CodeSystemType> tag);
 
 	/**
 	 * Removes an entity tag.
@@ -73,7 +73,7 @@ public interface TagService<ObjectType, CodeSystemType>
 	 * @param tag
 	 *            the tag to remove
 	 */
-	void removeEntityTag(Tag<EntityMetaData, ObjectType, CodeSystemType> tag);
+	void removeEntityTag(SemanticTag<EntityMetaData, ObjectType, CodeSystemType> tag);
 
 	/**
 	 * Removes all tags for a given entity

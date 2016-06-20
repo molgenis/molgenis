@@ -6,9 +6,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 /**
  * An AttributeFilter represents the value of the attrs parameter in a REST query.
@@ -125,7 +125,7 @@ class AttributeFilter implements Iterable<Entry<String, AttributeFilter>>
 
 	private String normalize(String name)
 	{
-		return name.toLowerCase();
+		return name;//.toLowerCase();
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL_MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
+import static org.molgenis.file.FileMetaMetaData.FILE_META;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -14,18 +15,19 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.EntityManager;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileMeta;
+import org.molgenis.file.FileMetaFactory;
 import org.molgenis.file.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -38,17 +40,22 @@ public class RestService
 	private final DataService dataService;
 	private final IdGenerator idGenerator;
 	private final FileStore fileStore;
+	private final FileMetaFactory fileMetaFactory;
+	private final EntityManager entityManager;
 
 	@Autowired
-	public RestService(DataService dataService, IdGenerator idGenerator, FileStore fileStore)
+	public RestService(DataService dataService, IdGenerator idGenerator, FileStore fileStore,
+			FileMetaFactory fileMetaFactory, EntityManager entityManager)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.idGenerator = requireNonNull(idGenerator);
 		this.fileStore = requireNonNull(fileStore);
+		this.fileMetaFactory = fileMetaFactory;
+		this.entityManager = entityManager;
 	}
 
 	/**
-	 * Creates a new MapEntity based from a HttpServletRequest
+	 * Creates a new entity based from a HttpServletRequest
 	 * 
 	 * @param meta
 	 * @param request
@@ -56,7 +63,7 @@ public class RestService
 	 */
 	public Entity toEntity(final EntityMetaData meta, final Map<String, Object> request)
 	{
-		final Entity entity = new MapEntity(meta);
+		final Entity entity = entityManager.create(meta);
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
@@ -115,14 +122,13 @@ public class RestService
 					throw new MolgenisDataException(e);
 				}
 
-				FileMeta fileEntity = new FileMeta(dataService);
-				fileEntity.setId(id);
+				FileMeta fileEntity = fileMetaFactory.create(id);
 				fileEntity.setFilename(multipartFile.getOriginalFilename());
 				fileEntity.setContentType(multipartFile.getContentType());
 				fileEntity.setSize(multipartFile.getSize());
 				fileEntity.setUrl(ServletUriComponentsBuilder.fromCurrentRequest()
 						.replacePath(FileDownloadController.URI + "/" + id).replaceQuery(null).build().toUriString());
-				dataService.add(FileMeta.ENTITY_NAME, fileEntity);
+				dataService.add(FILE_META, fileEntity);
 
 				return fileEntity;
 			}

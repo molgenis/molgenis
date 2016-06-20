@@ -4,14 +4,12 @@ import static java.util.Objects.requireNonNull;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 public class LazyEntity implements Entity
 {
@@ -37,6 +35,12 @@ public class LazyEntity implements Entity
 	}
 
 	@Override
+	public void setIdValue(Object id)
+	{
+		throw new UnsupportedOperationException("Identifier of a lazy entity cannot be modified");
+	}
+
+	@Override
 	public EntityMetaData getEntityMetaData()
 	{
 		return entityMetaData;
@@ -49,13 +53,13 @@ public class LazyEntity implements Entity
 	}
 
 	@Override
-	public String getLabelValue()
+	public Object getLabelValue()
 	{
-		AttributeMetaData idAttr = getEntityMetaData().getIdAttribute();
-		AttributeMetaData labelAttr = getEntityMetaData().getLabelAttribute();
+		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
+		AttributeMetaData labelAttr = entityMetaData.getLabelAttribute();
 		if (idAttr.equals(labelAttr))
 		{
-			return DataConverter.toString(getIdValue());
+			return id;
 		}
 		else
 		{
@@ -69,7 +73,7 @@ public class LazyEntity implements Entity
 		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
 		if (attributeName.equals(idAttr.getName()))
 		{
-			return getIdValue();
+			return id;
 		}
 		return getLazyLoadedEntity().get(attributeName);
 	}
@@ -80,7 +84,7 @@ public class LazyEntity implements Entity
 		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
 		if (attributeName.equals(idAttr.getName()))
 		{
-			return DataConverter.toString(getIdValue());
+			return (String) id;
 		}
 		return getLazyLoadedEntity().getString(attributeName);
 	}
@@ -91,7 +95,7 @@ public class LazyEntity implements Entity
 		AttributeMetaData idAttr = entityMetaData.getIdAttribute();
 		if (attributeName.equals(idAttr.getName()))
 		{
-			return DataConverter.toInt(getIdValue());
+			return (Integer) id;
 		}
 		return getLazyLoadedEntity().getInt(attributeName);
 	}
@@ -157,18 +161,6 @@ public class LazyEntity implements Entity
 	}
 
 	@Override
-	public List<String> getList(String attributeName)
-	{
-		return getLazyLoadedEntity().getList(attributeName);
-	}
-
-	@Override
-	public List<Integer> getIntList(String attributeName)
-	{
-		return getLazyLoadedEntity().getIntList(attributeName);
-	}
-
-	@Override
 	public void set(String attributeName, Object value)
 	{
 		getLazyLoadedEntity().set(attributeName, value);
@@ -184,12 +176,12 @@ public class LazyEntity implements Entity
 	{
 		if (entity == null)
 		{
-			entity = dataService.findOneById(getEntityMetaData().getName(), id);
+			entity = dataService.findOneById(entityMetaData.getName(), id);
 			if (entity == null)
 			{
-				throw new UnknownEntityException("entity [" + getEntityMetaData().getName() + "] with "
-						+ getEntityMetaData().getIdAttribute().getName() + " [" + getIdValue().toString()
-						+ "] does not exist");
+				throw new UnknownEntityException(
+						"entity [" + entityMetaData.getName() + "] with " + entityMetaData.getIdAttribute().getName()
+								+ " [" + id.toString() + "] does not exist");
 			}
 		}
 		return entity;

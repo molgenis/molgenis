@@ -84,6 +84,8 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 		PSQLException pSqlException = sqlException;
 		switch (pSqlException.getSQLState())
 		{
+			case "22P02": // not an integer exception
+				return translateInvalidIntegerException(pSqlException);
 			case "23502": // not_null_violation
 				return translateNotNullViolation(pSqlException);
 			case "23503": // foreign_key_violation
@@ -95,9 +97,26 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 		}
 	}
 
+	MolgenisValidationException translateInvalidIntegerException(PSQLException pSqlException)
+	{
+		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
+		String message = serverErrorMessage.getMessage();
+		Matcher matcher = Pattern.compile("invalid input syntax for integer: \"(.*?)\"").matcher(message);
+		boolean matches = matcher.matches();
+		if (!matches)
+		{
+			throw new RuntimeException("Error translating exception", pSqlException);
+		}
+		String value = matcher.group(1);
+
+		ConstraintViolation constraintViolation = new ConstraintViolation(
+				format("Value [%s] of this entity attribute is not an integer.", value), null);
+		return new MolgenisValidationException(singleton(constraintViolation));
+	}
+
 	/**
 	 * Package private for testability
-	 * 
+	 *
 	 * @param pSqlException
 	 * @return
 	 */
@@ -109,20 +128,35 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 		Matcher matcher = Pattern.compile("null value in column \"(.*?)\" violates not-null constraint")
 				.matcher(message);
 		boolean matches = matcher.matches();
-		if (!matches)
+		if (matches)
 		{
-			throw new RuntimeException("Error translating exception", pSqlException);
-		}
-		String columnName = matcher.group(1);
+			// exception message when adding data that does not match constraint
+			String columnName = matcher.group(1);
 
-		ConstraintViolation constraintViolation = new ConstraintViolation(
-				format("The attribute '%s' of entity '%s' can not be null.", columnName, tableName), null);
-		return new MolgenisValidationException(singleton(constraintViolation));
+			ConstraintViolation constraintViolation = new ConstraintViolation(
+					format("The attribute '%s' of entity '%s' can not be null.", columnName, tableName), null);
+			return new MolgenisValidationException(singleton(constraintViolation));
+		}
+		else
+		{
+			// exception message when applying constraint on existing data
+			matcher = Pattern.compile("column \"(.*?)\" contains null values").matcher(message);
+			matches = matcher.matches();
+			if (!matches)
+			{
+				throw new RuntimeException("Error translating exception", pSqlException);
+			}
+			String columnName = matcher.group(1);
+
+			ConstraintViolation constraintViolation = new ConstraintViolation(
+					format("The attribute '%s' of entity '%s' contains null values.", columnName, tableName), null);
+			return new MolgenisValidationException(singleton(constraintViolation));
+		}
 	}
 
 	/**
 	 * Package private for testability
-	 * 
+	 *
 	 * @param pSqlException
 	 * @return
 	 */
@@ -136,12 +170,12 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 		{
 			throw new RuntimeException("Error translating exception", pSqlException);
 		}
-		String value = m.group(1);
+		String colName = m.group(1);
 		if (!m.find())
 		{
 			throw new RuntimeException("Error translating exception", pSqlException);
 		}
-		String colName = m.group(1);
+		String value = m.group(1);
 		ConstraintViolation constraintViolation = new ConstraintViolation(
 				format("Unknown xref value '%s' for attribute '%s' of entity '%s'.", value, colName, tableName), null);
 		return new MolgenisValidationException(singleton(constraintViolation));
@@ -149,7 +183,7 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 
 	/**
 	 * Package private for testability
-	 * 
+	 *
 	 * @param pSqlException
 	 * @return
 	 */
@@ -160,17 +194,36 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 		String detailMessage = serverErrorMessage.getDetail();
 		Matcher matcher = Pattern.compile("Key \\((.*?)\\)=\\((.*?)\\) already exists.").matcher(detailMessage);
 		boolean matches = matcher.matches();
-		if (!matches)
+		if (matches)
 		{
-			throw new RuntimeException("Error translating exception", pSqlException);
-		}
-		String columnName = matcher.group(1);
-		String value = matcher.group(2);
+			// exception message when adding data that does not match constraint
+			String columnName = matcher.group(1);
+			String value = matcher.group(2);
 
-		ConstraintViolation constraintViolation = new ConstraintViolation(
-				format("Duplicate value '%s' for unique attribute '%s' from entity '%s'.", value, columnName,
-						tableName),
-				null);
-		return new MolgenisValidationException(singleton(constraintViolation));
+			ConstraintViolation constraintViolation = new ConstraintViolation(
+					format("Duplicate value '%s' for unique attribute '%s' from entity '%s'.", value, columnName,
+							tableName), null);
+			return new MolgenisValidationException(singleton(constraintViolation));
+		}
+		else
+		{
+			// exception message when applying constraint on existing data
+			matcher = Pattern.compile("Key \\((.*?)\\)=\\((.*?)\\) is duplicated.").matcher(detailMessage);
+			matches = matcher.matches();
+			if (matches)
+			{
+				String columnName = matcher.group(1);
+				String value = matcher.group(2);
+
+				ConstraintViolation constraintViolation = new ConstraintViolation(
+						format("The attribute '%s' of entity '%s' contains duplicate value '%s'.", columnName,
+								tableName, value), null);
+				return new MolgenisValidationException(singleton(constraintViolation));
+			}
+			else
+			{
+				throw new RuntimeException("Error translating exception", pSqlException);
+			}
+		}
 	}
 }

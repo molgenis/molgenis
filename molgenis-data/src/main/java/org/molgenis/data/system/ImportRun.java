@@ -1,374 +1,159 @@
 package org.molgenis.data.system;
 
+import static org.molgenis.data.meta.system.ImportRunMetaData.ENDDATE;
+import static org.molgenis.data.meta.system.ImportRunMetaData.ID;
+import static org.molgenis.data.meta.system.ImportRunMetaData.IMPORTEDENTITIES;
+import static org.molgenis.data.meta.system.ImportRunMetaData.MESSAGE;
+import static org.molgenis.data.meta.system.ImportRunMetaData.NOTIFY;
+import static org.molgenis.data.meta.system.ImportRunMetaData.PROGRESS;
+import static org.molgenis.data.meta.system.ImportRunMetaData.STARTDATE;
+import static org.molgenis.data.meta.system.ImportRunMetaData.STATUS;
+import static org.molgenis.data.meta.system.ImportRunMetaData.USERNAME;
+
+import java.util.ArrayList;
 import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.system.ImportRunMetaData;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.support.StaticEntity;
+import org.molgenis.util.ValueLabel;
 
-
-public class ImportRun extends org.molgenis.data.support.AbstractEntity implements org.molgenis.data.Entity
+public class ImportRun extends StaticEntity
 {
-	private static final long serialVersionUID = -1301848877377607791L;
-
-	public static final String ENTITY_NAME = "ImportRun";
-
-	private static final java.util.List<org.molgenis.util.ValueLabel> status_options;
-	private static final java.util.List<org.molgenis.util.ValueLabel> notify_options;
-
-	private String id;
-	private Date startDate;
-	private Date endDate;
-	private String userName;
-	private String status;
-	private String message;
-	private int progress;
-	private String importedEntities;
-	private boolean notify;
-	private String status_label;
+	private static final List<ValueLabel> status_options;
+	private static final List<ValueLabel> notify_options;
 
 	static
 	{
-		status_options = new java.util.ArrayList<org.molgenis.util.ValueLabel>();
+		status_options = new ArrayList<>();
 		status_options.add(new org.molgenis.util.ValueLabel("RUNNING", "RUNNING"));
 		status_options.add(new org.molgenis.util.ValueLabel("FINISHED", "FINISHED"));
 		status_options.add(new org.molgenis.util.ValueLabel("FAILED", "FAILED"));
-	}
 
-	static
-	{
-		notify_options = new java.util.ArrayList<org.molgenis.util.ValueLabel>();
+		notify_options = new ArrayList<>();
 		notify_options.add(new org.molgenis.util.ValueLabel("API", "API"));
 		notify_options.add(new org.molgenis.util.ValueLabel("UI", "UI"));
 	}
 
+	public ImportRun(Entity entity)
+	{
+		super(entity);
+	}
+
+	public ImportRun(EntityMetaData entityMeta)
+	{
+		super(entityMeta);
+	}
+
+	public ImportRun(String id, EntityMetaData entityMeta)
+	{
+		super(entityMeta);
+		setId(id);
+	}
+
 	public String getId()
 	{
-		return id;
+		return getString(ID);
 	}
 
 	public void setId(String id)
 	{
-		this.id = id;
+		set(ID, id);
 	}
 
 	public Date getStartDate()
 	{
-		return startDate;
+		return getUtilDate(STARTDATE);
 	}
 
 	public void setStartDate(Date startDate)
 	{
-		this.startDate = startDate;
+		set(STARTDATE, startDate);
 	}
 
 	public Date getEndDate()
 	{
-		return endDate;
+		return getUtilDate(ENDDATE);
 	}
 
 	public void setEndDate(Date endDate)
 	{
-		this.endDate = endDate;
+		set(ENDDATE, endDate);
 	}
 
 	public String getUserName()
 	{
-		return userName;
+		return getString(USERNAME);
 	}
 
 	public void setUserName(String userName)
 	{
-		this.userName = userName;
+		set(USERNAME, userName);
 	}
 
 	public String getStatus()
 	{
-		return status;
+		return getString(STATUS);
 	}
 
 	public void setStatus(String status)
 	{
-		this.status = status;
+		set(STATUS, status);
 	}
 
 	public String getMessage()
 	{
-		return message;
+		return getString(STATUS);
 	}
 
 	public void setMessage(String message)
 	{
-		this.message = message;
+		set(MESSAGE, message);
 	}
 
 	public int getProgress()
 	{
-		return progress;
+		Integer progress = getInt(PROGRESS);
+		return progress != null ? progress : 0;
 	}
 
 	public void setProgress(int progress)
 	{
-		this.progress = progress;
+		set(PROGRESS, progress);
 	}
 
 	public String getImportedEntities()
 	{
-		return importedEntities;
+		return getString(IMPORTEDENTITIES);
 	}
 
 	public void setImportedEntities(String importedEntities)
 	{
-		this.importedEntities = importedEntities;
-	}
-
-	public String getStatusLabel()
-	{
-		return this.status_label;
+		set(IMPORTEDENTITIES, importedEntities);
 	}
 
 	public boolean getNotify()
 	{
-		return notify;
+		Boolean notify = getBoolean(NOTIFY);
+		return notify != null ? notify : null;
 	}
 
 	public void setNotify(boolean notify)
 	{
-		this.notify = notify;
+		set(NOTIFY, notify);
 	}
 
 	/**
 	 * Status is enum. This method returns all available enum options.
 	 */
-	public java.util.List<org.molgenis.util.ValueLabel> getStatusOptions()
+	public List<ValueLabel> getStatusOptions()
 	{
 		return status_options;
 	}
 
-	public java.util.List<org.molgenis.util.ValueLabel> getnotifyOptions()
+	public List<ValueLabel> getNotifyOptions()
 	{
 		return notify_options;
-	}
-
-	@Override
-	public Object get(String name)
-	{
-		if (name.equals("id")) return getId();
-		if (name.equals("startDate")) return getStartDate();
-		if (name.equals("endDate")) return getEndDate();
-		if (name.equals("userName")) return getUserName();
-		if (name.equals("status")) return getStatus();
-		if (name.equals("status_label")) return getStatusLabel();
-		if (name.equals("message")) return getMessage();
-		if (name.equals("progress")) return getProgress();
-		if (name.equals("importedEntities")) return getImportedEntities();
-		if (name.equals("notify")) return getNotify();
-		return null;
-	}
-
-	@Override
-	public void set(Entity entity)
-	{
-		set(entity, true);
-	}
-
-	public void set(org.molgenis.data.Entity entity, boolean strict)
-	{
-		if (entity.getString("id") != null) this.setId(entity.getString("id"));
-		if (entity.getString("ImportRun_id") != null) this.setId(entity.getString("ImportRun_id"));
-		if (entity.getTimestamp("startDate") != null) this.setStartDate(entity.getTimestamp("startDate"));
-		if (entity.getTimestamp("ImportRun_startDate") != null)
-			this.setStartDate(entity.getTimestamp("ImportRun_startDate"));
-		if (entity.getTimestamp("endDate") != null) this.setEndDate(entity.getTimestamp("endDate"));
-		if (entity.getTimestamp("ImportRun_endDate") != null) this.setEndDate(entity.getTimestamp("ImportRun_endDate"));
-		if (entity.getString("userName") != null) this.setUserName(entity.getString("userName"));
-		if (entity.getString("ImportRun_userName") != null) this.setUserName(entity.getString("ImportRun_userName"));
-		if (entity.getString("status") != null) this.setStatus(entity.getString("status"));
-		if (entity.getString("ImportRun_status") != null) this.setStatus(entity.getString("ImportRun_status"));
-		if (entity.getString("message") != null) this.setMessage(entity.getString("message"));
-		if (entity.getString("ImportRun_message") != null) this.setMessage(entity.getString("ImportRun_message"));
-		if (entity.getInt("progress") != null) this.setProgress(entity.getInt("progress"));
-		if (entity.getInt("ImportRun_progress") != null) this.setProgress(entity.getInt("ImportRun_progress"));
-		if (entity.getString("importedEntities") != null)
-			this.setImportedEntities(entity.getString("importedEntities"));
-		if (entity.getString("ImportRun_importedEntities") != null)
-			this.setImportedEntities(entity.getString("ImportRun_importedEntities"));
-		if (entity.getBoolean("notify") != null) this.setNotify(entity.getBoolean("notify"));
-		if (entity.getString("ImportRun_notify") != null) this.setNotify(entity.getBoolean("ImportRun_notify"));
-
-	}
-
-	@Override
-	public String toString()
-	{
-		return this.toString(false);
-	}
-
-	public String toString(boolean verbose)
-	{
-		StringBuilder sb = new StringBuilder("ImportRun(");
-		sb.append("id='" + getId() + "' ");
-		sb.append("startDate='" + (getStartDate() == null ? ""
-				: new java.text.SimpleDateFormat("MMMM d, yyyy, HH:mm:ss", java.util.Locale.US).format(getStartDate()))
-				+ "' ");
-		sb.append("endDate='" + (getEndDate() == null ? ""
-				: new java.text.SimpleDateFormat("MMMM d, yyyy, HH:mm:ss", java.util.Locale.US).format(getEndDate()))
-				+ "' ");
-		sb.append("userName='" + getUserName() + "' ");
-		sb.append("status='" + getStatus() + "' ");
-		sb.append("message='" + getMessage() + "' ");
-		sb.append("progress='" + getProgress() + "' ");
-		sb.append("importedEntities='" + getImportedEntities() + "'");
-		sb.append("notify='" + getNotify() + "'");
-		sb.append(");");
-		return sb.toString();
-	}
-
-	@Override
-	public String getIdValue()
-	{
-		return getId();
-	}
-
-	@Override
-	public Iterable<String> getAttributeNames()
-	{
-		Set<String> attributeNames = new LinkedHashSet<String>();
-		for (AttributeMetaData attr : new ImportRunMetaData().getAttributes())
-		{
-			attributeNames.add(attr.getName());
-		}
-
-		return attributeNames;
-	}
-
-	@Override
-	public void set(String attributeName, Object value)
-	{
-		if ("id".equalsIgnoreCase(attributeName))
-		{
-			this.setId((String) value);
-			return;
-		}
-		if ("startDate".equalsIgnoreCase(attributeName))
-		{
-			this.setStartDate((java.util.Date) value);
-			return;
-		}
-		if ("endDate".equalsIgnoreCase(attributeName))
-		{
-			this.setEndDate((java.util.Date) value);
-			return;
-		}
-		if ("userName".equalsIgnoreCase(attributeName))
-		{
-			this.setUserName((String) value);
-			return;
-		}
-		if ("status".equalsIgnoreCase(attributeName))
-		{
-			this.setStatus((String) value);
-			return;
-		}
-		if ("message".equalsIgnoreCase(attributeName))
-		{
-			this.setMessage((String) value);
-			return;
-		}
-		if ("progress".equalsIgnoreCase(attributeName))
-		{
-			this.setProgress((Integer) value);
-			return;
-		}
-		if ("importedEntities".equalsIgnoreCase(attributeName))
-		{
-			this.setImportedEntities((String) value);
-			return;
-		}
-		if ("notify".equalsIgnoreCase(attributeName))
-		{
-			this.setNotify((Boolean) value);
-			return;
-		}
-	}
-
-
-
-	@Override
-	public int hashCode()
-	{
-		final int prime = 31;
-		int result = 1;
-		result = prime * result + ((endDate == null) ? 0 : endDate.hashCode());
-		result = prime * result + ((id == null) ? 0 : id.hashCode());
-		result = prime * result + ((importedEntities == null) ? 0 : importedEntities.hashCode());
-		result = prime * result + ((message == null) ? 0 : message.hashCode());
-		result = prime * result + (notify ? 1231 : 1237);
-		result = prime * result + progress;
-		result = prime * result + ((startDate == null) ? 0 : startDate.hashCode());
-		result = prime * result + ((status == null) ? 0 : status.hashCode());
-		result = prime * result + ((status_label == null) ? 0 : status_label.hashCode());
-		result = prime * result + ((userName == null) ? 0 : userName.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj)
-	{
-		if (this == obj) return true;
-		if (obj == null) return false;
-		if (getClass() != obj.getClass()) return false;
-		ImportRun other = (ImportRun) obj;
-		if (endDate == null)
-		{
-			if (other.endDate != null) return false;
-		}
-		else if (!endDate.equals(other.endDate)) return false;
-		if (id == null)
-		{
-			if (other.id != null) return false;
-		}
-		else if (!id.equals(other.id)) return false;
-		if (importedEntities == null)
-		{
-			if (other.importedEntities != null) return false;
-		}
-		else if (!importedEntities.equals(other.importedEntities)) return false;
-		if (message == null)
-		{
-			if (other.message != null) return false;
-		}
-		else if (!message.equals(other.message)) return false;
-		if (notify != other.notify) return false;
-		if (progress != other.progress) return false;
-		if (startDate == null)
-		{
-			if (other.startDate != null) return false;
-		}
-		else if (!startDate.equals(other.startDate)) return false;
-		if (status == null)
-		{
-			if (other.status != null) return false;
-		}
-		else if (!status.equals(other.status)) return false;
-		if (status_label == null)
-		{
-			if (other.status_label != null) return false;
-		}
-		else if (!status_label.equals(other.status_label)) return false;
-		if (userName == null)
-		{
-			if (other.userName != null) return false;
-		}
-		else if (!userName.equals(other.userName)) return false;
-		return true;
-	}
-
-	@Override
-	public org.molgenis.data.EntityMetaData getEntityMetaData()
-	{
-		return new ImportRunMetaData();
 	}
 }

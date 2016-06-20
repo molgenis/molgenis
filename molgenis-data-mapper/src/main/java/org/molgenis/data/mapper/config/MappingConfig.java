@@ -4,6 +4,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.data.mapper.algorithmgenerator.service.impl.AlgorithmGeneratorServiceImpl;
+import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.mapper.repository.impl.AttributeMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.EntityMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl;
@@ -16,6 +17,7 @@ import org.molgenis.data.mapper.service.impl.AlgorithmTemplateService;
 import org.molgenis.data.mapper.service.impl.AlgorithmTemplateServiceImpl;
 import org.molgenis.data.mapper.service.impl.MappingServiceImpl;
 import org.molgenis.data.mapper.service.impl.UnitResolverImpl;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.ontology.core.config.OntologyConfig;
@@ -56,11 +58,17 @@ public class MappingConfig
 	@Autowired
 	OntologyTermRepository ontologyTermRepository;
 
+	@Autowired
+	AttributeMappingMetaData attributeMappingMetaData;
+
+	@Autowired
+	AttributeMetaDataFactory attrMetaFactory;
+
 	@Bean
 	public MappingService mappingService()
 	{
 		return new MappingServiceImpl(dataService, algorithmServiceImpl(), idGenerator, mappingProjectRepository(),
-				permissionSystemService);
+				permissionSystemService, attrMetaFactory);
 	}
 
 	@Bean
@@ -103,7 +111,7 @@ public class MappingConfig
 	@Bean
 	public AttributeMappingRepositoryImpl attributeMappingRepository()
 	{
-		return new AttributeMappingRepositoryImpl(dataService);
+		return new AttributeMappingRepositoryImpl(dataService, attributeMappingMetaData);
 	}
 
 	@Bean

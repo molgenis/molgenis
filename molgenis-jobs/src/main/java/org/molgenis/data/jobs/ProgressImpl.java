@@ -17,9 +17,6 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
-
 /**
  * Tracks progress and stores it in a {@link JobExecution} entity.
  * The entity may be a subclass of {@link JobExecution}.

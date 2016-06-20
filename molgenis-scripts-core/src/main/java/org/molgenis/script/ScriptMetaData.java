@@ -1,25 +1,59 @@
 package org.molgenis.script;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.script.ScriptPackage.PACKAGE_SCRIPT;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class ScriptMetaData extends DefaultEntityMetaData
+public class ScriptMetaData extends SystemEntityMetaData
 {
-	public ScriptMetaData()
+	private static final String SIMPLE_NAME = "Script";
+	public static final String SCRIPT = PACKAGE_SCRIPT + PACKAGE_SEPARATOR + SIMPLE_NAME;
+
+	public static final String NAME = "name";
+	public static final String TYPE = "type";// The ScriptType like r
+	public static final String CONTENT = "content";// The freemarker code
+	public static final String GENERATE_TOKEN = "generateToken";// If true a security token is generated for the script
+	// (available as ${molgenisToken})
+	public static final String RESULT_FILE_EXTENSION = "resultFileExtension"; // If the script generates an outputfile,
+	// this is it's file extension
+	// (outputfile available as
+	// ${outputFile})
+	public static final String PARAMETERS = "parameters";// The names of the parameters required by this script
+
+	private final ScriptPackage scriptPackage;
+	private final ScriptParameterMetaData scriptParameterMetaData;
+	private final ScriptTypeMetaData scriptTypeMetaData;
+
+	@Autowired
+	ScriptMetaData(ScriptPackage scriptPackage, ScriptParameterMetaData scriptParameterMetaData,
+			ScriptTypeMetaData scriptTypeMetaData)
 	{
-		super(Script.ENTITY_NAME, Script.class);
-		addAttribute(Script.NAME, ROLE_ID).setNillable(false).setLabel("Name");
-		addAttribute(Script.TYPE).setNillable(false).setLabel("Type").setDataType(MolgenisFieldTypes.XREF)
-				.setRefEntity(ScriptType.META_DATA);
-		addAttribute(Script.CONTENT).setNillable(false).setDataType(MolgenisFieldTypes.SCRIPT).setLabel("Content");
-		addAttribute(Script.GENERATE_TOKEN).setDataType(MolgenisFieldTypes.BOOL).setLabel("Generate security token")
+		super(SIMPLE_NAME, PACKAGE_SCRIPT);
+		this.scriptPackage = requireNonNull(scriptPackage);
+		this.scriptParameterMetaData = requireNonNull(scriptParameterMetaData);
+		this.scriptTypeMetaData = requireNonNull(scriptTypeMetaData);
+	}
+
+	@Override
+	public void init()
+	{
+		setPackage(scriptPackage);
+
+		addAttribute(NAME, ROLE_ID).setNillable(false).setLabel("Name");
+		addAttribute(TYPE).setNillable(false).setLabel("Type").setDataType(MolgenisFieldTypes.XREF)
+				.setRefEntity(scriptTypeMetaData);
+		addAttribute(CONTENT).setNillable(false).setDataType(MolgenisFieldTypes.SCRIPT).setLabel("Content");
+		addAttribute(GENERATE_TOKEN).setDataType(MolgenisFieldTypes.BOOL).setLabel("Generate security token")
 				.setDefaultValue("false");
-		addAttribute(Script.RESULT_FILE_EXTENSION).setNillable(true).setLabel("Result file extension");
-		addAttribute(Script.PARAMETERS).setNillable(true).setLabel("Parameters").setDataType(MolgenisFieldTypes.MREF)
-				.setRefEntity(ScriptParameter.META_DATA);
+		addAttribute(RESULT_FILE_EXTENSION).setNillable(true).setLabel("Result file extension");
+		addAttribute(PARAMETERS).setNillable(true).setLabel("Parameters").setDataType(MolgenisFieldTypes.MREF)
+				.setRefEntity(scriptParameterMetaData);
 	}
 }

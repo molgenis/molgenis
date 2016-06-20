@@ -1,13 +1,13 @@
 package org.molgenis.data.elasticsearch.index;
 
+import java.io.IOException;
+
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
-
-import java.io.IOException;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 /**
  * Builds mappings for a documentType. For each column a multi_field is created, one analyzed for searching and one
@@ -21,7 +21,9 @@ public class MappingsBuilder
 	public static final String FIELD_NOT_ANALYZED = "raw";
 	public static final String FIELD_NGRAM_ANALYZED = "ngram";
 
-	private MappingsBuilder(){}
+	private MappingsBuilder()
+	{
+	}
 
 	/**
 	 * Creates a Elasticsearch mapping for the given entity meta data
@@ -33,7 +35,8 @@ public class MappingsBuilder
 	 * @return
 	 * @throws IOException
 	 */
-	public static void buildMapping(XContentBuilder jsonBuilder, EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
+	public static void buildMapping(XContentBuilder jsonBuilder, EntityMetaData entityMetaData, boolean storeSource,
+			boolean enableNorms,
 			boolean createAllIndex) throws IOException
 	{
 		String documentType = MapperTypeSanitizer.sanitizeMapperType(entityMetaData.getName());

@@ -532,7 +532,7 @@
             <plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.6.201602180812</version>
+                <version>0.7.6.201602180812</version>
 				<executions>
 					<execution>
 						<id>amend-unit-test-java-agent-option</id>
@@ -559,7 +559,7 @@
             <plugin>
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>0.7.6.201602180812</version>
+                <version>0.7.6.201602180812</version>
 			</plugin>
             <!-- code analysis -->
             <plugin>
@@ -687,7 +687,6 @@
         <module>molgenis-charts</module>
         <module>molgenis-js</module>
         <module>molgenis-model-registry</module>
-        <module>molgenis-data-examples</module>
         <module>molgenis-scripts</module>
         <module>molgenis-scripts-core</module>
         <module>molgenis-data-import</module>
@@ -700,7 +699,7 @@
 		<module>molgenis-catalogue</module>
 		<module>molgenis-file-ingester</module>
 		<module>molgenis-integration-tests</module>
-		<module>molgenis-jobs</module>
-		<module>molgenis-platform-integration-tests</module>
+        <module>molgenis-jobs</module>
+        <module>molgenis-platform-integration-tests</module>
     </modules>
 </project>
