@@ -13,18 +13,7 @@ public interface ReindexService
 	 */
 	void rebuildIndex(String transactionId);
 
-	/**
-	 * Check if the index for entity is stable, including references.
-	 *
-	 * @param entityName
-	 * @return boolean
-	 */
-	boolean isIndexStableIncludingReferences(String entityName);
+	void waitForAllIndicesStable() throws InterruptedException;
 
-	/**
-	 * Check if the whole index is stable
-	 *
-	 * @return boolean
-	 */
-	boolean areAllIndiciesStable();
+	void waitForIndexToBeStableIncludingReferences(String entityName) throws InterruptedException;
 }
