@@ -1,4 +1,4 @@
-package org.molgenis.integrationtest.data.postgresql;
+package org.molgenis.integrationtest.platform;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,8 +13,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
+import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.PostgreSqlEntityFactory;
 import org.molgenis.data.postgresql.PostgreSqlRepository;
@@ -28,12 +27,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 
-@Import({ PostgreSqlEntityFactory.class, PostgreSqlConfiguration.class })
+@Import(
+{ PostgreSqlEntityFactory.class, PostgreSqlConfiguration.class })
 public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestConfig
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractPostgreSqlTestConfig.class);
@@ -46,15 +47,12 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 	PostgreSqlEntityFactory postgreSqlEntityFactory;
 
 	@Autowired
-	EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
-
-	@Autowired
 	JdbcTemplate jdbcTemplate;
 
 	@Override
-	protected RepositoryCollection getBackend()
+	protected ManageableRepositoryCollection getBackend()
 	{
-		return new PostgreSqlRepositoryCollection(dataSource, null, null) // FIXME
+		return new PostgreSqlRepositoryCollection(dataSource)
 		{
 			@Override
 			protected PostgreSqlRepository createPostgreSqlRepository()
@@ -76,6 +74,7 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 		try
 		{
 			Connection conn = getConnection();
+
 			Statement statement = conn.createStatement();
 			statement.executeUpdate("DROP DATABASE IF EXISTS \"" + INTEGRATION_DATABASE + "\"");
 			statement.executeUpdate("CREATE DATABASE \"" + INTEGRATION_DATABASE + "\"");
@@ -84,7 +83,7 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 		}
 		catch (Exception e)
 		{
-			throw new RuntimeException(e);
+			throw new RuntimeException(e.getMessage());
 		}
 	}
 
@@ -111,11 +110,6 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 	@PreDestroy
 	public void cleanup()
 	{
-		cleanUpPostgreSQL();
-	}
-
-	private void cleanUpPostgreSQL()
-	{
 		try
 		{
 			((ComboPooledDataSource) dataSource).close();
@@ -135,7 +129,9 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 	public static PropertySourcesPlaceholderConfigurer properties()
 	{
 		PropertySourcesPlaceholderConfigurer pspc = new PropertySourcesPlaceholderConfigurer();
-		Resource[] resources = new Resource[] { new ClassPathResource("/postgresql/molgenis.properties") };
+		Resource[] resources = new Resource[]
+		{ new FileSystemResource(System.getProperty("molgenis.home") + "/molgenis-server.properties"),
+				new ClassPathResource("/postgresql/molgenis.properties") };
 		pspc.setLocations(resources);
 		pspc.setFileEncoding("UTF-8");
 		pspc.setIgnoreUnresolvablePlaceholders(true);

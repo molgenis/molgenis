@@ -13,9 +13,8 @@ import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.FileRepositoryCollection;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.file.FileMetaFactory;
 import org.molgenis.file.ingest.execution.FileIngester;
 import org.molgenis.file.ingest.execution.FileStoreDownload;
@@ -60,8 +59,8 @@ public class FileIngesterTest
 		fileIngester = new FileIngester(fileStoreDownloadMock, importServiceFactoryMock,
 				fileRepositoryCollectionFactoryMock, fileMetaFactory);
 
-		entityMetaData = new MapEntity(EntityMetaDataMetaData.FULL_NAME, entityName);
-		fileIngest = new MapEntity();
+		entityMetaData = new DynamicEntity(null); // FIXME pass entity meta data instead of null
+		fileIngest = new DynamicEntity(null); // FIXME pass entity meta data instead of null
 		fileIngest.set(FileIngestMetaData.ENTITY_META_DATA, entityMetaData);
 		fileIngest.set(FileIngestMetaData.URL, url);
 		fileIngest.set(FileIngestMetaData.LOADER, "CSV");

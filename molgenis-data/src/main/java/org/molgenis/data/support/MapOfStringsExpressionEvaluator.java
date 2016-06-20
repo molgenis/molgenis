@@ -66,7 +66,7 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 	@Override
 	public Object evaluate(Entity entity)
 	{
-		MapEntity result = new MapEntity(targetAttributeMetaData.getRefEntity());
+		Entity result = new DynamicEntity(targetAttributeMetaData.getRefEntity());
 		for (Entry<String, ExpressionEvaluator> entry : evaluators.entrySet())
 		{
 			result.set(entry.getKey(), entry.getValue().evaluate(entity));

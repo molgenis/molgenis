@@ -192,7 +192,7 @@ public class ImportWizardControllerTest extends AbstractTestNGSpringContextTests
 	//		Map<String, List<Permission>> groupPermissions = permissions.getGroupPermissions();
 	//
 	//		Permission permission = new Permission();
-	//		permission.setType("writemeta");
+	//		permission.setScriptType("writemeta");
 	//		permission.setGroup("TestGroup");
 	//		assertEquals(groupPermissions.get("entity1"), Arrays.asList(permission));
 	//		assertEquals(groupPermissions.get("entity2"), Arrays.asList(permission));

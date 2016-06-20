@@ -29,7 +29,6 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -63,7 +62,7 @@ import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
@@ -422,8 +421,9 @@ public class SortaServiceController extends MolgenisPluginController
 		{
 			String queryString = request.get("queryString").toString();
 			String ontologyIri = request.get(OntologyMetaData.ONTOLOGY_IRI).toString();
-			Entity inputEntity = new MapEntity(
-					Collections.singletonMap(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString));
+			// FIXME pass entity meta data instead of null
+			Entity inputEntity = new DynamicEntity(null);
+			inputEntity.set(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString);
 
 			return new SortaServiceResponse(inputEntity,
 					sortaService.findOntologyTermEntities(ontologyIri, inputEntity));
@@ -432,7 +432,7 @@ public class SortaServiceController extends MolgenisPluginController
 				"Please check that queryString and ontologyIRI keys exist in input and have nonempty value!");
 	}
 
-	private MapEntity toDownloadRow(SortaJobExecution sortaJobExecution, Entity resultEntity)
+	private Entity toDownloadRow(SortaJobExecution sortaJobExecution, Entity resultEntity)
 	{
 		NumberFormat format = NumberFormat.getNumberInstance();
 		format.setMaximumFractionDigits(2);
@@ -440,7 +440,8 @@ public class SortaServiceController extends MolgenisPluginController
 		Entity ontologyTermEntity = sortaService.getOntologyTermEntity(
 				resultEntity.getString(MatchingTaskContentEntityMetaData.MATCHED_TERM),
 				sortaJobExecution.getOntologyIri());
-		MapEntity row = new MapEntity(inputEntity);
+		Entity row = new DynamicEntity(null); // FIXME pass entity meta data instead of null
+		row.set(inputEntity);
 		row.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME,
 				ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_NAME));
 		row.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI,

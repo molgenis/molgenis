@@ -721,7 +721,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	//		Map<String, Object> lvl1 = gson.fromJson(responseWithAttrs.getContentAsString(),
 	//				new TypeToken<Map<String, Object>>()
 	//				{
-	//				}.getType());
+	//				}.getScriptType());
 	//		assertEquals(lvl1.get("selfRef").toString(), "{_href=/api/v2/selfRefEntity/0, id=0}");
 	//	}
 	//
@@ -736,7 +736,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	//		Map<String, Object> lvl1 = gson.fromJson(responseWithAttrs.getContentAsString(),
 	//				new TypeToken<Map<String, Object>>()
 	//				{
-	//				}.getType());
+	//				}.getScriptType());
 	//		@SuppressWarnings("unchecked")
 	//		Map<String, Object> lvl2 = (Map<String, Object>) lvl1.get("selfRef");
 	//		assertEquals(lvl2.get("selfRef").toString(),

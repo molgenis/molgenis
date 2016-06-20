@@ -91,7 +91,7 @@ public class SavedScriptRunner
 			parameters.put("outputFile", outputFile);
 		}
 
-		ScriptRunner scriptRunner = scriptRunnerFactory.getScriptRunner(script.getType().getName());
+		ScriptRunner scriptRunner = scriptRunnerFactory.getScriptRunner(script.getScriptType().getName());
 		String output = scriptRunner.runScript(script, parameters);
 
 		return new ScriptResult(outputFile, output);

@@ -4,7 +4,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.TagMetaData.TAG;
 import static org.testng.Assert.assertEquals;
 
 import java.util.UUID;
@@ -15,7 +14,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.TagMetaData;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -53,7 +52,7 @@ public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testGetTagEntity()
 	{
-		MapEntity expected = new MapEntity(TAG);
+		Entity expected = new DynamicEntity(null); // // FIXME pass entity meta data instead of null
 		expected.set(TagMetaData.IDENTIFIER, uuid.toString());
 		expected.set(TagMetaData.OBJECT_IRI, "http://edamontology.org/data_3031");
 		expected.set(TagMetaData.LABEL, "Core data");
@@ -64,9 +63,9 @@ public class TagRepositoryTest extends AbstractTestNGSpringContextTests
 		assertEquals(tagRepository.getTagEntity("http://edamontology.org/data_3031", "Core data", Relation.instanceOf,
 				"http://edamontology.org"), expected);
 
-		when(
-				repository.findOne(new QueryImpl<Entity>().eq(TagMetaData.OBJECT_IRI, "http://edamontology.org/data_3031")
-						.and().eq(TagMetaData.RELATION_IRI, "http://molgenis.org/biobankconnect/instanceOf").and()
+		when(repository.findOne(
+				new QueryImpl<Entity>().eq(TagMetaData.OBJECT_IRI, "http://edamontology.org/data_3031").and()
+						.eq(TagMetaData.RELATION_IRI, "http://molgenis.org/biobankconnect/instanceOf").and()
 						.eq(TagMetaData.CODE_SYSTEM, "http://edamontology.org"))).thenReturn(expected);
 
 		assertEquals(tagRepository.getTagEntity("http://edamontology.org/data_3031", "Core data", Relation.instanceOf,

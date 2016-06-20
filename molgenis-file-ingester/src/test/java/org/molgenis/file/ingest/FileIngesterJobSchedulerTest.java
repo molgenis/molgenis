@@ -10,7 +10,7 @@ import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
@@ -94,7 +94,7 @@ public class FileIngesterJobSchedulerTest {
 	public void scheduleInactive() throws SchedulerException
 	{
 		String id = "id";
-		Entity fileIngest = new MapEntity();
+		Entity fileIngest = new DynamicEntity(null); // // FIXME pass entity meta data instead of null
 		fileIngest.set(FileIngestMetaData.ID, id);
 		fileIngest.set(FileIngestMetaData.CRONEXPRESSION, "	0/20 * * * * ?");
 		fileIngest.set(FileIngestMetaData.NAME, "name");
@@ -111,7 +111,7 @@ public class FileIngesterJobSchedulerTest {
 	public void scheduleInvalidCronExpression() throws SchedulerException
 	{
 		String id = "id";
-		Entity fileIngest = new MapEntity();
+		Entity fileIngest = new DynamicEntity(null); // // FIXME pass entity meta data instead of null
 		fileIngest.set(FileIngestMetaData.ID, id);
 		fileIngest.set(FileIngestMetaData.CRONEXPRESSION, "XXX");
 		fileIngest.set(FileIngestMetaData.NAME, "name");

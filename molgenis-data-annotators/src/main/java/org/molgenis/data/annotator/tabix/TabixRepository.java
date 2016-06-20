@@ -21,7 +21,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -171,7 +171,7 @@ public class TabixRepository extends AbstractRepository
 
 	protected Entity toEntity(String line) throws IOException
 	{
-		Entity result = new MapEntity(entityMetaData);
+		Entity result = new DynamicEntity(entityMetaData);
 		CSVParser csvParser = getCsvParser();
 		String[] columns = csvParser.parseLine(line);
 		int i = 0;

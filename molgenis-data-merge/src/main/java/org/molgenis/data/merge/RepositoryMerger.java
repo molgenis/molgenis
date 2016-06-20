@@ -17,8 +17,7 @@ import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataFactory;
-import org.molgenis.data.support.AbstractEntity;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,14 +43,11 @@ public class RepositoryMerger
 	 * Create a new merged repository Metadata is merged based on the common attributes (those remain at root level) All
 	 * non-common level attributes are organised in 1 compound attribute per repository Data of all repositories is
 	 * merged based on the common columns
-	 * 
-	 * @param repositoryList
-	 *            list of repositories to be merged
-	 * @param commonAttributes
-	 *            list of common attributes, these columns are use to 'join'/'merge' on
-	 * @param mergedRepository
-	 *            the resulting repository default of 1000 for param: batchSize number of records after which the result
-	 *            is added or updated in the repository
+	 *
+	 * @param repositoryList   list of repositories to be merged
+	 * @param commonAttributes list of common attributes, these columns are use to 'join'/'merge' on
+	 * @param mergedRepository the resulting repository default of 1000 for param: batchSize number of records after which the result
+	 *                         is added or updated in the repository
 	 * @return mergedRepository ElasticSearchRepository containing the merged data
 	 */
 	public Repository<Entity> merge(List<Repository<Entity>> repositoryList, List<AttributeMetaData> commonAttributes,
@@ -64,15 +60,11 @@ public class RepositoryMerger
 	 * Create a new merged repository Metadata is merged based on the common attributes (those remain at root level) All
 	 * non-common level attributes are organised in 1 compound attribute per repository Data of all repositories is
 	 * merged based on the common columns
-	 * 
-	 * @param repositoryList
-	 *            list of repositories to be merged
-	 * @param commonAttributes
-	 *            list of common attributes, these columns are use to 'join'/'merge' on
-	 * @param mergedRepository
-	 *            the resulting repository
-	 * @param batchSize
-	 *            number of records after which the result is added or updated in the repository
+	 *
+	 * @param repositoryList   list of repositories to be merged
+	 * @param commonAttributes list of common attributes, these columns are use to 'join'/'merge' on
+	 * @param mergedRepository the resulting repository
+	 * @param batchSize        number of records after which the result is added or updated in the repository
 	 * @return mergedRepository ElasticSearchRepository containing the merged data
 	 */
 	public Repository<Entity> merge(List<Repository<Entity>> repositoryList, List<AttributeMetaData> commonAttributes,
@@ -108,11 +100,11 @@ public class RepositoryMerger
 				EntityMetaData entityMeta = entity.getEntityMetaData();
 				for (AttributeMetaData attr : entityMeta.getAtomicAttributes())
 				{
-					if ((!attr.equals(entityMeta.getIdAttribute()) || attr.isVisible())
-							&& !containsIgnoreCase(attr.getName(), commonAttributes))
+					if ((!attr.equals(entityMeta.getIdAttribute()) || attr.isVisible()) && !containsIgnoreCase(
+							attr.getName(), commonAttributes))
 					{
-						mergedEntity.set(getMergedAttributeName(repository, attr.getName()),
-								entity.get(attr.getName()));
+						mergedEntity
+								.set(getMergedAttributeName(repository, attr.getName()), entity.get(attr.getName()));
 					}
 				}
 				if (newEntity)
@@ -145,9 +137,9 @@ public class RepositoryMerger
 	/**
 	 * create a new entity based on the merged entity metadata
 	 */
-	private AbstractEntity createMergedEntity(List<AttributeMetaData> commonAttributes, Entity entity)
+	private Entity createMergedEntity(List<AttributeMetaData> commonAttributes, Entity entity)
 	{
-		AbstractEntity mergedEntity = new MapEntity(ID);
+		Entity mergedEntity = new DynamicEntity(null); // FIXME pass entity meta data instead of null
 		mergedEntity.set(ID, UUID.randomUUID().toString());
 
 		for (AttributeMetaData attributeMetaData : commonAttributes)
@@ -160,14 +152,15 @@ public class RepositoryMerger
 	/**
 	 * check if an entity for the common attributes already exists and if so, return it
 	 */
-	private Entity getMergedEntity(Repository<Entity> repository, List<AttributeMetaData> commonAttributes, Entity entity)
+	private Entity getMergedEntity(Repository<Entity> repository, List<AttributeMetaData> commonAttributes,
+			Entity entity)
 	{
 		Query<Entity> findMergedEntityQuery = new QueryImpl<Entity>();
 		for (AttributeMetaData attributeMetaData : commonAttributes)
 		{
 			if (!findMergedEntityQuery.getRules().isEmpty()) findMergedEntityQuery = findMergedEntityQuery.and();
-			findMergedEntityQuery = findMergedEntityQuery.eq(attributeMetaData.getName(),
-					entity.get(attributeMetaData.getName()));
+			findMergedEntityQuery = findMergedEntityQuery
+					.eq(attributeMetaData.getName(), entity.get(attributeMetaData.getName()));
 		}
 
 		Entity result = repository.findOne(findMergedEntityQuery);
@@ -247,8 +240,8 @@ public class RepositoryMerger
 	/**
 	 * Recursively add all the attributes in an compound attribute
 	 */
-	private void addCompoundAttributeParts(Repository<Entity> repository, AttributeMetaData originalRepositoryAttributeMetaData,
-			AttributeMetaData attributePartMetaData)
+	private void addCompoundAttributeParts(Repository<Entity> repository,
+			AttributeMetaData originalRepositoryAttributeMetaData, AttributeMetaData attributePartMetaData)
 	{
 		List<AttributeMetaData> subAttributeParts = new ArrayList<AttributeMetaData>();
 		for (AttributeMetaData originalRepositorySubAttributeMetaData : originalRepositoryAttributeMetaData

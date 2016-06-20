@@ -27,7 +27,7 @@ import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.RhinoConfig;
 import org.molgenis.js.ScriptEvaluator;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -111,7 +111,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				AlgorithmEvaluation algorithmResult = new AlgorithmEvaluation(entity);
 
 				Object derivedValue;
-				MapEntity mapEntity = createMapEntity(attributeNames, entity); // why is this necessary?
+				Entity mapEntity = createEntity(attributeNames, entity); // why is this necessary?
 				try
 				{
 					Object result = ScriptEvaluator.eval(algorithm, mapEntity, entity.getEntityMetaData());
@@ -127,9 +127,9 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		});
 	}
 
-	private MapEntity createMapEntity(Collection<String> attributeNames, Entity entity)
+	private Entity createEntity(Collection<String> attributeNames, Entity entity)
 	{
-		MapEntity mapEntity = new MapEntity();
+		Entity mapEntity = new DynamicEntity(entity.getEntityMetaData());
 		for (String attributeName : attributeNames)
 		{
 			Object value = entity.get(attributeName);
@@ -151,7 +151,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			return null;
 		}
 
-		MapEntity entity = createMapEntity(getSourceAttributeNames(attributeMapping.getAlgorithm()), sourceEntity);
+		Entity entity = createEntity(getSourceAttributeNames(attributeMapping.getAlgorithm()), sourceEntity);
 		Object value = ScriptEvaluator.eval(algorithm, entity, sourceEntityMetaData);
 		return convert(value, attributeMapping.getTargetAttributeMetaData());
 	}

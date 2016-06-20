@@ -12,7 +12,7 @@ import java.util.Arrays;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.processor.CellProcessor;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.Test;
 
 public class CsvWriterTest
@@ -49,7 +49,7 @@ public class CsvWriterTest
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
 
-		Entity entity = new MapEntity();
+		Entity entity = new DynamicEntity(null); // // FIXME pass entity meta data instead of null
 		entity.set("col1", "val1");
 		entity.set("col2", "val2");
 
@@ -76,7 +76,7 @@ public class CsvWriterTest
 		try
 		{
 			csvWriter.writeAttributeNames(Arrays.asList("col1", "col2"));
-			Entity entity = new MapEntity();
+			Entity entity = new DynamicEntity(null); // FIXME pass entity meta data instead of null
 			entity.set("col1", "val1");
 			entity.set("col2", "val2");
 			csvWriter.add(entity);
@@ -96,7 +96,7 @@ public class CsvWriterTest
 		try
 		{
 			csvWriter.writeAttributes(Arrays.asList("col1", "col2"), Arrays.asList("label1", "label2"));
-			Entity entity = new MapEntity();
+			Entity entity = new DynamicEntity(null); // FIXME pass entity meta data instead of null
 			entity.set("col1", "val1");
 			entity.set("col2", "val2");
 			csvWriter.add(entity);

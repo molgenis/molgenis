@@ -35,7 +35,7 @@ import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataFactory;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 
 import com.google.common.collect.Iterables;
 
@@ -153,13 +153,13 @@ public class OmimRepository extends AbstractRepository
 
 	/**
 	 * Uses the map containing the parsed OMIM map to create a list of {@link Entity}
-	 * 
+	 *
 	 * @param omimEntriesByGeneSymbol
 	 * @param geneSymbol
 	 */
 	private void addEntityToGeneEntityList(Map<String, List<List<String>>> omimEntriesByGeneSymbol, String geneSymbol)
 	{
-		Entity entity = new MapEntity(getEntityMetaData());
+		Entity entity = new DynamicEntity(getEntityMetaData());
 		entity.set(OMIM_GENE_SYMBOLS_COL_NAME, geneSymbol);
 		entity.set(OMIM_PHENOTYPE_COL_NAME, join(omimEntriesByGeneSymbol.get(geneSymbol).get(0), ","));
 		entity.set(OMIM_MIM_NUMBER_COL_NAME, join(omimEntriesByGeneSymbol.get(geneSymbol).get(1), ","));

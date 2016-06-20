@@ -59,9 +59,14 @@ public class Script extends StaticEntity
 		set(NAME, name);
 	}
 
-	public ScriptType getType()
+	public ScriptType getScriptType()
 	{
 		return getEntity(TYPE, ScriptType.class);
+	}
+
+	public void setScriptType(ScriptType scriptType)
+	{
+		set(TYPE, scriptType);
 	}
 
 	public String getContent()

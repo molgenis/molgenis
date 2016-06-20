@@ -30,7 +30,8 @@ public class BatchingQueryResultTest
 				assertEquals(q.getPageSize(), batchSize);
 
 				if (++batchCount == 3) return Lists.newArrayList();
-				return Arrays.asList(new MapEntity(), new MapEntity());
+				return Arrays.asList(new DynamicEntity(null),
+						new DynamicEntity(null)); // FIXME pass entity meta data instead of null
 			}
 		};
 

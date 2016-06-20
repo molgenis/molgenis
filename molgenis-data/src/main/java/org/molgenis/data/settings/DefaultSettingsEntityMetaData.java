@@ -1,12 +1,14 @@
 package org.molgenis.data.settings;
 
 import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
+import static org.molgenis.util.EntityUtils.getTypedValue;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -16,6 +18,9 @@ public abstract class DefaultSettingsEntityMetaData extends SystemEntityMetaData
 
 	@Autowired
 	private DataService dataService;
+
+	@Autowired
+	private EntityManager entityManager;
 
 	@Autowired
 	public SettingsEntityMeta settingsEntityMeta;
@@ -45,15 +50,17 @@ public abstract class DefaultSettingsEntityMetaData extends SystemEntityMetaData
 
 	Entity getDefaultSettings()
 	{
-		MapEntity mapEntity = new MapEntity(this);
+		Entity defaultSettingsEntity = new DynamicEntity(this);
 		for (AttributeMetaData attr : this.getAtomicAttributes())
 		{
+			// default values are stored/retrieved as strings, so we convert them to the required type here.
 			String defaultValue = attr.getDefaultValue();
 			if (defaultValue != null)
 			{
-				mapEntity.set(attr.getName(), defaultValue);
+				Object typedDefaultValue = getTypedValue(defaultValue, attr, entityManager);
+				defaultSettingsEntity.set(attr.getName(), typedDefaultValue);
 			}
 		}
-		return mapEntity;
+		return defaultSettingsEntity;
 	}
 }

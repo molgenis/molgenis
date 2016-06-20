@@ -2,7 +2,10 @@ package org.molgenis.util;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
+import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
+import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -12,6 +15,8 @@ import java.util.stream.StreamSupport;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.Package;
@@ -23,6 +28,78 @@ import com.google.common.collect.Iterables;
 
 public class EntityUtils
 {
+	/**
+	 * Convert a string value to a typed value based on the attribute data type.
+	 *
+	 * @param valueStr      string value
+	 * @param attr          attribute
+	 * @param entityManager entity manager used to convert referenced entity values
+	 * @return typed value
+	 */
+	public static Object getTypedValue(String valueStr, AttributeMetaData attr, EntityManager entityManager)
+	{
+		if (valueStr == null)
+		{
+			return null;
+		}
+
+		switch (attr.getDataType().getEnumType())
+		{
+			case BOOL:
+				return Boolean.valueOf(valueStr);
+			case CATEGORICAL:
+			case FILE:
+			case XREF:
+				EntityMetaData xrefEntity = attr.getRefEntity();
+				Object xrefIdValue = getTypedValue(valueStr, xrefEntity.getIdAttribute(), entityManager);
+				return entityManager.getReference(xrefEntity, xrefIdValue);
+			case CATEGORICAL_MREF:
+			case MREF:
+				EntityMetaData mrefEntity = attr.getRefEntity();
+				List<String> mrefIdStrValues = ListEscapeUtils.toList(valueStr);
+				return mrefIdStrValues.stream()
+						.map(mrefIdStrValue -> getTypedValue(mrefIdStrValue, mrefEntity.getIdAttribute(),
+								entityManager));
+			case COMPOUND:
+				throw new IllegalArgumentException("Compound attribute has no value");
+			case DATE:
+				try
+				{
+					return getDateFormat().parse(valueStr);
+				}
+				catch (ParseException e)
+				{
+					throw new MolgenisDataException(e);
+				}
+			case DATE_TIME:
+				try
+				{
+					return getDateTimeFormat().parse(valueStr);
+				}
+				catch (ParseException e)
+				{
+					throw new MolgenisDataException(e);
+				}
+			case DECIMAL:
+				return Double.valueOf(valueStr);
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				return valueStr;
+			case INT:
+				return Integer.valueOf(valueStr);
+			case LONG:
+				return Long.valueOf(valueStr);
+			default:
+				throw new RuntimeException(
+						format("Unknown attribute type [%s]", attr.getDataType().getEnumType().toString()));
+		}
+	}
+
 	/**
 	 * Checks if an entity contains data or not
 	 *

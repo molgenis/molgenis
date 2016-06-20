@@ -4,10 +4,11 @@ import static java.util.Objects.requireNonNull;
 
 import java.util.Map;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataFactory;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.ScriptEvaluator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -41,7 +42,10 @@ public class JsMagmaScriptExecutor
 		parameters.keySet().stream().forEach(key -> {
 			entityMeta.addAttribute(attrMetaFactory.create().setName(key));
 		});
-		MapEntity entity = new MapEntity(parameters);
+		Entity entity = new DynamicEntity(entityMeta);
+		parameters.entrySet().forEach(parameter -> {
+			entity.set(parameter.getKey(), parameter.getValue());
+		});
 		return ScriptEvaluator.eval(jsScript, entity, entityMeta);
 	}
 }

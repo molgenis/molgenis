@@ -14,7 +14,7 @@ import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.MappingProjectMetaData;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.repository.MappingTargetRepository;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -97,9 +97,8 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 
 	/**
 	 * Creates a fully reconstructed MappingProject from an Entity retrieved from the repository.
-	 * 
-	 * @param mappingProjectEntity
-	 *            Entity with {@link MappingProjectMetaData} metadata
+	 *
+	 * @param mappingProjectEntity Entity with {@link MappingProjectMetaData} metadata
 	 * @return fully reconstructed MappingProject
 	 */
 	private MappingProject toMappingProject(Entity mappingProjectEntity)
@@ -117,14 +116,13 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	/**
 	 * Creates a new Entity for a MappingProject. Upserts the {@link MappingProject}'s {@link MappingTarget}s in the
 	 * {@link #mappingTargetRepository}.
-	 * 
-	 * @param mappingProject
-	 *            the {@link MappingProject} used to create an Entity
+	 *
+	 * @param mappingProject the {@link MappingProject} used to create an Entity
 	 * @return Entity filled with the data from the MappingProject
 	 */
 	private Entity toEntity(MappingProject mappingProject)
 	{
-		Entity result = new MapEntity(mappingProjectMetaData);
+		Entity result = new DynamicEntity(mappingProjectMetaData);
 		if (mappingProject.getIdentifier() == null)
 		{
 			mappingProject.setIdentifier(idGenerator.generateId());

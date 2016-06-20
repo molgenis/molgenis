@@ -38,7 +38,7 @@ import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataFactory;
 import org.molgenis.data.meta.MetaValidationUtils;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfAttributes;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.utils.VcfUtils;
@@ -93,8 +93,9 @@ public class VcfToEntity
 					name = name + "_";
 				}
 				AttributeMetaData attributeMetaData = attrMetaFactory.create()
-						.setName(name.replaceAll("[-.*$&%^()#!@?]", "_")).setDataType(
-						vcfFieldTypeToMolgenisFieldType(meta)).setAggregatable(true).setLabel(meta.getId());
+						.setName(name.replaceAll("[-.*$&%^()#!@?]", "_"))
+						.setDataType(vcfFieldTypeToMolgenisFieldType(meta)).setAggregatable(true)
+						.setLabel(meta.getId());
 
 				result.addAttribute(attributeMetaData);
 			}
@@ -266,7 +267,7 @@ public class VcfToEntity
 
 	public Entity toEntity(VcfRecord vcfRecord)
 	{
-		Entity entity = new MapEntity(entityMetaData);
+		Entity entity = new DynamicEntity(entityMetaData);
 		entity.set(CHROM, vcfRecord.getChromosome());
 		entity.set(ALT, StringUtils.join(Lists.transform(vcfRecord.getAlternateAlleles(), Allele::toString), ','));
 		entity.set(POS, vcfRecord.getPosition());
@@ -298,7 +299,7 @@ public class VcfToEntity
 			{
 				String[] format = vcfRecord.getFormat();
 				VcfSample sample = sampleIterator.next();
-				Entity sampleEntity = new MapEntity(sampleEntityMetaData);
+				Entity sampleEntity = new DynamicEntity(sampleEntityMetaData);
 				for (int i = 0; i < format.length; i = i + 1)
 				{
 					sampleEntity.set(format[i], sample.getData(i));

@@ -26,7 +26,7 @@ import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.file.FileStore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -86,7 +86,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 	public void valid() throws IOException
 	{
 		Repository<Entity> repository = this.getDefaultValidSettingRepositoryMock();
-		MapEntity entity0 = getDefaultValidMapEntityMock();
+		Entity entity0 = getDefaultValidMapEntityMock();
 		when(repository.iterator()).thenReturn(Collections.<Entity>singletonList(entity0).iterator());
 		gafListValidator.validate(report, repository, columns);
 		assertFalse(report.hasRunIdsErrors());
@@ -166,9 +166,9 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 	 *
 	 * @return MapEntity
 	 */
-	private MapEntity getDefaultValidMapEntityMock()
+	private Entity getDefaultValidMapEntityMock()
 	{
-		MapEntity entity0 = new MapEntity();
+		DynamicEntity entity0 = new DynamicEntity(null); // FIXME pass entity meta data instead of null
 		entity0.set(INTERNAL_SAMPLE_ID.toString(), "1");
 		entity0.set(LANE.toString(), "8");
 		entity0.set(SEQUENCER.toString(), "SN163");
@@ -181,7 +181,7 @@ public class GafListValidatorTest extends AbstractTestNGSpringContextTests
 	private void invalidTest(String nameColumn, String value) throws IOException
 	{
 		Repository<Entity> repository = this.getDefaultValidSettingRepositoryMock();
-		MapEntity entity0 = getDefaultValidMapEntityMock();
+		Entity entity0 = getDefaultValidMapEntityMock();
 
 		entity0.set(nameColumn, value);
 
