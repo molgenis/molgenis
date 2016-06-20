@@ -11,7 +11,6 @@ public class BbmriNlCheatSheet
 	public static final String REF_DATA_CATEGORY_TYPES = "bbmri_nl_data_category_types";
 	public static final String REF_OMICS_DATA_TYPES = "bbmri_nl_omics_data_types";
 	public static final String REF_GENDER_TYPES = "bbmri_nl_gender_types";
-	public static final String REF_PUBLICATIONS = "bbmri_nl_publications";
 	public static final String REF_PERSONS = "bbmri_nl_persons";
 	public static final String REF_JURISTIC_PERSONS = "bbmri_nl_juristic_persons";
 	public static final String REF_DISEASE_TYPES = "bbmri_nl_disease_types";
@@ -39,15 +38,13 @@ public class BbmriNlCheatSheet
 	public static final String INSTITUTES = "institutes";
 	public static final String BIOBANKS = "biobanks";
 	public static final String WEBSITE = "website";
-	public static final String SAMPLE_ACCESS = "sample_access";
 	public static final String BIOBANK_SAMPLE_ACCESS_FEE = "biobankSampleAccessFee";
 	public static final String BIOBANK_SAMPLE_ACCESS_JOINT_PROJECTS = "biobankSampleAccessJointProjects";
 	public static final String BIOBANK_SAMPLE_ACCESS_DESCRIPTION = "biobankSampleAccessDescription";
+	public static final String BIOBANK_DATA_SAMPLE_ACCESS_DESCRIPTION = "";
 	public static final String BIOBANK_SAMPLE_ACCESS_URI = "biobankSampleAccessURI";
-	public static final String DATA_ACCESS = "data_access";
 	public static final String BIOBANK_DATA_ACCESS_FEE = "biobankDataAccessFee";
 	public static final String BIOBANK_DATA_ACCESS_JOINT_PROJECTS = "biobankDataAccessJointProjects";
 	public static final String BIOBANK_DATA_ACCESS_DESCRIPTION = "biobankDataAccessDescription";
 	public static final String BIOBANK_DATA_ACCESS_URI = "biobankDataAccessURI";
-
 }
