@@ -43,7 +43,7 @@ import org.molgenis.data.support.AggregateQueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
+import com.google.common.collect.Lists;
 
 public class IndexedRepositoryDecoratorTest
 {

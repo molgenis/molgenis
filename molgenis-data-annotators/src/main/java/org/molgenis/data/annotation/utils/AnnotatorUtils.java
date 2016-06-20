@@ -11,7 +11,7 @@ import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
 
-import autovalue.shaded.com.google.common.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 
 public class AnnotatorUtils
 {
