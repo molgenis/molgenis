@@ -77,11 +77,6 @@ public class SnpEffRunner
 
 	private EffectsMetaData effectsMetaData = new EffectsMetaData();
 
-	public enum Impact
-	{
-		MODIFIER, LOW, MODERATE, HIGH
-	}
-
 	private final JarRunner jarRunner;
 	private final Entity snpEffAnnotatorSettings;
 	private final IdGenerator idGenerator;
