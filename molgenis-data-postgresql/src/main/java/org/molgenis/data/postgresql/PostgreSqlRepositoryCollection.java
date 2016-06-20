@@ -96,7 +96,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 					.toString();
 			if (LOG.isDebugEnabled())
 			{
-				LOG.debug("Fetching [{}] languages");
+				LOG.debug("Fetching languages");
 				if (LOG.isTraceEnabled())
 				{
 					LOG.trace("SQL: {}", sql);
