@@ -21,7 +21,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	Stream<String> getLanguageCodes();
 
 	/**
-	 * Returns the repository for the given entity name
+	 * Returns the repository for the given entity name.
 	 *
 	 * @param entityName entity name
 	 * @return entity repository or null if no repository exists for the entity (e.g. the entity is abstract)
@@ -30,12 +30,33 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	Repository<Entity> getRepository(String entityName);
 
 	/**
+	 * Returns the typed repository for the given entity name.
+	 *
+	 * @param entityName  entity name
+	 * @param entityClass entity class
+	 * @param <E>         entity type
+	 * @return typed entity repository or null if no repository exists for the entity (e.g. the entity is abstract)
+	 * @throws UnknownEntityException if no entity with the given name exists
+	 */
+	<E extends Entity> Repository<E> getRepository(String entityName, Class<E> entityClass);
+
+	/**
 	 * Returns the repository for the given entity meta data
 	 *
 	 * @param entityMeta entity meta data
 	 * @return entity repository or null if no repository exists for the entity (e.g. the entity is abstract)
 	 */
 	Repository<Entity> getRepository(EntityMetaData entityMeta);
+
+	/**
+	 * Returns the typed repository for the given entity meta data
+	 *
+	 * @param entityMeta  entity meta data
+	 * @param entityClass entity class
+	 * @param <E>         entity type
+	 * @return typed entity repository or null if no repository exists for the entity (e.g. the entity is abstract).
+	 */
+	<E extends Entity> Repository<E> getRepository(EntityMetaData entityMeta, Class<E> entityClass);
 
 	/**
 	 * Returns whether a {@link Repository} exists for the given entity name. Always returns false for abstract entities.
@@ -73,7 +94,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 *
 	 * @return List of Package
 	 */
-	public List<Package> getPackages();
+	List<Package> getPackages();
 
 	/**
 	 * Lists all root packages.

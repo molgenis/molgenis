@@ -7,8 +7,18 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ID_ATTRIBUTE;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL_ATTRIBUTE;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.LOOKUP_ATTRIBUTES;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.SIMPLE_NAME;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.TAGS;
 import static org.molgenis.data.meta.PackageMetaData.PACKAGE;
 import static org.molgenis.data.meta.PackageMetaData.PARENT;
 import static org.molgenis.data.meta.TagMetaData.TAG;
@@ -24,6 +34,7 @@ import javax.annotation.Nonnull;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryCollectionRegistry;
@@ -78,11 +89,23 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
+	public <E extends Entity> Repository<E> getRepository(String entityName, Class<E> entityClass)
+	{
+		return (Repository<E>) getRepository(entityName);
+	}
+
+	@Override
 	public Repository<Entity> getRepository(EntityMetaData entityMeta)
 	{
 		String backendName = entityMeta.getBackend();
 		RepositoryCollection backend = getBackend(backendName);
 		return backend.getRepository(entityMeta);
+	}
+
+	@Override
+	public <E extends Entity> Repository<E> getRepository(EntityMetaData entityMeta, Class<E> entityClass)
+	{
+		return (Repository<E>) getRepository(entityMeta);
 	}
 
 	@Override
@@ -186,7 +209,11 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 		else
 		{
-			return getEntityRepository().findOneById(fullyQualifiedEntityName);
+			// TODO simplify fetch creation (in this case *all* attributes and expand xref/mrefs)
+			Fetch fetch = new Fetch().field(FULL_NAME).field(SIMPLE_NAME).field(EntityMetaDataMetaData.PACKAGE)
+					.field(LABEL).field(DESCRIPTION).field(ATTRIBUTES).field(ID_ATTRIBUTE).field(LABEL_ATTRIBUTE)
+					.field(LOOKUP_ATTRIBUTES).field(ABSTRACT).field(EXTENDS).field(TAGS).field(BACKEND);
+			return getEntityRepository().findOneById(fullyQualifiedEntityName, fetch);
 		}
 	}
 
@@ -357,34 +384,22 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	private Repository<Package> getPackageRepository()
 	{
-
-		//		SystemEntityFactory<Package, Object> packageFactory = systemEntityMetaRegistry
-		//				.getSystemEntityFactory(Package.class);
-		//		return new TypedRepositoryDecorator<>(getRepository(PACKAGE), packageFactory);
-		return (Repository<Package>) (Repository<? extends Entity>) getRepository(PACKAGE);
+		return getRepository(PACKAGE, Package.class);
 	}
 
 	private Repository<EntityMetaData> getEntityRepository()
 	{
-		//		SystemEntityFactory<EntityMetaData, Object> entityMetaFactory = systemEntityMetaRegistry
-		//				.getSystemEntityFactory(EntityMetaData.class);
-		//		return new TypedRepositoryDecorator<>(getRepository(ENTITY_META_DATA), entityMetaFactory);
-		return (Repository<EntityMetaData>) (Repository<? extends Entity>) getRepository(ENTITY_META_DATA);
+		return getRepository(ENTITY_META_DATA, EntityMetaData.class);
 	}
 
 	private Repository<AttributeMetaData> getAttributeRepository()
 	{
-		//		SystemEntityFactory<AttributeMetaData, Object> attrFactory = systemEntityMetaRegistry
-		//				.getSystemEntityFactory(AttributeMetaData.class);
-		//		return new TypedRepositoryDecorator<>(getRepository(ATTRIBUTE_META_DATA), attrFactory);
-		return (Repository<AttributeMetaData>) (Repository<? extends Entity>) getRepository(ATTRIBUTE_META_DATA);
+		return getRepository(ATTRIBUTE_META_DATA, AttributeMetaData.class);
 	}
 
 	private Repository<Tag> getTagRepository()
 	{
-		//		SystemEntityFactory<Tag, Object> tagFactory = systemEntityMetaRegistry.getSystemEntityFactory(Tag.class);
-		//		return new TypedRepositoryDecorator<>(getRepository(TAG), tagFactory);
-		return (Repository<Tag>) (Repository<? extends Entity>) getRepository(TAG);
+		return getRepository(TAG, Tag.class);
 	}
 
 	/**
