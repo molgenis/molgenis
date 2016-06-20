@@ -43,12 +43,16 @@ public class GavinAlgorithm
 		Double pathoMAFThreshold, meanPathogenicCADDScore, meanPopulationCADDScore, spec95thPerCADDThreshold, sens95thPerCADDThreshold = null;
 		Category category = null;
 
-		//at 5, GAVIN is 92% sensitive and 78% specific, whereas at 1, GAVIN is 89% sensitive and 83% specific. However sensitivity is more important. (don't want to miss anything)
+		// sensitivity is more important than specificity, so we can adjust this parameter to globally adjust the thresholds
+		// at a setting of 1, ie. default behaviour, GAVIN is 89% sensitive and 83% specific
+		// at a setting of 5, a more sensitive setting, GAVIN is 92% sensitive and 78% specific
+		// technically we lose more than we gain, but having >90% sensitivity is really important
+		// better to have a few more false positives than to miss a true positive
 		int extraSensitivityFactor = 5;
 
 		if(geneToEntry == null)
 		{
-			//get data from entity
+			//get data from entity for the annotator
 			pathoMAFThreshold = annotationSourceEntity.getDouble(PATHOMAFTHRESHOLD) * extraSensitivityFactor * 2;
 			meanPathogenicCADDScore = annotationSourceEntity.getDouble(MEANPATHOGENICCADDSCORE) - extraSensitivityFactor;
 			meanPopulationCADDScore = annotationSourceEntity.getDouble(MEANPATHOGENICCADDSCORE) - extraSensitivityFactor;
@@ -58,7 +62,7 @@ public class GavinAlgorithm
 		}
 		else
 		{
-			//get data from map
+			//get data from map, for reuse in GAVIN-related tools other than the annotator
 			if(!geneToEntry.containsKey(gene))
 			{
 				//if we have no data for this gene, immediately fall back to the genomewide method
@@ -102,7 +106,7 @@ public class GavinAlgorithm
 			}
 		}
 
-		// MAF based classification, calibrated but slightly relaxed with a factor x
+		// MAF-based classification, calibrated
 		if(pathoMAFThreshold != null && exacMAF > pathoMAFThreshold)
 		{
 			return new Judgment(Judgment.Classification.Benign, Method.calibrated, gene, "Variant MAF of " + exacMAF + " is greater than "+pathoMAFThreshold+".");
