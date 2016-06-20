@@ -38,9 +38,9 @@ public abstract class StaticEntity implements Entity
 
 	}
 
-	protected void init(EntityMetaData entityMeta)
+	protected void init(Entity entity)
 	{
-		entity = new DynamicEntity(entityMeta);
+		this.entity = requireNonNull(entity);
 	}
 
 	@Override

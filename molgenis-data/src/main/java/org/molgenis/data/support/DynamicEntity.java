@@ -190,27 +190,25 @@ public class DynamicEntity implements Entity
 		throw new RuntimeException("TODO implement");
 	}
 
-	private void validateValueType(String attrName, Object value)
+	/**
+	 * Validate is value is of the type defined by the attribute data type.
+	 *
+	 * @param attrName attribute name
+	 * @param value    value (must be of the type defined by the attribute data type.)
+	 */
+	protected void validateValueType(String attrName, Object value)
 	{
 		if (value == null)
 		{
 			return;
 		}
 
-		// FIXME remove try-catch that deals with bootstrapping exceptions
-		AttributeMetaData attr;
-		try
+		AttributeMetaData attr = entityMeta.getAttribute(attrName);
+		if (attr == null)
 		{
-			attr = entityMeta.getAttribute(attrName);
-			if (attr == null)
-			{
-				throw new UnknownAttributeException(format("Unknown attribute [%s]", attrName));
-			}
+			throw new UnknownAttributeException(format("Unknown attribute [%s]", attrName));
 		}
-		catch (Exception e)
-		{
-			return;
-		}
+
 		MolgenisFieldTypes.FieldTypeEnum dataType = attr.getDataType().getEnumType();
 		switch (dataType)
 		{

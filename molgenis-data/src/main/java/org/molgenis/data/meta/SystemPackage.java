@@ -1,10 +1,13 @@
 package org.molgenis.data.meta;
 
+import org.molgenis.data.support.BootstrapEntity;
+
 public abstract class SystemPackage extends Package
 {
 	protected SystemPackage(String packageName, PackageMetaData packageMetaData)
 	{
-		super(packageName, packageMetaData);
+		super(new BootstrapEntity(packageMetaData));
+		setSimpleName(packageName);
 	}
 
 	public void bootstrap()

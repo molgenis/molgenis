@@ -51,4 +51,9 @@ public class AttributeMetaDataFactory implements EntityFactory<AttributeMetaData
 	{
 		this.attrMetaMeta = requireNonNull(attrMetaMeta);
 	}
+
+	public AttributeMetaDataMetaData getAttributeMetaDataMetaData()
+	{
+		return attrMetaMeta;
+	}
 }

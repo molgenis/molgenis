@@ -43,7 +43,7 @@ public class EntityMetaData extends StaticEntity
 	}
 
 	/**
-	 * Creates a new entity meta data. Call {@link #init(EntityMetaData)} to initialize the created entity meta data.
+	 * Creates a new entity meta data.
 	 */
 	protected EntityMetaData()
 	{

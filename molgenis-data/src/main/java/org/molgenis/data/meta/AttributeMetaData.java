@@ -537,7 +537,7 @@ public class AttributeMetaData extends StaticEntity
 		set(TAGS, tag);
 	}
 
-	private void setDefaultValues()
+	protected void setDefaultValues()
 	{
 		setDataType(MolgenisFieldTypes.STRING);
 		setNillable(true);
