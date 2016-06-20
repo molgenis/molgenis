@@ -1,20 +1,5 @@
 package org.molgenis.data.postgresql;
 
-import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.JUNCTION_TABLE_ORDER_ATTR_NAME;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableName;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributes;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributesNonMref;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableName;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isPersistedInPostgreSql;
-
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -30,6 +15,21 @@ import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.JUNCTION_TABLE_ORDER_ATTR_NAME;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableName;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributes;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributesNonMref;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableName;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isPersistedInPostgreSql;
 
 /**
  * Utility class that generates the SQL used by {@link PostgreSqlRepository} and {@link PostgreSqlRepositoryCollection}
@@ -298,7 +298,7 @@ class PostgreSqlQueryGenerator
 
 	/**
 	 * Produces SQL to count the number of entities that match the given query. Ignores query offset and pagesize.
-	 * 
+	 *
 	 * @param q
 	 * @param parameters
 	 * @return
@@ -569,7 +569,7 @@ class PostgreSqlQueryGenerator
 						parameters.add(convertedVal);
 					}
 					if (result.length() > 0 && !result.toString().endsWith(" OR ") && !result.toString()
-							.endsWith(" AND "))
+							.endsWith(" AND ") && !result.toString().endsWith(" NOT "))
 					{
 						result.append(" AND ");
 					}
