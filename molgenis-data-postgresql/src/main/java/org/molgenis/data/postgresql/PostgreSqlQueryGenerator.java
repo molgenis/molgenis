@@ -1,20 +1,5 @@
 package org.molgenis.data.postgresql;
 
-import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.JUNCTION_TABLE_ORDER_ATTR_NAME;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableName;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributes;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributesNonMref;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableName;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isPersistedInPostgreSql;
-
-import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -30,6 +15,21 @@ import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
+
+import java.text.MessageFormat;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.JUNCTION_TABLE_ORDER_ATTR_NAME;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableName;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributes;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributesNonMref;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableName;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isPersistedInPostgreSql;
 
 /**
  * Utility class that generates the SQL used by {@link PostgreSqlRepository} and {@link PostgreSqlRepositoryCollection}
@@ -232,11 +232,11 @@ class PostgreSqlQueryGenerator
 				{
 					// TODO retrieve mref values in seperate queries to allow specifying limit and offset after nested
 					// MOLGENIS queries are implemented as sub-queries instead of query rules
-					String mrefSelect = MessageFormat
-							.format("(SELECT array_agg(DISTINCT ARRAY[{0}.{1}::TEXT,{0}.{0}::TEXT]) "
-											+ "FROM {2} AS {0} WHERE this.{3} = {0}.{3}) AS {0}", getColumnName(attr),
-									getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME),
-									getJunctionTableName(entityMeta, attr), getColumnName(idAttribute));
+					String mrefSelect = MessageFormat.format(
+							"(SELECT array_agg(DISTINCT ARRAY[{0}.{1}::TEXT,{0}.{0}::TEXT]) "
+									+ "FROM {2} AS {0} WHERE this.{3} = {0}.{3}) AS {0}",
+							getColumnName(attr), getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME),
+							getJunctionTableName(entityMeta, attr), getColumnName(idAttribute));
 					select.append(mrefSelect);
 				}
 				else
@@ -391,9 +391,9 @@ class PostgreSqlQueryGenerator
 			}
 			if (attr.getDataType() instanceof EnumField)
 			{
-				sql.append(" CHECK (").append(getColumnName(attr)).append(" IN (")
-						.append(attr.getEnumOptions().stream().map(enumOption -> "'" + enumOption + "'")
-								.collect(joining(","))).append("))");
+				sql.append(" CHECK (").append(getColumnName(attr)).append(" IN (").append(
+						attr.getEnumOptions().stream().map(enumOption -> "'" + enumOption + "'").collect(joining(",")))
+						.append("))");
 			}
 		}
 	}
@@ -475,8 +475,9 @@ class PostgreSqlQueryGenerator
 
 					StringBuilder in = new StringBuilder();
 
-					@SuppressWarnings("unchecked") Iterable<Object> inValueIterable = (Iterable<Object>) inValue;
-					for (Iterator<Object> it = inValueIterable.iterator(); it.hasNext(); )
+					@SuppressWarnings("unchecked")
+					Iterable<Object> inValueIterable = (Iterable<Object>) inValue;
+					for (Iterator<Object> it = inValueIterable.iterator(); it.hasNext();)
 					{
 						Object inValueItem = it.next();
 
@@ -568,8 +569,8 @@ class PostgreSqlQueryGenerator
 						}
 						parameters.add(convertedVal);
 					}
-					if (result.length() > 0 && !result.toString().endsWith(" OR ") && !result.toString()
-							.endsWith(" AND "))
+					if (result.length() > 0 && !result.toString().endsWith(" OR ")
+							&& !result.toString().endsWith(" AND ") && !result.toString().endsWith(" NOT "))
 					{
 						result.append(" AND ");
 					}
@@ -620,8 +621,8 @@ class PostgreSqlQueryGenerator
 					}
 					parameters.add(convertedVal);
 
-					if (result.length() > 0 && !result.toString().endsWith(" OR ") && !result.toString()
-							.endsWith(" AND ") && !result.toString().endsWith(" NOT "))
+					if (result.length() > 0 && !result.toString().endsWith(" OR ")
+							&& !result.toString().endsWith(" AND ") && !result.toString().endsWith(" NOT "))
 					{
 						result.append(" AND ");
 					}
@@ -633,9 +634,8 @@ class PostgreSqlQueryGenerator
 				case SEARCH:
 				case SHOULD:
 					// PostgreSQL does not support semantic searching and sorting matching rows on relevance.
-					throw new UnsupportedOperationException(
-							format("Query operator [%s] not supported by PostgreSQL repository",
-									r.getOperator().toString()));
+					throw new UnsupportedOperationException(format(
+							"Query operator [%s] not supported by PostgreSQL repository", r.getOperator().toString()));
 				default:
 					throw new RuntimeException(format("Unknown query operator [%s]", r.getOperator().toString()));
 			}
