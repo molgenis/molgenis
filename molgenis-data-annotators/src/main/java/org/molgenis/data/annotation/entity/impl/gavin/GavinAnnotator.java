@@ -165,10 +165,8 @@ public class GavinAnnotator
 				{
 					Entity annotationSourceEntity = annotationSourceEntities.iterator().next();
 
-					Category category = Category.valueOf(annotationSourceEntity.getString(CATEGORY));
-
-					Judgment judgment = gavinAlgorithm.classifyVariant(impact, caddScaled, exacMAF, category, gene,
-							annotationSourceEntity);
+					Judgment judgment = gavinAlgorithm.classifyVariant(impact, caddScaled, exacMAF, gene,
+							annotationSourceEntity, null);
 					resultEntity.set(CLASSIFICATION, judgment.getClassification().toString());
 					resultEntity.set(CONFIDENCE, judgment.getConfidence().toString());
 					resultEntity.set(REASON, judgment.getReason());
