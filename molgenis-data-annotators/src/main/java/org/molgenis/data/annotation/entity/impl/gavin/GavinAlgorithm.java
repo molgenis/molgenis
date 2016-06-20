@@ -93,6 +93,9 @@ public class GavinAlgorithm
 					{
 						return new Judgment(Judgment.Classification.Benign,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is less than "+meanPopulationCADDScore+" in a gene for which CADD scores are informative.");
 					}
+					else{
+						//this rule does not classify apparently, just continue onto the next rules
+					}
 					break;
 				case C3: case C4: case C5:
 					if(caddScaled > spec95thPerCADDThreshold)
@@ -102,6 +105,10 @@ public class GavinAlgorithm
 					else if(caddScaled < sens95thPerCADDThreshold)
 					{
 						return new Judgment(Judgment.Classification.Benign,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is less than "+sens95thPerCADDThreshold+" for this gene.");
+					}
+					else
+					{
+						//this rule does not classify apparently, just continue onto the next rules
 					}
 					break;
 			}
