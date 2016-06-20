@@ -1,7 +1,7 @@
 package org.molgenis.data.vcf;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.LONG;
+import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.data.vcf.VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION;
@@ -48,7 +48,7 @@ public class VcfAttributes
 
 	public AttributeMetaData getPosAttribute()
 	{
-		return attributeMetaDataFactory.create().setName(POS).setDataType(LONG).setAggregatable(true).setNillable(false)
+		return attributeMetaDataFactory.create().setName(POS).setDataType(INT).setAggregatable(true).setNillable(false)
 				.setDescription("The position on the chromosome which the variant is observed");
 	}
 

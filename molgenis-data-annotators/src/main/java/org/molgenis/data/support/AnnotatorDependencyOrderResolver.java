@@ -13,7 +13,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
+import com.google.common.collect.Lists;
 
 public class AnnotatorDependencyOrderResolver
 {

@@ -64,8 +64,8 @@
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
                 <exclusion>
-                  <groupId>org.slf4j</groupId>
-                  <artifactId>slf4j-nop</artifactId>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-nop</artifactId>
                 </exclusion>
                 <exclusion>
                     <groupId>org.apache.lucene</groupId>

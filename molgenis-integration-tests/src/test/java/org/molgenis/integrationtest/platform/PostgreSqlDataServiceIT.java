@@ -245,7 +245,7 @@ public class PostgreSqlDataServiceIT extends AbstractDataServiceIT
 	@Override
 	public List<RepositoryCapability> getExpectedCapabilities()
 	{
-		return Arrays.asList(RepositoryCapability.MANAGABLE, RepositoryCapability.QUERYABLE,
-				RepositoryCapability.WRITABLE);
+		return Arrays
+				.asList(RepositoryCapability.MANAGABLE, RepositoryCapability.QUERYABLE, RepositoryCapability.WRITABLE);
 	}
 }

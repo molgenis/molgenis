@@ -51,8 +51,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Ordering;
-
-import autovalue.shaded.com.google.common.common.collect.Sets;
+import com.google.common.collect.Sets;
 
 public class SemanticSearchServiceImpl implements SemanticSearchService
 {
