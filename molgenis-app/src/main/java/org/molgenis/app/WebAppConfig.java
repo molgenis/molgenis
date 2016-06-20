@@ -40,6 +40,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
+import javax.xml.soap.SOAPConnectionFactory;
+import javax.xml.soap.SOAPException;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -159,5 +161,11 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		// Look up unknown templates in the FreemarkerTemplate repository
 		result.setPostTemplateLoaders(new RepositoryTemplateLoader(dataService));
 		return result;
+	}
+
+	@Bean
+	public SOAPConnectionFactory soapConnectionFactory() throws UnsupportedOperationException, SOAPException
+	{
+		return SOAPConnectionFactory.newInstance();
 	}
 }
