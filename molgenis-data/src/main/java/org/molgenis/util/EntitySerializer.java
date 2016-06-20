@@ -24,7 +24,7 @@ public class EntitySerializer implements JsonSerializer<Entity>
 		JsonObject result = new JsonObject();
 		result.addProperty("__entityName", entity.getEntityMetaData().getName());
 		result.add("__idValue", context.serialize(entity.getIdValue()));
-		result.addProperty("__labelValue", entity.getLabelValue());
+		result.add("__labelValue", context.serialize(entity.getLabelValue()));
 		return result;
 	}
 

@@ -21,7 +21,10 @@ import com.google.common.collect.Iterables;
 
 /**
  * Simple Entity implementation based on a Map
+ *
+ * @deprecated see {@link DynamicEntity}
  */
+@Deprecated
 public class MapEntity extends AbstractEntity
 {
 	private static final long serialVersionUID = -8283375007931769373L;
@@ -176,7 +179,7 @@ public class MapEntity extends AbstractEntity
 	}
 
 	@Override
-	public String getLabelValue()
+	public Object getLabelValue()
 	{
 		return null;
 	}

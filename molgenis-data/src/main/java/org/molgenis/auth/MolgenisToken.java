@@ -10,6 +10,7 @@ import static org.molgenis.auth.MolgenisTokenMetaData.TOKEN;
 import java.util.Date;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
 public class MolgenisToken extends StaticEntity
@@ -19,14 +20,14 @@ public class MolgenisToken extends StaticEntity
 		super(entity);
 	}
 
-	public MolgenisToken(MolgenisTokenMetaData molgenisTokenMetaData)
+	public MolgenisToken(EntityMetaData entityMeta)
 	{
-		super(molgenisTokenMetaData);
+		super(entityMeta);
 	}
 
-	public MolgenisToken(String id, MolgenisTokenMetaData molgenisTokenMetaData)
+	public MolgenisToken(String id, EntityMetaData entityMeta)
 	{
-		super(molgenisTokenMetaData);
+		super(entityMeta);
 		setId(id);
 	}
 

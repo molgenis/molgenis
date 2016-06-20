@@ -15,7 +15,6 @@ import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -35,7 +34,7 @@ public class SourceToEntityConverter
 
 	public Entity convert(Map<String, Object> source, EntityMetaData entityMeta)
 	{
-		DefaultEntity entity = new DefaultEntity(entityMeta, dataService);
+		Entity entity = entityManager.create(entityMeta);
 		source.entrySet().forEach(entry -> {
 			String attrName = entry.getKey();
 			if (attrName.equals(ElasticsearchService.CRUD_TYPE_FIELD_NAME))
@@ -76,8 +75,7 @@ public class SourceToEntityConverter
 						// TODO store id for xrefs
 						if (sourceValue instanceof Map<?, ?>)
 						{
-							@SuppressWarnings("unchecked")
-							Map<String, Object> sourceRefEntity = (Map<String, Object>) sourceValue;
+							@SuppressWarnings("unchecked") Map<String, Object> sourceRefEntity = (Map<String, Object>) sourceValue;
 							EntityMetaData refEntity = attr.getRefEntity();
 							String refIdAttrName = refEntity.getIdAttribute().getName();
 							Object sourceRefEntityId = sourceRefEntity.get(refIdAttrName);
@@ -94,8 +92,7 @@ public class SourceToEntityConverter
 						if (sourceValue instanceof Iterable<?>)
 						{
 							// TODO store list of ids for mrefs
-							@SuppressWarnings("unchecked")
-							Iterable<Map<String, Object>> sourceRefEntities = (Iterable<Map<String, Object>>) sourceValue;
+							@SuppressWarnings("unchecked") Iterable<Map<String, Object>> sourceRefEntities = (Iterable<Map<String, Object>>) sourceValue;
 							EntityMetaData refEntity = attr.getRefEntity();
 							String refIdAttrName = refEntity.getIdAttribute().getName();
 							Iterable<Object> sourceRefEntityIds = new Iterable<Object>()

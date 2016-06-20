@@ -4,7 +4,7 @@ import static org.testng.Assert.fail;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.data.abstracts.AbstractDataIntegrationIT;
 
@@ -19,7 +19,7 @@ public abstract class AbstractValidationExpressionIT extends AbstractDataIntegra
 		//				.setValidationExpression("$('validationExpressionAttr').gt(10).value() && $('intAttr').lt(10).value()");
 		metaDataService.addEntityMeta(entityMetaData);
 
-		Entity entity = new DefaultEntity(entityMetaData, dataService);// Not OK
+		Entity entity = new DynamicEntity(entityMetaData);// Not OK
 		try
 		{
 			dataService.add(entityMetaData.getName(), entity);

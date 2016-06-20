@@ -164,7 +164,7 @@ class ReindexJob extends Job
 	 */
 	private void setStatus(Entity reindexAction, ReindexStatus status)
 	{
-		reindexAction.set(REINDEX_STATUS, status);
+		reindexAction.set(REINDEX_STATUS, status.toString());
 		dataService.update(REINDEX_ACTION, reindexAction);
 	}
 

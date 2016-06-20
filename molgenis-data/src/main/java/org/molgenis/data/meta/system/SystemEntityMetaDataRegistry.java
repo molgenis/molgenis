@@ -3,18 +3,17 @@ package org.molgenis.data.meta.system;
 import static java.lang.String.format;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import org.molgenis.data.Entity;
-import org.molgenis.data.SystemEntityFactory;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.google.common.collect.Maps;
 
 /**
  * Registry containing all {@link SystemEntityMetaData}.
@@ -25,12 +24,10 @@ public class SystemEntityMetaDataRegistry
 	private final Logger LOG = LoggerFactory.getLogger(SystemEntityMetaDataRegistry.class);
 
 	private final Map<String, SystemEntityMetaData> systemEntityMetaDataMap;
-	private final Map<String, SystemEntityFactory<Entity, Object>> systemEntityFactoryMap;
 
 	public SystemEntityMetaDataRegistry()
 	{
-		systemEntityMetaDataMap = new HashMap<>();
-		systemEntityFactoryMap = new HashMap<>();
+		systemEntityMetaDataMap = Maps.newHashMap();
 	}
 
 	public SystemEntityMetaData getSystemEntityMetaData(String entityName)
@@ -73,13 +70,14 @@ public class SystemEntityMetaDataRegistry
 				.filter(Objects::nonNull).findFirst().orElse(null);
 	}
 
-	private AttributeMetaData getSystemAttributeMetaData(SystemEntityMetaData systemEntityMetaData,
+	private static AttributeMetaData getSystemAttributeMetaData(SystemEntityMetaData systemEntityMetaData,
 			String attrIdentifier)
 	{
 		return getSystemAttributeMetaDataRec(systemEntityMetaData.getAllAttributes(), attrIdentifier);
 	}
 
-	private AttributeMetaData getSystemAttributeMetaDataRec(Iterable<AttributeMetaData> attrs, String attrIdentifier)
+	private static AttributeMetaData getSystemAttributeMetaDataRec(Iterable<AttributeMetaData> attrs,
+			String attrIdentifier)
 	{
 		for (AttributeMetaData attr : attrs)
 		{
@@ -96,27 +94,5 @@ public class SystemEntityMetaDataRegistry
 			}
 		}
 		return null;
-	}
-
-	public void addSystemEntityFactory(SystemEntityFactory systemEntityFactory)
-	{
-		String entityName = systemEntityFactory.getEntityName();
-		systemEntityFactoryMap.put(entityName, systemEntityFactory);
-	}
-
-	public SystemEntityFactory<Entity, Object> getSystemEntityFactory(String entityName)
-	{
-		return systemEntityFactoryMap.get(entityName);
-	}
-
-	public <E extends Entity> SystemEntityFactory<E, Object> getSystemEntityFactory(Class<E> entityClass)
-	{
-		return getSystemEntityFactory(entityClass, Object.class);
-	}
-
-	public <E extends Entity, P> SystemEntityFactory<E, P> getSystemEntityFactory(Class<E> entityClass,
-			Class<P> entityIdClass)
-	{
-		return (SystemEntityFactory<E, P>) systemEntityFactoryMap.get(entityClass.getName());
 	}
 }

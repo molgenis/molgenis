@@ -3,14 +3,12 @@ package org.molgenis.util;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 
-import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.apache.commons.lang3.reflect.ConstructorUtils;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -18,7 +16,6 @@ import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.Package;
 import org.molgenis.data.meta.Tag;
-import org.springframework.beans.BeanUtils;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -26,7 +23,6 @@ import com.google.common.collect.Iterables;
 
 public class EntityUtils
 {
-
 	/**
 	 * Checks if an entity contains data or not
 	 *

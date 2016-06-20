@@ -14,6 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
 public class FileIngest extends StaticEntity
@@ -23,14 +24,14 @@ public class FileIngest extends StaticEntity
 		super(entity);
 	}
 
-	public FileIngest(FileIngestMetaData fileIngestMetaData)
+	public FileIngest(EntityMetaData entityMeta)
 	{
-		super(fileIngestMetaData);
+		super(entityMeta);
 	}
 
-	public FileIngest(String id, FileIngestMetaData fileIngestMetaData)
+	public FileIngest(String id, EntityMetaData entityMeta)
 	{
-		super(fileIngestMetaData);
+		super(entityMeta);
 		setIdentifier(id);
 	}
 

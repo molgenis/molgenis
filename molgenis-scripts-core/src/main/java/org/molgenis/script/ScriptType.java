@@ -3,6 +3,7 @@ package org.molgenis.script;
 import static org.molgenis.script.ScriptTypeMetaData.NAME;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
 /**
@@ -18,22 +19,22 @@ public class ScriptType extends StaticEntity
 	/**
 	 * Constructs a script type with the given meta data
 	 *
-	 * @param scriptTypeMetaData script type meta data
+	 * @param entityMeta script type meta data
 	 */
-	public ScriptType(ScriptTypeMetaData scriptTypeMetaData)
+	public ScriptType(EntityMetaData entityMeta)
 	{
-		super(scriptTypeMetaData);
+		super(entityMeta);
 	}
 
 	/**
 	 * Constructs a script type with the given type name and meta data
 	 *
 	 * @param name               script type name
-	 * @param scriptTypeMetaData script type meta data
+	 * @param entityMeta script type meta data
 	 */
-	public ScriptType(String name, ScriptTypeMetaData scriptTypeMetaData)
+	public ScriptType(String name, EntityMetaData entityMeta)
 	{
-		super(scriptTypeMetaData);
+		super(entityMeta);
 		setName(name);
 	}
 

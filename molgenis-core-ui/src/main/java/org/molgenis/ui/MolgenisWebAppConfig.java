@@ -15,6 +15,7 @@ import java.util.Properties;
 import javax.annotation.PostConstruct;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityFactoryRegistry;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.convert.DateToStringConverter;
@@ -362,12 +363,18 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 	@Bean
 	public EntityManager entityManager()
 	{
-		return new EntityManagerImpl(dataService());
+		return new EntityManagerImpl(dataService(), entityFactoryRegistry());
 	}
 
 	@Bean
 	public RepositoryDecoratorRegistry repositoryDecoratorRegistry()
 	{
 		return new RepositoryDecoratorRegistry();
+	}
+
+	@Bean
+	public EntityFactoryRegistry entityFactoryRegistry()
+	{
+		return new EntityFactoryRegistry();
 	}
 }

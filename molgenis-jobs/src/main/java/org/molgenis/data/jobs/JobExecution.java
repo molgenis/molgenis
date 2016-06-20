@@ -33,15 +33,15 @@ public abstract class JobExecution extends StaticEntity
 		super(entity);
 	}
 
-	public JobExecution(EntityMetaData entityMetaData)
+	public JobExecution(EntityMetaData entityMeta)
 	{
-		super(entityMetaData);
+		super(entityMeta);
 		setDefaultValues();
 	}
 
-	public JobExecution(String identifier, EntityMetaData entityMetaData)
+	public JobExecution(String identifier, EntityMetaData entityMeta)
 	{
-		super(entityMetaData);
+		super(entityMeta);
 		setDefaultValues();
 
 		setIdentifier(identifier);

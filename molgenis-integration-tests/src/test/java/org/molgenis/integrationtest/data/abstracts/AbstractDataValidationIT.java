@@ -6,7 +6,7 @@ import static org.testng.Assert.fail;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.data.abstracts.AbstractDataIntegrationIT;
 import org.testng.annotations.BeforeClass;
@@ -45,7 +45,7 @@ public abstract class AbstractDataValidationIT extends AbstractDataIntegrationIT
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		entity = new DefaultEntity(entityMetaData, dataService);
+		entity = new DynamicEntity(entityMetaData);
 	}
 
 	public void testInt()
@@ -117,7 +117,7 @@ public abstract class AbstractDataValidationIT extends AbstractDataIntegrationIT
 		//		entityMetaData1.addAttribute("stringAttr").setNillable(false);
 		metaDataService.addEntityMeta(entityMetaData1);
 
-		Entity entity1 = new DefaultEntity(entityMetaData1, dataService);
+		Entity entity1 = new DynamicEntity(entityMetaData1);
 		entity1.set("identifier", "one");
 
 		try

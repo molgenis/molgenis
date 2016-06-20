@@ -4,9 +4,7 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
 import java.sql.Timestamp;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -22,7 +20,7 @@ public abstract class AbstractEntity implements Entity
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public String getLabelValue()
+	public Object getLabelValue()
 	{
 		AttributeMetaData labelAttribute = getEntityMetaData().getLabelAttribute();
 		if (labelAttribute == null && getEntityMetaData().isAbstract())
@@ -134,8 +132,9 @@ public abstract class AbstractEntity implements Entity
 	@Override
 	public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
 	{
-		Entity entity = getEntity(attributeName);
-		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator().next() : null;
+		throw new UnsupportedOperationException("FIXME"); // FIXME
+		//		Entity entity = getEntity(attributeName);
+		//		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator().next() : null;
 	}
 
 	@Override
@@ -148,20 +147,9 @@ public abstract class AbstractEntity implements Entity
 	@Override
 	public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz)
 	{
-		Iterable<Entity> entities = getEntities(attributeName);
-		return entities != null ? new ConvertingIterable<E>(clazz, entities) : emptyList();
-	}
-
-	@Override
-	public List<String> getList(String attributeName)
-	{
-		return DataConverter.toList(get(attributeName));
-	}
-
-	@Override
-	public List<Integer> getIntList(String attributeName)
-	{
-		return DataConverter.toIntList(get(attributeName));
+		throw new UnsupportedOperationException("FIXME"); // FIXME
+		//		Iterable<Entity> entities = getEntities(attributeName);
+		//		return entities != null ? new ConvertingIterable<E>(clazz, entities) : emptyList();
 	}
 
 	@Override

@@ -19,7 +19,7 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -86,7 +86,7 @@ public abstract class AbstractI18nIT extends AbstractDataIntegrationIT
 		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(), new String[]
 		{ "en", "nl" });
 
-		Entity car = new DefaultEntity(i18nStringMetaData, dataService);
+		Entity car = new DynamicEntity(i18nStringMetaData);
 		car.set(I18nStringMetaData.MSGID, "car");
 		car.set("en", "car");
 		car.set("nl", "auto");

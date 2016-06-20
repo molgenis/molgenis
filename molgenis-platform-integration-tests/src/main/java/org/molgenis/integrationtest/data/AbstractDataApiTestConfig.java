@@ -124,7 +124,7 @@ public abstract class AbstractDataApiTestConfig
 	@Bean
 	public EntityManager entityManager()
 	{
-		return new EntityManagerImpl(dataService());
+		return new EntityManagerImpl(dataService(), null);
 	}
 
 	@Bean

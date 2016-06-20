@@ -37,7 +37,7 @@ public class RestServiceTest
 		dataService = mock(DataService.class);
 		IdGenerator idGenerator = mock(IdGenerator.class);
 		FileStore fileStore = mock(FileStore.class);
-		this.restService = new RestService(dataService, idGenerator, fileStore, null); // FIXME
+		this.restService = new RestService(dataService, idGenerator, fileStore, null, null); // FIXME
 	}
 
 	@Test

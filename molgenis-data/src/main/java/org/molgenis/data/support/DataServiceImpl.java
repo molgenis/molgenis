@@ -2,7 +2,6 @@ package org.molgenis.data.support;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 import java.util.Iterator;
@@ -18,10 +17,8 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.SystemEntityFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +32,6 @@ public class DataServiceImpl implements DataService
 	private static final Logger LOG = LoggerFactory.getLogger(DataServiceImpl.class);
 
 	private MetaDataService metaDataService;
-	private SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
 
 	@Autowired
 	public void setMetaDataService(MetaDataService metaDataService)
@@ -43,21 +39,10 @@ public class DataServiceImpl implements DataService
 		this.metaDataService = requireNonNull(metaDataService);
 	}
 
-	@Autowired
-	public void setSystemEntityMetaDataRegistry(SystemEntityMetaDataRegistry systemEntityMetaDataRegistry)
-	{
-		this.systemEntityMetaDataRegistry = requireNonNull(systemEntityMetaDataRegistry);
-	}
-
 	@Override
 	public EntityMetaData getEntityMetaData(String entityName)
 	{
-		EntityMetaData entityMetaData = systemEntityMetaDataRegistry.getSystemEntityMetaData(entityName);
-		if (entityMetaData == null)
-		{
-			entityMetaData = query(ENTITY_META_DATA, EntityMetaData.class).eq(FULL_NAME, entityName).findOne();
-		}
-		return entityMetaData;
+		return metaDataService.getEntityMetaData(entityName);
 	}
 
 	@Override
@@ -177,10 +162,6 @@ public class DataServiceImpl implements DataService
 	@SuppressWarnings("unchecked")
 	public <E extends Entity> Repository<E> getRepository(String entityName, Class<E> entityClass)
 	{
-		//		Repository<Entity> untypedRepo = getRepository(entityName);
-		//		SystemEntityFactory<E, Object> systemEntityFactory = systemEntityMetaDataRegistry
-		//				.getSystemEntityFactory(entityClass);
-		//		return new TypedRepositoryDecorator<>(untypedRepo, systemEntityFactory);
 		return (Repository<E>) getRepository(entityName);
 	}
 
@@ -211,9 +192,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public <E extends Entity> E findOne(String entityName, Query<E> q, Class<E> clazz)
 	{
-		Entity entity = getRepository(entityName, clazz).findOne(q);
-		if (entity == null) return null;
-		return getSystemEntityFactory(entityName, clazz).create(entity);
+		return getRepository(entityName, clazz).findOne(q);
 	}
 
 	@Override
@@ -249,9 +228,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public <E extends Entity> Stream<E> stream(String entityName, Fetch fetch, Class<E> clazz)
 	{
-		Stream<Entity> entities = getRepository(entityName).stream(fetch);
-		SystemEntityFactory<E, Object> systemEntityFactory = getSystemEntityFactory(entityName, clazz);
-		return entities.map(systemEntityFactory::create);
+		return getRepository(entityName, clazz).stream(fetch);
 	}
 
 	@Override
@@ -269,9 +246,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public <E extends Entity> E findOneById(String entityName, Object id, Fetch fetch, Class<E> clazz)
 	{
-		Entity entity = getRepository(entityName).findOneById(id, fetch);
-		if (entity == null) return null;
-		return getSystemEntityFactory(entityName, clazz).create(entity);
+		return getRepository(entityName, clazz).findOneById(id, fetch);
 	}
 
 	@Override
@@ -295,9 +270,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public <E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Class<E> clazz)
 	{
-		Stream<Entity> entities = getRepository(entityName).findAll(ids);
-		SystemEntityFactory<E, Object> systemEntityFactory = getSystemEntityFactory(entityName, clazz);
-		return entities.map(systemEntityFactory::create);
+		return getRepository(entityName, clazz).findAll(ids);
 	}
 
 	@Override
@@ -309,9 +282,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public <E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Fetch fetch, Class<E> clazz)
 	{
-		Stream<Entity> entities = getRepository(entityName).findAll(ids, fetch);
-		SystemEntityFactory<E, Object> systemEntityFactory = getSystemEntityFactory(entityName, clazz);
-		return entities.map(systemEntityFactory::create);
+		return getRepository(entityName, clazz).findAll(ids, fetch);
 	}
 
 	@Override
@@ -345,11 +316,5 @@ public class DataServiceImpl implements DataService
 			}
 			throw e;
 		}
-	}
-
-	private <E extends Entity> SystemEntityFactory<E, Object> getSystemEntityFactory(String entityName,
-			Class<E> entityClass)
-	{
-		return (SystemEntityFactory<E, Object>) systemEntityMetaDataRegistry.getSystemEntityFactory(entityName);
 	}
 }

@@ -8,43 +8,40 @@ import static java.util.stream.StreamSupport.stream;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.List;
 import java.util.Map;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
-import org.molgenis.data.convert.DateToStringConverter;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
 
-public class EntityImpl implements Entity
+/**
+ * Class for entities not defined in pre-existing Java classes
+ *
+ * @see StaticEntity
+ */
+public class DynamicEntity implements Entity
 {
 	private static final long serialVersionUID = 1L;
 
-	// TODO add final modifier
 	/**
 	 * Entity meta data
 	 */
-	private EntityMetaData entityMeta;
+	private final EntityMetaData entityMeta;
 
-	// TODO add final modifier
 	/**
 	 * Maps attribute names to values. Value class types are determined by attribute data type.
 	 */
-	private Map<String, Object> values;
-
-	// TODO remove constructor
-	protected EntityImpl()
-	{
-		this.values = newHashMap();
-	}
+	private final Map<String, Object> values;
 
 	/**
 	 * Constructs an entity with the given entity meta data.
 	 *
 	 * @param entityMeta entity meta
 	 */
-	public EntityImpl(EntityMetaData entityMeta)
+	public DynamicEntity(EntityMetaData entityMeta)
 	{
 		this.entityMeta = requireNonNull(entityMeta);
 		this.values = newHashMap();
@@ -52,16 +49,11 @@ public class EntityImpl implements Entity
 		//this.values = newHashMapWithExpectedSize(Iterables.size(entityMeta.getAtomicAttributes()));
 	}
 
-	// TODO remove method
-	protected void init(EntityMetaData entityMeta)
-	{
-		this.entityMeta = requireNonNull(entityMeta);
-	}
-
+	// TODO should we return immutable meta data?
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return entityMeta; // TODO should we return immutable meta data?
+		return entityMeta;
 	}
 
 	// TODO remove, use getEntityMetaData to retrieve entity meta data
@@ -86,20 +78,21 @@ public class EntityImpl implements Entity
 		AttributeMetaData idAttr = entityMeta.getIdAttribute();
 		if (idAttr == null)
 		{
-			throw new IllegalArgumentException(format("Entity [%s] doesn't have an id attribute"));
+			throw new IllegalArgumentException(
+					format("Entity [%s] doesn't have an id attribute", entityMeta.getName()));
 		}
 		set(idAttr.getName(), id);
 	}
 
-	// TODO getLabelValue should return Object
 	@Override
-	public String getLabelValue()
+	public Object getLabelValue()
 	{
 		// abstract entities might not have an label attribute
 		AttributeMetaData labelAttr = entityMeta.getLabelAttribute();
-		return labelAttr != null ? getLabelValueAsString(labelAttr) : null;
+		return labelAttr != null ? get(labelAttr.getName()) : null;
 	}
 
+	// FIXME return empty list in case attr is a (categorical)mref and value is null
 	@Override
 	public Object get(String attrName)
 	{
@@ -183,23 +176,10 @@ public class EntityImpl implements Entity
 		return value != null ? (Iterable<E>) value : emptyList();
 	}
 
-	// TODO remove method, move to utility class
-	@Override
-	public List<String> getList(String attrName)
-	{
-		throw new RuntimeException("TODO implement");
-	}
-
-	// TODO remove method, move to utility class
-	@Override
-	public List<Integer> getIntList(String attrName)
-	{
-		throw new RuntimeException("TODO implement");
-	}
-
 	@Override
 	public void set(String attrName, Object value)
 	{
+		validateValueType(attrName, value);
 		values.put(attrName, value);
 	}
 
@@ -210,52 +190,110 @@ public class EntityImpl implements Entity
 		throw new RuntimeException("TODO implement");
 	}
 
-	private String getLabelValueAsString(AttributeMetaData labelAttr)
+	private void validateValueType(String attrName, Object value)
 	{
-		String labelAttributeName = labelAttr.getName();
-		MolgenisFieldTypes.FieldTypeEnum dataType = labelAttr.getDataType().getEnumType();
+		if (value == null)
+		{
+			return;
+		}
+
+		// FIXME remove try-catch that deals with bootstrapping exceptions
+		AttributeMetaData attr;
+		try
+		{
+			attr = entityMeta.getAttribute(attrName);
+			if (attr == null)
+			{
+				throw new UnknownAttributeException(format("Unknown attribute [%s]", attrName));
+			}
+		}
+		catch (Exception e)
+		{
+			return;
+		}
+		MolgenisFieldTypes.FieldTypeEnum dataType = attr.getDataType().getEnumType();
 		switch (dataType)
 		{
+
 			case BOOL:
+				if (!(value instanceof Boolean))
+				{
+					throw new MolgenisDataException(
+							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
+									value.getClass().getSimpleName(), Boolean.class.getSimpleName()));
+				}
+				break;
+			case CATEGORICAL:
+				// expected type is FileMeta. validation is not possible because molgenis-data does not depend on molgenis-file
+			case FILE:
+			case XREF:
+				if (!(value instanceof Entity))
+				{
+					throw new MolgenisDataException(
+							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
+									value.getClass().getSimpleName(), Entity.class.getSimpleName()));
+				}
+				break;
+			case CATEGORICAL_MREF:
+			case MREF:
+				if (!(value instanceof Iterable))
+				{
+					throw new MolgenisDataException(
+							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
+									value.getClass().getSimpleName(), Iterable.class.getSimpleName()));
+				}
+				break;
+			case COMPOUND:
+				throw new IllegalArgumentException(format("Unexpected data type [%s]", dataType.toString()));
+			case DATE:
+			case DATE_TIME:
+				if (!(value instanceof java.util.Date))
+				{
+					throw new MolgenisDataException(
+							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
+									value.getClass().getSimpleName(), java.util.Date.class.getSimpleName()));
+				}
+				break;
 			case DECIMAL:
+				if (!(value instanceof Double))
+				{
+					throw new MolgenisDataException(
+							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
+									value.getClass().getSimpleName(), Double.class.getSimpleName()));
+				}
+				break;
 			case EMAIL:
 			case ENUM:
 			case HTML:
 			case HYPERLINK:
-			case INT:
-			case LONG:
 			case SCRIPT:
 			case STRING:
 			case TEXT:
-				Object obj = get(labelAttributeName);
-				return obj != null ? obj.toString() : null;
-			case DATE:
-			case DATE_TIME:
-				java.util.Date date = getUtilDate(labelAttributeName);
-				return new DateToStringConverter().convert(date);
-			case CATEGORICAL:
-			case XREF:
-			case FILE:
-				Entity refEntity = getEntity(labelAttributeName);
-				return refEntity != null ? refEntity.getLabelValue() : null;
-			case CATEGORICAL_MREF:
-			case MREF:
-				Iterable<Entity> refEntities = getEntities(labelAttributeName);
-				if (refEntities != null)
+				if (!(value instanceof String))
 				{
-					StringBuilder strBuilder = new StringBuilder();
-					for (Entity mrefEntity : refEntities)
-					{
-						if (strBuilder.length() > 0) strBuilder.append(',');
-						strBuilder.append(mrefEntity.getLabelValue());
-					}
-					return strBuilder.toString();
+					throw new MolgenisDataException(
+							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
+									value.getClass().getSimpleName(), String.class.getSimpleName()));
 				}
-				return null;
-			case COMPOUND:
-				throw new RuntimeException("invalid label data type " + dataType);
+				break;
+			case INT:
+				if (!(value instanceof Integer))
+				{
+					throw new MolgenisDataException(
+							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
+									value.getClass().getSimpleName(), Double.class.getSimpleName()));
+				}
+				break;
+			case LONG:
+				if (!(value instanceof Long))
+				{
+					throw new MolgenisDataException(
+							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
+									value.getClass().getSimpleName(), Double.class.getSimpleName()));
+				}
+				break;
 			default:
-				throw new RuntimeException("unsupported label data type " + dataType);
+				throw new RuntimeException(format("Unknown data type [%s]", dataType.toString()));
 		}
 	}
 }

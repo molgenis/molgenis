@@ -123,7 +123,8 @@ public class ExcelSheetWriter extends AbstractWritable
 						value = ((Entity) obj).getIdValue().toString();
 						break;
 					case ENTITY_LABELS:
-						value = ((Entity) obj).getLabelValue();
+						Object labelValue = ((Entity) obj).getLabelValue();
+						value = labelValue != null ? labelValue.toString() : null;
 						break;
 					default:
 						throw new RuntimeException("Unknown write mode [" + getEntityWriteMode() + "]");
@@ -131,7 +132,8 @@ public class ExcelSheetWriter extends AbstractWritable
 			}
 			else
 			{
-				value = ((Entity) obj).getLabelValue();
+				Object labelValue = ((Entity) obj).getLabelValue();
+				value = labelValue != null ? labelValue.toString() : null;
 			}
 		}
 		else if (obj instanceof Iterable<?>)

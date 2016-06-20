@@ -43,7 +43,7 @@ public class JobBootstrapper
 
 	private void setFailed(Entity jobExecutionEntity)
 	{
-		jobExecutionEntity.set(STATUS, FAILED);
+		jobExecutionEntity.set(STATUS, FAILED.toString());
 		jobExecutionEntity.set(PROGRESS_MESSAGE, "Application terminated unexpectedly");
 		dataService.update(jobExecutionEntity.getEntityMetaData().getName(), jobExecutionEntity);
 	}

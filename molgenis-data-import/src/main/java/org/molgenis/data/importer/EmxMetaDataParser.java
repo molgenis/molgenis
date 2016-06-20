@@ -38,6 +38,7 @@ import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -279,7 +280,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			Boolean readOnly = attributeEntity.getBoolean(READ_ONLY);
 			Boolean unique = attributeEntity.getBoolean(UNIQUE);
 			String expression = attributeEntity.getString(EXPRESSION);
-			List<String> tagIds = attributeEntity.getList(TAGS);
+			List<String> tagIds = DataConverter.toList(attributeEntity.get(TAGS));
 			String validationExpression = attributeEntity.getString(VALIDATION_EXPRESSION);
 			String defaultValue = attributeEntity.getString(DEFAULT_VALUE);
 
@@ -391,7 +392,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			if (attribute.getDataType() instanceof EnumField)
 			{
-				List<String> enumOptions = attributeEntity.getList(ENUM_OPTIONS);
+				List<String> enumOptions = DataConverter.toList(attributeEntity.get(ENUM_OPTIONS));
 				if ((enumOptions == null) || enumOptions.isEmpty())
 				{
 					throw new IllegalArgumentException("Missing enum options for attribute [" + attribute.getName()
@@ -637,7 +638,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				}
 
 				if (entity.getBoolean(ABSTRACT) != null) md.setAbstract(entity.getBoolean(ABSTRACT));
-				List<String> tagIds = entity.getList(EntityMetaDataMetaData.TAGS);
+				List<String> tagIds = DataConverter.toList(entity.get(TAGS));
 
 				String extendsEntityName = entity.getString(EXTENDS);
 				if (extendsEntityName != null)
@@ -715,7 +716,8 @@ public class EmxMetaDataParser implements MetaDataParser
 				parent = intermediateResults.getPackage(parentName);
 			}
 
-			intermediateResults.addPackage(name, packageFactory.create(simpleName, description, parent));
+			intermediateResults.addPackage(name,
+					packageFactory.create().setSimpleName(simpleName).setDescription(description).setParent(parent));
 		}
 	}
 
@@ -735,7 +737,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			for (Entity pack : repo)
 			{
-				Iterable<String> tagIdentifiers = pack.getList(org.molgenis.data.meta.PackageMetaData.TAGS);
+				Iterable<String> tagIdentifiers = DataConverter.toList(pack.get(TAGS));
 				if (tagIdentifiers != null)
 				{
 					String name = pack.getString(NAME);

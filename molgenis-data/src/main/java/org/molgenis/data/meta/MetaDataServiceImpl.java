@@ -9,6 +9,7 @@ import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DA
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
+import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
 import static org.molgenis.data.meta.PackageMetaData.PACKAGE;
 import static org.molgenis.data.meta.PackageMetaData.PARENT;
 import static org.molgenis.data.meta.TagMetaData.TAG;
@@ -78,11 +79,23 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
+	public <E extends Entity> Repository<E> getRepository(String entityName, Class<E> entityClass)
+	{
+		return (Repository<E>) getRepository(entityName);
+	}
+
+	@Override
 	public Repository<Entity> getRepository(EntityMetaData entityMeta)
 	{
 		String backendName = entityMeta.getBackend();
 		RepositoryCollection backend = getBackend(backendName);
 		return backend.getRepository(entityMeta);
+	}
+
+	@Override
+	public <E extends Entity> Repository<E> getRepository(EntityMetaData entityMeta, Class<E> entityClass)
+	{
+		return (Repository<E>) getRepository(entityMeta);
 	}
 
 	@Override
@@ -186,7 +199,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		}
 		else
 		{
-			return getEntityRepository().findOneById(fullyQualifiedEntityName);
+			return getEntityRepository().findOneById(fullyQualifiedEntityName, getEntityMetaDataFetch());
 		}
 	}
 
@@ -225,13 +238,14 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public Stream<EntityMetaData> getEntityMetaDatas()
 	{
-		return getEntityRepository().stream();
+		return getEntityRepository().stream(getEntityMetaDataFetch());
 	}
 
 	@Override
 	public Stream<Repository<Entity>> getRepositories()
 	{
-		return getEntityRepository().query().eq(ABSTRACT, false).findAll().map(this::getRepository);
+		return getEntityRepository().query().eq(ABSTRACT, false).fetch(getEntityMetaDataFetch()).findAll()
+				.map(this::getRepository);
 	}
 
 	@Transactional
@@ -357,34 +371,22 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	private Repository<Package> getPackageRepository()
 	{
-
-		//		SystemEntityFactory<Package, Object> packageFactory = systemEntityMetaRegistry
-		//				.getSystemEntityFactory(Package.class);
-		//		return new TypedRepositoryDecorator<>(getRepository(PACKAGE), packageFactory);
-		return (Repository<Package>) (Repository<? extends Entity>) getRepository(PACKAGE);
+		return getRepository(PACKAGE, Package.class);
 	}
 
 	private Repository<EntityMetaData> getEntityRepository()
 	{
-		//		SystemEntityFactory<EntityMetaData, Object> entityMetaFactory = systemEntityMetaRegistry
-		//				.getSystemEntityFactory(EntityMetaData.class);
-		//		return new TypedRepositoryDecorator<>(getRepository(ENTITY_META_DATA), entityMetaFactory);
-		return (Repository<EntityMetaData>) (Repository<? extends Entity>) getRepository(ENTITY_META_DATA);
+		return getRepository(ENTITY_META_DATA, EntityMetaData.class);
 	}
 
 	private Repository<AttributeMetaData> getAttributeRepository()
 	{
-		//		SystemEntityFactory<AttributeMetaData, Object> attrFactory = systemEntityMetaRegistry
-		//				.getSystemEntityFactory(AttributeMetaData.class);
-		//		return new TypedRepositoryDecorator<>(getRepository(ATTRIBUTE_META_DATA), attrFactory);
-		return (Repository<AttributeMetaData>) (Repository<? extends Entity>) getRepository(ATTRIBUTE_META_DATA);
+		return getRepository(ATTRIBUTE_META_DATA, AttributeMetaData.class);
 	}
 
 	private Repository<Tag> getTagRepository()
 	{
-		//		SystemEntityFactory<Tag, Object> tagFactory = systemEntityMetaRegistry.getSystemEntityFactory(Tag.class);
-		//		return new TypedRepositoryDecorator<>(getRepository(TAG), tagFactory);
-		return (Repository<Tag>) (Repository<? extends Entity>) getRepository(TAG);
+		return getRepository(TAG, Tag.class);
 	}
 
 	/**

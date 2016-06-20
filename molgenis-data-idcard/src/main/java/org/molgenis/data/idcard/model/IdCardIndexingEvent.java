@@ -5,6 +5,7 @@ import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.MESSAGE
 import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.STATUS;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
 public class IdCardIndexingEvent extends StaticEntity
@@ -14,14 +15,14 @@ public class IdCardIndexingEvent extends StaticEntity
 		super(entity);
 	}
 
-	public IdCardIndexingEvent(IdCardIndexingEventMetaData idCardIndexingEventMetaData)
+	public IdCardIndexingEvent(EntityMetaData entityMeta)
 	{
-		super(idCardIndexingEventMetaData);
+		super(entityMeta);
 	}
 
-	public IdCardIndexingEvent(String id, IdCardIndexingEventMetaData idCardIndexingEventMetaData)
+	public IdCardIndexingEvent(String id, EntityMetaData entityMeta)
 	{
-		super(idCardIndexingEventMetaData);
+		super(entityMeta);
 		set(ID, id);
 	}
 

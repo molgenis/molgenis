@@ -4,7 +4,6 @@ import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.List;
 import java.util.ResourceBundle;
 
 import org.molgenis.data.DataService;
@@ -61,7 +60,7 @@ public abstract class DefaultSettingsEntity implements Entity
 	}
 
 	@Override
-	public String getLabelValue()
+	public Object getLabelValue()
 	{
 		return getEntity().getLabelValue();
 	}
@@ -142,18 +141,6 @@ public abstract class DefaultSettingsEntity implements Entity
 	public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz)
 	{
 		return getEntity().getEntities(attributeName, clazz);
-	}
-
-	@Override
-	public List<String> getList(String attributeName)
-	{
-		return getEntity().getList(attributeName);
-	}
-
-	@Override
-	public List<Integer> getIntList(String attributeName)
-	{
-		return getEntity().getIntList(attributeName);
 	}
 
 	@Override

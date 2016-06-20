@@ -1,5 +1,7 @@
 package org.molgenis.data.validation;
 
+import static java.lang.String.format;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -322,14 +324,27 @@ public class EntityAttributesValidator
 		}
 	}
 
-	private ConstraintViolation checkRange(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
+	private ConstraintViolation checkRange(Entity entity, AttributeMetaData attr, EntityMetaData meta)
 	{
-		Range range = attribute.getRange();
-		Long value = entity.getLong(attribute.getName());
+		Range range = attr.getRange();
+		Long value;
+		switch (attr.getDataType().getEnumType())
+		{
+			case INT:
+				Integer intValue = entity.getInt(attr.getName());
+				value = intValue != null ? intValue.longValue() : null;
+				break;
+			case LONG:
+				value = entity.getLong(attr.getName());
+				break;
+			default:
+				throw new RuntimeException(
+						format("Range not allowed for data type [%s]", attr.getDataType().getEnumType().toString()));
+		}
 		if ((value != null) && ((range.getMin() != null && value < range.getMin()) || (range.getMax() != null
 				&& value > range.getMax())))
 		{
-			return createConstraintViolation(entity, attribute, meta);
+			return createConstraintViolation(entity, attr, meta);
 		}
 
 		return null;
@@ -378,20 +393,20 @@ public class EntityAttributesValidator
 	private ConstraintViolation createConstraintViolation(Entity entity, AttributeMetaData attribute,
 			EntityMetaData meta)
 	{
-		String message = String.format("Invalid %s value '%s' for attribute '%s' of entity '%s'.",
+		String message = format("Invalid %s value '%s' for attribute '%s' of entity '%s'.",
 				attribute.getDataType().getEnumType().toString().toLowerCase(), entity.getString(attribute.getName()),
 				attribute.getLabel(), meta.getName());
 
 		Range range = attribute.getRange();
 		if (range != null)
 		{
-			message += String.format("Value must be between %d and %d", range.getMin(), range.getMax());
+			message += format("Value must be between %d and %d", range.getMin(), range.getMax());
 		}
 
 		Long maxLength = attribute.getDataType().getMaxLength();
 		if (maxLength != null)
 		{
-			message += String.format("Value must be less than or equal to %d characters", maxLength);
+			message += format("Value must be less than or equal to %d characters", maxLength);
 		}
 
 		return new ConstraintViolation(message, entity.getString(attribute.getName()), entity, attribute, meta, null);
@@ -400,7 +415,7 @@ public class EntityAttributesValidator
 	private ConstraintViolation createConstraintViolation(Entity entity, AttributeMetaData attribute,
 			EntityMetaData meta, String message)
 	{
-		String fullMessage = String.format("Invalid %s value '%s' for attribute '%s' of entity '%s'.",
+		String fullMessage = format("Invalid %s value '%s' for attribute '%s' of entity '%s'.",
 				attribute.getDataType().getEnumType().toString().toLowerCase(), entity.getString(attribute.getName()),
 				attribute.getLabel(), meta.getName());
 		fullMessage += " " + message;

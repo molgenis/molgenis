@@ -13,6 +13,7 @@ import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
+import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlAddColumn;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateForeignKey;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateJunctionTable;
@@ -96,7 +97,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 					.toString();
 			if (LOG.isDebugEnabled())
 			{
-				LOG.debug("Fetching [{}] languages");
+				LOG.debug("Fetching languages");
 				if (LOG.isTraceEnabled())
 				{
 					LOG.trace("SQL: {}", sql);
@@ -133,15 +134,16 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 	@Override
 	public Iterable<String> getEntityNames()
 	{
-		return dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(BACKEND, POSTGRESQL).findAll()
-				.map(EntityMetaData::getName)::iterator;
+		return dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(BACKEND, POSTGRESQL)
+				.fetch(getEntityMetaDataFetch()).findAll().map(EntityMetaData::getName)::iterator;
 	}
 
 	@Override
 	public Repository<Entity> getRepository(String name)
 	{
 		EntityMetaData entityMetaData = dataService.query(ENTITY_META_DATA, EntityMetaData.class)
-				.eq(BACKEND, POSTGRESQL).and().eq(FULL_NAME, name).and().eq(ABSTRACT, false).findOne();
+				.eq(BACKEND, POSTGRESQL).and().eq(FULL_NAME, name).and().eq(ABSTRACT, false)
+				.fetch(getEntityMetaDataFetch()).findOne();
 		return getRepository(entityMetaData);
 	}
 
@@ -157,7 +159,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 	public Iterator<Repository<Entity>> iterator()
 	{
 		return dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(BACKEND, POSTGRESQL).and()
-				.eq(ABSTRACT, false).findAll().map(this::getRepository).iterator();
+				.eq(ABSTRACT, false).fetch(getEntityMetaDataFetch()).findAll().map(this::getRepository).iterator();
 	}
 
 	@Override

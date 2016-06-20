@@ -70,11 +70,6 @@ public final class IntermediateParseResults
 		this.i18nStrings = new LinkedHashMap<>();
 	}
 
-	public void addEntityMetaData(EntityMetaData entityMetaData)
-	{
-		entities.put(entityMetaData.getName(), entityMetaData);
-	}
-
 	public void addTagEntity(String identifier, Entity tagEntity)
 	{
 		tags.put(identifier, tagEntity);

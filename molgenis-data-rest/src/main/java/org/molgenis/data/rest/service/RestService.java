@@ -18,11 +18,11 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.file.FileDownloadController;
@@ -41,15 +41,17 @@ public class RestService
 	private final IdGenerator idGenerator;
 	private final FileStore fileStore;
 	private final FileMetaFactory fileMetaFactory;
+	private final EntityManager entityManager;
 
 	@Autowired
 	public RestService(DataService dataService, IdGenerator idGenerator, FileStore fileStore,
-			FileMetaFactory fileMetaFactory)
+			FileMetaFactory fileMetaFactory, EntityManager entityManager)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.idGenerator = requireNonNull(idGenerator);
 		this.fileStore = requireNonNull(fileStore);
 		this.fileMetaFactory = fileMetaFactory;
+		this.entityManager = entityManager;
 	}
 
 	/**
@@ -61,7 +63,7 @@ public class RestService
 	 */
 	public Entity toEntity(final EntityMetaData meta, final Map<String, Object> request)
 	{
-		final Entity entity = new MapEntity(meta);
+		final Entity entity = entityManager.create(meta);
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{

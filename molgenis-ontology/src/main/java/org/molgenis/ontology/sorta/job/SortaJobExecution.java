@@ -10,7 +10,7 @@ import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.THRESHO
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.JobExecution;
-import org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 public class SortaJobExecution extends JobExecution
 {
@@ -19,15 +19,15 @@ public class SortaJobExecution extends JobExecution
 		super(entity);
 	}
 
-	public SortaJobExecution(SortaJobExecutionMetaData sortaJobExecutionMetaData)
+	public SortaJobExecution(EntityMetaData entityMeta)
 	{
-		super(sortaJobExecutionMetaData);
+		super(entityMeta);
 		setDefaultValues();
 	}
 
-	public SortaJobExecution(String identifier, SortaJobExecutionMetaData sortaJobExecutionMetaData)
+	public SortaJobExecution(String identifier, EntityMetaData entityMeta)
 	{
-		super(identifier, sortaJobExecutionMetaData);
+		super(identifier, entityMeta);
 		setDefaultValues();
 	}
 	

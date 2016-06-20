@@ -1,6 +1,5 @@
 package org.molgenis.ui;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
 import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
@@ -24,7 +23,6 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.RepositorySecurityDecorator;
-import org.molgenis.data.SystemEntityFactory;
 import org.molgenis.data.elasticsearch.IndexedRepositoryDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.i18n.I18nStringDecorator;
@@ -41,8 +39,6 @@ import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.data.reindex.ReindexActionRepositoryDecorator;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.support.TypedRepositoryDecorator;
-import org.molgenis.data.support.UntypedRepositoryDecorator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
@@ -144,44 +140,29 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	{
 		if (repo.getName().equals(MOLGENIS_USER))
 		{
-			//			repo = getUntypedRepository(
-			//					new MolgenisUserDecorator(getTypedRepository(repo, MolgenisUser.class), molgenisUserFactory,
-			//							userAuthorityFactory), MolgenisUser.class);
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new MolgenisUserDecorator(
 					(Repository<MolgenisUser>) (Repository<? extends Entity>) repo, molgenisUserFactory,
 					userAuthorityFactory);
 		}
 		else if (repo.getName().equals(ATTRIBUTE_META_DATA))
 		{
-			//			repo = getUntypedRepository(
-			//					new AttributeMetaDataRepositoryDecorator(getTypedRepository(repo, AttributeMetaData.class),
-			//							systemEntityMetaDataRegistry, dataService), AttributeMetaData.class);
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new AttributeMetaDataRepositoryDecorator(
 					(Repository<AttributeMetaData>) (Repository<? extends Entity>) repo, systemEntityMetaDataRegistry,
 					dataService);
 		}
 		else if (repo.getName().equals(ENTITY_META_DATA))
 		{
-			//			repo = getUntypedRepository(
-			//					new EntityMetaDataRepositoryDecorator(getTypedRepository(repo, EntityMetaData.class), dataService,
-			//							systemEntityMetaDataRegistry), EntityMetaData.class);
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityMetaDataRepositoryDecorator(
 					(Repository<EntityMetaData>) (Repository<? extends Entity>) repo, dataService,
 					systemEntityMetaDataRegistry);
 		}
 		else if (repo.getName().equals(PACKAGE))
 		{
-			//			repo = getUntypedRepository(
-			//					new PackageRepositoryDecorator(getTypedRepository(repo, Package.class), dataService),
-			//					Package.class);
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new PackageRepositoryDecorator(
 					(Repository<Package>) (Repository<? extends Entity>) repo, dataService);
 		}
 		else if (repo.getName().equals(LANGUAGE))
 		{
-			//			repo = getUntypedRepository(
-			//					new LanguageRepositoryDecorator(getTypedRepository(repo, Language.class), dataService,
-			//							systemEntityMetaDataRegistry, attrMetaFactory), Language.class);
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new LanguageRepositoryDecorator(
 					(Repository<Language>) (Repository<? extends Entity>) repo, dataService,
 					systemEntityMetaDataRegistry, attrMetaFactory);
@@ -191,29 +172,5 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			repo = new I18nStringDecorator(repo);
 		}
 		return repo;
-	}
-
-	private <E extends Entity> Repository<Entity> getUntypedRepository(Repository<E> typedRepo, Class<E> entityClass)
-	{
-		SystemEntityFactory<E, Object> systemEntityFactory = systemEntityMetaDataRegistry
-				.getSystemEntityFactory(entityClass);
-		if (systemEntityFactory == null)
-		{
-			throw new IllegalArgumentException(
-					format("Unknown entity factory for class [%s]", entityClass.getSimpleName()));
-		}
-		return new UntypedRepositoryDecorator<>(typedRepo, systemEntityFactory);
-	}
-
-	private <E extends Entity> Repository<E> getTypedRepository(Repository<Entity> untypedRepo, Class<E> entityClass)
-	{
-		SystemEntityFactory<E, Object> systemEntityFactory = systemEntityMetaDataRegistry
-				.getSystemEntityFactory(entityClass);
-		if (systemEntityFactory == null)
-		{
-			throw new IllegalArgumentException(
-					format("Unknown entity factory for class [%s]", entityClass.getSimpleName()));
-		}
-		return new TypedRepositoryDecorator<>(untypedRepo, systemEntityFactory);
 	}
 }

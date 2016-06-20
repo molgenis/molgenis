@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.EntityMetaData;
@@ -14,6 +13,8 @@ import org.molgenis.data.meta.EntityMetaData;
  */
 public abstract class StaticEntity implements Entity
 {
+	private static final long serialVersionUID = 1L;
+
 	private Entity entity;
 
 	public StaticEntity(Entity entity)
@@ -23,7 +24,7 @@ public abstract class StaticEntity implements Entity
 
 	public StaticEntity(EntityMetaData entityMeta)
 	{
-		this.entity = new EntityImpl(entityMeta);
+		this.entity = new DynamicEntity(entityMeta);
 	}
 
 	public StaticEntity(Object id, EntityMetaData entityMeta)
@@ -39,7 +40,7 @@ public abstract class StaticEntity implements Entity
 
 	protected void init(EntityMetaData entityMeta)
 	{
-		entity = new EntityImpl(entityMeta);
+		entity = new DynamicEntity(entityMeta);
 	}
 
 	@Override
@@ -115,21 +116,9 @@ public abstract class StaticEntity implements Entity
 	}
 
 	@Override
-	public List<Integer> getIntList(String attributeName)
-	{
-		return entity.getIntList(attributeName);
-	}
-
-	@Override
-	public String getLabelValue()
+	public Object getLabelValue()
 	{
 		return entity.getLabelValue();
-	}
-
-	@Override
-	public List<String> getList(String attributeName)
-	{
-		return entity.getList(attributeName);
 	}
 
 	@Override

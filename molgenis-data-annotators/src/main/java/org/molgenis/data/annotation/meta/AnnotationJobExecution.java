@@ -5,6 +5,7 @@ import static org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData.T
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.JobExecution;
+import org.molgenis.data.meta.EntityMetaData;
 
 public class AnnotationJobExecution extends JobExecution
 {
@@ -13,15 +14,15 @@ public class AnnotationJobExecution extends JobExecution
 		super(entity);
 	}
 
-	public AnnotationJobExecution(AnnotationJobExecutionMetaData annotationJobExecutionMetaData)
+	public AnnotationJobExecution(EntityMetaData entityMeta)
 	{
-		super(annotationJobExecutionMetaData);
+		super(entityMeta);
 		setDefaultValues();
 	}
 
-	public AnnotationJobExecution(String identifier, AnnotationJobExecutionMetaData annotationJobExecutionMetaData)
+	public AnnotationJobExecution(String identifier, EntityMetaData entityMeta)
 	{
-		super(identifier, annotationJobExecutionMetaData);
+		super(identifier, entityMeta);
 		setDefaultValues();
 	}
 

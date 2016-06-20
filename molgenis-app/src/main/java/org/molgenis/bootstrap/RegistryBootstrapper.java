@@ -3,6 +3,7 @@ package org.molgenis.bootstrap;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
 
+import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.importer.ImportServiceRegistrar;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistrar;
@@ -24,16 +25,18 @@ public class RegistryBootstrapper
 
 	private final RepositoryCollectionBootstrapper repoCollectionBootstrapper;
 	private final SystemEntityMetaDataRegistrar systemEntityMetaRegistrar;
+	private final EntityFactoryRegistrar entityFactoryRegistrar;
 	private final ImportServiceRegistrar importServiceRegistrar;
 	private final ScriptRunnerRegistrar scriptRunnerRegistrar;
 
 	@Autowired
 	public RegistryBootstrapper(RepositoryCollectionBootstrapper repoCollectionBootstrapper,
-			SystemEntityMetaDataRegistrar systemEntityMetaRegistrar, ImportServiceRegistrar importServiceRegistrar,
-			ScriptRunnerRegistrar scriptRunnerRegistrar)
+			SystemEntityMetaDataRegistrar systemEntityMetaRegistrar, EntityFactoryRegistrar entityFactoryRegistrar,
+			ImportServiceRegistrar importServiceRegistrar, ScriptRunnerRegistrar scriptRunnerRegistrar)
 	{
 		this.repoCollectionBootstrapper = requireNonNull(repoCollectionBootstrapper);
-		this.systemEntityMetaRegistrar = systemEntityMetaRegistrar;
+		this.systemEntityMetaRegistrar = requireNonNull(systemEntityMetaRegistrar);
+		this.entityFactoryRegistrar = requireNonNull(entityFactoryRegistrar);
 		this.importServiceRegistrar = requireNonNull(importServiceRegistrar);
 		this.scriptRunnerRegistrar = requireNonNull(scriptRunnerRegistrar);
 	}
@@ -47,6 +50,10 @@ public class RegistryBootstrapper
 		LOG.trace("Registering system entity meta data ...");
 		systemEntityMetaRegistrar.register(event);
 		LOG.trace("Registered system entity meta data");
+
+		LOG.trace("Registering entity factories ...");
+		entityFactoryRegistrar.register(event);
+		LOG.trace("Registered entity factories");
 
 		LOG.trace("Registering importers ...");
 		importServiceRegistrar.register(event);

@@ -5,7 +5,7 @@ import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP;
 import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_USER;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.SystemEntityFactory;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
 public class MolgenisGroupMember extends StaticEntity
@@ -15,21 +15,14 @@ public class MolgenisGroupMember extends StaticEntity
 		super(entity);
 	}
 
-	public MolgenisGroupMember(MolgenisGroupMemberMetaData molgenisGroupMemberMetaData)
+	public MolgenisGroupMember(EntityMetaData entityMeta)
 	{
-		super(molgenisGroupMemberMetaData);
+		super(entityMeta);
 	}
 
-	public MolgenisGroupMember(String id, MolgenisGroupMemberMetaData molgenisGroupMemberMetaData)
+	public MolgenisGroupMember(String id, EntityMetaData entityMeta)
 	{
-		super(molgenisGroupMemberMetaData);
-		setId(id);
-	}
-
-	public MolgenisGroupMember(String id, MolgenisGroupMemberMetaData molgenisGroupMemberMetaData,
-			SystemEntityFactory entityFactory)
-	{
-		super(molgenisGroupMemberMetaData);
+		super(entityMeta);
 		setId(id);
 	}
 

@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,7 @@ import org.slf4j.LoggerFactory;
  * @param <P> entity id type
  */
 public abstract class AbstractSystemEntityFactory<E extends Entity, M extends SystemEntityMetaData, P>
-		implements SystemEntityFactory<E, P>
+		implements EntityFactory<E, P>
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractSystemEntityFactory.class);
 
@@ -37,8 +38,8 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
 		this.entityClass = requireNonNull(entityClass);
 
 		// determining constructors at creation time validates that required constructors exist on start-up
-		this.entityConstructorWithEntity = getConstructor(entityClass);
-		this.entityConstructorWithEntityMeta = getConstructor(entityClass, systemEntityMeta.getClass());
+		this.entityConstructorWithEntity = getConstructorEntity(entityClass);
+		this.entityConstructorWithEntityMeta = getConstructorEntityMeta(entityClass);
 		this.systemEntityMetaData = systemEntityMeta;
 	}
 
@@ -91,7 +92,7 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
 		}
 	}
 
-	private Constructor<E> getConstructor(Class<E> entityClass)
+	private Constructor<E> getConstructorEntity(Class<E> entityClass)
 	{
 		try
 		{
@@ -105,32 +106,16 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
 		}
 	}
 
-	private Constructor<E> getConstructor(Class<E> entityClass,
-			Class<? extends SystemEntityMetaData> entityMetaArgClass)
+	private Constructor<E> getConstructorEntityMeta(Class<E> entityClass)
 	{
 		try
 		{
-			return entityClass.getConstructor(entityMetaArgClass);
+			return entityClass.getConstructor(EntityMetaData.class);
 		}
 		catch (NoSuchMethodException e)
 		{
 			LOG.error("[{}] is missing the required constructor [public {}({})", entityClass.getName(),
-					entityClass.getSimpleName(), entityMetaArgClass.getSimpleName());
-			throw new RuntimeException(e);
-		}
-	}
-
-	private Constructor<E> getConstructor(Class<E> entityClass,
-			Class<? extends SystemEntityMetaData> entityMetaArgClass, Class<?> idArgType)
-	{
-		try
-		{
-			return entityClass.getConstructor(idArgType, entityMetaArgClass);
-		}
-		catch (NoSuchMethodException e)
-		{
-			LOG.error("[{}] is missing the required constructor [public {}({}, {})", entityClass.getName(),
-					entityClass.getSimpleName(), idArgType.getSimpleName(), entityMetaArgClass.getSimpleName());
+					entityClass.getSimpleName(), EntityMetaData.class.getSimpleName());
 			throw new RuntimeException(e);
 		}
 	}
