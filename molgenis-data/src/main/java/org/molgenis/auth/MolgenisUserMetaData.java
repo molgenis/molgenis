@@ -43,12 +43,11 @@ public class MolgenisUserMetaData extends SystemEntityMetaData
 	public static final String COUNTRY = "Country";
 	public static final String LANGUAGECODE = "languageCode";
 	public static final String ID = "id";
-	public static final String ADDESS = "Addess";
 
 	private final SecurityPackage securityPackage;
 
 	@Autowired
-	MolgenisUserMetaData(SecurityPackage securityPackage)
+	public MolgenisUserMetaData(SecurityPackage securityPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
 		this.securityPackage = requireNonNull(securityPackage);

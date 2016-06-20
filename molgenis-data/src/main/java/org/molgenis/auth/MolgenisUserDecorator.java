@@ -1,7 +1,10 @@
 package org.molgenis.auth;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.AuthorityMetaData.ROLE;
+import static org.molgenis.auth.UserAuthorityMetaData.MOLGENIS_USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -11,7 +14,6 @@ import java.util.stream.Stream;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
@@ -19,25 +21,22 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.util.ApplicationContextProvider;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class MolgenisUserDecorator implements Repository<MolgenisUser>
 {
 	private final Repository<MolgenisUser> decoratedRepository;
-	private final MolgenisUserFactory molgenisUserFactory;
 	private final UserAuthorityFactory userAuthorityFactory;
+	private final DataService dataService;
+	private final PasswordEncoder passwordEncoder;
 
-	public MolgenisUserDecorator(Repository<MolgenisUser> decoratedRepository, MolgenisUserFactory molgenisUserFactory,
-			UserAuthorityFactory userAuthorityFactory)
+	public MolgenisUserDecorator(Repository<MolgenisUser> decoratedRepository,
+			UserAuthorityFactory userAuthorityFactory, DataService dataService, PasswordEncoder passwordEncoder)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
-		this.molgenisUserFactory = requireNonNull(molgenisUserFactory);
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
+		this.dataService = requireNonNull(dataService);
+		this.passwordEncoder = requireNonNull(passwordEncoder);
 	}
 
 	@Override
@@ -83,105 +82,68 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 		decoratedRepository.update(entities);
 	}
 
-	private void updatePassword(MolgenisUser entity)
+	private void updatePassword(MolgenisUser molgenisUser)
 	{
-		MolgenisUser currentUser = molgenisUserFactory.create();
-		currentUser.set(findOneById(entity.getIdValue()));
+		MolgenisUser currentUser = findOneById(molgenisUser.getId());
 
 		String currentPassword = currentUser.getPassword();
-		String password = entity.getString(MolgenisUserMetaData.PASSWORD_);
+		String password = passwordEncoder.encode(molgenisUser.getPassword());
 
 		if (!password.equals(currentPassword))
 		{
-			encodePassword(entity);
+			molgenisUser.setPassword(password);
 		}
 	}
 
-	private void encodePassword(MolgenisUser entity)
+	private void encodePassword(MolgenisUser molgenisUser)
 	{
-		String password = entity.getString(MolgenisUserMetaData.PASSWORD_);
-		String encodedPassword = getPasswordEncoder().encode(password);
-		entity.set(MolgenisUserMetaData.PASSWORD_, encodedPassword);
+		String password = molgenisUser.getPassword();
+		String encodedPassword = passwordEncoder.encode(password);
+		molgenisUser.setPassword(encodedPassword);
 	}
 
 	private void addSuperuserAuthority(MolgenisUser molgenisUser)
 	{
 		Boolean isSuperuser = molgenisUser.isSuperuser();
-		if (isSuperuser != null && isSuperuser == true)
+		if (isSuperuser != null && isSuperuser)
 		{
 			UserAuthority userAuthority = userAuthorityFactory.create();
 			userAuthority.setMolgenisUser(molgenisUser);
-			userAuthority.setRole(SecurityUtils.AUTHORITY_SU);
+			userAuthority.setRole(AUTHORITY_SU);
 
 			getUserAuthorityRepository().add(userAuthority);
 		}
 	}
 
-	private void updateSuperuserAuthority(MolgenisUser entity)
+	private void updateSuperuserAuthority(MolgenisUser molgenisUser)
 	{
-		MolgenisUser molgenisUser = molgenisUserFactory.create();
-		molgenisUser.set(findOneById(entity.getIdValue()));
+		Repository<UserAuthority> userAuthorityRepo = getUserAuthorityRepository();
+		UserAuthority suAuthority = userAuthorityRepo.query().eq(MOLGENIS_USER, molgenisUser).and()
+				.eq(ROLE, AUTHORITY_SU).findOne();
 
-		Repository<UserAuthority> userAuthorityRepository = getUserAuthorityRepository();
-		Entity suAuthorityEntity = userAuthorityRepository.findOne(
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, molgenisUser).and()
-						.eq(AuthorityMetaData.ROLE, SecurityUtils.AUTHORITY_SU));
-
-		Boolean isSuperuser = entity.getBoolean(MolgenisUserMetaData.SUPERUSER);
-		if (isSuperuser != null && isSuperuser == true)
+		Boolean isSuperuser = molgenisUser.isSuperuser();
+		if (isSuperuser != null && isSuperuser)
 		{
-			if (suAuthorityEntity == null)
+			if (suAuthority == null)
 			{
-
 				UserAuthority userAuthority = userAuthorityFactory.create();
 				userAuthority.setMolgenisUser(molgenisUser);
-				userAuthority.setRole(SecurityUtils.AUTHORITY_SU);
-				userAuthorityRepository.add(userAuthority);
+				userAuthority.setRole(AUTHORITY_SU);
+				userAuthorityRepo.add(userAuthority);
 			}
 		}
 		else
 		{
-			if (suAuthorityEntity != null)
+			if (suAuthority != null)
 			{
-				userAuthorityRepository.deleteById(suAuthorityEntity.getIdValue());
+				userAuthorityRepo.deleteById(suAuthority.getId());
 			}
 		}
 	}
 
-	private PasswordEncoder getPasswordEncoder()
-	{
-		ApplicationContext applicationContext = ApplicationContextProvider.getApplicationContext();
-		if (applicationContext == null)
-		{
-			throw new RuntimeException(new ApplicationContextException("missing required application context"));
-		}
-		PasswordEncoder passwordEncoder = applicationContext.getBean(PasswordEncoder.class);
-		if (passwordEncoder == null)
-		{
-			throw new RuntimeException(new ApplicationContextException("missing required PasswordEncoder bean"));
-		}
-		return passwordEncoder;
-	}
-
 	private Repository<UserAuthority> getUserAuthorityRepository()
 	{
-		ApplicationContext applicationContext = ApplicationContextProvider.getApplicationContext();
-		if (applicationContext == null)
-		{
-			throw new RuntimeException(new ApplicationContextException("missing required application context"));
-		}
-		DataService dataService = applicationContext.getBean(DataService.class);
-		if (dataService == null)
-		{
-			throw new RuntimeException(new ApplicationContextException("missing required DataService bean"));
-		}
-		Repository<UserAuthority> userAuthorityRepository = dataService
-				.getRepository(USER_AUTHORITY, UserAuthority.class);
-		if (userAuthorityRepository == null)
-		{
-			throw new RuntimeException("missing required UserAuthority repository");
-		}
-		return userAuthorityRepository;
+		return dataService.getRepository(USER_AUTHORITY, UserAuthority.class);
 	}
 
 	@Override
