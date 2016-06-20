@@ -82,27 +82,28 @@ public class GavinAlgorithm
 		// CADD score based classification, calibrated
 		if(caddScaled != null)
 		{
-			if((category.equals(Category.C1) || category.equals(Category.C2)))
+			switch(category)
 			{
-				if(caddScaled > meanPathogenicCADDScore)
-				{
-					return new Judgment(Judgment.Classification.Pathogenic,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is greater than "+meanPathogenicCADDScore+" in a gene for which CADD scores are informative.");
-				}
-				else if(caddScaled < meanPopulationCADDScore)
-				{
-					return new Judgment(Judgment.Classification.Benign,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is less than "+meanPopulationCADDScore+" in a gene for which CADD scores are informative.");
-				}
-			}
-			else if((category.equals(Category.C3) || category.equals(Category.C4) || category.equals(Category.C5)))
-			{
-				if(caddScaled > spec95thPerCADDThreshold)
-				{
-					return new Judgment(Judgment.Classification.Pathogenic,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is greater than "+spec95thPerCADDThreshold+" for this gene.");
-				}
-				else if(caddScaled < sens95thPerCADDThreshold)
-				{
-					return new Judgment(Judgment.Classification.Benign,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is less than "+sens95thPerCADDThreshold+" for this gene.");
-				}
+				case C1: case C2:
+					if(caddScaled > meanPathogenicCADDScore)
+					{
+						return new Judgment(Judgment.Classification.Pathogenic,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is greater than "+meanPathogenicCADDScore+" in a gene for which CADD scores are informative.");
+					}
+					else if(caddScaled < meanPopulationCADDScore)
+					{
+						return new Judgment(Judgment.Classification.Benign,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is less than "+meanPopulationCADDScore+" in a gene for which CADD scores are informative.");
+					}
+					break;
+				case C3: case C4: case C5:
+					if(caddScaled > spec95thPerCADDThreshold)
+					{
+						return new Judgment(Judgment.Classification.Pathogenic,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is greater than "+spec95thPerCADDThreshold+" for this gene.");
+					}
+					else if(caddScaled < sens95thPerCADDThreshold)
+					{
+						return new Judgment(Judgment.Classification.Benign,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is less than "+sens95thPerCADDThreshold+" for this gene.");
+					}
+					break;
 			}
 		}
 
