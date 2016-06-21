@@ -15,7 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotator.tabix.TabixReader.Iterator;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfReaderFactory;
 import org.molgenis.vcf.VcfReader;

@@ -1,5 +1,7 @@
-package org.molgenis.data.meta;
+package org.molgenis.data.system.model;
 
+import org.molgenis.data.meta.SystemPackage;
+import org.molgenis.data.meta.model.PackageMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

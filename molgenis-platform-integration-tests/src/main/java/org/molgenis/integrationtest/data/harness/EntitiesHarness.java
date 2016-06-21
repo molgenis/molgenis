@@ -6,12 +6,12 @@ import java.util.stream.IntStream;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * Creates {@link org.molgenis.data.meta.EntityMetaData} and {@link org.molgenis.data.Entity}s to test with.
+ * Creates {@link EntityMetaData} and {@link org.molgenis.data.Entity}s to test with.
  */
 @Component
 public class EntitiesHarness

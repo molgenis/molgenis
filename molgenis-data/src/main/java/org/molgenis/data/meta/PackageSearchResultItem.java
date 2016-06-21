@@ -1,5 +1,7 @@
 package org.molgenis.data.meta;
 
+import org.molgenis.data.meta.model.Package;
+
 public class PackageSearchResultItem
 {
 	private final Package packageFound;

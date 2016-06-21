@@ -3,7 +3,7 @@ package org.molgenis.script;
 import static org.molgenis.script.ScriptParameterMetaData.NAME;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
 public class ScriptParameter extends StaticEntity

@@ -3,7 +3,7 @@ package org.molgenis.data;
 import java.io.Serializable;
 import java.sql.Timestamp;
 
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Entity is a data record which can contain a hash of attribute values. Attribute names are unique. Synonyms are

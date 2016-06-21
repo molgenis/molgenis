@@ -1,18 +1,18 @@
 package org.molgenis.data.meta;
 
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ID_ATTRIBUTE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL_ATTRIBUTE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.LOOKUP_ATTRIBUTES;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.SIMPLE_NAME;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.TAGS;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ABSTRACT;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.BACKEND;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.EXTENDS;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.FULL_NAME;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ID_ATTRIBUTE;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.LABEL;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.LABEL_ATTRIBUTE;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.LOOKUP_ATTRIBUTES;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.PACKAGE;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.SIMPLE_NAME;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.TAGS;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 import java.util.List;
@@ -21,6 +21,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.security.core.Permission;
 
 import com.google.common.base.Function;

@@ -2,7 +2,7 @@ package org.molgenis.data;
 
 import java.util.Map;
 
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import com.google.common.collect.Maps;
 

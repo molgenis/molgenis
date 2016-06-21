@@ -1,5 +1,7 @@
 package org.molgenis.data.meta;
 
+import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageMetaData;
 import org.molgenis.data.support.BootstrapEntity;
 
 public abstract class SystemPackage extends Package

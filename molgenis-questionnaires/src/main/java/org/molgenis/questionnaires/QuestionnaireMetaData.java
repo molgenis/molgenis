@@ -1,8 +1,8 @@
 package org.molgenis.questionnaires;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 import java.util.ArrayList;
 import java.util.List;

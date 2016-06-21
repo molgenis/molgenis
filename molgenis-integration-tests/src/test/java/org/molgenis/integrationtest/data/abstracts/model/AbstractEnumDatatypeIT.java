@@ -5,7 +5,7 @@ import static org.testng.Assert.assertEquals;
 import java.util.Arrays;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 
 public class AbstractEnumDatatypeIT extends AbstractDatatypeIT

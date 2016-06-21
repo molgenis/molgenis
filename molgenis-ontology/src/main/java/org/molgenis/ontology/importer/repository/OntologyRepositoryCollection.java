@@ -22,14 +22,22 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.mem.InMemoryRepository;
-import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
-import org.molgenis.ontology.core.meta.OntologyMetaData;
+import org.molgenis.ontology.core.meta.Ontology;
+import org.molgenis.ontology.core.meta.OntologyFactory;
+import org.molgenis.ontology.core.meta.OntologyTerm;
+import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotation;
+import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationFactory;
 import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermFactory;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermNodePath;
+import org.molgenis.ontology.core.meta.OntologyTermNodePathFactory;
 import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermSynonym;
+import org.molgenis.ontology.core.meta.OntologyTermSynonymFactory;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.utils.OWLClassContainer;
 import org.molgenis.ontology.utils.OntologyLoader;
@@ -60,19 +68,19 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	private IdGenerator idGenerator;
 
 	@Autowired
-	private OntologyMetaData ontologyMetaData;
+	private OntologyFactory ontologyFactory;
 
 	@Autowired
-	private OntologyTermNodePathMetaData ontologyTermNodePathMetaData;
+	private OntologyTermNodePathFactory ontologyTermNodePathFactory;
 
 	@Autowired
-	private OntologyTermMetaData ontologyTermMetaData;
+	private OntologyTermDynamicAnnotationFactory ontologyTermDynamicAnnotationFactory;
 
 	@Autowired
-	private OntologyTermDynamicAnnotationMetaData ontologyTermDynamicAnnotationMetaData;
+	private OntologyTermSynonymFactory ontologyTermSynonymFactory;
 
 	@Autowired
-	private OntologyTermSynonymMetaData ontologyTermSynonymMetaData;
+	private OntologyTermFactory ontologyTermFactory;
 
 	// repositories
 	private Repository<Entity> ontologyRepository;
@@ -83,8 +91,8 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	private Map<String, Repository<Entity>> repositories;
 
 	private OntologyLoader loader;
-	private Multimap<String, Entity> nodePathsPerOntologyTerm = ArrayListMultimap.create();
-	private Entity ontologyEntity;
+	private Multimap<String, OntologyTermNodePath> nodePathsPerOntologyTerm = ArrayListMultimap.create();
+	private Ontology ontologyEntity;
 
 	/**
 	 * Creates a new {@link OntologyRepositoryCollection} for an ontology file
@@ -117,11 +125,11 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	@Override
 	public void init() throws IOException
 	{
-		ontologyRepository = new InMemoryRepository(ontologyMetaData);
-		nodePathRepository = new InMemoryRepository(ontologyTermNodePathMetaData);
-		ontologyTermRepository = new InMemoryRepository(ontologyTermMetaData);
-		annotationRepository = new InMemoryRepository(ontologyTermDynamicAnnotationMetaData);
-		synonymRepository = new InMemoryRepository(ontologyTermSynonymMetaData);
+		ontologyRepository = new InMemoryRepository(ontologyFactory.getEntityMetaData());
+		nodePathRepository = new InMemoryRepository(ontologyTermNodePathFactory.getEntityMetaData());
+		ontologyTermRepository = new InMemoryRepository(ontologyTermFactory.getEntityMetaData());
+		annotationRepository = new InMemoryRepository(ontologyTermDynamicAnnotationFactory.getEntityMetaData());
+		synonymRepository = new InMemoryRepository(ontologyTermSynonymFactory.getEntityMetaData());
 		repositories = ImmutableMap
 				.of(ONTOLOGY_TERM_DYNAMIC_ANNOTATION, annotationRepository, ONTOLOGY_TERM_SYNONYM, synonymRepository,
 						ONTOLOGY_TERM_NODE_PATH, nodePathRepository, ONTOLOGY, ontologyRepository, ONTOLOGY_TERM,
@@ -146,10 +154,10 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 */
 	private void createOntology()
 	{
-		ontologyEntity = new DynamicEntity(ontologyMetaData);
-		ontologyEntity.set(OntologyMetaData.ID, idGenerator.generateId());
-		ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, loader.getOntologyIRI());
-		ontologyEntity.set(OntologyMetaData.ONTOLOGY_NAME, loader.getOntologyName());
+		ontologyEntity = ontologyFactory.create();
+		ontologyEntity.setId(idGenerator.generateId());
+		ontologyEntity.setOntologyIri(loader.getOntologyIRI());
+		ontologyEntity.setOntologyName(loader.getOntologyName());
 		ontologyRepository.add(ontologyEntity);
 	}
 
@@ -187,7 +195,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 			OWLClass ontologyTerm = container.getOwlClass();
 			String ontologyTermNodePath = container.getNodePath();
 			String ontologyTermIRI = ontologyTerm.getIRI().toString();
-			Entity nodePathEntity = createNodePathEntity(container, ontologyTermNodePath);
+			OntologyTermNodePath nodePathEntity = createNodePathEntity(container, ontologyTermNodePath);
 			nodePathsPerOntologyTerm.put(ontologyTermIRI, nodePathEntity);
 		}
 	}
@@ -204,23 +212,23 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	/**
 	 * Creates an {@link OntologyTermMetaData} {@link Entity} and adds it in the {@link #ontologyTermRepository}
 	 *
-	 * @param ontologyTerm the OWLClass to create an entity for
+	 * @param ontologyTermClass the OWLClass to create an entity for
 	 * @return the created ontology term {@link Entity}
 	 */
-	private Entity createOntologyTerm(OWLClass ontologyTerm)
+	private Entity createOntologyTerm(OWLClass ontologyTermClass)
 	{
-		String ontologyTermIRI = ontologyTerm.getIRI().toString();
-		String ontologyTermName = loader.getLabel(ontologyTerm);
-		Entity entity = new DynamicEntity(ontologyTermMetaData);
-		entity.set(OntologyTermMetaData.ID, idGenerator.generateId());
-		entity.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ontologyTermIRI);
-		entity.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME, ontologyTermName);
-		entity.set(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, createSynonyms(ontologyTerm));
-		entity.set(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION, createDynamicAnnotations(ontologyTerm));
-		entity.set(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, nodePathsPerOntologyTerm.get(ontologyTermIRI));
-		entity.set(OntologyTermMetaData.ONTOLOGY, ontologyEntity);
-		ontologyTermRepository.add(entity);
-		return entity;
+		String ontologyTermIRI = ontologyTermClass.getIRI().toString();
+		String ontologyTermName = loader.getLabel(ontologyTermClass);
+		OntologyTerm ontologyTerm = ontologyTermFactory.create();
+		ontologyTerm.setId(idGenerator.generateId());
+		ontologyTerm.setOntologyTermIri(ontologyTermIRI);
+		ontologyTerm.setOntologyTermName(ontologyTermName);
+		ontologyTerm.setOntologyTermSynonyms(createSynonyms(ontologyTermClass));
+		ontologyTerm.setOntologyTermDynamicAnnotations(createDynamicAnnotations(ontologyTermClass));
+		ontologyTerm.setOntologyTermNodePaths(nodePathsPerOntologyTerm.get(ontologyTermIRI));
+		ontologyTerm.setOntology(ontologyEntity);
+		ontologyTermRepository.add(ontologyTerm);
+		return ontologyTerm;
 	}
 
 	/**
@@ -229,7 +237,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 * @param ontologyTerm {@link OWLClass} for the ontology term
 	 * @return {@link List} of created synonym {@link Entity}s
 	 */
-	private List<Entity> createSynonyms(OWLClass ontologyTerm)
+	private List<OntologyTermSynonym> createSynonyms(OWLClass ontologyTerm)
 	{
 		return loader.getSynonyms(ontologyTerm).stream().map(this::createSynonym).collect(Collectors.toList());
 	}
@@ -240,11 +248,11 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 * @param synonym String of the synonym to create an {@link Entity} for
 	 * @return the created {@link Entity}
 	 */
-	private Entity createSynonym(String synonym)
+	private OntologyTermSynonym createSynonym(String synonym)
 	{
-		Entity entity = new DynamicEntity(ontologyTermSynonymMetaData);
-		entity.set(OntologyTermSynonymMetaData.ID, idGenerator.generateId());
-		entity.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR, synonym);
+		OntologyTermSynonym entity = ontologyTermSynonymFactory.create();
+		entity.setId(idGenerator.generateId());
+		entity.setOntologyTermSynonym(synonym);
 		synonymRepository.add(entity);
 		return entity;
 	}
@@ -255,7 +263,7 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 * @param term the term to create annotation entities for
 	 * @return List of created {@link Entity}s.
 	 */
-	private List<Entity> createDynamicAnnotations(OWLClass term)
+	private List<OntologyTermDynamicAnnotation> createDynamicAnnotations(OWLClass term)
 	{
 		return loader.getDatabaseIds(term).stream().map(this::createDynamicAnnotation).collect(Collectors.toList());
 	}
@@ -266,14 +274,14 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	 * @param label the key:value label
 	 * @return the {@link Entity}
 	 */
-	private Entity createDynamicAnnotation(String label)
+	private OntologyTermDynamicAnnotation createDynamicAnnotation(String label)
 	{
-		Entity entity = new DynamicEntity(ontologyTermDynamicAnnotationMetaData);
-		entity.set(OntologyTermDynamicAnnotationMetaData.ID, idGenerator.generateId());
+		OntologyTermDynamicAnnotation entity = ontologyTermDynamicAnnotationFactory.create();
+		entity.setId(idGenerator.generateId());
 		String fragments[] = label.split(":");
-		entity.set(OntologyTermDynamicAnnotationMetaData.NAME, fragments[0]);
-		entity.set(OntologyTermDynamicAnnotationMetaData.VALUE, fragments[1]);
-		entity.set(OntologyTermDynamicAnnotationMetaData.LABEL, label);
+		entity.setName(fragments[0]);
+		entity.setValue(fragments[1]);
+		entity.setLabel(label);
 		annotationRepository.add(entity);
 		return entity;
 	}
@@ -297,18 +305,18 @@ public class OntologyRepositoryCollection extends FileRepositoryCollection
 	/**
 	 * Creates a {@link OntologyTermNodePathMetaData} {@link Entity} and stores it in the {@link #nodePathRepository}.
 	 *
-	 * @param container            {@link OWLClassContainer} for the path to the ontology term
-	 * @param ontologyTermNodePath the node path
+	 * @param container                {@link OWLClassContainer} for the path to the ontology term
+	 * @param ontologyTermNodePathText the node path
 	 * @return the created {@link Entity}
 	 */
-	private Entity createNodePathEntity(OWLClassContainer container, String ontologyTermNodePath)
+	private OntologyTermNodePath createNodePathEntity(OWLClassContainer container, String ontologyTermNodePathText)
 	{
-		Entity entity = new DynamicEntity(ontologyTermNodePathMetaData);
-		entity.set(OntologyTermNodePathMetaData.ID, idGenerator.generateId());
-		entity.set(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR, ontologyTermNodePath);
-		entity.set(OntologyTermNodePathMetaData.ROOT, container.isRoot());
-		nodePathRepository.add(entity);
-		return entity;
+		OntologyTermNodePath ontologyTermNodePath = ontologyTermNodePathFactory.create();
+		ontologyTermNodePath.setId(idGenerator.generateId());
+		ontologyTermNodePath.setNodePath(ontologyTermNodePathText);
+		ontologyTermNodePath.setRoot(container.isRoot());
+		nodePathRepository.add(ontologyTermNodePath);
+		return ontologyTermNodePath;
 	}
 
 	@Override

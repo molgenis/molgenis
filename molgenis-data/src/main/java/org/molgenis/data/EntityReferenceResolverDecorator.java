@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 
 public class EntityReferenceResolverDecorator implements Repository<Entity>

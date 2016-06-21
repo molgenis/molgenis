@@ -10,7 +10,7 @@ import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.THRESHO
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.JobExecution;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 public class SortaJobExecution extends JobExecution
 {

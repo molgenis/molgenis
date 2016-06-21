@@ -6,7 +6,7 @@ import static org.testng.Assert.assertNull;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.integrationtest.data.SecuritySupport;
 import org.molgenis.integrationtest.data.abstracts.AbstractDataIntegrationIT;

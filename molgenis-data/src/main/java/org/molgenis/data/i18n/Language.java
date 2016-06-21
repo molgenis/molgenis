@@ -4,7 +4,7 @@ import static org.molgenis.data.i18n.LanguageMetaData.CODE;
 import static org.molgenis.data.i18n.LanguageMetaData.NAME;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
 /**

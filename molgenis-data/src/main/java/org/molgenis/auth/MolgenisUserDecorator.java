@@ -20,7 +20,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class MolgenisUserDecorator implements Repository<MolgenisUser>

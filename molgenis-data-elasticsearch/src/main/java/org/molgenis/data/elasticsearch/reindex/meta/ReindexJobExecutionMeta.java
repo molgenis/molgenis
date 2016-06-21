@@ -1,7 +1,7 @@
 package org.molgenis.data.elasticsearch.reindex.meta;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.reindex.meta.IndexPackage.PACKAGE_INDEX;
 
 import org.molgenis.data.jobs.JobExecutionMetaData;

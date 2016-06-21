@@ -3,7 +3,7 @@ package org.molgenis.data;
 import java.io.Closeable;
 import java.util.List;
 
-import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
 
 /**

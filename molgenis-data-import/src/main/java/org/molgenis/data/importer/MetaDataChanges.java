@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.framework.db.EntityImportReport;
 
 import com.google.common.collect.ImmutableList;

@@ -5,8 +5,8 @@ import static java.util.Objects.requireNonNull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
-import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,6 +41,11 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
 		this.entityConstructorWithEntity = getConstructorEntity(entityClass);
 		this.entityConstructorWithEntityMeta = getConstructorEntityMeta(entityClass);
 		this.systemEntityMetaData = systemEntityMeta;
+	}
+
+	public M getEntityMetaData()
+	{
+		return systemEntityMetaData;
 	}
 
 	@Override

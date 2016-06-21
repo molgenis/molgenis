@@ -1,4 +1,4 @@
-package org.molgenis.data.meta;
+package org.molgenis.data.meta.model;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
@@ -7,20 +7,9 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ID_ATTRIBUTE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL_ATTRIBUTE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.LOOKUP_ATTRIBUTES;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.SIMPLE_NAME;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.TAGS;
-import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.LABEL;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
 
 import java.util.ArrayList;
@@ -111,12 +100,12 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public String getName()
 	{
-		return getString(FULL_NAME);
+		return getString(EntityMetaDataMetaData.FULL_NAME);
 	}
 
 	public EntityMetaData setName(String fullName)
 	{
-		set(FULL_NAME, fullName);
+		set(EntityMetaDataMetaData.FULL_NAME, fullName);
 		return this;
 	}
 
@@ -127,12 +116,12 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public String getSimpleName()
 	{
-		return getString(SIMPLE_NAME);
+		return getString(EntityMetaDataMetaData.SIMPLE_NAME);
 	}
 
 	public EntityMetaData setSimpleName(String simpleName)
 	{
-		set(SIMPLE_NAME, simpleName);
+		set(EntityMetaDataMetaData.SIMPLE_NAME, simpleName);
 		updateFullName();
 		return this;
 	}
@@ -145,7 +134,7 @@ public class EntityMetaData extends StaticEntity
 	public String getLabel()
 	{
 		String label = getString(LABEL);
-		return label != null ? label : getString(FULL_NAME);
+		return label != null ? label : getString(EntityMetaDataMetaData.FULL_NAME);
 	}
 
 	/**
@@ -211,12 +200,12 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public String getBackend()
 	{
-		return getString(BACKEND);
+		return getString(EntityMetaDataMetaData.BACKEND);
 	}
 
 	public EntityMetaData setBackend(String backend)
 	{
-		set(BACKEND, backend);
+		set(EntityMetaDataMetaData.BACKEND, backend);
 		return this;
 	}
 
@@ -227,12 +216,12 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public Package getPackage()
 	{
-		return getEntity(PACKAGE, Package.class);
+		return getEntity(EntityMetaDataMetaData.PACKAGE, Package.class);
 	}
 
 	public EntityMetaData setPackage(Package package_)
 	{
-		set(PACKAGE, package_);
+		set(EntityMetaDataMetaData.PACKAGE, package_);
 		updateFullName();
 		return this;
 	}
@@ -263,12 +252,12 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public AttributeMetaData getOwnIdAttribute()
 	{
-		return getEntity(ID_ATTRIBUTE, AttributeMetaData.class);
+		return getEntity(EntityMetaDataMetaData.ID_ATTRIBUTE, AttributeMetaData.class);
 	}
 
 	public EntityMetaData setIdAttribute(AttributeMetaData idAttr)
 	{
-		set(ID_ATTRIBUTE, idAttr);
+		set(EntityMetaDataMetaData.ID_ATTRIBUTE, idAttr);
 		idAttr.setReadOnly(true);
 		idAttr.setUnique(true);
 		idAttr.setNillable(false);
@@ -323,17 +312,18 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public AttributeMetaData getOwnLabelAttribute()
 	{
-		return getEntity(LABEL_ATTRIBUTE, AttributeMetaData.class);
+		return getEntity(EntityMetaDataMetaData.LABEL_ATTRIBUTE, AttributeMetaData.class);
 	}
 
 	public AttributeMetaData getOwnLabelAttribute(String languageCode)
 	{
-		return getEntity(getI18nAttributeName(LABEL_ATTRIBUTE, languageCode), AttributeMetaData.class);
+		return getEntity(getI18nAttributeName(EntityMetaDataMetaData.LABEL_ATTRIBUTE, languageCode),
+				AttributeMetaData.class);
 	}
 
 	public EntityMetaData setLabelAttribute(AttributeMetaData labelAttr)
 	{
-		set(LABEL_ATTRIBUTE, labelAttr);
+		set(EntityMetaDataMetaData.LABEL_ATTRIBUTE, labelAttr);
 		if (!getLookupAttributes().iterator().hasNext())
 		{
 			addLookupAttribute(labelAttr);
@@ -376,12 +366,12 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public Iterable<AttributeMetaData> getOwnLookupAttributes()
 	{
-		return getEntities(LOOKUP_ATTRIBUTES, AttributeMetaData.class);
+		return getEntities(EntityMetaDataMetaData.LOOKUP_ATTRIBUTES, AttributeMetaData.class);
 	}
 
 	public EntityMetaData setLookupAttributes(Iterable<AttributeMetaData> lookupAttrs)
 	{
-		set(LOOKUP_ATTRIBUTES, lookupAttrs);
+		set(EntityMetaDataMetaData.LOOKUP_ATTRIBUTES, lookupAttrs);
 		return this;
 	}
 
@@ -393,13 +383,13 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public boolean isAbstract()
 	{
-		Boolean abstract_ = getBoolean(ABSTRACT);
+		Boolean abstract_ = getBoolean(EntityMetaDataMetaData.ABSTRACT);
 		return abstract_ != null ? abstract_ : false;
 	}
 
 	public EntityMetaData setAbstract(boolean abstract_)
 	{
-		set(ABSTRACT, abstract_);
+		set(EntityMetaDataMetaData.ABSTRACT, abstract_);
 		return this;
 	}
 
@@ -410,12 +400,12 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public EntityMetaData getExtends()
 	{
-		return getEntity(EXTENDS, EntityMetaData.class);
+		return getEntity(EntityMetaDataMetaData.EXTENDS, EntityMetaData.class);
 	}
 
 	public EntityMetaData setExtends(EntityMetaData extends_)
 	{
-		set(EXTENDS, extends_);
+		set(EntityMetaDataMetaData.EXTENDS, extends_);
 		return this;
 	}
 
@@ -426,12 +416,12 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public Iterable<AttributeMetaData> getOwnAttributes()
 	{
-		return getEntities(ATTRIBUTES, AttributeMetaData.class);
+		return getEntities(EntityMetaDataMetaData.ATTRIBUTES, AttributeMetaData.class);
 	}
 
 	public EntityMetaData setOwnAttributes(Iterable<AttributeMetaData> attrs)
 	{
-		set(ATTRIBUTES, attrs);
+		set(EntityMetaDataMetaData.ATTRIBUTES, attrs);
 		return this;
 	}
 
@@ -507,8 +497,8 @@ public class EntityMetaData extends StaticEntity
 
 	public void addAttribute(AttributeMetaData attr, AttributeRole... attrTypes)
 	{
-		Iterable<AttributeMetaData> attrs = getEntities(ATTRIBUTES, AttributeMetaData.class);
-		set(ATTRIBUTES, concat(attrs, singletonList(attr)));
+		Iterable<AttributeMetaData> attrs = getEntities(EntityMetaDataMetaData.ATTRIBUTES, AttributeMetaData.class);
+		set(EntityMetaDataMetaData.ATTRIBUTES, concat(attrs, singletonList(attr)));
 		if (attrTypes != null)
 		{
 			for (AttributeRole attrType : attrTypes)
@@ -549,18 +539,20 @@ public class EntityMetaData extends StaticEntity
 	public void removeAttribute(AttributeMetaData attr)
 	{
 		// FIXME does not remove attr if attr is located in a compound attr
-		Iterable<AttributeMetaData> existingAttrs = getEntities(ATTRIBUTES, AttributeMetaData.class);
+		Iterable<AttributeMetaData> existingAttrs = getEntities(EntityMetaDataMetaData.ATTRIBUTES,
+				AttributeMetaData.class);
 		List<AttributeMetaData> filteredAttrs = stream(existingAttrs.spliterator(), false)
 				.filter(existingAttr -> !existingAttr.getName().equals(attr.getName())).collect(toList());
-		set(ATTRIBUTES, filteredAttrs);
+		set(EntityMetaDataMetaData.ATTRIBUTES, filteredAttrs);
 	}
 
 	public void addLookupAttribute(AttributeMetaData lookupAttr)
 	{
-		Iterable<AttributeMetaData> lookupAttrs = getEntities(LOOKUP_ATTRIBUTES, AttributeMetaData.class);
+		Iterable<AttributeMetaData> lookupAttrs = getEntities(EntityMetaDataMetaData.LOOKUP_ATTRIBUTES,
+				AttributeMetaData.class);
 		if (!Iterables.contains(lookupAttrs, lookupAttr))
 		{
-			set(LOOKUP_ATTRIBUTES, concat(lookupAttrs, singletonList(lookupAttr)));
+			set(EntityMetaDataMetaData.LOOKUP_ATTRIBUTES, concat(lookupAttrs, singletonList(lookupAttr)));
 		}
 	}
 
@@ -571,7 +563,7 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public Iterable<Tag> getTags()
 	{
-		return getEntities(TAGS, Tag.class);
+		return getEntities(EntityMetaDataMetaData.TAGS, Tag.class);
 	}
 
 	/**
@@ -582,7 +574,7 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public EntityMetaData setTags(Iterable<Tag> tags)
 	{
-		set(TAGS, tags);
+		set(EntityMetaDataMetaData.TAGS, tags);
 		return this;
 	}
 
@@ -593,7 +585,7 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public void addTag(Tag tag)
 	{
-		set(TAGS, concat(getTags(), singletonList(tag)));
+		set(EntityMetaDataMetaData.TAGS, concat(getTags(), singletonList(tag)));
 	}
 
 	/**
@@ -605,7 +597,7 @@ public class EntityMetaData extends StaticEntity
 	{
 		Iterable<Tag> tags = getTags();
 		removeAll(tags, singletonList(tag));
-		set(TAGS, tag);
+		set(EntityMetaDataMetaData.TAGS, tag);
 	}
 
 	/**
@@ -684,7 +676,7 @@ public class EntityMetaData extends StaticEntity
 			{
 				fullName = simpleName;
 			}
-			set(FULL_NAME, fullName);
+			set(EntityMetaDataMetaData.FULL_NAME, fullName);
 		}
 	}
 

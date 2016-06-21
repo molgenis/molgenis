@@ -9,7 +9,7 @@ import java.util.Iterator;
 
 import org.elasticsearch.common.collect.Iterables;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
 
 public class AbstractMrefDatatypeIT extends AbstractDatatypeIT

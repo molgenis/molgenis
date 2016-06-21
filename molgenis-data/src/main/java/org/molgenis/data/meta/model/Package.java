@@ -1,18 +1,11 @@
-package org.molgenis.data.meta;
+package org.molgenis.data.meta.model;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.meta.PackageMetaData.DESCRIPTION;
-import static org.molgenis.data.meta.PackageMetaData.FULL_NAME;
-import static org.molgenis.data.meta.PackageMetaData.LABEL;
-import static org.molgenis.data.meta.PackageMetaData.PACKAGE;
-import static org.molgenis.data.meta.PackageMetaData.PARENT;
-import static org.molgenis.data.meta.PackageMetaData.SIMPLE_NAME;
-import static org.molgenis.data.meta.PackageMetaData.TAGS;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -82,12 +75,12 @@ public class Package extends StaticEntity
 	 */
 	public String getSimpleName()
 	{
-		return getString(SIMPLE_NAME);
+		return getString(PackageMetaData.SIMPLE_NAME);
 	}
 
 	public Package setSimpleName(String simpleName)
 	{
-		set(SIMPLE_NAME, simpleName);
+		set(PackageMetaData.SIMPLE_NAME, simpleName);
 		updateFullName();
 		return this;
 	}
@@ -99,12 +92,12 @@ public class Package extends StaticEntity
 	 */
 	public Package getParent()
 	{
-		return getEntity(PARENT, Package.class);
+		return getEntity(PackageMetaData.PARENT, Package.class);
 	}
 
 	public Package setParent(Package parentPackage)
 	{
-		set(PARENT, parentPackage);
+		set(PackageMetaData.PARENT, parentPackage);
 		updateFullName();
 		return this;
 	}
@@ -116,12 +109,12 @@ public class Package extends StaticEntity
 	 */
 	public String getName()
 	{
-		return getString(FULL_NAME);
+		return getString(PackageMetaData.FULL_NAME);
 	}
 
 	public Package setName(String fullName)
 	{
-		set(FULL_NAME, fullName);
+		set(PackageMetaData.FULL_NAME, fullName);
 		return this;
 	}
 
@@ -132,12 +125,12 @@ public class Package extends StaticEntity
 	 */
 	public String getLabel()
 	{
-		return getString(LABEL);
+		return getString(PackageMetaData.LABEL);
 	}
 
 	public Package setLabel(String label)
 	{
-		set(LABEL, label);
+		set(PackageMetaData.LABEL, label);
 		return this;
 	}
 
@@ -148,12 +141,12 @@ public class Package extends StaticEntity
 	 */
 	public String getDescription()
 	{
-		return getString(DESCRIPTION);
+		return getString(PackageMetaData.DESCRIPTION);
 	}
 
 	public Package setDescription(String description)
 	{
-		set(DESCRIPTION, description);
+		set(PackageMetaData.DESCRIPTION, description);
 		return this;
 	}
 
@@ -164,7 +157,7 @@ public class Package extends StaticEntity
 	 */
 	public Iterable<Tag> getTags()
 	{
-		return getEntities(TAGS, Tag.class);
+		return getEntities(PackageMetaData.TAGS, Tag.class);
 	}
 
 	/**
@@ -175,7 +168,7 @@ public class Package extends StaticEntity
 	 */
 	public Package setTags(Iterable<Tag> tags)
 	{
-		set(TAGS, tags);
+		set(PackageMetaData.TAGS, tags);
 		return this;
 	}
 
@@ -186,7 +179,7 @@ public class Package extends StaticEntity
 	 */
 	public void addTag(Tag tag)
 	{
-		set(TAGS, concat(getTags(), singletonList(tag)));
+		set(PackageMetaData.TAGS, concat(getTags(), singletonList(tag)));
 	}
 
 	/**
@@ -198,7 +191,7 @@ public class Package extends StaticEntity
 	{
 		Iterable<Tag> tags = getTags();
 		removeAll(tags, singletonList(tag));
-		set(TAGS, tag);
+		set(PackageMetaData.TAGS, tag);
 	}
 
 	/**
@@ -224,7 +217,8 @@ public class Package extends StaticEntity
 	{
 		// TODO use one-to-many relationship for Package.parent
 		DataService dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
-		Query<Package> query = dataService.query(PACKAGE, Package.class).eq(PARENT, this);
+		Query<Package> query = dataService.query(PackageMetaData.PACKAGE, Package.class)
+				.eq(PackageMetaData.PARENT, this);
 		return () -> query.findAll().iterator();
 	}
 
@@ -258,7 +252,7 @@ public class Package extends StaticEntity
 			{
 				fullName = simpleName;
 			}
-			set(FULL_NAME, fullName);
+			set(PackageMetaData.FULL_NAME, fullName);
 		}
 	}
 }

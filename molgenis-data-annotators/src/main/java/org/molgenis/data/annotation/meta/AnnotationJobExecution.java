@@ -5,7 +5,7 @@ import static org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData.T
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.JobExecution;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 public class AnnotationJobExecution extends JobExecution
 {

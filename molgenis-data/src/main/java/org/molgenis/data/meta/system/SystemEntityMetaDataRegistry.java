@@ -7,8 +7,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;

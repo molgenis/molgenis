@@ -126,11 +126,11 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 	//							"molgenis"));
 	//
 	//			Entity nodePathEntity_1 = new MapEntity(
-	//					ImmutableMap.of(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR, "0[0].1[1]"));
+	//					ImmutableMap.of(OntologyTermNodePathMetaData.NODE_PATH, "0[0].1[1]"));
 	//			Entity nodePathEntity_2 = new MapEntity(
-	//					ImmutableMap.of(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR, "0[0].1[1].0[2]"));
+	//					ImmutableMap.of(OntologyTermNodePathMetaData.NODE_PATH, "0[0].1[1].0[2]"));
 	//			Entity nodePathEntity_3 = new MapEntity(
-	//					ImmutableMap.of(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR, "0[0].1[1].1[2]"));
+	//					ImmutableMap.of(OntologyTermNodePathMetaData.NODE_PATH, "0[0].1[1].1[2]"));
 	//
 	//			MapEntity ontologyTerm_2 = new MapEntity();
 	//			ontologyTerm_2.set(ONTOLOGY, ontologyEntity);

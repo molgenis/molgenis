@@ -1,6 +1,6 @@
 package org.molgenis.data.annotation;
 
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 public abstract class AnnotatorTestData
 {

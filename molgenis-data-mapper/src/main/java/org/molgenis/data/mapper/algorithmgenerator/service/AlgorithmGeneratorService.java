@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.mapper.algorithmgenerator.bean.GeneratedAlgorithm;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 
 public interface AlgorithmGeneratorService

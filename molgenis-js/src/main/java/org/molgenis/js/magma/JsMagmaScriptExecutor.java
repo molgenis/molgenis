@@ -5,9 +5,9 @@ import static java.util.Objects.requireNonNull;
 import java.util.Map;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.AttributeMetaDataFactory;
-import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.ScriptEvaluator;
 import org.springframework.beans.factory.annotation.Autowired;

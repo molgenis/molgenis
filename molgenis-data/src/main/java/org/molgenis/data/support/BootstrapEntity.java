@@ -1,6 +1,6 @@
 package org.molgenis.data.support;
 
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Entity used during application bootstrapping. Same as {@link DynamicEntity} but without value validation.

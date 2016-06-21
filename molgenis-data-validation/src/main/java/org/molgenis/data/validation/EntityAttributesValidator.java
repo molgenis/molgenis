@@ -14,8 +14,8 @@ import org.hibernate.validator.constraints.impl.EmailValidator;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.fieldtypes.FieldType;
 import org.springframework.stereotype.Component;
 
