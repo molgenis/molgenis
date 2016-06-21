@@ -5,7 +5,9 @@ import org.molgenis.app.promise.client.PromiseDataParser;
 import org.molgenis.app.promise.mapper.MappingReport.Status;
 import org.molgenis.app.promise.model.BbmriNlCheatSheet;
 import org.molgenis.app.promise.model.PromiseMappingProjectMetaData;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.UuidGenerator;
 import org.slf4j.Logger;
@@ -26,34 +28,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang.StringUtils.join;
-import static org.apache.commons.lang.exception.ExceptionUtils.getStackTrace;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.ACRONYM;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_HIGH;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_LOW;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_UNIT;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANKS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_DESCRIPTION;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_FEE;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_JOINT_PROJECTS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_URI;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_SAMPLE_ACCESS_DESCRIPTION;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_FEE;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_URI;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.CONTACT_PERSON;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.DATA_CATEGORIES;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.DESCRIPTION;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.DISEASE;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.INSTITUTES;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.MATERIALS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.NAME;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.NUMBER_OF_DONORS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.OMICS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.PRINCIPAL_INVESTIGATORS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.PUBLICATIONS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.SAMPLE_COLLECTIONS_ENTITY;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.SEX;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.TYPE;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.WEBSITE;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.*;
 
 @Component
 public class RadboudMapper implements PromiseMapper, ApplicationListener<ContextRefreshedEvent>
@@ -153,7 +128,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 			report.setStatus(Status.ERROR);
 			report.setMessage(e.getMessage());
 
-			LOG.warn(getStackTrace(e));
+			LOG.warn("Error sending message", e);
 		}
 		return report;
 	}
