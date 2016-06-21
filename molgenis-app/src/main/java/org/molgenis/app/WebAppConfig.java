@@ -14,6 +14,7 @@ import org.molgenis.data.mysql.*;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
+import org.molgenis.framework.MolgenisUpgradeService;
 import org.molgenis.migrate.version.v1_11.Step20RebuildElasticsearchIndex;
 import org.molgenis.migrate.version.v1_11.Step21SetLoggingEventBackend;
 import org.molgenis.migrate.version.v1_13.Step22RemoveDiseaseMatcher;
@@ -47,13 +48,14 @@ import javax.xml.soap.SOAPException;
 import java.io.IOException;
 import java.util.*;
 
+import static java.util.Arrays.asList;
+
 @Configuration
 @EnableTransactionManagement
 @EnableWebMvc
 @EnableAsync
-@ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class) )
-@Import(
-{ WebAppSecurityConfig.class, DatabaseConfig.class, HttpClientConfig.class, EmbeddedElasticSearchConfig.class,
+@ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class))
+@Import({ WebAppSecurityConfig.class, DatabaseConfig.class, HttpClientConfig.class, EmbeddedElasticSearchConfig.class,
 		GsonConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
 {
@@ -104,8 +106,17 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step31UpdateApplicationSettings(dataSource, idGenerator));
 
 		// Set the entities which should be row level secured
-		Step32AddRowLevelSecurityMetadata step32AddRowLevelSecurityMetadata = new Step32AddRowLevelSecurityMetadata(dataSource, idGenerator);
-		step32AddRowLevelSecurityMetadata.setEntitiesToSecure(Arrays.asList("bbmri_eric_EricSource", "bbmri_eric_biobanksize", "bbmri_eric_directory", "bbmri_eric_staffsize", "bbmri_nl_age_types", "bbmri_nl_biobanks", "bbmri_nl_biobanks_contact_person", "bbmri_nl_biobanks_juristic_person", "bbmri_nl_biobanks_principal_investigators", "bbmri_nl_collection_types", "bbmri_nl_countries", "bbmri_nl_data_category_types", "bbmri_nl_disease_types", "bbmri_nl_gender_types", "bbmri_nl_juristic_persons", "bbmri_nl_material_types", "bbmri_nl_omics_data_types", "bbmri_nl_persons", "bbmri_nl_persons_juristic_person", "bbmri_nl_publications", "bbmri_nl_sample_collections", "bbmri_nl_sample_collections_biobanks", "bbmri_nl_sample_collections_contact_person", "bbmri_nl_sample_collections_data_categories", "bbmri_nl_sample_collections_disease", "bbmri_nl_sample_collections_institutes", "bbmri_nl_sample_collections_materials", "bbmri_nl_sample_collections_omics", "bbmri_nl_sample_collections_principal_investigators", "bbmri_nl_sample_collections_publications", "bbmri_nl_sample_collections_sex", "bbmri_nl_sample_collections_type", "bbmri_nl_sample_size_types", "bbmri_nl_staff_size_types"));
+		Step32AddRowLevelSecurityMetadata step32AddRowLevelSecurityMetadata = new Step32AddRowLevelSecurityMetadata(
+				dataSource, idGenerator);
+
+		step32AddRowLevelSecurityMetadata.setEntitiesToSecure(
+				asList("bbmri_eric_biobanksize", "bbmri_eric_directory", "bbmri_eric_EricSource",
+						"bbmri_eric_staffsize", "bbmri_nl_age_types", "bbmri_nl_biobanks", "bbmri_nl_collection_types",
+						"bbmri_nl_countries", "bbmri_nl_data_category_types", "bbmri_nl_disease_types",
+						"bbmri_nl_gender_types", "bbmri_nl_juristic_persons", "bbmri_nl_material_types",
+						"bbmri_nl_omics_data_types", "bbmri_nl_ontology_term", "bbmri_nl_persons",
+						"bbmri_nl_publications", "bbmri_nl_sample_collections", "bbmri_nl_sample_size_types",
+						"bbmri_nl_staff_size_types"));
 		upgradeService.addUpgrade(step32AddRowLevelSecurityMetadata);
 	}
 
@@ -157,8 +168,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Override
 	protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables)
 	{
-		freemarkerVariables.put("dataExplorerLink",
-				new DataExplorerHyperlinkDirective(molgenisPluginRegistry(), dataService));
+		freemarkerVariables
+				.put("dataExplorerLink", new DataExplorerHyperlinkDirective(molgenisPluginRegistry(), dataService));
 	}
 
 	@Override
