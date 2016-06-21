@@ -1,35 +1,37 @@
 package org.molgenis.app.promise.client;
 
+import com.google.auto.value.AutoValue;
+import org.molgenis.data.Entity;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import org.molgenis.data.Entity;
-
-import com.google.auto.value.AutoValue;
+import static org.molgenis.app.promise.client.PromiseClientImpl.ACTION_GETDATAFORXML;
+import static org.molgenis.app.promise.client.PromiseClientImpl.NAMESPACE_VALUE;
 
 @AutoValue
 @XmlType(propOrder =
 { "proj", "PWS", "SEQNR", "securitycode", "username", "passw" })
-@XmlRootElement(name=PromiseClientImpl.ACTION_GETDATAFORXML, namespace="http://tempuri.org")
+@XmlRootElement(name = ACTION_GETDATAFORXML, namespace = NAMESPACE_VALUE)
 public abstract class PromiseRequest
 {
-	@XmlElement
+	@XmlElement(namespace = NAMESPACE_VALUE)
 	public abstract String getProj();
 
-	@XmlElement
+	@XmlElement(namespace = NAMESPACE_VALUE)
 	public abstract String getPWS();
 
-	@XmlElement
+	@XmlElement(namespace = NAMESPACE_VALUE)
 	public abstract String getSEQNR();
 
-	@XmlElement
+	@XmlElement(namespace = NAMESPACE_VALUE)
 	public abstract String getSecuritycode();
 
-	@XmlElement
+	@XmlElement(namespace = NAMESPACE_VALUE)
 	public abstract String getUsername();
 
-	@XmlElement
+	@XmlElement(namespace = NAMESPACE_VALUE)
 	public abstract String getPassw();
 
 	public static PromiseRequest create(Entity credentials, String seqNr)
