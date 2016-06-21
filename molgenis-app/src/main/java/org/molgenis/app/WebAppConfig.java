@@ -45,8 +45,7 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import javax.xml.soap.SOAPConnectionFactory;
 import javax.xml.soap.SOAPException;
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Configuration
 @EnableTransactionManagement
@@ -103,7 +102,11 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step29MigrateJobExecutionProgressMessage(dataSource));
 		upgradeService.addUpgrade(new Step30MigrateJobExecutionUser(dataSource));
 		upgradeService.addUpgrade(new Step31UpdateApplicationSettings(dataSource, idGenerator));
-		upgradeService.addUpgrade(new Step32AddRowLevelSecurityMetadata(dataSource, idGenerator));
+
+		// Set the entities which should be row level secured
+		Step32AddRowLevelSecurityMetadata step32AddRowLevelSecurityMetadata = new Step32AddRowLevelSecurityMetadata(dataSource, idGenerator);
+		step32AddRowLevelSecurityMetadata.setEntitiesToSecure(Arrays.asList("bbmri_eric_EricSource", "bbmri_eric_biobanksize", "bbmri_eric_directory", "bbmri_eric_staffsize", "bbmri_nl_age_types", "bbmri_nl_biobanks", "bbmri_nl_biobanks_contact_person", "bbmri_nl_biobanks_juristic_person", "bbmri_nl_biobanks_principal_investigators", "bbmri_nl_collection_types", "bbmri_nl_countries", "bbmri_nl_data_category_types", "bbmri_nl_disease_types", "bbmri_nl_gender_types", "bbmri_nl_juristic_persons", "bbmri_nl_material_types", "bbmri_nl_omics_data_types", "bbmri_nl_persons", "bbmri_nl_persons_juristic_person", "bbmri_nl_publications", "bbmri_nl_sample_collections", "bbmri_nl_sample_collections_biobanks", "bbmri_nl_sample_collections_contact_person", "bbmri_nl_sample_collections_data_categories", "bbmri_nl_sample_collections_disease", "bbmri_nl_sample_collections_institutes", "bbmri_nl_sample_collections_materials", "bbmri_nl_sample_collections_omics", "bbmri_nl_sample_collections_principal_investigators", "bbmri_nl_sample_collections_publications", "bbmri_nl_sample_collections_sex", "bbmri_nl_sample_collections_type", "bbmri_nl_sample_size_types", "bbmri_nl_staff_size_types"));
+		upgradeService.addUpgrade(step32AddRowLevelSecurityMetadata);
 	}
 
 	@Override
