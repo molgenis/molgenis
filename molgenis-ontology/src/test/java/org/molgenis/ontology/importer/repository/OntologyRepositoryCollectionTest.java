@@ -1,5 +1,8 @@
 package org.molgenis.ontology.importer.repository;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
@@ -14,10 +17,8 @@ import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -26,9 +27,6 @@ import org.mockito.stubbing.Answer;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
@@ -43,12 +41,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = { OntologyRepositoryCollectionTest.Config.class })
-public class OntologyRepositoryCollectionTest extends AbstractTestNGSpringContextTests
+public class OntologyRepositoryCollectionTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
 	private AutowireCapableBeanFactory autowireCapableBeanFactory;
@@ -62,12 +59,6 @@ public class OntologyRepositoryCollectionTest extends AbstractTestNGSpringContex
 	@BeforeMethod
 	public void beforeMethod() throws IOException, OWLOntologyCreationException, NoSuchMethodException
 	{
-		// bootstrap meta data
-		EntityMetaDataMetaData entityMetaMeta = applicationContext.getBean(EntityMetaDataMetaData.class);
-		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityMetaMeta);
-		Map<String, SystemEntityMetaData> systemEntityMetaMap = applicationContext
-				.getBeansOfType(SystemEntityMetaData.class);
-		systemEntityMetaMap.values().forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityMetaMeta));
 
 		// ontology repository collection is not spring managed, see FileRepositoryCollectionFactory
 		File file = ResourceUtils.getFile("small_test_data_NGtest.owl.zip");
@@ -257,12 +248,12 @@ public class OntologyRepositoryCollectionTest extends AbstractTestNGSpringContex
 		assertNotNull(entity.get(OntologyTermMetaData.ID));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "http://www.molgenis.org#Organization");
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "organization");
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), Arrays.asList("organization"));
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-				OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-				OntologyTermNodePathMetaData.NODE_PATH), Arrays.asList("0[0].0[1]"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), singletonList("organization"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+				OntologyTermDynamicAnnotationMetaData.LABEL), emptyList());
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
+				OntologyTermNodePathMetaData.NODE_PATH), singletonList("0[0].0[1]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
 		// Team
@@ -270,12 +261,12 @@ public class OntologyRepositoryCollectionTest extends AbstractTestNGSpringContex
 		assertNotNull(entity.get(OntologyTermMetaData.ID));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "http://www.molgenis.org#Team");
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "team");
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), Arrays.asList("team"));
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-				OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList("friday:2412423", "molgenis:1231424"));
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-				OntologyTermNodePathMetaData.NODE_PATH), Arrays.asList("0[0].1[1]"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), singletonList("team"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+				OntologyTermDynamicAnnotationMetaData.LABEL), asList("friday:2412423", "molgenis:1231424"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
+				OntologyTermNodePathMetaData.NODE_PATH), singletonList("0[0].1[1]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
 		// GCC
@@ -283,12 +274,12 @@ public class OntologyRepositoryCollectionTest extends AbstractTestNGSpringContex
 		assertNotNull(entity.get(OntologyTermMetaData.ID));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "http://www.molgenis.org#GCC");
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "Genomics coordination center");
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), Arrays.asList("Genomics coordination center"));
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-				OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList("GCC:987654", "GCC:123456"));
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-				OntologyTermNodePathMetaData.NODE_PATH), Arrays.asList("0[0].0[1].0[2].0[3]", "0[0].1[1].0[2]"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), singletonList("Genomics coordination center"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+				OntologyTermDynamicAnnotationMetaData.LABEL), asList("GCC:987654", "GCC:123456"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
+				OntologyTermNodePathMetaData.NODE_PATH), asList("0[0].0[1].0[2].0[3]", "0[0].1[1].0[2]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
 		// Weight
@@ -296,12 +287,12 @@ public class OntologyRepositoryCollectionTest extends AbstractTestNGSpringContex
 		assertNotNull(entity.get(OntologyTermMetaData.ID));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "http://www.molgenis.org#weight");
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "weight");
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), Arrays.asList("weight"));
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-				OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-				OntologyTermNodePathMetaData.NODE_PATH), Arrays.asList("0[0].2[1].0[2]"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), singletonList("weight"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+				OntologyTermDynamicAnnotationMetaData.LABEL), emptyList());
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
+				OntologyTermNodePathMetaData.NODE_PATH), singletonList("0[0].2[1].0[2]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
 		// Top
@@ -309,12 +300,12 @@ public class OntologyRepositoryCollectionTest extends AbstractTestNGSpringContex
 		assertNotNull(entity.get(OntologyTermMetaData.ID));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "top");
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "top");
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), Arrays.asList("top"));
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-				OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-				OntologyTermNodePathMetaData.NODE_PATH), Arrays.asList("0[0]"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), singletonList("top"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+				OntologyTermDynamicAnnotationMetaData.LABEL), emptyList());
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
+				OntologyTermNodePathMetaData.NODE_PATH), singletonList("0[0]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
 		// Measurement
@@ -322,12 +313,12 @@ public class OntologyRepositoryCollectionTest extends AbstractTestNGSpringContex
 		assertNotNull(entity.get(OntologyTermMetaData.ID));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "http://www.molgenis.org#measurement");
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "measurement");
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), Arrays.asList("measurement"));
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-				OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-				OntologyTermNodePathMetaData.NODE_PATH), Arrays.asList("0[0].2[1]"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), singletonList("measurement"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+				OntologyTermDynamicAnnotationMetaData.LABEL), emptyList());
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
+				OntologyTermNodePathMetaData.NODE_PATH), singletonList("0[0].2[1]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
 		// Body length
@@ -335,12 +326,12 @@ public class OntologyRepositoryCollectionTest extends AbstractTestNGSpringContex
 		assertNotNull(entity.get(OntologyTermMetaData.ID));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "http://www.molgenis.org#body_length");
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "body length");
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), Arrays.asList("body length"));
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-				OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-				OntologyTermNodePathMetaData.NODE_PATH), Arrays.asList("0[0].2[1].1[2].0[3]"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), singletonList("body length"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+				OntologyTermDynamicAnnotationMetaData.LABEL), emptyList());
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
+				OntologyTermNodePathMetaData.NODE_PATH), singletonList("0[0].2[1].1[2].0[3]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
 		// Height
@@ -348,12 +339,12 @@ public class OntologyRepositoryCollectionTest extends AbstractTestNGSpringContex
 		assertNotNull(entity.get(OntologyTermMetaData.ID));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "http://www.molgenis.org#height");
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "height");
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), Arrays.asList("height"));
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-				OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-				OntologyTermNodePathMetaData.NODE_PATH), Arrays.asList("0[0].2[1].1[2]"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), singletonList("height"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+				OntologyTermDynamicAnnotationMetaData.LABEL), emptyList());
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
+				OntologyTermNodePathMetaData.NODE_PATH), singletonList("0[0].2[1].1[2]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
 		// Hospital
@@ -361,18 +352,18 @@ public class OntologyRepositoryCollectionTest extends AbstractTestNGSpringContex
 		assertNotNull(entity.get(OntologyTermMetaData.ID));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI), "http://www.molgenis.org#hospital");
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY_TERM_NAME), "hospital");
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
-				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), Arrays.asList("hospital"));
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
-				OntologyTermDynamicAnnotationMetaData.LABEL), Arrays.asList());
-		assertEquals(getMREFAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
-				OntologyTermNodePathMetaData.NODE_PATH), Arrays.asList("0[0].0[1].0[2]"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM,
+				OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR), singletonList("hospital"));
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
+				OntologyTermDynamicAnnotationMetaData.LABEL), emptyList());
+		assertEquals(getMrefAttributeList(entity, OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH,
+				OntologyTermNodePathMetaData.NODE_PATH), singletonList("0[0].0[1].0[2]"));
 		assertEquals(entity.get(OntologyTermMetaData.ONTOLOGY), entityOntology);
 
 		assertFalse(i.hasNext());
 	}
 
-	private List<String> getMREFAttributeList(Entity entity, String attributeName, String refEntityAttributeName)
+	private static List<String> getMrefAttributeList(Entity entity, String attributeName, String refEntityAttributeName)
 	{
 		return StreamSupport.stream(entity.getEntities(attributeName).spliterator(), false)
 				.map(e -> e.getString(refEntityAttributeName)).collect(Collectors.toList());
@@ -387,15 +378,17 @@ public class OntologyRepositoryCollectionTest extends AbstractTestNGSpringContex
 		public IdGenerator idGenerator()
 		{
 			IdGenerator idGenerator = mock(IdGenerator.class);
-			when(idGenerator.generateId()).thenAnswer(new Answer<String>()
-			{
-				@Override
-				public String answer(InvocationOnMock invocation) throws Throwable
-				{
-					return String.valueOf(System.nanoTime());
-				}
-			});
+			when(idGenerator.generateId()).thenAnswer(new GenerateIdAnswer());
 			return idGenerator;
+		}
+
+		private static class GenerateIdAnswer implements Answer<String>
+		{
+			@Override
+			public String answer(InvocationOnMock invocation) throws Throwable
+			{
+				return String.valueOf(System.nanoTime());
+			}
 		}
 	}
 }
