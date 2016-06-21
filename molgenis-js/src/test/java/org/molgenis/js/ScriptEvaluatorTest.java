@@ -36,7 +36,6 @@ import com.google.common.collect.Iterables;
 
 public class ScriptEvaluatorTest
 {
-
 	private static EntityMetaData personWeightEntityMeta;
 	private static EntityMetaData personHeightEntityMeta;
 	private static EntityMetaData personWeightAndHeightEntityMeta;
@@ -46,7 +45,7 @@ public class ScriptEvaluatorTest
 	private static EntityMetaData personGenderEntityMeta;
 
 	@BeforeClass
-	private static void beforeClass()
+	protected static void beforeClass()
 	{
 		AttributeMetaData weightAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("weight").getMock();
 		when(weightAttr.getDataType()).thenReturn(INT);

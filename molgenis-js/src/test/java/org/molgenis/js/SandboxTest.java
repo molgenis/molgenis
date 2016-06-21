@@ -1,25 +1,73 @@
 package org.molgenis.js;
 
+import static freemarker.template.utility.Collections12.singletonList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.SCRIPT;
+
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.DynamicEntity;
+import org.mozilla.javascript.EcmaError;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
+
 public class SandboxTest extends ScriptEvaluatorTest
 {
-	//	@Test public void testAllowed() { ScriptEvaluator.eval("1 + 1", new MapEntity("firstName", "Piet"), new EntityMetaDataImpl("person")); } @Test(expectedExceptions = EcmaError.class) public void testCallingNonVisibleClass() { EntityMetaData emd = new EntityMetaDataImpl("person"); emd.addAttribute("firstName").setDataType(MolgenisFieldTypes.SCRIPT); ScriptEvaluator.eval("new java.lang.Integer(6).toString()", new MapEntity("firstName", "Piet"), emd); } @Test public void testGlobalMethod() { EntityMetaData emd = new EntityMetaDataImpl("person"); emd.addAttribute("firstName").setDataType(MolgenisFieldTypes.SCRIPT); ScriptEvaluator.eval("$('firstName')", new MapEntity("firstName", "Piet"), emd);
-	//	}
-	//
-	//	@Test(expectedExceptions = EcmaError.class)
-	//	public void testCallingReflection()
-	//	{
-	//		try
-	//		{
-	//			EntityMetaData emd = new EntityMetaDataImpl("person");
-	//			emd.addAttribute("firstName").setDataType(MolgenisFieldTypes.SCRIPT);
-	//
-	//			ScriptEvaluator.eval("java.lang.Class.forName('java.util.Date').newInstance()", new MapEntity("firstName",
-	//					"Piet"), emd);
-	//		}
-	//		catch (Exception e)
-	//		{
-	//			e.printStackTrace();
-	//			throw e;
-	//		}
-	//	}
+	private static EntityMetaData personFirstNameEntityMeta;
+
+	@BeforeClass
+	protected static void beforeClass()
+	{
+		ScriptEvaluatorTest.beforeClass();
+		AttributeMetaData firstNameAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("firstName")
+				.getMock();
+		when(firstNameAttr.getDataType()).thenReturn(SCRIPT);
+		personFirstNameEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("person").getMock();
+		when(personFirstNameEntityMeta.getAttribute("firstName")).thenReturn(firstNameAttr);
+		when(personFirstNameEntityMeta.getAtomicAttributes()).thenReturn(singletonList(firstNameAttr));
+	}
+
+	@Test
+	public void testAllowed()
+	{
+		Entity person = new DynamicEntity(personFirstNameEntityMeta);
+		person.set("firstName", "Piet");
+		ScriptEvaluator.eval("1 + 1", person, personFirstNameEntityMeta);
+	}
+
+	@Test(expectedExceptions = EcmaError.class)
+	public void testCallingNonVisibleClass()
+	{
+		Entity person = new DynamicEntity(personFirstNameEntityMeta);
+		person.set("firstName", "Piet");
+		ScriptEvaluator.eval("new java.lang.Integer(6).toString()", person, personFirstNameEntityMeta);
+	}
+
+	@Test
+	public void testGlobalMethod()
+	{
+		Entity person = new DynamicEntity(personFirstNameEntityMeta);
+		person.set("firstName", "Piet");
+		ScriptEvaluator.eval("$('firstName')", person, personFirstNameEntityMeta);
+	}
+
+	@Test(expectedExceptions = EcmaError.class)
+	public void testCallingReflection()
+	{
+		try
+		{
+			Entity person = new DynamicEntity(personFirstNameEntityMeta);
+			person.set("firstName", "Piet");
+
+			ScriptEvaluator
+					.eval("java.lang.Class.forName('java.util.Date').newInstance()", person, personFirstNameEntityMeta);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			throw e;
+		}
+	}
 }
