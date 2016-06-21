@@ -33,7 +33,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
 import org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.jobs.JobExecutionMetaData;
+import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.settings.AppSettings;

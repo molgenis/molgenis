@@ -1,19 +1,19 @@
-package org.molgenis.data.jobs;
+package org.molgenis.data.jobs.model;
 
-import static org.molgenis.data.jobs.JobExecutionMetaData.END_DATE;
-import static org.molgenis.data.jobs.JobExecutionMetaData.FAILURE_EMAIL;
-import static org.molgenis.data.jobs.JobExecutionMetaData.IDENTIFIER;
-import static org.molgenis.data.jobs.JobExecutionMetaData.LOG;
-import static org.molgenis.data.jobs.JobExecutionMetaData.PROGRESS_INT;
-import static org.molgenis.data.jobs.JobExecutionMetaData.PROGRESS_MAX;
-import static org.molgenis.data.jobs.JobExecutionMetaData.PROGRESS_MESSAGE;
-import static org.molgenis.data.jobs.JobExecutionMetaData.RESULT_URL;
-import static org.molgenis.data.jobs.JobExecutionMetaData.START_DATE;
-import static org.molgenis.data.jobs.JobExecutionMetaData.STATUS;
-import static org.molgenis.data.jobs.JobExecutionMetaData.SUBMISSION_DATE;
-import static org.molgenis.data.jobs.JobExecutionMetaData.SUCCESS_EMAIL;
-import static org.molgenis.data.jobs.JobExecutionMetaData.TYPE;
-import static org.molgenis.data.jobs.JobExecutionMetaData.USER;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.END_DATE;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.FAILURE_EMAIL;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.IDENTIFIER;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.LOG;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.PROGRESS_INT;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.PROGRESS_MAX;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.PROGRESS_MESSAGE;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.RESULT_URL;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.START_DATE;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.STATUS;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.SUBMISSION_DATE;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.SUCCESS_EMAIL;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.TYPE;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.USER;
 
 import java.util.Date;
 

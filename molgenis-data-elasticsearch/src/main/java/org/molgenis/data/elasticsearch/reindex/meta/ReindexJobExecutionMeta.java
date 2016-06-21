@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.reindex.meta.IndexPackage.PACKAGE_INDEX;
 
-import org.molgenis.data.jobs.JobExecutionMetaData;
+import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.reindex.meta.IndexPackage;
 import org.springframework.beans.factory.annotation.Autowired;

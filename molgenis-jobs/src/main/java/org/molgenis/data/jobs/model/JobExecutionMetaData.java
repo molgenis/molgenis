@@ -1,4 +1,4 @@
-package org.molgenis.data.jobs;
+package org.molgenis.data.jobs.model;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.molgenis.MolgenisFieldTypes.DATETIME;
