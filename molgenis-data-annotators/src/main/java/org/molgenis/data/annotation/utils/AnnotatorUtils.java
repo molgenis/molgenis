@@ -1,22 +1,26 @@
 package org.molgenis.data.annotation.utils;
 
+import static org.molgenis.MolgenisFieldTypes.COMPOUND;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
+
 import java.util.List;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
+import org.molgenis.data.meta.EntityMetaData;
 
 import autovalue.shaded.com.google.common.common.collect.Iterables;
 
 public class AnnotatorUtils
 {
-	public static DefaultAttributeMetaData getCompoundResultAttribute(RepositoryAnnotator annotator,
+	public static AttributeMetaData getCompoundResultAttribute(RepositoryAnnotator annotator,
 			EntityMetaData entityMetaData)
 	{
-		DefaultAttributeMetaData compoundAttributeMetaData = new DefaultAttributeMetaData(annotator.getFullName(),
-				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
+		AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
+		AttributeMetaData compoundAttributeMetaData = attrMetaFactory.create().setName(annotator.getFullName())
+				.setDataType(COMPOUND);
 		compoundAttributeMetaData.setLabel(annotator.getSimpleName());
 
 		List<AttributeMetaData> outputAttrs = annotator.getOutputMetaData();
@@ -25,7 +29,7 @@ public class AnnotatorUtils
 				&& Iterables.get(outputAttrs, 0).getDataType().getEnumType()
 						.equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
 		{
-			compoundAttributeMetaData = (DefaultAttributeMetaData) outputAttrs.get(0);
+			compoundAttributeMetaData = outputAttrs.get(0);
 		}
 		else
 		{

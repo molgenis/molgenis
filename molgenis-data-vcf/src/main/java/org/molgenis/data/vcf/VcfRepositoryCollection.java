@@ -1,5 +1,7 @@
 package org.molgenis.data.vcf;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -7,9 +9,9 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.FileRepositoryCollection;
 
 import com.google.common.collect.ImmutableSet;
@@ -28,8 +30,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	public VcfRepositoryCollection(File file) throws IOException
 	{
 		super(EXTENSIONS);
-		if (file == null) throw new IllegalArgumentException("file is null");
-		this.file = file;
+		this.file = requireNonNull(file);
 
 		String name = file.getName();
 		if (name.endsWith(EXTENSION_VCF))
@@ -48,6 +49,12 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 		{
 			throw new IllegalArgumentException("Not a VCF file [" + file.getName() + "]");
 		}
+	}
+
+	@Override
+	public void init() throws IOException
+	{
+		// no operation
 	}
 
 	@Override
@@ -74,12 +81,6 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	public String getName()
 	{
 		return NAME;
-	}
-
-	@Override
-	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
-	{
-		return getRepository(entityMeta.getName());
 	}
 
 	@Override
@@ -114,5 +115,11 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 			if (entityNames.next().equals(name)) return true;
 		}
 		return false;
+	}
+
+	@Override
+	public boolean hasRepository(EntityMetaData entityMeta)
+	{
+		return hasRepository(entityMeta.getName());
 	}
 }

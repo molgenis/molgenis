@@ -2,10 +2,9 @@ package org.molgenis.data.annotation.filter;
 
 import static com.google.common.collect.FluentIterable.from;
 import static java.util.Arrays.asList;
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.ALT_META;
-import static org.molgenis.data.vcf.VcfRepository.REF;
-import static org.molgenis.data.vcf.VcfRepository.REF_META;
+import static org.molgenis.data.vcf.VcfAttributes.ALT;
+import static org.molgenis.data.vcf.VcfAttributes.REF;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,10 +12,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.entity.ResultFilter;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.vcf.VcfAttributes;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterators;
@@ -26,40 +26,37 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.PeekingIterator;
 
 /**
- * 
  * TODO: Support multi-allelic combination fields. These fields contain not only info for ref-alt pairs, but also values
  * for all possible alt-alt pairs. For example, the "AC_Het" field in ExAC:
- * 
+ * <p>
  * For 2 alt alleles, there are 3 values in the AC_Het field, the third being the count for T-A: 1 6536051 . C T,A
  * 11129.51 PASS AC_Adj=5,3;AC_Het=5,3,0;AC_Hom=0,0; Alt-allele combinations in AC_Het field occur in the following
  * order: C-T, C-A, T-A.
- * 
+ * <p>
  * For 3 alt alleles, there are 6 values (3+2+1): 15 66641732 rs2063690 G C,A,T 35371281.87 PASS
  * AC_Adj=13570,3,2;AC_Het=11380,1,2,2,0,0;AC_Hom=1094,0,0; Alt-allele combinations in AC_Het field occur in the
  * following order: G-C, G-A, G-T, C-A, C-T, A-T.
- * 
+ * <p>
  * For 4 alt alleles, there are 10 values (4+3+2+1): 21 45650009 rs3831401 T G,C,TG,A 8366813.26 PASS
  * AC_Adj=2528,3415,1,0;AC_Het=934,1240,0,0,725,1,0,0,0,0;AC_Hom=434,725,0,0; Alt-allele combinations in AC_Het field
  * occur in the following order: T-G, T-C, T-TG, T-A, G-C, G-TG, G-A, C-TG, C-A, TG-A.
- *
- *
- *
+ * <p>
+ * <p>
+ * <p>
  * TODO: Smart matching of non-obvious ref and alt alleles. Right now, we only 'string match' the exact values of ref
  * and alt alleles. However, depending on which other genotypes you call for a certain genomic position, the same
  * variant may be denoted in a different way. For example: "1 231094050 GA G" is the same variant as the GAA/GA in
  * "1 231094050 GAA GA,G", but to allow notation of the the AA deletion (in GAA/G), the ref was written as GAA instead
  * of GA.
- * 
+ * <p>
  * This can be tricky. Consider this variant: 1 6529182 . TTCCTCC TTCC
- * 
+ * <p>
  * And after some puzzling, you will find that it is seen in ExAC: 1 6529182 . TTCCTCCTCC
  * TTCCTCC,TTCC,T,TTCCTCCTCCTCC,TTCCTCCTCCTCCTCC,TTCCTCCTCCTCCTCCTCCTCC
- * 
+ * <p>
  * But here denoted as "TTCCTCCTCC/TTCCTCC". In both cases, a TCC was deleted, but in ExAC this variant is trailed with
  * another TCC. Finding and parsing these variants to correctly match them against databases such as 1000 Genomes and
  * ExAC would be very valuable.
- * 
- *
  */
 public class MultiAllelicResultFilter implements ResultFilter
 {
@@ -82,7 +79,8 @@ public class MultiAllelicResultFilter implements ResultFilter
 	@Override
 	public Collection<AttributeMetaData> getRequiredAttributes()
 	{
-		return asList(REF_META, ALT_META);
+		VcfAttributes vcfAttributes = getApplicationContext().getBean(VcfAttributes.class);
+		return asList(vcfAttributes.getRefAttribute(), vcfAttributes.getAltAttribute());
 	}
 
 	@Override
@@ -170,7 +168,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 	/**
 	 * Combine ALT information per reference allele (in VCF there is only 1 reference by letting ALT vary, but that
 	 * might not always be the case)
-	 * 
+	 * <p>
 	 * So we want to support this hypothetical example:
 	 * 3	300	G	A	0.2|23.1
 	 * 3	300	G	T	-2.4|0.123
@@ -180,15 +178,14 @@ public class MultiAllelicResultFilter implements ResultFilter
 	 * 3	300	GC	T	-2.4|0.123
 	 * 3	300	C	GX	-0.002|2.3
 	 * 3	300	C	GC	0.5|14.5
-	 * 
+	 * <p>
 	 * and it should become:
-	 * 
+	 * <p>
 	 * 3	300	G	A,T,X,C	0.2|23.1,-2.4|0.123,-0.002|2.3,0.5|14.5
 	 * 3	300	GC	A,T	0.2|23.1,-2.4|0.123
 	 * 3	300	C	GX,GC	-0.002|2.3,0.5|14.5
-	 * 
+	 * <p>
 	 * so that the multi-allelic filter can then find back the appropriate values as if it were a multi-allelic VCF line
-	 * 
 	 */
 	public Iterable<Entity> merge(Iterable<Entity> resourceEntities)
 	{
@@ -205,7 +202,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 		// collect entities to be merged by ref
 		Multimap<String, Entity> refToMergedEntity = LinkedListMultimap.create();
 
-		while(resourceEntitiesIterator.hasNext())
+		while (resourceEntitiesIterator.hasNext())
 		{
 			Entity resourceEntity = resourceEntitiesIterator.next();
 			// verify if all results have the same chrom & pos
@@ -237,8 +234,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 				else
 				{
 					// concatenate alleles
-					mergeWithMe.set(ALT,
-							mergeWithMe.get(ALT).toString() + "," + entityToBeMerged.get(ALT).toString());
+					mergeWithMe.set(ALT, mergeWithMe.get(ALT).toString() + "," + entityToBeMerged.get(ALT).toString());
 
 					// concatenate allele specific attributes
 					for (AttributeMetaData alleleSpecificAttributes : attributes)

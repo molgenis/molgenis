@@ -1,6 +1,7 @@
 package org.molgenis.ontology.importer;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
 import static java.util.stream.StreamSupport.stream;
 
 import java.io.File;
@@ -15,7 +16,6 @@ import org.apache.commons.io.IOUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
@@ -23,6 +23,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.QueryImpl;
@@ -122,16 +123,16 @@ public class OntologyImportService implements ImportService
 	{
 		EntitiesValidationReport report = new EntitiesValidationReportImpl();
 
-		if (source.getRepository(OntologyMetaData.ENTITY_NAME) == null)
-			throw new MolgenisDataException("Exception Repository [" + OntologyMetaData.ENTITY_NAME + "] is missing");
+		if (source.getRepository(ONTOLOGY) == null)
+			throw new MolgenisDataException("Exception Repository [" + ONTOLOGY + "] is missing");
 
 		boolean ontologyExists = false;
-		for (Entity ontologyEntity : source.getRepository(OntologyMetaData.ENTITY_NAME))
+		for (Entity ontologyEntity : source.getRepository(ONTOLOGY))
 		{
 			String ontologyIRI = ontologyEntity.getString(OntologyMetaData.ONTOLOGY_IRI);
 			String ontologyName = ontologyEntity.getString(OntologyMetaData.ONTOLOGY_NAME);
 
-			Entity ontologyQueryEntity = dataService.findOne(OntologyMetaData.ENTITY_NAME,
+			Entity ontologyQueryEntity = dataService.findOne(ONTOLOGY,
 					new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIRI).or()
 							.eq(OntologyMetaData.ONTOLOGY_NAME, ontologyName));
 			ontologyExists = ontologyQueryEntity != null;

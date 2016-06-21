@@ -18,6 +18,8 @@ import org.molgenis.data.elasticsearch.response.ResponseParser;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.Pair;
@@ -488,7 +490,7 @@ public class ElasticsearchService implements SearchService
 		LOG.info("Rebuild index for {}...", repository.getName());
 		if (storeSource(repository.getEntityMetaData()))
 		{
-			throw new MolgenisDataException("ElasticSearch is an index, not a backend");
+			throw new UnsupportedOperationException("Elasticsearch does not store data"); // FIXME
 		}
 		EntityMetaData entityMetaData = repository.getEntityMetaData();
 		if (hasMapping(entityMetaData))

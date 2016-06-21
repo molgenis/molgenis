@@ -9,14 +9,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMeta.REINDEX_JOB_EXECUTION;
+import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.REINDEX_ACTION_JOB;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ENTITY_FULL_NAME;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collections;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.regex.Matcher;
@@ -32,9 +33,11 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.EntityMetaDataFactory;
+import org.molgenis.data.reindex.meta.IndexPackage;
+import org.molgenis.data.reindex.meta.ReindexActionJob;
 import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.user.MolgenisUserService;
 import org.testng.annotations.AfterMethod;
@@ -88,7 +91,8 @@ public class ReindexServiceImplTest
 	public void setUp() throws Exception
 	{
 		initMocks(this);
-		reindexActionEntity = new DefaultEntity(new ReindexActionJobMetaData(), dataService);
+		EntityMetaDataFactory factory = new EntityMetaDataFactory();
+		reindexActionEntity = new ReindexActionJob();
 		reindexActionEntity.set(ENTITY_FULL_NAME, "test_TestEntity");
 	}
 
@@ -102,9 +106,9 @@ public class ReindexServiceImplTest
 	@Test
 	public void testRebuildIndex() throws Exception
 	{
-		when(dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, "abcde")).thenReturn(reindexActionJobEntity);
+		when(dataService.findOneById(REINDEX_ACTION_JOB, "abcde")).thenReturn(reindexActionJobEntity);
 
-		when(dataService.findAll(ReindexActionMetaData.ENTITY_NAME,
+		when(dataService.findAll(REINDEX_ACTION,
 				new QueryImpl<>().eq(REINDEX_ACTION_GROUP, reindexActionJobEntity)))
 				.thenReturn(Stream.of(reindexActionEntity));
 
@@ -128,7 +132,7 @@ public class ReindexServiceImplTest
 	@Test
 	public void testRebuildIndexDoesNothingIfNoReindexActionJobIsFound() throws Exception
 	{
-		when(dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, "abcde")).thenReturn(null);
+		when(dataService.findOneById(REINDEX_ACTION_JOB, "abcde")).thenReturn(null);
 
 		rebuildIndexService.rebuildIndex("abcde");
 

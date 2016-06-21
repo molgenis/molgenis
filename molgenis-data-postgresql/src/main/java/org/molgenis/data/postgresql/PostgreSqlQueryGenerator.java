@@ -16,14 +16,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Sort;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
@@ -31,7 +31,6 @@ import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.StringField;
 import org.molgenis.fieldtypes.TextField;
 import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.util.EntityUtils;
 
 /**
  * Utility class that generates the SQL used by {@link PostgreSqlRepository} and {@link PostgreSqlRepositoryCollection}
@@ -56,6 +55,33 @@ class PostgreSqlQueryGenerator
 		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ADD CONSTRAINT ")
 				.append(getUniqueKeyName(entityMeta, attr)).append(" UNIQUE (").append(getColumnName(attr)).append(")")
 				.toString();
+	}
+
+	public static String getSqlDropUniqueKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	{
+		// PostgreSQL name convention
+		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" DROP CONSTRAINT ")
+				.append(getUniqueKeyName(entityMeta, attr)).toString();
+	}
+
+	public static String getSqlSetNotNull(EntityMetaData entityMeta, AttributeMetaData attr)
+	{
+		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ALTER COLUMN ")
+				.append(getColumnName(attr)).append(" SET NOT NULL").toString();
+	}
+
+	public static String getSqlDropNotNull(EntityMetaData entityMeta, AttributeMetaData attr)
+	{
+		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ALTER COLUMN ")
+				.append(getColumnName(attr)).append(" DROP NOT NULL").toString();
+	}
+
+	public static String getSqlSetDataType(EntityMetaData entityMeta, AttributeMetaData attr)
+	{
+		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ALTER COLUMN ")
+				.append(getColumnName(attr)).append(" SET DATA TYPE ").append(attr.getDataType().getPostgreSqlType())
+				.append(" USING ").append(getColumnName(attr)).append("::")
+				.append(attr.getDataType().getPostgreSqlType()).toString();
 	}
 
 	public static String getSqlAddColumn(EntityMetaData entityMeta, AttributeMetaData attr)
@@ -389,18 +415,11 @@ class PostgreSqlQueryGenerator
 			{
 				sql.append(attr.getDataType().getPostgreSqlType());
 			}
-			// TODO remove Questionnaire entity hack
-			// not null
-			if (!attr.isNillable() && !EntityUtils.doesExtend(entityMeta, "Questionnaire")
-					&& (attr.getVisibleExpression() == null))
-			{
-				sql.append(" NOT NULL");
-			}
 			if (attr.getDataType() instanceof EnumField)
 			{
-				sql.append(" CHECK (").append(getColumnName(attr)).append(" IN (").append(
-						attr.getEnumOptions().stream().map(enumOption -> "'" + enumOption + "'").collect(joining(",")))
-						.append("))");
+				sql.append(" CHECK (").append(getColumnName(attr)).append(" IN (")
+						.append(attr.getEnumOptions().stream().map(enumOption -> "'" + enumOption + "'")
+								.collect(joining(","))).append("))");
 			}
 		}
 	}
@@ -482,9 +501,8 @@ class PostgreSqlQueryGenerator
 
 					StringBuilder in = new StringBuilder();
 
-					@SuppressWarnings("unchecked")
-					Iterable<Object> inValueIterable = (Iterable<Object>) inValue;
-					for (Iterator<Object> it = inValueIterable.iterator(); it.hasNext();)
+					@SuppressWarnings("unchecked") Iterable<Object> inValueIterable = (Iterable<Object>) inValue;
+					for (Iterator<Object> it = inValueIterable.iterator(); it.hasNext(); )
 					{
 						Object inValueItem = it.next();
 
@@ -535,7 +553,7 @@ class PostgreSqlQueryGenerator
 					parameters.add(rangeValues.next()); // to
 
 					StringBuilder column = new StringBuilder();
-					if (attr.getDataType() instanceof  MrefField)
+					if (attr.getDataType() instanceof MrefField)
 					{
 						column.append(getFilterColumnName(attr, mrefFilterIndex));
 					}
@@ -548,6 +566,41 @@ class PostgreSqlQueryGenerator
 					result.append(predicate);
 					break;
 				case EQUALS:
+					FieldType equalsType = attr.getDataType();
+					if (equalsType instanceof MrefField)
+					{
+						predicate.append(getFilterColumnName(attr, mrefFilterIndex));
+					}
+					else
+					{
+						predicate.append("this");
+					}
+
+					predicate.append('.').append(getColumnName(r.getField()));
+					if (r.getValue() == null)
+					{
+						// expression = null is not valid, use IS NULL
+						predicate.append(" IS NULL ");
+					}
+					else
+					{
+						predicate.append(" =");
+						predicate.append(" ? ");
+
+						Object convertedVal = attr.getDataType().convert(r.getValue());
+						if (convertedVal instanceof Entity)
+						{
+							convertedVal = ((Entity) convertedVal).getIdValue();
+						}
+						parameters.add(convertedVal);
+					}
+					if (result.length() > 0 && !result.toString().endsWith(" OR ") && !result.toString()
+							.endsWith(" AND "))
+					{
+						result.append(" AND ");
+					}
+					result.append(predicate);
+					break;
 				case GREATER:
 				case GREATER_EQUAL:
 				case LESS:
@@ -593,8 +646,8 @@ class PostgreSqlQueryGenerator
 					}
 					parameters.add(convertedVal);
 
-					if (result.length() > 0 && !result.toString().endsWith(" OR ")
-							&& !result.toString().endsWith(" AND ") && !result.toString().endsWith(" NOT "))
+					if (result.length() > 0 && !result.toString().endsWith(" OR ") && !result.toString()
+							.endsWith(" AND ") && !result.toString().endsWith(" NOT "))
 					{
 						result.append(" AND ");
 					}
@@ -606,8 +659,9 @@ class PostgreSqlQueryGenerator
 				case SEARCH:
 				case SHOULD:
 					// PostgreSQL does not support semantic searching and sorting matching rows on relevance.
-					throw new UnsupportedOperationException(format(
-							"Query operator [%s] not supported by PostgreSQL repository", r.getOperator().toString()));
+					throw new UnsupportedOperationException(
+							format("Query operator [%s] not supported by PostgreSQL repository",
+									r.getOperator().toString()));
 				default:
 					throw new RuntimeException(format("Unknown query operator [%s]", r.getOperator().toString()));
 			}

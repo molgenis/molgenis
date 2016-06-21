@@ -1,33 +1,54 @@
 package org.molgenis.data.meta;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.MetaPackage.PACKAGE_META;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-public class PackageMetaData extends DefaultEntityMetaData
+@Component
+public class PackageMetaData extends SystemEntityMetaData
 {
-	public static final String ENTITY_NAME = "packages";
+	private static final String SIMPLE_NAME_ = "packages";
+	public static final String PACKAGE = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME_;
+
 	public static final String FULL_NAME = "fullName";
 	public static final String SIMPLE_NAME = "name";
+	public static final String LABEL = "label";
 	public static final String DESCRIPTION = "description";
 	public static final String PARENT = "parent";
 	public static final String TAGS = "tags";
 
-	public static final PackageMetaData INSTANCE = new PackageMetaData();
+	private TagMetaData tagMetaData;
 
-	private PackageMetaData()
+	PackageMetaData()
 	{
-		super(ENTITY_NAME);
-
-		addAttribute(FULL_NAME, ROLE_ID, ROLE_LABEL).setNillable(false);
-		addAttribute(SIMPLE_NAME);
-		addAttribute(DESCRIPTION).setDataType(TEXT);
-		addAttribute(PARENT).setDataType(XREF).setRefEntity(this);
-		addAttribute(TAGS).setDataType(MREF).setRefEntity(TagMetaData.INSTANCE);
+		super(SIMPLE_NAME_, PACKAGE_META);
 	}
 
+	@Override
+	public void init()
+	{
+		setLabel("Package");
+		setDescription("Grouping of related entities");
+		addAttribute(FULL_NAME, ROLE_ID, ROLE_LABEL).setLabel("Qualified name");
+		addAttribute(SIMPLE_NAME).setLabel("Name");
+		addAttribute(LABEL).setLabel("Label");
+		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
+		addAttribute(PARENT).setDataType(XREF).setRefEntity(this).setLabel("Parent");
+		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData).setLabel("Tags");
+	}
+
+	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
+	@Autowired
+	public void setTagMetaData(TagMetaData tagMetaData)
+	{
+		this.tagMetaData = requireNonNull(tagMetaData);
+	}
 }

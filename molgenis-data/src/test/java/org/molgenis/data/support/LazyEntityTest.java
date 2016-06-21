@@ -10,12 +10,11 @@ import static org.testng.Assert.assertEquals;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Arrays;
-import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -74,7 +73,7 @@ public class LazyEntityTest
 	@Test
 	public void getAttributeNames()
 	{
-		DefaultEntity entity = new DefaultEntity(entityMeta, dataService);
+		Entity entity = new DynamicEntity(entityMeta);
 		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
 		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1").getMock();
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(attr0, attr1));
@@ -190,18 +189,6 @@ public class LazyEntityTest
 	}
 
 	@Test
-	public void getIntList()
-	{
-		String attrName = "attr";
-		@SuppressWarnings("unchecked")
-		List<Integer> value = mock(List.class);
-		when(entity.getIntList(attrName)).thenReturn(value);
-		assertEquals(value, lazyEntity.getIntList(attrName));
-		assertEquals(value, lazyEntity.getIntList(attrName));
-		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
-	}
-
-	@Test
 	public void getLabelValue()
 	{
 		String value = "label";
@@ -217,18 +204,6 @@ public class LazyEntityTest
 		when(entityMeta.getLabelAttribute()).thenReturn(idAttr);
 		assertEquals(id.toString(), lazyEntity.getLabelValue());
 		verifyNoMoreInteractions(dataService);
-	}
-
-	@Test
-	public void getList()
-	{
-		String attrName = "attr";
-		@SuppressWarnings("unchecked")
-		List<String> value = mock(List.class);
-		when(entity.getList(attrName)).thenReturn(value);
-		assertEquals(value, lazyEntity.getList(attrName));
-		assertEquals(value, lazyEntity.getList(attrName));
-		verify(dataService, times(1)).findOneById(ENTITY_NAME, id);
 	}
 
 	@Test

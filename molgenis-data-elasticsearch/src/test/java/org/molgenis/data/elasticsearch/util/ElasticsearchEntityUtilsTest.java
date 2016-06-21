@@ -9,9 +9,9 @@ import java.util.Arrays;
 import java.util.stream.Stream;
 
 import org.elasticsearch.common.collect.Lists;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.testng.annotations.Test;
 
 public class ElasticsearchEntityUtilsTest

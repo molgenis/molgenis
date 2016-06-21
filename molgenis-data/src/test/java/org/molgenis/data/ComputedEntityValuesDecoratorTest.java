@@ -12,13 +12,13 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.mockito.*;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

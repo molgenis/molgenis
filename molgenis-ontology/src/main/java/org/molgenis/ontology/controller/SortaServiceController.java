@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.QueryRule.Operator.AND;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.QueryRule.Operator.GREATER_EQUAL;
@@ -15,6 +16,7 @@ import static org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData.MATCHED_TERM;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData.SCORE;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData.VALIDATED;
+import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.SORTA_JOB_EXECUTION;
 import static org.molgenis.ontology.utils.SortaServiceUtil.getEntityAsMap;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
@@ -27,7 +29,6 @@ import java.text.NumberFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -43,12 +44,9 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Query;
@@ -58,17 +56,20 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.jobs.JobExecutionMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.sorta.job.SortaJobExecution;
+import org.molgenis.ontology.sorta.job.SortaJobExecutionFactory;
 import org.molgenis.ontology.sorta.job.SortaJobFactory;
 import org.molgenis.ontology.sorta.job.SortaJobImpl;
 import org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData;
@@ -120,6 +121,11 @@ public class SortaServiceController extends MolgenisPluginController
 	private final MenuReaderService menuReaderService;
 	private final IdGenerator idGenerator;
 	private final PermissionSystemService permissionSystemService;
+	private final MatchingTaskContentEntityMetaData matchingTaskContentEntityMetaData;
+	private final SortaJobExecutionMetaData sortaJobExecutionMetaData;
+	private final OntologyTermMetaData ontologyTermMetaData;
+	private final SortaJobExecutionFactory sortaJobExecutionFactory;
+	private final AttributeMetaDataFactory attrMetaFactory;
 
 	public static final String MATCH_VIEW_NAME = "sorta-match-view";
 	public static final String ID = "sortaservice";
@@ -133,7 +139,10 @@ public class SortaServiceController extends MolgenisPluginController
 			SortaJobFactory sortaMatchJobFactory, ExecutorService taskExecutor, UserAccountService userAccountService,
 			FileStore fileStore, MolgenisPermissionService molgenisPermissionService, DataService dataService,
 			LanguageService languageService, MenuReaderService menuReaderService, IdGenerator idGenerator,
-			PermissionSystemService permissionSystemService)
+			PermissionSystemService permissionSystemService,
+			MatchingTaskContentEntityMetaData matchingTaskContentEntityMetaData,
+			SortaJobExecutionMetaData sortaJobExecutionMetaData, OntologyTermMetaData ontologyTermMetaData,
+			SortaJobExecutionFactory sortaJobExecutionFactory, AttributeMetaDataFactory attrMetaFactory)
 	{
 		super(URI);
 		this.ontologyService = requireNonNull(ontologyService);
@@ -148,6 +157,11 @@ public class SortaServiceController extends MolgenisPluginController
 		this.menuReaderService = requireNonNull(menuReaderService);
 		this.idGenerator = requireNonNull(idGenerator);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
+		this.matchingTaskContentEntityMetaData = requireNonNull(matchingTaskContentEntityMetaData);
+		this.sortaJobExecutionMetaData = requireNonNull(sortaJobExecutionMetaData);
+		this.ontologyTermMetaData = requireNonNull(ontologyTermMetaData);
+		this.sortaJobExecutionFactory = sortaJobExecutionFactory;
+		this.attrMetaFactory = attrMetaFactory;
 	}
 
 	@RequestMapping(method = GET)
@@ -160,8 +174,8 @@ public class SortaServiceController extends MolgenisPluginController
 	private SortaJobExecution findSortaJobExecution(String sortaJobExecutionId)
 	{
 		Fetch fetch = new Fetch();
-		SortaJobExecutionMetaData.INSTANCE.getAtomicAttributes().forEach(attr -> fetch.field(attr.getName()));
-		SortaJobExecution result = RunAsSystemProxy.runAsSystem(() -> dataService.findOneById(SortaJobExecution.ENTITY_NAME,
+		sortaJobExecutionMetaData.getAtomicAttributes().forEach(attr -> fetch.field(attr.getName()));
+		SortaJobExecution result = RunAsSystemProxy.runAsSystem(() -> dataService.findOneById(SORTA_JOB_EXECUTION,
 				sortaJobExecutionId, fetch, SortaJobExecution.class));
 		return result;
 	}
@@ -195,7 +209,7 @@ public class SortaServiceController extends MolgenisPluginController
 					RunAsSystemProxy.runAsSystem(() -> {
 						Double thresholdValue = Double.parseDouble(threshold);
 						sortaJobExecution.setThreshold(thresholdValue);
-						dataService.update(SortaJobExecution.ENTITY_NAME, sortaJobExecution);
+						dataService.update(SORTA_JOB_EXECUTION, sortaJobExecution);
 					});
 				}
 			}
@@ -253,7 +267,7 @@ public class SortaServiceController extends MolgenisPluginController
 			if (currentUser.isSuperuser() || sortaJobExecution.getUser().equals(currentUser.getUsername()))
 			{
 				RunAsSystemProxy.runAsSystem(() -> {
-					dataService.deleteById(SortaJobExecution.ENTITY_NAME, sortaJobExecution.getIdentifier());
+					dataService.deleteById(SORTA_JOB_EXECUTION, sortaJobExecution.getIdentifier());
 				});
 				tryDeleteRepository(sortaJobExecution.getResultEntityName());
 				tryDeleteRepository(sortaJobExecution.getSourceEntityName());
@@ -345,7 +359,7 @@ public class SortaServiceController extends MolgenisPluginController
 		});
 
 		EntityPager pager = new EntityPager(start, num, count, null);
-		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve", OntologyTermMetaData.INSTANCE,
+		return new EntityCollectionResponse(pager, entityMaps, "/match/retrieve", ontologyTermMetaData,
 				molgenisPermissionService, dataService, languageService);
 	}
 
@@ -408,8 +422,9 @@ public class SortaServiceController extends MolgenisPluginController
 		{
 			String queryString = request.get("queryString").toString();
 			String ontologyIri = request.get(OntologyMetaData.ONTOLOGY_IRI).toString();
-			Entity inputEntity = new MapEntity(
-					Collections.singletonMap(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString));
+			// FIXME pass entity meta data instead of null
+			Entity inputEntity = new DynamicEntity(null);
+			inputEntity.set(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString);
 
 			return new SortaServiceResponse(inputEntity,
 					sortaService.findOntologyTermEntities(ontologyIri, inputEntity));
@@ -418,7 +433,7 @@ public class SortaServiceController extends MolgenisPluginController
 				"Please check that queryString and ontologyIRI keys exist in input and have nonempty value!");
 	}
 
-	private MapEntity toDownloadRow(SortaJobExecution sortaJobExecution, Entity resultEntity)
+	private Entity toDownloadRow(SortaJobExecution sortaJobExecution, Entity resultEntity)
 	{
 		NumberFormat format = NumberFormat.getNumberInstance();
 		format.setMaximumFractionDigits(2);
@@ -426,7 +441,8 @@ public class SortaServiceController extends MolgenisPluginController
 		Entity ontologyTermEntity = sortaService.getOntologyTermEntity(
 				resultEntity.getString(MatchingTaskContentEntityMetaData.MATCHED_TERM),
 				sortaJobExecution.getOntologyIri());
-		MapEntity row = new MapEntity(inputEntity);
+		Entity row = new DynamicEntity(null); // FIXME pass entity meta data instead of null
+		row.set(inputEntity);
 		row.set(OntologyTermMetaData.ONTOLOGY_TERM_NAME,
 				ontologyTermEntity.getString(OntologyTermMetaData.ONTOLOGY_TERM_NAME));
 		row.set(OntologyTermMetaData.ONTOLOGY_TERM_IRI,
@@ -513,12 +529,12 @@ public class SortaServiceController extends MolgenisPluginController
 	{
 		final List<Entity> jobs = new ArrayList<>();
 		MolgenisUser currentUser = userAccountService.getCurrentUser();
-		Query<Entity> query = QueryImpl.EQ(SortaJobExecution.USER, currentUser);
-		query.sort().on(SortaJobExecution.START_DATE, DESC);
+		Query<Entity> query = QueryImpl.EQ(JobExecutionMetaData.USER, currentUser);
+		query.sort().on(JobExecutionMetaData.START_DATE, DESC);
 		RunAsSystemProxy.runAsSystem(() -> {
-			dataService.findAll(SortaJobExecution.ENTITY_NAME, query).forEach(job -> {
+			dataService.findAll(SORTA_JOB_EXECUTION, query).forEach(job -> {
 				// TODO: fetch the user as well
-				job.set(SortaJobExecution.USER, currentUser);
+				job.set(JobExecutionMetaData.USER, currentUser);
 				jobs.add(job);
 			});
 		});
@@ -530,7 +546,7 @@ public class SortaServiceController extends MolgenisPluginController
 	{
 		String resultEntityName = idGenerator.generateId();
 
-		SortaJobExecution sortaJobExecution = new SortaJobExecution(dataService);
+		SortaJobExecution sortaJobExecution = sortaJobExecutionFactory.create();
 		sortaJobExecution.setIdentifier(resultEntityName);
 		sortaJobExecution.setName(jobName);
 		sortaJobExecution.setUser(userAccountService.getCurrentUser());
@@ -543,7 +559,7 @@ public class SortaServiceController extends MolgenisPluginController
 		RunAsSystemProxy.runAsSystem(() -> {
 			createInputRepository(inputData);
 			createEmptyResultRepository(jobName, resultEntityName, inputData.getEntityMetaData());
-			dataService.add(SortaJobExecution.ENTITY_NAME, sortaJobExecution);
+			dataService.add(SORTA_JOB_EXECUTION, sortaJobExecution);
 		});
 
 		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
@@ -554,10 +570,10 @@ public class SortaServiceController extends MolgenisPluginController
 
 	private void createEmptyResultRepository(String jobName, String resultEntityName, EntityMetaData sourceMetaData)
 	{
-		DefaultEntityMetaData resultEntityMetaData = new DefaultEntityMetaData(resultEntityName,
-				MatchingTaskContentEntityMetaData.INSTANCE);
+		EntityMetaData resultEntityMetaData = EntityMetaData.newInstance(matchingTaskContentEntityMetaData);
+		resultEntityMetaData.setName(resultEntityName);
 		resultEntityMetaData.setAbstract(false);
-		resultEntityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(INPUT_TERM, FieldTypeEnum.XREF)
+		resultEntityMetaData.addAttribute(attrMetaFactory.create().setName(INPUT_TERM).setDataType(XREF)
 				.setRefEntity(sourceMetaData).setDescription("Reference to the input term").setNillable(false));
 		resultEntityMetaData.setLabel(jobName + " output");
 		dataService.getMeta().addEntityMeta(resultEntityMetaData);

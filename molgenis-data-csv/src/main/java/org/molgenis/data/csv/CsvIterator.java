@@ -22,8 +22,8 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.GenericImporterExtensions;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.util.CloseableIterator;
 import org.springframework.util.StringUtils;
 
@@ -37,7 +37,7 @@ public class CsvIterator implements CloseableIterator<Entity>
 	private CSVReader csvReader;
 	private final List<CellProcessor> cellProcessors;
 	private final Map<String, Integer> colNamesMap; // column names index
-	private MapEntity next;
+	private Entity next;
 	private boolean getNext = true;
 	private Character separator = null;
 
@@ -101,14 +101,14 @@ public class CsvIterator implements CloseableIterator<Entity>
 	}
 
 	@Override
-	public MapEntity next()
+	public Entity next()
 	{
-		MapEntity entity = get();
+		Entity entity = get();
 		getNext = true;
 		return entity;
 	}
 
-	private MapEntity get()
+	private Entity get()
 	{
 		if (getNext)
 		{
@@ -128,7 +128,7 @@ public class CsvIterator implements CloseableIterator<Entity>
 						values[i] = processCell(value, false);
 					}
 
-					next = new MapEntity();
+					next = new DynamicEntity(null); // FIXME pass entity meta data instead of null
 
 					for (String name : colNamesMap.keySet())
 					{

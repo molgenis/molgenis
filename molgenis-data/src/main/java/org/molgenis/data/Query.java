@@ -8,6 +8,8 @@ import java.util.stream.Stream;
  */
 public interface Query<E extends Entity> extends Iterable<E>
 {
+	Repository<E> getRepository();
+
 	/**
 	 * Count entities matching query
 	 *

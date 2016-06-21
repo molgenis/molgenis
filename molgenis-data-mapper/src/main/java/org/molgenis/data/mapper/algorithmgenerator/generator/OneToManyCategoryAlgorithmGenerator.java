@@ -14,11 +14,11 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorithmGenerator
 {

@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.elasticsearch.common.collect.Lists;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AbstractRepositoryEntityAnnotator;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
+import org.molgenis.data.meta.AttributeMetaData;
 
 public class RepositoryAnnotatorImpl extends AbstractRepositoryEntityAnnotator
 {

@@ -1,6 +1,6 @@
 package org.molgenis.integrationtest.data.postgresql.model;
 
-import org.molgenis.integrationtest.data.abstracts.model.AbstractValidationExpressionIT;
+import org.molgenis.integrationtest.data.AbstractValidationExpressionIT;
 import org.molgenis.integrationtest.data.postgresql.AbstractPostgreSqlTestConfig;
 import org.molgenis.integrationtest.data.postgresql.model.PostgreSqlValidationExpressionIT.ValidationExpressionPostgreSqlTestConfig;
 import org.springframework.context.annotation.Configuration;

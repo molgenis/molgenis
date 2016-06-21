@@ -10,10 +10,10 @@ import java.util.Map;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.PartialEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -50,7 +50,7 @@ public class ElasticsearchEntityFactoryTest
 		Entity entity = mock(Entity.class);
 		PartialEntity partialEntity = mock(PartialEntity.class);
 		when(sourceToEntityConverter.convert(source, entityMeta)).thenReturn(entity);
-		when(entityManager.createEntityForPartialEntity(entity, fetch)).thenReturn(partialEntity);
+		//		when(entityManager.createEntityForPartialEntity(entity, fetch)).thenReturn(partialEntity); // FIXME
 		assertEquals(elasticsearchEntityFactory.create(entityMeta, source, fetch), partialEntity);
 	}
 

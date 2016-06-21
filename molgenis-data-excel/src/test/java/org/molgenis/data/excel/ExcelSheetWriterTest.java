@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.processor.CellProcessor;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -40,7 +40,7 @@ public class ExcelSheetWriterTest
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
 
-		Entity entity = new MapEntity();
+		Entity entity = new DynamicEntity(null); // // FIXME pass entity meta data instead of null
 		entity.set("col1", "val1");
 		entity.set("col2", "val2");
 
@@ -54,12 +54,12 @@ public class ExcelSheetWriterTest
 	@Test
 	public void write() throws IOException
 	{
-		Entity entity1 = new MapEntity();
+		Entity entity1 = new DynamicEntity(null); // // FIXME pass entity meta data instead of null
 		entity1.set("col1", "val1");
 		entity1.set("col2", "val2");
 		excelSheetWriter.add(entity1);
 
-		Entity entity2 = new MapEntity();
+		Entity entity2 = new DynamicEntity(null); // // FIXME pass entity meta data instead of null
 		entity2.set("col1", "val3");
 		entity2.set("col2", "val4");
 		excelSheetWriter.add(entity2);

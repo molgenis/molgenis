@@ -22,6 +22,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.mail.MailSender;
 import org.testng.annotations.AfterClass;
 
+//@Import({EmbeddedElasticSearchConfig.class, ElasticsearchEntityFactory.class, ElasticsearchRepositoryCollection.class})
 import static org.mockito.Mockito.mock;
 
 public abstract class AbstractElasticsearchTestConfig extends AbstractDataApiTestConfig

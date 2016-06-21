@@ -13,16 +13,16 @@ import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.util.CloseableIterator;
 
+import com.google.common.collect.Iterables;
+
 import au.com.bytecode.opencsv.CSVParser;
 import au.com.bytecode.opencsv.CSVReader;
-
-import com.google.common.collect.Iterables;
 
 /**
  * Repository that contains typed entities. For csv/tsv files with known content.

@@ -5,10 +5,13 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.COUNT;
+import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.REINDEX_ACTION_JOB;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ACTION_ORDER;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.DELETE;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType.DATA;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_STATUS;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.FAILED;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.FINISHED;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.STARTED;
@@ -55,7 +58,7 @@ class ReindexJob extends Job
 	public Void call(Progress progress)
 	{
 		requireNonNull(progress);
-		Entity reindexActionEntity = dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
+		Entity reindexActionEntity = dataService.findOneById(REINDEX_ACTION_JOB, transactionId);
 		if (reindexActionEntity != null && reindexActionEntity.getInt(COUNT) != null
 				&& reindexActionEntity.getInt(COUNT) > 0)
 		{
@@ -79,8 +82,7 @@ class ReindexJob extends Job
 	private void performReindexActions(Progress progress)
 	{
 		List<Entity> reindexActions = dataService
-				.findAll(ReindexActionMetaData.ENTITY_NAME, createQueryGetAllReindexActions(transactionId))
-				.collect(toList());
+				.findAll(REINDEX_ACTION, createQueryGetAllReindexActions(transactionId)).collect(toList());
 		try
 		{
 			boolean success = true;
@@ -92,8 +94,8 @@ class ReindexJob extends Job
 			if (success)
 			{
 				progress.progress(count, "Executed all reindex actions, cleaning up the actions...");
-				dataService.delete(ReindexActionMetaData.ENTITY_NAME, reindexActions.stream());
-				dataService.deleteById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
+				dataService.delete(REINDEX_ACTION, reindexActions.stream());
+				dataService.deleteById(REINDEX_ACTION_JOB, transactionId);
 				progress.progress(count, "Cleaned up the actions.");
 			}
 		}
@@ -165,8 +167,8 @@ class ReindexJob extends Job
 	 */
 	private void setStatus(Entity reindexAction, ReindexStatus status)
 	{
-		reindexAction.set(ReindexActionMetaData.REINDEX_STATUS, status);
-		dataService.update(ReindexActionMetaData.ENTITY_NAME, reindexAction);
+		reindexAction.set(REINDEX_STATUS, status.toString());
+		dataService.update(REINDEX_ACTION, reindexAction);
 	}
 
 	/**

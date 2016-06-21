@@ -27,6 +27,18 @@ public class QueryImpl<E extends Entity> implements Query<E>
 	 * {@link Fetch} that defines which entity attributes to retrieve.
 	 */
 	private Fetch fetch;
+
+	@Override
+	public Repository<E> getRepository()
+	{
+		return repository;
+	}
+
+	public void setRepository(Repository<E> repository)
+	{
+		this.repository = repository;
+	}
+
 	private Repository<E> repository;
 
 	public static Query<Entity> query()

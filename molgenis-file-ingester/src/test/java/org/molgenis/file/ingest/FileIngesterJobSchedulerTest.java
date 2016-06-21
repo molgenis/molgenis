@@ -5,11 +5,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
@@ -40,8 +41,8 @@ public class FileIngesterJobSchedulerTest {
 		String id = "id";
 		FileIngest fileIngest = new FileIngest(null);
 		fileIngest.set(FileIngestMetaData.ID, id);
-		
-		when(dataServiceMock.findOneById(FileIngestMetaData.ENTITY_NAME, id, FileIngest.class)).thenReturn(fileIngest);
+
+		when(dataServiceMock.findOneById(FILE_INGEST, id, FileIngest.class)).thenReturn(fileIngest);
 		when(schedulerMock.checkExists(new JobKey(id, FileIngesterJobScheduler.JOB_GROUP))).thenReturn(false);
 		
 		fileIngesterJobScheduler.runNow(id);
@@ -53,7 +54,7 @@ public class FileIngesterJobSchedulerTest {
 	public void runNowUnknownEntity()
 	{
 		String id = "id";
-		when(dataServiceMock.findOneById(FileIngestMetaData.ENTITY_NAME, id)).thenReturn(null);
+		when(dataServiceMock.findOneById(FILE_INGEST, id)).thenReturn(null);
 		fileIngesterJobScheduler.runNow(id);
 	}
 
@@ -64,7 +65,7 @@ public class FileIngesterJobSchedulerTest {
 		FileIngest fileIngest = new FileIngest(null);
 		fileIngest.set(FileIngestMetaData.ID, id);
 
-		when(dataServiceMock.findOneById(FileIngestMetaData.ENTITY_NAME, id, FileIngest.class)).thenReturn(fileIngest);
+		when(dataServiceMock.findOneById(FILE_INGEST, id, FileIngest.class)).thenReturn(fileIngest);
 		when(schedulerMock.checkExists(new JobKey(id, FileIngesterJobScheduler.JOB_GROUP))).thenReturn(true);
 
 		fileIngesterJobScheduler.runNow(id);
@@ -93,7 +94,7 @@ public class FileIngesterJobSchedulerTest {
 	public void scheduleInactive() throws SchedulerException
 	{
 		String id = "id";
-		Entity fileIngest = new MapEntity();
+		Entity fileIngest = new DynamicEntity(null); // // FIXME pass entity meta data instead of null
 		fileIngest.set(FileIngestMetaData.ID, id);
 		fileIngest.set(FileIngestMetaData.CRONEXPRESSION, "	0/20 * * * * ?");
 		fileIngest.set(FileIngestMetaData.NAME, "name");
@@ -110,7 +111,7 @@ public class FileIngesterJobSchedulerTest {
 	public void scheduleInvalidCronExpression() throws SchedulerException
 	{
 		String id = "id";
-		Entity fileIngest = new MapEntity();
+		Entity fileIngest = new DynamicEntity(null); // // FIXME pass entity meta data instead of null
 		fileIngest.set(FileIngestMetaData.ID, id);
 		fileIngest.set(FileIngestMetaData.CRONEXPRESSION, "XXX");
 		fileIngest.set(FileIngestMetaData.NAME, "name");

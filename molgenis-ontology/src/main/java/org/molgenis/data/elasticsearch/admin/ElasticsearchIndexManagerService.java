@@ -2,7 +2,7 @@ package org.molgenis.data.elasticsearch.admin;
 
 import java.util.List;
 
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 public interface ElasticsearchIndexManagerService
 {

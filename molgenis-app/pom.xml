@@ -247,6 +247,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-scripts-core</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-file-ingester</artifactId>
 			<version>${project.version}</version>
 		</dependency>

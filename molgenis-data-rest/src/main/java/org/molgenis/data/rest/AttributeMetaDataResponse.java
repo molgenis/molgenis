@@ -6,11 +6,11 @@ import java.util.Map;
 import java.util.Set;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Range;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.security.core.MolgenisPermissionService;
 
 import com.google.common.base.Function;
@@ -173,7 +173,7 @@ public class AttributeMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("readOnly".toLowerCase()))
 		{
-			this.readOnly = attr.isReadonly();
+			this.readOnly = attr.isReadOnly();
 		}
 		else this.readOnly = null;
 
@@ -203,7 +203,7 @@ public class AttributeMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("aggregateable".toLowerCase()))
 		{
-			this.aggregateable = attr.isAggregateable();
+			this.aggregateable = attr.isAggregatable();
 		}
 		else this.aggregateable = null;
 

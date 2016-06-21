@@ -1,30 +1,33 @@
 package org.molgenis.data.support;
 
+import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 
 import java.sql.Timestamp;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.convert.DateToStringConverter;
-import org.springframework.beans.BeanUtils;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 
 public abstract class AbstractEntity implements Entity
 {
 	private static final long serialVersionUID = 1L;
 
 	@Override
-	public String getLabelValue()
+	public Object getLabelValue()
 	{
 		AttributeMetaData labelAttribute = getEntityMetaData().getLabelAttribute();
+		if (labelAttribute == null && getEntityMetaData().isAbstract())
+		{
+			return null;
+		}
+
 		String labelAttributeName = labelAttribute.getName();
 		FieldTypeEnum dataType = labelAttribute.getDataType().getEnumType();
 		switch (dataType)
@@ -129,8 +132,9 @@ public abstract class AbstractEntity implements Entity
 	@Override
 	public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
 	{
-		Entity entity = getEntity(attributeName);
-		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity), null).iterator().next() : null;
+		throw new UnsupportedOperationException("FIXME"); // FIXME
+		//		Entity entity = getEntity(attributeName);
+		//		return entity != null ? new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator().next() : null;
 	}
 
 	@Override
@@ -143,20 +147,32 @@ public abstract class AbstractEntity implements Entity
 	@Override
 	public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz)
 	{
-		Iterable<Entity> entities = getEntities(attributeName);
-		return entities != null ? new ConvertingIterable<E>(clazz, entities, null) : emptyList();
+		throw new UnsupportedOperationException("FIXME"); // FIXME
+		//		Iterable<Entity> entities = getEntities(attributeName);
+		//		return entities != null ? new ConvertingIterable<E>(clazz, entities) : emptyList();
 	}
 
 	@Override
-	public List<String> getList(String attributeName)
+	public Object getIdValue()
 	{
-		return DataConverter.toList(get(attributeName));
+		return get(getEntityMetaData().getIdAttribute().getName());
 	}
 
 	@Override
-	public List<Integer> getIntList(String attributeName)
+	public void setIdValue(Object id)
 	{
-		return DataConverter.toIntList(get(attributeName));
+		AttributeMetaData idAttr = getEntityMetaData().getIdAttribute();
+		if (idAttr == null)
+		{
+			throw new IllegalArgumentException(format("Entity [%s] doesn't have an id attribute"));
+		}
+		set(idAttr.getName(), id);
+	}
+
+	@Override
+	public Iterable<String> getAttributeNames()
+	{
+		return EntityMetaDataUtils.getAttributeNames(getEntityMetaData().getAtomicAttributes());
 	}
 
 	@Override
@@ -186,36 +202,5 @@ public abstract class AbstractEntity implements Entity
 				return String.format("%s=%s", attrName, this.get(attrName));
 			}
 		}).collect(Collectors.joining(","));
-	}
-
-	public static boolean isObjectRepresentation(String objStr)
-	{
-		int left = objStr.indexOf('(');
-		int right = objStr.lastIndexOf(')');
-		return (left == -1 || right == -1) ? false : true;
-	}
-
-	public static <T extends Entity> T setValuesFromString(String objStr, Class<T> klass)
-	{
-		T result = BeanUtils.instantiateClass(klass);
-
-		int left = objStr.indexOf('(');
-		int right = objStr.lastIndexOf(')');
-
-		String content = objStr.substring(left + 1, right);
-
-		String[] attrValues = content.split(" ");
-		for (String attrValue : attrValues)
-		{
-			String[] av = attrValue.split("=");
-			String attr = av[0];
-			String value = av[1];
-			if (value.charAt(0) == '\'' && value.charAt(value.length() - 1) == '\'')
-			{
-				value = value.substring(1, value.length() - 1);
-			}
-			result.set(attr, value);
-		}
-		return result;
 	}
 }

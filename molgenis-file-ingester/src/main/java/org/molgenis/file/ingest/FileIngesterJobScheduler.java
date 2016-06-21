@@ -1,6 +1,6 @@
 package org.molgenis.file.ingest;
 
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
 import static org.quartz.TriggerBuilder.newTrigger;
@@ -23,8 +23,6 @@ import org.quartz.Trigger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.Sets;
@@ -33,7 +31,7 @@ import com.google.common.collect.Sets;
  * Schedule and unschedule FileIngestJobs
  */
 @Component
-public class FileIngesterJobScheduler implements ApplicationListener<ContextRefreshedEvent>
+public class FileIngesterJobScheduler
 {
 	public static final String TRIGGER_GROUP = "fileingest";
 	public static final String JOB_GROUP = "fileingest";
@@ -55,7 +53,7 @@ public class FileIngesterJobScheduler implements ApplicationListener<ContextRefr
 	 */
 	public synchronized void runNow(String fileIngestId)
 	{
-		FileIngest fileIngest = dataService.findOneById(FileIngestMetaData.ENTITY_NAME, fileIngestId, FileIngest.class);
+		FileIngest fileIngest = dataService.findOneById(FILE_INGEST, fileIngestId, FileIngest.class);
 		if (fileIngest == null)
 		{
 			throw new UnknownEntityException("Unknown FileIngest entity id '" + fileIngestId + "'");
@@ -149,14 +147,6 @@ public class FileIngesterJobScheduler implements ApplicationListener<ContextRefr
 			LOG.error("Error unschedule FileIngesterJob '" + fileIngestId + "'", e);
 			throw new FileIngestException("Error unscheduling job", e);
 		}
-	}
-
-	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		// Schedule all FileIngest jobs
-		runAsSystem(
-				() -> dataService.findAll(FileIngestMetaData.ENTITY_NAME, FileIngest.class).forEach(this::schedule));
 	}
 
 	private void schedule(String id, Trigger trigger) throws SchedulerException

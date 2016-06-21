@@ -10,10 +10,10 @@ import java.util.zip.ZipFile;
 
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
@@ -47,6 +47,12 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 		this.file = file;
 
 		loadEntityNames();
+	}
+
+	@Override
+	public void init() throws IOException
+	{
+		// no operation
 	}
 
 	@Override
@@ -118,12 +124,6 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
-	{
-		return getRepository(entityMeta.getName());
-	}
-
-	@Override
 	public Iterator<Repository<Entity>> iterator()
 	{
 		return new Iterator<Repository<Entity>>()
@@ -151,4 +151,9 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 		return entityNames.contains(name);
 	}
 
+	@Override
+	public boolean hasRepository(EntityMetaData entityMeta)
+	{
+		return hasRepository(entityMeta.getName());
+	}
 }

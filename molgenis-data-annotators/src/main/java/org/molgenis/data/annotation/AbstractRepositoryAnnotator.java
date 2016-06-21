@@ -3,10 +3,10 @@ package org.molgenis.data.annotation;
 import java.util.Iterator;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.transaction.annotation.Transactional;
 
 /**

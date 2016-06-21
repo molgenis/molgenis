@@ -94,7 +94,7 @@
     	<td>
     	    <#assign constraints = []>
             <#if attribute.nillable><#assign constraints = constraints + [ "nillable" ] /></#if>
-       		<#if attribute.readonly><#assign constraints = constraints + [ "read-only" ] /></#if>
+            <#if attribute.readOnly><#assign constraints = constraints + [ "read-only" ] /></#if>
         	<#if attribute.unique><#assign constraints = constraints + [ "unique" ] /></#if>
         	<#if !attribute.visible><#assign constraints = constraints + [ "hidden" ] /></#if>
         	<#if attribute.auto><#assign constraints = constraints + [ "auto" ] /></#if>

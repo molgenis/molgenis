@@ -1,19 +1,19 @@
 package org.molgenis.file.ingest.execution;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
+import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 
 import java.io.File;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.Package;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileMeta;
+import org.molgenis.file.FileMetaFactory;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.framework.db.EntityImportReport;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,24 +30,22 @@ public class FileIngester
 	private final FileStoreDownload fileStoreDownload;
 	private final ImportServiceFactory importServiceFactory;
 	private final FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
-	private final DataService dataService;
+	private final FileMetaFactory fileMetaFactory;
 
 	@Autowired
 	public FileIngester(FileStoreDownload fileStoreDownload, ImportServiceFactory importServiceFactory,
-			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, DataService dataService)
+			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, FileMetaFactory fileMetaFactory)
 	{
 		this.fileStoreDownload = requireNonNull(fileStoreDownload);
 		this.importServiceFactory = requireNonNull(importServiceFactory);
 		this.fileRepositoryCollectionFactory = requireNonNull(fileRepositoryCollectionFactory);
-		this.dataService = requireNonNull(dataService);
+		this.fileMetaFactory = requireNonNull(fileMetaFactory);
 	}
 
 	/**
 	 * Imports a csv file defined in the fileIngest entity
 	 * 
 	 * @see FileIngestMetaData
-	 * 
-	 * @param fileIngest
 	 */
 	public FileMeta ingest(String entityName, String url, String loader, String jobExecutionID, Progress progress,
 			String failureEmail)
@@ -63,21 +61,19 @@ public class FileIngester
 		progress.progress(1, "Importing...");
 		FileRepositoryCollection repoCollection = fileRepositoryCollectionFactory.createFileRepositoryCollection(file);
 		ImportService importService = importServiceFactory.getImportService(file, repoCollection);
-		EntityImportReport report = importService.doImport(repoCollection, DatabaseAction.ADD_UPDATE_EXISTING,
-				Package.DEFAULT_PACKAGE_NAME);
+		EntityImportReport report = importService.doImport(repoCollection, ADD_UPDATE_EXISTING, PACKAGE_DEFAULT);
 
 		progress.status("Ingestion of url '" + url + "' done.");
 		Integer count = report.getNrImportedEntitiesMap().get(entityName);
 		count = count != null ? count : 0;
 		progress.progress(2, "Successfully imported " + count + " " + entityName + " entities.");
-		FileMeta fileMeta = createFileMeta(jobExecutionID, dataService, file);
+		FileMeta fileMeta = createFileMeta(jobExecutionID, file);
 		return fileMeta;
 	}
 
-	private FileMeta createFileMeta(String jobExecutionID, DataService dataService, File file)
+	private FileMeta createFileMeta(String jobExecutionID, File file)
 	{
-		FileMeta fileMeta = new FileMeta(dataService);
-		fileMeta.setId(jobExecutionID);
+		FileMeta fileMeta = fileMetaFactory.create(jobExecutionID);
 		fileMeta.setContentType("text/csv");
 		fileMeta.setSize(file.length());
 		fileMeta.setFilename(jobExecutionID + '/' + file.getName());

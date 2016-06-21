@@ -8,10 +8,10 @@ import static org.mockito.Mockito.when;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

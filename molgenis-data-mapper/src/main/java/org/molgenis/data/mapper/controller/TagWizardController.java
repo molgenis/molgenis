@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.elasticsearch.common.collect.ImmutableSet.of;
 import static org.molgenis.data.mapper.controller.TagWizardController.URI;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
 
 import java.util.List;
 import java.util.Map;
@@ -13,15 +14,15 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.mapper.data.request.AddTagRequest;
 import org.molgenis.data.mapper.data.request.AutoTagRequest;
 import org.molgenis.data.mapper.data.request.GetOntologyTermRequest;
 import org.molgenis.data.mapper.data.request.RemoveTagRequest;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.semantic.Hit;
@@ -91,7 +92,7 @@ public class TagWizardController extends MolgenisPluginController
 	@RequestMapping
 	public String viewTagWizard(@RequestParam(required = false, value = "selectedTarget") String target, Model model)
 	{
-		List<String> entityNames = dataService.findAll(EntityMetaDataMetaData.ENTITY_NAME)
+		List<String> entityNames = dataService.findAll(ENTITY_META_DATA)
 				.map(e -> e.getString(EntityMetaDataMetaData.FULL_NAME)).collect(toList());
 
 		if (StringUtils.isEmpty(target))

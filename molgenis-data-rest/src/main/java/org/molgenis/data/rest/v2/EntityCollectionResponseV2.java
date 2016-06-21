@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.security.core.MolgenisPermissionService;
 

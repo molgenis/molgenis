@@ -6,10 +6,10 @@ import java.util.Map;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.PartialEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -49,7 +49,8 @@ public class ElasticsearchEntityFactory
 		Entity entity = sourceToEntityConverter.convert(source, entityMeta);
 		if (fetch != null)
 		{
-			return entityManager.createEntityForPartialEntity(entity, fetch);
+			// FIXME create entity through entity manager
+			throw new UnsupportedOperationException();
 		}
 		else
 		{

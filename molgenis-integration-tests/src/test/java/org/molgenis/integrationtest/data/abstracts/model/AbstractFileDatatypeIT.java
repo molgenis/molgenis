@@ -1,25 +1,20 @@
 package org.molgenis.integrationtest.data.abstracts.model;
 
-import static org.molgenis.MolgenisFieldTypes.FILE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.file.FileMeta;
-
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public class AbstractFileDatatypeIT extends AbstractDatatypeIT
 {
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("FileTest");
-		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false);
-		entityMetaData.addAttribute("file").setDataType(FILE).setRefEntity(FileMeta.META_DATA);
+		EntityMetaData entityMetaData = null; //new EntityMetaData("FileTest");
+		//		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false);
+		//		entityMetaData.addAttribute("file").setDataType(FILE).setRefEntity(FileMeta.META_DATA); // FIXME
 
 		return entityMetaData;
 	}
@@ -29,13 +24,13 @@ public class AbstractFileDatatypeIT extends AbstractDatatypeIT
 	{
 		entity.set("identifier", "one");
 
-		FileMeta file = new FileMeta(dataService);
+		FileMeta file = null;//new FileMeta(dataService);// FIXME
 		file.setId("image");
 		file.setContentType("image/jpg");
 		file.setFilename("image.jpg");
 		file.setSize(Long.valueOf(2000L));
 		file.setUrl("http://www.myurl.com/image.jpg");
-		dataService.add(FileMeta.META_DATA.getName(), file);
+		//dataService.add(FileMeta.META_DATA.getName(), file); // FIXME
 
 		entity.set("file", file);
 	}
@@ -58,13 +53,13 @@ public class AbstractFileDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public void updateTestEntity(Entity entity) throws Exception
 	{
-		FileMeta file = new FileMeta(dataService);
+		FileMeta file = null;//new FileMeta(dataService); // FIXME
 		file.setId("image1");
 		file.setContentType("image/jpg");
 		file.setFilename("image1.jpg");
 		file.setSize(Long.valueOf(2000L));
 		file.setUrl("http://www.myurl.com/image1.jpg");
-		dataService.add(FileMeta.META_DATA.getName(), file);
+		//dataService.add(FileMeta.META_DATA.getName(), file); // FIXME
 
 		entity.set("file", file);
 	}
@@ -72,7 +67,7 @@ public class AbstractFileDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public void verifyTestEntityAfterUpdate(Entity entity) throws Exception
 	{
-		FileMeta fileMeta = entity.getEntity("file", FileMeta.class);
+		FileMeta fileMeta = null; // entity.getEntity("file", FileMeta.class); // FIXME
 		assertNotNull(fileMeta);
 		assertEquals(fileMeta.getId(), "image1");
 		assertEquals(fileMeta.getFilename(), "image1.jpg");

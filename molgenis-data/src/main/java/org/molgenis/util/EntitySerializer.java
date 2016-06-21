@@ -3,8 +3,8 @@ package org.molgenis.util;
 import java.lang.reflect.Type;
 import java.util.Date;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeMetaData;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -24,7 +24,7 @@ public class EntitySerializer implements JsonSerializer<Entity>
 		JsonObject result = new JsonObject();
 		result.addProperty("__entityName", entity.getEntityMetaData().getName());
 		result.add("__idValue", context.serialize(entity.getIdValue()));
-		result.addProperty("__labelValue", entity.getLabelValue());
+		result.add("__labelValue", context.serialize(entity.getLabelValue()));
 		return result;
 	}
 

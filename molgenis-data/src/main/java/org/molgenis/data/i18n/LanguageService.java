@@ -1,6 +1,10 @@
 package org.molgenis.data.i18n;
 
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
+import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.util.List;
@@ -35,7 +39,7 @@ public class LanguageService
 	@RunAsSystem
 	public List<String> getLanguageCodes()
 	{
-		return dataService.findAll(LanguageMetaData.ENTITY_NAME).map(e -> e.getString(LanguageMetaData.CODE))
+		return dataService.findAll(LANGUAGE).map(e -> e.getString(LanguageMetaData.CODE))
 				.collect(toList());
 	}
 
@@ -44,7 +48,7 @@ public class LanguageService
 	 */
 	public ResourceBundle getBundle(String languageCode)
 	{
-		return ResourceBundle.getBundle(I18nStringMetaData.ENTITY_NAME, new Locale(languageCode),
+		return ResourceBundle.getBundle(I18N_STRING, new Locale(languageCode),
 				new MolgenisResourceBundleControl(dataService, appSettings));
 	}
 
@@ -68,12 +72,11 @@ public class LanguageService
 
 			if (currentUserName != null)
 			{
-				Entity user = dataService.query("MolgenisUser").eq("username", currentUserName).findOne();
+				Entity user = dataService.query(MOLGENIS_USER).eq("username", currentUserName).findOne();
 				if (user != null)
 				{
 					languageCode = user.getString("languageCode");
-					if ((languageCode != null)
-							&& (dataService.findOneById(LanguageMetaData.ENTITY_NAME, languageCode) == null))
+					if ((languageCode != null) && (dataService.findOneById(LANGUAGE, languageCode) == null))
 					{
 						languageCode = null;
 					}
@@ -84,9 +87,9 @@ public class LanguageService
 			{
 				// Use app default
 				languageCode = appSettings.getLanguageCode();
-				if ((languageCode == null) || (dataService.findOneById(LanguageMetaData.ENTITY_NAME, languageCode) == null))
+				if ((languageCode == null) || (dataService.findOneById(LANGUAGE, languageCode) == null))
 				{
-					languageCode = FALLBACK_LANGUAGE;
+					languageCode = DEFAULT_LANGUAGE_CODE;
 				}
 			}
 

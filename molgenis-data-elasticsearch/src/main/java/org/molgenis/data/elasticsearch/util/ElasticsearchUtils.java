@@ -14,6 +14,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
 import com.codepoetics.protonpack.StreamUtils;
 import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.ElasticsearchException;
@@ -43,12 +44,15 @@ import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.fetch.source.FetchSourceContext;
-import org.molgenis.data.*;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
+import org.molgenis.data.meta.EntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
+import com.google.common.util.concurrent.AtomicLongMap;
 
 /**
  * Facade in front of the ElasticSearch client.
@@ -363,7 +367,8 @@ public class ElasticsearchUtils
 	/**
 	 * Performs a search query and returns the result as a {@link Stream} of ID strings.
 	 */
-	public Stream<String> searchForIds(Consumer<SearchRequestBuilder> queryBuilder, String queryToString, String type, String indexName)
+	public Stream<String> searchForIds(Consumer<SearchRequestBuilder> queryBuilder, String queryToString, String type,
+			String indexName)
 	{
 		SearchHits searchHits = search(queryBuilder, queryToString, type, indexName);
 		return Arrays.stream(searchHits.hits()).map(SearchHit::getId);
@@ -395,13 +400,15 @@ public class ElasticsearchUtils
 	/**
 	 * Performs a search query and returns the result as a {@link Stream} of source objects.
 	 */
-	public Stream<Map<String, Object>> searchForSources(Consumer<SearchRequestBuilder> queryBuilder, String queryToString, String type, String indexName)
+	public Stream<Map<String, Object>> searchForSources(Consumer<SearchRequestBuilder> queryBuilder,
+			String queryToString, String type, String indexName)
 	{
 		SearchHits searchHits = search(queryBuilder, queryToString, type, indexName);
 		return Arrays.stream(searchHits.hits()).map(SearchHit::getSource);
 	}
 
-	private SearchHits search(Consumer<SearchRequestBuilder> queryBuilder, String queryToString, String type, String indexName)
+	private SearchHits search(Consumer<SearchRequestBuilder> queryBuilder, String queryToString, String type,
+			String indexName)
 	{
 		LOG.trace("Searching Elasticsearch '{}' docs using query [{}] ...", type, queryToString);
 		SearchRequestBuilder searchRequestBuilder = client.prepareSearch(indexName);

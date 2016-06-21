@@ -11,10 +11,9 @@ import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
@@ -25,16 +24,19 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
 import static org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode.ADD;
 import static org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode.UPDATE;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 
 public class ElasticsearchService2Test
@@ -63,11 +65,11 @@ public class ElasticsearchService2Test
 	@Captor
 	private ArgumentCaptor<Stream<Object>> idObjectStreamCaptor;
 
-	private DefaultEntityMetaData typeTestMeta;
-	private DefaultEntityMetaData typeTestRefMeta;
+	private EntityMetaData typeTestMeta;
+	private EntityMetaData typeTestRefMeta;
 
-	private DefaultEntity typeTestRefEntity;
-	private DefaultEntity typeTestEntity;
+	private Entity typeTestRefEntity;
+	private Entity typeTestEntity;
 
 	@BeforeMethod
 	public void beforeMethod() throws InterruptedException
@@ -98,8 +100,8 @@ public class ElasticsearchService2Test
 
 		typeTestMeta = new DefaultEntityMetaData("TypeTest");
 		typeTestMeta.addAttribute("id", ROLE_ID);
-		DefaultAttributeMetaData xrefAttribute = new DefaultAttributeMetaData("xref",
-				MolgenisFieldTypes.FieldTypeEnum.XREF);
+		AttributeMetaData xrefAttribute = new DefaultAttributeMetaData("xref",
+				XREF);
 		xrefAttribute.setRefEntity(typeTestRefMeta);
 		typeTestMeta.addAttributeMetaData(xrefAttribute);
 		typeTestEntity = new DefaultEntity(typeTestMeta, dataService);

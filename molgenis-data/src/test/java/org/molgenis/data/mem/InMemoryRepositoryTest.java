@@ -1,10 +1,13 @@
 package org.molgenis.data.mem;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import com.google.common.collect.Lists;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.support.QueryImpl;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -14,17 +17,9 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.support.QueryImpl;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import com.google.common.collect.Lists;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 public class InMemoryRepositoryTest
 {

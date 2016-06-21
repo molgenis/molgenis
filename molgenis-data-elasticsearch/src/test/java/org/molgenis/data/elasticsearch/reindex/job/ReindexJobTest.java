@@ -5,19 +5,20 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.molgenis.data.*;
-import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.jobs.Progress;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData;
-import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
-import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
-import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.security.core.Authentication;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -27,13 +28,15 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.REINDEX_ACTION_JOB;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_STATUS;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.FAILED;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.FINISHED;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertSame;
 
-public class ReindexJobTest
+public class ReindexJobTest extends AbstractTestNGSpringContextTests
 {
 	@Mock
 	private Progress progress;
@@ -47,6 +50,7 @@ public class ReindexJobTest
 	private MetaDataService mds;
 	@Captor
 	private ArgumentCaptor<Stream<Entity>> streamCaptor;
+
 
 	private final String transactionId = "aabbcc";
 
@@ -62,7 +66,7 @@ public class ReindexJobTest
 		initMocks(this);
 		reindexJob = new ReindexJob(progress, authentication, transactionId, dataService, searchService);
 		reindexActionJob = reindexActionRegisterService.createReindexActionJob(transactionId, 0);
-		when(dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, transactionId)).thenReturn(reindexActionJob);
+		when(dataService.findOneById(REINDEX_ACTION_JOB, transactionId)).thenReturn(reindexActionJob);
 		when(dataService.getMeta()).thenReturn(mds);
 		testEntityMetaData = new DefaultEntityMetaData("test");
 		when(mds.getEntityMetaData("test")).thenReturn(testEntityMetaData);
@@ -71,7 +75,7 @@ public class ReindexJobTest
 	@Test
 	public void testNoReindexActionJobForTransaction()
 	{
-		when(dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, this.transactionId)).thenReturn(null);
+		when(dataService.findOneById(REINDEX_ACTION_JOB, this.transactionId)).thenReturn(null);
 		mockGetAllReindexActions(this.transactionId, Stream.empty());
 
 		reindexJob.call(this.progress);
@@ -94,7 +98,7 @@ public class ReindexJobTest
 	private void mockGetAllReindexActions(String transactionId, Stream<Entity> entities)
 	{
 		Query<Entity> q = ReindexJob.createQueryGetAllReindexActions(transactionId);
-		when(dataService.findAll(ReindexActionMetaData.ENTITY_NAME, q)).thenReturn(entities);
+		when(dataService.findAll(REINDEX_ACTION, q)).thenReturn(entities);
 	}
 
 	@Test
@@ -109,7 +113,7 @@ public class ReindexJobTest
 	public void rebuildIndexDeleteSingleEntityTest()
 	{
 		Entity reindexAction = reindexActionRegisterService
-				.createReindexAction(transactionId, "test", CudType.DELETE, DataType.DATA, "entityId", 0);
+				.createReindexAction(transactionId, "test", ReindexActionMetaData.CudType.DELETE, ReindexActionMetaData.DataType.DATA, "entityId", 0);
 		mockGetAllReindexActions(this.transactionId, Stream.of(reindexAction));
 		reindexActionJob.set(ReindexActionJobMetaData.COUNT, 1);
 
@@ -124,32 +128,32 @@ public class ReindexJobTest
 		// verify progress messages
 		verify(progress).status("######## START Reindex transaction id: [aabbcc] ########");
 		verify(progress).setProgressMax(1);
-		verify(progress).progress(0, "Reindexing test.entityId, CUDType = " + CudType.DELETE);
+		verify(progress).progress(0, "Reindexing test.entityId, CUDType = " + ReindexActionMetaData.CudType.DELETE);
 		verify(progress).progress(1, "Executed all reindex actions, cleaning up the actions...");
 		verify(progress).status("refreshIndex...");
 		verify(progress).status("refreshIndex done.");
 		verify(progress).status("######## END Reindex transaction id: [aabbcc] ########");
 
 		verify(searchService).refreshIndex();
-		verify(dataService, times(2)).update(ReindexActionMetaData.ENTITY_NAME, reindexAction);
+		verify(dataService, times(2)).update(REINDEX_ACTION, reindexAction);
 	}
 
 	@Test
 	public void rebuildIndexCreateSingleEntityTest()
 	{
-		this.rebuildIndexSingleEntityTest(CudType.CREATE, IndexingMode.ADD);
+		this.rebuildIndexSingleEntityTest(ReindexActionMetaData.CudType.CREATE, ElasticsearchService.IndexingMode.ADD);
 	}
 
 	@Test
 	public void rebuildIndexUpdateSingleEntityTest()
 	{
-		this.rebuildIndexSingleEntityTest(CudType.UPDATE, IndexingMode.UPDATE);
+		this.rebuildIndexSingleEntityTest(ReindexActionMetaData.CudType.UPDATE, ElasticsearchService.IndexingMode.UPDATE);
 	}
 
-	private void rebuildIndexSingleEntityTest(CudType cudType, IndexingMode indexingMode)
+	private void rebuildIndexSingleEntityTest(ReindexActionMetaData.CudType cudType, ElasticsearchService.IndexingMode indexingMode)
 	{
 		Entity reindexAction = reindexActionRegisterService
-				.createReindexAction(transactionId, "test", cudType, DataType.DATA, "entityId", 0);
+				.createReindexAction(transactionId, "test", cudType, ReindexActionMetaData.DataType.DATA, "entityId", 0);
 		mockGetAllReindexActions(this.transactionId, Stream.of(reindexAction));
 		reindexActionJob.set(ReindexActionJobMetaData.COUNT, 1);
 
@@ -174,31 +178,31 @@ public class ReindexJobTest
 		verify(progress).status("refreshIndex done.");
 		verify(progress).status("######## END Reindex transaction id: [aabbcc] ########");
 
-		verify(dataService, times(2)).update(ReindexActionMetaData.ENTITY_NAME, reindexAction);
+		verify(dataService, times(2)).update(REINDEX_ACTION, reindexAction);
 	}
 
 	@Test
 	public void rebuildIndexCreateBatchEntitiesTest()
 	{
-		this.rebuildIndexBatchEntitiesTest(CudType.CREATE);
+		this.rebuildIndexBatchEntitiesTest(ReindexActionMetaData.CudType.CREATE);
 	}
 
 	@Test
 	public void rebuildIndexDeleteBatchEntitiesTest()
 	{
-		this.rebuildIndexBatchEntitiesTest(CudType.DELETE);
+		this.rebuildIndexBatchEntitiesTest(ReindexActionMetaData.CudType.DELETE);
 	}
 
 	@Test
 	public void rebuildIndexUpdateBatchEntitiesTest()
 	{
-		this.rebuildIndexBatchEntitiesTest(CudType.UPDATE);
+		this.rebuildIndexBatchEntitiesTest(ReindexActionMetaData.CudType.UPDATE);
 	}
 
-	private void rebuildIndexBatchEntitiesTest(CudType cudType)
+	private void rebuildIndexBatchEntitiesTest(ReindexActionMetaData.CudType cudType)
 	{
 		Entity reindexAction = reindexActionRegisterService
-				.createReindexAction(transactionId, "test", cudType, DataType.DATA, null, 0);
+				.createReindexAction(transactionId, "test", cudType, ReindexActionMetaData.DataType.DATA, null, 0);
 		mockGetAllReindexActions(this.transactionId, Stream.of(reindexAction));
 		reindexActionJob.set(ReindexActionJobMetaData.COUNT, 1);
 
@@ -220,25 +224,25 @@ public class ReindexJobTest
 		verify(progress).status("refreshIndex done.");
 		verify(progress).status("######## END Reindex transaction id: [aabbcc] ########");
 
-		verify(dataService, times(2)).update(ReindexActionMetaData.ENTITY_NAME, reindexAction);
+		verify(dataService, times(2)).update(REINDEX_ACTION, reindexAction);
 	}
 
 	@Test
 	public void rebuildIndexCreateMetaDataTest()
 	{
-		this.rebuildIndexMetaDataTest(CudType.CREATE);
+		this.rebuildIndexMetaDataTest(ReindexActionMetaData.CudType.CREATE);
 	}
 
 	@Test
 	public void rebuildIndexUpdateMetaDataTest()
 	{
-		this.rebuildIndexMetaDataTest(CudType.UPDATE);
+		this.rebuildIndexMetaDataTest(ReindexActionMetaData.CudType.UPDATE);
 	}
 
-	private void rebuildIndexMetaDataTest(CudType cudType)
+	private void rebuildIndexMetaDataTest(ReindexActionMetaData.CudType cudType)
 	{
 		Entity reindexAction = reindexActionRegisterService
-				.createReindexAction(transactionId, "test", cudType, DataType.METADATA, null, 0);
+				.createReindexAction(transactionId, "test", cudType, ReindexActionMetaData.DataType.METADATA, null, 0);
 		mockGetAllReindexActions(this.transactionId, Stream.of(reindexAction));
 		reindexActionJob.set(ReindexActionJobMetaData.COUNT, 1);
 
@@ -255,21 +259,21 @@ public class ReindexJobTest
 		verify(progress).status("refreshIndex done.");
 		verify(progress).status("######## END Reindex transaction id: [aabbcc] ########");
 
-		verify(dataService, times(2)).update(ReindexActionMetaData.ENTITY_NAME, reindexAction);
+		verify(dataService, times(2)).update(REINDEX_ACTION reindexAction);
 
 		// make sure both the actions and the action job got deleted
-		verify(dataService).delete(eq(ReindexActionMetaData.ENTITY_NAME), streamCaptor.capture());
+		verify(dataService).delete(eq(REINDEX_ACTION), streamCaptor.capture());
 		assertEquals(streamCaptor.getValue().collect(toList()), newArrayList(reindexAction));
-		verify(dataService).deleteById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
+		verify(dataService).deleteById(REINDEX_ACTION_JOB, transactionId);
 
-		verify(dataService).deleteById(ReindexActionJobMetaData.ENTITY_NAME, transactionId);
+		verify(dataService).deleteById(REINDEX_ACTION_JOB, transactionId);
 	}
 
 	@Test
 	public void rebuildIndexDeleteMetaDataEntityTest()
 	{
 		Entity reindexAction = reindexActionRegisterService
-				.createReindexAction(transactionId, "test", CudType.DELETE, DataType.METADATA, null, 0);
+				.createReindexAction(transactionId, "test", ReindexActionMetaData.CudType.DELETE, ReindexActionMetaData.DataType.METADATA, null, 0);
 		mockGetAllReindexActions(this.transactionId, Stream.of(reindexAction));
 		reindexActionJob.set(ReindexActionJobMetaData.COUNT, 1);
 
@@ -291,20 +295,20 @@ public class ReindexJobTest
 		verify(progress).status("refreshIndex done.");
 		verify(progress).status("######## END Reindex transaction id: [aabbcc] ########");
 
-		verify(dataService, times(2)).update(ReindexActionMetaData.ENTITY_NAME, reindexAction);
+		verify(dataService, times(2)).update(REINDEX_ACTION, reindexAction);
 	}
 
 	@Test
 	public void reindexSingleEntitySearchServiceThrowsExceptionOnSecondEntityId()
 	{
 		Entity reindexAction1 = reindexActionRegisterService
-				.createReindexAction(transactionId, "test", CudType.DELETE, DataType.DATA, "entityId1", 0);
+				.createReindexAction(transactionId, "test", ReindexActionMetaData.CudType.DELETE, ReindexActionMetaData.DataType.DATA, "entityId1", 0);
 
 		Entity reindexAction2 = reindexActionRegisterService
-				.createReindexAction(transactionId, "test", CudType.DELETE, DataType.DATA, "entityId2", 1);
+				.createReindexAction(transactionId, "test", ReindexActionMetaData.CudType.DELETE, ReindexActionMetaData.DataType.DATA, "entityId2", 1);
 
 		Entity reindexAction3 = reindexActionRegisterService
-				.createReindexAction(transactionId, "test", CudType.DELETE, DataType.DATA, "entityId3", 2);
+				.createReindexAction(transactionId, "test", ReindexActionMetaData.CudType.DELETE, ReindexActionMetaData.DataType.DATA, "entityId3", 2);
 
 		mockGetAllReindexActions(this.transactionId, Stream.of(reindexAction1, reindexAction2, reindexAction3));
 		reindexActionJob.set(ReindexActionJobMetaData.COUNT, 3);
@@ -336,8 +340,8 @@ public class ReindexJobTest
 		// Make sure the action status got updated and that the actionJob didn't get deleted
 		assertEquals(reindexAction1.get(REINDEX_STATUS), FINISHED.name());
 		assertEquals(reindexAction2.get(REINDEX_STATUS), FAILED.name());
-		verify(dataService, atLeast(1)).update(ReindexActionMetaData.ENTITY_NAME, reindexAction1);
-		verify(dataService, atLeast(1)).update(ReindexActionMetaData.ENTITY_NAME, reindexAction2);
-		verify(dataService, never()).delete(ReindexActionJobMetaData.ENTITY_NAME, reindexActionJob);
+		verify(dataService, atLeast(1)).update(REINDEX_ACTION, reindexAction1);
+		verify(dataService, atLeast(1)).update(REINDEX_ACTION, reindexAction2);
+		verify(dataService, never()).delete(REINDEX_ACTION_JOB, reindexActionJob);
 	}
 }

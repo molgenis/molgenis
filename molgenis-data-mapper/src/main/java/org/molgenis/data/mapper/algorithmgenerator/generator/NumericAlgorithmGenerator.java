@@ -1,5 +1,6 @@
 package org.molgenis.data.mapper.algorithmgenerator.generator;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
@@ -13,12 +14,10 @@ import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.service.UnitResolver;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import static java.util.Objects.requireNonNull;
 
 public class NumericAlgorithmGenerator implements AlgorithmGenerator
 {

@@ -1,13 +1,15 @@
 package org.molgenis.data.support;
 
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
 
 import java.util.Iterator;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.Package;
+import org.molgenis.data.meta.Package;
 
 public class EntityMetaDataUtils
 {
@@ -41,11 +43,11 @@ public class EntityMetaDataUtils
 	 */
 	public static String buildFullName(Package package_, String simpleName)
 	{
-		if (package_ != null && !Package.DEFAULT_PACKAGE_NAME.equals(package_.getName()))
+		if (package_ != null && !PACKAGE_DEFAULT.equals(package_.getName()))
 		{
 			StringBuilder sb = new StringBuilder();
 			sb.append(package_.getName());
-			sb.append(Package.PACKAGE_SEPARATOR);
+			sb.append(PACKAGE_SEPARATOR);
 			sb.append(simpleName);
 			return sb.toString();
 		}

@@ -1,8 +1,8 @@
 package org.molgenis.data.annotator.tabix;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.POS;
+import static org.molgenis.data.vcf.VcfAttributes.CHROM;
+import static org.molgenis.data.vcf.VcfAttributes.POS;
 
 import java.io.File;
 import java.io.IOException;
@@ -14,14 +14,14 @@ import java.util.NoSuchElementException;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -171,7 +171,7 @@ public class TabixRepository extends AbstractRepository
 
 	protected Entity toEntity(String line) throws IOException
 	{
-		Entity result = new MapEntity(entityMetaData);
+		Entity result = new DynamicEntity(entityMetaData);
 		CSVParser csvParser = getCsvParser();
 		String[] columns = csvParser.parseLine(line);
 		int i = 0;

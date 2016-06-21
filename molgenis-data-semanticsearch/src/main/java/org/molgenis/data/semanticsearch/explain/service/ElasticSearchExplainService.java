@@ -5,8 +5,8 @@ import java.util.Set;
 
 import org.apache.lucene.search.Explanation;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 
 public interface ElasticSearchExplainService

@@ -1,11 +1,13 @@
 package org.molgenis.gaf;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.MolgenisFieldTypes.TEXT;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -23,17 +25,23 @@ public class GafListDbSettings implements GafListSettings
 	}
 
 	@Component
-	public static class Meta extends DefaultEntityMetaData
+	public static class Meta extends SystemEntityMetaData
 	{
-		private static final String ENTITY_NAME = "GafListSettings";
+		private static final String SIMPLE_NAME = "GafListSettings";
+		public static final String ENTITY_NAME = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 		private static final String NAME = "Name";
 		private static final String VALUE = "Value";
 
-		public Meta()
+		Meta()
 		{
-			super(ENTITY_NAME);
+			super(SIMPLE_NAME);
+		}
+
+		@Override
+		public void init()
+		{
 			addAttribute(NAME, ROLE_ID);
-			addAttribute(VALUE).setNillable(false).setDataType(MolgenisFieldTypes.TEXT);
+			addAttribute(VALUE).setNillable(false).setDataType(TEXT);
 		}
 	}
 

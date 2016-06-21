@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.util.List;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -53,7 +53,7 @@ public class VcfReaderFactoryImpl implements VcfReaderFactory
 				   inputStream = zipFile.getInputStream(entry);
 			}
 			VcfReader reader = new VcfReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
-			// register reader so close() can close all readers
+			// bootstrap reader so close() can close all readers
 			vcfReaderRegistry.add(reader);
 			return reader;
 

@@ -1,23 +1,29 @@
 package org.molgenis.data.annotation.meta;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
+import static org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData.ANNOTATORS;
+import static org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData.TARGET_NAME;
+
+import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.JobExecution;
+import org.molgenis.data.meta.EntityMetaData;
 
 public class AnnotationJobExecution extends JobExecution
 {
-	private static final long serialVersionUID = -4064249548140446038L;
-
-	public static final String ENTITY_NAME = "AnnotationJobExecution";
-	public static final String TARGET_NAME = "targetName";
-	public static final String ANNOTATORS = "annotators";
-
-	public static final EntityMetaData META_DATA = new AnnotationJobExecutionMetaData();
-
-	public AnnotationJobExecution(DataService dataService)
+	public AnnotationJobExecution(Entity entity)
 	{
-		super(dataService, META_DATA);
-		setType(ANNOTATORS);
+		super(entity);
+	}
+
+	public AnnotationJobExecution(EntityMetaData entityMeta)
+	{
+		super(entityMeta);
+		setDefaultValues();
+	}
+
+	public AnnotationJobExecution(String identifier, EntityMetaData entityMeta)
+	{
+		super(identifier, entityMeta);
+		setDefaultValues();
 	}
 
 	public String getTargetName()
@@ -29,7 +35,7 @@ public class AnnotationJobExecution extends JobExecution
 	{
 		set(TARGET_NAME, value);
 	}
-	
+
 	public String getAnnotators()
 	{
 		return getString(ANNOTATORS);
@@ -38,5 +44,10 @@ public class AnnotationJobExecution extends JobExecution
 	public void setAnnotators(String value)
 	{
 		set(ANNOTATORS, value);
+	}
+
+	private void setDefaultValues()
+	{
+		setType(ANNOTATORS);
 	}
 }

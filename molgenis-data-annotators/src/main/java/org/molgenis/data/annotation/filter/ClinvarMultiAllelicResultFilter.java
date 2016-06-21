@@ -1,5 +1,7 @@
 package org.molgenis.data.annotation.filter;
 
+import static java.util.Objects.requireNonNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -7,21 +9,27 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.entity.ResultFilter;
-import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.vcf.VcfAttributes;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 
 public class ClinvarMultiAllelicResultFilter implements ResultFilter
 {
+	private final VcfAttributes vcfAttributes;
+
+	public ClinvarMultiAllelicResultFilter(VcfAttributes vcfAttributes)
+	{
+		this.vcfAttributes = requireNonNull(vcfAttributes);
+	}
 
 	@Override
 	public Collection<AttributeMetaData> getRequiredAttributes()
 	{
-		return Arrays.asList(VcfRepository.REF_META, VcfRepository.ALT_META);
+		return Arrays.asList(vcfAttributes.getRefAttribute(), vcfAttributes.getAltAttribute());
 	}
 
 	@Override
@@ -33,14 +41,14 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 
 		for (Entity entity : results)
 		{
-			if (entity.get(VcfRepository.REF).equals(annotatedEntity.get(VcfRepository.REF)))
+			if (entity.get(VcfAttributes.REF).equals(annotatedEntity.get(VcfAttributes.REF)))
 			{
-				String[] alts = entity.getString(VcfRepository.ALT).split(",");
+				String[] alts = entity.getString(VcfAttributes.ALT).split(",");
 				String[] clnSigs = entity.getString("CLNSIG").split(",");
 				String[] clnAll = entity.getString("CLNALLE").split(",");
 				StringBuilder newClnlallAttributeValue = new StringBuilder();
 				StringBuilder newClnlsigAttributeValue = new StringBuilder();
-				String[] annotatedEntityAltAlleles = annotatedEntity.getString(VcfRepository.ALT).split(",");
+				String[] annotatedEntityAltAlleles = annotatedEntity.getString(VcfAttributes.ALT).split(",");
 				// sometimes the clnsig is not defined for all alternative alleles
 				// so we need to check this and just add what we have
 				for (int i = 0; i < clnSigs.length; i++)
@@ -54,8 +62,8 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 					else if (significantAlleleIndex == 0)
 					{
 
-						String resultRefAllele = entity.getString(VcfRepository.REF);
-						String refAllele = annotatedEntity.getString(VcfRepository.REF);
+						String resultRefAllele = entity.getString(VcfAttributes.REF);
+						String refAllele = annotatedEntity.getString(VcfAttributes.REF);
 
 						// if annotated entity allele equals the clinvar significant allele we want it!
 						if (refAllele.equals(resultRefAllele))

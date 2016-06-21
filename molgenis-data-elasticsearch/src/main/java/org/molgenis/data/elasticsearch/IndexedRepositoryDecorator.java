@@ -1,9 +1,9 @@
 package org.molgenis.data.elasticsearch;
 
-import com.google.common.collect.Sets;
 import org.elasticsearch.common.collect.Iterators;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.EntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.QueryUtils.containsAnyOperator;
@@ -217,28 +218,6 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		elasticSearchService.rebuildIndex(decoratedRepository);
 	}
 
-	@Override
-	public void create()
-	{
-		if (!decoratedRepository.getCapabilities().contains(MANAGABLE))
-		{
-			throw new MolgenisDataAccessException(
-					"Repository '" + decoratedRepository.getName() + "' is not Manageable");
-		}
-		decoratedRepository.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		if (!decoratedRepository.getCapabilities().contains(MANAGABLE))
-		{
-			throw new MolgenisDataAccessException(
-					"Repository '" + decoratedRepository.getName() + "' is not Manageable");
-		}
-		decoratedRepository.drop();
-	}
-
 	/**
 	 * Gets the capabilities of the underlying repository and adds three read capabilities provided by the index:
 	 * {@link RepositoryCapability#INDEXABLE}, {@link RepositoryCapability#QUERYABLE} and {@link RepositoryCapability#AGGREGATEABLE}.
@@ -346,7 +325,7 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		@Override
 		public Set<RepositoryCapability> getCapabilities()
 		{
-			return Sets.newHashSet(AGGREGATEABLE, QUERYABLE);
+			return newHashSet(AGGREGATEABLE, QUERYABLE);
 		}
 
 		@Override
@@ -417,18 +396,6 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 
 		@Override
 		public void deleteAll()
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void create()
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void drop()
 		{
 			throw new UnsupportedOperationException();
 		}

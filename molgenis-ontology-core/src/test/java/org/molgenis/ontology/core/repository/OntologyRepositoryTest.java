@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
 import static org.testng.Assert.assertEquals;
 
 import java.util.List;
@@ -12,7 +13,7 @@ import java.util.stream.Stream;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.model.Ontology;
@@ -33,12 +34,15 @@ public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	OntologyRepository ontologyRepository;
 
+	@Autowired
+	OntologyMetaData ontologyMetaData;
+
 	private Entity ontologyEntity;
 
 	@BeforeTest
 	public void beforeTest()
 	{
-		ontologyEntity = new MapEntity(OntologyMetaData.INSTANCE);
+		ontologyEntity = new DynamicEntity(ontologyMetaData);
 		ontologyEntity.set(OntologyMetaData.ID, "1");
 		ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, "http://www.ontology.com/test");
 		ontologyEntity.set(OntologyMetaData.ONTOLOGY_NAME, "testOntology");
@@ -48,7 +52,7 @@ public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testGetOntologies()
 	{
-		when(dataService.findAll(eq(OntologyMetaData.ENTITY_NAME))).thenReturn(Stream.of(ontologyEntity));
+		when(dataService.findAll(eq(ONTOLOGY))).thenReturn(Stream.of(ontologyEntity));
 		List<Ontology> ontologies = ontologyRepository.getOntologies().collect(Collectors.toList());
 		assertEquals(ontologies, asList(Ontology.create("1", "http://www.ontology.com/test", "testOntology")));
 	}
@@ -56,9 +60,8 @@ public class OntologyRepositoryTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testGetOntology()
 	{
-		when(dataService.findOne(OntologyMetaData.ENTITY_NAME,
-				QueryImpl.EQ(OntologyMetaData.ONTOLOGY_IRI, "http://www.ontology.com/test")))
-						.thenReturn(ontologyEntity);
+		when(dataService.findOne(ONTOLOGY, QueryImpl.EQ(OntologyMetaData.ONTOLOGY_IRI, "http://www.ontology.com/test")))
+				.thenReturn(ontologyEntity);
 		assertEquals(ontologyRepository.getOntology("http://www.ontology.com/test"),
 				Ontology.create("1", "http://www.ontology.com/test", "testOntology"));
 	}

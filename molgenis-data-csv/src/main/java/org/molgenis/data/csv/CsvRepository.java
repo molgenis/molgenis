@@ -1,5 +1,8 @@
 package org.molgenis.data.csv;
 
+import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,16 +12,14 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.EntityMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Iterables;
@@ -33,7 +34,7 @@ public class CsvRepository extends AbstractRepository
 	private final String sheetName;
 	private final File file;
 	private List<CellProcessor> cellProcessors;
-	private DefaultEntityMetaData entityMetaData;
+	private EntityMetaData entityMetaData;
 	private Character separator = null;
 
 	public CsvRepository(String file)
@@ -70,12 +71,15 @@ public class CsvRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			entityMetaData = new DefaultEntityMetaData(sheetName, MapEntity.class);
+			EntityMetaDataFactory entityMetaFactory = getApplicationContext().getBean(EntityMetaDataFactory.class);
+			AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
+
+			entityMetaData = entityMetaFactory.create().setSimpleName(sheetName);
 
 			for (String attrName : new CsvIterator(file, sheetName, null, separator).getColNamesMap().keySet())
 			{
-				AttributeMetaData attr = new DefaultAttributeMetaData(attrName, MolgenisFieldTypes.FieldTypeEnum.STRING);
-				entityMetaData.addAttributeMetaData(attr);
+				AttributeMetaData attr = attrMetaFactory.create().setName(attrName).setDataType(STRING);
+				entityMetaData.addAttribute(attr);
 			}
 		}
 

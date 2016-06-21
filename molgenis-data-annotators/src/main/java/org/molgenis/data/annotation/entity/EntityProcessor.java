@@ -2,8 +2,8 @@ package org.molgenis.data.annotation.entity;
 
 import java.util.Collection;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.AttributeMetaData;
 
 /**
  * A step to use in the Annotator. Each step has requirements on the annotated entity's metadata.

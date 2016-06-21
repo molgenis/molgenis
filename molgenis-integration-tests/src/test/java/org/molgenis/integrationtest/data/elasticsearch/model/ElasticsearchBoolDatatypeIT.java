@@ -1,6 +1,6 @@
 package org.molgenis.integrationtest.data.elasticsearch.model;
 
-import org.molgenis.integrationtest.data.abstracts.model.AbstractBoolDatatypeIT;
+import org.molgenis.integrationtest.data.AbstractBoolDatatypeIT;
 import org.molgenis.integrationtest.data.elasticsearch.AbstractElasticsearchTestConfig;
 import org.molgenis.integrationtest.data.elasticsearch.model.ElasticsearchBoolDatatypeIT.BoolElasticsearchTestConfig;
 import org.springframework.context.annotation.Configuration;

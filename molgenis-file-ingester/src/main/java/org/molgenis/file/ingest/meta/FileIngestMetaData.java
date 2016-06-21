@@ -1,22 +1,27 @@
 package org.molgenis.file.ingest.meta;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.StringField;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.common.collect.ImmutableList;
 
 @Component
-public class FileIngestMetaData extends DefaultEntityMetaData
+public class FileIngestMetaData extends SystemEntityMetaData
 {
-	public static final String ENTITY_NAME = "FileIngest";
+	private static final String SIMPLE_NAME = "FileIngest";
+	public static final String FILE_INGEST = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
+
 	public static final String ID = "id";
 	public static final String NAME = "name";
 	public static final String DESCRIPTION = "description";
@@ -28,10 +33,18 @@ public class FileIngestMetaData extends DefaultEntityMetaData
 	public static final String FAILURE_EMAIL = "failureEmail";
 
 	public static final ImmutableList<String> LOADERS = ImmutableList.of("CSV");
+	private final EntityMetaDataMetaData entityMetaDataMetaData;
 
-	public FileIngestMetaData()
+	@Autowired
+	public FileIngestMetaData(EntityMetaDataMetaData entityMetaDataMetaData)
 	{
-		super(ENTITY_NAME);
+		super(SIMPLE_NAME, PACKAGE_SYSTEM);
+		this.entityMetaDataMetaData = entityMetaDataMetaData;
+	}
+
+	@Override
+	public void init()
+	{
 		addAttribute(ID, ROLE_ID).setAuto(true).setNillable(false);
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setNillable(false);
 		addAttribute(DESCRIPTION).setDataType(MolgenisFieldTypes.TEXT).setLabel("Description").setNillable(true);
@@ -39,7 +52,7 @@ public class FileIngestMetaData extends DefaultEntityMetaData
 		addAttribute(LOADER).setDataType(new EnumField()).setEnumOptions(LOADERS).setLabel("Loader type")
 				.setNillable(false);
 		addAttribute(ENTITY_META_DATA).setDataType(MolgenisFieldTypes.XREF)
-				.setRefEntity(EntityMetaDataMetaData.INSTANCE).setLabel("Target EntityMetaData").setNillable(false);
+				.setRefEntity(entityMetaDataMetaData).setLabel("Target EntityMetaData").setNillable(false);
 		addAttribute(CRONEXPRESSION).setLabel("Cronexpression").setNillable(false)
 				.setValidationExpression("$('" + CRONEXPRESSION + "').matches(" + StringField.CRON_REGEX + ").value()");
 		addAttribute(ACTIVE).setDataType(MolgenisFieldTypes.BOOL).setLabel("Active").setNillable(false);
@@ -47,5 +60,4 @@ public class FileIngestMetaData extends DefaultEntityMetaData
 				.setDescription("Leave blank if you don't want to receive emails if the jobs failed.")
 				.setNillable(true);
 	}
-
 }

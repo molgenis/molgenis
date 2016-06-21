@@ -1,14 +1,14 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.COMPOUND;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -17,15 +17,16 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.resources.Resources;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
+import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.support.DynamicEntity;
 
 /**
  * Base class for any {@link EntityAnnotator} that uses a {@link QueryCreator} to query the {@link DataService} or
  * {@link Resources}. It leaves it up to concrete implementations how they wish to process the results by implementing
  * {@link #processQueryResults(Entity, Iterable, Entity)}.
- * 
+ * <p>
  * See {@link AnnotatorImpl} for the most standard implementation of
  * {@link #processQueryResults(Entity, Iterable, Entity)}.
  */
@@ -59,8 +60,9 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	@Override
 	public AttributeMetaData getAnnotationAttributeMetaData()
 	{
-		DefaultAttributeMetaData result = new DefaultAttributeMetaData(ANNOTATORPREFIX + info.getCode(),
-				FieldTypeEnum.COMPOUND).setLabel(info.getCode());
+		AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
+		AttributeMetaData result = attrMetaFactory.create().setName(ANNOTATORPREFIX + info.getCode())
+				.setDataType(COMPOUND).setLabel(info.getCode());
 		getInfo().getOutputAttributes().forEach(result::addAttributePart);
 
 		return result;
@@ -100,9 +102,10 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 				}
 			};
 		}
-		DefaultEntityMetaData meta = new DefaultEntityMetaData(entity.getEntityMetaData());
-		info.getOutputAttributes().forEach(meta::addAttributeMetaData);
-		Entity resultEntity = new MapEntity(entity, meta);
+		EntityMetaData meta = null; // FIXME new EntityMetaData(entity.getEntityMetaData());
+		info.getOutputAttributes().forEach(meta::addAttribute);
+		Entity resultEntity = new DynamicEntity(meta);
+		resultEntity.set(entity);
 		processQueryResults(entity, annotatationSourceEntities, resultEntity);
 		return Collections.singletonList(resultEntity);
 	}
@@ -115,13 +118,10 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 
 	/**
 	 * Processes the query results.
-	 * 
-	 * @param inputEntity
-	 *            the input entity that is being annotated
-	 * @param annotationSourceEntities
-	 *            the entities resulting from the query on the annotation source
-	 * @param resultEntity
-	 *            the result entity to write the annotation attributes to
+	 *
+	 * @param inputEntity              the input entity that is being annotated
+	 * @param annotationSourceEntities the entities resulting from the query on the annotation source
+	 * @param resultEntity             the result entity to write the annotation attributes to
 	 */
 	protected abstract void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
 			Entity resultEntity);

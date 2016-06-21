@@ -43,8 +43,8 @@ public class AbstractAndQueryIT extends AbstractQueryIT
 	@Override
 	protected void testLong()
 	{
-		Query<Entity> findOneQuery = new QueryImpl<Entity>().eq(SERIAL_NUMBER, 374278348334L).and().eq(FIRST_NAME,
-				"john");
+		Query<Entity> findOneQuery = new QueryImpl<Entity>().eq(SERIAL_NUMBER, 374278348334L).and()
+				.eq(FIRST_NAME, "john");
 		assertTrue(newHashSet(person1).contains(personsRepository.findOne(findOneQuery)));
 
 		Query<Entity> findAllQuery = new QueryImpl<Entity>().eq(SERIAL_NUMBER, 67986789879L).and().eq(LAST_NAME, "doe");
@@ -111,8 +111,8 @@ public class AbstractAndQueryIT extends AbstractQueryIT
 	@Override
 	protected void testMref()
 	{
-		Query<Entity> query = new QueryImpl<Entity>().eq(AUTHOR_OF, "MOLGENIS for dummies").and().eq(AUTHOR_OF,
-				"Your database at the push of a button");
+		Query<Entity> query = new QueryImpl<Entity>().eq(AUTHOR_OF, "MOLGENIS for dummies").and()
+				.eq(AUTHOR_OF, "Your database at the push of a button");
 		assertTrue(newHashSet(person2).contains(personsRepository.findOne(query)));
 		assertEquals(personsRepository.findAll(query).collect(toSet()), newHashSet(person2));
 		assertEquals(personsRepository.count(query), 1);

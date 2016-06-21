@@ -8,17 +8,6 @@ import org.molgenis.data.postgresql.PostgreSqlEntityFactory;
 import org.molgenis.data.postgresql.PostgreSqlRepository;
 import org.molgenis.data.postgresql.PostgreSqlRepositoryCollection;
 import org.molgenis.integrationtest.data.AbstractDataApiTestConfig;
-import org.molgenis.util.ResourceUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;

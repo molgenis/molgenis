@@ -66,13 +66,13 @@ public abstract class AbstractRepository implements Repository<Entity>
 
 	public Query<Entity> query()
 	{
-		return new QueryImpl<Entity>(this);
+		return new QueryImpl<>(this);
 	}
 
 	@Override
 	public long count()
 	{
-		return count(new QueryImpl<Entity>());
+		return count(new QueryImpl<>());
 	}
 
 	@Override
@@ -123,9 +123,8 @@ public abstract class AbstractRepository implements Repository<Entity>
 	{
 		Iterator<List<Object>> batches = Iterators.partition(ids.iterator(), FIND_ALL_BATCH_SIZE);
 		Iterable<List<Object>> iterable = () -> batches;
-		return StreamSupport.stream(iterable.spliterator(), false).flatMap(batch -> {
-			return StreamSupport.stream(findAllBatched(batch, fetch).spliterator(), false);
-		});
+		return StreamSupport.stream(iterable.spliterator(), false)
+				.flatMap(batch -> StreamSupport.stream(findAllBatched(batch, fetch).spliterator(), false));
 	}
 
 	private Iterable<Entity> findAllBatched(List<Object> ids, Fetch fetch)
@@ -215,20 +214,6 @@ public abstract class AbstractRepository implements Repository<Entity>
 	@Override
 	public void clearCache()
 	{
-	}
-
-	// Implement in child class if repository has capability MANAGABLE
-	@Override
-	public void create()
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	// Implement in child class if repository has capability MANAGABLE
-	@Override
-	public void drop()
-	{
-		throw new UnsupportedOperationException();
 	}
 
 	// Implement in child class if repository has capability INDEXABLE

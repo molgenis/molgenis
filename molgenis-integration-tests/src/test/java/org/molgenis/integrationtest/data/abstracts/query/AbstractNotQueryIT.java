@@ -1,15 +1,15 @@
 package org.molgenis.integrationtest.data.abstracts.query;
 
-import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
-import org.molgenis.data.support.QueryImpl;
-
-import java.text.ParseException;
-
 import static com.google.common.collect.Sets.newHashSet;
 import static java.util.stream.Collectors.toSet;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
+
+import java.text.ParseException;
+
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
+import org.molgenis.data.support.QueryImpl;
 
 public class AbstractNotQueryIT extends AbstractQueryIT
 {
@@ -66,9 +66,9 @@ public class AbstractNotQueryIT extends AbstractQueryIT
 	{
 		assertTrue(newHashSet(person1, person2).contains(personsRepository
 				.findOne(notEqualsQueryBuilder(BIRTH_TIME, dateTimeFormat.parse("1976-06-07 08:08:08")))));
-		assertEquals(
-				personsRepository.findAll(notEqualsQueryBuilder(BIRTH_TIME, dateTimeFormat.parse("1976-06-07 08:08:08")))
-						.collect(toSet()), newHashSet(person1, person2));
+		assertEquals(personsRepository
+				.findAll(notEqualsQueryBuilder(BIRTH_TIME, dateTimeFormat.parse("1976-06-07 08:08:08")))
+				.collect(toSet()), newHashSet(person1, person2));
 		assertEquals(
 				personsRepository.count(notEqualsQueryBuilder(BIRTH_TIME, dateTimeFormat.parse("1976-06-07 08:08:08"))),
 				2);
@@ -90,9 +90,9 @@ public class AbstractNotQueryIT extends AbstractQueryIT
 				.contains(personsRepository.findOne(notEqualsQueryBuilder(AUTHOR_OF, "MOLGENIS for dummies"))));
 
 		// FIXME PostgreSql Repository finds person1 and person2, while the query is NOT book2 (which is owned by person2)
-//		assertEquals(
-//				personsRepository.findAll(notEqualsQueryBuilder(AUTHOR_OF, "Your database at the push of a button"))
-//						.collect(toSet()), newHashSet(person1, person3));
+		//		assertEquals(
+		//				personsRepository.findAll(notEqualsQueryBuilder(AUTHOR_OF, "Your database at the push of a button"))
+		//						.collect(toSet()), newHashSet(person1, person3));
 		assertEquals(personsRepository.count(notEqualsQueryBuilder(AUTHOR_OF, "MOLGENIS for dummies")), 1);
 	}
 

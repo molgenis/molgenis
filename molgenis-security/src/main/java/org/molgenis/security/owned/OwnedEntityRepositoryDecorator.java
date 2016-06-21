@@ -1,6 +1,7 @@
 package org.molgenis.security.owned;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.support.OwnedEntityMetaData.OWNED;
 import static java.util.stream.Collectors.toList;
 
 import java.io.IOException;
@@ -16,12 +17,12 @@ import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.SystemSecurityToken;
@@ -338,7 +339,7 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 
 	private boolean isOwnedEntityMetaData()
 	{
-		return EntityUtils.doesExtend(getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME);
+		return EntityUtils.doesExtend(getEntityMetaData(), OWNED);
 	}
 
 	private void addRowLevelSecurity(Query<Entity> q)
@@ -354,18 +355,6 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	private String getOwnerUserName(Entity questionnaire)
 	{
 		return questionnaire.getString(OwnedEntityMetaData.ATTR_OWNER_USERNAME);
-	}
-
-	@Override
-	public void create()
-	{
-		decoratedRepo.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		decoratedRepo.drop();
 	}
 
 	@Override

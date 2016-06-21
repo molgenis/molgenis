@@ -1,24 +1,35 @@
 package org.molgenis.data.i18n;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.springframework.stereotype.Component;
 
-public class I18nStringMetaData extends DefaultEntityMetaData
+@Component
+public class I18nStringMetaData extends SystemEntityMetaData
 {
-	public static final I18nStringMetaData INSTANCE = new I18nStringMetaData();
-	public static final String ENTITY_NAME = "i18nstrings";
+	private static final String SIMPLE_NAME = "i18nstrings";
+	public static final String I18N_STRING = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
+
 	public static final String MSGID = "msgid";
 	public static final String DESCRIPTION = "description";
 	public static final String EN = "en";
 
-	private I18nStringMetaData()
+	I18nStringMetaData()
 	{
-		super(ENTITY_NAME);
+		super(SIMPLE_NAME, PACKAGE_SYSTEM);
+	}
+
+	@Override
+	public void init()
+	{
 		addAttribute(MSGID, ROLE_ID);
 		addAttribute(DESCRIPTION).setNillable(true).setDataType(MolgenisFieldTypes.TEXT);
+
 		addAttribute(EN).setNillable(true).setDataType(MolgenisFieldTypes.TEXT);
 	}
 
@@ -36,6 +47,6 @@ public class I18nStringMetaData extends DefaultEntityMetaData
 	public void removeLanguage(String languageCode)
 	{
 		AttributeMetaData attr = getAttribute(languageCode);
-		if (attr != null) removeAttributeMetaData(attr);
+		if (attr != null) removeAttribute(attr);
 	}
 }

@@ -66,7 +66,8 @@
                 	<div class="form-horizontal">
                     	<div class="form-group">
                         	<div class="col-md-12">
-                            	<div class="input-group" <#if plugin_settings.searchbox == false> style="display:none"</#if>>
+                                <div class="input-group" <#if plugin_settings.get("searchbox") == false>
+                                     style="display:none"</#if>>
                                 	<input type="text" class="form-control" id="observationset-search" placeholder="Search data values" autofocus="autofocus"/>
                                 	<span class="input-group-btn">
                                     	<button id="search-clear-button" class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span></button>
