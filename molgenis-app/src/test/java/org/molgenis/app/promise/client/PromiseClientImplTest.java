@@ -1,14 +1,5 @@
 package org.molgenis.app.promise.client;
 
-import static org.springframework.ws.test.client.RequestMatchers.connectionTo;
-import static org.springframework.ws.test.client.RequestMatchers.payload;
-import static org.springframework.ws.test.client.ResponseCreators.withPayload;
-import static org.testng.Assert.assertEquals;
-
-import java.net.URI;
-
-import javax.xml.transform.Source;
-
 import org.molgenis.app.promise.PromiseConfig;
 import org.molgenis.app.promise.model.PromiseCredentialsMetaData;
 import org.molgenis.data.Entity;
@@ -22,6 +13,14 @@ import org.springframework.xml.transform.StringSource;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import javax.xml.transform.Source;
+import java.net.URI;
+
+import static org.springframework.ws.test.client.RequestMatchers.connectionTo;
+import static org.springframework.ws.test.client.RequestMatchers.payload;
+import static org.springframework.ws.test.client.ResponseCreators.withPayload;
+import static org.testng.Assert.assertEquals;
+
 @ContextConfiguration(classes = PromiseConfig.class)
 public class PromiseClientImplTest extends AbstractTestNGSpringContextTests
 {
@@ -29,7 +28,7 @@ public class PromiseClientImplTest extends AbstractTestNGSpringContextTests
 	private WebServiceTemplate webServiceTemplate;
 
 	@Autowired
-	private PromiseClientImpl promiseClient;
+	private PromiseClient promiseClient;
 
 	MockWebServiceServer mockServer;
 

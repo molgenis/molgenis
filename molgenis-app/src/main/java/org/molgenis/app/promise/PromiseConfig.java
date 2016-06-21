@@ -14,15 +14,6 @@ import org.springframework.ws.client.core.WebServiceTemplate;
 @Configuration
 public class PromiseConfig
 {
-
-	// For streaming messaging
-	// (not really needed I think here, and you'll need more advanced unmarshalling)
-	// @Bean
-	// public SoapMessageFactory soapMessageFactory()
-	// {
-	// return new AxiomSoapMessageFactory();
-	// }
-
 	@Bean
 	PromiseClient promiseClient()
 	{
