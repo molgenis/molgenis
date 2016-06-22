@@ -13,7 +13,6 @@ import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaD
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.COMBINED_SCORE;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.SCORE;
-import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,11 +31,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.data.semanticsearch.string.Stemmer;
-import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermSynonymFactory;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.roc.InformationContentService;
 import org.molgenis.ontology.sorta.bean.OntologyTermHitEntity;
@@ -68,14 +67,17 @@ public class SortaServiceImpl implements SortaService
 	private final DataService dataService;
 	private final InformationContentService informationContentService;
 	private final OntologyTermHitEntityMetaData ontologyTermHitEntityMetaData;
+	private final OntologyTermSynonymFactory ontologyTermSynonymFactory;
 
 	@Autowired
 	public SortaServiceImpl(DataService dataService, InformationContentService informationContentService,
-			OntologyTermHitEntityMetaData ontologyTermHitEntityMetaData)
+			OntologyTermHitEntityMetaData ontologyTermHitEntityMetaData,
+			OntologyTermSynonymFactory ontologyTermSynonymFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.informationContentService = requireNonNull(informationContentService);
 		this.ontologyTermHitEntityMetaData = requireNonNull(ontologyTermHitEntityMetaData);
+		this.ontologyTermSynonymFactory = requireNonNull(ontologyTermSynonymFactory);
 	}
 
 	@Override
@@ -103,14 +105,6 @@ public class SortaServiceImpl implements SortaService
 							.eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
 		}
 		return null;
-	}
-
-	@Override
-	public Iterable<Entity> findOntologyTermEntities(String ontologyUrl, String queryString)
-	{
-		Entity entity = new DynamicEntity(null); // FIXME pass entity meta data instead of null
-		entity.set(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString);
-		return findOntologyTermEntities(ontologyUrl, entity);
 	}
 
 	@Override
@@ -290,8 +284,8 @@ public class SortaServiceImpl implements SortaService
 						&& StringUtils.equalsIgnoreCase(attributeName, annotationName)
 						&& StringUtils.equalsIgnoreCase(inputEntity.getString(attributeName), annotationValue))
 				{
-					mapEntity.set(SCORE, 100);
-					mapEntity.set(COMBINED_SCORE, 100);
+					mapEntity.set(SCORE, 100d);
+					mapEntity.set(COMBINED_SCORE, 100d);
 					return mapEntity;
 				}
 			}
@@ -311,10 +305,6 @@ public class SortaServiceImpl implements SortaService
 		Iterable<Entity> entities = ontologyTermEntity.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM);
 		if (Iterables.size(entities) > 0)
 		{
-			// FIXME get rid of getApplicationContext reference
-			OntologyTermSynonymMetaData ontologyTermSynonymMetaData = getApplicationContext()
-					.getBean(OntologyTermSynonymMetaData.class);
-
 			String cleanedQueryString = removeIllegalCharWithSingleWhiteSpace(queryString);
 
 			// Calculate the Ngram silmiarity score for all the synonyms and sort them in descending order
@@ -322,7 +312,7 @@ public class SortaServiceImpl implements SortaService
 			{
 				public Entity apply(Entity ontologyTermSynonymEntity)
 				{
-					Entity mapEntity = new DynamicEntity(ontologyTermSynonymMetaData);
+					Entity mapEntity = ontologyTermSynonymFactory.create();
 					mapEntity.set(ontologyTermSynonymEntity);
 					String ontologyTermSynonym = removeIllegalCharWithSingleWhiteSpace(ontologyTermSynonymEntity
 							.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR));
@@ -339,8 +329,7 @@ public class SortaServiceImpl implements SortaService
 				}
 			});
 
-			Entity firstMatchedSynonymEntity = Iterables
-					.getFirst(synonymEntities, new DynamicEntity(ontologyTermSynonymMetaData));
+			Entity firstMatchedSynonymEntity = Iterables.getFirst(synonymEntities, ontologyTermSynonymFactory.create());
 			double topNgramScore = firstMatchedSynonymEntity.getDouble(SCORE);
 			String topMatchedSynonym = firstMatchedSynonymEntity
 					.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR);
@@ -443,12 +432,12 @@ public class SortaServiceImpl implements SortaService
 		return stringBuilder.toString().trim();
 	}
 
-	public String removeIllegalCharWithSingleWhiteSpace(String string)
+	private static String removeIllegalCharWithSingleWhiteSpace(String string)
 	{
 		return string.replaceAll(ILLEGAL_CHARACTERS_PATTERN, SINGLE_WHITESPACE);
 	}
 
-	public String removeIllegalCharWithEmptyString(String string)
+	private static String removeIllegalCharWithEmptyString(String string)
 	{
 		return string.replaceAll(ILLEGAL_CHARACTERS_PATTERN, StringUtils.EMPTY);
 	}

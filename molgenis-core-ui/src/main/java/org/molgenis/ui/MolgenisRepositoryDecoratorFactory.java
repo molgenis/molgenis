@@ -7,7 +7,7 @@ import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
-import static org.molgenis.data.support.OwnedEntityMetaData.OWNED;
+import static org.molgenis.security.owned.OwnedEntityMetaData.OWNED;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserDecorator;

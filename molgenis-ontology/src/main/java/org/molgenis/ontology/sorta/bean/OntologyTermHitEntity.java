@@ -14,6 +14,11 @@ public class OntologyTermHitEntity extends DynamicEntity
 		set(entity);
 	}
 
+	protected void validateValueType(String attrName, Object value)
+	{
+		// no operation
+	}
+
 	@Override
 	public boolean equals(Object obj)
 	{

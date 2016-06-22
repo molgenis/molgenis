@@ -5,9 +5,9 @@ import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
-import org.molgenis.data.jobs.JobExecutionMetaData;
+import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.file.FileMetaMetaData;
+import org.molgenis.file.model.FileMetaMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

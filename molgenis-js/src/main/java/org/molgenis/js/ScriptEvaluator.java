@@ -83,8 +83,8 @@ public class ScriptEvaluator
 
 	/**
 	 * Evaluates a script on a batch of entities
-	 * 
-	 * @param source
+	 *
+	 * @param sources
 	 *            the source of the script to run
 	 * @param entities
 	 *            {@link Iterable} of {@link Entity}s to evaluate it for

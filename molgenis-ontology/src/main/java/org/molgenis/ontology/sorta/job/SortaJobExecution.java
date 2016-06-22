@@ -9,7 +9,7 @@ import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.SOURCE_
 import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.THRESHOLD;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.jobs.JobExecution;
+import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 public class SortaJobExecution extends JobExecution

@@ -1,66 +1,72 @@
 package org.molgenis.file.ingest;
 
+import org.molgenis.data.FileRepositoryCollectionFactory;
+import org.molgenis.data.importer.ImportService;
+import org.molgenis.data.importer.ImportServiceFactory;
+import org.molgenis.data.jobs.Progress;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.file.ingest.execution.FileIngester;
+import org.molgenis.file.ingest.execution.FileStoreDownload;
+import org.molgenis.file.ingest.meta.FileIngest;
+import org.molgenis.file.ingest.meta.FileIngestFactory;
+import org.molgenis.file.ingest.meta.FileIngestMetaData;
+import org.molgenis.file.model.FileMetaFactory;
+import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.io.File;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 
-import java.io.File;
-
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.importer.ImportServiceFactory;
-import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.data.support.FileRepositoryCollection;
-import org.molgenis.file.FileMetaFactory;
-import org.molgenis.file.ingest.execution.FileIngester;
-import org.molgenis.file.ingest.execution.FileStoreDownload;
-import org.molgenis.file.ingest.meta.FileIngestMetaData;
-import org.molgenis.framework.db.EntityImportReport;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-public class FileIngesterTest
+@ContextConfiguration(classes = { FileIngesterTest.Config.class })
+public class FileIngesterTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
 	private FileIngester fileIngester;
 
+	@Autowired
 	private FileStoreDownload fileStoreDownloadMock;
+
+	@Autowired
 	private ImportServiceFactory importServiceFactoryMock;
-	private ImportService importServiceMock;
+
+	@Autowired
 	private FileRepositoryCollectionFactory fileRepositoryCollectionFactoryMock;
+
+	@Autowired
+	private FileIngestFactory fileIngestFactory;
+
+	private ImportService importServiceMock;
 	private FileRepositoryCollection fileRepositoryCollectionMock;
 
-	private final String entityName = "test";
-	private final String url = "http://www.test.nl/test";
-	private final String identifier = "identifier";
+	private static final String entityName = "test";
+	private static final String url = "http://www.test.nl/test";
+	private static final String identifier = "identifier";
 	private final File f = new File("");
 	private final EntityImportReport report = new EntityImportReport();
-	private Entity entityMetaData;
-	private Entity fileIngest;
 
-	private DataService dataService;
 	private Progress progress;
 
 	@BeforeMethod
 	public void setUp()
 	{
-		fileStoreDownloadMock = mock(FileStoreDownload.class);
-		fileRepositoryCollectionFactoryMock = mock(FileRepositoryCollectionFactory.class);
 		fileRepositoryCollectionMock = mock(FileRepositoryCollection.class);
-		importServiceFactoryMock = mock(ImportServiceFactory.class);
 		importServiceMock = mock(ImportService.class);
-		dataService = mock(DataService.class);
 		progress = mock(Progress.class);
-		FileMetaFactory fileMetaFactory = mock(FileMetaFactory.class);
 
-		fileIngester = new FileIngester(fileStoreDownloadMock, importServiceFactoryMock,
-				fileRepositoryCollectionFactoryMock, fileMetaFactory);
-
-		entityMetaData = new DynamicEntity(null); // FIXME pass entity meta data instead of null
-		fileIngest = new DynamicEntity(null); // FIXME pass entity meta data instead of null
+		EntityMetaData entityMetaData = when(mock(EntityMetaData.class).getName()).thenReturn("target").getMock();
+		FileIngest fileIngest = fileIngestFactory.create();
 		fileIngest.set(FileIngestMetaData.ENTITY_META_DATA, entityMetaData);
 		fileIngest.set(FileIngestMetaData.URL, url);
 		fileIngest.set(FileIngestMetaData.LOADER, "CSV");
@@ -87,5 +93,42 @@ public class FileIngesterTest
 		when(fileStoreDownloadMock.downloadFile(url, identifier, entityName + ".csv")).thenThrow(e);
 
 		fileIngester.ingest(entityName, url, "CSV", identifier, progress, "a@b.com,x@y.com");
+	}
+
+	@Configuration
+	@ComponentScan({ "org.molgenis.file.ingest.meta", "org.molgenis.security.owned", "org.molgenis.file.model",
+			"org.molgenis.data.jobs.model", "org.molgenis.auth" })
+	public static class Config
+	{
+		@Bean
+		public FileIngester fileIngester()
+		{
+			return new FileIngester(fileStoreDownload(), importServiceFactory(), fileRepositoryCollectionFactory(),
+					fileMetaFactory());
+		}
+
+		@Bean
+		public FileStoreDownload fileStoreDownload()
+		{
+			return mock(FileStoreDownload.class);
+		}
+
+		@Bean
+		public ImportServiceFactory importServiceFactory()
+		{
+			return mock(ImportServiceFactory.class);
+		}
+
+		@Bean
+		public FileRepositoryCollectionFactory fileRepositoryCollectionFactory()
+		{
+			return mock(FileRepositoryCollectionFactory.class);
+		}
+
+		@Bean
+		public FileMetaFactory fileMetaFactory()
+		{
+			return mock(FileMetaFactory.class);
+		}
 	}
 }

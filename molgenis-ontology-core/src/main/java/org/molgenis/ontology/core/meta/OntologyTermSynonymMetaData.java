@@ -6,6 +6,7 @@ import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,8 @@ public class OntologyTermSynonymMetaData extends SystemEntityMetaData
 
 	public final static String ID = "id";
 	public final static String ONTOLOGY_TERM_SYNONYM_ATTR = "ontologyTermSynonym";
+	public static final String SCORE = "Score";
+	public static final String COMBINED_SCORE = "Combined_Score";
 
 	private OntologyPackage ontologyPackage;
 
@@ -34,6 +37,8 @@ public class OntologyTermSynonymMetaData extends SystemEntityMetaData
 
 		addAttribute(ID, ROLE_ID).setVisible(false);
 		addAttribute(ONTOLOGY_TERM_SYNONYM_ATTR, ROLE_LABEL).setDataType(TEXT).setNillable(false);
+		addAttribute(SCORE).setDataType(MolgenisFieldTypes.DECIMAL);
+		addAttribute(COMBINED_SCORE).setDataType(MolgenisFieldTypes.DECIMAL);
 	}
 
 	@Autowired

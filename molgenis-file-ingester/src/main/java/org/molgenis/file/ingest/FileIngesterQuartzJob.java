@@ -1,20 +1,20 @@
 package org.molgenis.file.ingest;
 
-import static org.molgenis.file.FileMetaMetaData.FILE_META;
 import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_EXECUTION;
 import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
+import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import org.molgenis.data.DataService;
-import org.molgenis.file.FileMeta;
 import org.molgenis.file.ingest.execution.FileIngestJob;
 import org.molgenis.file.ingest.execution.FileIngestJobFactory;
 import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionFactory;
+import org.molgenis.file.model.FileMeta;
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.Job;
 import org.quartz.JobExecutionContext;

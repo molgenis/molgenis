@@ -1,11 +1,11 @@
 package org.molgenis.data.jobs;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.jobs.JobExecution.Status.FAILED;
-import static org.molgenis.data.jobs.JobExecution.Status.RUNNING;
-import static org.molgenis.data.jobs.JobExecutionMetaData.JOB_EXECUTION;
-import static org.molgenis.data.jobs.JobExecutionMetaData.PROGRESS_MESSAGE;
-import static org.molgenis.data.jobs.JobExecutionMetaData.STATUS;
+import static org.molgenis.data.jobs.model.JobExecution.Status.FAILED;
+import static org.molgenis.data.jobs.model.JobExecution.Status.RUNNING;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.JOB_EXECUTION;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.PROGRESS_MESSAGE;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.STATUS;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;

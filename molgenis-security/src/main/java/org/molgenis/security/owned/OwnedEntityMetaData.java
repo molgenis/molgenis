@@ -1,4 +1,4 @@
-package org.molgenis.data.support;
+package org.molgenis.security.owned;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.STRING;
@@ -24,7 +24,7 @@ public class OwnedEntityMetaData extends SystemEntityMetaData
 	private static final String SIMPLE_NAME = "Owned";
 	public static final String OWNED = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public static final String ATTR_OWNER_USERNAME = "ownerUsername";
+	public static final String OWNER_USERNAME = "ownerUsername";
 
 	private final SecurityPackage securityPackage;
 
@@ -41,6 +41,6 @@ public class OwnedEntityMetaData extends SystemEntityMetaData
 		setPackage(securityPackage);
 
 		setAbstract(true);
-		addAttribute(ATTR_OWNER_USERNAME).setDataType(STRING).setVisible(false);
+		addAttribute(OWNER_USERNAME).setDataType(STRING).setVisible(false);
 	}
 }

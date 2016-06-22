@@ -2,7 +2,7 @@ package org.molgenis.file.ingest.execution;
 
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
-import org.molgenis.file.FileMeta;
+import org.molgenis.file.model.FileMeta;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
 

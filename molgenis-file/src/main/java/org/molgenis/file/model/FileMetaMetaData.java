@@ -1,7 +1,8 @@
-package org.molgenis.file;
+package org.molgenis.file.model;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.HYPERLINK;
+import static org.molgenis.MolgenisFieldTypes.LONG;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
@@ -10,7 +11,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.data.support.OwnedEntityMetaData;
+import org.molgenis.security.owned.OwnedEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +43,7 @@ public class FileMetaMetaData extends SystemEntityMetaData
 		addAttribute(ID, ROLE_ID).setVisible(false).setLabel("Id");
 		addAttribute(FILENAME, ROLE_LABEL, ROLE_LOOKUP).setDataType(STRING).setNillable(false).setLabel("Filename");
 		addAttribute(CONTENT_TYPE, ROLE_LOOKUP).setDataType(STRING).setLabel("Content-type");
-		addAttribute(SIZE).setDataType(STRING).setLabel("Size").setDescription("File size in bytes");
+		addAttribute(SIZE).setDataType(LONG).setLabel("Size").setDescription("File size in bytes");
 		addAttribute(URL).setDataType(HYPERLINK).setLabel("URL").setDescription("File download URL").setUnique(true);
 	}
 }

@@ -187,7 +187,7 @@ public class DynamicEntity implements Entity
 	@Override
 	public void set(Entity values)
 	{
-		throw new RuntimeException("TODO implement");
+		values.getAttributeNames().forEach(attrName -> set(attrName, values.get(attrName)));
 	}
 
 	/**
