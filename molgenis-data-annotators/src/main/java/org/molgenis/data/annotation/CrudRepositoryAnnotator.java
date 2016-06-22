@@ -128,12 +128,13 @@ public class CrudRepositoryAnnotator
 		//currently this would nullpointer
 		AttributeMetaData compoundAttributeMetaData = attributeMetaDataFactory.create()
 				.setName("MOLGENIS_" + annotatorName).setDataType(COMPOUND);
-		if (entityMetaData.getAttribute(annotatorName) == null)
+		if (entityMetaData.getAttribute("MOLGENIS_" + annotatorName) == null)
 		{
 			for (AttributeMetaData part : attributeMetaDatas)
 			{
 				//compoundAttributeMetaData.addAttributePart(part);
-				entityMetaData.addAttribute(part);
+				if(entityMetaData.getAttribute(part.getName()) == null)
+					entityMetaData.addAttribute(part);
 			}
 			//entityMetaData.addAttribute(compoundAttributeMetaData);
 			dataService.getMeta().updateEntityMeta(entityMetaData);

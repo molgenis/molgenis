@@ -1,28 +1,20 @@
 package org.molgenis.data.support;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
-
-import java.util.Iterator;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Iterator;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 /**
  * Implementation of the DataService interface
@@ -112,11 +104,7 @@ public class DataServiceImpl implements DataService
 	@Transactional
 	public void update(String entityName, Entity entity)
 	{
-		try{
 			getRepository(entityName).update(entity);
-		}                                            catch (Exception e){
-			System.out.print(e);
-		}
 	}
 
 	@Override
