@@ -29,6 +29,31 @@ import com.google.common.collect.Iterables;
 public class EntityUtils
 {
 	/**
+	 * Convert a string value to a typed value based on a non-entity-referencing attribute data type.
+	 *
+	 * @param valueStr string value
+	 * @param attr     non-entity-referencing attribute
+	 * @return typed value
+	 * @throws MolgenisDataException if attribute references another entity
+	 */
+	public static Object getTypedValue(String valueStr, AttributeMetaData attr)
+	{
+		switch (attr.getDataType().getEnumType())
+		{
+			case CATEGORICAL:
+			case FILE:
+			case XREF:
+			case CATEGORICAL_MREF:
+			case MREF:
+				throw new MolgenisDataException(
+						"getTypedValue(String, AttributeMetaData) can't be used for attributes referencing entities");
+			default:
+				break;
+		}
+		return getTypedValue(valueStr, attr, null);
+	}
+
+	/**
 	 * Convert a string value to a typed value based on the attribute data type.
 	 *
 	 * @param valueStr      string value

@@ -1,4 +1,4 @@
-package org.molgenis.data.vcf;
+package org.molgenis.data.vcf.model;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.INT;

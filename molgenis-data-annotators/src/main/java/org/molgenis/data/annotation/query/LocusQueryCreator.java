@@ -11,7 +11,7 @@ import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.impl.datastructures.Locus;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.vcf.VcfAttributes;
+import org.molgenis.data.vcf.model.VcfAttributes;
 
 /**
  * Creates a Locus query that finds rows that match chromosome/position

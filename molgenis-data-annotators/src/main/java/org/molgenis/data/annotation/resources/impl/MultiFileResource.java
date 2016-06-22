@@ -12,7 +12,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.ResourceConfig;
-import org.molgenis.data.vcf.VcfAttributes;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
