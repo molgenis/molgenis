@@ -1,5 +1,6 @@
 package org.molgenis.app.promise.client;
 
+import org.apache.axiom.soap.SOAPMessage;
 import org.molgenis.data.Entity;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
@@ -12,12 +13,11 @@ import org.springframework.ws.client.core.WebServiceMessageCallback;
 import org.springframework.ws.client.core.WebServiceMessageExtractor;
 import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.SoapMessage;
+import org.springframework.ws.soap.axiom.AxiomSoapMessage;
 import org.springframework.ws.support.MarshallingUtils;
 
-import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
-import javax.xml.transform.Source;
 import java.util.function.Consumer;
 
 import static java.util.Objects.requireNonNull;
@@ -61,10 +61,10 @@ public class PromiseClientImpl implements PromiseClient
 		};
 
 		WebServiceMessageExtractor extractor = webServiceMessage -> {
-			Source source = webServiceMessage.getPayloadSource();
+			SOAPMessage axiomSoapMessage = ((AxiomSoapMessage) webServiceMessage).getAxiomMessage();
 			try
 			{
-				XMLStreamReader streamReader = XMLInputFactory.newInstance().createXMLStreamReader(source);
+				XMLStreamReader streamReader = axiomSoapMessage.getXMLStreamReader();
 				consumer.accept(streamReader);
 				streamReader.close();
 			}

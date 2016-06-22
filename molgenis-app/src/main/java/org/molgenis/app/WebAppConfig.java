@@ -1,20 +1,23 @@
 package org.molgenis.app;
 
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
 import freemarker.template.TemplateException;
 import org.molgenis.CommandLineOnlyConfiguration;
 import org.molgenis.DatabaseConfig;
-import org.molgenis.data.*;
+import org.molgenis.app.promise.client.PromiseRequest;
+import org.molgenis.data.DataService;
+import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.config.HttpClientConfig;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
-import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
-import org.molgenis.data.mysql.*;
+import org.molgenis.data.mysql.AsyncJdbcTemplate;
+import org.molgenis.data.mysql.MySqlEntityFactory;
+import org.molgenis.data.mysql.MysqlRepository;
+import org.molgenis.data.mysql.MysqlRepositoryCollection;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.system.RepositoryTemplateLoader;
 import org.molgenis.dataexplorer.freemarker.DataExplorerHyperlinkDirective;
-import org.molgenis.framework.MolgenisUpgradeService;
 import org.molgenis.migrate.version.v1_11.Step20RebuildElasticsearchIndex;
 import org.molgenis.migrate.version.v1_11.Step21SetLoggingEventBackend;
 import org.molgenis.migrate.version.v1_13.Step22RemoveDiseaseMatcher;
@@ -38,16 +41,17 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.*;
 import org.springframework.context.annotation.ComponentScan.Filter;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
+import org.springframework.ws.client.core.WebServiceTemplate;
 import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
 
-import javax.xml.soap.SOAPConnectionFactory;
-import javax.xml.soap.SOAPException;
 import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 
 import static java.util.Arrays.asList;
 
@@ -71,12 +75,6 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 	@Autowired
 	private ElasticsearchRepositoryCollection elasticsearchRepositoryCollection;
-
-	@Autowired
-	private EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
-
-	@Autowired
-	private Gson gson;
 
 	@Autowired
 	private Step20RebuildElasticsearchIndex step20RebuildElasticsearchIndex;
@@ -180,16 +178,5 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		// Look up unknown templates in the FreemarkerTemplate repository
 		result.setPostTemplateLoaders(new RepositoryTemplateLoader(dataService));
 		return result;
-	}
-
-	@Bean
-	public AxiomSoapMessageFactory axiomSoapMessageFactory() throws UnsupportedOperationException, SOAPException
-	{
-		AxiomSoapMessageFactory axiomSoapMessageFactory = new AxiomSoapMessageFactory();
-
-		// Disables caching. If you want to debug the SOAP response, set this to true
-		axiomSoapMessageFactory.setPayloadCaching(false);
-
-		return axiomSoapMessageFactory;
 	}
 }
