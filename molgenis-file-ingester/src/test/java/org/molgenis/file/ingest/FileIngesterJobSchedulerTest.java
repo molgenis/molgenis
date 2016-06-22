@@ -31,7 +31,6 @@ import org.testng.annotations.Test;
 public class FileIngesterJobSchedulerTest extends AbstractMolgenisSpringTest
 {
 	private static DataService dataServiceMock = mock(DataService.class);
-	;
 	private static Scheduler schedulerMock = mock(Scheduler.class);
 
 	@Autowired

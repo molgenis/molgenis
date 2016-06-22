@@ -15,7 +15,6 @@ import java.net.URL;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.support.StaticEntity;
 
 public class FileIngest extends StaticEntity
@@ -93,7 +92,7 @@ public class FileIngest extends StaticEntity
 
 	public String getTargetEntityName()
 	{
-		return getEntity(ENTITY_META_DATA, EntityMetaDataMetaData.class).getName();
+		return getEntity(ENTITY_META_DATA, EntityMetaData.class).getName();
 	}
 
 	public void setCronExpression(String cronExpression)
