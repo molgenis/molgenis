@@ -36,13 +36,13 @@ public class TabixVcfRepository extends VcfRepository
 
 	public TabixVcfRepository(File file, String entityName) throws IOException
 	{
-		super(file, entityName);
+		super(file, entityName, null, null, null);
 		tabixReader = new TabixReader(file.getCanonicalPath());
 	}
 
 	TabixVcfRepository(VcfReaderFactory readerFactory, TabixReader tabixReader, String entityName)
 	{
-		super(readerFactory, entityName);
+		super(readerFactory, entityName, null, null, null);
 		this.tabixReader = tabixReader;
 	}
 

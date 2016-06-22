@@ -222,7 +222,8 @@ public class CmdLineAnnotator
 
 		BufferedWriter outputVCFWriter = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
-		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
+		// FIXME replace null contructor arguments with actual arguments
+		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName(), null, null, null);
 
 		try
 		{
