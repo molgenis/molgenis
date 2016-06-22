@@ -1,28 +1,27 @@
 package org.molgenis.app.promise.client;
 
-import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
-import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
-import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamReader;
-
 import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.MapEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+import java.io.IOException;
+import java.util.Objects;
+import java.util.function.Consumer;
+
+import static javax.xml.stream.XMLStreamConstants.END_ELEMENT;
+import static javax.xml.stream.XMLStreamConstants.START_ELEMENT;
 
 @Component
 public class PromiseDataParser
 {
 	private final PromiseClient promiseClient;
+
+	private static final Logger LOG = LoggerFactory.getLogger(PromiseDataParser.class);
 
 	@Autowired
 	public PromiseDataParser(PromiseClient promiseClient)
@@ -30,78 +29,64 @@ public class PromiseDataParser
 		this.promiseClient = Objects.requireNonNull(promiseClient, "promiseClient is null");
 	}
 
-	//TODO: better to do this in the unmarshaller as well I think
-	public Iterable<Entity> parse(Entity credentials, Integer seqNr) throws IOException
+	public void parse(Entity credentials, Integer seqNr, Consumer<Entity> entityConsumer) throws IOException
 	{
-		String resultXml = promiseClient.getDataForXml(credentials, seqNr.toString());
-		String rootElementName = "root";
-		StringBuilder strBuilder = new StringBuilder();
-		strBuilder.append('<');
-		strBuilder.append(rootElementName);
-		strBuilder.append('>');
-		strBuilder.append(resultXml);
-		strBuilder.append("</");
-		strBuilder.append(rootElementName);
-		strBuilder.append('>');
-
-		XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
-		XMLStreamReader xmlContentReader;
-		try
-		{
-			xmlContentReader = xmlInputFactory.createXMLStreamReader(new StringReader(strBuilder.toString()));
-			return parseContentContainer(xmlContentReader, rootElementName);
-		}
-		catch (XMLStreamException e)
-		{
-			throw new IOException(e);
-		}
-	}
-
-	private static Iterable<Entity> parseContentContainer(XMLStreamReader xmlStreamReader, String parentLocalName)
-			throws XMLStreamException
-	{
-		List<Entity> entities = new ArrayList<Entity>();
-
-		while (xmlStreamReader.hasNext())
-		{
-			switch (xmlStreamReader.next())
+		promiseClient.getData(credentials, seqNr.toString(), reader -> {
+			try
 			{
-				case START_ELEMENT:
-					if (!xmlStreamReader.getLocalName().equals(parentLocalName))
+				boolean inDocumentElement = false;
+				while (reader.hasNext())
+				{
+					switch (reader.next())
 					{
-						// parse study
-						Entity entity = parseContent(xmlStreamReader, xmlStreamReader.getLocalName());
-						entities.add(entity);
+						case START_ELEMENT:
+							if ("DocumentElement".equals(reader.getLocalName()))
+							{
+								inDocumentElement = true;
+							}
+							else
+							{
+								if (inDocumentElement)
+								{
+									entityConsumer.accept(parseContent(reader));
+								}
+							}
+							break;
+						case END_ELEMENT:
+							if ("DocumentElement".equals(reader.getLocalName()))
+							{
+								inDocumentElement = false;
+							}
+							break;
 					}
-					break;
-				default:
-					break;
+				}
 			}
-		}
-
-		if (entities.isEmpty()) throw new MolgenisDataException("No ProMISe entities found in response");
-
-		return entities;
+			catch (XMLStreamException e)
+			{
+				LOG.error("Something went wrong: ", e);
+			}
+		});
 	}
 
-	private static Entity parseContent(XMLStreamReader xmlStreamReader, String parentLocalName)
-			throws XMLStreamException
+	/**
+	 * Parses one entity from the reader
+	 *
+	 * @param reader
+	 * @return the parsed {@link Entity}
+	 * @throws XMLStreamException
+	 */
+	private static Entity parseContent(XMLStreamReader reader) throws XMLStreamException
 	{
 		MapEntity entity = new MapEntity();
-		boolean parse = true;
-		while (parse && xmlStreamReader.hasNext())
+		while (reader.hasNext())
 		{
-			switch (xmlStreamReader.next())
+			switch (reader.next())
 			{
 				case START_ELEMENT:
-					entity.set(xmlStreamReader.getLocalName(), xmlStreamReader.getElementText());
+					entity.set(reader.getLocalName(), reader.getElementText());
 					break;
 				case END_ELEMENT:
-					if (xmlStreamReader.getLocalName().equals(parentLocalName))
-					{
-						parse = false;
-					}
-					break;
+					return entity;
 				default:
 					break;
 			}

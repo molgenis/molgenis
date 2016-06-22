@@ -1,13 +1,12 @@
 package org.molgenis.app.promise.client;
 
-import java.io.IOException;
-
-import javax.xml.transform.Source;
-
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.XmlMappingException;
 import org.springframework.xml.xpath.Jaxp13XPathTemplate;
 import org.springframework.xml.xpath.XPathOperations;
+
+import javax.xml.transform.Source;
+import java.io.IOException;
 
 public class PromiseDataUnmarshaller implements Unmarshaller
 {

@@ -42,6 +42,7 @@ import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
+import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
 
 import javax.xml.soap.SOAPConnectionFactory;
 import javax.xml.soap.SOAPException;
@@ -182,8 +183,13 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	}
 
 	@Bean
-	public SOAPConnectionFactory soapConnectionFactory() throws UnsupportedOperationException, SOAPException
+	public AxiomSoapMessageFactory axiomSoapMessageFactory() throws UnsupportedOperationException, SOAPException
 	{
-		return SOAPConnectionFactory.newInstance();
+		AxiomSoapMessageFactory axiomSoapMessageFactory = new AxiomSoapMessageFactory();
+
+		// Disables caching. If you want to debug the SOAP response, set this to true
+		axiomSoapMessageFactory.setPayloadCaching(false);
+
+		return axiomSoapMessageFactory;
 	}
 }

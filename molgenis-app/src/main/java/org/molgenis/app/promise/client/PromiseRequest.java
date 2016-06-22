@@ -7,13 +7,13 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-import static org.molgenis.app.promise.client.PromiseClientImpl.ACTION_GETDATAFORXML;
+import static org.molgenis.app.promise.client.PromiseClientImpl.ACTION_GETDATA;
 import static org.molgenis.app.promise.client.PromiseClientImpl.NAMESPACE_VALUE;
 
 @AutoValue
 @XmlType(propOrder =
 { "proj", "PWS", "SEQNR", "securitycode", "username", "passw" })
-@XmlRootElement(name = ACTION_GETDATAFORXML, namespace = NAMESPACE_VALUE)
+@XmlRootElement(name = ACTION_GETDATA, namespace = NAMESPACE_VALUE)
 public abstract class PromiseRequest
 {
 	@XmlElement(namespace = NAMESPACE_VALUE)
