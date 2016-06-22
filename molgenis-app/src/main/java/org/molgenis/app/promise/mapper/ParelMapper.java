@@ -32,7 +32,7 @@ import static org.molgenis.app.promise.model.BbmriNlCheatSheet.*;
 @Component
 public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRefreshedEvent>
 {
-	private final String ID = "PAREL";
+	private final String MAPPER_ID = "PAREL";
 
 	private PromiseMapperFactory promiseMapperFactory;
 	private PromiseDataParser promiseDataParser;
@@ -87,13 +87,13 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent arg0)
 	{
-		promiseMapperFactory.registerMapper(ID, this);
+		promiseMapperFactory.registerMapper(MAPPER_ID, this);
 	}
 
 	@Override
 	public String getId()
 	{
-		return ID;
+		return MAPPER_ID;
 	}
 
 	@Override
@@ -113,7 +113,7 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 			promiseDataParser.parse(credentials, 0, promiseBiobankEntity -> {
 
 				// find out if a sample collection with this id already exists
-				Entity targetEntity = dataService.findOne(SAMPLE_COLLECTIONS_ENTITY, project.getString("biobank_id"));
+				Entity targetEntity = dataService.findOne(SAMPLE_COLLECTIONS_ENTITY, project.getString(BIOBANK_ID));
 
 				boolean biobankExists = true;
 				if (targetEntity == null)
@@ -148,32 +148,9 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 				}
 
 				// map data from ProMISe
-				targetEntity.set(BbmriNlCheatSheet.ID, project.getString("biobank_id"));
+				targetEntity.set(BbmriNlCheatSheet.ID, project.getString(BIOBANK_ID));
 				targetEntity.set(TYPE, toTypes(promiseBiobankEntity.getString("COLLECTION_TYPE"))); // mref
-
-				try
-				{
-					// Parse samples
-					promiseDataParser.parse(credentials, 1,
-							promiseSampleEntity -> toMaterialTypes(promiseSampleEntity.getString("MATERIAL_TYPES"),
-									promiseSampleEntity.getString("MATERIAL_TYPES_SUB")));
-				}
-				catch (IOException e)
-				{
-					LOG.error("Something went wrong: {}", e);
-				}
-
-				if (!unknownMaterialTypes.isEmpty()) throw new RuntimeException(
-						"Unknown ProMISe material types: [" + String.join(",", unknownMaterialTypes) + "]");
-
-				Iterable<Entity> materialTypes = dataService
-						.findAll(REF_MATERIAL_TYPES, transform(materialTypeIds, id -> (Object) id).stream())
-						.collect(Collectors.toList());
-
-				if (Iterables.isEmpty(materialTypes)) throw new RuntimeException(
-						"Couldn't find mappings for some of the material types in:" + materialTypeIds);
-
-				targetEntity.set(MATERIALS, materialTypes); // mref
+				targetEntity.set(MATERIALS, getMaterialTypes(credentials)); // mref
 				targetEntity.set(SEX, toGenders(promiseBiobankEntity.getString("SEX"))); // mref
 				targetEntity.set(AGE_LOW, promiseBiobankEntity.getString("AGE_LOW")); // nillable
 				targetEntity.set(AGE_HIGH, promiseBiobankEntity.getString("AGE_HIGH")); // nillable
@@ -203,6 +180,32 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		}
 
 		return report;
+	}
+
+	private Iterable<Entity> getMaterialTypes(Entity credentials)
+	{
+		try
+		{
+			// Parse samples
+			promiseDataParser.parse(credentials, 1,
+					promiseSampleEntity -> toMaterialTypes(promiseSampleEntity.getString("MATERIAL_TYPES"),
+							promiseSampleEntity.getString("MATERIAL_TYPES_SUB")));
+		}
+		catch (IOException e)
+		{
+			LOG.error("Something went wrong: {}", e);
+		}
+
+		if (!unknownMaterialTypes.isEmpty()) throw new RuntimeException(
+				"Unknown ProMISe material types: [" + String.join(",", unknownMaterialTypes) + "]");
+
+		Iterable<Entity> materialTypes = dataService
+				.findAll(REF_MATERIAL_TYPES, transform(materialTypeIds, id -> (Object) id).stream())
+				.collect(Collectors.toList());
+
+		if (Iterables.isEmpty(materialTypes))
+			throw new RuntimeException("Couldn't find mappings for some of the material types in:" + materialTypeIds);
+		return materialTypes;
 	}
 
 	private Object getTempDataCategories()
