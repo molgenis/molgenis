@@ -1,10 +1,5 @@
 package org.molgenis.file.ingest;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import org.molgenis.auth.MolgenisUser;
@@ -21,7 +16,7 @@ import org.molgenis.file.ingest.meta.FileIngestFactory;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.file.model.FileMeta;
-import org.molgenis.fileingester.test.AbstractMolgenisSpringTest;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +26,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { FileIngesterQuartzJobTest.Config.class })
 public class FileIngesterQuartzJobTest extends AbstractMolgenisSpringTest

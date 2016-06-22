@@ -10,7 +10,9 @@ import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import java.io.IOException;
 import java.util.EnumSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.elasticsearch.common.primitives.Ints;
@@ -114,10 +116,9 @@ public abstract class AbstractElasticsearchRepository implements Repository<Enti
 	}
 
 	@Override
-	public Stream<Entity> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		Query<Entity> q = new QueryImpl<>().fetch(fetch);
-		return elasticSearchService.searchAsStream(q, getEntityMetaData());
+		throw new UnsupportedOperationException("Not supposed to be called.");
 	}
 
 	@Override

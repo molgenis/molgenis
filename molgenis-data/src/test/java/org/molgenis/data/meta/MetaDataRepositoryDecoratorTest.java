@@ -19,6 +19,9 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.Sets;
 
+import java.util.List;
+import java.util.function.Consumer;
+
 public class MetaDataRepositoryDecoratorTest
 {
 	private Repository<Entity> repo;
@@ -40,10 +43,11 @@ public class MetaDataRepositoryDecoratorTest
 	}
 
 	@Test
-	public void streamFetch()
+	public void forEachBatchedFetch()
 	{
 		Fetch fetch = new Fetch();
-		decorator.stream(fetch);
-		verify(repo, times(1)).stream(fetch);
+		Consumer<List<Entity>> consumer = mock(Consumer.class);
+		repo.forEachBatched(fetch, consumer, 234);
+		verify(repo, times(1)).forEachBatched(fetch, consumer, 234);
 	}
 }

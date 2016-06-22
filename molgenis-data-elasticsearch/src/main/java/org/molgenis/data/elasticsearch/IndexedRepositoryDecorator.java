@@ -1,37 +1,25 @@
 package org.molgenis.data.elasticsearch;
 
-import static java.util.Collections.unmodifiableSet;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.QueryUtils.containsAnyOperator;
-import static org.molgenis.data.QueryUtils.containsComputedAttribute;
-import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
-import static org.molgenis.data.RepositoryCapability.QUERYABLE;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
-
 import org.elasticsearch.common.collect.Iterators;
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
+import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Sets;
+import java.io.IOException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
+import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Collections.unmodifiableSet;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.QueryUtils.containsAnyOperator;
+import static org.molgenis.data.QueryUtils.containsComputedAttribute;
+import static org.molgenis.data.RepositoryCapability.*;
 
 /**
  * Decorator for indexed repositories. Sends all queries with operators that are not supported by the decorated
@@ -219,15 +207,15 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public Stream<Entity> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		return decoratedRepository.stream(fetch);
+		decoratedRepository.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override
 	public void rebuildIndex()
 	{
-		elasticSearchService.rebuildIndex(decoratedRepository, getEntityMetaData());
+		elasticSearchService.rebuildIndex(decoratedRepository);
 	}
 
 	/**
@@ -337,7 +325,7 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		@Override
 		public Set<RepositoryCapability> getCapabilities()
 		{
-			return Sets.newHashSet(AGGREGATEABLE, QUERYABLE);
+			return newHashSet(AGGREGATEABLE, QUERYABLE);
 		}
 
 		@Override

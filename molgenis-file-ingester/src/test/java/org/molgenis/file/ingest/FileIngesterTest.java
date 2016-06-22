@@ -1,12 +1,5 @@
 package org.molgenis.file.ingest;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-
-import java.io.File;
-
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
@@ -19,8 +12,8 @@ import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestFactory;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.file.model.FileMetaFactory;
-import org.molgenis.fileingester.test.AbstractMolgenisSpringTest;
 import org.molgenis.framework.db.EntityImportReport;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -28,6 +21,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.io.File;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
+import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 
 @ContextConfiguration(classes = { FileIngesterTest.Config.class })
 public class FileIngesterTest extends AbstractMolgenisSpringTest

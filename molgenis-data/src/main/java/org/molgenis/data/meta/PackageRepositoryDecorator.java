@@ -8,7 +8,9 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -106,9 +108,9 @@ public class PackageRepositoryDecorator implements Repository<Package>
 	}
 
 	@Override
-	public Stream<Package> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<Package>> consumer, int batchSize)
 	{
-		return decoratedRepo.stream(fetch);
+		decoratedRepo.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override
@@ -192,7 +194,7 @@ public class PackageRepositoryDecorator implements Repository<Package>
 	@Override
 	public void deleteAll()
 	{
-		stream().forEach(this::deletePackage);
+		forEach(this::deletePackage);
 	}
 
 	@Override

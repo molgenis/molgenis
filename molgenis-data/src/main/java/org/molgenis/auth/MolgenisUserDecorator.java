@@ -8,7 +8,9 @@ import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
@@ -165,9 +167,9 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 	}
 
 	@Override
-	public Stream<MolgenisUser> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<MolgenisUser>> consumer, int batchSize)
 	{
-		return decoratedRepository.stream(fetch);
+		decoratedRepository.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override

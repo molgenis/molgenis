@@ -1,7 +1,9 @@
 package org.molgenis.data;
 
 import java.io.Closeable;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -14,21 +16,24 @@ import org.molgenis.data.meta.model.EntityMetaData;
 public interface Repository<E extends Entity> extends Iterable<E>, Closeable
 {
 	/**
-	 * Streams the {@link Entity}s
+	 *  Executes a function for each batch of entities.
+	 *
+	 * @param consumer  function to call for each batch of entities
+	 * @param batchSize size of the batches to feed to the consumer
 	 */
-	default Stream<E> stream()
+	default void forEachBatched(Consumer<List<E>> consumer, int batchSize)
 	{
-		return StreamSupport.stream(spliterator(), false);
+		forEachBatched(null, consumer, batchSize);
 	}
 
 	/**
-	 * Streams the {@link Entity}s
-	 * 
-	 * @param fetch
-	 *            fetch defining which attributes to retrieve
-	 * @return Stream of all entities
+	 * Executes a function for each batch of entities.
+	 *
+	 * @param fetch     fetch defining which attributes to retrieve
+	 * @param consumer  function to call for each batch of entities
+	 * @param batchSize size of the batches to feed to the consumer
 	 */
-	Stream<E> stream(Fetch fetch);
+	void forEachBatched(Fetch fetch, Consumer<List<E>> consumer, int batchSize);
 
 	Set<RepositoryCapability> getCapabilities();
 

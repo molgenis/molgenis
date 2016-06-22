@@ -39,6 +39,11 @@ public class PostgreSqlEntityFactory
 		return new EntityMapper(entityMeta, fetch);
 	}
 
+	Iterable<Entity> getReferences(EntityMetaData refEntityMeta, Iterable<?> ids)
+	{
+		return entityManager.getReferences(refEntityMeta, ids);
+	}
+
 	private class EntityMapper implements RowMapper<Entity>
 	{
 		private final EntityMetaData entityMetaData;

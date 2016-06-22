@@ -32,7 +32,6 @@ public class BulkProcessorFactory
 			{
 				LOG.warn("Error executing bulk", failure);
 			}
-			//TODO: Why 50 and not the default 1000?
-		}).setConcurrentRequests(0).setBulkActions(50).build();
+		}).build();
 	}
 }

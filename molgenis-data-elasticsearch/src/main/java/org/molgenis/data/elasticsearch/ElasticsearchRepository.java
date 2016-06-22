@@ -2,7 +2,6 @@ package org.molgenis.data.elasticsearch;
 
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 
@@ -25,7 +24,6 @@ public class ElasticsearchRepository extends AbstractElasticsearchRepository
 	@Override
 	public void rebuildIndex()
 	{
-		Iterable<Entity> entities = elasticSearchService.search(new QueryImpl<>(this), getEntityMetaData());
-		elasticSearchService.rebuildIndex(entities, entityMetaData);
+		elasticSearchService.rebuildIndex(this);
 	}
 }

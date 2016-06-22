@@ -1,24 +1,12 @@
 package org.molgenis.file.ingest;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestFactory;
-import org.molgenis.fileingester.test.AbstractMolgenisSpringTest;
-import org.quartz.JobDetail;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.quartz.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -26,6 +14,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
+import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
 
 @ContextConfiguration(classes = { FileIngesterJobSchedulerTest.Config.class })
 public class FileIngesterJobSchedulerTest extends AbstractMolgenisSpringTest

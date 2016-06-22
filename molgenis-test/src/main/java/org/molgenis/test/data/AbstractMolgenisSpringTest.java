@@ -1,6 +1,4 @@
-package org.molgenis.fileingester.test;
-
-import java.util.Map;
+package org.molgenis.test.data;
 
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
@@ -13,9 +11,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
 
-/**
- * TODO move to molgenis-test module
- */
+import java.util.Map;
+
 @ContextConfiguration(classes = { AbstractMolgenisSpringTest.Config.class })
 public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringContextTests
 {

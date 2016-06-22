@@ -2,6 +2,7 @@ package org.molgenis.data.support;
 
 import static com.google.common.base.Predicates.notNull;
 import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.Iterables.partition;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Maps.uniqueIndex;
 
@@ -12,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -145,13 +147,6 @@ public abstract class AbstractRepository implements Repository<Entity>
 	}
 
 	@Override
-	public Stream<Entity> stream(Fetch fetch)
-	{
-		// default action: ignore fetch
-		return stream();
-	}
-
-	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		throw new UnsupportedOperationException();
@@ -238,5 +233,15 @@ public abstract class AbstractRepository implements Repository<Entity>
 	public void removeEntityListener(EntityListener entityListener)
 	{
 		throw new UnsupportedOperationException();
+	}
+
+	@Override
+	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
+	{
+		// by default: ignore fetch
+		for(List<Entity> entities: partition(this, batchSize))
+		{
+			consumer.accept(entities);
+		}
 	}
 }

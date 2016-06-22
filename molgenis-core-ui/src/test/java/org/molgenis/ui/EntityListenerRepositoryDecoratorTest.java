@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -256,7 +258,8 @@ public class EntityListenerRepositoryDecoratorTest
 	public void streamFetch()
 	{
 		Fetch fetch = new Fetch();
-		entityListenerRepositoryDecorator.stream(fetch);
-		verify(decoratedRepository, times(1)).stream(fetch);
+		Consumer<List<Entity>> consumer = mock(Consumer.class);
+		entityListenerRepositoryDecorator.forEachBatched(fetch, consumer, 543);
+		verify(decoratedRepository, times(1)).forEachBatched(fetch, consumer, 543);
 	}
 }

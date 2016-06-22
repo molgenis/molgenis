@@ -1,38 +1,46 @@
 package org.molgenis.data;
 
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.Mock;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.testng.Assert.assertEquals;
+
 public class EntityReferenceResolverDecoratorTest
 {
+	@Mock
 	private Repository<Entity> decoratedRepo;
+	@Mock
 	private EntityMetaData entityMeta;
+	@Mock
 	private EntityManager entityManager;
 	private EntityReferenceResolverDecorator entityReferenceResolverDecorator;
+	@Mock
+	private Consumer<List<Entity>> consumer;
+	@Captor
+	private ArgumentCaptor<Consumer<List<Entity>>> consumerArgumentCaptor;
+	@Captor
+	ArgumentCaptor<Stream<Entity>> streamArgumentCaptor;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		decoratedRepo = mock(Repository.class);
-		entityMeta = mock(EntityMetaData.class);
+		initMocks(this);
 		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
-		entityManager = mock(EntityManager.class);
 		entityReferenceResolverDecorator = new EntityReferenceResolverDecorator(decoratedRepo, entityManager);
 	}
 
@@ -219,12 +227,22 @@ public class EntityReferenceResolverDecoratorTest
 		Entity entity1 = mock(Entity.class);
 		Entity entity0WithRefs = mock(Entity.class);
 		Entity entity1WithRefs = mock(Entity.class);
-		Stream<Entity> entities = Stream.of(entity0, entity1);
-		when(decoratedRepo.stream(fetch)).thenReturn(entities);
-		when(entityManager.resolveReferences(entityMeta, entities, fetch))
-				.thenReturn(Stream.of(entity0WithRefs, entity1WithRefs));
-		Stream<Entity> expectedEntities = entityReferenceResolverDecorator.stream(fetch);
-		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0WithRefs, entity1WithRefs));
+		List<Entity> entities = Arrays.asList(entity0, entity1);
+		List<Entity> entitiesWithRefs = Arrays.asList(entity0WithRefs, entity1WithRefs);
+
+		when(entityManager.resolveReferences(eq(entityMeta), streamArgumentCaptor.capture(), eq(fetch)))
+				.thenReturn(entitiesWithRefs.stream());
+
+		// the test
+		entityReferenceResolverDecorator.forEachBatched(fetch, consumer, 123);
+
+		verify(decoratedRepo).forEachBatched(eq(fetch), consumerArgumentCaptor.capture(), eq(123));
+		consumerArgumentCaptor.getValue().accept(entities);
+
+		Stream<Entity> entitiesToDecorate = streamArgumentCaptor.getValue();
+
+		assertEquals(entitiesToDecorate.collect(Collectors.toList()), entities);
+		verify(consumer).accept(entitiesWithRefs);
 	}
 
 	@Test

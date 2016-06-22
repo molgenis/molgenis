@@ -12,8 +12,10 @@ import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
@@ -55,9 +57,9 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	}
 
 	@Override
-	public Stream<Language> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<Language>> consumer, int batchSize)
 	{
-		return decorated.stream(fetch);
+		decorated.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override
@@ -242,7 +244,7 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	@Override
 	public void deleteAll()
 	{
-		delete(this.stream());
+		forEachBatched(entities -> delete(entities.stream()), 1000);
 	}
 
 	@Override

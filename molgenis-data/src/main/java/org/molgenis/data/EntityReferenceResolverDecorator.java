@@ -4,7 +4,10 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.molgenis.data.QueryRule.Operator;
@@ -96,10 +99,12 @@ public class EntityReferenceResolverDecorator implements Repository<Entity>
 
 	// Resolve entity references
 	@Override
-	public Stream<Entity> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		Stream<Entity> entities = decoratedRepo.stream(fetch);
-		return resolveEntityReferences(entities, fetch);
+		decoratedRepo.forEachBatched(fetch, entities -> {
+			List<Entity> resolvedEntities = resolveEntityReferences(entities.stream(), fetch).collect(Collectors.toList());
+			consumer.accept(resolvedEntities);
+		}, batchSize);
 	}
 
 	// Resolve entity references

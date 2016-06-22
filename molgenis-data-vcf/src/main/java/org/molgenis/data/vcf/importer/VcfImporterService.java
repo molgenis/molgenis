@@ -216,10 +216,7 @@ public class VcfImporterService implements ImportService
 			}
 
 			AtomicInteger vcfEntityCount = new AtomicInteger();
-			outRepository.add(inRepository.stream().filter(entity -> {
-				vcfEntityCount.incrementAndGet();
-				return true;
-			}));
+			inRepository.forEachBatched(entities -> vcfEntityCount.addAndGet(entities.size()), 1000);
 			if (vcfEntityCount.get() > 0)
 			{
 				report.addEntityCount(entityName, vcfEntityCount.get());

@@ -1,21 +1,5 @@
 package org.molgenis.security.user;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
-import static org.testng.Assert.assertEquals;
-
-import java.util.List;
-import java.util.stream.Stream;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -23,14 +7,23 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserDecorator;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.auth.UserAuthorityFactory;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.testng.Assert.assertEquals;
 
 public class MolgenisUserDecoratorTest
 {
@@ -194,11 +187,12 @@ public class MolgenisUserDecoratorTest
 		assertEquals(entities.collect(toList()), singletonList(molgenisUser));
 	}
 
-	@Test
-	public void streamFetch()
-	{
-		Fetch fetch = new Fetch();
-		molgenisUserDecorator.stream(fetch);
-		verify(decoratedRepository, times(1)).stream(fetch);
-	}
+		@Test
+		public void forEachBatchedFetch()
+		{
+			Fetch fetch = new Fetch();
+			Consumer<List<MolgenisUser>> consumer = mock(Consumer.class);
+			molgenisUserDecorator.forEachBatched(fetch, consumer, 234);
+			verify(decoratedRepository, times(1)).forEachBatched(fetch, consumer, 234);
+		}
 }

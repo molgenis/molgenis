@@ -1,5 +1,20 @@
 package org.molgenis.data.elasticsearch.reindex.job;
 
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.reindex.meta.ReindexActionJob;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.runas.RunAsSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Scheduled;
+
+import java.util.Date;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.Stream;
+
 import static java.time.OffsetDateTime.now;
 import static java.util.Date.from;
 import static java.util.Objects.requireNonNull;
@@ -10,25 +25,8 @@ import static org.molgenis.data.jobs.model.JobExecution.Status.SUCCESS;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.END_DATE;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.STATUS;
 import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.REINDEX_ACTION_JOB;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ENTITY_FULL_NAME;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.*;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-
-import java.util.Date;
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.stream.Stream;
-
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.reindex.meta.ReindexActionJob;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.runas.RunAsSystem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.Scheduled;
 
 public class ReindexServiceImpl implements ReindexService
 {
@@ -74,7 +72,7 @@ public class ReindexServiceImpl implements ReindexService
 			reindexJobExecution.setReindexActionJobID(transactionId);
 			ReindexJob job = reindexJobFactory.createJob(reindexJobExecution);
 			CompletableFuture.runAsync(job::call, executorService)
-					.thenRun(() -> indexStatus.removeActionCounts(numberOfActionsPerEntity));
+					.whenComplete((a, b) -> indexStatus.removeActionCounts(numberOfActionsPerEntity));
 		}
 		else
 		{

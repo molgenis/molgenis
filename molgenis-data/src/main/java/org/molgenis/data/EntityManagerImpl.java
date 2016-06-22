@@ -1,21 +1,8 @@
 package org.molgenis.data;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.SetMultimap;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
@@ -27,9 +14,15 @@ import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.util.BatchingIterable;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.SetMultimap;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.StreamSupport.stream;
 
 /**
  * Entity manager responsible for creating entities, entity references and resolving references of reference attributes.

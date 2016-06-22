@@ -18,11 +18,8 @@ import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 
 import java.io.IOException;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -117,9 +114,9 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	}
 
 	@Override
-	public Stream<AttributeMetaData> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<AttributeMetaData>> consumer, int batchSize)
 	{
-		return decoratedRepo.stream(fetch);
+		decoratedRepo.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override

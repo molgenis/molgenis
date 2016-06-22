@@ -1,27 +1,23 @@
 package org.molgenis.security.owned;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.owned.OwnedEntityMetaData.OWNED;
-
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
+import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.util.EntityUtils;
+
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.security.owned.OwnedEntityMetaData.OWNED;
 
 /**
  * RepositoryDecorator that works on EntityMetaData that extends OwnedEntityMetaData.
@@ -48,18 +44,23 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public Stream<Entity> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
 		if (fetch != null)
 		{
 			fetch.field(OwnedEntityMetaData.OWNER_USERNAME);
 		}
-		Stream<Entity> entities = decoratedRepo.stream(fetch);
-		if (mustAddRowLevelSecurity())
-		{
-			entities = entities.filter(this::currentUserIsOwner);
-		}
-		return entities;
+		decoratedRepo.forEachBatched(fetch, entities -> {
+			if (mustAddRowLevelSecurity())
+			{
+				//TODO: This results in smaller batches! Should do a findAll instead!
+				consumer.accept(entities.stream().filter(this::currentUserIsOwner).collect(toList()));
+			}
+			else
+			{
+				consumer.accept(entities);
+			}
+		}, batchSize);
 	}
 
 	@Override
@@ -268,7 +269,7 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	{
 		if (mustAddRowLevelSecurity())
 		{
-			delete(decoratedRepo.stream());
+			decoratedRepo.forEachBatched(entities -> delete(entities.stream()), 1000);
 		}
 		else
 		{

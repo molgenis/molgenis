@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -125,9 +126,9 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 	}
 
 	@Override
-	public Stream<EntityMetaData> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<EntityMetaData>> consumer, int batchSize)
 	{
-		return decoratedRepo.stream(fetch);
+		decoratedRepo.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override

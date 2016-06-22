@@ -4,10 +4,13 @@ import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
+import autovalue.shaded.com.google.common.common.collect.Lists;
+import com.google.common.collect.Iterators;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.EntityWithComputedAttributes;
@@ -94,11 +97,18 @@ public class ComputedEntityValuesDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public Stream<Entity> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		Stream<Entity> entities = decoratedRepo.stream(fetch);
-		// compute values with attributes with expressions
-		return toComputedValuesEntities(entities);
+		if(getEntityMetaData().hasAttributeWithExpression())
+		{
+			decoratedRepo.forEachBatched(fetch, entities -> consumer
+					.accept(Lists.transform(entities, EntityWithComputedAttributes::new)), batchSize);
+		}
+		else
+		{
+			decoratedRepo.forEachBatched(fetch, consumer, batchSize);
+		}
+
 	}
 
 	@Override
@@ -235,32 +245,11 @@ public class ComputedEntityValuesDecorator implements Repository<Entity>
 		}
 	}
 
-	private Iterable<Entity> toComputedValuesEntities(Iterable<Entity> entities)
-	{
-		if (getEntityMetaData().hasAttributeWithExpression())
-		{
-			return new Iterable<Entity>()
-			{
-				@Override
-				public Iterator<Entity> iterator()
-				{
-					return StreamSupport.stream(entities.spliterator(), false)
-							.map(entity -> (Entity) new EntityWithComputedAttributes(entity)).iterator();
-				}
-			};
-		}
-		else
-		{
-			return entities;
-		}
-	}
-
 	private Iterator<Entity> toComputedValuesEntities(Iterator<Entity> it)
 	{
 		if (getEntityMetaData().hasAttributeWithExpression())
 		{
-			Iterable<Entity> entities = () -> it;
-			return toComputedValuesEntities(entities).iterator();
+			return Iterators.transform(it, EntityWithComputedAttributes::new);
 		}
 		else
 		{
@@ -272,9 +261,7 @@ public class ComputedEntityValuesDecorator implements Repository<Entity>
 	{
 		if (getEntityMetaData().hasAttributeWithExpression())
 		{
-			return entities.map(entity -> {
-				return new EntityWithComputedAttributes(entity);
-			});
+			return entities.map(EntityWithComputedAttributes::new);
 		}
 		else
 		{

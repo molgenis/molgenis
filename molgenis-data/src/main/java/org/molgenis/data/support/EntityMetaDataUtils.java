@@ -1,13 +1,13 @@
 package org.molgenis.data.support;
 
+import org.molgenis.data.Fetch;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Package;
+
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-
-import java.util.Iterator;
-
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.Package;
 
 public class EntityMetaDataUtils
 {
@@ -22,14 +22,7 @@ public class EntityMetaDataUtils
 	 */
 	public static Iterable<String> getAttributeNames(Iterable<AttributeMetaData> attrs)
 	{
-		return new Iterable<String>()
-		{
-			@Override
-			public Iterator<String> iterator()
-			{
-				return stream(attrs.spliterator(), false).map(AttributeMetaData::getName).iterator();
-			}
-		};
+		return () -> stream(attrs.spliterator(), false).map(AttributeMetaData::getName).iterator();
 	}
 
 	/**
@@ -53,5 +46,28 @@ public class EntityMetaDataUtils
 		{
 			return simpleName;
 		}
+	}
+
+	public static Fetch createFetchForReindexing(EntityMetaData refEntityMetaData)
+	{
+		Fetch fetch = new Fetch();
+		for (AttributeMetaData attr : refEntityMetaData.getAtomicAttributes())
+		{
+			if (attr.getRefEntity() != null)
+			{
+				Fetch attributeFetch = new Fetch();
+				for (AttributeMetaData refAttr : attr.getRefEntity().getAtomicAttributes())
+				{
+					attributeFetch.field(refAttr.getName());
+				}
+				fetch.field(attr.getName(), attributeFetch);
+			}
+			else
+			{
+				fetch.field(attr.getName());
+			}
+
+		}
+		return fetch;
 	}
 }
