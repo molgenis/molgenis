@@ -1,11 +1,11 @@
 package org.molgenis.data.vcf;
 
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,18 +17,28 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.vcf.test.AbstractMolgenisSpringTest;
 import org.molgenis.fieldtypes.FieldType;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class VcfRepositoryTest
+public class VcfRepositoryTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
 	private static File testdata;
 	private static File testnodata;
 
 	@BeforeClass
-	public static void beforeClass() throws FileNotFoundException, IOException
+	public static void beforeClass() throws IOException
 	{
 		InputStream in_data = VcfRepositoryTest.class.getResourceAsStream("/testdata.vcf");
 		testdata = new File(FileUtils.getTempDirectory(), "testdata.vcf");
@@ -42,12 +52,11 @@ public class VcfRepositoryTest
 	@Test
 	public void metaData() throws IOException
 	{
-		VcfRepository vcfRepository = null;
+		VcfAttributes vcfAttrs = mock(VcfAttributes.class);
+		VcfRepository vcfRepository = new VcfRepository(testdata, "testdata", vcfAttrs, entityMetaFactory,
+				attrMetaFactory);
 		try
 		{
-			RepositoryCollection collection = new VcfRepositoryCollection(testdata);
-			vcfRepository = (VcfRepository) collection.getRepository("testdata");
-
 			assertEquals(vcfRepository.getName(), "testdata");
 			Iterator<AttributeMetaData> it = vcfRepository.getEntityMetaData().getAttributes().iterator();
 			assertTrue(it.hasNext());
