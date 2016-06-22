@@ -19,7 +19,7 @@ import org.molgenis.ontology.core.meta.Ontology;
 import org.molgenis.ontology.core.meta.OntologyFactory;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
-import org.molgenis.ontology.importer.repository.AbstractMolgenisSpringTest;
+import org.molgenis.ontology.test.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
