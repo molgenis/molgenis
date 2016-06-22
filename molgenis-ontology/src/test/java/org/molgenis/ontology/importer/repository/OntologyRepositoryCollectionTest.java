@@ -370,8 +370,7 @@ public class OntologyRepositoryCollectionTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.ontology.core.meta", "org.molgenis.ontology.core.model",
-			"org.molgenis.data.meta.model", "org.molgenis.data.system.model" })
+	@ComponentScan({ "org.molgenis.ontology.core.meta", "org.molgenis.ontology.core.model" })
 	public static class Config
 	{
 		@Bean

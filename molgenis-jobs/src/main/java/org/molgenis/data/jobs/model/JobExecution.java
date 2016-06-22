@@ -25,8 +25,10 @@ import org.springframework.util.StringUtils;
 
 /**
  * Superclass that represents a job execution.
+ *
+ * Do not add abstract identifier to this class, see EntitySerializerTest
  */
-public abstract class JobExecution extends StaticEntity
+public class JobExecution extends StaticEntity
 {
 	public JobExecution(Entity entity)
 	{
@@ -164,7 +166,7 @@ public abstract class JobExecution extends StaticEntity
 
 	public String getResultUrl()
 	{
-		return getString(LOG);
+		return getString(RESULT_URL);
 	}
 
 	public void setResultUrl(String value)
