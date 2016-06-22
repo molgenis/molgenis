@@ -1,12 +1,18 @@
 package org.molgenis.security.account;
 
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
 import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
+import static org.molgenis.auth.MolgenisGroupMetaData.NAME;
+import static org.molgenis.auth.MolgenisUserMetaData.ACTIVATIONCODE;
+import static org.molgenis.auth.MolgenisUserMetaData.ACTIVE;
+import static org.molgenis.auth.MolgenisUserMetaData.EMAIL;
 import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.MolgenisUserMetaData.USERNAME;
 
 import java.net.URI;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,13 +20,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.auth.MolgenisGroupMember;
 import org.molgenis.auth.MolgenisGroupMemberFactory;
-import org.molgenis.auth.MolgenisGroupMetaData;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.user.MolgenisUserException;
 import org.molgenis.security.user.MolgenisUserService;
@@ -88,7 +91,7 @@ public class AccountServiceImpl implements AccountService
 			String activationEmailAddress = molgenisUser.getEmail();
 			if (activationEmailAddress == null || activationEmailAddress.isEmpty()) throw new MolgenisDataException(
 					"User '" + molgenisUser.getUsername() + "' is missing required email address");
-			activationEmailAddresses = Arrays.asList(activationEmailAddress);
+			activationEmailAddresses = asList(activationEmailAddress);
 		}
 
 		// create user
@@ -98,9 +101,7 @@ public class AccountServiceImpl implements AccountService
 		LOG.debug("created user " + molgenisUser.getUsername());
 
 		// add user to group
-		MolgenisGroup group = dataService
-				.findOne(MOLGENIS_GROUP, new QueryImpl<MolgenisGroup>().eq(MolgenisGroupMetaData.NAME, ALL_USER_GROUP),
-						MolgenisGroup.class);
+		MolgenisGroup group = dataService.query(MOLGENIS_GROUP, MolgenisGroup.class).eq(NAME, ALL_USER_GROUP).findOne();
 		MolgenisGroupMember molgenisGroupMember = null;
 		if (group != null)
 		{
@@ -116,8 +117,7 @@ public class AccountServiceImpl implements AccountService
 		try
 		{
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
-			mailMessage.setTo(activationEmailAddresses.toArray(new String[]
-			{}));
+			mailMessage.setTo(activationEmailAddresses.toArray(new String[] {}));
 			mailMessage.setSubject("User registration for " + appSettings.getTitle());
 			mailMessage.setText(createActivationEmailText(molgenisUser, activationUri));
 			mailSender.send(mailMessage);
@@ -131,16 +131,13 @@ public class AccountServiceImpl implements AccountService
 				dataService.delete(MOLGENIS_GROUP_MEMBER, molgenisGroupMember);
 			}
 
-			if (molgenisUser != null)
-			{
-				dataService.delete(MOLGENIS_USER, molgenisUser);
-			}
+			dataService.delete(MOLGENIS_USER, molgenisUser);
 
 			throw new MolgenisUserException(
 					"An error occurred. Please contact the administrator. You are not signed up!");
 		}
-		LOG.debug("send activation email for user " + molgenisUser.getUsername() + " to "
-				+ StringUtils.join(activationEmailAddresses, ','));
+		LOG.debug("send activation email for user " + molgenisUser.getUsername() + " to " + StringUtils
+				.join(activationEmailAddresses, ','));
 
 	}
 
@@ -148,21 +145,19 @@ public class AccountServiceImpl implements AccountService
 	@RunAsSystem
 	public void activateUser(String activationCode)
 	{
-		MolgenisUser molgenisUser = dataService.findOne(MOLGENIS_USER,
-				new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.ACTIVE, false).and()
-						.eq(MolgenisUserMetaData.ACTIVATIONCODE, activationCode),
-				MolgenisUser.class);
+		MolgenisUser user = dataService.query(MOLGENIS_USER, MolgenisUser.class).eq(ACTIVE, false).and()
+				.eq(ACTIVATIONCODE, activationCode).findOne();
 
-		if (molgenisUser != null)
+		if (user != null)
 		{
-			molgenisUser.setActive(true);
-			dataService.update(MOLGENIS_USER, molgenisUser);
+			user.setActive(true);
+			dataService.update(MOLGENIS_USER, user);
 
 			// send activated email to user
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
-			mailMessage.setTo(molgenisUser.getEmail());
+			mailMessage.setTo(user.getEmail());
 			mailMessage.setSubject("Your registration request for " + appSettings.getTitle());
-			mailMessage.setText(createActivatedEmailText(molgenisUser, appSettings.getTitle()));
+			mailMessage.setText(createActivatedEmailText(user, appSettings.getTitle()));
 			mailSender.send(mailMessage);
 		}
 		else
@@ -175,29 +170,24 @@ public class AccountServiceImpl implements AccountService
 	@RunAsSystem
 	public void changePassword(String username, String newPassword)
 	{
-		MolgenisUser molgenisUser = dataService
-				.findOne(MOLGENIS_USER, new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.USERNAME, username),
-						MolgenisUser.class);
-
-		if (molgenisUser == null)
+		MolgenisUser user = dataService.query(MOLGENIS_USER, MolgenisUser.class).eq(USERNAME, username).findOne();
+		if (user == null)
 		{
-			throw new MolgenisUserException("Unknown user [" + username + "]");
+			throw new MolgenisUserException(format("Unknown user [%s]"));
 		}
 
-		molgenisUser.setPassword(newPassword);
-		molgenisUser.setChangePassword(false);
-		dataService.update(MOLGENIS_USER, molgenisUser);
+		user.setPassword(newPassword);
+		user.setChangePassword(false);
+		dataService.update(MOLGENIS_USER, user);
 
-		LOG.info("Changed password of user [" + username + "]");
+		LOG.info("Changed password of user [{}]", username);
 	}
 
 	@Override
 	@RunAsSystem
 	public void resetPassword(String userEmail)
 	{
-		MolgenisUser molgenisUser = dataService
-				.findOne(MOLGENIS_USER, new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.EMAIL, userEmail),
-						MolgenisUser.class);
+		MolgenisUser molgenisUser = dataService.query(MOLGENIS_USER, MolgenisUser.class).eq(EMAIL, userEmail).findOne();
 
 		if (molgenisUser != null)
 		{

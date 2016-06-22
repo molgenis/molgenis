@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 import autovalue.shaded.com.google.common.common.collect.Lists;
 import com.google.common.collect.Iterators;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 
 public class ComputedEntityValuesDecorator implements Repository<Entity>

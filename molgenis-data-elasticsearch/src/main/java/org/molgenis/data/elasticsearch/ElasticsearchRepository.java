@@ -2,7 +2,8 @@ package org.molgenis.data.elasticsearch;
 
 import static java.util.Objects.requireNonNull;
 
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.QueryImpl;
 
 public class ElasticsearchRepository extends AbstractElasticsearchRepository
 {

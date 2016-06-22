@@ -12,8 +12,8 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.convert.DateToStringConverter;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 public abstract class AbstractEntity implements Entity
 {

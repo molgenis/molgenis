@@ -14,7 +14,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 public class DisMaxQueryGenerator implements QueryPartGenerator
 {

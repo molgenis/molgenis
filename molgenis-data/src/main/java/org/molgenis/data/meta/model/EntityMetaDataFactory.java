@@ -1,4 +1,4 @@
-package org.molgenis.data.meta;
+package org.molgenis.data.meta.model;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.springframework.beans.factory.annotation.Autowired;

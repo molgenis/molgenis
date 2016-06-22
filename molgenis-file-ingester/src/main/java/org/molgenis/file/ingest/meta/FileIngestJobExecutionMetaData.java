@@ -2,8 +2,8 @@ package org.molgenis.file.ingest.meta;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 import org.molgenis.data.jobs.JobExecutionMetaData;
 import org.molgenis.data.meta.SystemEntityMetaData;

@@ -1,27 +1,5 @@
 package org.molgenis.data.i18n;
 
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.molgenis.data.*;
-import org.molgenis.data.meta.AttributeMetaDataFactory;
-import org.molgenis.data.meta.MetaDataService;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
 public class LanguageRepositoryDecoratorTest
 {
 //	@Mock

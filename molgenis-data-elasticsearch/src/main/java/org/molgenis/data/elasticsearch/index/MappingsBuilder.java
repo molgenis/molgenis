@@ -6,8 +6,8 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Builds mappings for a documentType. For each column a multi_field is created, one analyzed for searching and one

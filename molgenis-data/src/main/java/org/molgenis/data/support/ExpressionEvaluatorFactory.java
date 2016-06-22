@@ -1,7 +1,7 @@
 package org.molgenis.data.support;
 
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import com.google.gson.Gson;
 

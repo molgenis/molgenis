@@ -1,7 +1,7 @@
 package org.molgenis.data.support;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 import java.util.Iterator;
@@ -17,8 +17,8 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

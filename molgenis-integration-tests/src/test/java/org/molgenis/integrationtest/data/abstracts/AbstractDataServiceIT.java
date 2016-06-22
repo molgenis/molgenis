@@ -27,7 +27,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.Sort;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.AfterMethod;

@@ -22,8 +22,8 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Sort;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
@@ -324,7 +324,7 @@ class PostgreSqlQueryGenerator
 
 	/**
 	 * Produces SQL to count the number of entities that match the given query. Ignores query offset and pagesize.
-	 * 
+	 *
 	 * @param q
 	 * @param parameters
 	 * @return
@@ -595,7 +595,7 @@ class PostgreSqlQueryGenerator
 						parameters.add(convertedVal);
 					}
 					if (result.length() > 0 && !result.toString().endsWith(" OR ") && !result.toString()
-							.endsWith(" AND "))
+							.endsWith(" AND ") && !result.toString().endsWith(" NOT "))
 					{
 						result.append(" AND ");
 					}

@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Repository gives access to a collection of Entity. Synonyms: EntityReader, EntitySource, EntityCollection

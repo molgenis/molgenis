@@ -9,8 +9,8 @@ import static org.molgenis.data.jobs.JobExecutionMetaData.STATUS;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

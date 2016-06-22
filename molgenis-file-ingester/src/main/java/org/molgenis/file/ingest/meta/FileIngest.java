@@ -14,7 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
 public class FileIngest extends StaticEntity

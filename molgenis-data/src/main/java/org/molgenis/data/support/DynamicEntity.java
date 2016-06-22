@@ -1,21 +1,21 @@
 package org.molgenis.data.support;
 
-import static com.google.common.collect.Maps.newHashMap;
-import static java.lang.String.format;
-import static java.util.Collections.emptyList;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Map;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import static com.google.common.collect.Maps.newHashMap;
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.StreamSupport.stream;
 
 /**
  * Class for entities not defined in pre-existing Java classes
@@ -190,27 +190,25 @@ public class DynamicEntity implements Entity
 		throw new RuntimeException("TODO implement");
 	}
 
-	private void validateValueType(String attrName, Object value)
+	/**
+	 * Validate is value is of the type defined by the attribute data type.
+	 *
+	 * @param attrName attribute name
+	 * @param value    value (must be of the type defined by the attribute data type.)
+	 */
+	protected void validateValueType(String attrName, Object value)
 	{
 		if (value == null)
 		{
 			return;
 		}
 
-		// FIXME remove try-catch that deals with bootstrapping exceptions
-		AttributeMetaData attr;
-		try
+		AttributeMetaData attr = entityMeta.getAttribute(attrName);
+		if (attr == null)
 		{
-			attr = entityMeta.getAttribute(attrName);
-			if (attr == null)
-			{
-				throw new UnknownAttributeException(format("Unknown attribute [%s]", attrName));
-			}
+			throw new UnknownAttributeException(format("Unknown attribute [%s]", attrName));
 		}
-		catch (Exception e)
-		{
-			return;
-		}
+
 		MolgenisFieldTypes.FieldTypeEnum dataType = attr.getDataType().getEnumType();
 		switch (dataType)
 		{
@@ -281,7 +279,7 @@ public class DynamicEntity implements Entity
 				{
 					throw new MolgenisDataException(
 							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
-									value.getClass().getSimpleName(), Double.class.getSimpleName()));
+									value.getClass().getSimpleName(), Integer.class.getSimpleName()));
 				}
 				break;
 			case LONG:
@@ -289,7 +287,7 @@ public class DynamicEntity implements Entity
 				{
 					throw new MolgenisDataException(
 							format("Value [%s] is of type [%s] instead of [%s]", value.toString(),
-									value.getClass().getSimpleName(), Double.class.getSimpleName()));
+									value.getClass().getSimpleName(), Long.class.getSimpleName()));
 				}
 				break;
 			default:

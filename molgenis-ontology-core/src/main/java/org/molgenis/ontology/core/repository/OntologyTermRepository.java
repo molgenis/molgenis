@@ -244,7 +244,7 @@ public class OntologyTermRepository
 
 		for (Entity ontologyTermNodePathEntity : ontologyTermNodePathEntities)
 		{
-			return ontologyTermNodePathEntity.getString(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR);
+			return ontologyTermNodePathEntity.getString(OntologyTermNodePathMetaData.NODE_PATH);
 		}
 
 		return null;
@@ -304,7 +304,7 @@ public class OntologyTermRepository
 
 	public List<OntologyTerm> getChildOntologyTermsByNodePath(Entity ontologyEntity, Entity nodePathEntity)
 	{
-		String nodePath = nodePathEntity.getString(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR);
+		String nodePath = nodePathEntity.getString(OntologyTermNodePathMetaData.NODE_PATH);
 
 		Iterable<Entity> relatedOntologyTermEntities = new Iterable<Entity>()
 		{
@@ -330,7 +330,7 @@ public class OntologyTermRepository
 	{
 		Iterable<Entity> nodePathEntities = entity.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH);
 		return Lists.newArrayList(nodePathEntities).stream().anyMatch(nodePathEntity -> {
-			String childNodePath = nodePathEntity.getString(OntologyTermNodePathMetaData.ONTOLOGY_TERM_NODE_PATH_ATTR);
+			String childNodePath = nodePathEntity.getString(OntologyTermNodePathMetaData.NODE_PATH);
 			return !StringUtils.equals(nodePath, childNodePath) && childNodePath.startsWith(nodePath);
 		});
 	}

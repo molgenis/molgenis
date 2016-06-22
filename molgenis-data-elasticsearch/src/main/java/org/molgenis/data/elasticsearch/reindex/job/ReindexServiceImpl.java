@@ -2,6 +2,7 @@ package org.molgenis.data.elasticsearch.reindex.job;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.reindex.meta.ReindexActionJob;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
@@ -24,9 +25,7 @@ import static org.molgenis.data.jobs.JobExecution.Status.SUCCESS;
 import static org.molgenis.data.jobs.JobExecutionMetaData.END_DATE;
 import static org.molgenis.data.jobs.JobExecutionMetaData.STATUS;
 import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.REINDEX_ACTION_JOB;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ENTITY_FULL_NAME;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.*;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 public class ReindexServiceImpl implements ReindexService
@@ -35,13 +34,13 @@ public class ReindexServiceImpl implements ReindexService
 
 	private final DataService dataService;
 	private final ReindexJobFactory reindexJobFactory;
+	private final ReindexJobExecutionFactory reindexJobExecutionFactory;
+
 	/**
 	 * The {@link ReindexJob}s are executed on this thread.
 	 */
 	private final ExecutorService executorService;
-
 	private final IndexStatus indexStatus = new IndexStatus();
-	private final ReindexJobExecutionFactory reindexJobExecutionFactory;
 
 	public ReindexServiceImpl(DataService dataService, ReindexJobFactory reindexJobFactory,
 			ReindexJobExecutionFactory reindexJobExecutionFactory, ExecutorService executorService)
@@ -57,7 +56,8 @@ public class ReindexServiceImpl implements ReindexService
 	public void rebuildIndex(String transactionId)
 	{
 		LOG.trace("Reindex transaction with id {}...", transactionId);
-		Entity reindexActionJob = dataService.findOneById(REINDEX_ACTION_JOB, transactionId);
+		ReindexActionJob reindexActionJob = dataService
+				.findOneById(REINDEX_ACTION_JOB, transactionId, ReindexActionJob.class);
 
 		if (reindexActionJob != null)
 		{

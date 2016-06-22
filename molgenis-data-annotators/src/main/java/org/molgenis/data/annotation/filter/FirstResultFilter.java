@@ -5,7 +5,7 @@ import java.util.Collections;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.entity.ResultFilter;
-import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;

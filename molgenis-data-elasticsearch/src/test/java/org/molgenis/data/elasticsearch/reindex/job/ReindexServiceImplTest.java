@@ -1,29 +1,5 @@
 package org.molgenis.data.elasticsearch.reindex.job;
 
-import static java.util.concurrent.TimeUnit.MINUTES;
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMeta.REINDEX_JOB_EXECUTION;
-import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.REINDEX_ACTION_JOB;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ENTITY_FULL_NAME;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.concurrent.ExecutorService;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Stream;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
@@ -33,16 +9,32 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.EntityMetaDataFactory;
-import org.molgenis.data.reindex.meta.IndexPackage;
 import org.molgenis.data.reindex.meta.ReindexActionJob;
 import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
-import org.molgenis.data.reindex.meta.ReindexActionMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.user.MolgenisUserService;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
+
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMeta.REINDEX_JOB_EXECUTION;
+import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.REINDEX_ACTION_JOB;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 public class ReindexServiceImplTest
 {
@@ -78,6 +70,8 @@ public class ReindexServiceImplTest
 	@Mock
 	private Stream<Entity> jobExecutions;
 
+	@Mock
+	private ReindexActionJobMetaData reindexActionJobMetaData;
 	@InjectMocks
 	private ReindexServiceImpl rebuildIndexService;
 
@@ -91,8 +85,7 @@ public class ReindexServiceImplTest
 	public void setUp() throws Exception
 	{
 		initMocks(this);
-		EntityMetaDataFactory factory = new EntityMetaDataFactory();
-		reindexActionEntity = new ReindexActionJob();
+		reindexActionEntity = new ReindexActionJob(reindexActionJobMetaData);
 		reindexActionEntity.set(ENTITY_FULL_NAME, "test_TestEntity");
 	}
 
@@ -108,8 +101,7 @@ public class ReindexServiceImplTest
 	{
 		when(dataService.findOneById(REINDEX_ACTION_JOB, "abcde")).thenReturn(reindexActionJobEntity);
 
-		when(dataService.findAll(REINDEX_ACTION,
-				new QueryImpl<>().eq(REINDEX_ACTION_GROUP, reindexActionJobEntity)))
+		when(dataService.findAll(REINDEX_ACTION, new QueryImpl<>().eq(REINDEX_ACTION_GROUP, reindexActionJobEntity)))
 				.thenReturn(Stream.of(reindexActionEntity));
 
 		when(reindexJobFactory.createJob(reindexJobExecutionCaptor.capture())).thenReturn(reindexJob);

@@ -6,7 +6,7 @@ import static org.testng.Assert.assertNull;
 import java.text.SimpleDateFormat;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 public class AbstractDatetimeDatatypeIT extends AbstractDatatypeIT
 {

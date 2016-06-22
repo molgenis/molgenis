@@ -3,29 +3,29 @@ package org.molgenis.data.importer;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.i18n.I18nUtils.getLanguageCode;
 import static org.molgenis.data.i18n.I18nUtils.isI18n;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.AGGREGATEABLE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.DATA_TYPE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.DEFAULT_VALUE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.ENUM_OPTIONS;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.EXPRESSION;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.NAME;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.NILLABLE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MAX;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.RANGE_MIN;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.READ_ONLY;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.REF_ENTITY;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.TAGS;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.UNIQUE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.VALIDATION_EXPRESSION;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.VISIBLE;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
-import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.AGGREGATEABLE;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.DATA_TYPE;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.DEFAULT_VALUE;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ENUM_OPTIONS;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.EXPRESSION;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.LABEL;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.NAME;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.NILLABLE;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.RANGE_MAX;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.RANGE_MIN;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.READ_ONLY;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.REF_ENTITY;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.TAGS;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.UNIQUE;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.VALIDATION_EXPRESSION;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.VISIBLE;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ABSTRACT;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.BACKEND;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.EXTENDS;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.PACKAGE;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -50,16 +50,16 @@ import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.I18nUtils;
 import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.AttributeMetaDataFactory;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaValidationUtils;
-import org.molgenis.data.meta.Package;
-import org.molgenis.data.meta.PackageFactory;
-import org.molgenis.data.meta.PackageMetaData;
-import org.molgenis.data.meta.TagMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageFactory;
+import org.molgenis.data.meta.model.PackageMetaData;
+import org.molgenis.data.meta.model.TagMetaData;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.fieldtypes.CompoundField;
 import org.molgenis.fieldtypes.EnumField;
@@ -705,8 +705,8 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (name == null) throw new IllegalArgumentException("package.name is missing on line " + i);
 
 			String simpleName = name;
-			String description = pack.getString(org.molgenis.data.meta.PackageMetaData.DESCRIPTION);
-			String parentName = pack.getString(org.molgenis.data.meta.PackageMetaData.PARENT);
+			String description = pack.getString(PackageMetaData.DESCRIPTION);
+			String parentName = pack.getString(PackageMetaData.PARENT);
 			Package parent = null;
 			if (parentName != null)
 			{
@@ -770,7 +770,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		for (Entity pack : packageRepo)
 		{
 			String name = pack.getString(NAME);
-			String parentName = pack.getString(org.molgenis.data.meta.PackageMetaData.PARENT);
+			String parentName = pack.getString(PackageMetaData.PARENT);
 
 			if (parentName == null)
 			{
@@ -791,7 +791,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			for (Entity pack : unresolved)
 			{
-				Entity parent = resolvedByName.get(pack.getString(org.molgenis.data.meta.PackageMetaData.PARENT));
+				Entity parent = resolvedByName.get(pack.getString(PackageMetaData.PARENT));
 				if (parent != null)
 				{
 					String name = pack.getString(NAME);

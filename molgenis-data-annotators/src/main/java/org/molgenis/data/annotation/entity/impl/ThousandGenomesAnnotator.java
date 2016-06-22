@@ -1,29 +1,20 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.CHROMOSOMES;
 import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.FILEPATTERN;
 import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES;
 import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.ROOT_DIRECTORY;
 
-import java.util.Collections;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.entity.AnnotatorInfo;
-import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
-import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
-import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.MultiFileResource;
 import org.molgenis.data.annotation.resources.impl.MultiResourceConfigImpl;
 import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
-import org.molgenis.data.meta.AttributeMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

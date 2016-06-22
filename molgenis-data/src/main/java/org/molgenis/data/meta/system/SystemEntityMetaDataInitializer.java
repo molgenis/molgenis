@@ -7,13 +7,13 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 import org.molgenis.data.i18n.I18nStringMetaData;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.MetaPackage;
-import org.molgenis.data.meta.RootSystemPackage;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.SystemPackage;
+import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.MetaPackage;
+import org.molgenis.data.system.model.RootSystemPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;

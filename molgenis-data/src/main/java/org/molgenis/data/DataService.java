@@ -4,8 +4,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * DataService is a facade that manages data sources Entity names should be unique over all data sources.

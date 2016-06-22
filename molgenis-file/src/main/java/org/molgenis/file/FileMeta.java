@@ -7,7 +7,7 @@ import static org.molgenis.file.FileMetaMetaData.SIZE;
 import static org.molgenis.file.FileMetaMetaData.URL;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 

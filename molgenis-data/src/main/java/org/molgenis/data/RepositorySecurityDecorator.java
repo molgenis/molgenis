@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.AggregateAnonymizerImpl;
 import org.molgenis.data.support.QueryImpl;

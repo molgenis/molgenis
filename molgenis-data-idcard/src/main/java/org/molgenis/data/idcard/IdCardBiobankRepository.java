@@ -24,7 +24,7 @@ import org.molgenis.data.idcard.model.IdCardBiobank;
 import org.molgenis.data.idcard.model.IdCardBiobankFactory;
 import org.molgenis.data.idcard.model.IdCardBiobankMetaData;
 import org.molgenis.data.idcard.settings.IdCardIndexerSettings;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -145,7 +145,7 @@
                                     </resource>
                                 </resources>
                             </configuration>
-                        </execution>                    
+                        </execution>
                         <!--
                             Copying the das server config to the war ROOT
                             the uk.ac.ebi.mydas.controller.MydasServlet cannot find the file if

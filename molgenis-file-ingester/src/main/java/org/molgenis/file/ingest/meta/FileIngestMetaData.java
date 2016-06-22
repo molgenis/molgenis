@@ -1,14 +1,14 @@
 package org.molgenis.file.ingest.meta;
 
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
-import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
 import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.StringField;
 import org.springframework.beans.factory.annotation.Autowired;

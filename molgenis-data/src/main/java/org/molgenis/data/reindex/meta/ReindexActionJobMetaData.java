@@ -1,8 +1,8 @@
 package org.molgenis.data.reindex.meta;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.reindex.meta.IndexPackage.PACKAGE_INDEX;
 
 import org.molgenis.MolgenisFieldTypes;

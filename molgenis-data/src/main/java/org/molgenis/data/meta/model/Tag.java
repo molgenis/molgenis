@@ -1,11 +1,4 @@
-package org.molgenis.data.meta;
-
-import static org.molgenis.data.meta.TagMetaData.CODE_SYSTEM;
-import static org.molgenis.data.meta.TagMetaData.IDENTIFIER;
-import static org.molgenis.data.meta.TagMetaData.LABEL;
-import static org.molgenis.data.meta.TagMetaData.OBJECT_IRI;
-import static org.molgenis.data.meta.TagMetaData.RELATION_IRI;
-import static org.molgenis.data.meta.TagMetaData.RELATION_LABEL;
+package org.molgenis.data.meta.model;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.StaticEntity;
@@ -44,67 +37,67 @@ public class Tag extends StaticEntity
 
 	public String getIdentifier()
 	{
-		return getString(IDENTIFIER);
+		return getString(TagMetaData.IDENTIFIER);
 	}
 
 	public Tag setIdentifier(String identifier)
 	{
-		set(IDENTIFIER, identifier);
+		set(TagMetaData.IDENTIFIER, identifier);
 		return this;
 	}
 
 	public String getObjectIri()
 	{
-		return getString(OBJECT_IRI);
+		return getString(TagMetaData.OBJECT_IRI);
 	}
 
 	public Tag setObjectIri(String objectIri)
 	{
-		set(OBJECT_IRI, objectIri);
+		set(TagMetaData.OBJECT_IRI, objectIri);
 		return this;
 	}
 
 	public String getLabel()
 	{
-		return getString(LABEL);
+		return getString(TagMetaData.LABEL);
 	}
 
 	public Tag setLabel(String label)
 	{
-		set(LABEL, label);
+		set(TagMetaData.LABEL, label);
 		return this;
 	}
 
 	public String getRelationIri()
 	{
-		return getString(RELATION_IRI);
+		return getString(TagMetaData.RELATION_IRI);
 	}
 
 	public Tag setRelationIri(String relationIri)
 	{
-		set(RELATION_IRI, relationIri);
+		set(TagMetaData.RELATION_IRI, relationIri);
 		return this;
 	}
 
 	public String getRelationLabel()
 	{
-		return getString(RELATION_LABEL);
+		return getString(TagMetaData.RELATION_LABEL);
 	}
 
 	public Tag setRelationLabel(String relationLabel)
 	{
-		set(RELATION_LABEL, relationLabel);
+		set(TagMetaData.RELATION_LABEL, relationLabel);
 		return this;
 	}
 
 	public String getCodeSystem()
 	{
-		return getString(CODE_SYSTEM);
+		return getString(TagMetaData.CODE_SYSTEM);
 	}
 
 	public Tag setCodeSystem(String codeSystem)
 	{
-		set(CODE_SYSTEM, codeSystem);
+		set(TagMetaData.CODE_SYSTEM, codeSystem);
 		return this;
 	}
 }

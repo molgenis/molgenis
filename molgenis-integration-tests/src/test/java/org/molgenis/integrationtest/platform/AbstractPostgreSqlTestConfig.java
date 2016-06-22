@@ -1,40 +1,11 @@
 package org.molgenis.integrationtest.platform;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.Properties;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
-import org.molgenis.data.DataService;
-import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.PostgreSqlEntityFactory;
-import org.molgenis.data.postgresql.PostgreSqlRepository;
-import org.molgenis.data.postgresql.PostgreSqlRepositoryCollection;
 import org.molgenis.integrationtest.data.AbstractDataApiTestConfig;
-import org.molgenis.util.ResourceUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
-import org.springframework.jdbc.core.JdbcTemplate;
 
-import com.mchange.v2.c3p0.ComboPooledDataSource;
-
-@Import(
-{ PostgreSqlEntityFactory.class, PostgreSqlConfiguration.class })
+@Import({ PostgreSqlEntityFactory.class, PostgreSqlConfiguration.class })
 public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestConfig
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractPostgreSqlTestConfig.class);

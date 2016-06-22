@@ -17,6 +17,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Repository decorator for entities, attributes and packages repositories.

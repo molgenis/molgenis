@@ -1,8 +1,6 @@
-package org.molgenis.data.meta;
+package org.molgenis.data.meta.model;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.IDENTIFIER;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.Entity;
@@ -22,7 +20,7 @@ public class AttributeMetaDataFactory implements EntityFactory<AttributeMetaData
 	@Override
 	public String getEntityName()
 	{
-		return ATTRIBUTE_META_DATA;
+		return AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 	}
 
 	@Override
@@ -35,7 +33,7 @@ public class AttributeMetaDataFactory implements EntityFactory<AttributeMetaData
 	public AttributeMetaData create(String entityId)
 	{
 		AttributeMetaData attrMeta = create();
-		attrMeta.set(IDENTIFIER, entityId);
+		attrMeta.set(AttributeMetaDataMetaData.IDENTIFIER, entityId);
 		return attrMeta;
 	}
 
@@ -50,5 +48,10 @@ public class AttributeMetaDataFactory implements EntityFactory<AttributeMetaData
 	public void setAttributeMetaDataMetaData(AttributeMetaDataMetaData attrMetaMeta)
 	{
 		this.attrMetaMeta = requireNonNull(attrMetaMeta);
+	}
+
+	public AttributeMetaDataMetaData getAttributeMetaDataMetaData()
+	{
+		return attrMetaMeta;
 	}
 }

@@ -1,35 +1,31 @@
 package org.molgenis.data;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.DynamicEntity;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.support.DynamicEntity;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 public class EntityManagerImplTest
 {
 	private DataService dataService;
 	private EntityManagerImpl entityManagerImpl;
+	private EntityFactoryRegistry entityFactoryRegistry;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		dataService = mock(DataService.class);
-		entityManagerImpl = new EntityManagerImpl(dataService, null);
+		entityFactoryRegistry = mock(EntityFactoryRegistry.class);
+		entityManagerImpl = new EntityManagerImpl(dataService, entityFactoryRegistry);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)

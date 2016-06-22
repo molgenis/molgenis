@@ -4,7 +4,7 @@ import static org.molgenis.auth.UserAuthorityMetaData.ID;
 import static org.molgenis.auth.UserAuthorityMetaData.MOLGENIS_USER;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 public class UserAuthority extends Authority
 {

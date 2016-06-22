@@ -3,7 +3,7 @@ package org.molgenis.data.mapper.service.impl;
 import java.util.Map;
 import java.util.stream.Stream;
 
-import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 
 /**

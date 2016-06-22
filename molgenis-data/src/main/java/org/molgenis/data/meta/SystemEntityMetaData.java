@@ -2,9 +2,15 @@ package org.molgenis.data.meta;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.system.SystemAttributeMetaData;
+import org.molgenis.data.support.BootstrapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
 /**
@@ -47,7 +53,7 @@ public abstract class SystemEntityMetaData extends EntityMetaData
 
 	public void bootstrap(EntityMetaDataMetaData entityMetaDataMetaData)
 	{
-		super.init(entityMetaDataMetaData);
+		super.init(new BootstrapEntity(entityMetaDataMetaData));
 		setName(systemPackageName + PACKAGE_SEPARATOR + entityName);
 		setSimpleName(entityName);
 		init();
@@ -77,7 +83,8 @@ public abstract class SystemEntityMetaData extends EntityMetaData
 
 	public AttributeMetaData addAttribute(String attrName, AttributeMetaData parentAttr, AttributeRole... attrTypes)
 	{
-		AttributeMetaData attr = attributeMetaDataFactory.create();
+		AttributeMetaData attr = new SystemAttributeMetaData(attributeMetaDataFactory.getAttributeMetaDataMetaData());
+		attr.setDefaultValues();
 		attr.setName(attrName);
 		if (parentAttr != null)
 		{

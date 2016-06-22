@@ -20,7 +20,7 @@ import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.processor.CellProcessor;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;

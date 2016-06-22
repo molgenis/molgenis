@@ -6,7 +6,7 @@ import java.text.ParseException;
 import java.util.Date;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.util.MolgenisDateFormat;
 
 public abstract class AbstractDateDatatypeIT extends AbstractDatatypeIT
