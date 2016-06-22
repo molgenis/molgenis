@@ -557,15 +557,14 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		Entity entityToUpdate = findOneById(entity.getIdValue());
 		validationResource.getReadonlyAttrs().forEach(readonlyAttr -> {
 			Object value = entity.get(readonlyAttr.getName());
-			Object existingValue =null;
+			Object existingValue = null;
 			try
 			{
 				existingValue = entityToUpdate.get(readonlyAttr.getName());
 			}
 			catch (Exception e)
 			{
-
-					System.out.print(true);
+				throw new RuntimeException(e);
 			}
 
 			if (readonlyAttr.getDataType() instanceof XrefField)

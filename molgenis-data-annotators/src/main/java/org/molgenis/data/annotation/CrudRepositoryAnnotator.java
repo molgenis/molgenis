@@ -12,7 +12,6 @@ import org.molgenis.data.vcf.VcfAttributes;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -59,7 +58,6 @@ public class CrudRepositoryAnnotator
 	 * @param annotator
 	 * @param repository
 	 */
-	@Transactional
 	public Repository<Entity> annotate(RepositoryAnnotator annotator, Repository<Entity> repository) throws IOException
 	{
 		if (!repository.getCapabilities().contains(RepositoryCapability.WRITABLE))
@@ -75,7 +73,8 @@ public class CrudRepositoryAnnotator
 					() -> addAnnotatorMetadataToRepositories(entityMetaData, annotator.getSimpleName(),
 							attributeMetaDatas));
 
-			Repository<Entity> crudRepository = iterateOverEntitiesAndAnnotate(repository, annotator);
+			Repository<Entity> crudRepository = iterateOverEntitiesAndAnnotate(
+					dataService.getRepository(repository.getName()), annotator);
 			return crudRepository;
 		}
 		catch (Exception e)
@@ -125,12 +124,15 @@ public class CrudRepositoryAnnotator
 	private void addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, String annotatorName,
 			List<AttributeMetaData> attributeMetaDatas)
 	{
-		//AttributeMetaData compoundAttributeMetaData = attributeMetaDataFactory.create()
-		//		.setName("MOLGENIS_" + annotatorName).setDataType(COMPOUND);
+		//FIXME: add the attributes in the compound once the generating of id's in the factory is implemented
+		//currently this would nullpointer
+		AttributeMetaData compoundAttributeMetaData = attributeMetaDataFactory.create()
+				.setName("MOLGENIS_" + annotatorName).setDataType(COMPOUND);
 		if (entityMetaData.getAttribute(annotatorName) == null)
 		{
 			for (AttributeMetaData part : attributeMetaDatas)
 			{
+				//compoundAttributeMetaData.addAttributePart(part);
 				entityMetaData.addAttribute(part);
 			}
 			//entityMetaData.addAttribute(compoundAttributeMetaData);

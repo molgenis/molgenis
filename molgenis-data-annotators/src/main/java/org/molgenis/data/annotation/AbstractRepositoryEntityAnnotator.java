@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 public abstract class AbstractRepositoryEntityAnnotator extends AbstractRepositoryAnnotator
 {
 	@Override
-	@Transactional
 	@RunAsSystem
 	public Iterator<Entity> annotate(final Iterable<Entity> sourceIterable)
 	{
