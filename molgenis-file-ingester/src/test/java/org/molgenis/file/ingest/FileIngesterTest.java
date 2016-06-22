@@ -50,12 +50,11 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 	private ImportService importServiceMock;
 	private FileRepositoryCollection fileRepositoryCollectionMock;
 
-	private final String entityName = "test";
-	private final String url = "http://www.test.nl/test";
-	private final String identifier = "identifier";
+	private static final String entityName = "test";
+	private static final String url = "http://www.test.nl/test";
+	private static final String identifier = "identifier";
 	private final File f = new File("");
 	private final EntityImportReport report = new EntityImportReport();
-	private FileIngest fileIngest;
 
 	private Progress progress;
 
@@ -67,7 +66,7 @@ public class FileIngesterTest extends AbstractMolgenisSpringTest
 		progress = mock(Progress.class);
 
 		EntityMetaData entityMetaData = when(mock(EntityMetaData.class).getName()).thenReturn("target").getMock();
-		fileIngest = fileIngestFactory.create();
+		FileIngest fileIngest = fileIngestFactory.create();
 		fileIngest.set(FileIngestMetaData.ENTITY_META_DATA, entityMetaData);
 		fileIngest.set(FileIngestMetaData.URL, url);
 		fileIngest.set(FileIngestMetaData.LOADER, "CSV");
