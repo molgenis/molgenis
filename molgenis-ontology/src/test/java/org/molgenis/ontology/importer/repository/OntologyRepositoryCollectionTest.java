@@ -32,6 +32,7 @@ import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
+import org.molgenis.ontology.test.AbstractMolgenisSpringTest;
 import org.molgenis.util.ResourceUtils;
 import org.semanticweb.owlapi.model.OWLOntologyCreationException;
 import org.springframework.beans.BeanUtils;

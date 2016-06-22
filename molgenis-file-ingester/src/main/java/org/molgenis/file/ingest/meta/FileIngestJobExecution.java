@@ -7,7 +7,7 @@ import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_
 import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.file.FileMeta;
+import org.molgenis.file.model.FileMeta;
 
 public class FileIngestJobExecution extends JobExecution
 {

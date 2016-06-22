@@ -5,7 +5,7 @@ import static org.testng.Assert.assertNotNull;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.file.FileMeta;
+import org.molgenis.file.model.FileMeta;
 
 public class AbstractFileDatatypeIT extends AbstractDatatypeIT
 {

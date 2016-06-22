@@ -1,4 +1,4 @@
-package org.molgenis.file;
+package org.molgenis.file.model;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.springframework.beans.factory.annotation.Autowired;

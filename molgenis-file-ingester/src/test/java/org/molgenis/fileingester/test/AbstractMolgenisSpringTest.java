@@ -1,4 +1,4 @@
-package org.molgenis.ontology.importer.repository;
+package org.molgenis.fileingester.test;
 
 import java.util.Map;
 

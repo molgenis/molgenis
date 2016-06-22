@@ -1,7 +1,7 @@
 package org.molgenis.file;
 
 import static org.molgenis.file.FileDownloadController.URI;
-import static org.molgenis.file.FileMetaMetaData.FILE_META;
+import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import java.io.File;
@@ -12,6 +12,7 @@ import java.io.InputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.molgenis.data.DataService;
+import org.molgenis.file.model.FileMeta;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;

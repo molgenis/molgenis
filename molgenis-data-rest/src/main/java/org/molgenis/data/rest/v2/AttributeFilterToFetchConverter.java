@@ -10,7 +10,7 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.file.FileMetaMetaData;
+import org.molgenis.file.model.FileMetaMetaData;
 
 /**
  * Converts {@link AttributeFilter} to {@link Fetch}.

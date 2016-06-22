@@ -1,4 +1,4 @@
-package org.molgenis.test;
+package org.molgenis.jobs.test;
 
 import java.util.Map;
 

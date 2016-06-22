@@ -1,10 +1,10 @@
-package org.molgenis.file.ingest.meta;
+package org.molgenis.file.ingest;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
 
 import org.molgenis.data.DataService;
-import org.molgenis.file.ingest.FileIngesterJobScheduler;
+import org.molgenis.file.ingest.meta.FileIngest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

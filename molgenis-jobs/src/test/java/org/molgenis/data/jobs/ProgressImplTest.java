@@ -7,7 +7,7 @@ import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
-import org.molgenis.test.AbstractMolgenisSpringTest;
+import org.molgenis.jobs.test.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;

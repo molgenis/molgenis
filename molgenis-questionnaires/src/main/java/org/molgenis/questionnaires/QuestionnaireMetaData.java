@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
+import org.molgenis.security.owned.OwnedEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
