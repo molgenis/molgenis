@@ -1,29 +1,5 @@
 package org.molgenis.ontology.sorta;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.data.QueryRule.Operator.AND;
-import static org.molgenis.data.QueryRule.Operator.DIS_MAX;
-import static org.molgenis.data.QueryRule.Operator.EQUALS;
-import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH;
-import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH_NGRAM;
-import static org.molgenis.data.QueryRule.Operator.IN;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
-import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.COMBINED_SCORE;
-import static org.testng.Assert.assertEquals;
-
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Stream;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
@@ -31,21 +7,11 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.core.meta.Ontology;
-import org.molgenis.ontology.core.meta.OntologyFactory;
-import org.molgenis.ontology.core.meta.OntologyMetaData;
-import org.molgenis.ontology.core.meta.OntologyTerm;
-import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotation;
-import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationFactory;
-import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermFactory;
-import org.molgenis.ontology.core.meta.OntologyTermMetaData;
-import org.molgenis.ontology.core.meta.OntologyTermSynonym;
-import org.molgenis.ontology.core.meta.OntologyTermSynonymFactory;
+import org.molgenis.ontology.core.meta.*;
 import org.molgenis.ontology.roc.InformationContentService;
 import org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
-import org.molgenis.ontology.test.AbstractMolgenisSpringTest;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -53,6 +19,25 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.data.QueryRule.Operator.*;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
+import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.COMBINED_SCORE;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { SortaServiceImplTest.Config.class })
 public class SortaServiceImplTest extends AbstractMolgenisSpringTest

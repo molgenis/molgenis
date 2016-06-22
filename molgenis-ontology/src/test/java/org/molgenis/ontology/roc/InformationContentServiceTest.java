@@ -1,14 +1,6 @@
 package org.molgenis.ontology.roc;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.when;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
-
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.collect.Sets;
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -19,7 +11,7 @@ import org.molgenis.ontology.core.meta.Ontology;
 import org.molgenis.ontology.core.meta.OntologyFactory;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
-import org.molgenis.ontology.test.AbstractMolgenisSpringTest;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -27,7 +19,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Sets;
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.when;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
 
 @ContextConfiguration(classes = { InformationContentServiceTest.Config.class })
 public class InformationContentServiceTest extends AbstractMolgenisSpringTest
