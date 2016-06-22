@@ -2,6 +2,8 @@ package org.molgenis.data.annotation.entity;
 
 import org.molgenis.data.meta.AttributeMetaData;
 
+import java.util.List;
+
 /**
  * An Annotator.
  * 
@@ -20,5 +22,5 @@ public interface Annotator
 	/**
 	 * @return Compound {@link AttributeMetaData} for the attributes that get added by this {@link Annotator}
 	 */
-	AttributeMetaData getAnnotationAttributeMetaData();
+	List<AttributeMetaData> getAnnotationAttributeMetaDatas();
 }

@@ -528,11 +528,14 @@ public class PostgreSqlRepository extends AbstractRepository
 							AtomicInteger seqNr = new AtomicInteger();
 							for (Entity val : entity.getEntities(attr.getName()))
 							{
-								Map<String, Object> mref = new HashMap<>();
-								mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
-								mref.put(idAttribute.getName(), idValue);
-								mref.put(attr.getName(), val.get(attr.getRefEntity().getIdAttribute().getName()));
-								mrefs.get(attr.getName()).add(mref);
+								if (val != null)
+								{
+									Map<String, Object> mref = new HashMap<>();
+									mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
+									mref.put(idAttribute.getName(), entity.get(idAttribute.getName()));
+									mref.put(attr.getName(), val.getIdValue());
+									mrefs.get(attr.getName()).add(mref);
+								}
 							}
 						}
 					}

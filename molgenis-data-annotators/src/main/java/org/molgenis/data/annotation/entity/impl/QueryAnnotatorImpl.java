@@ -21,6 +21,8 @@ import org.molgenis.data.meta.AttributeMetaData;
 import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.util.ApplicationContextProvider;
+import org.springframework.context.ApplicationContext;
 
 /**
  * Base class for any {@link EntityAnnotator} that uses a {@link QueryCreator} to query the {@link DataService} or
@@ -33,7 +35,7 @@ import org.molgenis.data.support.DynamicEntity;
 public abstract class QueryAnnotatorImpl implements EntityAnnotator
 {
 	private final QueryCreator queryCreator;
-	private final Resources resources;
+	private Resources resources;
 	private final DataService dataService;
 	private final String sourceRepositoryName;
 	private final AnnotatorInfo info;
@@ -51,40 +53,41 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 		this.cmdLineAnnotatorSettingsConfigurer = cmdLineAnnotatorSettingsConfigurer;
 	}
 
-	@Override
-	public AnnotatorInfo getInfo()
+	@Override public AnnotatorInfo getInfo()
 	{
 		return info;
 	}
 
-	@Override
-	public AttributeMetaData getAnnotationAttributeMetaData()
+	@Override public List<AttributeMetaData> getAnnotationAttributeMetaDatas()
 	{
-		AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
-		AttributeMetaData result = attrMetaFactory.create().setName(ANNOTATORPREFIX + info.getCode())
-				.setDataType(COMPOUND).setLabel(info.getCode());
-		getInfo().getOutputAttributes().forEach(result::addAttributePart);
-
-		return result;
+		return getInfo().getOutputAttributes();
 	}
 
-	@Override
-	public boolean sourceExists()
+	@Override public boolean sourceExists()
 	{
+		getResources();
 		return resources.hasRepository(sourceRepositoryName) || dataService.hasRepository(sourceRepositoryName);
 	}
 
-	@Override
-	public List<AttributeMetaData> getRequiredAttributes()
+	private void getResources()
+	{
+		if (resources == null)
+		{
+			ApplicationContext applicationContext = ApplicationContextProvider.getApplicationContext();
+			resources = applicationContext.getBean(Resources.class);
+		}
+	}
+
+	@Override public List<AttributeMetaData> getRequiredAttributes()
 	{
 		List<AttributeMetaData> sourceMetaData = new ArrayList<>();
 		sourceMetaData.addAll(queryCreator.getRequiredAttributes());
 		return sourceMetaData;
 	}
 
-	@Override
-	public List<Entity> annotateEntity(Entity entity)
+	@Override public List<Entity> annotateEntity(Entity entity)
 	{
+		getResources();
 		Query<Entity> q = queryCreator.createQuery(entity);
 		Iterable<Entity> annotatationSourceEntities;
 		if (resources.hasRepository(sourceRepositoryName))
@@ -95,19 +98,14 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 		{
 			annotatationSourceEntities = new Iterable<Entity>()
 			{
-				@Override
-				public Iterator<Entity> iterator()
+				@Override public Iterator<Entity> iterator()
 				{
 					return dataService.findAll(sourceRepositoryName, q).iterator();
 				}
 			};
 		}
-		EntityMetaData meta = null; // FIXME new EntityMetaData(entity.getEntityMetaData());
-		info.getOutputAttributes().forEach(meta::addAttribute);
-		Entity resultEntity = new DynamicEntity(meta);
-		resultEntity.set(entity);
-		processQueryResults(entity, annotatationSourceEntities, resultEntity);
-		return Collections.singletonList(resultEntity);
+		processQueryResults(entity, annotatationSourceEntities);
+		return Collections.singletonList(entity);
 	}
 
 	@Override
@@ -121,9 +119,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	 *
 	 * @param inputEntity              the input entity that is being annotated
 	 * @param annotationSourceEntities the entities resulting from the query on the annotation source
-	 * @param resultEntity             the result entity to write the annotation attributes to
 	 */
-	protected abstract void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
-			Entity resultEntity);
+	protected abstract void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities);
 
 }

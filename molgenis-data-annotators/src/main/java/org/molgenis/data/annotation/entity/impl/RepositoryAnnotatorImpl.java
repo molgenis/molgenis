@@ -22,11 +22,9 @@ public class RepositoryAnnotatorImpl extends AbstractRepositoryEntityAnnotator
 	}
 
 	@Override
-	public List<AttributeMetaData> getOutputMetaData()
+	public List<AttributeMetaData> getOutputAttributes()
 	{
-		List<AttributeMetaData> result = new ArrayList<>();
-		result.add(entityAnnotator.getAnnotationAttributeMetaData());
-		return result;
+		return entityAnnotator.getAnnotationAttributeMetaDatas();
 	}
 
 	@Override

@@ -557,4 +557,6 @@ public class AttributeMetaData extends StaticEntity
 	{
 		return !enumOptions.isEmpty() ? enumOptions.stream().collect(joining(",")) : null;
 	}
+
+
 }

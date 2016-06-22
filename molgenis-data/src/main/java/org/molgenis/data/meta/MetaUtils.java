@@ -1,31 +1,19 @@
 package org.molgenis.data.meta;
 
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ABSTRACT;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.BACKEND;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.EXTENDS;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.FULL_NAME;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ID_ATTRIBUTE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.LABEL_ATTRIBUTE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.LOOKUP_ATTRIBUTES;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.PACKAGE;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.SIMPLE_NAME;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.TAGS;
-import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
-
-import java.util.List;
-
+import com.google.common.base.Function;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.security.core.Permission;
+import org.molgenis.util.EntityUtils;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
+import java.util.List;
+
+import static org.molgenis.data.meta.EntityMetaDataMetaData.*;
+import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 public class MetaUtils
 {
@@ -68,7 +56,7 @@ public class MetaUtils
 			AttributeMetaData currentAttribute = existingEntityMetaData.getAttribute(attr.getName());
 			if (currentAttribute != null)
 			{
-				if (!currentAttribute.equals(attr))
+				if (!EntityUtils.equals(currentAttribute, attr))
 				{
 					throw new MolgenisDataException(
 							"Changing existing attributes is not currently supported. You tried to alter attribute ["

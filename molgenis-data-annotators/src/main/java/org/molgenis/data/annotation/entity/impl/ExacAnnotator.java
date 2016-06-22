@@ -1,14 +1,5 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
-import static org.molgenis.data.annotator.websettings.ExacAnnotatorSettings.Meta.EXAC_LOCATION;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
@@ -24,9 +15,19 @@ import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
 import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
+import org.molgenis.data.meta.EntityMetaDataFactory;
+import org.molgenis.data.vcf.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.molgenis.MolgenisFieldTypes.*;
+import static org.molgenis.data.annotator.websettings.ExacAnnotatorSettings.Meta.EXAC_LOCATION;
 
 @Configuration
 public class ExacAnnotator
@@ -54,61 +55,69 @@ public class ExacAnnotator
 	@Autowired
 	private Resources resources;
 
+	@Autowired
+	private VcfAttributes vcfAttributes;
+
+	@Autowired
+	private EntityMetaDataFactory entityMetaDataFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attributeMetaDataFactory;
+
 	@Bean
 	public RepositoryAnnotator exac()
 	{
 
-//		AttributeMetaData outputAttribute_AF = new AttributeMetaData(EXAC_AF, STRING)
-//				.setDescription("The ExAC allele frequency").setLabel(EXAC_AF_LABEL);
-//		AttributeMetaData outputAttribute_AC_HOM = new AttributeMetaData(EXAC_AC_HOM, STRING).setDescription("The ExAC homozygous alternative genotype count").setLabel(
-//				EXAC_AC_HOM_LABEL);
-//		AttributeMetaData outputAttribute_AC_HET = new AttributeMetaData(EXAC_AC_HET, STRING).setDescription("The ExAC heterozygous genotype count")
-//				.setLabel(EXAC_AC_HET_LABEL);
-//
-//		List<AttributeMetaData> outputMetaData = new ArrayList<AttributeMetaData>(
-//				Arrays.asList(
-//						new AttributeMetaData[] { outputAttribute_AF, outputAttribute_AC_HOM, outputAttribute_AC_HET }));
-//
-//		List<AttributeMetaData> resourceMetaData = new ArrayList<AttributeMetaData>(
-//				Arrays.asList(new AttributeMetaData[] { new AttributeMetaData(EXAC_AF_ResourceAttributeName, DECIMAL),
-//						new AttributeMetaData(EXAC_AC_HOM_ResourceAttributeName, INT),
-//						new AttributeMetaData(EXAC_AC_HET_ResourceAttributeName, INT) }));
-//
-//		AnnotatorInfo exacInfo = AnnotatorInfo
-//				.create(Status.READY,
-//						AnnotatorInfo.Type.POPULATION_REFERENCE,
-//						"exac",
-//						" The Exome Aggregation Consortium (ExAC) is a coalition of investigators seeking to aggregate"
-//								+ " and harmonize exome sequencing data from a wide variety of large-scale sequencing projects"
-//								+ ", and to make summary data available for the wider scientific community.The data set provided"
-//								+ " on this website spans 60,706 unrelated individuals sequenced as part of various "
-//								+ "disease-specific and population genetic studies. ", outputMetaData);
-//
-//		// TODO: properly test multiAllelicFresultFilter
-//		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
-//		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(resourceMetaData);
-		EntityAnnotator entityAnnotator = null; //FIXME new AnnotatorImpl(EXAC_TABIX_RESOURCE, exacInfo, locusQueryCreator,
-//				multiAllelicResultFilter, dataService, resources,
-//				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(EXAC_LOCATION, exacAnnotatorSettings))
-//		{
-//			@Override
-//			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity sourceEntity)
-//			{
-//				String attrName = EXAC_AF.equals(attr.getName()) ? EXAC_AF_ResourceAttributeName : EXAC_AC_HOM
-//						.equals(attr.getName()) ? EXAC_AC_HOM_ResourceAttributeName : EXAC_AC_HET
-//						.equals(attr.getName()) ? EXAC_AC_HET_ResourceAttributeName : attr.getName();
-//				return sourceEntity.get(attrName);
-//			}
-//		};
-//
+		AttributeMetaData outputAttribute_AF = attributeMetaDataFactory.create().setName(EXAC_AF).setDataType(STRING)
+				.setDescription("The ExAC allele frequency").setLabel(EXAC_AF_LABEL);
+		AttributeMetaData outputAttribute_AC_HOM = attributeMetaDataFactory.create().setName(EXAC_AC_HOM)
+				.setDataType(STRING).setDescription("The ExAC homozygous alternative genotype count")
+				.setLabel(EXAC_AC_HOM_LABEL);
+		AttributeMetaData outputAttribute_AC_HET = attributeMetaDataFactory.create().setName(EXAC_AC_HET)
+				.setDataType(STRING).setDescription("The ExAC heterozygous genotype count").setLabel(EXAC_AC_HET_LABEL);
+
+		List<AttributeMetaData> outputMetaData = new ArrayList<AttributeMetaData>(Arrays.asList(
+				new AttributeMetaData[] { outputAttribute_AF, outputAttribute_AC_HOM, outputAttribute_AC_HET }));
+
+		List<AttributeMetaData> resourceMetaData = new ArrayList<AttributeMetaData>(Arrays.asList(
+				new AttributeMetaData[] {
+						attributeMetaDataFactory.create().setName(EXAC_AF_ResourceAttributeName).setDataType(DECIMAL),
+						attributeMetaDataFactory.create().setName(EXAC_AC_HOM_ResourceAttributeName).setDataType(INT),
+						attributeMetaDataFactory.create().setName(EXAC_AC_HET_ResourceAttributeName).setDataType(
+								INT) }));
+
+		AnnotatorInfo exacInfo = AnnotatorInfo.create(Status.READY, AnnotatorInfo.Type.POPULATION_REFERENCE, "exac",
+				" The Exome Aggregation Consortium (ExAC) is a coalition of investigators seeking to aggregate"
+						+ " and harmonize exome sequencing data from a wide variety of large-scale sequencing projects"
+						+ ", and to make summary data available for the wider scientific community.The data set provided"
+						+ " on this website spans 60,706 unrelated individuals sequenced as part of various "
+						+ "disease-specific and population genetic studies. ", outputMetaData);
+
+		// TODO: properly test multiAllelicFresultFilter
+		LocusQueryCreator locusQueryCreator = new LocusQueryCreator(vcfAttributes);
+		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(resourceMetaData);
+		EntityAnnotator entityAnnotator = new AnnotatorImpl(EXAC_TABIX_RESOURCE, exacInfo, locusQueryCreator,
+		multiAllelicResultFilter, dataService, resources, new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(
+				EXAC_LOCATION, exacAnnotatorSettings))
+		{
+			@Override protected Object getResourceAttributeValue (AttributeMetaData attr, Entity sourceEntity)
+			{
+				String attrName = EXAC_AF.equals(attr.getName()) ? EXAC_AF_ResourceAttributeName : EXAC_AC_HOM
+						.equals(attr.getName()) ? EXAC_AC_HOM_ResourceAttributeName : EXAC_AC_HET
+						.equals(attr.getName()) ? EXAC_AC_HET_ResourceAttributeName : attr.getName();
+				return sourceEntity.get(attrName);
+			}
+		} ;
+
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}
 
 	@Bean
 	Resource exacResource()
 	{
-		Resource exacTabixResource = new ResourceImpl(EXAC_TABIX_RESOURCE, new SingleResourceConfig(EXAC_LOCATION,
-				exacAnnotatorSettings), new TabixVcfRepositoryFactory(EXAC_TABIX_RESOURCE));
+		Resource exacTabixResource = new ResourceImpl(EXAC_TABIX_RESOURCE,
+				new SingleResourceConfig(EXAC_LOCATION, exacAnnotatorSettings),
+				new TabixVcfRepositoryFactory(EXAC_TABIX_RESOURCE));
 
 		return exacTabixResource;
 	}

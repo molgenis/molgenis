@@ -1,11 +1,6 @@
 package org.molgenis.dataexplorer.controller;
 
-import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
-
-import java.util.Arrays;
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -15,6 +10,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.meta.AnnotationJobExecution;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
+import org.molgenis.data.meta.EntityMetaDataFactory;
 import org.molgenis.data.support.AnnotatorDependencyOrderResolver;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
@@ -27,7 +23,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.google.common.collect.Lists;
+import java.util.Arrays;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 
 /**
  * Creates AnnotationJob based on its {@link AnnotationJobExecution}. Is a bean so that it can use {@link Autowired}
@@ -59,6 +59,9 @@ public class AnnotationJobFactory
 	@Autowired
 	private MailSender mailSender;
 
+	@Autowired
+	private EntityMetaDataFactory entityMetaDataFactory;
+
 	@RunAsSystem
 	public AnnotationJob createJob(AnnotationJobExecution metaData)
 	{
@@ -78,7 +81,8 @@ public class AnnotationJobFactory
 				.map(annotationService::getAnnotatorByName).collect(toList());
 		AnnotatorDependencyOrderResolver resolver = new AnnotatorDependencyOrderResolver();
 		List<RepositoryAnnotator> annotators = Lists.newArrayList(
-				resolver.getAnnotatorSelectionDependencyList(availableAnnotators, requestedAnnotators, repository));
+				resolver.getAnnotatorSelectionDependencyList(availableAnnotators, requestedAnnotators, repository,
+						entityMetaDataFactory));
 		return new AnnotationJob(crudRepositoryAnnotator, username, annotators, repository,
 				new ProgressImpl(metaData, jobExecutionUpdater, mailSender), runAsAuthentication,
 				new TransactionTemplate(transactionManager));

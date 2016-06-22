@@ -112,7 +112,11 @@ public class DataServiceImpl implements DataService
 	@Transactional
 	public void update(String entityName, Entity entity)
 	{
-		getRepository(entityName).update(entity);
+		try{
+			getRepository(entityName).update(entity);
+		}                                            catch (Exception e){
+			System.out.print(e);
+		}
 	}
 
 	@Override

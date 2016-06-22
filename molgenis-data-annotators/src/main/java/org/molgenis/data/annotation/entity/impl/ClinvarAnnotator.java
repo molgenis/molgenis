@@ -1,6 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.data.annotator.websettings.ClinvarAnnotatorSettings.Meta.CLINVAR_LOCATION;
 
 import java.util.ArrayList;
@@ -21,6 +21,9 @@ import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
 import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.AttributeMetaDataFactory;
+import org.molgenis.data.meta.EntityMetaDataFactory;
+import org.molgenis.data.vcf.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,66 +49,75 @@ public class ClinvarAnnotator
 	@Autowired
 	private Resources resources;
 
+	@Autowired
+	private VcfAttributes vcfAttributes;
+
+	@Autowired
+	private EntityMetaDataFactory entityMetaDataFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attributeMetaDataFactory;
+
 	@Bean
 	public RepositoryAnnotator clinvar()
 	{
-//		List<AttributeMetaData> attributes = new ArrayList<>();
-//
-//		AttributeMetaData clinvar_clnsig = new AttributeMetaData(CLINVAR_CLNSIG, STRING)
-//				.setDescription(
-//						"Value representing clinical significant allele 0 means ref 1 means first alt allele etc.")
-//				.setLabel(CLINVAR_CLNSIG_LABEL);
-//
-//		AttributeMetaData clinvar_clnalle = new AttributeMetaData(CLINVAR_CLNALLE, STRING)
-//				.setDescription("Value representing the clinical significanct according to ClinVar").setLabel(
-//						CLINVAR_CLNALLE_LABEL);
-//
-//		attributes.add(clinvar_clnsig);
-//		attributes.add(clinvar_clnalle);
-//
-//		AnnotatorInfo clinvarInfo = AnnotatorInfo
-//				.create(Status.READY,
-//						AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE,
-//						NAME,
-//						" ClinVar is a freely accessible, public archive of reports of the relationships"
-//								+ " among human variations and phenotypes, with supporting evidence. ClinVar thus facilitates"
-//								+ " access to and communication about the relationships asserted between human variation and "
-//								+ "observed health status, and the history of that interpretation. ClinVar collects reports "
-//								+ "of variants found in patient samples, assertions made regarding their clinical significance, "
-//								+ "information about the submitter, and other supporting data. The alleles described in submissions "
-//								+ "are mapped to reference sequences, and reported according to the HGVS standard. ClinVar then "
-//								+ "presents the data for interactive users as well as those wishing to use ClinVar in daily "
-//								+ "workflows and other local applications. ClinVar works in collaboration with interested "
-//								+ "organizations to meet the needs of the medical genetics community as efficiently and effectively "
-//								+ "as possible. Information about using ClinVar is available at: http://www.ncbi.nlm.nih.gov/clinvar/docs/help/.",
-//						attributes);
-//
-//		LocusQueryCreator locusQueryCreator = new LocusQueryCreator();
-//		ClinvarMultiAllelicResultFilter clinvarMultiAllelicResultFilter = new ClinvarMultiAllelicResultFilter();
-		EntityAnnotator entityAnnotator = null; // FIXME new AnnotatorImpl(CLINVAR_TABIX_RESOURCE, clinvarInfo, locusQueryCreator,
-//				clinvarMultiAllelicResultFilter, dataService, resources,
-//				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CLINVAR_LOCATION, clinvarAnnotatorSettings))
-//		{
-//			@Override
-//			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity sourceEntity)
-//			{
-//				String attrName = null;
-//				if (CLINVAR_CLNSIG.equals(attr.getName()))
-//				{
-//					attrName = CLINVAR_CLNSIG_ResourceAttributeName;
-//				}
-//				else if (CLINVAR_CLNALLE.equals(attr.getName()))
-//				{
-//					attrName = CLINVAR_CLINALL_ResourceAttributeName;
-//				}
-//				else
-//				{
-//
-//					attrName = attr.getName();
-//				}
-//				return sourceEntity.get(attrName);
-//			}
-//		};
+		List<AttributeMetaData> attributes = new ArrayList<>();
+
+		AttributeMetaData clinvar_clnsig = attributeMetaDataFactory.create().setName(CLINVAR_CLNSIG).setDataType(STRING)
+				.setDescription(
+						"Value representing clinical significant allele 0 means ref 1 means first alt allele etc.")
+				.setLabel(CLINVAR_CLNSIG_LABEL);
+
+		AttributeMetaData clinvar_clnalle = attributeMetaDataFactory.create().setName(CLINVAR_CLNALLE).setDataType(STRING)
+				.setDescription("Value representing the clinical significanct according to ClinVar").setLabel(
+						CLINVAR_CLNALLE_LABEL);
+
+		attributes.add(clinvar_clnsig);
+		attributes.add(clinvar_clnalle);
+
+		AnnotatorInfo clinvarInfo = AnnotatorInfo
+				.create(Status.READY,
+						AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE,
+						NAME,
+						" ClinVar is a freely accessible, public archive of reports of the relationships"
+								+ " among human variations and phenotypes, with supporting evidence. ClinVar thus facilitates"
+								+ " access to and communication about the relationships asserted between human variation and "
+								+ "observed health status, and the history of that interpretation. ClinVar collects reports "
+								+ "of variants found in patient samples, assertions made regarding their clinical significance, "
+								+ "information about the submitter, and other supporting data. The alleles described in submissions "
+								+ "are mapped to reference sequences, and reported according to the HGVS standard. ClinVar then "
+								+ "presents the data for interactive users as well as those wishing to use ClinVar in daily "
+								+ "workflows and other local applications. ClinVar works in collaboration with interested "
+								+ "organizations to meet the needs of the medical genetics community as efficiently and effectively "
+								+ "as possible. Information about using ClinVar is available at: http://www.ncbi.nlm.nih.gov/clinvar/docs/help/.",
+						attributes);
+
+		LocusQueryCreator locusQueryCreator = new LocusQueryCreator(vcfAttributes);
+		ClinvarMultiAllelicResultFilter clinvarMultiAllelicResultFilter = new ClinvarMultiAllelicResultFilter(vcfAttributes);
+		EntityAnnotator entityAnnotator = new AnnotatorImpl(CLINVAR_TABIX_RESOURCE, clinvarInfo, locusQueryCreator,
+				clinvarMultiAllelicResultFilter, dataService, resources,
+				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CLINVAR_LOCATION, clinvarAnnotatorSettings))
+		{
+			@Override
+			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity sourceEntity)
+			{
+				String attrName = null;
+				if (CLINVAR_CLNSIG.equals(attr.getName()))
+				{
+					attrName = CLINVAR_CLNSIG_ResourceAttributeName;
+				}
+				else if (CLINVAR_CLNALLE.equals(attr.getName()))
+				{
+					attrName = CLINVAR_CLINALL_ResourceAttributeName;
+				}
+				else
+				{
+
+					attrName = attr.getName();
+				}
+				return sourceEntity.get(attrName);
+			}
+		};
 
 		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}

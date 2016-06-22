@@ -138,7 +138,7 @@ public class AnnotatorController
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(dataSetName);
 			for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
 			{
-				List<AttributeMetaData> outputAttrs = annotator.getOutputMetaData();
+				List<AttributeMetaData> outputAttrs = annotator.getOutputAttributes();
 				outputAttrs = getAtomicAttributesFromList(outputAttrs);
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("description", annotator.getDescription());
@@ -146,7 +146,7 @@ public class AnnotatorController
 				map.put("inputAttributes", createAttrsResponse(annotator.getRequiredAttributes()));
 				map.put("inputAttributeTypes", toMap(annotator.getRequiredAttributes()));
 				map.put("outputAttributes", createAttrsResponse(outputAttrs));
-				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData()));
+				map.put("outputAttributeTypes", toMap(annotator.getOutputAttributes()));
 
 				String settingsEntityName = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + annotator.getInfo().getCode();
 				map.put("showSettingsButton",

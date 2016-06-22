@@ -28,7 +28,6 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 {
 	private static final long serialVersionUID = 1L;
 	public static final String TRANSACTION_ID_RESOURCE_NAME = "transactionId";
-	private static final Logger LOG = LoggerFactory.getLogger(MolgenisTransactionManager.class);
 	private final IdGenerator idGenerator;
 	private final List<MolgenisTransactionListener> transactionListeners = new ArrayList<>();
 
@@ -67,10 +66,6 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 	protected void doBegin(Object transaction, TransactionDefinition definition) throws TransactionException
 	{
 		MolgenisTransaction molgenisTransaction = (MolgenisTransaction) transaction;
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Start transaction [{}]", molgenisTransaction.getId());
-		}
 
 		super.doBegin(molgenisTransaction.getDataSourceTransaction(), definition);
 
@@ -85,10 +80,6 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 	protected void doCommit(DefaultTransactionStatus status) throws TransactionException
 	{
 		MolgenisTransaction transaction = (MolgenisTransaction) status.getTransaction();
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Commit transaction [{}]", transaction.getId());
-		}
 
 		DefaultTransactionStatus jpaTransactionStatus = new DefaultTransactionStatus(transaction.getDataSourceTransaction(),
 				status.isNewTransaction(), status.isNewSynchronization(), status.isReadOnly(), status.isDebug(),
@@ -110,10 +101,6 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 	protected void doRollback(DefaultTransactionStatus status) throws TransactionException
 	{
 		MolgenisTransaction transaction = (MolgenisTransaction) status.getTransaction();
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Rollback transaction [{}]", transaction.getId());
-		}
 
 		DefaultTransactionStatus jpaTransactionStatus = new DefaultTransactionStatus(transaction.getDataSourceTransaction(),
 				status.isNewTransaction(), status.isNewSynchronization(), status.isReadOnly(), status.isDebug(),
@@ -149,10 +136,6 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 	protected void doCleanupAfterCompletion(Object transaction)
 	{
 		MolgenisTransaction molgenisTransaction = (MolgenisTransaction) transaction;
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Cleanup transaction [{}]", molgenisTransaction.getId());
-		}
 
 		super.doCleanupAfterCompletion(molgenisTransaction.getDataSourceTransaction());
 		TransactionSynchronizationManager.unbindResourceIfPossible(TRANSACTION_ID_RESOURCE_NAME);
