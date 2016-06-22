@@ -5,7 +5,7 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.data.meta.TagMetaData;
+import org.molgenis.data.meta.model.TagMetaData;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;

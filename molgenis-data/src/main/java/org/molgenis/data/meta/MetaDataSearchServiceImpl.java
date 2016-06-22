@@ -1,7 +1,7 @@
 package org.molgenis.data.meta;
 
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.meta.PackageMetaData.PACKAGE;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 
 import java.util.List;
 import java.util.ListIterator;
@@ -10,6 +10,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;

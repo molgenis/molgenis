@@ -1,8 +1,8 @@
 package org.molgenis.data.elasticsearch.reindex.job;
 
 import com.google.common.util.concurrent.AtomicLongMap;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

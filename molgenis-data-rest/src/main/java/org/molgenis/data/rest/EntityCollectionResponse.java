@@ -5,7 +5,7 @@ import java.util.Map;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.security.core.MolgenisPermissionService;
 
 public class EntityCollectionResponse

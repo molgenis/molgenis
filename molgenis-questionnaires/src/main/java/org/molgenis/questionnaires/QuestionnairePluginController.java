@@ -15,10 +15,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.support.OwnedEntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.owned.OwnedEntityMetaData;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -119,7 +119,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 	private Entity createQuestionnaireEntity(EntityMetaData emd, QuestionnaireStatus status)
 	{
 		Entity entity = entityManager.create(emd);
-		entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
+		entity.set(OwnedEntityMetaData.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		entity.set(QuestionnaireMetaData.ATTR_STATUS, status.toString());
 		dataService.add(emd.getName(), entity);
 
@@ -135,8 +135,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 
 	private Entity findQuestionnaireEntity(String name)
 	{
-		return dataService
-				.findOne(name, EQ(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername()));
+		return dataService.findOne(name, EQ(OwnedEntityMetaData.OWNER_USERNAME, SecurityUtils.getCurrentUsername()));
 	}
 
 	public String getThankYouText(String questionnaireName)

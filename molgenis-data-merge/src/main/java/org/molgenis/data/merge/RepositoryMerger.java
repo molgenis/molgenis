@@ -1,7 +1,7 @@
 package org.molgenis.data.merge;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.ArrayList;
@@ -13,10 +13,10 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.AttributeMetaDataFactory;
-import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;

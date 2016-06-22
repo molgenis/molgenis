@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 
 public interface AggregateQuery
 {

@@ -6,7 +6,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Base class for entities defined in pre-existing Java classes
@@ -38,9 +38,9 @@ public abstract class StaticEntity implements Entity
 
 	}
 
-	protected void init(EntityMetaData entityMeta)
+	protected void init(Entity entity)
 	{
-		entity = new DynamicEntity(entityMeta);
+		this.entity = requireNonNull(entity);
 	}
 
 	@Override

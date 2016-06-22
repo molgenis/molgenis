@@ -11,7 +11,7 @@ import java.util.Map;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.entity.ResultFilter;
-import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.vcf.VcfAttributes;
 
 import com.google.common.base.Optional;

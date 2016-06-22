@@ -23,7 +23,7 @@
 			query : {
 				operator : 'NESTED',
 				nestedRules : [
-	               	{field : 'package', operator : 'EQUALS', value : 'settings'},
+	               	{field : 'package', operator : 'EQUALS', value : 'sys_set'},
 	               	{operator : 'AND'},
 	               	{operator : 'NOT'},
 	               	{field : 'abstract', operator : 'EQUALS', value : 'true'}

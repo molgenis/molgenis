@@ -1,7 +1,7 @@
 package org.molgenis.ontology.sorta.bean;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
 
 public class OntologyTermHitEntity extends DynamicEntity
@@ -12,6 +12,11 @@ public class OntologyTermHitEntity extends DynamicEntity
 	{
 		super(entityMetaData);
 		set(entity);
+	}
+
+	protected void validateValueType(String attrName, Object value)
+	{
+		// no operation
 	}
 
 	@Override

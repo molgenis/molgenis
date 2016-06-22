@@ -1,7 +1,7 @@
 package org.molgenis.data.support;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 import java.util.Iterator;
@@ -17,8 +17,8 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -217,18 +217,6 @@ public class DataServiceImpl implements DataService
 	public synchronized Iterator<Repository<Entity>> iterator()
 	{
 		return metaDataService.getRepositories().iterator();
-	}
-
-	@Override
-	public Stream<Entity> stream(String entityName, Fetch fetch)
-	{
-		return getRepository(entityName).stream(fetch);
-	}
-
-	@Override
-	public <E extends Entity> Stream<E> stream(String entityName, Fetch fetch, Class<E> clazz)
-	{
-		return getRepository(entityName, clazz).stream(fetch);
 	}
 
 	@Override

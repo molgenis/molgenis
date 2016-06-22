@@ -3,12 +3,14 @@ package org.molgenis.data.meta;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -25,6 +27,10 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageMetaData;
 import org.molgenis.util.DependencyResolver;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -102,9 +108,9 @@ public class PackageRepositoryDecorator implements Repository<Package>
 	}
 
 	@Override
-	public Stream<Package> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<Package>> consumer, int batchSize)
 	{
-		return decoratedRepo.stream(fetch);
+		decoratedRepo.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override
@@ -188,7 +194,7 @@ public class PackageRepositoryDecorator implements Repository<Package>
 	@Override
 	public void deleteAll()
 	{
-		stream().forEach(this::deletePackage);
+		forEach(this::deletePackage);
 	}
 
 	@Override

@@ -4,16 +4,18 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.LABEL;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.LABEL;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
@@ -26,10 +28,10 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.AttributeMetaDataFactory;
-import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 
 public class LanguageRepositoryDecorator implements Repository<Language>
@@ -55,9 +57,9 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	}
 
 	@Override
-	public Stream<Language> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<Language>> consumer, int batchSize)
 	{
-		return decorated.stream(fetch);
+		decorated.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override
@@ -242,7 +244,7 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	@Override
 	public void deleteAll()
 	{
-		delete(this.stream());
+		forEachBatched(entities -> delete(entities.stream()), 1000);
 	}
 
 	@Override

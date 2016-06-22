@@ -16,7 +16,7 @@ import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.fieldtypes.FieldType;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.BeforeClass;

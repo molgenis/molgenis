@@ -1,35 +1,16 @@
 package org.molgenis.data.elasticsearch;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Stream.concat;
-import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.elasticsearch.request.SourceFilteringGenerator.toFetchFields;
-import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
-import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
-import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
-
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Stream;
-
+import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.index.IndexRequest;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.collect.Iterators;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityStream;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
+import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
@@ -37,23 +18,34 @@ import org.molgenis.data.elasticsearch.response.ResponseParser;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.EntityUtils;
 import org.molgenis.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.AtomicLongMap;
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Stream.concat;
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.DataConverter.convert;
+import static org.molgenis.data.elasticsearch.request.SourceFilteringGenerator.toFetchFields;
+import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
+import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
+import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
+import static org.molgenis.data.support.EntityMetaDataUtils.createFetchForReindexing;
 
 /**
  * ElasticSearch implementation of the SearchService interface.
- * <p>
- * TODO use scroll-scan where possible:
- * http://www.elasticsearch.org/guide/en/elasticsearch /reference/current/search-request-scroll.html#scroll-scans
  *
  * @author erwin
  */
@@ -75,7 +67,7 @@ public class ElasticsearchService implements SearchService
 	private final String indexName;
 	private final ResponseParser responseParser = new ResponseParser();
 	private final ElasticsearchUtils elasticsearchFacade;
-	private final SearchRequestGenerator generator = new SearchRequestGenerator();
+	private final SearchRequestGenerator searchRequestGenerator = new SearchRequestGenerator();
 
 	public ElasticsearchService(Client client, String indexName, DataService dataService,
 			ElasticsearchEntityFactory elasticsearchEntityFactory)
@@ -183,18 +175,21 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void index(Entity entity, EntityMetaData entityMetaData, IndexingMode indexingMode)
 	{
+		LOG.debug("Indexing single {}.{} entity ...", entityMetaData.getName(), entity.getIdValue());
 		index(Stream.of(entity), entityMetaData, indexingMode == IndexingMode.UPDATE);
 	}
 
 	@Override
 	public long index(Iterable<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode)
 	{
+		LOG.debug("Indexing multiple {} entities...", entityMetaData.getName());
 		return index(stream(entities.spliterator(), false), entityMetaData, indexingMode == IndexingMode.UPDATE);
 	}
 
 	@Override
 	public long index(Stream<? extends Entity> entities, EntityMetaData entityMetaData, IndexingMode indexingMode)
 	{
+		LOG.debug("Indexing multiple {} entities...", entityMetaData.getName());
 		return index(entities, entityMetaData, indexingMode == IndexingMode.UPDATE);
 	}
 
@@ -265,32 +260,10 @@ public class ElasticsearchService implements SearchService
 		return references;
 	}
 
-	private Fetch createFetchForReindexing(EntityMetaData refEntityMetaData)
-	{
-		Fetch fetch = new Fetch();
-		for (AttributeMetaData attr : refEntityMetaData.getAtomicAttributes())
-		{
-			if (attr.getRefEntity() != null)
-			{
-				Fetch attributeFetch = new Fetch();
-				for (AttributeMetaData refAttr : attr.getRefEntity().getAtomicAttributes())
-				{
-					attributeFetch.field(refAttr.getName());
-				}
-				fetch.field(attr.getName(), attributeFetch);
-			}
-			else
-			{
-				fetch.field(attr.getName());
-			}
-
-		}
-		return fetch;
-	}
-
 	/**
 	 * Searches the index for documents of a certain type that contain a reference to a specific entity.
-	 * Uses searchInternal to create a batched stream.
+	 * Uses {@link #searchInternalWithScanScroll(Query, EntityMetaData)} to scroll through the existing referring
+	 * entities in a context that remains valid even when the documents are getting updated.
 	 *
 	 * @param referredEntity          the entity that should be referred to in the documents
 	 * @param referringEntityMetaData {@link EntityMetaData} of the referring documents
@@ -315,7 +288,7 @@ public class ElasticsearchService implements SearchService
 			}
 			q.eq(attributeMetaData.getName(), referredEntity);
 		}
-		return searchInternal(q, referringEntityMetaData).stream();
+		return searchInternalWithScanScroll(q, referringEntityMetaData);
 	}
 
 	/**
@@ -329,7 +302,7 @@ public class ElasticsearchService implements SearchService
 	{
 		String id = toElasticsearchId(entity, entityMetaData);
 		Map<String, Object> source = elasticsearchEntityFactory.create(entityMetaData, entity);
-		LOG.debug("Indexing [{}] with id [{}] in index [{}]...", type, id, indexName);
+		LOG.trace("Indexing [{}] with id [{}] in index [{}]...", type, id, indexName);
 		return new IndexRequest().index(indexName).type(type).id(id).source(source);
 	}
 
@@ -476,7 +449,20 @@ public class ElasticsearchService implements SearchService
 	private ElasticsearchEntityIterable searchInternal(Query<Entity> q, EntityMetaData entityMetaData)
 	{
 		return new ElasticsearchEntityIterable(q, entityMetaData, elasticsearchFacade, elasticsearchEntityFactory,
-				generator, indexName);
+				searchRequestGenerator, indexName);
+	}
+
+	private Stream<Entity> searchInternalWithScanScroll(Query<Entity> query, EntityMetaData entityMetaData)
+	{
+		String type = sanitizeMapperType(entityMetaData.getName());
+		Consumer<SearchRequestBuilder> searchRequestBuilderConsumer = searchRequestBuilder -> searchRequestGenerator
+				.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH, query, null, null, null,
+						entityMetaData);
+
+		return elasticsearchFacade
+				.searchForIdsWithScanScroll(searchRequestBuilderConsumer, query.toString(), type, indexName)
+				.map(idString -> convert(idString, entityMetaData.getIdAttribute()))
+				.map(idObject -> elasticsearchEntityFactory.getReference(entityMetaData, idObject));
 	}
 
 	@Override
@@ -499,38 +485,23 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public void rebuildIndex(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
+	public void rebuildIndex(Repository<? extends Entity> repository)
 	{
-		if (storeSource(entityMetaData))
+		LOG.info("Rebuild index for {}...", repository.getName());
+		if (storeSource(repository.getEntityMetaData()))
 		{
 			throw new UnsupportedOperationException("Elasticsearch does not store data"); // FIXME
 		}
-		else
-		{
-			this.rebuildIndexGeneric(entities, entityMetaData);
-		}
-	}
-
-	/**
-	 * Rebuild Elasticsearch index when the source is living in another backend than the Elasticsearch itself.
-	 *
-	 * @param entities       entities that will be reindexed.
-	 * @param entityMetaData meta data information about the entities that will be reindexed.
-	 */
-	private void rebuildIndexGeneric(Iterable<? extends Entity> entities, EntityMetaData entityMetaData)
-	{
-		Iterable<? extends Entity> entitiesToIndex = entities;
-		if (DependencyResolver.hasSelfReferences(entityMetaData))
-		{
-			Iterable<Entity> iterable = Iterables.transform(entities, input -> input);
-			entitiesToIndex = new DependencyResolver().resolveSelfReferences(iterable, entityMetaData);
-		}
+		EntityMetaData entityMetaData = repository.getEntityMetaData();
 		if (hasMapping(entityMetaData))
 		{
 			delete(entityMetaData.getName());
 		}
 		createMappings(entityMetaData);
-		index(entitiesToIndex, entityMetaData, IndexingMode.ADD);
+		LOG.info("Reindexing {} repository in batches of size {}...", entityMetaData.getName(), BATCH_SIZE);
+		repository.forEachBatched(createFetchForReindexing(entityMetaData),
+				entities -> index(entities, entityMetaData, IndexingMode.ADD), BATCH_SIZE);
+		LOG.info("Reindexed {} repository.", entityMetaData.getName());
 	}
 
 	@Override

@@ -4,8 +4,8 @@ import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * DataService is a facade that manages data sources Entity names should be unique over all data sources.
@@ -14,33 +14,6 @@ import org.molgenis.data.meta.MetaDataService;
  */
 public interface DataService extends Iterable<Repository<Entity>>
 {
-	/**
-	 * Streams the {@link Repository}s
-	 */
-	default Stream<Repository<Entity>> stream()
-	{
-		return StreamSupport.stream(spliterator(), false);
-	}
-
-	/**
-	 * Streams the {@link Entity}s
-	 *
-	 * @param entityName entity name (case insensitive)
-	 * @param fetch      fetch defining which attributes to retrieve
-	 * @return Stream of all entities
-	 */
-	Stream<Entity> stream(String entityName, Fetch fetch);
-
-	/**
-	 * Streams the {@link Entity}s
-	 *
-	 * @param entityName entity name (case insensitive)
-	 * @param fetch      fetch defining which attributes to retrieve
-	 * @param clazz      typed entity class
-	 * @return Stream of all entities of the give type
-	 */
-	<E extends Entity> Stream<E> stream(String entityName, Fetch fetch, Class<E> clazz);
-
 	void setMetaDataService(MetaDataService metaDataService);
 
 	/**

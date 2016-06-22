@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import org.molgenis.data.idcard.IdCardBootstrapper;
 import org.molgenis.data.jobs.JobBootstrapper;
 import org.molgenis.data.meta.system.SystemEntityMetaDataBootstrapper;
-import org.molgenis.file.ingest.meta.FileIngesterJobRegistrar;
+import org.molgenis.file.ingest.FileIngesterJobRegistrar;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -20,9 +20,9 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.vcf.VcfAttributes;
 import org.molgenis.framework.db.EntitiesValidationReport;
@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
@@ -53,6 +54,7 @@ public class VcfImporterService implements ImportService
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 	}
 
+	@Transactional
 	@Override
 	public EntityImportReport doImport(RepositoryCollection source, DatabaseAction databaseAction,
 			String defaultPackage)
@@ -151,12 +153,12 @@ public class VcfImporterService implements ImportService
 			throw new MolgenisDataException("Can't overwrite existing " + entityName);
 		}
 
-		EntityMetaData entityMetaData = new EntityMetaData(inRepository.getEntityMetaData());
+		EntityMetaData entityMetaData = inRepository.getEntityMetaData();
 
 		AttributeMetaData sampleAttribute = entityMetaData.getAttribute(VcfAttributes.SAMPLES);
 		if (sampleAttribute != null)
 		{
-			EntityMetaData samplesEntityMetaData = new EntityMetaData(sampleAttribute.getRefEntity());
+			EntityMetaData samplesEntityMetaData = sampleAttribute.getRefEntity();
 			sampleRepository = dataService.getMeta().addEntityMeta(samplesEntityMetaData);
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Collections.singletonList(samplesEntityMetaData.getName()));
@@ -214,10 +216,7 @@ public class VcfImporterService implements ImportService
 			}
 
 			AtomicInteger vcfEntityCount = new AtomicInteger();
-			outRepository.add(inRepository.stream().filter(entity -> {
-				vcfEntityCount.incrementAndGet();
-				return true;
-			}));
+			inRepository.forEachBatched(entities -> vcfEntityCount.addAndGet(entities.size()), 1000);
 			if (vcfEntityCount.get() > 0)
 			{
 				report.addEntityCount(entityName, vcfEntityCount.get());

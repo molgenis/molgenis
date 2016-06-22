@@ -1,12 +1,13 @@
 package org.molgenis.script;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collections;
@@ -18,15 +19,16 @@ import org.testng.annotations.Test;
 
 public class ScriptTest
 {
-
 	@Test
-	public void generateScript() throws FileNotFoundException, IOException
+	public void generateScript() throws IOException
 	{
-		Script script = null; // FIXME new Script(mock(DataService.class));
-		script.setContent("Hey ${name}");
-
 		FileStore fileStore = new FileStore(System.getProperty("java.io.tmpdir"));
-		Map<String, Object> parameterValues = Collections.<String, Object> singletonMap("name", "Piet");
+		Map<String, Object> parameterValues = Collections.singletonMap("name", "Piet");
+
+		Script script = mock(Script.class);
+		when(script.getContent()).thenReturn("Hey ${name}");
+		when(script.generateScript(fileStore, "txt", parameterValues)).thenCallRealMethod();
+
 		File f = script.generateScript(fileStore, "txt", parameterValues);
 		assertNotNull(f);
 		assertTrue(f.exists());

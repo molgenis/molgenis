@@ -5,7 +5,7 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
-import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.gson.AutoGson;
 
 import com.google.auto.value.AutoValue;

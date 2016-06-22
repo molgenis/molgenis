@@ -56,10 +56,10 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.Sort;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.jobs.JobExecutionMetaData;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.AttributeMetaDataFactory;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.jobs.model.JobExecutionMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.DynamicEntity;
@@ -108,6 +108,7 @@ import com.google.common.collect.ImmutableMap;
 @RequestMapping(URI)
 public class SortaServiceController extends MolgenisPluginController
 {
+	static final int BATCH_SIZE = 1000;
 	private final OntologyService ontologyService;
 	private final SortaService sortaService;
 	private final DataService dataService;
@@ -582,7 +583,9 @@ public class SortaServiceController extends MolgenisPluginController
 	{
 		// Add the original input dataset to database
 		dataService.getMeta().addEntityMeta(inputRepository.getEntityMetaData());
-		dataService.getRepository(inputRepository.getName()).add(inputRepository.stream());
+
+		Repository<Entity> target = dataService.getRepository(inputRepository.getName());
+		inputRepository.forEachBatched(entities -> target.add(entities.stream()), BATCH_SIZE);
 	}
 
 	private long countMatchedEntities(SortaJobExecution sortaJobExecution, boolean isMatched)

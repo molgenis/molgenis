@@ -1,5 +1,6 @@
 package org.molgenis.file.ingest;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
 import static org.quartz.CronScheduleBuilder.cronSchedule;
 import static org.quartz.JobBuilder.newJob;
@@ -42,8 +43,8 @@ public class FileIngesterJobScheduler
 	@Autowired
 	public FileIngesterJobScheduler(Scheduler scheduler, DataService dataService)
 	{
-		this.scheduler = scheduler;
-		this.dataService = dataService;
+		this.scheduler = requireNonNull(scheduler);
+		this.dataService = requireNonNull(dataService);
 	}
 
 	/**

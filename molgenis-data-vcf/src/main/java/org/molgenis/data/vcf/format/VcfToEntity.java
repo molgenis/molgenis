@@ -8,9 +8,9 @@ import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.MREF;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LOOKUP;
 import static org.molgenis.data.vcf.VcfAttributes.ALT;
 import static org.molgenis.data.vcf.VcfAttributes.CHROM;
 import static org.molgenis.data.vcf.VcfAttributes.FILTER;
@@ -33,11 +33,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.AttributeMetaDataFactory;
-import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataFactory;
 import org.molgenis.data.meta.MetaValidationUtils;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfAttributes;
 import org.molgenis.data.vcf.VcfRepository;
@@ -105,11 +105,10 @@ public class VcfToEntity
 
 	private EntityMetaData createEntityMetaData(String entityName, VcfMeta vcfMeta)
 	{
+		// FIXME do not use application context
 		EntityMetaDataFactory entityMetaFactory = getApplicationContext().getBean(EntityMetaDataFactory.class);
 		AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
-
-		VcfAttributes vcfAttributes = getApplicationContext()
-				.getBean(VcfAttributes.class); // FIXME do not use application context
+		VcfAttributes vcfAttributes = getApplicationContext().getBean(VcfAttributes.class);
 
 		EntityMetaData entityMetaData = entityMetaFactory.create().setSimpleName(entityName);
 		entityMetaData.addAttribute(vcfAttributes.getChromAttribute());

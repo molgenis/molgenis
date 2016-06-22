@@ -1,7 +1,7 @@
 package org.molgenis.data.semantic;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.TagMetaData;
+import org.molgenis.data.meta.model.TagMetaData;
 
 public class SemanticTag<SubjectType, ObjectType, CodeSystemType>
 {

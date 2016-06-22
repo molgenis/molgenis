@@ -3,7 +3,7 @@ package org.molgenis.integrationtest.data;
 import static org.testng.Assert.assertEquals;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.integrationtest.data.abstracts.model.AbstractDatatypeIT;
 
 public abstract class AbstractCompoundDatatypeIT extends AbstractDatatypeIT

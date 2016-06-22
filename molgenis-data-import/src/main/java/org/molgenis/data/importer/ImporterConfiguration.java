@@ -2,9 +2,9 @@ package org.molgenis.data.importer;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.I18nStringMetaData;
-import org.molgenis.data.meta.AttributeMetaDataFactory;
-import org.molgenis.data.meta.PackageFactory;
-import org.molgenis.data.meta.TagMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.PackageFactory;
+import org.molgenis.data.meta.model.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.security.core.MolgenisPermissionService;

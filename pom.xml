@@ -145,7 +145,7 @@
                                     </resource>
                                 </resources>
                             </configuration>
-                        </execution>                    
+                        </execution>
                         <!--
                             Copying the das server config to the war ROOT
                             the uk.ac.ebi.mydas.controller.MydasServlet cannot find the file if
@@ -701,5 +701,6 @@
 		<module>molgenis-integration-tests</module>
         <module>molgenis-jobs</module>
         <module>molgenis-platform-integration-tests</module>
+        <module>molgenis-test</module>
     </modules>
 </project>

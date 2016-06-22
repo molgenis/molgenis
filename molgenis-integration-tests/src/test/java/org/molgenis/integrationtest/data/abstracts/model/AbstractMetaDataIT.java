@@ -6,9 +6,9 @@ import static org.testng.Assert.assertNull;
 
 import java.util.Iterator;
 
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
-import org.molgenis.data.meta.Package;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.integrationtest.data.SecuritySupport;
 import org.molgenis.integrationtest.data.abstracts.AbstractDataIntegrationIT;
 

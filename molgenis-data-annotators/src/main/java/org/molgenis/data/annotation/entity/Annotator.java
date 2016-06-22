@@ -1,6 +1,6 @@
 package org.molgenis.data.annotation.entity;
 
-import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 
 /**
  * An Annotator.

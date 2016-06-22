@@ -1,9 +1,9 @@
 package org.molgenis.data.jobs;
 
-import static org.molgenis.data.jobs.JobExecution.Status.CANCELED;
-import static org.molgenis.data.jobs.JobExecution.Status.FAILED;
-import static org.molgenis.data.jobs.JobExecution.Status.RUNNING;
-import static org.molgenis.data.jobs.JobExecution.Status.SUCCESS;
+import static org.molgenis.data.jobs.model.JobExecution.Status.CANCELED;
+import static org.molgenis.data.jobs.model.JobExecution.Status.FAILED;
+import static org.molgenis.data.jobs.model.JobExecution.Status.RUNNING;
+import static org.molgenis.data.jobs.model.JobExecution.Status.SUCCESS;
 
 import java.util.Date;
 
@@ -11,6 +11,7 @@ import org.joda.time.Duration;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
+import org.molgenis.data.jobs.model.JobExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;

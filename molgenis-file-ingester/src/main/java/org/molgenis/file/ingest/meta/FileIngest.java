@@ -14,7 +14,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
 public class FileIngest extends StaticEntity
@@ -32,17 +32,22 @@ public class FileIngest extends StaticEntity
 	public FileIngest(String id, EntityMetaData entityMeta)
 	{
 		super(entityMeta);
-		setIdentifier(id);
+		setId(id);
 	}
 
-	private void setIdentifier(String identifier)
+	public void setId(String identifier)
 	{
 		set(ID, identifier);
 	}
 
-	public String getIdentifier()
+	public String getId()
 	{
 		return getString(ID);
+	}
+
+	public void setName(String name)
+	{
+		set(NAME, name);
 	}
 
 	public String getName()
@@ -50,9 +55,19 @@ public class FileIngest extends StaticEntity
 		return getString(NAME);
 	}
 
+	public void setDescription(String description)
+	{
+		set(DESCRIPTION, description);
+	}
+
 	public String getDescription()
 	{
 		return getString(DESCRIPTION);
+	}
+
+	public void setUrl(URL url)
+	{
+		set(URL, url != null ? url.toString() : null);
 	}
 
 	public URL getUrl() throws MalformedURLException
@@ -60,14 +75,29 @@ public class FileIngest extends StaticEntity
 		return new URL(getString(URL));
 	}
 
+	public void setLoader(String loader)
+	{
+		set(LOADER, loader);
+	}
+
 	public String getLoader()
 	{
 		return getString(LOADER);
 	}
 
+	public void setTargetEntity(EntityMetaData entityMetaData)
+	{
+		set(ENTITY_META_DATA, entityMetaData);
+	}
+
 	public String getTargetEntityName()
 	{
-		return getEntity(ENTITY_META_DATA, FileIngestMetaData.class).getName();
+		return getEntity(ENTITY_META_DATA, EntityMetaData.class).getName();
+	}
+
+	public void setCronExpression(String cronExpression)
+	{
+		set(CRONEXPRESSION, cronExpression);
 	}
 
 	public String getCronExpression()
@@ -75,9 +105,20 @@ public class FileIngest extends StaticEntity
 		return getString(CRONEXPRESSION);
 	}
 
+	public void setActive(boolean active)
+	{
+		set(ACTIVE, active);
+	}
+
 	public boolean isActive()
 	{
-		return getBoolean(ACTIVE);
+		Boolean active = getBoolean(ACTIVE);
+		return active != null ? active.booleanValue() : false;
+	}
+
+	public void setFailureEmail(String failureEmail)
+	{
+		set(FAILURE_EMAIL, failureEmail);
 	}
 
 	public String getFailureEmail()

@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 
 /**
  * Simple interface to implement for fine-grained annotators.

@@ -1,11 +1,27 @@
 package org.molgenis.security.account;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.molgenis.auth.MolgenisUserMetaData.EMAIL;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+import static org.testng.Assert.assertEquals;
+
+import java.util.Collections;
+
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserFactory;
-import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.settings.AppSettings;
@@ -31,16 +47,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.Collections;
-
-import static org.mockito.Mockito.*;
-import static org.molgenis.auth.MolgenisUserMetaData.EMAIL;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.testng.Assert.assertEquals;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = { Config.class, GsonConfig.class })
@@ -286,7 +292,7 @@ public class AccountControllerTest extends AbstractTestNGSpringContextTests
 				@Override
 				public MolgenisUser answer(InvocationOnMock invocationOnMock) throws Throwable
 				{
-					return new MolgenisUser(mock(MolgenisUserMetaData.class));
+					return mock(MolgenisUser.class);
 				}
 			});
 			return molgenisUserFactory;

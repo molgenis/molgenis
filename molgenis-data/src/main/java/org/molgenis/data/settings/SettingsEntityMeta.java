@@ -1,7 +1,7 @@
 package org.molgenis.data.settings;
 
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 
 import org.molgenis.data.meta.SystemEntityMetaData;

@@ -2,6 +2,7 @@ package org.molgenis.data.postgresql;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
+import static java.util.stream.IntStream.range;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.JUNCTION_TABLE_ORDER_ATTR_NAME;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableName;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributes;
@@ -21,8 +22,8 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Sort;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
@@ -157,6 +158,14 @@ class PostgreSqlQueryGenerator
 		return sql.toString();
 	}
 
+	static String getSqlCreateJunctionTableIndex(EntityMetaData entityMeta, AttributeMetaData attr)
+	{
+		String junctionTableName = getJunctionTableName(entityMeta, attr);
+		return "CREATE INDEX " + junctionTableName.substring(0, junctionTableName.length() - 1) + "_" + entityMeta
+				.getIdAttribute().getName() + "_index\" ON " + junctionTableName + " (" + getColumnName(
+				entityMeta.getIdAttribute()) + ")";
+	}
+
 	public static String getSqlDropJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		return getSqlDropTable(getJunctionTableName(entityMeta, attr));
@@ -214,7 +223,17 @@ class PostgreSqlQueryGenerator
 				.append(getColumnName(attr)).append(" = ?").toString();
 	}
 
-	public static <E extends Entity> String getSqlSelect(EntityMetaData entityMeta, Query<E> q, List<Object> parameters)
+	static String getJunctionTableSelect(EntityMetaData entityMeta, AttributeMetaData attr, int numOfIds)
+	{
+		return "SELECT " + getColumnName(entityMeta.getIdAttribute()) + ", \"" + JUNCTION_TABLE_ORDER_ATTR_NAME + "\","
+				+ getColumnName(attr) + " FROM " + getJunctionTableName(entityMeta, attr) + " WHERE " + getColumnName(
+				entityMeta.getIdAttribute()) + " in (" + range(0, numOfIds).mapToObj((x) -> "?").collect(joining(", "))
+				+ ") ORDER BY " + getColumnName(entityMeta.getIdAttribute()) + ", \"" + JUNCTION_TABLE_ORDER_ATTR_NAME
+				+ "\"";
+	}
+
+	public static <E extends Entity> String getSqlSelect(EntityMetaData entityMeta, Query<E> q, List<Object> parameters,
+			boolean includeMrefs)
 	{
 		final StringBuilder select = new StringBuilder("SELECT ");
 		final StringBuilder group = new StringBuilder();
@@ -230,14 +249,21 @@ class PostgreSqlQueryGenerator
 
 				if (attr.getDataType() instanceof MrefField)
 				{
-					// TODO retrieve mref values in seperate queries to allow specifying limit and offset after nested
-					// MOLGENIS queries are implemented as sub-queries instead of query rules
-					String mrefSelect = MessageFormat
-							.format("(SELECT array_agg(DISTINCT ARRAY[{0}.{1}::TEXT,{0}.{0}::TEXT]) "
-											+ "FROM {2} AS {0} WHERE this.{3} = {0}.{3}) AS {0}", getColumnName(attr),
-									getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME),
-									getJunctionTableName(entityMeta, attr), getColumnName(idAttribute));
-					select.append(mrefSelect);
+					if (includeMrefs)
+					{
+						// TODO retrieve mref values in seperate queries to allow specifying limit and offset after nested
+						// MOLGENIS queries are implemented as sub-queries instead of query rules
+						String mrefSelect = MessageFormat
+								.format("(SELECT array_agg(DISTINCT ARRAY[{0}.{1}::TEXT,{0}.{0}::TEXT]) "
+												+ "FROM {2} AS {0} WHERE this.{3} = {0}.{3}) AS {0}", getColumnName(attr),
+										getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME),
+										getJunctionTableName(entityMeta, attr), getColumnName(idAttribute));
+						select.append(mrefSelect);
+					}
+					else
+					{
+						select.append("NULL AS " + getColumnName(attr));
+					}
 				}
 				else
 				{
@@ -298,7 +324,7 @@ class PostgreSqlQueryGenerator
 
 	/**
 	 * Produces SQL to count the number of entities that match the given query. Ignores query offset and pagesize.
-	 * 
+	 *
 	 * @param q
 	 * @param parameters
 	 * @return
@@ -569,7 +595,7 @@ class PostgreSqlQueryGenerator
 						parameters.add(convertedVal);
 					}
 					if (result.length() > 0 && !result.toString().endsWith(" OR ") && !result.toString()
-							.endsWith(" AND "))
+							.endsWith(" AND ") && !result.toString().endsWith(" NOT "))
 					{
 						result.append(" AND ");
 					}
@@ -720,12 +746,12 @@ class PostgreSqlQueryGenerator
 		return from.toString();
 	}
 
-	private static String getColumnName(AttributeMetaData attr)
+	static String getColumnName(AttributeMetaData attr)
 	{
 		return getColumnName(attr.getName());
 	}
 
-	private static String getColumnName(String attrName)
+	static String getColumnName(String attrName)
 	{
 		return new StringBuilder().append("\"").append(attrName).append("\"").toString();
 	}
