@@ -9,11 +9,10 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static java.util.stream.Collectors.toList;
 
 @Component
 public class DynamicEntityTestHarness
@@ -56,24 +55,24 @@ public class DynamicEntityTestHarness
 		AttributeMetaData idAttribute = attributeMetaDataFactory.create();
 		idAttribute.setName(ATTR_REF_ID);
 		AttributeMetaData labelAttribute = attributeMetaDataFactory.create();
-		labelAttribute.setName(ATTR_STRING);
+		labelAttribute.setName(ATTR_REF_STRING);
 
-		result.setIdAttribute(idAttribute);
-		result.setLabelAttribute(labelAttribute);
-		result.addAttributes(newArrayList(idAttribute, labelAttribute));
+		result.addAttribute(idAttribute, EntityMetaData.AttributeRole.ROLE_ID);
+		result.addAttribute(labelAttribute, EntityMetaData.AttributeRole.ROLE_LABEL);
+
 		return result;
 	}
 
 	public List<Entity> createTestRefEntities(EntityMetaData refEntityMetaData, int numberOfEntities)
 	{
 		return IntStream.range(0, numberOfEntities).mapToObj(i -> createRefEntity(refEntityMetaData, i))
-				.collect(Collectors.toList());
+				.collect(toList());
 	}
 
 	public Stream<Entity> createTestEntities(EntityMetaData entityMetaData, int numberOfEntities,
 			List<Entity> refEntities)
 	{
-		return IntStream.range(0, numberOfEntities+1)
+		return IntStream.range(0, numberOfEntities + 1)
 				.mapToObj(i -> createEntity(entityMetaData, i, refEntities.get(i % refEntities.size())));
 	}
 

@@ -6,11 +6,11 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class ReindexActionJobFactory
-		extends AbstractSystemEntityFactory<ReindexActionJob, ReindexActionJobMetaData, String>
+		extends AbstractSystemEntityFactory<ReindexActionGroup, ReindexActionGroupMetaData, String>
 {
 	@Autowired
-	ReindexActionJobFactory(ReindexActionJobMetaData reindexActionJobMetaData)
+	ReindexActionJobFactory(ReindexActionGroupMetaData reindexActionJobMetaData)
 	{
-		super(ReindexActionJob.class, reindexActionJobMetaData);
+		super(ReindexActionGroup.class, reindexActionJobMetaData);
 	}
 }
