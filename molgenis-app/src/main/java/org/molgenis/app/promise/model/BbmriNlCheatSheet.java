@@ -53,7 +53,7 @@ public class BbmriNlCheatSheet
 
 	// XML Response attributes
 	public static final String XML_ID = "ID";
-	public static final String XML_TITLE = "TITLE";
+	public static final String XML_TITLE = "TITEL";
 	public static final String XML_IDAA = "IDAA";
 	public static final String XML_DESCRIPTION = "OMSCHRIJVING";
 }
