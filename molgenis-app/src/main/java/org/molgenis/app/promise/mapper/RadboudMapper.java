@@ -41,10 +41,6 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 	private final PromiseDataParser promiseDataParser;
 	private final DataService dataService;
 
-	private List<Entity> toAdd = newArrayList();
-	private List<Entity> toUpdate = newArrayList();
-
-	private static final Map<String, List<Entity>> sampleIdMap = newHashMap();
 	private static final Logger LOG = LoggerFactory.getLogger(RadboudMapper.class);
 
 	@Autowired
@@ -72,7 +68,13 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 	public MappingReport map(Entity project)
 	{
 		requireNonNull(project);
+
 		MappingReport report = new MappingReport();
+
+		List<Entity> sampleCollectionsToAdd = newArrayList();
+		List<Entity> sampleCollectionsToUpdate = newArrayList();
+
+		Map<String, List<Entity>> sampleIdMap = newHashMap();
 
 		try
 		{
@@ -138,23 +140,15 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 				targetEntity.set(BIOBANK_DATA_ACCESS_JOINT_PROJECTS, true);
 				targetEntity.set(BIOBANK_DATA_ACCESS_DESCRIPTION, null);  // Don't fill in
 
-				if (biobankExists)
-				{
-					//LOG.info("Updating biobank [" + targetEntity.getIdValue() + "] for " + SAMPLE_COLLECTIONS_ENTITY);
-					toUpdate.add(targetEntity);
-				}
-				else
-				{
-					//LOG.info("Adding biobank [" + targetEntity.getIdValue() + "] to " + SAMPLE_COLLECTIONS_ENTITY);
-					toAdd.add(targetEntity);
-				}
+				if (biobankExists) sampleCollectionsToUpdate.add(targetEntity);
+				else sampleCollectionsToAdd.add(targetEntity);
 			});
 
-			LOG.info("Adding entities to {}", SAMPLE_COLLECTIONS_ENTITY);
-			dataService.add(SAMPLE_COLLECTIONS_ENTITY, toAdd.stream());
+			LOG.info("Updating {} entities in {}", sampleCollectionsToUpdate.size(), SAMPLE_COLLECTIONS_ENTITY);
+			dataService.update(SAMPLE_COLLECTIONS_ENTITY, sampleCollectionsToUpdate.stream());
 
-			LOG.info("Updating entities to {}", SAMPLE_COLLECTIONS_ENTITY);
-			dataService.update(SAMPLE_COLLECTIONS_ENTITY, toUpdate.stream());
+			LOG.info("Adding {} entities to {}", sampleCollectionsToAdd.size(), SAMPLE_COLLECTIONS_ENTITY);
+			dataService.add(SAMPLE_COLLECTIONS_ENTITY, sampleCollectionsToAdd.stream());
 
 			LOG.info("Finished mapping RADBOUD biobanks");
 			report.setStatus(Status.SUCCESS);
@@ -164,7 +158,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 			report.setStatus(Status.ERROR);
 			report.setMessage(e.getMessage());
 
-			LOG.warn("Error in mapping response to entities {}", e);
+			LOG.warn("Error in mapping response to entities", e);
 		}
 
 		sampleIdMap.clear();
