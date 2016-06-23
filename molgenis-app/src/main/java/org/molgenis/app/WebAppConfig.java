@@ -4,7 +4,6 @@ import com.google.common.collect.Sets;
 import freemarker.template.TemplateException;
 import org.molgenis.CommandLineOnlyConfiguration;
 import org.molgenis.DatabaseConfig;
-import org.molgenis.app.promise.client.PromiseRequest;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.ManageableRepositoryCollection;
@@ -38,16 +37,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.*;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.ComponentScan.Filter;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
-import org.springframework.ws.client.core.WebServiceTemplate;
-import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -109,13 +108,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				dataSource, idGenerator);
 
 		step32AddRowLevelSecurityMetadata.setEntitiesToSecure(
-				asList("bbmri_eric_biobanksize", "bbmri_eric_directory", "bbmri_eric_EricSource",
-						"bbmri_eric_staffsize", "bbmri_nl_age_types", "bbmri_nl_biobanks", "bbmri_nl_collection_types",
-						"bbmri_nl_countries", "bbmri_nl_data_category_types", "bbmri_nl_disease_types",
-						"bbmri_nl_gender_types", "bbmri_nl_juristic_persons", "bbmri_nl_material_types",
-						"bbmri_nl_omics_data_types", "bbmri_nl_ontology_term", "bbmri_nl_persons",
-						"bbmri_nl_publications", "bbmri_nl_sample_collections", "bbmri_nl_sample_size_types",
-						"bbmri_nl_staff_size_types"));
+				asList("bbmri_nl_sample_collections", "bbmri_nl_biobanks", "bbmri_nl_juristic_persons",
+						"bbmri_nl_persons", "bbmri_nl_publications"));
 		upgradeService.addUpgrade(step32AddRowLevelSecurityMetadata);
 	}
 
