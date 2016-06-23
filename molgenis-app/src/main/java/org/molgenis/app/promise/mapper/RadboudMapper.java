@@ -1,6 +1,5 @@
 package org.molgenis.app.promise.mapper;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
 import org.molgenis.app.promise.client.PromiseDataParser;
 import org.molgenis.app.promise.mapper.MappingReport.Status;
 import org.molgenis.app.promise.model.PromiseMappingProjectMetaData;
@@ -8,7 +7,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.UuidGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +21,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 import static com.google.common.collect.Iterables.size;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.hash.Hashing.md5;
 import static java.nio.charset.Charset.forName;
@@ -41,6 +40,9 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 	private final PromiseMapperFactory promiseMapperFactory;
 	private final PromiseDataParser promiseDataParser;
 	private final DataService dataService;
+
+	private List<Entity> toAdd = newArrayList();
+	private List<Entity> toUpdate = newArrayList();
 
 	private static final Map<String, List<Entity>> sampleIdMap = newHashMap();
 	private static final Logger LOG = LoggerFactory.getLogger(RadboudMapper.class);
@@ -79,25 +81,25 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 			LOG.info("Generating RADBOUD sample map");
 			promiseDataParser.parse(credentials, 1, sampleEntity -> {
 				String samplesId = sampleEntity.getString(XML_ID) + sampleEntity.getString(XML_IDAA);
-				sampleIdMap.putIfAbsent(samplesId, Lists.newArrayList());
+				sampleIdMap.putIfAbsent(samplesId, newArrayList());
 				sampleIdMap.get(samplesId).add(sampleEntity);
 			});
 
-			LOG.info("Downloading biobank data for " + project.getString("name"));
+			LOG.info("Downloading biobank data for " + project.getString(NAME));
 			promiseDataParser.parse(credentials, 0, biobankEntity -> {
+				LOG.info("Mapping biobank: " + biobankEntity.getString(XML_TITLE));
+
 				EntityMetaData targetEntityMetaData = requireNonNull(
 						dataService.getEntityMetaData(SAMPLE_COLLECTIONS_ENTITY));
 
 				String biobankId = biobankEntity.getString(XML_ID) + biobankEntity.getString(XML_IDAA);
 				Iterable<Entity> biobankSamplesEntities = sampleIdMap.get(biobankId);
 
-				Entity targetEntity = dataService.findOne(SAMPLE_COLLECTIONS_ENTITY,
-						new QueryImpl().eq(ID, biobankId));
+				Entity targetEntity = dataService.findOne(SAMPLE_COLLECTIONS_ENTITY, biobankId);
 
 				boolean biobankExists = true;
 				if (targetEntity == null)
 				{
-					LOG.info("targetEntity == null!");
 					targetEntity = new MapEntity(targetEntityMetaData);
 
 					// fill hand coded fields with dummy data the first time this biobank is added
@@ -138,16 +140,23 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 
 				if (biobankExists)
 				{
-					LOG.info("Updating biobank [" + targetEntity + "] for " + SAMPLE_COLLECTIONS_ENTITY);
-					dataService.update(SAMPLE_COLLECTIONS_ENTITY, targetEntity);
+					//LOG.info("Updating biobank [" + targetEntity.getIdValue() + "] for " + SAMPLE_COLLECTIONS_ENTITY);
+					toUpdate.add(targetEntity);
 				}
 				else
 				{
-					LOG.info("Adding biobank [" + targetEntity + "] to " + SAMPLE_COLLECTIONS_ENTITY);
-					dataService.add(SAMPLE_COLLECTIONS_ENTITY, targetEntity);
+					//LOG.info("Adding biobank [" + targetEntity.getIdValue() + "] to " + SAMPLE_COLLECTIONS_ENTITY);
+					toAdd.add(targetEntity);
 				}
 			});
 
+			LOG.info("Adding entities to {}", SAMPLE_COLLECTIONS_ENTITY);
+			dataService.add(SAMPLE_COLLECTIONS_ENTITY, toAdd.stream());
+
+			LOG.info("Updating entities to {}", SAMPLE_COLLECTIONS_ENTITY);
+			dataService.update(SAMPLE_COLLECTIONS_ENTITY, toUpdate.stream());
+
+			LOG.info("Finished mapping RADBOUD biobanks");
 			report.setStatus(Status.SUCCESS);
 		}
 		catch (Exception e)
@@ -196,7 +205,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		return singletonList(principalInvestigators);
 	}
 
-	private Iterable<Entity> getContactPersons(Entity biobankEntity)
+	public Iterable<Entity> getContactPersons(Entity biobankEntity)
 	{
 		String[] contactPerson = biobankEntity.getString("CONTACTPERS").split(",");
 		String address1 = biobankEntity.getString("ADRES1");
@@ -206,16 +215,16 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		String[] email = biobankEntity.getString("EMAIL").split(" ");
 		String phoneNumber = biobankEntity.getString("TELEFOON");
 
-		List<Entity> persons = Lists.newArrayList();
+		List<Entity> persons = newArrayList();
 		for (int i = 0; i < contactPerson.length; i++)
 		{
 			StringBuilder contentBuilder = new StringBuilder();
-			if (contactPerson != null && !contactPerson[i].isEmpty()) contentBuilder.append(contactPerson);
+			if (contactPerson[i] != null && !contactPerson[i].isEmpty()) contentBuilder.append(contactPerson[i]);
 			if (address1 != null && !address1.isEmpty()) contentBuilder.append(address1);
 			if (address2 != null && !address2.isEmpty()) contentBuilder.append(address2);
 			if (postalCode != null && !postalCode.isEmpty()) contentBuilder.append(postalCode);
 			if (city != null && !city.isEmpty()) contentBuilder.append(city);
-			if (email != null && !email[i].isEmpty()) contentBuilder.append(email);
+			if (email[i] != null && !email[i].isEmpty()) contentBuilder.append(email[i]);
 			if (phoneNumber != null && !phoneNumber.isEmpty()) contentBuilder.append(phoneNumber);
 
 			String personId = md5().newHasher().putString(contentBuilder, forName("UTF-8")).hash().toString();
@@ -229,10 +238,10 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 			{
 				MapEntity newPerson = new MapEntity(dataService.getEntityMetaData(REF_PERSONS));
 				newPerson.set("id", personId);
-				newPerson.set("first_name", contactPerson);
-				newPerson.set("last_name", contactPerson);
+				newPerson.set("first_name", contactPerson[i]);
+				newPerson.set("last_name", contactPerson[i]);
 				newPerson.set("phone", phoneNumber);
-				newPerson.set("email", email);
+				newPerson.set("email", email[i]);
 
 				StringBuilder addressBuilder = new StringBuilder();
 				if (address1 != null && !address1.isEmpty()) addressBuilder.append(address1);
