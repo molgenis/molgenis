@@ -2,8 +2,8 @@ package org.molgenis.data.annotation.filter;
 
 import static com.google.common.collect.FluentIterable.from;
 import static java.util.Arrays.asList;
-import static org.molgenis.data.vcf.VcfAttributes.ALT;
-import static org.molgenis.data.vcf.VcfAttributes.REF;
+import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
+import static org.molgenis.data.vcf.model.VcfAttributes.REF;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.vcf.VcfAttributes;
+import org.molgenis.data.vcf.model.VcfAttributes;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.Iterators;

@@ -1,4 +1,4 @@
-package org.molgenis.data.meta.system;
+package org.molgenis.data.system.core;
 
 import static org.molgenis.MolgenisFieldTypes.SCRIPT;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;

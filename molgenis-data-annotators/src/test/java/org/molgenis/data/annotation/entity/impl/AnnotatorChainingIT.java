@@ -22,7 +22,8 @@ public class AnnotatorChainingIT
 	{
 		File vcf = new File("src/test/resources/gonl/test_gonl_and_1000g.vcf");
 
-		try (VcfRepository repo = new VcfRepository(vcf, "vcf"))
+		// FIXME replace null contructor arguments with actual arguments
+		try (VcfRepository repo = new VcfRepository(vcf, "vcf", null, null, null))
 		{
 			try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 					"org.molgenis.data.annotation"))
