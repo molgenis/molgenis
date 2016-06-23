@@ -144,11 +144,11 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 				else sampleCollectionsToAdd.add(targetEntity);
 			});
 
-			LOG.info("Updating {} entities in {}", sampleCollectionsToUpdate.size(), SAMPLE_COLLECTIONS_ENTITY);
-			dataService.update(SAMPLE_COLLECTIONS_ENTITY, sampleCollectionsToUpdate.stream());
-
 			LOG.info("Adding {} entities to {}", sampleCollectionsToAdd.size(), SAMPLE_COLLECTIONS_ENTITY);
 			dataService.add(SAMPLE_COLLECTIONS_ENTITY, sampleCollectionsToAdd.stream());
+
+			LOG.info("Updating {} entities in {}", sampleCollectionsToUpdate.size(), SAMPLE_COLLECTIONS_ENTITY);
+			dataService.update(SAMPLE_COLLECTIONS_ENTITY, sampleCollectionsToUpdate.stream());
 
 			LOG.info("Finished mapping RADBOUD biobanks");
 			report.setStatus(Status.SUCCESS);
