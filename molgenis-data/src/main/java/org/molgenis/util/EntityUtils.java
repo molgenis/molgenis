@@ -418,6 +418,35 @@ public class EntityUtils
 		return true;
 	}
 
+	public static boolean equals(Tag tag, Tag otherTag)
+	{
+		if (!Objects.equals(tag.getIdentifier(), otherTag.getIdentifier()))
+		{
+			return false;
+		}
+		if (!Objects.equals(tag.getObjectIri(), otherTag.getObjectIri()))
+		{
+			return false;
+		}
+		if (!Objects.equals(tag.getLabel(), otherTag.getLabel()))
+		{
+			return false;
+		}
+		if (!Objects.equals(tag.getRelationIri(), otherTag.getRelationIri()))
+		{
+			return false;
+		}
+		if (!Objects.equals(tag.getRelationLabel(), otherTag.getRelationLabel()))
+		{
+			return false;
+		}
+		if (!Objects.equals(tag.getCodeSystem(), otherTag.getCodeSystem()))
+		{
+			return false;
+		}
+		return true;
+	}
+
 	public static boolean equals(AttributeMetaData attr, AttributeMetaData otherAttr)
 	{
 		// identifier might be null if attribute hasn't been persisted yet
