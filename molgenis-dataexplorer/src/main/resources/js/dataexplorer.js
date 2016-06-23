@@ -94,7 +94,7 @@ function($, molgenis, settingsXhr) {
 		var items = [];
 		items.push('<ul class="nav nav-tabs pull-left" style="width: 100%" role="tablist">');
 		$.each(modules, function() {
-			var href = molgenis.getContextUrl() + '/module/' + this.id+'?entity=' + entity;
+			var href = molgenis.getContextUrl() + '/module/' + this.id+'?entity=' + entity + "&" + window.location.search;
 			items.push('<li data-id="' + this.id + '"><a href="' + href + '" data-target="#tab-' + this.id + '" data-id="' + this.id + '" role="tab" data-toggle="tab"><img src="/img/' + this.icon + '"> ' + this.label + '</a></li>');
 		});
         items.push('<li class="pull-right">');

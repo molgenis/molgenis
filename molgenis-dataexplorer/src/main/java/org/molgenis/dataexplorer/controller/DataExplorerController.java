@@ -44,6 +44,7 @@ import org.springframework.web.bind.annotation.SessionAttributes;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.io.File;
@@ -163,7 +164,7 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@RequestMapping(value = "/module/{moduleId}", method = GET)
 	public String getModule(@PathVariable("moduleId") String moduleId, @RequestParam("entity") String entityName,
-			Model model)
+			Model model, HttpServletRequest request)
 	{
 		if (moduleId.equals(MOD_DATA))
 		{
@@ -172,6 +173,10 @@ public class DataExplorerController extends MolgenisPluginController
 		}
 		else if (moduleId.equals(MOD_ENTITIESREPORT))
 		{
+			for(Map.Entry<String, String[]> e: request.getParameterMap().entrySet())
+			{
+				model.addAttribute(e.getKey(), e.getValue()[0]);
+			}
 			model.addAttribute("datasetRepository", dataService.getRepository(entityName));
 			model.addAttribute("viewName", dataExplorerSettings.getEntityReport(entityName));
 		}
