@@ -43,6 +43,8 @@ public class Step26migrateJpaBackend extends MolgenisUpgrade
 		jdbcTemplate.update("INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)", 23,
 				"MolgenisUser", googleAccountId);
 
+		jdbcTemplate.update("ALTER TABLE MolgenisUser ADD COLUMN `googleAccountId` TEXT");
+
 		// Fix https://github.com/molgenis/molgenis/issues/4357: add MolgenisUser.languageCode
 		String languageCode = idGenerator.generateId();
 		jdbcTemplate.update(
@@ -52,6 +54,8 @@ public class Step26migrateJpaBackend extends MolgenisUpgrade
 
 		jdbcTemplate.update("INSERT INTO entities_attributes (`order`, `fullName`, `attributes`) VALUES (?, ?, ?)", 22,
 				"MolgenisUser", languageCode);
+
+		jdbcTemplate.update("ALTER TABLE MolgenisUser ADD COLUMN `languageCode` TEXT");
 
 		//Fix #4397 migration from 1.8.1 to 1.16 fails because of changes in the JPA entities
 		jdbcTemplate.update(
