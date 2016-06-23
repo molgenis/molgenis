@@ -73,12 +73,12 @@ public class DataExplorerControllerTest extends AbstractTestNGSpringContextTests
 	public void getAnnotatorModuleSuccess() throws Exception
 	{
 		assertEquals("view-dataexplorer-mod-" + DataExplorerController.MOD_ANNOTATORS,
-				controller.getModule(DataExplorerController.MOD_ANNOTATORS, "yes", mock(Model.class)));
+				controller.getModule(DataExplorerController.MOD_ANNOTATORS, "yes", mock(Model.class), null));
 	}
 
 	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void getAnnotatorModuleFail() throws Exception
 	{
-		controller.getModule(DataExplorerController.MOD_ANNOTATORS, "no", mock(Model.class));
+		controller.getModule(DataExplorerController.MOD_ANNOTATORS, "no", mock(Model.class), null);
 	}
 }
