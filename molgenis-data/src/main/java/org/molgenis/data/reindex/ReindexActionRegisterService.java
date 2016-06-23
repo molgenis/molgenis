@@ -46,7 +46,7 @@ public class ReindexActionRegisterService
 	private ReindexActionFactory reindexActionFactory;
 
 	@Autowired
-	private ReindexActionJobFactory reindexActionGroupFactory;
+	private ReindexActionGroupFactory reindexActionGroupFactory;
 
 	public ReindexActionRegisterService()
 	{
