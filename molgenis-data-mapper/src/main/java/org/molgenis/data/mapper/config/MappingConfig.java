@@ -5,6 +5,7 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.data.mapper.algorithmgenerator.service.impl.AlgorithmGeneratorServiceImpl;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
+import org.molgenis.data.mapper.meta.MappingProjectMetaData;
 import org.molgenis.data.mapper.repository.impl.AttributeMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.EntityMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl;
@@ -64,6 +65,12 @@ public class MappingConfig
 	@Autowired
 	AttributeMetaDataFactory attrMetaFactory;
 
+	@Autowired
+	MolgenisUserService molgenisUserService;
+
+	@Autowired
+	MappingProjectMetaData mappingProjectMeta;
+
 	@Bean
 	public MappingService mappingService()
 	{
@@ -93,7 +100,8 @@ public class MappingConfig
 	@Bean
 	public MappingProjectRepositoryImpl mappingProjectRepository()
 	{
-		return new MappingProjectRepositoryImpl(dataService, mappingTargetRepository());
+		return new MappingProjectRepositoryImpl(dataService, mappingTargetRepository(), molgenisUserService,
+				idGenerator, mappingProjectMeta);
 	}
 
 	@Bean
