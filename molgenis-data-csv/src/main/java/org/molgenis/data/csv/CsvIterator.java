@@ -20,6 +20,7 @@ import org.apache.commons.io.IOUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.DynamicEntity;
@@ -33,6 +34,7 @@ public class CsvIterator implements CloseableIterator<Entity>
 {
 	private static final Charset CHARSET = Charset.forName("UTF-8");
 	private final String repositoryName;
+	private final EntityMetaData entityMeta;
 	private ZipFile zipFile;
 	private CSVReader csvReader;
 	private final List<CellProcessor> cellProcessors;
@@ -43,9 +45,16 @@ public class CsvIterator implements CloseableIterator<Entity>
 
 	public CsvIterator(File file, String repositoryName, List<CellProcessor> cellProcessors, Character separator)
 	{
+		this(file, repositoryName, cellProcessors, separator, null);
+	}
+
+	public CsvIterator(File file, String repositoryName, List<CellProcessor> cellProcessors, Character separator,
+			EntityMetaData entityMeta)
+	{
 		this.repositoryName = repositoryName;
 		this.cellProcessors = cellProcessors;
 		this.separator = separator;
+		this.entityMeta = entityMeta;
 
 		try
 		{
@@ -128,7 +137,7 @@ public class CsvIterator implements CloseableIterator<Entity>
 						values[i] = processCell(value, false);
 					}
 
-					next = new DynamicEntity(null); // FIXME pass entity meta data instead of null
+					next = new DynamicEntity(entityMeta);
 
 					for (String name : colNamesMap.keySet())
 					{
@@ -174,13 +183,13 @@ public class CsvIterator implements CloseableIterator<Entity>
 
 		if (null == separator)
 		{
-			if (fileName.toLowerCase().endsWith("." + GenericImporterExtensions.CSV.toString())
-					|| fileName.toLowerCase().endsWith("." + GenericImporterExtensions.TXT.toString()))
+			if (fileName.toLowerCase().endsWith('.' + GenericImporterExtensions.CSV.toString()) || fileName
+					.toLowerCase().endsWith('.' + GenericImporterExtensions.TXT.toString()))
 			{
 				return new CSVReader(reader);
 			}
 
-			if (fileName.toLowerCase().endsWith("." + GenericImporterExtensions.TSV.toString()))
+			if (fileName.toLowerCase().endsWith('.' + GenericImporterExtensions.TSV.toString()))
 			{
 				return new CSVReader(reader, '\t');
 			}
@@ -196,7 +205,7 @@ public class CsvIterator implements CloseableIterator<Entity>
 		if ((headers == null) || (headers.length == 0)) return Collections.emptyMap();
 
 		int capacity = (int) (headers.length / 0.75) + 1;
-		Map<String, Integer> columnIdx = new LinkedHashMap<String, Integer>(capacity);
+		Map<String, Integer> columnIdx = new LinkedHashMap<>(capacity);
 		for (int i = 0; i < headers.length; ++i)
 		{
 			String header = processCell(headers[i], true);

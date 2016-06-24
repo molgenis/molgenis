@@ -1,5 +1,7 @@
 package org.molgenis.data.csv;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Enumeration;
@@ -13,7 +15,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
@@ -32,19 +36,26 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	public static final String NAME = "CSV";
 	private static final String MAC_ZIP = "__MACOSX";
 	private final File file;
+	private final EntityMetaDataFactory entityMetaFactory;
+	private final AttributeMetaDataFactory attrMetaFactory;
 	private List<String> entityNames;
 	private List<String> entityNamesLowerCase;
 
-	public CsvRepositoryCollection(File file) throws MolgenisInvalidFormatException, IOException
+	public CsvRepositoryCollection(File file, EntityMetaDataFactory entityMetaFactory,
+			AttributeMetaDataFactory attrMetaFactory) throws MolgenisInvalidFormatException, IOException
 	{
-		this(file, (CellProcessor[]) null);
+		this(file, entityMetaFactory, attrMetaFactory, (CellProcessor[]) null);
 	}
 
-	public CsvRepositoryCollection(File file, CellProcessor... cellProcessors) throws MolgenisInvalidFormatException,
+	public CsvRepositoryCollection(File file, EntityMetaDataFactory entityMetaFactory,
+			AttributeMetaDataFactory attrMetaFactory, CellProcessor... cellProcessors)
+			throws MolgenisInvalidFormatException,
 			IOException
 	{
 		super(GenericImporterExtensions.getCSV(), cellProcessors);
 		this.file = file;
+		this.entityMetaFactory = requireNonNull(entityMetaFactory);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 
 		loadEntityNames();
 	}
@@ -69,7 +80,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 			return null;
 		}
 
-		return new CsvRepository(file, name, cellProcessors);
+		return new CsvRepository(file, entityMetaFactory, attrMetaFactory, name, cellProcessors);
 	}
 
 	private void loadEntityNames()
@@ -112,7 +123,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 		}
 	}
 
-	private String getRepositoryName(String fileName)
+	private static String getRepositoryName(String fileName)
 	{
 		return StringUtils.stripFilenameExtension(StringUtils.getFilename(fileName));
 	}
