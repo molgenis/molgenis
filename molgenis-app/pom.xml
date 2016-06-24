@@ -114,47 +114,47 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-core</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-core-ui</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-security</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-dataexplorer</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-pathways</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-excel</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-csv</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-googlespreadsheet</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>servlet-api</artifactId>
@@ -165,42 +165,42 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-python</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-r</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-annotators</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-charts</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-rest</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-merge</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-jobs</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-vcf</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>log4j</artifactId>
@@ -211,32 +211,32 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-mapper</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-import</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-mysql</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-elasticsearch</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-idcard</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-das</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 			<exclusions>
 				<exclusion>
 					<artifactId>log4j</artifactId>
@@ -247,47 +247,47 @@
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-model-registry</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-ontology</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-semanticsearch</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-data-migrate</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-questionnaires</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-catalogue</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-scripts</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-file-ingester</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.molgenis</groupId>
 			<artifactId>molgenis-gavin</artifactId>
-			<version>1.22.0-ROW-LEVEL-SECURITY</version>
+			<version>${dependency.version}</version>
 		</dependency>
 	</dependencies>
 </project>

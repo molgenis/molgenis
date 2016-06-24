@@ -1,6 +1,5 @@
 package org.molgenis.app.promise.mapper;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
 import org.molgenis.app.promise.client.PromiseDataParser;
 import org.molgenis.app.promise.mapper.MappingReport.Status;
 import org.molgenis.app.promise.model.PromiseMappingProjectMetaData;
@@ -8,7 +7,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.UuidGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,8 +20,8 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 
-import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Iterables.size;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.hash.Hashing.md5;
 import static java.nio.charset.Charset.forName;
@@ -40,7 +38,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 	private final String MAPPER_ID = "RADBOUD";
 
 	public static final String XML_ID = "ID";
-	public static final String XML_TITLE = "TITLE";
+	public static final String XML_TITLE = "TITEL";
 	public static final String XML_IDAA = "IDAA";
 	public static final String XML_CODEINDEX = "CODEINDEX";
 	public static final String XML_DESCRIPTION = "OMSCHRIJVING";
@@ -49,8 +47,8 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 	private final PromiseDataParser promiseDataParser;
 	private final DataService dataService;
 
-	private static final Map<String, List<Entity>> sampleIdMap = newHashMap();
 	private static final Map<String, List<Entity>> diseaseIdMap = newHashMap();
+
 	private static final Logger LOG = LoggerFactory.getLogger(RadboudMapper.class);
 
 	@Autowired
@@ -78,7 +76,13 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 	public MappingReport map(Entity project)
 	{
 		requireNonNull(project);
+
 		MappingReport report = new MappingReport();
+
+		List<Entity> sampleCollectionsToAdd = newArrayList();
+		List<Entity> sampleCollectionsToUpdate = newArrayList();
+
+		Map<String, List<Entity>> sampleIdMap = newHashMap();
 
 		try
 		{
@@ -98,8 +102,10 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 				diseaseIdMap.get(diseaseId).add(diseaseEntity);
 			});
 
-			LOG.info("Downloading biobank data for " + project.getString("name"));
+			LOG.info("Downloading biobank data for " + project.getString(NAME));
 			promiseDataParser.parse(credentials, 0, biobankEntity -> {
+				LOG.info("Mapping biobank: " + biobankEntity.getString(XML_TITLE));
+
 				EntityMetaData targetEntityMetaData = requireNonNull(
 						dataService.getEntityMetaData(SAMPLE_COLLECTIONS_ENTITY));
 
@@ -107,13 +113,11 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 				String biobankId = biobankEntity.getString(XML_ID) + biobankEntity.getString(XML_IDAA);
 				Iterable<Entity> biobankSamplesEntities = sampleIdMap.get(biobankId);
 
-				Entity targetEntity = dataService.findOne(SAMPLE_COLLECTIONS_ENTITY,
-						new QueryImpl().eq(ID, biobankId));
+				Entity targetEntity = dataService.findOne(SAMPLE_COLLECTIONS_ENTITY, biobankId);
 
 				boolean biobankExists = true;
 				if (targetEntity == null)
 				{
-					LOG.info("targetEntity == null!");
 					targetEntity = new MapEntity(targetEntityMetaData);
 
 					// fill hand coded fields with dummy data the first time this biobank is added
@@ -152,18 +156,17 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 				targetEntity.set(BIOBANK_DATA_ACCESS_JOINT_PROJECTS, true);
 				targetEntity.set(BIOBANK_DATA_ACCESS_DESCRIPTION, null);  // Don't fill in
 
-				if (biobankExists)
-				{
-					LOG.info("Updating biobank [" + targetEntity + "] for " + SAMPLE_COLLECTIONS_ENTITY);
-					dataService.update(SAMPLE_COLLECTIONS_ENTITY, targetEntity);
-				}
-				else
-				{
-					LOG.info("Adding biobank [" + targetEntity + "] to " + SAMPLE_COLLECTIONS_ENTITY);
-					dataService.add(SAMPLE_COLLECTIONS_ENTITY, targetEntity);
-				}
+				if (biobankExists) sampleCollectionsToUpdate.add(targetEntity);
+				else sampleCollectionsToAdd.add(targetEntity);
 			});
 
+			LOG.info("Adding {} entities to {}", sampleCollectionsToAdd.size(), SAMPLE_COLLECTIONS_ENTITY);
+			dataService.add(SAMPLE_COLLECTIONS_ENTITY, sampleCollectionsToAdd.stream());
+
+			LOG.info("Updating {} entities in {}", sampleCollectionsToUpdate.size(), SAMPLE_COLLECTIONS_ENTITY);
+			dataService.update(SAMPLE_COLLECTIONS_ENTITY, sampleCollectionsToUpdate.stream());
+
+			LOG.info("Finished mapping RADBOUD biobanks");
 			report.setStatus(Status.SUCCESS);
 		}
 		catch (Exception e)
@@ -171,10 +174,11 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 			report.setStatus(Status.ERROR);
 			report.setMessage(e.getMessage());
 
-			LOG.warn("Error in mapping response to entities {}", e);
+			LOG.warn("Error in mapping response to entities", e);
 		}
 
 		sampleIdMap.clear();
+		diseaseIdMap.clear();
 		return report;
 	}
 
@@ -224,7 +228,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		return singletonList(principalInvestigators);
 	}
 
-	private Iterable<Entity> getContactPersons(Entity biobankEntity)
+	public Iterable<Entity> getContactPersons(Entity biobankEntity)
 	{
 		String[] contactPerson = biobankEntity.getString("CONTACTPERS").split(",");
 		String address1 = biobankEntity.getString("ADRES1");
@@ -238,12 +242,12 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		for (int i = 0; i < contactPerson.length; i++)
 		{
 			StringBuilder contentBuilder = new StringBuilder();
-			if (contactPerson != null && !contactPerson[i].isEmpty()) contentBuilder.append(contactPerson);
+			if (contactPerson[i] != null && !contactPerson[i].isEmpty()) contentBuilder.append(contactPerson[i]);
 			if (address1 != null && !address1.isEmpty()) contentBuilder.append(address1);
 			if (address2 != null && !address2.isEmpty()) contentBuilder.append(address2);
 			if (postalCode != null && !postalCode.isEmpty()) contentBuilder.append(postalCode);
 			if (city != null && !city.isEmpty()) contentBuilder.append(city);
-			if (email != null && !email[i].isEmpty()) contentBuilder.append(email);
+			if (email[i] != null && !email[i].isEmpty()) contentBuilder.append(email[i]);
 			if (phoneNumber != null && !phoneNumber.isEmpty()) contentBuilder.append(phoneNumber);
 
 			String personId = md5().newHasher().putString(contentBuilder, forName("UTF-8")).hash().toString();
@@ -257,10 +261,10 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 			{
 				MapEntity newPerson = new MapEntity(dataService.getEntityMetaData(REF_PERSONS));
 				newPerson.set("id", personId);
-				newPerson.set("first_name", contactPerson);
-				newPerson.set("last_name", contactPerson);
+				newPerson.set("first_name", contactPerson[i]);
+				newPerson.set("last_name", contactPerson[i]);
 				newPerson.set("phone", phoneNumber);
-				newPerson.set("email", email);
+				newPerson.set("email", email[i]);
 
 				StringBuilder addressBuilder = new StringBuilder();
 				if (address1 != null && !address1.isEmpty()) addressBuilder.append(address1);

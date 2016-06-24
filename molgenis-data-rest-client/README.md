@@ -1,1 +1,0 @@
-# molgenis-rest-client

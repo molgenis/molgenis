@@ -50,5 +50,4 @@ public class BbmriNlCheatSheet
 	public static final String BIOBANK_DATA_ACCESS_JOINT_PROJECTS = "biobankDataAccessJointProjects";
 	public static final String BIOBANK_DATA_ACCESS_DESCRIPTION = "biobankDataAccessDescription";
 	public static final String BIOBANK_DATA_ACCESS_URI = "biobankDataAccessURI";
-
 }
