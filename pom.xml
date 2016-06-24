@@ -674,7 +674,6 @@
         <module>molgenis-data-googlespreadsheet</module>
         <module>molgenis-data</module>
         <module>molgenis-data-system</module>
-        <module>molgenis-data-merge</module>
 		<module>molgenis-data-postgresql</module>
         <module>molgenis-data-vcf</module>
         <module>molgenis-data-rest</module>
