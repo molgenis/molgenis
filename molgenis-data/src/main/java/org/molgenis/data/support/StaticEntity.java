@@ -94,14 +94,7 @@ public abstract class StaticEntity implements Entity
 	@Override
 	public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
 	{
-		try
-		{
-			return entity.getEntity(attributeName, clazz);
-		}
-		catch (Exception e)
-		{
-			throw new RuntimeException(e);
-		}
+		return entity.getEntity(attributeName, clazz);
 	}
 
 	@Override
