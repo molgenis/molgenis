@@ -14,15 +14,12 @@ import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.SCRIPT;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ATTRIBUTES;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 
 import java.io.IOException;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
@@ -36,6 +33,8 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.util.EntityUtils;
@@ -115,9 +114,9 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	}
 
 	@Override
-	public Stream<AttributeMetaData> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<AttributeMetaData>> consumer, int batchSize)
 	{
-		return decoratedRepo.stream(fetch);
+		decoratedRepo.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override

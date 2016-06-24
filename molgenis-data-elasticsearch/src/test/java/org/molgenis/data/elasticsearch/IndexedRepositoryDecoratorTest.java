@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -37,8 +38,8 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -323,7 +324,7 @@ public class IndexedRepositoryDecoratorTest
 	public void rebuildIndex()
 	{
 		indexedRepositoryDecorator.rebuildIndex();
-		verify(elasticSearchService).rebuildIndex(decoratedRepo, repositoryEntityMetaData);
+		verify(elasticSearchService).rebuildIndex(decoratedRepo);
 	}
 
 	@Test
@@ -372,11 +373,12 @@ public class IndexedRepositoryDecoratorTest
 	}
 
 	@Test
-	public void streamFetch()
+	public void forEachBatched()
 	{
 		Fetch fetch = new Fetch();
-		indexedRepositoryDecorator.stream(fetch);
-		verify(decoratedRepo, times(1)).stream(fetch);
+		Consumer<List<Entity>> consumer = mock(Consumer.class);
+		indexedRepositoryDecorator.forEachBatched(fetch, consumer, 12);
+		verify(decoratedRepo, times(1)).forEachBatched(fetch, consumer, 12);
 	}
 
 	@Test

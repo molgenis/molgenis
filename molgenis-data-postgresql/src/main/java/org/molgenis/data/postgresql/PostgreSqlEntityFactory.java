@@ -10,8 +10,8 @@ import java.sql.SQLException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.fieldtypes.MrefField;
 import org.molgenis.fieldtypes.XrefField;
 import org.slf4j.Logger;
@@ -37,6 +37,11 @@ public class PostgreSqlEntityFactory
 	RowMapper<Entity> createRowMapper(EntityMetaData entityMeta, Fetch fetch)
 	{
 		return new EntityMapper(entityMeta, fetch);
+	}
+
+	Iterable<Entity> getReferences(EntityMetaData refEntityMeta, Iterable<?> ids)
+	{
+		return entityManager.getReferences(refEntityMeta, ids);
 	}
 
 	private class EntityMapper implements RowMapper<Entity>

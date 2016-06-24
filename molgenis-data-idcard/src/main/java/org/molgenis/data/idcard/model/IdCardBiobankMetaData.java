@@ -7,10 +7,10 @@ import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.data.idcard.model.IdCardPackage.PACKAGE_ID_CARD;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
-import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.idcard.IdCardRepositoryCollection;

@@ -1,13 +1,5 @@
 package org.molgenis.data.i18n;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.meta.AttributeMetaData;
 import org.testng.annotations.Test;
 
 public class I18nStringMetaDataTest

@@ -20,9 +20,9 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.vcf.VcfAttributes;
 import org.molgenis.framework.db.EntitiesValidationReport;
@@ -216,10 +216,7 @@ public class VcfImporterService implements ImportService
 			}
 
 			AtomicInteger vcfEntityCount = new AtomicInteger();
-			outRepository.add(inRepository.stream().filter(entity -> {
-				vcfEntityCount.incrementAndGet();
-				return true;
-			}));
+			inRepository.forEachBatched(entities -> vcfEntityCount.addAndGet(entities.size()), 1000);
 			if (vcfEntityCount.get() > 0)
 			{
 				report.addEntityCount(entityName, vcfEntityCount.get());

@@ -4,7 +4,7 @@ import static org.molgenis.auth.GroupAuthorityMetaData.ID;
 import static org.molgenis.auth.GroupAuthorityMetaData.MOLGENIS_GROUP;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 public class GroupAuthority extends Authority
 {

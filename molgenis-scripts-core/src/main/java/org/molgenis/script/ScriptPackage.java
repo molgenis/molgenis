@@ -1,11 +1,11 @@
 package org.molgenis.script;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
+import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
-import org.molgenis.data.meta.PackageMetaData;
-import org.molgenis.data.meta.RootSystemPackage;
 import org.molgenis.data.meta.SystemPackage;
+import org.molgenis.data.meta.model.PackageMetaData;
+import org.molgenis.data.system.model.RootSystemPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

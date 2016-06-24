@@ -4,7 +4,7 @@ import java.lang.reflect.Type;
 import java.util.Date;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;

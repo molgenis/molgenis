@@ -4,8 +4,8 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -187,33 +187,28 @@ public class DynamicEntity implements Entity
 	@Override
 	public void set(Entity values)
 	{
-		for (AttributeMetaData attr : values.getEntityMetaData().getAtomicAttributes())
-		{
-			set(attr.getName(), values.get(attr.getName()));
-		}
+		values.getAttributeNames().forEach(attrName -> set(attrName, values.get(attrName)));
 	}
 
-	private void validateValueType(String attrName, Object value)
+	/**
+	 * Validate is value is of the type defined by the attribute data type.
+	 *
+	 * @param attrName attribute name
+	 * @param value    value (must be of the type defined by the attribute data type.)
+	 */
+	protected void validateValueType(String attrName, Object value)
 	{
 		if (value == null)
 		{
 			return;
 		}
 
-		// FIXME remove try-catch that deals with bootstrapping exceptions
-		AttributeMetaData attr;
-		try
+		AttributeMetaData attr = entityMeta.getAttribute(attrName);
+		if (attr == null)
 		{
-			attr = entityMeta.getAttribute(attrName);
-			if (attr == null)
-			{
-				throw new UnknownAttributeException(format("Unknown attribute [%s]", attrName));
-			}
+			throw new UnknownAttributeException(format("Unknown attribute [%s]", attrName));
 		}
-		catch (Exception e)
-		{
-			return;
-		}
+
 		MolgenisFieldTypes.FieldTypeEnum dataType = attr.getDataType().getEnumType();
 		switch (dataType)
 		{

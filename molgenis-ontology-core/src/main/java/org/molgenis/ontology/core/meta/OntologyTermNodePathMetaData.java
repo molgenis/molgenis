@@ -3,9 +3,9 @@ package org.molgenis.ontology.core.meta;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
 import org.molgenis.data.meta.SystemEntityMetaData;
@@ -20,7 +20,7 @@ public class OntologyTermNodePathMetaData extends SystemEntityMetaData
 	public final static String ONTOLOGY_TERM_NODE_PATH = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public final static String ID = "id";
-	public final static String ONTOLOGY_TERM_NODE_PATH_ATTR = "nodePath";
+	public final static String NODE_PATH = "nodePath";
 	public final static String ROOT = "root";
 
 	private OntologyPackage ontologyPackage;
@@ -35,7 +35,7 @@ public class OntologyTermNodePathMetaData extends SystemEntityMetaData
 	{
 		setPackage(ontologyPackage);
 		addAttribute(ID, ROLE_ID).setVisible(false);
-		addAttribute(ONTOLOGY_TERM_NODE_PATH_ATTR, ROLE_LABEL).setDataType(TEXT).setNillable(false);
+		addAttribute(NODE_PATH, ROLE_LABEL).setDataType(TEXT).setNillable(false);
 		addAttribute(ROOT).setDataType(BOOL).setNillable(false);
 	}
 

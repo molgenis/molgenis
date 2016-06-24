@@ -1,8 +1,8 @@
 package org.molgenis.ui.jobs;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.jobs.JobExecutionMetaData.SUBMISSION_DATE;
-import static org.molgenis.data.jobs.JobExecutionMetaData.USER;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.SUBMISSION_DATE;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.USER;
 import static org.molgenis.ui.jobs.JobsController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -17,7 +17,7 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.jobs.JobExecutionMetaData;
+import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;

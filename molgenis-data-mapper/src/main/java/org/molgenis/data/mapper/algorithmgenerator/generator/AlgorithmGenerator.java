@@ -2,8 +2,8 @@ package org.molgenis.data.mapper.algorithmgenerator.generator;
 
 import java.util.List;
 
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 public interface AlgorithmGenerator
 {

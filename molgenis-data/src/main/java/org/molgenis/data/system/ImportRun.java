@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 import org.molgenis.util.ValueLabel;
 

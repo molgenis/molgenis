@@ -5,8 +5,8 @@ import static java.lang.Math.toIntExact;
 import java.util.List;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 public class ConstraintViolation
 {

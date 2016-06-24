@@ -8,7 +8,7 @@ import java.util.Collection;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.entity.QueryCreator;
-import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 
 /**
  * Create a query that finds rows that match gene name

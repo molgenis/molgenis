@@ -4,10 +4,10 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.DATETIME;
 import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.data.idcard.model.IdCardPackage.PACKAGE_ID_CARD;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.meta.EntityMetaData.AttributeRole.ROLE_LOOKUP;
-import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 import java.util.Arrays;
 import java.util.stream.Collectors;

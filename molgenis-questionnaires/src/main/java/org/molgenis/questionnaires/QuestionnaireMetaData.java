@@ -1,15 +1,15 @@
 package org.molgenis.questionnaires;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.meta.RootSystemPackage.PACKAGE_SYSTEM;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
+import org.molgenis.security.owned.OwnedEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

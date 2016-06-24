@@ -1,5 +1,6 @@
 package org.molgenis.data.meta;
 
+import org.molgenis.data.meta.model.PackageMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

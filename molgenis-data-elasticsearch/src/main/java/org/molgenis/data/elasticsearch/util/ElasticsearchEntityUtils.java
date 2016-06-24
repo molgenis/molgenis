@@ -3,7 +3,7 @@ package org.molgenis.data.elasticsearch.util;
 import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;

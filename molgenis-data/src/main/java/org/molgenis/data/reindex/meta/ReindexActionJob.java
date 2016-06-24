@@ -4,7 +4,7 @@ import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.COUNT;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ID;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
 public class ReindexActionJob extends StaticEntity

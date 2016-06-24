@@ -3,7 +3,7 @@ package org.molgenis.data.elasticsearch.request;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Generates a part of the elasticsearch query of the SearchRequestBuilder.

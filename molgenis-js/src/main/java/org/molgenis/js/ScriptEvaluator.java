@@ -10,7 +10,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.ContextAction;
 import org.mozilla.javascript.ContextFactory;
@@ -83,8 +83,8 @@ public class ScriptEvaluator
 
 	/**
 	 * Evaluates a script on a batch of entities
-	 * 
-	 * @param source
+	 *
+	 * @param sources
 	 *            the source of the script to run
 	 * @param entities
 	 *            {@link Iterable} of {@link Entity}s to evaluate it for

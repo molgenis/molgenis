@@ -8,6 +8,8 @@ import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -98,10 +100,11 @@ public class I18nStringDecoratorTest
 	}
 
 	@Test
-	public void streamFetch()
+	public void forEachBatchedFetch()
 	{
 		Fetch fetch = new Fetch();
-		i18nStringDecorator.stream(fetch);
-		verify(decoratedRepo, times(1)).stream(fetch);
+		Consumer<List<Entity>> consumer = mock(Consumer.class);
+		i18nStringDecorator.forEachBatched(fetch, consumer, 234);
+		verify(decoratedRepo, times(1)).forEachBatched(fetch, consumer, 234);
 	}
 }

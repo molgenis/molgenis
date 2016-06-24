@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import org.molgenis.data.meta.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 
 /**
  * {@link Fetch} that defines which entity attributes to retrieve. For attributes referring to entities a Fetch can be

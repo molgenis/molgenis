@@ -4,14 +4,13 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
 import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
-import static org.molgenis.data.meta.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.meta.PackageMetaData.PACKAGE;
-import static org.molgenis.data.support.OwnedEntityMetaData.OWNED;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
+import static org.molgenis.security.owned.OwnedEntityMetaData.OWNED;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserDecorator;
-import org.molgenis.auth.MolgenisUserFactory;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.AutoValueRepositoryDecorator;
 import org.molgenis.data.ComputedEntityValuesDecorator;
@@ -28,13 +27,13 @@ import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.i18n.I18nStringDecorator;
 import org.molgenis.data.i18n.Language;
 import org.molgenis.data.i18n.LanguageRepositoryDecorator;
-import org.molgenis.data.meta.AttributeMetaData;
-import org.molgenis.data.meta.AttributeMetaDataFactory;
 import org.molgenis.data.meta.AttributeMetaDataRepositoryDecorator;
-import org.molgenis.data.meta.EntityMetaData;
 import org.molgenis.data.meta.EntityMetaDataRepositoryDecorator;
-import org.molgenis.data.meta.Package;
 import org.molgenis.data.meta.PackageRepositoryDecorator;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.data.reindex.ReindexActionRepositoryDecorator;
@@ -45,6 +44,7 @@ import org.molgenis.data.validation.RepositoryValidationDecorator;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -58,20 +58,20 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final ExpressionValidator expressionValidator;
 	private final RepositoryDecoratorRegistry repositoryDecoratorRegistry;
 	private final SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
-	private final MolgenisUserFactory molgenisUserFactory;
 	private final UserAuthorityFactory userAuthorityFactory;
 	private final ReindexActionRegisterService reindexActionRegisterService;
 	private final SearchService searchService;
 	private final AttributeMetaDataFactory attrMetaFactory;
+	private final PasswordEncoder passwordEncoder;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
 			EntityAttributesValidator entityAttributesValidator, IdGenerator idGenerator, AppSettings appSettings,
 			DataService dataService, ExpressionValidator expressionValidator,
 			RepositoryDecoratorRegistry repositoryDecoratorRegistry,
-			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, MolgenisUserFactory molgenisUserFactory,
-			UserAuthorityFactory userAuthorityFactory, ReindexActionRegisterService reindexActionRegisterService,
-			SearchService searchService, AttributeMetaDataFactory attrMetaFactory)
+			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, UserAuthorityFactory userAuthorityFactory,
+			ReindexActionRegisterService reindexActionRegisterService, SearchService searchService,
+			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder)
 	{
 		this.entityManager = requireNonNull(entityManager);
 		this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
@@ -81,11 +81,11 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.expressionValidator = requireNonNull(expressionValidator);
 		this.repositoryDecoratorRegistry = requireNonNull(repositoryDecoratorRegistry);
 		this.systemEntityMetaDataRegistry = requireNonNull(systemEntityMetaDataRegistry);
-		this.molgenisUserFactory = requireNonNull(molgenisUserFactory);
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
 		this.reindexActionRegisterService = requireNonNull(reindexActionRegisterService);
 		this.searchService = requireNonNull(searchService);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
+		this.passwordEncoder = requireNonNull(passwordEncoder);
 	}
 
 	@Override
@@ -141,8 +141,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		if (repo.getName().equals(MOLGENIS_USER))
 		{
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new MolgenisUserDecorator(
-					(Repository<MolgenisUser>) (Repository<? extends Entity>) repo, molgenisUserFactory,
-					userAuthorityFactory);
+					(Repository<MolgenisUser>) (Repository<? extends Entity>) repo, userAuthorityFactory, dataService,
+					passwordEncoder);
 		}
 		else if (repo.getName().equals(ATTRIBUTE_META_DATA))
 		{

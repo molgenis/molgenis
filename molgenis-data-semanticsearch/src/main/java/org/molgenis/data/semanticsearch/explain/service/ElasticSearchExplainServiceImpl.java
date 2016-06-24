@@ -16,7 +16,7 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.request.QueryGenerator;
-import org.molgenis.data.meta.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
