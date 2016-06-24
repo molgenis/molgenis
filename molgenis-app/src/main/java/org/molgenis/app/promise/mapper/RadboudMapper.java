@@ -140,7 +140,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 				targetEntity.set(AGE_LOW, toAgeMinOrMax(biobankSamplesEntities, true));
 				targetEntity.set(AGE_HIGH, toAgeMinOrMax(biobankSamplesEntities, false));
 				targetEntity.set(AGE_UNIT, getXrefEntity(REF_AGE_TYPES, "YEAR"));
-				targetEntity.set(DISEASE, getDiseaseType(biobankId));
+				targetEntity.set(DISEASE, getDiseaseTypes(biobankIdaa));
 				targetEntity.set(NUMBER_OF_DONORS, size(biobankSamplesEntities));
 				targetEntity.set(DESCRIPTION, biobankEntity.getString(XML_DESCRIPTION));
 				targetEntity.set(CONTACT_PERSON, getContactPersons(biobankEntity));
@@ -178,7 +178,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		return report;
 	}
 
-	private Iterable<Entity> getDiseaseType(String biobankIdaa)
+	private Iterable<Entity> getDiseaseTypes(String biobankIdaa)
 	{
 		List<Entity> diseaseTypes = newArrayList();
 		diseaseIdMap.get(biobankIdaa).forEach(disease -> {
