@@ -41,9 +41,6 @@ public class OwnedEntityMetaData extends SystemEntityMetaData
 		setPackage(securityPackage);
 
 		setAbstract(true);
-
-		setLabel("Owned");
-
 		addAttribute(OWNER_USERNAME).setDataType(STRING).setVisible(false);
 	}
 }
