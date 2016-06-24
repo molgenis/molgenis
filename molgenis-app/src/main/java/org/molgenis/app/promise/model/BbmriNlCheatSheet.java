@@ -19,7 +19,7 @@ public class BbmriNlCheatSheet
 	public static final String REF_COUNTRIES = "bbmri_nl_countries";
 	public static final String REF_BIOBANKS = "bbmri_nl_biobanks";
 
-	// Attributes
+	// Sample Collections Attributes
 	public static final String BIOBANK_ID = "biobank_id";
 	public static final String ID = "id";
 	public static final String NAME = "name";
@@ -50,4 +50,6 @@ public class BbmriNlCheatSheet
 	public static final String BIOBANK_DATA_ACCESS_JOINT_PROJECTS = "biobankDataAccessJointProjects";
 	public static final String BIOBANK_DATA_ACCESS_DESCRIPTION = "biobankDataAccessDescription";
 	public static final String BIOBANK_DATA_ACCESS_URI = "biobankDataAccessURI";
+
+
 }

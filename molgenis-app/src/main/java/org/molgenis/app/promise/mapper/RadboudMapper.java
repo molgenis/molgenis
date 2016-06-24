@@ -35,6 +35,13 @@ import static org.molgenis.app.promise.model.BbmriNlCheatSheet.*;
 @Component
 public class RadboudMapper implements PromiseMapper, ApplicationListener<ContextRefreshedEvent>
 {
+	public static final String URN_MIRIAM_ICD = "urn:miriam:icd:";
+	public static final String XML_CONTACT_PERSON = "CONTACTPERS";
+	public static final String XML_ADRESS1 = "ADRES1";
+	public static final String XML_ADRESS2 = "ADRES2";
+	public static final String XML_ZIP_CODE = "POSTCODE";
+	public static final String XML_LOCATION = "PLAATS";
+	public static final String XML_EMAIL = "EMAIL";
 	private final String MAPPER_ID = "RADBOUD";
 
 	public static final String XML_ID = "ID";
@@ -186,7 +193,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 	{
 		List<Entity> diseaseTypes = newArrayList();
 		diseaseIdMap.get(biobankIdaa).forEach(disease -> {
-			String icd10urn = "urn:miriam:icd:" + disease.getString(XML_CODEINDEX);
+			String icd10urn = URN_MIRIAM_ICD + disease.getString(XML_CODEINDEX);
 			Entity diseaseType = dataService.findOne(REF_DISEASE_TYPES, icd10urn);
 			if (diseaseType != null) diseaseTypes.add(diseaseType);
 		});
@@ -216,26 +223,26 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 
 	private Iterable<Entity> toPrincipalInvestigators()
 	{
-		MapEntity principalInvestigators = new MapEntity(dataService.getEntityMetaData("bbmri_nl_persons"));
+		MapEntity principalInvestigators = new MapEntity(dataService.getEntityMetaData(REF_PERSONS));
 		principalInvestigators.set("id", new UuidGenerator().generateId());
-		Entity countryNl = dataService.findOne("bbmri_nl_countries", "NL");
+		Entity countryNl = dataService.findOne(REF_COUNTRIES, "NL");
 		if (countryNl == null)
 		{
-			throw new RuntimeException("Unknown 'bbmri_nl_countries' [NL]");
+			throw new RuntimeException("Unknown '" + REF_COUNTRIES + "' [NL]");
 		}
 		principalInvestigators.set("country", countryNl);
-		dataService.add("bbmri_nl_persons", principalInvestigators);
+		dataService.add(REF_PERSONS, principalInvestigators);
 		return singletonList(principalInvestigators);
 	}
 
 	public Iterable<Entity> getContactPersons(Entity biobankEntity)
 	{
-		String[] contactPerson = biobankEntity.getString("CONTACTPERS").split(",");
-		String address1 = biobankEntity.getString("ADRES1");
-		String address2 = biobankEntity.getString("ADRES2");
-		String postalCode = biobankEntity.getString("POSTCODE");
-		String city = biobankEntity.getString("PLAATS");
-		String[] email = biobankEntity.getString("EMAIL").split(" ");
+		String[] contactPerson = biobankEntity.getString(XML_CONTACT_PERSON).split(",");
+		String address1 = biobankEntity.getString(XML_ADRESS1);
+		String address2 = biobankEntity.getString(XML_ADRESS2);
+		String postalCode = biobankEntity.getString(XML_ZIP_CODE);
+		String city = biobankEntity.getString(XML_LOCATION);
+		String[] email = biobankEntity.getString(XML_EMAIL).split(" ");
 		String phoneNumber = biobankEntity.getString("TELEFOON");
 
 		List<Entity> persons = newArrayList();
