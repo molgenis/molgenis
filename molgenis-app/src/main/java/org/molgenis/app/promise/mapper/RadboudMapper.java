@@ -37,9 +37,17 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 {
 	private final String MAPPER_ID = "RADBOUD";
 
+	public static final String XML_ID = "ID";
+	public static final String XML_TITLE = "TITEL";
+	public static final String XML_IDAA = "IDAA";
+	public static final String XML_CODEINDEX = "CODEINDEX";
+	public static final String XML_DESCRIPTION = "OMSCHRIJVING";
+
 	private final PromiseMapperFactory promiseMapperFactory;
 	private final PromiseDataParser promiseDataParser;
 	private final DataService dataService;
+
+	private static final Map<String, List<Entity>> diseaseIdMap = newHashMap();
 
 	private static final Logger LOG = LoggerFactory.getLogger(RadboudMapper.class);
 
@@ -87,6 +95,13 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 				sampleIdMap.get(samplesId).add(sampleEntity);
 			});
 
+			LOG.info("Generating RADBOUD disease map");
+			promiseDataParser.parse(credentials, 2, diseaseEntity -> {
+				String diseaseId = diseaseEntity.getString(XML_IDAA);
+				diseaseIdMap.putIfAbsent(diseaseId, newArrayList());
+				diseaseIdMap.get(diseaseId).add(diseaseEntity);
+			});
+
 			LOG.info("Downloading biobank data for " + project.getString(NAME));
 			promiseDataParser.parse(credentials, 0, biobankEntity -> {
 				LOG.info("Mapping biobank: " + biobankEntity.getString(XML_TITLE));
@@ -94,6 +109,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 				EntityMetaData targetEntityMetaData = requireNonNull(
 						dataService.getEntityMetaData(SAMPLE_COLLECTIONS_ENTITY));
 
+				String biobankIdaa = biobankEntity.getString(XML_IDAA);
 				String biobankId = biobankEntity.getString(XML_ID) + biobankEntity.getString(XML_IDAA);
 				Iterable<Entity> biobankSamplesEntities = sampleIdMap.get(biobankId);
 
@@ -112,7 +128,6 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 					targetEntity.set(WEBSITE, "http://www.radboudbiobank.nl/");
 					targetEntity.set(BIOBANK_DATA_ACCESS_URI,
 							"http://www.radboudbiobank.nl/nl/collecties/materiaal-opvragen/");
-					targetEntity.set(DISEASE, getMrefEntities(REF_DISEASE_TYPES, "NAV"));
 					targetEntity.set(PRINCIPAL_INVESTIGATORS, toPrincipalInvestigators());
 					targetEntity.set(INSTITUTES, getMrefEntities(REF_JURISTIC_PERSONS, "83"));
 
@@ -129,6 +144,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 				targetEntity.set(AGE_LOW, toAgeMinOrMax(biobankSamplesEntities, true));
 				targetEntity.set(AGE_HIGH, toAgeMinOrMax(biobankSamplesEntities, false));
 				targetEntity.set(AGE_UNIT, getXrefEntity(REF_AGE_TYPES, "YEAR"));
+				targetEntity.set(DISEASE, getDiseaseTypes(biobankIdaa));
 				targetEntity.set(NUMBER_OF_DONORS, size(biobankSamplesEntities));
 				targetEntity.set(DESCRIPTION, biobankEntity.getString(XML_DESCRIPTION));
 				targetEntity.set(CONTACT_PERSON, getContactPersons(biobankEntity));
@@ -162,7 +178,20 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		}
 
 		sampleIdMap.clear();
+		diseaseIdMap.clear();
 		return report;
+	}
+
+	private Iterable<Entity> getDiseaseTypes(String biobankIdaa)
+	{
+		List<Entity> diseaseTypes = newArrayList();
+		diseaseIdMap.get(biobankIdaa).forEach(disease -> {
+			String icd10urn = "urn:miriam:icd:" + disease.getString(XML_CODEINDEX);
+			Entity diseaseType = dataService.findOne(REF_DISEASE_TYPES, icd10urn);
+			if (diseaseType != null) diseaseTypes.add(diseaseType);
+		});
+
+		return diseaseTypes;
 	}
 
 	private Iterable<Entity> getMrefEntities(String entityName, String value)

@@ -50,10 +50,4 @@ public class BbmriNlCheatSheet
 	public static final String BIOBANK_DATA_ACCESS_JOINT_PROJECTS = "biobankDataAccessJointProjects";
 	public static final String BIOBANK_DATA_ACCESS_DESCRIPTION = "biobankDataAccessDescription";
 	public static final String BIOBANK_DATA_ACCESS_URI = "biobankDataAccessURI";
-
-	// XML Response attributes
-	public static final String XML_ID = "ID";
-	public static final String XML_TITLE = "TITEL";
-	public static final String XML_IDAA = "IDAA";
-	public static final String XML_DESCRIPTION = "OMSCHRIJVING";
 }
