@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <getDataResponse xmlns="http://tempuri.org/">
+            <getDataResult>
+                <xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+                    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:MainDataTable="_x0023_tmp39093" msdata:UseCurrentLocale="true">
+                        <xs:complexType>
+                            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                <xs:element name="_x0023_tmp39093">
+                                    <xs:complexType>
+                                        <xs:sequence>
+                                            <xs:element name="PSI_REG_ID">
+                                                <xs:simpleType>
+                                                    <xs:restriction base="xs:string">
+                                                        <xs:maxLength value="4" />
+                                                    </xs:restriction>
+                                                </xs:simpleType>
+                                            </xs:element>
+                                            <xs:element name="ACRONYM">
+                                                <xs:simpleType>
+                                                    <xs:restriction base="xs:string">
+                                                        <xs:maxLength value="16" />
+                                                    </xs:restriction>
+                                                </xs:simpleType>
+                                            </xs:element>
+                                            <xs:element name="MATERIAL_TYPES">
+                                                <xs:simpleType>
+                                                    <xs:restriction base="xs:string">
+                                                        <xs:maxLength value="48" />
+                                                    </xs:restriction>
+                                                </xs:simpleType>
+                                            </xs:element>
+                                            <xs:element name="COLLECTION_TYPE">
+                                                <xs:simpleType>
+                                                    <xs:restriction base="xs:string">
+                                                        <xs:maxLength value="16" />
+                                                    </xs:restriction>
+                                                </xs:simpleType>
+                                            </xs:element>
+                                            <xs:element name="SEX">
+                                                <xs:simpleType>
+                                                    <xs:restriction base="xs:string">
+                                                        <xs:maxLength value="11" />
+                                                    </xs:restriction>
+                                                </xs:simpleType>
+                                            </xs:element>
+                                            <xs:element name="NUMBER_SAMPLES" type="xs:int" minOccurs="0" />
+                                            <xs:element name="NUMBER_DONORS" type="xs:int" minOccurs="0" />
+                                            <xs:element name="AGE_LOW" type="xs:int" minOccurs="0" />
+                                            <xs:element name="AGE_HIGH" type="xs:int" minOccurs="0" />
+                                            <xs:element name="AGE_UNIT">
+                                                <xs:simpleType>
+                                                    <xs:restriction base="xs:string">
+                                                        <xs:maxLength value="4" />
+                                                    </xs:restriction>
+                                                </xs:simpleType>
+                                            </xs:element>
+                                            <xs:element name="ID" type="xs:int" minOccurs="0" />
+                                            <xs:element name="IDAA" type="xs:int" minOccurs="0" />
+                                        </xs:sequence>
+                                    </xs:complexType>
+                                </xs:element>
+                            </xs:choice>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:schema>
+                <diffgr:diffgram xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:diffgr="urn:schemas-microsoft-com:xml-diffgram-v1">
+                    <DocumentElement xmlns="">
+                        <_x0023_tmp39093 diffgr:id="#tmp390931" msdata:rowOrder="0">
+                            <PSI_REG_ID>1006</PSI_REG_ID>
+                            <MATERIAL_TYPES>DNA_UIT_BLOEDCELLEN,BLOEDPLASMA(EDTA),BLOEDSERUM</MATERIAL_TYPES>
+                        </_x0023_tmp39093>
+                        <_x0023_tmp39032 diffgr:id="#tmp390951" msdata:rowOrder="1">
+                            <PSI_REG_ID>1042</PSI_REG_ID>
+                            <MATERIAL_TYPES>OORSMEER</MATERIAL_TYPES>
+                        </_x0023_tmp39032>
+                    </DocumentElement>
+                </diffgr:diffgram>
+            </getDataResult>
+        </getDataResponse>
+    </soap:Body>
+</soap:Envelope>

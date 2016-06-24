@@ -1,12 +1,13 @@
 package org.molgenis.app.promise.mapper;
 
-import com.google.common.collect.Lists;
-import org.apache.commons.lang.exception.ExceptionUtils;
+import autovalue.shaded.com.google.common.common.collect.Iterables;
 import org.molgenis.app.promise.client.PromiseDataParser;
 import org.molgenis.app.promise.mapper.MappingReport.Status;
 import org.molgenis.app.promise.model.BbmriNlCheatSheet;
 import org.molgenis.app.promise.model.PromiseMappingProjectMetaData;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,57 +16,23 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
 import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.ACRONYM;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_HIGH;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_LOW;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_UNIT;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANKS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_DESCRIPTION;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_FEE;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_JOINT_PROJECTS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_URI;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_DESCRIPTION;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_FEE;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_JOINT_PROJECTS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_URI;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.CONTACT_PERSON;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.DATA_CATEGORIES;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.DESCRIPTION;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.DISEASE;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.INSTITUTES;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.MATERIALS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.NAME;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.NUMBER_OF_DONORS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.OMICS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.PRINCIPAL_INVESTIGATORS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.PUBLICATIONS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_AGE_TYPES;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_COLLECTION_TYPES;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_COUNTRIES;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_DATA_CATEGORY_TYPES;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_DISEASE_TYPES;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_GENDER_TYPES;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_JURISTIC_PERSONS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_MATERIAL_TYPES;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_OMICS_DATA_TYPES;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_PERSONS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.SAMPLE_COLLECTIONS_ENTITY;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.SEX;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.TYPE;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.WEBSITE;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.*;
 
 @Component
 public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRefreshedEvent>
 {
-	private final String ID = "PAREL";
+	private final String MAPPER_ID = "PAREL";
 
 	private PromiseMapperFactory promiseMapperFactory;
 	private PromiseDataParser promiseDataParser;
@@ -74,6 +41,8 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 	private static final Logger LOG = LoggerFactory.getLogger(ParelMapper.class);
 
 	private static final HashMap<String, List<String>> materialTypesMap;
+	private static final List<String> unknownMaterialTypes = newArrayList();
+	private static final List<String> materialTypeIds = newArrayList();
 
 	static
 	{
@@ -93,10 +62,7 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		materialTypesMap.put("RNA uit bloedcellen", asList("RNA"));
 		materialTypesMap.put("serum", asList("SERUM"));
 		materialTypesMap.put("urine", asList("URINE"));
-		materialTypesMap.put("weefsel", asList("TISSUE_FROZEN", "TISSUE_PARAFFIN_EMBEDDED")); // when a Parel doesn't
-																								// distinguish between
-																								// tissue types, add
-																								// them both
+		materialTypesMap.put("weefsel", asList("TISSUE_FROZEN", "TISSUE_PARAFFIN_EMBEDDED"));
 	}
 
 	private static final HashMap<String, List<String>> tissueTypesMap;
@@ -121,104 +87,125 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent arg0)
 	{
-		promiseMapperFactory.registerMapper(ID, this);
+		promiseMapperFactory.registerMapper(MAPPER_ID, this);
 	}
 
 	@Override
 	public String getId()
 	{
-		return ID;
+		return MAPPER_ID;
 	}
 
 	@Override
 	public MappingReport map(Entity project)
 	{
 		requireNonNull(project);
-
 		MappingReport report = new MappingReport();
 
 		try
 		{
 			LOG.info("Getting data from ProMISe for " + project.getString("name"));
-
 			Entity credentials = project.getEntity(PromiseMappingProjectMetaData.CREDENTIALS);
-
-			Iterable<Entity> promiseBiobankEntities = promiseDataParser.parse(credentials, 0);
-			Iterable<Entity> promiseSampleEntities = promiseDataParser.parse(credentials, 1);
-
 			EntityMetaData targetEntityMetaData = requireNonNull(
 					dataService.getEntityMetaData(SAMPLE_COLLECTIONS_ENTITY));
 
-			// parels should only have one biobank entity
-			Entity promiseBiobankEntity = promiseBiobankEntities.iterator().next();
+			// Parse biobanks
+			promiseDataParser.parse(credentials, 0, promiseBiobankEntity -> {
 
-			// find out if a sample collection with this id already exists
-			Entity targetEntity = dataService.findOne(SAMPLE_COLLECTIONS_ENTITY, project.getString("biobank_id"));
+				// find out if a sample collection with this id already exists
+				Entity targetEntity = dataService.findOne(SAMPLE_COLLECTIONS_ENTITY, project.getString(BIOBANK_ID));
 
-			boolean biobankExists = true;
-			if (targetEntity == null)
-			{
-				targetEntity = new MapEntity(targetEntityMetaData);
+				boolean biobankExists = true;
+				if (targetEntity == null)
+				{
+					targetEntity = new MapEntity(targetEntityMetaData);
 
-				// fill hand coded fields with dummy data the first time this biobank is added
-				targetEntity.set(CONTACT_PERSON, asList(getTempPerson(REF_PERSONS))); // mref
-				targetEntity.set(PRINCIPAL_INVESTIGATORS, asList(getTempPerson(REF_PERSONS))); // mref
-				targetEntity.set(INSTITUTES, asList(getTempPerson(REF_JURISTIC_PERSONS))); // mref
-				targetEntity.set(DISEASE, asList(getTempDisease())); // mref
-				targetEntity.set(OMICS, asList(getTempOmics())); // mref
-				targetEntity.set(DATA_CATEGORIES, asList(getTempDataCategories())); // mref
+					// fill hand coded fields with dummy data the first time this biobank is added
+					targetEntity.set(CONTACT_PERSON, asList(getTempPerson(REF_PERSONS))); // mref
+					targetEntity.set(PRINCIPAL_INVESTIGATORS, asList(getTempPerson(REF_PERSONS))); // mref
+					targetEntity.set(INSTITUTES, asList(getTempPerson(REF_JURISTIC_PERSONS))); // mref
+					targetEntity.set(DISEASE, asList(getTempDisease())); // mref
+					targetEntity.set(OMICS, asList(getTempOmics())); // mref
+					targetEntity.set(DATA_CATEGORIES, asList(getTempDataCategories())); // mref
 
-				targetEntity.set(NAME, null); // nillable
-				targetEntity.set(ACRONYM, null); // nillable
-				targetEntity.set(DESCRIPTION, null); // nillable
-				targetEntity.set(PUBLICATIONS, null); // nillable
-				targetEntity.set(BIOBANKS, null); // nillable
-				targetEntity.set(WEBSITE, "http://www.parelsnoer.org/"); // nillable
-				targetEntity.set(BIOBANK_SAMPLE_ACCESS_FEE, null); // nillable
-				targetEntity.set(BIOBANK_SAMPLE_ACCESS_JOINT_PROJECTS, null); // nillable
-				targetEntity.set(BIOBANK_SAMPLE_ACCESS_DESCRIPTION, null); // nillable
-				targetEntity.set(BIOBANK_SAMPLE_ACCESS_URI, "http://www.parelsnoer.org/page/Onderzoeker"); // nillable
-				targetEntity.set(BIOBANK_DATA_ACCESS_FEE, null); // nillable
-				targetEntity.set(BIOBANK_DATA_ACCESS_JOINT_PROJECTS, null); // nillable
-				targetEntity.set(BIOBANK_DATA_ACCESS_DESCRIPTION, null); // nillable
-				targetEntity.set(BIOBANK_DATA_ACCESS_URI, "http://www.parelsnoer.org/page/Onderzoeker"); // nillable
+					targetEntity.set(NAME, null); // nillable
+					targetEntity.set(ACRONYM, null); // nillable
+					targetEntity.set(DESCRIPTION, null); // nillable
+					targetEntity.set(PUBLICATIONS, null); // nillable
+					targetEntity.set(BIOBANKS, null); // nillable
+					targetEntity.set(WEBSITE, "http://www.parelsnoer.org/"); // nillable
+					targetEntity.set(BIOBANK_SAMPLE_ACCESS_FEE, null); // nillable
+					targetEntity.set(BIOBANK_SAMPLE_ACCESS_JOINT_PROJECTS, null); // nillable
+					targetEntity.set(BIOBANK_SAMPLE_ACCESS_DESCRIPTION, null); // nillable
+					targetEntity
+							.set(BIOBANK_SAMPLE_ACCESS_URI, "http://www.parelsnoer.org/page/Onderzoeker"); // nillable
+					targetEntity.set(BIOBANK_DATA_ACCESS_FEE, null); // nillable
+					targetEntity.set(BIOBANK_DATA_ACCESS_JOINT_PROJECTS, null); // nillable
+					targetEntity.set(BIOBANK_DATA_ACCESS_DESCRIPTION, null); // nillable
+					targetEntity.set(BIOBANK_DATA_ACCESS_URI, "http://www.parelsnoer.org/page/Onderzoeker"); // nillable
 
-				biobankExists = false;
-			}
+					biobankExists = false;
+				}
 
-			// map data from ProMISe
-			targetEntity.set(BbmriNlCheatSheet.ID, project.getString("biobank_id"));
-			targetEntity.set(TYPE, toTypes(promiseBiobankEntity.getString("COLLECTION_TYPE"))); // mref
-			targetEntity.set(MATERIALS, toMaterialTypes(promiseSampleEntities)); // mref
-			targetEntity.set(SEX, toGenders(promiseBiobankEntity.getString("SEX"))); // mref
-			targetEntity.set(AGE_LOW, promiseBiobankEntity.getString("AGE_LOW")); // nillable
-			targetEntity.set(AGE_HIGH, promiseBiobankEntity.getString("AGE_HIGH")); // nillable
-			targetEntity.set(AGE_UNIT, toAgeType(promiseBiobankEntity.getString("AGE_UNIT")));
-			targetEntity.set(NUMBER_OF_DONORS, promiseBiobankEntity.getString("NUMBER_DONORS")); // nillable
+				// map data from ProMISe
+				targetEntity.set(BbmriNlCheatSheet.ID, project.getString(BIOBANK_ID));
+				targetEntity.set(TYPE, toTypes(promiseBiobankEntity.getString("COLLECTION_TYPE"))); // mref
+				targetEntity.set(MATERIALS, getMaterialTypes(credentials)); // mref
+				targetEntity.set(SEX, toGenders(promiseBiobankEntity.getString("SEX"))); // mref
+				targetEntity.set(AGE_LOW, promiseBiobankEntity.getString("AGE_LOW")); // nillable
+				targetEntity.set(AGE_HIGH, promiseBiobankEntity.getString("AGE_HIGH")); // nillable
+				targetEntity.set(AGE_UNIT, toAgeType(promiseBiobankEntity.getString("AGE_UNIT")));
+				targetEntity.set(NUMBER_OF_DONORS, promiseBiobankEntity.getString("NUMBER_DONORS")); // nillable
 
-			if (biobankExists)
-			{
-				LOG.info("Updating Sample Collection with id " + targetEntity.getIdValue());
-				dataService.update(SAMPLE_COLLECTIONS_ENTITY, targetEntity);
-			}
-			else
-			{
-				LOG.info("Adding new Sample Collection with id " + targetEntity.getIdValue());
-				dataService.add(SAMPLE_COLLECTIONS_ENTITY, targetEntity);
-			}
+				if (biobankExists)
+				{
+					LOG.info("Updating Sample Collection with id " + targetEntity.getIdValue());
+					dataService.update(SAMPLE_COLLECTIONS_ENTITY, targetEntity);
+				}
+				else
+				{
+					LOG.info("Adding new Sample Collection with id " + targetEntity.getIdValue());
+					dataService.add(SAMPLE_COLLECTIONS_ENTITY, targetEntity);
+				}
 
-			report.setStatus(Status.SUCCESS);
-
+				report.setStatus(Status.SUCCESS);
+			});
 		}
 		catch (Exception e)
 		{
 			report.setStatus(Status.ERROR);
 			report.setMessage(e.getMessage());
 
-			LOG.warn(ExceptionUtils.getStackTrace(e));
+			LOG.error("Something went wrong: {}", e);
 		}
 
 		return report;
+	}
+
+	private Iterable<Entity> getMaterialTypes(Entity credentials)
+	{
+		try
+		{
+			// Parse samples
+			promiseDataParser.parse(credentials, 1,
+					promiseSampleEntity -> toMaterialTypes(promiseSampleEntity.getString("MATERIAL_TYPES"),
+							promiseSampleEntity.getString("MATERIAL_TYPES_SUB")));
+		}
+		catch (IOException e)
+		{
+			LOG.error("Something went wrong: {}", e);
+		}
+
+		if (!unknownMaterialTypes.isEmpty()) throw new RuntimeException(
+				"Unknown ProMISe material types: [" + String.join(",", unknownMaterialTypes) + "]");
+
+		Iterable<Entity> materialTypes = dataService
+				.findAll(REF_MATERIAL_TYPES, transform(materialTypeIds, id -> (Object) id).stream())
+				.collect(Collectors.toList());
+
+		if (Iterables.isEmpty(materialTypes))
+			throw new RuntimeException("Couldn't find mappings for some of the material types in:" + materialTypeIds);
+		return materialTypes;
 	}
 
 	private Object getTempDataCategories()
@@ -285,52 +272,17 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		return collectionTypes;
 	}
 
-	private Iterable<Entity> toMaterialTypes(Iterable<Entity> promiseSampleEntities)
+	private void toMaterialTypes(String type, String tissue)
 	{
-		List<String> ids = Lists.newArrayList();
-		List<String> unknown = Lists.newArrayList();
-		for (Entity sample : promiseSampleEntities)
+		if (type.equals("weefsel") && tissue != null)
 		{
-			String type = sample.getString("MATERIAL_TYPES");
-			String tissue = sample.getString("MATERIAL_TYPES_SUB");
-			if (type.equals("weefsel") && tissue != null)
-			{
-				if (tissueTypesMap.containsKey(tissue))
-				{
-					tissueTypesMap.get(tissue).forEach(t -> ids.add(t));
-				}
-				else
-				{
-					unknown.add(tissue);
-				}
-			}
-			else
-			{
-				if (materialTypesMap.containsKey(type))
-				{
-					materialTypesMap.get(type).forEach(t -> ids.add(t));
-				}
-				else
-				{
-					unknown.add(type);
-				}
-			}
-
+			if (tissueTypesMap.containsKey(tissue)) tissueTypesMap.get(tissue).forEach(t -> materialTypeIds.add(t));
+			else unknownMaterialTypes.add(tissue);
 		}
-
-		if (!unknown.isEmpty())
+		else
 		{
-			throw new RuntimeException("Unknown ProMISe material types: [" + String.join(",", unknown) + "]");
+			if (materialTypesMap.containsKey(type)) materialTypesMap.get(type).forEach(t -> materialTypeIds.add(t));
+			else unknownMaterialTypes.add(type);
 		}
-
-		Iterable<Entity> materialTypes = dataService.findAll(REF_MATERIAL_TYPES, transform(ids, id -> (Object) id).stream()).collect(toList());
-		if (!materialTypes.iterator().hasNext())
-
-		{
-			String message = String.format("Couldn't find mappings for some of the material types in %s.", ids);
-			throw new RuntimeException(message);
-		}
-		return materialTypes;
 	}
-
 }

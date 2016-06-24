@@ -1,13 +1,12 @@
 package org.molgenis.app.promise.mapper;
 
-import com.google.common.collect.Iterables;
 import org.molgenis.app.promise.client.PromiseDataParser;
 import org.molgenis.app.promise.mapper.MappingReport.Status;
-import org.molgenis.app.promise.model.BbmriNlCheatSheet;
 import org.molgenis.app.promise.model.PromiseMappingProjectMetaData;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.UuidGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,53 +15,43 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 
+import static com.google.common.collect.Iterables.size;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.hash.Hashing.md5;
 import static java.nio.charset.Charset.forName;
+import static java.time.LocalDate.now;
+import static java.time.LocalDate.parse;
+import static java.time.format.DateTimeFormatter.ISO_DATE_TIME;
+import static java.time.temporal.ChronoUnit.YEARS;
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang.StringUtils.join;
-import static org.apache.commons.lang.exception.ExceptionUtils.getStackTrace;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.ACRONYM;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_HIGH;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_LOW;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.AGE_UNIT;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANKS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_DESCRIPTION;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_FEE;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_JOINT_PROJECTS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCESS_URI;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_SAMPLE_ACCESS_DESCRIPTION;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_FEE;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_SAMPLE_ACCESS_URI;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.CONTACT_PERSON;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.DATA_CATEGORIES;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.DESCRIPTION;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.DISEASE;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.INSTITUTES;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.MATERIALS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.NAME;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.NUMBER_OF_DONORS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.OMICS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.PRINCIPAL_INVESTIGATORS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.PUBLICATIONS;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.SAMPLE_COLLECTIONS_ENTITY;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.SEX;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.TYPE;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.WEBSITE;
+import static org.molgenis.app.promise.model.BbmriNlCheatSheet.*;
 
 @Component
 public class RadboudMapper implements PromiseMapper, ApplicationListener<ContextRefreshedEvent>
 {
-	private final String ID = "RADBOUD";
+	public static final String XML_GENDER = "GESLACHT";
+	public static final String XML_BIRTHDATE = "GEBOORTEDATUM";
+	private final String MAPPER_ID = "RADBOUD";
+
+	public static final String XML_ID = "ID";
+	public static final String XML_TITLE = "TITEL";
+	public static final String XML_IDAA = "IDAA";
+	public static final String XML_CODEINDEX = "CODEINDEX";
+	public static final String XML_DESCRIPTION = "OMSCHRIJVING";
 
 	private final PromiseMapperFactory promiseMapperFactory;
 	private final PromiseDataParser promiseDataParser;
 	private final DataService dataService;
+
+	private static final Map<String, List<Entity>> diseaseIdMap = newHashMap();
+	private Entity countryNl;
 
 	private static final Logger LOG = LoggerFactory.getLogger(RadboudMapper.class);
 
@@ -78,74 +67,112 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 	@Override
 	public String getId()
 	{
-		return ID;
+		return MAPPER_ID;
 	}
 
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent arg0)
 	{
-		promiseMapperFactory.registerMapper(ID, this);
+		promiseMapperFactory.registerMapper(MAPPER_ID, this);
 	}
 
 	@Override
 	public MappingReport map(Entity project)
 	{
 		requireNonNull(project);
+
 		MappingReport report = new MappingReport();
+
+		List<Entity> sampleCollectionsToAdd = newArrayList();
+		List<Entity> sampleCollectionsToUpdate = newArrayList();
+
+		Map<String, List<Entity>> sampleIdMap = newHashMap();
+
+		countryNl = dataService.findOne(REF_COUNTRIES, "NL");
+		if (countryNl == null) throw new RuntimeException("Unknown '" + REF_COUNTRIES + "' [NL]");
 
 		try
 		{
-			LOG.info("Downloading data for " + project.getString("name"));
-
 			Entity credentials = project.getEntity(PromiseMappingProjectMetaData.CREDENTIALS);
 
-			Iterable<Entity> promiseBiobankEntities = promiseDataParser.parse(credentials, 0);
-			Iterable<Entity> promiseSampleEntities = promiseDataParser.parse(credentials, 1);
+			LOG.info("Generating RADBOUD sample map");
+			promiseDataParser.parse(credentials, 1, sampleEntity -> {
+				String samplesId = sampleEntity.getString(XML_ID) + sampleEntity.getString(XML_IDAA);
+				sampleIdMap.putIfAbsent(samplesId, newArrayList());
+				sampleIdMap.get(samplesId).add(sampleEntity);
+			});
 
-			EntityMetaData targetEntityMetaData = requireNonNull(
-					dataService.getEntityMetaData(SAMPLE_COLLECTIONS_ENTITY));
+			LOG.info("Generating RADBOUD disease map");
+			promiseDataParser.parse(credentials, 2, diseaseEntity -> {
+				String diseaseId = diseaseEntity.getString(XML_IDAA);
+				diseaseIdMap.putIfAbsent(diseaseId, newArrayList());
+				diseaseIdMap.get(diseaseId).add(diseaseEntity);
+			});
 
-			for (Entity promiseBiobankEntity : promiseBiobankEntities)
-			{
-				Iterable<Entity> promiseBiobankSamplesEntities = getPromiseBiobankSamples(promiseBiobankEntity,
-						promiseSampleEntities);
+			LOG.info("Downloading biobank data for " + project.getString(NAME));
+			promiseDataParser.parse(credentials, 0, biobankEntity -> {
+				LOG.info("Mapping biobank: " + biobankEntity.getString(XML_TITLE));
 
-				MapEntity targetEntity = new MapEntity(targetEntityMetaData);
-				targetEntity.set(BbmriNlCheatSheet.ID, project.getString("biobank_id"));
-				targetEntity.set(NAME, promiseBiobankEntity.getString("TITEL"));
-				targetEntity.set(ACRONYM, project.getString("biobank_id")); //TODO Standard mapping based on ID
-				targetEntity.set(TYPE, toTypes(promiseBiobankEntity.getString("TYPEBIOBANK")));
-				targetEntity.set(DISEASE, null); // TODO Will be supplied by Radboud
-				targetEntity.set(DATA_CATEGORIES,
-						toDataCategories(promiseBiobankEntity, promiseBiobankSamplesEntities));
-				targetEntity.set(MATERIALS, toMaterials(promiseBiobankSamplesEntities));
-				targetEntity.set(OMICS, toOmics(promiseBiobankSamplesEntities));
-				targetEntity.set(SEX, toSex(promiseBiobankSamplesEntities));
-				targetEntity.set(AGE_LOW, toAgeMinOrMax(promiseBiobankSamplesEntities, true));
-				targetEntity.set(AGE_HIGH, toAgeMinOrMax(promiseBiobankSamplesEntities, false));
-				targetEntity.set(AGE_UNIT, toAgeUnit());
-				targetEntity.set(NUMBER_OF_DONORS, Iterables.size(promiseBiobankSamplesEntities));
-				targetEntity.set(DESCRIPTION, promiseBiobankEntity.getString("OMSCHRIJVING"));
-				targetEntity.set(PUBLICATIONS, null);  // TODO Will be supplied by Radboud
-				targetEntity.set(CONTACT_PERSON, getCreatePersons(promiseBiobankEntity));
-				targetEntity.set(PRINCIPAL_INVESTIGATORS, toPrincipalInvestigators());
-				targetEntity.set(INSTITUTES, toInstitutes());
-				targetEntity.set(BIOBANKS, toBiobanks());
-				targetEntity.set(WEBSITE, "http://www.radboudbiobank.nl/");
+				EntityMetaData targetEntityMetaData = requireNonNull(
+						dataService.getEntityMetaData(SAMPLE_COLLECTIONS_ENTITY));
+
+				String biobankId = biobankEntity.getString(XML_ID) + biobankEntity.getString(XML_IDAA);
+				Iterable<Entity> biobankSamplesEntities = sampleIdMap.get(biobankId);
+
+				Entity targetEntity = dataService.findOne(SAMPLE_COLLECTIONS_ENTITY, biobankId);
+
+				boolean biobankExists = true;
+				if (targetEntity == null)
+				{
+					targetEntity = new MapEntity(targetEntityMetaData);
+
+					// fill hand coded fields with dummy data the first time this biobank is added
+					targetEntity.set(ACRONYM, null);
+					targetEntity.set(PUBLICATIONS, null);
+					targetEntity.set(BIOBANK_SAMPLE_ACCESS_URI,
+							"http://www.radboudbiobank.nl/nl/collecties/materiaal-opvragen/");
+					targetEntity.set(WEBSITE, "http://www.radboudbiobank.nl/");
+					targetEntity.set(BIOBANK_DATA_ACCESS_URI,
+							"http://www.radboudbiobank.nl/nl/collecties/materiaal-opvragen/");
+					targetEntity.set(PRINCIPAL_INVESTIGATORS, getPrincipalInvestigator(biobankId));
+					targetEntity.set(INSTITUTES, getMrefEntities(REF_JURISTIC_PERSONS, "83"));
+
+					biobankExists = false;
+				}
+
+				targetEntity.set(ID, biobankId);
+				targetEntity.set(NAME, biobankEntity.getString(XML_TITLE));
+				targetEntity.set(TYPE, toTypes(biobankEntity.getString("TYPEBIOBANK")));
+				targetEntity.set(DATA_CATEGORIES, toDataCategories(biobankEntity, biobankSamplesEntities));
+				targetEntity.set(MATERIALS, toMaterials(biobankSamplesEntities));
+				targetEntity.set(OMICS, toOmics(biobankSamplesEntities));
+				targetEntity.set(SEX, toSex(biobankSamplesEntities));
+				targetEntity.set(AGE_LOW, toAgeMinOrMax(biobankSamplesEntities, true));
+				targetEntity.set(AGE_HIGH, toAgeMinOrMax(biobankSamplesEntities, false));
+				targetEntity.set(AGE_UNIT, getXrefEntity(REF_AGE_TYPES, "YEAR"));
+				targetEntity.set(DISEASE, getDiseaseTypes(biobankEntity.getString(XML_IDAA)));
+				targetEntity.set(NUMBER_OF_DONORS, size(biobankSamplesEntities));
+				targetEntity.set(DESCRIPTION, biobankEntity.getString(XML_DESCRIPTION));
+				targetEntity.set(CONTACT_PERSON, getContactPersons(biobankEntity));
+				targetEntity.set(BIOBANKS, getMrefEntities(REF_BIOBANKS, "RBB"));
 				targetEntity.set(BIOBANK_SAMPLE_ACCESS_FEE, true);
 				targetEntity.set(BIOBANK_DATA_ACCESS_JOINT_PROJECTS, true);
 				targetEntity.set(BIOBANK_DATA_SAMPLE_ACCESS_DESCRIPTION, null);  // Don't fill in
-				targetEntity.set(BIOBANK_SAMPLE_ACCESS_URI,
-						"http://www.radboudbiobank.nl/nl/collecties/materiaal-opvragen/");
 				targetEntity.set(BIOBANK_DATA_ACCESS_FEE, true);
 				targetEntity.set(BIOBANK_DATA_ACCESS_JOINT_PROJECTS, true);
 				targetEntity.set(BIOBANK_DATA_ACCESS_DESCRIPTION, null);  // Don't fill in
-				targetEntity.set(BIOBANK_DATA_ACCESS_URI,
-						"http://www.radboudbiobank.nl/nl/collecties/materiaal-opvragen/");
 
-				dataService.add("bbmri_nl_sample_collections", targetEntity);
-			}
+				if (biobankExists) sampleCollectionsToUpdate.add(targetEntity);
+				else sampleCollectionsToAdd.add(targetEntity);
+			});
 
+			LOG.info("Adding {} entities to {}", sampleCollectionsToAdd.size(), SAMPLE_COLLECTIONS_ENTITY);
+			dataService.add(SAMPLE_COLLECTIONS_ENTITY, sampleCollectionsToAdd.stream());
+
+			LOG.info("Updating {} entities in {}", sampleCollectionsToUpdate.size(), SAMPLE_COLLECTIONS_ENTITY);
+			dataService.update(SAMPLE_COLLECTIONS_ENTITY, sampleCollectionsToUpdate.stream());
+
+			LOG.info("Finished mapping RADBOUD biobanks");
 			report.setStatus(Status.SUCCESS);
 		}
 		catch (Exception e)
@@ -153,123 +180,129 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 			report.setStatus(Status.ERROR);
 			report.setMessage(e.getMessage());
 
-			LOG.warn(getStackTrace(e));
+			LOG.warn("Error in mapping response to entities", e);
 		}
+
+		sampleIdMap.clear();
+		diseaseIdMap.clear();
 		return report;
 	}
 
-	private Iterable<Entity> toBiobanks()
+	private Iterable<Entity> getPrincipalInvestigator(String biobankId)
 	{
-		Entity biobank = dataService.findOne("bbmri_nl_biobanks", "RBB");
-		if (biobank == null)
+		Entity principalInvestigatorEntity = dataService.findOne(REF_PERSONS, biobankId);
+		if (principalInvestigatorEntity == null)
 		{
-			throw new RuntimeException("Unknown 'bbmri_nl_biobanks' [RBB]");
+			principalInvestigatorEntity = new MapEntity(dataService.getEntityMetaData(REF_PERSONS));
+			principalInvestigatorEntity.set(ID, biobankId);
+			principalInvestigatorEntity.set("country", countryNl);
+			dataService.add(REF_PERSONS, principalInvestigatorEntity);
 		}
-		return singletonList(biobank);
+		return singletonList(principalInvestigatorEntity);
 	}
 
-	private Iterable<Entity> toInstitutes()
+	private Iterable<Entity> getDiseaseTypes(String biobankIdaa)
 	{
-		Entity juristicPerson = dataService.findOne("bbmri_nl_juristic_persons", "83");
-		if (juristicPerson == null)
+		List<Entity> diseaseTypes = newArrayList();
+		Iterable<Entity> diseaseEntities = diseaseIdMap.get(biobankIdaa);
+
+		if (diseaseEntities != null)
 		{
-			throw new RuntimeException("Unknown 'bbmri_nl_juristic_persons' [83]");
+			diseaseEntities.forEach(disease -> {
+				String icd10urn = "urn:miriam:icd:" + disease.getString(XML_CODEINDEX);
+				Entity diseaseType = dataService.findOne(REF_DISEASE_TYPES, icd10urn);
+				if (diseaseType != null) diseaseTypes.add(diseaseType);
+			});
 		}
-		return singletonList(juristicPerson);
+
+		if (diseaseTypes.isEmpty())
+		{
+			Entity unknownDiseaseType = new MapEntity(dataService.getEntityMetaData(REF_DISEASE_TYPES));
+			unknownDiseaseType.set(ID, "NAV");
+			diseaseTypes.add(unknownDiseaseType);
+		}
+
+		return diseaseTypes;
 	}
 
-	private Entity toAgeUnit()
+	private Iterable<Entity> getMrefEntities(String entityName, String value)
 	{
-		Entity ageUnit = dataService.findOne("bbmri_nl_age_types", "YEAR");
-		if (ageUnit == null)
+		Entity entity = dataService.findOne(entityName, value);
+		if (entity == null)
 		{
-			throw new RuntimeException("Unknown 'bbmri_nl_age_types' [YEAR]");
+			throw new RuntimeException("Unknown '" + entityName + "' [" + value + "]");
 		}
-		return ageUnit;
+		return singletonList(entity);
 	}
 
-	private Iterable<Entity> toPrincipalInvestigators()
+	private Entity getXrefEntity(String entityName, String value)
 	{
-		MapEntity principalInvestigators = new MapEntity(dataService.getEntityMetaData("bbmri_nl_persons"));
-		principalInvestigators.set("id", new UuidGenerator().generateId());
-		Entity countryNl = dataService.findOne("bbmri_nl_countries", "NL");
-		if (countryNl == null)
+		Entity entity = dataService.findOne(entityName, value);
+		if (entity == null)
 		{
-			throw new RuntimeException("Unknown 'bbmri_nl_countries' [NL]");
+			throw new RuntimeException("Unknown '" + entityName + "' [" + value + "]");
 		}
-		principalInvestigators.set("country", countryNl);
-		dataService.add("bbmri_nl_persons", principalInvestigators);
-		return singletonList(principalInvestigators);
+		return entity;
 	}
 
-	private Iterable<Entity> getCreatePersons(Entity promiseBiobankEntity)
+	public Iterable<Entity> getContactPersons(Entity biobankEntity)
 	{
-		// TODO what if all fields are null?
-		String contactPerson = promiseBiobankEntity.getString("CONTACTPERS");
-		String address1 = promiseBiobankEntity.getString("ADRES1");
-		String address2 = promiseBiobankEntity.getString("ADRES2");
-		String postalCode = promiseBiobankEntity.getString("POSTCODE");
-		String city = promiseBiobankEntity.getString("PLAATS");
-		String email = promiseBiobankEntity.getString("EMAIL");
-		String phoneNumber = promiseBiobankEntity.getString("TELEFOON");
+		String[] contactPerson = biobankEntity.getString("CONTACTPERS").split(",");
+		String address1 = biobankEntity.getString("ADRES1");
+		String address2 = biobankEntity.getString("ADRES2");
+		String postalCode = biobankEntity.getString("POSTCODE");
+		String city = biobankEntity.getString("PLAATS");
+		String[] email = biobankEntity.getString("EMAIL").split(" ");
+		String phoneNumber = biobankEntity.getString("TELEFOON");
 
-		StringBuilder contentBuilder = new StringBuilder();
-		if (contactPerson != null && !contactPerson.isEmpty()) contentBuilder.append(contactPerson);
-		if (address1 != null && !address1.isEmpty()) contentBuilder.append(address1);
-		if (address2 != null && !address2.isEmpty()) contentBuilder.append(address2);
-		if (postalCode != null && !postalCode.isEmpty()) contentBuilder.append(postalCode);
-		if (city != null && !city.isEmpty()) contentBuilder.append(city);
-		if (email != null && !email.isEmpty()) contentBuilder.append(email);
-		if (phoneNumber != null && !phoneNumber.isEmpty()) contentBuilder.append(phoneNumber);
+		List<Entity> persons = newArrayList();
+		for (int i = 0; i < contactPerson.length; i++)
+		{
+			StringBuilder contentBuilder = new StringBuilder();
+			if (contactPerson[i] != null && !contactPerson[i].isEmpty()) contentBuilder.append(contactPerson[i]);
+			if (address1 != null && !address1.isEmpty()) contentBuilder.append(address1);
+			if (address2 != null && !address2.isEmpty()) contentBuilder.append(address2);
+			if (postalCode != null && !postalCode.isEmpty()) contentBuilder.append(postalCode);
+			if (city != null && !city.isEmpty()) contentBuilder.append(city);
+			if (email[i] != null && !email[i].isEmpty()) contentBuilder.append(email[i]);
+			if (phoneNumber != null && !phoneNumber.isEmpty()) contentBuilder.append(phoneNumber);
 
-		String personId = md5().newHasher().putString(contentBuilder, forName("UTF-8")).hash().toString();
-		Entity person = dataService.findOne("bbmri_nl_persons", personId);
-		if (person != null)
-		{
-			return singletonList(person);
-		}
-		else
-		{
-			MapEntity newPerson = new MapEntity(dataService.getEntityMetaData("bbmri_nl_persons"));
-			newPerson.set("id", personId);
-			if(contactPerson != null)
+			String personId = md5().newHasher().putString(contentBuilder, forName("UTF-8")).hash().toString();
+			Entity person = dataService.findOne(REF_PERSONS, personId);
+
+			if (person != null)
 			{
-				newPerson.set("first_name", contactPerson.split(" ")[0]);
+				persons.add(person);
 			}
 			else
 			{
-				newPerson.set("first_name", contactPerson);
-			}
-			newPerson.set("last_name", contactPerson);
-			newPerson.set("phone", phoneNumber);
-			newPerson.set("email", email);
+				MapEntity newPerson = new MapEntity(dataService.getEntityMetaData(REF_PERSONS));
+				newPerson.set("id", personId);
+				newPerson.set("first_name", contactPerson[i]);
+				newPerson.set("last_name", contactPerson[i]);
+				newPerson.set("phone", phoneNumber);
+				newPerson.set("email", email[i]);
 
-			StringBuilder addressBuilder = new StringBuilder();
-			if (address1 != null && !address1.isEmpty()) addressBuilder.append(address1);
-			if (address2 != null && !address2.isEmpty())
-			{
-				if (address1 != null && !address1.isEmpty()) addressBuilder.append(' ');
-				addressBuilder.append(address2);
-			}
-			if (addressBuilder.length() > 0)
-			{
-				newPerson.set("address", addressBuilder.toString());
-			}
-			newPerson.set("zip", postalCode);
-			newPerson.set("city", city);
-			Entity countryNl = dataService.findOne("bbmri_nl_countries", "NL");
-			if (countryNl == null)
-			{
-				throw new RuntimeException("Unknown 'bbmri_nl_countries' [NL]");
+				StringBuilder addressBuilder = new StringBuilder();
+				if (address1 != null && !address1.isEmpty()) addressBuilder.append(address1);
+				if (address2 != null && !address2.isEmpty())
+				{
+					if (address1 != null && !address1.isEmpty()) addressBuilder.append(' ');
+					addressBuilder.append(address2);
+				}
+				if (addressBuilder.length() > 0)
+				{
+					newPerson.set("address", addressBuilder.toString());
+				}
+				newPerson.set("zip", postalCode);
+				newPerson.set("city", city);
+				newPerson.set("country", countryNl);
+				dataService.add(REF_PERSONS, newPerson);
+				persons.add(newPerson);
 			}
 
-			// TODO what to put here, this is a required attribute?
-			newPerson.set("country", countryNl);
-
-			dataService.add("bbmri_nl_persons", newPerson);
-
-			return singletonList(newPerson);
 		}
+		return persons;
 	}
 
 	private Integer toAgeMinOrMax(Iterable<Entity> promiseBiobankSamplesEntities, boolean lowest)
@@ -277,12 +310,12 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		Long ageMinOrMax = null;
 		for (Entity promiseBiobankSamplesEntity : promiseBiobankSamplesEntities)
 		{
-			String birthDate = promiseBiobankSamplesEntity.getString("GEBOORTEDATUM");
+			String birthDate = promiseBiobankSamplesEntity.getString(XML_BIRTHDATE);
 			if (birthDate != null && !birthDate.isEmpty())
 			{
-				LocalDate start = LocalDate.parse(birthDate, DateTimeFormatter.ISO_DATE_TIME);
-				LocalDate end = LocalDate.now();
-				long age = ChronoUnit.YEARS.between(start, end);
+				LocalDate start = parse(birthDate, ISO_DATE_TIME);
+				LocalDate end = now();
+				long age = YEARS.between(start, end);
 				if (ageMinOrMax == null || (lowest && age < ageMinOrMax) || (!lowest && age > ageMinOrMax))
 				{
 					ageMinOrMax = age;
@@ -298,15 +331,16 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 
 		for (Entity promiseBiobankSamplesEntity : promiseBiobankSamplesEntities)
 		{
-			if ("1".equals(promiseBiobankSamplesEntity.getString("GESLACHT")))
+			String genderValue = promiseBiobankSamplesEntity.getString(XML_GENDER);
+			if ("1".equals(genderValue))
 			{
 				genderTypeIds.add("FEMALE");
 			}
-			if ("2".equals(promiseBiobankSamplesEntity.getString("GESLACHT")))
+			if ("2".equals(genderValue))
 			{
 				genderTypeIds.add("MALE");
 			}
-			if ("3".equals(promiseBiobankSamplesEntity.getString("GESLACHT")))
+			if ("3".equals(genderValue))
 			{
 				genderTypeIds.add("UNKNOWN");
 			}
@@ -316,12 +350,10 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		{
 			genderTypeIds.add("NAV");
 		}
-		Iterable<Entity> genderTypes = dataService.findAll("bbmri_nl_gender_types", genderTypeIds.stream()).collect(
-				toList());
+		Iterable<Entity> genderTypes = dataService.findAll(REF_GENDER_TYPES, genderTypeIds.stream()).collect(toList());
 		if (!genderTypeIds.iterator().hasNext())
 		{
-			throw new RuntimeException(
-					"Unknown 'bbmri_nl_gender_types' [" + join(genderTypeIds, ',') + "]");
+			throw new RuntimeException("Unknown '" + REF_GENDER_TYPES + "' [" + join(genderTypeIds, ',') + "]");
 		}
 		return genderTypes;
 	}
@@ -350,22 +382,12 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 					throw new RuntimeException("Unknown biobank type [" + promiseTypeBiobank + "]");
 			}
 		}
-		Entity collectionType = dataService.findOne("bbmri_nl_collection_types", collectionTypeId);
+		Entity collectionType = dataService.findOne(REF_COLLECTION_TYPES, collectionTypeId);
 		if (collectionType == null)
 		{
-			throw new RuntimeException("Unknown 'bbmri_nl_collection_types' [" + collectionTypeId + "]");
+			throw new RuntimeException("Unknown '" + REF_COLLECTION_TYPES + "' [" + collectionTypeId + "]");
 		}
-		return Arrays.asList(collectionType);
-	}
-
-	private Iterable<Entity> toDiseases()
-	{
-		Entity diseaseType = dataService.findOne("bbmri_nl_disease_types", "NAV");
-		if (diseaseType == null)
-		{
-			throw new RuntimeException("Unknown 'bbmri_nl_disease_types' [NAV]");
-		}
-		return Arrays.asList(diseaseType);
+		return asList(collectionType);
 	}
 
 	private Iterable<Entity> toDataCategories(Entity promiseBiobankEntity,
@@ -450,11 +472,12 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 			dataCategoryTypeIds.add("NAV");
 		}
 
-		Iterable<Entity> dataCategoryTypes = dataService.findAll("bbmri_nl_data_category_types", dataCategoryTypeIds.stream()).collect(toList());
+		Iterable<Entity> dataCategoryTypes = dataService.findAll(REF_DATA_CATEGORY_TYPES, dataCategoryTypeIds.stream())
+				.collect(toList());
 		if (!dataCategoryTypes.iterator().hasNext())
 		{
 			throw new RuntimeException(
-					"Unknown 'bbmri_nl_data_category_types' [" + join(dataCategoryTypeIds, ',') + "]");
+					"Unknown '" + REF_DATA_CATEGORY_TYPES + "' [" + join(dataCategoryTypeIds, ',') + "]");
 		}
 		return dataCategoryTypes;
 	}
@@ -465,8 +488,8 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 
 		for (Entity promiseBiobankSamplesEntity : promiseBiobankSamplesEntities)
 		{
-			if ("1".equals(promiseBiobankSamplesEntity.getString("DNA"))
-					|| "1".equals(promiseBiobankSamplesEntity.getString("DNABEENMERG")))
+			if ("1".equals(promiseBiobankSamplesEntity.getString("DNA")) || "1"
+					.equals(promiseBiobankSamplesEntity.getString("DNABEENMERG")))
 			{
 				materialTypeIds.add("DNA");
 			}
@@ -510,20 +533,20 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 				materialTypeIds.add("FECES");
 			}
 
-			if ("1".equals(promiseBiobankSamplesEntity.getString("RNA"))
-					|| "1".equals(promiseBiobankSamplesEntity.getString("RNABEENMERG")))
+			if ("1".equals(promiseBiobankSamplesEntity.getString("RNA")) || "1"
+					.equals(promiseBiobankSamplesEntity.getString("RNABEENMERG")))
 			{
 				materialTypeIds.add("MICRO_RNA");
 			}
 
-			if ("1".equals(promiseBiobankSamplesEntity.getString("GASTROINTMUC"))
-					|| "1".equals(promiseBiobankSamplesEntity.getString("LIQUOR"))
-					|| "1".equals(promiseBiobankSamplesEntity.getString("CELLBEENMERG"))
-					|| "1".equals(promiseBiobankSamplesEntity.getString("MONONUCLBLOED"))
-					|| "1".equals(promiseBiobankSamplesEntity.getString("MONONUCMERG"))
-					|| "1".equals(promiseBiobankSamplesEntity.getString("GRANULOCYTMERG"))
-					|| "1".equals(promiseBiobankSamplesEntity.getString("MONOCYTMERG"))
-					|| "1".equals(promiseBiobankSamplesEntity.getString("MICROBIOOM")))
+			if ("1".equals(promiseBiobankSamplesEntity.getString("GASTROINTMUC")) || "1"
+					.equals(promiseBiobankSamplesEntity.getString("LIQUOR")) || "1"
+					.equals(promiseBiobankSamplesEntity.getString("CELLBEENMERG")) || "1"
+					.equals(promiseBiobankSamplesEntity.getString("MONONUCLBLOED")) || "1"
+					.equals(promiseBiobankSamplesEntity.getString("MONONUCMERG")) || "1"
+					.equals(promiseBiobankSamplesEntity.getString("GRANULOCYTMERG")) || "1"
+					.equals(promiseBiobankSamplesEntity.getString("MONOCYTMERG")) || "1"
+					.equals(promiseBiobankSamplesEntity.getString("MICROBIOOM")))
 			{
 				materialTypeIds.add("OTHER");
 			}
@@ -533,12 +556,11 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		{
 			materialTypeIds.add("NAV");
 		}
-		Iterable<Entity> materialTypes = dataService.findAll("bbmri_nl_material_types", materialTypeIds.stream()).collect(
-				toList());
+		Iterable<Entity> materialTypes = dataService.findAll(REF_MATERIAL_TYPES, materialTypeIds.stream())
+				.collect(toList());
 		if (!materialTypes.iterator().hasNext())
 		{
-			throw new RuntimeException(
-					"Unknown 'bbmri_nl_material_types' [" + join(materialTypeIds, ',') + "]");
+			throw new RuntimeException("Unknown '" + REF_MATERIAL_TYPES + "' [" + join(materialTypeIds, ',') + "]");
 		}
 
 		return materialTypes;
@@ -550,9 +572,9 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 
 		for (Entity promiseBiobankSamplesEntity : promiseBiobankSamplesEntities)
 		{
-			if ("1".equals(promiseBiobankSamplesEntity.getString("GWASOMNI"))
-					|| "1".equals(promiseBiobankSamplesEntity.getString("GWAS370CNV"))
-					|| "1".equals(promiseBiobankSamplesEntity.getString("EXOOMCHIP")))
+			if ("1".equals(promiseBiobankSamplesEntity.getString("GWASOMNI")) || "1"
+					.equals(promiseBiobankSamplesEntity.getString("GWAS370CNV")) || "1"
+					.equals(promiseBiobankSamplesEntity.getString("EXOOMCHIP")))
 			{
 				omicsTypeIds.add("GENOMICS");
 			}
@@ -562,30 +584,12 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		{
 			omicsTypeIds.add("NAV");
 		}
-		Iterable<Entity> omicsTypes = dataService.findAll("bbmri_nl_omics_data_types", omicsTypeIds.stream()).collect(
-				toList());
+		Iterable<Entity> omicsTypes = dataService.findAll(REF_OMICS_DATA_TYPES, omicsTypeIds.stream())
+				.collect(toList());
 		if (!omicsTypes.iterator().hasNext())
 		{
-			throw new RuntimeException(
-					"Unknown 'bbmri_nl_omics_data_types' [" + join(omicsTypeIds, ',') + "]");
+			throw new RuntimeException("Unknown '" + REF_OMICS_DATA_TYPES + "' [" + join(omicsTypeIds, ',') + "]");
 		}
 		return omicsTypes;
 	}
-
-	private Iterable<Entity> getPromiseBiobankSamples(Entity promiseBiobankEntity,
-			Iterable<Entity> promiseSampleEntities)
-	{
-		List<Entity> promiseBiobankSampleEntities = new ArrayList<Entity>();
-		String biobankId = promiseBiobankEntity.getString("ID") + promiseBiobankEntity.getString("IDAA");
-		for (Entity promiseSampleEntity : promiseSampleEntities)
-		{
-			String biobankSamplesId = promiseSampleEntity.getString("ID") + promiseSampleEntity.getString("IDAA");
-			if (biobankId.equals(biobankSamplesId))
-			{
-				promiseBiobankSampleEntities.add(promiseSampleEntity);
-			}
-		}
-		return promiseBiobankSampleEntities;
-	}
-
 }

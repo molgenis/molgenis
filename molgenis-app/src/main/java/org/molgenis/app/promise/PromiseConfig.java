@@ -10,6 +10,7 @@ import org.springframework.oxm.Marshaller;
 import org.springframework.oxm.Unmarshaller;
 import org.springframework.oxm.jaxb.Jaxb2Marshaller;
 import org.springframework.ws.client.core.WebServiceTemplate;
+import org.springframework.ws.soap.axiom.AxiomSoapMessageFactory;
 
 @Configuration
 public class PromiseConfig
@@ -24,6 +25,13 @@ public class PromiseConfig
 	public WebServiceTemplate webServiceTemplate()
 	{
 		WebServiceTemplate webServiceTemplate = new WebServiceTemplate(marshaller(), unmarshaller());
+		AxiomSoapMessageFactory axiomSoapMessageFactory = new AxiomSoapMessageFactory();
+
+		// Disables caching. If you want to debug the SOAP response, set this to true
+		axiomSoapMessageFactory.setPayloadCaching(false);
+
+		webServiceTemplate.setMessageFactory(axiomSoapMessageFactory);
+
 		return webServiceTemplate;
 	}
 

@@ -5,8 +5,8 @@ package org.molgenis.app.promise.model;
  */
 public class BbmriNlCheatSheet
 {
+	// Entities
 	public static final String SAMPLE_COLLECTIONS_ENTITY = "bbmri_nl_sample_collections";
-
 	public static final String REF_COLLECTION_TYPES = "bbmri_nl_collection_types";
 	public static final String REF_DATA_CATEGORY_TYPES = "bbmri_nl_data_category_types";
 	public static final String REF_OMICS_DATA_TYPES = "bbmri_nl_omics_data_types";
@@ -17,7 +17,10 @@ public class BbmriNlCheatSheet
 	public static final String REF_MATERIAL_TYPES = "bbmri_nl_material_types";
 	public static final String REF_AGE_TYPES = "bbmri_nl_age_types";
 	public static final String REF_COUNTRIES = "bbmri_nl_countries";
+	public static final String REF_BIOBANKS = "bbmri_nl_biobanks";
 
+	// Attributes
+	public static final String BIOBANK_ID = "biobank_id";
 	public static final String ID = "id";
 	public static final String NAME = "name";
 	public static final String ACRONYM = "acronym";
