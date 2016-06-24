@@ -56,13 +56,13 @@ public class ReindexServiceImpl implements ReindexService
 	public void rebuildIndex(String transactionId)
 	{
 		LOG.trace("Reindex transaction with id {}...", transactionId);
-		ReindexActionGroup reindexActionJob = dataService
+		ReindexActionGroup reindexActionGroup = dataService
 				.findOneById(REINDEX_ACTION_GROUP, transactionId, ReindexActionGroup.class);
 
-		if (reindexActionJob != null)
+		if (reindexActionGroup != null)
 		{
 			Stream<Entity> reindexActions = dataService
-					.findAll(REINDEX_ACTION, new QueryImpl<>().eq(REINDEX_ACTION_GROUP, reindexActionJob));
+					.findAll(REINDEX_ACTION, new QueryImpl<>().eq(REINDEX_ACTION_GROUP, reindexActionGroup));
 			Map<String, Long> numberOfActionsPerEntity = reindexActions
 					.collect(groupingBy(reindexAction -> reindexAction.getString(ENTITY_FULL_NAME), counting()));
 			indexStatus.addActionCounts(numberOfActionsPerEntity);
