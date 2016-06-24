@@ -1,0 +1,65 @@
+.accordion-group {
+	min-height : 270px;
+	max-height : 350px;
+	background-color: #5B82A4;
+}
+
+.accordion-body {
+	min-height : 220px;
+	max-height : 270px;
+	background-color: white;
+}
+
+.accordion-heading h5{
+	color : white;
+	padding-left : 10px;
+}
+
+div#alert-message {
+	height : 40px;
+	margin-top : 10px;
+}
+
+div#div-index-ontology {
+	min-height : 400px;
+}
+
+div#div-new-ontology {
+	margin-top : 30px;
+}
+
+div.btn-group {
+	margin-top : 30px;	
+}
+
+input#ontologyName {
+	margin-bottom : 20px;
+}
+
+.float-right {
+	float : right;
+	margin-right : 5px;
+}
+
+.icon-remove {
+	cursor: hand; 
+	cursor: pointer;
+}
+
+table {
+	font-size : 16px;
+}
+
+ol.action-list, ol.action-list li{
+	padding : 3px;
+	padding-left : 5px;
+}
+
+.align-list {
+	padding-left : 10px;
+	padding-top : 10px;
+}
+
+h3 {
+	color : #3079C2;
+}

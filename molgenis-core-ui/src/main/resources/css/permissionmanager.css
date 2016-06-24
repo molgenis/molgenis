@@ -1,0 +1,10 @@
+.permission-table-container {
+  max-height: 500px;
+  overflow-y: scroll;
+  margin-bottom: 20px;
+}
+
+.inherited-permission {
+    font-style: italic;
+    padding-left: 20px;
+}

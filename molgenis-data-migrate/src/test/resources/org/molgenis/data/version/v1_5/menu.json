@@ -1,0 +1,165 @@
+
+{
+    "type": "menu",
+    "id": "main",
+    "label": "Home",
+    "items": [{
+        "type": "plugin",
+        "id": "home",
+        "label": "Home"
+    }, {
+        "type": "plugin",
+        "id": "importwizard",
+        "label": "Upload"
+    }, {
+        "type": "plugin",
+        "id": "catalogue",
+        "label": "Catalogue"
+    }, {
+        "type": "plugin",
+        "id": "dataexplorer",
+        "label": "Data Explorer"
+    }, {
+        "type": "plugin",
+        "id": "mappingservice",
+        "label": "Mapping Service"
+    }, {
+        "type": "menu",
+        "id": "plugins",
+        "label": "Plugins",
+        "items": [{
+            "type": "plugin",
+            "id": "dataexplorer",
+            "label": "TypeTest",
+            "params": "dataset\u003dorg_molgenis_test_TypeTest"
+        }, {
+            "type": "plugin",
+            "id": "pathways",
+            "label": "Pathways"
+        }, {
+            "type": "plugin",
+            "id": "standardsregistry",
+            "label": "Model registry"
+        }, {
+            "type": "plugin",
+            "id": "geneticrepositorymerger",
+            "label": "Merge Genetic Data"
+        }, {
+            "type": "plugin",
+            "id": "background",
+            "label": "Background"
+        }, {
+            "type": "plugin",
+            "id": "contact",
+            "label": "Contact"
+        }, {
+            "type": "plugin",
+            "id": "gaflistimporter",
+            "label": "GAF List Importer"
+        }, {
+            "type": "plugin",
+            "id": "news",
+            "label": "News"
+        }, {
+            "type": "plugin",
+            "id": "references",
+            "label": "References"
+        }, {
+            "type": "plugin",
+            "id": "scripts",
+            "label": "Scripts"
+        }]
+    }, {
+        "type": "menu",
+        "id": "entities",
+        "label": "Entities",
+        "items": [{
+            "type": "plugin",
+            "id": "form.entities",
+            "label": "EntityMeta",
+            "params": "subForms\u003dattributes.entity"
+        }, {
+            "type": "plugin",
+            "id": "form.RuntimeProperty",
+            "label": "RuntimeProperty"
+        }, {
+            "type": "plugin",
+            "id": "form.MolgenisUser",
+            "label": "MolgenisUser"
+        }, {
+            "type": "plugin",
+            "id": "form.MolgenisGroup",
+            "label": "MolgenisGroup"
+        }, {
+            "type": "plugin",
+            "id": "form.MolgenisToken",
+            "label": "Tokens"
+        }, {
+            "type": "plugin",
+            "id": "form.Script",
+            "label": "Script"
+        }, {
+            "type": "plugin",
+            "id": "form.ScriptParameter",
+            "label": "ScriptParameter"
+        }, {
+            "type": "plugin",
+            "id": "form.FreemarkerTemplate",
+            "label": "FreemarkerTemplate"
+        }, {
+            "type": "plugin",
+            "id": "form.org_molgenis_test_TypeTestRef",
+            "label": "org_molgenis_test_TypeTestRef"
+        }, {
+            "type": "plugin",
+            "id": "form.Location",
+            "label": "Location"
+        }, {
+            "type": "plugin",
+            "id": "form.org_molgenis_test_TypeTest",
+            "label": "org_molgenis_test_TypeTest"
+        }, {
+            "type": "plugin",
+            "id": "form.test_entity",
+            "label": "test_entity"
+        }]
+    }, {
+        "type": "menu",
+        "id": "admin",
+        "label": "Admin",
+        "items": [{
+            "type": "plugin",
+            "id": "usermanager",
+            "label": "User Manager"
+        }, {
+            "type": "plugin",
+            "id": "permissionmanager",
+            "label": "Permission Manager"
+        }, {
+            "type": "plugin",
+            "id": "menumanager",
+            "label": "Menu Manager"
+        }, {
+            "type": "plugin",
+            "id": "indexmanager",
+            "label": "Index manager"
+        }, {
+            "type": "plugin",
+            "id": "logmanager",
+            "label": "Log manager"
+        }]
+    }, {
+        "type": "menu",
+        "id": "background",
+        "label": "About",
+        "items": [{
+            "type": "plugin",
+            "id": "feedback",
+            "label": "Feedback"
+        }]
+    }, {
+        "type": "plugin",
+        "id": "useraccount",
+        "label": "Account"
+    }]
+}

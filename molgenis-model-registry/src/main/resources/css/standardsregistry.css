@@ -1,0 +1,123 @@
+#attribute-selection .molgenis-tree {
+	height: 400px;
+	overflow: auto;
+	margin-bottom: 10px;
+}
+
+#entity-class h3 {
+	display: inline;
+	margin-right: 10px;
+}
+
+#entity-select-holder {
+	margin-bottom: 18px;	
+}
+
+#search-results-back-btn{
+	margin-bottom: 15px;
+}
+
+#print-btn {
+	margin-bottom: 15px;
+}
+
+#print-doc-btn {
+	margin: 30px;
+}
+
+.entity span.fancytree-icon, .entity span.fancytree-icon:hover {
+	background-position: -16px -160px !important;
+}
+
+p.form-inline {
+	margin-top: 25px;
+}
+
+.pagination {
+	margin: 0;
+}
+
+#package-doc-container,
+#package-tree-container {
+	height: 600px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.package-index-container ul
+{
+    list-style-type: none;
+}
+
+.package-container {
+	padding: 15px;
+}
+
+.entity-select-control {
+	width: 400px;
+}
+
+.entity-select-dropdown {
+    width: 300px;	
+}
+
+.details-btn {
+	margin-right: 10px;
+}
+
+.label a {
+	color: white;
+}
+
+.package form {
+	margin-top: 40px;
+}
+
+.page-header {
+	margin-top: 0;
+}
+
+.tab-pane {
+	margin-top: 20px;
+}
+
+#uml{
+	margin-left: 1%;
+	margin-right: 1%;
+}
+
+#paper-holder {
+	width: auto;
+	height: auto;
+	margin-left: auto;
+	margin-right: auto;
+	overflow: scroll;
+}
+
+#paper>svg {
+	margin: 1%;
+	outline: 1px solid gray;
+}
+
+#dpi{
+	height: 1in; 
+	left: -100%; 
+	position: absolute; 
+	top: -100%; 
+	width: 1in;
+}
+
+#zoom-in-out {
+	position: fixed;
+	z-index: 3000;
+}
+
+/* Prevent detaching of relationship vertices in jointjs */
+.marker-arrowheads { display: none } 
+.tool-remove { display: none }
+.tool-options { display: none }
+
+.description-column {
+	word-break: break-all;
+}
+

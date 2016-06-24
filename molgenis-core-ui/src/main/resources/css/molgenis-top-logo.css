@@ -1,0 +1,16 @@
+.navbar-fixed-top {
+    top: 150px;
+}
+
+ body>.container-fluid {
+     padding-top: 210px;
+ }
+
+#Intro {
+    top: 0;
+    position: fixed;
+    background-color: #FFFFFF;
+    height: 150px;
+    width: 100%;
+    z-index: 1039;
+}

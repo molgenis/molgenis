@@ -1,0 +1,118 @@
+{
+    "value": 8.169711,
+    "description": "sum of:",
+    "details": [{
+        "value": 5.4836154,
+        "description": "max of:",
+        "details": [{
+            "value": 5.4836154,
+            "description": "sum of:",
+            "details": [{
+                "value": 2.986988,
+                "description": "weight(label:high in 20697) [PerFieldSimilarity], result of:",
+                "details": [{
+                    "value": 2.986988,
+                    "description": "score(doc=20697,freq=1.0), product of:",
+                    "details": [{
+                        "value": 0.604663,
+                        "description": "queryWeight, product of:",
+                        "details": [{
+                            "value": 9.879844,
+                            "description": "idf(docFreq=2, maxDocs=21557)"
+                        }, {
+                            "value": 0.061201677,
+                            "description": "queryNorm"
+                        }]
+                    }, {
+                        "value": 4.939922,
+                        "description": "fieldWeight in 20697, product of:",
+                        "details": [{
+                            "value": 1.0,
+                            "description": "tf(freq=1.0), with freq of:",
+                            "details": [{
+                                "value": 1.0,
+                                "description": "termFreq=1.0"
+                            }]
+                        }, {
+                            "value": 9.879844,
+                            "description": "idf(docFreq=2, maxDocs=21557)"
+                        }, {
+                            "value": 0.5,
+                            "description": "fieldNorm(doc=20697)"
+                        }]
+                    }]
+                }]
+            }, {
+                "value": 2.4966273,
+                "description": "weight(label:blood in 20697) [PerFieldSimilarity], result of:",
+                "details": [{
+                    "value": 2.4966273,
+                    "description": "score(doc=20697,freq=1.0), product of:",
+                    "details": [{
+                        "value": 0.552807,
+                        "description": "queryWeight, product of:",
+                        "details": [{
+                            "value": 9.032546,
+                            "description": "idf(docFreq=6, maxDocs=21557)"
+                        }, {
+                            "value": 0.061201677,
+                            "description": "queryNorm"
+                        }]
+                    }, {
+                        "value": 4.516273,
+                        "description": "fieldWeight in 20697, product of:",
+                        "details": [{
+                            "value": 1.0,
+                            "description": "tf(freq=1.0), with freq of:",
+                            "details": [{
+                                "value": 1.0,
+                                "description": "termFreq=1.0"
+                            }]
+                        }, {
+                            "value": 9.032546,
+                            "description": "idf(docFreq=6, maxDocs=21557)"
+                        }, {
+                            "value": 0.5,
+                            "description": "fieldNorm(doc=20697)"
+                        }]
+                    }]
+                }]
+            }]
+        }]
+    }, {
+        "value": 2.6860955,
+        "description": "weight(label:medic in 20697) [PerFieldSimilarity], result of:",
+        "details": [{
+            "value": 2.6860955,
+            "description": "score(doc=20697,freq=1.0), product of:",
+            "details": [{
+                "value": 0.5733996,
+                "description": "queryWeight, product of:",
+                "details": [{
+                    "value": 9.369018,
+                    "description": "idf(docFreq=4, maxDocs=21557)"
+                }, {
+                    "value": 0.061201677,
+                    "description": "queryNorm"
+                }]
+            }, {
+                "value": 4.684509,
+                "description": "fieldWeight in 20697, product of:",
+                "details": [{
+                    "value": 1.0,
+                    "description": "tf(freq=1.0), with freq of:",
+                    "details": [{
+                        "value": 1.0,
+                        "description": "termFreq=1.0"
+                    }]
+                }, {
+                    "value": 9.369018,
+                    "description": "idf(docFreq=4, maxDocs=21557)"
+                }, {
+                    "value": 0.5,
+                    "description": "fieldNorm(doc=20697)"
+                }]
+            }]
+        }]
+    }]
+}

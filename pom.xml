@@ -670,7 +670,48 @@
     </dependencies>
 
     <modules>
-        <module>molgenis-app</module>
+        <module>molgenis-core</module>
+        <module>molgenis-core-ui</module>
+        <module>molgenis-ontology-core</module>
+        <module>molgenis-ontology</module>
         <module>molgenis-das</module>
+        <module>molgenis-dataexplorer</module>
+        <module>molgenis-app</module>
+        <module>molgenis-security</module>
+        <module>molgenis-security-core</module>
+        <module>molgenis-data-annotators</module>
+        <module>molgenis-data-excel</module>
+        <module>molgenis-data-csv</module>
+        <module>molgenis-data-googlespreadsheet</module>
+        <module>molgenis-data</module>
+        <module>molgenis-data-system</module>
+        <module>molgenis-data-merge</module>
+        <module>molgenis-data-mysql</module>
+        <module>molgenis-data-vcf</module>
+        <module>molgenis-data-rest</module>
+        <module>molgenis-data-elasticsearch</module>
+        <module>molgenis-data-semanticsearch</module>
+        <module>molgenis-data-validation</module>
+        <module>molgenis-data-idcard</module>
+        <module>molgenis-python</module>
+        <module>molgenis-r</module>
+        <module>molgenis-charts</module>
+        <module>molgenis-js</module>
+        <module>molgenis-model-registry</module>
+        <module>molgenis-data-examples</module>
+        <module>molgenis-scripts</module>
+        <module>molgenis-scripts-core</module>
+        <module>molgenis-data-import</module>
+        <module>molgenis-data-mapper</module>
+        <module>molgenis-pathways</module>
+        <module>molgenis-data-rest-client</module>
+        <module>molgenis-data-migrate</module>
+        <module>molgenis-questionnaires</module>
+		<module>molgenis-file</module>
+		<module>molgenis-catalogue</module>
+		<module>molgenis-file-ingester</module>
+		<module>molgenis-integration-tests</module>
+		<module>molgenis-jobs</module>
+		<module>molgenis-gavin</module>
     </modules>
 </project>

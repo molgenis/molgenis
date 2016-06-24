@@ -1,0 +1,12 @@
+.wizard-page {
+	margin-top: 20px;
+	min-height: 500px;	
+}
+
+ul.pager {
+	width: 30%;
+}
+
+ul.pager li.next {
+	margin-left: 12px;
+}

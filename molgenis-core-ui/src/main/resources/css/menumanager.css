@@ -1,0 +1,19 @@
+#menu-editor-container .glyphicon:hover {
+	cursor: pointer;
+}
+
+#menu-editor-container li.root {
+	background: none;
+	border: none;
+	color: black;
+	font-weight:bold; 
+}
+
+#menu-editor-container li.node {
+	font-weight:normal; 
+}
+
+#menu-editor-tree {
+	max-height: 600px;
+	overflow: auto;
+}

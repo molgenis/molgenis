@@ -3,12 +3,16 @@ package org.molgenis.das;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.das.impl.MolgenisDasTarget;
 import uk.ac.ebi.mydas.datasource.RangeHandlingAnnotationDataSource;
-import uk.ac.ebi.mydas.exceptions.*;
+import uk.ac.ebi.mydas.exceptions.BadReferenceObjectException;
+import uk.ac.ebi.mydas.exceptions.CoordinateErrorException;
+import uk.ac.ebi.mydas.exceptions.DataSourceException;
+import uk.ac.ebi.mydas.exceptions.UnimplementedFeatureException;
 import uk.ac.ebi.mydas.model.*;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+
 
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "DMI_COLLECTION_OF_URLS", justification = "Third party class requires a map of URLs")
 public abstract class RangeHandlingDataSource implements RangeHandlingAnnotationDataSource
