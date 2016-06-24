@@ -11,7 +11,7 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import com.google.common.collect.Lists;
-import org.molgenis.data.meta.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 
 public class AnnotatorDependencyOrderResolver
 {

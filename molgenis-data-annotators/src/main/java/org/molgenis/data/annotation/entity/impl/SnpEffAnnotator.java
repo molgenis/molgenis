@@ -7,6 +7,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.AbstractRepositoryAnnotator;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.utils.JarRunner;
@@ -51,7 +52,7 @@ import static org.molgenis.util.ApplicationContextProvider.getApplicationContext
  * -lof doesnt seem to work? would be great... http://snpeff.sourceforge.net/snpEff_lof_nmd.pdfs
  */
 @Configuration
-public class SnpEffAnnotator
+public class SnpEffAnnotator implements AnnotatorConfig
 {
 	private static final Logger LOG = LoggerFactory.getLogger(SnpEffAnnotator.class);
 	public static final String NAME = "snpEff";
@@ -73,12 +74,12 @@ public class SnpEffAnnotator
 	public static final String ERRORS = "Errors";
 	public static final String LOF = "LOF";
 	public static final String NMD = "NMD";
+	private RepositoryAnnotator annotator;
 
 	public enum Impact
 	{
-		MODIFIER, LOW, MODERATE, HIGH
+		MODIFIER, LOW, MODERATE, HIGH;
 	}
-
 	@Autowired
 	private JarRunner jarRunner;
 
@@ -91,7 +92,13 @@ public class SnpEffAnnotator
 	@Bean
 	public RepositoryAnnotator snpEff()
 	{
-		return new SnpEffRepositoryAnnotator(snpEffAnnotatorSettings, jarRunner, attributeMetaDataFactory);
+		return annotator;
+	}
+
+	@Override
+	public void init()
+	{
+		annotator = new SnpEffRepositoryAnnotator(snpEffAnnotatorSettings, jarRunner, attributeMetaDataFactory);
 	}
 
 	@Bean

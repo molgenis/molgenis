@@ -3,6 +3,7 @@ package org.molgenis.data.annotation.entity.impl;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
@@ -11,6 +12,7 @@ import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.Sing
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
+import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
@@ -30,7 +32,7 @@ import static org.molgenis.MolgenisFieldTypes.*;
 import static org.molgenis.data.annotator.websettings.ExacAnnotatorSettings.Meta.EXAC_LOCATION;
 
 @Configuration
-public class ExacAnnotator
+public class ExacAnnotator implements AnnotatorConfig
 {
 	public static final String NAME = "exac";
 
@@ -63,9 +65,16 @@ public class ExacAnnotator
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
 	public RepositoryAnnotator exac()
+	{		annotator = new RepositoryAnnotatorImpl();
+		return annotator;
+	}
+
+	@Override
+	public void init()
 	{
 
 		AttributeMetaData outputAttribute_AF = attributeMetaDataFactory.create().setName(EXAC_AF).setDataType(STRING)
@@ -109,15 +118,21 @@ public class ExacAnnotator
 			}
 		} ;
 
-		return new RepositoryAnnotatorImpl(entityAnnotator);
+		annotator.init(entityAnnotator);
 	}
 
 	@Bean
 	Resource exacResource()
 	{
 		Resource exacTabixResource = new ResourceImpl(EXAC_TABIX_RESOURCE,
-				new SingleResourceConfig(EXAC_LOCATION, exacAnnotatorSettings),
-				new TabixVcfRepositoryFactory(EXAC_TABIX_RESOURCE));
+				new SingleResourceConfig(EXAC_LOCATION, exacAnnotatorSettings))
+		{
+			@Override
+			public RepositoryFactory getRepositoryFactory()
+			{
+				return new TabixVcfRepositoryFactory(EXAC_TABIX_RESOURCE);
+			}
+		};
 
 		return exacTabixResource;
 	}

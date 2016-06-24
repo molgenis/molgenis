@@ -6,6 +6,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.ResultFilter;
@@ -33,7 +34,7 @@ import static org.molgenis.MolgenisFieldTypes.TEXT;
 import static org.molgenis.data.annotator.websettings.OmimAnnotatorSettings.Meta.OMIM_LOCATION;
 
 @Configuration
-public class OmimAnnotator
+public class OmimAnnotator  implements AnnotatorConfig
 {
 	public static final String NAME = "OMIM";
 	public static final char SEPARATOR = '\t';
@@ -63,9 +64,16 @@ public class OmimAnnotator
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
 	public RepositoryAnnotator omim()
+	{		annotator = new RepositoryAnnotatorImpl();
+		return annotator;
+	}
+
+	@Override
+	public void init()
 	{
 		List<AttributeMetaData> outputAttributes = new ArrayList<>();
 		AttributeMetaData omim_phenotype = attributeMetaDataFactory.create().setName(OMIM_DISORDER).setDataType(TEXT)
@@ -102,21 +110,28 @@ public class OmimAnnotator
 				new OmimResultFilter(), dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(OMIM_LOCATION, omimAnnotatorSettings));
 
-		return new RepositoryAnnotatorImpl(entityAnnotator);
+		annotator.init(entityAnnotator);
 	}
 
 	@Bean
 	public Resource omimResource()
 	{
-		return new ResourceImpl(OMIM_RESOURCE, new SingleResourceConfig(OMIM_LOCATION, omimAnnotatorSettings),
-				new RepositoryFactory()
+		return new ResourceImpl(OMIM_RESOURCE, new SingleResourceConfig(OMIM_LOCATION, omimAnnotatorSettings))
+		{
+			@Override
+			public RepositoryFactory getRepositoryFactory()
+			{
+				return new RepositoryFactory()
 				{
 					@Override
 					public Repository<Entity> createRepository(File file) throws IOException
 					{
 						return new OmimRepository(file);
 					}
-				});
+				};
+			}
+		};
+
 	}
 
 	public static class OmimResultFilter implements ResultFilter

@@ -6,6 +6,7 @@ import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
@@ -14,6 +15,7 @@ import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.MultiFileResource;
 import org.molgenis.data.annotation.resources.impl.MultiResourceConfigImpl;
+import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
@@ -31,7 +33,7 @@ import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.*;
 
 @Configuration
-public class GoNLAnnotator
+public class GoNLAnnotator implements AnnotatorConfig
 {
 	public static final String NAME = "gonl";
 
@@ -59,9 +61,16 @@ public class GoNLAnnotator
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
 	public RepositoryAnnotator gonl()
+	{ 		annotator = new RepositoryAnnotatorImpl();
+		return annotator;
+	}
+
+	@Override
+	public void init()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
 		AttributeMetaData goNlAfAttribute = attributeMetaDataFactory.create().setName(GONL_GENOME_AF).setDataType(STRING)
@@ -173,7 +182,7 @@ public class GoNLAnnotator
 				entity.set(GONL_GENOME_GTC, gtcs);
 			}
 		} ;
-		return new RepositoryAnnotatorImpl(entityAnnotator);
+		annotator.init(entityAnnotator);
 
 	}
 
@@ -183,7 +192,13 @@ public class GoNLAnnotator
 		MultiResourceConfig goNLConfig = new MultiResourceConfigImpl(CHROMOSOMES, FILEPATTERN, ROOT_DIRECTORY,
 				OVERRIDE_CHROMOSOME_FILES, goNLAnnotatorSettings);
 
-		return new MultiFileResource(GONL_MULTI_FILE_RESOURCE, goNLConfig,
-				new TabixVcfRepositoryFactory(GONL_MULTI_FILE_RESOURCE));
+		return new MultiFileResource(GONL_MULTI_FILE_RESOURCE, goNLConfig)
+		{
+			@Override
+			public RepositoryFactory getRepositoryFactory()
+			{
+				return new TabixVcfRepositoryFactory(GONL_MULTI_FILE_RESOURCE);
+			}
+		};
 	}
 }

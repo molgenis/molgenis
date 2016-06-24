@@ -3,6 +3,7 @@ package org.molgenis.data.annotation.entity.impl;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
@@ -10,6 +11,7 @@ import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.Sing
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
+import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.resources.impl.TabixRepositoryFactory;
@@ -29,7 +31,7 @@ import static org.molgenis.MolgenisFieldTypes.DECIMAL;
 import static org.molgenis.data.annotator.websettings.DannAnnotatorSettings.Meta.DANN_LOCATION;
 
 @Configuration
-public class DannAnnotator
+public class DannAnnotator  implements AnnotatorConfig
 {
 	public static final String NAME = "dann";
 
@@ -54,9 +56,16 @@ public class DannAnnotator
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
 	public RepositoryAnnotator dann()
+	{		annotator = new RepositoryAnnotatorImpl();
+		return annotator;
+	}
+
+	@Override
+	public void init()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
 		AttributeMetaData dann_score = attributeMetaDataFactory.create().setName(DANN_SCORE).setDataType(DECIMAL)
@@ -89,27 +98,35 @@ public class DannAnnotator
 				new MultiAllelicResultFilter(attributes), dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(DANN_LOCATION, dannAnnotatorSettings));
 
-		return new RepositoryAnnotatorImpl(entityAnnotator);
+		annotator.init(entityAnnotator);
 	}
 
 	@Bean
 	Resource dannResource()
 	{
 		Resource dannTabixResource = null;
-		String idAttrName = "id";
-		EntityMetaData repoMetaData = entityMetaDataFactory.create().setName(DANN_TABIX_RESOURCE);
-		repoMetaData.addAttribute(vcfAttributes.getChromAttribute());
-		repoMetaData.addAttribute(vcfAttributes.getPosAttribute());
-		repoMetaData.addAttribute(vcfAttributes.getRefAttribute());
-		repoMetaData.addAttribute(vcfAttributes.getAltAttribute());
-		repoMetaData.addAttribute(attributeMetaDataFactory.create().setName("DANN_SCORE").setDataType(DECIMAL));
-		AttributeMetaData idAttributeMetaData = attributeMetaDataFactory.create().setName(idAttrName).setVisible(false);
-		repoMetaData.addAttribute(idAttributeMetaData);
-		repoMetaData.setIdAttribute(idAttributeMetaData);
+
 
 		dannTabixResource = new ResourceImpl(DANN_TABIX_RESOURCE,
-				new SingleResourceConfig(DANN_LOCATION, dannAnnotatorSettings),
-				new TabixRepositoryFactory(repoMetaData));
+				new SingleResourceConfig(DANN_LOCATION, dannAnnotatorSettings))
+		{
+			@Override
+			public RepositoryFactory getRepositoryFactory()
+			{
+
+				String idAttrName = "id";
+				EntityMetaData repoMetaData = entityMetaDataFactory.create().setName(DANN_TABIX_RESOURCE);
+				repoMetaData.addAttribute(vcfAttributes.getChromAttribute());
+				repoMetaData.addAttribute(vcfAttributes.getPosAttribute());
+				repoMetaData.addAttribute(vcfAttributes.getRefAttribute());
+				repoMetaData.addAttribute(vcfAttributes.getAltAttribute());
+				repoMetaData.addAttribute(attributeMetaDataFactory.create().setName("DANN_SCORE").setDataType(DECIMAL));
+				AttributeMetaData idAttributeMetaData = attributeMetaDataFactory.create().setName(idAttrName).setVisible(false);
+				repoMetaData.addAttribute(idAttributeMetaData);
+				repoMetaData.setIdAttribute(idAttributeMetaData);
+				return new TabixRepositoryFactory(repoMetaData);
+			}
+		};
 
 		return dannTabixResource;
 	}

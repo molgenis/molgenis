@@ -6,6 +6,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.ResultFilter;
@@ -41,7 +42,7 @@ import static org.molgenis.data.annotator.websettings.HPOAnnotatorSettings.Meta.
  * Add resource file path to RuntimeProperty 'hpo_location'
  */
 @Configuration
-public class HPOAnnotator
+public class HPOAnnotator implements AnnotatorConfig
 {
 	public static final String NAME = "hpo";
 
@@ -67,9 +68,16 @@ public class HPOAnnotator
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
 	public RepositoryAnnotator hpo()
+	{ 		annotator = new RepositoryAnnotatorImpl();
+		return annotator;
+	}
+
+	@Override
+	public void init()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
 		attributes.add(attributeMetaDataFactory.create().setName(HPO_IDS).setDataType(MolgenisFieldTypes.TEXT)
@@ -87,21 +95,27 @@ public class HPOAnnotator
 				new HPOResultFilter(), dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(HPO_LOCATION, HPOAnnotatorSettings));
 
-		return new RepositoryAnnotatorImpl(entityAnnotator);
+		annotator.init(entityAnnotator);
 	}
 
 	@Bean
 	public Resource hpoResource()
 	{
-		return new ResourceImpl(HPO_RESOURCE, new SingleResourceConfig(HPO_LOCATION, HPOAnnotatorSettings),
-				new RepositoryFactory()
+		return new ResourceImpl(HPO_RESOURCE, new SingleResourceConfig(HPO_LOCATION, HPOAnnotatorSettings))
+		{
+			@Override
+			public RepositoryFactory getRepositoryFactory()
+			{
+				return new RepositoryFactory()
 				{
 					@Override
 					public Repository<Entity> createRepository(File file) throws IOException
 					{
 						return new HPORepository(file);
 					}
-				});
+				};
+			}
+		};
 	}
 
 	public static class HPOResultFilter implements ResultFilter

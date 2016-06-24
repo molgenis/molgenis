@@ -14,9 +14,11 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 
 public class RepositoryAnnotatorImpl extends AbstractRepositoryEntityAnnotator
 {
-	private final EntityAnnotator entityAnnotator;
+	private EntityAnnotator entityAnnotator;
 
-	public RepositoryAnnotatorImpl(EntityAnnotator entityAnnotator)
+	public RepositoryAnnotatorImpl(){}
+
+	public void init(EntityAnnotator entityAnnotator)
 	{
 		this.entityAnnotator = entityAnnotator;
 	}

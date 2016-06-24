@@ -10,7 +10,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.meta.AnnotationJobExecution;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
-import org.molgenis.data.meta.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.AnnotatorDependencyOrderResolver;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;

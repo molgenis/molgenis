@@ -5,12 +5,9 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.entity.*;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
-import org.molgenis.data.annotation.entity.EntityAnnotator;
-import org.molgenis.data.annotation.entity.QueryCreator;
-import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.annotation.filter.FirstResultFilter;
 import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.query.AttributeEqualsQueryCreator;
@@ -48,7 +45,7 @@ import static org.molgenis.data.annotator.websettings.CGDAnnotatorSettings.Meta.
  * 'cgd_location'
  */
 @Configuration
-public class CGDAnnotator
+public class CGDAnnotator implements AnnotatorConfig
 {
 	public static final String NAME = "CGD";
 
@@ -78,6 +75,7 @@ public class CGDAnnotator
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private RepositoryAnnotatorImpl annotator;
 
 	public static enum GeneralizedInheritance
 	{
@@ -134,6 +132,13 @@ public class CGDAnnotator
 	@Bean
 	public RepositoryAnnotator cgd()
 	{
+		annotator = new RepositoryAnnotatorImpl();
+		return annotator;
+	}
+
+	@Override
+	public void init()
+	{
 		AnnotatorInfo info = getAnnotatorInfo();
 		QueryCreator queryCreator = new AttributeEqualsQueryCreator(
 				attributeMetaDataFactory.create().setName(GENE.getAttributeName()));
@@ -141,22 +146,28 @@ public class CGDAnnotator
 
 		EntityAnnotator entityAnnotator = new CGDEntityAnnotator(CGD_RESOURCE, info, queryCreator, resultFilter,
 				dataService, resources);
-
-		return new RepositoryAnnotatorImpl(entityAnnotator);
 	}
 
 	@Bean
 	public Resource cgdResource()
 	{
-		return new ResourceImpl(CGD_RESOURCE, new SingleResourceConfig(CGD_LOCATION, CGDAnnotatorSettings),
-				new RepositoryFactory()
+		return new ResourceImpl(CGD_RESOURCE, new SingleResourceConfig(CGD_LOCATION, CGDAnnotatorSettings))
+		{
+			@Override
+			public RepositoryFactory getRepositoryFactory()
+			{
+				return new RepositoryFactory()
 				{
 					@Override
 					public Repository<Entity> createRepository(File file) throws IOException
 					{
 						return new GeneCsvRepository(file, GENE.getCgdName(), GENE.getAttributeName(), SEPARATOR);
 					}
-				});
+				};
+			}
+		};
+
+
 	}
 
 	private AnnotatorInfo getAnnotatorInfo()

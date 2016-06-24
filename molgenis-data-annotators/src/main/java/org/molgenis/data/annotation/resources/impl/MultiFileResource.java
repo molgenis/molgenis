@@ -16,17 +16,15 @@ import org.molgenis.data.vcf.VcfAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MultiFileResource implements Resource {
+public abstract class MultiFileResource implements Resource {
     private final String name;
     private final Map<String, ResourceImpl> resources = new HashMap<>();
     private final MultiResourceConfig config;
-    private final RepositoryFactory factory;
     private static final Logger LOG = LoggerFactory.getLogger(MultiFileResource.class);
 
-    public MultiFileResource(String name, MultiResourceConfig config, RepositoryFactory factory) {
+    public MultiFileResource(String name, MultiResourceConfig config) {
         this.name = name;
         this.config = config;
-        this.factory = factory;
     }
 
     private void initializeResources() {
@@ -34,12 +32,15 @@ public class MultiFileResource implements Resource {
 
         for (Entry<String, ResourceConfig> chromConfig : config.getConfigs().entrySet()) {
             final String key = chromConfig.getKey();
-            this.resources.put(key, new ResourceImpl(name + key, new ResourceConfig() {
+            this.resources.put(key, new ResourceImpl(name + key, new ResourceConfig()
+            {
                 // Config may change so keep querying the MultiResourceConfig for the current File
                 @Override
-                public File getFile() {
+                public File getFile()
+                {
                     ResourceConfig resourceConfig = config.getConfigs().get(key);
-                    if (resourceConfig == null) {
+                    if (resourceConfig == null)
+                    {
                         initializeResources();
                         return null;
                     }
@@ -47,7 +48,14 @@ public class MultiFileResource implements Resource {
                     return file;
                 }
 
-            }, factory));
+            })
+            {
+                @Override
+                public RepositoryFactory getRepositoryFactory()
+                {
+                    return getRepositoryFactory();
+                }
+            });
         }
     }
 
@@ -98,5 +106,4 @@ public class MultiFileResource implements Resource {
 
         return result;
     }
-
 }

@@ -3,6 +3,7 @@ package org.molgenis.data.annotation.entity.impl;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
@@ -13,6 +14,7 @@ import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.MultiFileResource;
 import org.molgenis.data.annotation.resources.impl.MultiResourceConfigImpl;
+import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
@@ -29,7 +31,7 @@ import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.*;
 
 @Configuration
-public class ThousandGenomesAnnotator
+public class ThousandGenomesAnnotator implements AnnotatorConfig
 {
 	public static final String NAME = "thousand_genomes";
 
@@ -55,9 +57,16 @@ public class ThousandGenomesAnnotator
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
 	public RepositoryAnnotator thousandGenomes()
+	{		annotator = new RepositoryAnnotatorImpl();
+		return annotator;
+	}
+
+	@Override
+	public void init()
 	{
 		AttributeMetaData outputAttribute = attributeMetaDataFactory.create().setName(THOUSAND_GENOME_AF)
 				.setDataType(STRING).setDescription(
@@ -101,7 +110,7 @@ public class ThousandGenomesAnnotator
 			}
 		};
 
-		return new RepositoryAnnotatorImpl(entityAnnotator);
+		annotator.init(entityAnnotator);
 	}
 
 	@Bean
@@ -110,7 +119,13 @@ public class ThousandGenomesAnnotator
 		MultiResourceConfig thousandGenomeConfig = new MultiResourceConfigImpl(CHROMOSOMES, FILEPATTERN, ROOT_DIRECTORY,
 				OVERRIDE_CHROMOSOME_FILES, thousendGenomesAnnotatorSettings);
 
-		return new MultiFileResource(THOUSAND_GENOME_MULTI_FILE_RESOURCE, thousandGenomeConfig,
-				new TabixVcfRepositoryFactory(THOUSAND_GENOME_MULTI_FILE_RESOURCE));
+		return new MultiFileResource(THOUSAND_GENOME_MULTI_FILE_RESOURCE, thousandGenomeConfig)
+		{
+			@Override
+			public RepositoryFactory getRepositoryFactory()
+			{
+				return new TabixVcfRepositoryFactory(THOUSAND_GENOME_MULTI_FILE_RESOURCE);
+			}
+		};
 	}
 }

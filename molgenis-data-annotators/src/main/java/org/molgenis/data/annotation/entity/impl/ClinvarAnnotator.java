@@ -9,6 +9,7 @@ import java.util.List;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
@@ -17,6 +18,7 @@ import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.Sing
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
+import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
@@ -29,7 +31,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class ClinvarAnnotator
+public class ClinvarAnnotator implements AnnotatorConfig
 {
 	public static final String NAME = "clinvar";
 	public static final String CLINVAR_CLNSIG = "CLINVAR_CLNSIG";
@@ -57,9 +59,16 @@ public class ClinvarAnnotator
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
 	public RepositoryAnnotator clinvar()
+	{		annotator = new RepositoryAnnotatorImpl();
+		return annotator;
+	}
+
+	@Override
+	public void init()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
 
@@ -119,14 +128,21 @@ public class ClinvarAnnotator
 			}
 		};
 
-		return new RepositoryAnnotatorImpl(entityAnnotator);
+		annotator.init(entityAnnotator);
 	}
 
 	@Bean
 	Resource clinVarTabixResource()
 	{
-		Resource clinVarTabixResource = new ResourceImpl(CLINVAR_TABIX_RESOURCE, new SingleResourceConfig(
-				CLINVAR_LOCATION, clinvarAnnotatorSettings), new TabixVcfRepositoryFactory(CLINVAR_TABIX_RESOURCE));
+		Resource clinVarTabixResource = new ResourceImpl(CLINVAR_TABIX_RESOURCE,
+				new SingleResourceConfig(CLINVAR_LOCATION, clinvarAnnotatorSettings))
+		{
+			@Override
+			public RepositoryFactory getRepositoryFactory()
+			{
+				return new TabixVcfRepositoryFactory(CLINVAR_TABIX_RESOURCE);
+			}
+		};
 
 		return clinVarTabixResource;
 	}

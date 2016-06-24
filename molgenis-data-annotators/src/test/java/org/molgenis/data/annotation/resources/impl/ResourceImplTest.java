@@ -30,7 +30,14 @@ public class ResourceImplTest
 	public void beforeMethod()
 	{
 		MockitoAnnotations.initMocks(this);
-		resource = new ResourceImpl("cadd_test", config, new TabixVcfRepositoryFactory("cadd"));
+		resource = new ResourceImpl("cadd_test", config)
+		{
+			@Override
+			public RepositoryFactory getRepositoryFactory()
+			{
+				return new TabixVcfRepositoryFactory("cadd");
+			}
+		};
 	}
 
 	@Test

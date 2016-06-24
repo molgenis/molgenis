@@ -1,12 +1,12 @@
 package org.molgenis.data.support;
 
-import static java.util.Objects.requireNonNull;
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.sql.Date;
 import java.sql.Timestamp;
 
-import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Base class for entities defined in pre-existing Java classes
@@ -94,7 +94,14 @@ public abstract class StaticEntity implements Entity
 	@Override
 	public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
 	{
-		return entity.getEntity(attributeName, clazz);
+		try
+		{
+			return entity.getEntity(attributeName, clazz);
+		}
+		catch (Exception e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
