@@ -104,4 +104,6 @@ public interface SearchService
 	void optimizeIndex();
 
 	void refreshIndex();
+
+	Entity findOne(Query<Entity> q, EntityMetaData entityMetaData);
 }

@@ -7,6 +7,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.collect.FluentIterable;
 import org.elasticsearch.common.collect.Iterators;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -70,20 +71,11 @@ public class ElasticsearchService implements SearchService
 	public ElasticsearchService(Client client, String indexName, DataService dataService,
 			ElasticsearchEntityFactory elasticsearchEntityFactory)
 	{
-		this(new ElasticsearchUtils(client), indexName, dataService, elasticsearchEntityFactory);
-		new ElasticsearchIndexCreator(client).createIndexIfNotExists(indexName);
-	}
-
-	/**
-	 * Constructor for testability.
-	 */
-	ElasticsearchService(ElasticsearchUtils elasticSearchFacade, String indexName, DataService dataService,
-			ElasticsearchEntityFactory elasticsearchEntityFactory)
-	{
 		this.indexName = requireNonNull(indexName);
 		this.dataService = requireNonNull(dataService);
 		this.elasticsearchEntityFactory = requireNonNull(elasticsearchEntityFactory);
-		this.elasticsearchFacade = elasticSearchFacade;
+		this.elasticsearchFacade = new ElasticsearchUtils(client);
+		new ElasticsearchIndexCreator(client).createIndexIfNotExists(indexName);
 	}
 
 	@Override
@@ -424,5 +416,11 @@ public class ElasticsearchService implements SearchService
 	public void optimizeIndex()
 	{
 		elasticsearchFacade.optimizeIndex(indexName);
+	}
+
+	@Override
+	public Entity findOne(Query<Entity> q, EntityMetaData entityMetaData)
+	{
+		return FluentIterable.from(search(q, entityMetaData)).first().orNull();
 	}
 }

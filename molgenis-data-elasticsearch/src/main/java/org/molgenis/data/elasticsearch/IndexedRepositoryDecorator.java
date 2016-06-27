@@ -167,10 +167,7 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		{
 			LOG.debug("public Entity findOne({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
 					INDEX_REPOSITORY);
-			//TODO: create findOne in elasticSearchService
-			Iterable<Entity> entities = elasticSearchService.search(q, getEntityMetaData());
-			Iterator<Entity> it = entities.iterator();
-			return it.hasNext() ? it.next() : null;
+			return elasticSearchService.findOne(q, getEntityMetaData());
 		}
 
 	}
