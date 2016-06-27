@@ -3,6 +3,7 @@ package org.molgenis.data.i18n;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.STRING;
 import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
 import static org.testng.Assert.assertEquals;
@@ -19,6 +20,8 @@ import java.util.stream.Stream;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.BeforeMethod;
@@ -62,12 +65,20 @@ public class MolgenisResourceBundleControlTest
 	@Test
 	public void newBundle() throws IllegalAccessException, InstantiationException, IOException
 	{
-		Entity entity = new DynamicEntity(null); // // FIXME pass entity meta data instead of null
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		AttributeMetaData msgAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
+		AttributeMetaData nlAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
+		AttributeMetaData enAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
+		when(entityMeta.getAttribute(I18nStringMetaData.MSGID)).thenReturn(msgAttr);
+		when(entityMeta.getAttribute("nl")).thenReturn(nlAttr);
+		when(entityMeta.getAttribute("en")).thenReturn(enAttr);
+
+		Entity entity = new DynamicEntity(entityMeta);
 		entity.set(I18nStringMetaData.MSGID, "test");
 		entity.set("en", "testen");
 		entity.set("nl", "testnl");
 
-		Entity entity1 = new DynamicEntity(null); // // FIXME pass entity meta data instead of null
+		Entity entity1 = new DynamicEntity(entityMeta);
 		entity1.set(I18nStringMetaData.MSGID, "testmissingnl");
 		entity1.set("en", "testen");
 

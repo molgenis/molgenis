@@ -22,7 +22,7 @@ public class GafListFileRepository extends CsvRepository
 	public GafListFileRepository(File tmpFile, @Nullable List<CellProcessor> cellProcessors, Character separator,
 			GafListValidationReport report) throws IOException
 	{
-		super(tmpFile, null, separator);
+		super(tmpFile, null, null, null, separator); // FIXME add dependencies
 		this.report = report;
 	}
 

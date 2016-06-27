@@ -1,13 +1,9 @@
 package org.molgenis.data.semanticsearch.config;
 
-import static org.molgenis.data.meta.model.TagMetaData.TAG;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.model.TagFactory;
 import org.molgenis.data.meta.model.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
@@ -89,8 +85,7 @@ public class SemanticSearchConfig
 	@Bean
 	TagRepository tagRepository()
 	{
-		Repository<Tag> repo = dataService.getRepository(TAG, Tag.class);
-		return new TagRepository(repo, idGenerator, tagFactory);
+		return new TagRepository(dataService, idGenerator, tagFactory);
 	}
 
 	@Bean

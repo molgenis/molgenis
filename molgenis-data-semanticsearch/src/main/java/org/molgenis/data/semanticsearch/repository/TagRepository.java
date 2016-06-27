@@ -4,9 +4,10 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.TagMetaData.CODE_SYSTEM;
 import static org.molgenis.data.meta.model.TagMetaData.OBJECT_IRI;
 import static org.molgenis.data.meta.model.TagMetaData.RELATION_IRI;
+import static org.molgenis.data.meta.model.TagMetaData.TAG;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.Repository;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.model.TagFactory;
@@ -20,13 +21,13 @@ import org.molgenis.data.semantic.Relation;
 
 public class TagRepository
 {
-	private final Repository<Tag> repository;
+	private final DataService dataService;
 	private final IdGenerator idGenerator;
 	private final TagFactory tagFactory;
 
-	public TagRepository(Repository<Tag> repository, IdGenerator idGenerator, TagFactory tagFactory)
+	public TagRepository(DataService dataService, IdGenerator idGenerator, TagFactory tagFactory)
 	{
-		this.repository = requireNonNull(repository);
+		this.dataService = requireNonNull(dataService);
 		this.idGenerator = requireNonNull(idGenerator);
 		this.tagFactory = requireNonNull(tagFactory);
 	}
@@ -42,8 +43,8 @@ public class TagRepository
 	 */
 	public Tag getTagEntity(String objectIRI, String label, Relation relation, String codeSystemIRI)
 	{
-		Tag tag = repository.query().eq(OBJECT_IRI, objectIRI).and().eq(RELATION_IRI, relation.getIRI()).and()
-				.eq(CODE_SYSTEM, codeSystemIRI).findOne();
+		Tag tag = dataService.query(TAG, Tag.class).eq(OBJECT_IRI, objectIRI).and().eq(RELATION_IRI, relation.getIRI())
+				.and().eq(CODE_SYSTEM, codeSystemIRI).findOne();
 		if (tag == null)
 		{
 			tag = tagFactory.create();
@@ -53,7 +54,7 @@ public class TagRepository
 			tag.setRelationIri(relation.getIRI());
 			tag.setRelationLabel(relation.getLabel());
 			tag.setCodeSystem(codeSystemIRI);
-			repository.add(tag);
+			dataService.add(TAG, tag);
 		}
 		return tag;
 	}

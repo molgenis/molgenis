@@ -21,13 +21,23 @@ import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class ExcelRepositoryTest
+public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
 	private ExcelRepository excelSheetReader;
 
 	private Workbook workbook;
@@ -38,7 +48,8 @@ public class ExcelRepositoryTest
 	{
 		is = getClass().getResourceAsStream("/test.xls");
 		workbook = WorkbookFactory.create(is);
-		excelSheetReader = new ExcelRepository("test.xls", workbook.getSheet("test"));
+		excelSheetReader = new ExcelRepository("test.xls", workbook.getSheet("test"), entityMetaFactory,
+				attrMetaFactory);
 	}
 
 	@AfterMethod
@@ -51,7 +62,7 @@ public class ExcelRepositoryTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void ExcelRepository()
 	{
-		new ExcelRepository("test.xls", workbook.getSheet("test_mergedcells"));
+		new ExcelRepository("test.xls", workbook.getSheet("test_mergedcells"), entityMetaFactory, attrMetaFactory);
 	}
 
 	@Test
@@ -63,8 +74,7 @@ public class ExcelRepositoryTest
 		when(processor.process("col2")).thenReturn("col2");
 
 		excelSheetReader.addCellProcessor(processor);
-		for (@SuppressWarnings("unused")
-		Entity entity : excelSheetReader)
+		for (@SuppressWarnings("unused") Entity entity : excelSheetReader)
 		{
 		}
 		verify(processor).process("col1");

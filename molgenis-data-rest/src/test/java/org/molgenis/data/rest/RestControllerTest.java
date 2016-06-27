@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.ENUM;
 import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.MolgenisFieldTypes.XREF;
 import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -391,51 +392,83 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(get(HREF_ENTITY_ID + "/name")).andExpect(status().isNotFound());
 	}
 
-	//		@Test
-	//		public void retrieveEntityAttributeXref() throws Exception
-	//		{
-	//			reset(dataService);
-	//
-	//			Repository<Entity> repo = mock(Repository.class);
-	//			when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
-	//			when(dataService.getEntityNames()).thenReturn(Stream.of(ENTITY_NAME));
-	//			Entity entityXref = new MapEntity("id");
-	//			entityXref.set("id", ENTITY_ID);
-	//			entityXref.set("xrefValue", "PietXREF");
-	//
-	//			Entity entity = new MapEntity("id");
-	//			entity.set("id", ENTITY_ID);
-	//			entity.set("name", entityXref);
-	//
-	//			when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
-	//
-	//			AttributeMetaData attrName = new AttributeMetaData("name", XREF);
-	//			EntityMetaData meta = mock(EntityMetaData.class);
-	//			when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(meta);
-	//			when(repo.getEntityMetaData()).thenReturn(meta);
-	//
-	//			EntityMetaData refMeta = mock(EntityMetaData.class);
-	//			AttributeMetaData attrNameXREF = new AttributeMetaData("xrefValue", STRING);
-	//			when(refMeta.getAtomicAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrNameXREF));
-	//			attrName.setRefEntity(refMeta);
-	//
-	//			AttributeMetaData attrId = new AttributeMetaData("id", INT);
-	//			attrId.setVisible(false);
-	//
-	//			when(meta.getAttribute("name")).thenReturn(attrName);
-	//			when(meta.getIdAttribute()).thenReturn(attrId);
-	//			when(meta.getAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
-	//			when(meta.getAtomicAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
-	//			when(repo.getName()).thenReturn(ENTITY_NAME);
-	//			when(meta.getName()).thenReturn(ENTITY_NAME);
-	//
-	//			mockMvc = MockMvcBuilders.standaloneSetup(restController).setMessageConverters(gsonHttpMessageConverter)
-	//					.build();
-	//
-	//			mockMvc.perform(get(HREF_ENTITY_ID + "/name")).andExpect(status().isOk())
-	//					.andExpect(content().contentType(APPLICATION_JSON))
-	//					.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID + "/name\",\"xrefValue\":\"PietXREF\"}"));
-	//		}
+	@Test
+	public void retrieveEntityAttributeXref() throws Exception
+	{
+		reset(dataService);
+
+		Repository<Entity> repo = mock(Repository.class);
+		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
+		when(dataService.getEntityNames()).thenReturn(Stream.of(ENTITY_NAME));
+
+		// entity meta data
+		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+
+		AttributeMetaData attrId = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		when(attrId.getLabel()).thenReturn("id");
+		when(attrId.getLabel(anyString())).thenReturn("id");
+		when(attrId.getDataType()).thenReturn(STRING);
+		when(attrId.isReadOnly()).thenReturn(true);
+		when(attrId.isUnique()).thenReturn(true);
+		when(attrId.isNillable()).thenReturn(false);
+		when(attrId.isVisible()).thenReturn(false);
+		when(attrId.getAttributeParts()).thenReturn(emptyList());
+		when(attrId.getEnumOptions()).thenReturn(emptyList());
+
+		AttributeMetaData attrName = when(mock(AttributeMetaData.class).getName()).thenReturn("name").getMock();
+		when(attrName.getLabel()).thenReturn("name");
+		when(attrName.getLabel(anyString())).thenReturn("name");
+		when(attrName.getDataType()).thenReturn(STRING);
+		when(attrName.isNillable()).thenReturn(true);
+		when(attrName.isVisible()).thenReturn(true);
+		when(attrName.getAttributeParts()).thenReturn(emptyList());
+		when(attrName.getEnumOptions()).thenReturn(emptyList());
+
+		when(refEntityMeta.getAttribute("id")).thenReturn(attrId);
+		when(refEntityMeta.getAttribute("name")).thenReturn(attrName);
+		when(refEntityMeta.getIdAttribute()).thenReturn(attrId);
+		when(refEntityMeta.getAttributes()).thenReturn(asList(attrId, attrName));
+		when(refEntityMeta.getAtomicAttributes()).thenReturn(asList(attrId, attrName));
+		when(refEntityMeta.getName()).thenReturn("refEntity");
+
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(ENTITY_NAME).getMock();
+
+		AttributeMetaData attrXref = when(mock(AttributeMetaData.class).getName()).thenReturn("xrefValue").getMock();
+		when(attrXref.getLabel()).thenReturn("xrefValue");
+		when(attrXref.getLabel(anyString())).thenReturn("xrefValue");
+		when(attrXref.getDataType()).thenReturn(XREF);
+		when(attrXref.isNillable()).thenReturn(true);
+		when(attrXref.isVisible()).thenReturn(true);
+		when(attrXref.getAttributeParts()).thenReturn(emptyList());
+		when(attrXref.getEnumOptions()).thenReturn(emptyList());
+		when(attrXref.getRefEntity()).thenReturn(refEntityMeta);
+
+		when(entityMeta.getAttribute("id")).thenReturn(attrId);
+		when(entityMeta.getAttribute("xrefValue")).thenReturn(attrXref);
+		when(entityMeta.getIdAttribute()).thenReturn(attrId);
+		when(entityMeta.getAttributes()).thenReturn(asList(attrId, attrXref));
+		when(entityMeta.getAtomicAttributes()).thenReturn(asList(attrId, attrXref));
+		when(entityMeta.getName()).thenReturn(ENTITY_NAME);
+
+		Entity entityXref = new DynamicEntity(refEntityMeta);
+		entityXref.set("id", ENTITY_ID);
+		entityXref.set("name", "Piet");
+
+		Entity entity = new DynamicEntity(entityMeta);
+		entity.set("id", ENTITY_ID);
+		entity.set("xrefValue", entityXref);
+
+		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
+		when(dataService.findOneById("refEntity", ENTITY_ID)).thenReturn(entityXref);
+		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(entityMeta);
+		when(dataService.getEntityMetaData("refEntity")).thenReturn(refEntityMeta);
+		mockMvc = MockMvcBuilders.standaloneSetup(restController).setMessageConverters(gsonHttpMessageConverter)
+				.build();
+
+		mockMvc.perform(get(HREF_ENTITY_ID + "/xrefValue")).andExpect(status().isOk())
+				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(
+				content().string("{\"href\":\"/api/v1/Person/p1/xrefValue\",\"id\":\"p1\",\"name\":\"Piet\"}"));
+	}
 
 	@Test
 	public void update() throws Exception

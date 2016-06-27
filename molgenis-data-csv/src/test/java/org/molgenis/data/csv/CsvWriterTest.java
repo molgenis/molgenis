@@ -11,18 +11,39 @@ import java.io.Writer;
 import java.util.Arrays;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class CsvWriterTest
+public class CsvWriterTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
+	private EntityMetaData entityMeta;
 
 	@SuppressWarnings("resource")
 	@Test(expectedExceptions = IllegalArgumentException.class)
 	public void CsvWriter()
 	{
 		new CsvWriter((Writer) null);
+	}
+
+	@BeforeMethod
+	public void setUpBeforeMethod()
+	{
+		entityMeta = entityMetaFactory.create();
+		entityMeta.addAttribute(attrMetaFactory.create().setName("col1"));
+		entityMeta.addAttribute(attrMetaFactory.create().setName("col2"));
 	}
 
 	@Test
@@ -49,7 +70,7 @@ public class CsvWriterTest
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
 
-		Entity entity = new DynamicEntity(null); // // FIXME pass entity meta data instead of null
+		Entity entity = new DynamicEntity(entityMeta);
 		entity.set("col1", "val1");
 		entity.set("col2", "val2");
 
@@ -76,7 +97,7 @@ public class CsvWriterTest
 		try
 		{
 			csvWriter.writeAttributeNames(Arrays.asList("col1", "col2"));
-			Entity entity = new DynamicEntity(null); // FIXME pass entity meta data instead of null
+			Entity entity = new DynamicEntity(entityMeta);
 			entity.set("col1", "val1");
 			entity.set("col2", "val2");
 			csvWriter.add(entity);
@@ -96,7 +117,7 @@ public class CsvWriterTest
 		try
 		{
 			csvWriter.writeAttributes(Arrays.asList("col1", "col2"), Arrays.asList("label1", "label2"));
-			Entity entity = new DynamicEntity(null); // FIXME pass entity meta data instead of null
+			Entity entity = new DynamicEntity(entityMeta);
 			entity.set("col1", "val1");
 			entity.set("col2", "val2");
 			csvWriter.add(entity);

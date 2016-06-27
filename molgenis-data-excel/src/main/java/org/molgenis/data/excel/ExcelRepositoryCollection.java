@@ -19,6 +19,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
@@ -40,7 +41,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	private final String name;
 	private final Workbook workbook;
 
-	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
 	private AttributeMetaDataFactory attrMetaFactory;
 
 	public ExcelRepositoryCollection(File file) throws IOException, MolgenisInvalidFormatException
@@ -98,7 +99,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 			return null;
 		}
 
-		return new ExcelRepository(name, poiSheet, cellProcessors);
+		return new ExcelRepository(name, poiSheet, entityMetaFactory, attrMetaFactory, cellProcessors);
 	}
 
 	public int getNumberOfSheets()
@@ -119,7 +120,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 			return null;
 		}
 
-		return new ExcelRepository(name, poiSheet, cellProcessors);
+		return new ExcelRepository(name, poiSheet, entityMetaFactory, attrMetaFactory, cellProcessors);
 	}
 
 	public ExcelSheetWriter createWritable(String entityName, List<AttributeMetaData> attributes,
@@ -186,5 +187,17 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	public boolean hasRepository(EntityMetaData entityMeta)
 	{
 		return hasRepository(entityMeta.getName());
+	}
+
+	@Autowired
+	public void setEntityMetaDataFactory(EntityMetaDataFactory entityMetaFactory)
+	{
+		this.entityMetaFactory = entityMetaFactory;
+	}
+
+	@Autowired
+	public void setAttributeMetaDataFactory(AttributeMetaDataFactory attrMetaFactory)
+	{
+		this.attrMetaFactory = attrMetaFactory;
 	}
 }

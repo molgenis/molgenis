@@ -32,22 +32,24 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 
 public class LanguageRepositoryDecorator implements Repository<Language>
 {
 	private final Repository<Language> decorated;
 	private final DataService dataService;
-	private final SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
 	private final AttributeMetaDataFactory attrMetaFactory;
+	private final EntityMetaDataMetaData entityMetaMeta;
+	private final I18nStringMetaData i18nStringMeta;
 
 	public LanguageRepositoryDecorator(Repository<Language> decorated, DataService dataService,
-			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, AttributeMetaDataFactory attrMetaFactory)
+			AttributeMetaDataFactory attrMetaFactory, EntityMetaDataMetaData entityMetaMeta,
+			I18nStringMetaData i18nStringMeta)
 	{
 		this.decorated = requireNonNull(decorated);
 		this.dataService = requireNonNull(dataService);
-		this.systemEntityMetaDataRegistry = requireNonNull(systemEntityMetaDataRegistry);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
+		this.entityMetaMeta = requireNonNull(entityMetaMeta);
+		this.i18nStringMeta = requireNonNull(i18nStringMeta);
 	}
 
 	@Override
@@ -177,8 +179,7 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 		decorated.delete(language);
 
 		// remove i18n attributes from i18n string meta data
-		EntityMetaData i18nMetaMeta = getI18nStringMetaData();
-		AttributeMetaData attrLanguageCode = i18nMetaMeta.getAttribute(languageCode);
+		AttributeMetaData attrLanguageCode = i18nStringMeta.getAttribute(languageCode);
 
 		EntityMetaData i18nMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(I18N_STRING));
 		i18nMeta.removeAttribute(attrLanguageCode);
@@ -190,7 +191,6 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 		i18nMetaUpdated.removeAttribute(attrLanguageCode);
 
 		// remove i18n attributes from entity meta data
-		EntityMetaData entityMetaMeta = getEntityMetaDataMetaData();
 		AttributeMetaData entityLabel = entityMetaMeta.getAttribute(LABEL + '-' + languageCode);
 		AttributeMetaData entityDescription = entityMetaMeta.getAttribute(DESCRIPTION + '-' + languageCode);
 
@@ -206,7 +206,7 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 		entityMetaUpdated.removeAttribute(entityDescription);
 
 		// remove i18n attributes from attribute meta data
-		EntityMetaData attrMetaMeta = getAttributeMetaDataMetaData();
+		EntityMetaData attrMetaMeta = attrMetaFactory.getAttributeMetaDataMetaData();
 		AttributeMetaData attrLabel = attrMetaMeta.getAttribute(LABEL + '-' + languageCode);
 		AttributeMetaData attrDescription = attrMetaMeta.getAttribute(DESCRIPTION + '-' + languageCode);
 
@@ -259,12 +259,10 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 			String languageCode = language.getCode();
 
 			// Add language attributes for attribute meta data
-			AttributeMetaData attrLabel = attrMetaFactory.create().setName(LABEL + '-' + languageCode)
-					.setNillable(true).setLabel(
-							new StringBuilder().append("Label (").append(languageCode).append(")").toString());
+			AttributeMetaData attrLabel = attrMetaFactory.create().setName(LABEL + '-' + languageCode).setNillable(true)
+					.setLabel("Label (" + languageCode + ')');
 			AttributeMetaData attrDescription = attrMetaFactory.create().setName(DESCRIPTION + '-' + languageCode)
-					.setNillable(true).setLabel(
-							new StringBuilder().append("Description (").append(languageCode).append(")").toString());
+					.setNillable(true).setLabel("Description (" + languageCode + ')');
 			dataService.add(ATTRIBUTE_META_DATA, Stream.of(attrLabel, attrDescription));
 
 			EntityMetaData attrMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(ATTRIBUTE_META_DATA));
@@ -280,11 +278,11 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 
 			// Add language attributes for entity meta data
 			AttributeMetaData entityLabel = attrMetaFactory.create()
-					.setName(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true).setLabel(
-							new StringBuilder().append("Label (").append(languageCode).append(')').toString());
+					.setName(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true)
+					.setLabel("Label (" + languageCode + ')');
 			AttributeMetaData entityDescription = attrMetaFactory.create()
-					.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true).setLabel(
-							new StringBuilder().append("Description (").append(languageCode).append(')').toString());
+					.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true)
+					.setLabel("Description (" + languageCode + ')');
 			dataService.add(ATTRIBUTE_META_DATA, Stream.of(entityLabel, entityDescription));
 
 			EntityMetaData entityMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(ENTITY_META_DATA));
@@ -353,21 +351,5 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	public void removeEntityListener(EntityListener entityListener)
 	{
 		decorated.removeEntityListener(entityListener);
-	}
-
-	private EntityMetaData getAttributeMetaDataMetaData()
-	{
-		return systemEntityMetaDataRegistry.getSystemEntityMetaData(ATTRIBUTE_META_DATA);
-	}
-
-	private EntityMetaData getEntityMetaDataMetaData()
-	{
-		return systemEntityMetaDataRegistry.getSystemEntityMetaData(ENTITY_META_DATA);
-	}
-
-	private I18nStringMetaData getI18nStringMetaData()
-	{
-		// FIXME hacky
-		return (I18nStringMetaData) systemEntityMetaDataRegistry.getSystemEntityMetaData(I18N_STRING);
 	}
 }

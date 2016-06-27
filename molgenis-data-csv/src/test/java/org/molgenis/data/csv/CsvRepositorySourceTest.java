@@ -11,13 +11,22 @@ import java.io.InputStream;
 
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.MolgenisInvalidFormatException;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.Iterables;
 
-public class CsvRepositorySourceTest
+public class CsvRepositorySourceTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
 
 	@Test
 	public void getRepositoriesCsv() throws FileNotFoundException, IOException, MolgenisInvalidFormatException
@@ -26,7 +35,7 @@ public class CsvRepositorySourceTest
 		File csvFile = new File(FileUtils.getTempDirectory(), "testdata.csv");
 		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
 
-		CsvRepositoryCollection repo = new CsvRepositoryCollection(csvFile);
+		CsvRepositoryCollection repo = new CsvRepositoryCollection(csvFile, entityMetaFactory, attrMetaFactory);
 		assertNotNull(repo.getEntityNames());
 		assertEquals(Iterables.size(repo.getEntityNames()), 1);
 		assertEquals(Iterables.get(repo.getEntityNames(), 0), "testdata");
@@ -80,7 +89,7 @@ public class CsvRepositorySourceTest
 			fos.close();
 		}
 
-		CsvRepositoryCollection repo = new CsvRepositoryCollection(zip);
+		CsvRepositoryCollection repo = new CsvRepositoryCollection(zip, entityMetaFactory, attrMetaFactory);
 		assertNotNull(repo.getEntityNames());
 		assertEquals(Iterables.size(repo.getEntityNames()), 3);
 		assertNotNull(repo.getRepository("0"));

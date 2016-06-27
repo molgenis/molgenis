@@ -2,7 +2,6 @@ package org.molgenis.data.vcf.format;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.elasticsearch.common.base.Preconditions.checkNotNull;
 import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.molgenis.MolgenisFieldTypes.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.DECIMAL;
@@ -73,8 +72,8 @@ public class VcfToEntity
 		this.entityMetaFactory = requireNonNull(entityMetaFactory);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 
-		sampleEntityMetaData = createSampleEntityMetaData(checkNotNull(entityName),
-				checkNotNull(vcfMeta.getFormatMeta()));
+		sampleEntityMetaData = createSampleEntityMetaData(requireNonNull(entityName),
+				requireNonNull((vcfMeta.getFormatMeta())));
 		entityMetaData = createEntityMetaData(entityName, vcfMeta);
 	}
 
