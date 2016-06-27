@@ -6,6 +6,7 @@ import static java.util.Objects.requireNonNull;
 import java.util.Map;
 import java.util.stream.Stream;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.SystemEntityMetaData;
@@ -75,7 +76,7 @@ public class SystemEntityMetaDataInitializer
 					new StringBuilder().append("Label (").append(languageCode).append(")").toString());
 			attrMetaMeta.addAttribute(AttributeMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true).setLabel(
 					new StringBuilder().append("Description (").append(languageCode).append(")").toString());
-			i18nStringMeta.addLanguage(languageCode);
+			i18nStringMeta.addAttribute(languageCode).setNillable(true).setDataType(MolgenisFieldTypes.TEXT);
 		});
 	}
 

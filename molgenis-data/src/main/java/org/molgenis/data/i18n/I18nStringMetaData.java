@@ -6,7 +6,6 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.data.meta.model.AttributeMetaData;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -31,22 +30,5 @@ public class I18nStringMetaData extends SystemEntityMetaData
 		addAttribute(DESCRIPTION).setNillable(true).setDataType(MolgenisFieldTypes.TEXT);
 
 		addAttribute(EN).setNillable(true).setDataType(MolgenisFieldTypes.TEXT);
-	}
-
-	public boolean addLanguage(String languageCode)
-	{
-		if (getAttribute(languageCode) == null)
-		{
-			addAttribute(languageCode).setNillable(true).setDataType(MolgenisFieldTypes.TEXT);
-			return true;
-		}
-
-		return false;
-	}
-
-	public void removeLanguage(String languageCode)
-	{
-		AttributeMetaData attr = getAttribute(languageCode);
-		if (attr != null) removeAttribute(attr);
 	}
 }
