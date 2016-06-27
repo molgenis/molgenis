@@ -2,7 +2,7 @@ package org.molgenis.data.elasticsearch.reindex.job;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.reindex.meta.ReindexActionJob;
+import org.molgenis.data.reindex.meta.ReindexActionGroup;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
@@ -24,7 +24,7 @@ import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMe
 import static org.molgenis.data.jobs.model.JobExecution.Status.SUCCESS;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.END_DATE;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.STATUS;
-import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.REINDEX_ACTION_JOB;
+import static org.molgenis.data.reindex.meta.ReindexActionGroupMetaData.REINDEX_ACTION_GROUP;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.*;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
@@ -56,13 +56,13 @@ public class ReindexServiceImpl implements ReindexService
 	public void rebuildIndex(String transactionId)
 	{
 		LOG.trace("Reindex transaction with id {}...", transactionId);
-		ReindexActionJob reindexActionJob = dataService
-				.findOneById(REINDEX_ACTION_JOB, transactionId, ReindexActionJob.class);
+		ReindexActionGroup reindexActionGroup = dataService
+				.findOneById(REINDEX_ACTION_GROUP, transactionId, ReindexActionGroup.class);
 
-		if (reindexActionJob != null)
+		if (reindexActionGroup != null)
 		{
 			Stream<Entity> reindexActions = dataService
-					.findAll(REINDEX_ACTION, new QueryImpl<>().eq(REINDEX_ACTION_GROUP, reindexActionJob));
+					.findAll(REINDEX_ACTION, new QueryImpl<>().eq(REINDEX_ACTION_GROUP, reindexActionGroup));
 			Map<String, Long> numberOfActionsPerEntity = reindexActions
 					.collect(groupingBy(reindexAction -> reindexAction.getString(ENTITY_FULL_NAME), counting()));
 			indexStatus.addActionCounts(numberOfActionsPerEntity);

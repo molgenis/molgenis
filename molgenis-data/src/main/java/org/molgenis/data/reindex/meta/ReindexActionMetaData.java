@@ -1,16 +1,16 @@
 package org.molgenis.data.reindex.meta;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.reindex.meta.IndexPackage.PACKAGE_INDEX;
-
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.TextField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.reindex.meta.IndexPackage.PACKAGE_INDEX;
 
 /**
  * The reindex action is used to describe the action that needs to be done to make a
@@ -69,14 +69,14 @@ public class ReindexActionMetaData extends SystemEntityMetaData
 	public static final String REINDEX_STATUS = "reindexStatus";
 
 	private final IndexPackage indexPackage;
-	private ReindexActionJobMetaData reindexActionJobMetaData;
+	private ReindexActionGroupMetaData reindexActionGroupMetaData;
 
 	@Autowired
-	public ReindexActionMetaData(IndexPackage indexPackage, ReindexActionJobMetaData reindexActionJobMetaData)
+	public ReindexActionMetaData(IndexPackage indexPackage, ReindexActionGroupMetaData reindexActionGroupMetaData)
 	{
 		super(SIMPLE_NAME, PACKAGE_INDEX);
 		this.indexPackage = requireNonNull(indexPackage);
-		this.reindexActionJobMetaData = requireNonNull(reindexActionJobMetaData);
+		this.reindexActionGroupMetaData = requireNonNull(reindexActionGroupMetaData);
 	}
 
 	@Override
@@ -86,7 +86,7 @@ public class ReindexActionMetaData extends SystemEntityMetaData
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
 		addAttribute(REINDEX_ACTION_GROUP).setDescription("The group that this reindex action belongs to")
-				.setDataType(MolgenisFieldTypes.XREF).setRefEntity(reindexActionJobMetaData);
+				.setDataType(MolgenisFieldTypes.XREF).setRefEntity(reindexActionGroupMetaData);
 		addAttribute(ACTION_ORDER)
 				.setDescription("The order in which the action is registered within its ReindexActionJob")
 				.setNillable(false);
