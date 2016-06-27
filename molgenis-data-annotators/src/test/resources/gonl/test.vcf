@@ -1,3 +1,0 @@
-##fileformat=VCFv4.1
-#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
-1	249239510	test	C	G	.	.	.
