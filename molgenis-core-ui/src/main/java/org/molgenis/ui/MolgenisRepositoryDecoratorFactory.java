@@ -1,27 +1,11 @@
 package org.molgenis.ui;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
-import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
-import static org.molgenis.security.owned.OwnedEntityMetaData.OWNED;
-
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserDecorator;
 import org.molgenis.auth.UserAuthorityFactory;
-import org.molgenis.data.AutoValueRepositoryDecorator;
-import org.molgenis.data.ComputedEntityValuesDecorator;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityManager;
-import org.molgenis.data.EntityReferenceResolverDecorator;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.data.RepositorySecurityDecorator;
+import org.molgenis.data.*;
+import org.molgenis.data.cache.L1Cache;
+import org.molgenis.data.cache.L1CacheRepositoryDecorator;
 import org.molgenis.data.elasticsearch.IndexedRepositoryDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.i18n.I18nStringDecorator;
@@ -47,6 +31,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
+import static org.molgenis.security.owned.OwnedEntityMetaData.OWNED;
+
 @Component
 public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFactory
 {
@@ -63,6 +56,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final SearchService searchService;
 	private final AttributeMetaDataFactory attrMetaFactory;
 	private final PasswordEncoder passwordEncoder;
+	private final L1Cache l1Cache;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -71,7 +65,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			RepositoryDecoratorRegistry repositoryDecoratorRegistry,
 			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, UserAuthorityFactory userAuthorityFactory,
 			ReindexActionRegisterService reindexActionRegisterService, SearchService searchService,
-			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder)
+			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder, L1Cache l1Cache)
 	{
 		this.entityManager = requireNonNull(entityManager);
 		this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
@@ -86,12 +80,16 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.searchService = requireNonNull(searchService);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 		this.passwordEncoder = requireNonNull(passwordEncoder);
+		this.l1Cache = requireNonNull(l1Cache);
 	}
 
 	@Override
 	public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 	{
 		Repository<Entity> decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
+
+		// 11. Query the L1 cache before asking the database
+		decoratedRepository = new L1CacheRepositoryDecorator(decoratedRepository, l1Cache);
 
 		// 10. Route specific queries to the index
 		decoratedRepository = new IndexedRepositoryDecorator(decoratedRepository, searchService);
