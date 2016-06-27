@@ -17,7 +17,11 @@ import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -32,8 +36,14 @@ import com.google.gdata.data.spreadsheet.ListEntry;
 import com.google.gdata.data.spreadsheet.ListFeed;
 import com.google.gdata.util.ServiceException;
 
-public class GoogleSpreadsheetRepositoryTest
+public class GoogleSpreadsheetRepositoryTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
 	private GoogleSpreadsheetRepository spreadsheetRepository;
 	private SpreadsheetService spreadsheetService;
 	private ListFeed listFeed;
@@ -46,10 +56,10 @@ public class GoogleSpreadsheetRepositoryTest
 		listFeed = mock(ListFeed.class);
 		TextConstruct textConstruct = when(mock(TextConstruct.class).getPlainText()).thenReturn("name").getMock();
 		when(listFeed.getTitle()).thenReturn(textConstruct);
-		List<ListEntry> entries = new ArrayList<ListEntry>();
+		List<ListEntry> entries = new ArrayList<>();
 		ListEntry entry = mock(ListEntry.class);
 		CustomElementCollection customElements = mock(CustomElementCollection.class);
-		when(customElements.getTags()).thenReturn(new LinkedHashSet<String>(Arrays.asList("col1", "col2", "col3")));
+		when(customElements.getTags()).thenReturn(new LinkedHashSet<>(Arrays.asList("col1", "col2", "col3")));
 		when(customElements.getValue("col1")).thenReturn("val1");
 		when(customElements.getValue("col2")).thenReturn("val2");
 		when(customElements.getValue("col3")).thenReturn("val3");
@@ -57,7 +67,7 @@ public class GoogleSpreadsheetRepositoryTest
 		entries.add(entry);
 		when(listFeed.getEntries()).thenReturn(entries);
 		cellFeed = mock(CellFeed.class);
-		List<CellEntry> cells = new ArrayList<CellEntry>();
+		List<CellEntry> cells = new ArrayList<>();
 
 		Cell cell1 = mock(Cell.class);
 		when(cell1.getRow()).thenReturn(1);
@@ -76,20 +86,15 @@ public class GoogleSpreadsheetRepositoryTest
 		cells.add(entry3);
 		when(cellFeed.getEntries()).thenReturn(cells);
 		when(cellFeed.getTitle()).thenReturn(textConstruct);
-		spreadsheetRepository = new GoogleSpreadsheetRepository(spreadsheetService, "key", "id");
+		spreadsheetRepository = new GoogleSpreadsheetRepository(spreadsheetService, "key", "id", entityMetaFactory,
+				attrMetaFactory);
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
+	@Test(expectedExceptions = NullPointerException.class)
 	public void GoogleSpreadsheetRepository() throws IOException, ServiceException
 	{
-		GoogleSpreadsheetRepository repo = null;
-		try
+		try (GoogleSpreadsheetRepository repo = new GoogleSpreadsheetRepository(null, null, null, null, null))
 		{
-			repo = new GoogleSpreadsheetRepository(null, null, null);
-		}
-		finally
-		{
-			if (repo != null) repo.close();
 		}
 	}
 

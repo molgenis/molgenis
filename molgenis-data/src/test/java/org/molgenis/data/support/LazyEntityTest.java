@@ -202,7 +202,7 @@ public class LazyEntityTest
 	public void getLabelValueLabelAttrIsIdAttr()
 	{
 		when(entityMeta.getLabelAttribute()).thenReturn(idAttr);
-		assertEquals(id.toString(), lazyEntity.getLabelValue());
+		assertEquals(id.toString(), lazyEntity.getLabelValue().toString());
 		verifyNoMoreInteractions(dataService);
 	}
 

@@ -2,7 +2,6 @@ package org.molgenis.data.mapper.repository.impl;
 
 import static java.util.Objects.requireNonNull;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -42,7 +41,7 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 	@Override
 	public List<Entity> upsert(Collection<AttributeMapping> attributeMappings)
 	{
-		List<Entity> result = new ArrayList<Entity>();
+		List<Entity> result = Lists.newArrayList();
 		for (AttributeMapping attributeMapping : attributeMappings)
 		{
 			result.add(upsert(attributeMapping));
@@ -86,7 +85,7 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 	public List<AttributeMetaData> retrieveAttributeMetaDatasFromAlgorithm(String algorithm,
 			EntityMetaData sourceEntityMetaData)
 	{
-		List<AttributeMetaData> sourceAttributeMetaDatas = new ArrayList<AttributeMetaData>();
+		List<AttributeMetaData> sourceAttributeMetaDatas = Lists.newArrayList();
 
 		Pattern pattern = Pattern.compile("\\$\\('([^']+)'\\)");
 		Matcher matcher = pattern.matcher(algorithm);
@@ -128,7 +127,7 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, attributeMapping.getAlgorithm());
 		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS,
 				attributeMapping.getSourceAttributeMetaDatas().stream().map(AttributeMetaData::getName)
-						.collect(Collectors.toList()));
+						.collect(Collectors.joining(",")));
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHMSTATE, attributeMapping.getAlgorithmState());
 		return attributeMappingEntity;
 	}

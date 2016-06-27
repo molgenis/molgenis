@@ -60,6 +60,7 @@ import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.support.DynamicEntity;
@@ -125,6 +126,7 @@ public class SortaServiceController extends MolgenisPluginController
 	private final SortaJobExecutionMetaData sortaJobExecutionMetaData;
 	private final OntologyTermMetaData ontologyTermMetaData;
 	private final SortaJobExecutionFactory sortaJobExecutionFactory;
+	private final EntityMetaDataFactory entityMetaFactory;
 	private final AttributeMetaDataFactory attrMetaFactory;
 
 	public static final String MATCH_VIEW_NAME = "sorta-match-view";
@@ -142,7 +144,8 @@ public class SortaServiceController extends MolgenisPluginController
 			PermissionSystemService permissionSystemService,
 			MatchingTaskContentEntityMetaData matchingTaskContentEntityMetaData,
 			SortaJobExecutionMetaData sortaJobExecutionMetaData, OntologyTermMetaData ontologyTermMetaData,
-			SortaJobExecutionFactory sortaJobExecutionFactory, AttributeMetaDataFactory attrMetaFactory)
+			SortaJobExecutionFactory sortaJobExecutionFactory, EntityMetaDataFactory entityMetaFactory,
+			AttributeMetaDataFactory attrMetaFactory)
 	{
 		super(URI);
 		this.ontologyService = requireNonNull(ontologyService);
@@ -160,8 +163,9 @@ public class SortaServiceController extends MolgenisPluginController
 		this.matchingTaskContentEntityMetaData = requireNonNull(matchingTaskContentEntityMetaData);
 		this.sortaJobExecutionMetaData = requireNonNull(sortaJobExecutionMetaData);
 		this.ontologyTermMetaData = requireNonNull(ontologyTermMetaData);
-		this.sortaJobExecutionFactory = sortaJobExecutionFactory;
-		this.attrMetaFactory = attrMetaFactory;
+		this.sortaJobExecutionFactory = requireNonNull(sortaJobExecutionFactory);
+		this.entityMetaFactory = requireNonNull(entityMetaFactory);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 	}
 
 	@RequestMapping(method = GET)
@@ -496,8 +500,8 @@ public class SortaServiceController extends MolgenisPluginController
 		String sessionId = httpServletRequest.getSession().getId();
 		File uploadFile = fileStore.store(inputStream, sessionId + "_input.csv");
 		String inputRepositoryName = idGenerator.generateId();
-		SortaCsvRepository inputRepository = new SortaCsvRepository(inputRepositoryName, jobName + " input",
-				uploadFile);
+		SortaCsvRepository inputRepository = new SortaCsvRepository(inputRepositoryName, jobName + " input", uploadFile,
+				entityMetaFactory, attrMetaFactory);
 
 		if (!validateFileHeader(inputRepository))
 		{
