@@ -1,12 +1,12 @@
 package org.molgenis.data.support;
 
-import static java.util.Objects.requireNonNull;
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.sql.Date;
 import java.sql.Timestamp;
 
-import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Base class for entities defined in pre-existing Java classes

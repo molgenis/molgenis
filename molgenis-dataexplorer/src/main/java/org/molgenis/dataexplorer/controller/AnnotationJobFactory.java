@@ -1,11 +1,6 @@
 package org.molgenis.dataexplorer.controller;
 
-import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
-
-import java.util.Arrays;
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -28,7 +23,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.google.common.collect.Lists;
+import java.util.Arrays;
+import java.util.List;
+
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 
 /**
  * Creates AnnotationJob based on its {@link AnnotationJobExecution}. Is a bean so that it can use {@link Autowired}
