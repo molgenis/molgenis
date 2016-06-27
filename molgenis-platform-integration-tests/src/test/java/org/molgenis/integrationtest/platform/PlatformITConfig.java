@@ -16,7 +16,6 @@ import org.molgenis.data.IdGenerator;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
-import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.i18n.LanguageService;
@@ -65,7 +64,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 		"org.molgenis.data.jobs", "org.molgenis.data.elasticsearch.reindex", "org.molgenis.auth",
 		"org.molgenis.test.data" })
 @Import({ DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class, ElasticsearchEntityFactory.class,
-		ElasticsearchRepositoryCollection.class, PostgreSqlConfiguration.class, RunAsSystemBeanPostProcessor.class,
+		PostgreSqlConfiguration.class, RunAsSystemBeanPostProcessor.class,
 		FileMetaMetaData.class, OwnedEntityMetaData.class, MolgenisUserServiceImpl.class, RhinoConfig.class,
 		UuidGenerator.class, ExpressionValidator.class, LanguageService.class, PostgreSqlEntityFactory.class,
 		PostgreSqlDatabase.class })

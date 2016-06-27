@@ -2,12 +2,22 @@ package org.molgenis.integrationtest.data.postgresql;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.molgenis.data.DataService;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.PostgreSqlEntityFactory;
 import org.molgenis.data.postgresql.PostgreSqlRepository;
 import org.molgenis.data.postgresql.PostgreSqlRepositoryCollection;
 import org.molgenis.integrationtest.data.AbstractDataApiTestConfig;
+import org.molgenis.util.ResourceUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -37,9 +47,9 @@ public abstract class AbstractPostgreSqlTestConfig extends AbstractDataApiTestCo
 	JdbcTemplate jdbcTemplate;
 
 	@Override
-	protected ManageableRepositoryCollection getBackend()
+	protected RepositoryCollection getBackend()
 	{
-		return new PostgreSqlRepositoryCollection(dataSource)
+		return new PostgreSqlRepositoryCollection(dataSource, jdbcTemplate, dataService)
 		{
 			@Override
 			protected PostgreSqlRepository createPostgreSqlRepository()

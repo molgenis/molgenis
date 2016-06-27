@@ -55,7 +55,7 @@ public class EntityTestHarness
 	@PostConstruct
 	public void postConstruct()
 	{
-		testPackage = packageFactory.create("test");
+//		testPackage = packageFactory.create("test");
 	}
 
 	public EntityMetaData createDynamicRefEntityMetaData()

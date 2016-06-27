@@ -14,12 +14,12 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.QueryUtils.containsAnyOperator;
 import static org.molgenis.data.QueryUtils.containsComputedAttribute;
-import static org.molgenis.data.RepositoryCapability.*;
+import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
+import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 
 /**
  * Decorator for indexed repositories. Sends all queries with operators that are not supported by the decorated
@@ -34,17 +34,18 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	private static final int BATCH_SIZE = 1000;
 
 	private final Repository<Entity> decoratedRepository;
-	private final Repository<Entity> indexRepository;
 	private SearchService elasticSearchService;
 
+	/**
+	 * Operators NOT supported by the decorated repository.
+	 */
 	private Set<Operator> unsupportedOperators;
 
 	public IndexedRepositoryDecorator(Repository<Entity> decoratedRepo, SearchService elasticSearchService)
 	{
 		this.elasticSearchService = requireNonNull(elasticSearchService);
 		this.decoratedRepository = requireNonNull(decoratedRepo);
-		this.indexRepository = this.getReadOnlyElasticsearchRepository();
-		Set<Operator> operators = indexRepository.getQueryOperators();
+		Set<Operator> operators = getQueryOperators();
 		operators.removeAll(decoratedRepository.getQueryOperators());
 		unsupportedOperators = Collections.unmodifiableSet(operators);
 	}
@@ -166,7 +167,10 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		{
 			LOG.debug("public Entity findOne({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
 					INDEX_REPOSITORY);
-			return indexRepository.findOne(q);
+			//TODO: create findOne in elasticSearchService
+			Iterable<Entity> entities = elasticSearchService.search(q, getEntityMetaData());
+			Iterator<Entity> it = entities.iterator();
+			return it.hasNext() ? it.next() : null;
 		}
 
 	}
@@ -196,7 +200,7 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		{
 			LOG.debug("public Entity findAll({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
 					INDEX_REPOSITORY);
-			return indexRepository.findAll(q);
+			return elasticSearchService.searchAsStream(q, getEntityMetaData());
 		}
 	}
 
@@ -235,7 +239,7 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	@Override
 	public Set<Operator> getQueryOperators()
 	{
-		return indexRepository.getQueryOperators();
+		return EnumSet.allOf(Operator.class);
 	}
 
 	@Override
@@ -276,14 +280,14 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		{
 			LOG.debug("public long count({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
 					INDEX_REPOSITORY);
-			return indexRepository.count(q);
+			return elasticSearchService.count(q, getEntityMetaData());
 		}
 	}
 
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		return indexRepository.aggregate(aggregateQuery);
+		return elasticSearchService.aggregate(aggregateQuery, getEntityMetaData());
 	}
 
 	@Override
@@ -307,109 +311,5 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		return !containsAnyOperator(q, unsupportedOperators) && !containsComputedAttribute(q.getRules(),
 				getEntityMetaData());
 
-	}
-
-	private ElasticsearchRepository getReadOnlyElasticsearchRepository()
-	{
-		return new IndexRepository(getEntityMetaData(), elasticSearchService);
-	}
-
-	private static class IndexRepository extends ElasticsearchRepository
-	{
-
-		private IndexRepository(EntityMetaData entityMetaData, SearchService searchService)
-		{
-			super(entityMetaData, searchService);
-		}
-
-		@Override
-		public Set<RepositoryCapability> getCapabilities()
-		{
-			return newHashSet(AGGREGATEABLE, QUERYABLE);
-		}
-
-		@Override
-		public void close() throws IOException
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void add(Entity entity)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public Integer add(Stream<Entity> entities)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void flush()
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void clearCache()
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void update(Entity entity)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void update(Stream<Entity> entities)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void delete(Entity entity)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void delete(Stream<Entity> entities)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void deleteById(Object id)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void deleteAll(Stream<Object> ids)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void deleteAll()
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void addEntityListener(EntityListener entityListener)
-		{
-			throw new UnsupportedOperationException();
-		}
-
-		@Override
-		public void removeEntityListener(EntityListener entityListener)
-		{
-			throw new UnsupportedOperationException();
-		}
 	}
 }

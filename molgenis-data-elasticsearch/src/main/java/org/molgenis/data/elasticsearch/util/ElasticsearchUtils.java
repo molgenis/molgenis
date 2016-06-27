@@ -1,20 +1,5 @@
 package org.molgenis.data.elasticsearch.util;
 
-import static java.util.Arrays.asList;
-import static java.util.stream.StreamSupport.stream;
-import static org.elasticsearch.client.Requests.refreshRequest;
-import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
-import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-
-import javax.annotation.Nonnull;
 import com.codepoetics.protonpack.StreamUtils;
 import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.ElasticsearchException;
@@ -27,9 +12,6 @@ import org.elasticsearch.action.bulk.BulkProcessor;
 import org.elasticsearch.action.deletebyquery.DeleteByQueryResponse;
 import org.elasticsearch.action.deletebyquery.IndexDeleteByQueryResponse;
 import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.get.MultiGetRequest;
-import org.elasticsearch.action.get.MultiGetRequestBuilder;
-import org.elasticsearch.action.get.MultiGetResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -43,7 +25,6 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.index.query.TermQueryBuilder;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.fetch.source.FetchSourceContext;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
@@ -52,7 +33,14 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.util.concurrent.AtomicLongMap;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
+import static org.elasticsearch.client.Requests.refreshRequest;
+import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 /**
  * Facade in front of the ElasticSearch client.
@@ -262,28 +250,6 @@ public class ElasticsearchUtils
 		return true;
 	}
 
-	public Optional<Map<String, Object>> getDocument(String type, String id, String indexName)
-	{
-		LOG.trace("Retrieving Elasticsearch [{}] doc with id [{}] ...", type, id);
-		GetResponse response = client.prepareGet(indexName, type, id).get();
-		LOG.debug("Retrieved Elasticsearch [{}] doc with id [{}]", type, id);
-		return getSourceFromResponse(response);
-	}
-
-	public Optional<Map<String, Object>> getDocument(String type, String id, String[] fetchFields, String indexName)
-	{
-		LOG.trace("Retrieving Elasticsearch [{}] doc with id [{}] and fetchFields {} ...", type, id,
-				asList(fetchFields));
-		GetResponse response = client.prepareGet(indexName, type, id).setFetchSource(fetchFields, null).get();
-		LOG.debug("Retrieved Elasticsearch [{}] doc with id [{}] and fetchFields {}", type, id, asList(fetchFields));
-		return getSourceFromResponse(response);
-	}
-
-	private static Optional<Map<String, Object>> getSourceFromResponse(GetResponse response)
-	{
-		return response.isExists() ? Optional.of(response.getSource()) : Optional.empty();
-	}
-
 	public void flushIndex(String indexName)
 	{
 		LOG.trace("Flushing Elasticsearch index [{}] ...", indexName);
@@ -302,66 +268,6 @@ public class ElasticsearchUtils
 		SearchResponse response = builder.get();
 		LOG.trace("*** RESPONSE\n{}", response);
 		return response;
-	}
-
-	public Stream<Map<String, Object>> getDocuments(String type, Stream<Object> entityIds, String indexName)
-	{
-		LOG.trace("Retrieving Elasticsearch [{}] docs with ids [{}] ...", type, entityIds);
-		MultiGetRequestBuilder request = client.prepareMultiGet();
-		entityIds.forEach(id -> {
-			MultiGetRequest.Item item = new MultiGetRequest.Item(indexName, type, toElasticsearchId(id));
-			request.add(item);
-		});
-		if (request.request().getItems().isEmpty())
-		{
-			return Stream.empty();
-		}
-		MultiGetResponse response = request.get();
-		LOG.debug("Retrieved Elasticsearch [{}] docs with ids [{}]", type, entityIds);
-
-		return combineResponses(response);
-	}
-
-	public Stream<Map<String, Object>> getDocuments(String type, @Nonnull String[] includes, Stream<Object> entityIds,
-			String indexName)
-	{
-		LOG.trace("Retrieving Elasticsearch [{}] docs with ids [{}] and includes [{}] ...", type, entityIds,
-				asList(includes));
-		MultiGetRequestBuilder request = client.prepareMultiGet();
-
-		entityIds.forEach(id -> {
-			MultiGetRequest.Item item = new MultiGetRequest.Item(indexName, type, toElasticsearchId(id))
-					.fetchSourceContext(new FetchSourceContext(includes));
-			request.add(item);
-		});
-		if (request.request().getItems().isEmpty())
-		{
-			return Stream.empty();
-		}
-		MultiGetResponse response = request.get();
-		LOG.debug("Retrieved Elasticsearch [{}] docs with ids [{}] and fetch [{}]", type, entityIds, asList(includes));
-
-		return combineResponses(response);
-	}
-
-	private Stream<Map<String, Object>> combineResponses(MultiGetResponse response)
-	{
-		return stream(response.spliterator(), false).flatMap(itemResponse -> {
-			if (itemResponse.isFailed())
-			{
-				throw new ElasticsearchException("Search failed. Returned headers:" + itemResponse.getFailure());
-			}
-			GetResponse getResponse = itemResponse.getResponse();
-			if (getResponse.isExists())
-			{
-				Map<String, Object> source = getResponse.getSource();
-				return Stream.of(source);
-			}
-			else
-			{
-				return Stream.empty();
-			}
-		});
 	}
 
 	/**
@@ -395,16 +301,6 @@ public class ElasticsearchUtils
 						.execute().actionGet());
 		return StreamUtils.takeWhile(infiniteResponses, searchResponse -> searchResponse.getHits().getHits().length > 0)
 				.flatMap(searchResponse -> Arrays.stream(searchResponse.getHits().getHits())).map(SearchHit::getId);
-	}
-
-	/**
-	 * Performs a search query and returns the result as a {@link Stream} of source objects.
-	 */
-	public Stream<Map<String, Object>> searchForSources(Consumer<SearchRequestBuilder> queryBuilder,
-			String queryToString, String type, String indexName)
-	{
-		SearchHits searchHits = search(queryBuilder, queryToString, type, indexName);
-		return Arrays.stream(searchHits.hits()).map(SearchHit::getSource);
 	}
 
 	private SearchHits search(Consumer<SearchRequestBuilder> queryBuilder, String queryToString, String type,
