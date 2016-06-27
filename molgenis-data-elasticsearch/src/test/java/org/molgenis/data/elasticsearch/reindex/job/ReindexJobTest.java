@@ -18,7 +18,7 @@ import org.molgenis.data.reindex.meta.ReindexActionGroup;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
-import org.molgenis.test.data.DynamicEntityTestHarness;
+import org.molgenis.test.data.EntityTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -64,7 +64,7 @@ public class ReindexJobTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private DataService dataService;
 	@Autowired
-	private DynamicEntityTestHarness harness;
+	private EntityTestHarness harness;
 
 	private final String transactionId = "aabbcc";
 
@@ -83,7 +83,7 @@ public class ReindexJobTest extends AbstractMolgenisSpringTest
 		when(dataService.findOneById(REINDEX_ACTION_GROUP, transactionId, ReindexActionGroup.class))
 				.thenReturn(reindexActionGroup);
 		when(dataService.getMeta()).thenReturn(mds);
-		testEntityMetaData = harness.createRefEntityMetaData();
+		testEntityMetaData = harness.createDynamicRefEntityMetaData();
 		when(mds.getEntityMetaData("test")).thenReturn(testEntityMetaData);
 		toReindexEntity = harness.createTestRefEntities(testEntityMetaData, 1).get(0);
 		when(dataService.findOneById("test", "entityId")).thenReturn(toReindexEntity);
