@@ -31,7 +31,6 @@ public class AbstractRepositoryTest
 	@BeforeTest
 	public void beforeTest()
 	{
-		String idAttrName = "id";
 		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
 		entityMetaData = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		when(entityMetaData.getIdAttribute()).thenReturn(idAttr);
