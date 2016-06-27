@@ -49,7 +49,14 @@ public class MultiFileResourceTest
 		MockitoAnnotations.initMocks(this);
 		configs = ImmutableMap.of("3", chrom3Config, "4", chrom4Config);
 		when(config.getConfigs()).thenReturn(configs);
-		multiFileResource = new MultiFileResource("name", config, factory);
+		multiFileResource = new MultiFileResource("name", config)
+		{
+			@Override
+			public RepositoryFactory getRepositoryFactory()
+			{
+				return factory;
+			}
+		};
 	}
 
 	@Test

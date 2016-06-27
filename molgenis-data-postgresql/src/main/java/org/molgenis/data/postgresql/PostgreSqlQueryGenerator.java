@@ -25,6 +25,7 @@ import org.molgenis.data.Sort;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.fieldtypes.EnumField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.fieldtypes.MrefField;
@@ -584,15 +585,26 @@ class PostgreSqlQueryGenerator
 					}
 					else
 					{
-						predicate.append(" =");
-						predicate.append(" ? ");
-
 						Object convertedVal = attr.getDataType().convert(r.getValue());
 						if (convertedVal instanceof Entity)
 						{
 							convertedVal = ((Entity) convertedVal).getIdValue();
 						}
-						parameters.add(convertedVal);
+						//Postgres does not return the rows with an empty value in a boolean field when queried with for example "... NOT abstract = TRUE"
+						//It does however return those rows when queried with "... NOT abstract IS TRUE"
+						if (attr.getDataType() instanceof BoolField)
+						{
+							Boolean bool = new Boolean(convertedVal.toString());
+							if (bool) predicate.append(" IS TRUE");
+							else predicate.append(" IS FALSE");
+						}
+						else
+						{
+							predicate.append(" =");
+							predicate.append(" ? ");
+
+							parameters.add(convertedVal);
+						}
 					}
 					if (result.length() > 0 && !result.toString().endsWith(" OR ") && !result.toString()
 							.endsWith(" AND ") && !result.toString().endsWith(" NOT "))
@@ -796,3 +808,4 @@ class PostgreSqlQueryGenerator
 		}
 	}
 }
+

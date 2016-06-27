@@ -29,6 +29,7 @@ import org.molgenis.security.core.Permission;
 import com.google.common.base.Function;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Lists;
+import org.molgenis.util.EntityUtils;
 
 public class MetaUtils
 {
@@ -71,7 +72,8 @@ public class MetaUtils
 			AttributeMetaData currentAttribute = existingEntityMetaData.getAttribute(attr.getName());
 			if (currentAttribute != null)
 			{
-				if (!currentAttribute.equals(attr))
+
+				if (!EntityUtils.equals(currentAttribute,attr))
 				{
 					throw new MolgenisDataException(
 							"Changing existing attributes is not currently supported. You tried to alter attribute ["

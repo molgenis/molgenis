@@ -25,6 +25,9 @@ public abstract class DefaultSettingsEntityMetaData extends SystemEntityMetaData
 	@Autowired
 	public SettingsEntityMeta settingsEntityMeta;
 
+	@Autowired
+	private SettingsPackage settingsPackage;
+
 	public DefaultSettingsEntityMetaData(String id)
 	{
 		super(id, PACKAGE_SETTINGS);
@@ -34,7 +37,7 @@ public abstract class DefaultSettingsEntityMetaData extends SystemEntityMetaData
 	public void init()
 	{
 		setExtends(settingsEntityMeta);
-		setPackage(settingsEntityMeta.getPackage());
+		setPackage(settingsPackage);
 	}
 
 	@RunAsSystem

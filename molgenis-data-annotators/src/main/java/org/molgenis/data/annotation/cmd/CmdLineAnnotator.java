@@ -147,7 +147,7 @@ public class CmdLineAnnotator
 			}
 		}
 
-		annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
+		//FIXME annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
 		annotate(annotator, inputVcfFile, outputVCFFile, options);
 	}
 
@@ -229,7 +229,7 @@ public class CmdLineAnnotator
 			if (!attributesToInclude.isEmpty())
 			{
 				// Check attribute names
-				List<String> outputAttributeNames = VcfUtils.getAtomicAttributesFromList(annotator.getOutputMetaData())
+				List<String> outputAttributeNames = VcfUtils.getAtomicAttributesFromList(annotator.getOutputAttributes())
 						.stream().map((attr) -> attr.getName()).collect(Collectors.toList());
 
 				boolean stop = false;
@@ -249,12 +249,12 @@ public class CmdLineAnnotator
 			}
 
 			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter,
-					annotator.getOutputMetaData(), attributesToInclude);
+					annotator.getOutputAttributes(), attributesToInclude);
 			System.out.println("Now starting to process the data.");
 
 			EntityMetaData emd = (EntityMetaData) vcfRepo.getEntityMetaData();
 			AttributeMetaData infoAttribute = (AttributeMetaData) emd.getAttribute(VcfAttributes.INFO);
-			for (AttributeMetaData attribute : annotator.getOutputMetaData())
+			for (AttributeMetaData attribute : annotator.getOutputAttributes())
 			{
 				for (AttributeMetaData atomicAttribute : attribute.getAttributeParts())
 				{
