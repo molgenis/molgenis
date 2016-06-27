@@ -75,7 +75,7 @@ public class MapOfStringsExpressionEvaluatorTest
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfAttributeHasExpression()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("\"#CHROM").getMock();
+		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
 		when(amd.getDataType()).thenReturn(STRING);
 		try
 		{
