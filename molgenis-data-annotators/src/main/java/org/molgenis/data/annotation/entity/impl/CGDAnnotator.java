@@ -48,6 +48,7 @@ import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -85,6 +86,9 @@ public class CGDAnnotator
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;
 
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+	
 	public static enum GeneralizedInheritance
 	{
 		DOM_OR_REC, DOMINANT, RECESSIVE, XLINKED, OTHER
@@ -157,7 +161,8 @@ public class CGDAnnotator
 					@Override
 					public Repository<Entity> createRepository(File file) throws IOException
 					{
-						return new GeneCsvRepository(file, GENE.getCgdName(), GENE.getAttributeName(), SEPARATOR);
+						return new GeneCsvRepository(file, GENE.getCgdName(), GENE.getAttributeName(),
+								entityMetaFactory, attrMetaFactory, SEPARATOR);
 					}
 				});
 	}
