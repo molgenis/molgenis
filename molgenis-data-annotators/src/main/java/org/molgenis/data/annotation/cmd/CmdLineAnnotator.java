@@ -230,7 +230,8 @@ public class CmdLineAnnotator
 			if (!attributesToInclude.isEmpty())
 			{
 				// Check attribute names
-				List<String> outputAttributeNames = VcfUtils.getAtomicAttributesFromList(annotator.getOutputAttributes())
+				List<String> outputAttributeNames = VcfUtils
+						.getAtomicAttributesFromList(annotator.getOutputAttributes())
 						.stream().map((attr) -> attr.getName()).collect(Collectors.toList());
 
 				boolean stop = false;

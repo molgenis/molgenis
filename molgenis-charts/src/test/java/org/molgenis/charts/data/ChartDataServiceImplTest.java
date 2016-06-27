@@ -1,5 +1,16 @@
 package org.molgenis.charts.data;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.MolgenisFieldTypes;
@@ -12,22 +23,10 @@ import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
 
 public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 {
@@ -55,7 +54,7 @@ public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 		AttributeMetaData patientAttr = attrMetaFactory.create().setName("patient");
 		AttributeMetaData probeAttr = attrMetaFactory.create().setName("probe").setDataType(MolgenisFieldTypes.DECIMAL);
 		EntityMetaData entityMetaData = entityMetaFactory.create();
-		entityMetaData.addAttributes(newArrayList(patientAttr,probeAttr));
+		entityMetaData.addAttributes(newArrayList(patientAttr, probeAttr));
 
 		Entity e1 = new DynamicEntity(entityMetaData);
 		e1.set("patient", "patient1");
