@@ -13,6 +13,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.js.magma.JsMagmaScriptRunner;
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptParameter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	{
 		// get all algorithm templates
 		Stream<Script> jsScripts = dataService.findAll(SCRIPT,
-				new QueryImpl<Script>().eq(TYPE, "FIXME"/*SCRIPT_TYPE_JAVASCRIPT_MAGMA*/), Script.class);
+				new QueryImpl<Script>().eq(TYPE, JsMagmaScriptRunner.NAME), Script.class);
 
 		// select all algorithm templates that can be used with target and sources
 		return jsScripts.flatMap(script -> toAlgorithmTemplate(script, attrMatches));

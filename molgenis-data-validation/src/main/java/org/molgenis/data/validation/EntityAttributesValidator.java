@@ -394,7 +394,7 @@ public class EntityAttributesValidator
 			EntityMetaData meta)
 	{
 		String message = format("Invalid %s value '%s' for attribute '%s' of entity '%s'.",
-				attribute.getDataType().getEnumType().toString().toLowerCase(), entity.getString(attribute.getName()),
+				attribute.getDataType().getEnumType().toString().toLowerCase(), entity.get(attribute.getName()),
 				attribute.getLabel(), meta.getName());
 
 		Range range = attribute.getRange();
@@ -409,7 +409,7 @@ public class EntityAttributesValidator
 			message += format("Value must be less than or equal to %d characters", maxLength);
 		}
 
-		return new ConstraintViolation(message, entity.getString(attribute.getName()), entity, attribute, meta, null);
+		return new ConstraintViolation(message, entity.get(attribute.getName()), entity, attribute, meta, null);
 	}
 
 	private ConstraintViolation createConstraintViolation(Entity entity, AttributeMetaData attribute,

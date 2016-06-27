@@ -1,4 +1,4 @@
-package utils;
+package org.molgenis.data.mapper.utils;
 
 import java.util.Collections;
 import java.util.HashSet;

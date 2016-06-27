@@ -1,5 +1,12 @@
 package org.molgenis.data.meta.model;
 
+import com.google.common.collect.Iterables;
+import org.molgenis.data.Entity;
+import org.molgenis.data.support.StaticEntity;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static java.lang.String.format;
@@ -11,14 +18,6 @@ import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.DESCRIPTION
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.molgenis.data.Entity;
-import org.molgenis.data.support.StaticEntity;
-
-import com.google.common.collect.Iterables;
 
 /**
  * EntityMetaData defines the structure and attributes of an Entity. Attributes are unique. Other software components
@@ -495,7 +494,7 @@ public class EntityMetaData extends StaticEntity
 		return getAttributeRec(attrName, getAttributes());
 	}
 
-	public void addAttribute(AttributeMetaData attr, AttributeRole... attrTypes)
+	public EntityMetaData addAttribute(AttributeMetaData attr, AttributeRole... attrTypes)
 	{
 		Iterable<AttributeMetaData> attrs = getEntities(EntityMetaDataMetaData.ATTRIBUTES, AttributeMetaData.class);
 		set(EntityMetaDataMetaData.ATTRIBUTES, concat(attrs, singletonList(attr)));
@@ -519,6 +518,7 @@ public class EntityMetaData extends StaticEntity
 				}
 			}
 		}
+		return this;
 	}
 
 	public void addAttributes(Iterable<AttributeMetaData> attrs)

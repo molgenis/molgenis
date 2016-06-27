@@ -1,21 +1,21 @@
 package org.molgenis.data.support;
 
+import static com.google.common.collect.Maps.newHashMap;
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.StreamSupport.stream;
+
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.Map;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.util.Map;
-
-import static com.google.common.collect.Maps.newHashMap;
-import static java.lang.String.format;
-import static java.util.Collections.emptyList;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
 
 /**
  * Class for entities not defined in pre-existing Java classes
@@ -47,6 +47,18 @@ public class DynamicEntity implements Entity
 		this.values = newHashMap();
 		// FIXME initialize values with hashmap with expected size (at the moment results in NPE)
 		//this.values = newHashMapWithExpectedSize(Iterables.size(entityMeta.getAtomicAttributes()));
+	}
+
+	/**
+	 * Constructs an entity with the given entity meta data and initialized the entity with the given data.
+	 *
+	 * @param entityMeta entity meta
+	 * @param values     map with attribute name-value pairs
+	 */
+	public DynamicEntity(EntityMetaData entityMeta, Map<String, Object> values)
+	{
+		this(entityMeta);
+		values.forEach((key, value) -> set(key, value));
 	}
 
 	// TODO should we return immutable meta data?

@@ -1,5 +1,12 @@
 package org.molgenis.data.annotation;
 
+import static org.molgenis.MolgenisFieldTypes.COMPOUND;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -8,17 +15,10 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
-import org.molgenis.data.vcf.VcfAttributes;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
-import static org.molgenis.MolgenisFieldTypes.COMPOUND;
 
 @Component
 public class CrudRepositoryAnnotator
@@ -133,8 +133,7 @@ public class CrudRepositoryAnnotator
 			for (AttributeMetaData part : attributeMetaDatas)
 			{
 				//compoundAttributeMetaData.addAttributePart(part);
-				if(entityMetaData.getAttribute(part.getName()) == null)
-					entityMetaData.addAttribute(part);
+				if (entityMetaData.getAttribute(part.getName()) == null) entityMetaData.addAttribute(part);
 			}
 			//entityMetaData.addAttribute(compoundAttributeMetaData);
 			dataService.getMeta().updateEntityMeta(entityMetaData);

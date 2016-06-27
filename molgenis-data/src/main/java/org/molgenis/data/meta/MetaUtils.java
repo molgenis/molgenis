@@ -17,19 +17,14 @@ import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 import java.util.List;
 
-import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.security.core.Permission;
-
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
 import org.molgenis.util.EntityUtils;
+
+import com.google.common.collect.Lists;
 
 public class MetaUtils
 {
@@ -73,7 +68,7 @@ public class MetaUtils
 			if (currentAttribute != null)
 			{
 
-				if (!EntityUtils.equals(currentAttribute,attr))
+				if (!EntityUtils.equals(currentAttribute, attr))
 				{
 					throw new MolgenisDataException(
 							"Changing existing attributes is not currently supported. You tried to alter attribute ["
@@ -98,30 +93,5 @@ public class MetaUtils
 		}
 
 		return addedAttributes;
-	}
-
-	/**
-	 * Convert a list of AttributeMetaDataEntity to AttributeMetaData
-	 *
-	 * @param entityMetaData
-	 * @param attributeMetaDataEntities
-	 * @return
-	 */
-	public static Iterable<AttributeMetaData> toExistingAttributeMetaData(EntityMetaData entityMetaData,
-			Iterable<Entity> attributeMetaDataEntities)
-	{
-		return FluentIterable.from(attributeMetaDataEntities).transform(new Function<Entity, AttributeMetaData>()
-		{
-			@Override
-			public AttributeMetaData apply(Entity attributeMetaDataEntity)
-			{
-				String attributeName = attributeMetaDataEntity.getString(AttributeMetaDataMetaData.NAME);
-				AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
-				if (attribute == null) throw new MolgenisDataAccessException(
-						"The attributeMetaData : " + attributeName + " does not exsit in EntityMetaData : "
-								+ entityMetaData.getName());
-				return attribute;
-			}
-		}).toList();
 	}
 }

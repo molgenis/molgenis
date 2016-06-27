@@ -29,6 +29,12 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-test</artifactId>
+            <scope>test</scope>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.elasticsearch</groupId>
             <artifactId>elasticsearch</artifactId>
             <version>1.7.3</version>

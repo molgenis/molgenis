@@ -1,22 +1,14 @@
 package org.molgenis.data.reindex;
 
-import static com.google.common.collect.Multimaps.synchronizedListMultimap;
-import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.REINDEX_ACTION_JOB;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
-import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME;
-
-import java.util.Collection;
-import java.util.Set;
-
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.reindex.meta.ReindexAction;
-import org.molgenis.data.reindex.meta.ReindexActionFactory;
-import org.molgenis.data.reindex.meta.ReindexActionJob;
-import org.molgenis.data.reindex.meta.ReindexActionJobFactory;
-import org.molgenis.data.reindex.meta.ReindexActionMetaData;
+import org.molgenis.data.reindex.meta.*;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,9 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.Set;
+
+import static com.google.common.collect.Multimaps.synchronizedListMultimap;
+import static org.molgenis.data.reindex.meta.ReindexActionGroupMetaData.REINDEX_ACTION_GROUP;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
+import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 
 /**
  * Registers changes made to an indexed repository that need to be fixed by reindexing
@@ -50,11 +46,11 @@ public class ReindexActionRegisterService
 	private ReindexActionFactory reindexActionFactory;
 
 	@Autowired
-	private ReindexActionJobFactory reindexActionJobFactory;
+	private ReindexActionGroupFactory reindexActionGroupFactory;
 
 	public ReindexActionRegisterService()
 	{
-		addExcludedEntity(REINDEX_ACTION_JOB);
+		addExcludedEntity(REINDEX_ACTION_GROUP);
 		addExcludedEntity(REINDEX_ACTION);
 	}
 
@@ -93,7 +89,7 @@ public class ReindexActionRegisterService
 							transactionId, actionOrder);
 				}
 				reindexActionsPerTransaction.put(transactionId,
-						createReindexAction(reindexActionJobFactory.create(transactionId), entityFullName, cudType,
+						createReindexAction(reindexActionGroupFactory.create(transactionId), entityFullName, cudType,
 								dataType, entityId, actionOrder));
 			}
 			else
@@ -116,7 +112,7 @@ public class ReindexActionRegisterService
 		if (!entities.isEmpty())
 		{
 			LOG.debug("Store reindex actions for transaction {}", transactionId);
-			dataService.add(REINDEX_ACTION_JOB, createReindexActionJob(transactionId, entities.size()));
+			dataService.add(REINDEX_ACTION_GROUP, createReindexActionGroup(transactionId, entities.size()));
 			dataService.add(REINDEX_ACTION, entities.stream());
 		}
 	}
@@ -133,24 +129,17 @@ public class ReindexActionRegisterService
 		return !reindexActionsPerTransaction.removeAll(transactionId).isEmpty();
 	}
 
-	public ReindexActionJob createReindexActionJob(String id, int count)
+	public ReindexActionGroup createReindexActionGroup(String id, int count)
 	{
-		ReindexActionJob reindexActionJob = reindexActionJobFactory.create(id);
-		reindexActionJob.setCount(count);
-		return reindexActionJob;
+		return reindexActionGroupFactory.create(id).setCount(count);
 	}
 
-	public ReindexAction createReindexAction(ReindexActionJob reindexActionGroup, String entityFullName,
+	public ReindexAction createReindexAction(ReindexActionGroup reindexActionGroup, String entityFullName,
 			CudType cudType, DataType dataType, String entityId, int actionOrder)
 	{
-		ReindexAction reindexAction = reindexActionFactory.create();
-		reindexAction.setReindexActionGroup(reindexActionGroup);
-		reindexAction.setEntityFullName(entityFullName);
-		reindexAction.setCudType(cudType);
-		reindexAction.setDataType(dataType);
-		reindexAction.setEntityId(entityId);
-		reindexAction.setActionOrder(String.valueOf(actionOrder));
-		reindexAction.setReindexStatus(ReindexActionMetaData.ReindexStatus.PENDING);
-		return reindexAction;
+		return reindexActionFactory.create().setReindexActionGroup(reindexActionGroup).setEntityFullName(entityFullName)
+				.setCudType(cudType).setDataType(dataType).setEntityId(entityId)
+				.setActionOrder(String.valueOf(actionOrder))
+				.setReindexStatus(ReindexStatus.PENDING);
 	}
 }

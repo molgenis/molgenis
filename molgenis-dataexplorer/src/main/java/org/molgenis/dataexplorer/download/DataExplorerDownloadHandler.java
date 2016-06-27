@@ -2,6 +2,7 @@ package org.molgenis.dataexplorer.download;
 
 import static com.google.common.collect.Iterables.filter;
 import static com.google.common.collect.Iterables.transform;
+import static java.util.Objects.requireNonNull;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,6 +17,7 @@ import org.molgenis.data.excel.ExcelSheetWriter;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
 import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
 import org.molgenis.data.support.AbstractWritable.EntityWriteMode;
@@ -26,16 +28,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class DataExplorerDownloadHandler
 {
 	private final DataService dataService;
+	private final AttributeMetaDataFactory attrMetaFactory;
 
 	@Autowired
-	public DataExplorerDownloadHandler(DataService dataService)
+	public DataExplorerDownloadHandler(DataService dataService, AttributeMetaDataFactory attrMetaFactory)
 	{
-		this.dataService = dataService;
+		this.dataService = requireNonNull(dataService);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 	}
 
 	public void writeToExcel(DataRequest dataRequest, OutputStream outputStream) throws IOException
 	{
-		ExcelWriter excelWriter = new ExcelWriter(outputStream, FileFormat.XLSX);
+		ExcelWriter excelWriter = new ExcelWriter(outputStream, attrMetaFactory, FileFormat.XLSX);
 		String entityName = dataRequest.getEntityName();
 
 		QueryImpl<Entity> query = dataRequest.getQuery();

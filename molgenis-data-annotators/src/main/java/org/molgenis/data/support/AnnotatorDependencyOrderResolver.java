@@ -1,6 +1,9 @@
 package org.molgenis.data.support;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
 import java.util.stream.Collectors;
 
 import org.molgenis.MolgenisFieldTypes;
@@ -9,9 +12,9 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 
 import com.google.common.collect.Lists;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
 
 public class AnnotatorDependencyOrderResolver
 {
@@ -35,7 +38,8 @@ public class AnnotatorDependencyOrderResolver
 	}
 
 	private Queue<RepositoryAnnotator> getSingleAnnotatorDependencyList(RepositoryAnnotator selectedAnnotator,
-			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> queue, EntityMetaData emd, EntityMetaDataFactory entityMetaDataFactory)
+			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> queue, EntityMetaData emd,
+			EntityMetaDataFactory entityMetaDataFactory)
 	{
 		EntityMetaData entityMetaData = entityMetaDataFactory.create(emd);
 		resolveAnnotatorDependencies(selectedAnnotator, annotatorList, queue, entityMetaData);

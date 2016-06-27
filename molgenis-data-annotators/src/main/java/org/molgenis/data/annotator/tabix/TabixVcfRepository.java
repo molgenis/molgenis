@@ -17,9 +17,9 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.vcf.VcfAttributes;
 import org.molgenis.data.vcf.VcfReaderFactory;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,13 +36,13 @@ public class TabixVcfRepository extends VcfRepository
 
 	public TabixVcfRepository(File file, String entityName) throws IOException
 	{
-		super(file, entityName);
+		super(file, entityName, null, null, null);
 		tabixReader = new TabixReader(file.getCanonicalPath());
 	}
 
 	TabixVcfRepository(VcfReaderFactory readerFactory, TabixReader tabixReader, String entityName)
 	{
-		super(readerFactory, entityName);
+		super(readerFactory, entityName, null, null, null);
 		this.tabixReader = tabixReader;
 	}
 

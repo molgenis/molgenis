@@ -23,7 +23,7 @@ public class ReindexActionRegisterServiceTest
 	//	@Test
 	//	public void createLog()
 	//	{
-	//		Entity entity = reindexActionRegisterService.createReindexActionJob("1", 5);
+	//		Entity entity = reindexActionRegisterService.createReindexActionGroup("1", 5);
 	//		assertEquals(entity.get(ReindexActionJobMetaData.ID), "1");
 	//		assertEquals(entity.get(ReindexActionJobMetaData.COUNT), 5);
 	//	}
@@ -31,7 +31,7 @@ public class ReindexActionRegisterServiceTest
 	//	@Test
 	//	public void createReindexAction()
 	//	{
-	//		Entity reindexActionJob = reindexActionRegisterService.createReindexActionJob("1", 2);
+	//		Entity reindexActionJob = reindexActionRegisterService.createReindexActionGroup("1", 2);
 	//
 	//		when(dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, "1")).thenReturn(reindexActionJob);
 	//
@@ -59,7 +59,7 @@ public class ReindexActionRegisterServiceTest
 	//	@Test
 	//	public void testLogAndStore()
 	//	{
-	//		DefaultEntity reindexActionJob = reindexActionRegisterService.createReindexActionJob("1", 1);
+	//		DefaultEntity reindexActionJob = reindexActionRegisterService.createReindexActionGroup("1", 1);
 	//		when(dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, "1")).thenReturn(reindexActionJob);
 	//
 	//		EntityMetaData entityMetaData = mock(EntityMetaData.class);
@@ -78,7 +78,7 @@ public class ReindexActionRegisterServiceTest
 	//	@Test
 	//	public void testLogAndForget()
 	//	{
-	//		DefaultEntity reindexActionJob = reindexActionRegisterService.createReindexActionJob("1", 1);
+	//		DefaultEntity reindexActionJob = reindexActionRegisterService.createReindexActionGroup("1", 1);
 	//		when(dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, "1")).thenReturn(reindexActionJob);
 	//
 	//		EntityMetaData entityMetaData = mock(EntityMetaData.class);

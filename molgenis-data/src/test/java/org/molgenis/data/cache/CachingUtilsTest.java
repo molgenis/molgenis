@@ -19,7 +19,7 @@ public class CachingUtilsTest
 	public void beforeClass()
 	{
 		entityManager = mock(EntityManager.class);
-		entityMetaData = 
+		entityMetaData =
 	}
 
 	@Test

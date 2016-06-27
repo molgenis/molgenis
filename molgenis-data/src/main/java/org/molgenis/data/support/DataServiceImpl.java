@@ -1,7 +1,6 @@
 package org.molgenis.data.support;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 import java.util.Iterator;
@@ -48,7 +47,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public synchronized Stream<String> getEntityNames()
 	{
-		return query(ENTITY_META_DATA, EntityMetaData.class).findAll().map(EntityMetaData::getName);
+		return metaDataService.getEntityMetaDatas().map(EntityMetaData::getName);
 	}
 
 	@Override

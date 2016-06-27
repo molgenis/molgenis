@@ -2,25 +2,42 @@ package org.molgenis.data.elasticsearch.reindex.job;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.reindex.meta.ReindexActionJob;
-import org.molgenis.data.reindex.meta.ReindexActionJobMetaData;
+import org.molgenis.data.elasticsearch.reindex.ReindexConfig;
+import org.molgenis.data.reindex.meta.ReindexAction;
+import org.molgenis.data.reindex.meta.ReindexActionFactory;
+import org.molgenis.data.reindex.meta.ReindexActionGroup;
+import org.molgenis.data.reindex.meta.ReindexActionGroupFactory;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.transaction.MolgenisTransaction;
+import org.molgenis.data.transaction.MolgenisTransactionListener;
+import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.mail.MailSender;
+import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RunnableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -31,49 +48,56 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMeta.REINDEX_JOB_EXECUTION;
-import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.REINDEX_ACTION_JOB;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.*;
+import static org.molgenis.data.reindex.meta.ReindexActionGroupMetaData.REINDEX_ACTION_GROUP;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-public class ReindexServiceImplTest
+@ContextConfiguration(classes = { ReindexServiceImplTest.Config.class })
+public class ReindexServiceImplTest extends AbstractMolgenisSpringTest
 {
-	@Mock
-	private DataService dataService;
+	@Autowired
+	private MolgenisUserFactory molgenisUserFactory;
 
-	@Mock
+	@Autowired
+	private ReindexActionFactory reindexActionFactory;
+
+	@Autowired
+	private ReindexActionGroupFactory reindexActionGroupFactory;
+
+	@Autowired
 	private ReindexJobFactory reindexJobFactory;
 
-	@Mock
-	private ReindexJob reindexJob;
+	@Autowired
+	private DataService dataService;
 
-	@Mock
-	private MolgenisUserService molgenisUserService;
+	@Autowired
+	private MolgenisTransactionManager molgenisTransactionManager;
 
-	@Mock
-	private MolgenisUser admin;
+	@Autowired
+	private MolgenisTransactionListener molgenisTransactionListener;
 
-	@Mock
-	private Entity reindexActionJobEntity;
-
-	@Captor
-	private ArgumentCaptor<Runnable> runnableArgumentCaptor;
-
-	private Entity reindexActionEntity;
-
-	@Mock
+	@Autowired
 	private ExecutorService executorService;
 
 	@Mock
 	private Repository<Entity> repository;
 
 	@Mock
+	private MolgenisUserService molgenisUserService;
+
+	@Autowired
+	private ReindexServiceImpl reindexService;
+
+	@Mock
 	private Stream<Entity> jobExecutions;
 
 	@Mock
-	private ReindexActionJobMetaData reindexActionJobMetaData;
-	@InjectMocks
-	private ReindexServiceImpl rebuildIndexService;
+	private ReindexJob reindexJob;
+
+	private MolgenisUser admin;
+	private ReindexAction reindexAction;
+	private ReindexActionGroup reindexActionGroup;
 
 	@Captor
 	private ArgumentCaptor<ReindexJobExecution> reindexJobExecutionCaptor;
@@ -81,33 +105,44 @@ public class ReindexServiceImplTest
 	@Captor
 	private ArgumentCaptor<Query<Entity>> queryCaptor;
 
+	@Captor
+	private ArgumentCaptor<Runnable> runnableArgumentCaptor;
+
+	@Autowired
+	private Config config;
+
 	@BeforeClass
 	public void setUp() throws Exception
 	{
-		initMocks(this);
-		reindexActionEntity = new ReindexActionJob(reindexActionJobMetaData);
-		reindexActionEntity.set(ENTITY_FULL_NAME, "test_TestEntity");
+		reindexAction = reindexActionFactory.create();
+		reindexAction.setEntityFullName("test_TestEntity");
+		reindexActionGroup = reindexActionGroupFactory.create();
+		admin = molgenisUserFactory.create();
+		admin.setUsername("admin");
+
+		verify(molgenisTransactionManager).addTransactionListener(molgenisTransactionListener);
 	}
 
-	@AfterMethod
-	public void afterMethod()
+	@BeforeMethod
+	public void beforeMethod() throws Exception
 	{
-		reset(dataService, reindexJobFactory, reindexJob, molgenisUserService, admin, reindexActionJobEntity,
-				executorService, repository, jobExecutions);
+		initMocks(this);
+		config.resetMocks();
 	}
 
 	@Test
 	public void testRebuildIndex() throws Exception
 	{
-		when(dataService.findOneById(REINDEX_ACTION_JOB, "abcde")).thenReturn(reindexActionJobEntity);
+		when(dataService.findOneById(REINDEX_ACTION_GROUP, "abcde", ReindexActionGroup.class))
+				.thenReturn(reindexActionGroup);
 
-		when(dataService.findAll(REINDEX_ACTION, new QueryImpl<>().eq(REINDEX_ACTION_GROUP, reindexActionJobEntity)))
-				.thenReturn(Stream.of(reindexActionEntity));
+		when(dataService.findAll(REINDEX_ACTION, new QueryImpl<>().eq(REINDEX_ACTION_GROUP, reindexActionGroup)))
+				.thenReturn(Stream.of(reindexAction));
 
 		when(reindexJobFactory.createJob(reindexJobExecutionCaptor.capture())).thenReturn(reindexJob);
 		when(molgenisUserService.getUser("admin")).thenReturn(admin);
 
-		rebuildIndexService.rebuildIndex("abcde");
+		reindexService.rebuildIndex("abcde");
 
 		ReindexJobExecution reindexJobExecution = reindexJobExecutionCaptor.getValue();
 		assertEquals(reindexJobExecution.getReindexActionJobID(), "abcde");
@@ -124,9 +159,9 @@ public class ReindexServiceImplTest
 	@Test
 	public void testRebuildIndexDoesNothingIfNoReindexActionJobIsFound() throws Exception
 	{
-		when(dataService.findOneById(REINDEX_ACTION_JOB, "abcde")).thenReturn(null);
+		when(dataService.findOneById(REINDEX_ACTION_GROUP, "abcde")).thenReturn(null);
 
-		rebuildIndexService.rebuildIndex("abcde");
+		reindexService.rebuildIndex("abcde");
 
 		verify(reindexJobFactory, never()).createJob(any());
 		verify(executorService, never()).submit(reindexJob);
@@ -139,7 +174,8 @@ public class ReindexServiceImplTest
 		when(repository.query()).thenReturn(new QueryImpl<>(repository));
 		when(repository.findAll(queryCaptor.capture())).thenReturn(jobExecutions);
 		when(dataService.hasRepository(REINDEX_JOB_EXECUTION)).thenReturn(true);
-		rebuildIndexService.cleanupJobExecutions();
+
+		reindexService.cleanupJobExecutions();
 
 		verify(dataService).delete(REINDEX_JOB_EXECUTION, jobExecutions);
 
@@ -156,6 +192,68 @@ public class ReindexServiceImplTest
 		long ago = System.currentTimeMillis() - date.getTime();
 		assertTrue(ago > MINUTES.toMillis(5));
 		assertTrue(ago < MINUTES.toMillis(5) + SECONDS.toMillis(3));
+	}
+
+	@ComponentScan(basePackages = {
+			"org.molgenis.data.elasticsearch.reindex, org.molgenis.data.jobs.model, org.molgenis.auth" })
+	@Configuration
+	@Import({ ReindexConfig.class })
+	public static class Config
+	{
+		@Mock
+		private DataService dataService;
+
+		@Mock
+		private ReindexJobFactory reindexJobFactory;
+
+		@Mock
+		private ExecutorService executorService;
+
+		@Mock
+		private MailSender mailSender;
+
+		@Mock
+		private MolgenisTransactionManager molgenisTransactionManager;
+
+		public Config()
+		{
+			initMocks(this);
+		}
+
+		private void resetMocks()
+		{
+			Mockito.reset(dataService, reindexJobFactory, executorService, mailSender);
+		}
+
+		@Bean
+		public DataService dataService()
+		{
+			return dataService;
+		}
+
+		@Bean
+		public ReindexJobFactory reindexJobFactory()
+		{
+			return reindexJobFactory;
+		}
+
+		@Bean
+		public ExecutorService executorService()
+		{
+			return executorService;
+		}
+
+		@Bean
+		public MolgenisTransactionManager molgenisTransactionManager()
+		{
+			return molgenisTransactionManager;
+		}
+
+		@Bean
+		public MailSender mailSender()
+		{
+			return mailSender;
+		}
 	}
 
 }
