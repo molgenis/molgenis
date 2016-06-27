@@ -13,8 +13,7 @@ import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
-import org.molgenis.data.reindex.meta.ReindexAction;
-import org.molgenis.data.reindex.meta.ReindexActionGroup;
+import org.molgenis.data.reindex.meta.*;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -65,6 +64,10 @@ public class ReindexJobTest extends AbstractMolgenisSpringTest
 	private DataService dataService;
 	@Autowired
 	private EntityTestHarness harness;
+	@Autowired
+	private ReindexActionFactory reindexActionFactory;
+	@Autowired
+	private ReindexActionGroupFactory reindexActionGroupFactory;
 
 	private final String transactionId = "aabbcc";
 
@@ -79,7 +82,7 @@ public class ReindexJobTest extends AbstractMolgenisSpringTest
 		initMocks(this);
 		config.resetMocks();
 		reindexJob = new ReindexJob(progress, authentication, transactionId, dataService, searchService);
-		reindexActionGroup = reindexActionRegisterService.createReindexActionGroup(transactionId, 0);
+		reindexActionGroup = reindexActionGroupFactory.create(transactionId).setCount(0);
 		when(dataService.findOneById(REINDEX_ACTION_GROUP, transactionId, ReindexActionGroup.class))
 				.thenReturn(reindexActionGroup);
 		when(dataService.getMeta()).thenReturn(mds);
@@ -129,8 +132,9 @@ public class ReindexJobTest extends AbstractMolgenisSpringTest
 	@Test
 	public void rebuildIndexDeleteSingleEntityTest()
 	{
-		ReindexAction reindexAction = reindexActionRegisterService
-				.createReindexAction(reindexActionGroup, "test", CudType.DELETE, DataType.DATA, "entityId", 0);
+		ReindexAction reindexAction = reindexActionFactory.create().setReindexActionGroup(reindexActionGroup)
+				.setEntityFullName("test").setCudType(CudType.DELETE).setDataType(DataType.DATA).setEntityId("entityId")
+				.setActionOrder(0).setReindexStatus(ReindexActionMetaData.ReindexStatus.PENDING);
 		mockGetAllReindexActions(of(reindexAction));
 		reindexActionGroup.setCount(1);
 
@@ -166,8 +170,9 @@ public class ReindexJobTest extends AbstractMolgenisSpringTest
 
 	private void rebuildIndexSingleEntityTest(CudType cudType, IndexingMode indexingMode)
 	{
-		ReindexAction reindexAction = reindexActionRegisterService
-				.createReindexAction(reindexActionGroup, "test", cudType, DataType.DATA, "entityId", 0);
+		ReindexAction reindexAction = reindexActionFactory.create().setReindexActionGroup(reindexActionGroup)
+				.setEntityFullName("test").setCudType(cudType).setDataType(DataType.DATA).setEntityId("entityId")
+				.setActionOrder(0).setReindexStatus(ReindexActionMetaData.ReindexStatus.PENDING);
 		mockGetAllReindexActions(of(reindexAction));
 		reindexActionGroup.setCount(1);
 
@@ -207,8 +212,9 @@ public class ReindexJobTest extends AbstractMolgenisSpringTest
 
 	private void rebuildIndexBatchEntitiesTest(CudType cudType)
 	{
-		ReindexAction reindexAction = reindexActionRegisterService
-				.createReindexAction(reindexActionGroup, "test", cudType, DataType.DATA, null, 0);
+		ReindexAction reindexAction = reindexActionFactory.create().setReindexActionGroup(reindexActionGroup)
+				.setEntityFullName("test").setCudType(cudType).setDataType(DataType.DATA).setEntityId(null)
+				.setActionOrder(0).setReindexStatus(ReindexActionMetaData.ReindexStatus.PENDING);
 		mockGetAllReindexActions(of(reindexAction));
 		reindexActionGroup.setCount(1);
 
@@ -242,8 +248,9 @@ public class ReindexJobTest extends AbstractMolgenisSpringTest
 
 	private void rebuildIndexMetaDataTest(CudType cudType)
 	{
-		ReindexAction reindexAction = reindexActionRegisterService
-				.createReindexAction(reindexActionGroup, "test", cudType, DataType.METADATA, null, 0);
+		ReindexAction reindexAction = reindexActionFactory.create().setReindexActionGroup(reindexActionGroup)
+				.setEntityFullName("test").setCudType(cudType).setDataType(DataType.METADATA).setEntityId(null)
+				.setActionOrder(0).setReindexStatus(ReindexActionMetaData.ReindexStatus.PENDING);
 		mockGetAllReindexActions(of(reindexAction));
 		reindexActionGroup.setCount(1);
 
@@ -273,8 +280,9 @@ public class ReindexJobTest extends AbstractMolgenisSpringTest
 	@Test
 	public void rebuildIndexDeleteMetaDataEntityTest()
 	{
-		ReindexAction reindexAction = reindexActionRegisterService
-				.createReindexAction(reindexActionGroup, "test", CudType.DELETE, DataType.METADATA, null, 0);
+		ReindexAction reindexAction = reindexActionFactory.create().setReindexActionGroup(reindexActionGroup)
+				.setEntityFullName("test").setCudType(CudType.DELETE).setDataType(DataType.METADATA).setEntityId(null)
+				.setActionOrder(0).setReindexStatus(ReindexActionMetaData.ReindexStatus.PENDING);
 		mockGetAllReindexActions(of(reindexAction));
 		reindexActionGroup.setCount(1);
 
@@ -297,14 +305,20 @@ public class ReindexJobTest extends AbstractMolgenisSpringTest
 	@Test
 	public void reindexSingleEntitySearchServiceThrowsExceptionOnSecondEntityId()
 	{
-		ReindexAction reindexAction1 = reindexActionRegisterService
-				.createReindexAction(reindexActionGroup, "test", CudType.DELETE, DataType.DATA, "entityId1", 0);
+		ReindexAction reindexAction1 = reindexActionFactory.create().setReindexActionGroup(reindexActionGroup)
+				.setEntityFullName("test").setCudType(CudType.DELETE).setDataType(DataType.DATA)
+				.setEntityId("entityId1").setActionOrder(0)
+				.setReindexStatus(ReindexActionMetaData.ReindexStatus.PENDING);
 
-		ReindexAction reindexAction2 = reindexActionRegisterService
-				.createReindexAction(reindexActionGroup, "test", CudType.DELETE, DataType.DATA, "entityId2", 1);
+		ReindexAction reindexAction2 = reindexActionFactory.create().setReindexActionGroup(reindexActionGroup)
+				.setEntityFullName("test").setCudType(CudType.DELETE).setDataType(DataType.DATA)
+				.setEntityId("entityId2").setActionOrder(1)
+				.setReindexStatus(ReindexActionMetaData.ReindexStatus.PENDING);
 
-		ReindexAction reindexAction3 = reindexActionRegisterService
-				.createReindexAction(reindexActionGroup, "test", CudType.DELETE, DataType.DATA, "entityId3", 2);
+		ReindexAction reindexAction3 = reindexActionFactory.create().setReindexActionGroup(reindexActionGroup)
+				.setEntityFullName("test").setCudType(CudType.DELETE).setDataType(DataType.DATA)
+				.setEntityId("entityId3").setActionOrder(2)
+				.setReindexStatus(ReindexActionMetaData.ReindexStatus.PENDING);
 
 		mockGetAllReindexActions(of(reindexAction1, reindexAction2, reindexAction3));
 		reindexActionGroup.setCount(3);

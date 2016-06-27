@@ -25,6 +25,11 @@ public class ReindexActionGroup extends StaticEntity
 		set(ID, id);
 	}
 
+	public String getId()
+	{
+		return getString(ID);
+	}
+
 	public int getCount()
 	{
 		Integer count = getInt(COUNT);
