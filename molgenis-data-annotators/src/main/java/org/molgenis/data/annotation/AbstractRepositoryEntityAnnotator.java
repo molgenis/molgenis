@@ -7,7 +7,6 @@ import java.util.List;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AbstractRepositoryEntityAnnotator extends AbstractRepositoryAnnotator
 {

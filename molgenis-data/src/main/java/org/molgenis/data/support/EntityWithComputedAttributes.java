@@ -1,6 +1,5 @@
 package org.molgenis.data.support;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import org.molgenis.data.Entity;
@@ -8,18 +7,21 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 
+import autovalue.shaded.com.google.common.common.collect.Maps;
+
 /**
  * Entity decorator that computes computed attributes.
  */
-public class EntityWithComputedAttributes extends AbstractEntity
+public class EntityWithComputedAttributes extends DynamicEntity
 {
 	private static final long serialVersionUID = 1L;
 
-	private final Map<String, ExpressionEvaluator> expressionEvaluators = new HashMap<String, ExpressionEvaluator>();
+	private final Map<String, ExpressionEvaluator> expressionEvaluators;
 
 	public EntityWithComputedAttributes(Entity entity)
 	{
-		this.entity = entity;
+		super(entity.getEntityMetaData());
+		expressionEvaluators = Maps.newHashMap();
 		EntityMetaData emd = entity.getEntityMetaData();
 		for (AttributeMetaData amd : emd.getAtomicAttributes())
 		{
@@ -30,26 +32,6 @@ public class EntityWithComputedAttributes extends AbstractEntity
 		}
 	}
 
-	private final Entity entity;
-
-	@Override
-	public EntityMetaData getEntityMetaData()
-	{
-		return entity.getEntityMetaData();
-	}
-
-	@Override
-	public Iterable<String> getAttributeNames()
-	{
-		return entity.getAttributeNames();
-	}
-
-	@Override
-	public Object getIdValue()
-	{
-		return entity.getIdValue();
-	}
-
 	@Override
 	public Object get(String attributeName)
 	{
@@ -58,7 +40,7 @@ public class EntityWithComputedAttributes extends AbstractEntity
 		{
 			return expressionEvaluator.evaluate(this);
 		}
-		return entity.get(attributeName);
+		return super.get(attributeName);
 	}
 
 	@Override
@@ -68,13 +50,6 @@ public class EntityWithComputedAttributes extends AbstractEntity
 		{
 			throw new MolgenisDataException("Attribute " + attributeName + "is computed");
 		}
-		entity.set(attributeName, value);
+		super.set(attributeName, value);
 	}
-
-	@Override
-	public void set(Entity values)
-	{
-		entity.set(values);
-	}
-
 }

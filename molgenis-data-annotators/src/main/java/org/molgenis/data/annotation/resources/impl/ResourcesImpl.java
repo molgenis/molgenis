@@ -1,5 +1,10 @@
 package org.molgenis.data.annotation.resources.impl;
 
+import static java.util.stream.Collectors.toMap;
+
+import java.util.Map;
+import java.util.Set;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -11,11 +16,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
-import java.util.Set;
-
-import static java.util.stream.Collectors.toMap;
 
 @Component
 public class ResourcesImpl implements Resources

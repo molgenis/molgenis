@@ -1,6 +1,6 @@
 package org.molgenis.data.system;
 
-import static org.molgenis.data.meta.system.FreemarkerTemplateMetaData.FREEMARKER_TEMPLATE;
+import static org.molgenis.data.system.core.FreemarkerTemplateMetaData.FREEMARKER_TEMPLATE;
 
 import java.io.IOException;
 import java.io.Reader;

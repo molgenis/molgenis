@@ -10,9 +10,12 @@ import java.util.Set;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.vcf.format.VcfToEntity;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.vcf.VcfReader;
 import org.molgenis.vcf.VcfRecord;
 import org.molgenis.vcf.meta.VcfMeta;
@@ -38,20 +41,28 @@ public class VcfRepository extends AbstractRepository
 	public static final String ORIGINAL_NAME = "ORIGINAL_NAME";
 	public static final String PREFIX = "##";
 
+	private final VcfReaderFactory vcfReaderFactory;
 	private final String entityName;
-	protected Supplier<VcfToEntity> vcfToEntitySupplier;
-	private VcfReaderFactory vcfReaderFactory;
+	private final VcfAttributes vcfAttributes;
+	private final EntityMetaDataFactory entityMetaFactory;
+	private final AttributeMetaDataFactory attrMetaFactory;
+	protected final Supplier<VcfToEntity> vcfToEntitySupplier;
 
-	public VcfRepository(File file, String entityName) throws IOException
+	public VcfRepository(File file, String entityName, VcfAttributes vcfAttributes,
+			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory) throws IOException
 	{
-		this(new VcfReaderFactoryImpl(file), entityName);
+		this(new VcfReaderFactoryImpl(file), entityName, vcfAttributes, entityMetaFactory, attrMetaFactory);
 	}
 
-	protected VcfRepository(VcfReaderFactory vcfReaderFactory, String entityName)
+	protected VcfRepository(VcfReaderFactory vcfReaderFactory, String entityName, VcfAttributes vcfAttributes,
+			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
 	{
+		this.vcfReaderFactory = requireNonNull(vcfReaderFactory);
 		this.entityName = requireNonNull(entityName);
-		this.vcfReaderFactory = vcfReaderFactory;
-		this.vcfToEntitySupplier = Suppliers.<VcfToEntity> memoize(this::parseVcfMeta);
+		this.vcfAttributes = requireNonNull(vcfAttributes);
+		this.entityMetaFactory = requireNonNull(entityMetaFactory);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
+		this.vcfToEntitySupplier = Suppliers.memoize(this::parseVcfMeta);
 	}
 
 	private VcfToEntity parseVcfMeta()
@@ -60,7 +71,7 @@ public class VcfRepository extends AbstractRepository
 		try
 		{
 			VcfMeta vcfMeta = reader.getVcfMeta();
-			return new VcfToEntity(entityName, vcfMeta);
+			return new VcfToEntity(entityName, vcfMeta, vcfAttributes, entityMetaFactory, attrMetaFactory);
 		}
 		catch (Exception e)
 		{

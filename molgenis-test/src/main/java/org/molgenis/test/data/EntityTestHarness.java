@@ -4,19 +4,23 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.fieldtypes.FieldType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static com.google.common.collect.Lists.newArrayList;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.MolgenisFieldTypes.*;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
 
 @Component
-public class DynamicEntityTestHarness
+public class EntityTestHarness
 {
 	public static final String ATTR_ID = "id_attr";
 	public static final String ATTR_STRING = "string_attr";
@@ -41,39 +45,59 @@ public class DynamicEntityTestHarness
 	private PackageFactory packageFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private AttributeMetaDataFactory attributeMetaDataFactory;
+
 	private Package testPackage;
 
-	public EntityMetaData createRefEntityMetaData()
+	@PostConstruct
+	public void postConstruct()
 	{
-		testPackage = packageFactory.create("test");
-		EntityMetaData result = entityMetaDataFactory.create();
-		result.setPackage(testPackage);
-		result.setSimpleName("TypeTestRef");
-		AttributeMetaData idAttribute = attributeMetaDataFactory.create();
-		idAttribute.setName(ATTR_REF_ID);
-		AttributeMetaData labelAttribute = attributeMetaDataFactory.create();
-		labelAttribute.setName(ATTR_STRING);
+//		testPackage = packageFactory.create("test");
+	}
 
-		result.setIdAttribute(idAttribute);
-		result.setLabelAttribute(labelAttribute);
-		result.addAttributes(newArrayList(idAttribute, labelAttribute));
-		return result;
+	public EntityMetaData createDynamicRefEntityMetaData()
+	{
+		return entityMetaDataFactory.create().setPackage(testPackage).setSimpleName("TypeTestRef")
+				.addAttribute(createAttribute(ATTR_REF_ID, STRING), ROLE_ID)
+				.addAttribute(createAttribute(ATTR_REF_STRING, STRING), ROLE_LABEL);
+	}
+
+	public EntityMetaData createDynamicTestEntityMetaData()
+	{
+		EntityMetaData refEntityMetaData = createDynamicRefEntityMetaData();
+		return entityMetaDataFactory.create().setPackage(testPackage).setSimpleName("TypeTest")
+				.addAttribute(createAttribute(ATTR_ID, STRING).setAuto(true), ROLE_ID)
+				.addAttribute(createAttribute(ATTR_STRING, STRING), ROLE_LABEL)
+				.addAttribute(createAttribute(ATTR_BOOL, BOOL))
+				.addAttribute(createAttribute(ATTR_CATEGORICAL, CATEGORICAL).setRefEntity(refEntityMetaData))
+				.addAttribute(createAttribute(ATTR_CATEGORICAL_MREF, CATEGORICAL_MREF).setRefEntity(refEntityMetaData))
+				.addAttribute(createAttribute(ATTR_DATE, DATE)).addAttribute(createAttribute(ATTR_DATETIME, DATETIME))
+				.addAttribute(createAttribute(ATTR_EMAIL, EMAIL)).addAttribute(createAttribute(ATTR_DECIMAL, DECIMAL))
+				.addAttribute(createAttribute(ATTR_HTML, HTML)).addAttribute(createAttribute(ATTR_HYPERLINK, HYPERLINK))
+				.addAttribute(createAttribute(ATTR_LONG, LONG)).addAttribute(createAttribute(ATTR_INT, INT))
+				.addAttribute(createAttribute(ATTR_SCRIPT, SCRIPT))
+				.addAttribute(createAttribute(ATTR_XREF, XREF).setRefEntity(refEntityMetaData))
+				.addAttribute(createAttribute(ATTR_MREF, MREF).setRefEntity(refEntityMetaData));
+	}
+
+	private AttributeMetaData createAttribute(String name, FieldType fieldType)
+	{
+		return attributeMetaDataFactory.create().setName(name).setDataType(fieldType);
 	}
 
 	public List<Entity> createTestRefEntities(EntityMetaData refEntityMetaData, int numberOfEntities)
 	{
 		return IntStream.range(0, numberOfEntities).mapToObj(i -> createRefEntity(refEntityMetaData, i))
-				.collect(Collectors.toList());
+				.collect(toList());
 	}
 
 	public Stream<Entity> createTestEntities(EntityMetaData entityMetaData, int numberOfEntities,
 			List<Entity> refEntities)
 	{
-		return IntStream.range(0, numberOfEntities+1)
+		return IntStream.range(0, numberOfEntities + 1)
 				.mapToObj(i -> createEntity(entityMetaData, i, refEntities.get(i % refEntities.size())));
 	}
 

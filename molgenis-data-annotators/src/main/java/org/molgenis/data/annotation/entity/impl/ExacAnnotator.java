@@ -1,5 +1,14 @@
 package org.molgenis.data.annotation.entity.impl;
 
+import static org.molgenis.MolgenisFieldTypes.DECIMAL;
+import static org.molgenis.MolgenisFieldTypes.INT;
+import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.data.annotator.websettings.ExacAnnotatorSettings.Meta.EXAC_LOCATION;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
@@ -19,17 +28,10 @@ import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
-import org.molgenis.data.vcf.VcfAttributes;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.molgenis.MolgenisFieldTypes.*;
-import static org.molgenis.data.annotator.websettings.ExacAnnotatorSettings.Meta.EXAC_LOCATION;
 
 @Configuration
 public class ExacAnnotator implements AnnotatorConfig
@@ -69,7 +71,8 @@ public class ExacAnnotator implements AnnotatorConfig
 
 	@Bean
 	public RepositoryAnnotator exac()
-	{		annotator = new RepositoryAnnotatorImpl(NAME);
+	{
+		annotator = new RepositoryAnnotatorImpl(NAME);
 		return annotator;
 	}
 
@@ -106,17 +109,18 @@ public class ExacAnnotator implements AnnotatorConfig
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator(vcfAttributes);
 		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(resourceMetaData);
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(EXAC_TABIX_RESOURCE, exacInfo, locusQueryCreator,
-		multiAllelicResultFilter, dataService, resources, new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(
-				EXAC_LOCATION, exacAnnotatorSettings))
+				multiAllelicResultFilter, dataService, resources,
+				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(EXAC_LOCATION, exacAnnotatorSettings))
 		{
-			@Override protected Object getResourceAttributeValue (AttributeMetaData attr, Entity sourceEntity)
+			@Override
+			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity sourceEntity)
 			{
 				String attrName = EXAC_AF.equals(attr.getName()) ? EXAC_AF_ResourceAttributeName : EXAC_AC_HOM
 						.equals(attr.getName()) ? EXAC_AC_HOM_ResourceAttributeName : EXAC_AC_HET
 						.equals(attr.getName()) ? EXAC_AC_HET_ResourceAttributeName : attr.getName();
 				return sourceEntity.get(attrName);
 			}
-		} ;
+		};
 
 		annotator.init(entityAnnotator);
 	}

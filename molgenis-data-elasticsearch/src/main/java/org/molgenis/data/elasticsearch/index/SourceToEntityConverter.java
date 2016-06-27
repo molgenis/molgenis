@@ -1,17 +1,7 @@
 package org.molgenis.data.elasticsearch.index;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.Iterator;
-import java.util.Map;
-import java.util.stream.StreamSupport;
-
 import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityManager;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -19,16 +9,20 @@ import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Iterator;
+import java.util.Map;
+import java.util.stream.StreamSupport;
+
+import static java.util.Objects.requireNonNull;
+
 @Component
 public class SourceToEntityConverter
 {
-	private final DataService dataService;
 	private final EntityManager entityManager;
 
 	@Autowired
-	public SourceToEntityConverter(DataService dataService, EntityManager entityManager)
+	public SourceToEntityConverter(EntityManager entityManager)
 	{
-		this.dataService = requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
 	}
 

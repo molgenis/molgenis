@@ -35,8 +35,8 @@ import org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
@@ -92,9 +92,6 @@ public class DataExplorerController extends MolgenisPluginController
 	public static final String MOD_DATA = "data";
 
 	@Autowired
-	private AppSettings appSettings;
-
-	@Autowired
 	private DataExplorerSettings dataExplorerSettings;
 
 	@Autowired
@@ -117,6 +114,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	@Autowired
 	private LanguageService languageService;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
 
 	public DataExplorerController()
 	{
@@ -322,7 +322,7 @@ public class DataExplorerController extends MolgenisPluginController
 	public void download(@RequestParam("dataRequest") String dataRequestStr, HttpServletResponse response)
 			throws IOException
 	{
-		DataExplorerDownloadHandler download = new DataExplorerDownloadHandler(dataService);
+		DataExplorerDownloadHandler download = new DataExplorerDownloadHandler(dataService, attrMetaFactory);
 
 		// Workaround because binding with @RequestBody is not possible:
 		// http://stackoverflow.com/a/9970672
@@ -364,7 +364,7 @@ public class DataExplorerController extends MolgenisPluginController
 		boolean galaxyEnabled = dataExplorerSettings.getGalaxyExport();
 		if (!galaxyEnabled) throw new MolgenisDataAccessException("Galaxy export disabled");
 
-		DataExplorerDownloadHandler download = new DataExplorerDownloadHandler(dataService);
+		DataExplorerDownloadHandler download = new DataExplorerDownloadHandler(dataService, attrMetaFactory);
 
 		String galaxyUrl = galaxyDataExportRequest.getGalaxyUrl();
 		String galaxyApiKey = galaxyDataExportRequest.getGalaxyApiKey();

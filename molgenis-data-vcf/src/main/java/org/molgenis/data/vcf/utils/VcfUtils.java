@@ -1,16 +1,16 @@
 package org.molgenis.data.vcf.utils;
 
-import static org.molgenis.data.vcf.VcfAttributes.ALT;
-import static org.molgenis.data.vcf.VcfAttributes.CHROM;
-import static org.molgenis.data.vcf.VcfAttributes.FILTER;
-import static org.molgenis.data.vcf.VcfAttributes.FORMAT_GT;
-import static org.molgenis.data.vcf.VcfAttributes.ID;
-import static org.molgenis.data.vcf.VcfAttributes.INFO;
-import static org.molgenis.data.vcf.VcfAttributes.POS;
-import static org.molgenis.data.vcf.VcfAttributes.QUAL;
-import static org.molgenis.data.vcf.VcfAttributes.REF;
-import static org.molgenis.data.vcf.VcfAttributes.SAMPLES;
 import static org.molgenis.data.vcf.VcfRepository.NAME;
+import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
+import static org.molgenis.data.vcf.model.VcfAttributes.CHROM;
+import static org.molgenis.data.vcf.model.VcfAttributes.FILTER;
+import static org.molgenis.data.vcf.model.VcfAttributes.FORMAT_GT;
+import static org.molgenis.data.vcf.model.VcfAttributes.ID;
+import static org.molgenis.data.vcf.model.VcfAttributes.INFO;
+import static org.molgenis.data.vcf.model.VcfAttributes.POS;
+import static org.molgenis.data.vcf.model.VcfAttributes.QUAL;
+import static org.molgenis.data.vcf.model.VcfAttributes.REF;
+import static org.molgenis.data.vcf.model.VcfAttributes.SAMPLES;
 
 import java.io.BufferedWriter;
 import java.io.File;

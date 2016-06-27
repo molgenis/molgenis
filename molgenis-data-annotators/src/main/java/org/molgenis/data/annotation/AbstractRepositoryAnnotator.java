@@ -7,7 +7,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.springframework.transaction.annotation.Transactional;
 
 public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 {

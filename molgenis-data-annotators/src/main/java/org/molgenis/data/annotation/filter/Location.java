@@ -1,7 +1,7 @@
 package org.molgenis.data.annotation.filter;
 
-import static org.molgenis.data.vcf.VcfAttributes.CHROM;
-import static org.molgenis.data.vcf.VcfAttributes.POS;
+import static org.molgenis.data.vcf.model.VcfAttributes.CHROM;
+import static org.molgenis.data.vcf.model.VcfAttributes.POS;
 
 import org.molgenis.data.Entity;
 

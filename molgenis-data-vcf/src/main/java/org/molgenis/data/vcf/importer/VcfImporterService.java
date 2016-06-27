@@ -24,7 +24,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.GenericImporterExtensions;
-import org.molgenis.data.vcf.VcfAttributes;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.permission.PermissionSystemService;

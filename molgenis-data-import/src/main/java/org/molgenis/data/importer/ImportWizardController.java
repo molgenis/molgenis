@@ -220,22 +220,28 @@ public class ImportWizardController extends AbstractWizardController
 					.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + entityClassId.toUpperCase())
 					|| userAccountService.getCurrentUser().isSuperuser()))
 			{
-				if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString())
-						|| value.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
+				if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString()) || value
+						.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
 				{
 					authority.setMolgenisGroup(dataService.findOneById(MOLGENIS_GROUP, groupId, MolgenisGroup.class));
-					authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
-							+ entityClassId.toUpperCase());
+					authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId
+							.toUpperCase());
 					if (authority.getId() == null)
 					{
 						authority.setId(UUID.randomUUID().toString());
 						dataService.add(GROUP_AUTHORITY, authority);
 					}
-					else dataService.update(GROUP_AUTHORITY, authority);
+					else
+					{
+						dataService.update(GROUP_AUTHORITY, authority);
+					}
 				}
 				else if (value.equalsIgnoreCase(NONE.toString()))
 				{
-					if (authority.getId() != null) dataService.deleteById(GROUP_AUTHORITY, authority.getId());
+					if (authority.getId() != null)
+					{
+						dataService.deleteById(GROUP_AUTHORITY, authority.getId());
+					}
 				}
 				else
 				{
@@ -255,8 +261,7 @@ public class ImportWizardController extends AbstractWizardController
 	{
 		return dataService.findAll(GROUP_AUTHORITY,
 				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.MOLGENIS_GROUP, molgenisGroup),
-				GroupAuthority.class)
-				.collect(Collectors.toList());
+				GroupAuthority.class).collect(Collectors.toList());
 	}
 
 	private Permissions createPermissions(List<? extends Authority> entityAuthorities, List<String> entityIds)
@@ -321,12 +326,12 @@ public class ImportWizardController extends AbstractWizardController
 		Stream<GroupAuthority> stream = dataService.findAll(GROUP_AUTHORITY,
 				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.MOLGENIS_GROUP, groupId),
 				GroupAuthority.class);
-		for (Iterator<GroupAuthority> it = stream.iterator(); it.hasNext();)
+		for (Iterator<GroupAuthority> it = stream.iterator(); it.hasNext(); )
 		{
 			GroupAuthority groupAuthority = it.next();
 			String entity = "";
-			if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX)
-					|| groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX))
+			if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX) || groupAuthority
+					.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX))
 			{
 				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX.length());
 			}
@@ -421,8 +426,8 @@ public class ImportWizardController extends AbstractWizardController
 	private String getFilename(String originalFileName, String entityName)
 	{
 		String filename;
-		String extension = FileExtensionUtils.findExtensionFromPossibilities(originalFileName,
-				GenericImporterExtensions.getAll());
+		String extension = FileExtensionUtils
+				.findExtensionFromPossibilities(originalFileName, GenericImporterExtensions.getAll());
 		if (entityName == null)
 		{
 			filename = originalFileName;
@@ -430,7 +435,7 @@ public class ImportWizardController extends AbstractWizardController
 		else
 		{
 			filename = entityName + "." + extension;
-			if (!extension.equals("vcf") && (!extension.equals("vcf.gz")&&(!extension.equals("vcf.zip"))))
+			if (!extension.equals("vcf") && (!extension.equals("vcf.gz") && (!extension.equals("vcf.zip"))))
 				LOG.warn("Specifing a filename for a non-VCF file has no effect on entity names.");
 		}
 		return filename;
@@ -469,13 +474,14 @@ public class ImportWizardController extends AbstractWizardController
 			}
 			catch (IllegalArgumentException e)
 			{
-				throw new IllegalArgumentException("Invalid action:[" + action.toUpperCase() + "] valid values: "
-						+ (Arrays.toString(DatabaseAction.values())));
+				throw new IllegalArgumentException(
+						"Invalid action:[" + action.toUpperCase() + "] valid values: " + (Arrays
+								.toString(DatabaseAction.values())));
 			}
 		}
 
-		String extension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
-				GenericImporterExtensions.getAll());
+		String extension = FileExtensionUtils
+				.findExtensionFromPossibilities(file.getName(), GenericImporterExtensions.getAll());
 
 		if (extension.equals("vcf") || extension.equals("vcf.gz") || extension.equals("vcf.zip"))
 		{

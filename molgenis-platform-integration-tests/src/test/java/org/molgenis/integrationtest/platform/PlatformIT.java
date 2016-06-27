@@ -1,23 +1,27 @@
 package org.molgenis.integrationtest.platform;
 
-import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Stream.concat;
-import static java.util.stream.Stream.generate;
-import static java.util.stream.Stream.of;
-import static org.molgenis.data.RepositoryCapability.MANAGABLE;
-import static org.molgenis.data.RepositoryCapability.QUERYABLE;
-import static org.molgenis.data.RepositoryCapability.WRITABLE;
-import static org.molgenis.data.Sort.Direction.DESC;
-import static org.molgenis.integrationtest.data.harness.EntitiesHarness.ATTR_ID;
-import static org.molgenis.integrationtest.data.harness.EntitiesHarness.ATTR_STRING;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-import static org.testng.Assert.fail;
+import com.google.common.collect.Iterators;
+import org.apache.commons.io.FileUtils;
+import org.molgenis.data.*;
+import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
+import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.molgenis.test.data.EntityTestHarness;
+import org.molgenis.test.data.TestEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.test.context.ContextConfiguration;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,39 +31,8 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.apache.commons.io.FileUtils;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.Sort;
-import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
-import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.PackageImpl;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.integrationtest.data.harness.EntitiesHarness;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
-
-import com.google.common.collect.Iterators;
 
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
@@ -67,13 +40,12 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.Sort.Direction.DESC;
-import static org.molgenis.integrationtest.data.harness.EntitiesHarness.ATTR_ID;
-import static org.molgenis.integrationtest.data.harness.EntitiesHarness.ATTR_STRING;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
-public class PlatformIT extends AbstractTestNGSpringContextTests
+public class PlatformIT extends AbstractMolgenisSpringTest
 {
 	private final Logger LOG = LoggerFactory.getLogger(PlatformIT.class);
 
@@ -85,7 +57,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private ReindexService reindexService;
 	@Autowired
-	private EntitiesHarness testHarness;
+	private EntityTestHarness testHarness;
 	@Autowired
 	private DataService dataService;
 	@Autowired
@@ -113,12 +85,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	}
 
 	/**
-	 * Wait till the index is stable. Reindex job is done a-synchronized.
-	 *  @param entityName
-	 * Wait till the index is stable. Reindex job is done a-synchronized.
-	 * Wait till the index is stable. Reindex job is done asynchronously.
+	 * Wait till the index is stable. Reindex job is executed asynchronously. This method waits for all reindex jobs
+	 * relevant for this entity to be finished.
 	 *
-	 * @param entityName
+	 * @param entityName name of the entitiy whose index needs to be stable
 	 */
 	private void waitForIndexToBeStable(String entityName)
 	{
@@ -157,10 +127,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@BeforeClass
 	public void setUp()
 	{
-		Package p = null; // FIXME new PackageImpl("test");
-		refEntityMetaData = testHarness.createRefEntityMetaData("TestRefEntity", p);
-		entityMetaData = testHarness.createEntityMetaData("TestEntity", p, refEntityMetaData);
-
+		refEntityMetaData = testHarness.createDynamicRefEntityMetaData();
+		entityMetaData = testHarness.createDynamicTestEntityMetaData();
 		metaDataService.addEntityMeta(refEntityMetaData);
 		metaDataService.addEntityMeta(entityMetaData);
 		this.waitForWorkToBeFinished();
@@ -598,7 +566,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		Query<Entity> q = new QueryImpl<>().search("refstring4");
 
 		assertEquals(searchService.count(q, entityMetaData), 5);
-		refEntity4.set(EntitiesHarness.ATTR_REF_STRING, "qwerty");
+		refEntity4.set(ATTR_REF_STRING, "qwerty");
 		runAsSystem(() -> dataService.update(REF_ENTITY_NAME, refEntity4));
 		waitForIndexToBeStable(ENTITY_NAME);
 		assertEquals(searchService.count(q, entityMetaData), 0);
@@ -615,11 +583,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		assertEquals(searchService.count(q, entityMetaData), 3333);
 		Entity refEntity4 = dataService.findOneById(REF_ENTITY_NAME, "4");
-		refEntity4.set(EntitiesHarness.ATTR_REF_STRING, "qwerty");
+		refEntity4.set(ATTR_REF_STRING, "qwerty");
 		runAsSystem(() -> dataService.update(REF_ENTITY_NAME, refEntity4));
 
 		Entity refEntity5 = dataService.findOneById(REF_ENTITY_NAME, "5");
-		refEntity5.set(EntitiesHarness.ATTR_REF_STRING, "qwerty");
+		refEntity5.set(ATTR_REF_STRING, "qwerty");
 		runAsSystem(() -> dataService.update(REF_ENTITY_NAME, refEntity5));
 
 		waitForIndexToBeStable(ENTITY_NAME);

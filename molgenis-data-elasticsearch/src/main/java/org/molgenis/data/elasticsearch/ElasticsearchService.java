@@ -7,6 +7,7 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.collect.FluentIterable;
 import org.elasticsearch.common.collect.Iterators;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
@@ -30,7 +31,6 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -38,7 +38,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.DataConverter.convert;
-import static org.molgenis.data.elasticsearch.request.SourceFilteringGenerator.toFetchFields;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
 import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
@@ -72,20 +71,11 @@ public class ElasticsearchService implements SearchService
 	public ElasticsearchService(Client client, String indexName, DataService dataService,
 			ElasticsearchEntityFactory elasticsearchEntityFactory)
 	{
-		this(new ElasticsearchUtils(client), indexName, dataService, elasticsearchEntityFactory);
-		new ElasticsearchIndexCreator(client).createIndexIfNotExists(indexName);
-	}
-
-	/**
-	 * Constructor for testability.
-	 */
-	ElasticsearchService(ElasticsearchUtils elasticSearchFacade, String indexName, DataService dataService,
-			ElasticsearchEntityFactory elasticsearchEntityFactory)
-	{
 		this.indexName = requireNonNull(indexName);
 		this.dataService = requireNonNull(dataService);
 		this.elasticsearchEntityFactory = requireNonNull(elasticsearchEntityFactory);
-		this.elasticsearchFacade = elasticSearchFacade;
+		this.elasticsearchFacade = new ElasticsearchUtils(client);
+		new ElasticsearchIndexCreator(client).createIndexIfNotExists(indexName);
 	}
 
 	@Override
@@ -94,12 +84,7 @@ public class ElasticsearchService implements SearchService
 		return () -> elasticsearchFacade.getMappings(indexName).keysIt();
 	}
 
-	/**
-	 * @deprecated see search(Query, EntityMetaData) or aggregate(AggregateQuery, EntityMetaData)
-	 */
-	@Override
-	@Deprecated
-	public SearchResult search(SearchRequest request)
+	private SearchResult search(SearchRequest request)
 	{
 		// TODO : A quick fix now! Need to find a better way to get
 		// EntityMetaData in ElasticSearchService, because ElasticSearchService should not be
@@ -122,15 +107,15 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void createMappings(EntityMetaData entityMetaData)
 	{
-		createMappings(entityMetaData, storeSource(entityMetaData), true, true);
+		createMappings(entityMetaData, true, true);
 	}
 
-	private void createMappings(String index, EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
+	private void createMappings(String index, EntityMetaData entityMetaData, boolean enableNorms,
 			boolean createAllIndex)
 	{
 		try (XContentBuilder jsonBuilder = XContentFactory.jsonBuilder())
 		{
-			MappingsBuilder.buildMapping(jsonBuilder, entityMetaData, storeSource, enableNorms, createAllIndex);
+			MappingsBuilder.buildMapping(jsonBuilder, entityMetaData, enableNorms, createAllIndex);
 			elasticsearchFacade.putMapping(index, jsonBuilder, entityMetaData.getName());
 		}
 		catch (IOException e)
@@ -140,10 +125,9 @@ public class ElasticsearchService implements SearchService
 	}
 
 	@Override
-	public void createMappings(EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
-			boolean createAllIndex)
+	public void createMappings(EntityMetaData entityMetaData, boolean enableNorms, boolean createAllIndex)
 	{
-		createMappings(indexName, entityMetaData, storeSource, enableNorms, createAllIndex);
+		createMappings(indexName, entityMetaData, enableNorms, createAllIndex);
 	}
 
 	@Override
@@ -361,78 +345,6 @@ public class ElasticsearchService implements SearchService
 		}
 	}
 
-	/**
-	 * Retrieve a stored entity from the index. Can only be used if the mapping was created with storeSource=true.
-	 */
-	@Override
-	public Entity get(Object entityId, EntityMetaData entityMetaData)
-	{
-		return get(entityId, entityMetaData, null);
-	}
-
-	@Override
-	public Entity get(Object entityId, EntityMetaData entityMetaData, Fetch fetch)
-	{
-		String entityName = entityMetaData.getName();
-		String type = sanitizeMapperType(entityName);
-		String id = toElasticsearchId(entityId);
-
-		Optional<Map<String, Object>> document;
-		if (fetch == null)
-		{
-			document = elasticsearchFacade.getDocument(type, id, indexName);
-		}
-		else
-		{
-			document = elasticsearchFacade.getDocument(type, id, toFetchFields(fetch), indexName);
-		}
-		return document.map(s -> elasticsearchEntityFactory.create(entityMetaData, s, fetch)).orElse(null);
-	}
-
-	/**
-	 * Retrieve stored entities from the index. Can only be used if the mapping was created with storeSource=true.
-	 */
-	@Override
-	public Iterable<Entity> get(Iterable<Object> entityIds, final EntityMetaData entityMetaData)
-	{
-		return get(entityIds, entityMetaData, null);
-	}
-
-	@Override
-	public Iterable<Entity> get(Iterable<Object> entityIds, final EntityMetaData entityMetaData, Fetch fetch)
-	{
-		return () -> {
-			Stream<Object> stream = stream(entityIds.spliterator(), false);
-			return get(stream, entityMetaData, fetch).iterator();
-		};
-	}
-
-	/**
-	 * Retrieve stored entities from the index. Can only be used if the mapping was created with storeSource=true.
-	 */
-	@Override
-	public Stream<Entity> get(Stream<Object> entityIds, final EntityMetaData entityMetaData)
-	{
-		return get(entityIds, entityMetaData, null);
-	}
-
-	@Override
-	public Stream<Entity> get(Stream<Object> entityIds, final EntityMetaData entityMetaData, Fetch fetch)
-	{
-		String entityName = entityMetaData.getName();
-		String type = sanitizeMapperType(entityName);
-		Stream<Map<String, Object>> sourceStream;
-		if (fetch == null)
-		{
-			sourceStream = elasticsearchFacade.getDocuments(type, entityIds, indexName);
-		}
-		else
-		{
-			sourceStream = elasticsearchFacade.getDocuments(type, toFetchFields(fetch), entityIds, indexName);
-		}
-		return sourceStream.map(source -> elasticsearchEntityFactory.create(entityMetaData, source, fetch));
-	}
-
 	@Override
 	public Iterable<Entity> search(Query<Entity> q, final EntityMetaData entityMetaData)
 	{
@@ -488,10 +400,6 @@ public class ElasticsearchService implements SearchService
 	public void rebuildIndex(Repository<? extends Entity> repository)
 	{
 		LOG.info("Rebuild index for {}...", repository.getName());
-		if (storeSource(repository.getEntityMetaData()))
-		{
-			throw new UnsupportedOperationException("Elasticsearch does not store data"); // FIXME
-		}
 		EntityMetaData entityMetaData = repository.getEntityMetaData();
 		if (hasMapping(entityMetaData))
 		{
@@ -510,14 +418,9 @@ public class ElasticsearchService implements SearchService
 		elasticsearchFacade.optimizeIndex(indexName);
 	}
 
-	/**
-	 * Entities are stored (in addition to indexed) in Elasticsearch only if the entity backend is Elasticsearch
-	 *
-	 * @param entityMeta {@link EntityMetaData} to check
-	 * @return whether or not this entity class is stored in Elasticsearch
-	 */
-	private boolean storeSource(EntityMetaData entityMeta)
+	@Override
+	public Entity findOne(Query<Entity> q, EntityMetaData entityMetaData)
 	{
-		return ElasticsearchRepositoryCollection.NAME.equals(entityMeta.getBackend());
+		return FluentIterable.from(search(q, entityMetaData)).first().orNull();
 	}
 }

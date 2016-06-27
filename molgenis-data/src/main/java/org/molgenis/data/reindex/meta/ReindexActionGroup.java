@@ -1,25 +1,25 @@
 package org.molgenis.data.reindex.meta;
 
-import static org.molgenis.data.reindex.meta.ReindexActionJobMetaData.COUNT;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ID;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
-public class ReindexActionJob extends StaticEntity
+import static org.molgenis.data.reindex.meta.ReindexActionGroupMetaData.COUNT;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ID;
+
+public class ReindexActionGroup extends StaticEntity
 {
-	public ReindexActionJob(Entity entity)
+	public ReindexActionGroup(Entity entity)
 	{
 		super(entity);
 	}
 
-	public ReindexActionJob(EntityMetaData entityMeta)
+	public ReindexActionGroup(EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 	}
 
-	public ReindexActionJob(String id, EntityMetaData entityMeta)
+	public ReindexActionGroup(String id, EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 		set(ID, id);
@@ -31,7 +31,7 @@ public class ReindexActionJob extends StaticEntity
 		return count != null ? count : 0;
 	}
 
-	public ReindexActionJob setCount(int count)
+	public ReindexActionGroup setCount(int count)
 	{
 		set(COUNT, count);
 		return this;
