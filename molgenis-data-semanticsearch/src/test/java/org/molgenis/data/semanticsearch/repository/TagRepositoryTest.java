@@ -2,6 +2,7 @@ package org.molgenis.data.semanticsearch.repository;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -9,13 +10,14 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.TagMetaData.CODE_SYSTEM;
 import static org.molgenis.data.meta.model.TagMetaData.OBJECT_IRI;
 import static org.molgenis.data.meta.model.TagMetaData.RELATION_IRI;
+import static org.molgenis.data.meta.model.TagMetaData.TAG;
 import static org.testng.Assert.assertTrue;
 
 import java.util.UUID;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.model.TagFactory;
@@ -38,7 +40,7 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest
 	private TagFactory tagFactory;
 
 	@Autowired
-	private Repository<Tag> repository;
+	private DataService dataService;
 
 	private TagRepository tagRepository;
 
@@ -50,7 +52,7 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		tagRepository = new TagRepository(repository, idGenerator, tagFactory);
+		tagRepository = new TagRepository(dataService, idGenerator, tagFactory);
 		when(idGenerator.generateId()).thenReturn(uuid.toString());
 	}
 
@@ -69,13 +71,13 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest
 		when(q.eq(anyString(), any())).thenReturn(q);
 		when(q.and()).thenReturn(q);
 		when(q.findOne()).thenReturn(null);
-		when(repository.query()).thenReturn(q);
+		when(dataService.query(TAG, Tag.class)).thenReturn(q);
 
 		assertTrue(EntityUtils.equals(tagRepository
 				.getTagEntity("http://edamontology.org/data_3031", "Core data", Relation.instanceOf,
 						"http://edamontology.org"), tag));
 
-		verify(repository, times(1)).add(any(Tag.class));
+		verify(dataService, times(1)).add(eq(TAG), any(Tag.class));
 	}
 
 	@Test
@@ -96,7 +98,7 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest
 		when(q.and()).thenReturn(q);
 		when(q.eq(CODE_SYSTEM, "http://edamontology.org")).thenReturn(q);
 		when(q.findOne()).thenReturn(tag);
-		when(repository.query()).thenReturn(q);
+		when(dataService.query(TAG, Tag.class)).thenReturn(q);
 
 		assertTrue(EntityUtils.equals(tagRepository
 				.getTagEntity("http://edamontology.org/data_3031", "Core data", Relation.instanceOf,
@@ -107,9 +109,9 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest
 	public static class Config
 	{
 		@Bean
-		Repository<Tag> repository()
+		DataService dataService()
 		{
-			return mock(Repository.class);
+			return mock(DataService.class);
 		}
 
 		@Bean
