@@ -25,6 +25,7 @@ import org.molgenis.data.RepositorySecurityDecorator;
 import org.molgenis.data.elasticsearch.IndexedRepositoryDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.i18n.I18nStringDecorator;
+import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.Language;
 import org.molgenis.data.i18n.LanguageRepositoryDecorator;
 import org.molgenis.data.meta.AttributeMetaDataRepositoryDecorator;
@@ -33,6 +34,7 @@ import org.molgenis.data.meta.PackageRepositoryDecorator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
@@ -63,6 +65,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final SearchService searchService;
 	private final AttributeMetaDataFactory attrMetaFactory;
 	private final PasswordEncoder passwordEncoder;
+	private final EntityMetaDataMetaData entityMetaMeta;
+	private final I18nStringMetaData i18nStringMeta;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -71,7 +75,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			RepositoryDecoratorRegistry repositoryDecoratorRegistry,
 			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, UserAuthorityFactory userAuthorityFactory,
 			ReindexActionRegisterService reindexActionRegisterService, SearchService searchService,
-			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder)
+			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder,
+			EntityMetaDataMetaData entityMetaMeta, I18nStringMetaData i18nStringMeta)
 	{
 		this.entityManager = requireNonNull(entityManager);
 		this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
@@ -86,6 +91,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.searchService = requireNonNull(searchService);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 		this.passwordEncoder = requireNonNull(passwordEncoder);
+		this.entityMetaMeta = requireNonNull(entityMetaMeta);
+		this.i18nStringMeta = requireNonNull(i18nStringMeta);
 	}
 
 	@Override
@@ -164,8 +171,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		else if (repo.getName().equals(LANGUAGE))
 		{
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new LanguageRepositoryDecorator(
-					(Repository<Language>) (Repository<? extends Entity>) repo, dataService,
-					systemEntityMetaDataRegistry, attrMetaFactory);
+					(Repository<Language>) (Repository<? extends Entity>) repo, dataService, attrMetaFactory,
+					entityMetaMeta, i18nStringMeta);
 		}
 		else if (repo.getName().equals(I18N_STRING))
 		{
