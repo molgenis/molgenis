@@ -69,7 +69,7 @@ public class ExacAnnotator implements AnnotatorConfig
 
 	@Bean
 	public RepositoryAnnotator exac()
-	{		annotator = new RepositoryAnnotatorImpl();
+	{		annotator = new RepositoryAnnotatorImpl(NAME);
 		return annotator;
 	}
 

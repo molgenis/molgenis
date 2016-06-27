@@ -68,7 +68,7 @@ public class OmimAnnotator  implements AnnotatorConfig
 
 	@Bean
 	public RepositoryAnnotator omim()
-	{		annotator = new RepositoryAnnotatorImpl();
+	{		annotator = new RepositoryAnnotatorImpl(NAME);
 		return annotator;
 	}
 

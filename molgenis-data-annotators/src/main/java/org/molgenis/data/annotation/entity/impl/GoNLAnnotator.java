@@ -65,7 +65,7 @@ public class GoNLAnnotator implements AnnotatorConfig
 
 	@Bean
 	public RepositoryAnnotator gonl()
-	{ 		annotator = new RepositoryAnnotatorImpl();
+	{ 		annotator = new RepositoryAnnotatorImpl(NAME);
 		return annotator;
 	}
 

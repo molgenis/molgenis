@@ -72,7 +72,7 @@ public class HPOAnnotator implements AnnotatorConfig
 
 	@Bean
 	public RepositoryAnnotator hpo()
-	{ 		annotator = new RepositoryAnnotatorImpl();
+	{ 		annotator = new RepositoryAnnotatorImpl(NAME);
 		return annotator;
 	}
 

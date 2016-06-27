@@ -63,7 +63,7 @@ public class ClinvarAnnotator implements AnnotatorConfig
 
 	@Bean
 	public RepositoryAnnotator clinvar()
-	{		annotator = new RepositoryAnnotatorImpl();
+	{		annotator = new RepositoryAnnotatorImpl(NAME);
 		return annotator;
 	}
 

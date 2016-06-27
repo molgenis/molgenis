@@ -1,9 +1,5 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AbstractRepositoryEntityAnnotator;
@@ -12,11 +8,18 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 
+import java.io.IOException;
+import java.util.List;
+
 public class RepositoryAnnotatorImpl extends AbstractRepositoryEntityAnnotator
 {
+	private final String name;//unused... however debug time you have no indication which annotator this is if bootstrapping is not done yet...
 	private EntityAnnotator entityAnnotator;
 
-	public RepositoryAnnotatorImpl(){}
+	public RepositoryAnnotatorImpl(String name)
+	{
+		this.name = name;
+	}
 
 	public void init(EntityAnnotator entityAnnotator)
 	{

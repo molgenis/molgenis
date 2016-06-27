@@ -61,7 +61,7 @@ public class FitConAnnotator implements AnnotatorConfig
 	@Bean
 	public RepositoryAnnotator fitcon()
 	{
-		annotator = new RepositoryAnnotatorImpl();
+		annotator = new RepositoryAnnotatorImpl(NAME);
 		return annotator;
 	}
 

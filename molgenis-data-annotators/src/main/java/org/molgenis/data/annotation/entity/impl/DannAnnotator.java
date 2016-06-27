@@ -60,7 +60,7 @@ public class DannAnnotator  implements AnnotatorConfig
 
 	@Bean
 	public RepositoryAnnotator dann()
-	{		annotator = new RepositoryAnnotatorImpl();
+	{		annotator = new RepositoryAnnotatorImpl(NAME);
 		return annotator;
 	}
 

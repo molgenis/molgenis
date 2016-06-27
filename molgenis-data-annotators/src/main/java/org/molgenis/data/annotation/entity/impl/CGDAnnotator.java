@@ -132,7 +132,7 @@ public class CGDAnnotator implements AnnotatorConfig
 	@Bean
 	public RepositoryAnnotator cgd()
 	{
-		annotator = new RepositoryAnnotatorImpl();
+		annotator = new RepositoryAnnotatorImpl(NAME);
 		return annotator;
 	}
 
@@ -146,6 +146,7 @@ public class CGDAnnotator implements AnnotatorConfig
 
 		EntityAnnotator entityAnnotator = new CGDEntityAnnotator(CGD_RESOURCE, info, queryCreator, resultFilter,
 				dataService, resources);
+		annotator.init(entityAnnotator);
 	}
 
 	@Bean

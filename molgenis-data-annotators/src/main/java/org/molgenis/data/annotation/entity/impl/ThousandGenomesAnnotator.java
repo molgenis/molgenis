@@ -61,7 +61,7 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 
 	@Bean
 	public RepositoryAnnotator thousandGenomes()
-	{		annotator = new RepositoryAnnotatorImpl();
+	{		annotator = new RepositoryAnnotatorImpl(NAME);
 		return annotator;
 	}
 

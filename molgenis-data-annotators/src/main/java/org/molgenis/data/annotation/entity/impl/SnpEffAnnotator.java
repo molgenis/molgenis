@@ -74,7 +74,7 @@ public class SnpEffAnnotator implements AnnotatorConfig
 	public static final String ERRORS = "Errors";
 	public static final String LOF = "LOF";
 	public static final String NMD = "NMD";
-	private RepositoryAnnotator annotator;
+	private SnpEffRepositoryAnnotator annotator;
 
 	public enum Impact
 	{
@@ -92,13 +92,13 @@ public class SnpEffAnnotator implements AnnotatorConfig
 	@Bean
 	public RepositoryAnnotator snpEff()
 	{
-		return annotator;
+		return annotator = new SnpEffRepositoryAnnotator();
 	}
 
 	@Override
 	public void init()
 	{
-		annotator = new SnpEffRepositoryAnnotator(snpEffAnnotatorSettings, jarRunner, attributeMetaDataFactory);
+		annotator.init(snpEffAnnotatorSettings, jarRunner, attributeMetaDataFactory);
 	}
 
 	@Bean
@@ -152,27 +152,26 @@ public class SnpEffAnnotator implements AnnotatorConfig
 	{
 		private static final String CHARSET = "UTF-8";
 		private String snpEffPath;
-		private final Entity pluginSettings;
+		private Entity pluginSettings;
 		private AnnotatorInfo info;
-		private final JarRunner jarRunner;
-		private final AttributeMetaDataFactory attributeMetaDataFactory;
+		private JarRunner jarRunner;
+		private AttributeMetaDataFactory attributeMetaDataFactory;
 
-		public SnpEffRepositoryAnnotator(Entity pluginSettings, JarRunner jarRunner,
-				AttributeMetaDataFactory attributeMetaDataFactory)
+		public SnpEffRepositoryAnnotator()
 		{
+
+		}
+
+		public void init(Entity pluginSettings, JarRunner jarRunner,
+				AttributeMetaDataFactory attributeMetaDataFactory){
 			this.pluginSettings = pluginSettings;
 			this.jarRunner = jarRunner;
 			this.attributeMetaDataFactory = attributeMetaDataFactory;
-		}
-
-		@PostConstruct
-		public void init(){
 			info = AnnotatorInfo
 					.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.EFFECT_PREDICTION, NAME,
 							"Genetic variant annotation and effect prediction toolbox. It annotates and predicts the effects of variants on genes (such as amino acid changes). ",
 							getOutputAttributes());
 		}
-
 		@Override
 		public AnnotatorInfo getInfo()
 		{
