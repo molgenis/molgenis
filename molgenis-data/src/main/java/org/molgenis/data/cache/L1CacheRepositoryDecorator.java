@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class L1CacheRepositoryDecorator implements Repository<Entity>
@@ -22,10 +23,139 @@ public class L1CacheRepositoryDecorator implements Repository<Entity>
 	private final Repository<Entity> decoratedRepository;
 	private final L1Cache l1Cache;
 
+	private final boolean cacheable = getCapabilities().contains(CACHEABLE);
+
 	public L1CacheRepositoryDecorator(Repository<Entity> decoratedRepository, L1Cache l1Cache)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
 		this.l1Cache = requireNonNull(l1Cache);
+	}
+
+	@Override
+	public Integer add(Stream<Entity> entities)
+	{
+		if (cacheable)
+		{
+			String entityName = getName();
+			entities = entities.filter(entity -> {
+				l1Cache.put(entityName, entity);
+				return true;
+			});
+		}
+		return decoratedRepository.add(entities);
+	}
+
+	@Override
+	public void add(Entity entity)
+	{
+		if (cacheable)
+		{
+			l1Cache.put(getName(), entity);
+		}
+		decoratedRepository.add(entity);
+	}
+
+	@Override
+	public Entity findOneById(Object id)
+	{
+		if (cacheable)
+		{
+			Entity entity = l1Cache.get(getName(), id, getEntityMetaData());
+			if (entity != null) return entity;
+		}
+		return decoratedRepository.findOneById(id);
+	}
+
+	@Override
+	public Entity findOneById(Object id, Fetch fetch)
+	{
+		return decoratedRepository.findOneById(id, fetch);
+	}
+
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids)
+	{
+		// TODO What if a part is in cache and another in database
+		if (cacheable)
+		{
+			List<Entity> entitiesFromCache = newArrayList();
+			String entityName = getName();
+			ids = ids.filter(id -> {
+				Entity cacheEntity = l1Cache.get(entityName, id, getEntityMetaData());
+				if (cacheEntity != null) entitiesFromCache.add(cacheEntity);
+				return true;
+			});
+			if (!entitiesFromCache.isEmpty()) return entitiesFromCache.stream();
+		}
+		return decoratedRepository.findAll(ids);
+	}
+
+	@Override
+	public void update(Entity entity)
+	{
+		if (cacheable) l1Cache.put(getName(), entity);
+		decoratedRepository.update(entity);
+	}
+
+	@Override
+	public void update(Stream<Entity> entities)
+	{
+		if (cacheable)
+		{
+			entities = entities.filter(entity -> {
+				l1Cache.put(getName(), entity);
+				return true;
+			});
+		}
+		decoratedRepository.update(entities);
+	}
+
+	@Override
+	public void delete(Entity entity)
+	{
+		if (cacheable) l1Cache.evict(getName(), entity.getIdValue());
+		decoratedRepository.delete(entity);
+	}
+
+	@Override
+	public void delete(Stream<Entity> entities)
+	{
+		if (cacheable)
+		{
+			entities = entities.filter(entity -> {
+				l1Cache.evict(getName(), entity.getIdValue());
+				return true;
+			});
+		}
+		decoratedRepository.delete(entities);
+	}
+
+	@Override
+	public void deleteById(Object id)
+	{
+		if (cacheable) l1Cache.evict(getName(), id);
+		decoratedRepository.deleteById(id);
+	}
+
+	@Override
+	public void deleteAll()
+	{
+		if (cacheable) l1Cache.evictAll(getName());
+		decoratedRepository.deleteAll();
+	}
+
+	@Override
+	public void deleteAll(Stream<Object> ids)
+	{
+		if (cacheable)
+		{
+			String entityName = getName();
+			ids = ids.filter(id -> {
+				l1Cache.evict(entityName, id);
+				return true;
+			});
+		}
+		decoratedRepository.deleteAll(ids);
 	}
 
 	@Override
@@ -61,7 +191,6 @@ public class L1CacheRepositoryDecorator implements Repository<Entity>
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		// TODO l1Cache.getEntityMetaData(entityName)???
 		return decoratedRepository.getEntityMetaData();
 	}
 
@@ -84,24 +213,6 @@ public class L1CacheRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public Entity findOneById(Object id)
-	{
-		// TODO CHECK IF THIS IS CORRECT
-		Entity entity = l1Cache.cacheGet(getName(), id);
-		if (entity == null) return decoratedRepository.findOneById(id);
-		return entity;
-	}
-
-	@Override
-	public Entity findOneById(Object id, Fetch fetch)
-	{
-		// TODO CHECK IF THIS IS CORRECT
-		Entity entity = l1Cache.cacheGet(getName(), id);
-		if (entity == null) return decoratedRepository.findOneById(id, fetch);
-		return entity;
-	}
-
-	@Override
 	public long count(Query q)
 	{
 		return decoratedRepository.count(q);
@@ -110,28 +221,13 @@ public class L1CacheRepositoryDecorator implements Repository<Entity>
 	@Override
 	public Stream<Entity> findAll(Query q)
 	{
-		// TODO SHOULD WE MAKE A l1Cache method for query???
 		return decoratedRepository.findAll(q);
 	}
 
 	@Override
 	public Entity findOne(Query q)
 	{
-		// TODO SHOULD WE MAKE A l1Cache method for query???
 		return decoratedRepository.findOne(q);
-	}
-
-	@Override
-	public Stream<Entity> findAll(Stream<Object> ids)
-	{
-		List<Entity> entitiesFromCache = newArrayList();
-		String entityName = getName();
-		ids.forEach(id -> {
-			Entity cacheEntity = l1Cache.cacheGet(entityName, id);
-			if(cacheEntity != null) entitiesFromCache.add(cacheEntity);
-		});
-		if(entitiesFromCache.isEmpty()) return decoratedRepository.findAll(ids);
-		return entitiesFromCache.stream();
 	}
 
 	@Override
@@ -144,59 +240,6 @@ public class L1CacheRepositoryDecorator implements Repository<Entity>
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		return decoratedRepository.aggregate(aggregateQuery);
-	}
-
-	@Override
-	public void update(Entity entity)
-	{
-		// TODO Is this correct?
-		l1Cache.cachePut(getName(), entity);
-		decoratedRepository.update(entity);
-	}
-
-	@Override
-	public void delete(Entity entity)
-	{
-		l1Cache.cacheEvict(getName(), entity.getIdValue());
-		decoratedRepository.delete(entity);
-	}
-
-	@Override
-	public void deleteById(Object id)
-	{
-		l1Cache.cacheEvict(getName(), id);
-		decoratedRepository.deleteById(id);
-	}
-
-	@Override
-	public void deleteAll(Stream<Object> ids)
-	{
-		String entityName = getName();
-		ids.forEach(id -> l1Cache.cacheEvict(entityName, id));
-		decoratedRepository.deleteAll(ids);
-	}
-
-	@Override
-	public void deleteAll()
-	{
-		l1Cache.cacheEvictAll(getName());
-		decoratedRepository.deleteAll();
-	}
-
-	@Override
-	public void delete(Stream<Entity> entities)
-	{
-		entities = entities.filter(entity -> {
-			l1Cache.cacheEvict(getName(), entity.getIdValue());
-			return true;
-		});
-		decoratedRepository.delete(entities);
-	}
-
-	@Override
-	public void add(Entity entity)
-	{
-		decoratedRepository.add(entity);
 	}
 
 	@Override
@@ -227,21 +270,5 @@ public class L1CacheRepositoryDecorator implements Repository<Entity>
 	public void removeEntityListener(EntityListener entityListener)
 	{
 		decoratedRepository.removeEntityListener(entityListener);
-	}
-
-	@Override
-	public Integer add(Stream<Entity> entities)
-	{
-		return null;
-	}
-
-	@Override
-	public void update(Stream<Entity> entities)
-	{
-		entities = entities.filter(entity -> {
-			l1Cache.cacheEvict(getName(), entity.getIdValue());
-			return true;
-		});
-		decoratedRepository.update(entities);
 	}
 }
