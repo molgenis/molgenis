@@ -1,8 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.COMPOUND;
-import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,9 +16,6 @@ import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.ApplicationContext;
 
@@ -53,17 +48,20 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 		this.cmdLineAnnotatorSettingsConfigurer = cmdLineAnnotatorSettingsConfigurer;
 	}
 
-	@Override public AnnotatorInfo getInfo()
+	@Override
+	public AnnotatorInfo getInfo()
 	{
 		return info;
 	}
 
-	@Override public List<AttributeMetaData> getAnnotationAttributeMetaDatas()
+	@Override
+	public List<AttributeMetaData> getAnnotationAttributeMetaDatas()
 	{
 		return getInfo().getOutputAttributes();
 	}
 
-	@Override public boolean sourceExists()
+	@Override
+	public boolean sourceExists()
 	{
 		getResources();
 		return resources.hasRepository(sourceRepositoryName) || dataService.hasRepository(sourceRepositoryName);
@@ -78,14 +76,16 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 		}
 	}
 
-	@Override public List<AttributeMetaData> getRequiredAttributes()
+	@Override
+	public List<AttributeMetaData> getRequiredAttributes()
 	{
 		List<AttributeMetaData> sourceMetaData = new ArrayList<>();
 		sourceMetaData.addAll(queryCreator.getRequiredAttributes());
 		return sourceMetaData;
 	}
 
-	@Override public List<Entity> annotateEntity(Entity entity)
+	@Override
+	public List<Entity> annotateEntity(Entity entity)
 	{
 		getResources();
 		Query<Entity> q = queryCreator.createQuery(entity);
@@ -98,7 +98,8 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 		{
 			annotatationSourceEntities = new Iterable<Entity>()
 			{
-				@Override public Iterator<Entity> iterator()
+				@Override
+				public Iterator<Entity> iterator()
 				{
 					return dataService.findAll(sourceRepositoryName, q).iterator();
 				}

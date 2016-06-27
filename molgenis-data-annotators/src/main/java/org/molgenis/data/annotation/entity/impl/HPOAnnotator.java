@@ -1,6 +1,17 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import com.google.common.base.Optional;
+import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_ID_COL_NAME;
+import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_TERM_COL_NAME;
+import static org.molgenis.data.annotator.websettings.HPOAnnotatorSettings.Meta.HPO_LOCATION;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -21,18 +32,12 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.data.vcf.VcfAttributes;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.*;
-
-import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_ID_COL_NAME;
-import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_TERM_COL_NAME;
-import static org.molgenis.data.annotator.websettings.HPOAnnotatorSettings.Meta.HPO_LOCATION;
+import com.google.common.base.Optional;
 
 /**
  * Typical HPO terms for a gene dataType (already present via SnpEff) Source:
@@ -72,7 +77,8 @@ public class HPOAnnotator implements AnnotatorConfig
 
 	@Bean
 	public RepositoryAnnotator hpo()
-	{ 		annotator = new RepositoryAnnotatorImpl(NAME);
+	{
+		annotator = new RepositoryAnnotatorImpl(NAME);
 		return annotator;
 	}
 
