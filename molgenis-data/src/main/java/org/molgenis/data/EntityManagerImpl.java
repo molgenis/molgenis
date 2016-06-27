@@ -6,6 +6,7 @@ import com.google.common.collect.SetMultimap;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.support.LazyEntity;
 import org.molgenis.data.support.PartialEntity;
 import org.molgenis.fieldtypes.FieldType;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 
@@ -55,6 +57,12 @@ public class EntityManagerImpl implements EntityManager
 		{
 			// create partial entity that loads attribute values not contained in the fetch on demand.
 			entity = new PartialEntity(entity, fetch, this);
+		}
+
+		if (entityMeta.hasAttributeWithExpression())
+		{
+			// create entity that computed values based on expressions defined in meta data
+			entity = new EntityWithComputedAttributes(entity);
 		}
 
 		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityMeta);
@@ -99,7 +107,7 @@ public class EntityManagerImpl implements EntityManager
 	@Override
 	public Entity resolveReferences(EntityMetaData entityMeta, Entity entity, Fetch fetch)
 	{
-		Iterable<Entity> entities = resolveReferences(entityMeta, Arrays.asList(entity), fetch);
+		Iterable<Entity> entities = resolveReferences(entityMeta, singletonList(entity), fetch);
 		return entities.iterator().next();
 	}
 
@@ -190,11 +198,9 @@ public class EntityManagerImpl implements EntityManager
 	private List<Entity> resolveReferences(List<AttributeMetaData> resolvableAttrs, List<Entity> entities, Fetch fetch)
 	{
 		// entity name --> entity ids
-		SetMultimap<String, Object> lazyRefEntityIdsMap = HashMultimap.<String, Object>create(resolvableAttrs.size(),
-				16);
+		SetMultimap<String, Object> lazyRefEntityIdsMap = HashMultimap.create(resolvableAttrs.size(), 16);
 		// entity name --> attributes referring to this entity
-		SetMultimap<String, AttributeMetaData> refEntityAttrsMap = HashMultimap.<String, AttributeMetaData>create(
-				resolvableAttrs.size(), 2);
+		SetMultimap<String, AttributeMetaData> refEntityAttrsMap = HashMultimap.create(resolvableAttrs.size(), 2);
 
 		// fill maps
 		for (AttributeMetaData attr : resolvableAttrs)
@@ -273,8 +279,7 @@ public class EntityManagerImpl implements EntityManager
 						List<Entity> mrefEntities = stream(lazyRefEntities.spliterator(), true).map(lazyRefEntity -> {
 							// replace lazy entity with real entity
 							Object refEntityId = lazyRefEntity.getIdValue();
-							Entity refEntity = refEntitiesIdMap.get(refEntityId);
-							return refEntity;
+							return refEntitiesIdMap.get(refEntityId);
 						}).collect(Collectors.toList());
 						entity.set(attrName, mrefEntities);
 					}
@@ -284,7 +289,7 @@ public class EntityManagerImpl implements EntityManager
 		return entities;
 	}
 
-	private Fetch createSubFetch(Fetch fetch, Iterable<AttributeMetaData> attrs)
+	private static Fetch createSubFetch(Fetch fetch, Iterable<AttributeMetaData> attrs)
 	{
 		Fetch subFetch = null;
 		for (AttributeMetaData attr : attrs)
@@ -313,7 +318,7 @@ public class EntityManagerImpl implements EntityManager
 		return subFetch;
 	}
 
-	private void mergeFetches(Fetch fetch, String field, Fetch subFetch)
+	private static void mergeFetches(Fetch fetch, String field, Fetch subFetch)
 	{
 		if (subFetch == null)
 		{
@@ -330,10 +335,6 @@ public class EntityManagerImpl implements EntityManager
 					mergeFetches(existingSubFetch, entry.getKey(), entry.getValue());
 				}
 			}
-			else
-			{
-				// do nothing
-			}
 		}
 		else
 		{
@@ -345,11 +346,11 @@ public class EntityManagerImpl implements EntityManager
 	/**
 	 * Return all resolvable attributes: non-computed reference attributes defined in fetch
 	 *
-	 * @param entityMeta
-	 * @param fetch
-	 * @return
+	 * @param entityMeta entity meta data
+	 * @param fetch      entity fetch
+	 * @return resolved attributes
 	 */
-	private List<AttributeMetaData> getResolvableAttrs(EntityMetaData entityMeta, Fetch fetch)
+	private static List<AttributeMetaData> getResolvableAttrs(EntityMetaData entityMeta, Fetch fetch)
 	{
 		return stream(entityMeta.getAtomicAttributes().spliterator(), false)
 				.filter(attr -> attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
@@ -357,11 +358,11 @@ public class EntityManagerImpl implements EntityManager
 				.collect(Collectors.toList());
 	}
 
-	private class EntityIdIterable implements Iterable<Object>
+	private static class EntityIdIterable implements Iterable<Object>
 	{
 		private final Iterable<Entity> entities;
 
-		public EntityIdIterable(Iterable<Entity> entities)
+		EntityIdIterable(Iterable<Entity> entities)
 		{
 			this.entities = requireNonNull(entities);
 		}
