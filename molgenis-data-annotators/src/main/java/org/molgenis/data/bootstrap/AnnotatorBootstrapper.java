@@ -1,11 +1,11 @@
 package org.molgenis.data.bootstrap;
 
+import java.util.Map;
+
 import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
-
-import java.util.Map;
 
 @Component
 public class AnnotatorBootstrapper

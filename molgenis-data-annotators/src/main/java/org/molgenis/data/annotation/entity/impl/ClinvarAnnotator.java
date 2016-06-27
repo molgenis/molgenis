@@ -25,7 +25,7 @@ import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
-import org.molgenis.data.vcf.VcfAttributes;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -63,7 +63,8 @@ public class ClinvarAnnotator implements AnnotatorConfig
 
 	@Bean
 	public RepositoryAnnotator clinvar()
-	{		annotator = new RepositoryAnnotatorImpl(NAME);
+	{
+		annotator = new RepositoryAnnotatorImpl(NAME);
 		return annotator;
 	}
 
@@ -77,32 +78,30 @@ public class ClinvarAnnotator implements AnnotatorConfig
 						"Value representing clinical significant allele 0 means ref 1 means first alt allele etc.")
 				.setLabel(CLINVAR_CLNSIG_LABEL);
 
-		AttributeMetaData clinvar_clnalle = attributeMetaDataFactory.create().setName(CLINVAR_CLNALLE).setDataType(STRING)
-				.setDescription("Value representing the clinical significanct according to ClinVar").setLabel(
-						CLINVAR_CLNALLE_LABEL);
+		AttributeMetaData clinvar_clnalle = attributeMetaDataFactory.create().setName(CLINVAR_CLNALLE)
+				.setDataType(STRING).setDescription("Value representing the clinical significanct according to ClinVar")
+				.setLabel(CLINVAR_CLNALLE_LABEL);
 
 		attributes.add(clinvar_clnsig);
 		attributes.add(clinvar_clnalle);
 
-		AnnotatorInfo clinvarInfo = AnnotatorInfo
-				.create(Status.READY,
-						AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE,
-						NAME,
-						" ClinVar is a freely accessible, public archive of reports of the relationships"
-								+ " among human variations and phenotypes, with supporting evidence. ClinVar thus facilitates"
-								+ " access to and communication about the relationships asserted between human variation and "
-								+ "observed health status, and the history of that interpretation. ClinVar collects reports "
-								+ "of variants found in patient samples, assertions made regarding their clinical significance, "
-								+ "information about the submitter, and other supporting data. The alleles described in submissions "
-								+ "are mapped to reference sequences, and reported according to the HGVS standard. ClinVar then "
-								+ "presents the data for interactive users as well as those wishing to use ClinVar in daily "
-								+ "workflows and other local applications. ClinVar works in collaboration with interested "
-								+ "organizations to meet the needs of the medical genetics community as efficiently and effectively "
-								+ "as possible. Information about using ClinVar is available at: http://www.ncbi.nlm.nih.gov/clinvar/docs/help/.",
-						attributes);
+		AnnotatorInfo clinvarInfo = AnnotatorInfo.create(Status.READY, AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME,
+				" ClinVar is a freely accessible, public archive of reports of the relationships"
+						+ " among human variations and phenotypes, with supporting evidence. ClinVar thus facilitates"
+						+ " access to and communication about the relationships asserted between human variation and "
+						+ "observed health status, and the history of that interpretation. ClinVar collects reports "
+						+ "of variants found in patient samples, assertions made regarding their clinical significance, "
+						+ "information about the submitter, and other supporting data. The alleles described in submissions "
+						+ "are mapped to reference sequences, and reported according to the HGVS standard. ClinVar then "
+						+ "presents the data for interactive users as well as those wishing to use ClinVar in daily "
+						+ "workflows and other local applications. ClinVar works in collaboration with interested "
+						+ "organizations to meet the needs of the medical genetics community as efficiently and effectively "
+						+ "as possible. Information about using ClinVar is available at: http://www.ncbi.nlm.nih.gov/clinvar/docs/help/.",
+				attributes);
 
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator(vcfAttributes);
-		ClinvarMultiAllelicResultFilter clinvarMultiAllelicResultFilter = new ClinvarMultiAllelicResultFilter(vcfAttributes);
+		ClinvarMultiAllelicResultFilter clinvarMultiAllelicResultFilter = new ClinvarMultiAllelicResultFilter(
+				vcfAttributes);
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(CLINVAR_TABIX_RESOURCE, clinvarInfo, locusQueryCreator,
 				clinvarMultiAllelicResultFilter, dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CLINVAR_LOCATION, clinvarAnnotatorSettings))
