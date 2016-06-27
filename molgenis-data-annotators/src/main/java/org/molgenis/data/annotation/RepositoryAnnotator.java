@@ -37,7 +37,7 @@ public interface RepositoryAnnotator
 	 * 
 	 * @return ouputMetadata
 	 */
-	List<AttributeMetaData> getOutputMetaData();
+	List<AttributeMetaData> getOutputAttributes();
 
 	/**
 	 * Returns a entityMetaData containing the attributes needed for the annotator to work

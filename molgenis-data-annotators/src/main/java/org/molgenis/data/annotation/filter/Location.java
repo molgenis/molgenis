@@ -17,10 +17,10 @@ abstract class Location
 {
 	public abstract String getChrom();
 
-	public abstract long getPos();
+	public abstract int getPos();
 
 	public static Location create(Entity entity)
 	{
-		return new AutoValue_Location(entity.getString(CHROM), entity.getLong(POS));
+		return new AutoValue_Location(entity.getString(CHROM), entity.getInt(POS));
 	}
 }

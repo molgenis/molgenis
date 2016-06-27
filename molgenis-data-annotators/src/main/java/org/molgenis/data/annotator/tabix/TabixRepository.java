@@ -99,9 +99,9 @@ public class TabixRepository extends AbstractRepository
 		// if one of both required attributes is null, skip the query and return an empty list
 		if (posValue != null && chromValue != null)
 		{
-			long posLongValue = Long.parseLong(posValue.toString());
+			int posIntValue = Integer.parseInt(posValue.toString());
 			String chromStringValue = chromValue.toString();
-			result = query(chromStringValue, Long.valueOf(posLongValue));
+			result = query(chromStringValue, Integer.valueOf(posIntValue));
 		}
 		return result.stream();
 	}
@@ -115,7 +115,7 @@ public class TabixRepository extends AbstractRepository
 	 *            position
 	 * @return {@link ImmutableList} of entities found
 	 */
-	private synchronized ImmutableList<Entity> query(String chrom, long pos)
+	private synchronized ImmutableList<Entity> query(String chrom, int pos)
 	{
 		String queryString = String.format("%s:%s-%2$s", chrom, pos);
 		LOG.debug("query({})", queryString);
@@ -129,7 +129,7 @@ public class TabixRepository extends AbstractRepository
 				while (line != null)
 				{
 					Entity entity = toEntity(line);
-					if (entity.getLong(positionAttributeName) == pos)
+					if (entity.getInt(positionAttributeName) == pos)
 					{
 						builder.add(entity);
 					}

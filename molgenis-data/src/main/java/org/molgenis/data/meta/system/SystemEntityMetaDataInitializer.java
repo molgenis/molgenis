@@ -48,7 +48,10 @@ public class SystemEntityMetaDataInitializer
 		EntityMetaDataMetaData entityMetaDataMetaData = ctx.getBean(EntityMetaDataMetaData.class);
 		ctx.getBean(AttributeMetaDataMetaData.class).bootstrap(entityMetaDataMetaData);
 		Map<String, SystemEntityMetaData> systemEntityMetaDataMap = ctx.getBeansOfType(SystemEntityMetaData.class);
-		systemEntityMetaDataMap.values()
+		//FIXME: can we do this cleaner than with the hardcoded "Owned". Problem: even the "isAbstract" nullpoiters at this point.
+		systemEntityMetaDataMap.values().stream().filter(systemEntityMetaData -> systemEntityMetaData.getSimpleName().equals("Owned"))
+				.forEach(systemEntityMetaData -> initialize(systemEntityMetaData, entityMetaDataMetaData));
+		systemEntityMetaDataMap.values().stream().filter(systemEntityMetaData -> !systemEntityMetaData.getSimpleName().equals("Owned"))
 				.forEach(systemEntityMetaData -> initialize(systemEntityMetaData, entityMetaDataMetaData));
 
 		initializeI18N(ctx);

@@ -1,7 +1,6 @@
 package org.molgenis.bootstrap;
 
-import static java.util.Objects.requireNonNull;
-
+import org.molgenis.data.bootstrap.AnnotatorBootstrapper;
 import org.molgenis.data.idcard.IdCardBootstrapper;
 import org.molgenis.data.jobs.JobBootstrapper;
 import org.molgenis.data.meta.system.SystemEntityMetaDataBootstrapper;
@@ -15,6 +14,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Application bootstrapper
@@ -31,13 +32,14 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	private final FileIngesterJobRegistrar fileIngesterJobRegistrar;
 	private final JobBootstrapper jobBootstrapper;
 	private final IdCardBootstrapper idCardBootstrapper;
+	private final AnnotatorBootstrapper annotatorBootstrapper;
 
 	@Autowired
 	public MolgenisBootstrapper(MolgenisUpgradeBootstrapper upgradeBootstrapper,
 			RegistryBootstrapper registryBootstrapper,
-			SystemEntityMetaDataBootstrapper systemEntityMetaDataBootstrapper,
-			RepositoryPopulator repositoryPopulator, FileIngesterJobRegistrar fileIngesterJobRegistrar,
-			JobBootstrapper jobBootstrapper, IdCardBootstrapper idCardBootstrapper)
+			SystemEntityMetaDataBootstrapper systemEntityMetaDataBootstrapper, RepositoryPopulator repositoryPopulator,
+			FileIngesterJobRegistrar fileIngesterJobRegistrar, JobBootstrapper jobBootstrapper,
+			IdCardBootstrapper idCardBootstrapper, AnnotatorBootstrapper annotatorBootstrapper)
 	{
 		this.upgradeBootstrapper = requireNonNull(upgradeBootstrapper);
 		this.registryBootstrapper = requireNonNull(registryBootstrapper);
@@ -46,6 +48,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		this.fileIngesterJobRegistrar = requireNonNull(fileIngesterJobRegistrar);
 		this.jobBootstrapper = requireNonNull(jobBootstrapper);
 		this.idCardBootstrapper = requireNonNull(idCardBootstrapper);
+		this.annotatorBootstrapper = requireNonNull(annotatorBootstrapper);
 	}
 
 	@Transactional
@@ -84,6 +87,10 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		LOG.trace("Bootstrapping ID Card scheduler ...");
 		idCardBootstrapper.bootstrap();
 		LOG.debug("Bootstrapped ID Card scheduler");
+
+		LOG.trace("Bootstrapping annotators ...");
+		annotatorBootstrapper.bootstrap(event);
+		LOG.debug("Bootstrapped annotators");
 
 		LOG.info("Bootstrapping application completed");
 	}
