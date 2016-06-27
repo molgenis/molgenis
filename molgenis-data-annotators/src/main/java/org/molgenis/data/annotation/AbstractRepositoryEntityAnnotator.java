@@ -1,12 +1,11 @@
 package org.molgenis.data.annotation;
 
+import org.molgenis.data.Entity;
+import org.molgenis.security.core.runas.RunAsSystem;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
-
-import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.entity.EntityAnnotator;
-import org.molgenis.security.core.runas.RunAsSystem;
 
 public abstract class AbstractRepositoryEntityAnnotator extends AbstractRepositoryAnnotator
 {
