@@ -271,10 +271,11 @@ public class EntityUtils
 		{
 			return false;
 		}
-		if (!package_.getIdValue().equals(otherPackage.getIdValue()))
-		{
-			return false;
-		}
+		//FIXME
+		//if (!package_.getIdValue().equals(otherPackage.getIdValue()))
+		//{
+		//	return false;
+		//}
 
 		// compare id attribute identifier (identifier might be null if id attribute hasn't been persisted yet)
 		AttributeMetaData ownIdAttribute = entityMeta.getOwnIdAttribute();
@@ -395,6 +396,11 @@ public class EntityUtils
 
 	public static boolean equals(AttributeMetaData attr, AttributeMetaData otherAttr)
 	{
+		if(attr == null || otherAttr == null){
+			if(attr == null && otherAttr == null)
+				return true;
+			return false;
+		}
 		// identifier might be null if attribute hasn't been persisted yet
 		if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier()))
 		{

@@ -30,7 +30,7 @@ public class LocusQueryCreator implements QueryCreator
 	public Query<Entity> createQuery(Entity entity)
 	{
 		String chromosome = entity.getString(VcfAttributes.CHROM);
-		Long position = entity.getLong(VcfAttributes.POS);
+		Integer position = entity.getInt(VcfAttributes.POS);
 		Locus locus = new Locus(chromosome, position);
 		return createQuery(locus);
 	}

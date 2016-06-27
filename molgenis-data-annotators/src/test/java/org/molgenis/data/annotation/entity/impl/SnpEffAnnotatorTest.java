@@ -235,7 +235,7 @@ public class SnpEffAnnotatorTest extends AbstractTestNGSpringContextTests
 	//			expected.set(SnpEffAnnotator.LOF, "");
 	//			expected.set(SnpEffAnnotator.NMD, "");
 	//
-	//			for (AttributeMetaData attributeMetaData : snpEffRepositoryAnnotator.getOutputMetaData().get(0)
+	//			for (AttributeMetaData attributeMetaData : snpEffRepositoryAnnotator.getOutputAttributes().get(0)
 	//					.getAttributeParts())
 	//			{
 	//				assertEquals(result.get(attributeMetaData.getName()), expected.get(attributeMetaData.getName()));

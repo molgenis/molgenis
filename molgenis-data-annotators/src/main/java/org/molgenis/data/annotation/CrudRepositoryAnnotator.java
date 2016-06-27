@@ -1,21 +1,24 @@
 package org.molgenis.data.annotation;
 
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.vcf.VcfAttributes;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
+import static org.molgenis.MolgenisFieldTypes.COMPOUND;
 
 @Component
 public class CrudRepositoryAnnotator
@@ -29,6 +32,15 @@ public class CrudRepositoryAnnotator
 	{
 		this.dataService = dataService;
 	}
+
+	@Autowired
+	public EntityMetaDataFactory entityMetaDataFactory;
+
+	@Autowired
+	public AttributeMetaDataFactory attributeMetaDataFactory;
+
+	@Autowired
+	public VcfAttributes vcfAttributes;
 
 	/**
 	 * @param annotators
@@ -46,7 +58,6 @@ public class CrudRepositoryAnnotator
 	 * @param annotator
 	 * @param repository
 	 */
-	@Transactional
 	public Repository<Entity> annotate(RepositoryAnnotator annotator, Repository<Entity> repository) throws IOException
 	{
 		if (!repository.getCapabilities().contains(RepositoryCapability.WRITABLE))
@@ -56,13 +67,14 @@ public class CrudRepositoryAnnotator
 		try
 		{
 			EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(repository.getName());
-			AttributeMetaData compoundAttributeMetaData = AnnotatorUtils.getCompoundResultAttribute(annotator,
-					entityMetaData);
+			List<AttributeMetaData> attributeMetaDatas = annotator.getOutputAttributes();
 
-			RunAsSystemProxy
-					.runAsSystem(() -> addAnnotatorMetadataToRepositories(entityMetaData, compoundAttributeMetaData));
+			RunAsSystemProxy.runAsSystem(
+					() -> addAnnotatorMetadataToRepositories(entityMetaData, annotator.getSimpleName(),
+							attributeMetaDatas));
 
-			Repository<Entity> crudRepository = iterateOverEntitiesAndAnnotate(repository, annotator);
+			Repository<Entity> crudRepository = iterateOverEntitiesAndAnnotate(
+					dataService.getRepository(repository.getName()), annotator);
 			return crudRepository;
 		}
 		catch (Exception e)
@@ -74,7 +86,8 @@ public class CrudRepositoryAnnotator
 	/**
 	 * Iterates over all the entities within a repository and annotates.
 	 */
-	private Repository<Entity> iterateOverEntitiesAndAnnotate(Repository<Entity> repository, RepositoryAnnotator annotator)
+	private Repository<Entity> iterateOverEntitiesAndAnnotate(Repository<Entity> repository,
+			RepositoryAnnotator annotator)
 	{
 		Iterator<Entity> it = annotator.annotate(repository);
 
@@ -105,17 +118,26 @@ public class CrudRepositoryAnnotator
 	/**
 	 * Adds a new compound attribute to an existing CrudRepository
 	 *
-	 * @param entityMetaData
-	 *            {@link EntityMetaData} for the existing repository
-	 * @param compoundAttributeMetaData
+	 * @param entityMetaData {@link EntityMetaData} for the existing repository
+	 * @param annotatorName
 	 */
-	private void addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, AttributeMetaData compoundAttributeMetaData)
+	private void addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, String annotatorName,
+			List<AttributeMetaData> attributeMetaDatas)
 	{
-		if (entityMetaData.getAttribute(compoundAttributeMetaData.getName()) == null)
+		//FIXME: add the attributes in the compound once the generating of id's in the factory is implemented
+		//currently this would nullpointer
+		AttributeMetaData compoundAttributeMetaData = attributeMetaDataFactory.create()
+				.setName("MOLGENIS_" + annotatorName).setDataType(COMPOUND);
+		if (entityMetaData.getAttribute("MOLGENIS_" + annotatorName) == null)
 		{
-			EntityMetaData newEntityMetaData = null; // FIXME new EntityMetaData(entityMetaData);
-			newEntityMetaData.addAttribute(compoundAttributeMetaData);
-			dataService.getMeta().updateEntityMeta(newEntityMetaData);
+			for (AttributeMetaData part : attributeMetaDatas)
+			{
+				//compoundAttributeMetaData.addAttributePart(part);
+				if(entityMetaData.getAttribute(part.getName()) == null)
+					entityMetaData.addAttribute(part);
+			}
+			//entityMetaData.addAttribute(compoundAttributeMetaData);
+			dataService.getMeta().updateEntityMeta(entityMetaData);
 		}
 	}
 

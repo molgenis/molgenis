@@ -30,10 +30,10 @@ public class AnnotatorChainingIT
 				Map<String, RepositoryAnnotator> annotators = ctx.getBeansOfType(RepositoryAnnotator.class);
 
 				RepositoryAnnotator gonlAnnotator = annotators.get("gonl");
-				gonlAnnotator.getCmdLineAnnotatorSettingsConfigurer().addSettings("src/test/resources/gonl");
+				//gonlAnnotator.getCmdLineAnnotatorSettingsConfigurer().addSettings("src/test/resources/gonl");
 
 				RepositoryAnnotator tgAnnotator = annotators.get("thousandGenomes");
-				tgAnnotator.getCmdLineAnnotatorSettingsConfigurer().addSettings("src/test/resources/1000g");
+				//tgAnnotator.getCmdLineAnnotatorSettingsConfigurer().addSettings("src/test/resources/1000g");
 
 				Iterator<Entity> it = gonlAnnotator.annotate(repo);
 				assertNotNull(it);

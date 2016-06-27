@@ -9,10 +9,6 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * Created with IntelliJ IDEA. User: charbonb Date: 21/02/14 Time: 11:24 To change this template use File | Settings |
- * File Templates.
- */
 public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 {
 	@Override
@@ -51,7 +47,6 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	}
 
 	@Override
-	@Transactional
 	public Iterator<Entity> annotate(final Iterator<Entity> sourceIterable)
 	{
 		return this.annotate(new Iterable<Entity>()
