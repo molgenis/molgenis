@@ -1,60 +1,12 @@
 package org.molgenis.data.postgresql;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.*;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import static java.util.Arrays.asList;
-import static java.util.Collections.unmodifiableSet;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.QueryRule.Operator.AND;
-import static org.molgenis.data.QueryRule.Operator.EQUALS;
-import static org.molgenis.data.QueryRule.Operator.GREATER;
-import static org.molgenis.data.QueryRule.Operator.GREATER_EQUAL;
-import static org.molgenis.data.QueryRule.Operator.IN;
-import static org.molgenis.data.QueryRule.Operator.LESS;
-import static org.molgenis.data.QueryRule.Operator.LESS_EQUAL;
-import static org.molgenis.data.QueryRule.Operator.LIKE;
-import static org.molgenis.data.QueryRule.Operator.NESTED;
-import static org.molgenis.data.QueryRule.Operator.NOT;
-import static org.molgenis.data.QueryRule.Operator.OR;
-import static org.molgenis.data.QueryRule.Operator.RANGE;
-import static org.molgenis.data.RepositoryCapability.MANAGABLE;
-import static org.molgenis.data.RepositoryCapability.QUERYABLE;
-import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT;
-import static org.molgenis.data.RepositoryCapability.VALIDATE_REFERENCE_CONSTRAINT;
-import static org.molgenis.data.RepositoryCapability.VALIDATE_UNIQUE_CONSTRAINT;
-import static org.molgenis.data.RepositoryCapability.WRITABLE;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCount;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDelete;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDeleteAll;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlInsert;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlInsertMref;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlSelect;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlUpdate;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.JUNCTION_TABLE_ORDER_ATTR_NAME;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableName;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributes;
-
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import org.molgenis.data.Entity;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
@@ -67,15 +19,28 @@ import org.springframework.jdbc.core.*;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Stopwatch.createStarted;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.unmodifiableSet;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.counting;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.QueryRule.Operator.*;
+import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
 
 /**
  * Repository that persists entities in a PostgreSQL database
@@ -98,7 +63,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	 */
 	private static final Set<RepositoryCapability> REPO_CAPABILITIES = unmodifiableSet(new HashSet<>(
 			asList(WRITABLE, MANAGABLE, QUERYABLE, VALIDATE_REFERENCE_CONSTRAINT, VALIDATE_UNIQUE_CONSTRAINT,
-					VALIDATE_NOTNULL_CONSTRAINT)));
+					VALIDATE_NOTNULL_CONSTRAINT, CACHEABLE)));
 
 	/**
 	 * Supported query operators

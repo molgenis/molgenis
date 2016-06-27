@@ -6,5 +6,7 @@ public enum RepositoryCollectionCapability
 
 	UPDATABLE,
 
-	META_DATA_PERSISTABLE
+	META_DATA_PERSISTABLE,
+
+	CACHEABLE
 }
