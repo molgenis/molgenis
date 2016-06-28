@@ -2,9 +2,7 @@ package org.molgenis.data.cache.utils;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.test.data.EntityTestHarness;
 import org.molgenis.util.MolgenisDateFormat;
@@ -32,12 +30,6 @@ import static org.testng.Assert.assertEquals;
 @ContextConfiguration(classes = { CachingUtilsTest.Config.class })
 public class CachingUtilsTest extends AbstractMolgenisSpringTest
 {
-	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
-
-	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
-
 	@Autowired
 	private EntityTestHarness entityTestHarness;
 
