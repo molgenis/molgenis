@@ -62,7 +62,7 @@ public class ReindexServiceImpl implements ReindexService
 		if (reindexActionGroup != null)
 		{
 			Stream<Entity> reindexActions = dataService
-					.findAll(REINDEX_ACTION, new QueryImpl<>().eq(REINDEX_ACTION_GROUP, reindexActionGroup));
+					.findAll(REINDEX_ACTION, new QueryImpl<>().eq(REINDEX_ACTION_GROUP_ATTR, reindexActionGroup));
 			Map<String, Long> numberOfActionsPerEntity = reindexActions
 					.collect(groupingBy(reindexAction -> reindexAction.getString(ENTITY_FULL_NAME), counting()));
 			indexStatus.addActionCounts(numberOfActionsPerEntity);
