@@ -1,13 +1,5 @@
 package org.molgenis.app.promise.client;
 
-import static org.testng.Assert.assertEquals;
-
-import java.io.IOException;
-import java.io.StringReader;
-
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.stream.StreamSource;
-
 import org.molgenis.app.promise.PromiseConfig;
 import org.molgenis.app.promise.model.PromiseCredentialsMetaData;
 import org.molgenis.data.Entity;
@@ -20,6 +12,14 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.xml.transform.StringResult;
 import org.testng.annotations.Test;
+
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.stream.StreamSource;
+import java.io.IOException;
+import java.io.StringReader;
+
+import static org.molgenis.app.promise.model.PromiseCredentialsMetaData.PWS;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = PromiseConfig.class)
 public class MarshallingTest extends AbstractTestNGSpringContextTests
@@ -35,7 +35,7 @@ public class MarshallingTest extends AbstractTestNGSpringContextTests
 	{
 		Entity credentials = new DefaultEntity(PromiseCredentialsMetaData.INSTANCE, null);
 		credentials.set(PromiseCredentialsMetaData.PROJ, "proj");
-		credentials.set(PromiseCredentialsMetaData.PWS, "pws");
+		credentials.set(PWS, "pws");
 		credentials.set(PromiseCredentialsMetaData.SECURITYCODE, "securityCode");
 		credentials.set(PromiseCredentialsMetaData.USERNAME, "userName");
 		credentials.set(PromiseCredentialsMetaData.PASSW, "passw");
@@ -44,11 +44,9 @@ public class MarshallingTest extends AbstractTestNGSpringContextTests
 		StringResult result = new StringResult();
 		marshaller.marshal(request, result);
 
-		assertEquals(result.toString(),
-				"<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
-						+ "<ns2:getDataForXML xmlns:ns2=\"http://tempuri.org\">"
-						+ "<proj>proj</proj><PWS>pws</PWS><SEQNR>10</SEQNR><securitycode>securityCode</securitycode>"
-						+ "<username>userName</username><passw>passw</passw></ns2:getDataForXML>");
+		assertEquals(result.toString(), "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
+				+ "<getData xmlns=\"http://tempuri.org/\"><proj>proj</proj><PWS>pws</PWS><SEQNR>10</SEQNR>"
+				+ "<securitycode>securityCode</securitycode><username>userName</username><passw>passw</passw></getData>");
 	}
 
 	@Test

@@ -89,7 +89,7 @@
                          -->
                         <webResources>
                             <resource>
-                                <directory>../molgenis-das/src/main/resources</directory>
+                                <directory>../molgenis-app/src/main/resources</directory>
                                 <includes>
                                     <include>**/*.jar</include>
                                 </includes>
@@ -671,6 +671,5 @@
 
     <modules>
         <module>molgenis-app</module>
-        <module>molgenis-das</module>
     </modules>
 </project>
