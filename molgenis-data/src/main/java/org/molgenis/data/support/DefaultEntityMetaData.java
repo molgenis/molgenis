@@ -1,35 +1,22 @@
 package org.molgenis.data.support;
 
-import static java.lang.String.format;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.unmodifiableCollection;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toMap;
-import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import org.molgenis.data.AttributeChangeListener;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EditableEntityMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import com.google.common.collect.Iterables;
+import org.molgenis.data.*;
 import org.molgenis.data.Package;
-import org.molgenis.data.PackageChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
-import com.google.common.collect.Iterables;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import static java.lang.String.format;
+import static java.util.Collections.*;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
 
 public class DefaultEntityMetaData implements EditableEntityMetaData
 {
@@ -89,7 +76,7 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 
 	/**
 	 * Copy-constructor
-	 * 
+	 *
 	 * @param entityMetaData
 	 */
 	public DefaultEntityMetaData(EntityMetaData entityMetaData)
@@ -126,7 +113,7 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 		this.ownIdAttr = entityMetaData.getOwnIdAttribute();
 		this.ownLabelAttr = entityMetaData.getOwnLabelAttribute();
 		this.ownLookupAttrs = stream(entityMetaData.getOwnLookupAttributes().spliterator(), false)
-				.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData> identity(), (u, v) -> {
+				.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData>identity(), (u, v) -> {
 					throw new IllegalStateException(String.format("Duplicate key %s", u));
 				}, LinkedCaseInsensitiveMap::new));
 	}
@@ -444,7 +431,7 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	public void setLookupAttributes(Stream<AttributeMetaData> lookupAttrs)
 	{
 		this.ownLookupAttrs = lookupAttrs
-				.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData> identity(), (u, v) -> {
+				.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData>identity(), (u, v) -> {
 					throw new IllegalStateException(String.format("Duplicate key %s", u));
 				}, LinkedCaseInsensitiveMap::new));
 		clearCache();
@@ -603,7 +590,7 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 			else if (extends_ != null)
 			{
 				cachedLookupAttrs = stream(extends_.getLookupAttributes().spliterator(), false)
-						.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData> identity(), (u, v) -> {
+						.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData>identity(), (u, v) -> {
 							throw new IllegalStateException(String.format("Duplicate key %s", u));
 						}, LinkedCaseInsensitiveMap::new));
 			}
@@ -684,7 +671,18 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	public AttributeMetaData getLabelAttribute(String languageCode)
 	{
 		AttributeMetaData labelAttr = getLabelAttribute();
-		AttributeMetaData i18nLabelAttr = getCachedAllAttrs().get(labelAttr.getName() + '-' + languageCode);
+		String labelAttributeName = labelAttr.getName();
+
+		if (labelAttributeName.contains("-"))
+		{
+			labelAttributeName = labelAttributeName.substring(0, labelAttributeName.length() - 3);
+		}
+		AttributeMetaData i18nLabelAttr = getCachedAllAttrs().get(labelAttributeName + '-' + languageCode);
+		if (i18nLabelAttr == null)
+		{
+			i18nLabelAttr = getCachedAllAttrs().get(labelAttributeName);
+		}
+
 		return i18nLabelAttr != null ? i18nLabelAttr : labelAttr;
 	}
 
