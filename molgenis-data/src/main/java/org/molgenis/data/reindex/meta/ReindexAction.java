@@ -46,12 +46,12 @@ public class ReindexAction extends StaticEntity
 		return this;
 	}
 
-	public String getActionOrder()
+	public int getActionOrder()
 	{
-		return getString(ACTION_ORDER);
+		return getInt(ACTION_ORDER);
 	}
 
-	public ReindexAction setActionOrder(String actionOrder)
+	public ReindexAction setActionOrder(int actionOrder)
 	{
 		set(ACTION_ORDER, actionOrder);
 		return this;

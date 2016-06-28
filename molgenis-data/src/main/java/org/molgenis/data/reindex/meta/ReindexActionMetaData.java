@@ -87,7 +87,7 @@ public class ReindexActionMetaData extends SystemEntityMetaData
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
 		addAttribute(REINDEX_ACTION_GROUP).setDescription("The group that this reindex action belongs to")
 				.setDataType(MolgenisFieldTypes.XREF).setRefEntity(reindexActionGroupMetaData);
-		addAttribute(ACTION_ORDER)
+		addAttribute(ACTION_ORDER).setDataType(MolgenisFieldTypes.INT)
 				.setDescription("The order in which the action is registered within its ReindexActionJob")
 				.setNillable(false);
 		addAttribute(ENTITY_FULL_NAME).setDescription("The full name of the entity that needs to be reindexed.")
