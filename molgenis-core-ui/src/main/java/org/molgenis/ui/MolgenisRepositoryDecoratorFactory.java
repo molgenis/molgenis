@@ -4,8 +4,8 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserDecorator;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.*;
-import org.molgenis.data.cache.L1Cache;
-import org.molgenis.data.cache.L1CacheRepositoryDecorator;
+import org.molgenis.data.cache.L1.L1Cache;
+import org.molgenis.data.cache.L1.L1CacheRepositoryDecorator;
 import org.molgenis.data.elasticsearch.IndexedRepositoryDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.i18n.I18nStringDecorator;
@@ -93,7 +93,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	{
 		Repository<Entity> decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
 
-		// 10. Query the L1 cache before querying the database
+		// 10. Query the org.molgenis.data.cache.L1 cache before querying the database
 		decoratedRepository = new L1CacheRepositoryDecorator(decoratedRepository, l1Cache);
 
 		// 9. Route specific queries to the index

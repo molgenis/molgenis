@@ -1,4 +1,4 @@
-package org.molgenis.data.cache;
+package org.molgenis.data.cache.L1;
 
 import org.testng.annotations.Test;
 

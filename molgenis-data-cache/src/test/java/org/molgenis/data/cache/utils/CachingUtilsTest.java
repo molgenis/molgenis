@@ -1,4 +1,4 @@
-package org.molgenis.data.cache;
+package org.molgenis.data.cache.utils;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -25,7 +25,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.cache.CachingUtils.*;
+import static org.molgenis.data.cache.utils.CachingUtils.*;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.testng.Assert.assertEquals;
 
@@ -64,12 +64,11 @@ public class CachingUtilsTest extends AbstractMolgenisSpringTest
 
 		// mock dehydrated entity
 		dehydratedEntity = newHashMap();
-		Entity refEntity = refEntities.get(0);
 		dehydratedEntity.put(ATTR_ID, "1");
 		dehydratedEntity.put(ATTR_STRING, "string1");
 		dehydratedEntity.put(ATTR_BOOL, true);
-		dehydratedEntity.put(ATTR_CATEGORICAL, refEntity);
-		dehydratedEntity.put(ATTR_CATEGORICAL_MREF, singletonList(refEntity));
+		dehydratedEntity.put(ATTR_CATEGORICAL, 0);
+		dehydratedEntity.put(ATTR_CATEGORICAL_MREF, singletonList(0));
 		dehydratedEntity.put(ATTR_DATE, date);
 		dehydratedEntity.put(ATTR_DATETIME, dateTime);
 		dehydratedEntity.put(ATTR_EMAIL, "this.is@mail.address");
@@ -79,8 +78,8 @@ public class CachingUtilsTest extends AbstractMolgenisSpringTest
 		dehydratedEntity.put(ATTR_LONG, new Long(1000000));
 		dehydratedEntity.put(ATTR_INT, 18);
 		dehydratedEntity.put(ATTR_SCRIPT, "/bin/blaat/script.sh");
-		dehydratedEntity.put(ATTR_XREF, refEntity);
-		dehydratedEntity.put(ATTR_MREF, singletonList(refEntity));
+		dehydratedEntity.put(ATTR_XREF, 0);
+		dehydratedEntity.put(ATTR_MREF, singletonList(0));
 
 		// mock entity manager
 		entityManager = when(mock(EntityManager.class).create(entityMetaData)).thenReturn(hydratedEntity).getMock();
@@ -89,15 +88,15 @@ public class CachingUtilsTest extends AbstractMolgenisSpringTest
 	@Test
 	public void hydrateTest()
 	{
-		assertEquals(hydrate(dehydratedEntity, entityMetaData, entityManager), hydratedEntity);
+		Entity actualHydratedEntity = hydrate(dehydratedEntity, entityMetaData, entityManager);
+		assertEquals(actualHydratedEntity, hydratedEntity);
 	}
 
 	@Test
 	public void dehydrateTest()
 	{
-		Object date = hydratedEntity.get(ATTR_DATE);
-
-		assertEquals(dehydrate(hydratedEntity), dehydratedEntity);
+		Map<String, Object> actualDehydratedEntity = dehydrate(hydratedEntity);
+		assertEquals(actualDehydratedEntity, dehydratedEntity);
 	}
 
 	@Test

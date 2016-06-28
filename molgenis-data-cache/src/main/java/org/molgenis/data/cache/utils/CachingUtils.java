@@ -1,19 +1,21 @@
-package org.molgenis.data.cache;
+package org.molgenis.data.cache.utils;
 
 import com.google.common.cache.Cache;
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
+import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
 import static com.google.common.cache.CacheBuilder.newBuilder;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
-import static java.util.Collections.emptyList;
 import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.*;
 
 public class CachingUtils
@@ -38,7 +40,7 @@ public class CachingUtils
 			Object value = dehydratedEntity.get(name);
 			if (value != null)
 			{
-				MolgenisFieldTypes.FieldTypeEnum type = attribute.getDataType().getEnumType();
+				FieldTypeEnum type = attribute.getDataType().getEnumType();
 
 				if (type.equals(MREF) || type.equals(CATEGORICAL_MREF))
 				{
@@ -79,7 +81,7 @@ public class CachingUtils
 
 		entityMetaData.getAtomicAttributes().forEach(attribute -> {
 			String name = attribute.getName();
-			MolgenisFieldTypes.FieldTypeEnum type = attribute.getDataType().getEnumType();
+			FieldTypeEnum type = attribute.getDataType().getEnumType();
 
 			dehydratedEntity.put(name, getValueBasedonType(entity, name, type));
 		});
@@ -97,7 +99,7 @@ public class CachingUtils
 		return entityName + "__" + id.toString();
 	}
 
-	private static Object getValueBasedonType(Entity entity, String name, MolgenisFieldTypes.FieldTypeEnum type)
+	private static Object getValueBasedonType(Entity entity, String name, FieldTypeEnum type)
 	{
 		LOG.debug("Dehydrating attribute '{}' of type [{}]", name, type.toString());
 
@@ -107,27 +109,16 @@ public class CachingUtils
 			case CATEGORICAL:
 			case XREF:
 			case FILE:
-				Entity refEntity = entity.getEntity(name);
-				value = refEntity != null ? refEntity.getIdValue() : null;
+				Entity xrefEntity = entity.getEntity(name);
+				value = xrefEntity != null ? xrefEntity.getIdValue() : null;
 				break;
 			case CATEGORICAL_MREF:
 			case MREF:
-				Iterator<Entity> refEntitiesIt = entity.getEntities(name).iterator();
-				if (refEntitiesIt.hasNext())
-				{
-					List<Object> mrefValues = new ArrayList<>();
-					do
-					{
-						Entity mrefEntity = refEntitiesIt.next();
-						mrefValues.add(mrefEntity != null ? mrefEntity.getIdValue() : null);
-					}
-					while (refEntitiesIt.hasNext());
-					value = mrefValues;
-				}
-				else
-				{
-					value = emptyList();
-				}
+				List<Object> mrefIdentifiers = newArrayList();
+				entity.getEntities(name).forEach(mrefEntity -> {
+					if (mrefEntity != null) mrefIdentifiers.add(mrefEntity.getIdValue());
+				});
+				value = mrefIdentifiers;
 				break;
 			case DATE:
 				Date date = entity.getUtilDate(name);
