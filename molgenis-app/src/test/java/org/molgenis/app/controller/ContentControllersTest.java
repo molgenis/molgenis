@@ -1,20 +1,9 @@
-package org.molgenis.omx.controller;
+package org.molgenis.app.controller;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-
-import org.molgenis.app.controller.BackgroundController;
-import org.molgenis.app.controller.ContactController;
-import org.molgenis.app.controller.HomeController;
-import org.molgenis.app.controller.NewsController;
-import org.molgenis.app.controller.ReferencesController;
+import org.molgenis.app.controller.ContentControllersTest.Config;
 import org.molgenis.data.DataService;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
-import org.molgenis.omx.controller.ContentControllersTest.Config;
 import org.molgenis.ui.controller.StaticContentService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -31,9 +20,14 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
+
 @WebAppConfiguration
-@ContextConfiguration(classes =
-{ Config.class, GsonConfig.class })
+@ContextConfiguration(classes = { Config.class, GsonConfig.class })
 public class ContentControllersTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
@@ -172,7 +166,7 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 		this.initEditGetMethodTest(mockMvcReferences, ReferencesController.URI, ReferencesController.ID);
 	}
 
-	public void initMethodTest(MockMvc mockMvc, String uri, String uniqueReference) throws Exception
+	private void initMethodTest(MockMvc mockMvc, String uri, String uniqueReference) throws Exception
 	{
 		when(this.staticContentService.getContent(any(String.class))).thenReturn("staticcontent");
 		mockMvc.perform(MockMvcRequestBuilders.get(uri)).andExpect(MockMvcResultMatchers.status().isOk())
@@ -180,7 +174,7 @@ public class ContentControllersTest extends AbstractTestNGSpringContextTests
 				.andExpect(model().attributeExists("isCurrentUserCanEdit"));
 	}
 
-	public void initEditGetMethodTest(MockMvc mockMvc, String uri, String uniqueReference) throws Exception
+	private void initEditGetMethodTest(MockMvc mockMvc, String uri, String uniqueReference) throws Exception
 	{
 		when(this.staticContentService.getContent(any(String.class))).thenReturn("staticcontent");
 		when(this.staticContentService.isCurrentUserCanEdit()).thenReturn(true);

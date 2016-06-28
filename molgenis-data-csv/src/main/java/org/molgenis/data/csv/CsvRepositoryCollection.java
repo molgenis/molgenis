@@ -1,15 +1,6 @@
 package org.molgenis.data.csv;
 
-import static java.util.Objects.requireNonNull;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
+import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -21,13 +12,20 @@ import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 
-import com.google.common.collect.Lists;
+import java.io.File;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 /**
  * Reads csv and tsv files. Can be bundled together in a zipfile.
- * 
+ * <p>
  * The exposes the files as {@link org.molgenis.data.Repository}. The names of the repositories are the names of the
  * files without the extension
  */
@@ -36,26 +34,21 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	public static final String NAME = "CSV";
 	private static final String MAC_ZIP = "__MACOSX";
 	private final File file;
-	private final EntityMetaDataFactory entityMetaFactory;
-	private final AttributeMetaDataFactory attrMetaFactory;
+	private EntityMetaDataFactory entityMetaFactory;
+	private AttributeMetaDataFactory attrMetaFactory;
 	private List<String> entityNames;
 	private List<String> entityNamesLowerCase;
 
-	public CsvRepositoryCollection(File file, EntityMetaDataFactory entityMetaFactory,
-			AttributeMetaDataFactory attrMetaFactory) throws MolgenisInvalidFormatException, IOException
+	public CsvRepositoryCollection(File file) throws MolgenisInvalidFormatException, IOException
 	{
-		this(file, entityMetaFactory, attrMetaFactory, (CellProcessor[]) null);
+		this(file, (CellProcessor[]) null);
 	}
 
-	public CsvRepositoryCollection(File file, EntityMetaDataFactory entityMetaFactory,
-			AttributeMetaDataFactory attrMetaFactory, CellProcessor... cellProcessors)
-			throws MolgenisInvalidFormatException,
-			IOException
+	public CsvRepositoryCollection(File file, CellProcessor... cellProcessors)
+			throws MolgenisInvalidFormatException, IOException
 	{
 		super(GenericImporterExtensions.getCSV(), cellProcessors);
 		this.file = file;
-		this.entityMetaFactory = requireNonNull(entityMetaFactory);
-		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 
 		loadEntityNames();
 	}
@@ -95,7 +88,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 			try
 			{
 				zipFile = new ZipFile(file);
-				for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();)
+				for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements(); )
 				{
 					ZipEntry entry = e.nextElement();
 					if (!entry.getName().contains(MAC_ZIP))
@@ -166,5 +159,17 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	public boolean hasRepository(EntityMetaData entityMeta)
 	{
 		return hasRepository(entityMeta.getName());
+	}
+
+	@Autowired
+	public void setEntityMetaDataFactory(EntityMetaDataFactory entityMetaFactory)
+	{
+		this.entityMetaFactory = entityMetaFactory;
+	}
+
+	@Autowired
+	public void setAttributeMetaDataFactory(AttributeMetaDataFactory attrMetaFactory)
+	{
+		this.attrMetaFactory = attrMetaFactory;
 	}
 }
