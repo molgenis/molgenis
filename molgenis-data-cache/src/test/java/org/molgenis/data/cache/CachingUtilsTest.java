@@ -7,6 +7,7 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.test.data.EntityTestHarness;
+import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +15,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -44,7 +47,7 @@ public class CachingUtilsTest extends AbstractMolgenisSpringTest
 	private Map<String, Object> dehydratedEntity;
 
 	@BeforeClass
-	public void beforeClass()
+	public void beforeClass() throws ParseException
 	{
 		// create metadata
 		entityMetaData = entityTestHarness.createDynamicTestEntityMetaData();
@@ -56,21 +59,24 @@ public class CachingUtilsTest extends AbstractMolgenisSpringTest
 		// create hydrated entity
 		hydratedEntity = entityTestHarness.createTestEntities(entityMetaData, 1, refEntities).collect(toList()).get(0);
 
+		Date date = MolgenisDateFormat.getDateFormat().parse("2012-12-21");
+		Date dateTime = MolgenisDateFormat.getDateTimeFormat().parse("1985-08-12T11:12:13+0500");
+
 		// mock dehydrated entity
 		dehydratedEntity = newHashMap();
 		Entity refEntity = refEntities.get(0);
-		dehydratedEntity.put(ATTR_ID, 1);
+		dehydratedEntity.put(ATTR_ID, "1");
 		dehydratedEntity.put(ATTR_STRING, "string1");
 		dehydratedEntity.put(ATTR_BOOL, true);
 		dehydratedEntity.put(ATTR_CATEGORICAL, refEntity);
 		dehydratedEntity.put(ATTR_CATEGORICAL_MREF, singletonList(refEntity));
-		dehydratedEntity.put(ATTR_DATE, "21-12-2012");
-		dehydratedEntity.put(ATTR_DATETIME, "1985-08-12T11:12:13+0500");
+		dehydratedEntity.put(ATTR_DATE, date);
+		dehydratedEntity.put(ATTR_DATETIME, dateTime);
 		dehydratedEntity.put(ATTR_EMAIL, "this.is@mail.address");
 		dehydratedEntity.put(ATTR_DECIMAL, 1.123);
 		dehydratedEntity.put(ATTR_HTML, "<html>where is my head and where is my body</html>");
 		dehydratedEntity.put(ATTR_HYPERLINK, "http://www.molgenis.org");
-		dehydratedEntity.put(ATTR_LONG, 1000000);
+		dehydratedEntity.put(ATTR_LONG, new Long(1000000));
 		dehydratedEntity.put(ATTR_INT, 18);
 		dehydratedEntity.put(ATTR_SCRIPT, "/bin/blaat/script.sh");
 		dehydratedEntity.put(ATTR_XREF, refEntity);
@@ -89,6 +95,8 @@ public class CachingUtilsTest extends AbstractMolgenisSpringTest
 	@Test
 	public void dehydrateTest()
 	{
+		Object date = hydratedEntity.get(ATTR_DATE);
+
 		assertEquals(dehydrate(hydratedEntity), dehydratedEntity);
 	}
 

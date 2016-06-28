@@ -8,7 +8,6 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Timestamp;
 import java.util.*;
 
 import static com.google.common.cache.CacheBuilder.newBuilder;
@@ -131,14 +130,12 @@ public class CachingUtils
 				}
 				break;
 			case DATE:
-				// Store timestamp since data is mutable
-				Date dateValue = entity.getDate(name);
-				value = dateValue != null ? dateValue.getTime() : null;
+				Date date = entity.getUtilDate(name);
+				value = date != null ? date : null;
 				break;
 			case DATE_TIME:
-				// Store timestamp since data is mutable
-				Timestamp dateTimeValue = entity.getTimestamp(name);
-				value = dateTimeValue != null ? dateTimeValue.getTime() : null;
+				Date dateTime = entity.getUtilDate(name);
+				value = dateTime != null ? dateTime : null;
 				break;
 			case BOOL:
 			case COMPOUND:

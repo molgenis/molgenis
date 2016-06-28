@@ -143,8 +143,6 @@ public class EntityTestHarness
 	{
 		DateFormat dateFormat = MolgenisDateFormat.getDateFormat();
 		DateFormat dateTimeFormat = MolgenisDateFormat.getDateTimeFormat();
-		Date date;
-		Date dateTime;
 		try
 		{
 			date = dateFormat.parse("2012-12-21");
