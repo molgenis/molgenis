@@ -40,10 +40,5 @@ public enum RepositoryCapability
 	/**
 	 * Repository can validate if values are not-null for attributes
 	 */
-	VALIDATE_NOTNULL_CONSTRAINT,
-
-	/**
-	 * Repository can store data in an L1, L2 or L3 cache
-	 */
-	CACHEABLE
+	VALIDATE_NOTNULL_CONSTRAINT
 }
