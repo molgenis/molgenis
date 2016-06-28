@@ -4,7 +4,5 @@ import org.molgenis.data.Entity;
 
 public interface ExpressionEvaluator
 {
-
-	public abstract Object evaluate(Entity entity);
-
+	Object evaluate(Entity entity);
 }

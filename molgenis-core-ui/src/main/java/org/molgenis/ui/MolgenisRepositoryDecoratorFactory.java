@@ -1,27 +1,9 @@
 package org.molgenis.ui;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
-import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
-import static org.molgenis.security.owned.OwnedEntityMetaData.OWNED;
-
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserDecorator;
 import org.molgenis.auth.UserAuthorityFactory;
-import org.molgenis.data.AutoValueRepositoryDecorator;
-import org.molgenis.data.ComputedEntityValuesDecorator;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityManager;
-import org.molgenis.data.EntityReferenceResolverDecorator;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.data.RepositorySecurityDecorator;
+import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.IndexedRepositoryDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.i18n.I18nStringDecorator;
@@ -31,10 +13,7 @@ import org.molgenis.data.i18n.LanguageRepositoryDecorator;
 import org.molgenis.data.meta.AttributeMetaDataRepositoryDecorator;
 import org.molgenis.data.meta.EntityMetaDataRepositoryDecorator;
 import org.molgenis.data.meta.PackageRepositoryDecorator;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
@@ -48,6 +27,15 @@ import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
+import static org.molgenis.security.owned.OwnedEntityMetaData.OWNED;
 
 @Component
 public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFactory
@@ -100,26 +88,23 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	{
 		Repository<Entity> decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
 
-		// 10. Route specific queries to the index
+		// 9. Route specific queries to the index
 		decoratedRepository = new IndexedRepositoryDecorator(decoratedRepository, searchService);
 
-		// 9. Register the cud action needed to reindex indexed repositories
+		// 8. Register the cud action needed to reindex indexed repositories
 		decoratedRepository = new ReindexActionRepositoryDecorator(decoratedRepository, reindexActionRegisterService);
 
-		// 8. Custom decorators
+		// 7. Custom decorators
 		decoratedRepository = applyCustomRepositoryDecorators(decoratedRepository);
 
-		// 7. Owned decorator
+		// 6. Owned decorator
 		if (EntityUtils.doesExtend(decoratedRepository.getEntityMetaData(), OWNED))
 		{
 			decoratedRepository = new OwnedEntityRepositoryDecorator(decoratedRepository);
 		}
 
-		// 6. Entity reference resolver decorator
+		// 5. Entity reference resolver decorator
 		decoratedRepository = new EntityReferenceResolverDecorator(decoratedRepository, entityManager);
-
-		// 5. Computed entity values decorator
-		decoratedRepository = new ComputedEntityValuesDecorator(decoratedRepository);
 
 		// 4. Entity listener
 		decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);

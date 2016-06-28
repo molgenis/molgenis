@@ -293,8 +293,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	public LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection)
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<>();
-		stream(repositoryCollection.getEntityNames().spliterator(), false).forEach(
-				entityName -> entitiesImportable.put(entityName, this.canIntegrateEntityMetadataCheck(
+		stream(repositoryCollection.getEntityNames().spliterator(), false)
+				.forEach(entityName -> entitiesImportable.put(entityName, this.canIntegrateEntityMetadataCheck(
 						repositoryCollection.getRepository(entityName).getEntityMetaData())));
 
 		return entitiesImportable;
@@ -307,8 +307,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<>();
 
-		stream(newEntitiesMetaDataMap.keySet().spliterator(), false).forEach(
-				entityName -> entitiesImportable.put(entityName, skipEntities.contains(entityName) || this
+		stream(newEntitiesMetaDataMap.keySet().spliterator(), false)
+				.forEach(entityName -> entitiesImportable.put(entityName, skipEntities.contains(entityName) || this
 						.canIntegrateEntityMetadataCheck(newEntitiesMetaDataMap.get(entityName))));
 
 		return entitiesImportable;
@@ -321,7 +321,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		{
 			EntityMetaData oldEntity = dataService.getEntityMetaData(entityName);
 
-			List<AttributeMetaData> oldAtomicAttributes = stream(oldEntity.getAtomicAttributes().spliterator(), false).collect(toList());
+			List<AttributeMetaData> oldAtomicAttributes = stream(oldEntity.getAtomicAttributes().spliterator(), false)
+					.collect(toList());
 
 			LinkedHashMap<String, AttributeMetaData> newAtomicAttributesMap = new LinkedHashMap<>();
 			stream(newEntityMetaData.getAtomicAttributes().spliterator(), false)
@@ -329,13 +330,15 @@ public class MetaDataServiceImpl implements MetaDataService
 
 			for (AttributeMetaData oldAttribute : oldAtomicAttributes)
 			{
-				if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName())) return false;
+				if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName()))
+				{
+					return false;
+				}
 
-				AttributeMetaData oldAttributDefault = AttributeMetaData.newInstance(oldAttribute);
-				AttributeMetaData newAttributDefault = AttributeMetaData
-						.newInstance(newAtomicAttributesMap.get(oldAttribute.getName()));
-
-				if (!oldAttributDefault.equals(newAttributDefault)) return false;
+				if (!EntityUtils.equals(oldAttribute, newAtomicAttributesMap.get(oldAttribute.getName())))
+				{
+					return false;
+				}
 			}
 		}
 
