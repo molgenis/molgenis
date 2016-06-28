@@ -30,7 +30,7 @@ public class ReindexActionMetaData extends SystemEntityMetaData
 	/**
 	 * The group that this reindex action belongs to.
 	 */
-	public static final String REINDEX_ACTION_GROUP = "reindexActionGroup";
+	public static final String REINDEX_ACTION_GROUP_ATTR = "reindexActionGroup";
 
 	/**
 	 * The order in which the action is registered within its ReindexActionJob
@@ -85,7 +85,7 @@ public class ReindexActionMetaData extends SystemEntityMetaData
 		setPackage(indexPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);
-		addAttribute(REINDEX_ACTION_GROUP).setDescription("The group that this reindex action belongs to")
+		addAttribute(REINDEX_ACTION_GROUP_ATTR).setDescription("The group that this reindex action belongs to")
 				.setDataType(MolgenisFieldTypes.XREF).setRefEntity(reindexActionGroupMetaData);
 		addAttribute(ACTION_ORDER).setDataType(MolgenisFieldTypes.INT)
 				.setDescription("The order in which the action is registered within its ReindexActionJob")
