@@ -1,22 +1,6 @@
 package org.molgenis.data.meta;
 
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ABSTRACT;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.BACKEND;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.DESCRIPTION;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.EXTENDS;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.FULL_NAME;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ID_ATTRIBUTE;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.LABEL;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.LABEL_ATTRIBUTE;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.LOOKUP_ATTRIBUTES;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.PACKAGE;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.SIMPLE_NAME;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.TAGS;
-import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
-
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -24,16 +8,22 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.security.core.Permission;
 import org.molgenis.util.EntityUtils;
 
-import com.google.common.collect.Lists;
+import java.util.List;
+
+import static org.molgenis.data.i18n.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
+import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 public class MetaUtils
 {
 	public static Fetch getEntityMetaDataFetch()
 	{
 		// TODO simplify fetch creation (in this case *all* attributes and expand xref/mrefs)
-		return new Fetch().field(FULL_NAME).field(SIMPLE_NAME).field(PACKAGE).field(LABEL).field(DESCRIPTION)
-				.field(ATTRIBUTES).field(ID_ATTRIBUTE).field(LABEL_ATTRIBUTE).field(LOOKUP_ATTRIBUTES).field(ABSTRACT)
-				.field(EXTENDS).field(TAGS).field(BACKEND);
+		return new Fetch().field(FULL_NAME).field(SIMPLE_NAME).field(PACKAGE).field(LABEL)
+				.field(LABEL + '-' + DEFAULT_LANGUAGE_CODE).field(DESCRIPTION)
+				.field(DESCRIPTION + '-' + DEFAULT_LANGUAGE_CODE).field(ATTRIBUTES).field(ID_ATTRIBUTE)
+				.field(LABEL_ATTRIBUTE).field(LOOKUP_ATTRIBUTES).field(ABSTRACT).field(EXTENDS).field(TAGS)
+				.field(BACKEND);
 	}
 
 	public static List<AttributeMetaData> updateEntityMeta(MetaDataService metaDataService, EntityMetaData entityMeta)
