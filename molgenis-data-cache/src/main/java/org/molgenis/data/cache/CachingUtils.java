@@ -30,6 +30,8 @@ public class CachingUtils
 	public static Entity hydrate(Map<String, Object> dehydratedEntity, EntityMetaData entityMetaData,
 			EntityManager entityManager)
 	{
+		LOG.debug("Hydrating map: {} for entity {}", dehydratedEntity, entityMetaData.getName());
+
 		Entity hydratedEntity = entityManager.create(entityMetaData);
 		entityMetaData.getAtomicAttributes().forEach(attribute -> {
 
@@ -59,6 +61,7 @@ public class CachingUtils
 
 		});
 
+		LOG.debug("Created a hydrated entity: {}", hydratedEntity);
 		return hydratedEntity;
 	}
 
