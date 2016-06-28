@@ -1,37 +1,8 @@
 package org.molgenis.data.vcf.format;
 
-import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.MolgenisFieldTypes.COMPOUND;
-import static org.molgenis.MolgenisFieldTypes.DECIMAL;
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.MREF;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LOOKUP;
-import static org.molgenis.data.vcf.VcfRepository.NAME;
-import static org.molgenis.data.vcf.VcfRepository.ORIGINAL_NAME;
-import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
-import static org.molgenis.data.vcf.model.VcfAttributes.CHROM;
-import static org.molgenis.data.vcf.model.VcfAttributes.FILTER;
-import static org.molgenis.data.vcf.model.VcfAttributes.ID;
-import static org.molgenis.data.vcf.model.VcfAttributes.INFO;
-import static org.molgenis.data.vcf.model.VcfAttributes.INTERNAL_ID;
-import static org.molgenis.data.vcf.model.VcfAttributes.POS;
-import static org.molgenis.data.vcf.model.VcfAttributes.QUAL;
-import static org.molgenis.data.vcf.model.VcfAttributes.REF;
-import static org.molgenis.data.vcf.model.VcfAttributes.SAMPLES;
-import static org.molgenis.util.EntityUtils.getTypedValue;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.MetaValidationUtils;
@@ -43,7 +14,6 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.genotype.Allele;
 import org.molgenis.genotype.GenotypeDataException;
 import org.molgenis.vcf.VcfInfo;
@@ -53,7 +23,18 @@ import org.molgenis.vcf.meta.VcfMeta;
 import org.molgenis.vcf.meta.VcfMetaFormat;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
+import static org.molgenis.data.vcf.VcfRepository.NAME;
+import static org.molgenis.data.vcf.VcfRepository.ORIGINAL_NAME;
+import static org.molgenis.data.vcf.model.VcfAttributes.*;
+import static org.molgenis.util.EntityUtils.getTypedValue;
 
 public class VcfToEntity
 {
@@ -173,7 +154,7 @@ public class VcfToEntity
 		return result;
 	}
 
-	private static FieldType vcfReaderFormatToMolgenisType(VcfMetaInfo vcfMetaInfo)
+	private static AttributeType vcfReaderFormatToMolgenisType(VcfMetaInfo vcfMetaInfo)
 	{
 		String number = vcfMetaInfo.getNumber();
 		boolean isListValue;
@@ -224,7 +205,7 @@ public class VcfToEntity
 		}
 	}
 
-	private static FieldType vcfFieldTypeToMolgenisFieldType(VcfMetaFormat format)
+	private static AttributeType vcfFieldTypeToMolgenisFieldType(VcfMetaFormat format)
 	{
 		String number = format.getNumber();
 		boolean isListValue;
@@ -388,8 +369,7 @@ public class VcfToEntity
 				}
 				if (!(vcfInfo.getKey() + postFix).equals(".")
 						&& entityMetaData.getAttribute(vcfInfo.getKey() + postFix) != null && entityMetaData
-						.getAttribute(vcfInfo.getKey() + postFix).getDataType().getEnumType()
-						.equals(MolgenisFieldTypes.FieldTypeEnum.BOOL))
+						.getAttribute(vcfInfo.getKey() + postFix).getDataType().equals(AttributeType.BOOL))
 				{
 					val = true;
 				}

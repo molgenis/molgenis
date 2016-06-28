@@ -1,7 +1,10 @@
 package org.molgenis.data.elasticsearch.index;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.*;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -47,8 +50,8 @@ public class SourceToEntityConverter
 			Object entityValue;
 			if (sourceValue != null)
 			{
-				FieldTypeEnum attrType = attr.getDataType().getEnumType();
-				switch (attr.getDataType().getEnumType())
+				AttributeType attrType = attr.getDataType();
+				switch (attr.getDataType())
 				{
 					case BOOL:
 					case DECIMAL:

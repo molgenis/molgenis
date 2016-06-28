@@ -1,14 +1,15 @@
 package org.molgenis.script;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.script.ScriptPackage.PACKAGE_SCRIPT;
-
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.script.ScriptPackage.PACKAGE_SCRIPT;
 
 @Component
 public class ScriptMetaData extends SystemEntityMetaData
@@ -47,13 +48,11 @@ public class ScriptMetaData extends SystemEntityMetaData
 		setPackage(scriptPackage);
 
 		addAttribute(NAME, ROLE_ID).setNillable(false).setLabel("Name");
-		addAttribute(TYPE).setNillable(false).setLabel("Type").setDataType(MolgenisFieldTypes.XREF)
-				.setRefEntity(scriptTypeMetaData);
-		addAttribute(CONTENT).setNillable(false).setDataType(MolgenisFieldTypes.SCRIPT).setLabel("Content");
-		addAttribute(GENERATE_TOKEN).setDataType(MolgenisFieldTypes.BOOL).setLabel("Generate security token")
-				.setDefaultValue("false");
+		addAttribute(TYPE).setNillable(false).setLabel("Type").setDataType(XREF).setRefEntity(scriptTypeMetaData);
+		addAttribute(CONTENT).setNillable(false).setDataType(AttributeType.SCRIPT).setLabel("Content");
+		addAttribute(GENERATE_TOKEN).setDataType(BOOL).setLabel("Generate security token").setDefaultValue("false");
 		addAttribute(RESULT_FILE_EXTENSION).setNillable(true).setLabel("Result file extension");
-		addAttribute(PARAMETERS).setNillable(true).setLabel("Parameters").setDataType(MolgenisFieldTypes.MREF)
+		addAttribute(PARAMETERS).setNillable(true).setLabel("Parameters").setDataType(MREF)
 				.setRefEntity(scriptParameterMetaData);
 	}
 }

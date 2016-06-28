@@ -1,18 +1,7 @@
 package org.molgenis.data.mapper.algorithmgenerator.service.impl;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.script.ScriptMetaData.SCRIPT;
-import static org.molgenis.script.ScriptMetaData.TYPE;
-import static org.testng.Assert.assertEquals;
-
-import java.util.Collections;
-import java.util.Map;
-import java.util.stream.Stream;
-
-import org.molgenis.MolgenisFieldTypes;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.algorithmgenerator.bean.GeneratedAlgorithm;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
@@ -42,8 +31,18 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Lists;
+import java.util.Collections;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.DECIMAL;
+import static org.molgenis.script.ScriptMetaData.SCRIPT;
+import static org.molgenis.script.ScriptMetaData.TYPE;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = AlgorithmGeneratorServiceImplTest.Config.class)
 public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTest
@@ -79,16 +78,16 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 		EntityMetaData targetEntityMetaData = entityMetaFactory.create("target");
 		AttributeMetaData targetBMIAttribute = attrMetaFactory.create().setName("targetHeight");
 		targetBMIAttribute.setLabel("BMI kg/m²");
-		targetBMIAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
+		targetBMIAttribute.setDataType(DECIMAL);
 		targetEntityMetaData.addAttribute(targetBMIAttribute);
 
 		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
 		AttributeMetaData heightSourceAttribute = attrMetaFactory.create().setName("sourceHeight");
-		heightSourceAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
+		heightSourceAttribute.setDataType(DECIMAL);
 		heightSourceAttribute.setLabel("body length in cm");
 
 		AttributeMetaData weightSourceAttribute = attrMetaFactory.create().setName("sourceWeight");
-		weightSourceAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
+		weightSourceAttribute.setDataType(DECIMAL);
 		weightSourceAttribute.setLabel("weight in kg");
 
 		sourceEntityMetaData.addAttribute(heightSourceAttribute);
@@ -125,12 +124,12 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 		EntityMetaData targetEntityMetaData = entityMetaFactory.create("target");
 		AttributeMetaData targetAttribute = attrMetaFactory.create().setName("targetHeight");
 		targetAttribute.setLabel("height in m");
-		targetAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
+		targetAttribute.setDataType(DECIMAL);
 		targetEntityMetaData.addAttribute(targetAttribute);
 
 		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
 		AttributeMetaData sourceAttribute = attrMetaFactory.create().setName("sourceHeight");
-		sourceAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
+		sourceAttribute.setDataType(DECIMAL);
 		sourceAttribute.setLabel("body length in cm");
 		sourceEntityMetaData.addAttribute(sourceAttribute);
 

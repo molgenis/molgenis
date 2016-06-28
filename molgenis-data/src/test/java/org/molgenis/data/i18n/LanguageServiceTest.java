@@ -1,14 +1,5 @@
 package org.molgenis.data.i18n;
 
-import static com.google.common.collect.ImmutableMap.of;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
-import static org.testng.Assert.assertEquals;
-
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -21,6 +12,15 @@ import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import static com.google.common.collect.ImmutableMap.of;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
+import static org.testng.Assert.assertEquals;
 
 public class LanguageServiceTest
 {

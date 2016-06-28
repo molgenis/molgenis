@@ -1,10 +1,9 @@
 package org.molgenis.data.meta.model;
 
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.support.StaticEntity;
-import org.molgenis.fieldtypes.FieldType;
 
 import java.util.List;
 
@@ -18,7 +17,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.*;
 import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
 
@@ -191,15 +190,15 @@ public class AttributeMetaData extends StaticEntity
 	 *
 	 * @return attribute data type
 	 */
-	public FieldType getDataType()
+	public AttributeType getDataType()
 	{
 		String dataTypeStr = getString(DATA_TYPE);
-		return dataTypeStr != null ? MolgenisFieldTypes.getType(dataTypeStr) : null;
+		return dataTypeStr != null ? AttributeType.toEnum(dataTypeStr) : null;
 	}
 
-	public AttributeMetaData setDataType(FieldType dataType)
+	public AttributeMetaData setDataType(AttributeType dataType)
 	{
-		set(DATA_TYPE, toDataTypeString(dataType));
+		set(DATA_TYPE, AttributeType.getValueString(dataType));
 		return this;
 	}
 
@@ -529,11 +528,6 @@ public class AttributeMetaData extends StaticEntity
 		setAggregatable(false);
 		setReadOnly(false);
 		setUnique(false);
-	}
-
-	private static String toDataTypeString(FieldType dataType)
-	{
-		return dataType != null ? dataType.toString() : null;
 	}
 
 	private static String toEnumOptionsString(List<String> enumOptions)

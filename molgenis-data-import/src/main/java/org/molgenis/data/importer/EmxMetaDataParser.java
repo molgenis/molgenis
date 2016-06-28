@@ -1,8 +1,7 @@
 package org.molgenis.data.importer;
 
 import com.google.common.collect.*;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.Range;
 import org.molgenis.data.i18n.I18nStringMetaData;
@@ -13,7 +12,6 @@ import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.SemanticTag;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.util.DependencyResolver;
 import org.springframework.util.StringUtils;
@@ -24,8 +22,7 @@ import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.ENUM;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.i18n.I18nUtils.getLanguageCode;
 import static org.molgenis.data.i18n.I18nUtils.isI18n;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
@@ -225,7 +222,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			if (emxDataType != null)
 			{
-				FieldType t = MolgenisFieldTypes.getType(emxDataType);
+				AttributeType t = AttributeType.toEnum(emxDataType);
 				if (t == null)
 				{
 					throw new IllegalArgumentException(
@@ -235,7 +232,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			}
 			else
 			{
-				attr.setDataType(MolgenisFieldTypes.STRING);
+				attr.setDataType(STRING);
 			}
 
 			String emxAttrNillable = emxAttrEntity.getString(NILLABLE);
@@ -317,7 +314,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				{
 					throw new IllegalArgumentException(
 							format("attributes.lookupAttribute error on line [%d] (%s.%s) lookupAttribute cannot be of type %s",
-									i, emxEntityName, emxName, attr.getDataType().getEnumType().toString()));
+									i, emxEntityName, emxName, attr.getDataType().toString()));
 				}
 
 				emxAttr.setLookupAttr(isLookAttr);
@@ -330,7 +327,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				{
 					throw new IllegalArgumentException(
 							format("attributes.labelAttribute error on line [%d] (%s.%s): labelAttribute cannot be of type %s",
-									i, emxEntityName, emxName, attr.getDataType().getEnumType().toString()));
+									i, emxEntityName, emxName, attr.getDataType().toString()));
 				}
 
 				emxAttr.setLabelAttr(isLabelAttr);
@@ -365,7 +362,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			attr.setDescription(emxAttrEntity.getString(DESCRIPTION));
 
-			if (attr.getDataType().getEnumType() == ENUM)
+			if (attr.getDataType() == ENUM)
 			{
 				List<String> enumOptions = DataConverter.toList(emxAttrEntity.get(ENUM_OPTIONS));
 				if (enumOptions == null || enumOptions.isEmpty())
@@ -387,7 +384,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			{
 				throw new IllegalArgumentException(
 						format("attributes.aggregatable error on line [%d] (%s.%s): aggregatable nillable attribute cannot be of type %s",
-								i, emxEntityName, emxName, attr.getDataType().getEnumType().toString()));
+								i, emxEntityName, emxName, attr.getDataType().toString()));
 			}
 
 			String emxRangeMin = emxAttrEntity.getString(RANGE_MIN);
@@ -479,12 +476,12 @@ public class EmxMetaDataParser implements MetaDataParser
 									+ entityName + "] must refer to an existing compound attribute on line " + i);
 				}
 
-				if (compoundAttribute.getDataType().getEnumType() != FieldTypeEnum.COMPOUND)
+				if (compoundAttribute.getDataType() != COMPOUND)
 				{
 					throw new IllegalArgumentException(
 							"partOfAttribute [" + partOfAttribute + "] of attribute [" + attributeName + "] of entity ["
-									+ entityName + "] must refer to a attribute of type [" + FieldTypeEnum.COMPOUND
-									+ "] on line " + i);
+									+ entityName + "] must refer to a attribute of type [" + COMPOUND + "] on line "
+									+ i);
 				}
 
 				compoundAttribute.addAttributePart(attribute);
@@ -1005,7 +1002,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					}
 					for (AttributeMetaData att : target.getAttributes())
 					{
-						if (!(att.getDataType().getEnumType() == COMPOUND))
+						if (!(att.getDataType() == COMPOUND))
 						{
 							if (!att.isAuto() && att.getExpression() == null && !report.getFieldsImportable().get(sheet)
 									.contains(att.getName()))

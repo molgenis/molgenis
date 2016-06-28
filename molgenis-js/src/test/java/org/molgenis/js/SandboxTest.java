@@ -1,10 +1,5 @@
 package org.molgenis.js;
 
-import static freemarker.template.utility.Collections12.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.SCRIPT;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -12,6 +7,11 @@ import org.molgenis.data.support.DynamicEntity;
 import org.mozilla.javascript.EcmaError;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import static freemarker.template.utility.Collections12.singletonList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.SCRIPT;
 
 public class SandboxTest extends ScriptEvaluatorTest
 {

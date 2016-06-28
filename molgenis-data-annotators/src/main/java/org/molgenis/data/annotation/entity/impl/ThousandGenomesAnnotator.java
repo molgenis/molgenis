@@ -1,14 +1,5 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.molgenis.MolgenisFieldTypes.DECIMAL;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.CHROMOSOMES;
-import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.FILEPATTERN;
-import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES;
-import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.ROOT_DIRECTORY;
-
-import java.util.Collections;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
@@ -32,6 +23,12 @@ import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Collections;
+
+import static org.molgenis.MolgenisFieldTypes.AttributeType.DECIMAL;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.*;
 
 @Configuration
 public class ThousandGenomesAnnotator implements AnnotatorConfig

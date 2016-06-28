@@ -1,16 +1,14 @@
 package org.molgenis.auth;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LOOKUP;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.BOOL;
+import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
 public class MolgenisGroupMetaData extends SystemEntityMetaData

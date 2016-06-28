@@ -1,16 +1,8 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.CHROMOSOMES;
-import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.FILEPATTERN;
-import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES;
-import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.ROOT_DIRECTORY;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
@@ -32,9 +24,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.google.common.base.Predicates;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.*;
 
 @Configuration
 public class GoNLAnnotator implements AnnotatorConfig

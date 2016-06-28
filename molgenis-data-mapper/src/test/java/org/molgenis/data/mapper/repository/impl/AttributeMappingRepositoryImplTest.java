@@ -1,21 +1,6 @@
 package org.molgenis.data.mapper.repository.impl;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.molgenis.data.mapper.meta.AttributeMappingMetaData.ALGORITHM;
-import static org.molgenis.data.mapper.meta.AttributeMappingMetaData.ALGORITHMSTATE;
-import static org.molgenis.data.mapper.meta.AttributeMappingMetaData.IDENTIFIER;
-import static org.molgenis.data.mapper.meta.AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS;
-import static org.molgenis.data.mapper.meta.AttributeMappingMetaData.TARGETATTRIBUTEMETADATA;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Collection;
-import java.util.List;
-
 import org.mockito.Mockito;
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
@@ -40,6 +25,17 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
+
+import java.util.Collection;
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.mock;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.data.mapper.meta.AttributeMappingMetaData.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 @ContextConfiguration(classes = { AttributeMappingRepositoryImplTest.Config.class, MappingConfig.class,
 		OntologyConfig.class })
@@ -94,7 +90,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName("targetAttribute");
 		List<AttributeMetaData> sourceAttributeMetaDatas = newArrayList();
 
-		targetAttributeMetaData.setDataType(MolgenisFieldTypes.STRING);
+		targetAttributeMetaData.setDataType(STRING);
 
 		Collection<AttributeMapping> attributeMappings = singletonList(
 				new AttributeMapping("attributeMappingID", targetAttributeMetaData, "algorithm",
@@ -123,7 +119,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 	{
 		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName("targetAttribute");
 		List<AttributeMetaData> sourceAttributeMetaDatas = newArrayList();
-		targetAttributeMetaData.setDataType(MolgenisFieldTypes.STRING);
+		targetAttributeMetaData.setDataType(STRING);
 
 		Collection<AttributeMapping> attributeMappings = singletonList(
 				new AttributeMapping(null, targetAttributeMetaData, "algorithm", sourceAttributeMetaDatas));

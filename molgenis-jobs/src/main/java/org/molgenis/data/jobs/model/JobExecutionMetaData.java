@@ -1,21 +1,15 @@
 package org.molgenis.data.jobs.model;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static org.molgenis.MolgenisFieldTypes.DATETIME;
-import static org.molgenis.MolgenisFieldTypes.HYPERLINK;
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.fieldtypes.EnumField;
-import org.springframework.stereotype.Component;
+import static com.google.common.collect.Lists.newArrayList;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
 public class JobExecutionMetaData extends SystemEntityMetaData
@@ -50,13 +44,13 @@ public class JobExecutionMetaData extends SystemEntityMetaData
 	{
 		setAbstract(true);
 		addAttribute(IDENTIFIER, ROLE_ID).setLabel("Job ID").setAuto(true).setNillable(false);
-		addAttribute(USER).setDataType(MolgenisFieldTypes.STRING).setLabel("Job owner").setNillable(false);
-		addAttribute(STATUS).setDataType(new EnumField()).setEnumOptions(jobStatusOptions).setLabel("Job status")
+		addAttribute(USER).setDataType(STRING).setLabel("Job owner").setNillable(false);
+		addAttribute(STATUS).setDataType(ENUM).setEnumOptions(jobStatusOptions).setLabel("Job status")
 				.setNillable(false);
 		addAttribute(TYPE).setDataType(STRING).setLabel("Job type").setNillable(false);
-		addAttribute(SUBMISSION_DATE).setDataType(DATETIME).setLabel("Job submission date").setNillable(false);
-		addAttribute(START_DATE).setDataType(DATETIME).setLabel("Job start date").setNillable(true);
-		addAttribute(END_DATE).setDataType(DATETIME).setLabel("Job end date").setNillable(true);
+		addAttribute(SUBMISSION_DATE).setDataType(DATE_TIME).setLabel("Job submission date").setNillable(false);
+		addAttribute(START_DATE).setDataType(DATE_TIME).setLabel("Job start date").setNillable(true);
+		addAttribute(END_DATE).setDataType(DATE_TIME).setLabel("Job end date").setNillable(true);
 		addAttribute(PROGRESS_INT).setDataType(INT).setLabel("Progress").setNillable(true);
 		addAttribute(PROGRESS_MAX).setDataType(INT).setLabel("Maximum progress").setNillable(true);
 		addAttribute(PROGRESS_MESSAGE).setDataType(STRING).setLabel("Progress message").setNillable(true);

@@ -1,36 +1,14 @@
 package org.molgenis.data.postgresql;
 
-import static autovalue.shaded.com.google.common.common.collect.Sets.immutableEnumSet;
-import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.RepositoryCollectionCapability.META_DATA_PERSISTABLE;
-import static org.molgenis.data.RepositoryCollectionCapability.UPDATABLE;
-import static org.molgenis.data.RepositoryCollectionCapability.WRITABLE;
-import static org.molgenis.data.i18n.LanguageMetaData.CODE;
-import static org.molgenis.data.i18n.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
-import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
-import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ABSTRACT;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.BACKEND;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.FULL_NAME;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlAddColumn;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateForeignKey;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateJunctionTable;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateTable;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlCreateUniqueKey;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropColumn;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropJunctionTable;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropNotNull;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropTable;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlDropUniqueKey;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlSetDataType;
-import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.getSqlSetNotNull;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributes;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributesMref;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableName;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isPersistedInPostgreSql;
+import org.molgenis.data.*;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.AbstractRepositoryCollection;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -40,24 +18,18 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import javax.sql.DataSource;
-
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollectionCapability;
-import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.UnknownRepositoryException;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.support.AbstractRepositoryCollection;
-import org.molgenis.fieldtypes.MrefField;
-import org.molgenis.fieldtypes.XrefField;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.jdbc.core.JdbcTemplate;
+import static autovalue.shaded.com.google.common.common.collect.Sets.immutableEnumSet;
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
+import static org.molgenis.data.RepositoryCollectionCapability.*;
+import static org.molgenis.data.i18n.LanguageMetaData.*;
+import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
+import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
+import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
+import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
 
 public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 {
@@ -220,7 +192,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 			// computed attributes are not persisted
 			return;
 		}
-		if (attr.getDataType() instanceof MrefField)
+		if (isMultipleReferenceType(attr))
 		{
 			String createJunctionTableSql = getSqlCreateJunctionTable(entityMetaData, attr);
 			if (LOG.isDebugEnabled())
@@ -233,7 +205,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 			}
 			jdbcTemplate.execute(createJunctionTableSql);
 		}
-		else if (!attr.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
+		else if (attr.getDataType() != COMPOUND)
 		{
 			String addColumnSql = getSqlAddColumn(entityMetaData, attr);
 			if (LOG.isDebugEnabled())
@@ -247,7 +219,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 			jdbcTemplate.execute(addColumnSql);
 		}
 
-		if (attr.getDataType() instanceof XrefField && isPersistedInPostgreSql(attr.getRefEntity()))
+		if (isSingleReferenceType(attr) && isPersistedInPostgreSql(attr.getRefEntity()))
 		{
 			String createForeignKeySql = getSqlCreateForeignKey(entityMetaData, attr);
 			if (LOG.isDebugEnabled())
@@ -276,7 +248,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 			jdbcTemplate.execute(createUniqueKeySql);
 		}
 
-		if (attr.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
+		if (attr.getDataType() == COMPOUND)
 		{
 			for (AttributeMetaData attrPart : attr.getAttributeParts())
 			{
@@ -302,7 +274,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 		}
 
 		// data type changes
-		if (!Objects.equals(attr.getDataType().getEnumType(), updatedAttr.getDataType().getEnumType()))
+		if (!Objects.equals(attr.getDataType(), updatedAttr.getDataType()))
 		{
 			updateDataType(entityMetaData, attr, updatedAttr);
 		}
@@ -321,8 +293,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("Changing data type of entity [{}] attribute [{}] from [{}] to [{}]", entityMetaData.getName(),
-					attr.getName(), attr.getDataType().getEnumType().toString(),
-					updatedAttr.getDataType().getEnumType().toString());
+					attr.getName(), attr.getDataType().toString(), updatedAttr.getDataType().toString());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", sqlSetDataType);
@@ -493,7 +464,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 		String idAttrName = entityMeta.getIdAttribute().getName();
 		getPersistedAttributes(entityMeta).forEach(attr -> {
 			// add mref tables
-			if (attr.getDataType() instanceof MrefField)
+			if (isMultipleReferenceType(attr))
 			{
 				String createJunctionTableSql = getSqlCreateJunctionTable(entityMeta, attr);
 				if (LOG.isDebugEnabled())
@@ -506,7 +477,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 				}
 				jdbcTemplate.execute(createJunctionTableSql);
 			}
-			else if (attr.getDataType() instanceof XrefField && isPersistedInPostgreSql(attr.getRefEntity()))
+			else if (isSingleReferenceType(attr) && isPersistedInPostgreSql(attr.getRefEntity()))
 			{
 				String createForeignKeySql = getSqlCreateForeignKey(entityMeta, attr);
 				if (LOG.isDebugEnabled())

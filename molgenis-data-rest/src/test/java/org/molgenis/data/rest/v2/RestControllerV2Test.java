@@ -1,69 +1,14 @@
 package org.molgenis.data.rest.v2;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.MolgenisFieldTypes.CATEGORICAL;
-import static org.molgenis.MolgenisFieldTypes.CATEGORICAL_MREF;
-import static org.molgenis.MolgenisFieldTypes.COMPOUND;
-import static org.molgenis.MolgenisFieldTypes.DATE;
-import static org.molgenis.MolgenisFieldTypes.DATETIME;
-import static org.molgenis.MolgenisFieldTypes.DECIMAL;
-import static org.molgenis.MolgenisFieldTypes.EMAIL;
-import static org.molgenis.MolgenisFieldTypes.ENUM;
-import static org.molgenis.MolgenisFieldTypes.HTML;
-import static org.molgenis.MolgenisFieldTypes.HYPERLINK;
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.LONG;
-import static org.molgenis.MolgenisFieldTypes.MREF;
-import static org.molgenis.MolgenisFieldTypes.SCRIPT;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.testng.Assert.assertEquals;
-
-import java.io.UnsupportedEncodingException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
+import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityManager;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -74,7 +19,6 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -103,10 +47,29 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
+import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.testng.Assert.assertEquals;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = { RestControllerV2Config.class, GsonConfig.class })
@@ -296,7 +259,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				CATEGORICAL_MREF, refEntityMeta);
 		AttributeMetaData attrCompound = createAttributeMeta(entityMeta, attrCompoundName, COMPOUND);
 		AttributeMetaData attrDate = createAttributeMeta(entityMeta, attrDateName, DATE);
-		AttributeMetaData attrDateTime = createAttributeMeta(entityMeta, attrDateTimeName, DATETIME);
+		AttributeMetaData attrDateTime = createAttributeMeta(entityMeta, attrDateTimeName, DATE_TIME);
 		AttributeMetaData attrDecimal = createAttributeMeta(entityMeta, attrDecimalName, DECIMAL, null);
 		when(attrDecimal.isReadOnly()).thenReturn(true);
 		AttributeMetaData attrEmail = createAttributeMeta(entityMeta, attrEmailName, EMAIL);
@@ -323,7 +286,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		when(attrCategoricalMrefOptional.isNillable()).thenReturn(true);
 		AttributeMetaData attrDateOptional = createAttributeMeta(entityMeta, attrDateOptionalName, DATE);
 		when(attrDateOptional.isNillable()).thenReturn(true);
-		AttributeMetaData attrDateTimeOptional = createAttributeMeta(entityMeta, attrDateTimeOptionalName, DATETIME);
+		AttributeMetaData attrDateTimeOptional = createAttributeMeta(entityMeta, attrDateTimeOptionalName, DATE_TIME);
 		when(attrDateTimeOptional.isNillable()).thenReturn(true);
 		AttributeMetaData attrDecimalOptional = createAttributeMeta(entityMeta, attrDecimalOptionalName, DECIMAL, null);
 		when(attrDecimalOptional.isNillable()).thenReturn(true);
@@ -492,12 +455,12 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 				.setConversionService(conversionService).build();
 	}
 
-	private AttributeMetaData createAttributeMeta(EntityMetaData entityMeta, String attrName, FieldType type)
+	private AttributeMetaData createAttributeMeta(EntityMetaData entityMeta, String attrName, AttributeType type)
 	{
 		return createAttributeMeta(entityMeta, attrName, type, null);
 	}
 
-	private AttributeMetaData createAttributeMeta(EntityMetaData entityMeta, String attrName, FieldType type,
+	private AttributeMetaData createAttributeMeta(EntityMetaData entityMeta, String attrName, AttributeType type,
 			EntityMetaData refEntityMeta)
 	{
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();

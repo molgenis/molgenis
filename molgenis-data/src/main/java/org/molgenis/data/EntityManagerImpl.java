@@ -5,13 +5,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.SetMultimap;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.data.support.EntityWithComputedAttributes;
-import org.molgenis.data.support.LazyEntity;
-import org.molgenis.data.support.PartialEntity;
-import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.fieldtypes.MrefField;
-import org.molgenis.fieldtypes.XrefField;
+import org.molgenis.data.support.*;
 import org.molgenis.util.BatchingIterable;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -25,6 +19,8 @@ import java.util.stream.StreamSupport;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
+import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
 
 /**
  * Entity manager responsible for creating entities, entity references and resolving references of reference attributes.
@@ -207,8 +203,7 @@ public class EntityManagerImpl implements EntityManager
 		{
 			String refEntityName = attr.getRefEntity().getName();
 
-			FieldType attrType = attr.getDataType();
-			if (attrType instanceof XrefField)
+			if (isSingleReferenceType(attr))
 			{
 				for (Entity entity : entities)
 				{
@@ -220,7 +215,7 @@ public class EntityManagerImpl implements EntityManager
 				}
 
 			}
-			else if (attrType instanceof MrefField)
+			else if (isMultipleReferenceType(attr))
 			{
 				for (Entity entity : entities)
 				{
@@ -253,8 +248,7 @@ public class EntityManagerImpl implements EntityManager
 
 			for (AttributeMetaData attr : attrs)
 			{
-				FieldType attrType = attr.getDataType();
-				if (attrType instanceof XrefField)
+				if (isSingleReferenceType(attr))
 				{
 					String attrName = attr.getName();
 					for (Entity entity : entities)
@@ -269,7 +263,7 @@ public class EntityManagerImpl implements EntityManager
 						}
 					}
 				}
-				else if (attrType instanceof MrefField)
+				else if (isMultipleReferenceType(attr))
 				{
 					String attrName = attr.getName();
 					for (Entity entity : entities)
@@ -353,7 +347,7 @@ public class EntityManagerImpl implements EntityManager
 	private static List<AttributeMetaData> getResolvableAttrs(EntityMetaData entityMeta, Fetch fetch)
 	{
 		return stream(entityMeta.getAtomicAttributes().spliterator(), false)
-				.filter(attr -> attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
+				.filter(EntityMetaDataUtils::isReferenceType)
 				.filter(attr -> attr.getExpression() == null).filter(attr -> fetch.hasField(attr.getName()))
 				.collect(Collectors.toList());
 	}

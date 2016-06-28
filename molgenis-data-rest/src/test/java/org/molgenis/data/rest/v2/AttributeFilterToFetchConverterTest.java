@@ -1,16 +1,5 @@
 package org.molgenis.data.rest.v2;
 
-import static java.util.Arrays.asList;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.COMPOUND;
-import static org.molgenis.MolgenisFieldTypes.FILE;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -18,6 +7,14 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.file.model.FileMetaMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import static java.util.Arrays.asList;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 public class AttributeFilterToFetchConverterTest
 {

@@ -1,18 +1,18 @@
 package org.molgenis.charts.data;
 
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.charts.MolgenisSerieType;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.charts.MolgenisSerieType;
 
 /**
  * A list of XYData points to be used by XYDataCharts, represents a line/bar
  */
 public class XYDataSerie extends MolgenisSerie
 {
-	private FieldTypeEnum attributeXFieldTypeEnum;
-	private FieldTypeEnum attributeYFieldTypeEnum;
+	private AttributeType attributeXFieldTypeEnum;
+	private AttributeType attributeYFieldTypeEnum;
 	private List<XYData> data = new ArrayList<XYData>();
 	
 	public XYDataSerie()
@@ -55,7 +55,7 @@ public class XYDataSerie extends MolgenisSerie
 	/**
 	 * @return the attributeXFieldTypeEnum
 	 */
-	public FieldTypeEnum getAttributeXFieldTypeEnum()
+	public AttributeType getAttributeXFieldTypeEnum()
 	{
 		return attributeXFieldTypeEnum;
 	}
@@ -63,7 +63,7 @@ public class XYDataSerie extends MolgenisSerie
 	/**
 	 * @param attributeXFieldTypeEnum the attributeXFieldTypeEnum to set
 	 */
-	public void setAttributeXFieldTypeEnum(FieldTypeEnum attributeXFieldTypeEnum)
+	public void setAttributeXFieldTypeEnum(AttributeType attributeXFieldTypeEnum)
 	{
 		this.attributeXFieldTypeEnum = attributeXFieldTypeEnum;
 	}
@@ -71,7 +71,7 @@ public class XYDataSerie extends MolgenisSerie
 	/**
 	 * @return the attributeYFieldTypeEnum
 	 */
-	public FieldTypeEnum getAttributeYFieldTypeEnum()
+	public AttributeType getAttributeYFieldTypeEnum()
 	{
 		return attributeYFieldTypeEnum;
 	}
@@ -79,7 +79,7 @@ public class XYDataSerie extends MolgenisSerie
 	/**
 	 * @param attributeYFieldTypeEnum the attributeYFieldTypeEnum to set
 	 */
-	public void setAttributeYFieldTypeEnum(FieldTypeEnum attributeYFieldTypeEnum)
+	public void setAttributeYFieldTypeEnum(AttributeType attributeYFieldTypeEnum)
 	{
 		this.attributeYFieldTypeEnum = attributeYFieldTypeEnum;
 	}

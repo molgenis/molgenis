@@ -13,7 +13,7 @@ import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
@@ -629,7 +629,7 @@ public class EntityMetaData extends StaticEntity
 			{
 				return attr;
 			}
-			if (attr.getDataType().getEnumType() == COMPOUND)
+			if (attr.getDataType() == COMPOUND)
 			{
 				AttributeMetaData attributeRec = getAttributeRec(attrName, attr.getAttributeParts());
 				if (attributeRec != null)
@@ -644,7 +644,7 @@ public class EntityMetaData extends StaticEntity
 	private void getOwnAtomicAttributesRec(Iterable<AttributeMetaData> attrs, List<AttributeMetaData> atomicAttrs)
 	{
 		attrs.forEach(attr -> {
-			if (attr.getDataType().getEnumType() == COMPOUND)
+			if (attr.getDataType() == COMPOUND)
 			{
 				getOwnAtomicAttributesRec(attr.getAttributeParts(), atomicAttrs);
 			}
@@ -658,7 +658,7 @@ public class EntityMetaData extends StaticEntity
 	private void getOwnAllAttributesRec(Iterable<AttributeMetaData> attrs, List<AttributeMetaData> allAttrs)
 	{
 		attrs.forEach(attr -> {
-			if (attr.getDataType().getEnumType() == COMPOUND)
+			if (attr.getDataType() == COMPOUND)
 			{
 				getOwnAllAttributesRec(attr.getAttributeParts(), allAttrs);
 			}

@@ -1,17 +1,17 @@
 package org.molgenis.questionnaires;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.security.owned.OwnedEntityMetaData;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.fieldtypes.EnumField;
-import org.molgenis.security.owned.OwnedEntityMetaData;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.ENUM;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 /**
  * Base EntityMetaData for 'questionnaire' entities
@@ -44,7 +44,6 @@ public class QuestionnaireMetaData extends SystemEntityMetaData
 		{
 			enumOptions.add(questionnaireStatus.toString());
 		}
-		addAttribute(ATTR_STATUS).setDataType(new EnumField()).setEnumOptions(enumOptions).setVisible(false)
-				.setNillable(false);
+		addAttribute(ATTR_STATUS).setDataType(ENUM).setEnumOptions(enumOptions).setVisible(false).setNillable(false);
 	}
 }

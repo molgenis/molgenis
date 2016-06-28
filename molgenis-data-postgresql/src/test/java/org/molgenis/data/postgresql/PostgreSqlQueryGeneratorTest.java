@@ -1,13 +1,5 @@
 package org.molgenis.data.postgresql;
 
-import static java.util.Arrays.asList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.MREF;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-
-import java.util.List;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -16,6 +8,14 @@ import org.molgenis.data.support.QueryImpl;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
+
+import java.util.List;
+
+import static java.util.Arrays.asList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 
 public class PostgreSqlQueryGeneratorTest
 {

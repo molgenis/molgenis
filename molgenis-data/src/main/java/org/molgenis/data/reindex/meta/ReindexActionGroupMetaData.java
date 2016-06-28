@@ -1,11 +1,11 @@
 package org.molgenis.data.reindex.meta;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.reindex.meta.IndexPackage.PACKAGE_INDEX;
@@ -45,6 +45,6 @@ public class ReindexActionGroupMetaData extends SystemEntityMetaData
 
 		setDescription("This entity is used to group the reindex actions.");
 		addAttribute(ID, ROLE_ID);
-		addAttribute(COUNT).setDataType(MolgenisFieldTypes.INT).setNillable(false);
+		addAttribute(COUNT).setDataType(INT).setNillable(false);
 	}
 }

@@ -1,11 +1,6 @@
 package org.molgenis.data.rsql;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.testng.Assert.assertEquals;
-
+import cz.jirutka.rsql.parser.RSQLParserException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.UnknownAttributeException;
@@ -16,7 +11,11 @@ import org.springframework.core.convert.ConversionFailedException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import cz.jirutka.rsql.parser.RSQLParserException;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.testng.Assert.assertEquals;
 
 public class MolgenisRSQLTest
 {

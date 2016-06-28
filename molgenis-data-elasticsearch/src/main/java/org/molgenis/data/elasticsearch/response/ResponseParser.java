@@ -1,10 +1,5 @@
 package org.molgenis.data.elasticsearch.response;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.ShardSearchFailure;
 import org.elasticsearch.common.base.Joiner;
@@ -12,7 +7,6 @@ import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHitField;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.suggest.term.TermSuggestion.Score;
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.util.Hit;
@@ -20,6 +14,13 @@ import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
 
 /**
  * Generates a SearchResult from the ElasticSearch SearchResponse object
@@ -78,8 +79,7 @@ public class ResponseParser
 					String fieldName = entry.getKey();
 					if (entityMetaData == null
 							|| entityMetaData.getAttribute(fieldName) == null
-							|| !entityMetaData.getAttribute(fieldName).getDataType().getEnumType().toString()
-									.equalsIgnoreCase(MolgenisFieldTypes.MREF.toString()))
+							|| entityMetaData.getAttribute(fieldName).getDataType() != MREF)
 
 					{
 						columnValueMap.put(entry.getKey(), entry.getValue());

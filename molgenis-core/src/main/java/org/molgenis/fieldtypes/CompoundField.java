@@ -1,10 +1,10 @@
 package org.molgenis.fieldtypes;
 
-import java.text.ParseException;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Field;
+
+import java.text.ParseException;
 
 /**
  * Compound field type is a field type for attributes consisting of multiple attributes
@@ -103,9 +103,9 @@ public class CompoundField extends FieldType
 	}
 
 	@Override
-	public FieldTypeEnum getEnumType()
+	public AttributeType getEnumType()
 	{
-		return FieldTypeEnum.COMPOUND;
+		return AttributeType.COMPOUND;
 	}
 
 	@Override

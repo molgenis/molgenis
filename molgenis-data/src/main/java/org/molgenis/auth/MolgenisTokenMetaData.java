@@ -1,17 +1,15 @@
 package org.molgenis.auth;
 
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.DATETIME;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.MolgenisFieldTypes.XREF;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-
-import org.molgenis.data.meta.SystemEntityMetaData;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 @Component
 public class MolgenisTokenMetaData extends SystemEntityMetaData
@@ -43,15 +41,13 @@ public class MolgenisTokenMetaData extends SystemEntityMetaData
 		setPackage(securityPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
-		addAttribute(MOLGENIS_USER).setDataType(XREF).setRefEntity(molgenisUserMetaData)
-				.setAggregatable(true).setDescription("").setNillable(false);
-		addAttribute(TOKEN, ROLE_LABEL).setLabel("Token").setUnique(true).setDescription("")
-				.setNillable(false);
-		addAttribute(EXPIRATIONDATE).setDataType(DATETIME).setLabel("Expiration date").setNillable(true)
+		addAttribute(MOLGENIS_USER).setDataType(XREF).setRefEntity(molgenisUserMetaData).setAggregatable(true)
+				.setDescription("").setNillable(false);
+		addAttribute(TOKEN, ROLE_LABEL).setLabel("Token").setUnique(true).setDescription("").setNillable(false);
+		addAttribute(EXPIRATIONDATE).setDataType(DATE_TIME).setLabel("Expiration date").setNillable(true)
 				.setDescription("When expiration date is null it will never expire");
-		addAttribute(CREATIONDATE).setDataType(DATETIME).setLabel("Creation date").setAuto(true)
-				.setReadOnly(true).setDescription("").setNillable(false);
-		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description").setNillable(true)
-				.setDescription("");
+		addAttribute(CREATIONDATE).setDataType(DATE_TIME).setLabel("Creation date").setAuto(true).setReadOnly(true)
+				.setDescription("").setNillable(false);
+		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description").setNillable(true).setDescription("");
 	}
 }
