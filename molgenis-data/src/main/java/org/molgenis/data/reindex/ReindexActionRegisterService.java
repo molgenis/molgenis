@@ -5,10 +5,11 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.reindex.meta.*;
+import org.molgenis.data.reindex.meta.ReindexAction;
+import org.molgenis.data.reindex.meta.ReindexActionFactory;
+import org.molgenis.data.reindex.meta.ReindexActionGroupFactory;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
-import org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +23,7 @@ import java.util.Set;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static org.molgenis.data.reindex.meta.ReindexActionGroupMetaData.REINDEX_ACTION_GROUP;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.PENDING;
 import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME;
 
 /**
@@ -88,9 +90,11 @@ public class ReindexActionRegisterService
 							"Transaction {} has caused {} ReindexActions to be created. Consider streaming your data manipulations.",
 							transactionId, actionOrder);
 				}
-				reindexActionsPerTransaction.put(transactionId,
-						createReindexAction(reindexActionGroupFactory.create(transactionId), entityFullName, cudType,
-								dataType, entityId, actionOrder));
+				ReindexAction reindexAction = reindexActionFactory.create()
+						.setReindexActionGroup(reindexActionGroupFactory.create(transactionId))
+						.setEntityFullName(entityFullName).setCudType(cudType).setDataType(dataType)
+						.setEntityId(entityId).setActionOrder(actionOrder).setReindexStatus(PENDING);
+				reindexActionsPerTransaction.put(transactionId, reindexAction);
 			}
 			else
 			{
@@ -112,7 +116,8 @@ public class ReindexActionRegisterService
 		if (!entities.isEmpty())
 		{
 			LOG.debug("Store reindex actions for transaction {}", transactionId);
-			dataService.add(REINDEX_ACTION_GROUP, createReindexActionGroup(transactionId, entities.size()));
+			dataService.add(REINDEX_ACTION_GROUP,
+					reindexActionGroupFactory.create(transactionId).setCount(entities.size()));
 			dataService.add(REINDEX_ACTION, entities.stream());
 		}
 	}
@@ -129,17 +134,4 @@ public class ReindexActionRegisterService
 		return !reindexActionsPerTransaction.removeAll(transactionId).isEmpty();
 	}
 
-	public ReindexActionGroup createReindexActionGroup(String id, int count)
-	{
-		return reindexActionGroupFactory.create(id).setCount(count);
-	}
-
-	public ReindexAction createReindexAction(ReindexActionGroup reindexActionGroup, String entityFullName,
-			CudType cudType, DataType dataType, String entityId, int actionOrder)
-	{
-		return reindexActionFactory.create().setReindexActionGroup(reindexActionGroup).setEntityFullName(entityFullName)
-				.setCudType(cudType).setDataType(dataType).setEntityId(entityId)
-				.setActionOrder(String.valueOf(actionOrder))
-				.setReindexStatus(ReindexStatus.PENDING);
-	}
 }
