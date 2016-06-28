@@ -12,7 +12,7 @@
 				window.open("/scripts/" + encodeURIComponent(script) + "/run");
 			} else {
 				var parametersTemplate = Handlebars.compile($("#parameters-template").html());
-				restApi.getAsync('/api/v1/sys_Script', {
+				restApi.getAsync('/api/v1/sys_scr_Script', {
 					q: {q: [{field: 'name', operator: 'EQUALS', value: script}]},
 					expand: ['parameters']
 				}, function (result) {
@@ -33,7 +33,7 @@
 		$('#create-script-btn').click(function(e) {
 			React.render(molgenis.ui.Form({
 				mode: 'create',
-				entity: 'sys_Script',
+				entity: 'sys_scr_Script',
 				modal: true,
 				onSubmitSuccess : function() {
 					location.reload();
@@ -46,7 +46,7 @@
 			
 			React.render(molgenis.ui.Form({
 				mode: 'edit',
-				entity: 'sys_Script',
+				entity: 'sys_scr_Script',
 				entityInstance: encodeURIComponent(scriptToEdit),
 				modal: true,
 				onSubmitSuccess : function() {
@@ -59,7 +59,7 @@
 			var scriptToDelete = $(this).parent().siblings(".name").text();
 			
 			if (confirm("Delete script named " + scriptToDelete + " ?")){
-				restApi.remove("/api/v1/sys_Script/" + encodeURIComponent(scriptToDelete), {
+				restApi.remove("/api/v1/sys_scr_Script/" + encodeURIComponent(scriptToDelete), {
 					success:function(){},
 					error:function(){}
 				});
@@ -71,7 +71,7 @@
 			var scriptParameterToDelete = $(this).parent().siblings(".name").text();
 			
 			if (confirm("Delete script parameter named " + scriptParameterToDelete + " ?")){
-				restApi.remove("/api/v1/sys_ScriptParameter/" + encodeURIComponent(scriptParameterToDelete), {
+				restApi.remove("/api/v1/sys_scr_ScriptParameter/" + encodeURIComponent(scriptParameterToDelete), {
 					success:function(){
 						location.reload();						
 					},
@@ -83,7 +83,7 @@
 		$('#create-scriptparameter-btn').click(function() {
 			React.render(molgenis.ui.Form({
 				mode: 'create',
-				entity: 'sys_ScriptParameter',
+				entity: 'sys_scr_ScriptParameter',
 				modal: true,
 				onSubmitSuccess : function() {
 					location.reload();
