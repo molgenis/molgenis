@@ -7,7 +7,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.support.UuidGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +26,6 @@ import static java.time.LocalDate.now;
 import static java.time.LocalDate.parse;
 import static java.time.format.DateTimeFormatter.ISO_DATE_TIME;
 import static java.time.temporal.ChronoUnit.YEARS;
-import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -35,25 +33,26 @@ import static org.apache.commons.lang.StringUtils.join;
 import static org.molgenis.app.promise.model.BbmriNlCheatSheet.*;
 
 @Component
-public class RadboudMapper implements PromiseMapper, ApplicationListener<ContextRefreshedEvent>
+class RadboudMapper implements PromiseMapper, ApplicationListener<ContextRefreshedEvent>
 {
 	private final String MAPPER_ID = "RADBOUD";
 
-	public static final String URN_MIRIAM_ICD_PREFIX = "urn:miriam:icd:";
-	public static final String XML_CONTACT_PERSON = "CONTACTPERS";
-	public static final String XML_ADRESS1 = "ADRES1";
-	public static final String XML_ADRESS2 = "ADRES2";
-	public static final String XML_ZIP_CODE = "POSTCODE";
-	public static final String XML_LOCATION = "PLAATS";
-	public static final String XML_EMAIL = "EMAIL";
-	public static final String XML_GENDER = "GESLACHT";
-	public static final String XML_BIRTHDATE = "GEBOORTEDATUM";
+	private static final String URN_MIRIAM_ICD_PREFIX = "urn:miriam:icd:";
+	private static final String XML_CONTACT_PERSON = "CONTACTPERS";
+	private static final String XML_ADRESS1 = "ADRES1";
+	private static final String XML_ADRESS2 = "ADRES2";
+	private static final String XML_ZIP_CODE = "POSTCODE";
+	private static final String XML_LOCATION = "PLAATS";
+	private static final String XML_EMAIL = "EMAIL";
+	private static final String XML_PHONE = "TELEFOON";
+	private static final String XML_GENDER = "GESLACHT";
+	private static final String XML_BIRTHDATE = "GEBOORTEDATUM";
 
-	public static final String XML_ID = "ID";
-	public static final String XML_TITLE = "TITEL";
-	public static final String XML_IDAA = "IDAA";
-	public static final String XML_CODEINDEX = "CODEINDEX";
-	public static final String XML_DESCRIPTION = "OMSCHRIJVING";
+	private static final String XML_ID = "ID";
+	private static final String XML_TITLE = "TITEL";
+	private static final String XML_IDAA = "IDAA";
+	private static final String XML_CODEINDEX = "CODEINDEX";
+	private static final String XML_DESCRIPTION = "OMSCHRIJVING";
 
 	private final PromiseMapperFactory promiseMapperFactory;
 	private final PromiseDataParser promiseDataParser;
@@ -91,10 +90,8 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		requireNonNull(project);
 
 		MappingReport report = new MappingReport();
-
 		List<Entity> sampleCollectionsToAdd = newArrayList();
 		List<Entity> sampleCollectionsToUpdate = newArrayList();
-
 		Map<String, List<Entity>> sampleIdMap = newHashMap();
 
 		countryNl = dataService.findOne(REF_COUNTRIES, "NL");
@@ -233,9 +230,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 
 		if (diseaseTypes.isEmpty())
 		{
-			Entity unknownDiseaseType = new MapEntity(dataService.getEntityMetaData(REF_DISEASE_TYPES));
-			unknownDiseaseType.set(ID, "NAV");
-			diseaseTypes.add(unknownDiseaseType);
+			diseaseTypes.add(dataService.findOne(REF_DISEASE_TYPES, "NAV"));
 		}
 		return diseaseTypes;
 	}
@@ -260,7 +255,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		return entity;
 	}
 
-	public Iterable<Entity> getContactPersons(Entity biobankEntity)
+	private Iterable<Entity> getContactPersons(Entity biobankEntity)
 	{
 		String[] contactPerson = biobankEntity.getString(XML_CONTACT_PERSON).split(",");
 		String address1 = biobankEntity.getString(XML_ADRESS1);
@@ -268,7 +263,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		String postalCode = biobankEntity.getString(XML_ZIP_CODE);
 		String city = biobankEntity.getString(XML_LOCATION);
 		String[] email = biobankEntity.getString(XML_EMAIL).split(" ");
-		String phoneNumber = biobankEntity.getString("TELEFOON");
+		String phoneNumber = biobankEntity.getString(XML_PHONE);
 
 		List<Entity> persons = newArrayList();
 		for (int i = 0; i < contactPerson.length; i++)
@@ -342,7 +337,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 
 	private Iterable<Entity> toSex(Iterable<Entity> promiseBiobankSamplesEntities) throws RuntimeException
 	{
-		Set<Object> genderTypeIds = new LinkedHashSet<Object>();
+		Set<Object> genderTypeIds = new LinkedHashSet<>();
 
 		for (Entity promiseBiobankSamplesEntity : promiseBiobankSamplesEntities)
 		{
@@ -402,13 +397,13 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 		{
 			throw new RuntimeException("Unknown '" + REF_COLLECTION_TYPES + "' [" + collectionTypeId + "]");
 		}
-		return asList(collectionType);
+		return singletonList(collectionType);
 	}
 
 	private Iterable<Entity> toDataCategories(Entity promiseBiobankEntity,
 			Iterable<Entity> promiseBiobankSamplesEntities)
 	{
-		Set<Object> dataCategoryTypeIds = new LinkedHashSet<Object>();
+		Set<Object> dataCategoryTypeIds = new LinkedHashSet<>();
 
 		for (Entity promiseBiobankSamplesEntity : promiseBiobankSamplesEntities)
 		{
@@ -499,7 +494,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 
 	private Iterable<Entity> toMaterials(Iterable<Entity> promiseBiobankSamplesEntities)
 	{
-		Set<Object> materialTypeIds = new LinkedHashSet<Object>();
+		Set<Object> materialTypeIds = new LinkedHashSet<>();
 
 		for (Entity promiseBiobankSamplesEntity : promiseBiobankSamplesEntities)
 		{
@@ -583,7 +578,7 @@ public class RadboudMapper implements PromiseMapper, ApplicationListener<Context
 
 	private Iterable<Entity> toOmics(Iterable<Entity> promiseBiobankSamplesEntities)
 	{
-		Set<Object> omicsTypeIds = new LinkedHashSet<Object>();
+		Set<Object> omicsTypeIds = new LinkedHashSet<>();
 
 		for (Entity promiseBiobankSamplesEntity : promiseBiobankSamplesEntities)
 		{
