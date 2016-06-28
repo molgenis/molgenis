@@ -27,6 +27,7 @@ import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ACTION_ORDER;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.DELETE;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType.DATA;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP_ATTR;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.*;
 
 /**
@@ -214,7 +215,7 @@ class ReindexJob extends Job
 	 */
 	static Query<ReindexAction> createQueryGetAllReindexActions(String transactionId)
 	{
-		QueryRule rule = new QueryRule(REINDEX_ACTION_GROUP, EQUALS, transactionId);
+		QueryRule rule = new QueryRule(REINDEX_ACTION_GROUP_ATTR, EQUALS, transactionId);
 		QueryImpl<ReindexAction> q = new QueryImpl<>(rule);
 		q.setSort(new Sort(ACTION_ORDER));
 		return q;
