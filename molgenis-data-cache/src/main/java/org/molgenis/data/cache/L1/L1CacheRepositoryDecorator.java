@@ -13,7 +13,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.RepositoryCapability.CACHEABLE;
+import static org.molgenis.data.RepositoryCollectionCapability.CACHEABLE;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class L1CacheRepositoryDecorator implements Repository<Entity>

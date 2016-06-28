@@ -34,14 +34,14 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	@Override
 	public void transactionStarted(String transactionId)
 	{
-		LOG.trace("Creating org.molgenis.data.cache.L1 cache for transaction [{}]", transactionId);
+		LOG.trace("Creating L1 cache for transaction [{}]", transactionId);
 		cache.set(createCache(1000));
 	}
 
 	@Override
 	public void doCleanupAfterCompletion(String transactionId)
 	{
-		LOG.trace("Cleaning up org.molgenis.data.cache.L1 cache after transaction [{}]", transactionId);
+		LOG.trace("Cleaning up L1 cache after transaction [{}]", transactionId);
 		cache.remove();
 	}
 
@@ -115,7 +115,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 			LOG.trace("Dehydrating entity with id [{}]", key);
 
 			entityCache.put(key, dehydratedEntity);
-			LOG.trace("Adding dehydrated entity [{}] to org.molgenis.data.cache.L1 Cache", key);
+			LOG.trace("Adding dehydrated entity [{}] to L1 Cache", key);
 		}
 	}
 
