@@ -120,7 +120,7 @@ public class EntityTestHarness
 		if (date == null || dateTime == null) generateDateAndDateTime();
 
 		Entity entity1 = new DynamicEntity(entityMetaData);
-		entity1.set(ATTR_ID, Integer.toString(id));
+		entity1.set(ATTR_ID, "" + id);
 		entity1.set(ATTR_STRING, "string1");
 		entity1.set(ATTR_BOOL, true);
 		entity1.set(ATTR_CATEGORICAL, refEntity);

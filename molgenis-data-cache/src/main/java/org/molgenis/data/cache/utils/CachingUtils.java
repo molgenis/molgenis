@@ -23,7 +23,7 @@ public class CachingUtils
 	private static final Logger LOG = LoggerFactory.getLogger(CachingUtils.class);
 
 	/**
-	 * Rebuild entity from the values representing this entity.
+	 * Rebuild entity from a map with key value pairs representing this entity.
 	 *
 	 * @param dehydratedEntity
 	 * @return hydrated entity
