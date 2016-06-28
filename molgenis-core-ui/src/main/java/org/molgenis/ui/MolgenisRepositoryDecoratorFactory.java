@@ -93,29 +93,26 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	{
 		Repository<Entity> decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
 
-		// 11. Query the L1 cache before asking the database
+		// 10. Query the L1 cache before querying the database
 		decoratedRepository = new L1CacheRepositoryDecorator(decoratedRepository, l1Cache);
 
-		// 10. Route specific queries to the index
+		// 9. Route specific queries to the index
 		decoratedRepository = new IndexedRepositoryDecorator(decoratedRepository, searchService);
 
-		// 9. Register the cud action needed to reindex indexed repositories
+		// 8. Register the cud action needed to reindex indexed repositories
 		decoratedRepository = new ReindexActionRepositoryDecorator(decoratedRepository, reindexActionRegisterService);
 
-		// 8. Custom decorators
+		// 7. Custom decorators
 		decoratedRepository = applyCustomRepositoryDecorators(decoratedRepository);
 
-		// 7. Owned decorator
+		// 6. Owned decorator
 		if (EntityUtils.doesExtend(decoratedRepository.getEntityMetaData(), OWNED))
 		{
 			decoratedRepository = new OwnedEntityRepositoryDecorator(decoratedRepository);
 		}
 
-		// 6. Entity reference resolver decorator
+		// 5. Entity reference resolver decorator
 		decoratedRepository = new EntityReferenceResolverDecorator(decoratedRepository, entityManager);
-
-		// 5. Computed entity values decorator
-		decoratedRepository = new ComputedEntityValuesDecorator(decoratedRepository);
 
 		// 4. Entity listener
 		decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);

@@ -257,10 +257,12 @@ public class EntityMetaData extends StaticEntity
 	public EntityMetaData setIdAttribute(AttributeMetaData idAttr)
 	{
 		set(EntityMetaDataMetaData.ID_ATTRIBUTE, idAttr);
-		idAttr.setReadOnly(true);
-		idAttr.setUnique(true);
-		idAttr.setNillable(false);
-
+		if (idAttr != null)
+		{
+			idAttr.setReadOnly(true);
+			idAttr.setUnique(true);
+			idAttr.setNillable(false);
+		}
 		if (getLabelAttribute() == null)
 		{
 			setLabelAttribute(idAttr);
@@ -323,9 +325,12 @@ public class EntityMetaData extends StaticEntity
 	public EntityMetaData setLabelAttribute(AttributeMetaData labelAttr)
 	{
 		set(EntityMetaDataMetaData.LABEL_ATTRIBUTE, labelAttr);
-		if (!getLookupAttributes().iterator().hasNext())
+		if (labelAttr != null)
 		{
-			addLookupAttribute(labelAttr);
+			if (!getLookupAttributes().iterator().hasNext())
+			{
+				addLookupAttribute(labelAttr);
+			}
 		}
 		return this;
 	}
