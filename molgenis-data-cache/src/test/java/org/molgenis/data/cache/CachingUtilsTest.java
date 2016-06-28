@@ -18,10 +18,12 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.cache.CachingUtils.*;
+import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { CachingUtilsTest.Config.class })
@@ -44,20 +46,35 @@ public class CachingUtilsTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void beforeClass()
 	{
+		// create metadata
 		entityMetaData = entityTestHarness.createDynamicTestEntityMetaData();
 
-		EntityMetaData refEntityMetaData = entityTestHarness.createDynamicRefEntityMetaData();
-		List<Entity> refEntities = entityTestHarness.createTestRefEntities(refEntityMetaData, 1);
+		// create referenced entities
+		List<Entity> refEntities = entityTestHarness
+				.createTestRefEntities(entityTestHarness.createDynamicRefEntityMetaData(), 1);
 
-		// create
-		hydratedEntity = entityTestHarness.createTestEntities(entityMetaData, 1, refEntities)
-				.collect(toList()).get(0);
+		// create hydrated entity
+		hydratedEntity = entityTestHarness.createTestEntities(entityMetaData, 1, refEntities).collect(toList()).get(0);
 
 		// mock dehydrated entity
 		dehydratedEntity = newHashMap();
-		dehydratedEntity.put("identifier", 1);
-		dehydratedEntity.put("height", 170.50);
-		dehydratedEntity.put("person", xrefEntity);
+		Entity refEntity = refEntities.get(0);
+		dehydratedEntity.put(ATTR_ID, 1);
+		dehydratedEntity.put(ATTR_STRING, "string1");
+		dehydratedEntity.put(ATTR_BOOL, true);
+		dehydratedEntity.put(ATTR_CATEGORICAL, refEntity);
+		dehydratedEntity.put(ATTR_CATEGORICAL_MREF, singletonList(refEntity));
+		dehydratedEntity.put(ATTR_DATE, "21-12-2012");
+		dehydratedEntity.put(ATTR_DATETIME, "1985-08-12T11:12:13+0500");
+		dehydratedEntity.put(ATTR_EMAIL, "this.is@mail.address");
+		dehydratedEntity.put(ATTR_DECIMAL, 1.123);
+		dehydratedEntity.put(ATTR_HTML, "<html>where is my head and where is my body</html>");
+		dehydratedEntity.put(ATTR_HYPERLINK, "http://www.molgenis.org");
+		dehydratedEntity.put(ATTR_LONG, 1000000);
+		dehydratedEntity.put(ATTR_INT, 18);
+		dehydratedEntity.put(ATTR_SCRIPT, "/bin/blaat/script.sh");
+		dehydratedEntity.put(ATTR_XREF, refEntity);
+		dehydratedEntity.put(ATTR_MREF, singletonList(refEntity));
 
 		// mock entity manager
 		entityManager = when(mock(EntityManager.class).create(entityMetaData)).thenReturn(hydratedEntity).getMock();
