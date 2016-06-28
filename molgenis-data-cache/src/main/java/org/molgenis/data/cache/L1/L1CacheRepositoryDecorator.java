@@ -75,17 +75,28 @@ public class L1CacheRepositoryDecorator implements Repository<Entity>
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
-		// TODO What if a part is in cache and another in database
 		if (cacheable)
 		{
+			List<Object> missingIds = newArrayList();
 			List<Entity> entitiesFromCache = newArrayList();
 			String entityName = getName();
 			ids = ids.filter(id -> {
 				Entity cacheEntity = l1Cache.get(entityName, id, getEntityMetaData());
+
 				if (cacheEntity != null) entitiesFromCache.add(cacheEntity);
+				else missingIds.add(id);
+
 				return true;
 			});
-			if (!entitiesFromCache.isEmpty()) return entitiesFromCache.stream();
+
+			if (!entitiesFromCache.isEmpty())
+			{
+				// If there are missing IDs, retrieve them from the decorated repository and concat
+				// them together with the enitities found in the stream
+				if (!missingIds.isEmpty())
+					return Stream.concat(decoratedRepository.findAll(missingIds.stream()), entitiesFromCache.stream());
+				return entitiesFromCache.stream();
+			}
 		}
 		return decoratedRepository.findAll(ids);
 	}
