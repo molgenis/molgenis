@@ -73,7 +73,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	}
 
 	/**
-	 * Retrieves a dehydrated entity from the org.molgenis.data.cache.L1 cache based on a combination of entity name and entity id.
+	 * Retrieves a dehydrated entity from the L1 cache based on a combination of entity name and entity id.
 	 * returns a hydrated entity or null if there is no value present for the requested key
 	 *
 	 * @param entityName
@@ -90,16 +90,16 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 
 			if (dehydratedEntity != null)
 			{
-				LOG.trace("Retrieving and hydrating a dehydrated entity with id [{}] from org.molgenis.data.cache.L1 cache", key);
+				LOG.trace("Retrieving and hydrating a dehydrated entity with id [{}] from L1 cache", key);
 				return hydrate(dehydratedEntity, entityMetaData, entityManager);
 			}
-			LOG.trace("No dehydrated entities with id [{}] present in org.molgenis.data.cache.L1 cache", key);
+			LOG.trace("No dehydrated entities with id [{}] present in L1 cache", key);
 		}
 		return null;
 	}
 
 	/**
-	 * Puts a dehydrated entity into the org.molgenis.data.cache.L1 cache, with the key based on a combination of entity name and entity id.
+	 * Puts a dehydrated entity into the L1 cache, with the key based on a combination of entity name and entity id.
 	 *
 	 * @param entityName
 	 * @param entity
