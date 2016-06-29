@@ -1,6 +1,7 @@
 package org.molgenis.data.cache.utils;
 
 import com.google.common.cache.Cache;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -14,8 +15,7 @@ import java.util.Map;
 import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
 import static com.google.common.cache.CacheBuilder.newBuilder;
 import static com.google.common.collect.Maps.newHashMap;
-import static java.lang.String.format;
-import static org.molgenis.MolgenisFieldTypes.*;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 
 public class CachingUtils
 {
@@ -142,7 +142,7 @@ public class CachingUtils
 				value = entity.get(name);
 				break;
 			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", type));
+				throw new RuntimeException(String.format("Unknown attribute type [%s]", type));
 		}
 
 		LOG.debug("Dehydration resulted in value [{}]", value);
