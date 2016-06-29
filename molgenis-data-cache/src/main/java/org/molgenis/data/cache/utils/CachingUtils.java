@@ -1,7 +1,6 @@
 package org.molgenis.data.cache.utils;
 
 import com.google.common.cache.Cache;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -16,7 +15,7 @@ import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayLi
 import static com.google.common.cache.CacheBuilder.newBuilder;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.*;
+import static org.molgenis.MolgenisFieldTypes.*;
 
 public class CachingUtils
 {
@@ -40,7 +39,7 @@ public class CachingUtils
 			Object value = dehydratedEntity.get(name);
 			if (value != null)
 			{
-				FieldTypeEnum type = attribute.getDataType().getEnumType();
+				AttributeType type = attribute.getDataType();
 
 				if (type.equals(MREF) || type.equals(CATEGORICAL_MREF))
 				{
@@ -81,7 +80,7 @@ public class CachingUtils
 
 		entityMetaData.getAtomicAttributes().forEach(attribute -> {
 			String name = attribute.getName();
-			FieldTypeEnum type = attribute.getDataType().getEnumType();
+			AttributeType type = attribute.getDataType();
 
 			dehydratedEntity.put(name, getValueBasedonType(entity, name, type));
 		});
@@ -99,7 +98,7 @@ public class CachingUtils
 		return entityName + "__" + id.toString();
 	}
 
-	private static Object getValueBasedonType(Entity entity, String name, FieldTypeEnum type)
+	private static Object getValueBasedonType(Entity entity, String name, AttributeType type)
 	{
 		LOG.debug("Dehydrating attribute '{}' of type [{}]", name, type.toString());
 
