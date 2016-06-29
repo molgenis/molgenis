@@ -41,8 +41,12 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	@Override
 	public void doCleanupAfterCompletion(String transactionId)
 	{
-		LOG.trace("Cleaning up L1 cache after transaction [{}]", transactionId);
-		cache.remove();
+		Cache<String, Map<String, Object>> entityCache = cache.get();
+		if (entityCache != null)
+		{
+			LOG.debug("Cleaning up L1 cache after transaction [{}]", transactionId);
+			cache.remove();
+		}
 	}
 
 	/**
