@@ -30,7 +30,7 @@ public class CachingUtils
 	public static Entity hydrate(Map<String, Object> dehydratedEntity, EntityMetaData entityMetaData,
 			EntityManager entityManager)
 	{
-		LOG.debug("Hydrating map: {} for entity {}", dehydratedEntity, entityMetaData.getName());
+		LOG.trace("Hydrating entity: {} for entity {}", dehydratedEntity, entityMetaData.getName());
 
 		Entity hydratedEntity = entityManager.create(entityMetaData);
 		entityMetaData.getAtomicAttributes().forEach(attribute -> {
@@ -61,7 +61,7 @@ public class CachingUtils
 
 		});
 
-		LOG.debug("Created a hydrated entity: {}", hydratedEntity);
+		LOG.trace("Created a hydrated entity: {}", hydratedEntity);
 		return hydratedEntity;
 	}
 
@@ -74,7 +74,7 @@ public class CachingUtils
 	 */
 	public static Map<String, Object> dehydrate(Entity entity)
 	{
-		LOG.debug("Dehydrating entity {}", entity);
+		LOG.trace("Dehydrating entity {}", entity);
 		Map<String, Object> dehydratedEntity = newHashMap();
 		EntityMetaData entityMetaData = entity.getEntityMetaData();
 
@@ -100,8 +100,6 @@ public class CachingUtils
 
 	private static Object getValueBasedonType(Entity entity, String name, AttributeType type)
 	{
-		LOG.debug("Dehydrating attribute '{}' of type [{}]", name, type.toString());
-
 		Object value;
 		switch (type)
 		{
@@ -145,7 +143,7 @@ public class CachingUtils
 				throw new RuntimeException(String.format("Unknown attribute type [%s]", type));
 		}
 
-		LOG.debug("Dehydration resulted in value [{}]", value);
+		LOG.trace("Dehydrating attribute '{}' of type [{}] resulted in value: {}", name, type.toString(), value);
 		return value;
 	}
 }
