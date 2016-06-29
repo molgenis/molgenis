@@ -1,10 +1,9 @@
 package org.molgenis.data.annotation.entity.impl.gavin;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.entity.impl.gavin.Judgment.Method;
 import org.molgenis.data.annotation.entity.impl.gavin.GavinEntry.Category;
+import org.molgenis.data.annotation.entity.impl.gavin.Judgment.Method;
 import org.molgenis.data.annotation.entity.impl.snpEff.Impact;
-import org.molgenis.data.annotation.entity.impl.snpEff.SnpEffRunner;
 
 import java.util.HashMap;
 
@@ -29,7 +28,6 @@ public class GavinAlgorithm
 	public static final int GENOMEWIDE_CADD_THRESHOLD = 15;
 
 	/**
-	 *
 	 * @param impact
 	 * @param caddScaled
 	 * @param exacMAF
@@ -37,8 +35,8 @@ public class GavinAlgorithm
 	 * @param annotationSourceEntity
 	 * @return
 	 */
-	public Judgment classifyVariant(Impact impact, Double caddScaled, Double exacMAF,
-									String gene, Entity annotationSourceEntity, HashMap<String, GavinEntry> geneToEntry)
+	public Judgment classifyVariant(Impact impact, Double caddScaled, Double exacMAF, String gene,
+			Entity annotationSourceEntity, HashMap<String, GavinEntry> geneToEntry)
 	{
 		Double pathoMAFThreshold, meanPathogenicCADDScore, meanPopulationCADDScore, spec95thPerCADDThreshold, sens95thPerCADDThreshold = null;
 		Category category = null;
@@ -50,61 +48,83 @@ public class GavinAlgorithm
 		// better to have a few more false positives than to miss a true positive
 		int extraSensitivityFactor = 5;
 
-		if(geneToEntry == null)
+		if (geneToEntry == null)
 		{
 			//get data from entity for the annotator
-			pathoMAFThreshold = annotationSourceEntity.getDouble(PATHOMAFTHRESHOLD) * extraSensitivityFactor * 2;
-			meanPathogenicCADDScore = annotationSourceEntity.getDouble(MEANPATHOGENICCADDSCORE) - extraSensitivityFactor;
-			meanPopulationCADDScore = annotationSourceEntity.getDouble(MEANPATHOGENICCADDSCORE) - extraSensitivityFactor;
-			spec95thPerCADDThreshold = annotationSourceEntity.getDouble(SPEC95THPERCADDTHRESHOLD) - extraSensitivityFactor;
-			sens95thPerCADDThreshold = annotationSourceEntity.getDouble(SPEC95THPERCADDTHRESHOLD) - extraSensitivityFactor;
+			pathoMAFThreshold = annotationSourceEntity.getDouble(PATHOMAFTHRESHOLD) != null ?
+					annotationSourceEntity.getDouble(PATHOMAFTHRESHOLD) * extraSensitivityFactor * 2 : null;
+			meanPathogenicCADDScore = annotationSourceEntity.getDouble(MEANPATHOGENICCADDSCORE) != null ?
+					annotationSourceEntity.getDouble(MEANPATHOGENICCADDSCORE) - extraSensitivityFactor : null;
+			meanPopulationCADDScore = annotationSourceEntity.getDouble(MEANPOPULATIONCADDSCORE) != null ?
+					annotationSourceEntity.getDouble(MEANPOPULATIONCADDSCORE) - extraSensitivityFactor : null;
+			spec95thPerCADDThreshold = annotationSourceEntity.getDouble(SPEC95THPERCADDTHRESHOLD) != null ?
+					annotationSourceEntity.getDouble(SPEC95THPERCADDTHRESHOLD) - extraSensitivityFactor : null;
+			sens95thPerCADDThreshold = annotationSourceEntity.getDouble(SENS95THPERCADDTHRESHOLD) != null ?
+					annotationSourceEntity.getDouble(SENS95THPERCADDTHRESHOLD) - extraSensitivityFactor : null;
 			category = Category.valueOf(annotationSourceEntity.getString(CATEGORY));
 		}
 		else
 		{
 			//get data from map, for reuse in GAVIN-related tools other than the annotator
-			if(!geneToEntry.containsKey(gene))
+			if (!geneToEntry.containsKey(gene))
 			{
 				//if we have no data for this gene, immediately fall back to the genomewide method
 				return genomewideClassifyVariant(impact, caddScaled, exacMAF, gene);
 			}
 			else
 			{
-				pathoMAFThreshold = geneToEntry.get(gene).PathoMAFThreshold != null ? geneToEntry.get(gene).PathoMAFThreshold * extraSensitivityFactor * 2 : null;
-				meanPathogenicCADDScore = geneToEntry.get(gene).MeanPathogenicCADDScore != null ? geneToEntry.get(gene).MeanPathogenicCADDScore - extraSensitivityFactor : null;
-				meanPopulationCADDScore = geneToEntry.get(gene).MeanPopulationCADDScore != null ? geneToEntry.get(gene).MeanPopulationCADDScore - extraSensitivityFactor : null;
-				spec95thPerCADDThreshold = geneToEntry.get(gene).Spec95thPerCADDThreshold != null ? geneToEntry.get(gene).Spec95thPerCADDThreshold - extraSensitivityFactor : null;
-				sens95thPerCADDThreshold = geneToEntry.get(gene).Sens95thPerCADDThreshold != null ? geneToEntry.get(gene).Sens95thPerCADDThreshold - extraSensitivityFactor : null;
+				pathoMAFThreshold = geneToEntry.get(gene).PathoMAFThreshold != null ?
+						geneToEntry.get(gene).PathoMAFThreshold * extraSensitivityFactor * 2 : null;
+				meanPathogenicCADDScore = geneToEntry.get(gene).MeanPathogenicCADDScore != null ?
+						geneToEntry.get(gene).MeanPathogenicCADDScore - extraSensitivityFactor : null;
+				meanPopulationCADDScore = geneToEntry.get(gene).MeanPopulationCADDScore != null ?
+						geneToEntry.get(gene).MeanPopulationCADDScore - extraSensitivityFactor : null;
+				spec95thPerCADDThreshold = geneToEntry.get(gene).Spec95thPerCADDThreshold != null ?
+						geneToEntry.get(gene).Spec95thPerCADDThreshold - extraSensitivityFactor : null;
+				sens95thPerCADDThreshold = geneToEntry.get(gene).Sens95thPerCADDThreshold != null ?
+						geneToEntry.get(gene).Sens95thPerCADDThreshold - extraSensitivityFactor : null;
 				category = geneToEntry.get(gene).category;
 			}
 		}
 
 		// CADD score based classification, calibrated
-		if(caddScaled != null)
+		if (caddScaled != null)
 		{
-			switch(category)
+			switch (category)
 			{
-				case C1: case C2:
-					if(caddScaled > meanPathogenicCADDScore)
+				case C1:
+				case C2:
+					if (caddScaled > meanPathogenicCADDScore)
 					{
-						return new Judgment(Judgment.Classification.Pathogenic,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is greater than "+meanPathogenicCADDScore+" in a gene for which CADD scores are informative.");
+						return new Judgment(Judgment.Classification.Pathogenic, Method.calibrated, gene,
+								"Variant CADD score of " + caddScaled + " is greater than " + meanPathogenicCADDScore
+										+ " in a gene for which CADD scores are informative.");
 					}
-					else if(caddScaled < meanPopulationCADDScore)
+					else if (caddScaled < meanPopulationCADDScore)
 					{
-						return new Judgment(Judgment.Classification.Benign,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is less than "+meanPopulationCADDScore+" in a gene for which CADD scores are informative.");
+						return new Judgment(Judgment.Classification.Benign, Method.calibrated, gene,
+								"Variant CADD score of " + caddScaled + " is less than " + meanPopulationCADDScore
+										+ " in a gene for which CADD scores are informative.");
 					}
-					else{
+					else
+					{
 						//this rule does not classify apparently, just continue onto the next rules
 					}
 					break;
-				case C3: case C4: case C5:
-					if(caddScaled > spec95thPerCADDThreshold)
+				case C3:
+				case C4:
+				case C5:
+					if (caddScaled > spec95thPerCADDThreshold)
 					{
-						return new Judgment(Judgment.Classification.Pathogenic,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is greater than "+spec95thPerCADDThreshold+" for this gene.");
+						return new Judgment(Judgment.Classification.Pathogenic, Method.calibrated, gene,
+								"Variant CADD score of " + caddScaled + " is greater than " + spec95thPerCADDThreshold
+										+ " for this gene.");
 					}
-					else if(caddScaled < sens95thPerCADDThreshold)
+					else if (caddScaled < sens95thPerCADDThreshold)
 					{
-						return new Judgment(Judgment.Classification.Benign,  Method.calibrated, gene, "Variant CADD score of " + caddScaled + " is less than "+sens95thPerCADDThreshold+" for this gene.");
+						return new Judgment(Judgment.Classification.Benign, Method.calibrated, gene,
+								"Variant CADD score of " + caddScaled + " is less than " + sens95thPerCADDThreshold
+										+ " for this gene.");
 					}
 					else
 					{
@@ -115,31 +135,41 @@ public class GavinAlgorithm
 		}
 
 		// MAF-based classification, calibrated
-		if(pathoMAFThreshold != null && exacMAF > pathoMAFThreshold)
+		if (pathoMAFThreshold != null && exacMAF > pathoMAFThreshold)
 		{
-			return new Judgment(Judgment.Classification.Benign, Method.calibrated, gene, "Variant MAF of " + exacMAF + " is greater than "+pathoMAFThreshold+".");
+			return new Judgment(Judgment.Classification.Benign, Method.calibrated, gene,
+					"Variant MAF of " + exacMAF + " is greater than " + pathoMAFThreshold + ".");
 		}
 
-		String mafReason = "the variant MAF of " + exacMAF + " is less than a MAF of "+ pathoMAFThreshold + ".";
+		String mafReason = "the variant MAF of " + exacMAF + " is less than a MAF of " + pathoMAFThreshold + ".";
 
 		// Impact based classification, calibrated
-		if(impact != null)
+		if (impact != null)
 		{
-			if(category == Category.I1 && impact == Impact.HIGH)
+			if (category == Category.I1 && impact == Impact.HIGH)
 			{
-				return new Judgment(Judgment.Classification.Pathogenic,  Method.calibrated, gene, "Variant is of high impact, while there are no known high impact variants in the population. Also, " + mafReason);
+				return new Judgment(Judgment.Classification.Pathogenic, Method.calibrated, gene,
+						"Variant is of high impact, while there are no known high impact variants in the population. Also, "
+								+ mafReason);
 			}
-			else if(category == Category.I2 && (impact == Impact.MODERATE || impact == Impact.HIGH))
+			else if (category == Category.I2 && (impact == Impact.MODERATE || impact == Impact.HIGH))
 			{
-				return new Judgment(Judgment.Classification.Pathogenic,  Method.calibrated, gene, "Variant is of high/moderate impact, while there are no known high/moderate impact variants in the population. Also, " + mafReason);
+				return new Judgment(Judgment.Classification.Pathogenic, Method.calibrated, gene,
+						"Variant is of high/moderate impact, while there are no known high/moderate impact variants in the population. Also, "
+								+ mafReason);
 			}
-			else if(category == Category.I3 && (impact == Impact.LOW || impact == Impact.MODERATE || impact == Impact.HIGH))
+			else if (category == Category.I3 && (impact == Impact.LOW || impact == Impact.MODERATE
+					|| impact == Impact.HIGH))
 			{
-				return new Judgment(Judgment.Classification.Pathogenic,  Method.calibrated, gene, "Variant is of high/moderate/low impact, while there are no known high/moderate/low impact variants in the population. Also, " + mafReason);
+				return new Judgment(Judgment.Classification.Pathogenic, Method.calibrated, gene,
+						"Variant is of high/moderate/low impact, while there are no known high/moderate/low impact variants in the population. Also, "
+								+ mafReason);
 			}
-			else if(impact == Impact.MODIFIER)
+			else if (impact == Impact.MODIFIER)
 			{
-				return new Judgment(Judgment.Classification.Benign,  Method.calibrated, gene, "Variant is of 'modifier' impact, and therefore unlikely to be pathogenic. However, " + mafReason);
+				return new Judgment(Judgment.Classification.Benign, Method.calibrated, gene,
+						"Variant is of 'modifier' impact, and therefore unlikely to be pathogenic. However, "
+								+ mafReason);
 			}
 		}
 
@@ -154,33 +184,43 @@ public class GavinAlgorithm
 	 * @param gene
 	 * @return
 	 */
-	public Judgment genomewideClassifyVariant(Impact impact, Double caddScaled, Double exacMAF,
-			String gene)
+	public Judgment genomewideClassifyVariant(Impact impact, Double caddScaled, Double exacMAF, String gene)
 	{
 
 		exacMAF = exacMAF != null ? exacMAF : 0;
 
-		if(exacMAF > GENOMEWIDE_MAF_THRESHOLD)
+		if (exacMAF > GENOMEWIDE_MAF_THRESHOLD)
 		{
-			return new Judgment(Judgment.Classification.Benign, Method.genomewide, gene, "Variant MAF of "+exacMAF+" is not rare enough to generally be considered pathogenic.");
+			return new Judgment(Judgment.Classification.Benign, Method.genomewide, gene,
+					"Variant MAF of " + exacMAF + " is not rare enough to generally be considered pathogenic.");
 		}
-		if(impact == Impact.MODIFIER)
+		if (impact == Impact.MODIFIER)
 		{
-			return new Judgment(Judgment.Classification.Benign, Method.genomewide, gene, "Variant is of 'modifier' impact, and therefore unlikely to be pathogenic.");
+			return new Judgment(Judgment.Classification.Benign, Method.genomewide, gene,
+					"Variant is of 'modifier' impact, and therefore unlikely to be pathogenic.");
 		}
 		else
 		{
-			if(caddScaled != null && caddScaled > GENOMEWIDE_CADD_THRESHOLD)
+			if (caddScaled != null && caddScaled > GENOMEWIDE_CADD_THRESHOLD)
 			{
-				return new Judgment(Judgment.Classification.Pathogenic, Method.genomewide, gene, "Variant MAF of "+exacMAF+" is rare enough to be potentially pathogenic and its CADD score of "+caddScaled+ " is greater than a global threshold of "+GENOMEWIDE_CADD_THRESHOLD+".");
+				return new Judgment(Judgment.Classification.Pathogenic, Method.genomewide, gene,
+						"Variant MAF of " + exacMAF
+								+ " is rare enough to be potentially pathogenic and its CADD score of " + caddScaled
+								+ " is greater than a global threshold of " + GENOMEWIDE_CADD_THRESHOLD + ".");
 			}
-			else if(caddScaled != null && caddScaled <= GENOMEWIDE_CADD_THRESHOLD)
+			else if (caddScaled != null && caddScaled <= GENOMEWIDE_CADD_THRESHOLD)
 			{
-				return new Judgment(Judgment.Classification.Benign, Method.genomewide, gene, "Variant CADD score of "+caddScaled+ " is less than a global threshold of "+GENOMEWIDE_CADD_THRESHOLD+", although the variant MAF of "+exacMAF+" is rare enough to be potentially pathogenic.");
+				return new Judgment(Judgment.Classification.Benign, Method.genomewide, gene,
+						"Variant CADD score of " + caddScaled + " is less than a global threshold of "
+								+ GENOMEWIDE_CADD_THRESHOLD + ", although the variant MAF of " + exacMAF
+								+ " is rare enough to be potentially pathogenic.");
 			}
 			else
 			{
-				return new Judgment(Judgment.Classification.VOUS, Method.genomewide, gene, "Unable to classify variant as benign or pathogenic. The combination of "+impact+" impact, a CADD score of "+caddScaled +" and MAF of " + exacMAF + " in " + gene + " is inconclusive.");
+				return new Judgment(Judgment.Classification.VOUS, Method.genomewide, gene,
+						"Unable to classify variant as benign or pathogenic. The combination of " + impact
+								+ " impact, a CADD score of " + caddScaled + " and MAF of " + exacMAF + " in " + gene
+								+ " is inconclusive.");
 			}
 		}
 	}
