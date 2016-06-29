@@ -1,11 +1,9 @@
 package org.molgenis.data.rest;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Range;
 import org.molgenis.data.i18n.LanguageService;
@@ -13,14 +11,17 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.security.core.MolgenisPermissionService;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.molgenis.MolgenisFieldTypes.getType;
 
 public class AttributeMetaDataResponse
 {
 	private final String href;
-	private final FieldTypeEnum fieldType;
+	private final AttributeType fieldType;
 	private final String name;
 	private final String label;
 	private final String description;
@@ -67,7 +68,7 @@ public class AttributeMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("fieldType".toLowerCase()))
 		{
-			this.fieldType = attr.getDataType().getEnumType();
+			this.fieldType = attr.getDataType();
 		}
 		else this.fieldType = null;
 
@@ -97,7 +98,7 @@ public class AttributeMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("maxLength".toLowerCase()))
 		{
-			this.maxLength = attr.getDataType().getMaxLength();
+			this.maxLength = getType(AttributeType.getValueString(attr.getDataType())).getMaxLength();
 		}
 		else this.maxLength = null;
 
@@ -237,7 +238,7 @@ public class AttributeMetaDataResponse
 		return href;
 	}
 
-	public FieldTypeEnum getFieldType()
+	public AttributeType getFieldType()
 	{
 		return fieldType;
 	}

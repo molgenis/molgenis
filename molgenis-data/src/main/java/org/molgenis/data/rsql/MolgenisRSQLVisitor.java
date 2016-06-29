@@ -1,25 +1,15 @@
 package org.molgenis.data.rsql;
 
-import java.util.Iterator;
-import java.util.List;
-
-import org.molgenis.data.DataConverter;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisQueryException;
-import org.molgenis.data.Query;
-import org.molgenis.data.UnknownAttributeException;
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import cz.jirutka.rsql.parser.ast.*;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-
-import cz.jirutka.rsql.parser.ast.AndNode;
-import cz.jirutka.rsql.parser.ast.ComparisonNode;
-import cz.jirutka.rsql.parser.ast.NoArgRSQLVisitorAdapter;
-import cz.jirutka.rsql.parser.ast.Node;
-import cz.jirutka.rsql.parser.ast.OrNode;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * RSQLVisitor implementation for molgenis Query.
@@ -172,7 +162,7 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
 
 	private void validateNumericOrDate(AttributeMetaData attr, String symbol)
 	{
-		switch (attr.getDataType().getEnumType())
+		switch (attr.getDataType())
 		{
 			case DATE:
 			case DATE_TIME:

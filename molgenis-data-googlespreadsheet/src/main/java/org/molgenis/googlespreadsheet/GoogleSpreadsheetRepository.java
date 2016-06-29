@@ -1,14 +1,10 @@
 package org.molgenis.googlespreadsheet;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
-
+import com.google.common.collect.Iterables;
+import com.google.gdata.client.spreadsheet.FeedURLFactory;
+import com.google.gdata.client.spreadsheet.SpreadsheetService;
+import com.google.gdata.data.spreadsheet.*;
+import com.google.gdata.util.ServiceException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -18,16 +14,14 @@ import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DynamicEntity;
 
-import com.google.common.collect.Iterables;
-import com.google.gdata.client.spreadsheet.FeedURLFactory;
-import com.google.gdata.client.spreadsheet.SpreadsheetService;
-import com.google.gdata.data.spreadsheet.Cell;
-import com.google.gdata.data.spreadsheet.CellEntry;
-import com.google.gdata.data.spreadsheet.CellFeed;
-import com.google.gdata.data.spreadsheet.CustomElementCollection;
-import com.google.gdata.data.spreadsheet.ListEntry;
-import com.google.gdata.data.spreadsheet.ListFeed;
-import com.google.gdata.util.ServiceException;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 
 public class GoogleSpreadsheetRepository extends AbstractRepository
 {

@@ -1,17 +1,17 @@
 package org.molgenis.data;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.DATE;
-import static org.molgenis.MolgenisFieldTypes.DATETIME;
-import static org.testng.Assert.assertEquals;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.util.MolgenisDateFormat;
+import org.testng.annotations.Test;
 
 import java.text.ParseException;
 import java.util.Arrays;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.util.MolgenisDateFormat;
-import org.testng.annotations.Test;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.DATE;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.DATE_TIME;
+import static org.testng.Assert.assertEquals;
 
 public class DataConverterTest
 {
@@ -34,7 +34,7 @@ public class DataConverterTest
 	public void convertDateTime() throws ParseException
 	{
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
-		when(attr.getDataType()).thenReturn(DATETIME);
+		when(attr.getDataType()).thenReturn(DATE_TIME);
 		assertEquals(DataConverter.convert("2015-05-22T11:12:13+0500", attr),
 				MolgenisDateFormat.getDateTimeFormat().parse("2015-05-22T11:12:13+0500"));
 	}

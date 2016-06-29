@@ -1,11 +1,5 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.data.annotator.websettings.ClinvarAnnotatorSettings.Meta.CLINVAR_LOCATION;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
@@ -29,6 +23,12 @@ import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.data.annotator.websettings.ClinvarAnnotatorSettings.Meta.CLINVAR_LOCATION;
 
 @Configuration
 public class ClinvarAnnotator implements AnnotatorConfig

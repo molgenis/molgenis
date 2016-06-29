@@ -1,18 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_ID_COL_NAME;
-import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_TERM_COL_NAME;
-import static org.molgenis.data.annotator.websettings.HPOAnnotatorSettings.Meta.HPO_LOCATION;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import org.molgenis.MolgenisFieldTypes;
+import com.google.common.base.Optional;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -37,7 +25,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.google.common.base.Optional;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
+import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
+import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_ID_COL_NAME;
+import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_TERM_COL_NAME;
+import static org.molgenis.data.annotator.websettings.HPOAnnotatorSettings.Meta.HPO_LOCATION;
 
 /**
  * Typical HPO terms for a gene dataType (already present via SnpEff) Source:
@@ -86,9 +81,9 @@ public class HPOAnnotator implements AnnotatorConfig
 	public void init()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
-		attributes.add(attributeMetaDataFactory.create().setName(HPO_IDS).setDataType(MolgenisFieldTypes.TEXT)
+		attributes.add(attributeMetaDataFactory.create().setName(HPO_IDS).setDataType(TEXT)
 				.setDescription("HPO identifiers"));
-		attributes.add(attributeMetaDataFactory.create().setName(HPO_TERMS).setDataType(MolgenisFieldTypes.TEXT)
+		attributes.add(attributeMetaDataFactory.create().setName(HPO_TERMS).setDataType(TEXT)
 				.setDescription("HPO terms"));
 
 		AnnotatorInfo info = AnnotatorInfo

@@ -1,19 +1,18 @@
 package org.molgenis.data.meta.system;
 
-import static java.lang.String.format;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
-
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Stream;
-
+import com.google.common.collect.Maps;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Maps;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
+
+import static java.lang.String.format;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 
 /**
  * Registry containing all {@link SystemEntityMetaData}.
@@ -87,7 +86,7 @@ public class SystemEntityMetaDataRegistry
 			}
 			else
 			{
-				if (attr.getDataType().getEnumType() == COMPOUND)
+				if (attr.getDataType() == COMPOUND)
 				{
 					return getSystemAttributeMetaDataRec(attr.getAttributeParts(), attrIdentifier);
 				}

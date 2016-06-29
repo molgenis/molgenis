@@ -1,20 +1,8 @@
 package org.molgenis.pathways;
 
-import static freemarker.template.utility.Collections12.singletonList;
-import static java.util.Arrays.asList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.testng.Assert.assertEquals;
-
-import java.io.IOException;
-import java.rmi.RemoteException;
-import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Stream;
-
-import javax.xml.parsers.ParserConfigurationException;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -35,9 +23,19 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.xml.sax.SAXException;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+import java.rmi.RemoteException;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Stream;
+
+import static freemarker.template.utility.Collections12.singletonList;
+import static java.util.Arrays.asList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { WikiPathwaysControllerTest.Config.class })
 public class WikiPathwaysControllerTest extends AbstractTestNGSpringContextTests

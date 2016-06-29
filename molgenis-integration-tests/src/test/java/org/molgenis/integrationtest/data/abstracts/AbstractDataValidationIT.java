@@ -1,8 +1,5 @@
 package org.molgenis.integrationtest.data;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -11,6 +8,9 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.data.abstracts.AbstractDataIntegrationIT;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.fail;
 
 public abstract class AbstractDataValidationIT extends AbstractDataIntegrationIT
 {
@@ -29,7 +29,7 @@ public abstract class AbstractDataValidationIT extends AbstractDataIntegrationIT
 		//		entityMetaData.addAttribute("intAttr").setDataType(INT);
 		//		entityMetaData.addAttribute("boolAttr").setDataType(BOOL);
 		//		entityMetaData.addAttribute("dateAttr").setDataType(DATE);
-		//		entityMetaData.addAttribute("datetimeAttr").setDataType(DATETIME);
+		//		entityMetaData.addAttribute("datetimeAttr").setDataType(DATE_TIME);
 		//		entityMetaData.addAttribute("decimalAttr").setDataType(DECIMAL);
 		//		entityMetaData.addAttribute("xrefAttr").setDataType(XREF).setRefEntity(refEntityMetaData);
 		//		entityMetaData.addAttribute("mrefAttr").setDataType(MREF).setRefEntity(refEntityMetaData);

@@ -1,23 +1,20 @@
 package org.molgenis.data.mapper.algorithmgenerator.generator;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.LONG;
-
-import java.util.Arrays;
-import java.util.List;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.data.mapper.service.UnitResolver;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.measure.converter.ConversionException;
 import javax.measure.converter.UnitConverter;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
+import java.util.Arrays;
+import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.mapper.service.UnitResolver;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.springframework.beans.factory.annotation.Autowired;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 
 public class NumericAlgorithmGenerator implements AlgorithmGenerator
 {
@@ -63,7 +60,7 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator
 
 	boolean isNumericDataType(AttributeMetaData attribute)
 	{
-		FieldTypeEnum enumType = attribute.getDataType().getEnumType();
+		AttributeType enumType = attribute.getDataType();
 		return enumType == INT || enumType == LONG || enumType == DECIMAL;
 	}
 

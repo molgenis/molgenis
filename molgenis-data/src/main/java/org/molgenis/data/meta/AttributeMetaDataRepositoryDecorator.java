@@ -1,43 +1,22 @@
 package org.molgenis.data.meta;
 
-import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL_MREF;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.EMAIL;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.HTML;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.HYPERLINK;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.INT;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.SCRIPT;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.data.*;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
+import org.molgenis.util.EntityUtils;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntityListener;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
-import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.util.EntityUtils;
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 
 public class AttributeMetaDataRepositoryDecorator implements Repository<AttributeMetaData>
 {
@@ -256,8 +235,8 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	private void validateUpdate(AttributeMetaData currentAttr, AttributeMetaData newAttr)
 	{
 		// data type
-		FieldType currentDataType = currentAttr.getDataType();
-		FieldType newDataType = newAttr.getDataType();
+		AttributeType currentDataType = currentAttr.getDataType();
+		AttributeType newDataType = newAttr.getDataType();
 		if (!Objects.equals(currentDataType, newDataType))
 		{
 			validateUpdateDataType(currentDataType, newDataType);
@@ -286,11 +265,11 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 		}
 	}
 
-	private static EnumMap<FieldTypeEnum, EnumSet<FieldTypeEnum>> DATA_TYPE_ALLOWED_TRANSITIONS;
+	private static EnumMap<AttributeType, EnumSet<AttributeType>> DATA_TYPE_ALLOWED_TRANSITIONS;
 
 	static
 	{
-		DATA_TYPE_ALLOWED_TRANSITIONS = new EnumMap<>(FieldTypeEnum.class);
+		DATA_TYPE_ALLOWED_TRANSITIONS = new EnumMap<>(AttributeType.class);
 		DATA_TYPE_ALLOWED_TRANSITIONS.put(CATEGORICAL, EnumSet.of(XREF));
 		DATA_TYPE_ALLOWED_TRANSITIONS.put(CATEGORICAL_MREF, EnumSet.of(MREF));
 		DATA_TYPE_ALLOWED_TRANSITIONS.put(EMAIL, EnumSet.of(STRING));
@@ -306,16 +285,14 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 		DATA_TYPE_ALLOWED_TRANSITIONS.put(DECIMAL, EnumSet.of(STRING));
 	}
 
-	private static void validateUpdateDataType(FieldType currentDataTypeStr, FieldType newDataTypeStr)
+	private static void validateUpdateDataType(AttributeType currentDataType, AttributeType newDataType)
 	{
-		FieldTypeEnum currentDataType = currentDataTypeStr.getEnumType();
-		FieldTypeEnum newDataType = newDataTypeStr.getEnumType();
-		EnumSet<FieldTypeEnum> allowedDataTypes = DATA_TYPE_ALLOWED_TRANSITIONS.get(currentDataType);
+		EnumSet<AttributeType> allowedDataTypes = DATA_TYPE_ALLOWED_TRANSITIONS.get(currentDataType);
 		if (allowedDataTypes == null || !allowedDataTypes.contains(newDataType))
 		{
 			throw new MolgenisDataException(
-					format("Attribute data type update from [%s] to [%s] not allowed", currentDataTypeStr,
-							newDataTypeStr));
+					format("Attribute data type update from [%s] to [%s] not allowed", currentDataType.toString(),
+							newDataType.toString()));
 		}
 	}
 

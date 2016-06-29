@@ -1,21 +1,21 @@
 package org.molgenis.data.support;
 
-import static com.google.common.collect.Maps.newHashMap;
-import static java.lang.String.format;
-import static java.util.Collections.emptyList;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
-
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.util.Map;
-
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.Map;
+
+import static com.google.common.collect.Maps.newHashMap;
+import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.StreamSupport.stream;
 
 /**
  * Class for entities not defined in pre-existing Java classes
@@ -221,7 +221,7 @@ public class DynamicEntity implements Entity
 			throw new UnknownAttributeException(format("Unknown attribute [%s]", attrName));
 		}
 
-		MolgenisFieldTypes.FieldTypeEnum dataType = attr.getDataType().getEnumType();
+		MolgenisFieldTypes.AttributeType dataType = attr.getDataType();
 		switch (dataType)
 		{
 

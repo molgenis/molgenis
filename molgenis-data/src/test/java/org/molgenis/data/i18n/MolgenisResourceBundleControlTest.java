@@ -1,22 +1,5 @@
 package org.molgenis.data.i18n;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
-import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
-import java.io.IOException;
-import java.util.Locale;
-import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.stream.Stream;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -26,6 +9,20 @@ import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.util.Locale;
+import java.util.ResourceBundle;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
+import static org.testng.Assert.*;
 
 public class MolgenisResourceBundleControlTest
 {

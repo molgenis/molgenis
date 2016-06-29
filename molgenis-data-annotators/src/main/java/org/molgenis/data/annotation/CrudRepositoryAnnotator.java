@@ -1,12 +1,5 @@
 package org.molgenis.data.annotation;
 
-import static org.molgenis.MolgenisFieldTypes.COMPOUND;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -19,6 +12,13 @@ import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 
 @Component
 public class CrudRepositoryAnnotator

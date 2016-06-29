@@ -1,12 +1,6 @@
 package org.molgenis.data.support;
 
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
-import java.util.stream.Collectors;
-
-import org.molgenis.MolgenisFieldTypes;
+import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
@@ -14,7 +8,14 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 
-import com.google.common.collect.Lists;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+import java.util.stream.Collectors;
+
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
 
 public class AnnotatorDependencyOrderResolver
 {
@@ -47,7 +48,8 @@ public class AnnotatorDependencyOrderResolver
 	}
 
 	private void resolveAnnotatorDependencies(RepositoryAnnotator selectedAnnotator,
-			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> annotatorQueue, EntityMetaData entityMetaData)
+			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> annotatorQueue,
+			EntityMetaData entityMetaData)
 	{
 		if (!areRequiredAttributesAvailable(Lists.newArrayList(entityMetaData.getAtomicAttributes()),
 				selectedAnnotator.getRequiredAttributes()))
@@ -76,20 +78,19 @@ public class AnnotatorDependencyOrderResolver
 	}
 
 	private void resolveAnnotatorDependencies(RepositoryAnnotator selectedAnnotator,
-			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> annotatorQueue, EntityMetaData entityMetaData,
-			AttributeMetaData requiredAttribute, RepositoryAnnotator annotator)
+			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> annotatorQueue,
+			EntityMetaData entityMetaData, AttributeMetaData requiredAttribute, RepositoryAnnotator annotator)
 	{
 		if (isRequiredAttributeAvailable(annotator.getInfo().getOutputAttributes(), requiredAttribute))
 		{
-			if (areRequiredAttributesAvailable(
-					Lists.newArrayList(entityMetaData.getAtomicAttributes()),annotator.getRequiredAttributes()))
+			if (areRequiredAttributesAvailable(Lists.newArrayList(entityMetaData.getAtomicAttributes()),
+					annotator.getRequiredAttributes()))
 			{
 				if (!annotatorQueue.contains(selectedAnnotator))
 				{
 					annotatorQueue.add(annotator);
 				}
-				annotator.getInfo().getOutputAttributes()
-						.forEach(((EntityMetaData) entityMetaData)::addAttribute);
+				annotator.getInfo().getOutputAttributes().forEach(((EntityMetaData) entityMetaData)::addAttribute);
 				annotatorList.remove(annotator);
 				resolveAnnotatorDependencies(requestedAnnotator, annotatorList, annotatorQueue, entityMetaData);
 			}
@@ -113,18 +114,18 @@ public class AnnotatorDependencyOrderResolver
 		return true;
 	}
 
-	private boolean isRequiredAttributeAvailable(List<AttributeMetaData> availableAttributes, AttributeMetaData requiredAttribute)
+	private boolean isRequiredAttributeAvailable(List<AttributeMetaData> availableAttributes,
+			AttributeMetaData requiredAttribute)
 	{
 		for (AttributeMetaData availableAttribute : availableAttributes)
 		{
 			if (requiredAttribute.getName().equals(availableAttribute.getName()))
 			{
-				if (requiredAttribute.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.TEXT))
+				if (requiredAttribute.getDataType() == TEXT)
 				{
-					return requiredAttribute.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.TEXT)
-							|| requiredAttribute.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.STRING);
+					return availableAttribute.getDataType() == TEXT || availableAttribute.getDataType() == STRING;
 				}
-				else return requiredAttribute.getDataType().equals(availableAttribute.getDataType());
+				else return requiredAttribute.getDataType() == availableAttribute.getDataType();
 			}
 		}
 		return false;

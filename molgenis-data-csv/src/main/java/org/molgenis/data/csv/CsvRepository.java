@@ -1,17 +1,6 @@
 package org.molgenis.data.csv;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.Nullable;
-
+import com.google.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -22,7 +11,12 @@ import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.springframework.util.StringUtils;
 
-import com.google.common.collect.Iterables;
+import javax.annotation.Nullable;
+import java.io.File;
+import java.util.*;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 
 /**
  * Repository implementation for csv files.

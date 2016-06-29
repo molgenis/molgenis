@@ -3,7 +3,6 @@ package org.molgenis.das.impl;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -37,6 +36,7 @@ import java.util.stream.Stream;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.support.GenomicDataSettings.Meta.*;
@@ -97,11 +97,11 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 		q.pageSize(100);
 		SearchResult result = mock(SearchResult.class);
 		EntityMetaData emd = entityMetaFactory.create().setName("DAS");
-		emd.addAttribute(attrMetaFactory.create().setName("STOP").setDataType(MolgenisFieldTypes.INT));
+		emd.addAttribute(attrMetaFactory.create().setName("STOP").setDataType(INT));
 		emd.addAttribute(attrMetaFactory.create().setName("linkout"));
 		emd.addAttribute(attrMetaFactory.create().setName("NAME"), ROLE_LABEL);
 		emd.addAttribute(attrMetaFactory.create().setName("INFO"));
-		emd.addAttribute(attrMetaFactory.create().setName("POS").setDataType(MolgenisFieldTypes.INT));
+		emd.addAttribute(attrMetaFactory.create().setName("POS").setDataType(INT));
 		emd.addAttribute(attrMetaFactory.create().setName("ID"), ROLE_ID);
 		emd.addAttribute(attrMetaFactory.create().setName("CHROM"));
 

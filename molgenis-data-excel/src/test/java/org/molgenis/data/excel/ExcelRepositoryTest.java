@@ -1,23 +1,10 @@
 package org.molgenis.data.excel;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -29,6 +16,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
+
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 {
@@ -99,7 +93,7 @@ public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 	{
 		AttributeMetaData attr = excelSheetReader.getEntityMetaData().getAttribute("col1");
 		assertNotNull(attr);
-		assertEquals(attr.getDataType().getEnumType(), FieldTypeEnum.STRING);
+		assertEquals(attr.getDataType(), AttributeType.STRING);
 		assertEquals(attr.getName(), "col1");
 	}
 

@@ -1,15 +1,14 @@
 package org.molgenis.fieldtypes;
 
-import static java.util.stream.Collectors.toList;
+import com.google.common.collect.Lists;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.model.MolgenisModelException;
+import org.molgenis.model.elements.Field;
 
 import java.text.ParseException;
 import java.util.stream.Stream;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.model.MolgenisModelException;
-import org.molgenis.model.elements.Field;
-
-import com.google.common.collect.Lists;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Many to many reference.
@@ -123,9 +122,9 @@ public class MrefField extends FieldType
 	}
 
 	@Override
-	public FieldTypeEnum getEnumType()
+	public AttributeType getEnumType()
 	{
-		return FieldTypeEnum.MREF;
+		return AttributeType.MREF;
 	}
 
 	@Override

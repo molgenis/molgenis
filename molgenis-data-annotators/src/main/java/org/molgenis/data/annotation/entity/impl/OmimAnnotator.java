@@ -1,16 +1,7 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.data.annotator.websettings.OmimAnnotatorSettings.Meta.OMIM_LOCATION;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
@@ -35,8 +26,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
+import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
+import static org.molgenis.data.annotator.websettings.OmimAnnotatorSettings.Meta.OMIM_LOCATION;
 
 @Configuration
 public class OmimAnnotator implements AnnotatorConfig

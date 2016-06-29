@@ -1,19 +1,5 @@
 package org.molgenis.data.rest.service;
 
-import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.MREF;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.testng.Assert.assertEquals;
-
-import java.util.Arrays;
-import java.util.stream.Stream;
-
 import org.mockito.ArgumentMatcher;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -25,6 +11,18 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.file.FileStore;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.stream.Stream;
+
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toList;
+import static org.mockito.Matchers.argThat;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.testng.Assert.assertEquals;
 
 public class RestServiceTest
 {

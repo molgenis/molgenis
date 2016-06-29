@@ -9,13 +9,17 @@
 package org.molgenis.model;
 
 // jdk
-import java.io.ByteArrayInputStream;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.StringTokenizer;
-import java.util.Vector;
+
+import org.apache.commons.lang3.StringUtils;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.model.elements.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -26,26 +30,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.model.elements.Entity;
-import org.molgenis.model.elements.Field;
-import org.molgenis.model.elements.Index;
-import org.molgenis.model.elements.Matrix;
-import org.molgenis.model.elements.Method;
-import org.molgenis.model.elements.MethodQuery;
-import org.molgenis.model.elements.Model;
-import org.molgenis.model.elements.Module;
-import org.molgenis.model.elements.Parameter;
-import org.molgenis.model.elements.View;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import java.io.ByteArrayInputStream;
+import java.io.StringWriter;
+import java.util.*;
 
 /**
  * TODO: refactor: spread over multiple files.
@@ -505,9 +492,9 @@ public class MolgenisModelParser
 		if (aggregateable.isEmpty())
 		{
 			// Default xref,categorical and bool are aggregateable
-			FieldTypeEnum fieldType = field.getType().getEnumType();
-			field.setAggregateable(fieldType == FieldTypeEnum.BOOL || fieldType == FieldTypeEnum.XREF
-					|| fieldType == FieldTypeEnum.CATEGORICAL);
+			AttributeType fieldType = field.getType().getEnumType();
+			field.setAggregateable(fieldType == AttributeType.BOOL || fieldType == AttributeType.XREF
+					|| fieldType == AttributeType.CATEGORICAL);
 		}
 		else if (aggregateable.equalsIgnoreCase("true"))
 		{

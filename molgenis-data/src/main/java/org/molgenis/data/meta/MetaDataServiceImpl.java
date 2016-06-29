@@ -7,7 +7,6 @@ import org.molgenis.data.*;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
-import org.molgenis.fieldtypes.CompoundField;
 import org.molgenis.security.core.Permission;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.EntityUtils;
@@ -28,6 +27,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
@@ -399,7 +399,7 @@ public class MetaDataServiceImpl implements MetaDataService
 			@Override
 			public Iterable<AttributeMetaData> children(@Nonnull AttributeMetaData attr)
 			{
-				return attr.getDataType() instanceof CompoundField ? attr.getAttributeParts() : emptyList();
+				return attr.getDataType() == COMPOUND ? attr.getAttributeParts() : emptyList();
 			}
 		}.postOrderTraversal(attr).spliterator(), false);
 	}

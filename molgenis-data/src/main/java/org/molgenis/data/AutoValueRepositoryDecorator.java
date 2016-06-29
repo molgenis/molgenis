@@ -1,27 +1,20 @@
 package org.molgenis.data;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.DATE;
-import static org.molgenis.MolgenisFieldTypes.DATETIME;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.fieldtypes.StringField;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 
 /**
  * Adds auto id capabilities to a Repository
@@ -45,8 +38,7 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 
 		// auto id
 		AttributeMetaData idAttr = getEntityMetaData().getIdAttribute();
-		if (idAttr != null && idAttr.isAuto() && entity.getIdValue() == null
-				&& (idAttr.getDataType() instanceof StringField))
+		if (idAttr != null && idAttr.isAuto() && entity.getIdValue() == null && (idAttr.getDataType() == STRING))
 		{
 			entity.set(idAttr.getName(), idGenerator.generateId());
 		}
@@ -231,8 +223,8 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 			{
 				if (attr.isAuto())
 				{
-					FieldTypeEnum type = attr.getDataType().getEnumType();
-					return type == FieldTypeEnum.DATE || type == FieldTypeEnum.DATE_TIME;
+					AttributeType type = attr.getDataType();
+					return type == DATE || type == DATE_TIME;
 				}
 				else
 				{
@@ -247,12 +239,12 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 		{
 			for (AttributeMetaData attr : autoAttrs)
 			{
-				FieldTypeEnum type = attr.getDataType().getEnumType();
-				if (type == FieldTypeEnum.DATE)
+				AttributeType type = attr.getDataType();
+				if (type == DATE)
 				{
 					entity.set(attr.getName(), dateNow);
 				}
-				else if (type == FieldTypeEnum.DATE_TIME)
+				else if (type == DATE_TIME)
 				{
 					entity.set(attr.getName(), dateNow);
 				}
@@ -293,7 +285,6 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 	{
 		for (AttributeMetaData autoAttr : autoAttrs)
 		{
-			// autoAttrs.forEach(autoAttr -> {
 			// set auto values unless a value already exists
 			String autoAttrName = autoAttr.getName();
 			if (entity.get(autoAttrName) == null)
@@ -302,7 +293,7 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 				{
 					entity.set(autoAttrName, idGenerator.generateId());
 				}
-				else if (autoAttr.getDataType().equals(DATE) || autoAttr.getDataType().equals(DATETIME))
+				else if (autoAttr.getDataType() == DATE || autoAttr.getDataType() == DATE_TIME)
 				{
 					entity.set(autoAttrName, new Date());
 				}
@@ -311,7 +302,6 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 					throw new RuntimeException("Invalid auto attribute: " + autoAttr.toString());
 				}
 			}
-			// });
 		}
 		return entity;
 	}

@@ -1,29 +1,11 @@
 package org.molgenis.data.rest.service;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL_MREF;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
-import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.DataConverter;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityManager;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.MolgenisDataException;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.fieldtypes.BoolField;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileStore;
@@ -33,6 +15,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 
 @Service
 public class RestService
@@ -94,21 +86,20 @@ public class RestService
 		}
 
 		// boolean false is not posted (http feature), so if null and required, should be false
-		if ((paramValue == null) && (attr.getDataType() instanceof BoolField) && !attr.isNillable())
+		if ((paramValue == null) && (attr.getDataType() == BOOL) && !attr.isNillable())
 		{
 			value = false;
 		}
 
 		// Treat null lists as empty lists
-		if (paramValue == null
-				&& (attr.getDataType().getEnumType() == MREF || attr.getDataType().getEnumType() == CATEGORICAL_MREF))
+		if (paramValue == null && (attr.getDataType() == MREF || attr.getDataType() == CATEGORICAL_MREF))
 		{
 			value = Collections.emptyList();
 		}
 
 		if (paramValue != null)
 		{
-			if (attr.getDataType().getEnumType() == FieldTypeEnum.FILE)
+			if (attr.getDataType() == AttributeType.FILE)
 			{
 				MultipartFile multipartFile = (MultipartFile) paramValue;
 
@@ -133,7 +124,7 @@ public class RestService
 				return fileEntity;
 			}
 
-			if (attr.getDataType().getEnumType() == XREF || attr.getDataType().getEnumType() == CATEGORICAL)
+			if (attr.getDataType() == XREF || attr.getDataType() == CATEGORICAL)
 			{
 				value = dataService.findOneById(attr.getRefEntity().getName(), paramValue);
 				if (value == null)
@@ -142,14 +133,14 @@ public class RestService
 							"No " + attr.getRefEntity().getName() + " with id " + paramValue + " found");
 				}
 			}
-			else if (attr.getDataType().getEnumType() == MREF || attr.getDataType().getEnumType() == CATEGORICAL_MREF)
+			else if (attr.getDataType() == MREF || attr.getDataType() == CATEGORICAL_MREF)
 			{
 				List<Object> ids = DataConverter.toObjectList(paramValue);
 				if ((ids != null) && !ids.isEmpty())
 				{
-					FieldType refIdAttrDataType = attr.getRefEntity().getIdAttribute().getDataType();
+					AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
 					List<Entity> mrefList = dataService.findAll(attr.getRefEntity().getName(),
-							ids.stream().map(id -> refIdAttrDataType.convert(id))).collect(toList());
+							ids.stream().map(id -> convert(refIdAttr, id))).collect(toList());
 					if (mrefList.size() != ids.size())
 					{
 						throw new IllegalArgumentException("Could not find all referencing ids for  " + attr.getName());
@@ -164,5 +155,11 @@ public class RestService
 			}
 		}
 		return value;
+	}
+
+	private static Object convert(AttributeMetaData attr, Object value)
+	{
+		FieldType fieldType = MolgenisFieldTypes.getType(getValueString(attr.getDataType()));
+		return fieldType.convert(value);
 	}
 }

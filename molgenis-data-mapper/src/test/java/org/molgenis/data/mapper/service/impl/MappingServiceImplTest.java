@@ -1,31 +1,10 @@
 package org.molgenis.data.mapper.service.impl;
 
-import static com.google.common.collect.ImmutableSet.of;
-import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.DECIMAL;
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.LONG;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
-import java.util.List;
-import java.util.Set;
-
-import org.molgenis.MolgenisFieldTypes;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserFactory;
-import org.molgenis.data.Entity;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollectionRegistry;
+import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.mapper.config.MappingConfig;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
@@ -61,8 +40,15 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.util.List;
+import java.util.Set;
+
+import static com.google.common.collect.ImmutableSet.of;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.*;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { MappingServiceImplTest.Config.class, MappingConfig.class })
 public class MappingServiceImplTest extends AbstractMolgenisSpringTest
@@ -516,7 +502,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		reset(idGenerator);
 		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
 
-		mappingService.generateId(MolgenisFieldTypes.STRING, 1L);
+		mappingService.generateId(STRING, 1L);
 		verify(idGenerator).generateId();
 	}
 

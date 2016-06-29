@@ -1,10 +1,10 @@
 package org.molgenis.data.rest.v2;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
-
-import java.util.List;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Range;
@@ -12,19 +12,19 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.rest.Href;
-import org.molgenis.fieldtypes.MrefField;
-import org.molgenis.fieldtypes.XrefField;
+import org.molgenis.data.support.EntityMetaDataUtils;
 import org.molgenis.security.core.MolgenisPermissionService;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import java.util.List;
+
+import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.getValueString;
+import static org.molgenis.MolgenisFieldTypes.getType;
 
 class AttributeMetaDataResponseV2
 {
 	private final String href;
-	private final FieldTypeEnum fieldType;
+	private final AttributeType fieldType;
 	private final String name;
 	private final String label;
 	private final String description;
@@ -51,10 +51,9 @@ class AttributeMetaDataResponseV2
 	 * @param entityParentName
 	 * @param entityMeta
 	 * @param attr
-	 * @param attrFilter
+	 * @param fetch
 	 *            set of lowercase attribute names to include in response
-	 * @param attributeExpandsSet
-	 *            set of lowercase attribute names to expand in response
+	 * @param permissionService
 	 */
 	public AttributeMetaDataResponseV2(final String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,
 			Fetch fetch, MolgenisPermissionService permissionService, DataService dataService,
@@ -63,12 +62,12 @@ class AttributeMetaDataResponseV2
 		String attrName = attr.getName();
 		this.href = Href.concatMetaAttributeHref(RestControllerV2.BASE_URI, entityParentName, attrName);
 
-		this.fieldType = attr.getDataType().getEnumType();
+		this.fieldType = attr.getDataType();
 		this.name = attrName;
 		this.label = attr.getLabel(languageService.getCurrentUserLanguageCode());
 		this.description = attr.getDescription(languageService.getCurrentUserLanguageCode());
 		this.enumOptions = attr.getEnumOptions();
-		this.maxLength = attr.getDataType().getMaxLength();
+		this.maxLength = getType(getValueString(attr.getDataType())).getMaxLength();
 		this.expression = attr.getExpression();
 
 		EntityMetaData refEntity = attr.getRefEntity();
@@ -98,7 +97,7 @@ class AttributeMetaDataResponseV2
 							Fetch subAttrFetch;
 							if (fetch != null)
 							{
-								if (attr.getDataType().getEnumType() == FieldTypeEnum.COMPOUND)
+								if (attr.getDataType() == AttributeType.COMPOUND)
 								{
 									subAttrFetch = fetch;
 								}
@@ -107,7 +106,7 @@ class AttributeMetaDataResponseV2
 									subAttrFetch = fetch.getFetch(attr);
 								}
 							}
-							else if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
+							else if (EntityMetaDataUtils.isReferenceType(attr))
 							{
 								subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr,
 										languageService.getCurrentUserLanguageCode());
@@ -161,7 +160,7 @@ class AttributeMetaDataResponseV2
 
 	public static boolean filterAttributeRec(Fetch fetch, AttributeMetaData attr)
 	{
-		if (attr.getDataType().getEnumType() == COMPOUND)
+		if (attr.getDataType() == COMPOUND)
 		{
 			for (AttributeMetaData attrPart : attr.getAttributeParts())
 			{
@@ -183,7 +182,7 @@ class AttributeMetaDataResponseV2
 		return href;
 	}
 
-	public FieldTypeEnum getFieldType()
+	public AttributeType getFieldType()
 	{
 		return fieldType;
 	}

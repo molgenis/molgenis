@@ -1,20 +1,20 @@
 package org.molgenis.data.mapper.meta;
 
-import static java.util.Arrays.asList;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.mapper.meta.MapperPackage.PACKAGE_MAPPER;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
-import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.fieldtypes.EnumField;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.ENUM;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
+import static org.molgenis.data.mapper.meta.MapperPackage.PACKAGE_MAPPER;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
 public class AttributeMappingMetaData extends SystemEntityMetaData
@@ -45,11 +45,8 @@ public class AttributeMappingMetaData extends SystemEntityMetaData
 		addAttribute(IDENTIFIER, ROLE_ID);
 		addAttribute(TARGETATTRIBUTEMETADATA).setNillable(false);
 		addAttribute(SOURCEATTRIBUTEMETADATAS);
-		addAttribute(ALGORITHM).setDataType(MolgenisFieldTypes.TEXT);
-		List<String> algorithmStateOptions = asList(AlgorithmState.values()).stream().map(STATE -> STATE.toString())
-				.collect(toList());
-		EnumField enumField = new EnumField();
-		enumField.setEnumOptions(algorithmStateOptions); // FIXME remove this hack
-		addAttribute(ALGORITHMSTATE).setDataType(enumField).setEnumOptions(algorithmStateOptions);
+		addAttribute(ALGORITHM).setDataType(TEXT);
+		List<String> options = asList(AlgorithmState.values()).stream().map(AlgorithmState::toString).collect(toList());
+		addAttribute(ALGORITHMSTATE).setDataType(ENUM).setEnumOptions(options);
 	}
 }
