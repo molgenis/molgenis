@@ -9,8 +9,7 @@ import org.molgenis.data.reindex.meta.ReindexAction;
 import org.molgenis.data.reindex.meta.ReindexActionGroup;
 import org.molgenis.data.reindex.meta.ReindexActionGroupMetaData;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData;
-import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
-import org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData.*;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,11 +22,9 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.reindex.meta.ReindexActionGroupMetaData.REINDEX_ACTION_GROUP;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ACTION_ORDER;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.*;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.DELETE;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType.DATA;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP_ATTR;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.*;
 
 /**
