@@ -16,7 +16,6 @@ import org.molgenis.data.reindex.meta.ReindexActionFactory;
 import org.molgenis.data.reindex.meta.ReindexActionGroup;
 import org.molgenis.data.reindex.meta.ReindexActionGroupFactory;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.transaction.MolgenisTransaction;
 import org.molgenis.data.transaction.MolgenisTransactionListener;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.security.user.MolgenisUserService;
@@ -28,7 +27,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.mail.MailSender;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -37,7 +35,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.RunnableFuture;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -50,6 +47,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMeta.REINDEX_JOB_EXECUTION;
 import static org.molgenis.data.reindex.meta.ReindexActionGroupMetaData.REINDEX_ACTION_GROUP;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP_ATTR;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -136,7 +134,7 @@ public class ReindexServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataService.findOneById(REINDEX_ACTION_GROUP, "abcde", ReindexActionGroup.class))
 				.thenReturn(reindexActionGroup);
 
-		when(dataService.findAll(REINDEX_ACTION, new QueryImpl<>().eq(REINDEX_ACTION_GROUP, reindexActionGroup)))
+		when(dataService.findAll(REINDEX_ACTION, new QueryImpl<>().eq(REINDEX_ACTION_GROUP_ATTR, reindexActionGroup)))
 				.thenReturn(Stream.of(reindexAction));
 
 		when(reindexJobFactory.createJob(reindexJobExecutionCaptor.capture())).thenReturn(reindexJob);

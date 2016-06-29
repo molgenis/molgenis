@@ -9,8 +9,8 @@ public class ReindexActionGroupFactory
 		extends AbstractSystemEntityFactory<ReindexActionGroup, ReindexActionGroupMetaData, String>
 {
 	@Autowired
-	ReindexActionGroupFactory(ReindexActionGroupMetaData reindexActionJobMetaData)
+	ReindexActionGroupFactory(ReindexActionGroupMetaData reindexActionGroupMetaData)
 	{
-		super(ReindexActionGroup.class, reindexActionJobMetaData);
+		super(ReindexActionGroup.class, reindexActionGroupMetaData);
 	}
 }

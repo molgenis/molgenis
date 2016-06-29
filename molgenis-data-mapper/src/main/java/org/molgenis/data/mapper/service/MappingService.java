@@ -1,13 +1,13 @@
 package org.molgenis.data.mapper.service;
 
-import java.util.List;
-
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
-import org.molgenis.fieldtypes.FieldType;
+
+import java.util.List;
 
 public interface MappingService
 {
@@ -86,5 +86,5 @@ public interface MappingService
 	 */
 	MappingProject cloneMappingProject(String mappingProjectId, String clonedMappingProjectName);
 
-	String generateId(FieldType dataType, Long count);
+	String generateId(AttributeType dataType, Long count);
 }

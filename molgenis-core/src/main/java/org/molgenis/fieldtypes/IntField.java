@@ -1,11 +1,11 @@
 package org.molgenis.fieldtypes;
 
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.model.MolgenisModelException;
+
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.model.MolgenisModelException;
 
 public class IntField extends FieldType
 {
@@ -97,9 +97,9 @@ public class IntField extends FieldType
 	}
 
 	@Override
-	public FieldTypeEnum getEnumType()
+	public AttributeType getEnumType()
 	{
-		return FieldTypeEnum.INT;
+		return AttributeType.INT;
 	}
 
 	@Override

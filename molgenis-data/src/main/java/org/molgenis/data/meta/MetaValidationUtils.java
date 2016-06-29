@@ -1,19 +1,18 @@
 package org.molgenis.data.meta;
 
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
-
-import java.util.Set;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import com.google.common.collect.Sets;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.ReservedKeywords;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.fieldtypes.CompoundField;
 
-import com.google.common.collect.Sets;
+import java.util.Set;
+
+import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 
 /**
  * Validates if metadata is internally consistent and correct.
@@ -80,7 +79,7 @@ public class MetaValidationUtils
 		for (AttributeMetaData amd : amds)
 		{
 			validateAttribute(amd);
-			if (amd.getDataType() instanceof CompoundField)
+			if (amd.getDataType() == COMPOUND)
 			{
 				validateAttributes(amd.getAttributeParts());
 			}
@@ -102,8 +101,8 @@ public class MetaValidationUtils
 				throw new MolgenisDataException("Computed attribute " + amd.getName() + " cannot have default value");
 			}
 
-			FieldTypeEnum fieldType = amd.getDataType().getEnumType();
-			if (fieldType == FieldTypeEnum.XREF || fieldType == FieldTypeEnum.MREF)
+			AttributeType fieldType = amd.getDataType();
+			if (fieldType == AttributeType.XREF || fieldType == AttributeType.MREF)
 			{
 				throw new MolgenisDataException("Attribute " + amd.getName()
 						+ " cannot have default value since specifying a default value for XREF and MREF data types is not yet supported.");

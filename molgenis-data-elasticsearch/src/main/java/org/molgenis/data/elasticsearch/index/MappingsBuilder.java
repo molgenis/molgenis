@@ -1,7 +1,7 @@
 package org.molgenis.data.elasticsearch.index;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -70,7 +70,7 @@ public class MappingsBuilder
 			boolean createAllIndex, boolean nestRefs, boolean enableNgramAnalyzer, XContentBuilder jsonBuilder)
 					throws IOException
 	{
-		FieldTypeEnum dataType = attr.getDataType().getEnumType();
+		AttributeType dataType = attr.getDataType();
 		switch (dataType)
 		{
 			case BOOL:

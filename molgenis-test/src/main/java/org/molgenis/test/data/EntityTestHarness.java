@@ -1,10 +1,10 @@
 package org.molgenis.test.data;
 
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -19,7 +19,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.MolgenisFieldTypes.*;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
 
@@ -80,7 +80,7 @@ public class EntityTestHarness
 				.addAttribute(createAttribute(ATTR_BOOL, BOOL))
 				.addAttribute(createAttribute(ATTR_CATEGORICAL, CATEGORICAL).setRefEntity(refEntityMetaData))
 				.addAttribute(createAttribute(ATTR_CATEGORICAL_MREF, CATEGORICAL_MREF).setRefEntity(refEntityMetaData))
-				.addAttribute(createAttribute(ATTR_DATE, DATE)).addAttribute(createAttribute(ATTR_DATETIME, DATETIME))
+				.addAttribute(createAttribute(ATTR_DATE, DATE)).addAttribute(createAttribute(ATTR_DATETIME, DATE_TIME))
 				.addAttribute(createAttribute(ATTR_EMAIL, EMAIL)).addAttribute(createAttribute(ATTR_DECIMAL, DECIMAL))
 				.addAttribute(createAttribute(ATTR_HTML, HTML)).addAttribute(createAttribute(ATTR_HYPERLINK, HYPERLINK))
 				.addAttribute(createAttribute(ATTR_LONG, LONG)).addAttribute(createAttribute(ATTR_INT, INT))
@@ -89,9 +89,9 @@ public class EntityTestHarness
 				.addAttribute(createAttribute(ATTR_MREF, MREF).setRefEntity(refEntityMetaData));
 	}
 
-	private AttributeMetaData createAttribute(String name, FieldType fieldType)
+	private AttributeMetaData createAttribute(String name, AttributeType dataType)
 	{
-		return attributeMetaDataFactory.create().setName(name).setDataType(fieldType);
+		return attributeMetaDataFactory.create().setName(name).setDataType(dataType);
 	}
 
 	public List<Entity> createTestRefEntities(EntityMetaData refEntityMetaData, int numberOfEntities)

@@ -1,13 +1,13 @@
 package org.molgenis.data.system.core;
 
-import static org.molgenis.MolgenisFieldTypes.SCRIPT;
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.springframework.stereotype.Component;
+
+import static org.molgenis.MolgenisFieldTypes.AttributeType.SCRIPT;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
-
-import org.molgenis.data.meta.SystemEntityMetaData;
-import org.springframework.stereotype.Component;
 
 @Component
 public class FreemarkerTemplateMetaData extends SystemEntityMetaData

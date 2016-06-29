@@ -1,14 +1,5 @@
 package org.molgenis.data.mapper.algorithmgenerator.generator;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.mapper.service.impl.UnitResolverImpl;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -24,6 +15,13 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.DECIMAL;
+import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = NumericAlgorithmGeneratorTest.Config.class)
 public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest
@@ -59,17 +57,17 @@ public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest
 		targetEntityMetaData = entityMetaFactory.create("target");
 		targetAttribute = attrMetaFactory.create().setName("targetHeight");
 		targetAttribute.setLabel("height in m");
-		targetAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
+		targetAttribute.setDataType(DECIMAL);
 		targetEntityMetaData.addAttribute(targetAttribute);
 
 		sourceEntityMetaData = entityMetaFactory.create("source");
 		sourceAttribute = attrMetaFactory.create().setName("sourceHeight");
-		sourceAttribute.setDataType(MolgenisFieldTypes.DECIMAL);
+		sourceAttribute.setDataType(DECIMAL);
 		sourceAttribute.setLabel("body length in cm");
 		sourceEntityMetaData.addAttribute(sourceAttribute);
 
 		sourceAttribute1 = attrMetaFactory.create().setName("sourceHeight1");
-		sourceAttribute1.setDataType(MolgenisFieldTypes.DECIMAL);
+		sourceAttribute1.setDataType(DECIMAL);
 		sourceAttribute1.setLabel("body length in cm second time");
 		sourceEntityMetaData.addAttribute(sourceAttribute1);
 	}

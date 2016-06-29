@@ -30,7 +30,7 @@ import static java.util.Collections.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.*;
-import static org.molgenis.MolgenisFieldTypes.MREF;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
 import static org.testng.Assert.*;
 
 public class VcfImporterServiceTest
@@ -136,8 +136,8 @@ public class VcfImporterServiceTest
 		assertEquals(entityImportReport, expectedEntityImportReport);
 
 		verify(metaDataService, times(1)).addEntityMeta(argThat(eqName(entityMeta0)));
-		verify(permissionSystemService, times(1))
-				.giveUserEntityPermissions(securityContext, singletonList(entityName0));
+		verify(permissionSystemService, times(1)).giveUserEntityPermissions(securityContext,
+				singletonList(entityName0));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -244,10 +244,10 @@ public class VcfImporterServiceTest
 
 		verify(metaDataService, times(1)).addEntityMeta(argThat(eqName(sampleEntityMeta0)));
 		verify(metaDataService, times(1)).addEntityMeta(argThat(eqName(entityMeta0)));
-		verify(permissionSystemService, times(1))
-				.giveUserEntityPermissions(securityContext, singletonList(entityName0));
-		verify(permissionSystemService, times(1))
-				.giveUserEntityPermissions(securityContext, singletonList(sampleEntityName0));
+		verify(permissionSystemService, times(1)).giveUserEntityPermissions(securityContext,
+				singletonList(entityName0));
+		verify(permissionSystemService, times(1)).giveUserEntityPermissions(securityContext,
+				singletonList(sampleEntityName0));
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)

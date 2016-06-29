@@ -1,14 +1,5 @@
 package org.molgenis.data;
 
-import static java.util.stream.StreamSupport.stream;
-
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
@@ -19,6 +10,15 @@ import org.molgenis.util.ListEscapeUtils;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.ConverterNotFoundException;
 import org.springframework.core.convert.support.DefaultConversionService;
+
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.stream.StreamSupport.stream;
 
 @edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_BOOLEAN_RETURN_NULL", justification = "We want to return Boolean.TRUE, Boolean.FALSE or null")
 public class DataConverter
@@ -57,7 +57,7 @@ public class DataConverter
 
 	public static Object convert(Object source, AttributeMetaData attr)
 	{
-		switch (attr.getDataType().getEnumType())
+		switch (attr.getDataType())
 		{
 			case BOOL:
 				return toBoolean(source);

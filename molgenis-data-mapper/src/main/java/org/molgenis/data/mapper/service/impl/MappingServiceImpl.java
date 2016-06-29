@@ -1,24 +1,10 @@
 package org.molgenis.data.mapper.service.impl;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
-
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Collectors;
-
+import com.google.common.collect.Maps;
 import org.elasticsearch.common.collect.Lists;
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.*;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
@@ -31,7 +17,6 @@ import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.slf4j.Logger;
@@ -41,7 +26,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Maps;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 
 public class MappingServiceImpl implements MappingService
 {
@@ -286,11 +276,10 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
-	public String generateId(FieldType dataType, Long count)
+	public String generateId(AttributeType dataType, Long count)
 	{
 		Object id;
-		if (dataType.equals(MolgenisFieldTypes.INT) || dataType.equals(MolgenisFieldTypes.LONG) || dataType
-				.equals(MolgenisFieldTypes.DECIMAL))
+		if (dataType == INT || dataType == LONG || dataType == DECIMAL)
 		{
 			id = count + 1;
 		}

@@ -1,14 +1,6 @@
 package org.molgenis.data.mapper.algorithmgenerator.generator;
 
-import static com.google.common.collect.ImmutableMap.of;
-import static java.util.Collections.singletonList;
-import static org.molgenis.MolgenisFieldTypes.CATEGORICAL;
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
-
-import java.util.stream.Stream;
-
+import com.google.common.collect.Lists;
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -23,7 +15,14 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Lists;
+import java.util.stream.Stream;
+
+import static com.google.common.collect.ImmutableMap.of;
+import static java.util.Collections.singletonList;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.CATEGORICAL;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
 
 public class OneToOneCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpringTest
 {

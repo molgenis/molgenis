@@ -1,8 +1,7 @@
 package org.molgenis.data.importer;
 
 import com.google.common.collect.*;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.Range;
 import org.molgenis.data.i18n.I18nStringMetaData;
@@ -10,12 +9,13 @@ import org.molgenis.data.i18n.I18nUtils;
 import org.molgenis.data.i18n.LanguageMetaData;
 import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
 import org.molgenis.data.meta.MetaValidationUtils;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.SemanticTag;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.util.DependencyResolver;
+import org.molgenis.util.EntityUtils;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -24,8 +24,7 @@ import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.ENUM;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.i18n.I18nUtils.getLanguageCode;
 import static org.molgenis.data.i18n.I18nUtils.isI18n;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
@@ -56,7 +55,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	public static final String EMX_LANGUAGES = "languages";
 	public static final String EMX_I18NSTRINGS = "i18nstrings";
 
-	public static final Map<String, String> EMX_NAME_TO_REPO_NAME_MAP;
+	private static final Map<String, String> EMX_NAME_TO_REPO_NAME_MAP;
 
 	static
 	{
@@ -69,15 +68,15 @@ public class EmxMetaDataParser implements MetaDataParser
 		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_I18NSTRINGS, I18nStringMetaData.I18N_STRING);
 	}
 
-	public static final String ENTITY = "entity";
-	public static final String PART_OF_ATTRIBUTE = "partOfAttribute";
+	private static final String ENTITY = "entity";
+	private static final String PART_OF_ATTRIBUTE = "partOfAttribute";
 
-	static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays
+	private static final List<String> SUPPORTED_ENTITY_ATTRIBUTES = Arrays
 			.asList(EntityMetaDataMetaData.LABEL.toLowerCase(), EntityMetaDataMetaData.DESCRIPTION.toLowerCase(),
 					"name", ABSTRACT.toLowerCase(), EXTENDS.toLowerCase(), "package", EntityMetaDataMetaData.TAGS,
 					BACKEND);
 
-	static final List<String> SUPPORTED_ATTRIBUTE_ATTRIBUTES = Arrays
+	private static final List<String> SUPPORTED_ATTRIBUTE_ATTRIBUTES = Arrays
 			.asList(AGGREGATEABLE.toLowerCase(), DATA_TYPE.toLowerCase(), DESCRIPTION.toLowerCase(),
 					ENTITY.toLowerCase(), ENUM_OPTIONS.toLowerCase(), ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(),
 					LABEL_ATTRIBUTE.toLowerCase(), LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(),
@@ -86,7 +85,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					TAGS.toLowerCase(), EXPRESSION.toLowerCase(), VALIDATION_EXPRESSION.toLowerCase(),
 					DEFAULT_VALUE.toLowerCase());
 
-	static final String AUTO = "auto";
+	private static final String AUTO = "auto";
 
 	private final DataService dataService;
 	private final PackageFactory packageFactory;
@@ -225,7 +224,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			if (emxDataType != null)
 			{
-				FieldType t = MolgenisFieldTypes.getType(emxDataType);
+				AttributeType t = AttributeType.toEnum(emxDataType);
 				if (t == null)
 				{
 					throw new IllegalArgumentException(
@@ -235,7 +234,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			}
 			else
 			{
-				attr.setDataType(MolgenisFieldTypes.STRING);
+				attr.setDataType(STRING);
 			}
 
 			String emxAttrNillable = emxAttrEntity.getString(NILLABLE);
@@ -317,7 +316,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				{
 					throw new IllegalArgumentException(
 							format("attributes.lookupAttribute error on line [%d] (%s.%s) lookupAttribute cannot be of type %s",
-									i, emxEntityName, emxName, attr.getDataType().getEnumType().toString()));
+									i, emxEntityName, emxName, attr.getDataType().toString()));
 				}
 
 				emxAttr.setLookupAttr(isLookAttr);
@@ -330,7 +329,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				{
 					throw new IllegalArgumentException(
 							format("attributes.labelAttribute error on line [%d] (%s.%s): labelAttribute cannot be of type %s",
-									i, emxEntityName, emxName, attr.getDataType().getEnumType().toString()));
+									i, emxEntityName, emxName, attr.getDataType().toString()));
 				}
 
 				emxAttr.setLabelAttr(isLabelAttr);
@@ -365,7 +364,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			attr.setDescription(emxAttrEntity.getString(DESCRIPTION));
 
-			if (attr.getDataType().getEnumType() == ENUM)
+			if (attr.getDataType() == ENUM)
 			{
 				List<String> enumOptions = DataConverter.toList(emxAttrEntity.get(ENUM_OPTIONS));
 				if (enumOptions == null || enumOptions.isEmpty())
@@ -387,7 +386,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			{
 				throw new IllegalArgumentException(
 						format("attributes.aggregatable error on line [%d] (%s.%s): aggregatable nillable attribute cannot be of type %s",
-								i, emxEntityName, emxName, attr.getDataType().getEnumType().toString()));
+								i, emxEntityName, emxName, attr.getDataType().toString()));
 			}
 
 			String emxRangeMin = emxAttrEntity.getString(RANGE_MIN);
@@ -479,12 +478,12 @@ public class EmxMetaDataParser implements MetaDataParser
 									+ entityName + "] must refer to an existing compound attribute on line " + i);
 				}
 
-				if (compoundAttribute.getDataType().getEnumType() != FieldTypeEnum.COMPOUND)
+				if (compoundAttribute.getDataType() != COMPOUND)
 				{
 					throw new IllegalArgumentException(
 							"partOfAttribute [" + partOfAttribute + "] of attribute [" + attributeName + "] of entity ["
-									+ entityName + "] must refer to a attribute of type [" + FieldTypeEnum.COMPOUND
-									+ "] on line " + i);
+									+ entityName + "] must refer to a attribute of type [" + COMPOUND + "] on line "
+									+ i);
 				}
 
 				compoundAttribute.addAttributePart(attribute);
@@ -862,10 +861,11 @@ public class EmxMetaDataParser implements MetaDataParser
 		}
 		else
 		{
-			List<EntityMetaData> metadataList = new ArrayList<EntityMetaData>();
+			List<EntityMetaData> metadataList = new ArrayList<>();
 			for (String emxName : source.getEntityNames())
 			{
 				String repoName = EMX_NAME_TO_REPO_NAME_MAP.get(emxName);
+				if (repoName == null) repoName = emxName;
 				metadataList.add(dataService.getRepository(repoName).getEntityMetaData());
 			}
 			IntermediateParseResults intermediateResults = parseTagsSheet(source.getRepository(EMX_TAGS));
@@ -923,12 +923,25 @@ public class EmxMetaDataParser implements MetaDataParser
 	 */
 	private List<EntityMetaData> resolveEntityDependencies(List<? extends EntityMetaData> metaDataList)
 	{
+		Map<String, EntityMetaData> allEntityMetaDataMap = new HashMap<>();
 		Set<EntityMetaData> allMetaData = Sets.newLinkedHashSet(metaDataList);
 		Iterable<EntityMetaData> existingMetaData = dataService.getMeta().getEntityMetaDatas()::iterator;
-		Iterables.addAll(allMetaData, existingMetaData);
+		for (EntityMetaData emd : allMetaData)
+		{
+			allEntityMetaDataMap.put(emd.getName(), emd);
+		}
+		for (EntityMetaData emd : existingMetaData)
+		{
+			if (!allEntityMetaDataMap.containsKey(emd.getName())) allEntityMetaDataMap.put(emd.getName(), emd);
+			else if ((!EntityUtils.equals(emd, allEntityMetaDataMap.get(emd.getName()))) && emd instanceof SystemEntityMetaData)
+			{
+				throw new MolgenisDataException(
+						"SystemEntityMetaData in the database conflicts with the metadta for this import");
+			}
+		}
 
 		// Use all metadata for dependency resolving
-		List<EntityMetaData> resolved = DependencyResolver.resolve(allMetaData);
+		List<EntityMetaData> resolved = DependencyResolver.resolve(Sets.newLinkedHashSet(allEntityMetaDataMap.values()));
 
 		// Only import source
 		resolved.retainAll(metaDataList);
@@ -956,6 +969,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		for (String emxName : emxEntityNames)
 		{
 			String repoName = EMX_NAME_TO_REPO_NAME_MAP.get(emxName);
+			if (repoName == null) repoName = emxName;
 			builder.put(emxName, dataService.getRepository(repoName).getEntityMetaData());
 		}
 		return builder.build();
@@ -1005,7 +1019,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					}
 					for (AttributeMetaData att : target.getAttributes())
 					{
-						if (!(att.getDataType().getEnumType() == COMPOUND))
+						if (!(att.getDataType() == COMPOUND))
 						{
 							if (!att.isAuto() && att.getExpression() == null && !report.getFieldsImportable().get(sheet)
 									.contains(att.getName()))
