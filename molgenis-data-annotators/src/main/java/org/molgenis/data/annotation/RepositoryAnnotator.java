@@ -3,10 +3,10 @@ package org.molgenis.data.annotation;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * interface for annotators. annotators take an iterator and return an iterator with some information added or updated
@@ -37,7 +37,7 @@ public interface RepositoryAnnotator
 	 * 
 	 * @return ouputMetadata
 	 */
-	List<AttributeMetaData> getOutputMetaData();
+	List<AttributeMetaData> getOutputAttributes();
 
 	/**
 	 * Returns a entityMetaData containing the attributes needed for the annotator to work

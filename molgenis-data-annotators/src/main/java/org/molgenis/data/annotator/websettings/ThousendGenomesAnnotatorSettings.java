@@ -27,6 +27,12 @@ public class ThousendGenomesAnnotatorSettings extends DefaultSettingsEntity
 		public Meta()
 		{
 			super(ID);
+		}
+
+		@Override
+		public void init()
+		{
+			super.init();
 			addAttribute(CHROMOSOMES).setLabel("Chromosomes").setDefaultValue(
 					"1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22");
 			addAttribute(FILEPATTERN).setLabel("Filepattern").setDefaultValue(

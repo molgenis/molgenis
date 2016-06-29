@@ -1,52 +1,57 @@
 package org.molgenis.data.vcf.format;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.vcf.VcfRepository.ALT_META;
-import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
-import static org.molgenis.data.vcf.VcfRepository.FILTER_META;
-import static org.molgenis.data.vcf.VcfRepository.ID_META;
-import static org.molgenis.data.vcf.VcfRepository.INFO;
-import static org.molgenis.data.vcf.VcfRepository.INTERNAL_ID;
-import static org.molgenis.data.vcf.VcfRepository.POS_META;
-import static org.molgenis.data.vcf.VcfRepository.QUAL_META;
-import static org.molgenis.data.vcf.VcfRepository.REF_META;
-import static org.testng.Assert.assertEquals;
-
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.vcf.model.VcfAttributes;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.molgenis.util.EntityUtils;
 import org.molgenis.vcf.VcfReader;
 import org.molgenis.vcf.VcfRecord;
 import org.molgenis.vcf.meta.VcfMeta;
-import org.testng.annotations.BeforeTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.io.StringReader;
 
-public class VcfToEntityTest
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.vcf.model.VcfAttributes.INFO;
+import static org.molgenis.data.vcf.model.VcfAttributes.INTERNAL_ID;
+import static org.testng.Assert.assertTrue;
+
+@ContextConfiguration(classes = { VcfToEntityTest.Config.class })
+public class VcfToEntityTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private VcfAttributes vcfAttrs;
+
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
 	private VcfToEntity vcfToEntitySmall;
 	private VcfMeta vcfMetaSmall;
 
 	private static VcfMeta parseHeaders(String headers) throws IOException
 	{
-		VcfReader vcfReader;
-		vcfReader = new VcfReader(new StringReader(headers));
-		VcfMeta result = vcfReader.getVcfMeta();
-		vcfReader.close();
-		return result;
+		try (VcfReader vcfReader = new VcfReader(new StringReader(headers)))
+		{
+			return vcfReader.getVcfMeta();
+		}
 	}
 
-	@BeforeTest
+	@BeforeMethod
 	public void beforeTest() throws IOException
 	{
 		String headersSmall = "##fileformat=VCFv4.1\n" + "##fileDate=2012/11/05\n" + "##source=NextGENeV2.2\n"
@@ -57,49 +62,60 @@ public class VcfToEntityTest
 				+ "##INFO=<ID=DF2,Number=0,Type=Flag,Description=\"Flag field 2\">\n"
 				+ "#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO\n";
 		vcfMetaSmall = parseHeaders(headersSmall);
-		vcfToEntitySmall = new VcfToEntity("EntityNameSmall", vcfMetaSmall);
+		vcfToEntitySmall = new VcfToEntity("EntityNameSmall", vcfMetaSmall, vcfAttrs, entityMetaFactory,
+				attrMetaFactory);
 	}
 
 	@Test
 	public void testGetEntityMetaData()
 	{
-		DefaultEntityMetaData expected = new DefaultEntityMetaData("EntityName");
-		expected.addAllAttributeMetaData(
-				Arrays.asList(CHROM_META, ALT_META, POS_META, REF_META, FILTER_META, QUAL_META, ID_META));
-		DefaultAttributeMetaData internalIdMeta = new DefaultAttributeMetaData(INTERNAL_ID,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
-		internalIdMeta.setVisible(false);
-		expected.addAttributeMetaData(internalIdMeta, ROLE_ID);
+		EntityMetaData expectedEntityMeta = entityMetaFactory.create();
+		expectedEntityMeta.setSimpleName("EntityNameSmall");
+		expectedEntityMeta.setName("EntityNameSmall");
+		expectedEntityMeta.addAttribute(vcfAttrs.getChromAttribute());
+		expectedEntityMeta.addAttribute(vcfAttrs.getAltAttribute());
+		expectedEntityMeta.addAttribute(vcfAttrs.getPosAttribute());
+		expectedEntityMeta.addAttribute(vcfAttrs.getRefAttribute());
+		expectedEntityMeta.addAttribute(vcfAttrs.getFilterAttribute());
+		expectedEntityMeta.addAttribute(vcfAttrs.getQualAttribute());
+		expectedEntityMeta.addAttribute(vcfAttrs.getIdAttribute());
 
-		DefaultAttributeMetaData infoMetaData = new DefaultAttributeMetaData(INFO,
-				MolgenisFieldTypes.FieldTypeEnum.COMPOUND).setNillable(true);
+		AttributeMetaData internalIdMeta = attrMetaFactory.create().setName(INTERNAL_ID).setDataType(STRING)
+				.setVisible(false);
+		expectedEntityMeta.addAttribute(internalIdMeta, ROLE_ID);
 
-		DefaultAttributeMetaData infoNS = new DefaultAttributeMetaData("NS", MolgenisFieldTypes.FieldTypeEnum.INT)
-				.setNillable(true).setDescription("Number of Samples With Data");
+		AttributeMetaData infoMetaData = attrMetaFactory.create().setName(INFO).setDataType(COMPOUND).setNillable(true);
+
+		AttributeMetaData infoNS = attrMetaFactory.create().setName("NS").setDataType(INT)
+				.setDescription("Number of Samples With Data").setAggregatable(true);
 		infoMetaData.addAttributePart(infoNS);
-		DefaultAttributeMetaData infoDF = new DefaultAttributeMetaData("DF", MolgenisFieldTypes.FieldTypeEnum.BOOL)
-				.setNillable(false).setDescription("Flag field");
+		AttributeMetaData infoDF = attrMetaFactory.create().setName("DF").setDataType(BOOL).setDescription("Flag field")
+				.setAggregatable(true);
 		infoMetaData.addAttributePart(infoDF);
-		DefaultAttributeMetaData infoDF2 = new DefaultAttributeMetaData("DF2", MolgenisFieldTypes.FieldTypeEnum.BOOL)
-				.setNillable(false).setDescription("Flag field 2");
+		AttributeMetaData infoDF2 = attrMetaFactory.create().setName("DF2").setDataType(BOOL)
+				.setDescription("Flag field 2").setAggregatable(true);
 		infoMetaData.addAttributePart(infoDF2);
 
-		expected.addAttributeMetaData(infoMetaData);
+		expectedEntityMeta.addAttribute(infoMetaData);
 
-		EntityMetaData actualEntityMetaData = vcfToEntitySmall.getEntityMetaData();
-
-		ArrayList<AttributeMetaData> actualAttributes = Lists.newArrayList(actualEntityMetaData.getAtomicAttributes());
-		ArrayList<AttributeMetaData> expectedAttributes = Lists.newArrayList(expected.getAtomicAttributes());
-		assertEquals(actualAttributes, expectedAttributes);
+		EntityMetaData actualEntityMeta = vcfToEntitySmall.getEntityMetaData();
+		String backend = "test";
+		expectedEntityMeta.setBackend(backend);
+		actualEntityMeta.setBackend(backend);
+		Package package_ = mock(Package.class);
+		when(package_.getIdValue()).thenReturn("pck0");
+		expectedEntityMeta.setPackage(package_);
+		actualEntityMeta.setPackage(package_);
+		assertTrue(EntityUtils.equals(expectedEntityMeta, actualEntityMeta));
 	}
 
 	@Test
 	public void testToEntity() throws IOException
 	{
-		VcfRecord record = new VcfRecord(vcfMetaSmall, new String[]
-		{ "10", "12345", "id3", "A", "C", "7.9123", "pass", "DF" });
+		VcfRecord record = new VcfRecord(vcfMetaSmall,
+				new String[] { "10", "12345", "id3", "A", "C", "7.9123", "pass", "DF" });
 		Entity entity = vcfToEntitySmall.toEntity(record);
-		Entity expected = new MapEntity(vcfToEntitySmall.getEntityMetaData());
+		Entity expected = new DynamicEntity(vcfToEntitySmall.getEntityMetaData());
 		expected.set("#CHROM", "10");
 		expected.set("ALT", "C");
 		expected.set("POS", 12345);
@@ -111,16 +127,16 @@ public class VcfToEntityTest
 		expected.set("DF", true);
 		// Flag fields whose flag is not present are set to false
 		expected.set("DF2", false);
-		assertEquals(entity, expected);
+		assertTrue(EntityUtils.equals(entity, expected));
 	}
 
 	@Test
 	public void testToEntityAlternativeAlleles() throws IOException
 	{
-		VcfRecord record = new VcfRecord(vcfMetaSmall, new String[]
-		{ "10", "12345", "id3", "A", "A,C,G,T,N,*", "7.9123", "pass", "DF;DF2" });
+		VcfRecord record = new VcfRecord(vcfMetaSmall,
+				new String[] { "10", "12345", "id3", "A", "A,C,G,T,N,*", "7.9123", "pass", "DF;DF2" });
 		Entity entity = vcfToEntitySmall.toEntity(record);
-		Entity expected = new MapEntity(vcfToEntitySmall.getEntityMetaData());
+		Entity expected = new DynamicEntity(vcfToEntitySmall.getEntityMetaData());
 		expected.set("#CHROM", "10");
 		expected.set("ALT", "A,C,G,T,N,*");
 		expected.set("POS", 12345);
@@ -131,6 +147,13 @@ public class VcfToEntityTest
 		expected.set("INTERNAL_ID", entity.get("INTERNAL_ID"));
 		expected.set("DF", true);
 		expected.set("DF2", true);
-		assertEquals(entity, expected);
+		assertTrue(EntityUtils.equals(entity, expected));
+	}
+
+	@Configuration
+	@ComponentScan({ "org.molgenis.data.vcf.model" })
+	public static class Config
+	{
+
 	}
 }

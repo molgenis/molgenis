@@ -1,6 +1,6 @@
 package org.molgenis.integrationtest.data.postgresql.model;
 
-import org.molgenis.integrationtest.data.abstracts.model.AbstractBoolDatatypeIT;
+import org.molgenis.integrationtest.data.AbstractBoolDatatypeIT;
 import org.molgenis.integrationtest.data.postgresql.AbstractPostgreSqlTestConfig;
 import org.molgenis.integrationtest.data.postgresql.model.PostgreSqlBoolDatatypeIT.BoolPostgreSqlTestConfig;
 import org.springframework.context.annotation.Configuration;

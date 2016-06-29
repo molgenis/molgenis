@@ -1,26 +1,12 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_ID_COL_NAME;
-import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_TERM_COL_NAME;
-import static org.molgenis.data.annotator.websettings.HPOAnnotatorSettings.Meta.HPO_LOCATION;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
+import com.google.common.base.Optional;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
-import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
-import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
@@ -30,24 +16,33 @@ import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.google.common.base.Optional;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+
+import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
+import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_ID_COL_NAME;
+import static org.molgenis.data.annotation.entity.impl.HPORepository.HPO_TERM_COL_NAME;
+import static org.molgenis.data.annotator.websettings.HPOAnnotatorSettings.Meta.HPO_LOCATION;
 
 /**
- * Typical HPO terms for a gene identifier (already present via SnpEff) Source:
+ * Typical HPO terms for a gene dataType (already present via SnpEff) Source:
  * http://compbio.charite.de/hudson/job/hpo. annotations.monthly/lastStableBuild/artifact/annotation/
  * ALL_SOURCES_TYPICAL_FEATURES_diseases_to_genes_to_phenotypes .txt
- * 
+ * <p>
  * Add resource file path to RuntimeProperty 'hpo_location'
- * 
  */
 @Configuration
-public class HPOAnnotator
+public class HPOAnnotator implements AnnotatorConfig
 {
 	public static final String NAME = "hpo";
 
@@ -65,19 +60,34 @@ public class HPOAnnotator
 	@Autowired
 	private Resources resources;
 
+	@Autowired
+	private VcfAttributes vcfAttributes;
+
+	@Autowired
+	private EntityMetaDataFactory entityMetaDataFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private RepositoryAnnotatorImpl annotator;
+
 	@Bean
 	public RepositoryAnnotator hpo()
 	{
+		annotator = new RepositoryAnnotatorImpl(NAME);
+		return annotator;
+	}
+
+	@Override
+	public void init()
+	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
-		attributes.add(new DefaultAttributeMetaData(HPO_IDS).setDataType(MolgenisFieldTypes.TEXT).setDescription(
-				"HPO identifiers"));
-		attributes.add(new DefaultAttributeMetaData(HPO_TERMS).setDataType(MolgenisFieldTypes.TEXT).setDescription(
-				"HPO terms"));
+		attributes.add(attributeMetaDataFactory.create().setName(HPO_IDS).setDataType(TEXT)
+				.setDescription("HPO identifiers"));
+		attributes.add(attributeMetaDataFactory.create().setName(HPO_TERMS).setDataType(TEXT)
+				.setDescription("HPO terms"));
 
 		AnnotatorInfo info = AnnotatorInfo
-				.create(Status.READY,
-						Type.PHENOTYPE_ASSOCIATION,
-						NAME,
+				.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.PHENOTYPE_ASSOCIATION, NAME,
 						"The Human Phenotype Ontology (HPO) aims to provide a standardized vocabulary of phenotypic abnormalities encountered in human disease."
 								+ "Terms in the HPO describes a phenotypic abnormality, such as atrial septal defect.The HPO is currently being developed using the medical literature, Orphanet, DECIPHER, and OMIM. HPO currently contains approximately 11,000 terms and over 115,000 annotations to hereditary diseases.",
 						attributes);
@@ -86,21 +96,27 @@ public class HPOAnnotator
 				new HPOResultFilter(), dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(HPO_LOCATION, HPOAnnotatorSettings));
 
-		return new RepositoryAnnotatorImpl(entityAnnotator);
+		annotator.init(entityAnnotator);
 	}
 
 	@Bean
 	public Resource hpoResource()
 	{
-		return new ResourceImpl(HPO_RESOURCE, new SingleResourceConfig(HPO_LOCATION, HPOAnnotatorSettings),
-				new RepositoryFactory()
+		return new ResourceImpl(HPO_RESOURCE, new SingleResourceConfig(HPO_LOCATION, HPOAnnotatorSettings))
+		{
+			@Override
+			public RepositoryFactory getRepositoryFactory()
+			{
+				return new RepositoryFactory()
 				{
 					@Override
 					public Repository<Entity> createRepository(File file) throws IOException
 					{
 						return new HPORepository(file);
 					}
-				});
+				};
+			}
+		};
 	}
 
 	public static class HPOResultFilter implements ResultFilter
@@ -133,7 +149,7 @@ public class HPOAnnotator
 				terms.append(hpoTerm);
 			}
 
-			Entity aggregated = new MapEntity();
+			Entity aggregated = new DynamicEntity(null); // FIXME pass entity meta data instead of null
 			aggregated.set(HPO_IDS, ids.toString());
 			aggregated.set(HPO_TERMS, terms.toString());
 

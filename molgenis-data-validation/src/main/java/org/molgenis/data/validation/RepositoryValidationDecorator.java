@@ -1,51 +1,27 @@
 package org.molgenis.data.validation;
 
-import static java.lang.String.format;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.emptyMap;
-import static java.util.Collections.emptySet;
-import static java.util.Collections.singleton;
-import static java.util.Collections.unmodifiableList;
-import static java.util.Collections.unmodifiableMap;
-import static java.util.Collections.unmodifiableSet;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT;
-import static org.molgenis.data.RepositoryCapability.VALIDATE_REFERENCE_CONSTRAINT;
-import static org.molgenis.data.RepositoryCapability.VALIDATE_UNIQUE_CONSTRAINT;
+import org.molgenis.data.*;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.util.EntityUtils;
+import org.molgenis.util.HugeMap;
+import org.molgenis.util.HugeSet;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataConverter;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.fieldtypes.MrefField;
-import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.util.EntityUtils;
-import org.molgenis.util.HugeMap;
-import org.molgenis.util.HugeSet;
+import static java.lang.String.format;
+import static java.util.Collections.*;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.RepositoryCapability.*;
+import static org.molgenis.data.support.EntityMetaDataUtils.*;
 
 public class RepositoryValidationDecorator implements Repository<Entity>
 {
@@ -253,19 +229,6 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public void create()
-	{
-		decoratedRepository.create();
-
-	}
-
-	@Override
-	public void drop()
-	{
-		decoratedRepository.drop();
-	}
-
-	@Override
 	public void rebuildIndex()
 	{
 		decoratedRepository.rebuildIndex();
@@ -361,9 +324,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		{
 			// get reference attrs
 			refAttrs = StreamSupport.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-					.filter(attr -> (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
-							&& attr.getExpression() == null)
-					.collect(Collectors.toList());
+					.filter(attr -> isReferenceType(attr) && attr.getExpression() == null).collect(Collectors.toList());
 		}
 		else
 		{
@@ -371,10 +332,8 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			// validating other reference constraints
 			String backend = dataService.getMeta().getBackend(getEntityMetaData()).getName();
 			refAttrs = StreamSupport.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-					.filter(attr -> (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
-							&& attr.getExpression() == null
-							&& isDifferentBackend(backend, attr))
-					.collect(Collectors.toList());
+					.filter(attr -> isReferenceType(attr) && attr.getExpression() == null && isDifferentBackend(backend,
+							attr)).collect(Collectors.toList());
 		}
 
 		// get referenced entity ids
@@ -390,8 +349,9 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 					refEntityIds = new HugeSet<>();
 					refEntitiesIds.put(refEntityName, refEntityIds);
 
-					Query<Entity> q = new QueryImpl<>().fetch(new Fetch().field(refEntityMeta.getIdAttribute().getName()));
-					for (Iterator<Entity> it = dataService.findAll(refEntityName, q).iterator(); it.hasNext();)
+					Query<Entity> q = new QueryImpl<>()
+							.fetch(new Fetch().field(refEntityMeta.getIdAttribute().getName()));
+					for (Iterator<Entity> it = dataService.findAll(refEntityName, q).iterator(); it.hasNext(); )
 					{
 						refEntityIds.add(it.next().getIdValue());
 					}
@@ -440,7 +400,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 						Object attrValue = entity.get(uniqueAttr.getName());
 						if (attrValue != null)
 						{
-							if (uniqueAttr.getDataType() instanceof XrefField)
+							if (isSingleReferenceType(uniqueAttr))
 							{
 								attrValue = ((Entity) attrValue).getIdValue();
 							}
@@ -460,7 +420,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	{
 		List<AttributeMetaData> readonlyAttrs = StreamSupport
 				.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-				.filter(attr -> attr.isReadonly() && attr.getExpression() == null).collect(Collectors.toList());
+				.filter(attr -> attr.isReadOnly() && attr.getExpression() == null).collect(Collectors.toList());
 
 		validationResource.setReadonlyAttrs(readonlyAttrs);
 	}
@@ -469,15 +429,15 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	{
 		validationResource.getRequiredValueAttrs().forEach(nonNillableAttr -> {
 			Object value = entity.get(nonNillableAttr.getName());
-			if (value == null || (nonNillableAttr.getDataType() instanceof MrefField
-					&& !entity.getEntities(nonNillableAttr.getName()).iterator().hasNext()))
+			if (value == null || (isMultipleReferenceType(nonNillableAttr) && !entity
+					.getEntities(nonNillableAttr.getName()).iterator().hasNext()))
 			{
 				boolean isValid = false;
 
 				// FIXME remove hack (see https://github.com/molgenis/molgenis/issues/4308)
 				// Do not validate if Questionnaire status is not SUBMITTED
-				if (EntityUtils.doesExtend(getEntityMetaData(), "Questionnaire")
-						&& !"SUBMITTED".equals(entity.getString("status")))
+				if (EntityUtils.doesExtend(getEntityMetaData(), "Questionnaire") && !"SUBMITTED"
+						.equals(entity.getString("status")))
 				{
 					isValid = true;
 				}
@@ -521,7 +481,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			Object attrValue = entity.get(uniqueAttr.getName());
 			if (attrValue != null)
 			{
-				if (uniqueAttr.getDataType() instanceof XrefField)
+				if (isSingleReferenceType(uniqueAttr))
 				{
 					attrValue = ((Entity) attrValue).getIdValue();
 				}
@@ -529,14 +489,14 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 				HugeMap<Object, Object> uniqueAttrValues = validationResource.getUniqueAttrsValues()
 						.get(uniqueAttr.getName());
 				Object existingEntityId = uniqueAttrValues.get(attrValue);
-				if ((validationMode == ValidationMode.ADD && existingEntityId != null)
-						|| (validationMode == ValidationMode.UPDATE && existingEntityId != null
-								&& !existingEntityId.equals(entity.getIdValue())))
+				if ((validationMode == ValidationMode.ADD && existingEntityId != null) || (
+						validationMode == ValidationMode.UPDATE && existingEntityId != null && !existingEntityId
+								.equals(entity.getIdValue())))
 				{
 					ConstraintViolation constraintViolation = new ConstraintViolation(
 							format("Duplicate value '%s' for unique attribute '%s' from entity '%s'", attrValue,
-									uniqueAttr.getName(), getName()),
-							uniqueAttr, Long.valueOf(validationResource.getRow()));
+									uniqueAttr.getName(), getName()), uniqueAttr,
+							Long.valueOf(validationResource.getRow()));
 					validationResource.addViolation(constraintViolation);
 				}
 				else
@@ -553,7 +513,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			HugeSet<Object> refEntityIds = validationResource.getRefEntitiesIds().get(refAttr.getRefEntity().getName());
 
 			Iterable<Entity> refEntities;
-			if (refAttr.getDataType() instanceof XrefField)
+			if (isSingleReferenceType(refAttr))
 			{
 				Entity refEntity = entity.getEntity(refAttr.getName());
 				if (refEntity != null)
@@ -604,7 +564,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			Object value = entity.get(readonlyAttr.getName());
 			Object existingValue = entityToUpdate.get(readonlyAttr.getName());
 
-			if (readonlyAttr.getDataType() instanceof XrefField)
+			if (isSingleReferenceType(readonlyAttr))
 			{
 				if (value != null)
 				{
@@ -615,7 +575,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 					existingValue = ((Entity) existingValue).getIdValue();
 				}
 			}
-			else if (readonlyAttr.getDataType() instanceof MrefField)
+			else if (isMultipleReferenceType(readonlyAttr))
 			{
 				List<Object> entityIds = new ArrayList<>();
 				((Iterable<Entity>) value).forEach(mrefEntity -> {
@@ -632,12 +592,9 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 
 			if (value != null && existingValue != null && !value.equals(existingValue))
 			{
-				validationResource
-						.addViolation(
-								new ConstraintViolation(
-										format("The attribute '%s' of entity '%s' can not be changed it is readonly.",
-												readonlyAttr.getName(), getName()),
-										Long.valueOf(validationResource.getRow())));
+				validationResource.addViolation(new ConstraintViolation(
+						format("The attribute '%s' of entity '%s' can not be changed it is readonly.",
+								readonlyAttr.getName(), getName()), Long.valueOf(validationResource.getRow())));
 			}
 		});
 	}

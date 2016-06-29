@@ -1,20 +1,18 @@
 package org.molgenis.data.elasticsearch.index;
 
-import java.sql.Date;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import java.sql.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Converts entities to Elasticsearch documents
@@ -65,7 +63,7 @@ public class EntityToSourceConverter
 		Object value;
 
 		String attrName = attributeMetaData.getName();
-		FieldTypeEnum dataType = attributeMetaData.getDataType().getEnumType();
+		AttributeType dataType = attributeMetaData.getDataType();
 		switch (dataType)
 		{
 			case BOOL:
@@ -128,10 +126,14 @@ public class EntityToSourceConverter
 				{
 					final EntityMetaData refEntityMetaData = attributeMetaData.getRefEntity();
 					value = Lists.newArrayList(Iterables.transform(refEntities, refEntity -> {
-						if(refEntity != null) {
-							if (nestRefs) {
+						if (refEntity != null)
+						{
+							if (nestRefs)
+							{
 								return convert(refEntity, refEntityMetaData, false);
-							} else {
+							}
+							else
+							{
 								return convertAttribute(refEntity, refEntityMetaData.getIdAttribute(), false);
 							}
 						}

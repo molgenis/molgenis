@@ -1,9 +1,15 @@
 package org.molgenis.security.permission;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+
 import java.util.List;
 
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.auth.UserAuthority;
+import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.Permission;
@@ -23,11 +29,13 @@ import com.google.common.collect.Lists;
 public class PermissionSystemService
 {
 	private final DataService dataService;
+	private final UserAuthorityFactory userAuthorityFactory;
 
 	@Autowired
-	public PermissionSystemService(DataService dataService)
+	public PermissionSystemService(DataService dataService, UserAuthorityFactory userAuthorityFactory)
 	{
-		this.dataService = dataService;
+		this.dataService = requireNonNull(dataService);
+		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
 	}
 
 	@RunAsSystem
@@ -38,8 +46,9 @@ public class PermissionSystemService
 		if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))
 				&& !auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_SYSTEM")))
 		{
-			MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
-					new QueryImpl<MolgenisUser>().eq(MolgenisUser.USERNAME, SecurityUtils.getUsername(auth)), MolgenisUser.class);
+			MolgenisUser user = dataService.findOne(MOLGENIS_USER,
+					new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.USERNAME, SecurityUtils.getUsername(auth)),
+					MolgenisUser.class);
 
 			if (user != null)
 			{
@@ -54,13 +63,13 @@ public class PermissionSystemService
 							String role = SecurityUtils.AUTHORITY_ENTITY_PREFIX + permission.toString() + "_"
 									+ entity.toUpperCase();
 							roles.add(new SimpleGrantedAuthority(role));
-							UserAuthority userAuthority = new UserAuthority();
+							UserAuthority userAuthority = userAuthorityFactory.create();
 							userAuthority.setMolgenisUser(user);
 							userAuthority.setRole(role);
 
 							if (permission == Permission.WRITEMETA)
 							{
-								dataService.add(UserAuthority.ENTITY_NAME, userAuthority);
+								dataService.add(USER_AUTHORITY, userAuthority);
 							}
 						}
 					}

@@ -1,25 +1,15 @@
 package org.molgenis.dataexplorer.controller;
 
-import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
+import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.meta.AnnotationJobExecution;
-import org.molgenis.data.settings.SettingsEntityMeta;
+import org.molgenis.data.annotation.meta.AnnotationJobExecutionFactory;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -30,15 +20,19 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 
-import com.google.common.collect.Lists;
+import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
+
+import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
+import static org.molgenis.dataexplorer.controller.AnnotatorController.URI;
 
 @Controller
 @RequestMapping(URI)
@@ -53,12 +47,13 @@ public class AnnotatorController
 	private final UserAccountService userAccountService;
 	private final AnnotationJobFactory annotationJobFactory;
 	private final ExecutorService taskExecutor;
+	private final AnnotationJobExecutionFactory annotationJobExecutionFactory;
 
 	@Autowired
 	public AnnotatorController(DataService dataService, AnnotationService annotationService,
 			MolgenisPermissionService molgenisPermissionService, PermissionSystemService permissionSystemService,
 			UserAccountService userAccountService, AnnotationJobFactory annotationJobFactory,
-			ExecutorService taskExecutor)
+			ExecutorService taskExecutor, AnnotationJobExecutionFactory annotationJobExecutionFactory)
 	{
 		this.dataService = dataService;
 		this.annotationService = annotationService;
@@ -66,14 +61,14 @@ public class AnnotatorController
 		this.userAccountService = userAccountService;
 		this.annotationJobFactory = annotationJobFactory;
 		this.taskExecutor = taskExecutor;
+		this.annotationJobExecutionFactory = annotationJobExecutionFactory;
 	}
 
 	/**
 	 * Gets a map of all available annotators.
-	 * 
+	 *
 	 * @param dataSetName
 	 * @return annotatorMap
-	 * 
 	 */
 	@RequestMapping(value = "/get-available-annotators", method = RequestMethod.POST)
 	@ResponseBody
@@ -86,11 +81,10 @@ public class AnnotatorController
 	/**
 	 * Annotates an entity based on selected entity and selected annotators. Creates a copy of the entity dataset if
 	 * option is ticked by the user.
-	 * 
+	 *
 	 * @param annotatorNames
 	 * @param entityName
 	 * @return repositoryName
-	 * 
 	 */
 	@RequestMapping(value = "/annotate-data", method = RequestMethod.POST)
 	@ResponseBody
@@ -108,7 +102,7 @@ public class AnnotatorController
 
 	public String scheduleAnnotatorRun(String entityName, String[] annotatorNames)
 	{
-		AnnotationJobExecution annotationJobExecution = new AnnotationJobExecution(dataService);
+		AnnotationJobExecution annotationJobExecution = annotationJobExecutionFactory.create();
 		annotationJobExecution.setUser(userAccountService.getCurrentUser());
 		annotationJobExecution.setTargetName(entityName);
 		annotationJobExecution.setAnnotators(String.join(",", annotatorNames));
@@ -120,10 +114,9 @@ public class AnnotatorController
 
 	/**
 	 * Sets a map of annotators, whether they can be used by the selected data set.
-	 * 
+	 *
 	 * @param dataSetName
 	 * @return mapOfAnnotators
-	 * 
 	 */
 	private Map<String, Map<String, Object>> setMapOfAnnotators(String dataSetName)
 	{
@@ -134,7 +127,7 @@ public class AnnotatorController
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(dataSetName);
 			for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
 			{
-				List<AttributeMetaData> outputAttrs = annotator.getOutputMetaData();
+				List<AttributeMetaData> outputAttrs = annotator.getOutputAttributes();
 				outputAttrs = getAtomicAttributesFromList(outputAttrs);
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("description", annotator.getDescription());
@@ -142,10 +135,9 @@ public class AnnotatorController
 				map.put("inputAttributes", createAttrsResponse(annotator.getRequiredAttributes()));
 				map.put("inputAttributeTypes", toMap(annotator.getRequiredAttributes()));
 				map.put("outputAttributes", createAttrsResponse(outputAttrs));
-				map.put("outputAttributeTypes", toMap(annotator.getOutputMetaData()));
+				map.put("outputAttributeTypes", toMap(annotator.getOutputAttributes()));
 
-				String settingsEntityName = SettingsEntityMeta.PACKAGE_NAME
-						+ org.molgenis.data.Package.PACKAGE_SEPARATOR + annotator.getInfo().getCode();
+				String settingsEntityName = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + annotator.getInfo().getCode();
 				map.put("showSettingsButton",
 						molgenisPermissionService.hasPermissionOnEntity(settingsEntityName, Permission.WRITE));
 				mapOfAnnotators.put(annotator.getSimpleName(), map);
@@ -166,8 +158,7 @@ public class AnnotatorController
 
 	private List<AttributeMetaData> getAtomicAttributesFromList(List<AttributeMetaData> outputAttrs)
 	{
-		if (outputAttrs.size() == 1
-				&& outputAttrs.get(0).getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
+		if (outputAttrs.size() == 1 && outputAttrs.get(0).getDataType() == COMPOUND)
 		{
 			return getAtomicAttributesFromList(Lists.newArrayList(outputAttrs.get(0).getAttributeParts()));
 		}

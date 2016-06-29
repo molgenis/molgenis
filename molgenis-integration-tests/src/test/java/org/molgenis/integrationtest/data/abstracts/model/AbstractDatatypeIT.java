@@ -5,9 +5,9 @@ import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.integrationtest.data.SecuritySupport;
 import org.molgenis.integrationtest.data.abstracts.AbstractDataIntegrationIT;
 
@@ -84,7 +84,7 @@ public abstract class AbstractDatatypeIT extends AbstractDataIntegrationIT
 		assertEquals(repo.getName(), entityMetaData.getName());
 
 		// Create entity
-		DefaultEntity entity = new DefaultEntity(entityMetaData, dataService);
+		Entity entity = new DynamicEntity(entityMetaData);
 		populateTestEntity(entity);
 
 		// Add entity

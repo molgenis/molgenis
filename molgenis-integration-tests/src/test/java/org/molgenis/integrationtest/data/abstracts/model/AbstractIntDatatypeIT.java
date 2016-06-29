@@ -1,14 +1,9 @@
 package org.molgenis.integrationtest.data.abstracts.model;
 
-import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.testng.Assert.assertEquals;
 
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 public class AbstractIntDatatypeIT extends AbstractDatatypeIT
 {
@@ -16,10 +11,10 @@ public class AbstractIntDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("IntegerTest");
-		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(INT).setNillable(false);
-		entityMetaData.addAttribute("col2").setDataType(INT);
-		entityMetaData.addAttribute("col3").setDataType(INT);
+		EntityMetaData entityMetaData = null; //new EntityMetaData("IntegerTest");
+		//		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(INT).setNillable(false);
+		//		entityMetaData.addAttribute("col2").setDataType(INT);
+		//		entityMetaData.addAttribute("col3").setDataType(INT); // FIXME
 
 		return entityMetaData;
 	}

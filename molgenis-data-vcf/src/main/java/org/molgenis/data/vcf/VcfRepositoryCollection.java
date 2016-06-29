@@ -1,5 +1,7 @@
 package org.molgenis.data.vcf;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Collections;
@@ -7,10 +9,14 @@ import java.util.Iterator;
 import java.util.Set;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.data.vcf.model.VcfAttributes;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -22,14 +28,22 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	private static final String EXTENSION_VCF_ZIP = "vcf.zip";
 	static final Set<String> EXTENSIONS = ImmutableSet.of(EXTENSION_VCF, EXTENSION_VCF_GZ, EXTENSION_VCF_ZIP);
 
+	@Autowired
+	private VcfAttributes vcfAttributes;
+
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
 	private final File file;
 	private final String entityName;
 
 	public VcfRepositoryCollection(File file) throws IOException
 	{
 		super(EXTENSIONS);
-		if (file == null) throw new IllegalArgumentException("file is null");
-		this.file = file;
+		this.file = requireNonNull(file);
 
 		String name = file.getName();
 		if (name.endsWith(EXTENSION_VCF))
@@ -51,6 +65,12 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
+	public void init() throws IOException
+	{
+		// no operation
+	}
+
+	@Override
 	public Iterable<String> getEntityNames()
 	{
 		return Collections.singleton(entityName);
@@ -62,7 +82,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 		if (!entityName.equals(name)) throw new MolgenisDataException("Unknown entity name [" + name + "]");
 		try
 		{
-			return new VcfRepository(file, name);
+			return new VcfRepository(file, name, vcfAttributes, entityMetaFactory, attrMetaFactory);
 		}
 		catch (IOException e)
 		{
@@ -74,12 +94,6 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	public String getName()
 	{
 		return NAME;
-	}
-
-	@Override
-	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
-	{
-		return getRepository(entityMeta.getName());
 	}
 
 	@Override
@@ -114,5 +128,11 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 			if (entityNames.next().equals(name)) return true;
 		}
 		return false;
+	}
+
+	@Override
+	public boolean hasRepository(EntityMetaData entityMeta)
+	{
+		return hasRepository(entityMeta.getName());
 	}
 }

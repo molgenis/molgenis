@@ -1,11 +1,11 @@
 package org.molgenis.fieldtypes;
 
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.model.MolgenisModelException;
+
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.model.MolgenisModelException;
 
 public class LongField extends FieldType
 {
@@ -91,9 +91,9 @@ public class LongField extends FieldType
 	}
 
 	@Override
-	public FieldTypeEnum getEnumType()
+	public AttributeType getEnumType()
 	{
-		return FieldTypeEnum.LONG;
+		return AttributeType.LONG;
 	}
 
 	@Override

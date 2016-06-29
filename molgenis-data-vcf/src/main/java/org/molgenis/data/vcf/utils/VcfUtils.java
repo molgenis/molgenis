@@ -1,16 +1,16 @@
 package org.molgenis.data.vcf.utils;
 
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.FILTER;
-import static org.molgenis.data.vcf.VcfRepository.FORMAT_GT;
-import static org.molgenis.data.vcf.VcfRepository.ID;
-import static org.molgenis.data.vcf.VcfRepository.INFO;
-import static org.molgenis.data.vcf.VcfRepository.NAME;
-import static org.molgenis.data.vcf.VcfRepository.POS;
-import static org.molgenis.data.vcf.VcfRepository.QUAL;
-import static org.molgenis.data.vcf.VcfRepository.REF;
-import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
+import com.google.common.io.BaseEncoding;
+import org.apache.commons.lang3.StringUtils;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.MolgenisInvalidFormatException;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.datastructures.Sample;
+import org.molgenis.data.vcf.datastructures.Trio;
+import org.molgenis.vcf.meta.VcfMetaInfo;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -19,28 +19,11 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.MolgenisInvalidFormatException;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.vcf.VcfRepository;
-import org.molgenis.data.vcf.datastructures.Sample;
-import org.molgenis.data.vcf.datastructures.Trio;
-import org.molgenis.vcf.meta.VcfMetaInfo;
-
-import com.google.common.io.BaseEncoding;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
+import static org.molgenis.data.vcf.VcfRepository.NAME;
+import static org.molgenis.data.vcf.model.VcfAttributes.*;
 
 public class VcfUtils
 {
@@ -63,6 +46,12 @@ public class VcfUtils
 		strBuilder.append(StringUtils.strip(vcfEntity.get(REF).toString()));
 		strBuilder.append("_");
 		strBuilder.append(StringUtils.strip(vcfEntity.get(ALT).toString()));
+		strBuilder.append("_");
+		strBuilder.append(StringUtils.strip(vcfEntity.get(ID).toString()));
+		strBuilder.append("_");
+		strBuilder.append(StringUtils.strip(vcfEntity.get(QUAL).toString()));
+		strBuilder.append("_");
+		strBuilder.append(StringUtils.strip(vcfEntity.get(FILTER).toString()));
 		String idStr = strBuilder.toString();
 
 		// use MD5 hash to prevent ids that are too long
@@ -123,7 +112,7 @@ public class VcfUtils
 			String infoAttrName = attributeMetaData.getName();
 			if (attributesToInclude.isEmpty() || attributesToInclude.contains(infoAttrName))
 			{
-				if (attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.BOOL)
+				if (attributeMetaData.getDataType() == AttributeType.BOOL)
 				{
 					Boolean infoAttrBoolValue = vcfEntity.getBoolean(infoAttrName);
 					if (infoAttrBoolValue != null && infoAttrBoolValue.booleanValue() == true)
@@ -349,7 +338,7 @@ public class VcfUtils
 		List<AttributeMetaData> result = new ArrayList<>();
 		for (AttributeMetaData attributeMetaData : outputAttrs)
 		{
-			if (attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
+			if (attributeMetaData.getDataType() == COMPOUND)
 			{
 				result.addAll(getAtomicAttributesFromList(attributeMetaData.getAttributeParts()));
 			}
@@ -369,13 +358,13 @@ public class VcfUtils
 		sb.append(",Number=.");// FIXME: once we support list of primitives we can calculate based on combination of
 								// type and nillable
 		sb.append(",Type=");
-		sb.append(toVcfDataType(infoAttributeMetaData.getDataType().getEnumType()));
+		sb.append(toVcfDataType(infoAttributeMetaData.getDataType()));
 		sb.append(",Description=\"");
 		// http://samtools.github.io/hts-specs/VCFv4.1.pdf --> "The Description value must be surrounded by
 		// double-quotes. Double-quote character can be escaped with backslash \ and backslash as \\."
 		if (StringUtils.isBlank(infoAttributeMetaData.getDescription()))
 		{
-			((DefaultAttributeMetaData) infoAttributeMetaData)
+			((AttributeMetaData) infoAttributeMetaData)
 					.setDescription(VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION);
 		}
 		sb.append(
@@ -384,7 +373,7 @@ public class VcfUtils
 		return sb.toString();
 	}
 
-	private static String toVcfDataType(MolgenisFieldTypes.FieldTypeEnum dataType)
+	private static String toVcfDataType(AttributeType dataType)
 	{
 		switch (dataType)
 		{

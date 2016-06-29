@@ -11,6 +11,7 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.AggregateAnonymizerImpl;
 import org.molgenis.data.support.QueryImpl;
@@ -233,20 +234,6 @@ public class RepositorySecurityDecorator implements Repository<Entity>
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.rebuildIndex();
-	}
-
-	@Override
-	public void create()
-	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
-		decoratedRepository.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
-		decoratedRepository.drop();
 	}
 
 	@Override

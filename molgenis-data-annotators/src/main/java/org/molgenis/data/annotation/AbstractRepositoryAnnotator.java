@@ -1,18 +1,15 @@
 package org.molgenis.data.annotation;
 
+import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+
 import java.util.Iterator;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.entity.AnnotatorInfo;
-import org.springframework.transaction.annotation.Transactional;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
 
-/**
- * Created with IntelliJ IDEA. User: charbonb Date: 21/02/14 Time: 11:24 To change this template use File | Settings |
- * File Templates.
- */
 public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 {
 	@Override
@@ -28,13 +25,12 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 			}
 
 			// one of the needed attributes not of the correct type? we can not annotate
-			if (!repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
-					.equals(annotatorAttribute.getDataType()))
+			if (repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType() != annotatorAttribute
+					.getDataType())
 			{
 				// allow type string when required attribute is text (for backward compatibility)
-				if (!(repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
-						.equals(MolgenisFieldTypes.STRING) && annotatorAttribute.getDataType().equals(
-						MolgenisFieldTypes.TEXT)))
+				if (!(repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType() == STRING
+						&& annotatorAttribute.getDataType() == TEXT))
 				{
 					return "a required attribute has the wrong datatype";
 				}
@@ -51,7 +47,6 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	}
 
 	@Override
-	@Transactional
 	public Iterator<Entity> annotate(final Iterator<Entity> sourceIterable)
 	{
 		return this.annotate(new Iterable<Entity>()

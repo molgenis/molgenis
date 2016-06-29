@@ -1,29 +1,25 @@
-package org.molgenis.integrationtest.data.abstracts.model;
+package org.molgenis.integrationtest.data;
 
-import static org.molgenis.MolgenisFieldTypes.INT;
 import static org.testng.Assert.fail;
 
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.integrationtest.data.abstracts.AbstractDataIntegrationIT;
-
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 public abstract class AbstractValidationExpressionIT extends AbstractDataIntegrationIT
 {
 	public void testIt()
 	{
-		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("ValidationExpressionTest");
-		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false).setAuto(true);
-		entityMetaData.addAttribute("intAttr").setDataType(INT);
-		entityMetaData.addAttribute("validationExpressionAttr").setDataType(INT)
-				.setValidationExpression("$('validationExpressionAttr').gt(10).value() && $('intAttr').lt(10).value()");
+		EntityMetaData entityMetaData = null; //new EntityMetaData("ValidationExpressionTest");
+		//		entityMetaData.addAttribute("identifier", ROLE_ID).setNillable(false).setAuto(true);
+		//		entityMetaData.addAttribute("intAttr").setDataType(INT);
+		//		entityMetaData.addAttribute("validationExpressionAttr").setDataType(INT) // FIXME
+		//				.setValidationExpression("$('validationExpressionAttr').gt(10).value() && $('intAttr').lt(10).value()");
 		metaDataService.addEntityMeta(entityMetaData);
 
-		Entity entity = new DefaultEntity(entityMetaData, dataService);// Not OK
+		Entity entity = new DynamicEntity(entityMetaData);// Not OK
 		try
 		{
 			dataService.add(entityMetaData.getName(), entity);

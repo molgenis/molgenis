@@ -1,14 +1,11 @@
 package org.molgenis.data.postgresql;
 
-import static java.lang.String.format;
-import static java.util.stream.Collectors.joining;
-import static java.util.stream.IntStream.range;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.JUNCTION_TABLE_ORDER_ATTR_NAME;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getJunctionTableName;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributes;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributesNonMref;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableName;
-import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.isPersistedInPostgreSql;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.*;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.fieldtypes.FieldType;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -16,22 +13,12 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataConverter;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.Sort;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.fieldtypes.EnumField;
-import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.fieldtypes.MrefField;
-import org.molgenis.fieldtypes.StringField;
-import org.molgenis.fieldtypes.TextField;
-import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.util.EntityUtils;
+import static java.lang.String.format;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.IntStream.range;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
+import static org.molgenis.data.support.EntityMetaDataUtils.*;
 
 /**
  * Utility class that generates the SQL used by {@link PostgreSqlRepository} and {@link PostgreSqlRepositoryCollection}
@@ -56,6 +43,32 @@ class PostgreSqlQueryGenerator
 		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ADD CONSTRAINT ")
 				.append(getUniqueKeyName(entityMeta, attr)).append(" UNIQUE (").append(getColumnName(attr)).append(")")
 				.toString();
+	}
+
+	public static String getSqlDropUniqueKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	{
+		// PostgreSQL name convention
+		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" DROP CONSTRAINT ")
+				.append(getUniqueKeyName(entityMeta, attr)).toString();
+	}
+
+	public static String getSqlSetNotNull(EntityMetaData entityMeta, AttributeMetaData attr)
+	{
+		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ALTER COLUMN ")
+				.append(getColumnName(attr)).append(" SET NOT NULL").toString();
+	}
+
+	public static String getSqlDropNotNull(EntityMetaData entityMeta, AttributeMetaData attr)
+	{
+		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ALTER COLUMN ")
+				.append(getColumnName(attr)).append(" DROP NOT NULL").toString();
+	}
+
+	public static String getSqlSetDataType(EntityMetaData entityMeta, AttributeMetaData attr)
+	{
+		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ALTER COLUMN ")
+				.append(getColumnName(attr)).append(" SET DATA TYPE ").append(getPostgreSqlType(attr))
+				.append(" USING ").append(getColumnName(attr)).append("::").append(getPostgreSqlType(attr)).toString();
 	}
 
 	public static String getSqlAddColumn(EntityMetaData entityMeta, AttributeMetaData attr)
@@ -84,7 +97,7 @@ class PostgreSqlQueryGenerator
 			throw new MolgenisDataException(format("Missing idAttribute for entity [%s]", entityMeta.getName()));
 		}
 
-		if (idAttribute.getDataType() instanceof XrefField || idAttribute.getDataType() instanceof MrefField)
+		if (isReferenceType(idAttribute))
 		{
 			throw new RuntimeException(format("primary key(%s.%s) cannot be XREF or MREF", getTableName(entityMeta),
 					getColumnName(idAttribute)));
@@ -109,9 +122,8 @@ class PostgreSqlQueryGenerator
 
 		sql.append(" CREATE TABLE IF NOT EXISTS ").append(getJunctionTableName(entityMeta, attr)).append(" (")
 				.append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(" INT,").append(getColumnName(idAttr))
-				.append(' ').append(idAttr.getDataType().getPostgreSqlType()).append(" NOT NULL, ")
-				.append(getColumnName(attr)).append(' ')
-				.append(attr.getRefEntity().getIdAttribute().getDataType().getPostgreSqlType())
+				.append(' ').append(getPostgreSqlType(idAttr)).append(" NOT NULL, ")
+				.append(getColumnName(attr)).append(' ').append(getPostgreSqlType(attr.getRefEntity().getIdAttribute()))
 				.append(" NOT NULL, FOREIGN KEY (").append(getColumnName(idAttr)).append(") REFERENCES ")
 				.append(getTableName(entityMeta)).append('(').append(getColumnName(idAttr))
 				.append(") ON DELETE CASCADE");
@@ -221,7 +233,7 @@ class PostgreSqlQueryGenerator
 					select.append(", ");
 				}
 
-				if (attr.getDataType() instanceof MrefField)
+				if (isMultipleReferenceType(attr))
 				{
 					if (includeMrefs)
 					{
@@ -298,7 +310,7 @@ class PostgreSqlQueryGenerator
 
 	/**
 	 * Produces SQL to count the number of entities that match the given query. Ignores query offset and pagesize.
-	 * 
+	 *
 	 * @param q
 	 * @param parameters
 	 * @return
@@ -335,7 +347,7 @@ class PostgreSqlQueryGenerator
 
 	private static void getSqlAttribute(EntityMetaData entityMeta, StringBuilder sql, AttributeMetaData attr)
 	{
-		switch (attr.getDataType().getEnumType())
+		switch (attr.getDataType())
 		{
 			case BOOL:
 			case DATE:
@@ -361,46 +373,38 @@ class PostgreSqlQueryGenerator
 				{
 					throw new MolgenisDataException(
 							format("Attribute [%s] of entity [%s] is label attribute and of type [%s]. Label attributes cannot be of type xref, mref, categorical or compound.",
-									attr.getName(), entityMeta.getName(), attr.getDataType().getEnumType().toString()));
+									attr.getName(), entityMeta.getName(), attr.getDataType().toString()));
 				}
 
 				if (entityMeta.getLookupAttribute(attr.getName()) != null)
 				{
 					throw new MolgenisDataException(
 							format("Attribute [%s] of entity [%s] is lookup attribute and of type [%s]. Lookup attributes cannot be of type xref, mref, categorical or compound.",
-									attr.getName(), entityMeta.getName(), attr.getDataType().getEnumType().toString()));
+									attr.getName(), entityMeta.getName(), attr.getDataType().toString()));
 				}
 
 				break;
 			default:
-				throw new RuntimeException(
-						format("Unknown data type [%s]", attr.getDataType().getEnumType().toString()));
+				throw new RuntimeException(format("Unknown data type [%s]", attr.getDataType().toString()));
 		}
 
-		if (!(attr.getDataType() instanceof MrefField))
+		if (!(isMultipleReferenceType(attr)))
 		{
 			sql.append(getColumnName(attr)).append(' ');
 			// xref adopt type of the identifier of referenced entity
-			if (attr.getDataType() instanceof XrefField)
+			if (isSingleReferenceType(attr))
 			{
-				sql.append(attr.getRefEntity().getIdAttribute().getDataType().getPostgreSqlType());
+				sql.append(getPostgreSqlType(attr.getRefEntity().getIdAttribute()));
 			}
 			else
 			{
-				sql.append(attr.getDataType().getPostgreSqlType());
+				sql.append(getPostgreSqlType(attr));
 			}
-			// TODO remove Questionnaire entity hack
-			// not null
-			if (!attr.isNillable() && !EntityUtils.doesExtend(entityMeta, "Questionnaire")
-					&& (attr.getVisibleExpression() == null))
+			if (attr.getDataType() == ENUM)
 			{
-				sql.append(" NOT NULL");
-			}
-			if (attr.getDataType() instanceof EnumField)
-			{
-				sql.append(" CHECK (").append(getColumnName(attr)).append(" IN (").append(
-						attr.getEnumOptions().stream().map(enumOption -> "'" + enumOption + "'").collect(joining(",")))
-						.append("))");
+				sql.append(" CHECK (").append(getColumnName(attr)).append(" IN (")
+						.append(attr.getEnumOptions().stream().map(enumOption -> "'" + enumOption + "'")
+								.collect(joining(","))).append("))");
 			}
 		}
 	}
@@ -424,7 +428,7 @@ class PostgreSqlQueryGenerator
 				{
 					throw new MolgenisDataException(format("Unknown attribute [%s]", r.getField()));
 				}
-				if (attr.getDataType() instanceof MrefField)
+				if (isMultipleReferenceType(attr))
 				{
 					mrefFilterIndex++;
 				}
@@ -447,7 +451,7 @@ class PostgreSqlQueryGenerator
 				case LIKE:
 
 					String columnName;
-					if (attr.getDataType() instanceof MrefField)
+					if (isMultipleReferenceType(attr))
 					{
 						columnName = getFilterColumnName(attr, mrefFilterIndex);
 					}
@@ -456,7 +460,7 @@ class PostgreSqlQueryGenerator
 						columnName = "this." + getColumnName(attr);
 					}
 
-					if (attr.getDataType() instanceof StringField || attr.getDataType() instanceof TextField)
+					if (isStringType(attr) || isTextType(attr))
 					{
 						result.append(" ").append(columnName);
 					}
@@ -482,9 +486,8 @@ class PostgreSqlQueryGenerator
 
 					StringBuilder in = new StringBuilder();
 
-					@SuppressWarnings("unchecked")
-					Iterable<Object> inValueIterable = (Iterable<Object>) inValue;
-					for (Iterator<Object> it = inValueIterable.iterator(); it.hasNext();)
+					@SuppressWarnings("unchecked") Iterable<Object> inValueIterable = (Iterable<Object>) inValue;
+					for (Iterator<Object> it = inValueIterable.iterator(); it.hasNext(); )
 					{
 						Object inValueItem = it.next();
 
@@ -494,7 +497,7 @@ class PostgreSqlQueryGenerator
 							in.append(',');
 						}
 
-						if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
+						if (isReferenceType(attr))
 						{
 							// According to Query documentation value can be an entity or an entity id
 							if (inValueItem instanceof Entity)
@@ -502,10 +505,10 @@ class PostgreSqlQueryGenerator
 								inValueItem = ((Entity) inValueItem).getIdValue();
 							}
 						}
-						parameters.add(attr.getDataType().convert(inValueItem));
+						parameters.add(convert(attr, inValueItem));
 					}
 
-					if (attr.getDataType() instanceof MrefField)
+					if (isMultipleReferenceType(attr))
 					{
 						result.append(getFilterColumnName(attr, mrefFilterIndex));
 					}
@@ -535,7 +538,7 @@ class PostgreSqlQueryGenerator
 					parameters.add(rangeValues.next()); // to
 
 					StringBuilder column = new StringBuilder();
-					if (attr.getDataType() instanceof  MrefField)
+					if (isMultipleReferenceType(attr))
 					{
 						column.append(getFilterColumnName(attr, mrefFilterIndex));
 					}
@@ -548,12 +551,56 @@ class PostgreSqlQueryGenerator
 					result.append(predicate);
 					break;
 				case EQUALS:
+					if (isMultipleReferenceType(attr))
+					{
+						predicate.append(getFilterColumnName(attr, mrefFilterIndex));
+					}
+					else
+					{
+						predicate.append("this");
+					}
+
+					predicate.append('.').append(getColumnName(r.getField()));
+					if (r.getValue() == null)
+					{
+						// expression = null is not valid, use IS NULL
+						predicate.append(" IS NULL ");
+					}
+					else
+					{
+						Object convertedVal = convert(attr, r.getValue());
+						if (convertedVal instanceof Entity)
+						{
+							convertedVal = ((Entity) convertedVal).getIdValue();
+						}
+						//Postgres does not return the rows with an empty value in a boolean field when queried with for example "... NOT abstract = TRUE"
+						//It does however return those rows when queried with "... NOT abstract IS TRUE"
+						if (attr.getDataType() == BOOL)
+						{
+							Boolean bool = new Boolean(convertedVal.toString());
+							if (bool) predicate.append(" IS TRUE");
+							else predicate.append(" IS FALSE");
+						}
+						else
+						{
+							predicate.append(" =");
+							predicate.append(" ? ");
+
+							parameters.add(convertedVal);
+						}
+					}
+					if (result.length() > 0 && !result.toString().endsWith(" OR ") && !result.toString()
+							.endsWith(" AND ") && !result.toString().endsWith(" NOT "))
+					{
+						result.append(" AND ");
+					}
+					result.append(predicate);
+					break;
 				case GREATER:
 				case GREATER_EQUAL:
 				case LESS:
 				case LESS_EQUAL:
-					FieldType type = attr.getDataType();
-					if (type instanceof MrefField)
+					if (isMultipleReferenceType(attr))
 					{
 						predicate.append(getFilterColumnName(attr, mrefFilterIndex));
 					}
@@ -586,15 +633,15 @@ class PostgreSqlQueryGenerator
 					}
 					predicate.append(" ? ");
 
-					Object convertedVal = attr.getDataType().convert(r.getValue());
+					Object convertedVal = convert(attr, r.getValue());
 					if (convertedVal instanceof Entity)
 					{
 						convertedVal = ((Entity) convertedVal).getIdValue();
 					}
 					parameters.add(convertedVal);
 
-					if (result.length() > 0 && !result.toString().endsWith(" OR ")
-							&& !result.toString().endsWith(" AND ") && !result.toString().endsWith(" NOT "))
+					if (result.length() > 0 && !result.toString().endsWith(" OR ") && !result.toString()
+							.endsWith(" AND ") && !result.toString().endsWith(" NOT "))
 					{
 						result.append(" AND ");
 					}
@@ -606,8 +653,9 @@ class PostgreSqlQueryGenerator
 				case SEARCH:
 				case SHOULD:
 					// PostgreSQL does not support semantic searching and sorting matching rows on relevance.
-					throw new UnsupportedOperationException(format(
-							"Query operator [%s] not supported by PostgreSQL repository", r.getOperator().toString()));
+					throw new UnsupportedOperationException(
+							format("Query operator [%s] not supported by PostgreSQL repository",
+									r.getOperator().toString()));
 				default:
 					throw new RuntimeException(format("Unknown query operator [%s]", r.getOperator().toString()));
 			}
@@ -624,7 +672,7 @@ class PostgreSqlQueryGenerator
 			for (Sort.Order o : q.getSort())
 			{
 				AttributeMetaData attr = entityMeta.getAttribute(o.getAttr());
-				if (attr.getDataType() instanceof MrefField)
+				if (isMultipleReferenceType(attr))
 				{
 					sortSql.append(", ").append(getColumnName(attr));
 				}
@@ -729,7 +777,7 @@ class PostgreSqlQueryGenerator
 			if (rule.getField() != null)
 			{
 				AttributeMetaData attr = entityMeta.getAttribute(rule.getField());
-				if (attr != null && attr.getDataType() instanceof MrefField)
+				if (attr != null && isMultipleReferenceType(attr))
 				{
 					mrefAttrsInQuery.add(attr);
 				}
@@ -741,4 +789,17 @@ class PostgreSqlQueryGenerator
 			}
 		}
 	}
+
+	private static String getPostgreSqlType(AttributeMetaData attr)
+	{
+		FieldType fieldType = MolgenisFieldTypes.getType(getValueString(attr.getDataType()));
+		return fieldType.getPostgreSqlType();
+	}
+
+	private static Object convert(AttributeMetaData attr, Object value)
+	{
+		FieldType fieldType = MolgenisFieldTypes.getType(getValueString(attr.getDataType()));
+		return fieldType.convert(value);
+	}
 }
+

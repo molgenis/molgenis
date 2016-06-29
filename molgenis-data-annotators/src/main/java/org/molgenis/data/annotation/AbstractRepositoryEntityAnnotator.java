@@ -1,17 +1,15 @@
 package org.molgenis.data.annotation;
 
+import org.molgenis.data.Entity;
+import org.molgenis.security.core.runas.RunAsSystem;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 
-import org.molgenis.data.Entity;
-import org.molgenis.security.core.runas.RunAsSystem;
-import org.springframework.transaction.annotation.Transactional;
-
 public abstract class AbstractRepositoryEntityAnnotator extends AbstractRepositoryAnnotator
 {
 	@Override
-	@Transactional
 	@RunAsSystem
 	public Iterator<Entity> annotate(final Iterable<Entity> sourceIterable)
 	{

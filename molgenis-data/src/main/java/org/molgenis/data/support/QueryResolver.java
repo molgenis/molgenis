@@ -1,24 +1,21 @@
 package org.molgenis.data.support;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL_MREF;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
+import org.apache.commons.lang3.StringUtils;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 
 /**
  * Handle a bit of lagacy, handle query like 'SELECT FROM Category WHERE observableFeature_Identifier=xxx' Resolve xref
@@ -61,7 +58,7 @@ public class QueryResolver
 					}
 					else
 					{
-						FieldTypeEnum dataType = attr.getDataType().getEnumType();
+						AttributeType dataType = attr.getDataType();
 						if ((dataType == XREF || dataType == MREF || dataType == CATEGORICAL
 								|| dataType == CATEGORICAL_MREF))
 						{

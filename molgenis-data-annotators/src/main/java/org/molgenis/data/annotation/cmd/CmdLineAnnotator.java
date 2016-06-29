@@ -13,13 +13,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -147,7 +147,7 @@ public class CmdLineAnnotator
 			}
 		}
 
-		annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
+		//FIXME annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
 		annotate(annotator, inputVcfFile, outputVCFFile, options);
 	}
 
@@ -222,14 +222,16 @@ public class CmdLineAnnotator
 
 		BufferedWriter outputVCFWriter = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
-		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName());
+		// FIXME replace null contructor arguments with actual arguments
+		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName(), null, null, null);
 
 		try
 		{
 			if (!attributesToInclude.isEmpty())
 			{
 				// Check attribute names
-				List<String> outputAttributeNames = VcfUtils.getAtomicAttributesFromList(annotator.getOutputMetaData())
+				List<String> outputAttributeNames = VcfUtils
+						.getAtomicAttributesFromList(annotator.getOutputAttributes())
 						.stream().map((attr) -> attr.getName()).collect(Collectors.toList());
 
 				boolean stop = false;
@@ -249,12 +251,12 @@ public class CmdLineAnnotator
 			}
 
 			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter,
-					annotator.getOutputMetaData(), attributesToInclude);
+					annotator.getOutputAttributes(), attributesToInclude);
 			System.out.println("Now starting to process the data.");
 
-			DefaultEntityMetaData emd = (DefaultEntityMetaData) vcfRepo.getEntityMetaData();
-			DefaultAttributeMetaData infoAttribute = (DefaultAttributeMetaData) emd.getAttribute(VcfRepository.INFO);
-			for (AttributeMetaData attribute : annotator.getOutputMetaData())
+			EntityMetaData emd = (EntityMetaData) vcfRepo.getEntityMetaData();
+			AttributeMetaData infoAttribute = (AttributeMetaData) emd.getAttribute(VcfAttributes.INFO);
+			for (AttributeMetaData attribute : annotator.getOutputAttributes())
 			{
 				for (AttributeMetaData atomicAttribute : attribute.getAttributeParts())
 				{

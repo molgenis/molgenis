@@ -1,6 +1,7 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -23,15 +24,15 @@ import org.apache.lucene.search.Explanation;
 import org.apache.lucene.search.spell.StringDistance;
 import org.elasticsearch.common.base.Joiner;
 import org.elasticsearch.common.collect.Lists;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
@@ -50,8 +51,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.common.base.Splitter;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Ordering;
-
-import autovalue.shaded.com.google.common.common.collect.Sets;
+import com.google.common.collect.Sets;
 
 public class SemanticSearchServiceImpl implements SemanticSearchService
 {
@@ -102,7 +102,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			finalQueryRules.addAll(Arrays.asList(new QueryRule(Operator.AND), disMaxQueryRule));
 		}
 
-		Stream<Entity> attributeMetaDataEntities = dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME,
+		Stream<Entity> attributeMetaDataEntities = dataService.findAll(ATTRIBUTE_META_DATA,
 				new QueryImpl<>(finalQueryRules));
 
 		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper.collectExpandedQueryMap(queryTerms,
@@ -255,7 +255,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 					+ " does not exsit in EntityMetaData : " + sourceEntityMetaData.getName());
 		}
 		Explanation explanation = elasticSearchExplainService.explain(new QueryImpl<Entity>(finalQueryRules),
-				dataService.getEntityMetaData(AttributeMetaDataMetaData.ENTITY_NAME), attributeId);
+				dataService.getEntityMetaData(ATTRIBUTE_META_DATA), attributeId);
 
 		Set<ExplainedQueryString> detectedQueryStrings = elasticSearchExplainService
 				.findQueriesFromExplanation(collectExpanedQueryMap, explanation);

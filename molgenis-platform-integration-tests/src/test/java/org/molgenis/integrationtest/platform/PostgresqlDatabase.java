@@ -1,9 +1,5 @@
 package org.molgenis.integrationtest.platform;
 
-import org.molgenis.util.ResourceUtils;
-import org.springframework.stereotype.Component;
-
-import javax.sql.DataSource;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -12,6 +8,11 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
+
+import javax.sql.DataSource;
+
+import org.molgenis.util.ResourceUtils;
+import org.springframework.stereotype.Component;
 
 /**
  * Drops and creates the integration database
@@ -23,7 +24,8 @@ class PostgreSqlDatabase
 
 	private DataSource dataSource;
 
-	public void init() {
+	public void init()
+	{
 
 	}
 

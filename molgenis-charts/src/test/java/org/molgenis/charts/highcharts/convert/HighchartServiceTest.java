@@ -1,19 +1,6 @@
 package org.molgenis.charts.highcharts.convert;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.List;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.molgenis.charts.BoxPlotChart;
 import org.molgenis.charts.MolgenisAxisType;
@@ -21,12 +8,7 @@ import org.molgenis.charts.XYDataChart;
 import org.molgenis.charts.data.BoxPlotSerie;
 import org.molgenis.charts.data.XYData;
 import org.molgenis.charts.data.XYDataSerie;
-import org.molgenis.charts.highcharts.basic.AxisAlign;
-import org.molgenis.charts.highcharts.basic.AxisType;
-import org.molgenis.charts.highcharts.basic.ChartAlign;
-import org.molgenis.charts.highcharts.basic.ChartType;
-import org.molgenis.charts.highcharts.basic.Options;
-import org.molgenis.charts.highcharts.basic.SeriesType;
+import org.molgenis.charts.highcharts.basic.*;
 import org.molgenis.charts.highcharts.chart.Chart;
 import org.molgenis.charts.highcharts.stockchart.StockChart;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +18,15 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.ui.Model;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.List;
+
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.*;
 
 @ContextConfiguration
 public class HighchartServiceTest extends AbstractTestNGSpringContextTests
@@ -90,8 +81,8 @@ public class HighchartServiceTest extends AbstractTestNGSpringContextTests
 	{
 		List<XYDataSerie> data = new ArrayList<XYDataSerie>();
 		XYDataSerie serieOne = new XYDataSerie();
-		serieOne.setAttributeXFieldTypeEnum(FieldTypeEnum.INT);
-		serieOne.setAttributeXFieldTypeEnum(FieldTypeEnum.DECIMAL);
+		serieOne.setAttributeXFieldTypeEnum(AttributeType.INT);
+		serieOne.setAttributeXFieldTypeEnum(AttributeType.DECIMAL);
 		XYData xYDataOne = new XYData(Integer.valueOf("1"), Double.valueOf("1.1"));
 		XYData xYDataTwo = new XYData(Integer.valueOf("2"), Double.valueOf("2.2"));
 		XYData xYDataThree = new XYData(Integer.valueOf("3"), Double.valueOf("3.3"));
@@ -158,8 +149,8 @@ public class HighchartServiceTest extends AbstractTestNGSpringContextTests
 	{
 		List<XYDataSerie> data = new ArrayList<XYDataSerie>();
 		XYDataSerie serieOne = new XYDataSerie();
-		serieOne.setAttributeXFieldTypeEnum(FieldTypeEnum.DATE);
-		serieOne.setAttributeYFieldTypeEnum(FieldTypeEnum.DECIMAL);
+		serieOne.setAttributeXFieldTypeEnum(AttributeType.DATE);
+		serieOne.setAttributeYFieldTypeEnum(AttributeType.DECIMAL);
 
 		Calendar calOne = Calendar.getInstance();
 		calOne.clear();

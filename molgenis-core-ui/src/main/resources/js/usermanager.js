@@ -143,7 +143,13 @@
 	}
 	
 	function getAllUsersGroup(callback) {
-		api.getAsync('/api/v1/MolgenisGroup', {q:[{field:'name', operator:'EQUALS', value:'All Users'}]}, function(result) {
+		api.getAsync('/api/v1/sys_sec_MolgenisGroup', {
+			q: [{
+				field: 'name',
+				operator: 'EQUALS',
+				value: 'All Users'
+			}]
+		}, function (result) {
 			var groupId = null;
 			if (result.total > 0) {
 				groupId = result.items[0].id;

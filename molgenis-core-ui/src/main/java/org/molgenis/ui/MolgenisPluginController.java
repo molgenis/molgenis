@@ -69,9 +69,7 @@ public abstract class MolgenisPluginController
 	public Entity getPluginSettings()
 	{
 		String entityName = DefaultSettingsEntityMetaData.getSettingsEntityName(getId());
-		return RunAsSystemProxy.runAsSystem(() -> {
-			return getPluginSettings(entityName);
-		});
+		return RunAsSystemProxy.runAsSystem(() -> getPluginSettings(entityName));
 	}
 
 	private Entity getPluginSettings(String entityName)

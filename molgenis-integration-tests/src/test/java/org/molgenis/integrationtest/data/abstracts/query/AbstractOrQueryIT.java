@@ -29,8 +29,8 @@ public class AbstractOrQueryIT extends AbstractQueryIT
 	@Override
 	protected void testDecimal()
 	{
-		Query<Entity> findOneQuery = new QueryImpl<Entity>().eq(ACCOUNT_BALANCE, 299.99).or().eq(ACCOUNT_BALANCE,
-				43.21);
+		Query<Entity> findOneQuery = new QueryImpl<Entity>().eq(ACCOUNT_BALANCE, 299.99).or()
+				.eq(ACCOUNT_BALANCE, 43.21);
 		assertTrue(newHashSet(person1).contains(personsRepository.findOne(findOneQuery)));
 
 		Query<Entity> findAllQuery = new QueryImpl<Entity>().eq(ACCOUNT_BALANCE, 299.99).or()
@@ -44,16 +44,16 @@ public class AbstractOrQueryIT extends AbstractQueryIT
 	@Override
 	protected void testLong()
 	{
-		Query<Entity> findOneQuery = new QueryImpl<Entity>().eq(SERIAL_NUMBER, 374278348334L).or().eq(SERIAL_NUMBER,
-				376578342134L);
+		Query<Entity> findOneQuery = new QueryImpl<Entity>().eq(SERIAL_NUMBER, 374278348334L).or()
+				.eq(SERIAL_NUMBER, 376578342134L);
 		assertTrue(newHashSet(person1).contains(personsRepository.findOne(findOneQuery)));
 
 		Query<Entity> findAllQuery = new QueryImpl<Entity>().eq(SERIAL_NUMBER, 374278348334L).or()
 				.eq(SERIAL_NUMBER, 67986789879L).or().eq(SERIAL_NUMBER, 23471900909L);
 		assertEquals(personsRepository.findAll(findAllQuery).collect(toSet()), newHashSet(person1, person2, person3));
 
-		Query<Entity> countQuery = new QueryImpl<Entity>().eq(SERIAL_NUMBER, 67986789879L).or().eq(SERIAL_NUMBER,
-				23471900909L);
+		Query<Entity> countQuery = new QueryImpl<Entity>().eq(SERIAL_NUMBER, 67986789879L).or()
+				.eq(SERIAL_NUMBER, 23471900909L);
 		assertEquals(personsRepository.count(countQuery), 2);
 	}
 
@@ -117,8 +117,8 @@ public class AbstractOrQueryIT extends AbstractQueryIT
 	@Override
 	protected void testMref()
 	{
-		Query<Entity> query = new QueryImpl<Entity>().eq(AUTHOR_OF, "MOLGENIS for dummies").or().eq(AUTHOR_OF,
-				"Your database at the push of a button");
+		Query<Entity> query = new QueryImpl<Entity>().eq(AUTHOR_OF, "MOLGENIS for dummies").or()
+				.eq(AUTHOR_OF, "Your database at the push of a button");
 		assertTrue(newHashSet(person1, person2).contains(personsRepository.findOne(query)));
 		assertEquals(personsRepository.findAll(query).collect(toSet()), newHashSet(person1, person2));
 		assertEquals(personsRepository.count(query), 2);

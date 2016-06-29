@@ -1,12 +1,10 @@
 package org.molgenis.data.support;
 
-import static org.molgenis.security.core.utils.SecurityUtils.currentUserHasRole;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 import java.util.Iterator;
 import java.util.Set;
-import java.util.TreeSet;
-import java.util.concurrent.ConcurrentMap;
 import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
@@ -14,114 +12,54 @@ import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.RepositoryDecoratorFactory;
-import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.util.EntityUtils;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 /**
  * Implementation of the DataService interface
  */
-
 public class DataServiceImpl implements DataService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(DataServiceImpl.class);
 
-	private final ConcurrentMap<String, Repository<Entity>> repositories;
-	private final Set<String> repositoryNames;
 	private MetaDataService metaDataService;
-	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
 
-	public DataServiceImpl()
+	@Autowired
+	public void setMetaDataService(MetaDataService metaDataService)
 	{
-		this(new NonDecoratingRepositoryDecoratorFactory());
-	}
-
-	public DataServiceImpl(RepositoryDecoratorFactory repositoryDecoratorFactory)
-	{
-		this.repositories = Maps.newConcurrentMap();
-		this.repositoryNames = new TreeSet<String>();
-		this.repositoryDecoratorFactory = repositoryDecoratorFactory;
-	}
-
-	/**
-	 * For testing purposes
-	 */
-	public synchronized void resetRepositories()
-	{
-		repositories.clear();
-		repositoryNames.clear();
-	}
-
-	@Override
-	public void setMeta(MetaDataService metaDataService)
-	{
-		this.metaDataService = metaDataService;
-	}
-
-	public synchronized void addRepository(Repository<Entity> newRepository)
-	{
-		String repositoryName = newRepository.getName();
-		if (repositories.containsKey(repositoryName.toLowerCase()))
-		{
-			throw new MolgenisDataException("Entity [" + repositoryName + "] already registered.");
-		}
-		if (LOG.isDebugEnabled()) LOG.debug("Adding repository [" + repositoryName + "]");
-		repositoryNames.add(repositoryName);
-
-		Repository<Entity> decoratedRepo = repositoryDecoratorFactory.createDecoratedRepository(newRepository);
-		repositories.put(repositoryName.toLowerCase(), decoratedRepo);
-	}
-
-	public synchronized void removeRepository(String repositoryName)
-	{
-		if (null == repositoryName)
-		{
-			throw new MolgenisDataException("repositoryName may not be null");
-		}
-
-		if (!repositories.containsKey(repositoryName.toLowerCase()))
-		{
-			throw new MolgenisDataException("Repository [" + repositoryName + "] doesn't exists");
-		}
-		else
-		{
-			if (LOG.isDebugEnabled()) LOG.debug("Removing repository [" + repositoryName + "]");
-			repositoryNames.remove(repositoryName);
-			repositories.remove(repositoryName.toLowerCase());
-		}
+		this.metaDataService = requireNonNull(metaDataService);
 	}
 
 	@Override
 	public EntityMetaData getEntityMetaData(String entityName)
 	{
-		Repository<Entity> repository = getRepository(entityName);
-		return repository.getEntityMetaData();
+		return metaDataService.getEntityMetaData(entityName);
 	}
 
 	@Override
 	public synchronized Stream<String> getEntityNames()
 	{
-		return Lists.newArrayList(repositoryNames).stream().filter(entityName -> currentUserHasRole("ROLE_SU",
-				"ROLE_SYSTEM", "ROLE_ENTITY_COUNT_" + entityName.toUpperCase()));
+		return metaDataService.getEntityMetaDatas().map(EntityMetaData::getName);
 	}
 
 	@Override
 	public boolean hasRepository(String entityName)
 	{
-		return repositories.containsKey(entityName.toLowerCase());
+		return metaDataService.hasRepository(entityName);
+	}
+
+	@Override
+	public long count(String entityName)
+	{
+		return getRepository(entityName).count();
 	}
 
 	@Override
@@ -217,17 +155,13 @@ public class DataServiceImpl implements DataService
 	@Override
 	public Repository<Entity> getRepository(String entityName)
 	{
-		Repository<Entity> repository = repositories.get(entityName.toLowerCase());
-		if (repository == null) throw new UnknownEntityException("Unknown entity [" + entityName + "]");
-
-		return repository;
+		return metaDataService.getRepository(entityName);
 	}
 
 	@SuppressWarnings("unchecked")
 	public <E extends Entity> Repository<E> getRepository(String entityName, Class<E> entityClass)
 	{
-		Repository<Entity> untypedRepo = getRepository(entityName);
-		return new TypedRepositoryDecorator<>(untypedRepo, entityClass);
+		return (Repository<E>) getRepository(entityName);
 	}
 
 	@Override
@@ -257,9 +191,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public <E extends Entity> E findOne(String entityName, Query<E> q, Class<E> clazz)
 	{
-		Entity entity = getRepository(entityName, clazz).findOne(q);
-		if (entity == null) return null;
-		return EntityUtils.convert(entity, clazz, this);
+		return getRepository(entityName, clazz).findOne(q);
 	}
 
 	@Override
@@ -283,7 +215,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public synchronized Iterator<Repository<Entity>> iterator()
 	{
-		return Lists.newArrayList(repositories.values()).iterator();
+		return metaDataService.getRepositories().iterator();
 	}
 
 	@Override
@@ -301,9 +233,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public <E extends Entity> E findOneById(String entityName, Object id, Fetch fetch, Class<E> clazz)
 	{
-		Entity entity = getRepository(entityName).findOneById(id, fetch);
-		if (entity == null) return null;
-		return EntityUtils.convert(entity, clazz, this);
+		return getRepository(entityName, clazz).findOneById(id, fetch);
 	}
 
 	@Override
@@ -327,10 +257,7 @@ public class DataServiceImpl implements DataService
 	@Override
 	public <E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Class<E> clazz)
 	{
-		Stream<Entity> entities = getRepository(entityName).findAll(ids);
-		return entities.map(entity -> {
-			return EntityUtils.convert(entity, clazz, this);
-		});
+		return getRepository(entityName, clazz).findAll(ids);
 	}
 
 	@Override
@@ -342,25 +269,24 @@ public class DataServiceImpl implements DataService
 	@Override
 	public <E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Fetch fetch, Class<E> clazz)
 	{
-		Stream<Entity> entities = getRepository(entityName).findAll(ids, fetch);
-		return entities.map(entity -> {
-			return EntityUtils.convert(entity, clazz, this);
-		});
+		return getRepository(entityName, clazz).findAll(ids, fetch);
 	}
 
 	@Override
-	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId, String newRepositoryLabel)
+	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId,
+			String newRepositoryLabel)
 	{
-		return copyRepository(repository, newRepositoryId, newRepositoryLabel, new QueryImpl<Entity>());
+		return copyRepository(repository, newRepositoryId, newRepositoryLabel, new QueryImpl<>());
 	}
 
 	@Override
-	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId, String newRepositoryLabel,
-			Query<Entity> query)
+	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId,
+			String newRepositoryLabel, Query<Entity> query)
 	{
 		LOG.info("Creating a copy of " + repository.getName() + " repository, with ID: " + newRepositoryId
 				+ ", and label: " + newRepositoryLabel);
-		DefaultEntityMetaData emd = new DefaultEntityMetaData(newRepositoryId, repository.getEntityMetaData());
+		EntityMetaData emd = EntityMetaData.newInstance(repository.getEntityMetaData());
+		emd.setName(newRepositoryId);
 		emd.setLabel(newRepositoryLabel);
 		Repository<Entity> repositoryCopy = metaDataService.addEntityMeta(emd);
 		try

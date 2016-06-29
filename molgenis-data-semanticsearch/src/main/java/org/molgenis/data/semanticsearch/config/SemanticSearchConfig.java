@@ -1,12 +1,11 @@
 package org.molgenis.data.semanticsearch.config;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.TagMetaData;
+import org.molgenis.data.meta.model.TagFactory;
+import org.molgenis.data.meta.model.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainServiceImpl;
@@ -46,6 +45,12 @@ public class SemanticSearchConfig
 	@Autowired
 	EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
 
+	@Autowired
+	TagMetaData tagMetaData;
+
+	@Autowired
+	TagFactory tagFactory;
+
 	@Bean
 	public SemanticSearchServiceHelper semanticSearchServiceHelper()
 	{
@@ -55,7 +60,7 @@ public class SemanticSearchConfig
 	@Bean
 	public OntologyTagService ontologyTagService()
 	{
-		return new OntologyTagServiceImpl(dataService, ontologyService, tagRepository(), idGenerator);
+		return new OntologyTagServiceImpl(dataService, ontologyService, tagRepository(), idGenerator, tagMetaData);
 	}
 
 	@Bean
@@ -80,8 +85,7 @@ public class SemanticSearchConfig
 	@Bean
 	TagRepository tagRepository()
 	{
-		Repository<Entity> repo = dataService.getRepository(TagMetaData.ENTITY_NAME);
-		return new TagRepository(repo, idGenerator);
+		return new TagRepository(dataService, idGenerator, tagFactory);
 	}
 
 	@Bean

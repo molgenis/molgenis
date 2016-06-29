@@ -2,6 +2,8 @@ package org.molgenis.security.user;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -12,8 +14,11 @@ import java.util.stream.Stream;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.auth.MolgenisGroupMember;
+import org.molgenis.auth.MolgenisGroupMemberMetaData;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.auth.UserAuthority;
+import org.molgenis.auth.UserAuthorityMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
@@ -42,10 +47,10 @@ public class MolgenisUserDetailsServiceTest
 		MolgenisUser userUser = when(mock(MolgenisUser.class).isSuperuser()).thenReturn(Boolean.FALSE).getMock();
 		when(userUser.getUsername()).thenReturn("user");
 		when(userUser.getPassword()).thenReturn("password");
-		Query<MolgenisUser> qAdmin = new QueryImpl<MolgenisUser>().eq(MolgenisUser.USERNAME, "admin");
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, qAdmin, MolgenisUser.class)).thenReturn(adminUser);
-		Query<MolgenisUser> qUser = new QueryImpl<MolgenisUser>().eq(MolgenisUser.USERNAME, "user");
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, qUser, MolgenisUser.class)).thenReturn(userUser);
+		Query<MolgenisUser> qAdmin = new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.USERNAME, "admin");
+		when(dataService.findOne(MOLGENIS_USER, qAdmin, MolgenisUser.class)).thenReturn(adminUser);
+		Query<MolgenisUser> qUser = new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.USERNAME, "user");
+		when(dataService.findOne(MOLGENIS_USER, qUser, MolgenisUser.class)).thenReturn(userUser);
 		GrantedAuthoritiesMapper authoritiesMapper = new GrantedAuthoritiesMapper()
 		{
 			@Override
@@ -55,7 +60,8 @@ public class MolgenisUserDetailsServiceTest
 				return authorities;
 			}
 		};
-		when(dataService.findAll(UserAuthority.ENTITY_NAME, new QueryImpl<UserAuthority>().eq(UserAuthority.MOLGENISUSER, userUser),
+		when(dataService.findAll(USER_AUTHORITY,
+				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, userUser),
 				UserAuthority.class)).thenAnswer(new Answer<Stream<UserAuthority>>()
 				{
 					@Override
@@ -64,7 +70,8 @@ public class MolgenisUserDetailsServiceTest
 						return Stream.empty();
 					}
 				});
-		when(dataService.findAll(UserAuthority.ENTITY_NAME, new QueryImpl<UserAuthority>().eq(UserAuthority.MOLGENISUSER, adminUser),
+		when(dataService.findAll(USER_AUTHORITY,
+				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, adminUser),
 				UserAuthority.class)).thenAnswer(new Answer<Stream<UserAuthority>>()
 				{
 					@Override
@@ -73,8 +80,9 @@ public class MolgenisUserDetailsServiceTest
 						return Stream.empty();
 					}
 				});
-		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMember.MOLGENISUSER, userUser), MolgenisGroupMember.class))
+		when(dataService.findAll(MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER,
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, userUser),
+				MolgenisGroupMember.class))
 						.thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
 						{
 							@Override
@@ -83,8 +91,9 @@ public class MolgenisUserDetailsServiceTest
 								return Stream.empty();
 							}
 						});
-		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMember.MOLGENISUSER, adminUser), MolgenisGroupMember.class))
+		when(dataService.findAll(MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER,
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, adminUser),
+				MolgenisGroupMember.class))
 						.thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
 						{
 							@Override

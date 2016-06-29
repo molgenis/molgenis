@@ -25,6 +25,12 @@ public class SnpEffAnnotatorSettings extends DefaultSettingsEntity
 		public Meta()
 		{
 			super(ID);
+		}
+
+		@Override
+		public void init()
+		{
+			super.init();
 			setLabel("SnpEff annotator settings");
 			String defaultLocation = AnnotatorUtils.getAnnotatorResourceDir() + "/Applications/snpEff/snpEff.jar";
 			addAttribute(SNPEFF_JAR_LOCATION).setLabel("SnpEff jar location").setDefaultValue(defaultLocation);

@@ -54,7 +54,7 @@ public class PostgreSqlExceptionTranslatorTest
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getSQLState()).thenReturn("23503");
 		when(serverErrorMessage.getTable()).thenReturn("mytable");
-		when(serverErrorMessage.getDetail()).thenReturn("... (myvalue) ... (mycolumn) ...");
+		when(serverErrorMessage.getDetail()).thenReturn("... (mycolumn) ... (myvalue) ...");
 		MolgenisValidationException e = postgreSqlExceptionTranslator
 				.translateForeignKeyViolation(new PSQLException(serverErrorMessage));
 		assertEquals(e.getMessage(), "Unknown xref value 'myvalue' for attribute 'mycolumn' of entity 'mytable'.");

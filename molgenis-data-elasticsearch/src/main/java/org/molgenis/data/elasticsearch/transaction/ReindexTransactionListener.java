@@ -9,9 +9,11 @@ import org.slf4j.LoggerFactory;
 
 public class ReindexTransactionListener extends DefaultMolgenisTransactionListener
 {
+	private static final Logger LOG = LoggerFactory.getLogger(ReindexTransactionListener.class);
+
 	private ReindexService rebuildIndexService;
 	private ReindexActionRegisterService reindexActionRegisterService;
-	private static final Logger LOG = LoggerFactory.getLogger(ReindexTransactionListener.class);
+
 
 	public ReindexTransactionListener(ReindexService rebuildIndexService,
 			ReindexActionRegisterService reindexActionRegisterService)
@@ -60,6 +62,5 @@ public class ReindexTransactionListener extends DefaultMolgenisTransactionListen
 		{
 			LOG.error("Error during cleanupAfterCompletion");
 		}
-
 	}
 }

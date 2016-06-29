@@ -54,8 +54,8 @@ public class AbstractRangeQueryIT extends AbstractQueryIT
 	@Override
 	protected void testDate() throws ParseException
 	{
-		Query<Entity> query = new QueryImpl<>().rng(BIRTHDAY, dateFormat.parse("1949-01-31"),
-				dateFormat.parse("1977-01-31"));
+		Query<Entity> query = new QueryImpl<>()
+				.rng(BIRTHDAY, dateFormat.parse("1949-01-31"), dateFormat.parse("1977-01-31"));
 		Set<Entity> resultSet = Sets.newHashSet(person1, person3);
 		assertTrue(resultSet.contains(personsRepository.findOne(query)));
 		assertEquals(personsRepository.findAll(query).collect(toSet()), resultSet);

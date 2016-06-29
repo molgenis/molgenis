@@ -9,8 +9,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.testng.annotations.Test;
@@ -22,7 +22,8 @@ public class AnnotatorChainingIT
 	{
 		File vcf = new File("src/test/resources/gonl/test_gonl_and_1000g.vcf");
 
-		try (VcfRepository repo = new VcfRepository(vcf, "vcf"))
+		// FIXME replace null contructor arguments with actual arguments
+		try (VcfRepository repo = new VcfRepository(vcf, "vcf", null, null, null))
 		{
 			try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 					"org.molgenis.data.annotation"))
@@ -30,10 +31,10 @@ public class AnnotatorChainingIT
 				Map<String, RepositoryAnnotator> annotators = ctx.getBeansOfType(RepositoryAnnotator.class);
 
 				RepositoryAnnotator gonlAnnotator = annotators.get("gonl");
-				gonlAnnotator.getCmdLineAnnotatorSettingsConfigurer().addSettings("src/test/resources/gonl");
+				//gonlAnnotator.getCmdLineAnnotatorSettingsConfigurer().addSettings("src/test/resources/gonl");
 
 				RepositoryAnnotator tgAnnotator = annotators.get("thousandGenomes");
-				tgAnnotator.getCmdLineAnnotatorSettingsConfigurer().addSettings("src/test/resources/1000g");
+				//tgAnnotator.getCmdLineAnnotatorSettingsConfigurer().addSettings("src/test/resources/1000g");
 
 				Iterator<Entity> it = gonlAnnotator.annotate(repo);
 				assertNotNull(it);

@@ -27,6 +27,8 @@ import freemarker.template.TemplateException;
 @Service
 public class PythonScriptRunner implements ScriptRunner
 {
+	private static final String NAME = "python";
+
 	private static final Charset CHARSET = Charset.forName("utf-8");
 	private final PythonScriptExecutor pythonScriptExecutor;
 	private final FileStore fileStore;
@@ -101,6 +103,12 @@ public class PythonScriptRunner implements ScriptRunner
 		FileCopyUtils.copy(script, new OutputStreamWriter(new FileOutputStream(file), CHARSET));
 
 		pythonScriptExecutor.executeScript(file, outputHandler);
+	}
+
+	@Override
+	public String getName()
+	{
+		return NAME;
 	}
 
 	@Override

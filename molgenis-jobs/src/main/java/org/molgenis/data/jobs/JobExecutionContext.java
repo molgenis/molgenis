@@ -1,5 +1,7 @@
 package org.molgenis.data.jobs;
 
+import org.molgenis.data.jobs.model.JobExecution;
+
 /**
  * Keeps track of the currently executing {@link JobExecution}.
  */

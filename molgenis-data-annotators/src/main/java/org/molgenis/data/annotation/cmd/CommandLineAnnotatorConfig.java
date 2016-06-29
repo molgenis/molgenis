@@ -16,7 +16,7 @@ import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -38,10 +38,10 @@ public class CommandLineAnnotatorConfig
 
 	/**
 	 * Needed to make @Value annotations with property placeholders work!
-	 * 
+	 *
 	 * @see https
-	 *      ://stackoverflow.com/questions/17097521/spring-3-2-value-annotation-with-pure-java-configuration-does-not
-	 *      -work-but-env
+	 * ://stackoverflow.com/questions/17097521/spring-3-2-value-annotation-with-pure-java-configuration-does-not
+	 * -work-but-env
 	 */
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer()
@@ -65,7 +65,7 @@ public class CommandLineAnnotatorConfig
 
 	/**
 	 * Beans that allows referencing Spring managed beans from Java code which is not managed by Spring
-	 * 
+	 *
 	 * @return
 	 */
 	@Bean
@@ -86,67 +86,67 @@ public class CommandLineAnnotatorConfig
 	@Bean
 	public Entity caddAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
 	public Entity snpEffAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
 	public Entity goNLAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
 	public Entity thousendGenomesAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
 	public Entity CGDAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
 	public Entity clinvarAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
 	public Entity dannAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
 	public Entity exacAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
 	public Entity fitConAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
 	public Entity HPOAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
-	
+
 	@Bean
 	public Entity omimAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
@@ -163,17 +163,18 @@ public class CommandLineAnnotatorConfig
 
 	/**
 	 * Helper function to select the annotators that have received a recent brush up for the new way of configuring
-	 * 
+	 *
 	 * @param configuredAnnotators
 	 * @return
 	 */
-	static HashMap<String, RepositoryAnnotator> getFreshAnnotators(Map<String, RepositoryAnnotator> configuredAnnotators)
+	static HashMap<String, RepositoryAnnotator> getFreshAnnotators(
+			Map<String, RepositoryAnnotator> configuredAnnotators)
 	{
 		HashMap<String, RepositoryAnnotator> configuredFreshAnnotators = new HashMap<String, RepositoryAnnotator>();
 		for (String annotator : configuredAnnotators.keySet())
 		{
-			if (configuredAnnotators.get(annotator).getInfo() != null
-					&& configuredAnnotators.get(annotator).getInfo().getStatus().equals(AnnotatorInfo.Status.READY))
+			if (configuredAnnotators.get(annotator).getInfo() != null && configuredAnnotators.get(annotator).getInfo()
+					.getStatus().equals(AnnotatorInfo.Status.READY))
 			{
 				configuredFreshAnnotators.put(annotator, configuredAnnotators.get(annotator));
 			}
@@ -183,7 +184,7 @@ public class CommandLineAnnotatorConfig
 
 	/**
 	 * Helper function to print annotators per type
-	 * 
+	 *
 	 * @param annotators
 	 * @return
 	 */
@@ -199,8 +200,7 @@ public class CommandLineAnnotatorConfig
 			}
 			else
 			{
-				annotatorsPerType.put(type, new ArrayList<String>(Arrays.asList(new String[]
-				{ annotator })));
+				annotatorsPerType.put(type, new ArrayList<String>(Arrays.asList(new String[] { annotator })));
 			}
 
 		}

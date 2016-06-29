@@ -1,6 +1,8 @@
 package org.molgenis.ontology.roc;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
@@ -41,11 +43,11 @@ public class InformationContentService
 				@Override
 				public Long load(String ontologyIri)
 				{
-					Entity ontologyEntity = dataService.findOne(OntologyMetaData.ENTITY_NAME,
+					Entity ontologyEntity = dataService.findOne(ONTOLOGY,
 							new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
 					if (ontologyEntity != null)
 					{
-						return dataService.count(OntologyTermMetaData.ENTITY_NAME,
+						return dataService.count(ONTOLOGY_TERM,
 								new QueryImpl<Entity>().eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
 					}
 					return (long) 0;
@@ -58,7 +60,7 @@ public class InformationContentService
 				public Double load(OntologyWord key) throws ExecutionException
 				{
 					String ontologyIri = key.getOntologyIri();
-					Entity ontologyEntity = dataService.findOne(OntologyMetaData.ENTITY_NAME,
+					Entity ontologyEntity = dataService.findOne(ONTOLOGY,
 							new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
 					if (ontologyEntity != null)
 					{
@@ -68,7 +70,7 @@ public class InformationContentService
 						QueryRule finalQuery = new QueryRule(Arrays.asList(
 								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
 								new QueryRule(Operator.AND), queryRule));
-						long wordCount = dataService.count(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<>(finalQuery));
+						long wordCount = dataService.count(ONTOLOGY_TERM, new QueryImpl<>(finalQuery));
 						Long total = CACHED_TOTAL_WORD_COUNT.get(ontologyIri);
 						BigDecimal idfValue = new BigDecimal(
 								total == null ? 0 : (1 + Math.log((double) total / (wordCount + 1))));

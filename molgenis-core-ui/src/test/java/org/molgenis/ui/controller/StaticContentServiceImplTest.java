@@ -3,6 +3,7 @@ package org.molgenis.ui.controller;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.ui.settings.StaticContentMeta.STATIC_CONTENT;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -14,6 +15,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserDetailsService;
 import org.molgenis.ui.settings.StaticContent;
+import org.molgenis.ui.settings.StaticContentFactory;
+import org.molgenis.ui.settings.StaticContentMeta;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -125,9 +128,21 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 	public static class Config extends WebSecurityConfigurerAdapter
 	{
 		@Bean
+		public StaticContentMeta staticContentMeta()
+		{
+			return null; // new StaticContentMeta(); // FIXME
+		}
+
+		@Bean
+		public StaticContentFactory staticContentFactory()
+		{
+			return new StaticContentFactory(staticContentMeta());
+		}
+
+		@Bean
 		public StaticContentService staticContentService()
 		{
-			return new StaticContentServiceImpl(dataService());
+			return new StaticContentServiceImpl(dataService(), staticContentFactory());
 		}
 
 		@Bean
@@ -136,7 +151,7 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 			DataService dataService = mock(DataService.class);
 			StaticContent staticContent = when(mock(StaticContent.class).getContent())
 					.thenReturn("<p>Welcome to Molgenis!</p>").getMock();
-			when(dataService.findOneById(StaticContent.ENTITY_NAME, "home", StaticContent.class)).thenReturn(staticContent);
+			when(dataService.findOneById(STATIC_CONTENT, "home", StaticContent.class)).thenReturn(staticContent);
 			return dataService;
 		}
 

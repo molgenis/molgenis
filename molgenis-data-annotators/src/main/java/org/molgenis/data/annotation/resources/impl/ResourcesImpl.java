@@ -2,8 +2,6 @@ package org.molgenis.data.annotation.resources.impl;
 
 import static java.util.stream.Collectors.toMap;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -12,9 +10,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
+import org.molgenis.util.ApplicationContextProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -27,22 +27,18 @@ public class ResourcesImpl implements Resources
 
 	private Map<String, Resource> resources = null;
 
-	@Autowired
-	private void setResources(List<Resource> resources)
-	{
-		this.resources = resources.stream().collect(toMap(r -> r.getName(), r -> r));
-	}
-
 	@Override
 	public boolean hasRepository(String entityName)
 	{
-		return dataService.hasRepository(entityName)
-				|| (resources.containsKey(entityName) && resources.get(entityName).isAvailable());
+		getResources();
+		return dataService.hasRepository(entityName) || (resources.containsKey(entityName) && resources.get(entityName)
+				.isAvailable());
 	}
 
 	@Override
 	public Iterable<Entity> findAll(String name, Query<Entity> q)
 	{
+		getResources();
 		if (resources.containsKey(name))
 		{
 			// Don't check isAvailable() yet, it's too costly.
@@ -61,20 +57,23 @@ public class ResourcesImpl implements Resources
 				LOG.warn("Resource {} is unavailable, trying dataService instead.", name);
 			}
 		}
-		return new Iterable<Entity>()
-		{
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				return dataService.findAll(name, q).iterator();
-			}
-		};
+		return () -> dataService.findAll(name, q).iterator();
 	}
 
 	@Override
 	public Set<String> getResourcesNames()
 	{
+		getResources();
 		return resources.keySet();
 	}
 
+	private void getResources()
+	{
+		if (resources == null)
+		{
+			ApplicationContext applicationContext = ApplicationContextProvider.getApplicationContext();
+			this.resources = applicationContext.getBeansOfType(Resource.class).values().stream()
+					.collect(toMap(Resource::getName, r -> r));
+		}
+	}
 }

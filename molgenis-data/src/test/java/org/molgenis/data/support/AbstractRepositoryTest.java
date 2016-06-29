@@ -2,7 +2,6 @@ package org.molgenis.data.support;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
@@ -15,10 +14,11 @@ import java.util.stream.Stream;
 import org.mockito.Matchers;
 import org.mockito.Mockito;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -26,14 +26,14 @@ import org.testng.annotations.Test;
 public class AbstractRepositoryTest
 {
 	private AbstractRepository abstractRepository;
-	private DefaultEntityMetaData entityMetaData;
+	private EntityMetaData entityMetaData;
 
 	@BeforeTest
 	public void beforeTest()
 	{
-		String idAttrName = "id";
-		entityMetaData = new DefaultEntityMetaData("entity");
-		entityMetaData.addAttribute(idAttrName, ROLE_ID);
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		entityMetaData = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		when(entityMetaData.getIdAttribute()).thenReturn(idAttr);
 		abstractRepository = Mockito.spy(new AbstractRepository()
 		{
 
@@ -118,5 +118,5 @@ public class AbstractRepositoryTest
 		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
 	}
 
-	// Note: streamFetch cannot be tested because mocking default methods is not supported by Mockito
+	//	// Note: streamFetch cannot be tested because mocking default methods is not supported by Mockito
 }

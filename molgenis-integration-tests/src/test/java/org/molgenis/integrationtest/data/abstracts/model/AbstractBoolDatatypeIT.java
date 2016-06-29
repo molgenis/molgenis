@@ -1,14 +1,10 @@
-package org.molgenis.integrationtest.data.abstracts.model;
+package org.molgenis.integrationtest.data;
 
-import static org.molgenis.MolgenisFieldTypes.BOOL;
 import static org.testng.Assert.assertEquals;
 
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.integrationtest.data.abstracts.model.AbstractDatatypeIT;
 
 public abstract class AbstractBoolDatatypeIT extends AbstractDatatypeIT
 {
@@ -16,10 +12,10 @@ public abstract class AbstractBoolDatatypeIT extends AbstractDatatypeIT
 	@Override
 	public EntityMetaData createMetaData()
 	{
-		EditableEntityMetaData entityMetaData = new DefaultEntityMetaData("BoolTest");
-		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(BOOL).setNillable(false);
-		entityMetaData.addAttribute("col2").setDataType(BOOL);
-		entityMetaData.addAttribute("col3").setDataType(BOOL);
+		EntityMetaData entityMetaData = null; //new EntityMetaData("BoolTest");
+		//		entityMetaData.addAttribute("col1", ROLE_ID).setDataType(BOOL).setNillable(false); // FIXME
+		//		entityMetaData.addAttribute("col2").setDataType(BOOL);
+		//		entityMetaData.addAttribute("col3").setDataType(BOOL);
 
 		return entityMetaData;
 	}

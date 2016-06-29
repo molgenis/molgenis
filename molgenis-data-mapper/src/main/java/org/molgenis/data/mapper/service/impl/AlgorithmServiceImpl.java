@@ -1,33 +1,24 @@
 package org.molgenis.data.mapper.service.impl;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.algorithmgenerator.bean.GeneratedAlgorithm;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.service.AlgorithmService;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.RhinoConfig;
 import org.molgenis.js.ScriptEvaluator;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -38,9 +29,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 public class AlgorithmServiceImpl implements AlgorithmService
 {
@@ -111,7 +105,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				AlgorithmEvaluation algorithmResult = new AlgorithmEvaluation(entity);
 
 				Object derivedValue;
-				MapEntity mapEntity = createMapEntity(attributeNames, entity); // why is this necessary?
+				Entity mapEntity = createEntity(attributeNames, entity); // why is this necessary?
 				try
 				{
 					Object result = ScriptEvaluator.eval(algorithm, mapEntity, entity.getEntityMetaData());
@@ -127,9 +121,9 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		});
 	}
 
-	private MapEntity createMapEntity(Collection<String> attributeNames, Entity entity)
+	private Entity createEntity(Collection<String> attributeNames, Entity entity)
 	{
-		MapEntity mapEntity = new MapEntity();
+		Entity mapEntity = new DynamicEntity(entity.getEntityMetaData());
 		for (String attributeName : attributeNames)
 		{
 			Object value = entity.get(attributeName);
@@ -151,7 +145,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			return null;
 		}
 
-		MapEntity entity = createMapEntity(getSourceAttributeNames(attributeMapping.getAlgorithm()), sourceEntity);
+		Entity entity = createEntity(getSourceAttributeNames(attributeMapping.getAlgorithm()), sourceEntity);
 		Object value = ScriptEvaluator.eval(algorithm, entity, sourceEntityMetaData);
 		return convert(value, attributeMapping.getTargetAttributeMetaData());
 	}
@@ -164,7 +158,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			return null;
 		}
 		Object convertedValue;
-		FieldTypeEnum targetDataType = attributeMetaData.getDataType().getEnumType();
+		AttributeType targetDataType = attributeMetaData.getDataType();
 		try
 		{
 			switch (targetDataType)

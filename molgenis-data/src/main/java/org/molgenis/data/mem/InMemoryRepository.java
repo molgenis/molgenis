@@ -12,13 +12,13 @@ import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 
 import com.google.common.collect.Sets;
@@ -257,20 +257,6 @@ public class InMemoryRepository implements Repository<Entity>
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void create()
-	{
-		// Repo is not MANAGABLE
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void drop()
-	{
-		// Repo is not MANAGABLE
 		throw new UnsupportedOperationException();
 	}
 

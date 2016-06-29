@@ -1,14 +1,14 @@
 package org.molgenis.data.elasticsearch.request;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Builds a ElasticSearch search request
@@ -24,8 +24,7 @@ public class SearchRequestGenerator
 	public SearchRequestGenerator()
 	{
 		aggregateQueryGenerator = new AggregateQueryGenerator();
-		queryGenerators = Arrays.asList(new QueryGenerator(), new SortGenerator(), new LimitOffsetGenerator(),
-				new SourceFilteringGenerator());
+		queryGenerators = Arrays.asList(new QueryGenerator(), new SortGenerator(), new LimitOffsetGenerator());
 	}
 
 	/**

@@ -8,6 +8,9 @@ import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH;
 import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH_NGRAM;
 import static org.molgenis.data.QueryRule.Operator.IN;
 import static org.molgenis.data.QueryRule.Operator.OR;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.COMBINED_SCORE;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.SCORE;
 
@@ -28,11 +31,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.data.semanticsearch.string.Stemmer;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermSynonymFactory;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.roc.InformationContentService;
 import org.molgenis.ontology.sorta.bean.OntologyTermHitEntity;
@@ -63,25 +66,31 @@ public class SortaServiceImpl implements SortaService
 
 	private final DataService dataService;
 	private final InformationContentService informationContentService;
+	private final OntologyTermHitEntityMetaData ontologyTermHitEntityMetaData;
+	private final OntologyTermSynonymFactory ontologyTermSynonymFactory;
 
 	@Autowired
-	public SortaServiceImpl(DataService dataService, InformationContentService informationContentService)
+	public SortaServiceImpl(DataService dataService, InformationContentService informationContentService,
+			OntologyTermHitEntityMetaData ontologyTermHitEntityMetaData,
+			OntologyTermSynonymFactory ontologyTermSynonymFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.informationContentService = requireNonNull(informationContentService);
+		this.ontologyTermHitEntityMetaData = requireNonNull(ontologyTermHitEntityMetaData);
+		this.ontologyTermSynonymFactory = requireNonNull(ontologyTermSynonymFactory);
 	}
 
 	@Override
 	public Iterable<Entity> getAllOntologyEntities()
 	{
-		Stream<Entity> findAll = dataService.findAll(OntologyMetaData.ENTITY_NAME);
+		Stream<Entity> findAll = dataService.findAll(ONTOLOGY);
 		return findAll.collect(Collectors.toList());
 	}
 
 	@Override
 	public Entity getOntologyEntity(String ontologyIri)
 	{
-		return dataService.findOne(OntologyMetaData.ENTITY_NAME,
+		return dataService.findOne(ONTOLOGY,
 				new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
 	}
 
@@ -91,19 +100,11 @@ public class SortaServiceImpl implements SortaService
 		Entity ontologyEntity = getOntologyEntity(ontologyIri);
 		if (ontologyEntity != null)
 		{
-			return dataService.findOne(OntologyTermMetaData.ENTITY_NAME,
+			return dataService.findOne(ONTOLOGY_TERM,
 					new QueryImpl<Entity>().eq(OntologyTermMetaData.ONTOLOGY_TERM_IRI, ontologyTermIri).and()
 							.eq(OntologyTermMetaData.ONTOLOGY, ontologyEntity));
 		}
 		return null;
-	}
-
-	@Override
-	public Iterable<Entity> findOntologyTermEntities(String ontologyUrl, String queryString)
-	{
-		Entity entity = new MapEntity(
-				Collections.singletonMap(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD, queryString));
-		return findOntologyTermEntities(ontologyUrl, entity);
 	}
 
 	@Override
@@ -189,8 +190,7 @@ public class SortaServiceImpl implements SortaService
 	private void annotationMatchOntologyTerms(Entity inputEntity, Entity ontologyEntity, List<Entity> relevantEntities,
 			List<QueryRule> rulesForOtherFields)
 	{
-		List<Entity> ontologyTermAnnotationEntities = dataService
-				.findAll(OntologyTermDynamicAnnotationMetaData.ENTITY_NAME,
+		List<Entity> ontologyTermAnnotationEntities = dataService.findAll(ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
 						new QueryImpl<Entity>(rulesForOtherFields).pageSize(Integer.MAX_VALUE))
 				.collect(Collectors.toList());
 
@@ -201,7 +201,7 @@ public class SortaServiceImpl implements SortaService
 					new QueryRule(AND), new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION,
 							IN, ontologyTermAnnotationEntities));
 
-			Stream<Entity> ontologyTermEntities = dataService.findAll(OntologyTermMetaData.ENTITY_NAME,
+			Stream<Entity> ontologyTermEntities = dataService.findAll(ONTOLOGY_TERM,
 					new QueryImpl<Entity>(rules).pageSize(Integer.MAX_VALUE));
 
 			List<Entity> relevantOntologyTermEntities = ontologyTermEntities
@@ -223,7 +223,7 @@ public class SortaServiceImpl implements SortaService
 				new QueryRule(AND), disMaxQueryRule);
 
 		Stream<Entity> lexicalMatchedOntologyTermEntities = dataService
-				.findAll(OntologyTermMetaData.ENTITY_NAME, new QueryImpl<Entity>(finalQueryRules).pageSize(pageSize))
+				.findAll(ONTOLOGY_TERM, new QueryImpl<Entity>(finalQueryRules).pageSize(pageSize))
 				.map(ontologyTerm -> addLexicalScoreToMatchedEntity(inputEntity, ontologyTerm, ontologyIri));
 
 		lexicalMatchedOntologyTermEntities.forEach(matchedEntity -> {
@@ -255,8 +255,7 @@ public class SortaServiceImpl implements SortaService
 				}
 			}
 		}
-		OntologyTermHitEntity mapEntity = new OntologyTermHitEntity(ontologyTerm,
-				OntologyTermHitEntityMetaData.INSTANCE);
+		OntologyTermHitEntity mapEntity = new OntologyTermHitEntity(ontologyTerm, ontologyTermHitEntityMetaData);
 		mapEntity.set(SCORE, maxNgramScore);
 		mapEntity.set(COMBINED_SCORE, maxNgramIDFScore);
 		return mapEntity;
@@ -273,8 +272,7 @@ public class SortaServiceImpl implements SortaService
 	 */
 	private Entity calculateNGromOTAnnotations(Entity inputEntity, Entity ontologyTermEntity)
 	{
-		OntologyTermHitEntity mapEntity = new OntologyTermHitEntity(ontologyTermEntity,
-				OntologyTermHitEntityMetaData.INSTANCE);
+		OntologyTermHitEntity mapEntity = new OntologyTermHitEntity(ontologyTermEntity, ontologyTermHitEntityMetaData);
 		for (Entity annotationEntity : ontologyTermEntity
 				.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION))
 		{
@@ -286,8 +284,8 @@ public class SortaServiceImpl implements SortaService
 						&& StringUtils.equalsIgnoreCase(attributeName, annotationName)
 						&& StringUtils.equalsIgnoreCase(inputEntity.getString(attributeName), annotationValue))
 				{
-					mapEntity.set(SCORE, 100);
-					mapEntity.set(COMBINED_SCORE, 100);
+					mapEntity.set(SCORE, 100d);
+					mapEntity.set(COMBINED_SCORE, 100d);
 					return mapEntity;
 				}
 			}
@@ -310,30 +308,31 @@ public class SortaServiceImpl implements SortaService
 			String cleanedQueryString = removeIllegalCharWithSingleWhiteSpace(queryString);
 
 			// Calculate the Ngram silmiarity score for all the synonyms and sort them in descending order
-			List<MapEntity> synonymEntities = FluentIterable.from(entities).transform(new Function<Entity, MapEntity>()
+			List<Entity> synonymEntities = FluentIterable.from(entities).transform(new Function<Entity, Entity>()
 			{
-				public MapEntity apply(Entity ontologyTermSynonymEntity)
+				public Entity apply(Entity ontologyTermSynonymEntity)
 				{
-					MapEntity mapEntity = new MapEntity(ontologyTermSynonymEntity);
-					String ontologyTermSynonym = removeIllegalCharWithSingleWhiteSpace(
-							ontologyTermSynonymEntity.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM));
+					Entity mapEntity = ontologyTermSynonymFactory.create();
+					mapEntity.set(ontologyTermSynonymEntity);
+					String ontologyTermSynonym = removeIllegalCharWithSingleWhiteSpace(ontologyTermSynonymEntity
+							.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR));
 					mapEntity.set(SCORE,
 							NGramDistanceAlgorithm.stringMatching(cleanedQueryString, ontologyTermSynonym));
 					return mapEntity;
 				}
 
-			}).toSortedList(new Comparator<MapEntity>()
+			}).toSortedList(new Comparator<Entity>()
 			{
-				public int compare(MapEntity entity_1, MapEntity entity_2)
+				public int compare(Entity entity_1, Entity entity_2)
 				{
 					return entity_2.getDouble(SCORE).compareTo(entity_1.getDouble(SCORE));
 				}
 			});
 
-			MapEntity firstMatchedSynonymEntity = Iterables.getFirst(synonymEntities, new MapEntity());
+			Entity firstMatchedSynonymEntity = Iterables.getFirst(synonymEntities, ontologyTermSynonymFactory.create());
 			double topNgramScore = firstMatchedSynonymEntity.getDouble(SCORE);
 			String topMatchedSynonym = firstMatchedSynonymEntity
-					.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM);
+					.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR);
 
 			// the algorithm to combine synonyms to re-calculate the similarity scores to deal with the case where the
 			// input query string contains multiple words from different synonyms of the same ontology term. E.g.
@@ -353,7 +352,7 @@ public class SortaServiceImpl implements SortaService
 			for (Entity nextMatchedSynonymEntity : Iterables.skip(synonymEntities, 1))
 			{
 				String nextMatchedSynonym = nextMatchedSynonymEntity
-						.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM);
+						.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR);
 
 				StringBuilder tempCombinedSynonym = new StringBuilder();
 				tempCombinedSynonym.append(topMatchedSynonym).append(SINGLE_WHITESPACE).append(nextMatchedSynonym);
@@ -368,7 +367,7 @@ public class SortaServiceImpl implements SortaService
 				}
 			}
 
-			firstMatchedSynonymEntity.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM, topMatchedSynonym);
+			firstMatchedSynonymEntity.set(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR, topMatchedSynonym);
 			firstMatchedSynonymEntity.set(SCORE, topNgramScore);
 			firstMatchedSynonymEntity.set(COMBINED_SCORE, topNgramScore);
 
@@ -433,12 +432,12 @@ public class SortaServiceImpl implements SortaService
 		return stringBuilder.toString().trim();
 	}
 
-	public String removeIllegalCharWithSingleWhiteSpace(String string)
+	private static String removeIllegalCharWithSingleWhiteSpace(String string)
 	{
 		return string.replaceAll(ILLEGAL_CHARACTERS_PATTERN, SINGLE_WHITESPACE);
 	}
 
-	public String removeIllegalCharWithEmptyString(String string)
+	private static String removeIllegalCharWithEmptyString(String string)
 	{
 		return string.replaceAll(ILLEGAL_CHARACTERS_PATTERN, StringUtils.EMPTY);
 	}

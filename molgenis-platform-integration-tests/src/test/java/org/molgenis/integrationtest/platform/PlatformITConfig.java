@@ -1,33 +1,41 @@
 package org.molgenis.integrationtest.platform;
 
-import com.google.common.io.Files;
-import com.mchange.v2.c3p0.ComboPooledDataSource;
+import static org.mockito.Mockito.mock;
+
+import java.io.IOException;
+import java.sql.SQLException;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.sql.DataSource;
+
 import org.molgenis.DatabaseConfig;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.IdGenerator;
+import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.RepositoryDecoratorFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
-import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.PostgreSqlEntityFactory;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.OwnedEntityMetaData;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
-import org.molgenis.file.FileMetaMetaData;
+import org.molgenis.file.model.FileMetaMetaData;
 import org.molgenis.integrationtest.data.TestAppSettings;
 import org.molgenis.js.RhinoConfig;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
+import org.molgenis.security.owned.OwnedEntityMetaData;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.MolgenisUserServiceImpl;
-import org.molgenis.ui.MolgenisRepositoryDecoratorFactory;
 import org.molgenis.ui.RepositoryDecoratorRegistry;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.GsonConfig;
@@ -46,24 +54,17 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.sql.DataSource;
-
-import java.io.IOException;
-import java.sql.SQLException;
-
-import static org.mockito.Mockito.mock;
+import com.google.common.io.Files;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
 
 @Configuration
 @EnableTransactionManagement(proxyTargetClass = true)
 @ComponentScan({ "org.molgenis.data.meta", "org.molgenis.data.reindex", "org.molgenis.data.elasticsearch.index",
 		"org.molgenis.data.jobs", "org.molgenis.data.elasticsearch.reindex", "org.molgenis.auth",
-		"org.molgenis.integrationtest.data.harness" })
+		"org.molgenis.test.data" })
 @Import({ DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class, ElasticsearchEntityFactory.class,
-		ElasticsearchRepositoryCollection.class, PostgreSqlConfiguration.class, RunAsSystemBeanPostProcessor.class,
+		PostgreSqlConfiguration.class, RunAsSystemBeanPostProcessor.class,
 		FileMetaMetaData.class, OwnedEntityMetaData.class, MolgenisUserServiceImpl.class, RhinoConfig.class,
 		UuidGenerator.class, ExpressionValidator.class, LanguageService.class, PostgreSqlEntityFactory.class,
 		PostgreSqlDatabase.class })
@@ -85,7 +86,7 @@ public class PlatformITConfig
 	private MetaDataService metaDataService;
 	@Autowired
 	@Qualifier("PostgreSqlRepositoryCollection")
-	ManageableRepositoryCollection backend;
+	RepositoryCollection backend;
 	@Autowired
 	private PostgreSqlDatabase postgresqlDatabase;
 
@@ -123,33 +124,34 @@ public class PlatformITConfig
 	@PostConstruct
 	public void init()
 	{
-		postgresqlDatabase.dropAndCreateDatabase();
-		dataService.setMeta(metaDataService());
-		metaDataService.setDefaultBackend(backend);
+		// FIXME
+		//		postgresqlDatabase.dropAndCreateDatabase();
+		//		dataService.setMeta(metaDataService());
+		//		metaDataService.setDefaultBackend(backend);
 	}
 
 	@Bean
 	public MetaDataService metaDataService()
 	{
-		return new MetaDataServiceImpl(dataService());
+		return null; // FIXME new MetaDataServiceImpl(dataService());
 	}
 
 	@Bean
 	public DataServiceImpl dataService()
 	{
-		return new DataServiceImpl(repositoryDecoratorFactory());
+		return null; // FIXME new DataServiceImpl(repositoryDecoratorFactory());
 	}
 
 	@Bean
 	public EntityManager entityManager()
 	{
-		return new EntityManagerImpl(dataService());
+		return null; // FIXME return new EntityManagerImpl(dataService());
 	}
 
 	@Bean
 	public PermissionSystemService permissionSystemService()
 	{
-		return new PermissionSystemService(dataService());
+		return null; // FIXME return new PermissionSystemService(dataService());
 	}
 
 	@Bean
@@ -173,9 +175,10 @@ public class PlatformITConfig
 	@Bean
 	public RepositoryDecoratorFactory repositoryDecoratorFactory()
 	{
-		return repository -> new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(),
-				idGenerator, appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry(),
-				reindexActionRegisterService, searchService).createDecoratedRepository(repository);
+		return null; // FIXME
+		//		return repository -> new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(),
+		//				idGenerator, appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry(),
+		//				reindexActionRegisterService, searchService).createDecoratedRepository(repository);
 	}
 
 	@Bean

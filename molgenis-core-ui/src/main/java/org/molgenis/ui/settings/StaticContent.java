@@ -1,34 +1,38 @@
 package org.molgenis.ui.settings;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultEntity;
+import static org.molgenis.ui.settings.StaticContentMeta.CONTENT;
+import static org.molgenis.ui.settings.StaticContentMeta.KEY;
 
-public class StaticContent extends DefaultEntity
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.StaticEntity;
+
+public class StaticContent extends StaticEntity
 {
-	private static final long serialVersionUID = 1L;
-
-	public static final String ENTITY_NAME = "StaticContent";
-
-	public static final EntityMetaData META_DATA = new StaticContentMeta();
-
-	static final String KEY = "key_";
-	static final String CONTENT = "content";
-
-	public StaticContent(DataService dataService)
+	public StaticContent(Entity entity)
 	{
-		super(META_DATA, dataService);
+		super(entity);
 	}
 
-	public StaticContent(String key, DataService dataService)
+	public StaticContent(EntityMetaData entityMeta)
 	{
-		super(META_DATA, dataService);
-		set(KEY, key);
+		super(entityMeta);
+	}
+
+	public StaticContent(String key, EntityMetaData entityMeta)
+	{
+		super(entityMeta);
+		setKey(key);
 	}
 
 	public String getKey()
 	{
 		return getString(KEY);
+	}
+
+	private void setKey(String key)
+	{
+		set(KEY, key);
 	}
 
 	public String getContent()

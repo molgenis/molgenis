@@ -1,8 +1,8 @@
 package org.molgenis.ui.jobs;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.jobs.JobExecution.SUBMISSION_DATE;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.SUBMISSION_DATE;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.USER;
 import static org.molgenis.ui.jobs.JobsController.URI;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
@@ -17,8 +17,7 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.jobs.JobExecution;
-import org.molgenis.data.jobs.JobExecutionMetaData;
+import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,13 +72,13 @@ public class JobsController extends MolgenisPluginController
 		Date weekAgo = cal.getTime();
 		MolgenisUser currentUser = userAccountService.getCurrentUser();
 
-		stream(dataService.getMeta().getEntityMetaDatas().spliterator(), false)
+		dataService.getMeta().getEntityMetaDatas()
 				.filter(e -> e.getExtends() != null && e.getExtends().getName().equals(jobMetaDataMetaData.getName()))
 				.forEach(e -> {
-					Query<Entity> q = dataService.query(e.getName()).ge(JobExecution.SUBMISSION_DATE, weekAgo);
+					Query<Entity> q = dataService.query(e.getName()).ge(JobExecutionMetaData.SUBMISSION_DATE, weekAgo);
 					if (!currentUser.isSuperuser())
 					{
-						q.and().eq(JobExecution.USER, currentUser.getUsername());
+						q.and().eq(USER, currentUser.getUsername());
 					}
 					dataService.findAll(e.getName(), q).forEach(jobs::add);
 				});

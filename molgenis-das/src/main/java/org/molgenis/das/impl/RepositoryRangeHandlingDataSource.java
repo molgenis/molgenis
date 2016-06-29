@@ -1,18 +1,15 @@
 package org.molgenis.das.impl;
 
+import static com.google.common.collect.Iterables.toArray;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import javax.servlet.ServletContext;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.das.RangeHandlingDataSource;
 import org.molgenis.data.DataService;
@@ -127,8 +124,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 				break;
 			}
 			// no end position? assume mutation of 1 position, so stop == start
-			Iterable<String> attributes = entity.getAttributeNames();
-
+			List<String> attributes = Lists.newArrayList(entity.getAttributeNames().iterator());
 			valueStop = Iterables.contains(attributes, stopAttribute) ? entity.getInt(stopAttribute) : valueStart;
 			valueDescription = Iterables.contains(attributes, descriptionAttribute)
 					? entity.getString(descriptionAttribute) : "";
@@ -176,8 +172,10 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 					++score;
 				}
 
+				Object labelValue = entity.getLabelValue();
 				feature = createDasFeature(valueStart, valueStop, entity.getIdValue().toString(),
-						entity.getLabelValue(), valueDescription, valueLink, type, method, dataSet, valuePatient,
+						labelValue != null ? labelValue.toString() : null, valueDescription, valueLink, type, method,
+						dataSet, valuePatient,
 						notes);
 				features.add(feature);
 			}

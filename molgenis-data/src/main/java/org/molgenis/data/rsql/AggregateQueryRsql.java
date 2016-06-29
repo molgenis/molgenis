@@ -4,8 +4,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import cz.jirutka.rsql.parser.ast.Node;
 

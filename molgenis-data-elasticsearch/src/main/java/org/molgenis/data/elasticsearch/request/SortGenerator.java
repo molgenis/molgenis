@@ -4,15 +4,15 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Adds Sort to the SearchRequestBuilder object.
@@ -50,7 +50,7 @@ public class SortGenerator implements QueryPartGenerator
 	private String getSortField(AttributeMetaData attr)
 	{
 		String sortField;
-		FieldTypeEnum dataType = attr.getDataType().getEnumType();
+		AttributeType dataType = attr.getDataType();
 		switch (dataType)
 		{
 			case BOOL:

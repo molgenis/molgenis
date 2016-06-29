@@ -17,12 +17,13 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 
-import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
+import com.google.common.collect.Lists;
 
 public class QueryUtilsTest
 {
@@ -78,7 +79,7 @@ public class QueryUtilsTest
 	@Test
 	public void emptyQuery()
 	{
-		assertFalse(QueryUtils.containsAnyOperator(new QueryImpl<Entity>(), EnumSet.allOf(Operator.class)));
+		assertFalse(QueryUtils.containsAnyOperator(new QueryImpl<>(), EnumSet.allOf(QueryRule.Operator.class)));
 	}
 
 	@Test
@@ -96,8 +97,7 @@ public class QueryUtilsTest
 	{
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 
-		@SuppressWarnings("unchecked")
-		Query<Entity> q = mock(Query.class);
+		@SuppressWarnings("unchecked") Query<Entity> q = mock(Query.class);
 		QueryRule qRule1 = mock(QueryRule.class);
 		QueryRule qRule2 = mock(QueryRule.class);
 
@@ -125,8 +125,7 @@ public class QueryUtilsTest
 	{
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 
-		@SuppressWarnings("unchecked")
-		Query<Entity> q = mock(Query.class);
+		@SuppressWarnings("unchecked") Query<Entity> q = mock(Query.class);
 		QueryRule qRule1 = mock(QueryRule.class);
 		QueryRule qRule2 = mock(QueryRule.class);
 
@@ -154,8 +153,7 @@ public class QueryUtilsTest
 	{
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 
-		@SuppressWarnings("unchecked")
-		Query<Entity> q = mock(Query.class);
+		@SuppressWarnings("unchecked") Query<Entity> q = mock(Query.class);
 		QueryRule qRule1 = mock(QueryRule.class);
 		QueryRule qRule2 = mock(QueryRule.class);
 		QueryRule nestedRule1 = mock(QueryRule.class);

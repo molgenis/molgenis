@@ -1,11 +1,11 @@
 package org.molgenis.data.elasticsearch.index;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.io.IOException;
 
@@ -21,25 +21,25 @@ public class MappingsBuilder
 	public static final String FIELD_NOT_ANALYZED = "raw";
 	public static final String FIELD_NGRAM_ANALYZED = "ngram";
 
-	private MappingsBuilder(){}
+	private MappingsBuilder()
+	{
+	}
 
 	/**
 	 * Creates a Elasticsearch mapping for the given entity meta data
 	 *
 	 * @param jsonBuilder {@link XContentBuilder} to write the mapping to
 	 * @param entityMetaData {@link EntityMetaData} for the entity to map
-	 * @param storeSource
-	 *            whether or not documents are stored in the index
 	 * @return
 	 * @throws IOException
 	 */
-	public static void buildMapping(XContentBuilder jsonBuilder, EntityMetaData entityMetaData, boolean storeSource, boolean enableNorms,
+	public static void buildMapping(XContentBuilder jsonBuilder, EntityMetaData entityMetaData, boolean enableNorms,
 			boolean createAllIndex) throws IOException
 	{
 		String documentType = MapperTypeSanitizer.sanitizeMapperType(entityMetaData.getName());
 		jsonBuilder.startObject().startObject(documentType);
 
-		jsonBuilder.startObject("_source").field("enabled", storeSource).endObject();
+		jsonBuilder.startObject("_source").field("enabled", false).endObject();
 
 		jsonBuilder.startObject("properties");
 
@@ -70,7 +70,7 @@ public class MappingsBuilder
 			boolean createAllIndex, boolean nestRefs, boolean enableNgramAnalyzer, XContentBuilder jsonBuilder)
 					throws IOException
 	{
-		FieldTypeEnum dataType = attr.getDataType().getEnumType();
+		AttributeType dataType = attr.getDataType();
 		switch (dataType)
 		{
 			case BOOL:

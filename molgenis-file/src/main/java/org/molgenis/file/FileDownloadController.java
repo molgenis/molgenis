@@ -1,6 +1,7 @@
 package org.molgenis.file;
 
 import static org.molgenis.file.FileDownloadController.URI;
+import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 import java.io.File;
@@ -11,6 +12,7 @@ import java.io.InputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.molgenis.data.DataService;
+import org.molgenis.file.model.FileMeta;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -37,7 +39,7 @@ public class FileDownloadController
 	@RequestMapping(value = "/{id:.+}", method = GET)
 	public void getFile(@PathVariable("id") String id, HttpServletResponse response) throws IOException
 	{
-		FileMeta fileMeta = dataService.findOneById(FileMeta.ENTITY_NAME, id, FileMeta.class);
+		FileMeta fileMeta = dataService.findOneById(FILE_META, id, FileMeta.class);
 		if (fileMeta == null)
 		{
 			response.setStatus(HttpStatus.NOT_FOUND.value());

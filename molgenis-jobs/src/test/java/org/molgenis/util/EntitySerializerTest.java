@@ -5,26 +5,31 @@ import static org.testng.Assert.assertEquals;
 import java.text.ParseException;
 import java.util.Date;
 
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.DataService;
-import org.molgenis.data.jobs.JobExecution;
-import org.molgenis.data.support.DataServiceImpl;
+import org.molgenis.data.jobs.model.JobExecution;
+import org.molgenis.data.jobs.model.JobExecutionMetaData;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-public class EntitySerializerTest
+@ContextConfiguration(classes = { EntitySerializerTest.Config.class })
+public class EntitySerializerTest extends AbstractMolgenisSpringTest
 {
-	private DataService dataService;
+	@Autowired
+	private JobExecutionMetaData jobExecutionMeta;
+
 	private JobExecution jobExecution;
 
 	@BeforeClass
 	public void beforeClass()
 	{
-		dataService = new DataServiceImpl();
-		jobExecution = new JobExecution(dataService);
+		jobExecution = new JobExecution(jobExecutionMeta);
 	}
 
 	@Test
@@ -32,14 +37,11 @@ public class EntitySerializerTest
 	{
 		Date date = MolgenisDateFormat.getDateTimeFormat().parse("2016-02-19T13:33:09+0100");
 
-		MolgenisUser me = new MolgenisUser();
 		jobExecution.setProgressMessage(
 				"Annotating with SnpEff, Exac, CADD, Clinvar, Dann, CGD, Fitcon, GoNL, HPO, and many more.... %p");
 		jobExecution.setEndDate(date);
 		jobExecution.setIdentifier("AAAABDASDFR");
-		me.setUsername("fdlk");
-		me.setId("AAAAA");
-		jobExecution.setUser(me);
+		jobExecution.setUser("fdlk");
 		jobExecution.setStatus(JobExecution.Status.PENDING);
 		jobExecution.setType("AnnotatorJob");
 		jobExecution.setSubmissionDate(date);
@@ -48,9 +50,15 @@ public class EntitySerializerTest
 		jobExecution.setProgressMax(1032);
 
 		Gson gson = new GsonBuilder().registerTypeAdapter(JobExecution.class, new EntitySerializer())
-				.setDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME)
-				.registerTypeAdapter(MolgenisUser.class, new EntitySerializer()).create();
+				.setDateFormat(MolgenisDateFormat.DATEFORMAT_DATETIME).create();
 		assertEquals(gson.toJson(jobExecution),
-				"{\"__entityName\":\"JobExecution\",\"identifier\":\"AAAABDASDFR\",\"user\":\"fdlk\",\"status\":\"PENDING\",\"type\":\"AnnotatorJob\",\"submissionDate\":\"2016-02-19T13:33:09+0100\",\"startDate\":\"2016-02-19T13:33:09+0100\",\"endDate\":\"2016-02-19T13:33:09+0100\",\"progressInt\":50,\"progressMax\":1032,\"progressMessage\":\"Annotating with SnpEff, Exac, CADD, Clinvar, Dann, CGD, Fitcon, GoNL, HPO, and many more.... %p\"}");
+				"{\"__entityName\":\"sys_JobExecution\",\"identifier\":\"AAAABDASDFR\",\"user\":\"fdlk\",\"status\":\"PENDING\",\"type\":\"AnnotatorJob\",\"submissionDate\":\"2016-02-19T13:33:09+0100\",\"startDate\":\"2016-02-19T13:33:09+0100\",\"endDate\":\"2016-02-19T13:33:09+0100\",\"progressInt\":50,\"progressMax\":1032,\"progressMessage\":\"Annotating with SnpEff, Exac, CADD, Clinvar, Dann, CGD, Fitcon, GoNL, HPO, and many more.... %p\"}");
+	}
+
+	@Configuration
+	@ComponentScan({ "org.molgenis.data.jobs.model" })
+	public static class Config
+	{
+
 	}
 }

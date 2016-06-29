@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -7,26 +9,17 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
 
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.molgenis.MolgenisFieldTypes;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.NonDecoratingRepositoryDecoratorFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.security.core.Authentication;
@@ -34,23 +27,23 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class DataServiceImplTest
 {
-	private final List<String> entityNames = Arrays.asList("Entity1", "Entity2", "Entity3");
+	private final List<String> entityNames = asList("Entity1", "Entity2", "Entity3");
 	private Repository<Entity> repo1;
 	private Repository<Entity> repo2;
 	private Repository<Entity> repoToRemove;
 	private DataServiceImpl dataService;
+	private MetaDataService metaDataService;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		Collection<? extends GrantedAuthority> authorities = Arrays
-				.<SimpleGrantedAuthority> asList(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
+		Collection<? extends GrantedAuthority> authorities = singletonList(
+				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
 
 		Authentication authentication = mock(Authentication.class);
 
@@ -63,20 +56,32 @@ public class DataServiceImplTest
 
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		dataService = new DataServiceImpl(new NonDecoratingRepositoryDecoratorFactory());
-
-		repo1 = mock(Repository.class);
-		when(repo1.getName()).thenReturn("Entity1");
-		dataService.addRepository(repo1);
+		dataService = new DataServiceImpl();
+		repo1 = when(mock(Repository.class).getName()).thenReturn("Entity1").getMock();
 
 		repo2 = mock(Repository.class);
-		when(repo2.getName()).thenReturn("Entity2");
-		dataService.addRepository(repo2);
+		repo2 = when(mock(Repository.class).getName()).thenReturn("Entity2").getMock();
 
 		repoToRemove = mock(Repository.class);
-		when(repoToRemove.getName()).thenReturn("Entity3");
-		dataService.addRepository(repoToRemove);
+		repoToRemove = when(mock(Repository.class).getName()).thenReturn("Entity3").getMock();
 
+		metaDataService = mock(MetaDataService.class);
+		when(metaDataService.getRepository("Entity1")).thenReturn(repo1);
+		when(metaDataService.getRepository("Entity2")).thenReturn(repo2);
+		when(metaDataService.getRepository("Entity3")).thenReturn(repoToRemove);
+		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn("Entity1").getMock();
+		EntityMetaData entityMeta2 = when(mock(EntityMetaData.class).getName()).thenReturn("Entity2").getMock();
+		EntityMetaData entityMeta3 = when(mock(EntityMetaData.class).getName()).thenReturn("Entity3").getMock();
+
+		when(metaDataService.getEntityMetaDatas()).thenAnswer(new Answer<Stream<EntityMetaData>>()
+		{
+			@Override
+			public Stream<EntityMetaData> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return asList(entityMeta1, entityMeta2, entityMeta3).stream();
+			}
+		});
+		dataService.setMetaDataService(metaDataService);
 	}
 
 	@Test
@@ -106,15 +111,7 @@ public class DataServiceImplTest
 	@Test
 	public void getEntityNames()
 	{
-		assertNotNull(dataService.getEntityNames());
-		Iterator<String> it = dataService.getEntityNames().iterator();
-		assertTrue(it.hasNext());
-		assertTrue(it.next().equalsIgnoreCase(entityNames.get(0)));
-		assertTrue(it.hasNext());
-		assertTrue(it.next().equalsIgnoreCase(entityNames.get(1)));
-		assertTrue(it.hasNext());
-		assertTrue(it.next().equalsIgnoreCase(entityNames.get(2)));
-		assertFalse(it.hasNext());
+		assertEquals(dataService.getEntityNames().collect(toList()), asList("Entity1", "Entity2", "Entity3"));
 	}
 
 	@Test
@@ -125,31 +122,9 @@ public class DataServiceImplTest
 	}
 
 	@Test
-	public void removeRepositoryByEntityName()
-	{
-		assertEquals(dataService.getRepository("Entity3"), repoToRemove);
-		dataService.removeRepository("Entity3");
-	}
-
-	@Test(expectedExceptions = UnknownEntityException.class)
-	public void removeRepositoryByEntityNameUnknownEntityException()
-	{
-		assertEquals(dataService.getRepository("Entity3"), repoToRemove);
-		dataService.removeRepository("Entity3");
-		dataService.getRepository("Entity3");
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void removeRepositoryByEntityNameMolgenisDataException()
-	{
-		assertEquals(dataService.getRepository("Entity3"), repoToRemove);
-		dataService.removeRepository("Entity4");
-	}
-
-	@Test
 	public void findOneStringObjectFetch()
 	{
-		Object id = Integer.valueOf(0);
+		Object id = 0;
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
 		when(repo1.findOneById(id, fetch)).thenReturn(entity);
@@ -160,7 +135,7 @@ public class DataServiceImplTest
 	@Test
 	public void findOneStringObjectFetchEntityNull()
 	{
-		Object id = Integer.valueOf(0);
+		Object id = 0;
 		Fetch fetch = new Fetch();
 		when(repo1.findOneById(id, fetch)).thenReturn(null);
 		assertNull(dataService.findOneById("Entity1", id, fetch));
@@ -170,7 +145,7 @@ public class DataServiceImplTest
 	@Test
 	public void findOneStringObjectFetchClass()
 	{
-		Object id = Integer.valueOf(0);
+		Object id = 0;
 		Fetch fetch = new Fetch();
 		Class<Entity> clazz = Entity.class;
 		Entity entity = mock(Entity.class);
@@ -183,7 +158,7 @@ public class DataServiceImplTest
 	@Test
 	public void findOneStringObjectFetchClassEntityNull()
 	{
-		Object id = Integer.valueOf(0);
+		Object id = 0;
 		Fetch fetch = new Fetch();
 		Class<Entity> clazz = Entity.class;
 		when(repo1.findOneById(id, fetch)).thenReturn(null);
@@ -199,7 +174,7 @@ public class DataServiceImplTest
 		Entity entity0 = mock(Entity.class);
 		when(repo1.findAll(ids)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = dataService.findAll("Entity1", ids);
-		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+		assertEquals(entities.collect(toList()), singletonList(entity0));
 	}
 
 	@Test
@@ -211,7 +186,7 @@ public class DataServiceImplTest
 		Class<Entity> clazz = Entity.class;
 		when(repo1.findAll(ids)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = dataService.findAll("Entity1", ids, clazz);
-		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+		assertEquals(entities.collect(toList()), singletonList(entity0));
 	}
 
 	@Test
@@ -223,7 +198,7 @@ public class DataServiceImplTest
 		Fetch fetch = new Fetch();
 		when(repo1.findAll(ids, fetch)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = dataService.findAll("Entity1", ids, fetch);
-		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+		assertEquals(entities.collect(toList()), singletonList(entity0));
 	}
 
 	@Test
@@ -236,16 +211,16 @@ public class DataServiceImplTest
 		Fetch fetch = new Fetch();
 		when(repo1.findAll(ids, fetch)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = dataService.findAll("Entity1", ids, fetch, clazz);
-		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+		assertEquals(entities.collect(toList()), singletonList(entity0));
 	}
 
 	@Test
 	public void findAllStreamString()
 	{
 		Entity entity0 = mock(Entity.class);
-		when(repo1.findAll(new QueryImpl<Entity>())).thenReturn(Stream.of(entity0));
+		when(repo1.findAll(new QueryImpl<>())).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = dataService.findAll("Entity1");
-		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+		assertEquals(entities.collect(toList()), singletonList(entity0));
 	}
 
 	@Test
@@ -253,9 +228,9 @@ public class DataServiceImplTest
 	{
 		Class<Entity> clazz = Entity.class;
 		Entity entity0 = mock(Entity.class);
-		when(repo1.findAll(new QueryImpl<Entity>())).thenReturn(Stream.of(entity0));
+		when(repo1.findAll(new QueryImpl<>())).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = dataService.findAll("Entity1", clazz);
-		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+		assertEquals(entities.collect(toList()), singletonList(entity0));
 	}
 
 	@Test
@@ -265,7 +240,7 @@ public class DataServiceImplTest
 		Query<Entity> query = mock(Query.class);
 		when(repo1.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = dataService.findAll("Entity1", query);
-		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+		assertEquals(entities.collect(toList()), singletonList(entity0));
 	}
 
 	@Test
@@ -276,84 +251,6 @@ public class DataServiceImplTest
 		Query<Entity> query = mock(Query.class);
 		when(repo1.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = dataService.findAll("Entity1", query, clazz);
-		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
-	}
-
-	@Test
-	public void copyRepository()
-	{
-		// setup everything
-		Query<Entity> query = new QueryImpl<Entity>();
-		AttributeMetaData attr1 = new DefaultAttributeMetaData("attr1", MolgenisFieldTypes.FieldTypeEnum.STRING);
-		AttributeMetaData attr2 = new DefaultAttributeMetaData("attr2", MolgenisFieldTypes.FieldTypeEnum.STRING);
-
-		Entity entity0 = mock(Entity.class);
-		Entity entity1 = mock(Entity.class);
-		EntityMetaData emd = mock(EntityMetaData.class);
-		MetaDataService metaDataService = mock(MetaDataService.class);
-
-		when(repo1.findAll(query)).thenReturn(Stream.of(entity0, entity1));
-		when(repo1.getEntityMetaData()).thenReturn(emd);
-		when(emd.getOwnAttributes()).thenReturn(Arrays.asList(attr1, attr2));
-		when(emd.getOwnLookupAttributes()).thenReturn(Arrays.asList(attr1, attr2));
-
-		dataService.setMeta(metaDataService);
-
-		EntityMetaData emd2 = new DefaultEntityMetaData("Entity2", emd);
-		when(repo2.getEntityMetaData()).thenReturn(emd2);
-		when(metaDataService.addEntityMeta(emd2)).thenReturn(repo2);
-
-		// The actual method call
-		Repository<Entity> copy = dataService.copyRepository(repo1, "Entity2", "testCopyLabel");
-
-		// The test
-		verify(metaDataService).addEntityMeta(copy.getEntityMetaData());
-		@SuppressWarnings(
-		{ "unchecked", "rawtypes" })
-		ArgumentCaptor<Stream<Entity>> argument = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(repo2, times(1)).add(argument.capture());
-		List<Entity> list = argument.getAllValues().get(0).collect(toList());
-		assertEquals(list, Arrays.asList(entity0, entity1));
-	}
-
-	@Test
-	public void copyRepositoryException()
-	{
-		// setup everything
-		Query<Entity> query = new QueryImpl<Entity>();
-		AttributeMetaData attr1 = new DefaultAttributeMetaData("attr1", MolgenisFieldTypes.FieldTypeEnum.STRING);
-		AttributeMetaData attr2 = new DefaultAttributeMetaData("attr2", MolgenisFieldTypes.FieldTypeEnum.STRING);
-
-		Entity entity0 = mock(Entity.class);
-		Entity entity1 = mock(Entity.class);
-		EntityMetaData emd = mock(EntityMetaData.class);
-		MetaDataService metaDataService = mock(MetaDataService.class);
-
-		when(repo1.findAll(query)).thenReturn(Stream.of(entity0, entity1));
-		when(repo1.getEntityMetaData()).thenReturn(emd);
-		when(emd.getOwnAttributes()).thenReturn(Arrays.asList(attr1, attr2));
-		when(emd.getOwnLookupAttributes()).thenReturn(Arrays.asList(attr1, attr2));
-
-		dataService.setMeta(metaDataService);
-
-		EntityMetaData emd2 = new DefaultEntityMetaData("Entity2", emd);
-		when(repo2.getEntityMetaData()).thenReturn(emd2);
-		when(metaDataService.addEntityMeta(emd2)).thenReturn(repo2);
-
-		Mockito.doThrow(new MolgenisDataException("Stuk")).when(repo2).add(Mockito.any(Stream.class));
-
-		// The actual method call
-		try
-		{
-			dataService.copyRepository(repo1, "Entity2", "testCopyLabel");
-			Assert.fail("Should rethrow exception thrown when adding entities to copied repository");
-		}
-		catch (MolgenisDataException expected)
-		{
-			// verify that the copy got created
-			verify(metaDataService).addEntityMeta(emd2);
-			// verity that the copy got deleted again
-			verify(metaDataService).deleteEntityMeta("Entity2");
-		}
+		assertEquals(entities.collect(toList()), singletonList(entity0));
 	}
 }

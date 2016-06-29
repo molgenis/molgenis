@@ -3,12 +3,12 @@ package org.molgenis.data.semanticsearch.service.impl;
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -16,44 +16,48 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Stream;
 
-import org.elasticsearch.common.collect.Sets;
 import org.mockito.Mockito;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
-import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.semanticsearch.string.Stemmer;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 
 @ContextConfiguration(classes = SemanticSearchServiceImplTest.Config.class)
-public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTests
+public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaDataFactory;
+
 	@Autowired
 	private OntologyService ontologyService;
 
@@ -78,21 +82,20 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 
 	private List<OntologyTerm> ontologyTerms;
 
-	private DefaultAttributeMetaData attribute;
+	private AttributeMetaData attribute;
 
-	@BeforeTest
+	@BeforeMethod
 	public void beforeTest()
 	{
 		ontologies = asList("1", "2");
-		standingHeight = OntologyTerm.create("http://onto/height", "Standing height",
-				Arrays.asList("Standing height", "length"));
-		bodyWeight = OntologyTerm.create("http://onto/bmi", "Body weight",
-				Arrays.asList("Body weight", "Mass in kilograms"));
+		standingHeight = OntologyTerm
+				.create("http://onto/height", "Standing height", asList("Standing height", "length"));
+		bodyWeight = OntologyTerm.create("http://onto/bmi", "Body weight", asList("Body weight", "Mass in kilograms"));
 
 		hypertension = OntologyTerm.create("http://onto/hyp", "Hypertension");
 		maternalHypertension = OntologyTerm.create("http://onto/mhyp", "Maternal hypertension");
 		ontologyTerms = asList(standingHeight, bodyWeight, hypertension, maternalHypertension);
-		attribute = new DefaultAttributeMetaData("attr1");
+		attribute = attrMetaDataFactory.create().setName("attr1");
 	}
 
 	@BeforeMethod
@@ -116,7 +119,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	{
 		Mockito.reset(ontologyService);
 		attribute.setDescription("History of Hypertension");
-		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String> of("history", "hypertens"), 100))
+		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String>of("history", "hypertens"), 100))
 				.thenReturn(ontologyTerms);
 		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
 		assertEquals(result, null);
@@ -126,13 +129,12 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	public void testDistanceFrom()
 	{
 		Stemmer stemmer = new Stemmer();
-		Assert.assertEquals(semanticSearchService.distanceFrom("Hypertension",
-				ImmutableSet.<String> of("history", "hypertens"), stemmer), .6923, 0.0001,
+		Assert.assertEquals(semanticSearchService
+						.distanceFrom("Hypertension", ImmutableSet.<String>of("history", "hypertens"), stemmer), .6923, 0.0001,
 				"String distance should be equal");
-		Assert.assertEquals(
-				semanticSearchService.distanceFrom("Maternal Hypertension",
-						ImmutableSet.<String> of("history", "hypertens"), stemmer),
-				.5454, 0.0001, "String distance should be equal");
+		Assert.assertEquals(semanticSearchService
+						.distanceFrom("Maternal Hypertension", ImmutableSet.<String>of("history", "hypertens"), stemmer), .5454,
+				0.0001, "String distance should be equal");
 		;
 	}
 
@@ -141,10 +143,11 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	{
 		Mockito.reset(ontologyService);
 		attribute.setDescription("Standing height in meters.");
-		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String> of("standing", "height", "meters"),
-				100)).thenReturn(ontologyTerms);
+		when(ontologyService
+				.findOntologyTerms(ontologies, ImmutableSet.<String>of("standing", "height", "meters"), 100))
+				.thenReturn(ontologyTerms);
 		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(result, Hit.<OntologyTerm> create(standingHeight, 0.81250f));
+		assertEquals(result, Hit.<OntologyTerm>create(standingHeight, 0.81250f));
 	}
 
 	@Test
@@ -153,35 +156,35 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		Mockito.reset(ontologyService);
 		attribute.setDescription("Standing height (m.)");
 
-		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String> of("standing", "height", "m"), 100))
+		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.<String>of("standing", "height", "m"), 100))
 				.thenReturn(ontologyTerms);
 		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(result, Hit.<OntologyTerm> create(standingHeight, 0.92857f));
+		assertEquals(result, Hit.<OntologyTerm>create(standingHeight, 0.92857f));
 	}
 
 	@Test
 	public void testIsSingleMatchHighQuality()
 	{
-		List<ExplainedQueryString> explanations1 = Arrays
-				.asList(ExplainedQueryString.create("height", "height", "standing height", 50.0));
-		assertFalse(semanticSearchService.isSingleMatchHighQuality(Sets.newHashSet("height"), Sets.newHashSet("height"),
-				explanations1));
+		List<ExplainedQueryString> explanations1 = asList(
+				ExplainedQueryString.create("height", "height", "standing height", 50.0));
+		assertFalse(semanticSearchService
+				.isSingleMatchHighQuality(Sets.newHashSet("height"), Sets.newHashSet("height"), explanations1));
 
-		List<ExplainedQueryString> explanations2 = Arrays
-				.asList(ExplainedQueryString.create("body length", "body length", "height", 100));
+		List<ExplainedQueryString> explanations2 = asList(
+				ExplainedQueryString.create("body length", "body length", "height", 100));
 
 		assertTrue(semanticSearchService.isSingleMatchHighQuality(Sets.newHashSet("height in meter"),
 				Sets.newHashSet("height in meter", "height"), explanations2));
 
-		List<ExplainedQueryString> explanations3 = Arrays.asList(
+		List<ExplainedQueryString> explanations3 = asList(
 				ExplainedQueryString.create("fasting", "fasting", "fasting", 100),
 				ExplainedQueryString.create("glucose", "blood glucose", "blood glucose", 50));
 
 		assertFalse(semanticSearchService.isSingleMatchHighQuality(Sets.newHashSet("fasting glucose"),
 				Sets.newHashSet("fasting glucose", "fasting", "blood glucose"), explanations3));
 
-		List<ExplainedQueryString> explanations4 = Arrays
-				.asList(ExplainedQueryString.create("number of", "number of", "number", 100));
+		List<ExplainedQueryString> explanations4 = asList(
+				ExplainedQueryString.create("number of", "number of", "number", 100));
 
 		assertFalse(semanticSearchService.isSingleMatchHighQuality(Sets.newHashSet("number of cigarette smoked"),
 				Sets.newHashSet("number of cigarette smoked", "number of"), explanations4));
@@ -207,57 +210,59 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 	@Test
 	public void testFindAttributes()
 	{
-		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("sourceEntityMetaData");
+		EntityMetaData sourceEntityMetaData = entityMetaFactory.create().setSimpleName("sourceEntityMetaData");
 
 		// Mock the id's of the attribute entities that should be searched
-		List<String> attributeIdentifiers = Arrays.asList("1", "2");
+		List<String> attributeIdentifiers = asList("1", "2");
 		when(semanticSearchServiceHelper.getAttributeIdentifiers(sourceEntityMetaData))
 				.thenReturn(attributeIdentifiers);
 
 		// Mock the createDisMaxQueryRule method
 		List<QueryRule> rules = new ArrayList<QueryRule>();
-		QueryRule targetQueryRuleLabel = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, "height");
+		QueryRule targetQueryRuleLabel = new QueryRule(AttributeMetaDataMetaData.LABEL, QueryRule.Operator.FUZZY_MATCH,
+				"height");
 		rules.add(targetQueryRuleLabel);
-		QueryRule targetQueryRuleOntologyTermTag = new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH,
-				"standing height");
+		QueryRule targetQueryRuleOntologyTermTag = new QueryRule(AttributeMetaDataMetaData.LABEL,
+				QueryRule.Operator.FUZZY_MATCH, "standing height");
 		rules.add(targetQueryRuleOntologyTermTag);
 		QueryRule targetQueryRuleOntologyTermTagSyn = new QueryRule(AttributeMetaDataMetaData.LABEL,
-				Operator.FUZZY_MATCH, "length");
+				QueryRule.Operator.FUZZY_MATCH, "length");
 		rules.add(targetQueryRuleOntologyTermTagSyn);
 		QueryRule disMaxQueryRule = new QueryRule(rules);
-		disMaxQueryRule.setOperator(Operator.DIS_MAX);
+		disMaxQueryRule.setOperator(QueryRule.Operator.DIS_MAX);
 
-		when(semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(Sets.newHashSet("targetAttribute"),
-				Collections.emptyList())).thenReturn(disMaxQueryRule);
+		when(semanticSearchServiceHelper
+				.createDisMaxQueryRuleForAttribute(Sets.newHashSet("targetAttribute"), Collections.emptyList()))
+				.thenReturn(disMaxQueryRule);
 
-		MapEntity entity1 = new MapEntity(
-				ImmutableMap.of(AttributeMetaDataMetaData.NAME, "height_0", AttributeMetaDataMetaData.LABEL, "height",
-						AttributeMetaDataMetaData.DESCRIPTION, "this is a height measurement in m!"));
+		Entity entity1 = mock(Entity.class);
+		when(entity1.getString(AttributeMetaDataMetaData.NAME)).thenReturn("height_0");
+		when(entity1.getString(AttributeMetaDataMetaData.LABEL)).thenReturn("height");
+		when(entity1.getString(AttributeMetaDataMetaData.DESCRIPTION)).thenReturn("this is a height measurement in m!");
 
 		List<QueryRule> disMaxQueryRules = Lists.newArrayList(
-				new QueryRule(AttributeMetaDataMetaData.IDENTIFIER, Operator.IN, attributeIdentifiers),
-				new QueryRule(Operator.AND), disMaxQueryRule);
+				new QueryRule(AttributeMetaDataMetaData.IDENTIFIER, QueryRule.Operator.IN, attributeIdentifiers),
+				new QueryRule(QueryRule.Operator.AND), disMaxQueryRule);
 
-		AttributeMetaData attributeHeight = new DefaultAttributeMetaData("height_0");
-		AttributeMetaData attributeWeight = new DefaultAttributeMetaData("weight_0");
-		sourceEntityMetaData.addAttributeMetaData(attributeHeight);
-		sourceEntityMetaData.addAttributeMetaData(attributeWeight);
+		AttributeMetaData attributeHeight = attrMetaDataFactory.create().setName("height_0");
+		AttributeMetaData attributeWeight = attrMetaDataFactory.create().setName("weight_0");
+		sourceEntityMetaData.addAttribute(attributeHeight);
+		sourceEntityMetaData.addAttribute(attributeWeight);
 
 		// Case 1
-		when(dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, new QueryImpl<>(disMaxQueryRules)))
+		when(dataService.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(disMaxQueryRules)))
 				.thenReturn(Stream.of(entity1));
 
 		Map<AttributeMetaData, ExplainedAttributeMetaData> termsActual1 = semanticSearchService
 				.findAttributes(sourceEntityMetaData, Sets.newHashSet("targetAttribute"), Collections.emptyList());
 
-		Map<AttributeMetaData, ExplainedAttributeMetaData> termsExpected1 = ImmutableMap.of(attributeHeight,
-				ExplainedAttributeMetaData.create(attributeHeight));
+		Map<AttributeMetaData, ExplainedAttributeMetaData> termsExpected1 = ImmutableMap
+				.of(attributeHeight, ExplainedAttributeMetaData.create(attributeHeight));
 
 		assertEquals(termsActual1.toString(), termsExpected1.toString());
 
 		// Case 2
-		when(dataService.findAll(AttributeMetaDataMetaData.ENTITY_NAME, new QueryImpl<>(disMaxQueryRules)))
-				.thenReturn(Stream.empty());
+		when(dataService.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(disMaxQueryRules))).thenReturn(Stream.empty());
 
 		Map<AttributeMetaData, ExplainedAttributeMetaData> termsActual2 = semanticSearchService
 				.findAttributes(sourceEntityMetaData, Sets.newHashSet("targetAttribute"), Collections.emptyList());
@@ -272,7 +277,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		when(ontologyService.findOntologyTerms(ontologies, ImmutableSet.of("standing", "height", "ångstrøm"), 100))
 				.thenReturn(ontologyTerms);
 		Hit<OntologyTerm> result = semanticSearchService.findTags(attribute, ontologies);
-		assertEquals(result, Hit.<OntologyTerm> create(standingHeight, 0.76471f));
+		assertEquals(result, Hit.<OntologyTerm>create(standingHeight, 0.76471f));
 	}
 
 	@Test
@@ -315,7 +320,7 @@ public class SemanticSearchServiceImplTest extends AbstractTestNGSpringContextTe
 		}
 
 		@Bean
-		SemanticSearchService semanticSearchService()
+		SemanticSearchServiceImpl semanticSearchService()
 		{
 			return new SemanticSearchServiceImpl(dataService(), ontologyService(), metaDataService(),
 					semanticSearchServiceHelper(), elasticSearchExplainService());

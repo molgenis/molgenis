@@ -1,63 +1,55 @@
 package org.molgenis.das.impl;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_CHROM;
-import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_DESCRIPTION;
-import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_IDENTIFIER;
-import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_LINKOUT;
-import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_NAME;
-import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_POS;
-import static org.molgenis.data.support.GenomicDataSettings.Meta.ATTRS_STOP;
-import static org.testng.AssertJUnit.assertEquals;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
-
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.SearchResult;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.GenomicDataSettings;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.ApplicationContextProvider;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
 import uk.ac.ebi.mydas.configuration.DataSourceConfiguration;
 import uk.ac.ebi.mydas.configuration.PropertyType;
 import uk.ac.ebi.mydas.exceptions.BadReferenceObjectException;
 import uk.ac.ebi.mydas.exceptions.CoordinateErrorException;
 import uk.ac.ebi.mydas.exceptions.DataSourceException;
 import uk.ac.ebi.mydas.exceptions.UnimplementedFeatureException;
-import uk.ac.ebi.mydas.model.DasAnnotatedSegment;
-import uk.ac.ebi.mydas.model.DasFeature;
-import uk.ac.ebi.mydas.model.DasFeatureOrientation;
-import uk.ac.ebi.mydas.model.DasMethod;
-import uk.ac.ebi.mydas.model.DasPhase;
-import uk.ac.ebi.mydas.model.DasTarget;
-import uk.ac.ebi.mydas.model.DasType;
+import uk.ac.ebi.mydas.model.*;
 
-public class RepositoryRangeHandlingDataSourceTest
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.stream.Stream;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.support.GenomicDataSettings.Meta.*;
+import static org.testng.Assert.assertEquals;
+import static uk.ac.ebi.mydas.model.DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE;
+
+public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
 	RepositoryRangeHandlingDataSource source;
 	private DasFeature dasFeature;
 	private DataService dataService;
@@ -76,7 +68,7 @@ public class RepositoryRangeHandlingDataSourceTest
 		when(ctx.getBean(GenomicDataSettings.class)).thenReturn(genomicDataSettings);
 		new ApplicationContextProvider().setApplicationContext(ctx);
 
-		EntityMetaData metaData = new DefaultEntityMetaData("dataset");
+		EntityMetaData metaData = entityMetaFactory.create().setName("dataset");
 		when(dataService.getEntityMetaData("dataset")).thenReturn(metaData);
 		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, metaData)).thenReturn("CHROM");
 
@@ -97,23 +89,23 @@ public class RepositoryRangeHandlingDataSourceTest
 		notes.add("track:dataset");
 		notes.add("source:MOLGENIS");
 
-		dasFeature = new DasFeature("mutation id", "description", type, method, 10, 1000, new Double(0),
-				DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout,
-				dasTarget, new ArrayList<String>(), null);
+		dasFeature = new DasFeature("mutation id", "mutation name,description", type, method, 10, 1000, new Double(0),
+				ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout, dasTarget,
+				new ArrayList<>(), null);
 
-		Query<Entity> q = new QueryImpl<Entity>().eq("CHROM", "1");
+		Query<Entity> q = new QueryImpl<>().eq("CHROM", "1");
 		q.pageSize(100);
 		SearchResult result = mock(SearchResult.class);
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("DAS");
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("STOP"));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("linkout"));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("NAME"), ROLE_LABEL);
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("INFO"));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("POS"));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("ID"), ROLE_ID);
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("CHROM"));
+		EntityMetaData emd = entityMetaFactory.create().setName("DAS");
+		emd.addAttribute(attrMetaFactory.create().setName("STOP").setDataType(INT));
+		emd.addAttribute(attrMetaFactory.create().setName("linkout"));
+		emd.addAttribute(attrMetaFactory.create().setName("NAME"), ROLE_LABEL);
+		emd.addAttribute(attrMetaFactory.create().setName("INFO"));
+		emd.addAttribute(attrMetaFactory.create().setName("POS").setDataType(INT));
+		emd.addAttribute(attrMetaFactory.create().setName("ID"), ROLE_ID);
+		emd.addAttribute(attrMetaFactory.create().setName("CHROM"));
 
-		MapEntity entity = new MapEntity(emd);
+		DynamicEntity entity = new DynamicEntity(emd);
 
 		Map<String, Object> map = new HashMap<String, Object>();
 		map.put("STOP", 1000);
@@ -124,16 +116,17 @@ public class RepositoryRangeHandlingDataSourceTest
 		map.put("ID", "mutation id");
 		map.put("CHROM", "1");
 
-		entity.set(new MapEntity(map));
+		for (String key : map.keySet())
+			entity.set(key, map.get(key));
 
 		resultList = new ArrayList<>();
 		resultList.add(new Hit("", "", map));
 		featureList = new ArrayList<>();
 		featureList.add(dasFeature);
-		when(dataService.findAll("dataset", q)).thenAnswer(new Answer<Stream<MapEntity>>()
+		when(dataService.findAll("dataset", q)).thenAnswer(new Answer<Stream<DynamicEntity>>()
 		{
 			@Override
-			public Stream<MapEntity> answer(InvocationOnMock invocation) throws Throwable
+			public Stream<DynamicEntity> answer(InvocationOnMock invocation) throws Throwable
 			{
 				return Stream.of(entity);
 			}
@@ -164,17 +157,53 @@ public class RepositoryRangeHandlingDataSourceTest
 	}
 
 	@Test
-	public void getFeaturesRange() throws UnimplementedFeatureException, DataSourceException,
-			BadReferenceObjectException, CoordinateErrorException
+	public void getFeaturesSize()
+			throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
+			CoordinateErrorException
 	{
-		assertEquals(new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures(),
-				source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getFeatures());
-		assertEquals(new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getSegmentId(),
-				source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getSegmentId());
-		assertEquals(new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getStartCoordinate(),
-				source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getStartCoordinate());
-		assertEquals(new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getStopCoordinate(),
-				source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getStopCoordinate());
+		assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getFeatures().size(),
+				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures().size());
+	}
+
+	@Test
+	public void getFeaturesLabel()
+			throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
+			CoordinateErrorException
+	{
+			assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getFeatures().iterator().next().getFeatureLabel(),
+				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures().iterator().next().getFeatureLabel());
+	}
+
+	@Test
+	public void getFeaturesId()
+			throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
+			CoordinateErrorException
+	{	assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getFeatures().iterator().next().getFeatureId(),
+				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures().iterator().next().getFeatureId());
+	}
+
+	@Test
+	public void getFeaturesSegment()
+			throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
+			CoordinateErrorException
+	{	assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getSegmentId(),
+				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getSegmentId());
+	}
+
+	@Test
+	public void getFeaturesStart()
+			throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
+			CoordinateErrorException
+	{	assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getStartCoordinate(),
+				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getStartCoordinate());
+	}
+
+	@Test
+	public void getFeaturesStop()
+			throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
+			CoordinateErrorException
+	{	assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getStopCoordinate(),
+				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getStopCoordinate());
 	}
 
 	@Test

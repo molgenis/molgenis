@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Repository gives access to a collection of Entity. Synonyms: EntityReader, EntitySource, EntityCollection
@@ -162,18 +163,6 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable
 	void flush();
 
 	void clearCache();
-
-	/**
-	 * Create a new repository backend (e.g., create a table in a database; add a sheet to Excel)
-	 * 
-	 * TODO move to RepositoryCollection
-	 */
-	void create();
-
-	/**
-	 * Drop a repository backend (e.g. drop a table in a database; remove a sheet from Excel)
-	 */
-	void drop();
 
 	/**
 	 * Rebuild current index

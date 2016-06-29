@@ -1,23 +1,26 @@
 package org.molgenis.data.annotation.query;
 
+import static java.util.Collections.singleton;
+import static org.molgenis.data.annotation.entity.impl.SnpEffAnnotator.GENE_NAME;
 import static org.molgenis.data.support.QueryImpl.EQ;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.Collection;
-import java.util.Collections;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.entity.impl.SnpEffAnnotator;
-import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 
 public class GeneNameQueryCreator implements QueryCreator
 {
 	@Override
 	public Collection<AttributeMetaData> getRequiredAttributes()
 	{
-		return Collections.singleton(new DefaultAttributeMetaData(SnpEffAnnotator.GENE_NAME));
+		AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
+		return singleton(attrMetaFactory.create().setName(GENE_NAME));
 	}
 
 	@Override

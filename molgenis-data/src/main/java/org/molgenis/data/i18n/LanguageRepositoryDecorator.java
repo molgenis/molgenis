@@ -1,5 +1,12 @@
 package org.molgenis.data.i18n;
 
+import org.molgenis.data.*;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -8,42 +15,41 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.support.DefaultAttributeMetaData;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
+import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.*;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
-public class LanguageRepositoryDecorator implements Repository<Entity>
+public class LanguageRepositoryDecorator implements Repository<Language>
 {
-	private final Repository<Entity> decorated;
+	private final Repository<Language> decorated;
 	private final DataService dataService;
+	private final AttributeMetaDataFactory attrMetaFactory;
+	private final EntityMetaDataMetaData entityMetaMeta;
+	private final I18nStringMetaData i18nStringMeta;
 
-	public LanguageRepositoryDecorator(Repository<Entity> decorated, DataService dataService)
+	public LanguageRepositoryDecorator(Repository<Language> decorated, DataService dataService,
+			AttributeMetaDataFactory attrMetaFactory, EntityMetaDataMetaData entityMetaMeta,
+			I18nStringMetaData i18nStringMeta)
 	{
-		this.decorated = decorated;
-		this.dataService = dataService;
+		this.decorated = requireNonNull(decorated);
+		this.dataService = requireNonNull(dataService);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
+		this.entityMetaMeta = requireNonNull(entityMetaMeta);
+		this.i18nStringMeta = requireNonNull(i18nStringMeta);
 	}
 
 	@Override
-	public Iterator<Entity> iterator()
+	public Iterator<Language> iterator()
 	{
 		return decorated.iterator();
 	}
 
 	@Override
-	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
+	public void forEachBatched(Fetch fetch, Consumer<List<Language>> consumer, int batchSize)
 	{
 		decorated.forEachBatched(fetch, consumer, batchSize);
 	}
@@ -85,49 +91,49 @@ public class LanguageRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public Query<Entity> query()
+	public Query<Language> query()
 	{
 		return decorated.query();
 	}
 
 	@Override
-	public long count(Query<Entity> q)
+	public long count(Query<Language> q)
 	{
 		return decorated.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query<Entity> q)
+	public Stream<Language> findAll(Query<Language> q)
 	{
 		return decorated.findAll(q);
 	}
 
 	@Override
-	public Entity findOne(Query<Entity> q)
+	public Language findOne(Query<Language> q)
 	{
 		return decorated.findOne(q);
 	}
 
 	@Override
-	public Entity findOneById(Object id)
+	public Language findOneById(Object id)
 	{
 		return decorated.findOneById(id);
 	}
 
 	@Override
-	public Entity findOneById(Object id, Fetch fetch)
+	public Language findOneById(Object id, Fetch fetch)
 	{
 		return decorated.findOneById(id, fetch);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Stream<Object> ids)
+	public Stream<Language> findAll(Stream<Object> ids)
 	{
 		return decorated.findAll(ids);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	public Stream<Language> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		return decorated.findAll(ids, fetch);
 	}
@@ -139,72 +145,75 @@ public class LanguageRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public void update(Entity entity)
+	public void update(Language entity)
 	{
 		decorated.update(entity);
 	}
 
 	@Override
-	public void update(Stream<Entity> entities)
+	public void update(Stream<Language> entities)
 	{
 		decorated.update(entities);
 	}
 
 	@Override
-	public void delete(Entity entity)
+	public void delete(Language language)
 	{
-		String languageCode = entity.getString(LanguageMetaData.CODE);
-		if (languageCode.equalsIgnoreCase(LanguageService.FALLBACK_LANGUAGE))
+		String languageCode = language.getCode();
+		if (languageCode.equalsIgnoreCase(LanguageMetaData.DEFAULT_LANGUAGE_CODE))
 		{
 			throw new MolgenisDataException(
 					"It is not possible to delete '" + languageCode + "'. This is the default language.");
 		}
 
-		decorated.delete(entity);
+		decorated.delete(language);
 
-		// Delete label-{languageCode} attr from AttributeMetaDataMetaData
-		AttributeMetaData attributeLabel = AttributeMetaDataMetaData.INSTANCE
-				.getAttribute(AttributeMetaDataMetaData.LABEL + '-' + languageCode);
-		if (attributeLabel != null)
-		{
-			dataService.getMeta().getDefaultBackend().deleteAttribute(AttributeMetaDataMetaData.ENTITY_NAME,
-					attributeLabel.getName());
-		}
+		// remove i18n attributes from i18n string meta data
+		AttributeMetaData attrLanguageCode = i18nStringMeta.getAttribute(languageCode);
 
-		// Delete description-{languageCode} attr from AttributeMetaDataMetaData
-		AttributeMetaData attributeDescription = AttributeMetaDataMetaData.INSTANCE
-				.getAttribute(AttributeMetaDataMetaData.DESCRIPTION + '-' + languageCode);
-		if (attributeDescription != null)
-		{
-			dataService.getMeta().getDefaultBackend().deleteAttribute(AttributeMetaDataMetaData.ENTITY_NAME,
-					attributeDescription.getName());
-		}
+		EntityMetaData i18nMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(I18N_STRING));
+		i18nMeta.removeAttribute(attrLanguageCode);
 
-		// Delete description-{languageCode} attr from EntityMetaDataMetaData
-		AttributeMetaData entityDescription = EntityMetaDataMetaData.INSTANCE
-				.getAttribute(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode);
-		if (entityDescription != null)
-		{
-			dataService.getMeta().getDefaultBackend().deleteAttribute(EntityMetaDataMetaData.ENTITY_NAME,
-					entityDescription.getName());
-		}
+		runAsSystem(() -> dataService.update(ENTITY_META_DATA, i18nMeta));
 
-		// Delete label-{languageCode} attr from EntityMetaDataMetaData
-		AttributeMetaData entityLabel = EntityMetaDataMetaData.INSTANCE
-				.getAttribute(EntityMetaDataMetaData.LABEL + '-' + languageCode);
-		if (entityLabel != null)
-		{
-			dataService.getMeta().getDefaultBackend().deleteAttribute(EntityMetaDataMetaData.ENTITY_NAME,
-					entityLabel.getName());
-		}
+		// hack: update in memory representation
+		EntityMetaData i18nMetaUpdated = dataService.getEntityMetaData(I18N_STRING);
+		i18nMetaUpdated.removeAttribute(attrLanguageCode);
 
-		// Delete language attribute from I18nStringMetaData
-		dataService.getMeta().getDefaultBackend().deleteAttribute(I18nStringMetaData.ENTITY_NAME, languageCode);
-		I18nStringMetaData.INSTANCE.removeLanguage(languageCode);
+		// remove i18n attributes from entity meta data
+		AttributeMetaData entityLabel = entityMetaMeta.getAttribute(LABEL + '-' + languageCode);
+		AttributeMetaData entityDescription = entityMetaMeta.getAttribute(DESCRIPTION + '-' + languageCode);
+
+		EntityMetaData entityMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(ENTITY_META_DATA));
+		entityMeta.removeAttribute(entityLabel);
+		entityMeta.removeAttribute(entityDescription);
+
+		runAsSystem(() -> dataService.update(ENTITY_META_DATA, entityMeta));
+
+		// hack: update in memory representation
+		EntityMetaData entityMetaUpdated = dataService.getEntityMetaData(ENTITY_META_DATA);
+		entityMetaUpdated.removeAttribute(entityLabel);
+		entityMetaUpdated.removeAttribute(entityDescription);
+
+		// remove i18n attributes from attribute meta data
+		EntityMetaData attrMetaMeta = attrMetaFactory.getAttributeMetaDataMetaData();
+		AttributeMetaData attrLabel = attrMetaMeta.getAttribute(LABEL + '-' + languageCode);
+		AttributeMetaData attrDescription = attrMetaMeta.getAttribute(DESCRIPTION + '-' + languageCode);
+
+		EntityMetaData attrMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(ATTRIBUTE_META_DATA));
+		attrMeta.removeAttribute(attrLabel);
+		attrMeta.removeAttribute(attrDescription);
+
+		runAsSystem(() -> dataService.update(ENTITY_META_DATA, attrMeta));
+
+		// hack: update in memory representation
+		EntityMetaData attrMetaUpdated = dataService.getEntityMetaData(ATTRIBUTE_META_DATA);
+		attrMetaUpdated.removeAttribute(attrLabel);
+		attrMetaUpdated.removeAttribute(attrDescription);
 	}
 
 	@Override
-	public void delete(Stream<Entity> entities)
+	public void delete(Stream<Language> entities)
 	{
 		entities.forEach(this::delete);
 	}
@@ -212,7 +221,7 @@ public class LanguageRepositoryDecorator implements Repository<Entity>
 	@Override
 	public void deleteById(Object id)
 	{
-		Entity entity = findOneById(id);
+		Language entity = findOneById(id);
 		if (entity != null) delete(entity);
 	}
 
@@ -229,56 +238,76 @@ public class LanguageRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public void add(Entity entity)
+	public void add(Language language)
 	{
 		// Add language
-		decorated.add(entity);
+		decorated.add(language);
 
-		// Create new label and description attributes for the added language
-		String languageCode = entity.getString(LanguageMetaData.CODE);
-
-		// Atribute label
-		AttributeMetaData attrLabel = new DefaultAttributeMetaData(AttributeMetaDataMetaData.LABEL + '-' + languageCode)
-				.setNillable(true);
-
-		// Add the attribute to the attributes table
-		dataService.getMeta().getDefaultBackend().addAttribute(AttributeMetaDataMetaData.ENTITY_NAME, attrLabel);
-
-		// Update AttributeMetaDataMetaData
-		AttributeMetaDataMetaData.INSTANCE.addAttributeMetaData(attrLabel);
-
-		// Attribute description
-		AttributeMetaData attrDescription = new DefaultAttributeMetaData(
-				AttributeMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true);
-		dataService.getMeta().getDefaultBackend().addAttribute(AttributeMetaDataMetaData.ENTITY_NAME, attrDescription);
-		AttributeMetaDataMetaData.INSTANCE.addAttributeMetaData(attrDescription);
-
-		// EntityMeta description
-		AttributeMetaData entityDescription = new DefaultAttributeMetaData(
-				EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true);
-		dataService.getMeta().getDefaultBackend().addAttribute(EntityMetaDataMetaData.ENTITY_NAME, entityDescription);
-		EntityMetaDataMetaData.INSTANCE.addAttributeMetaData(entityDescription);
-
-		// EntityMeta label
-		AttributeMetaData entityLabel = new DefaultAttributeMetaData(EntityMetaDataMetaData.LABEL + '-' + languageCode)
-				.setNillable(true);
-		dataService.getMeta().getDefaultBackend().addAttribute(EntityMetaDataMetaData.ENTITY_NAME, entityLabel);
-		EntityMetaDataMetaData.INSTANCE.addAttributeMetaData(entityLabel);
-
-		// I18nString
-		if (I18nStringMetaData.INSTANCE.addLanguage(languageCode))
+		if (!language.getCode().equals(DEFAULT_LANGUAGE_CODE))
 		{
-			dataService.getMeta().getDefaultBackend().addAttribute(I18nStringMetaData.ENTITY_NAME,
-					I18nStringMetaData.INSTANCE.getAttribute(languageCode));
+			// Create new label and description attributes for the added language
+			String languageCode = language.getCode();
+
+			// Add language attributes for attribute meta data
+			AttributeMetaData attrLabel = attrMetaFactory.create().setName(LABEL + '-' + languageCode).setNillable(true)
+					.setLabel("Label (" + languageCode + ')');
+			AttributeMetaData attrDescription = attrMetaFactory.create().setName(DESCRIPTION + '-' + languageCode)
+					.setNillable(true).setLabel("Description (" + languageCode + ')');
+			dataService.add(ATTRIBUTE_META_DATA, Stream.of(attrLabel, attrDescription));
+
+			EntityMetaData attrMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(ATTRIBUTE_META_DATA));
+			attrMeta.addAttribute(attrLabel);
+			attrMeta.addAttribute(attrDescription);
+
+			runAsSystem(() -> dataService.update(ENTITY_META_DATA, attrMeta));
+
+			// hack: update in memory representation
+			EntityMetaData attrMetaUpdated = dataService.getEntityMetaData(ATTRIBUTE_META_DATA);
+			attrMetaUpdated.addAttribute(attrLabel);
+			attrMetaUpdated.addAttribute(attrDescription);
+
+			// Add language attributes for entity meta data
+			AttributeMetaData entityLabel = attrMetaFactory.create()
+					.setName(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true)
+					.setLabel("Label (" + languageCode + ')');
+			AttributeMetaData entityDescription = attrMetaFactory.create()
+					.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true)
+					.setLabel("Description (" + languageCode + ')');
+			dataService.add(ATTRIBUTE_META_DATA, Stream.of(entityLabel, entityDescription));
+
+			EntityMetaData entityMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(ENTITY_META_DATA));
+			entityMeta.addAttribute(entityLabel);
+			entityMeta.addAttribute(entityDescription);
+
+			runAsSystem(() -> dataService.update(ENTITY_META_DATA, entityMeta));
+
+			// hack: update in memory representation
+			EntityMetaData entityMetaUpdated = dataService.getEntityMetaData(ENTITY_META_DATA);
+			entityMetaUpdated.addAttribute(entityLabel);
+			entityMetaUpdated.addAttribute(entityDescription);
+
+			// Add language attributes for i18n string
+			AttributeMetaData languageCodeAttr = attrMetaFactory.create().setName(languageCode).setNillable(true)
+					.setDataType(TEXT);
+			dataService.add(ATTRIBUTE_META_DATA, languageCodeAttr);
+
+			EntityMetaData i18nMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(I18N_STRING));
+			i18nMeta.addAttribute(languageCodeAttr);
+
+			runAsSystem(() -> dataService.update(ENTITY_META_DATA, i18nMeta));
+
+			// hack: update in memory representation
+			EntityMetaData i18nMetaUpdated = dataService.getEntityMetaData(I18N_STRING);
+			i18nMetaUpdated.addAttribute(languageCodeAttr);
 		}
 	}
 
 	@Override
-	public Integer add(Stream<Entity> entities)
+	public Integer add(Stream<Language> entities)
 	{
 		AtomicInteger count = new AtomicInteger();
 		entities.forEach(entity -> {
-			add(entity);
+			add(entity); // FIXME inefficient, apply filter to stream
 			count.incrementAndGet();
 		});
 		return count.get();
@@ -294,18 +323,6 @@ public class LanguageRepositoryDecorator implements Repository<Entity>
 	public void clearCache()
 	{
 		decorated.clearCache();
-	}
-
-	@Override
-	public void create()
-	{
-		decorated.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		decorated.drop();
 	}
 
 	@Override
@@ -325,5 +342,4 @@ public class LanguageRepositoryDecorator implements Repository<Entity>
 	{
 		decorated.removeEntityListener(entityListener);
 	}
-
 }

@@ -1,60 +1,25 @@
 package org.molgenis.data.rest;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.rest.RestController.BASE_URI;
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Stream;
-
 import org.mockito.Matchers;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.Sort;
-import org.molgenis.data.Sort.Direction;
+import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.support.QueryResolver;
 import org.molgenis.file.FileStore;
+import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
-import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -68,14 +33,29 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.util.HashSet;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.rest.RestController.BASE_URI;
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 @WebAppConfiguration
-@ContextConfiguration(classes =
-{ RestControllerConfig.class, GsonConfig.class })
+@ContextConfiguration(classes = { RestControllerConfig.class, GsonConfig.class })
 public class RestControllerTest extends AbstractTestNGSpringContextTests
 {
 	private static String ENTITY_NAME = "Person";
 	private static Object ENTITY_ID = "p1";
-	private static String HREF_ENTITY = BASE_URI + "/" + ENTITY_NAME;
+	private static String HREF_ENTITY = BASE_URI + '/' + ENTITY_NAME;
 	private static String HREF_ENTITY_META = HREF_ENTITY + "/meta";
 	private static String HREF_ENTITY_ID = HREF_ENTITY + "/p1";
 
@@ -94,6 +74,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private GsonHttpMessageConverter gsonHttpMessageConverter;
 
+	@Autowired
+	private EntityManager entityManager;
+
 	private MockMvc mockMvc;
 
 	@BeforeMethod
@@ -106,24 +89,64 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		Repository<Entity> repo = mock(Repository.class);
 
-		Entity entityXref = new MapEntity("id");
+		// test entity meta data
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
+
+		AttributeMetaData attrId = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		when(attrId.getLabel()).thenReturn("id");
+		when(attrId.getLabel(anyString())).thenReturn("id");
+		when(attrId.getDataType()).thenReturn(STRING);
+		when(attrId.isReadOnly()).thenReturn(true);
+		when(attrId.isUnique()).thenReturn(true);
+		when(attrId.isNillable()).thenReturn(false);
+		when(attrId.isVisible()).thenReturn(false);
+		when(attrId.getAttributeParts()).thenReturn(emptyList());
+		when(attrId.getEnumOptions()).thenReturn(emptyList());
+
+		AttributeMetaData attrName = when(mock(AttributeMetaData.class).getName()).thenReturn("name").getMock();
+		when(attrName.getLabel()).thenReturn("name");
+		when(attrName.getLabel(anyString())).thenReturn("name");
+		when(attrName.getDataType()).thenReturn(STRING);
+		when(attrName.isNillable()).thenReturn(true);
+		when(attrName.isVisible()).thenReturn(true);
+		when(attrName.getAttributeParts()).thenReturn(emptyList());
+		when(attrName.getEnumOptions()).thenReturn(emptyList());
+
+		AttributeMetaData attrEnum = when(mock(AttributeMetaData.class).getName()).thenReturn("enum").getMock();
+		when(attrEnum.getLabel()).thenReturn("enum");
+		when(attrEnum.getLabel(anyString())).thenReturn("enum");
+		when(attrEnum.getDataType()).thenReturn(ENUM);
+		when(attrEnum.getEnumOptions()).thenReturn(asList("enum0, enum1"));
+		when(attrEnum.isNillable()).thenReturn(true);
+		when(attrEnum.isVisible()).thenReturn(true);
+		when(attrEnum.getAttributeParts()).thenReturn(emptyList());
+
+		when(entityMeta.getAttribute("id")).thenReturn(attrId);
+		when(entityMeta.getAttribute("name")).thenReturn(attrName);
+		when(entityMeta.getAttribute("enum")).thenReturn(attrEnum);
+		when(entityMeta.getIdAttribute()).thenReturn(attrId);
+		when(entityMeta.getAttributes()).thenReturn(asList(attrName, attrId, attrEnum));
+		when(entityMeta.getAtomicAttributes()).thenReturn(asList(attrName, attrId, attrEnum));
+		when(entityMeta.getName()).thenReturn(ENTITY_NAME);
+
+		when(repo.getEntityMetaData()).thenReturn(entityMeta);
+		when(repo.getName()).thenReturn(ENTITY_NAME);
+		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(entityMeta);
+		when(entityManager.create(entityMeta)).thenReturn(new DynamicEntity(entityMeta));
+
+		// test entities
+		Entity entityXref = new DynamicEntity(entityMeta);
 		entityXref.set("id", ENTITY_ID);
 		entityXref.set("name", "PietXREF");
 
-		Entity entity = new MapEntity("id");
+		Entity entity = new DynamicEntity(entityMeta);
 		entity.set("id", ENTITY_ID);
 		entity.set("name", "Piet");
 		entity.set("enum", "enum1");
-		entity.set("xrefAttribute", entityXref);
 
-		Entity entity2 = new MapEntity("id");
+		Entity entity2 = new DynamicEntity(entityMeta);
 		entity2.set("id", "p2");
 		entity2.set("name", "Klaas");
-		entity2.set("xrefAttribute", entityXref);
-
-		List<Entity> entities = new ArrayList<Entity>();
-		entities.add(entity2);
-		entities.add(entity);
 
 		when(dataService.getEntityNames()).thenReturn(Stream.of(ENTITY_NAME));
 		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
@@ -133,30 +156,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Query<Entity> q = new QueryImpl<>().eq("name", "Piet").pageSize(10).offset(5);
 		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(entity));
 
-		Query<Entity> q2 = new QueryImpl<>().sort(new Sort().on("name", Direction.DESC)).pageSize(100).offset(0);
+		Query<Entity> q2 = new QueryImpl<>().sort(new Sort().on("name", Sort.Direction.DESC)).pageSize(100).offset(0);
 		when(dataService.findAll(ENTITY_NAME, q2)).thenReturn(Stream.of(entity2, entity));
-
-		DefaultAttributeMetaData attrEnum = new DefaultAttributeMetaData("enum", FieldTypeEnum.ENUM)
-				.setEnumOptions(Arrays.asList("enum0, enum1"));
-
-		DefaultAttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.STRING);
-
-		DefaultAttributeMetaData attrId = new DefaultAttributeMetaData("id", FieldTypeEnum.STRING);
-		attrId.setReadOnly(true);
-		attrId.setUnique(true);
-		attrId.setNillable(false);
-		attrId.setVisible(false);
-
-		EntityMetaData entityMetaData = mock(EntityMetaData.class);
-		when(entityMetaData.getAttribute("name")).thenReturn(attrName);
-		when(entityMetaData.getIdAttribute()).thenReturn(attrId);
-		when(entityMetaData.getAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId, attrEnum));
-		when(entityMetaData.getAtomicAttributes())
-				.thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId, attrEnum));
-		when(entityMetaData.getName()).thenReturn(ENTITY_NAME);
-		when(repo.getEntityMetaData()).thenReturn(entityMetaData);
-		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(entityMetaData);
-		when(repo.getName()).thenReturn(ENTITY_NAME);
 
 		mockMvc = MockMvcBuilders.standaloneSetup(restController)
 				.setMessageConverters(gsonHttpMessageConverter, new CsvHttpMessageConverter()).build();
@@ -168,7 +169,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(post(HREF_ENTITY).content("{id:'p1', name:'Piet'}").contentType(APPLICATION_JSON))
 				.andExpect(status().isCreated()).andExpect(header().string("Location", HREF_ENTITY_ID));
 
-		verify(dataService).add(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class));
+		verify(dataService).add(Matchers.eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test
@@ -178,7 +179,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				post(HREF_ENTITY).contentType(APPLICATION_FORM_URLENCODED).param("id", "p1").param("name", "Piet"))
 				.andExpect(status().isCreated()).andExpect(header().string("Location", HREF_ENTITY_ID));
 
-		verify(dataService).add(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class));
+		verify(dataService).add(Matchers.eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test
@@ -227,10 +228,9 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveEntityMeta() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_META)).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_META
-						+ "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"" + ENTITY_NAME
-						+ "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
+				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
+				.string("{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
+						+ ENTITY_NAME + "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
 						+ "/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false}"));
 	}
 
@@ -239,12 +239,11 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		when(molgenisPermissionService.hasPermissionOnEntity(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
 		when(dataService.getCapabilities(ENTITY_NAME))
-				.thenReturn(new HashSet<RepositoryCapability>(Arrays.asList(RepositoryCapability.WRITABLE)));
+				.thenReturn(new HashSet<>(singletonList(RepositoryCapability.WRITABLE)));
 		mockMvc.perform(get(HREF_ENTITY_META)).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_META
-						+ "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"" + ENTITY_NAME
-						+ "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
+				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
+				.string("{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
+						+ ENTITY_NAME + "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
 						+ "/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":true}"));
 	}
 
@@ -253,12 +252,11 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		when(molgenisPermissionService.hasPermissionOnEntity(ENTITY_NAME, Permission.WRITE)).thenReturn(true);
 		when(dataService.getCapabilities(ENTITY_NAME))
-				.thenReturn(new HashSet<RepositoryCapability>(Arrays.asList(RepositoryCapability.QUERYABLE)));
+				.thenReturn(new HashSet<>(singletonList(RepositoryCapability.QUERYABLE)));
 		mockMvc.perform(get(HREF_ENTITY_META)).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_META
-						+ "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"" + ENTITY_NAME
-						+ "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
+				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
+				.string("{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
+						+ ENTITY_NAME + "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
 						+ "/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false}"));
 	}
 
@@ -267,40 +265,36 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		String json = "{\"attributes\":[\"name\"]}";
 		mockMvc.perform(post(HREF_ENTITY_META).param("_method", "GET").content(json).contentType(APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string(
-						"{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
-								+ ENTITY_NAME + "\",\"writable\":false}"));
+				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
+				.string("{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
+						+ ENTITY_NAME + "\",\"writable\":false}"));
 	}
 
 	@Test
 	public void retrieveEntityMetaSelectAttributes() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_META).param("attributes", "name")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string(
-						"{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
-								+ ENTITY_NAME + "\",\"writable\":false}"));
+				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
+				.string("{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
+						+ ENTITY_NAME + "\",\"writable\":false}"));
 	}
 
 	@Test
 	public void retrieveEntityMetaExpandAttributes() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_META).param("expand", "attributes")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content().string(
-						"{\"href\":\"/api/v1/Person/meta\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"aggregateable\":false},\"id\":{\"href\":\"/api/v1/Person/meta/id\",\"fieldType\":\"STRING\",\"name\":\"id\",\"label\":\"id\",\"attributes\":[],\"maxLength\":255,\"auto\":false,\"nillable\":false,\"readOnly\":true,\"labelAttribute\":false,\"unique\":true,\"visible\":false,\"lookupAttribute\":false,\"aggregateable\":false},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\",\"fieldType\":\"ENUM\",\"name\":\"enum\",\"label\":\"enum\",\"attributes\":[],\"enumOptions\":[\"enum0, enum1\"],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"aggregateable\":false}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false}"));
+				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
+				.string("{\"href\":\"/api/v1/Person/meta\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\",\"fieldType\":\"STRING\",\"name\":\"name\",\"label\":\"name\",\"attributes\":[],\"enumOptions\":[],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"aggregateable\":false},\"id\":{\"href\":\"/api/v1/Person/meta/id\",\"fieldType\":\"STRING\",\"name\":\"id\",\"label\":\"id\",\"attributes\":[],\"enumOptions\":[],\"maxLength\":255,\"auto\":false,\"nillable\":false,\"readOnly\":true,\"labelAttribute\":false,\"unique\":true,\"visible\":false,\"lookupAttribute\":false,\"aggregateable\":false},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\",\"fieldType\":\"ENUM\",\"name\":\"enum\",\"label\":\"enum\",\"attributes\":[],\"enumOptions\":[\"enum0, enum1\"],\"maxLength\":255,\"auto\":false,\"nillable\":true,\"readOnly\":false,\"labelAttribute\":false,\"unique\":false,\"visible\":true,\"lookupAttribute\":false,\"aggregateable\":false}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false}"));
 	}
 
 	@Test
 	public void retrieve() throws Exception
 	{
-		restController.retrieveEntity(ENTITY_NAME, ENTITY_ID, new String[]
-		{}, new String[]
-		{});
+		restController.retrieveEntity(ENTITY_NAME, ENTITY_ID, new String[] {}, new String[] {});
 
 		mockMvc.perform(get(HREF_ENTITY_ID)).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content().string(
-						"{\"href\":\"" + HREF_ENTITY_ID + "\",\"name\":\"Piet\",\"id\":\"p1\",\"enum\":\"enum1\"}"));
+				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
+				.string("{\"href\":\"" + HREF_ENTITY_ID + "\",\"name\":\"Piet\",\"id\":\"p1\",\"enum\":\"enum1\"}"));
 
 	}
 
@@ -318,8 +312,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		mockMvc.perform(get(HREF_ENTITY).param("start", "5").param("num", "10").param("q[0].operator", "EQUALS")
 				.param("q[0].field", "name").param("q[0].value", "Piet")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY
+				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
+				.string("{\"href\":\"" + HREF_ENTITY
 						+ "\",\"meta\":{\"href\":\"/api/v1/Person/meta\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false},\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\""
 						+ HREF_ENTITY + "?start=0&num=10\",\"items\":[{\"href\":\"" + HREF_ENTITY_ID
 						+ "\",\"name\":\"Piet\",\"id\":\"p1\",\"enum\":\"enum1\"}]}"));
@@ -332,8 +326,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		String json = "{start:5, num:10, q:[{operator:EQUALS,field:name,value:Piet}]}";
 
 		mockMvc.perform(post(HREF_ENTITY).param("_method", "GET").content(json).contentType(APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY
+				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
+				.string("{\"href\":\"" + HREF_ENTITY
 						+ "\",\"meta\":{\"href\":\"/api/v1/Person/meta\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false},\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\""
 						+ HREF_ENTITY + "?start=0&num=10\",\"items\":[{\"href\":\"" + HREF_ENTITY_ID
 						+ "\",\"name\":\"Piet\",\"id\":\"p1\",\"enum\":\"enum1\"}]}"));
@@ -386,42 +380,74 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		Repository<Entity> repo = mock(Repository.class);
 		when(dataService.getRepository(ENTITY_NAME)).thenReturn(repo);
 		when(dataService.getEntityNames()).thenReturn(Stream.of(ENTITY_NAME));
-		Entity entityXref = new MapEntity("id");
-		entityXref.set("id", ENTITY_ID);
-		entityXref.set("xrefValue", "PietXREF");
 
-		Entity entity = new MapEntity("id");
+		// entity meta data
+		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+
+		AttributeMetaData attrId = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		when(attrId.getLabel()).thenReturn("id");
+		when(attrId.getLabel(anyString())).thenReturn("id");
+		when(attrId.getDataType()).thenReturn(STRING);
+		when(attrId.isReadOnly()).thenReturn(true);
+		when(attrId.isUnique()).thenReturn(true);
+		when(attrId.isNillable()).thenReturn(false);
+		when(attrId.isVisible()).thenReturn(false);
+		when(attrId.getAttributeParts()).thenReturn(emptyList());
+		when(attrId.getEnumOptions()).thenReturn(emptyList());
+
+		AttributeMetaData attrName = when(mock(AttributeMetaData.class).getName()).thenReturn("name").getMock();
+		when(attrName.getLabel()).thenReturn("name");
+		when(attrName.getLabel(anyString())).thenReturn("name");
+		when(attrName.getDataType()).thenReturn(STRING);
+		when(attrName.isNillable()).thenReturn(true);
+		when(attrName.isVisible()).thenReturn(true);
+		when(attrName.getAttributeParts()).thenReturn(emptyList());
+		when(attrName.getEnumOptions()).thenReturn(emptyList());
+
+		when(refEntityMeta.getAttribute("id")).thenReturn(attrId);
+		when(refEntityMeta.getAttribute("name")).thenReturn(attrName);
+		when(refEntityMeta.getIdAttribute()).thenReturn(attrId);
+		when(refEntityMeta.getAttributes()).thenReturn(asList(attrId, attrName));
+		when(refEntityMeta.getAtomicAttributes()).thenReturn(asList(attrId, attrName));
+		when(refEntityMeta.getName()).thenReturn("refEntity");
+
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(ENTITY_NAME).getMock();
+
+		AttributeMetaData attrXref = when(mock(AttributeMetaData.class).getName()).thenReturn("xrefValue").getMock();
+		when(attrXref.getLabel()).thenReturn("xrefValue");
+		when(attrXref.getLabel(anyString())).thenReturn("xrefValue");
+		when(attrXref.getDataType()).thenReturn(XREF);
+		when(attrXref.isNillable()).thenReturn(true);
+		when(attrXref.isVisible()).thenReturn(true);
+		when(attrXref.getAttributeParts()).thenReturn(emptyList());
+		when(attrXref.getEnumOptions()).thenReturn(emptyList());
+		when(attrXref.getRefEntity()).thenReturn(refEntityMeta);
+
+		when(entityMeta.getAttribute("id")).thenReturn(attrId);
+		when(entityMeta.getAttribute("xrefValue")).thenReturn(attrXref);
+		when(entityMeta.getIdAttribute()).thenReturn(attrId);
+		when(entityMeta.getAttributes()).thenReturn(asList(attrId, attrXref));
+		when(entityMeta.getAtomicAttributes()).thenReturn(asList(attrId, attrXref));
+		when(entityMeta.getName()).thenReturn(ENTITY_NAME);
+
+		Entity entityXref = new DynamicEntity(refEntityMeta);
+		entityXref.set("id", ENTITY_ID);
+		entityXref.set("name", "Piet");
+
+		Entity entity = new DynamicEntity(entityMeta);
 		entity.set("id", ENTITY_ID);
-		entity.set("name", entityXref);
+		entity.set("xrefValue", entityXref);
 
 		when(dataService.findOneById(ENTITY_NAME, ENTITY_ID)).thenReturn(entity);
-
-		DefaultAttributeMetaData attrName = new DefaultAttributeMetaData("name", FieldTypeEnum.XREF);
-		EntityMetaData meta = mock(EntityMetaData.class);
-		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(meta);
-		when(repo.getEntityMetaData()).thenReturn(meta);
-
-		EntityMetaData refMeta = mock(EntityMetaData.class);
-		AttributeMetaData attrNameXREF = new DefaultAttributeMetaData("xrefValue", FieldTypeEnum.STRING);
-		when(refMeta.getAtomicAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrNameXREF));
-		attrName.setRefEntity(refMeta);
-
-		DefaultAttributeMetaData attrId = new DefaultAttributeMetaData("id", FieldTypeEnum.INT);
-		attrId.setVisible(false);
-
-		when(meta.getAttribute("name")).thenReturn(attrName);
-		when(meta.getIdAttribute()).thenReturn(attrId);
-		when(meta.getAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
-		when(meta.getAtomicAttributes()).thenReturn(Arrays.<AttributeMetaData> asList(attrName, attrId));
-		when(repo.getName()).thenReturn(ENTITY_NAME);
-		when(meta.getName()).thenReturn(ENTITY_NAME);
-
+		when(dataService.findOneById("refEntity", ENTITY_ID)).thenReturn(entityXref);
+		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(entityMeta);
+		when(dataService.getEntityMetaData("refEntity")).thenReturn(refEntityMeta);
 		mockMvc = MockMvcBuilders.standaloneSetup(restController).setMessageConverters(gsonHttpMessageConverter)
 				.build();
 
-		mockMvc.perform(get(HREF_ENTITY_ID + "/name")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON))
-				.andExpect(content().string("{\"href\":\"" + HREF_ENTITY_ID + "/name\",\"xrefValue\":\"PietXREF\"}"));
+		mockMvc.perform(get(HREF_ENTITY_ID + "/xrefValue")).andExpect(status().isOk())
+				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(
+				content().string("{\"href\":\"/api/v1/Person/p1/xrefValue\",\"id\":\"p1\",\"name\":\"Piet\"}"));
 	}
 
 	@Test
@@ -430,7 +456,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(put(HREF_ENTITY_ID).content("{name:Klaas}").contentType(APPLICATION_JSON))
 				.andExpect(status().isOk());
 
-		verify(dataService).update(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class));
+		verify(dataService).update(Matchers.eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test
@@ -471,14 +497,15 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(
 				post(HREF_ENTITY_ID + "/name").param("_method", "PUT").content("Klaas").contentType(APPLICATION_JSON))
 				.andExpect(status().isOk());
-		verify(dataService).update(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class));
+		verify(dataService).update(Matchers.eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test
 	public void updateAttribute_unknownEntity() throws Exception
 	{
-		mockMvc.perform(post(BASE_URI + "/unknownentity/" + ENTITY_ID + "/name").param("_method", "PUT")
-				.content("Klaas").contentType(APPLICATION_JSON)).andExpect(status().isNotFound());
+		mockMvc.perform(
+				post(BASE_URI + "/unknownentity/" + ENTITY_ID + "/name").param("_method", "PUT").content("Klaas")
+						.contentType(APPLICATION_JSON)).andExpect(status().isNotFound());
 	}
 
 	@Test
@@ -501,7 +528,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		mockMvc.perform(post(HREF_ENTITY_ID).param("_method", "PUT").param("name", "Klaas")
 				.contentType(APPLICATION_FORM_URLENCODED)).andExpect(status().isNoContent());
 
-		verify(dataService).update(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class));
+		verify(dataService).update(Matchers.eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test
@@ -511,7 +538,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 				post(HREF_ENTITY_ID).param("_method", "PUT").content("{name:Klaas}").contentType(APPLICATION_JSON))
 				.andExpect(status().isOk());
 
-		verify(dataService).update(Matchers.eq(ENTITY_NAME), Matchers.any(MapEntity.class));
+		verify(dataService).update(Matchers.eq(ENTITY_NAME), any(Entity.class));
 	}
 
 	@Test
@@ -540,7 +567,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		mockMvc.perform(get(BASE_URI + "/csv/Person").param("sortColumn", "name").param("sortOrder", "DESC"))
 				.andExpect(status().isOk()).andExpect(content().contentType("text/csv")).andExpect(
-						content().string("\"name\",\"id\",\"enum\"\n\"Klaas\",\"p2\",\n\"Piet\",\"p1\",\"enum1\"\n"));
+				content().string("\"name\",\"id\",\"enum\"\n\"Klaas\",\"p2\",\n\"Piet\",\"p1\",\"enum1\"\n"));
 	}
 
 	@Configuration
@@ -601,12 +628,24 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
+		public FileMetaFactory fileMetaFactory()
+		{
+			return mock(FileMetaFactory.class);
+		}
+
+		@Bean
+		public EntityManager entityManager()
+		{
+			return mock(EntityManager.class);
+		}
+
+		@Bean
 		public RestController restController()
 		{
 			return new RestController(dataService(), tokenService(), authenticationManager(),
-					molgenisPermissionService(), new ResourceFingerprintRegistry(), new MolgenisRSQL(),
-					new RestService(dataService(), idGenerator(), fileStore()), languageService());
+					molgenisPermissionService(), new MolgenisRSQL(),
+					new RestService(dataService(), idGenerator(), fileStore(), fileMetaFactory(), entityManager()),
+					languageService());
 		}
 	}
-
 }

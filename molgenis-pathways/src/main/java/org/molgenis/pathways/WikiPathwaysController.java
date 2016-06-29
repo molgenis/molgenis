@@ -32,9 +32,8 @@ import javax.xml.parsers.ParserConfigurationException;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Repository;
-import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.pathways.model.Impact;
 import org.molgenis.pathways.model.Pathway;
 import org.molgenis.pathways.service.WikiPathwaysService;
@@ -99,7 +98,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 
 	/**
 	 * Retrieves the list of VCF entities. They are recognized by the fact that they have an effect attribute.
-	 * 
+	 *
 	 * @return {@link List} of {@link EntityMetaData} for the VCF entities
 	 */
 	private List<EntityMetaData> getVCFEntities()

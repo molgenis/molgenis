@@ -96,8 +96,8 @@ public class AbstractInQueryIT extends AbstractQueryIT
 	@Override
 	protected void testMref()
 	{
-		Query<Entity> query = new QueryImpl<>().in(AUTHOR_OF,
-				newArrayList("MOLGENIS for dummies", "Your database at the push of a button"));
+		Query<Entity> query = new QueryImpl<>()
+				.in(AUTHOR_OF, newArrayList("MOLGENIS for dummies", "Your database at the push of a button"));
 		Set<Entity> resultSet = Sets.newHashSet(person1, person2);
 		assertTrue(resultSet.contains(personsRepository.findOne(query)));
 		assertEquals(personsRepository.findAll(query).collect(toSet()), resultSet);

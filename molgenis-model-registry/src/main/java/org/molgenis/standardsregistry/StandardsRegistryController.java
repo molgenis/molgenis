@@ -1,30 +1,19 @@
 package org.molgenis.standardsregistry;
 
-import static org.molgenis.standardsregistry.StandardsRegistryController.URI;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.Valid;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.gson.Gson;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Package;
 import org.molgenis.data.meta.MetaDataSearchService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.PackageSearchResultItem;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
-import org.molgenis.data.semantic.Tag;
+import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -34,16 +23,16 @@ import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.gson.Gson;
+import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import java.util.*;
+
+import static org.molgenis.standardsregistry.StandardsRegistryController.URI;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -160,7 +149,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 						}
 					}));
 
-			PackageResponse pr = new PackageResponse(p.getSimpleName(), p.getDescription(),
+			PackageResponse pr = new PackageResponse(p.getSimpleName(), p.getLabel(), p.getDescription(),
 					searchResult.getMatchDescription(), entitiesInPackageFiltered, getTagsForPackage(p));
 			packageResponses.add(pr);
 		}
@@ -223,7 +212,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 		Package molgenisPackage = metaDataService.getPackage(packageName);
 		if (molgenisPackage == null) return null;
 
-		return new PackageResponse(molgenisPackage.getName(), molgenisPackage.getDescription(), null,
+		return new PackageResponse(molgenisPackage.getName(), molgenisPackage.getLabel(),
+				molgenisPackage.getDescription(), null,
 				getEntitiesInPackage(molgenisPackage.getName()), getTagsForPackage(molgenisPackage));
 	}
 
@@ -238,11 +228,11 @@ public class StandardsRegistryController extends MolgenisPluginController
 		return Collections.singletonList(createPackageTreeNode(molgenisPackage));
 	}
 
-	private PackageTreeNode createPackageTreeNode(Package selectedPackage)
+	private PackageTreeNode createPackageTreeNode(Package package_)
 	{
-		String title = selectedPackage.getSimpleName();
-		String key = selectedPackage.getName();
-		String tooltip = selectedPackage.getDescription();
+		String title = package_.getLabel() != null ? package_.getLabel() : package_.getSimpleName();
+		String key = package_.getName();
+		String tooltip = package_.getDescription();
 		List<PackageTreeNode> result = new ArrayList<PackageTreeNode>();
 		boolean folder = true;
 		boolean expanded = true;
@@ -250,12 +240,12 @@ public class StandardsRegistryController extends MolgenisPluginController
 		Map<String, Object> data = new HashMap<String, Object>();
 		data.put("type", "package");
 
-		for (Package subPackage : selectedPackage.getSubPackages())
+		for (Package subPackage : package_.getSubPackages())
 		{
 			result.add(createPackageTreeNode(subPackage));
 		}
 
-		for (EntityMetaData emd : selectedPackage.getEntityMetaDatas())
+		for (EntityMetaData emd : package_.getEntityMetaDatas())
 		{
 			result.add(createPackageTreeNode(emd));
 		}
@@ -298,7 +288,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 		data.put("href", "/api/v1/" + emd.getName() + "/meta/" + amd.getName());
 		data.put("tags", tagService.getTagsForAttribute(emd, amd));
 
-		if (amd.getDataType().getEnumType() == FieldTypeEnum.COMPOUND)
+		if (amd.getDataType() == AttributeType.COMPOUND)
 		{
 			for (AttributeMetaData subAmd : amd.getAttributeParts())
 			{
@@ -318,7 +308,7 @@ public class StandardsRegistryController extends MolgenisPluginController
 	{
 		List<PackageResponse.Tag> tags = Lists.newArrayList();
 
-		for (Tag<Package, LabeledResource, LabeledResource> tag : tagService.getTagsForPackage(p))
+		for (SemanticTag<Package, LabeledResource, LabeledResource> tag : tagService.getTagsForPackage(p))
 		{
 			tags.add(new PackageResponse.Tag(tag.getObject().getLabel(), tag.getObject().getIri(), tag.getRelation()
 					.toString()));
@@ -442,15 +432,17 @@ public class StandardsRegistryController extends MolgenisPluginController
 	private static class PackageResponse
 	{
 		private final String name;
+		private final String label;
 		private final String description;
 		private final String matchDescription;
 		private final List<PackageResponse.Entity> entitiesInPackage;
 		private final List<Tag> tags;
 
-		public PackageResponse(String name, String description, String matchDescription,
+		public PackageResponse(String name, String label, String description, String matchDescription,
 				List<PackageResponse.Entity> entitiesInPackage, List<Tag> tags)
 		{
 			this.name = name;
+			this.label = label;
 			this.description = description;
 			this.matchDescription = matchDescription;
 			this.entitiesInPackage = entitiesInPackage;
@@ -461,6 +453,11 @@ public class StandardsRegistryController extends MolgenisPluginController
 		public String getName()
 		{
 			return name;
+		}
+
+		public String getLabel()
+		{
+			return label;
 		}
 
 		@SuppressWarnings("unused")

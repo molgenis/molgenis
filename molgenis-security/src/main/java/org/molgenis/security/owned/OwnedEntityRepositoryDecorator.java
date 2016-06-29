@@ -1,32 +1,23 @@
 package org.molgenis.security.owned;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
+import org.molgenis.data.*;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.runas.SystemSecurityToken;
+import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.util.EntityUtils;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.google.common.collect.Lists;
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.support.OwnedEntityMetaData;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.runas.SystemSecurityToken;
-import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.util.EntityUtils;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.security.owned.OwnedEntityMetaData.OWNED;
 
 /**
  * RepositoryDecorator that works on EntityMetaData that extends OwnedEntityMetaData.
@@ -57,7 +48,7 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	{
 		if (fetch != null)
 		{
-			fetch.field(OwnedEntityMetaData.ATTR_OWNER_USERNAME);
+			fetch.field(OwnedEntityMetaData.OWNER_USERNAME);
 		}
 		decoratedRepo.forEachBatched(fetch, entities -> {
 			if (mustAddRowLevelSecurity())
@@ -157,7 +148,7 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	{
 		if (fetch != null)
 		{
-			fetch.field(OwnedEntityMetaData.ATTR_OWNER_USERNAME);
+			fetch.field(OwnedEntityMetaData.OWNER_USERNAME);
 		}
 		Entity e = decoratedRepo.findOneById(id, fetch);
 
@@ -185,7 +176,7 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	{
 		if (fetch != null)
 		{
-			fetch.field(OwnedEntityMetaData.ATTR_OWNER_USERNAME);
+			fetch.field(OwnedEntityMetaData.OWNER_USERNAME);
 		}
 		Stream<Entity> entities = decoratedRepo.findAll(ids, fetch);
 		if (mustAddRowLevelSecurity())
@@ -205,9 +196,9 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	@Override
 	public void update(Entity entity)
 	{
-		if (isOwnedEntityMetaData()
-				&& (mustAddRowLevelSecurity() || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null))
-			entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
+		if (isOwnedEntityMetaData() && (mustAddRowLevelSecurity()
+				|| entity.get(OwnedEntityMetaData.OWNER_USERNAME) == null))
+			entity.set(OwnedEntityMetaData.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		decoratedRepo.update(entity);
 	}
 
@@ -219,9 +210,9 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
 			String currentUsername = SecurityUtils.getCurrentUsername();
 			entities = entities.map(entity -> {
-				if (mustAddRowLevelSecurity || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null)
+				if (mustAddRowLevelSecurity || entity.get(OwnedEntityMetaData.OWNER_USERNAME) == null)
 				{
-					entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, currentUsername);
+					entity.set(OwnedEntityMetaData.OWNER_USERNAME, currentUsername);
 				}
 				return entity;
 			});
@@ -289,10 +280,10 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	@Override
 	public void add(Entity entity)
 	{
-		if (isOwnedEntityMetaData()
-				&& (mustAddRowLevelSecurity() || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null))
+		if (isOwnedEntityMetaData() && (mustAddRowLevelSecurity()
+				|| entity.get(OwnedEntityMetaData.OWNER_USERNAME) == null))
 		{
-			entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
+			entity.set(OwnedEntityMetaData.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		}
 
 		decoratedRepo.add(entity);
@@ -306,9 +297,9 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
 			String currentUsername = SecurityUtils.getCurrentUsername();
 			entities = entities.map(entity -> {
-				if (mustAddRowLevelSecurity || entity.get(OwnedEntityMetaData.ATTR_OWNER_USERNAME) == null)
+				if (mustAddRowLevelSecurity || entity.get(OwnedEntityMetaData.OWNER_USERNAME) == null)
 				{
-					entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, currentUsername);
+					entity.set(OwnedEntityMetaData.OWNER_USERNAME, currentUsername);
 				}
 				return entity;
 			});
@@ -338,7 +329,7 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 
 	private boolean isOwnedEntityMetaData()
 	{
-		return EntityUtils.doesExtend(getEntityMetaData(), OwnedEntityMetaData.ENTITY_NAME);
+		return EntityUtils.doesExtend(getEntityMetaData(), OWNED);
 	}
 
 	private void addRowLevelSecurity(Query<Entity> q)
@@ -347,25 +338,13 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 		if (user != null)
 		{
 			if (!q.getRules().isEmpty()) q.and();
-			q.eq(OwnedEntityMetaData.ATTR_OWNER_USERNAME, user);
+			q.eq(OwnedEntityMetaData.OWNER_USERNAME, user);
 		}
 	}
 
 	private String getOwnerUserName(Entity questionnaire)
 	{
-		return questionnaire.getString(OwnedEntityMetaData.ATTR_OWNER_USERNAME);
-	}
-
-	@Override
-	public void create()
-	{
-		decoratedRepo.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		decoratedRepo.drop();
+		return questionnaire.getString(OwnedEntityMetaData.OWNER_USERNAME);
 	}
 
 	@Override

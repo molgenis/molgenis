@@ -1,5 +1,8 @@
 package org.molgenis.data.i18n;
 
+import static java.util.Collections.singletonList;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -14,79 +17,107 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
-import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 public class LanguageRepositoryDecoratorTest
 {
-	private Repository<Entity> decoratedRepo;
+	@Mock
+	private Repository<Language> decoratedRepo;
+	@Mock
 	private DataService dataService;
+	@Mock
+	private MetaDataService metaDataService;
+	@Mock
+	private RepositoryCollection defaultBackend;
+	@Mock
+	private LanguageMetaData languageMeta;
 	private LanguageRepositoryDecorator languageRepositoryDecorator;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		decoratedRepo = mock(Repository.class);
-		when(decoratedRepo.getEntityMetaData()).thenReturn(LanguageMetaData.INSTANCE);
-		dataService = mock(DataService.class);
-		MetaDataService metaDataService = mock(MetaDataService.class);
-		ManageableRepositoryCollection defaultBackend = mock(ManageableRepositoryCollection.class);
+		MockitoAnnotations.initMocks(this);
 		when(metaDataService.getDefaultBackend()).thenReturn(defaultBackend);
 		when(dataService.getMeta()).thenReturn(metaDataService);
-		languageRepositoryDecorator = new LanguageRepositoryDecorator(decoratedRepo, dataService);
+		EntityMetaData attrMetaMeta = mock(EntityMetaData.class);
+		when(dataService.getEntityMetaData(AttributeMetaDataMetaData.ATTRIBUTE_META_DATA)).thenReturn(attrMetaMeta);
+		AttributeMetaDataFactory attrMetaFactory = mock(AttributeMetaDataFactory.class);
+		when(attrMetaFactory.create()).thenAnswer(new Answer<AttributeMetaData>()
+		{
+			@Override
+			public AttributeMetaData answer(InvocationOnMock invocation) throws Throwable
+			{
+				AttributeMetaData attrMeta = mock(AttributeMetaData.class);
+				when(attrMeta.setName(anyString())).thenReturn(attrMeta);
+				when(attrMeta.setNillable(anyBoolean())).thenReturn(attrMeta);
+				return attrMeta;
+			}
+		});
+		EntityMetaDataMetaData entityMetaMeta = mock(EntityMetaDataMetaData.class);
+		I18nStringMetaData i18nStringMeta = mock(I18nStringMetaData.class);
+		languageRepositoryDecorator = new LanguageRepositoryDecorator(decoratedRepo, dataService, attrMetaFactory,
+				entityMetaMeta, i18nStringMeta);
 	}
 
 	@Test
 	public void addStream()
 	{
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityMetaData()).thenReturn(LanguageMetaData.INSTANCE);
-		when(entity0.getString(LanguageMetaData.CODE)).thenReturn("nl");
+		Language language0 = mock(Language.class);
+		when(language0.getEntityMetaData()).thenReturn(languageMeta);
+		when(language0.getCode()).thenReturn("nl");
 
-		Entity entity1 = mock(Entity.class);
-		when(entity1.getEntityMetaData()).thenReturn(LanguageMetaData.INSTANCE);
-		when(entity1.getString(LanguageMetaData.CODE)).thenReturn("de");
+		Language language1 = mock(Language.class);
+		when(language1.getEntityMetaData()).thenReturn(languageMeta);
+		when(language1.getCode()).thenReturn("de");
 
-		Stream<Entity> entities = Arrays.asList(entity0, entity1).stream();
+		Stream<Language> entities = Arrays.asList(language0, language1).stream();
 		assertEquals(languageRepositoryDecorator.add(entities), Integer.valueOf(2));
-		verify(decoratedRepo, times(1)).add(entity0);
-		verify(decoratedRepo, times(1)).add(entity1);
+		verify(decoratedRepo, times(1)).add(language0);
+		verify(decoratedRepo, times(1)).add(language1);
 	}
 
 	@Test
 	public void deleteStream()
 	{
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityMetaData()).thenReturn(LanguageMetaData.INSTANCE);
-		when(entity0.getString(LanguageMetaData.CODE)).thenReturn("nl");
+		Language language0 = mock(Language.class);
+		when(language0.getEntityMetaData()).thenReturn(languageMeta);
+		when(language0.getCode()).thenReturn("nl");
 
-		Entity entity1 = mock(Entity.class);
-		when(entity1.getEntityMetaData()).thenReturn(LanguageMetaData.INSTANCE);
-		when(entity1.getString(LanguageMetaData.CODE)).thenReturn("de");
+		Language language1 = mock(Language.class);
+		when(language1.getEntityMetaData()).thenReturn(languageMeta);
+		when(language1.getCode()).thenReturn("de");
 
-		languageRepositoryDecorator.delete(Stream.of(entity0, entity1));
-		verify(decoratedRepo, times(1)).delete(entity0);
-		verify(decoratedRepo, times(1)).delete(entity1);
+		languageRepositoryDecorator.delete(Stream.of(language0, language1));
+		verify(decoratedRepo, times(1)).delete(language0);
+		verify(decoratedRepo, times(1)).delete(language1);
 	}
 
-	@SuppressWarnings(
-	{ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void updateStream()
 	{
-		Entity entity0 = mock(Entity.class);
-		Stream<Entity> entities = Stream.of(entity0);
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		Language language0 = mock(Language.class);
+		Stream<Language> entities = Stream.of(language0);
+		ArgumentCaptor<Stream<Language>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		doNothing().when(decoratedRepo).update(captor.capture());
 		languageRepositoryDecorator.update(entities);
-		assertEquals(captor.getValue().collect(Collectors.toList()), Arrays.asList(entity0));
+		assertEquals(captor.getValue().collect(Collectors.toList()), singletonList(language0));
 	}
 
 	@Test
@@ -94,12 +125,12 @@ public class LanguageRepositoryDecoratorTest
 	{
 		Object id0 = "id0";
 		Object id1 = "id1";
-		Entity entity0 = mock(Entity.class);
-		Entity entity1 = mock(Entity.class);
+		Language language0 = mock(Language.class);
+		Language language1 = mock(Language.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(decoratedRepo.findAll(entityIds)).thenReturn(Stream.of(entity0, entity1));
-		Stream<Entity> expectedEntities = languageRepositoryDecorator.findAll(entityIds);
-		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+		when(decoratedRepo.findAll(entityIds)).thenReturn(Stream.of(language0, language1));
+		Stream<Language> expectedEntities = languageRepositoryDecorator.findAll(entityIds);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(language0, language1));
 	}
 
 	@Test
@@ -108,29 +139,29 @@ public class LanguageRepositoryDecoratorTest
 		Fetch fetch = new Fetch();
 		Object id0 = "id0";
 		Object id1 = "id1";
-		Entity entity0 = mock(Entity.class);
-		Entity entity1 = mock(Entity.class);
+		Language language0 = mock(Language.class);
+		Language language1 = mock(Language.class);
 		Stream<Object> entityIds = Stream.of(id0, id1);
-		when(decoratedRepo.findAll(entityIds, fetch)).thenReturn(Stream.of(entity0, entity1));
-		Stream<Entity> expectedEntities = languageRepositoryDecorator.findAll(entityIds, fetch);
-		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+		when(decoratedRepo.findAll(entityIds, fetch)).thenReturn(Stream.of(language0, language1));
+		Stream<Language> expectedEntities = languageRepositoryDecorator.findAll(entityIds, fetch);
+		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(language0, language1));
 	}
 
 	@Test
 	public void findAllAsStream()
 	{
-		Entity entity0 = mock(Entity.class);
-		Query<Entity> query = mock(Query.class);
-		when(decoratedRepo.findAll(query)).thenReturn(Stream.of(entity0));
-		Stream<Entity> entities = languageRepositoryDecorator.findAll(query);
-		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
+		Language language0 = mock(Language.class);
+		Query<Language> query = mock(Query.class);
+		when(decoratedRepo.findAll(query)).thenReturn(Stream.of(language0));
+		Stream<Language> entities = languageRepositoryDecorator.findAll(query);
+		assertEquals(entities.collect(Collectors.toList()), singletonList(language0));
 	}
 
 	@Test
 	public void forEachBatchedFetch()
 	{
 		Fetch fetch = new Fetch();
-		Consumer<List<Entity>> consumer = mock(Consumer.class);
+		Consumer<List<Language>> consumer = mock(Consumer.class);
 		decoratedRepo.forEachBatched(fetch, consumer, 234);
 		verify(decoratedRepo, times(1)).forEachBatched(fetch, consumer, 234);
 	}

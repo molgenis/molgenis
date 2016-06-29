@@ -1,24 +1,31 @@
 package org.molgenis.data.postgresql;
 
 import com.google.common.base.Stopwatch;
-import com.google.common.collect.*;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.EntityMetaDataUtils;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.fieldtypes.*;
+import org.molgenis.fieldtypes.FieldType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.*;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.sql.DataSource;
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.*;
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -27,16 +34,18 @@ import java.util.stream.StreamSupport;
 import static com.google.common.base.Stopwatch.createStarted;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.counting;
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
+import static org.molgenis.data.support.EntityMetaDataUtils.*;
 
 /**
  * Repository that persists entities in a PostgreSQL database
@@ -50,14 +59,20 @@ public class PostgreSqlRepository extends AbstractRepository
 {
 	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlRepository.class);
 
-	/** JDBC batch operation size */
+	/**
+	 * JDBC batch operation size
+	 */
 	private static final int BATCH_SIZE = 1000;
+	/**
+	 * Repository capabilities
+	 */
+	private static final Set<RepositoryCapability> REPO_CAPABILITIES = unmodifiableSet(new HashSet<>(
+			asList(WRITABLE, MANAGABLE, QUERYABLE, VALIDATE_REFERENCE_CONSTRAINT, VALIDATE_UNIQUE_CONSTRAINT,
+					VALIDATE_NOTNULL_CONSTRAINT)));
 
-	/** Repository capabilities */
-	private static final Set<RepositoryCapability> REPO_CAPABILITIES = unmodifiableSet(EnumSet.of(WRITABLE, MANAGABLE,
-			QUERYABLE, VALIDATE_REFERENCE_CONSTRAINT, VALIDATE_UNIQUE_CONSTRAINT, VALIDATE_NOTNULL_CONSTRAINT));
-
-	/** Supported query operators */
+	/**
+	 * Supported query operators
+	 */
 	private static final Set<Operator> QUERY_OPERATORS = unmodifiableSet(
 			EnumSet.of(EQUALS, IN, LESS, LESS_EQUAL, GREATER, GREATER_EQUAL, RANGE, LIKE, NOT, AND, OR, NESTED));
 
@@ -75,7 +90,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		this.jdbcTemplate = requireNonNull(jdbcTemplate);
 	}
 
-	public void setMetaData(EntityMetaData metaData)
+	void setMetaData(EntityMetaData metaData)
 	{
 		this.metaData = metaData;
 	}
@@ -84,7 +99,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	@Transactional(readOnly = true)
 	public Iterator<Entity> iterator()
 	{
-		Query<Entity> q = new QueryImpl<Entity>();
+		Query<Entity> q = new QueryImpl<>();
 		return findAllBatching(q).iterator();
 	}
 
@@ -120,7 +135,7 @@ public class PostgreSqlRepository extends AbstractRepository
 				LOG.trace("SQL: {}, parameters: {}", sql, parameters);
 			}
 		}
-		return jdbcTemplate.queryForObject(sql, parameters.toArray(new Object[0]), Long.class);
+		return jdbcTemplate.queryForObject(sql, parameters.toArray(new Object[parameters.size()]), Long.class);
 	}
 
 	@Override
@@ -148,7 +163,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		{
 			return null;
 		}
-		return findOne(new QueryImpl<Entity>().eq(getEntityMetaData().getIdAttribute().getName(), id));
+		return findOne(new QueryImpl<>().eq(getEntityMetaData().getIdAttribute().getName(), id));
 	}
 
 	@Override
@@ -158,7 +173,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		{
 			return null;
 		}
-		return findOne(new QueryImpl<Entity>().eq(getEntityMetaData().getIdAttribute().getName(), id).fetch(fetch));
+		return findOne(new QueryImpl<>().eq(getEntityMetaData().getIdAttribute().getName(), id).fetch(fetch));
 	}
 
 	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
@@ -261,231 +276,6 @@ public class PostgreSqlRepository extends AbstractRepository
 		return addBatching(entities.iterator());
 	}
 
-	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
-	@Override
-	public void create()
-	{
-		String createTableSql = getSqlCreateTable(getEntityMetaData());
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Creating table for entity [{}]", getName());
-			if (LOG.isTraceEnabled())
-			{
-				LOG.trace("SQL: {}", createTableSql);
-			}
-		}
-		jdbcTemplate.execute(createTableSql);
-
-		String idAttrName = getEntityMetaData().getIdAttribute().getName();
-		getPersistedAttributes(getEntityMetaData()).forEach(attr -> {
-			// add mref tables
-			if (attr.getDataType() instanceof MrefField)
-			{
-				String createJunctionTableSql = getSqlCreateJunctionTable(getEntityMetaData(), attr);
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("Creating junction table for entity [{}] attribute [{}]", getName(), attr.getName());
-					if (LOG.isTraceEnabled())
-					{
-						LOG.trace("SQL: {}", createJunctionTableSql);
-					}
-				}
-				jdbcTemplate.execute(createJunctionTableSql);
-				String createIndexJunctionTableSql = getSqlCreateJunctionTableIndex(getEntityMetaData(), attr);
-				LOG.debug("Creating index on junction table for entity [{}] attribute [{}]", getName(), attr.getName());
-				LOG.trace("SQL: {}", createIndexJunctionTableSql);
-				jdbcTemplate.execute(createIndexJunctionTableSql);
-			}
-			else if (attr.getDataType() instanceof XrefField && isPersistedInPostgreSql(attr.getRefEntity()))
-			{
-				String createForeignKeySql = getSqlCreateForeignKey(getEntityMetaData(), attr);
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("Creating foreign key for entity [{}] attribute [{}]", getName(), attr.getName());
-					if (LOG.isTraceEnabled())
-					{
-						LOG.trace("SQL: {}", createForeignKeySql);
-					}
-				}
-				jdbcTemplate.execute(createForeignKeySql);
-			}
-
-			if (attr.isUnique() && !attr.getName().equals(idAttrName))
-			{
-				String createUniqueSql = getSqlCreateUniqueKey(getEntityMetaData(), attr);
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("Creating unique key for entity [{}] attribute [{}]", getName(), attr.getName());
-					if (LOG.isTraceEnabled())
-					{
-						LOG.trace("SQL: {}", createUniqueSql);
-					}
-				}
-				jdbcTemplate.execute(createUniqueSql);
-			}
-		});
-	}
-
-	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
-	@Override
-	public void drop()
-	{
-		getPersistedAttributesMref(getEntityMetaData()).forEach(mrefAttr -> {
-			String sqlDropJunctionTable = getSqlDropJunctionTable(getEntityMetaData(), mrefAttr);
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("Dropping junction table for entity [{}] attribute [{}]", getName(), mrefAttr.getName());
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("SQL: {}", sqlDropJunctionTable);
-				}
-			}
-			jdbcTemplate.execute(sqlDropJunctionTable);
-		});
-
-		String sqlDropTable = getSqlDropTable(getEntityMetaData());
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Dropping table for entity [{}]", getName());
-			if (LOG.isTraceEnabled())
-			{
-				LOG.trace("SQL: {}", sqlDropTable);
-			}
-		}
-		jdbcTemplate.execute(sqlDropTable);
-	}
-
-	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
-	void dropAttribute(String attrName)
-	{
-		String dropColumnSql = getSqlDropColumn(getEntityMetaData(), attrName);
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Dropping column for entity [{}] attribute [{}]", getName(), attrName);
-			if (LOG.isTraceEnabled())
-			{
-				LOG.trace("SQL: {}", dropColumnSql);
-			}
-		}
-		jdbcTemplate.execute(dropColumnSql);
-
-		DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
-		demd.removeAttributeMetaData(demd.getAttribute(attrName));
-		setMetaData(demd);
-	}
-
-	/**
-	 * Adds an attribute to the repository.
-	 * 
-	 * @param attr
-	 *            the {@link AttributeMetaData} to add
-	 */
-	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
-	void addAttribute(AttributeMetaData attr)
-	{
-		addAttributeRec(attr, true);
-	}
-
-	// FIXME code duplication with create table
-	/**
-	 * Adds an attribute to the repository.
-	 *
-	 * @param attr
-	 *            the {@link AttributeMetaData} to add
-	 * @param addToEntityMetaData
-	 *            boolean indicating if the repository's {@link EntityMetaData} should be updated as well. This should
-	 *            not happen for parts of a compound attribute.
-	 */
-	private void addAttributeRec(AttributeMetaData attr, boolean addToEntityMetaData)
-	{
-		try
-		{
-			if (attr.getExpression() != null)
-			{
-				// computed attributes are not persisted
-				return;
-			}
-			if (attr.getDataType() instanceof MrefField)
-			{
-				String createJunctionTableSql = getSqlCreateJunctionTable(getEntityMetaData(), attr);
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("Creating junction table for entity [{}] attribute [{}]", getName(), attr.getName());
-					if (LOG.isTraceEnabled())
-					{
-						LOG.trace("SQL: {}", createJunctionTableSql);
-					}
-				}
-				jdbcTemplate.execute(createJunctionTableSql);
-				String createIndexJunctionTableSql = getSqlCreateJunctionTableIndex(getEntityMetaData(), attr);
-				LOG.debug("Creating index on junction table for entity [{}] attribute [{}]", getName(), attr.getName());
-				LOG.trace("SQL: {}", createIndexJunctionTableSql);
-				jdbcTemplate.execute(createIndexJunctionTableSql);
-			}
-			else if (!attr.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
-			{
-				String addColumnSql = getSqlAddColumn(getEntityMetaData(), attr);
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("Creating column for entity [{}] attribute [{}]", getName(), attr.getName());
-					if (LOG.isTraceEnabled())
-					{
-						LOG.trace("SQL: {}", addColumnSql);
-					}
-				}
-				jdbcTemplate.execute(addColumnSql);
-			}
-
-			if (attr.getDataType() instanceof XrefField && isPersistedInPostgreSql(attr.getRefEntity()))
-			{
-				String createForeignKeySql = getSqlCreateForeignKey(getEntityMetaData(), attr);
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("Creating foreign key for entity [{}] attribute [{}]", getName(), attr.getName());
-					if (LOG.isTraceEnabled())
-					{
-						LOG.trace("SQL: {}", createForeignKeySql);
-					}
-				}
-				jdbcTemplate.execute(createForeignKeySql);
-			}
-
-			String idAttrName = getEntityMetaData().getIdAttribute().getName();
-			if (attr.isUnique() && !attr.getName().equals(idAttrName))
-			{
-				String createUniqueKeySql = getSqlCreateUniqueKey(getEntityMetaData(), attr);
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("Creating unique key for entity [{}] attribute [{}]", getName(), attr.getName());
-					if (LOG.isTraceEnabled())
-					{
-						LOG.trace("SQL: {}", createUniqueKeySql);
-					}
-				}
-				jdbcTemplate.execute(createUniqueKeySql);
-			}
-
-			if (attr.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
-			{
-				for (AttributeMetaData attrPart : attr.getAttributeParts())
-				{
-					addAttributeRec(attrPart, false);
-				}
-			}
-			DefaultEntityMetaData demd = new DefaultEntityMetaData(metaData);
-			if (addToEntityMetaData)
-			{
-				demd.addAttributeMetaData(attr);
-			}
-			setMetaData(demd);
-		}
-		catch (Exception e)
-		{
-			LOG.error("Exception updating PostgreSqlRepository.", e);
-			throw new MolgenisDataException(e);
-		}
-	}
-
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
@@ -540,11 +330,11 @@ public class PostgreSqlRepository extends AbstractRepository
 	 */
 	private void handleBatch(Consumer<List<Entity>> consumer, EntityMetaData entityMeta, Map<Object, Entity> batch)
 	{
-		FieldType idAttributeDataType = entityMeta.getIdAttribute().getDataType();
+		AttributeType idAttributeDataType = entityMeta.getIdAttribute().getDataType();
 		LOG.debug("Select ID values for a batch of MREF attributes...");
 		for (AttributeMetaData mrefAttr : entityMeta.getAtomicAttributes())
 		{
-			if (mrefAttr.getExpression() == null && mrefAttr.getDataType() instanceof MrefField)
+			if (mrefAttr.getExpression() == null && isMultipleReferenceType(mrefAttr))
 			{
 				EntityMetaData refEntityMeta = mrefAttr.getRefEntity();
 				Multimap<Object, Object> mrefIDs = selectMrefIDsForAttribute(entityMeta, idAttributeDataType, mrefAttr,
@@ -564,21 +354,21 @@ public class PostgreSqlRepository extends AbstractRepository
 	 * Selects MREF IDs for an MREF attribute from the junction table, in the order of the MREF attribute value.
 	 *
 	 * @param entityMeta          EntityMetaData for the entities
-	 * @param idAttributeDataType {@link FieldType} of the ID attribute of the entity
+	 * @param idAttributeDataType {@link AttributeType} of the ID attribute of the entity
 	 * @param mrefAttr            AttributeMetaData of the MREF attribute to select the values for
 	 * @param ids                 {@link Set} of {@link Object}s containing the values for the ID attribute of the entity
-	 * @param refIdDataType       {@link FieldType} of the ID attribute of the refEntity of the attribute
+	 * @param refIdDataType       {@link AttributeType} of the ID attribute of the refEntity of the attribute
 	 * @return Multimap mapping entity ID to a list containing the MREF IDs for the values in the attribute
 	 */
-	private Multimap<Object, Object> selectMrefIDsForAttribute(EntityMetaData entityMeta, FieldType idAttributeDataType,
-			AttributeMetaData mrefAttr, Set<Object> ids, FieldType refIdDataType)
+	private Multimap<Object, Object> selectMrefIDsForAttribute(EntityMetaData entityMeta,
+			AttributeType idAttributeDataType, AttributeMetaData mrefAttr, Set<Object> ids, AttributeType refIdDataType)
 	{
 		Stopwatch stopwatch = createStarted();
 		Multimap<Object, Object> mrefIDs = ArrayListMultimap.create();
 		String junctionTableSelect = getJunctionTableSelect(entityMeta, mrefAttr, ids.size());
 		LOG.trace("SQL: {}", junctionTableSelect);
 		jdbcTemplate.query(junctionTableSelect, (RowCallbackHandler) row -> mrefIDs
-						.put(idAttributeDataType.convert(row.getObject(1)), refIdDataType.convert(row.getObject(3))),
+						.put(convert(idAttributeDataType, row.getObject(1)), convert(refIdDataType, row.getObject(3))),
 				ids.toArray());
 
 		if (LOG.isTraceEnabled())
@@ -604,7 +394,7 @@ public class PostgreSqlRepository extends AbstractRepository
 				LOG.debug("Fetching [{}] data for query [{}]", getName(), batchQuery);
 				LOG.trace("SQL: {}, parameters: {}", sql, parameters);
 				Stopwatch sw = createStarted();
-				List<Entity> result = jdbcTemplate.query(sql, parameters.toArray(new Object[0]), entityMapper);
+				List<Entity> result = jdbcTemplate.query(sql, parameters.toArray(new Object[parameters.size()]), entityMapper);
 				LOG.trace("That took {}", sw);
 				return result;
 			}
@@ -618,16 +408,22 @@ public class PostgreSqlRepository extends AbstractRepository
 		final AttributeMetaData idAttr = getEntityMetaData().getIdAttribute();
 		List<AttributeMetaData> persistedAttrs = getPersistedAttributes(getEntityMetaData()).collect(toList());
 		final List<AttributeMetaData> persistedNonMrefAttrs = persistedAttrs.stream()
-				.filter(attr -> !(attr.getDataType() instanceof MrefField)).collect(toList());
+				.filter(attr -> !isMultipleReferenceType(attr)).collect(toList());
 		final List<AttributeMetaData> persistedMrefAttrs = persistedAttrs.stream()
-				.filter(attr -> attr.getDataType() instanceof MrefField).collect(toList());
+				.filter(EntityMetaDataUtils::isMultipleReferenceType).collect(toList());
 		final String insertSql = getSqlInsert(getEntityMetaData());
 
 		Iterators.partition(entities, BATCH_SIZE).forEachRemaining(entitiesBatch -> {
 			final Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
 
-			LOG.debug("Adding {} [{}] entities", entitiesBatch.size(), getName());
-			LOG.trace("SQL: {}", insertSql);
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Adding {} [{}] entities", entitiesBatch.size(), getName());
+				if (LOG.isTraceEnabled())
+				{
+					LOG.trace("SQL: {}", insertSql);
+				}
+			}
 			jdbcTemplate.batchUpdate(insertSql, new BatchPreparedStatementSetter()
 			{
 				@Override
@@ -640,15 +436,15 @@ public class PostgreSqlRepository extends AbstractRepository
 					{
 						if (entity.get(attr.getName()) == null)
 						{
-							if (attr.equals(getEntityMetaData().getIdAttribute()) && attr.isAuto()
-									&& (attr.getDataType() instanceof StringField))
+							if (attr.equals(getEntityMetaData().getIdAttribute()) && attr.isAuto() && isStringType(
+									attr))
 							{
 								throw new MolgenisDataException(
 										"Missing auto id value. Please use the 'AutoValueRepositoryDecorator' to add auto id capabilities.");
 							}
 							preparedStatement.setObject(fieldIndex++, null);
 						}
-						else if (attr.getDataType() instanceof XrefField)
+						else if (isSingleReferenceType(attr))
 						{
 							Object value = entity.get(attr.getName());
 							if (value instanceof Entity)
@@ -656,17 +452,17 @@ public class PostgreSqlRepository extends AbstractRepository
 								value = ((Entity) value).get(attr.getRefEntity().getIdAttribute().getName());
 							}
 
-							preparedStatement.setObject(fieldIndex++,
-									attr.getRefEntity().getIdAttribute().getDataType().convert(value));
+							preparedStatement
+									.setObject(fieldIndex++, convert(attr.getRefEntity().getIdAttribute(), value));
 						}
 						else
 						{
-							Object value = attr.getDataType().convert(entity.get(attr.getName()));
-							if (attr.getDataType() instanceof DateField)
+							Object value = convert(attr, entity.get(attr.getName()));
+							if (attr.getDataType() == DATE)
 							{
 								value = new java.sql.Date(((java.util.Date) value).getTime());
 							}
-							else if (attr.getDataType() instanceof DatetimeField)
+							else if (attr.getDataType() == DATE_TIME)
 							{
 								value = new java.sql.Timestamp(((java.util.Date) value).getTime());
 							}
@@ -720,17 +516,23 @@ public class PostgreSqlRepository extends AbstractRepository
 		final AttributeMetaData idAttribute = getEntityMetaData().getIdAttribute();
 		List<AttributeMetaData> persistedAttrs = getPersistedAttributes(getEntityMetaData()).collect(toList());
 		final List<AttributeMetaData> persistedNonMrefAttrs = persistedAttrs.stream()
-				.filter(attr -> !(attr.getDataType() instanceof MrefField)).collect(toList());
+				.filter(attr -> !isMultipleReferenceType(attr)).collect(toList());
 		final List<AttributeMetaData> persistedMrefAttrs = persistedAttrs.stream()
-				.filter(attr -> attr.getDataType() instanceof MrefField).collect(toList());
+				.filter(EntityMetaDataUtils::isMultipleReferenceType).collect(toList());
 		final String updateSql = getSqlUpdate(getEntityMetaData());
 
 		Iterators.partition(entities, BATCH_SIZE).forEachRemaining(entitiesBatch -> {
-			final List<Object> ids = new ArrayList<Object>();
+			final List<Object> ids = new ArrayList<>();
 			final Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
 
-			LOG.debug("Updating {} [{}] entities", entitiesBatch.size(), getName());
-			LOG.trace("SQL: {}", updateSql);
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Updating {} [{}] entities", entitiesBatch.size(), getName());
+				if (LOG.isTraceEnabled())
+				{
+					LOG.trace("SQL: {}", updateSql);
+				}
+			}
 			jdbcTemplate.batchUpdate(updateSql, new BatchPreparedStatementSetter()
 			{
 				@Override
@@ -738,7 +540,7 @@ public class PostgreSqlRepository extends AbstractRepository
 				{
 					Entity entity = entitiesBatch.get(rowIndex);
 
-					Object idValue = idAttribute.getDataType().convert(entity.get(idAttribute.getName()));
+					Object idValue = convert(idAttribute, entity.get(idAttribute.getName()));
 					ids.add(idValue);
 					int fieldIndex = 1;
 					for (AttributeMetaData attr : persistedNonMrefAttrs)
@@ -750,29 +552,29 @@ public class PostgreSqlRepository extends AbstractRepository
 						}
 						else
 						{
-							if (attr.getDataType() instanceof XrefField)
+							if (isSingleReferenceType(attr))
 							{
 								Object value = entity.get(attr.getName());
 								if (value instanceof Entity)
 								{
 									preparedStatement.setObject(fieldIndex++,
-											attr.getRefEntity().getIdAttribute().getDataType().convert(((Entity) value)
+											convert(attr.getRefEntity().getIdAttribute(), ((Entity) value)
 													.get(attr.getRefEntity().getIdAttribute().getName())));
 								}
 								else
 								{
 									preparedStatement.setObject(fieldIndex++,
-											attr.getRefEntity().getIdAttribute().getDataType().convert(value));
+											convert(attr.getRefEntity().getIdAttribute(), value));
 								}
 							}
 							else
 							{
-								Object value = attr.getDataType().convert(entity.get(attr.getName()));
-								if (attr.getDataType() instanceof DateField)
+								Object value = convert(attr, entity.get(attr.getName()));
+								if (attr.getDataType() == DATE)
 								{
 									value = new java.sql.Date(((java.util.Date) value).getTime());
 								}
-								else if (attr.getDataType() instanceof DatetimeField)
+								else if (attr.getDataType() == DATE_TIME)
 								{
 									value = new java.sql.Timestamp(((java.util.Date) value).getTime());
 								}
@@ -787,18 +589,14 @@ public class PostgreSqlRepository extends AbstractRepository
 						mrefs.putIfAbsent(attr.getName(), new ArrayList<>());
 						if (entity.get(attr.getName()) != null)
 						{
-							List<Entity> vals = Lists.newArrayList(entity.getEntities(attr.getName()));
-							if (vals != null)
+							AtomicInteger seqNr = new AtomicInteger();
+							for (Entity val : entity.getEntities(attr.getName()))
 							{
-								AtomicInteger seqNr = new AtomicInteger();
-								for (Entity val : vals)
-								{
-									Map<String, Object> mref = new HashMap<>();
-									mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
-									mref.put(idAttribute.getName(), idValue);
-									mref.put(attr.getName(), val.get(attr.getRefEntity().getIdAttribute().getName()));
-									mrefs.get(attr.getName()).add(mref);
-								}
+								Map<String, Object> mref = new HashMap<>();
+								mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
+								mref.put(idAttribute.getName(), idValue);
+								mref.put(attr.getName(), val.get(attr.getRefEntity().getIdAttribute().getName()));
+								mrefs.get(attr.getName()).add(mref);
 							}
 						}
 					}
@@ -815,7 +613,7 @@ public class PostgreSqlRepository extends AbstractRepository
 			// update mrefs
 			for (AttributeMetaData attr : persistedMrefAttrs)
 			{
-				if (attr.getDataType() instanceof MrefField)
+				if (isMultipleReferenceType(attr))
 				{
 					removeMrefs(ids, attr);
 					addMrefs(mrefs.get(attr.getName()), attr);
@@ -853,12 +651,12 @@ public class PostgreSqlRepository extends AbstractRepository
 				Object value = mref.get(attr.getName());
 				if (value instanceof Entity)
 				{
-					preparedStatement.setObject(3, refEntityIdAttribute.getDataType()
-							.convert(((Entity) value).get(refEntityIdAttribute.getName())));
+					preparedStatement.setObject(3,
+							convert(refEntityIdAttribute, ((Entity) value).get(refEntityIdAttribute.getName())));
 				}
 				else
 				{
-					preparedStatement.setObject(3, refEntityIdAttribute.getDataType().convert(value));
+					preparedStatement.setObject(3, convert(refEntityIdAttribute, value));
 				}
 			}
 
@@ -901,5 +699,17 @@ public class PostgreSqlRepository extends AbstractRepository
 				return ids.size();
 			}
 		});
+	}
+
+	private static Object convert(AttributeMetaData attr, Object value)
+	{
+		FieldType fieldType = MolgenisFieldTypes.getType(getValueString(attr.getDataType()));
+		return fieldType.convert(value);
+	}
+
+	private static Object convert(AttributeType attrType, Object value)
+	{
+		FieldType fieldType = MolgenisFieldTypes.getType(getValueString(attrType));
+		return fieldType.convert(value);
 	}
 }
