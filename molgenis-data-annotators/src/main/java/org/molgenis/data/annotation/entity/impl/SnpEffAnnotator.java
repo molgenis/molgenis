@@ -17,7 +17,7 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.data.vcf.VcfAttributes;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,12 +25,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.PostConstruct;
 import java.io.*;
 import java.util.*;
 import java.util.regex.Pattern;
 
-import static org.molgenis.MolgenisFieldTypes.*;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 /**
@@ -162,15 +161,14 @@ public class SnpEffAnnotator implements AnnotatorConfig
 
 		}
 
-		public void init(Entity pluginSettings, JarRunner jarRunner,
-				AttributeMetaDataFactory attributeMetaDataFactory){
+		public void init(Entity pluginSettings, JarRunner jarRunner, AttributeMetaDataFactory attributeMetaDataFactory)
+		{
 			this.pluginSettings = pluginSettings;
 			this.jarRunner = jarRunner;
 			this.attributeMetaDataFactory = attributeMetaDataFactory;
-			info = AnnotatorInfo
-					.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.EFFECT_PREDICTION, NAME,
-							"Genetic variant annotation and effect prediction toolbox. It annotates and predicts the effects of variants on genes (such as amino acid changes). ",
-							getOutputAttributes());
+			info = AnnotatorInfo.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.EFFECT_PREDICTION, NAME,
+					"Genetic variant annotation and effect prediction toolbox. It annotates and predicts the effects of variants on genes (such as amino acid changes). ",
+					getOutputAttributes());
 		}
 		@Override
 		public AnnotatorInfo getInfo()
@@ -375,7 +373,8 @@ public class SnpEffAnnotator implements AnnotatorConfig
 					"Annotated using Sequence Ontology terms. Multiple effects can be concatenated using ‘&’ (source:http://snpeff.sourceforge.net)");
 			attributes.add(annotation);
 
-			AttributeMetaData putative_impact = attributeMetaDataFactory.create().setName(PUTATIVE_IMPACT).setDataType(STRING);
+			AttributeMetaData putative_impact = attributeMetaDataFactory.create().setName(PUTATIVE_IMPACT)
+					.setDataType(STRING);
 			putative_impact.setDescription(
 					" A simple estimation of putative impact / deleteriousness : {HIGH, MODERATE, LOW, MODIFIER}(source:http://snpeff.sourceforge.net)");
 			attributes.add(putative_impact);
@@ -389,7 +388,8 @@ public class SnpEffAnnotator implements AnnotatorConfig
 			gene_id.setDescription("Gene ID");
 			attributes.add(gene_id);
 
-			AttributeMetaData feature_type = attributeMetaDataFactory.create().setName(FEATURE_TYPE).setDataType(STRING);
+			AttributeMetaData feature_type = attributeMetaDataFactory.create().setName(FEATURE_TYPE)
+					.setDataType(STRING);
 			feature_type.setDescription(
 					"Which type of feature is in the next field (e.g. transcript, motif, miRNA, etc.). It is preferred to use Sequence Ontology (SO) terms, but ‘custom’ (user defined) are allowed. ANN=A|stop_gained|HIGH|||transcript|... Tissue specific features may include cell type / tissue information separated by semicolon e.g.: ANN=A|histone_binding_site|LOW|||H3K4me3:HeLa-S3|...\n"
 							+ "Feature ID: Depending on the annotation, this may be: Transcript ID (preferably using version number), Motif ID, miRNA, ChipSeq peak, Histone mark, etc. Note: Some features may not have ID (e.g. histone marks from custom Chip-Seq experiments may not have a unique ID). (source:http://snpeff.sourceforge.net)");
@@ -420,17 +420,20 @@ public class SnpEffAnnotator implements AnnotatorConfig
 					"If variant is coding, this field describes the variant using HGVS notation (Protein level). Since transcript ID is already mentioned in ‘feature ID’, it may be omitted here.(source:http://snpeff.sourceforge.net)");
 			attributes.add(HGVS_p);
 
-			AttributeMetaData cDNA_position = attributeMetaDataFactory.create().setName(C_DNA_POSITION).setDataType(STRING);
+			AttributeMetaData cDNA_position = attributeMetaDataFactory.create().setName(C_DNA_POSITION)
+					.setDataType(STRING);
 			cDNA_position.setDescription(
 					"Position in cDNA and trancript’s cDNA length (one based)(source:http://snpeff.sourceforge.net)");
 			attributes.add(cDNA_position);
 
-			AttributeMetaData CDS_position = attributeMetaDataFactory.create().setName(CDS_POSITION).setDataType(STRING);
+			AttributeMetaData CDS_position = attributeMetaDataFactory.create().setName(CDS_POSITION)
+					.setDataType(STRING);
 			CDS_position.setDescription(
 					"Position and number of coding bases (one based includes START and STOP codons)(source:http://snpeff.sourceforge.net)");
 			attributes.add(CDS_position);
 
-			AttributeMetaData Protein_position = attributeMetaDataFactory.create().setName(PROTEIN_POSITION).setDataType(STRING);
+			AttributeMetaData Protein_position = attributeMetaDataFactory.create().setName(PROTEIN_POSITION)
+					.setDataType(STRING);
 			Protein_position.setDescription("Position and number of AA (one based, including START, but not STOP)");
 			attributes.add(Protein_position);
 

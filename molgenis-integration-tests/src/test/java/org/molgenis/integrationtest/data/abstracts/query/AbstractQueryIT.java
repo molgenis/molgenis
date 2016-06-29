@@ -1,11 +1,11 @@
 package org.molgenis.integrationtest.data.abstracts.query;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.integrationtest.data.abstracts.AbstractDataIntegrationIT;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 {
@@ -63,7 +63,7 @@ public abstract class AbstractQueryIT extends AbstractDataIntegrationIT
 		//		personEMD.addAttribute(FIRST_NAME);
 		//		personEMD.addAttribute(LAST_NAME);
 		//		personEMD.addAttribute(BIRTHDAY).setDataType(DATE);
-		//		personEMD.addAttribute(BIRTH_TIME).setDataType(DATETIME);
+		//		personEMD.addAttribute(BIRTH_TIME).setDataType(DATE_TIME);
 		//		personEMD.addAttribute(HEIGHT).setDataType(INT);
 		//		personEMD.addAttribute(ACTIVE).setDataType(BOOL);
 		//		personEMD.addAttribute(COUNTRY).setDataType(XREF).setRefEntity(countryEMD);

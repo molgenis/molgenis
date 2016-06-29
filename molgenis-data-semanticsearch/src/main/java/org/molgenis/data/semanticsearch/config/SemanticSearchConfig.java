@@ -1,11 +1,10 @@
 package org.molgenis.data.semanticsearch.config;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
-import org.molgenis.data.Repository;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.TagFactory;
 import org.molgenis.data.meta.model.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
@@ -49,6 +48,9 @@ public class SemanticSearchConfig
 	@Autowired
 	TagMetaData tagMetaData;
 
+	@Autowired
+	TagFactory tagFactory;
+
 	@Bean
 	public SemanticSearchServiceHelper semanticSearchServiceHelper()
 	{
@@ -83,8 +85,7 @@ public class SemanticSearchConfig
 	@Bean
 	TagRepository tagRepository()
 	{
-		Repository<Entity> repo = null;//FIXME dataService.getRepository(TagMetaData.MOLGENIS_GROUP_MEMBER);
-		return new TagRepository(repo, idGenerator);
+		return new TagRepository(dataService, idGenerator, tagFactory);
 	}
 
 	@Bean

@@ -1,6 +1,6 @@
 package org.molgenis.fieldtypes;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.model.MolgenisModelException;
 
 public class BoolField extends FieldType
@@ -87,9 +87,9 @@ public class BoolField extends FieldType
 	}
 
 	@Override
-	public FieldTypeEnum getEnumType()
+	public AttributeType getEnumType()
 	{
-		return FieldTypeEnum.BOOL;
+		return AttributeType.BOOL;
 	}
 
 	@Override

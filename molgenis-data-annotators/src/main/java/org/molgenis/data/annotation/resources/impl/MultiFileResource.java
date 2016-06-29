@@ -12,17 +12,19 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.ResourceConfig;
-import org.molgenis.data.vcf.VcfAttributes;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class MultiFileResource implements Resource {
+public abstract class MultiFileResource implements Resource
+{
     private final String name;
     private final Map<String, ResourceImpl> resources = new HashMap<>();
     private final MultiResourceConfig config;
     private static final Logger LOG = LoggerFactory.getLogger(MultiFileResource.class);
 
-    public MultiFileResource(String name, MultiResourceConfig config) {
+    public MultiFileResource(String name, MultiResourceConfig config)
+    {
         this.name = name;
         this.config = config;
     }

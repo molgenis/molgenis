@@ -21,7 +21,7 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.data.vcf.VcfAttributes;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,11 +30,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import static org.molgenis.MolgenisFieldTypes.TEXT;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
 import static org.molgenis.data.annotator.websettings.OmimAnnotatorSettings.Meta.OMIM_LOCATION;
 
 @Configuration
-public class OmimAnnotator  implements AnnotatorConfig
+public class OmimAnnotator implements AnnotatorConfig
 {
 	public static final String NAME = "OMIM";
 	public static final char SEPARATOR = '\t';
@@ -68,7 +68,8 @@ public class OmimAnnotator  implements AnnotatorConfig
 
 	@Bean
 	public RepositoryAnnotator omim()
-	{		annotator = new RepositoryAnnotatorImpl(NAME);
+	{
+		annotator = new RepositoryAnnotatorImpl(NAME);
 		return annotator;
 	}
 

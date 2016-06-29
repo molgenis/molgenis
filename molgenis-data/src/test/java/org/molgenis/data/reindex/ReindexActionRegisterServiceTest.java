@@ -1,115 +1,123 @@
 package org.molgenis.data.reindex;
 
+import autovalue.shaded.com.google.common.common.collect.Lists;
+import org.mockito.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.reindex.meta.ReindexAction;
+import org.molgenis.data.reindex.meta.ReindexActionFactory;
+import org.molgenis.data.reindex.meta.ReindexActionGroup;
+import org.molgenis.data.reindex.meta.ReindexActionGroupFactory;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
+import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
+import org.molgenis.data.transaction.MolgenisTransactionManager;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.mockito.Mockito.*;
+import static org.molgenis.data.reindex.meta.ReindexActionGroupMetaData.REINDEX_ACTION_GROUP;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.PENDING;
+import static org.testng.Assert.assertEquals;
+
 public class ReindexActionRegisterServiceTest
 {
-	//	@InjectMocks
-	//	private ReindexActionRegisterService reindexActionRegisterService = new ReindexActionRegisterService();
-	//	@Mock
-	//	private DataService dataService;
-	//
-	//	@BeforeMethod
-	//	public void beforeMethod()
-	//	{
-	//		MockitoAnnotations.initMocks(this);
-	//		TransactionSynchronizationManager.bindResource(MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME, "1");
-	//	}
-	//
-	//	@AfterMethod
-	//	public void afterMethod()
-	//	{
-	//		TransactionSynchronizationManager.unbindResource(MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME);
-	//	}
-	//
-	//	@Test
-	//	public void createLog()
-	//	{
-	//		Entity entity = reindexActionRegisterService.createReindexActionJob("1", 5);
-	//		assertEquals(entity.get(ReindexActionJobMetaData.ID), "1");
-	//		assertEquals(entity.get(ReindexActionJobMetaData.COUNT), 5);
-	//	}
-	//
-	//	@Test
-	//	public void createReindexAction()
-	//	{
-	//		Entity reindexActionJob = reindexActionRegisterService.createReindexActionJob("1", 2);
-	//
-	//		when(dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, "1")).thenReturn(reindexActionJob);
-	//
-	//		Entity reindexAction = reindexActionRegisterService
-	//				.createReindexAction("1", "full_entity_name", CudType.CREATE, DataType.DATA, "123", 1);
-	//		assertNotNull(reindexAction.get(ReindexActionMetaData.REINDEX_ACTION_GROUP));
-	//		assertEquals(reindexAction.getInt(ReindexActionMetaData.ACTION_ORDER), Integer.valueOf(1));
-	//		assertEquals(reindexAction.getString(ReindexActionMetaData.ENTITY_FULL_NAME), "full_entity_name");
-	//		assertEquals(reindexAction.get(ReindexActionMetaData.ENTITY_ID), "123");
-	//		assertEquals(reindexAction.get(ReindexActionMetaData.CUD_TYPE), CudType.CREATE.name());
-	//		assertEquals(reindexAction.get(ReindexActionMetaData.DATA_TYPE), DataType.DATA.name());
-	//		assertEquals(reindexAction.get(ReindexActionMetaData.REINDEX_STATUS), ReindexStatus.PENDING.name());
-	//
-	//		Entity reindexAction2 = reindexActionRegisterService
-	//				.createReindexAction("1", "full_entity_name", CudType.DELETE, DataType.METADATA, null, 2);
-	//		assertNotNull(reindexAction2.get(ReindexActionMetaData.REINDEX_ACTION_GROUP));
-	//		assertEquals(reindexAction2.getInt(ReindexActionMetaData.ACTION_ORDER), Integer.valueOf(2));
-	//		assertEquals(reindexAction2.getString(ReindexActionMetaData.ENTITY_FULL_NAME), "full_entity_name");
-	//		assertEquals(reindexAction2.getString(ReindexActionMetaData.ENTITY_ID), null);
-	//		assertEquals(reindexAction2.get(ReindexActionMetaData.CUD_TYPE), CudType.DELETE.name());
-	//		assertEquals(reindexAction2.get(ReindexActionMetaData.DATA_TYPE), DataType.METADATA.name());
-	//		assertEquals(reindexAction2.get(ReindexActionMetaData.REINDEX_STATUS), ReindexStatus.PENDING.name());
-	//	}
-	//
-	//	@Test
-	//	public void testLogAndStore()
-	//	{
-	//		DefaultEntity reindexActionJob = reindexActionRegisterService.createReindexActionJob("1", 1);
-	//		when(dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, "1")).thenReturn(reindexActionJob);
-	//
-	//		EntityMetaData entityMetaData = mock(EntityMetaData.class);
-	//		when(entityMetaData.getName()).thenReturn("non_log_entity");
-	//
-	//		reindexActionRegisterService.register(entityMetaData.getName(), CudType.CREATE, DataType.DATA, "123");
-	//
-	//		verifyZeroInteractions(dataService);
-	//
-	//		reindexActionRegisterService.storeReindexActions("1");
-	//
-	//		verify(dataService).add(eq(ReindexActionJobMetaData.ENTITY_NAME), any(Entity.class));
-	//		verify(dataService).add(eq(ReindexActionMetaData.ENTITY_NAME), any(Stream.class));
-	//	}
-	//
-	//	@Test
-	//	public void testLogAndForget()
-	//	{
-	//		DefaultEntity reindexActionJob = reindexActionRegisterService.createReindexActionJob("1", 1);
-	//		when(dataService.findOneById(ReindexActionJobMetaData.ENTITY_NAME, "1")).thenReturn(reindexActionJob);
-	//
-	//		EntityMetaData entityMetaData = mock(EntityMetaData.class);
-	//		when(entityMetaData.getName()).thenReturn("non_log_entity");
-	//
-	//		reindexActionRegisterService.register(entityMetaData.getName(), CudType.CREATE, DataType.DATA, "123");
-	//
-	//		verifyZeroInteractions(dataService);
-	//
-	//		reindexActionRegisterService.forgetReindexActions("1");
-	//
-	//		verifyZeroInteractions(dataService);
-	//
-	//		reindexActionRegisterService.storeReindexActions("1");
-	//
-	//		verifyZeroInteractions(dataService);
-	//	}
-	//
-	//	@Test
-	//	public void testLogExcludedEntities()
-	//	{
-	//		EntityMetaData entityMetaData = mock(EntityMetaData.class);
-	//		when(entityMetaData.getName()).thenReturn("ABC");
-	//		reindexActionRegisterService.addExcludedEntity("ABC");
-	//
-	//		reindexActionRegisterService.register(entityMetaData.getName(), CudType.CREATE, DataType.DATA, "123");
-	//		verifyNoMoreInteractions(dataService);
-	//
-	//		when(entityMetaData.getName()).thenReturn(ReindexActionJobMetaData.ENTITY_NAME);
-	//
-	//		reindexActionRegisterService.register(entityMetaData.getName(), CudType.CREATE, DataType.DATA, "123");
-	//		verifyNoMoreInteractions(dataService);
-	//	}
+	@InjectMocks
+	private ReindexActionRegisterService reindexActionRegisterService = new ReindexActionRegisterService();
+	@Mock
+	private ReindexActionGroupFactory reindexActionGroupFactory;
+	@Mock
+	private ReindexActionGroup reindexActionGroup;
+	@Mock
+	private ReindexActionFactory reindexActionFactory;
+	@Mock
+	private ReindexAction reindexAction;
+	@Mock
+	private DataService dataService;
+	@Captor
+	private ArgumentCaptor<Stream<ReindexAction>> reindexActionStreamCaptor;
+
+	@BeforeMethod
+	public void beforeMethod()
+	{
+		MockitoAnnotations.initMocks(this);
+		TransactionSynchronizationManager.bindResource(MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME, "1");
+	}
+
+	@AfterMethod
+	public void afterMethod()
+	{
+		TransactionSynchronizationManager.unbindResource(MolgenisTransactionManager.TRANSACTION_ID_RESOURCE_NAME);
+	}
+
+	@Test
+	public void testRegisterCreateSingleEntity()
+	{
+		when(reindexActionGroupFactory.create("1")).thenReturn(reindexActionGroup);
+		when(reindexActionGroup.setCount(1)).thenReturn(reindexActionGroup);
+
+		when(reindexActionFactory.create()).thenReturn(reindexAction);
+		when(reindexAction.setReindexActionGroup(reindexActionGroup)).thenReturn(reindexAction);
+		when(reindexAction.setEntityFullName("TestEntityName")).thenReturn(reindexAction);
+		when(reindexAction.setCudType(CudType.CREATE)).thenReturn(reindexAction);
+		when(reindexAction.setDataType(DataType.DATA)).thenReturn(reindexAction);
+		when(reindexAction.setEntityId("123")).thenReturn(reindexAction);
+		when(reindexAction.setActionOrder(0)).thenReturn(reindexAction);
+		when(reindexAction.setReindexStatus(PENDING)).thenReturn(reindexAction);
+
+		reindexActionRegisterService.register("TestEntityName", CudType.CREATE, DataType.DATA, "123");
+
+		verifyZeroInteractions(dataService);
+
+		reindexActionRegisterService.storeReindexActions("1");
+
+		verify(dataService).add(REINDEX_ACTION_GROUP, reindexActionGroup);
+		verify(dataService).add(eq(REINDEX_ACTION), reindexActionStreamCaptor.capture());
+		assertEquals(reindexActionStreamCaptor.getValue().collect(Collectors.toList()),
+				Lists.newArrayList(reindexAction));
+	}
+
+	@Test
+	public void testRegisterAndForget()
+	{
+		when(reindexActionGroupFactory.create("1")).thenReturn(reindexActionGroup);
+		when(reindexActionGroup.setCount(1)).thenReturn(reindexActionGroup);
+
+		when(reindexActionFactory.create()).thenReturn(reindexAction);
+		when(reindexAction.setReindexActionGroup(reindexActionGroup)).thenReturn(reindexAction);
+		when(reindexAction.setEntityFullName("TestEntityName")).thenReturn(reindexAction);
+		when(reindexAction.setCudType(CudType.CREATE)).thenReturn(reindexAction);
+		when(reindexAction.setDataType(DataType.DATA)).thenReturn(reindexAction);
+		when(reindexAction.setEntityId("123")).thenReturn(reindexAction);
+		when(reindexAction.setActionOrder(0)).thenReturn(reindexAction);
+		when(reindexAction.setReindexStatus(PENDING)).thenReturn(reindexAction);
+
+		reindexActionRegisterService.register("TestEntityName", CudType.CREATE, DataType.DATA, "123");
+
+		verifyZeroInteractions(dataService);
+
+		reindexActionRegisterService.forgetReindexActions("1");
+
+		verifyZeroInteractions(dataService);
+
+		reindexActionRegisterService.storeReindexActions("1");
+
+		verifyZeroInteractions(dataService);
+	}
+
+	@Test
+	public void testRegisterExcludedEntities()
+	{
+		EntityMetaData entityMetaData = mock(EntityMetaData.class);
+		when(entityMetaData.getName()).thenReturn("ABC");
+		reindexActionRegisterService.addExcludedEntity("ABC");
+
+		reindexActionRegisterService.register("ABC", CudType.CREATE, DataType.DATA, "123");
+		verifyNoMoreInteractions(dataService);
+	}
 }

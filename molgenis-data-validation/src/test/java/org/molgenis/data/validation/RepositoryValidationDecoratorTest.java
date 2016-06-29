@@ -1,15 +1,13 @@
 package org.molgenis.data.validation;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singleton;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.MREF;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.testng.Assert.assertEquals;
+import org.mockito.ArgumentCaptor;
+import org.molgenis.data.*;
+import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.QueryImpl;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -19,14 +17,11 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.mockito.ArgumentCaptor;
-import org.molgenis.data.*;
-import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.support.QueryImpl;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singleton;
+import static org.mockito.Mockito.*;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.testng.Assert.assertEquals;
 
 public class RepositoryValidationDecoratorTest
 {
@@ -214,34 +209,6 @@ public class RepositoryValidationDecoratorTest
 		repositoryValidationDecorator.add(entity0);
 		verify(decoratedRepo, times(1)).add(entity0);
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
-	}
-
-	@Test
-	public void addEntityDoesNotRequireValidation()
-	{
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because entity does not require validation
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(null); // valid, because entity does not require validation
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		// actual tests
-		repositoryValidationDecorator.add(entity0);
-		verify(decoratedRepo, times(1)).add(entity0);
 	}
 
 	@Test
@@ -1020,41 +987,6 @@ public class RepositoryValidationDecoratorTest
 		stream.collect(Collectors.toList()); // process stream to enable validation
 
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
-	}
-
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
-	@Test
-	public void addStreamEntityDoesNotRequireValidation()
-	{
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because entity does not require validation
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		// actual tests
-		List<Entity> entities = Arrays.asList(entity0);
-		repositoryValidationDecorator.add(entities.stream());
-
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(decoratedRepo, times(1)).add(captor.capture());
-		Stream<Entity> stream = captor.getValue();
-		stream.collect(Collectors.toList()); // process stream to enable validation
 	}
 
 	@SuppressWarnings(
@@ -2092,34 +2024,6 @@ public class RepositoryValidationDecoratorTest
 	}
 
 	@Test
-	public void updateEntityDoesNotRequireValidation()
-	{
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because entity does not require validation
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		// actual tests
-		repositoryValidationDecorator.update(entity0);
-		verify(decoratedRepo, times(1)).update(entity0);
-	}
-
-	@Test
 	public void updateEntityAttributesValidationError()
 	{
 		// entities
@@ -3154,41 +3058,6 @@ public class RepositoryValidationDecoratorTest
 		stream.collect(Collectors.toList()); // process stream to enable validation
 
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
-	}
-
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
-	@Test
-	public void updateStreamEntityDoesNotRequireValidation()
-	{
-		// entities
-		Entity entity0 = mock(Entity.class);
-		when(entity0.getEntityMetaData()).thenReturn(entityMeta);
-
-		when(entity0.getIdValue()).thenReturn("id0");
-		when(entity0.getEntity(attrXrefName)).thenReturn(null); // valid, because entity does not require validation
-		when(entity0.getEntity(attrNillableXrefName)).thenReturn(null);
-		when(entity0.getEntities(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.getEntities(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.getString(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		when(entity0.get(attrIdName)).thenReturn("id0");
-		when(entity0.get(attrXrefName)).thenReturn(refEntity0);
-		when(entity0.get(attrNillableXrefName)).thenReturn(null);
-		when(entity0.get(attrMrefName)).thenReturn(Arrays.asList(refEntity0));
-		when(entity0.get(attrNillableMrefName)).thenReturn(emptyList());
-		when(entity0.get(attrUniqueStringName)).thenReturn("unique0");
-		when(entity0.get(attrUniqueXrefName)).thenReturn(refEntity0);
-
-		// actual tests
-		List<Entity> entities = Arrays.asList(entity0);
-		repositoryValidationDecorator.update(entities.stream());
-
-		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(decoratedRepo, times(1)).update(captor.capture());
-		Stream<Entity> stream = captor.getValue();
-		stream.collect(Collectors.toList()); // process stream to enable validation
 	}
 
 	@SuppressWarnings(

@@ -1,22 +1,16 @@
 package org.molgenis.data.idcard.model;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.DATETIME;
-import static org.molgenis.MolgenisFieldTypes.HYPERLINK;
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.data.idcard.model.IdCardPackage.PACKAGE_ID_CARD;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LOOKUP;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.idcard.IdCardRepositoryCollection;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.idcard.model.IdCardPackage.PACKAGE_ID_CARD;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
 public class IdCardBiobankMetaData extends SystemEntityMetaData
@@ -71,8 +65,8 @@ public class IdCardBiobankMetaData extends SystemEntityMetaData
 		addAttribute(ID).setLabel("ID-Card").setDataType(HYPERLINK);
 		addAttribute(ALSO_LISTED_IN).setLabel("also listed in").setDataType(TEXT).setVisible(false);
 
-		addAttribute(LAST_ACTIVITIES).setLabel("Last activities").setDataType(DATETIME);
-		addAttribute(DATE_OF_INCLUSION).setLabel("Date of inclusion").setDataType(DATETIME);
+		addAttribute(LAST_ACTIVITIES).setLabel("Last activities").setDataType(DATE_TIME);
+		addAttribute(DATE_OF_INCLUSION).setLabel("Date of inclusion").setDataType(DATE_TIME);
 
 		addAttribute(NAME_OF_HOST_INSTITUTION).setLabel("Host institution");
 		addAttribute(TYPE_OF_HOST_INSTITUTION).setLabel("Type of host institution").setAggregatable(true);
@@ -80,7 +74,7 @@ public class IdCardBiobankMetaData extends SystemEntityMetaData
 		addAttribute(SALUTATION).setLabel("Salutation").setDataType(STRING).setVisible(false);
 		addAttribute(FIRST_NAME).setLabel("First name").setDataType(STRING);
 		addAttribute(LAST_NAME).setLabel("Last name").setDataType(STRING);
-		addAttribute(EMAIL).setLabel("e-mail address").setDataType(MolgenisFieldTypes.EMAIL);
+		addAttribute(EMAIL).setLabel("e-mail address").setDataType(AttributeType.EMAIL);
 		addAttribute(PHONE).setLabel("Phone").setDataType(STRING);
 		addAttribute(STREET1).setLabel("Address").setDataType(STRING);
 		addAttribute(STREET2).setLabel("Address (cont.)").setDataType(STRING);
@@ -88,7 +82,6 @@ public class IdCardBiobankMetaData extends SystemEntityMetaData
 		addAttribute(CITY).setLabel("City");
 		addAttribute(COUNTRY).setLabel("Country");
 
-		addAttribute(ORGANIZATION_ID, ROLE_ID).setLabel("OrganizationID").setDataType(INT)
-				.setVisible(false);
+		addAttribute(ORGANIZATION_ID, ROLE_ID).setLabel("OrganizationID").setDataType(INT).setVisible(false);
 	}
 }

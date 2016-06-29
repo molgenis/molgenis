@@ -1,18 +1,9 @@
 package org.molgenis.util;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static java.lang.String.format;
-import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
-import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
-
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -22,12 +13,45 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static java.lang.String.format;
+import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
+import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 
 public class EntityUtils
 {
+	/**
+	 * Convert a string value to a typed value based on a non-entity-referencing attribute data type.
+	 *
+	 * @param valueStr string value
+	 * @param attr     non-entity-referencing attribute
+	 * @return typed value
+	 * @throws MolgenisDataException if attribute references another entity
+	 */
+	public static Object getTypedValue(String valueStr, AttributeMetaData attr)
+	{
+		switch (attr.getDataType())
+		{
+			case CATEGORICAL:
+			case FILE:
+			case XREF:
+			case CATEGORICAL_MREF:
+			case MREF:
+				throw new MolgenisDataException(
+						"getTypedValue(String, AttributeMetaData) can't be used for attributes referencing entities");
+			default:
+				break;
+		}
+		return getTypedValue(valueStr, attr, null);
+	}
+
 	/**
 	 * Convert a string value to a typed value based on the attribute data type.
 	 *
@@ -43,7 +67,7 @@ public class EntityUtils
 			return null;
 		}
 
-		switch (attr.getDataType().getEnumType())
+		switch (attr.getDataType())
 		{
 			case BOOL:
 				return Boolean.valueOf(valueStr);
@@ -95,8 +119,7 @@ public class EntityUtils
 			case LONG:
 				return Long.valueOf(valueStr);
 			default:
-				throw new RuntimeException(
-						format("Unknown attribute type [%s]", attr.getDataType().getEnumType().toString()));
+				throw new RuntimeException(format("Unknown attribute type [%s]", attr.getDataType().toString()));
 		}
 	}
 
@@ -177,7 +200,7 @@ public class EntityUtils
 					@Override
 					public boolean apply(AttributeMetaData attributeMetaData)
 					{
-						return attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.COMPOUND;
+						return attributeMetaData.getDataType() == AttributeType.COMPOUND;
 					}
 				}), new Function<AttributeMetaData, String>()
 				{
@@ -394,11 +417,40 @@ public class EntityUtils
 		return true;
 	}
 
+	public static boolean equals(Tag tag, Tag otherTag)
+	{
+		if (!Objects.equals(tag.getIdentifier(), otherTag.getIdentifier()))
+		{
+			return false;
+		}
+		if (!Objects.equals(tag.getObjectIri(), otherTag.getObjectIri()))
+		{
+			return false;
+		}
+		if (!Objects.equals(tag.getLabel(), otherTag.getLabel()))
+		{
+			return false;
+		}
+		if (!Objects.equals(tag.getRelationIri(), otherTag.getRelationIri()))
+		{
+			return false;
+		}
+		if (!Objects.equals(tag.getRelationLabel(), otherTag.getRelationLabel()))
+		{
+			return false;
+		}
+		if (!Objects.equals(tag.getCodeSystem(), otherTag.getCodeSystem()))
+		{
+			return false;
+		}
+		return true;
+	}
+
 	public static boolean equals(AttributeMetaData attr, AttributeMetaData otherAttr)
 	{
-		if(attr == null || otherAttr == null){
-			if(attr == null && otherAttr == null)
-				return true;
+		if (attr == null || otherAttr == null)
+		{
+			if (attr == null && otherAttr == null) return true;
 			return false;
 		}
 		// identifier might be null if attribute hasn't been persisted yet
@@ -422,7 +474,7 @@ public class EntityUtils
 			return false;
 		}
 
-		if (!attr.getDataType().equals(otherAttr.getDataType()))
+		if (attr.getDataType() != otherAttr.getDataType())
 		{
 			return false;
 		}
@@ -556,7 +608,7 @@ public class EntityUtils
 		for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
 		{
 			String attrName = attr.getName();
-			switch (attr.getDataType().getEnumType())
+			switch (attr.getDataType())
 			{
 				case BOOL:
 					if (!Objects.equals(entity.getBoolean(attrName), otherEntity.getBoolean(attrName)))
@@ -611,7 +663,7 @@ public class EntityUtils
 					}
 					break;
 				case COMPOUND:
-					throw new RuntimeException(format("Invalid data type [%s]", attr.getDataType().getEnumType()));
+					throw new RuntimeException(format("Invalid data type [%s]", attr.getDataType()));
 				case DATE:
 					if (!Objects.equals(entity.getDate(attrName), otherEntity.getDate(attrName)))
 					{
@@ -655,7 +707,7 @@ public class EntityUtils
 					}
 					break;
 				default:
-					throw new RuntimeException(format("Unknown data type [%s]", attr.getDataType().getEnumType()));
+					throw new RuntimeException(format("Unknown data type [%s]", attr.getDataType()));
 			}
 		}
 		return true;
@@ -668,7 +720,7 @@ public class EntityUtils
 		{
 			int hValue = 0;
 			String attrName = attr.getName();
-			switch (attr.getDataType().getEnumType())
+			switch (attr.getDataType())
 			{
 				case BOOL:
 					hValue = Objects.hashCode(entity.getBoolean(attrName));
@@ -689,7 +741,7 @@ public class EntityUtils
 					}
 					break;
 				case COMPOUND:
-					throw new RuntimeException(format("Invalid data type [%s]", attr.getDataType().getEnumType()));
+					throw new RuntimeException(format("Invalid data type [%s]", attr.getDataType()));
 				case DATE:
 					hValue = Objects.hashCode(entity.getDate(attrName));
 					break;
@@ -715,7 +767,7 @@ public class EntityUtils
 					hValue = Objects.hashCode(entity.getLong(attrName));
 					break;
 				default:
-					throw new RuntimeException(format("Unknown data type [%s]", attr.getDataType().getEnumType()));
+					throw new RuntimeException(format("Unknown data type [%s]", attr.getDataType()));
 			}
 			h += Objects.hashCode(attrName) ^ hValue;
 		}

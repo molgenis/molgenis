@@ -1,18 +1,14 @@
 package org.molgenis.data.meta.system;
 
-import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.MolgenisFieldTypes.DATETIME;
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.fieldtypes.EnumField;
-import org.springframework.stereotype.Component;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
 public class ImportRunMetaData extends SystemEntityMetaData
@@ -40,10 +36,10 @@ public class ImportRunMetaData extends SystemEntityMetaData
 	{
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false)
 				.setDescription("automatically generated internal id, only for internal use.");
-		addAttribute(STARTDATE).setDataType(DATETIME).setNillable(false).setDescription("");
-		addAttribute(ENDDATE).setDataType(DATETIME).setNillable(true).setDescription("");
+		addAttribute(STARTDATE).setDataType(DATE_TIME).setNillable(false).setDescription("");
+		addAttribute(ENDDATE).setDataType(DATE_TIME).setNillable(true).setDescription("");
 		addAttribute(USERNAME).setNillable(false).setDescription("");
-		addAttribute(STATUS).setDataType(new EnumField()).setNillable(false)
+		addAttribute(STATUS).setDataType(ENUM).setNillable(false)
 				.setEnumOptions(Arrays.asList("RUNNING", "FINISHED", "FAILED")).setDescription("");
 		addAttribute(MESSAGE).setDataType(TEXT).setNillable(true).setDescription("");
 		addAttribute(PROGRESS).setDataType(INT).setNillable(false).setDescription("");

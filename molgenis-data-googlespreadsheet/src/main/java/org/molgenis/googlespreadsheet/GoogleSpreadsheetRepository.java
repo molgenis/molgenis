@@ -1,15 +1,10 @@
 package org.molgenis.googlespreadsheet;
 
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
-
+import com.google.common.collect.Iterables;
+import com.google.gdata.client.spreadsheet.FeedURLFactory;
+import com.google.gdata.client.spreadsheet.SpreadsheetService;
+import com.google.gdata.data.spreadsheet.*;
+import com.google.gdata.util.ServiceException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -19,16 +14,14 @@ import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DynamicEntity;
 
-import com.google.common.collect.Iterables;
-import com.google.gdata.client.spreadsheet.FeedURLFactory;
-import com.google.gdata.client.spreadsheet.SpreadsheetService;
-import com.google.gdata.data.spreadsheet.Cell;
-import com.google.gdata.data.spreadsheet.CellEntry;
-import com.google.gdata.data.spreadsheet.CellFeed;
-import com.google.gdata.data.spreadsheet.CustomElementCollection;
-import com.google.gdata.data.spreadsheet.ListEntry;
-import com.google.gdata.data.spreadsheet.ListFeed;
-import com.google.gdata.util.ServiceException;
+import java.io.IOException;
+import java.net.URL;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 
 public class GoogleSpreadsheetRepository extends AbstractRepository
 {
@@ -46,27 +39,29 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 	private final SpreadsheetService spreadsheetService;
 	private final String spreadsheetKey;
 	private final String worksheetId;
+	private final EntityMetaDataFactory entityMetaFactory;
+	private final AttributeMetaDataFactory attrMetaFactory;
 	private final Visibility visibility;
 
 	private EntityMetaData entityMetaData;
 
-	public GoogleSpreadsheetRepository(SpreadsheetService spreadsheetService, String spreadsheetKey, String worksheetId)
+	public GoogleSpreadsheetRepository(SpreadsheetService spreadsheetService, String spreadsheetKey, String worksheetId,
+			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
 			throws IOException, ServiceException
 	{
-		this(spreadsheetService, spreadsheetKey, worksheetId, Visibility.PUBLIC);
+		this(spreadsheetService, spreadsheetKey, worksheetId, entityMetaFactory, attrMetaFactory, Visibility.PUBLIC);
 	}
 
 	public GoogleSpreadsheetRepository(SpreadsheetService spreadsheetService, String spreadsheetKey, String worksheetId,
-			Visibility visibility) throws IOException, ServiceException
+			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory, Visibility visibility)
+			throws IOException, ServiceException
 	{
-		if (spreadsheetService == null) throw new IllegalArgumentException("spreadsheetService is null");
-		if (spreadsheetKey == null) throw new IllegalArgumentException("spreadsheetKey is null");
-		if (worksheetId == null) throw new IllegalArgumentException("worksheetId is null");
-		if (visibility == null) throw new IllegalArgumentException("visibility is null");
-		this.spreadsheetService = spreadsheetService;
-		this.spreadsheetKey = spreadsheetKey;
-		this.worksheetId = worksheetId;
-		this.visibility = visibility;
+		this.spreadsheetService = requireNonNull(spreadsheetService);
+		this.spreadsheetKey = requireNonNull(spreadsheetKey);
+		this.worksheetId = requireNonNull(worksheetId);
+		this.entityMetaFactory = requireNonNull(entityMetaFactory);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
+		this.visibility = requireNonNull(visibility);
 	}
 
 	@Override
@@ -80,15 +75,7 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 			feed = spreadsheetService.getFeed(FeedURLFactory.getDefault()
 					.getListFeedUrl(spreadsheetKey, worksheetId, visibility.toString(), "full"), ListFeed.class);
 		}
-		catch (MalformedURLException e)
-		{
-			throw new RuntimeException(e);
-		}
-		catch (IOException e)
-		{
-			throw new RuntimeException(e);
-		}
-		catch (ServiceException e)
+		catch (IOException | ServiceException e)
 		{
 			throw new RuntimeException(e);
 		}
@@ -105,7 +92,7 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 			@Override
 			public Entity next()
 			{
-				Entity entity = new DynamicEntity(null); // FIXME pass entity meta data instead of null
+				Entity entity = new DynamicEntity(getEntityMetaData());
 				CustomElementCollection customElements = it.next().getCustomElements();
 				for (AttributeMetaData attributeMetaData : entityMetaData.getAttributes())
 				{
@@ -131,9 +118,6 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			EntityMetaDataFactory entityMetaFactory = getApplicationContext().getBean(EntityMetaDataFactory.class);
-			AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
-
 			// ListFeed does not give you the true column names, use CellFeed instead
 			CellFeed feed;
 			try
@@ -143,15 +127,7 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 				cellFeedUrl = new URL(cellFeedUrl.toString() + "?min-row=1&max-row=1");
 				feed = spreadsheetService.getFeed(cellFeedUrl, CellFeed.class);
 			}
-			catch (MalformedURLException e)
-			{
-				throw new RuntimeException(e);
-			}
-			catch (IOException e)
-			{
-				throw new RuntimeException(e);
-			}
-			catch (ServiceException e)
+			catch (IOException | ServiceException e)
 			{
 				throw new RuntimeException(e);
 			}

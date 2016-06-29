@@ -19,7 +19,7 @@ import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.vcf.VcfAttributes;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -29,7 +29,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.*;
 
 @Configuration
@@ -65,7 +65,8 @@ public class GoNLAnnotator implements AnnotatorConfig
 
 	@Bean
 	public RepositoryAnnotator gonl()
-	{ 		annotator = new RepositoryAnnotatorImpl(NAME);
+	{
+		annotator = new RepositoryAnnotatorImpl(NAME);
 		return annotator;
 	}
 
@@ -73,12 +74,14 @@ public class GoNLAnnotator implements AnnotatorConfig
 	public void init()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
-		AttributeMetaData goNlAfAttribute = attributeMetaDataFactory.create().setName(GONL_GENOME_AF).setDataType(STRING)
+		AttributeMetaData goNlAfAttribute = attributeMetaDataFactory.create().setName(GONL_GENOME_AF)
+				.setDataType(STRING)
 				.setDescription("The allele frequency for variants seen in the population used for the GoNL project")
 				.setLabel(GONL_AF_LABEL);
 
-		AttributeMetaData goNlGtcAttribute = attributeMetaDataFactory.create().setName(GONL_GENOME_GTC).setDataType(STRING).setDescription(
-				"GenoType Counts. For each ALT allele in the same order as listed = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 1/0, 0|1 and 1|0 are all counted as 0/1. When one or more alleles is not called for a genotype in a specific sample (./., ./0, ./1, ./2, etc.), that sample's genotype is completely discarded for calculating GTC.")
+		AttributeMetaData goNlGtcAttribute = attributeMetaDataFactory.create().setName(GONL_GENOME_GTC)
+				.setDataType(STRING).setDescription(
+						"GenoType Counts. For each ALT allele in the same order as listed = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 1/0, 0|1 and 1|0 are all counted as 0/1. When one or more alleles is not called for a genotype in a specific sample (./., ./0, ./1, ./2, etc.), that sample's genotype is completely discarded for calculating GTC.")
 				.setLabel(GONL_GTC_LABEL);
 
 		attributes.add(goNlGtcAttribute);
@@ -98,7 +101,7 @@ public class GoNLAnnotator implements AnnotatorConfig
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator(vcfAttributes);
 
 		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(GONL_MULTI_FILE_RESOURCE, thousandGenomeInfo,
-		locusQueryCreator, dataService, resources, (annotationSourceFileName) -> {
+				locusQueryCreator, dataService, resources, (annotationSourceFileName) -> {
 			goNLAnnotatorSettings.set(ROOT_DIRECTORY, annotationSourceFileName);
 			goNLAnnotatorSettings.set(FILEPATTERN, "gonl.chr%s.snps_indels.r5.vcf.gz");
 			goNLAnnotatorSettings.set(OVERRIDE_CHROMOSOME_FILES, "X:gonl.chrX.release4.gtc.vcf.gz");
@@ -107,8 +110,8 @@ public class GoNLAnnotator implements AnnotatorConfig
 		{
 			public String postFixResource = "";
 
-			@Override protected void processQueryResults (Entity
-			entity, Iterable < Entity > annotationSourceEntities)
+			@Override
+			protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities)
 			{
 				String afs = null;
 				String gtcs = null;
@@ -116,7 +119,8 @@ public class GoNLAnnotator implements AnnotatorConfig
 				for (Entity resourceEntity : annotationSourceEntities)
 				{
 					//situation example: input A, GoNL A
-					if (resourceEntity.get(vcfAttributes.getRefAttribute().getName()).equals(vcfAttributes.getRefAttribute().getName()))
+					if (resourceEntity.get(vcfAttributes.getRefAttribute().getName())
+							.equals(vcfAttributes.getRefAttribute().getName()))
 					{
 						refMatches.add(resourceEntity);
 					}
@@ -126,13 +130,13 @@ public class GoNLAnnotator implements AnnotatorConfig
 					else if (vcfAttributes.getRefAttribute().getName()
 							.indexOf(resourceEntity.getString(vcfAttributes.getRefAttribute().getName())) == 0)
 					{
-						postFixResource = entity.getString(vcfAttributes.getRefAttribute().getName())
-								.substring(resourceEntity.getString(vcfAttributes.getRefAttribute().getName()).length());
-						resourceEntity
-								.set(vcfAttributes.getRefAttribute().getName(), resourceEntity.getString(vcfAttributes.getRefAttribute().getName()) + postFixResource);
+						postFixResource = entity.getString(vcfAttributes.getRefAttribute().getName()).substring(
+								resourceEntity.getString(vcfAttributes.getRefAttribute().getName()).length());
+						resourceEntity.set(vcfAttributes.getRefAttribute().getName(),
+								resourceEntity.getString(vcfAttributes.getRefAttribute().getName()) + postFixResource);
 						String newAltString = Arrays
-								.asList(resourceEntity.getString(vcfAttributes.getAltAttribute().getName()).split(",")).stream()
-								.map(alt -> alt + postFixResource).collect(Collectors.joining(","));
+								.asList(resourceEntity.getString(vcfAttributes.getAltAttribute().getName()).split(","))
+								.stream().map(alt -> alt + postFixResource).collect(Collectors.joining(","));
 						resourceEntity.set(vcfAttributes.getAltAttribute().getName(), newAltString);
 						refMatches.add(resourceEntity);
 					}
@@ -143,14 +147,18 @@ public class GoNLAnnotator implements AnnotatorConfig
 							.indexOf(entity.getString(vcfAttributes.getRefAttribute().getName())) == 0)
 					{
 						int postFixInputLength = resourceEntity.getString(vcfAttributes.getRefAttribute().getName())
-								.substring(entity.getString(vcfAttributes.getRefAttribute().getName()).length()).length();
+								.substring(entity.getString(vcfAttributes.getRefAttribute().getName()).length())
+								.length();
 						//bugfix: matching A/G to ACT/A results in postFixInputLength=2, correctly updating ref from ACT to A,
 						//but then tries to substring the alt allele A to length -1 (1 minus 2) which is not allowed.
 						//added a check to prevent this: alt.length() > postFixInputLength ? trim the alt : change to 'n/a' because we cannot use this alt.
-						resourceEntity.set(vcfAttributes.getRefAttribute().getName(), resourceEntity.getString(vcfAttributes.getRefAttribute().getName()).substring(0,
-								(resourceEntity.getString(vcfAttributes.getRefAttribute().getName()).length() - postFixInputLength)));
-						String newAltString = Arrays.asList(resourceEntity.getString(vcfAttributes.getAltAttribute().getName()).split(",")).stream()
-								.map(alt -> alt.length() > postFixInputLength ? alt
+						resourceEntity.set(vcfAttributes.getRefAttribute().getName(),
+								resourceEntity.getString(vcfAttributes.getRefAttribute().getName()).substring(0,
+										(resourceEntity.getString(vcfAttributes.getRefAttribute().getName()).length()
+												- postFixInputLength)));
+						String newAltString = Arrays
+								.asList(resourceEntity.getString(vcfAttributes.getAltAttribute().getName()).split(","))
+								.stream().map(alt -> alt.length() > postFixInputLength ? alt
 										.substring(0, (alt.length() - postFixInputLength)) : "n/a")
 								.collect(Collectors.joining(","));
 						resourceEntity.set(vcfAttributes.getAltAttribute().getName(), newAltString);
@@ -162,8 +170,9 @@ public class GoNLAnnotator implements AnnotatorConfig
 					List<Entity> alleleMatches = Lists.newArrayList();
 					for (String alt : entity.getString(vcfAttributes.getAltAttribute().getName()).split(","))
 					{
-						alleleMatches
-								.add(Iterables.find(refMatches, gonl -> (alt).equals((gonl.getString(vcfAttributes.getAltAttribute().getName()))), null));
+						alleleMatches.add(Iterables.find(refMatches,
+								gonl -> (alt).equals((gonl.getString(vcfAttributes.getAltAttribute().getName()))),
+								null));
 					}
 
 					if (!Iterables.all(alleleMatches, Predicates.isNull()))
@@ -181,7 +190,7 @@ public class GoNLAnnotator implements AnnotatorConfig
 				entity.set(GONL_GENOME_AF, afs);
 				entity.set(GONL_GENOME_GTC, gtcs);
 			}
-		} ;
+		};
 		annotator.init(entityAnnotator);
 
 	}

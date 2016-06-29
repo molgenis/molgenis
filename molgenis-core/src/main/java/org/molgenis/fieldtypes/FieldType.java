@@ -1,14 +1,14 @@
 package org.molgenis.fieldtypes;
 
-import java.io.Serializable;
-import java.text.ParseException;
-import java.util.Arrays;
-import java.util.List;
-
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Entity;
 import org.molgenis.model.elements.Field;
+
+import java.io.Serializable;
+import java.text.ParseException;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Definition of a MOLGENIS field type. For example <field name="x" type="string" would relate to type StringField
@@ -176,7 +176,7 @@ public abstract class FieldType implements Serializable
 
 	public abstract Object getTypedValue(String value) throws ParseException;
 
-	public abstract MolgenisFieldTypes.FieldTypeEnum getEnumType();
+	public abstract MolgenisFieldTypes.AttributeType getEnumType();
 
 	public List<String> getAllowedOperators()
 	{

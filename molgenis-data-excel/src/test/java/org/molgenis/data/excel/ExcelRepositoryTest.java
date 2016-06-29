@@ -1,33 +1,37 @@
 package org.molgenis.data.excel;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import org.apache.commons.io.IOUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.processor.CellProcessor;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 
-import org.apache.commons.io.IOUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.processor.CellProcessor;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
-public class ExcelRepositoryTest
+public class ExcelRepositoryTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
 	private ExcelRepository excelSheetReader;
 
 	private Workbook workbook;
@@ -38,7 +42,8 @@ public class ExcelRepositoryTest
 	{
 		is = getClass().getResourceAsStream("/test.xls");
 		workbook = WorkbookFactory.create(is);
-		excelSheetReader = new ExcelRepository("test.xls", workbook.getSheet("test"));
+		excelSheetReader = new ExcelRepository("test.xls", workbook.getSheet("test"), entityMetaFactory,
+				attrMetaFactory);
 	}
 
 	@AfterMethod
@@ -51,7 +56,7 @@ public class ExcelRepositoryTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void ExcelRepository()
 	{
-		new ExcelRepository("test.xls", workbook.getSheet("test_mergedcells"));
+		new ExcelRepository("test.xls", workbook.getSheet("test_mergedcells"), entityMetaFactory, attrMetaFactory);
 	}
 
 	@Test
@@ -63,8 +68,7 @@ public class ExcelRepositoryTest
 		when(processor.process("col2")).thenReturn("col2");
 
 		excelSheetReader.addCellProcessor(processor);
-		for (@SuppressWarnings("unused")
-		Entity entity : excelSheetReader)
+		for (@SuppressWarnings("unused") Entity entity : excelSheetReader)
 		{
 		}
 		verify(processor).process("col1");
@@ -89,7 +93,7 @@ public class ExcelRepositoryTest
 	{
 		AttributeMetaData attr = excelSheetReader.getEntityMetaData().getAttribute("col1");
 		assertNotNull(attr);
-		assertEquals(attr.getDataType().getEnumType(), FieldTypeEnum.STRING);
+		assertEquals(attr.getDataType(), AttributeType.STRING);
 		assertEquals(attr.getName(), "col1");
 	}
 

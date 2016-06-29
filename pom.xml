@@ -674,7 +674,6 @@
         <module>molgenis-data-googlespreadsheet</module>
         <module>molgenis-data</module>
         <module>molgenis-data-system</module>
-        <module>molgenis-data-merge</module>
 		<module>molgenis-data-postgresql</module>
         <module>molgenis-data-vcf</module>
         <module>molgenis-data-rest</module>
@@ -698,9 +697,9 @@
 		<module>molgenis-file</module>
 		<module>molgenis-catalogue</module>
 		<module>molgenis-file-ingester</module>
-		<module>molgenis-integration-tests</module>
+        <!--<module>molgenis-integration-tests</module>-->
         <module>molgenis-jobs</module>
-        <module>molgenis-platform-integration-tests</module>
+        <!--<module>molgenis-platform-integration-tests</module>-->
         <module>molgenis-test</module>
     </modules>
 </project>

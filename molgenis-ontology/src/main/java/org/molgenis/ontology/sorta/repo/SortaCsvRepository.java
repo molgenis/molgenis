@@ -18,6 +18,7 @@ import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
@@ -35,16 +36,20 @@ public class SortaCsvRepository extends AbstractRepository
 	private final static List<CellProcessor> LOWERCASE_AND_TRIM = Arrays.asList(new LowerCaseProcessor(),
 			new TrimProcessor());
 
-	public SortaCsvRepository(File file)
+	public SortaCsvRepository(File file, EntityMetaDataFactory entityMetaFactory,
+			AttributeMetaDataFactory attrMetaFactory)
 	{
-		this.csvRepository = new CsvRepository(file, LOWERCASE_AND_TRIM, SortaServiceImpl.DEFAULT_SEPARATOR);
+		this.csvRepository = new CsvRepository(file, entityMetaFactory, attrMetaFactory, LOWERCASE_AND_TRIM,
+				SortaServiceImpl.DEFAULT_SEPARATOR);
 		this.entityName = file.getName();
 		this.entityLabel = file.getName();
 	}
 
-	public SortaCsvRepository(String entityName, String entityLabel, File uploadedFile)
+	public SortaCsvRepository(String entityName, String entityLabel, File uploadedFile,
+			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
 	{
-		this.csvRepository = new CsvRepository(uploadedFile, LOWERCASE_AND_TRIM, SortaServiceImpl.DEFAULT_SEPARATOR);
+		this.csvRepository = new CsvRepository(uploadedFile, entityMetaFactory, attrMetaFactory, LOWERCASE_AND_TRIM,
+				SortaServiceImpl.DEFAULT_SEPARATOR);
 		this.entityName = entityName;
 		this.entityLabel = entityLabel;
 	}

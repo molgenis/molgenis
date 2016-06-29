@@ -1,18 +1,16 @@
 package org.molgenis.auth;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LOOKUP;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.BOOL;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
+import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
 public class MolgenisUserMetaData extends SystemEntityMetaData
@@ -91,7 +89,7 @@ public class MolgenisUserMetaData extends SystemEntityMetaData
 				.setDescription("The telephone number of the Contact including the suitable area codes.")
 				.setNillable(true);
 		addAttribute(EMAIL, ROLE_LOOKUP).setDescription("The email address of the Contact.").setUnique(true)
-				.setDataType(MolgenisFieldTypes.EMAIL).setNillable(false);
+				.setDataType(AttributeType.EMAIL).setNillable(false);
 		addAttribute(FAX).setDescription("The fax number of the Contact.").setNillable(true);
 		addAttribute(TOLLFREEPHONE).setLabel("Toll-free phone").setNillable(true)
 				.setDescription("A toll free phone number for the Contact, including suitable area codes.");

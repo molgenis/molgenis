@@ -14,24 +14,31 @@ import java.util.Arrays;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Writable;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.Test;
 
-public class ExcelWriterTest
+public class ExcelWriterTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
 	@SuppressWarnings("resource")
-	@Test(expectedExceptions = IllegalArgumentException.class)
+	@Test(expectedExceptions = NullPointerException.class)
 	public void ExcelWriter()
 	{
-		new ExcelWriter((OutputStream) null);
+		new ExcelWriter((OutputStream) null, attrMetaFactory);
 	}
 
 	@Test
 	public void ExcelWriterFileFormat_default() throws IOException
 	{
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		new ExcelWriter(bos).close();
+		new ExcelWriter(bos, attrMetaFactory).close();
 		byte[] b = bos.toByteArray();
 		assertEquals(b[0] & 0xff, 0xD0);
 		assertEquals(b[1] & 0xff, 0xCF);
@@ -43,7 +50,7 @@ public class ExcelWriterTest
 	public void ExcelWriterFileFormat_XLS() throws IOException
 	{
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		new ExcelWriter(bos, FileFormat.XLS).close();
+		new ExcelWriter(bos, attrMetaFactory, FileFormat.XLS).close();
 		byte[] b = bos.toByteArray();
 		assertEquals(b[0] & 0xff, 0xD0);
 		assertEquals(b[1] & 0xff, 0xCF);
@@ -55,7 +62,7 @@ public class ExcelWriterTest
 	public void ExcelWriterFileFormat_XLSX() throws IOException
 	{
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		new ExcelWriter(bos, FileFormat.XLSX).close();
+		new ExcelWriter(bos, attrMetaFactory, FileFormat.XLSX).close();
 		byte[] b = bos.toByteArray();
 		assertEquals(b[0] & 0xff, 0x50);
 		assertEquals(b[1] & 0xff, 0x4B);
@@ -69,7 +76,7 @@ public class ExcelWriterTest
 		CellProcessor processor = when(mock(CellProcessor.class).processHeader()).thenReturn(true).getMock();
 
 		OutputStream os = mock(OutputStream.class);
-		ExcelWriter excelWriter = new ExcelWriter(os);
+		ExcelWriter excelWriter = new ExcelWriter(os, attrMetaFactory);
 		excelWriter.addCellProcessor(processor);
 		try
 		{
@@ -88,11 +95,18 @@ public class ExcelWriterTest
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
 		OutputStream os = mock(OutputStream.class);
-		ExcelWriter excelWriter = new ExcelWriter(os);
+		ExcelWriter excelWriter = new ExcelWriter(os, attrMetaFactory);
 		excelWriter.addCellProcessor(processor);
 		try
 		{
-			Entity entity = new DynamicEntity(null); // // FIXME pass entity meta data instead of null
+			Entity entity = new DynamicEntity(mock(EntityMetaData.class))
+			{
+				@Override
+				protected void validateValueType(String attrName, Object value)
+				{
+					// noop
+				}
+			};
 			entity.set("col1", "val1");
 			entity.set("col2", "val2");
 			Writable writable = excelWriter.createWritable("test", Arrays.asList("col1", "col2"));
@@ -110,7 +124,7 @@ public class ExcelWriterTest
 	public void close() throws IOException
 	{
 		OutputStream os = mock(OutputStream.class);
-		ExcelWriter excelWriter = new ExcelWriter(os);
+		ExcelWriter excelWriter = new ExcelWriter(os, attrMetaFactory);
 		excelWriter.close();
 		verify(os).close();
 	}
@@ -119,7 +133,7 @@ public class ExcelWriterTest
 	public void createSheet() throws IOException
 	{
 		OutputStream os = mock(OutputStream.class);
-		ExcelWriter excelWriter = new ExcelWriter(os);
+		ExcelWriter excelWriter = new ExcelWriter(os, attrMetaFactory);
 		try
 		{
 			assertNotNull(excelWriter.createWritable("sheet", null));
@@ -134,7 +148,7 @@ public class ExcelWriterTest
 	public void createSheet_null() throws IOException
 	{
 		OutputStream os = mock(OutputStream.class);
-		ExcelWriter excelWriter = new ExcelWriter(os);
+		ExcelWriter excelWriter = new ExcelWriter(os, attrMetaFactory);
 		try
 		{
 			assertNotNull(excelWriter.createWritable(null, null));

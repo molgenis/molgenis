@@ -1,20 +1,10 @@
 package org.molgenis.data.reindex.meta;
 
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ACTION_ORDER;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CUD_TYPE;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.DATA_TYPE;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ENTITY_FULL_NAME;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ENTITY_ID;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ID;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_STATUS;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
+
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.*;
 
 public class ReindexAction extends StaticEntity
 {
@@ -45,23 +35,23 @@ public class ReindexAction extends StaticEntity
 		return this;
 	}
 
-	public ReindexActionJob getReindexActionGroup()
+	public ReindexActionGroup getReindexActionGroup()
 	{
-		return getEntity(REINDEX_ACTION_GROUP, ReindexActionJob.class);
+		return getEntity(REINDEX_ACTION_GROUP_ATTR, ReindexActionGroup.class);
 	}
 
-	public ReindexAction setReindexActionGroup(ReindexActionJob reindexActionGroup)
+	public ReindexAction setReindexActionGroup(ReindexActionGroup reindexActionGroup)
 	{
-		set(REINDEX_ACTION_GROUP, reindexActionGroup);
+		set(REINDEX_ACTION_GROUP_ATTR, reindexActionGroup);
 		return this;
 	}
 
-	public String getActionOrder()
+	public int getActionOrder()
 	{
-		return getString(ACTION_ORDER);
+		return getInt(ACTION_ORDER);
 	}
 
-	public ReindexAction setActionOrder(String actionOrder)
+	public ReindexAction setActionOrder(int actionOrder)
 	{
 		set(ACTION_ORDER, actionOrder);
 		return this;

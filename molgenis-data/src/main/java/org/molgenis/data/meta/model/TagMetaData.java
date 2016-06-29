@@ -1,14 +1,12 @@
 package org.molgenis.data.meta.model;
 
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LOOKUP;
-import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.stereotype.Component;
+
+import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
+import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
 public class TagMetaData extends SystemEntityMetaData

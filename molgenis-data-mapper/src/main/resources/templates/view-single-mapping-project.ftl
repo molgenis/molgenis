@@ -74,7 +74,8 @@
 							<#if !attribute.nillable> <span class="label label-default">required</span></#if>
 							<#if attribute.unique> <span class="label label-default">unique</span></#if>
 							<#if attribute.description??><br />${attribute.description?html}</#if>
-							<#if attribute.tags??><br />${attribute.tags?html}</#if>
+							<#if attribute.tags??><br/><#list attribute.tags as tag>${tag.label?html}<#sep>
+                                , </#list></#if>
 							<#if attributeTagMap[attribute.name]??>
 								<br />
 								<#list attributeTagMap[attribute.name] as tag>

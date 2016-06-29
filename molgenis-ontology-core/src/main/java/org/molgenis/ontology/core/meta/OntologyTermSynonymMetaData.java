@@ -1,16 +1,16 @@
 package org.molgenis.ontology.core.meta;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
-
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.DECIMAL;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
 @Component
 public class OntologyTermSynonymMetaData extends SystemEntityMetaData
@@ -37,8 +37,8 @@ public class OntologyTermSynonymMetaData extends SystemEntityMetaData
 
 		addAttribute(ID, ROLE_ID).setVisible(false);
 		addAttribute(ONTOLOGY_TERM_SYNONYM_ATTR, ROLE_LABEL).setDataType(TEXT).setNillable(false);
-		addAttribute(SCORE).setDataType(MolgenisFieldTypes.DECIMAL);
-		addAttribute(COMBINED_SCORE).setDataType(MolgenisFieldTypes.DECIMAL);
+		addAttribute(SCORE).setDataType(DECIMAL);
+		addAttribute(COMBINED_SCORE).setDataType(DECIMAL);
 	}
 
 	@Autowired

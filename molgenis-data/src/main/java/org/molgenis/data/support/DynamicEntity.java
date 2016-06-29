@@ -49,6 +49,18 @@ public class DynamicEntity implements Entity
 		//this.values = newHashMapWithExpectedSize(Iterables.size(entityMeta.getAtomicAttributes()));
 	}
 
+	/**
+	 * Constructs an entity with the given entity meta data and initialized the entity with the given data.
+	 *
+	 * @param entityMeta entity meta
+	 * @param values     map with attribute name-value pairs
+	 */
+	public DynamicEntity(EntityMetaData entityMeta, Map<String, Object> values)
+	{
+		this(entityMeta);
+		values.forEach((key, value) -> set(key, value));
+	}
+
 	// TODO should we return immutable meta data?
 	@Override
 	public EntityMetaData getEntityMetaData()
@@ -209,7 +221,7 @@ public class DynamicEntity implements Entity
 			throw new UnknownAttributeException(format("Unknown attribute [%s]", attrName));
 		}
 
-		MolgenisFieldTypes.FieldTypeEnum dataType = attr.getDataType().getEnumType();
+		MolgenisFieldTypes.AttributeType dataType = attr.getDataType();
 		switch (dataType)
 		{
 

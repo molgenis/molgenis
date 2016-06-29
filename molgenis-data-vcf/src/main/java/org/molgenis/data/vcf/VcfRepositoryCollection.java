@@ -11,8 +11,12 @@ import java.util.Set;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.FileRepositoryCollection;
+import org.molgenis.data.vcf.model.VcfAttributes;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.ImmutableSet;
 
@@ -23,6 +27,15 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	private static final String EXTENSION_VCF_GZ = "vcf.gz";
 	private static final String EXTENSION_VCF_ZIP = "vcf.zip";
 	static final Set<String> EXTENSIONS = ImmutableSet.of(EXTENSION_VCF, EXTENSION_VCF_GZ, EXTENSION_VCF_ZIP);
+
+	@Autowired
+	private VcfAttributes vcfAttributes;
+
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
 
 	private final File file;
 	private final String entityName;
@@ -69,7 +82,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 		if (!entityName.equals(name)) throw new MolgenisDataException("Unknown entity name [" + name + "]");
 		try
 		{
-			return new VcfRepository(file, name);
+			return new VcfRepository(file, name, vcfAttributes, entityMetaFactory, attrMetaFactory);
 		}
 		catch (IOException e)
 		{

@@ -11,7 +11,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.vcf.VcfAttributes;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -30,7 +30,7 @@ import static java.util.Collections.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.*;
-import static org.molgenis.MolgenisFieldTypes.MREF;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
 import static org.testng.Assert.*;
 
 public class VcfImporterServiceTest
@@ -92,6 +92,12 @@ public class VcfImporterServiceTest
 			public Iterator<Entity> iterator()
 			{
 				return entities.iterator();
+			}
+
+			@Override
+			public Spliterator<Entity> spliterator()
+			{
+				return entities.spliterator();
 			}
 
 			@Override
@@ -191,6 +197,12 @@ public class VcfImporterServiceTest
 			public Iterator<Entity> iterator()
 			{
 				return entities.iterator();
+			}
+
+			@Override
+			public Spliterator<Entity> spliterator()
+			{
+				return entities.spliterator();
 			}
 
 			@Override

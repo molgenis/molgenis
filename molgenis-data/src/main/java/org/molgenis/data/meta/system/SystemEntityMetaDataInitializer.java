@@ -48,9 +48,11 @@ public class SystemEntityMetaDataInitializer
 		ctx.getBean(AttributeMetaDataMetaData.class).bootstrap(entityMetaDataMetaData);
 		Map<String, SystemEntityMetaData> systemEntityMetaDataMap = ctx.getBeansOfType(SystemEntityMetaData.class);
 		//FIXME: can we do this cleaner than with the hardcoded "Owned". Problem: even the "isAbstract" nullpoiters at this point.
-		systemEntityMetaDataMap.values().stream().filter(systemEntityMetaData -> systemEntityMetaData.getSimpleName().equals("Owned"))
+		systemEntityMetaDataMap.values().stream()
+				.filter(systemEntityMetaData -> systemEntityMetaData.getSimpleName().equals("Owned"))
 				.forEach(systemEntityMetaData -> initialize(systemEntityMetaData, entityMetaDataMetaData));
-		systemEntityMetaDataMap.values().stream().filter(systemEntityMetaData -> !systemEntityMetaData.getSimpleName().equals("Owned"))
+		systemEntityMetaDataMap.values().stream()
+				.filter(systemEntityMetaData -> !systemEntityMetaData.getSimpleName().equals("Owned"))
 				.forEach(systemEntityMetaData -> initialize(systemEntityMetaData, entityMetaDataMetaData));
 
 		initializeI18N(ctx);
@@ -70,15 +72,14 @@ public class SystemEntityMetaDataInitializer
 		I18nStringMetaData i18nStringMeta = ctx.getBean(I18nStringMetaData.class);
 
 		languageCodes.forEach(languageCode -> {
-			entityMetaMeta.addAttribute(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true).setLabel(
-					new StringBuilder().append("Label (").append(languageCode).append(")").toString());
-			entityMetaMeta.addAttribute(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true).setLabel(
-					new StringBuilder().append("Description (").append(languageCode).append(")").toString());
-			attrMetaMeta.addAttribute(AttributeMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true).setLabel(
-					new StringBuilder().append("Label (").append(languageCode).append(")").toString());
-			attrMetaMeta.addAttribute(AttributeMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true).setLabel(
-					new StringBuilder().append("Description (").append(languageCode).append(")").toString());
-			i18nStringMeta.addLanguage(languageCode);
+			entityMetaMeta.addAttribute(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true)
+					.setLabel(new StringBuilder().append("Label (").append(languageCode).append(")").toString());
+			entityMetaMeta.addAttribute(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true)
+					.setLabel(new StringBuilder().append("Description (").append(languageCode).append(")").toString());
+			attrMetaMeta.addAttribute(AttributeMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true)
+					.setLabel(new StringBuilder().append("Label (").append(languageCode).append(")").toString());
+			attrMetaMeta.addAttribute(AttributeMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true)
+					.setLabel(new StringBuilder().append("Description (").append(languageCode).append(")").toString());
 		});
 	}
 
