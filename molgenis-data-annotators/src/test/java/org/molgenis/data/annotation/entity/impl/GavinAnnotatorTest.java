@@ -187,7 +187,7 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		expectedEntity.set(GavinAnnotator.CLASSIFICATION, "Benign");
 		expectedEntity.set(GavinAnnotator.CONFIDENCE, "calibrated");
 		expectedEntity.set(GavinAnnotator.REASON,
-				"Variant CADD score of 6.0 is less than 30.35 for this gene.");
+				"Variant CADD score of 6.0 is less than 13.329999999999998 for this gene.");
 
 		assertEquals(resultEntity.get(GavinAnnotator.CLASSIFICATION),
 				expectedEntity.get(GavinAnnotator.CLASSIFICATION));
