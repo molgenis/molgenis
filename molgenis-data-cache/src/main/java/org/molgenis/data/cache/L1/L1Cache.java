@@ -34,7 +34,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	@Override
 	public void transactionStarted(String transactionId)
 	{
-		LOG.trace("Creating L1 cache for transaction [{}]", transactionId);
+		LOG.debug("Creating L1 cache for transaction [{}]", transactionId);
 		cache.set(createCache(1000));
 	}
 
@@ -57,6 +57,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	 */
 	public void evict(String entityName, Object entityId)
 	{
+		LOG.debug("Removing  entity [{}] from L1 cache that belongs to {}", entityId, entityName);
 		Cache<String, Map<String, Object>> entityCache = cache.get();
 		if (entityCache != null)
 		{
@@ -67,6 +68,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 
 	public void evictAll(String entityName)
 	{
+		LOG.debug("Removing all entities from L1 cache that belong to {}", entityName);
 		Cache<String, Map<String, Object>> entityCache = cache.get();
 		if (entityCache != null)
 		{
@@ -94,10 +96,10 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 
 			if (dehydratedEntity != null)
 			{
-				LOG.trace("Retrieving and hydrating a dehydrated entity with id [{}] from L1 cache", key);
+				LOG.debug("Retrieving and hydrating a dehydrated entity with id [{}] from L1 cache", key);
 				return hydrate(dehydratedEntity, entityMetaData, entityManager);
 			}
-			LOG.trace("No dehydrated entities with id [{}] present in L1 cache", key);
+			LOG.debug("No dehydrated entities with id [{}] present in L1 cache", key);
 		}
 		return null;
 	}
@@ -110,17 +112,17 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	 */
 	public void put(String entityName, Entity entity)
 	{
+		LOG.debug("Adding row [{}] from entity {} to the L1 cache", entity.getIdValue(), entityName);
 		Cache<String, Map<String, Object>> entityCache = cache.get();
 		if (entityCache != null)
 		{
 			String key = generateCacheKey(entityName, entity.getIdValue());
 
 			Map<String, Object> dehydratedEntity = dehydrate(entity);
-			LOG.trace("Dehydrating entity with id [{}]", key);
+			LOG.debug("Dehydrating entity with id [{}]", key);
 
 			entityCache.put(key, dehydratedEntity);
-			LOG.trace("Adding dehydrated entity [{}] to L1 Cache", key);
+			LOG.debug("Adding dehydrated entity [{}] to L1 Cache", key);
 		}
 	}
-
 }
