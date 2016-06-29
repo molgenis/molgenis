@@ -46,6 +46,12 @@ public class VcfUtils
 		strBuilder.append(StringUtils.strip(vcfEntity.get(REF).toString()));
 		strBuilder.append("_");
 		strBuilder.append(StringUtils.strip(vcfEntity.get(ALT).toString()));
+		strBuilder.append("_");
+		strBuilder.append(StringUtils.strip(vcfEntity.get(ID).toString()));
+		strBuilder.append("_");
+		strBuilder.append(StringUtils.strip(vcfEntity.get(QUAL).toString()));
+		strBuilder.append("_");
+		strBuilder.append(StringUtils.strip(vcfEntity.get(FILTER).toString()));
 		String idStr = strBuilder.toString();
 
 		// use MD5 hash to prevent ids that are too long
