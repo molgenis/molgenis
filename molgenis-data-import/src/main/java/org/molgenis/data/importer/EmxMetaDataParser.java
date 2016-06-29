@@ -620,7 +620,11 @@ public class EmxMetaDataParser implements MetaDataParser
 					}
 				}
 
-				if (entity.getBoolean(ABSTRACT) != null) md.setAbstract(entity.getBoolean(ABSTRACT));
+				String abstractStr = entity.getString(ABSTRACT);
+				if (abstractStr != null)
+				{
+					md.setAbstract(parseBoolean(abstractStr, i, ABSTRACT));
+				}
 				List<String> tagIds = DataConverter.toList(entity.get(TAGS));
 
 				String extendsEntityName = entity.getString(EXTENDS);
