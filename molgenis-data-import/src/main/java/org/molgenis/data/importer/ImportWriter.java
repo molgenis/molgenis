@@ -11,6 +11,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.I18nStringMetaData;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
@@ -27,6 +28,7 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.DependencyResolver;
+import org.molgenis.util.EntityUtils;
 import org.molgenis.util.HugeSet;
 import org.molgenis.util.MolgenisDateFormat;
 import org.slf4j.Logger;
@@ -98,7 +100,23 @@ public class ImportWriter
 		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges);
 		addEntityPermissions(job.metaDataChanges);
 		runAsSystem(() -> importEntityAndAttributeTags(job.parsedMetaData));
-		importData(job.report, DependencyResolver.resolve(Sets.newHashSet(job.parsedMetaData.getEntities())),
+		Iterable<EntityMetaData> existingMetaData = dataService.getMeta().getEntityMetaDatas()::iterator;
+		Map<String, EntityMetaData> allEntityMetaDataMap = new HashMap<>();
+		for (EntityMetaData emd : job.parsedMetaData.getEntities())
+		{
+			allEntityMetaDataMap.put(emd.getName(), emd);
+		}
+		for (EntityMetaData emd : existingMetaData)
+		{
+			if (!allEntityMetaDataMap.containsKey(emd.getName())) allEntityMetaDataMap.put(emd.getName(), emd);
+			else if ((!EntityUtils.equals(emd, allEntityMetaDataMap.get(emd.getName())))
+					&& emd instanceof SystemEntityMetaData)
+			{
+				throw new MolgenisDataException(
+						"SystemEntityMetaData in the database conflicts with the metadta for this import");
+			}
+		}
+		importData(job.report, DependencyResolver.resolve(Sets.newLinkedHashSet(allEntityMetaDataMap.values())),
 				job.source, job.dbAction, job.defaultPackage);
 		importI18nStrings(job.report, job.parsedMetaData.getI18nStrings(), job.dbAction);
 
@@ -273,8 +291,24 @@ public class ImportWriter
 	private void addEntityMetaData(ParsedMetaData parsedMetaData, EntityImportReport report,
 			MetaDataChanges metaDataChanges)
 	{
+		Iterable<EntityMetaData> existingMetaData = dataService.getMeta().getEntityMetaDatas()::iterator;
+		Map<String, EntityMetaData> allEntityMetaDataMap = new HashMap<>();
+		for (EntityMetaData emd : parsedMetaData.getEntities())
+		{
+			allEntityMetaDataMap.put(emd.getName(), emd);
+		}
+		for (EntityMetaData emd : existingMetaData)
+		{
+			if (!allEntityMetaDataMap.containsKey(emd.getName())) allEntityMetaDataMap.put(emd.getName(), emd);
+			else if ((!EntityUtils.equals(emd, allEntityMetaDataMap.get(emd.getName())))
+					&& emd instanceof SystemEntityMetaData)
+			{
+				throw new MolgenisDataException(
+						"SystemEntityMetaData in the database conflicts with the metadta for this import");
+			}
+		}
 		List<EntityMetaData> resolve = DependencyResolver
-				.resolve(new HashSet<EntityMetaData>(parsedMetaData.getEntities()));
+				.resolve(new HashSet<EntityMetaData>(Sets.newLinkedHashSet(allEntityMetaDataMap.values())));
 		for (EntityMetaData entityMetaData : resolve)
 		{
 			String name = entityMetaData.getName();
@@ -350,7 +384,7 @@ public class ImportWriter
 	 * @param dbAction {@link DatabaseAction} describing how to merge the existing entities
 	 * @return number of updated entities
 	 */
-	public int update(Repository<Entity> repo, Iterable<Entity> entities, DatabaseAction dbAction)
+	private int update(Repository<Entity> repo, Iterable<Entity> entities, DatabaseAction dbAction)
 	{
 		if (entities == null) return 0;
 
@@ -635,7 +669,8 @@ public class ImportWriter
 			AttributeMetaData idAttr = entityMetaData.getIdAttribute();
 			if (idAttr == null)
 			{
-				throw new IllegalArgumentException(format("Entity [%s] doesn't have an id attribute"));
+				throw new IllegalArgumentException(
+						format("Entity [%s] doesn't have an id attribute", entityMetaData.getName()));
 			}
 			set(idAttr.getName(), id);
 		}
