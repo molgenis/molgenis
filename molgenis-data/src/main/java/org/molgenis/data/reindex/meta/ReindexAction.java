@@ -37,12 +37,12 @@ public class ReindexAction extends StaticEntity
 
 	public ReindexActionGroup getReindexActionGroup()
 	{
-		return getEntity(REINDEX_ACTION_GROUP, ReindexActionGroup.class);
+		return getEntity(REINDEX_ACTION_GROUP_ATTR, ReindexActionGroup.class);
 	}
 
 	public ReindexAction setReindexActionGroup(ReindexActionGroup reindexActionGroup)
 	{
-		set(REINDEX_ACTION_GROUP, reindexActionGroup);
+		set(REINDEX_ACTION_GROUP_ATTR, reindexActionGroup);
 		return this;
 	}
 

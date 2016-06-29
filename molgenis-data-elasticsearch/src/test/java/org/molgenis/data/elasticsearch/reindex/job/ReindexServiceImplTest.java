@@ -50,6 +50,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMeta.REINDEX_JOB_EXECUTION;
 import static org.molgenis.data.reindex.meta.ReindexActionGroupMetaData.REINDEX_ACTION_GROUP;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION_GROUP_ATTR;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -136,7 +137,7 @@ public class ReindexServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataService.findOneById(REINDEX_ACTION_GROUP, "abcde", ReindexActionGroup.class))
 				.thenReturn(reindexActionGroup);
 
-		when(dataService.findAll(REINDEX_ACTION, new QueryImpl<>().eq(REINDEX_ACTION_GROUP, reindexActionGroup)))
+		when(dataService.findAll(REINDEX_ACTION, new QueryImpl<>().eq(REINDEX_ACTION_GROUP_ATTR, reindexActionGroup)))
 				.thenReturn(Stream.of(reindexAction));
 
 		when(reindexJobFactory.createJob(reindexJobExecutionCaptor.capture())).thenReturn(reindexJob);
