@@ -42,6 +42,12 @@ import static org.testng.Assert.*;
 @ContextConfiguration(classes = { GavinAnnotatorTest.Config.class, GavinAnnotator.class })
 public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 {
+	private static final String BENIGN = "Benign";
+	private static final String GENOMEWIDE = "genomewide";
+	private static final String VOUS = "VOUS";
+	private static final String CALIBRATED = "calibrated";
+	private static final String PATHOGENIC = "Pathogenic";
+	
 	@Autowired
 	RepositoryAnnotator annotator;
 
@@ -83,12 +89,10 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		Entity resultEntity = results.next();
 		assertFalse(results.hasNext());
 
-		Entity expectedEntity = getExpectedEntity("Benign", "genomewide",
+		assertEquals(resultEntity.get(CLASSIFICATION), BENIGN);
+		assertEquals(resultEntity.get(CONFIDENCE), GENOMEWIDE);
+		assertEquals(resultEntity.get(REASON),
 				"Variant MAF of 2.0 is not rare enough to generally be considered pathogenic.");
-
-		assertEquals(resultEntity.get(CLASSIFICATION), expectedEntity.get(CLASSIFICATION));
-		assertEquals(resultEntity.get(CONFIDENCE), expectedEntity.get(CONFIDENCE));
-		assertEquals(resultEntity.get(REASON), expectedEntity.get(REASON));
 	}
 
 	@Test
@@ -102,12 +106,10 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		Entity resultEntity = results.next();
 		assertFalse(results.hasNext());
 
-		Entity expectedEntity = getExpectedEntity("Benign", "genomewide",
+		assertEquals(resultEntity.get(CLASSIFICATION), BENIGN);
+		assertEquals(resultEntity.get(CONFIDENCE), GENOMEWIDE);
+		assertEquals(resultEntity.get(REASON),
 				"Variant CADD score of 1.0 is less than a global threshold of 15, although the variant MAF of 1.0E-5 is rare enough to be potentially pathogenic.");
-
-		assertEquals(resultEntity.get(CLASSIFICATION), expectedEntity.get(CLASSIFICATION));
-		assertEquals(resultEntity.get(CONFIDENCE), expectedEntity.get(CONFIDENCE));
-		assertEquals(resultEntity.get(REASON), expectedEntity.get(REASON));
 	}
 
 	@Test
@@ -121,12 +123,10 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		Entity resultEntity = results.next();
 		assertFalse(results.hasNext());
 
-		Entity expectedEntity = getExpectedEntity("VOUS", "genomewide",
+		assertEquals(resultEntity.get(CLASSIFICATION), VOUS);
+		assertEquals(resultEntity.get(CONFIDENCE), GENOMEWIDE);
+		assertEquals(resultEntity.get(REASON),
 				"Unable to classify variant as benign or pathogenic. The combination of HIGH impact, a CADD score of null and MAF of 1.0E-5 in TFR2 is inconclusive.");
-
-		assertEquals(resultEntity.get(CLASSIFICATION), expectedEntity.get(CLASSIFICATION));
-		assertEquals(resultEntity.get(CONFIDENCE), expectedEntity.get(CONFIDENCE));
-		assertEquals(resultEntity.get(REASON), expectedEntity.get(REASON));
 	}
 
 	@Test
@@ -140,12 +140,10 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		Entity resultEntity = results.next();
 		assertFalse(results.hasNext());
 
-		Entity expectedEntity = getExpectedEntity("Benign", "calibrated",
+		assertEquals(resultEntity.get(CLASSIFICATION), BENIGN);
+		assertEquals(resultEntity.get(CONFIDENCE), CALIBRATED);
+		assertEquals(resultEntity.get(REASON),
 				"Variant CADD score of 6.0 is less than 13.329999999999998 for this gene.");
-
-		assertEquals(resultEntity.get(CLASSIFICATION), expectedEntity.get(CLASSIFICATION));
-		assertEquals(resultEntity.get(CONFIDENCE), expectedEntity.get(CONFIDENCE));
-		assertEquals(resultEntity.get(REASON), expectedEntity.get(REASON));
 	}
 
 	@Test
@@ -159,12 +157,9 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		Entity resultEntity = results.next();
 		assertFalse(results.hasNext());
 
-		Entity expectedEntity = getExpectedEntity("Pathogenic", "calibrated",
-				"Variant CADD score of 80.0 is greater than 30.35 for this gene.");
-
-		assertEquals(resultEntity.get(CLASSIFICATION), expectedEntity.get(CLASSIFICATION));
-		assertEquals(resultEntity.get(CONFIDENCE), expectedEntity.get(CONFIDENCE));
-		assertEquals(resultEntity.get(REASON), expectedEntity.get(REASON));
+		assertEquals(resultEntity.get(CLASSIFICATION), PATHOGENIC);
+		assertEquals(resultEntity.get(CONFIDENCE), CALIBRATED);
+		assertEquals(resultEntity.get(REASON), "Variant CADD score of 80.0 is greater than 30.35 for this gene.");
 	}
 
 	@Test
@@ -178,11 +173,9 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		Entity resultEntity = results.next();
 		assertFalse(results.hasNext());
 
-		Entity expectedEntity = getExpectedEntity("Benign", "calibrated", "Variant MAF of 1.0E-5 is greater than 0.0.");
-
-		assertEquals(resultEntity.get(CLASSIFICATION), expectedEntity.get(CLASSIFICATION));
-		assertEquals(resultEntity.get(CONFIDENCE), expectedEntity.get(CONFIDENCE));
-		assertEquals(resultEntity.get(REASON), expectedEntity.get(REASON));
+		assertEquals(resultEntity.get(CLASSIFICATION), BENIGN);
+		assertEquals(resultEntity.get(CONFIDENCE), CALIBRATED);
+		assertEquals(resultEntity.get(REASON), "Variant MAF of 1.0E-5 is greater than 0.0.");
 	}
 
 	private Entity getEffectEntity(String alt, String putativeImpact, String geneName, Entity variantEntity)
@@ -202,15 +195,6 @@ public class GavinAnnotatorTest extends AbstractTestNGSpringContextTests
 		variantEntity.set(CaddAnnotator.CADD_SCALED, caddScaled);
 		variantEntity.set(ExacAnnotator.EXAC_AF, exacAF);
 		return variantEntity;
-	}
-
-	private Entity getExpectedEntity(String classification, String confidence, String reason)
-	{
-		Entity expectedEntity = new MapEntity("expected");
-		expectedEntity.set(CLASSIFICATION, classification);
-		expectedEntity.set(CONFIDENCE, confidence);
-		expectedEntity.set(REASON, reason);
-		return expectedEntity;
 	}
 
 	public static class Config
