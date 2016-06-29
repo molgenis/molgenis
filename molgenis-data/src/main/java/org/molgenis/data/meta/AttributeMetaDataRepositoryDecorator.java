@@ -348,6 +348,7 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 
 	private Stream<EntityMetaData> getEntities(AttributeMetaData attr)
 	{
+		// FIXME fails for compound attributes
 		return dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(ATTRIBUTES, attr).findAll();
 	}
 
