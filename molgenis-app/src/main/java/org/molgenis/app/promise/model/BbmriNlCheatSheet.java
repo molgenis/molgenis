@@ -51,5 +51,13 @@ public class BbmriNlCheatSheet
 	public static final String BIOBANK_DATA_ACCESS_DESCRIPTION = "biobankDataAccessDescription";
 	public static final String BIOBANK_DATA_ACCESS_URI = "biobankDataAccessURI";
 
-
+	// Persons attributes
+	public static final String COUNTRY = "country";
+	public static final String FIRST_NAME = "first_name";
+	public static final String LAST_NAME = "last_name";
+	public static final String PHONE = "phone";
+	public static final String EMAIL = "email";
+	public static final String ADDRESS = "address";
+	public static final String ZIP = "zip";
+	public static final String CITY = "city";
 }
