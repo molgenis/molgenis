@@ -1,6 +1,17 @@
 package org.molgenis.data.mapper.repository.impl;
 
-import static java.util.Objects.requireNonNull;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.IdGenerator;
+import org.molgenis.data.mapper.mapping.model.AttributeMapping;
+import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
+import org.molgenis.data.mapper.repository.AttributeMappingRepository;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.DynamicEntity;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Collection;
 import java.util.List;
@@ -8,20 +19,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.mapper.mapping.model.AttributeMapping;
-import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
-import org.molgenis.data.mapper.meta.EntityMappingMetaData;
-import org.molgenis.data.mapper.repository.AttributeMappingRepository;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.support.DynamicEntity;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.mapper.meta.AttributeMappingMetaData.*;
 
 public class AttributeMappingRepositoryImpl implements AttributeMappingRepository
 {
@@ -105,11 +104,11 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 	private AttributeMapping toAttributeMapping(Entity attributeMappingEntity, EntityMetaData sourceEntityMetaData,
 			EntityMetaData targetEntityMetaData)
 	{
-		String identifier = attributeMappingEntity.getString(EntityMappingMetaData.IDENTIFIER);
-		String targetAtributeName = attributeMappingEntity.getString(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA);
+		String identifier = attributeMappingEntity.getString(IDENTIFIER);
+		String targetAtributeName = attributeMappingEntity.getString(TARGETATTRIBUTEMETADATA);
 		AttributeMetaData targetAttributeMetaData = targetEntityMetaData.getAttribute(targetAtributeName);
-		String algorithm = attributeMappingEntity.getString(AttributeMappingMetaData.ALGORITHM);
-		String algorithmState = attributeMappingEntity.getString(AttributeMappingMetaData.ALGORITHMSTATE);
+		String algorithm = attributeMappingEntity.getString(ALGORITHM);
+		String algorithmState = attributeMappingEntity.getString(ALGORITHMSTATE);
 		List<AttributeMetaData> sourceAttributeMetaDatas = retrieveAttributeMetaDatasFromAlgorithm(algorithm,
 				sourceEntityMetaData);
 
@@ -120,15 +119,15 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 	private Entity toAttributeMappingEntity(AttributeMapping attributeMapping)
 	{
 		Entity attributeMappingEntity = new DynamicEntity(attributeMappingMetaData);
-		attributeMappingEntity.set(AttributeMappingMetaData.IDENTIFIER, attributeMapping.getIdentifier());
-		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA,
+		attributeMappingEntity.set(IDENTIFIER, attributeMapping.getIdentifier());
+		attributeMappingEntity.set(TARGETATTRIBUTEMETADATA,
 				attributeMapping.getTargetAttributeMetaData() != null ? attributeMapping.getTargetAttributeMetaData()
 						.getName() : null);
-		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, attributeMapping.getAlgorithm());
-		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS,
+		attributeMappingEntity.set(ALGORITHM, attributeMapping.getAlgorithm());
+		attributeMappingEntity.set(SOURCEATTRIBUTEMETADATAS,
 				attributeMapping.getSourceAttributeMetaDatas().stream().map(AttributeMetaData::getName)
 						.collect(Collectors.joining(",")));
-		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHMSTATE, attributeMapping.getAlgorithmState());
+		attributeMappingEntity.set(ALGORITHMSTATE, attributeMapping.getAlgorithmState().toString());
 		return attributeMappingEntity;
 	}
 
