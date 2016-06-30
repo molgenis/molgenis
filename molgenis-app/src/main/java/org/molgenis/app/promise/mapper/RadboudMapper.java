@@ -102,6 +102,6 @@ class RadboudMapper implements PromiseMapper, ApplicationListener<ContextRefresh
 
 	static String getBiobankId(Entity radboudEntity)
 	{
-		return radboudEntity.getString(XML_ID) + radboudEntity.getString(XML_IDAA);
+		return radboudEntity.getString(XML_ID) + "_" + radboudEntity.getString(XML_IDAA);
 	}
 }

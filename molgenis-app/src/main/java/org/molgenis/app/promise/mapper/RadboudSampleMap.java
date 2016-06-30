@@ -22,43 +22,43 @@ import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_GENDER_TYPES;
 
 class RadboudSampleMap
 {
-	private static final String XML_MICROBIOOM = "MICROBIOOM";
-	private static final String XML_GENDER = "GESLACHT";
-	private static final String XML_BIRTHDATE = "GEBOORTEDATUM";
-	private static final String XML_DEELBIOBANKS = "DEELBIOBANKS";
-	private static final String XML_VOORGESCH = "VOORGESCH";
-	private static final String XML_FAMANAM = "FAMANAM";
-	private static final String XML_BEHANDEL = "BEHANDEL";
-	private static final String XML_FOLLOWUP = "FOLLOWUP";
-	private static final String XML_BEELDEN = "BEELDEN";
-	private static final String XML_VRAGENLIJST = "VRAGENLIJST";
-	private static final String XML_OMICS = "OMICS";
-	private static final String XML_ROUTINEBEP = "ROUTINEBEP";
-	private static final String XML_GWAS = "GWAS";
-	private static final String XML_HISTOPATH = "HISTOPATH";
-	private static final String XML_OUTCOME = "OUTCOME";
-	private static final String XML_ANDERS = "ANDERS";
-	private static final String XML_DNA = "DNA";
-	private static final String XML_DNABEENMERG = "DNABEENMERG";
-	private static final String XML_BLOED = "BLOED";
-	private static final String XML_BLOEDPLASMA = "BLOEDPLASMA";
-	private static final String XML_BLOEDSERUM = "BLOEDSERUM";
-	private static final String XML_WEEFSELSOORT = "WEEFSELSOORT";
-	private static final String XML_URINE = "URINE";
-	private static final String XML_SPEEKSEL = "SPEEKSEL";
-	private static final String XML_FECES = "FECES";
-	private static final String XML_RNA = "RNA";
-	private static final String XML_RNABEENMERG = "RNABEENMERG";
-	private static final String XML_GASTROINTMUC = "GASTROINTMUC";
-	private static final String XML_LIQUOR = "LIQUOR";
-	private static final String XML_CELLBEENMERG = "CELLBEENMERG";
-	private static final String XML_MONONUCLBLOED = "MONONUCLBLOED";
-	private static final String XML_MONONUCMERG = "MONONUCMERG";
-	private static final String XML_GRANULOCYTMERG = "GRANULOCYTMERG";
-	private static final String XML_MONOCYTMERG = "MONOCYTMERG";
-	private static final String XML_GWASOMNI = "GWASOMNI";
-	private static final String XML_GWAS370CNV = "GWAS370CNV";
-	private static final String XML_EXOOMCHIP = "EXOOMCHIP";
+	static final String XML_MICROBIOOM = "MICROBIOOM";
+	static final String XML_GENDER = "GESLACHT";
+	static final String XML_BIRTHDATE = "GEBOORTEDATUM";
+	static final String XML_DEELBIOBANKS = "DEELBIOBANKS";
+	static final String XML_VOORGESCH = "VOORGESCH";
+	static final String XML_FAMANAM = "FAMANAM";
+	static final String XML_BEHANDEL = "BEHANDEL";
+	static final String XML_FOLLOWUP = "FOLLOWUP";
+	static final String XML_BEELDEN = "BEELDEN";
+	static final String XML_VRAGENLIJST = "VRAGENLIJST";
+	static final String XML_OMICS = "OMICS";
+	static final String XML_ROUTINEBEP = "ROUTINEBEP";
+	static final String XML_GWAS = "GWAS";
+	static final String XML_HISTOPATH = "HISTOPATH";
+	static final String XML_OUTCOME = "OUTCOME";
+	static final String XML_ANDERS = "ANDERS";
+	static final String XML_DNA = "DNA";
+	static final String XML_DNABEENMERG = "DNABEENMERG";
+	static final String XML_BLOED = "BLOED";
+	static final String XML_BLOEDPLASMA = "BLOEDPLASMA";
+	static final String XML_BLOEDSERUM = "BLOEDSERUM";
+	static final String XML_WEEFSELSOORT = "WEEFSELSOORT";
+	static final String XML_URINE = "URINE";
+	static final String XML_SPEEKSEL = "SPEEKSEL";
+	static final String XML_FECES = "FECES";
+	static final String XML_RNA = "RNA";
+	static final String XML_RNABEENMERG = "RNABEENMERG";
+	static final String XML_GASTROINTMUC = "GASTROINTMUC";
+	static final String XML_LIQUOR = "LIQUOR";
+	static final String XML_CELLBEENMERG = "CELLBEENMERG";
+	static final String XML_MONONUCLBLOED = "MONONUCLBLOED";
+	static final String XML_MONONUCMERG = "MONONUCMERG";
+	static final String XML_GRANULOCYTMERG = "GRANULOCYTMERG";
+	static final String XML_MONOCYTMERG = "MONOCYTMERG";
+	static final String XML_GWASOMNI = "GWASOMNI";
+	static final String XML_GWAS370CNV = "GWAS370CNV";
+	static final String XML_EXOOMCHIP = "EXOOMCHIP";
 
 	private Map<String, AggregatedSampleInfo> sampleInfos = newHashMap();
 
@@ -178,12 +178,12 @@ class RadboudSampleMap
 		return getTypeEntities(REF_GENDER_TYPES, sampleInfos.get(biobankId).getSexIds());
 	}
 
-	int getAgeMin(String biobankId)
+	Integer getAgeMin(String biobankId)
 	{
 		return sampleInfos.get(biobankId).getAgeMin();
 	}
 
-	int getAgeMax(String biobankId)
+	Integer getAgeMax(String biobankId)
 	{
 		return sampleInfos.get(biobankId).getAgeMax();
 	}
@@ -351,8 +351,8 @@ class RadboudSampleMap
 		private Set<String> omicsIds = newHashSet();
 		private Set<String> sexIds = newHashSet();
 		private int size = 0;
-		private int ageMin = 0;
-		private int ageMax = 0;
+		private Integer ageMin;
+		private Integer ageMax;
 
 		Set<String> getMaterialIds()
 		{
@@ -404,25 +404,27 @@ class RadboudSampleMap
 			size++;
 		}
 
-		public int getAgeMin()
+		Integer getAgeMin()
 		{
 			return ageMin;
 		}
 
-		public void setAgeMin(Integer ageMin)
+		void setAgeMin(Integer ageMin)
 		{
 			if (ageMin == null) return;
+			if (this.ageMin == null) this.ageMin = ageMin;
 			if (this.ageMin > ageMin) this.ageMin = ageMin;
 		}
 
-		public int getAgeMax()
+		Integer getAgeMax()
 		{
 			return ageMax;
 		}
 
-		public void setAgeMax(Integer ageMax)
+		void setAgeMax(Integer ageMax)
 		{
 			if (ageMax == null) return;
+			if (this.ageMax == null) this.ageMax = ageMax;
 			if (this.ageMax < ageMax) this.ageMax = ageMax;
 		}
 	}
