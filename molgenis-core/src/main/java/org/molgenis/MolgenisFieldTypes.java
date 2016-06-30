@@ -51,7 +51,7 @@ public class MolgenisFieldTypes
 		 */
 		public static AttributeType toEnum(String valueString)
 		{
-			return strValMap.get(valueString);
+			return strValMap.get(normalize(valueString));
 		}
 
 		/**
@@ -62,7 +62,7 @@ public class MolgenisFieldTypes
 		 */
 		public static String getValueString(AttributeType value)
 		{
-			return value.toString().replace("_", "").toLowerCase();
+			return normalize(value.toString());
 		}
 
 		/**
@@ -73,6 +73,11 @@ public class MolgenisFieldTypes
 		public static List<String> getOptionsLowercase()
 		{
 			return Arrays.stream(values()).map(AttributeType::getValueString).collect(toList());
+		}
+
+		private static String normalize(String valueString)
+		{
+			return valueString.replace("_", "").toLowerCase();
 		}
 	}
 

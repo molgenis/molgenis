@@ -45,8 +45,6 @@ public class DynamicEntity implements Entity
 	{
 		this.entityMeta = requireNonNull(entityMeta);
 		this.values = newHashMap();
-		// FIXME initialize values with hashmap with expected size (at the moment results in NPE)
-		//this.values = newHashMapWithExpectedSize(Iterables.size(entityMeta.getAtomicAttributes()));
 	}
 
 	/**
@@ -58,24 +56,21 @@ public class DynamicEntity implements Entity
 	public DynamicEntity(EntityMetaData entityMeta, Map<String, Object> values)
 	{
 		this(entityMeta);
-		values.forEach((key, value) -> set(key, value));
+		values.forEach(this::set);
 	}
 
-	// TODO should we return immutable meta data?
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
 		return entityMeta;
 	}
 
-	// TODO remove, use getEntityMetaData to retrieve entity meta data
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
 		return stream(entityMeta.getAtomicAttributes().spliterator(), false).map(AttributeMetaData::getName)::iterator;
 	}
 
-	// TODO getIdValue should return id of type of entity (add Class<P> getIdType() on EntityMetaData?)
 	@Override
 	public Object getIdValue()
 	{
@@ -104,7 +99,6 @@ public class DynamicEntity implements Entity
 		return labelAttr != null ? get(labelAttr.getName()) : null;
 	}
 
-	// FIXME return empty list in case attr is a (categorical)mref and value is null
 	@Override
 	public Object get(String attrName)
 	{
@@ -171,6 +165,7 @@ public class DynamicEntity implements Entity
 	@Override
 	public <E extends Entity> E getEntity(String attrName, Class<E> clazz)
 	{
+		//noinspection unchecked
 		return (E) get(attrName);
 	}
 
@@ -178,6 +173,7 @@ public class DynamicEntity implements Entity
 	public Iterable<Entity> getEntities(String attrName)
 	{
 		Object value = get(attrName);
+		//noinspection unchecked
 		return value != null ? (Iterable<Entity>) value : emptyList();
 	}
 
@@ -185,6 +181,7 @@ public class DynamicEntity implements Entity
 	public <E extends Entity> Iterable<E> getEntities(String attrName, Class<E> clazz)
 	{
 		Object value = get(attrName);
+		//noinspection unchecked
 		return value != null ? (Iterable<E>) value : emptyList();
 	}
 
@@ -195,7 +192,6 @@ public class DynamicEntity implements Entity
 		values.put(attrName, value);
 	}
 
-	// TODO remove method, move to utility class
 	@Override
 	public void set(Entity values)
 	{
