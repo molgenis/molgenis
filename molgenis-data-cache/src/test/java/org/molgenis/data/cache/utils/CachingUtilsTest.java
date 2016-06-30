@@ -54,7 +54,7 @@ public class CachingUtilsTest extends AbstractMolgenisSpringTest
 		Date date = MolgenisDateFormat.getDateFormat().parse("2012-12-21");
 		Date dateTime = MolgenisDateFormat.getDateTimeFormat().parse("1985-08-12T11:12:13+0500");
 
-		// mock dehydrated entity
+		// create dehydrated entity
 		dehydratedEntity = newHashMap();
 		dehydratedEntity.put(ATTR_ID, "0");
 		dehydratedEntity.put(ATTR_STRING, "string1");

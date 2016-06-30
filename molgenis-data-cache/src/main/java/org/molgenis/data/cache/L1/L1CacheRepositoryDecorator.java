@@ -1,5 +1,7 @@
 package org.molgenis.data.cache.L1;
 
+import autovalue.shaded.com.google.common.common.collect.Lists;
+import com.google.common.collect.Iterators;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
@@ -7,13 +9,22 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Iterators.partition;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.RepositoryCollectionCapability.CACHEABLE;
+import static java.util.Spliterator.ORDERED;
+import static java.util.Spliterator.SORTED;
+import static java.util.Spliterators.spliteratorUnknownSize;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.RepositoryCapability.CACHEABLE;
+import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.slf4j.LoggerFactory.getLogger;
 
 public class L1CacheRepositoryDecorator implements Repository<Entity>
@@ -23,12 +34,13 @@ public class L1CacheRepositoryDecorator implements Repository<Entity>
 	private final Repository<Entity> decoratedRepository;
 	private final L1Cache l1Cache;
 
-	private final boolean cacheable = getCapabilities().contains(CACHEABLE);
+	private final boolean cacheable;
 
 	public L1CacheRepositoryDecorator(Repository<Entity> decoratedRepository, L1Cache l1Cache)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
 		this.l1Cache = requireNonNull(l1Cache);
+		this.cacheable = decoratedRepository.getCapabilities().containsAll(newArrayList(CACHEABLE, WRITABLE));
 	}
 
 	@Override
@@ -77,26 +89,9 @@ public class L1CacheRepositoryDecorator implements Repository<Entity>
 	{
 		if (cacheable)
 		{
-			List<Object> missingIds = newArrayList();
-			List<Entity> entitiesFromCache = newArrayList();
-			String entityName = getName();
-			ids = ids.filter(id -> {
-				Entity cacheEntity = l1Cache.get(entityName, id, getEntityMetaData());
-
-				if (cacheEntity != null) entitiesFromCache.add(cacheEntity);
-				else missingIds.add(id);
-
-				return true;
-			});
-
-			if (!entitiesFromCache.isEmpty())
-			{
-				// If there are missing IDs, retrieve them from the decorated repository and concat
-				// them together with the enitities found in the stream
-				if (!missingIds.isEmpty())
-					return Stream.concat(decoratedRepository.findAll(missingIds.stream()), entitiesFromCache.stream());
-				return entitiesFromCache.stream();
-			}
+			Iterator<List<Object>> idBatches = partition(ids.iterator(), 2);
+			Iterator<List<Entity>> entityBatches = Iterators.transform(idBatches, this::findAllBatch);
+			return stream(spliteratorUnknownSize(entityBatches, SORTED | ORDERED), false).flatMap(List::stream);
 		}
 		return decoratedRepository.findAll(ids);
 	}
@@ -281,5 +276,31 @@ public class L1CacheRepositoryDecorator implements Repository<Entity>
 	public void removeEntityListener(EntityListener entityListener)
 	{
 		decoratedRepository.removeEntityListener(entityListener);
+	}
+
+	/**
+	 * Looks up the Entities for a List of entity IDs.
+	 * Those present in the cache are returned from cache. The missing ones are retrieved from the decoratedRepository.
+	 *
+	 * @param batch list of entity IDs to look up
+	 * @return List of {@link Entity}s
+	 */
+	private List<Entity> findAllBatch(List<Object> batch)
+	{
+		String entityName = getName();
+		List<Object> missingIds = batch.stream().filter(id -> l1Cache.get(entityName, id, getEntityMetaData()) == null)
+				.collect(toList());
+
+		Map<Object, Entity> missingEntities = decoratedRepository.findAll(missingIds.stream())
+				.collect(toMap(Entity::getIdValue, e -> e));
+
+		return Lists.transform(batch, id -> {
+			Entity result = l1Cache.get(entityName, id, getEntityMetaData());
+			if (result == null)
+			{
+				result = missingEntities.get(id);
+			}
+			return result;
+		});
 	}
 }

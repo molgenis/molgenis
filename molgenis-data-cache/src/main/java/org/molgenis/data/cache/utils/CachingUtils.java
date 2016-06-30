@@ -60,8 +60,7 @@ public class CachingUtils
 			}
 
 		});
-
-		LOG.trace("Created a hydrated entity: {}", hydratedEntity);
+		
 		return hydratedEntity;
 	}
 
