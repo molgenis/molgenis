@@ -1,14 +1,23 @@
 package org.molgenis.data.i18n;
 
-import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.molgenis.data.*;
+import org.molgenis.data.i18n.model.I18nStringMetaData;
+import org.molgenis.data.i18n.model.Language;
+import org.molgenis.data.i18n.model.LanguageMetaData;
+import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,27 +25,28 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.*;
+import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.testng.Assert.assertEquals;
 
-public class LanguageRepositoryDecoratorTest
+@ContextConfiguration(classes = { LanguageRepositoryDecoratorTest.Config.class })
+public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private AttributeMetaDataMetaData attrMetaMeta;
+
+	@Autowired
+	private EntityMetaDataMetaData entityMetaMeta;
+
+	@Autowired
+	private I18nStringMetaData i18nStringMetaData;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
 	@Mock
 	private Repository<Language> decoratedRepo;
 	@Mock
@@ -55,24 +65,11 @@ public class LanguageRepositoryDecoratorTest
 		MockitoAnnotations.initMocks(this);
 		when(metaDataService.getDefaultBackend()).thenReturn(defaultBackend);
 		when(dataService.getMeta()).thenReturn(metaDataService);
-		EntityMetaData attrMetaMeta = mock(EntityMetaData.class);
-		when(dataService.getEntityMetaData(AttributeMetaDataMetaData.ATTRIBUTE_META_DATA)).thenReturn(attrMetaMeta);
-		AttributeMetaDataFactory attrMetaFactory = mock(AttributeMetaDataFactory.class);
-		when(attrMetaFactory.create()).thenAnswer(new Answer<AttributeMetaData>()
-		{
-			@Override
-			public AttributeMetaData answer(InvocationOnMock invocation) throws Throwable
-			{
-				AttributeMetaData attrMeta = mock(AttributeMetaData.class);
-				when(attrMeta.setName(anyString())).thenReturn(attrMeta);
-				when(attrMeta.setNillable(anyBoolean())).thenReturn(attrMeta);
-				return attrMeta;
-			}
-		});
-		EntityMetaDataMetaData entityMetaMeta = mock(EntityMetaDataMetaData.class);
-		I18nStringMetaData i18nStringMeta = mock(I18nStringMetaData.class);
+		when(dataService.getEntityMetaData(ENTITY_META_DATA)).thenReturn(entityMetaMeta);
+		when(dataService.getEntityMetaData(ATTRIBUTE_META_DATA)).thenReturn(attrMetaMeta);
+		when(dataService.getEntityMetaData(I18N_STRING)).thenReturn(i18nStringMetaData);
 		languageRepositoryDecorator = new LanguageRepositoryDecorator(decoratedRepo, dataService, attrMetaFactory,
-				entityMetaMeta, i18nStringMeta);
+				entityMetaMeta, i18nStringMetaData);
 	}
 
 	@Test
@@ -164,5 +161,12 @@ public class LanguageRepositoryDecoratorTest
 		Consumer<List<Language>> consumer = mock(Consumer.class);
 		decoratedRepo.forEachBatched(fetch, consumer, 234);
 		verify(decoratedRepo, times(1)).forEachBatched(fetch, consumer, 234);
+	}
+
+	@Configuration
+	@ComponentScan({ "org.molgenis.data.i18n.model" })
+	public static class Config
+	{
+
 	}
 }

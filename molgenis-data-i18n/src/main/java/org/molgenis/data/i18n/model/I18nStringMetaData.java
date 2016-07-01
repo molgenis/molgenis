@@ -1,4 +1,4 @@
-package org.molgenis.data.i18n;
+package org.molgenis.data.i18n.model;
 
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.stereotype.Component;
@@ -16,7 +16,6 @@ public class I18nStringMetaData extends SystemEntityMetaData
 
 	public static final String MSGID = "msgid";
 	public static final String DESCRIPTION = "description";
-	public static final String EN = "en";
 
 	I18nStringMetaData()
 	{
@@ -28,7 +27,5 @@ public class I18nStringMetaData extends SystemEntityMetaData
 	{
 		addAttribute(MSGID, ROLE_ID);
 		addAttribute(DESCRIPTION).setNillable(true).setDataType(TEXT);
-
-		addAttribute(EN).setNillable(true).setDataType(TEXT);
 	}
 }

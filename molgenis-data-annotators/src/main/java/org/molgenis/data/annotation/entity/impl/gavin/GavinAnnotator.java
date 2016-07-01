@@ -107,7 +107,7 @@ public class GavinAnnotator implements AnnotatorConfig
 	private EffectsAnnotator annotator;
 
 	@Bean
-	public EffectsAnnotator cadd()
+	public EffectsAnnotator gavin()
 	{
 		annotator = new EffectsAnnotator(NAME);
 		return annotator;

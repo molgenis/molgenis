@@ -5,7 +5,7 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;
-import org.molgenis.data.i18n.LanguageFactory;
+import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulatorService;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -17,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
-import static org.molgenis.data.i18n.LanguageMetaData.*;
+import static org.molgenis.data.i18n.model.LanguageMetaData.*;
 
 @Service
 public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulatorService

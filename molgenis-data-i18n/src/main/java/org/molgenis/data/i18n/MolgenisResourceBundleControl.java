@@ -1,9 +1,12 @@
 package org.molgenis.data.i18n;
 
-import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
-import static org.molgenis.data.i18n.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
-import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.i18n.model.I18nStringMetaData;
+import org.molgenis.data.i18n.model.LanguageMetaData;
+import org.molgenis.data.settings.AppSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -12,11 +15,10 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.settings.AppSettings;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.model.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
+import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 /**
  * ResourceBundle Control that gets it content from the i18nstrings repository

@@ -15,7 +15,8 @@ import java.util.Map;
 import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
 import static com.google.common.cache.CacheBuilder.newBuilder;
 import static com.google.common.collect.Maps.newHashMap;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
+import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
 
 public class CachingUtils
 {
@@ -33,24 +34,24 @@ public class CachingUtils
 		LOG.trace("Hydrating entity: {} for entity {}", dehydratedEntity, entityMetaData.getName());
 
 		Entity hydratedEntity = entityManager.create(entityMetaData);
-		entityMetaData.getAtomicAttributes().forEach(attribute -> {
+		entityMetaData.getAtomicAttributes().forEach(attr -> {
 
-			String name = attribute.getName();
+			String name = attr.getName();
 			Object value = dehydratedEntity.get(name);
 			if (value != null)
 			{
-				AttributeType type = attribute.getDataType();
+				AttributeType type = attr.getDataType();
 
-				if (type.equals(MREF) || type.equals(CATEGORICAL_MREF))
+				if (isMultipleReferenceType(attr))
 				{
 					// We can do this cast because during dehydration, mrefs and categorical mrefs are stored as a List of Object
 					Iterable<Entity> referenceEntities = entityManager
-							.getReferences(entityMetaData, (List<Object>) value);
+							.getReferences(attr.getRefEntity(), (List<Object>) value);
 					hydratedEntity.set(name, referenceEntities);
 				}
-				else if (type.equals(XREF) || type.equals(CATEGORICAL) || type.equals(FILE))
+				else if (isSingleReferenceType(attr))
 				{
-					Entity referenceEntity = entityManager.getReference(entityMetaData, value);
+					Entity referenceEntity = entityManager.getReference(attr.getRefEntity(), value);
 					hydratedEntity.set(name, referenceEntity);
 				}
 				else

@@ -1,7 +1,4 @@
-package org.molgenis.data.i18n;
-
-import static org.molgenis.data.i18n.LanguageMetaData.CODE;
-import static org.molgenis.data.i18n.LanguageMetaData.NAME;
+package org.molgenis.data.i18n.model;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -41,23 +38,23 @@ public class Language extends StaticEntity
 
 	public String getCode()
 	{
-		return getString(CODE);
+		return getString(LanguageMetaData.CODE);
 	}
 
 	public Language setCode(String code)
 	{
-		set(CODE, code);
+		set(LanguageMetaData.CODE, code);
 		return this;
 	}
 
 	public String getName()
 	{
-		return getString(NAME);
+		return getString(LanguageMetaData.NAME);
 	}
 
 	public Language setName(String name)
 	{
-		set(NAME, name);
+		set(LanguageMetaData.NAME, name);
 		return this;
 	}
 }

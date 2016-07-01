@@ -1,23 +1,24 @@
 package org.molgenis.data.i18n;
 
-import static java.util.stream.Collectors.toList;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
-import static org.molgenis.data.i18n.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
-import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-
-import java.util.List;
-import java.util.Locale;
-import java.util.ResourceBundle;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.i18n.model.LanguageMetaData;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Locale;
+import java.util.ResourceBundle;
+
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.model.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
+import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 @Service
 public class LanguageService

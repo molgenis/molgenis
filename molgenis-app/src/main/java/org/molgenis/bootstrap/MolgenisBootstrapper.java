@@ -1,11 +1,8 @@
 package org.molgenis.bootstrap;
 
-import static java.util.Objects.requireNonNull;
-
 import org.molgenis.data.bootstrap.AnnotatorBootstrapper;
 import org.molgenis.data.idcard.IdCardBootstrapper;
 import org.molgenis.data.jobs.JobBootstrapper;
-import org.molgenis.data.meta.system.SystemEntityMetaDataBootstrapper;
 import org.molgenis.file.ingest.FileIngesterJobRegistrar;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
@@ -16,6 +13,8 @@ import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.core.PriorityOrdered;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Application bootstrapper
