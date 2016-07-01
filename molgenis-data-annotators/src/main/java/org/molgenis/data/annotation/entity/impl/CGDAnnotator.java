@@ -5,11 +5,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.cmd.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.entity.*;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.filter.FirstResultFilter;
-import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.query.AttributeEqualsQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
@@ -19,6 +19,7 @@ import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.support.EffectsMetaData;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -84,7 +85,7 @@ public class CGDAnnotator implements AnnotatorConfig
 
 	public enum CGDAttributeName
 	{
-		GENE("#GENE", SnpEffAnnotator.GENE_NAME), REFERENCES("REFERENCES", "REFS"), INTERVENTION_RATIONALE(
+		GENE("#GENE", EffectsMetaData.GENE_NAME), REFERENCES("REFERENCES", "REFS"), INTERVENTION_RATIONALE(
 			"INTERVENTION/RATIONALE", "INTERVENTION_RATIONALE"), COMMENTS("COMMENTS",
 			"COMMENTS"), INTERVENTION_CATEGORIES("INTERVENTION CATEGORIES",
 			"INTERVENTION_CATEGORIES"), MANIFESTATION_CATEGORIES("MANIFESTATION CATEGORIES",

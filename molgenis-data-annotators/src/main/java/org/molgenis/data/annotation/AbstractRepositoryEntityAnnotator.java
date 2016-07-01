@@ -2,6 +2,7 @@ package org.molgenis.data.annotation;
 
 import org.molgenis.data.Entity;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -12,6 +13,14 @@ public abstract class AbstractRepositoryEntityAnnotator extends AbstractReposito
 	@Override
 	@RunAsSystem
 	public Iterator<Entity> annotate(final Iterable<Entity> sourceIterable)
+	{ // default update mode is false
+		return annotate(sourceIterable, false);
+	}
+
+	@Override
+	@Transactional
+	@RunAsSystem
+	public Iterator<Entity> annotate(final Iterable<Entity> sourceIterable, boolean updateMode)
 	{
 		Iterator<Entity> source = sourceIterable.iterator();
 		return new Iterator<Entity>()
@@ -38,7 +47,7 @@ public abstract class AbstractRepositoryEntityAnnotator extends AbstractReposito
 						try
 						{
 							sourceEntity = source.next();
-							results = annotateEntity(sourceEntity);
+							results = annotateEntity(sourceEntity, updateMode);
 						}
 						catch (IOException e)
 						{
@@ -73,6 +82,7 @@ public abstract class AbstractRepositoryEntityAnnotator extends AbstractReposito
 		};
 	}
 
-	public abstract List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException;
+	public abstract List<Entity> annotateEntity(Entity entity, boolean updateMode)
+			throws IOException, InterruptedException;
 
 }
