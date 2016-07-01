@@ -3,6 +3,7 @@ package org.molgenis.data.i18n;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.settings.AppSettings;
@@ -20,8 +21,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
-import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
+import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.testng.Assert.*;
 
 public class MolgenisResourceBundleControlTest

@@ -1,7 +1,7 @@
 package org.molgenis.data.importer;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.i18n.I18nStringMetaData;
+import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.PackageFactory;
 import org.molgenis.data.meta.model.TagMetaData;

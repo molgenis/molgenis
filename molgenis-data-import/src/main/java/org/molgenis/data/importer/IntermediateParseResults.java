@@ -1,15 +1,9 @@
 package org.molgenis.data.importer;
 
-import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
-
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.*;
 import org.molgenis.data.Entity;
-import org.molgenis.data.i18n.I18nStringMetaData;
-import org.molgenis.data.i18n.LanguageMetaData;
+import org.molgenis.data.i18n.model.I18nStringMetaData;
+import org.molgenis.data.i18n.model.LanguageMetaData;
 import org.molgenis.data.importer.EmxMetaDataParser.EmxAttribute;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -18,11 +12,12 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.SetMultimap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 /**
  * Mutable bean to store intermediate parse results. Uses lookup tables to map simple names to the parsed objects. Is
