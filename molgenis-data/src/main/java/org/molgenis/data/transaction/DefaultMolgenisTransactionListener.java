@@ -1,6 +1,4 @@
-package org.molgenis.data.elasticsearch.transaction;
-
-import org.molgenis.data.transaction.MolgenisTransactionListener;
+package org.molgenis.data.transaction;
 
 public abstract class DefaultMolgenisTransactionListener implements MolgenisTransactionListener
 {

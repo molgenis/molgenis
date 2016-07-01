@@ -702,5 +702,6 @@
         <module>molgenis-jobs</module>
         <!--<module>molgenis-platform-integration-tests</module>-->
         <module>molgenis-test</module>
+        <module>molgenis-data-cache</module>
     </modules>
 </project>

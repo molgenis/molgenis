@@ -12,7 +12,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
@@ -20,6 +19,7 @@ import java.util.stream.Stream;
 
 import static autovalue.shaded.com.google.common.common.collect.Sets.immutableEnumSet;
 import static java.lang.String.format;
+import static java.util.EnumSet.of;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.data.RepositoryCollectionCapability.*;
@@ -57,7 +57,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 	@Override
 	public Set<RepositoryCollectionCapability> getCapabilities()
 	{
-		return immutableEnumSet(EnumSet.of(WRITABLE, UPDATABLE, META_DATA_PERSISTABLE));
+		return immutableEnumSet(of(WRITABLE, UPDATABLE, META_DATA_PERSISTABLE, CACHEABLE));
 	}
 
 	@Override
@@ -219,6 +219,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 			jdbcTemplate.execute(addColumnSql);
 		}
 
+		// FIXME Code duplication
 		if (isSingleReferenceType(attr) && isPersistedInPostgreSql(attr.getRefEntity()))
 		{
 			String createForeignKeySql = getSqlCreateForeignKey(entityMetaData, attr);
@@ -477,6 +478,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 				}
 				jdbcTemplate.execute(createJunctionTableSql);
 			}
+			// FIXME Code duplication
 			else if (isSingleReferenceType(attr) && isPersistedInPostgreSql(attr.getRefEntity()))
 			{
 				String createForeignKeySql = getSqlCreateForeignKey(entityMeta, attr);
