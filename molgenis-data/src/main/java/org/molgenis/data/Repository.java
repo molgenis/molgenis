@@ -1,14 +1,13 @@
 package org.molgenis.data;
 
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.model.EntityMetaData;
+
 import java.io.Closeable;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Repository gives access to a collection of Entity. Synonyms: EntityReader, EntitySource, EntityCollection

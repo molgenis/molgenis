@@ -4,6 +4,8 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserDecorator;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.*;
+import org.molgenis.data.cache.L1.L1Cache;
+import org.molgenis.data.cache.L1.L1CacheRepositoryDecorator;
 import org.molgenis.data.elasticsearch.IndexedRepositoryDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.i18n.I18nStringDecorator;
@@ -55,6 +57,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final PasswordEncoder passwordEncoder;
 	private final EntityMetaDataMetaData entityMetaMeta;
 	private final I18nStringMetaData i18nStringMeta;
+	private final L1Cache l1Cache;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -64,7 +67,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, UserAuthorityFactory userAuthorityFactory,
 			ReindexActionRegisterService reindexActionRegisterService, SearchService searchService,
 			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder,
-			EntityMetaDataMetaData entityMetaMeta, I18nStringMetaData i18nStringMeta)
+			EntityMetaDataMetaData entityMetaMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache)
+
 	{
 		this.entityManager = requireNonNull(entityManager);
 		this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
@@ -81,12 +85,16 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.passwordEncoder = requireNonNull(passwordEncoder);
 		this.entityMetaMeta = requireNonNull(entityMetaMeta);
 		this.i18nStringMeta = requireNonNull(i18nStringMeta);
+		this.l1Cache = requireNonNull(l1Cache);
 	}
 
 	@Override
 	public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 	{
 		Repository<Entity> decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
+
+		// 10. Query the L1 cache before querying the database
+		decoratedRepository = new L1CacheRepositoryDecorator(decoratedRepository, l1Cache);
 
 		// 9. Route specific queries to the index
 		decoratedRepository = new IndexedRepositoryDecorator(decoratedRepository, searchService);
