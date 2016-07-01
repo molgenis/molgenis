@@ -3,6 +3,8 @@ package org.molgenis.data.importer;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
+import static org.apache.commons.io.FilenameUtils.getBaseName;
+import static org.apache.commons.io.FilenameUtils.getExtension;
 import static org.molgenis.data.importer.ImportWizardController.URI;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.security.core.Permission.COUNT;
@@ -33,7 +35,7 @@ import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.apache.commons.io.FilenameUtils;
+
 import org.molgenis.auth.Authority;
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.GroupAuthorityFactory;
@@ -445,11 +447,13 @@ public class ImportWizardController extends AbstractWizardController
 	{
 		// no action specified? default is ADD just like the importerPlugin
 		ImportRun importRun;
+		String fileExtension = getExtension(file.getName());
 		DatabaseAction databaseAction = getDatabaseAction(file, action);
-		if (dataService.hasRepository(FilenameUtils.getBaseName(file.getName())))
+		if (fileExtension.contains("vcf") &&
+				dataService.hasRepository(getBaseName(file.getName())))
 		{
 			throw new MolgenisDataException(
-					"A repository with name " + FilenameUtils.getBaseName(file.getName()) + " already exists");
+					"A repository with name " + getBaseName(file.getName()) + " already exists");
 		}
 		ImportService importService = importServiceFactory.getImportService(file.getName());
 		RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory

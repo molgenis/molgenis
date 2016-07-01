@@ -11,6 +11,7 @@ import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.annotation.entity.impl.omim.OmimRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;

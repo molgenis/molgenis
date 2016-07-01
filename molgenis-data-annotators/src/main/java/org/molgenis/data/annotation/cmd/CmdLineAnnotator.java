@@ -45,6 +45,7 @@ import joptsimple.OptionSet;
  */
 public class CmdLineAnnotator
 {
+	public static final String EFFECT = "EFFECT";
 	@Autowired
 	private ApplicationContext applicationContext;
 
@@ -147,7 +148,7 @@ public class CmdLineAnnotator
 			}
 		}
 
-		//FIXME annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
+		annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
 		annotate(annotator, inputVcfFile, outputVCFFile, options);
 	}
 
@@ -199,6 +200,8 @@ public class CmdLineAnnotator
 		parser.acceptsAll(asList("h", "help"), "Prints this help text");
 		parser.acceptsAll(asList("r", "replace"),
 				"Enables output file override, replacing a file with the same name as the argument for the -o option");
+		parser.acceptsAll(asList("u", "update-annotations"),
+				"Enables add/updating of annotations, i.e. CADD scores from a different source, by reusing existing annotations when no match was found.");
 
 		return parser;
 	}
@@ -219,20 +222,27 @@ public class CmdLineAnnotator
 	{
 		List<String> attributesToInclude = options.nonOptionArguments().stream().map(Object::toString)
 				.collect(Collectors.toList());
+		annotate(annotator, inputVcfFile, outputVCFFile, attributesToInclude, options.has("validate"), options.has("u"));
+	}
 
+	public void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile,
+			List<String> attributesToInclude, boolean validate, boolean update) throws IOException, MolgenisInvalidFormatException
+	{
 		BufferedWriter outputVCFWriter = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
-		// FIXME replace null contructor arguments with actual arguments
-		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, this.getClass().getName(), null, null, null);
+		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, inputVcfFile.getName());
 
 		try
 		{
 			if (!attributesToInclude.isEmpty())
 			{
 				// Check attribute names
-				List<String> outputAttributeNames = VcfUtils
-						.getAtomicAttributesFromList(annotator.getOutputAttributes())
+				List<String> outputAttributeNames = VcfUtils.getAtomicAttributesFromList(annotator.getOutputMetaData())
 						.stream().map((attr) -> attr.getName()).collect(Collectors.toList());
+
+				List<String> inputAttributeNames = VcfUtils
+						.getAtomicAttributesFromList(vcfRepo.getEntityMetaData().getAtomicAttributes()).stream()
+						.map((attr) -> attr.getName()).collect(Collectors.toList());
 
 				boolean stop = false;
 				for (Object attrName : attributesToInclude)
@@ -242,16 +252,39 @@ public class CmdLineAnnotator
 						System.out.println("Unknown output attribute '" + attrName + "'");
 						stop = true;
 					}
+					else if (inputAttributeNames.contains(attrName))
+					{
+						System.out.println("The output attribute '" + attrName
+								+ "' is present in the inputfile, but is deselected in the current run, this is not supported");
+						stop = true;
+					}
 				}
 				if (stop) return;
-
-				// Include the original attributes
-				vcfRepo.getEntityMetaData().getAtomicAttributes()
-						.forEach((attr) -> attributesToInclude.add(attr.getName()));
 			}
 
-			VcfUtils.checkPreviouslyAnnotatedAndAddMetadata(inputVcfFile, outputVCFWriter,
-					annotator.getOutputAttributes(), attributesToInclude);
+			// If the annotator e.g. SnpEff creates an external repository, collect the output metadata into an mref
+			// entity
+			// This allows for the header to be written as 'EFFECT annotations: <ouput_attributes> | <ouput_attributes>'
+			List<AttributeMetaData> outputMetaData = newArrayList();
+			if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
+			{
+				DefaultEntityMetaData effectRefEntity = new DefaultEntityMetaData(
+						annotator.getSimpleName() + "_EFFECTS");
+				for (AttributeMetaData outputAttribute : annotator.getOutputMetaData())
+				{
+					effectRefEntity.addAttributeMetaData(outputAttribute);
+				}
+				DefaultAttributeMetaData effect = new DefaultAttributeMetaData(EFFECT);
+				effect.setDataType(MREF).setRefEntity(effectRefEntity);
+				outputMetaData.add(effect);
+			}
+			else
+			{
+				outputMetaData = annotator.getOutputMetaData();
+			}
+
+			VcfWriterUtils.writeVcfHeader(inputVcfFile, outputVCFWriter,
+					VcfUtils.getAtomicAttributesFromList(outputMetaData), attributesToInclude);
 			System.out.println("Now starting to process the data.");
 
 			EntityMetaData emd = (EntityMetaData) vcfRepo.getEntityMetaData();
@@ -263,22 +296,40 @@ public class CmdLineAnnotator
 					infoAttribute.addAttributePart(atomicAttribute);
 				}
 			}
+			Iterable<Entity> entitiesToAnnotate;
+			if (annotator instanceof EffectsAnnotator)
+			{
+				entitiesToAnnotate = VcfUtils.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT,
+						vcfRepo.stream());
+			}
+			else
+			{
+				entitiesToAnnotate = vcfRepo;
+			}
+			Iterator<Entity> annotatedRecords = annotator.annotate(entitiesToAnnotate, update);
 
-			Iterator<Entity> annotatedRecords = annotator.annotate(vcfRepo);
+			if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
+			{
+				annotatedRecords = VcfUtils.reverseXrefMrefRelation(annotatedRecords);
+			}
+
 			while (annotatedRecords.hasNext())
 			{
 				Entity annotatedRecord = annotatedRecords.next();
-				VcfUtils.writeToVcf(annotatedRecord, attributesToInclude, outputVCFWriter);
+				VcfWriterUtils.writeToVcf(annotatedRecord, VcfUtils.getAtomicAttributesFromList(outputMetaData),
+						attributesToInclude, outputVCFWriter);
 				outputVCFWriter.newLine();
 			}
+
 		}
+
 		finally
 		{
 			outputVCFWriter.close();
 
 			vcfRepo.close();
 		}
-		if (options.has("validate"))
+		if (validate)
 		{
 			System.out.println("Validating produced VCF file...");
 			System.out.println(vcfValidator.validateVCF(outputVCFFile));
@@ -336,4 +387,5 @@ public class CmdLineAnnotator
 		molgenisLogger.setLevel(Level.INFO);
 		molgenisLogger.setAdditive(false);
 	}
+
 }

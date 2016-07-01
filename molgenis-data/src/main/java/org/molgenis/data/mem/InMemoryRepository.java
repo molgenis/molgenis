@@ -109,7 +109,7 @@ public class InMemoryRepository implements Repository<Entity>
 						{
 							return null;
 						}
-					});
+					}).filter(Objects::nonNull);
 				}
 			}
 			throw new UnsupportedOperationException();

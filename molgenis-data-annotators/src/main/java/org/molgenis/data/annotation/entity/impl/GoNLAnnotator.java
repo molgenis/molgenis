@@ -2,9 +2,15 @@ package org.molgenis.data.annotation.entity.impl;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
+import org.elasticsearch.common.collect.Lists;
+import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.data.AttributeMetaData;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
@@ -31,6 +37,16 @@ import java.util.stream.Collectors;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.CHROMOSOMES;
+import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.FILEPATTERN;
+import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES;
+import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.ROOT_DIRECTORY;
+import static org.molgenis.data.vcf.VcfRepository.ALT;
 
 @Configuration
 public class GoNLAnnotator implements AnnotatorConfig
@@ -111,8 +127,13 @@ public class GoNLAnnotator implements AnnotatorConfig
 			public String postFixResource = "";
 
 			@Override
-			protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities)
+			protected void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
+					Entity resultEntity, boolean updateMode)
 			{
+				if (updateMode == true)
+				{
+					throw new MolgenisDataException("This annotator/filter does not support updating of values");
+				}
 				String afs = null;
 				String gtcs = null;
 				List<Entity> refMatches = Lists.newArrayList();

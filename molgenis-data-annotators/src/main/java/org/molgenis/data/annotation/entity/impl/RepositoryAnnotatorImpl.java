@@ -51,9 +51,9 @@ public class RepositoryAnnotatorImpl extends AbstractRepositoryEntityAnnotator
 	}
 
 	@Override
-	public List<Entity> annotateEntity(Entity entity) throws IOException, InterruptedException
+	public List<Entity> annotateEntity(Entity entity, boolean updateMode) throws IOException, InterruptedException
 	{
-		return Lists.newArrayList(entityAnnotator.annotateEntity(entity));
+		return Lists.newArrayList(entityAnnotator.annotateEntity(entity, updateMode));
 	}
 
 	@Override

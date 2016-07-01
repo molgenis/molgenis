@@ -15,6 +15,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Controller that handles static content pages requests.
  */
@@ -43,7 +45,8 @@ public class StaticContentServiceImpl implements StaticContentService
 			StaticContent staticContent = dataService.findOneById(STATIC_CONTENT, key, StaticContent.class);
 			if (staticContent == null)
 			{
-				staticContent = staticContentFactory.create(key);
+				staticContent = new StaticContent(key, dataService);
+				staticContent.setContent(content);
 				dataService.add(STATIC_CONTENT, staticContent);
 			}
 			else

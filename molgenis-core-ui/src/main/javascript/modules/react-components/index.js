@@ -40,6 +40,8 @@ import TextArea from './TextArea';
 import ProgressBar from './ProgressBar';
 import FileIngestPlugin from './FileIngestPlugin';
 import jobs from './jobs';
+import UploadContainer from './UploadContainer';
+import UploadForm from './UploadForm';
 
 export default {
 	'mixin' : mixin,
@@ -73,5 +75,7 @@ export default {
 	'ProgressBar' : ProgressBar,
 	'jobs': jobs,
 	'FileIngestPlugin' : FileIngestPlugin,
-	'ConfirmClick': ConfirmClick
+	'ConfirmClick': ConfirmClick,
+	'UploadContainer' : UploadContainer,
+	'UploadForm' : UploadForm
 };

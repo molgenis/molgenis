@@ -12,6 +12,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.utils.JarRunnerImpl;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.support.AnnotationServiceImpl;
@@ -32,6 +33,8 @@ import org.springframework.core.convert.support.DefaultConversionService;
 @CommandLineOnlyConfiguration
 public class CommandLineAnnotatorConfig
 {
+
+	private DataServiceImpl dataService = new DataServiceImpl();
 
 	@Value("${vcf-validator-location:@null}")
 	private String vcfValidatorLocation;
@@ -90,6 +93,18 @@ public class CommandLineAnnotatorConfig
 	}
 
 	@Bean
+	public UuidGenerator uuidGenerator()
+	{
+		return new UuidGenerator();
+	}
+
+	@Bean
+	public JarRunnerImpl jarRunner()
+	{
+		return new JarRunnerImpl();
+	}
+
+	@Bean
 	public Entity snpEffAnnotatorSettings()
 	{
 		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
@@ -143,6 +158,13 @@ public class CommandLineAnnotatorConfig
 		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
+
+	@Bean
+	public Entity gavinAnnotatorSettings()
+	{
+		return new new DynamicEntity(null);
+	}
+
 	@Bean
 	public Entity omimAnnotatorSettings()
 	{
@@ -152,7 +174,13 @@ public class CommandLineAnnotatorConfig
 	@Bean
 	DataService dataService()
 	{
-		return new DataServiceImpl();
+		return dataService;
+	}
+
+	@Bean
+	PermissionSystemService permissionSystemService()
+	{
+		return new PermissionSystemService(dataService);
 	}
 
 	@Bean

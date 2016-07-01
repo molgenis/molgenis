@@ -2,6 +2,8 @@ package org.molgenis.data.annotation.entity.impl;
 
 import java.util.List;
 
+import com.google.common.base.Optional;
+import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
@@ -12,7 +14,7 @@ import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.annotation.resources.Resources;
 import org.molgenis.data.meta.model.AttributeMetaData;
 
-import com.google.common.base.Optional;
+import java.util.List;
 
 /**
  * The most standard implementation of an {@link EntityAnnotator} that first creates a query, queries the resource, then
@@ -32,14 +34,25 @@ public class AnnotatorImpl extends QueryAnnotatorImpl implements EntityAnnotator
 	}
 
 	@Override
-	protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities)
+	protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities, Entity resultEntity,
+			boolean updateMode)
 	{
-		Optional<Entity> filteredResult = resultFilter.filterResults(annotationSourceEntities, entity);
+		Optional<Entity> filteredResult = resultFilter.filterResults(annotationSourceEntities, entity, updateMode);
 		if (filteredResult.isPresent())
 		{
 			for (AttributeMetaData attr : getInfo().getOutputAttributes())
 			{
 				entity.set(attr.getName(), getResourceAttributeValue(attr, filteredResult.get()));
+			}
+		}
+		else
+		{
+			for (AttributeMetaData attr : getInfo().getOutputAttributes())
+			{
+				if (!updateMode || resultEntity.get(attr.getName()) == null)
+				{
+					resultEntity.set(attr.getName(), null);
+				}
 			}
 		}
 	}
@@ -49,8 +62,8 @@ public class AnnotatorImpl extends QueryAnnotatorImpl implements EntityAnnotator
 	 * 
 	 * @param attr
 	 *            the name of the output attribute
-	 * @param the
-	 *            current entity
+	 * @param entity
+	 *            the current entity
 	 * @return the value of the attribute to copy from the resource entity
 	 */
 	protected Object getResourceAttributeValue(AttributeMetaData attr, Entity entity)

@@ -97,6 +97,7 @@ public class ProgressImpl implements Progress
 		JOB_EXECUTION_LOG.error("Failed", ex);
 		jobExecution.setEndDate(new Date());
 		jobExecution.setStatus(FAILED);
+		jobExecution.setProgressMessage(ex.getMessage());
 		sendEmail(jobExecution.getFailureEmail(), jobExecution.getType() + " job failed.", jobExecution.getLog());
 		update();
 		JobExecutionContext.unset();

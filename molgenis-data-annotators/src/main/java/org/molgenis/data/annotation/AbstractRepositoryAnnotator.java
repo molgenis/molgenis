@@ -1,11 +1,19 @@
 package org.molgenis.data.annotation;
 
+import java.util.Iterator;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Iterator;
+import java.util.stream.StreamSupport;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
@@ -29,10 +37,26 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 					.getDataType())
 			{
 				// allow type string when required attribute is text (for backward compatibility)
-				if (!(repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType() == STRING
-						&& annotatorAttribute.getDataType() == TEXT))
+				if (!(repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType().equals(
+						MolgenisFieldTypes.STRING) && annotatorAttribute.getDataType().equals(MolgenisFieldTypes.TEXT)))
 				{
 					return "a required attribute has the wrong datatype";
+				}
+			}
+			if (annotatorAttribute.getDataType().equals(MolgenisFieldTypes.XREF))
+			{
+				EntityMetaData refEntity = repoMetaData.getAttribute(annotatorAttribute.getName()).getRefEntity();
+				for (AttributeMetaData refAttribute : annotatorAttribute.getRefEntity().getAtomicAttributes())
+				{
+					if (refEntity.getAttribute(refAttribute.getName()) == null)
+					{
+						return "the required referenced entity ["
+								+ StreamSupport
+										.stream(annotatorAttribute.getRefEntity().getAtomicAttributes().spliterator(),
+												false)
+										.map(AttributeMetaData::getName).collect(Collectors.joining(", "))
+								+ "] is missing a required attribute";
+					}
 				}
 			}
 

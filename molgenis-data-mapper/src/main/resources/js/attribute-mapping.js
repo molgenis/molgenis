@@ -290,7 +290,6 @@
 	function getAceEditor(){
 		
 		var $textarea = $("#ace-editor-text-area");
-		
 		if(!$textarea.data('ace')){			
 			// create ace editor
 			$textarea.ace({
@@ -302,22 +301,6 @@
 				mode : 'javascript',
 				showGutter : true,
 				highlightActiveLine : true
-			});
-			
-			$textarea.data('ace').editor.getSession().on('change', function(object) {
-				var algorithm = $textarea.data('ace').editor.getSession().getValue();
-				
-				// check attributes if manually added
-				checkSelectedAttributes(algorithm);
-				
-				// update save buttons visibility
-				disableEnableSaveButtons(algorithm);
-				
-				// validate mapping
-				validateAttrMapping(algorithm);
-
-				// preview mapping results
-				loadAlgorithmResult(algorithm);
 			});
 		}	
 		return $textarea.data('ace').editor;
@@ -581,7 +564,26 @@
 			'targetAttribute' : $('[name="targetAttribute"]').val(),
 			'searchTerms' : ""
 		}, explainedAttributes, attributes = [];
-		
+
+		$('#validate-algorithm-btn').on('click', function() {
+			var algorithm = $("#ace-editor-text-area").data('ace').editor.getSession().getValue();
+
+			// check attributes if manually added
+			checkSelectedAttributes(algorithm);
+
+			// update save buttons visibility
+			disableEnableSaveButtons(algorithm);
+
+			// validate mapping
+			validateAttrMapping(algorithm);
+
+			// preview mapping results
+			loadAlgorithmResult(algorithm);
+
+			// Show the result container
+			$('#result-container').css('display', 'inline');
+		});
+
 		// tooltip placement
 		$("[rel=tooltip]").tooltip({
 			placement : 'right'

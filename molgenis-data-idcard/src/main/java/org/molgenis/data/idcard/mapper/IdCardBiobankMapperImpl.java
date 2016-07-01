@@ -41,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.google.gson.stream.JsonReader;
+import java.util.Locale;
 
 @Component
 public class IdCardBiobankMapperImpl implements IdCardBiobankMapper
@@ -63,7 +64,7 @@ public class IdCardBiobankMapperImpl implements IdCardBiobankMapper
 		IdCardBiobank idCardBiobank = idCardBiobankFactory.create();
 
 		// e.g. "Mon Jan 05 18:02:13 GMT 2015"
-		SimpleDateFormat dateTimeFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy");
+		SimpleDateFormat dateTimeFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);
 
 		jsonReader.beginObject();
 		while (jsonReader.hasNext())

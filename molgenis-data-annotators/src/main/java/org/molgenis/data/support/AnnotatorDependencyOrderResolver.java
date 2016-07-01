@@ -7,6 +7,7 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.annotation.EffectsAnnotator;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -28,7 +29,12 @@ public class AnnotatorDependencyOrderResolver
 		Queue<RepositoryAnnotator> sortedList = new LinkedList<>();
 		for (RepositoryAnnotator annotator : requestedAnnotatorList)
 		{
-			if (!sortedList.contains(annotator))
+			if (annotator instanceof EffectsAnnotator)
+			{
+				// FIXME: implement correct dependency resolving for Effect annotator
+				sortedList.add(annotator);
+			}
+			else if (!sortedList.contains(annotator))
 			{
 				requestedAnnotator = annotator;
 				sortedList = getSingleAnnotatorDependencyList(annotator, availableAnnotatorList, sortedList,
@@ -72,6 +78,7 @@ public class AnnotatorDependencyOrderResolver
 		}
 		if (annotatorQueue.size() == 0)
 		{
+			// FIXME: what to do for ref entity annotator.
 			throw new UnresolvedAnnotatorDependencyException("unsolved for: " + requestedAnnotator);
 		}
 

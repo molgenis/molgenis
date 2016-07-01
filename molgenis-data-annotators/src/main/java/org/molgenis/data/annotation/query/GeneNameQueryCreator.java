@@ -19,14 +19,13 @@ public class GeneNameQueryCreator implements QueryCreator
 	@Override
 	public Collection<AttributeMetaData> getRequiredAttributes()
 	{
-		AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
 		return singleton(attrMetaFactory.create().setName(GENE_NAME));
 	}
 
 	@Override
 	public Query<Entity> createQuery(Entity entity)
 	{
-		Object value = entity.get(SnpEffAnnotator.GENE_NAME);
-		return EQ(SnpEffAnnotator.GENE_NAME, value);
+		Object value = entity.get(EffectsMetaData.GENE_NAME);
+		return EQ(EffectsMetaData.GENE_NAME, value);
 	}
 }
