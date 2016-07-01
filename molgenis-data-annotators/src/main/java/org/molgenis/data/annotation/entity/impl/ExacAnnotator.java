@@ -147,7 +147,7 @@ public class ExacAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory(EXAC_TABIX_RESOURCE);
+				return new TabixVcfRepositoryFactory(EXAC_TABIX_RESOURCE, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory);
 			}
 		};
 

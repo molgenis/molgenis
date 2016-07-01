@@ -35,7 +35,7 @@ public class ResourceImplTest
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory("cadd");
+				return null;//new TabixVcfRepositoryFactory("cadd");FIXME
 			}
 		};
 	}

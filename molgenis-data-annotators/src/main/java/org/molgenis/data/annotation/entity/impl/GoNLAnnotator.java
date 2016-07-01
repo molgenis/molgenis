@@ -19,6 +19,8 @@ import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -61,6 +63,10 @@ public class GoNLAnnotator implements AnnotatorConfig
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
+
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+
 	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
@@ -211,7 +217,7 @@ public class GoNLAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory(GONL_MULTI_FILE_RESOURCE);
+				return new TabixVcfRepositoryFactory(GONL_MULTI_FILE_RESOURCE, vcfAttributes, entityMetaFactory, attributeMetaDataFactory);
 			}
 		};
 	}

@@ -69,16 +69,14 @@ public class CGDAnnotator implements AnnotatorConfig
 	private Resources resources;
 
 	@Autowired
-	private VcfAttributes vcfAttributes;
-
-	@Autowired
 	private EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
+
 	private RepositoryAnnotatorImpl annotator;
 
-	public static enum GeneralizedInheritance
+	public enum GeneralizedInheritance
 	{
 		DOM_OR_REC, DOMINANT, RECESSIVE, XLINKED, OTHER
 	}

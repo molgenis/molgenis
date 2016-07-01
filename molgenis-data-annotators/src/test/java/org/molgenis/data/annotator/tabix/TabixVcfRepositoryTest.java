@@ -43,7 +43,7 @@ public class TabixVcfRepositoryTest
 		Mockito.when(vcfReaderFactory.get()).thenReturn(vcfReader);
 		VcfMeta vcfMeta = new VcfMeta();
 		Mockito.when(vcfReader.getVcfMeta()).thenReturn(vcfMeta);
-		tabixVcfRepository = new TabixVcfRepository(vcfReaderFactory, tabixReader, "MyEntity");
+		tabixVcfRepository = new TabixVcfRepository(vcfReaderFactory, tabixReader, "MyEntity",null,null,null);
 		entityMetaData = tabixVcfRepository.getEntityMetaData();
 	}
 

@@ -61,6 +61,9 @@ public class CmdLineAnnotator
 	VcfAttributes vcfAttributes;
 
 	@Autowired
+	VcfUtils vcfUtils;
+
+	@Autowired
 	EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
@@ -314,7 +317,7 @@ public class CmdLineAnnotator
 			Iterable<Entity> entitiesToAnnotate;
 			if (annotator instanceof EffectsAnnotator)
 			{
-				entitiesToAnnotate = VcfUtils.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT,
+				entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT,
 						vcfRepo.findAll(new QueryImpl<Entity>()));
 			}
 			else
@@ -325,7 +328,7 @@ public class CmdLineAnnotator
 
 			if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
 			{
-				annotatedRecords = VcfUtils.reverseXrefMrefRelation(annotatedRecords);
+				annotatedRecords = vcfUtils.reverseXrefMrefRelation(annotatedRecords);
 			}
 
 			while (annotatedRecords.hasNext())

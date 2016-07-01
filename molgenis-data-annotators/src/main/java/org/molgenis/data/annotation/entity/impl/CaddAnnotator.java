@@ -58,11 +58,11 @@ public class CaddAnnotator implements AnnotatorConfig
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
+
 	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
-	public RepositoryAnnotator cadd()
-	{
+	public RepositoryAnnotator cadd(){
 		annotator = new RepositoryAnnotatorImpl(NAME);
 		return annotator;
 	}

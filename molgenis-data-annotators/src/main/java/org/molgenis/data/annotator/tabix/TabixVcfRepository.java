@@ -1,30 +1,27 @@
 package org.molgenis.data.annotator.tabix;
 
-import static org.elasticsearch.common.base.Preconditions.checkNotNull;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableList.Builder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.VcfReaderFactory;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableList.Builder;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.elasticsearch.common.base.Preconditions.checkNotNull;
 
 /**
  * An indexed VCF Repository
@@ -34,15 +31,18 @@ public class TabixVcfRepository extends VcfRepository
 	private static final Logger LOG = LoggerFactory.getLogger(TabixVcfRepository.class);
 	private final TabixReader tabixReader;
 
-	public TabixVcfRepository(File file, String entityName) throws IOException
+	public TabixVcfRepository(File file, String entityName, VcfAttributes vcfAttributes,
+			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory) throws IOException
 	{
-		super(file, entityName, null, null, null);
+		super(file, entityName, vcfAttributes, entityMetaFactory, attrMetaFactory);
 		tabixReader = new TabixReader(file.getCanonicalPath());
 	}
 
-	TabixVcfRepository(VcfReaderFactory readerFactory, TabixReader tabixReader, String entityName)
+	TabixVcfRepository(VcfReaderFactory readerFactory, TabixReader tabixReader, String entityName, VcfAttributes vcfAttributes,
+			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
 	{
-		super(readerFactory, entityName, null, null, null);
+		super(readerFactory, entityName, vcfAttributes,
+				entityMetaFactory, attrMetaFactory);
 		this.tabixReader = tabixReader;
 	}
 
@@ -55,11 +55,9 @@ public class TabixVcfRepository extends VcfRepository
 	/**
 	 * Examines a {@link Query} and finds the first {@link QueryRule} with operator {@link Operator#EQUALS} whose field
 	 * matches an attributeName. It returns the value of that first matching {@link QueryRule}.
-	 * 
-	 * @param attributeName
-	 *            the query field name to match
-	 * @param q
-	 *            the query to search in
+	 *
+	 * @param attributeName the query field name to match
+	 * @param q             the query to search in
 	 * @return the value from the first matching query rule
 	 */
 	private static Object getFirstEqualsValueFor(String attributeName, Query<Entity> q)
@@ -88,13 +86,10 @@ public class TabixVcfRepository extends VcfRepository
 
 	/**
 	 * Queries the tabix reader.
-	 * 
-	 * @param chrom
-	 *            Name of chromosome
-	 * @param posFrom
-	 *            position lower bound (inclusive)
-	 * @param posTo
-	 *            position upper bound (inclusive)
+	 *
+	 * @param chrom   Name of chromosome
+	 * @param posFrom position lower bound (inclusive)
+	 * @param posTo   position upper bound (inclusive)
 	 * @return {@link ImmutableList} of entities found
 	 */
 	public synchronized List<Entity> query(String chrom, long posFrom, long posTo)
@@ -124,11 +119,11 @@ public class TabixVcfRepository extends VcfRepository
 
 	/**
 	 * Tabix is not always so precise. For example, the cmdline query
-	 * 
+	 * <p>
 	 * <pre>
 	 * tabix ExAC.r0.3.sites.vep.vcf.gz 1:1115548-1115548
 	 * </pre>
-	 * 
+	 * <p>
 	 * returns 2 variants:
 	 * <ul>
 	 * <li>"1 1115547 . CG C,TG"</li>
@@ -144,14 +139,13 @@ public class TabixVcfRepository extends VcfRepository
 
 	/**
 	 * Collect the lines returned in a {@link TabixReader.Iterator}.
-	 * 
-	 * @param iterator
-	 *            the iterator from which the lines are collected, may be null.
+	 *
+	 * @param iterator the iterator from which the lines are collected, may be null.
 	 * @return {@link Collection} of lines, is empty if the iterator was null.
 	 */
 	protected Collection<String> getLines(org.molgenis.data.annotator.tabix.TabixReader.Iterator iterator)
 	{
-		Builder<String> builder = ImmutableList.<String> builder();
+		Builder<String> builder = ImmutableList.<String>builder();
 		if (iterator != null)
 		{
 			try

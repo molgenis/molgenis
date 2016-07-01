@@ -55,7 +55,7 @@ public class CrudRepositoryAnnotator
 	 */
 	public Repository<Entity> annotate(RepositoryAnnotator annotator, Repository<Entity> repository) throws IOException
 	{
-		return annotate(annotator, repository, DatabaseAction.ADD);
+		return annotate(annotator, repository, DatabaseAction.UPDATE);
 	}
 
 	/**

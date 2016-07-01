@@ -55,10 +55,11 @@ public class ClinvarAnnotator implements AnnotatorConfig
 	private VcfAttributes vcfAttributes;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private EntityMetaDataFactory entityMetaDataFactory;
+
 	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
@@ -139,7 +140,7 @@ public class ClinvarAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory(CLINVAR_TABIX_RESOURCE);
+				return new TabixVcfRepositoryFactory(CLINVAR_TABIX_RESOURCE, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory);
 			}
 		};
 

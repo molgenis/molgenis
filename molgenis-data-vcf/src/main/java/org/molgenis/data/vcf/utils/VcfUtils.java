@@ -37,10 +37,10 @@ import static org.molgenis.data.vcf.model.VcfAttributes.*;
 public class VcfUtils
 {
 	@Autowired
-	private static EntityMetaDataFactory entityMetaDataFactory;
+	private EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
-	private static AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeMetaDataFactory attributeMetaDataFactory;
 	/**
 	 * Creates a internal molgenis id from a vcf entity
 	 *
@@ -147,7 +147,7 @@ public class VcfUtils
 		}
 	}
 
-	public static Iterator<Entity> reverseXrefMrefRelation(Iterator<Entity> annotatedRecords)
+	public Iterator<Entity> reverseXrefMrefRelation(Iterator<Entity> annotatedRecords)
 	{
 		return new Iterator<Entity>()
 		{
@@ -231,13 +231,13 @@ public class VcfUtils
 		};
 	}
 
-	public static List<Entity> createEntityStructureForVcf(EntityMetaData entityMetaData, String attributeName,
+	public List<Entity> createEntityStructureForVcf(EntityMetaData entityMetaData, String attributeName,
 			Stream<Entity> inputStream)
 	{
 		return createEntityStructureForVcf(entityMetaData, attributeName, inputStream, Collections.emptyList());
 	}
 
-	private static List<Entity> createEntityStructureForVcf(EntityMetaData entityMetaData, String attributeName,
+	private List<Entity> createEntityStructureForVcf(EntityMetaData entityMetaData, String attributeName,
 			Stream<Entity> inputStream, List<AttributeMetaData> annotatorAttributes)
 	{
 		AttributeMetaData attributeToParse = entityMetaData.getAttribute(attributeName);
@@ -268,7 +268,7 @@ public class VcfUtils
 		return results;
 	}
 
-	private static EntityMetaData getXrefEntityMetaData(Map<Integer, AttributeMetaData> metadataMap,
+	private EntityMetaData getXrefEntityMetaData(Map<Integer, AttributeMetaData> metadataMap,
 			String entityName)
 	{
 		EntityMetaData xrefMetaData = entityMetaDataFactory.create().setName(entityName);
@@ -293,7 +293,7 @@ public class VcfUtils
 		return newMeta;
 	}
 
-	private static Map<Integer, AttributeMetaData> parseDescription(String description,
+	private Map<Integer, AttributeMetaData> parseDescription(String description,
 			List<AttributeMetaData> annotatorAttributes)
 	{
 		String value = description.replaceAll("^\\s'|'$", "");
