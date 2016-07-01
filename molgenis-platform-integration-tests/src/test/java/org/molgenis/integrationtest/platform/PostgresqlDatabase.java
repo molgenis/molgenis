@@ -43,7 +43,6 @@ class PostgreSqlDatabase
 
 	static void dropAndCreateDatabase()
 	{
-		System.out.println("PostgreSqlDatabase.dropAndCreateDatabase");
 		try
 		{
 			Connection conn = getConnection();

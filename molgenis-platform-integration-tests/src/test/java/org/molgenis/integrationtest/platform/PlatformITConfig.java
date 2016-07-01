@@ -3,36 +3,27 @@ package org.molgenis.integrationtest.platform;
 import com.google.common.io.Files;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.molgenis.DatabaseConfig;
-import org.molgenis.data.*;
-import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
-import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.EntityFactoryRegistrar;
+import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
-import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.system.SystemEntityMetaDataBootstrapper;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistrar;
+import org.molgenis.data.platform.bootstrap.SystemEntityMetaDataBootstrapper;
 import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
-import org.molgenis.data.postgresql.PostgreSqlEntityFactory;
-import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.validation.ExpressionValidator;
-import org.molgenis.file.model.FileMetaMetaData;
 import org.molgenis.integrationtest.data.TestAppSettings;
 import org.molgenis.js.RhinoConfig;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
-import org.molgenis.security.owned.OwnedEntityMetaData;
-import org.molgenis.security.user.MolgenisUserServiceImpl;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.GsonConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -50,7 +41,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
 import java.io.IOException;
@@ -62,18 +52,20 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 
 @Configuration
 @EnableTransactionManagement(proxyTargetClass = true)
-@ComponentScan({ "org.molgenis.data.meta", "org.molgenis.data.reindex", "org.molgenis.data.elasticsearch.index",
-		"org.molgenis.data.jobs", "org.molgenis.data.elasticsearch.reindex", "org.molgenis.auth",
-		"org.molgenis.test.data", "org.molgenis.data.platform", "org.molgenis.data.meta.model",
-		"org.molgenis.data.system.model", "org.molgenis.data.cache" })
-@Import({ DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class, ElasticsearchEntityFactory.class,
-		PostgreSqlConfiguration.class, RunAsSystemBeanPostProcessor.class, FileMetaMetaData.class,
-		OwnedEntityMetaData.class, MolgenisUserServiceImpl.class, RhinoConfig.class, UuidGenerator.class,
-		ExpressionValidator.class, LanguageService.class, PostgreSqlEntityFactory.class, PlatformConfig.class,
-		RepositoryCollectionRegistry.class, RepositoryCollectionDecoratorFactory.class,
-		org.molgenis.data.i18n.I18nStringMetaData.class, org.molgenis.data.validation.EntityAttributesValidator.class,
-		RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class,
-		org.molgenis.data.system.model.RootSystemPackage.class })
+/*
+ FIXME Ideally, we'd like to scan all of org.molgenis.data or even org.molgenis, but there's some unwanted dependencies
+ in org.molgenis.data and subpackages from included modules
+  */
+@ComponentScan({ "org.molgenis.data.meta", "org.molgenis.data.reindex", "org.molgenis.data.jobs",
+		"org.molgenis.data.elasticsearch", "org.molgenis.auth", "org.molgenis.test.data", "org.molgenis.data.platform",
+		"org.molgenis.data.meta.model", "org.molgenis.data.system.model", "org.molgenis.data.cache",
+		"org.molgenis.data.i18n", "org.molgenis.data.postgresql", "org.molgenis.file.model",
+		"org.molgenis.security.owned", "org.molgenis.security.user" })
+@Import({ DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class, PostgreSqlConfiguration.class,
+		RunAsSystemBeanPostProcessor.class, RhinoConfig.class, UuidGenerator.class,
+		ExpressionValidator.class, PlatformConfig.class, org.molgenis.data.RepositoryCollectionRegistry.class,
+		org.molgenis.data.RepositoryCollectionDecoratorFactory.class, org.molgenis.data.validation.EntityAttributesValidator.class,
+		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class, })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	static
@@ -86,44 +78,13 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	@Autowired
 	private DataSource dataSource;
 	@Autowired
-	private SearchService searchService;
-	@Autowired
-	private ExpressionValidator expressionValidator;
-	@Autowired
-	private ReindexActionRegisterService reindexActionRegisterService;
-	@Autowired
-	private IdGenerator idGenerator;
-	@Autowired
-	private DataService dataService;
-	@Autowired
-	private MetaDataService metaDataService;
-	@Autowired
-	@Qualifier("PostgreSqlRepositoryCollection")
-	RepositoryCollection backend;
-
-	//	private final MolgenisUpgradeBootstrapper upgradeBootstrapper;
-	//	@Autowired
-	//	private RegistryBootstrapper registryBootstrapper;
-	// Inlined:
-
-	@Autowired
 	private RepositoryCollectionBootstrapper repoCollectionBootstrapper;
 	@Autowired
 	private SystemEntityMetaDataRegistrar systemEntityMetaRegistrar;
 	@Autowired
 	private EntityFactoryRegistrar entityFactoryRegistrar;
-
-	//TODO: why did this work? Should not be on compile path for data-platform!
-	//	private final ImportServiceRegistrar importServiceRegistrar;
-	//	private final ScriptRunnerRegistrar scriptRunnerRegistrar;
-
 	@Autowired
 	private SystemEntityMetaDataBootstrapper systemEntityMetaDataBootstrapper;
-	//	private final RepositoryPopulator repositoryPopulator;
-	//	private final FileIngesterJobRegistrar fileIngesterJobRegistrar;
-	//	private final JobBootstrapper jobBootstrapper;
-	//	private final IdCardBootstrapper idCardBootstrapper;
-	//	private final AnnotatorBootstrapper annotatorBootstrapper;
 
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer properties()
@@ -141,7 +102,6 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	@Bean
 	public MailSender mailSender()
 	{
-		System.out.println("PlatformITConfig.mailSender");
 		return mock(MailSender.class);
 	}
 
@@ -155,13 +115,6 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	public PlatformITConfig()
 	{
 		System.setProperty("molgenis.home", Files.createTempDir().getAbsolutePath());
-	}
-
-	@PostConstruct
-	public void init()
-	{
-		dataService.setMetaDataService(metaDataService);
-		//		metaDataService.setDefaultBackend(backend);
 	}
 
 	@Bean
@@ -188,6 +141,9 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 		return new MolgenisPasswordEncoder(new BCryptPasswordEncoder());
 	}
 
+
+	// FIXME The bootstrapping of the data platform should be delegated to a specific bootstrapper so that updates
+	// are reflected in the test
 	@Autowired
 	MolgenisTransactionManager molgenisTransactionManager;
 
@@ -196,7 +152,6 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	{
 		TransactionTemplate transactionTemplate = new TransactionTemplate();
 		transactionTemplate.setTransactionManager(molgenisTransactionManager);
-
 		transactionTemplate.execute((action) -> {
 			try
 			{
