@@ -1,19 +1,8 @@
 package org.molgenis.ui;
 
-import static freemarker.template.Configuration.VERSION_2_3_23;
-import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_CSS;
-import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
-import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_IMG;
-import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_JS;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.annotation.PostConstruct;
-
+import com.google.common.collect.Maps;
+import freemarker.template.Configuration;
+import freemarker.template.TemplateException;
 import org.molgenis.data.DataService;
 import org.molgenis.data.EntityFactoryRegistry;
 import org.molgenis.data.EntityManager;
@@ -64,10 +53,15 @@ import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
-import com.google.common.collect.Maps;
+import javax.annotation.PostConstruct;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
-import freemarker.template.Configuration;
-import freemarker.template.TemplateException;
+import static freemarker.template.Configuration.VERSION_2_3_23;
+import static org.molgenis.framework.ui.ResourcePathPatterns.*;
 
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 {

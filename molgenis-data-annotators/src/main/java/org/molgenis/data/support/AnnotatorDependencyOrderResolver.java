@@ -3,11 +3,11 @@ package org.molgenis.data.support;
 import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
+import org.molgenis.data.annotation.EffectsAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
-import org.molgenis.data.annotation.EffectsAnnotator;
 
 import java.util.Collections;
 import java.util.LinkedList;

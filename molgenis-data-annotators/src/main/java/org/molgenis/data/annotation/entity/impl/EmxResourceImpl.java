@@ -1,17 +1,13 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import org.molgenis.data.annotation.resources.impl.InMemoryRepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 
-import java.util.List;
-
-public class EmxResourceImpl extends ResourceImpl
+public abstract class EmxResourceImpl extends ResourceImpl
 {
-	public EmxResourceImpl(String variantResource, SingleResourceConfig singleResourceConfig,
-			InMemoryRepositoryFactory filename, String entityName, List<String> attributeNames)
+	public EmxResourceImpl(String variantResource, SingleResourceConfig singleResourceConfig)
 	{
-		super(variantResource, singleResourceConfig, filename);
+		super(variantResource, singleResourceConfig);
 	}
 
     @Override

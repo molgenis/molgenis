@@ -3,12 +3,12 @@ package org.molgenis.data.annotation.entity.impl;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.cmd.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
-import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
@@ -78,13 +78,9 @@ public class ExacAnnotator implements AnnotatorConfig
 	public void init()
 	{
 
-		AttributeMetaData outputAttribute_AF = attributeMetaDataFactory.create().setName(EXAC_AF).setDataType(STRING)
-				.setDescription("The ExAC allele frequency").setLabel(EXAC_AF_LABEL);
-		AttributeMetaData outputAttribute_AC_HOM = attributeMetaDataFactory.create().setName(EXAC_AC_HOM)
-				.setDataType(STRING).setDescription("The ExAC homozygous alternative genotype count")
-				.setLabel(EXAC_AC_HOM_LABEL);
-		AttributeMetaData outputAttribute_AC_HET = attributeMetaDataFactory.create().setName(EXAC_AC_HET)
-				.setDataType(STRING).setDescription("The ExAC heterozygous genotype count").setLabel(EXAC_AC_HET_LABEL);
+		AttributeMetaData outputAttribute_AF = getExacAFAttr();
+		AttributeMetaData outputAttribute_AC_HOM = getExacAcHomAttr();
+		AttributeMetaData outputAttribute_AC_HET = ExacAcHetAttr();
 
 		List<AttributeMetaData> outputMetaData = new ArrayList<AttributeMetaData>(Arrays.asList(
 				new AttributeMetaData[] { outputAttribute_AF, outputAttribute_AC_HOM, outputAttribute_AC_HET }));
@@ -121,6 +117,25 @@ public class ExacAnnotator implements AnnotatorConfig
 		};
 
 		annotator.init(entityAnnotator);
+	}
+
+	public AttributeMetaData ExacAcHetAttr()
+	{
+		return attributeMetaDataFactory.create().setName(EXAC_AC_HET)
+					.setDataType(STRING).setDescription("The ExAC heterozygous genotype count").setLabel(EXAC_AC_HET_LABEL);
+	}
+
+	public AttributeMetaData getExacAcHomAttr()
+	{
+		return attributeMetaDataFactory.create().setName(EXAC_AC_HOM)
+					.setDataType(STRING).setDescription("The ExAC homozygous alternative genotype count")
+					.setLabel(EXAC_AC_HOM_LABEL);
+	}
+
+	public AttributeMetaData getExacAFAttr()
+	{
+		return attributeMetaDataFactory.create().setName(EXAC_AF).setDataType(STRING)
+					.setDescription("The ExAC allele frequency").setLabel(EXAC_AF_LABEL);
 	}
 
 	@Bean

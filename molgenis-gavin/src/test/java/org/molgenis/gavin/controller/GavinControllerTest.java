@@ -1,23 +1,6 @@
 package org.molgenis.gavin.controller;
 
-import static java.io.File.separator;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.gavin.job.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
-import static org.testng.Assert.assertEquals;
-
-import java.io.File;
-import java.io.InputStream;
-import java.util.Collections;
-import java.util.concurrent.ExecutorService;
-
-import javax.servlet.http.HttpServletResponse;
-
+import com.google.common.collect.ImmutableMap;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -39,7 +22,19 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ImmutableMap;
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.InputStream;
+import java.util.Collections;
+import java.util.concurrent.ExecutorService;
+
+import static java.io.File.separator;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.gavin.job.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
+import static org.testng.Assert.assertEquals;
 
 public class GavinControllerTest
 {
@@ -134,7 +129,7 @@ public class GavinControllerTest
 		resultFile.deleteOnExit();
 
 		when(gavinJobExecution.getFilename()).thenReturn("annotate-file-gavin.vcf");
-		when(dataService.findOne(GAVIN_JOB_EXECUTION, "ABCDE", GavinJobExecution.class)).thenReturn(gavinJobExecution);
+		when(dataService.findOneById(GAVIN_JOB_EXECUTION, "ABCDE", GavinJobExecution.class)).thenReturn(gavinJobExecution);
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "gavin-result.vcf"))
 				.thenReturn(resultFile);
 
@@ -152,7 +147,7 @@ public class GavinControllerTest
 		File file = mock(File.class);
 
 		when(gavinJobExecution.getFilename()).thenReturn("annotate-file-gavin.vcf");
-		when(dataService.findOne(GAVIN_JOB_EXECUTION, "ABCDE", GavinJobExecution.class)).thenReturn(gavinJobExecution);
+		when(dataService.findOneById(GAVIN_JOB_EXECUTION, "ABCDE", GavinJobExecution.class)).thenReturn(gavinJobExecution);
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "gavin-result.vcf")).thenReturn(file);
 		when(file.exists()).thenReturn(false);
 

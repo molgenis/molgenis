@@ -2,12 +2,6 @@ package org.molgenis.data.annotation.entity.impl;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
-import org.elasticsearch.common.collect.Lists;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import com.google.common.base.Predicates;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -37,16 +31,6 @@ import java.util.stream.Collectors;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.CHROMOSOMES;
-import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.FILEPATTERN;
-import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.OVERRIDE_CHROMOSOME_FILES;
-import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.ROOT_DIRECTORY;
-import static org.molgenis.data.vcf.VcfRepository.ALT;
 
 @Configuration
 public class GoNLAnnotator implements AnnotatorConfig
@@ -127,8 +111,8 @@ public class GoNLAnnotator implements AnnotatorConfig
 			public String postFixResource = "";
 
 			@Override
-			protected void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
-					Entity resultEntity, boolean updateMode)
+			protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities,
+					boolean updateMode)
 			{
 				if (updateMode == true)
 				{
@@ -136,7 +120,7 @@ public class GoNLAnnotator implements AnnotatorConfig
 				}
 				String afs = null;
 				String gtcs = null;
-				List<Entity> refMatches = Lists.newArrayList();
+				List<Entity> refMatches = com.google.common.collect.Lists.newArrayList();
 				for (Entity resourceEntity : annotationSourceEntities)
 				{
 					//situation example: input A, GoNL A
@@ -188,7 +172,7 @@ public class GoNLAnnotator implements AnnotatorConfig
 				}
 				if (entity.getString(vcfAttributes.getAltAttribute().getName()) != null)
 				{
-					List<Entity> alleleMatches = Lists.newArrayList();
+					List<Entity> alleleMatches = com.google.common.collect.Lists.newArrayList();
 					for (String alt : entity.getString(vcfAttributes.getAltAttribute().getName()).split(","))
 					{
 						alleleMatches.add(Iterables.find(refMatches,

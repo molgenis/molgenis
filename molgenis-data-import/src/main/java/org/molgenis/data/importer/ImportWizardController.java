@@ -1,52 +1,7 @@
 package org.molgenis.data.importer;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
-import static org.apache.commons.io.FilenameUtils.getBaseName;
-import static org.apache.commons.io.FilenameUtils.getExtension;
-import static org.molgenis.data.importer.ImportWizardController.URI;
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-import static org.molgenis.security.core.Permission.COUNT;
-import static org.molgenis.security.core.Permission.NONE;
-import static org.molgenis.security.core.Permission.READ;
-import static org.molgenis.security.core.Permission.WRITE;
-import static org.molgenis.security.core.Permission.WRITEMETA;
-import static org.springframework.http.MediaType.TEXT_PLAIN;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.servlet.http.HttpServletRequest;
-
-
-import org.molgenis.auth.Authority;
-import org.molgenis.auth.GroupAuthority;
-import org.molgenis.auth.GroupAuthorityFactory;
-import org.molgenis.auth.GroupAuthorityMetaData;
-import org.molgenis.auth.MolgenisGroup;
-import org.molgenis.data.DataService;
-import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.RepositoryCollection;
+import org.molgenis.auth.*;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.GenericImporterExtensions;
@@ -71,14 +26,32 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.Objects.requireNonNull;
+import static org.apache.commons.io.FilenameUtils.getBaseName;
+import static org.apache.commons.io.FilenameUtils.getExtension;
+import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
+import static org.molgenis.data.importer.ImportWizardController.URI;
+import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
+import static org.molgenis.security.core.Permission.*;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 @Controller
 @RequestMapping(URI)

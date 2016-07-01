@@ -1,26 +1,18 @@
 package org.molgenis.data.annotation;
 
-import java.util.Iterator;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Iterator;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
 
 public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 {
-	@Override
+    @Override
 	public String canAnnotate(EntityMetaData repoMetaData)
 	{
 		Iterable<AttributeMetaData> annotatorAttributes = getRequiredAttributes();

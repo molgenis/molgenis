@@ -1,9 +1,9 @@
 package org.molgenis.data.annotation.resources;
 
-import java.util.Set;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+
+import java.util.Set;
 
 public interface Resources
 {

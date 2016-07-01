@@ -1,9 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import java.util.List;
-
 import com.google.common.base.Optional;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
@@ -34,7 +31,7 @@ public class AnnotatorImpl extends QueryAnnotatorImpl implements EntityAnnotator
 	}
 
 	@Override
-	protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities, Entity resultEntity,
+	protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities,
 			boolean updateMode)
 	{
 		Optional<Entity> filteredResult = resultFilter.filterResults(annotationSourceEntities, entity, updateMode);
@@ -49,9 +46,9 @@ public class AnnotatorImpl extends QueryAnnotatorImpl implements EntityAnnotator
 		{
 			for (AttributeMetaData attr : getInfo().getOutputAttributes())
 			{
-				if (!updateMode || resultEntity.get(attr.getName()) == null)
+				if (!updateMode || entity.get(attr.getName()) == null)
 				{
-					resultEntity.set(attr.getName(), null);
+					entity.set(attr.getName(), null);
 				}
 			}
 		}

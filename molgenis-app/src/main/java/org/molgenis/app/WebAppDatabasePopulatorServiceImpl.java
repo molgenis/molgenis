@@ -1,12 +1,5 @@
 package org.molgenis.app;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
-import static org.molgenis.data.i18n.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
-import static org.molgenis.data.i18n.LanguageMetaData.DEFAULT_LANGUAGE_NAME;
-import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
-
 import org.molgenis.app.controller.HomeController;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
@@ -21,6 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.data.i18n.LanguageMetaData.*;
+
 @Service
 public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulatorService
 {
@@ -32,13 +30,13 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	@Autowired
 	public WebAppDatabasePopulatorServiceImpl(DataService dataService,
 			MolgenisSecurityWebAppDatabasePopulatorService molgenisSecurityWebAppDatabasePopulatorService,
-			UserAuthorityFactory userAuthorityFactory, LanguageFactory langaugeFactory)
+			UserAuthorityFactory userAuthorityFactory, LanguageFactory languageFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.molgenisSecurityWebAppDatabasePopulatorService = requireNonNull(
 				molgenisSecurityWebAppDatabasePopulatorService);
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
-		this.languageFactory = requireNonNull(langaugeFactory);
+		this.languageFactory = requireNonNull(languageFactory);
 	}
 
 	@Override

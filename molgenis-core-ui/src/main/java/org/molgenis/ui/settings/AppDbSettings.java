@@ -11,13 +11,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
-import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.MolgenisFieldTypes.COMPOUND;
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.SCRIPT;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 
@@ -75,7 +68,6 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 
 		private static final String CUSTOM_JAVASCRIPT = "custom_javascript";
 
-		public Meta()
 		private final MenuManagerServiceImpl menuManagerServiceImpl;
 
 		@Autowired

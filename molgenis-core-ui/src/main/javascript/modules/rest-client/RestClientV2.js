@@ -1,6 +1,6 @@
-import _ from 'underscore';
-import $ from 'jquery';
-import { htmlEscape } from '../utils/HtmlUtils';
+import _ from "underscore";
+import $ from "jquery";
+import {htmlEscape} from "../utils/HtmlUtils";
 
 var apiBaseUri = '/api/v2/';
 

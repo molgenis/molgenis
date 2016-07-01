@@ -1,8 +1,8 @@
 package org.molgenis.gavin.job;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.jobs.JobExecution;
+import org.molgenis.data.Entity;
+import org.molgenis.data.jobs.model.JobExecution;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import static org.molgenis.gavin.job.GavinJobExecutionMetaData.FILENAME;
 
@@ -11,12 +11,21 @@ public class GavinJobExecution extends JobExecution
 	private static final long serialVersionUID = 1L;
 	private static final String GAVIN = "gavin";
 
-	@SuppressWarnings("WeakerAccess")
-	public static final EntityMetaData META_DATA = new GavinJobExecutionMetaData();
-
-	public GavinJobExecution(DataService dataService)
+	public GavinJobExecution(Entity entity)
 	{
-		super(dataService, META_DATA);
+		super(entity);
+		setType(GAVIN);
+	}
+
+	public GavinJobExecution(EntityMetaData entityMeta)
+	{
+		super(entityMeta);
+		setType(GAVIN);
+	}
+
+	public GavinJobExecution(String identifier, EntityMetaData entityMeta)
+	{
+		super(identifier, entityMeta);
 		setType(GAVIN);
 	}
 

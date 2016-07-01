@@ -1,14 +1,5 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -31,10 +22,10 @@ import static java.util.Objects.requireNonNull;
 /**
  * Base class for any {@link EntityAnnotator} that uses a {@link QueryCreator} to query the {@link DataService} or
  * {@link Resources}. It leaves it up to concrete implementations how they wish to process the results by implementing
- * {@link #processQueryResults(Entity, Iterable, Entity)}.
+ * {@link #processQueryResults(Entity, Iterable, boolean)}.
  * <p>
  * See {@link AnnotatorImpl} for the most standard implementation of
- * {@link #processQueryResults(Entity, Iterable, Entity)}.
+ * {@link #processQueryResults(Entity, Iterable, boolean)}.
  */
 public abstract class QueryAnnotatorImpl implements EntityAnnotator
 {

@@ -1,10 +1,6 @@
 package org.molgenis.data.annotation;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -26,8 +22,6 @@ import java.util.List;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-
 @Component
 public class CrudRepositoryAnnotator
 {
@@ -39,13 +33,6 @@ public class CrudRepositoryAnnotator
 	private final PermissionSystemService permissionSystemService;
 
 	@Autowired
-	public CrudRepositoryAnnotator(DataService dataService, PermissionSystemService permissionSystemService)
-	{
-		this.dataService = dataService;
-		this.permissionSystemService = permissionSystemService;
-	}
-
-	@Autowired
 	public EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
@@ -53,17 +40,13 @@ public class CrudRepositoryAnnotator
 
 	@Autowired
 	public VcfAttributes vcfAttributes;
+	private EntityMetaData targetMetaData;
 
-	/**
-	 * @param annotators
-	 * @param repo
-	 */
-	public void annotate(List<RepositoryAnnotator> annotators, Repository<Entity> repo) throws IOException
+	@Autowired
+	public CrudRepositoryAnnotator(DataService dataService, PermissionSystemService permissionSystemService)
 	{
-		for (RepositoryAnnotator annotator : annotators)
-		{
-			repo = annotate(annotator, repo);
-		}
+		this.dataService = dataService;
+		this.permissionSystemService = permissionSystemService;
 	}
 
 	/**
@@ -71,6 +54,17 @@ public class CrudRepositoryAnnotator
 	 * @param repository
 	 */
 	public Repository<Entity> annotate(RepositoryAnnotator annotator, Repository<Entity> repository) throws IOException
+	{
+		return annotate(annotator, repository, DatabaseAction.ADD);
+	}
+
+	/**
+	 * @param annotator
+	 * @param repository
+	 * @param action
+	 */
+	public Repository<Entity> annotate(RepositoryAnnotator annotator, Repository<Entity> repository,
+			DatabaseAction action) throws IOException
 	{
 		if (!repository.getCapabilities().contains(RepositoryCapability.WRITABLE))
 		{
@@ -84,18 +78,17 @@ public class CrudRepositoryAnnotator
 			RunAsSystemProxy.runAsSystem(
 					() -> addAnnotatorMetadataToRepositories(entityMetaData, annotator.getSimpleName(),
 							attributeMetaDatas));
-			Repository crudRepository;
+			Repository<Entity> crudRepository;
 			if (annotator instanceof RefEntityAnnotator)
 			{
-				targetMetaData = ((RefEntityAnnotator) annotator).getOutputMetaData(entityMetaData);
+				targetMetaData = ((RefEntityAnnotator) annotator).getOutputAttributes(entityMetaData);
 				if (!dataService.hasRepository(targetMetaData.getName()))
 				{
 					// add new entities to new repo
 					Repository externalRepository = dataService.getMeta().addEntityMeta(targetMetaData);
 					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 							Collections.singletonList(externalRepository.getName()));
-					crudRepository = iterateOverEntitiesAndAnnotate(repository, externalRepository, annotator,
-							DatabaseAction.ADD);
+					crudRepository = iterateOverEntitiesAndAnnotate(repository, annotator, DatabaseAction.ADD);
 				}
 				else
 				{
@@ -105,17 +98,13 @@ public class CrudRepositoryAnnotator
 			}
 			else
 			{
-				// add attribute meta data to source entity
-				DefaultAttributeMetaData compoundAttributeMetaData = AnnotatorUtils
-						.getCompoundResultAttribute(annotator, entityMetaData);
+				RunAsSystemProxy.runAsSystem(
+						() -> addAnnotatorMetadataToRepositories(entityMetaData, annotator.getSimpleName(),
+								attributeMetaDatas));
 
-			Repository<Entity> crudRepository = iterateOverEntitiesAndAnnotate(
-					dataService.getRepository(repository.getName()), annotator);
-				runAsSystem(() -> addAnnotatorMetadataToRepositories(entityMetaData, compoundAttributeMetaData));
-				crudRepository = iterateOverEntitiesAndAnnotate(repository, repository, annotator,
-						DatabaseAction.UPDATE);
+				crudRepository = iterateOverEntitiesAndAnnotate(dataService.getRepository(repository.getName()),
+						annotator, action);
 			}
-
 			return crudRepository;
 		}
 		catch (Exception e)
@@ -148,9 +137,9 @@ public class CrudRepositoryAnnotator
 	 * Iterates over all the entities within a repository and annotates.
 	 */
 	private Repository<Entity> iterateOverEntitiesAndAnnotate(Repository<Entity> repository,
-			RepositoryAnnotator annotator)
+			RepositoryAnnotator annotator, DatabaseAction action)
 	{
-		Iterator<Entity> it = annotator.annotate(sourceRepository);
+		Iterator<Entity> it = annotator.annotate(repository);
 
 		List<Entity> batch = new ArrayList<>();
 		while (it.hasNext())
@@ -158,20 +147,20 @@ public class CrudRepositoryAnnotator
 			batch.add(it.next());
 			if (batch.size() == BATCH_SIZE)
 			{
-				processBatch(batch, targetRepository, action);
+				processBatch(batch, repository, action);
 				batch.clear();
 			}
 		}
 
 		if (!batch.isEmpty())
 		{
-			processBatch(batch, targetRepository, action);
+			processBatch(batch, repository, action);
 		}
 
-		return targetRepository;
+		return repository;
 	}
 
-	private void processBatch(List<Entity> batch, Repository<Entity> repository)
+	private void processBatch(List<Entity> batch, Repository<Entity> repository, DatabaseAction action)
 	{
 		switch (action)
 		{

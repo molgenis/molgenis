@@ -1,12 +1,7 @@
 package org.molgenis.data.annotation.cmd;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.molgenis.CommandLineOnlyConfiguration;
+import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
@@ -18,6 +13,8 @@ import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +22,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+
+import java.util.*;
 
 /**
  * Commandline-specific annotator configuration.
@@ -42,8 +41,7 @@ public class CommandLineAnnotatorConfig
 	/**
 	 * Needed to make @Value annotations with property placeholders work!
 	 *
-	 * @see https
-	 * ://stackoverflow.com/questions/17097521/spring-3-2-value-annotation-with-pure-java-configuration-does-not
+	 * https://stackoverflow.com/questions/17097521/spring-3-2-value-annotation-with-pure-java-configuration-does-not
 	 * -work-but-env
 	 */
 	@Bean
@@ -162,7 +160,7 @@ public class CommandLineAnnotatorConfig
 	@Bean
 	public Entity gavinAnnotatorSettings()
 	{
-		return new new DynamicEntity(null);
+		return new DynamicEntity(null);
 	}
 
 	@Bean
@@ -178,9 +176,15 @@ public class CommandLineAnnotatorConfig
 	}
 
 	@Bean
+	UserAuthorityFactory userAuthorityFactory()
+	{
+		return null;//FIXME
+	}
+
+	@Bean
 	PermissionSystemService permissionSystemService()
 	{
-		return new PermissionSystemService(dataService);
+		return new PermissionSystemService(dataService, userAuthorityFactory());
 	}
 
 	@Bean

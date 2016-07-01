@@ -1,32 +1,7 @@
 package org.molgenis.data.annotation.entity.impl.omim;
 
-import static au.com.bytecode.opencsv.CSVParser.DEFAULT_QUOTE_CHARACTER;
-import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
-import static java.nio.charset.Charset.forName;
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptySet;
-import static org.apache.commons.lang3.StringUtils.join;
-import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.NAME;
-import static org.molgenis.data.annotation.entity.impl.OmimAnnotator.SEPARATOR;
-import static org.molgenis.data.annotation.entity.impl.omim.OmimAnnotator.SEPARATOR;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
-
+import au.com.bytecode.opencsv.CSVReader;
+import com.google.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
@@ -38,9 +13,20 @@ import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DynamicEntity;
 
-import com.google.common.collect.Iterables;
+import java.io.*;
+import java.util.*;
+import java.util.stream.Stream;
 
-import au.com.bytecode.opencsv.CSVReader;
+import static au.com.bytecode.opencsv.CSVParser.DEFAULT_QUOTE_CHARACTER;
+import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
+import static java.nio.charset.Charset.forName;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptySet;
+import static org.apache.commons.lang3.StringUtils.join;
+import static org.molgenis.data.annotation.entity.impl.omim.OmimAnnotator.NAME;
+import static org.molgenis.data.annotation.entity.impl.omim.OmimAnnotator.SEPARATOR;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 public class OmimRepository extends AbstractRepository
 {

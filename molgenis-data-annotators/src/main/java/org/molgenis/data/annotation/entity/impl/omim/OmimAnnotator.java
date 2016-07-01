@@ -7,11 +7,13 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.cmd.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.ResultFilter;
-import org.molgenis.data.annotation.impl.cmdlineannotatorsettingsconfigurer.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.entity.impl.AnnotatorImpl;
+import org.molgenis.data.annotation.entity.impl.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.query.GeneNameQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
@@ -32,16 +34,6 @@ import java.io.IOException;
 import java.util.*;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
-import static org.molgenis.data.annotator.websettings.OmimAnnotatorSettings.Meta.OMIM_LOCATION;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import static java.util.Arrays.asList;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.TEXT;
 import static org.molgenis.data.annotator.websettings.OmimAnnotatorSettings.Meta.OMIM_LOCATION;
 
 @Configuration
@@ -75,6 +67,10 @@ public class OmimAnnotator implements AnnotatorConfig
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
+
+	@Autowired
+	GeneNameQueryCreator geneNameQueryCreator;
+
 	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
@@ -118,7 +114,7 @@ public class OmimAnnotator implements AnnotatorConfig
 								+ "known mendelian disorders and over 15,000 genes. OMIM focuses on the relationship between phenotype and genotype.",
 						outputAttributes);
 
-		EntityAnnotator entityAnnotator = new AnnotatorImpl(OMIM_RESOURCE, omimInfo, new GeneNameQueryCreator(),
+		EntityAnnotator entityAnnotator = new AnnotatorImpl(OMIM_RESOURCE, omimInfo, geneNameQueryCreator,
 				new OmimResultFilter(), dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(OMIM_LOCATION, omimAnnotatorSettings));
 

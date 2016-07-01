@@ -1,22 +1,16 @@
 package org.molgenis.data.annotation.filter;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
+import java.util.*;
+
+import static java.util.Objects.requireNonNull;
 
 public class ClinvarMultiAllelicResultFilter implements ResultFilter
 {

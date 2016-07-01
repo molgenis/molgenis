@@ -1,47 +1,21 @@
 package org.molgenis.data.annotation.filter;
 
-import static com.google.common.collect.FluentIterable.from;
-import static java.util.Arrays.asList;
-import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
-import static org.molgenis.data.vcf.model.VcfAttributes.REF;
-import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.base.Optional;
+import com.google.common.collect.*;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.LinkedListMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.PeekingIterator;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.annotation.entity.ResultFilter;
-import org.molgenis.data.vcf.VcfRepository;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.google.common.collect.FluentIterable.from;
 import static java.util.Arrays.asList;
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.ALT_META;
-import static org.molgenis.data.vcf.VcfRepository.REF;
-import static org.molgenis.data.vcf.VcfRepository.REF_META;
+import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
+import static org.molgenis.data.vcf.model.VcfAttributes.REF;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
+
 
 /**
  * TODO: Support multi-allelic combination fields. These fields contain not only info for ref-alt pairs, but also values
@@ -150,8 +124,8 @@ public class MultiAllelicResultFilter implements ResultFilter
 		List<Entity> result = Lists.newArrayList();
 		Map<String, String> alleleValueMap = new HashMap<>();
 		Map<String, String> sourceAlleleValueMap = new HashMap<>();
-		String[] alts = resourceEntity.getString(VcfRepository.ALT).split(",");
-		String[] sourceAlts = sourceEntity.getString(VcfRepository.ALT).split(",");
+		String[] alts = resourceEntity.getString(VcfAttributes.ALT).split(",");
+		String[] sourceAlts = sourceEntity.getString(VcfAttributes.ALT).split(",");
 		for (AttributeMetaData attributeMetaData : attributes)
 		{
 			String[] values = resourceEntity.getString(attributeMetaData.getName()).split(",", -1);

@@ -1,12 +1,5 @@
 package org.molgenis.data.jobs;
 
-import static org.molgenis.data.jobs.model.JobExecution.Status.CANCELED;
-import static org.molgenis.data.jobs.model.JobExecution.Status.FAILED;
-import static org.molgenis.data.jobs.model.JobExecution.Status.RUNNING;
-import static org.molgenis.data.jobs.model.JobExecution.Status.SUCCESS;
-
-import java.util.Date;
-
 import org.joda.time.Duration;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
@@ -17,6 +10,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+
+import java.util.Date;
+
+import static org.molgenis.data.jobs.model.JobExecution.Status.*;
 
 /**
  * Tracks progress and stores it in a {@link JobExecution} entity.

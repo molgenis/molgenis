@@ -1,11 +1,7 @@
 package org.molgenis.data.annotation.filter;
 
-import java.util.Collection;
-import java.util.Collections;
-
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.entity.ResultFilter;
