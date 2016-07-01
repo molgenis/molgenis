@@ -1,12 +1,5 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -19,13 +12,20 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.context.ApplicationContext;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * Base class for any {@link EntityAnnotator} that uses a {@link QueryCreator} to query the {@link DataService} or
  * {@link Resources}. It leaves it up to concrete implementations how they wish to process the results by implementing
- * {@link #processQueryResults(Entity, Iterable, Entity)}.
+ * {@link #processQueryResults(Entity, Iterable, boolean)}.
  * <p>
  * See {@link AnnotatorImpl} for the most standard implementation of
- * {@link #processQueryResults(Entity, Iterable, Entity)}.
+ * {@link #processQueryResults(Entity, Iterable, boolean)}.
  */
 public abstract class QueryAnnotatorImpl implements EntityAnnotator
 {
@@ -85,7 +85,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	}
 
 	@Override
-	public List<Entity> annotateEntity(Entity entity)
+	public List<Entity> annotateEntity(Entity entity, boolean updateMode)
 	{
 		getResources();
 		Query<Entity> q = queryCreator.createQuery(entity);
@@ -105,7 +105,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 				}
 			};
 		}
-		processQueryResults(entity, annotatationSourceEntities);
+		processQueryResults(entity, annotatationSourceEntities, updateMode);
 		return Collections.singletonList(entity);
 	}
 
@@ -121,6 +121,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	 * @param inputEntity              the input entity that is being annotated
 	 * @param annotationSourceEntities the entities resulting from the query on the annotation source
 	 */
-	protected abstract void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities);
+	protected abstract void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
+			boolean updateMode);
 
 }

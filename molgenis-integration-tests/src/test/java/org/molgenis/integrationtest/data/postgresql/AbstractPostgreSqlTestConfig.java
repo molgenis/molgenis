@@ -2,6 +2,7 @@ package org.molgenis.integrationtest.data.postgresql;
 
 import com.mchange.v2.c3p0.ComboPooledDataSource;
 import org.molgenis.data.DataService;
+import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.postgresql.PostgreSqlEntityFactory;

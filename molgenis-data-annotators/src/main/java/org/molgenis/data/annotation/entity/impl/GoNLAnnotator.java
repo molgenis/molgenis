@@ -2,9 +2,9 @@ package org.molgenis.data.annotation.entity.impl;
 
 import com.google.common.base.Predicates;
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
@@ -111,11 +111,16 @@ public class GoNLAnnotator implements AnnotatorConfig
 			public String postFixResource = "";
 
 			@Override
-			protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities)
+			protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities,
+					boolean updateMode)
 			{
+				if (updateMode == true)
+				{
+					throw new MolgenisDataException("This annotator/filter does not support updating of values");
+				}
 				String afs = null;
 				String gtcs = null;
-				List<Entity> refMatches = Lists.newArrayList();
+				List<Entity> refMatches = com.google.common.collect.Lists.newArrayList();
 				for (Entity resourceEntity : annotationSourceEntities)
 				{
 					//situation example: input A, GoNL A
@@ -167,7 +172,7 @@ public class GoNLAnnotator implements AnnotatorConfig
 				}
 				if (entity.getString(vcfAttributes.getAltAttribute().getName()) != null)
 				{
-					List<Entity> alleleMatches = Lists.newArrayList();
+					List<Entity> alleleMatches = com.google.common.collect.Lists.newArrayList();
 					for (String alt : entity.getString(vcfAttributes.getAltAttribute().getName()).split(","))
 					{
 						alleleMatches.add(Iterables.find(refMatches,

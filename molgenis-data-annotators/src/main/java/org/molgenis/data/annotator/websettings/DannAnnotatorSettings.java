@@ -1,6 +1,7 @@
 package org.molgenis.data.annotator.websettings;
 
 import org.molgenis.data.annotation.entity.impl.DannAnnotator;
+import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
 import org.springframework.stereotype.Component;
@@ -31,7 +32,8 @@ public class DannAnnotatorSettings extends DefaultSettingsEntity
 		{
 			super.init();
 			setLabel("Dann annotator settings");
-			addAttribute(DANN_LOCATION).setLabel("Dann file location");
+			String defaultLocation = AnnotatorUtils.getAnnotatorResourceDir() + "/dann/dann.tsv.bgz";
+			addAttribute(DANN_LOCATION).setLabel("Dann file location").setDefaultValue(defaultLocation);
 		}
 	}
 }

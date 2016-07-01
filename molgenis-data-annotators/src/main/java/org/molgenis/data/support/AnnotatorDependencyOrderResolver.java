@@ -3,6 +3,7 @@ package org.molgenis.data.support;
 import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
+import org.molgenis.data.annotation.EffectsAnnotator;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -28,7 +29,12 @@ public class AnnotatorDependencyOrderResolver
 		Queue<RepositoryAnnotator> sortedList = new LinkedList<>();
 		for (RepositoryAnnotator annotator : requestedAnnotatorList)
 		{
-			if (!sortedList.contains(annotator))
+			if (annotator instanceof EffectsAnnotator)
+			{
+				// FIXME: implement correct dependency resolving for Effect annotator
+				sortedList.add(annotator);
+			}
+			else if (!sortedList.contains(annotator))
 			{
 				requestedAnnotator = annotator;
 				sortedList = getSingleAnnotatorDependencyList(annotator, availableAnnotatorList, sortedList,
@@ -72,6 +78,7 @@ public class AnnotatorDependencyOrderResolver
 		}
 		if (annotatorQueue.size() == 0)
 		{
+			// FIXME: what to do for ref entity annotator.
 			throw new UnresolvedAnnotatorDependencyException("unsolved for: " + requestedAnnotator);
 		}
 

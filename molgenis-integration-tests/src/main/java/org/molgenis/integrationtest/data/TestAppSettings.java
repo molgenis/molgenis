@@ -208,4 +208,14 @@ public class TestAppSettings implements AppSettings
 		return null;
 	}
 
+	@Override
+	public void setCustomJavascript(String customJavascript) {
+
+	}
+
+	@Override
+	public String getCustomJavascript() {
+		return null;
+	}
+
 }
