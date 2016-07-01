@@ -1,23 +1,23 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.stream.Collectors.toList;
-import static org.molgenis.util.ResourceUtils.getFile;
-import static org.testng.Assert.assertEquals;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-
+import com.google.common.collect.Iterators;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.annotation.entity.impl.omim.OmimRepository;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Iterators;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.util.ResourceUtils.getFile;
+import static org.testng.Assert.assertEquals;
 
 public class OmimRepositoryTest
 {

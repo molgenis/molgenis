@@ -39,6 +39,7 @@ public class JobExecution extends StaticEntity
 	{
 		super(entityMeta);
 		setDefaultValues();
+
 	}
 
 	public JobExecution(String identifier, EntityMetaData entityMeta)

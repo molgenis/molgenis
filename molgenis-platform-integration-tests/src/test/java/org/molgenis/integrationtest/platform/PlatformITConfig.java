@@ -65,7 +65,7 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 @ComponentScan({ "org.molgenis.data.meta", "org.molgenis.data.reindex", "org.molgenis.data.elasticsearch.index",
 		"org.molgenis.data.jobs", "org.molgenis.data.elasticsearch.reindex", "org.molgenis.auth",
 		"org.molgenis.test.data", "org.molgenis.data.platform", "org.molgenis.data.meta.model",
-		"org.molgenis.data.system.model" })
+		"org.molgenis.data.system.model", "org.molgenis.data.cache" })
 @Import({ DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class, ElasticsearchEntityFactory.class,
 		PostgreSqlConfiguration.class, RunAsSystemBeanPostProcessor.class, FileMetaMetaData.class,
 		OwnedEntityMetaData.class, MolgenisUserServiceImpl.class, RhinoConfig.class, UuidGenerator.class,

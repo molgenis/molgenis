@@ -178,25 +178,6 @@ function getCurrentTimezoneOffset() {
 	return offset;
 }
 
-(function() {
-	var entityMap = {
-		"&" : "&amp;",
-		"<" : "&lt;",
-		"\u2264": "&lte;",
-		">" : "&gt;",
-		"\u2265": "&gte;",
-		'"' : '&quot;',
-		"'" : '&#39;',
-		"/" : '&#x2F;'
-	};
-
-	window.htmlEscape = function(string) {
-		return String(string).replace(/[&<>"'\/]/g, function(s) {
-			return entityMap[s];
-		});
-	};
-}(window));
-
 /*
  * Create a table cell to show data of a certain type Is used by the
  * dataexplorer and the forms plugin
@@ -489,16 +470,18 @@ $(function() {
 						try {
 							molgenis
 									.createAlert(JSON.parse(xhr.responseText).errors);
-						} catch (e) {
+						} catch (ex) {
 							molgenis
 									.createAlert(
 											[ {
 												'message' : 'An error occurred. Please contact the administrator.'
 											} ], 'error');
+							console.log('An ajax error occurred.', event, xhr, settings, e);
 						}
 					});
 
 	window.onerror = function(msg, url, line) {
+		console.log('An error occurred.', msg, url, line);
 		molgenis.createAlert([ {
 			'message' : 'An error occurred. Please contact the administrator.'
 		}, {

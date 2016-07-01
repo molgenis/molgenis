@@ -1,6 +1,6 @@
 package org.molgenis.data.annotator.websettings;
 
-import org.molgenis.data.annotation.entity.impl.OmimAnnotator;
+import org.molgenis.data.annotation.entity.impl.omim.OmimAnnotator;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;

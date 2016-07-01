@@ -1,13 +1,13 @@
 package org.molgenis.data.annotation.cmd;
 
-import static org.testng.Assert.assertEquals;
+import org.apache.commons.io.FileUtils;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 /**
  * Annotator integration tests
@@ -30,8 +30,8 @@ public class EdgeCaseExacCmdLineAnnotatorIT
 		String outputFile = "target/out-" + name + "-" + inputFileName;
 		String expectedOutputFile = resourceDir + "/" + expectedOutputFileName;
 
-		CmdLineAnnotator
-				.main(new String[] { "-a", name, "-s", resourceLocation, "-i", inputFile, "-o", outputFile, "-r" });
+		CmdLineAnnotator.main(new String[]
+		{ "-a", name, "-s", resourceLocation, "-i", inputFile, "-o", outputFile, "-r"});
 
 		assertEquals(readLines(outputFile), readLines(expectedOutputFile));
 	}

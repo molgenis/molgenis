@@ -103,7 +103,7 @@ public class EntityTestHarness
 	public Stream<Entity> createTestEntities(EntityMetaData entityMetaData, int numberOfEntities,
 			List<Entity> refEntities)
 	{
-		return IntStream.range(0, numberOfEntities + 1)
+		return IntStream.range(0, numberOfEntities)
 				.mapToObj(i -> createEntity(entityMetaData, i, refEntities.get(i % refEntities.size())));
 	}
 
