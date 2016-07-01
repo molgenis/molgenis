@@ -1,21 +1,12 @@
 package org.molgenis.integrationtest.data.abstracts;
 
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
-import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertEqualsNoOrder;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserFactory;
 import org.molgenis.data.Entity;
-import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.I18nUtils;
 import org.molgenis.data.i18n.LanguageFactory;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
@@ -23,6 +14,15 @@ import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertEqualsNoOrder;
 
 ;
 

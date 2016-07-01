@@ -1,14 +1,18 @@
 package org.molgenis.data.i18n;
 
-import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.anyBoolean;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
+import org.molgenis.data.*;
+import org.molgenis.data.i18n.model.I18nStringMetaData;
+import org.molgenis.data.i18n.model.Language;
+import org.molgenis.data.i18n.model.LanguageMetaData;
+import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.*;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.List;
@@ -16,24 +20,11 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static java.util.Collections.singletonList;
+import static org.mockito.Matchers.anyBoolean;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertEquals;
 
 public class LanguageRepositoryDecoratorTest
 {
@@ -56,6 +47,7 @@ public class LanguageRepositoryDecoratorTest
 		when(metaDataService.getDefaultBackend()).thenReturn(defaultBackend);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		EntityMetaData attrMetaMeta = mock(EntityMetaData.class);
+		when(attrMetaMeta.getEntityMetaData()).thenReturn(mock(EntityMetaDataMetaData.class));
 		when(dataService.getEntityMetaData(AttributeMetaDataMetaData.ATTRIBUTE_META_DATA)).thenReturn(attrMetaMeta);
 		AttributeMetaDataFactory attrMetaFactory = mock(AttributeMetaDataFactory.class);
 		when(attrMetaFactory.create()).thenAnswer(new Answer<AttributeMetaData>()

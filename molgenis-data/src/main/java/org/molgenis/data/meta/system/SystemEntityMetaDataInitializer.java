@@ -1,12 +1,5 @@
 package org.molgenis.data.meta.system;
 
-import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
-
-import java.util.Map;
-import java.util.stream.Stream;
-
-import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.SystemPackage;
@@ -18,6 +11,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
+
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Discovers and initializes {@link SystemEntityMetaData} beans.
@@ -54,33 +52,6 @@ public class SystemEntityMetaDataInitializer
 		systemEntityMetaDataMap.values().stream()
 				.filter(systemEntityMetaData -> !systemEntityMetaData.getSimpleName().equals("Owned"))
 				.forEach(systemEntityMetaData -> initialize(systemEntityMetaData, entityMetaDataMetaData));
-
-		initializeI18N(ctx);
-	}
-
-	/**
-	 * Initialize internationalization attributes
-	 *
-	 * @param ctx application context
-	 */
-	private void initializeI18N(ApplicationContext ctx)
-	{
-		Stream<String> languageCodes = metaDataService.getDefaultBackend().getLanguageCodes();
-
-		EntityMetaDataMetaData entityMetaMeta = ctx.getBean(EntityMetaDataMetaData.class);
-		AttributeMetaDataMetaData attrMetaMeta = ctx.getBean(AttributeMetaDataMetaData.class);
-		I18nStringMetaData i18nStringMeta = ctx.getBean(I18nStringMetaData.class);
-
-		languageCodes.forEach(languageCode -> {
-			entityMetaMeta.addAttribute(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true)
-					.setLabel(new StringBuilder().append("Label (").append(languageCode).append(")").toString());
-			entityMetaMeta.addAttribute(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true)
-					.setLabel(new StringBuilder().append("Description (").append(languageCode).append(")").toString());
-			attrMetaMeta.addAttribute(AttributeMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true)
-					.setLabel(new StringBuilder().append("Label (").append(languageCode).append(")").toString());
-			attrMetaMeta.addAttribute(AttributeMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true)
-					.setLabel(new StringBuilder().append("Description (").append(languageCode).append(")").toString());
-		});
 	}
 
 	private void initialize(SystemEntityMetaData systemEntityMetaData, EntityMetaDataMetaData entityMetaDataMetaData)

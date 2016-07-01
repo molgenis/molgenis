@@ -23,7 +23,7 @@ import static java.util.EnumSet.of;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.data.RepositoryCollectionCapability.*;
-import static org.molgenis.data.i18n.LanguageMetaData.*;
+import static org.molgenis.data.i18n.model.LanguageMetaData.*;
 import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
