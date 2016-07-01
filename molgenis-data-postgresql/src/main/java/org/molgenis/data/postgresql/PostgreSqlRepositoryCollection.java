@@ -453,7 +453,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 		String createTableSql = getSqlCreateTable(entityMeta);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Creating table for entity [{}]", getName());
+			LOG.debug("Creating table for entity [{}]", entityMeta.getName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", createTableSql);
@@ -469,7 +469,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 				String createJunctionTableSql = getSqlCreateJunctionTable(entityMeta, attr);
 				if (LOG.isDebugEnabled())
 				{
-					LOG.debug("Creating junction table for entity [{}] attribute [{}]", getName(), attr.getName());
+					LOG.debug("Creating junction table for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
 					if (LOG.isTraceEnabled())
 					{
 						LOG.trace("SQL: {}", createJunctionTableSql);
@@ -482,7 +482,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 				String createForeignKeySql = getSqlCreateForeignKey(entityMeta, attr);
 				if (LOG.isDebugEnabled())
 				{
-					LOG.debug("Creating foreign key for entity [{}] attribute [{}]", getName(), attr.getName());
+					LOG.debug("Creating foreign key for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
 					if (LOG.isTraceEnabled())
 					{
 						LOG.trace("SQL: {}", createForeignKeySql);
@@ -496,7 +496,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 				String createUniqueSql = getSqlCreateUniqueKey(entityMeta, attr);
 				if (LOG.isDebugEnabled())
 				{
-					LOG.debug("Creating unique key for entity [{}] attribute [{}]", getName(), attr.getName());
+					LOG.debug("Creating unique key for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
 					if (LOG.isTraceEnabled())
 					{
 						LOG.trace("SQL: {}", createUniqueSql);

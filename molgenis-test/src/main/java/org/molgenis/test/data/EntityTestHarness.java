@@ -5,11 +5,15 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.text.DateFormat;
+import java.text.ParseException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -51,11 +55,13 @@ public class EntityTestHarness
 	private AttributeMetaDataFactory attributeMetaDataFactory;
 
 	private Package testPackage;
+	private Date date;
+	private Date dateTime;
 
 	@PostConstruct
 	public void postConstruct()
 	{
-//		testPackage = packageFactory.create("test");
+		//		testPackage = packageFactory.create("test");
 	}
 
 	public EntityMetaData createDynamicRefEntityMetaData()
@@ -111,23 +117,40 @@ public class EntityTestHarness
 
 	private Entity createEntity(EntityMetaData entityMetaData, int id, Entity refEntity)
 	{
+		if (date == null || dateTime == null) generateDateAndDateTime();
+
 		Entity entity1 = new DynamicEntity(entityMetaData);
-		entity1.set(ATTR_ID, id);
+		entity1.set(ATTR_ID, "" + id);
 		entity1.set(ATTR_STRING, "string1");
 		entity1.set(ATTR_BOOL, true);
 		entity1.set(ATTR_CATEGORICAL, refEntity);
 		entity1.set(ATTR_CATEGORICAL_MREF, Collections.singletonList(refEntity));
-		entity1.set(ATTR_DATE, "21-12-2012");
-		entity1.set(ATTR_DATETIME, "1985-08-12T11:12:13+0500");
+		entity1.set(ATTR_DATE, date);
+		entity1.set(ATTR_DATETIME, dateTime);
 		entity1.set(ATTR_EMAIL, "this.is@mail.address");
 		entity1.set(ATTR_DECIMAL, 1.123);
 		entity1.set(ATTR_HTML, "<html>where is my head and where is my body</html>");
 		entity1.set(ATTR_HYPERLINK, "http://www.molgenis.org");
-		entity1.set(ATTR_LONG, 1000000);
+		entity1.set(ATTR_LONG, new Long(1000000));
 		entity1.set(ATTR_INT, 18);
 		entity1.set(ATTR_SCRIPT, "/bin/blaat/script.sh");
 		entity1.set(ATTR_XREF, refEntity);
 		entity1.set(ATTR_MREF, Collections.singletonList(refEntity));
 		return entity1;
+	}
+
+	private void generateDateAndDateTime()
+	{
+		DateFormat dateFormat = MolgenisDateFormat.getDateFormat();
+		DateFormat dateTimeFormat = MolgenisDateFormat.getDateTimeFormat();
+		try
+		{
+			date = dateFormat.parse("2012-12-21");
+			dateTime = dateTimeFormat.parse("1985-08-12T11:12:13+0500");
+		}
+		catch (ParseException e)
+		{
+			e.printStackTrace();
+		}
 	}
 }

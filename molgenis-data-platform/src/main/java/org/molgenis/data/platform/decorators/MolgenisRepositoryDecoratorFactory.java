@@ -1,4 +1,4 @@
-package org.molgenis.ui;
+package org.molgenis.data.platform.decorators;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserDecorator;

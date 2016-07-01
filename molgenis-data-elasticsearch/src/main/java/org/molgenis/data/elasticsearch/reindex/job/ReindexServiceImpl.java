@@ -81,12 +81,14 @@ public class ReindexServiceImpl implements ReindexService
 	}
 
 	@Override
+	@RunAsSystem
 	public void waitForAllIndicesStable() throws InterruptedException
 	{
 		indexStatus.waitForAllEntitiesToBeStable();
 	}
 
 	@Override
+	@RunAsSystem
 	public void waitForIndexToBeStableIncludingReferences(String entityName) throws InterruptedException
 	{
 		indexStatus.waitForIndexToBeStableIncludingReferences(dataService.getEntityMetaData(entityName));

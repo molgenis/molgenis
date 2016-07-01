@@ -699,7 +699,8 @@
 		<module>molgenis-file-ingester</module>
         <!--<module>molgenis-integration-tests</module>-->
         <module>molgenis-jobs</module>
-        <!--<module>molgenis-platform-integration-tests</module>-->
+        <module>molgenis-platform-integration-tests</module>
         <module>molgenis-test</module>
+        <module>molgenis-data-platform</module>
     </modules>
 </project>
