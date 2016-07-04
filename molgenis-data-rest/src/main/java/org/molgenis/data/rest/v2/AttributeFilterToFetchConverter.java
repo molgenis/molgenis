@@ -9,7 +9,7 @@ import org.molgenis.file.model.FileMetaMetaData;
 
 import static java.lang.String.format;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.FILE;
-import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
+import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
 
 /**
  * Converts {@link AttributeFilter} to {@link Fetch}.
@@ -174,7 +174,7 @@ public class AttributeFilterToFetchConverter
 	public static Fetch createDefaultAttributeFetch(AttributeMetaData attr, String languageCode)
 	{
 		Fetch fetch;
-		if (isMultipleReferenceType(attr))
+		if (isReferenceType(attr))
 		{
 			fetch = new Fetch();
 			EntityMetaData refEntityMeta = attr.getRefEntity();
