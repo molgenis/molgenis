@@ -17,7 +17,7 @@ import java.util.Map;
 public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
-	ApplicationContext applicationContext;
+	protected ApplicationContext applicationContext;
 
 	@BeforeClass
 	public void bootstrap()
