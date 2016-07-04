@@ -107,7 +107,7 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 		GroupAuthority usersGroupLanguagesAuthority = groupAuthorityFactory.create();
 		usersGroupLanguagesAuthority.setMolgenisGroup(allUsersGroup);
 		// FIXME do not hardcode default language code
-		usersGroupLanguagesAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "EN");
+		usersGroupLanguagesAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "SYS_LANGUAGES");
 		dataService.add(GROUP_AUTHORITY, usersGroupLanguagesAuthority);
 	}
 
