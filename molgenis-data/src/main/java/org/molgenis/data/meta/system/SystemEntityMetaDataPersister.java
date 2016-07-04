@@ -90,7 +90,9 @@ public class SystemEntityMetaDataPersister
 		// add default meta entities
 		ApplicationContext ctx = event.getApplicationContext();
 		Map<String, Package> packageMap = ctx.getBeansOfType(Package.class);
-		DependencyResolver.resolve(packageMap.values().stream()).filter(this::isNotPersisted).forEach(this::persist);
+		DependencyResolver.resolve(packageMap.values().stream())
+				.filter(this::isNotPersisted)
+				.forEach(this::persist);
 
 		// persist entity meta data
 		Set<EntityMetaData> metaEntityMetaSet = systemEntityMetaRegistry.getSystemEntityMetaDatas().collect(toSet());

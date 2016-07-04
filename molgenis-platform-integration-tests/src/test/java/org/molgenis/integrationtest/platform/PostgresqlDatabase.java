@@ -1,5 +1,7 @@
 package org.molgenis.integrationtest.platform;
 
+import org.molgenis.util.ResourceUtils;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -9,30 +11,17 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
 
-import javax.sql.DataSource;
-
-import org.molgenis.util.ResourceUtils;
-import org.springframework.stereotype.Component;
-
 /**
  * Drops and creates the integration database
  */
-@Component
 class PostgreSqlDatabase
 {
 	private static final String INTEGRATION_DATABASE = "molgenis_integration_test";
 
-	private DataSource dataSource;
-
-	public void init()
-	{
-
-	}
-
-	private Connection getConnection() throws IOException, SQLException
+	private static Connection getConnection() throws IOException, SQLException
 	{
 		Properties properties = new Properties();
-		File file = ResourceUtils.getFile(getClass(), "/postgresql/molgenis.properties");
+		File file = ResourceUtils.getFile(PostgreSqlDatabase.class, "/postgresql/molgenis.properties");
 		properties.load(new FileInputStream(file));
 
 		String db_uri = properties.getProperty("db_uri");
@@ -44,7 +33,7 @@ class PostgreSqlDatabase
 				.getConnection(adminDbUri, properties.getProperty("db_user"), properties.getProperty("db_password"));
 	}
 
-	void dropDatabase() throws IOException, SQLException
+	static void dropDatabase() throws IOException, SQLException
 	{
 		Connection conn = getConnection();
 		Statement statement = conn.createStatement();
@@ -52,7 +41,7 @@ class PostgreSqlDatabase
 		conn.close();
 	}
 
-	void dropAndCreateDatabase()
+	static void dropAndCreateDatabase()
 	{
 		try
 		{
