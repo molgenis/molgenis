@@ -302,25 +302,4 @@ public class DynamicEntity implements Entity
 				throw new RuntimeException(format("Unknown data type [%s]", dataType.toString()));
 		}
 	}
-
-	@Override
-	public boolean equals(Object o)
-	{
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-
-		DynamicEntity that = (DynamicEntity) o;
-
-		if (!entityMeta.equals(that.entityMeta)) return false;
-		return values.equals(that.values);
-
-	}
-
-	@Override
-	public int hashCode()
-	{
-		int result = entityMeta.hashCode();
-		result = 31 * result + values.hashCode();
-		return result;
-	}
 }

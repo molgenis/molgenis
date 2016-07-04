@@ -5,6 +5,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.*;
+import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
@@ -21,8 +22,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
+import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { MapOfStringsExpressionEvaluatorTest.Config.class })
 public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringContextTests
@@ -187,8 +187,8 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 		Entity expected = new DynamicEntity(refEmd);
 		expected.set("Chromosome", "12");
 		expected.set("Position", "1");
-		Object actual = evaluator.evaluate(entity);
-		assertEquals(actual, expected);
+		Entity actual = (Entity) evaluator.evaluate(entity);
+		assertTrue(EntityUtils.equals(actual, expected));
 	}
 
 	@Autowired
