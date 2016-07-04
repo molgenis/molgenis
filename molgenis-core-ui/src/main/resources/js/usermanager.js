@@ -21,7 +21,7 @@
 	function getCreateForm(type) {
 		React.render(molgenis.ui.Form({
 			mode: 'create',
-			entity : 'molgenis' + type,
+			entity : 'sys_sec_Molgenis' + type,
 			modal: true,
 			onSubmitSuccess : function(e) {
 				
@@ -170,22 +170,22 @@
 
 		$('#create-user-btn').click(function(e) {
 			e.preventDefault();
-			getCreateForm('user');
+			getCreateForm('User');
 		});
 
 		$('#create-group-btn').click(function(e) {
 			e.preventDefault();
-			getCreateForm('group');
+			getCreateForm('Group');
 		});
 
 		$('.edit-user-btn').click(function(e) {
 			e.preventDefault();
-			getEditForm($(this).data('id'), 'user');
+			getEditForm($(this).data('id'), 'User');
 		});
 
 		$('.edit-group-btn').click(function(e) {
 			e.preventDefault();
-			getEditForm($(this).data('id'), 'group');
+			getEditForm($(this).data('id'), 'Group');
 		});
 
 		$('.activate-user-checkbox').click(function(e) {

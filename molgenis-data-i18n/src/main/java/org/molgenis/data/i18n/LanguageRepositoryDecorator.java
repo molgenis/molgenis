@@ -2,6 +2,9 @@ package org.molgenis.data.i18n;
 
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.i18n.model.I18nStringMetaData;
+import org.molgenis.data.i18n.model.Language;
+import org.molgenis.data.i18n.model.LanguageMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -17,8 +20,8 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
-import static org.molgenis.data.i18n.I18nStringMetaData.I18N_STRING;
-import static org.molgenis.data.i18n.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
+import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.model.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.*;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
