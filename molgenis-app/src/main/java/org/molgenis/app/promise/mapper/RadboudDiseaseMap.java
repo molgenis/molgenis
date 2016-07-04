@@ -10,10 +10,7 @@ import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static java.time.LocalDate.now;
-import static java.time.LocalDate.parse;
 import static java.util.Objects.requireNonNull;
-import static org.apache.commons.lang.StringUtils.join;
 import static org.molgenis.app.promise.mapper.RadboudMapper.*;
 import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_DISEASE_TYPES;
 
@@ -21,8 +18,12 @@ class RadboudDiseaseMap
 {
 	private static final Logger LOG = LoggerFactory.getLogger(RadboudDiseaseMap.class);
 
-	private static final String URN_MIRIAM_ICD_PREFIX = "urn:miriam:icd:";
-	private static final String XML_CODEINDEX = "CODEINDEX";
+	static final String URN_MIRIAM_ICD_PREFIX = "urn:miriam:icd:";
+	static final String XML_IDAABB = "IDAABB";
+	static final String XML_CODENAME = "CODENAME";
+	static final String XML_CODEVERSION = "CODEVERSION";
+	static final String XML_CODEDESCEN = "CODEDESCEN";
+	static final String XML_CODEINDEX = "CODEINDEX";
 
 	private Map<String, List<Entity>> diseases = newHashMap();
 	private DataService dataService;
