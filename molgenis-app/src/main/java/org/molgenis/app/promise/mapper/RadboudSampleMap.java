@@ -153,11 +153,11 @@ class RadboudSampleMap
 			{
 				dataCategoryTypeIds.add("OTHER");
 			}
+		}
 
-			if (dataCategoryTypeIds.isEmpty())
-			{
-				dataCategoryTypeIds.add("NAV");
-			}
+		if (dataCategoryTypeIds.isEmpty())
+		{
+			dataCategoryTypeIds.add("NAV");
 		}
 
 		return getTypeEntities(REF_DATA_CATEGORY_TYPES, dataCategoryTypeIds);

@@ -11,18 +11,6 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
-import java.util.*;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.hash.Hashing.md5;
-import static java.nio.charset.Charset.forName;
-import static java.time.LocalDate.now;
-import static java.time.LocalDate.parse;
-import static java.time.format.DateTimeFormatter.ISO_DATE_TIME;
-import static java.time.temporal.ChronoUnit.YEARS;
-import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.app.promise.model.BbmriNlCheatSheet.SAMPLE_COLLECTIONS_ENTITY;
 import static org.molgenis.app.promise.model.PromiseMappingProjectMetaData.CREDENTIALS;

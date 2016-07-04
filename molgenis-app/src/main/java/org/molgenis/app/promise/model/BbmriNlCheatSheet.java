@@ -60,5 +60,4 @@ public class BbmriNlCheatSheet
 	public static final String ADDRESS = "address";
 	public static final String ZIP = "zip";
 	public static final String CITY = "city";
-
 }
