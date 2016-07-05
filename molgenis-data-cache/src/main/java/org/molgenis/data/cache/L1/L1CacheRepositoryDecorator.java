@@ -4,7 +4,6 @@ import autovalue.shaded.com.google.common.common.collect.Lists;
 import com.google.common.collect.Iterators;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -25,11 +24,10 @@ import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
-import static org.slf4j.LoggerFactory.getLogger;
 
 public class L1CacheRepositoryDecorator implements Repository<Entity>
 {
-	private static final Logger LOG = getLogger(L1CacheRepositoryDecorator.class);
+	private static final int ID_BATCH_SIZE = 1000;
 
 	private final Repository<Entity> decoratedRepository;
 	private final L1Cache l1Cache;
@@ -89,7 +87,7 @@ public class L1CacheRepositoryDecorator implements Repository<Entity>
 	{
 		if (cacheable)
 		{
-			Iterator<List<Object>> idBatches = partition(ids.iterator(), 2);
+			Iterator<List<Object>> idBatches = partition(ids.iterator(), ID_BATCH_SIZE);
 			Iterator<List<Entity>> entityBatches = Iterators.transform(idBatches, this::findAllBatch);
 			return stream(spliteratorUnknownSize(entityBatches, SORTED | ORDERED), false).flatMap(List::stream)
 					.filter(e -> e != null);
@@ -214,25 +212,25 @@ public class L1CacheRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decoratedRepository.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return decoratedRepository.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return decoratedRepository.findAll(q);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		return decoratedRepository.findOne(q);
 	}
