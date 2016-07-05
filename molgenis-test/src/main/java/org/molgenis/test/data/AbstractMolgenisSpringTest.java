@@ -6,6 +6,7 @@ import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.util.GenericDependencyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -37,5 +38,10 @@ public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringCon
 	@ComponentScan({ "org.molgenis.data.meta.model", "org.molgenis.data.system.model" })
 	public static class Config
 	{
+		@Bean
+		public GenericDependencyResolver genericDependencyResolver()
+		{
+			return new GenericDependencyResolver();
+		}
 	}
 }
