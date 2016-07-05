@@ -3,6 +3,7 @@ package org.molgenis.test.data;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.util.GenericDependencyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
@@ -25,9 +26,11 @@ public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringCon
 		// bootstrap meta data
 		EntityMetaDataMetaData entityMetaMeta = applicationContext.getBean(EntityMetaDataMetaData.class);
 		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityMetaMeta);
-		Map<String, SystemEntityMetaData> systemEntityMetaMap = applicationContext
+		Map<String, SystemEntityMetaData> systemEntityMetaDataMap = applicationContext
 				.getBeansOfType(SystemEntityMetaData.class);
-		systemEntityMetaMap.values().forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityMetaMeta));
+		new GenericDependencyResolver().resolve(systemEntityMetaDataMap.values(), SystemEntityMetaData::getDependencies)
+				.stream().forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityMetaMeta));
+
 	}
 
 	@Configuration

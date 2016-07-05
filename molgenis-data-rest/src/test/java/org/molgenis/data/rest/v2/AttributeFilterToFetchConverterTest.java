@@ -3,8 +3,10 @@ package org.molgenis.data.rest.v2;
 import org.molgenis.auth.SecurityPackage;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.system.model.RootSystemPackage;
 import org.molgenis.file.model.FileMetaMetaData;
 import org.molgenis.security.owned.OwnedEntityMetaData;
@@ -13,11 +15,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.Map;
 
 import static java.util.Arrays.asList;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
@@ -276,19 +275,6 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 		assertEquals(fetch, new Fetch().field("id").field("label").field("selfRef",
 				new Fetch().field("id").field("label").field("selfRef", new Fetch().field("id").field("label")
 						.field("selfRef", new Fetch().field("id").field("label")))));
-	}
-
-	@BeforeClass
-	@Override
-	public void bootstrap()
-	{
-		// bootstrap meta data
-		EntityMetaDataMetaData entityMetaMeta = applicationContext.getBean(EntityMetaDataMetaData.class);
-		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityMetaMeta);
-		applicationContext.getBean(OwnedEntityMetaData.class).bootstrap(entityMetaMeta);
-		Map<String, SystemEntityMetaData> systemEntityMetaMap = applicationContext
-				.getBeansOfType(SystemEntityMetaData.class);
-		systemEntityMetaMap.values().forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityMetaMeta));
 	}
 
 	@Configuration
