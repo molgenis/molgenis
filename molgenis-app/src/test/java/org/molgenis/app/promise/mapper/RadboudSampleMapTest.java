@@ -199,15 +199,15 @@ public class RadboudSampleMapTest
 	public void testGetSex() throws Exception
 	{
 		radboudSampleMap.getSex("9000_100");
-		verify(dataService, atLeastOnce()).findAll(eq(REF_GENDER_TYPES), streamCaptor.capture());
+		verify(dataService, atLeastOnce()).findAll(eq(REF_SEX_TYPES), streamCaptor.capture());
 		assertEquals(streamCaptor.getValue().collect(toSet()), newHashSet("MALE", "FEMALE"));
 
 		radboudSampleMap.getSex("9000_8");
-		verify(dataService, atLeastOnce()).findAll(eq(REF_GENDER_TYPES), streamCaptor.capture());
+		verify(dataService, atLeastOnce()).findAll(eq(REF_SEX_TYPES), streamCaptor.capture());
 		assertEquals(streamCaptor.getValue().collect(toSet()), newHashSet("UNKNOWN"));
 
 		radboudSampleMap.getSex("1_1");
-		verify(dataService, atLeastOnce()).findAll(eq(REF_GENDER_TYPES), streamCaptor.capture());
+		verify(dataService, atLeastOnce()).findAll(eq(REF_SEX_TYPES), streamCaptor.capture());
 		assertEquals(streamCaptor.getValue().collect(toSet()), newHashSet("NAV"));
 	}
 
@@ -234,5 +234,4 @@ public class RadboudSampleMapTest
 		assertEquals(radboudSampleMap.getSize("9000_8"), 1);
 		assertEquals(radboudSampleMap.getSize("1_1"), 1);
 	}
-
 }

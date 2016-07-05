@@ -250,10 +250,10 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 		Object[] sexes = promiseSex.split(",");
 		Stream<Object> ids = asList(sexes).stream();
 
-		Iterable<Entity> genderTypes = dataService.findAll(REF_GENDER_TYPES, ids).collect(toList());
+		Iterable<Entity> genderTypes = dataService.findAll(REF_SEX_TYPES, ids).collect(toList());
 		if (!genderTypes.iterator().hasNext())
 		{
-			throw new RuntimeException("Unknown '" + REF_GENDER_TYPES + "' [" + ids.toString() + "]");
+			throw new RuntimeException("Unknown '" + REF_SEX_TYPES + "' [" + ids.toString() + "]");
 		}
 		return genderTypes;
 	}
