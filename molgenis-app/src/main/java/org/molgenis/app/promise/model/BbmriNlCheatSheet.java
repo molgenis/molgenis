@@ -44,12 +44,19 @@ public class BbmriNlCheatSheet
 	public static final String BIOBANK_SAMPLE_ACCESS_FEE = "biobankSampleAccessFee";
 	public static final String BIOBANK_SAMPLE_ACCESS_JOINT_PROJECTS = "biobankSampleAccessJointProjects";
 	public static final String BIOBANK_SAMPLE_ACCESS_DESCRIPTION = "biobankSampleAccessDescription";
-	public static final String BIOBANK_DATA_SAMPLE_ACCESS_DESCRIPTION = "";
 	public static final String BIOBANK_SAMPLE_ACCESS_URI = "biobankSampleAccessURI";
 	public static final String BIOBANK_DATA_ACCESS_FEE = "biobankDataAccessFee";
 	public static final String BIOBANK_DATA_ACCESS_JOINT_PROJECTS = "biobankDataAccessJointProjects";
 	public static final String BIOBANK_DATA_ACCESS_DESCRIPTION = "biobankDataAccessDescription";
 	public static final String BIOBANK_DATA_ACCESS_URI = "biobankDataAccessURI";
 
-
+	// Persons attributes
+	public static final String COUNTRY = "country";
+	public static final String FIRST_NAME = "first_name";
+	public static final String LAST_NAME = "last_name";
+	public static final String PHONE = "phone";
+	public static final String EMAIL = "email";
+	public static final String ADDRESS = "address";
+	public static final String ZIP = "zip";
+	public static final String CITY = "city";
 }
