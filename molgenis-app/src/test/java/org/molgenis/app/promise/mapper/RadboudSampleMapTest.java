@@ -6,14 +6,10 @@ import org.molgenis.data.Entity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static java.time.temporal.ChronoUnit.YEARS;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.mockito.Matchers.any;
@@ -43,18 +39,13 @@ public class RadboudSampleMapTest
 		when(resultStream.collect(toList())).thenReturn(resultEntities);
 		when(dataService.findAll(any(String.class), any(Stream.class))).thenReturn(resultStream);
 
-		DateTimeFormatter isoDateTime = DateTimeFormatter.ISO_DATE_TIME;
-		LocalDateTime now = LocalDateTime.now();
-		LocalDateTime birthdate1 = now.minus(10, YEARS);
-		LocalDateTime birthdate2 = now.minus(80, YEARS);
-		LocalDateTime birthdate3 = now.minus(50, YEARS);
-
 		Entity sample1 = mock(Entity.class);
 		when(sample1.getString(XML_ID)).thenReturn("9000");
 		when(sample1.getString(XML_IDAA)).thenReturn("100");
 		when(sample1.getString(XML_DEELBIOBANKS)).thenReturn("100");
 		when(sample1.getString(XML_GENDER)).thenReturn("2");
-		when(sample1.getString(XML_BIRTHDATE)).thenReturn(birthdate1.format(isoDateTime));
+		when(sample1.getString(XML_BIRTHDATE)).thenReturn("1960-01-01T00:00:00+02:00");
+		when(sample1.getString(XML_INCLUSIE)).thenReturn("2000-01-01T00:00:00+02:00");
 		when(sample1.getString(XML_BLOED)).thenReturn("2");
 		when(sample1.getString(XML_BLOEDPLASMA)).thenReturn("2");
 		when(sample1.getString(XML_BLOEDSERUM)).thenReturn("2");
@@ -80,7 +71,8 @@ public class RadboudSampleMapTest
 		when(sample2.getString(XML_IDAA)).thenReturn("100");
 		when(sample2.getString(XML_DEELBIOBANKS)).thenReturn("100");
 		when(sample2.getString(XML_GENDER)).thenReturn("1");
-		when(sample2.getString(XML_BIRTHDATE)).thenReturn(birthdate2.format(isoDateTime));
+		when(sample2.getString(XML_BIRTHDATE)).thenReturn("2010-01-01T00:00:00+02:00");
+		when(sample2.getString(XML_INCLUSIE)).thenReturn("2011-01-01T00:00:00+02:00");
 		when(sample2.getString(XML_BLOED)).thenReturn("2");
 		when(sample2.getString(XML_BLOEDPLASMA)).thenReturn("2");
 		when(sample2.getString(XML_BLOEDSERUM)).thenReturn("2");
@@ -106,7 +98,8 @@ public class RadboudSampleMapTest
 		when(sample3.getString(XML_IDAA)).thenReturn("8");
 		when(sample3.getString(XML_DEELBIOBANKS)).thenReturn("0");
 		when(sample3.getString(XML_GENDER)).thenReturn("3");
-		when(sample3.getString(XML_BIRTHDATE)).thenReturn(birthdate3.format(isoDateTime));
+		when(sample3.getString(XML_BIRTHDATE)).thenReturn("2050-01-01T00:00:00+02:00");
+		when(sample3.getString(XML_INCLUSIE)).thenReturn("2268-01-01T00:00:00+02:00"); // will fail age sanity check
 		when(sample3.getString(XML_BLOED)).thenReturn("2");
 		when(sample3.getString(XML_BLOEDPLASMA)).thenReturn("2");
 		when(sample3.getString(XML_BLOEDSERUM)).thenReturn("2");
@@ -189,15 +182,15 @@ public class RadboudSampleMapTest
 	public void testGetOmics() throws Exception
 	{
 		radboudSampleMap.getOmics("9000_100");
-		verify(dataService, atLeastOnce()).findAll(eq(REF_OMICS_DATA_TYPES), streamCaptor.capture());
+		verify(dataService, atLeastOnce()).findAll(eq(REF_EXP_DATA_TYPES), streamCaptor.capture());
 		assertEquals(streamCaptor.getValue().collect(toSet()), newHashSet("GENOMICS"));
 
 		radboudSampleMap.getOmics("9000_8");
-		verify(dataService, atLeastOnce()).findAll(eq(REF_OMICS_DATA_TYPES), streamCaptor.capture());
+		verify(dataService, atLeastOnce()).findAll(eq(REF_EXP_DATA_TYPES), streamCaptor.capture());
 		assertEquals(streamCaptor.getValue().collect(toSet()), newHashSet("GENOMICS"));
 
 		radboudSampleMap.getOmics("1_1");
-		verify(dataService, atLeastOnce()).findAll(eq(REF_OMICS_DATA_TYPES), streamCaptor.capture());
+		verify(dataService, atLeastOnce()).findAll(eq(REF_EXP_DATA_TYPES), streamCaptor.capture());
 		assertEquals(streamCaptor.getValue().collect(toSet()), newHashSet("NAV"));
 	}
 
@@ -221,16 +214,16 @@ public class RadboudSampleMapTest
 	@Test
 	public void testGetAgeMin() throws Exception
 	{
-		assertEquals(radboudSampleMap.getAgeMin("9000_100"), Integer.valueOf(10));
-		assertEquals(radboudSampleMap.getAgeMin("9000_8"), Integer.valueOf(50));
+		assertEquals(radboudSampleMap.getAgeMin("9000_100"), Integer.valueOf(1));
+		assertEquals(radboudSampleMap.getAgeMin("9000_8"), null);
 		assertEquals(radboudSampleMap.getAgeMin("1_1"), null);
 	}
 
 	@Test
 	public void testGetAgeMax() throws Exception
 	{
-		assertEquals(radboudSampleMap.getAgeMax("9000_100"), Integer.valueOf(80));
-		assertEquals(radboudSampleMap.getAgeMax("9000_8"), Integer.valueOf(50));
+		assertEquals(radboudSampleMap.getAgeMax("9000_100"), Integer.valueOf(40));
+		assertEquals(radboudSampleMap.getAgeMax("9000_8"), null);
 		assertEquals(radboudSampleMap.getAgeMax("1_1"), null);
 	}
 

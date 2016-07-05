@@ -215,7 +215,7 @@ public class ParelMapper implements PromiseMapper, ApplicationListener<ContextRe
 
 	private Entity getTempOmics()
 	{
-		return dataService.findOne(REF_OMICS_DATA_TYPES, "NAV");
+		return dataService.findOne(REF_EXP_DATA_TYPES, "NAV");
 	}
 
 	private Entity getTempDisease()

@@ -60,6 +60,7 @@ class RadboudSampleMap
 	static final String XML_GWASOMNI = "GWASOMNI";
 	static final String XML_GWAS370CNV = "GWAS370CNV";
 	static final String XML_EXOOMCHIP = "EXOOMCHIP";
+	static final String XML_INCLUSIE = "INCLUSIE";
 
 	private Map<String, AggregatedSampleInfo> sampleInfos = newHashMap();
 
@@ -180,7 +181,7 @@ class RadboudSampleMap
 
 	Iterable<Entity> getOmics(String biobankId)
 	{
-		return getTypeEntities(REF_OMICS_DATA_TYPES, sampleInfos.get(biobankId).getOmicsIds());
+		return getTypeEntities(REF_EXP_DATA_TYPES, sampleInfos.get(biobankId).getOmicsIds());
 	}
 
 	Iterable<Entity> getSex(String biobankId) throws RuntimeException
@@ -341,17 +342,18 @@ class RadboudSampleMap
 	private Integer collectAge(Entity radboudSampleEntity)
 	{
 		String birthDate = radboudSampleEntity.getString(XML_BIRTHDATE);
-		if (birthDate != null && !birthDate.isEmpty())
+		String inclusionDate = radboudSampleEntity.getString(XML_INCLUSIE);
+		if (birthDate != null && inclusionDate != null && !birthDate.isEmpty() && !inclusionDate.isEmpty())
 		{
 			LocalDate start = parse(birthDate, ISO_DATE_TIME);
-			LocalDate end = now();
+			LocalDate end = parse(inclusionDate, ISO_DATE_TIME);
 			Long age = YEARS.between(start, end);
-			return age.intValue();
+			if (age >= 0 && age <= 130)
+			{
+				return age.intValue();
+			}
 		}
-		else
-		{
-			return null;
-		}
+		return null;
 	}
 
 	private class AggregatedSampleInfo
