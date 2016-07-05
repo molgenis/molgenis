@@ -1,4 +1,4 @@
-package org.molgenis.bootstrap;
+package org.molgenis.data.platform.bootstrap;
 
 import org.molgenis.data.i18n.SystemEntityMetaDataI18nInitializer;
 import org.molgenis.data.meta.system.SystemEntityMetaDataInitializer;
