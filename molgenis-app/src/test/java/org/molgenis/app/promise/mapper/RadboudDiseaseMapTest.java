@@ -42,7 +42,8 @@ public class RadboudDiseaseMapTest
 		when(disease1.getString(XML_CODENAME)).thenReturn("ICD-10");
 		when(disease1.getString(XML_CODEVERSION)).thenReturn("2015");
 		when(disease1.getString(XML_CODEINDEX)).thenReturn("C81-C96");
-		when(disease1.getString(XML_CODEDESCEN)).thenReturn("Malignant neoplasms, stated or presumed to be primary, of lymphoid, haematopoietic and related tissue");
+		when(disease1.getString(XML_CODEDESCEN)).thenReturn(
+				"Malignant neoplasms, stated or presumed to be primary, of lymphoid, haematopoietic and related tissue");
 
 		Entity disease2 = mock(Entity.class);
 		when(disease2.getString(XML_ID)).thenReturn("9000");

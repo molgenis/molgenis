@@ -4,7 +4,6 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.MapEntity;
 
 import java.util.List;
 
@@ -20,22 +19,25 @@ import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCE
 
 class RadboudBiobankMapper
 {
-	private static final String XML_TITLE = "TITEL";
-	private static final String XML_DESCRIPTION = "OMSCHRIJVING";
-	private static final String XML_CONTACT_PERSON = "CONTACTPERS";
-	private static final String XML_ADDRESS1 = "ADRES1";
-	private static final String XML_ADDRESS2 = "ADRES2";
-	private static final String XML_ZIP_CODE = "POSTCODE";
-	private static final String XML_LOCATION = "PLAATS";
-	private static final String XML_EMAIL = "EMAIL";
-	private static final String XML_PHONE = "TELEFOON";
-	private static final String XML_TYPEBIOBANK = "TYPEBIOBANK";
+	static final String XML_TITLE = "TITEL";
+	static final String XML_DESCRIPTION = "OMSCHRIJVING";
+	static final String XML_CONTACT_PERSON = "CONTACTPERS";
+	static final String XML_ADDRESS1 = "ADRES1";
+	static final String XML_ADDRESS2 = "ADRES2";
+	static final String XML_ZIP_CODE = "POSTCODE";
+	static final String XML_LOCATION = "PLAATS";
+	static final String XML_EMAIL = "EMAIL";
+	static final String XML_PHONE = "TELEFOON";
+	static final String XML_TYPEBIOBANK = "TYPEBIOBANK";
 
-	private static final String ACCESS_URI = "http://www.radboudbiobank.nl/nl/collecties/materiaal-opvragen/";
+	static final String ACCESS_URI = "http://www.radboudbiobank.nl/nl/collecties/materiaal-opvragen/";
 
 	private DataService dataService;
 
 	private Entity countryNl;
+	private Entity ageType;
+	private Entity rbbBiobank;
+	private Entity juristicPerson;
 	private EntityMetaData personMetaData;
 
 	RadboudBiobankMapper(DataService dataService)
@@ -44,6 +46,9 @@ class RadboudBiobankMapper
 
 		// cache entities that will be used more than once
 		countryNl = requireNonNull(dataService.findOne(REF_COUNTRIES, "NL"));
+		ageType = requireNonNull(dataService.findOne(REF_AGE_TYPES, "YEAR"));
+		rbbBiobank = requireNonNull(dataService.findOne(REF_BIOBANKS, "RBB"));
+		juristicPerson = requireNonNull(dataService.findOne(REF_JURISTIC_PERSONS, "83"));
 		personMetaData = requireNonNull(dataService.getEntityMetaData(REF_PERSONS));
 	}
 
@@ -68,7 +73,7 @@ class RadboudBiobankMapper
 		newSampleCollection.set(WEBSITE, "http://www.radboudbiobank.nl/");
 		newSampleCollection.set(BIOBANK_DATA_ACCESS_URI, ACCESS_URI);
 		newSampleCollection.set(PRINCIPAL_INVESTIGATORS, getPrincipalInvestigator(getBiobankId(radboudBiobankEntity)));
-		newSampleCollection.set(INSTITUTES, getMrefEntities(REF_JURISTIC_PERSONS, "83"));
+		newSampleCollection.set(INSTITUTES, newArrayList(juristicPerson));
 
 		return mapExistingBiobank(radboudBiobankEntity, samples, diseases, newSampleCollection);
 	}
@@ -97,15 +102,15 @@ class RadboudBiobankMapper
 		existingSampleCollection.set(SEX, samples.getSex(biobankId));
 		existingSampleCollection.set(AGE_LOW, samples.getAgeMin(biobankId));
 		existingSampleCollection.set(AGE_HIGH, samples.getAgeMax(biobankId));
-		existingSampleCollection.set(AGE_UNIT, getXrefEntity(REF_AGE_TYPES, "YEAR"));
+		existingSampleCollection.set(AGE_UNIT, ageType);
 		existingSampleCollection.set(DISEASE, diseases.getDiseaseTypes(radboudBiobankEntity.getString(XML_IDAA)));
 		existingSampleCollection.set(NUMBER_OF_DONORS, samples.getSize(biobankId));
 		existingSampleCollection.set(DESCRIPTION, radboudBiobankEntity.getString(XML_DESCRIPTION));
 		existingSampleCollection.set(CONTACT_PERSON, getContactPersons(radboudBiobankEntity));
-		existingSampleCollection.set(BIOBANKS, getMrefEntities(REF_BIOBANKS, "RBB"));
+		existingSampleCollection.set(BIOBANKS, newArrayList(rbbBiobank));
 		existingSampleCollection.set(BIOBANK_SAMPLE_ACCESS_FEE, true);
-		existingSampleCollection.set(BIOBANK_DATA_ACCESS_JOINT_PROJECTS, true);
-		existingSampleCollection.set(BIOBANK_DATA_SAMPLE_ACCESS_DESCRIPTION, null);  // Don't fill in
+		existingSampleCollection.set(BIOBANK_SAMPLE_ACCESS_JOINT_PROJECTS, true);
+		existingSampleCollection.set(BIOBANK_SAMPLE_ACCESS_DESCRIPTION, null);  // Don't fill in
 		existingSampleCollection.set(BIOBANK_DATA_ACCESS_FEE, true);
 		existingSampleCollection.set(BIOBANK_DATA_ACCESS_JOINT_PROJECTS, true);
 		existingSampleCollection.set(BIOBANK_DATA_ACCESS_DESCRIPTION, null);  // Don't fill in
@@ -118,32 +123,12 @@ class RadboudBiobankMapper
 		Entity principalInvestigatorEntity = dataService.findOne(REF_PERSONS, biobankId);
 		if (principalInvestigatorEntity == null)
 		{
-			principalInvestigatorEntity = new MapEntity(dataService.getEntityMetaData(REF_PERSONS));
+			principalInvestigatorEntity = new DefaultEntity(personMetaData, dataService);
 			principalInvestigatorEntity.set(ID, biobankId);
 			principalInvestigatorEntity.set(COUNTRY, countryNl);
 			dataService.add(REF_PERSONS, principalInvestigatorEntity);
 		}
 		return singletonList(principalInvestigatorEntity);
-	}
-
-	private Iterable<Entity> getMrefEntities(String entityName, String value)
-	{
-		Entity entity = dataService.findOne(entityName, value);
-		if (entity == null)
-		{
-			throw new RuntimeException("Unknown '" + entityName + "' [" + value + "]");
-		}
-		return singletonList(entity);
-	}
-
-	private Entity getXrefEntity(String entityName, String value)
-	{
-		Entity entity = dataService.findOne(entityName, value);
-		if (entity == null)
-		{
-			throw new RuntimeException("Unknown '" + entityName + "' [" + value + "]");
-		}
-		return entity;
 	}
 
 	private Iterable<Entity> getContactPersons(Entity biobankEntity)

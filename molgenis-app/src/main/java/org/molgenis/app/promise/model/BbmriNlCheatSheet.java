@@ -44,7 +44,6 @@ public class BbmriNlCheatSheet
 	public static final String BIOBANK_SAMPLE_ACCESS_FEE = "biobankSampleAccessFee";
 	public static final String BIOBANK_SAMPLE_ACCESS_JOINT_PROJECTS = "biobankSampleAccessJointProjects";
 	public static final String BIOBANK_SAMPLE_ACCESS_DESCRIPTION = "biobankSampleAccessDescription";
-	public static final String BIOBANK_DATA_SAMPLE_ACCESS_DESCRIPTION = "";
 	public static final String BIOBANK_SAMPLE_ACCESS_URI = "biobankSampleAccessURI";
 	public static final String BIOBANK_DATA_ACCESS_FEE = "biobankDataAccessFee";
 	public static final String BIOBANK_DATA_ACCESS_JOINT_PROJECTS = "biobankDataAccessJointProjects";
