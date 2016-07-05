@@ -30,6 +30,9 @@ class RadboudMapper implements PromiseMapper, ApplicationListener<ContextRefresh
 
 	private final DataService dataService;
 
+	private int newBiobanks;
+	private int existingBiobanks;
+
 	@Autowired
 	public RadboudMapper(PromiseDataParser promiseDataParser, DataService dataService,
 			PromiseMapperFactory promiseMapperFactory)
@@ -66,12 +69,17 @@ class RadboudMapper implements PromiseMapper, ApplicationListener<ContextRefresh
 
 			Entity credentials = project.getEntity(CREDENTIALS);
 
-			LOG.info("Generating RADBOUD sample");
+			LOG.info("Reading RADBOUD samples");
 			promiseDataParser.parse(credentials, 1, samples::addSample);
+			LOG.info("Processed {} RADBOUD samples", samples.getNumberOfSamples());
 
-			LOG.info("Generating RADBOUD disease");
+			LOG.info("Reading RADBOUD disease types");
 			promiseDataParser.parse(credentials, 2, diseases::addDisease);
+			LOG.info("Processed {} RADBOUD disease types", diseases.getNumberOfDiseaseTypes());
 
+			LOG.info("Mapping RADBOUD biobanks");
+			newBiobanks = 0;
+			existingBiobanks = 0;
 			promiseDataParser.parse(credentials, 0, biobankEntity -> {
 				String biobankId = biobankEntity.getString(XML_ID) + biobankEntity.getString(XML_IDAA);
 				Entity bbmriSampleCollection = dataService.findOne(SAMPLE_COLLECTIONS_ENTITY, biobankId);
@@ -79,15 +87,17 @@ class RadboudMapper implements PromiseMapper, ApplicationListener<ContextRefresh
 				{
 					bbmriSampleCollection = biobankMapper.mapNewBiobank(biobankEntity, samples, diseases);
 					dataService.add(SAMPLE_COLLECTIONS_ENTITY, bbmriSampleCollection);
+					newBiobanks++;
 				}
 				else
 				{
 					bbmriSampleCollection = biobankMapper.mapExistingBiobank(biobankEntity, samples, diseases, bbmriSampleCollection);
 					dataService.update(SAMPLE_COLLECTIONS_ENTITY, bbmriSampleCollection);
+					existingBiobanks++;
 				}
 			});
 
-			LOG.info("Finished mapping RADBOUD biobanks");
+			LOG.info("Mapped {} new biobanks and {} existing biobanks", newBiobanks, existingBiobanks);
 			report.setStatus(Status.SUCCESS);
 		}
 		catch (Exception e)

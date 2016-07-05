@@ -28,6 +28,8 @@ class RadboudDiseaseMap
 	private Map<String, List<Entity>> diseases = newHashMap();
 	private DataService dataService;
 
+	private int numberOfDiseaseTypes;
+
 	RadboudDiseaseMap(DataService dataService)
 	{
 		this.dataService = requireNonNull(dataService);
@@ -38,6 +40,12 @@ class RadboudDiseaseMap
 		String diseaseId = radboudDiseaseEntity.getString(XML_IDAA);
 		diseases.putIfAbsent(diseaseId, newArrayList());
 		diseases.get(diseaseId).add(radboudDiseaseEntity);
+		numberOfDiseaseTypes++;
+	}
+
+	int getNumberOfDiseaseTypes()
+	{
+		return numberOfDiseaseTypes;
 	}
 
 	Iterable<Entity> getDiseaseTypes(String biobankIdaa)

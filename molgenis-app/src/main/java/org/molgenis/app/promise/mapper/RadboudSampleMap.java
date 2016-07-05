@@ -4,11 +4,13 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 
 import java.time.LocalDate;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newTreeSet;
 import static java.time.LocalDate.now;
 import static java.time.LocalDate.parse;
 import static java.time.format.DateTimeFormatter.ISO_DATE_TIME;
@@ -16,9 +18,8 @@ import static java.time.temporal.ChronoUnit.YEARS;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.apache.commons.lang.StringUtils.join;
-import static org.molgenis.app.promise.mapper.RadboudMapper.*;
+import static org.molgenis.app.promise.mapper.RadboudMapper.getBiobankId;
 import static org.molgenis.app.promise.model.BbmriNlCheatSheet.*;
-import static org.molgenis.app.promise.model.BbmriNlCheatSheet.REF_GENDER_TYPES;
 
 class RadboudSampleMap
 {
@@ -64,6 +65,8 @@ class RadboudSampleMap
 
 	private DataService dataService;
 
+	private int numberOfSamples = 0;
+
 	RadboudSampleMap(DataService dataService)
 	{
 		this.dataService = requireNonNull(dataService);
@@ -84,12 +87,19 @@ class RadboudSampleMap
 		Integer age = collectAge(radboudSampleEntity);
 		info.setAgeMax(age);
 		info.setAgeMin(age);
+
+		numberOfSamples++;
+	}
+
+	int getNumberOfSamples()
+	{
+		return numberOfSamples;
 	}
 
 	Iterable<Entity> getDataCategories(Entity radboudBiobankEntity)
 	{
 		String biobankId = getBiobankId(radboudBiobankEntity);
-		Set<String> dataCategoryTypeIds = new LinkedHashSet<>();
+		Set<String> dataCategoryTypeIds = newTreeSet();
 
 		dataCategoryTypeIds.addAll(sampleInfos.get(biobankId).getDataCategoryIds());
 
@@ -195,7 +205,7 @@ class RadboudSampleMap
 
 	private Set<String> collectDataCategoryIds(Entity radboudSampleEntity)
 	{
-		Set<String> dataCategoryTypeIds = newHashSet();
+		Set<String> dataCategoryTypeIds = newTreeSet();
 		String deelbiobanks = radboudSampleEntity.getString(XML_DEELBIOBANKS);
 		if (deelbiobanks != null && Integer.valueOf(deelbiobanks) >= 1)
 		{
@@ -225,7 +235,7 @@ class RadboudSampleMap
 
 	private Set<String> collectMaterialIds(Entity radboudSampleEntity)
 	{
-		Set<String> materialTypeIds = new HashSet<>();
+		Set<String> materialTypeIds = newTreeSet();
 
 		if ("1".equals(radboudSampleEntity.getString(XML_DNA)) || "1"
 				.equals(radboudSampleEntity.getString(XML_DNABEENMERG)))
@@ -295,7 +305,7 @@ class RadboudSampleMap
 
 	private Set<String> collectOmicsIds(Entity radboudSampleEntity)
 	{
-		Set<String> omicsTypeIds = new HashSet<>();
+		Set<String> omicsTypeIds = newTreeSet();
 
 		if ("1".equals(radboudSampleEntity.getString(XML_GWASOMNI)) || "1"
 				.equals(radboudSampleEntity.getString(XML_GWAS370CNV)) || "1"
@@ -309,7 +319,7 @@ class RadboudSampleMap
 
 	private Set<String> collectSexIds(Entity radboudSampleEntity)
 	{
-		Set<String> genderTypeIds = new HashSet<>();
+		Set<String> genderTypeIds = newTreeSet();
 
 		String genderValue = radboudSampleEntity.getString(XML_GENDER);
 		if ("1".equals(genderValue))
@@ -346,10 +356,10 @@ class RadboudSampleMap
 
 	private class AggregatedSampleInfo
 	{
-		private Set<String> materialIds = newHashSet();
-		private Set<String> dataCategoryIds = newHashSet();
-		private Set<String> omicsIds = newHashSet();
-		private Set<String> sexIds = newHashSet();
+		private Set<String> materialIds = newTreeSet();
+		private Set<String> dataCategoryIds = newTreeSet();
+		private Set<String> omicsIds = newTreeSet();
+		private Set<String> sexIds = newTreeSet();
 		private int size = 0;
 		private Integer ageMin;
 		private Integer ageMax;

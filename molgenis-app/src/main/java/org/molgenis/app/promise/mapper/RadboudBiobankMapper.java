@@ -4,6 +4,8 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.support.DefaultEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
@@ -19,6 +21,8 @@ import static org.molgenis.app.promise.model.BbmriNlCheatSheet.BIOBANK_DATA_ACCE
 
 class RadboudBiobankMapper
 {
+	private static final Logger LOG = LoggerFactory.getLogger(RadboudBiobankMapper.class);
+
 	static final String XML_TITLE = "TITEL";
 	static final String XML_DESCRIPTION = "OMSCHRIJVING";
 	static final String XML_CONTACT_PERSON = "CONTACTPERS";
@@ -127,6 +131,7 @@ class RadboudBiobankMapper
 			principalInvestigatorEntity.set(ID, biobankId);
 			principalInvestigatorEntity.set(COUNTRY, countryNl);
 			dataService.add(REF_PERSONS, principalInvestigatorEntity);
+			LOG.info("Added new principal investigator (person) with id {}", biobankId);
 		}
 		return singletonList(principalInvestigatorEntity);
 	}
@@ -184,6 +189,7 @@ class RadboudBiobankMapper
 				newPerson.set(CITY, city);
 				newPerson.set(COUNTRY, countryNl);
 				dataService.add(REF_PERSONS, newPerson);
+				LOG.info("Added new contact person: {}", contactPerson[i]);
 				persons.add(newPerson);
 			}
 
