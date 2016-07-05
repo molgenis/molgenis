@@ -1,6 +1,9 @@
-package org.molgenis.ui;
+package org.molgenis.data;
 
-import static java.util.Objects.requireNonNull;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -9,19 +12,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.model.EntityMetaData;
-
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.SetMultimap;
+import static java.util.Objects.requireNonNull;
 
 public class EntityListenerRepositoryDecorator implements Repository<Entity>
 {

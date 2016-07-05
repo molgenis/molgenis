@@ -8,6 +8,7 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.*;
 import org.molgenis.util.BatchingIterable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -25,6 +26,7 @@ import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceTyp
 /**
  * Entity manager responsible for creating entities, entity references and resolving references of reference attributes.
  */
+@Component
 public class EntityManagerImpl implements EntityManager
 {
 	private static final int BATCH_SIZE = 100;

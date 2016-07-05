@@ -3,15 +3,11 @@ package org.molgenis.ui;
 import com.google.common.collect.Maps;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntityFactoryRegistry;
-import org.molgenis.data.EntityManager;
-import org.molgenis.data.EntityManagerImpl;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
@@ -33,6 +29,7 @@ import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
@@ -63,6 +60,7 @@ import java.util.Properties;
 import static freemarker.template.Configuration.VERSION_2_3_23;
 import static org.molgenis.framework.ui.ResourcePathPatterns.*;
 
+@Import(PlatformConfig.class)
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Autowired
@@ -348,29 +346,5 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			throw new RuntimeException("Invalid value '" + environment + "' for property 'environment' in " + path
 					+ ", allowed values are [development, production].");
 		}
-	}
-
-	@Bean
-	public DataService dataService()
-	{
-		return new DataServiceImpl();
-	}
-
-	@Bean
-	public EntityManager entityManager()
-	{
-		return new EntityManagerImpl(dataService(), entityFactoryRegistry());
-	}
-
-	@Bean
-	public RepositoryDecoratorRegistry repositoryDecoratorRegistry()
-	{
-		return new RepositoryDecoratorRegistry();
-	}
-
-	@Bean
-	public EntityFactoryRegistry entityFactoryRegistry()
-	{
-		return new EntityFactoryRegistry();
 	}
 }
