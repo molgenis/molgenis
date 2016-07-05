@@ -10,8 +10,7 @@ import org.mockito.stubbing.Answer;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.v2.RestControllerV2Test.RestControllerV2Config;
@@ -24,6 +23,7 @@ import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.permission.PermissionSystemService;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
 import org.molgenis.util.MolgenisDateFormat;
@@ -36,7 +36,6 @@ import org.springframework.format.support.FormattingConversionServiceFactoryBean
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -58,12 +57,11 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -73,12 +71,19 @@ import static org.testng.Assert.assertEquals;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = { RestControllerV2Config.class, GsonConfig.class })
-public class RestControllerV2Test extends AbstractTestNGSpringContextTests
+public class RestControllerV2Test extends AbstractMolgenisSpringTest
 {
 	private static final String SELF_REF_ENTITY_NAME = "selfRefEntity";
 	private static final String ENTITY_NAME = "entity";
 	private static final String REF_ENTITY_NAME = "refEntity";
 	private static final String REF_REF_ENTITY_NAME = "refRefEntity";
+
+	private static final String REF_ATTR_ID_NAME = "id";
+	private static final String REF_ATTR_VALUE_NAME = "value";
+	private static final String REF_ATTR_REF_NAME = "ref";
+	private static final String REF_REF_ATTR_VALUE_NAME = "value";
+	private static final String REF_REF_ATTR_ID_NAME = "id";
+
 	private static final String ENTITY_ID = "0";
 	private static final String REF_ENTITY0_ID = "ref0";
 	private static final String REF_ENTITY1_ID = "ref0";
@@ -86,6 +91,12 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	private static final String HREF_ENTITY_COLLECTION = RestControllerV2.BASE_URI + '/' + ENTITY_NAME;
 	private static final String HREF_COPY_ENTITY = RestControllerV2.BASE_URI + "/copy/" + ENTITY_NAME;
 	private static final String HREF_ENTITY_ID = HREF_ENTITY_COLLECTION + '/' + ENTITY_ID;
+
+	@Autowired
+	private EntityMetaDataFactory entityMetaDataFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
 	private RestControllerV2 restControllerV2;
@@ -119,82 +130,33 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	private String attrCompoundAttr0Name;
 	private String attrCompoundAttrCompoundName;
 	private String attrCompoundAttrCompoundAttr0Name;
-	private String refAttrValueName;
-	private String refAttrIdName;
-	private String refAttrRefName;
-	private String refRefAttrValueName;
 
 	@BeforeMethod
 	public void beforeMethod() throws ParseException
 	{
 		reset(dataService);
-		String refRefAttrIdName = "id";
-		refRefAttrValueName = "value";
 
-		EntityMetaData refRefEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(REF_REF_ENTITY_NAME)
-				.getMock();
-		when(refRefEntityMeta.getLabel()).thenReturn(REF_REF_ENTITY_NAME);
-		when(refRefEntityMeta.getLabel(anyString())).thenReturn(REF_REF_ENTITY_NAME);
-		AttributeMetaData refRefAttrId = createAttributeMeta(refRefEntityMeta, refRefAttrIdName, STRING);
-		when(refRefAttrId.isNillable()).thenReturn(false);
-		when(refRefAttrId.isReadOnly()).thenReturn(true);
-		when(refRefAttrId.isUnique()).thenReturn(true);
-		when(refRefAttrId.isVisible()).thenReturn(true);
-		AttributeMetaData refRefAttrValue = createAttributeMeta(refRefEntityMeta, refRefAttrValueName, STRING);
-		when(refRefEntityMeta.getIdAttribute()).thenReturn(refRefAttrId);
-		when(refRefEntityMeta.getLabelAttribute()).thenReturn(refRefAttrId);
-		when(refRefEntityMeta.getLabelAttribute(anyString())).thenReturn(refRefAttrId);
-		when(refRefEntityMeta.getLookupAttributes()).thenReturn(asList(refRefAttrId));
-		when(refRefEntityMeta.getLookupAttribute(refRefAttrIdName)).thenReturn(refRefAttrId);
-		when(refRefEntityMeta.getAtomicAttributes()).thenReturn(asList(refRefAttrId, refRefAttrValue));
-		when(refRefEntityMeta.getAttributes()).thenReturn(asList(refRefAttrId, refRefAttrValue));
+		EntityMetaData refRefEntityMeta = entityMetaDataFactory.create().setName(REF_REF_ENTITY_NAME)
+				.setLabel(REF_REF_ENTITY_NAME)
+				.addAttribute(attributeMetaDataFactory.create().setName(REF_REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL,
+						ROLE_LOOKUP).addAttribute(attributeMetaDataFactory.create().setName(REF_REF_ATTR_VALUE_NAME));
 
-		EntityMetaData selfRefEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(SELF_REF_ENTITY_NAME)
-				.getMock();
-		when(selfRefEntityMeta.getLabel()).thenReturn(SELF_REF_ENTITY_NAME);
-		when(selfRefEntityMeta.getLabel(anyString())).thenReturn(SELF_REF_ENTITY_NAME);
-		AttributeMetaData selfRefAttrId = createAttributeMeta(selfRefEntityMeta, "id", STRING);
-		when(selfRefAttrId.isNillable()).thenReturn(false);
-		when(selfRefAttrId.isReadOnly()).thenReturn(true);
-		when(selfRefAttrId.isUnique()).thenReturn(true);
-		when(selfRefAttrId.isVisible()).thenReturn(true);
-		AttributeMetaData selfRefAttrValue = createAttributeMeta(selfRefEntityMeta, "selfRef", XREF, selfRefEntityMeta);
-
-		when(selfRefEntityMeta.getIdAttribute()).thenReturn(selfRefAttrId);
-		when(selfRefEntityMeta.getLabelAttribute()).thenReturn(selfRefAttrId);
-		when(selfRefEntityMeta.getLabelAttribute(anyString())).thenReturn(selfRefAttrId);
-		when(selfRefEntityMeta.getLookupAttributes()).thenReturn(asList(selfRefAttrId));
-		when(selfRefEntityMeta.getLookupAttribute("selfRef")).thenReturn(selfRefAttrId);
-		when(selfRefEntityMeta.getAtomicAttributes()).thenReturn(asList(selfRefAttrId, selfRefAttrValue));
-		when(selfRefEntityMeta.getAttributes()).thenReturn(asList(selfRefAttrId, selfRefAttrValue));
+		EntityMetaData selfRefEntityMeta = entityMetaDataFactory.create().setName(SELF_REF_ENTITY_NAME)
+				.setLabel(SELF_REF_ENTITY_NAME)
+				.addAttribute(attributeMetaDataFactory.create().setName("id"), ROLE_ID, ROLE_LABEL, ROLE_LOOKUP);
+		selfRefEntityMeta.addAttribute(
+				attributeMetaDataFactory.create().setName("selfRef").setDataType(XREF).setRefEntity(selfRefEntityMeta));
 
 		Entity selfRefEntity = new DynamicEntity(selfRefEntityMeta);
 		selfRefEntity.set("id", "0");
 		selfRefEntity.set("selfRef", selfRefEntity);
 
-		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(REF_ENTITY_NAME).getMock();
-		when(refEntityMeta.getLabel()).thenReturn(REF_ENTITY_NAME);
-		when(refEntityMeta.getLabel(anyString())).thenReturn(REF_ENTITY_NAME);
-		refAttrIdName = "id";
-		refAttrValueName = "value";
-		refAttrRefName = "ref";
-
-		AttributeMetaData refAttrId = createAttributeMeta(refEntityMeta, refAttrIdName, STRING);
-		when(refAttrId.isNillable()).thenReturn(false);
-		when(refAttrId.isReadOnly()).thenReturn(true);
-		when(refAttrId.isUnique()).thenReturn(true);
-		when(refAttrId.isVisible()).thenReturn(true);
-		AttributeMetaData refAttrValue = createAttributeMeta(refEntityMeta, refAttrValueName, STRING);
-		AttributeMetaData refAttrRef = createAttributeMeta(refEntityMeta, refAttrRefName, XREF, refRefEntityMeta);
-
-		when(refEntityMeta.getIdAttribute()).thenReturn(refAttrId);
-		when(refEntityMeta.getLabelAttribute()).thenReturn(refAttrId);
-		when(refEntityMeta.getLabelAttribute(anyString())).thenReturn(refAttrId);
-		when(refEntityMeta.getLookupAttributes()).thenReturn(asList(refAttrId));
-		when(refEntityMeta.getLookupAttribute(refAttrIdName)).thenReturn((refAttrId));
-		when(refEntityMeta.getAtomicAttributes()).thenReturn(asList(refAttrId, refAttrValue, refAttrRef));
-		when(refEntityMeta.getAttributes()).thenReturn(asList(refAttrId, refAttrValue, refAttrRef));
-
+		EntityMetaData refEntityMeta = entityMetaDataFactory.create().setName(REF_ENTITY_NAME)
+				.setLabel(REF_ENTITY_NAME)
+				.addAttribute(attributeMetaDataFactory.create().setName(REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL,
+						ROLE_LOOKUP).addAttribute(attributeMetaDataFactory.create().setName(REF_ATTR_VALUE_NAME))
+				.addAttribute(attributeMetaDataFactory.create().setName(REF_ATTR_REF_NAME).setDataType(XREF)
+						.setRefEntity(refRefEntityMeta));
 		// required
 		String attrIdName = "id";
 		attrBoolName = "bool";
@@ -244,138 +206,86 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		String enum2 = "enum2";
 
 		// required
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(ENTITY_NAME).getMock();
-		when(entityMeta.getLabel()).thenReturn(ENTITY_NAME);
-		when(entityMeta.getLabel(anyString())).thenReturn(ENTITY_NAME);
-		AttributeMetaData attrId = createAttributeMeta(entityMeta, attrIdName, STRING);
-		when(attrId.isNillable()).thenReturn(false);
-		when(attrId.isReadOnly()).thenReturn(true);
-		when(attrId.isUnique()).thenReturn(true);
-		when(attrId.isVisible()).thenReturn(true);
-		AttributeMetaData attrBool = createAttributeMeta(entityMeta, attrBoolName, BOOL);
+		EntityMetaData entityMeta = entityMetaDataFactory.create().setName(ENTITY_NAME).setLabel(ENTITY_NAME);
+		AttributeMetaData attrId = attributeMetaDataFactory.create().setName(attrIdName);
+		entityMeta.addAttribute(attrId, ROLE_ID, ROLE_LABEL, ROLE_LOOKUP);
+		AttributeMetaData attrBool = createAttributeMeta(entityMeta, attrBoolName, BOOL).setNillable(true);
 		AttributeMetaData attrCategorical = createAttributeMeta(entityMeta, attrCategoricalName, CATEGORICAL,
-				refEntityMeta);
+				refEntityMeta).setNillable(false);
 		AttributeMetaData attrCategoricalMref = createAttributeMeta(entityMeta, attrCategoricalMrefName,
-				CATEGORICAL_MREF, refEntityMeta);
-		AttributeMetaData attrCompound = createAttributeMeta(entityMeta, attrCompoundName, COMPOUND);
-		AttributeMetaData attrDate = createAttributeMeta(entityMeta, attrDateName, DATE);
-		AttributeMetaData attrDateTime = createAttributeMeta(entityMeta, attrDateTimeName, DATE_TIME);
-		AttributeMetaData attrDecimal = createAttributeMeta(entityMeta, attrDecimalName, DECIMAL, null);
-		when(attrDecimal.isReadOnly()).thenReturn(true);
-		AttributeMetaData attrEmail = createAttributeMeta(entityMeta, attrEmailName, EMAIL);
-		AttributeMetaData attrEnum = createAttributeMeta(entityMeta, attrEnumName, ENUM);
-		when(attrEnum.getEnumOptions()).thenReturn(asList(enum0, enum1, enum2));
-		AttributeMetaData attrHtml = createAttributeMeta(entityMeta, attrHtmlName, HTML);
-		AttributeMetaData attrHyperlink = createAttributeMeta(entityMeta, attrHyperlinkName, HYPERLINK);
-		AttributeMetaData attrInt = createAttributeMeta(entityMeta, attrIntName, INT);
-		AttributeMetaData attrLong = createAttributeMeta(entityMeta, attrLongName, LONG);
-		AttributeMetaData attrMref = createAttributeMeta(entityMeta, attrMrefName, MREF, refEntityMeta);
-		AttributeMetaData attrScript = createAttributeMeta(entityMeta, attrScriptName, SCRIPT);
-		AttributeMetaData attrString = createAttributeMeta(entityMeta, attrStringName, STRING);
-		AttributeMetaData attrText = createAttributeMeta(entityMeta, attrTextName, TEXT);
-		AttributeMetaData attrXref = createAttributeMeta(entityMeta, attrXrefName, XREF, refEntityMeta);
+				CATEGORICAL_MREF, refEntityMeta).setNillable(false);
+		AttributeMetaData attrCompound = createAttributeMeta(entityMeta, attrCompoundName, COMPOUND).setNillable(false);
+		AttributeMetaData attrDate = createAttributeMeta(entityMeta, attrDateName, DATE).setNillable(false);
+		AttributeMetaData attrDateTime = createAttributeMeta(entityMeta, attrDateTimeName, DATE_TIME)
+				.setNillable(false);
+		AttributeMetaData attrDecimal = createAttributeMeta(entityMeta, attrDecimalName, DECIMAL, null)
+				.setReadOnly(true).setNillable(false);
+		AttributeMetaData attrEmail = createAttributeMeta(entityMeta, attrEmailName, EMAIL).setNillable(false);
+		AttributeMetaData attrEnum = createAttributeMeta(entityMeta, attrEnumName, ENUM)
+				.setEnumOptions(asList(enum0, enum1, enum2)).setNillable(false);
+		AttributeMetaData attrHtml = createAttributeMeta(entityMeta, attrHtmlName, HTML).setNillable(false);
+		AttributeMetaData attrHyperlink = createAttributeMeta(entityMeta, attrHyperlinkName, HYPERLINK)
+				.setNillable(false);
+		AttributeMetaData attrInt = createAttributeMeta(entityMeta, attrIntName, INT).setNillable(false);
+		AttributeMetaData attrLong = createAttributeMeta(entityMeta, attrLongName, LONG).setNillable(false);
+		AttributeMetaData attrMref = createAttributeMeta(entityMeta, attrMrefName, MREF, refEntityMeta)
+				.setNillable(false);
+		AttributeMetaData attrScript = createAttributeMeta(entityMeta, attrScriptName, SCRIPT).setNillable(false);
+		AttributeMetaData attrString = createAttributeMeta(entityMeta, attrStringName, STRING).setNillable(false);
+		AttributeMetaData attrText = createAttributeMeta(entityMeta, attrTextName, TEXT).setNillable(false);
+		AttributeMetaData attrXref = createAttributeMeta(entityMeta, attrXrefName, XREF, refEntityMeta)
+				.setNillable(false);
 
 		// optional
 		AttributeMetaData attrBoolOptional = createAttributeMeta(entityMeta, attrBoolOptionalName, BOOL);
-		when(attrBoolOptional.isNillable()).thenReturn(true);
 		AttributeMetaData attrCategoricalOptional = createAttributeMeta(entityMeta, attrCategoricalOptionalName,
 				CATEGORICAL, refEntityMeta);
-		when(attrCategoricalOptional.isNillable()).thenReturn(true);
 		AttributeMetaData attrCategoricalMrefOptional = createAttributeMeta(entityMeta, attrCategoricalMrefOptionalName,
 				CATEGORICAL_MREF, refEntityMeta);
-		when(attrCategoricalMrefOptional.isNillable()).thenReturn(true);
 		AttributeMetaData attrDateOptional = createAttributeMeta(entityMeta, attrDateOptionalName, DATE);
-		when(attrDateOptional.isNillable()).thenReturn(true);
 		AttributeMetaData attrDateTimeOptional = createAttributeMeta(entityMeta, attrDateTimeOptionalName, DATE_TIME);
-		when(attrDateTimeOptional.isNillable()).thenReturn(true);
 		AttributeMetaData attrDecimalOptional = createAttributeMeta(entityMeta, attrDecimalOptionalName, DECIMAL, null);
-		when(attrDecimalOptional.isNillable()).thenReturn(true);
 		AttributeMetaData attrEmailOptional = createAttributeMeta(entityMeta, attrEmailOptionalName, EMAIL);
-		when(attrEmailOptional.isNillable()).thenReturn(true);
-		AttributeMetaData attrEnumOptional = createAttributeMeta(entityMeta, attrEnumOptionalName, ENUM);
-		when(attrEnumOptional.isNillable()).thenReturn(true);
-		when(attrEnumOptional.getEnumOptions()).thenReturn(asList(enum0, enum1, enum2));
+		AttributeMetaData attrEnumOptional = createAttributeMeta(entityMeta, attrEnumOptionalName, ENUM)
+				.setEnumOptions(asList(enum0, enum1, enum2));
 		AttributeMetaData attrHtmlOptional = createAttributeMeta(entityMeta, attrHtmlOptionalName, HTML);
-		when(attrHtmlOptional.isNillable()).thenReturn(true);
 		AttributeMetaData attrHyperlinkOptional = createAttributeMeta(entityMeta, attrHyperlinkOptionalName, HYPERLINK);
-		when(attrHyperlinkOptional.isNillable()).thenReturn(true);
 		AttributeMetaData attrIntOptional = createAttributeMeta(entityMeta, attrIntOptionalName, INT);
-		when(attrIntOptional.isNillable()).thenReturn(true);
 		AttributeMetaData attrLongOptional = createAttributeMeta(entityMeta, attrLongOptionalName, LONG);
-		when(attrLongOptional.isNillable()).thenReturn(true);
 		AttributeMetaData attrMrefOptional = createAttributeMeta(entityMeta, attrMrefOptionalName, MREF, refEntityMeta);
-		when(attrMrefOptional.isNillable()).thenReturn(true);
 		AttributeMetaData attrScriptOptional = createAttributeMeta(entityMeta, attrScriptOptionalName, SCRIPT);
-		when(attrScriptOptional.isNillable()).thenReturn(true);
 		AttributeMetaData attrStringOptional = createAttributeMeta(entityMeta, attrStringOptionalName, STRING);
-		when(attrStringOptional.isNillable()).thenReturn(true);
 		AttributeMetaData attrTextOptional = createAttributeMeta(entityMeta, attrTextOptionalName, TEXT);
-		when(attrTextOptional.isNillable()).thenReturn(true);
 		AttributeMetaData attrXrefOptional = createAttributeMeta(entityMeta, attrXrefOptionalName, XREF, refEntityMeta);
-		when(attrXrefOptional.isNillable()).thenReturn(true);
 
 		AttributeMetaData compoundAttrCompoundAttr0 = createAttributeMeta(entityMeta, attrCompoundAttrCompoundAttr0Name,
 				STRING);
 		AttributeMetaData compoundAttrCompoundAttr0Optional = createAttributeMeta(entityMeta,
 				attrCompoundAttrCompoundAttr0OptionalName, STRING);
-		when(compoundAttrCompoundAttr0Optional.isNillable()).thenReturn(true);
 
 		AttributeMetaData compoundAttrCompound = createAttributeMeta(entityMeta, attrCompoundAttrCompoundName,
 				COMPOUND);
-		when(compoundAttrCompound.getAttributeParts())
-				.thenReturn(asList(compoundAttrCompoundAttr0, compoundAttrCompoundAttr0Optional));
-		when(compoundAttrCompound.getAttributePart(attrCompoundAttrCompoundAttr0Name))
-				.thenReturn(compoundAttrCompoundAttr0);
-		when(compoundAttrCompound.getAttributePart(attrCompoundAttrCompoundAttr0OptionalName))
-				.thenReturn(compoundAttrCompoundAttr0Optional);
+		compoundAttrCompound.setAttributeParts(asList(compoundAttrCompoundAttr0, compoundAttrCompoundAttr0Optional));
 
-		AttributeMetaData compoundAttr0 = createAttributeMeta(entityMeta, attrCompoundAttr0Name, STRING);
+		AttributeMetaData compoundAttr0 = createAttributeMeta(entityMeta, attrCompoundAttr0Name, STRING)
+				.setNillable(false);
 		AttributeMetaData compoundAttr0Optional = createAttributeMeta(entityMeta, attrCompoundAttr0OptionalName,
 				STRING);
-		when(compoundAttr0Optional.isNillable()).thenReturn(true);
-
-		when(attrCompound.getAttributeParts())
-				.thenReturn(asList(compoundAttr0, compoundAttr0Optional, compoundAttrCompound));
-		when(attrCompound.getAttributePart(attrCompoundAttr0Name)).thenReturn(compoundAttr0);
-		when(attrCompound.getAttributePart(attrCompoundAttr0OptionalName)).thenReturn(compoundAttr0Optional);
-		when(attrCompound.getAttributePart(attrCompoundAttrCompoundName)).thenReturn(compoundAttrCompound);
-
-		when(entityMeta.getIdAttribute()).thenReturn(attrId);
-		when(entityMeta.getLabelAttribute()).thenReturn(attrId);
-		when(entityMeta.getLabelAttribute(anyString())).thenReturn(attrId);
-		when(entityMeta.getLookupAttributes()).thenReturn(asList(attrId));
-		when(entityMeta.getLookupAttribute(attrIdName)).thenReturn(attrId);
-		when(entityMeta.getAtomicAttributes()).thenReturn(
-				asList(attrId, attrBool, attrCategorical, attrCategoricalMref, compoundAttr0, compoundAttr0Optional,
-						compoundAttrCompoundAttr0, compoundAttrCompoundAttr0Optional, attrDate, attrDateTime,
-						attrDecimal, attrEmail, attrEnum, attrHtml, attrHyperlink, attrInt, attrLong, attrMref,
-						attrScript, attrString, attrText, attrXref, attrBoolOptional, attrCategoricalOptional,
-						attrCategoricalMrefOptional, attrDateOptional, attrDateTimeOptional, attrDecimalOptional,
-						attrEmailOptional, attrEnumOptional, attrHtmlOptional, attrHyperlinkOptional, attrIntOptional,
-						attrLongOptional, attrMrefOptional, attrScriptOptional, attrStringOptional, attrTextOptional,
-						attrXrefOptional));
-		when(entityMeta.getAttributes()).thenReturn(
-				asList(attrId, attrBool, attrCategorical, attrCategoricalMref, attrCompound, attrDate, attrDateTime,
-						attrDecimal, attrEmail, attrEnum, attrHtml, attrHyperlink, attrInt, attrLong, attrMref,
-						attrScript, attrString, attrText, attrXref, attrBoolOptional, attrCategoricalOptional,
-						attrCategoricalMrefOptional, attrDateOptional, attrDateTimeOptional, attrDecimalOptional,
-						attrEmailOptional, attrEnumOptional, attrHtmlOptional, attrHyperlinkOptional, attrIntOptional,
-						attrLongOptional, attrMrefOptional, attrScriptOptional, attrStringOptional, attrTextOptional,
-						attrXrefOptional));
+		attrCompound.setAttributeParts(asList(compoundAttr0, compoundAttr0Optional, compoundAttrCompound));
 
 		Entity refRefEntity = new DynamicEntity(refRefEntityMeta);
-		refRefEntity.set(refRefAttrIdName, REF_REF_ENTITY_ID);
-		refRefEntity.set(refRefAttrValueName, "value");
+		refRefEntity.set(REF_REF_ATTR_ID_NAME, REF_REF_ENTITY_ID);
+		refRefEntity.set(REF_REF_ATTR_VALUE_NAME, "value");
 
 		Entity refEntity0 = new DynamicEntity(refEntityMeta);
-		refEntity0.set(refAttrIdName, REF_ENTITY0_ID);
-		refEntity0.set(refAttrValueName, "val0");
-		refEntity0.set(refAttrRefName, refRefEntity);
+		refEntity0.set(REF_ATTR_ID_NAME, REF_ENTITY0_ID);
+		refEntity0.set(REF_ATTR_VALUE_NAME, "val0");
+		refEntity0.set(REF_ATTR_REF_NAME, refRefEntity);
 
 		Entity refEntity1 = new DynamicEntity(refEntityMeta);
-		refEntity1.set(refAttrIdName, REF_ENTITY1_ID);
-		refEntity1.set(refAttrValueName, "val1");
-		refEntity1.set(refAttrRefName, refRefEntity);
+		refEntity1.set(REF_ATTR_ID_NAME, REF_ENTITY1_ID);
+		refEntity1.set(REF_ATTR_VALUE_NAME, "val1");
+		refEntity1.set(REF_ATTR_REF_NAME, refRefEntity);
 
 		Entity entity = new DynamicEntity(entityMeta);
 
@@ -463,22 +373,12 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	private AttributeMetaData createAttributeMeta(EntityMetaData entityMeta, String attrName, AttributeType type,
 			EntityMetaData refEntityMeta)
 	{
-		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
-		when(attr.getIdentifier()).thenReturn(attrName);
-		when(attr.getLabel()).thenReturn(attrName);
-		when(attr.getLabel(anyString())).thenReturn(attrName);
-		when(attr.getDataType()).thenReturn(type);
-		when(attr.getRefEntity()).thenReturn(refEntityMeta);
-		when(attr.isReadOnly()).thenReturn(false);
-		when(attr.isUnique()).thenReturn(false);
-		when(attr.isNillable()).thenReturn(true);
-		when(attr.isVisible()).thenReturn(true);
-		when(attr.getAttributeParts()).thenReturn(emptyList());
-		when(attr.getEnumOptions()).thenReturn(null);
+		AttributeMetaData attr = attributeMetaDataFactory.create().setName(attrName).setLabel(attrName)
+				.setDataType(type).setRefEntity(refEntityMeta).setNillable(true);
 
 		if (entityMeta != null)
 		{
-			when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+			entityMeta.addAttribute(attr);
 		}
 		return attr;
 	}
@@ -544,7 +444,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveResourcePartialResponseSubAttribute() throws Exception
 	{
-		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrXrefName + '(' + refAttrValueName + ')'))
+		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs", attrXrefName + '(' + REF_ATTR_VALUE_NAME + ')'))
 				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(resourcePartialSubAttributeResponse));
 	}
@@ -552,8 +452,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	@Test
 	public void retrieveResourcePartialResponseSubAttributes() throws Exception
 	{
-		mockMvc.perform(
-				get(HREF_ENTITY_ID).param("attrs", attrXrefName + '(' + refAttrIdName + ',' + refAttrValueName + ')'))
+		mockMvc.perform(get(HREF_ENTITY_ID)
+				.param("attrs", attrXrefName + '(' + REF_ATTR_ID_NAME + ',' + REF_ATTR_VALUE_NAME + ')'))
 				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(resourcePartialSubAttributesResponse));
 	}
@@ -562,8 +462,8 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 	public void retrieveResourcePartialResponseSubSubAttributes() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_ID).param("attrs",
-				attrXrefName + '(' + refAttrIdName + ',' + refAttrRefName + '(' + refRefAttrValueName + ')' + ')'))
-				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
+				attrXrefName + '(' + REF_ATTR_ID_NAME + ',' + REF_ATTR_REF_NAME + '(' + REF_REF_ATTR_VALUE_NAME + ')'
+						+ ')')).andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
 				.andExpect(content().string(resourcePartialSubSubAttributesResponse));
 	}
 

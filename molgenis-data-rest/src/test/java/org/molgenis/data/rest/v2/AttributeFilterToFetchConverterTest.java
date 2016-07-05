@@ -43,6 +43,28 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	private static final String REF_LABEL_ATTR_NAME = "refAttrLabel";
 	private static final String REF_ATTR_NAME = "refAttr";
 
+	/**
+	 * <ul>
+	 * <li>
+	 * entity
+	 * <ul>
+	 * <li>attrId</li>
+	 * <li>attrLabel</li>
+	 * <li>attrCompound
+	 * <ul>
+	 * <li>attrCompoundPart</li>
+	 * <li>attrCompoundPartFile</li>
+	 * <li>attrCompoundPartCompound
+	 * <ul>
+	 * <li>attrCompoundPartCompoundPart</li>
+	 * <li>attr2CompoundPartCompoundPart</li>
+	 * </ul>
+	 * </li>
+	 * </ul>
+	 * </li>
+	 * </ul>
+	 * </li>
+	 */
 	private EntityMetaData entityMeta;
 	private AttributeMetaData labelAttr;
 	private AttributeMetaData xrefAttr;
@@ -138,22 +160,20 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	public void convertAttrFilterCompoundAttr()
 	{
 		AttributeFilter attrFilter = new AttributeFilter().add(COMPOUND_ATTR_NAME);
-		Fetch actual = AttributeFilterToFetchConverter.convert(attrFilter, entityMeta, "en");
-		Fetch expected = new Fetch().field(COMPOUND_PART_FILE_ATTR_NAME,
-				new Fetch().field(FileMetaMetaData.ID).field(FileMetaMetaData.FILENAME).field(FileMetaMetaData.URL))
-				.field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME).field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME);
-		assertEquals(actual, expected);
+		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta, "en"), new Fetch()
+				.field(COMPOUND_PART_FILE_ATTR_NAME,
+						new Fetch().field(FileMetaMetaData.ID).field(FileMetaMetaData.FILENAME)
+								.field(FileMetaMetaData.URL)).field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME)
+				.field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME));
 	}
 
 	@Test
 	public void convertAttrFilterCompoundAttrPart()
 	{
-		// FIXME: filtering a compound attribute inside a compound attribute results in an EMPTY fetch because the
-		// attribute is not atomic. Unsure if this is intended, but it seems off.
 		AttributeFilter attrFilter = new AttributeFilter()
-				.add(COMPOUND_ATTR_NAME, new AttributeFilter().add(COMPOUND_PART_ATTR_NAME));
+				.add(COMPOUND_ATTR_NAME, new AttributeFilter().add(COMPOUND_PART_COMPOUND_ATTR_NAME));
 		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta, "en"),
-				new Fetch());
+				new Fetch().field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME).field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME));
 	}
 
 	@Test
