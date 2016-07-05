@@ -348,7 +348,7 @@ class RadboudSampleMap
 			LocalDate start = parse(birthDate, ISO_DATE_TIME);
 			LocalDate end = parse(inclusionDate, ISO_DATE_TIME);
 			Long age = YEARS.between(start, end);
-			if (age > 0 && age < 130)
+			if (age >= 0 && age <= 130)
 			{
 				return age.intValue();
 			}
