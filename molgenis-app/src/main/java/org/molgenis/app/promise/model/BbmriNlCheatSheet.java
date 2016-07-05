@@ -9,7 +9,7 @@ public class BbmriNlCheatSheet
 	public static final String SAMPLE_COLLECTIONS_ENTITY = "bbmri_nl_sample_collections";
 	public static final String REF_COLLECTION_TYPES = "bbmri_nl_collection_types";
 	public static final String REF_DATA_CATEGORY_TYPES = "bbmri_nl_data_category_types";
-	public static final String REF_OMICS_DATA_TYPES = "bbmri_nl_omics_data_types";
+	public static final String REF_EXP_DATA_TYPES = "bbmri_nl_exp_data_types";
 	public static final String REF_GENDER_TYPES = "bbmri_nl_gender_types";
 	public static final String REF_PERSONS = "bbmri_nl_persons";
 	public static final String REF_JURISTIC_PERSONS = "bbmri_nl_juristic_persons";

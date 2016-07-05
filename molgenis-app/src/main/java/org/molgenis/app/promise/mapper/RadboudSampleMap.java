@@ -181,7 +181,7 @@ class RadboudSampleMap
 
 	Iterable<Entity> getOmics(String biobankId)
 	{
-		return getTypeEntities(REF_OMICS_DATA_TYPES, sampleInfos.get(biobankId).getOmicsIds());
+		return getTypeEntities(REF_EXP_DATA_TYPES, sampleInfos.get(biobankId).getOmicsIds());
 	}
 
 	Iterable<Entity> getSex(String biobankId) throws RuntimeException

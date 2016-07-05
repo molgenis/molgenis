@@ -6,14 +6,10 @@ import org.molgenis.data.Entity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static java.time.temporal.ChronoUnit.YEARS;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.mockito.Matchers.any;
@@ -186,15 +182,15 @@ public class RadboudSampleMapTest
 	public void testGetOmics() throws Exception
 	{
 		radboudSampleMap.getOmics("9000_100");
-		verify(dataService, atLeastOnce()).findAll(eq(REF_OMICS_DATA_TYPES), streamCaptor.capture());
+		verify(dataService, atLeastOnce()).findAll(eq(REF_EXP_DATA_TYPES), streamCaptor.capture());
 		assertEquals(streamCaptor.getValue().collect(toSet()), newHashSet("GENOMICS"));
 
 		radboudSampleMap.getOmics("9000_8");
-		verify(dataService, atLeastOnce()).findAll(eq(REF_OMICS_DATA_TYPES), streamCaptor.capture());
+		verify(dataService, atLeastOnce()).findAll(eq(REF_EXP_DATA_TYPES), streamCaptor.capture());
 		assertEquals(streamCaptor.getValue().collect(toSet()), newHashSet("GENOMICS"));
 
 		radboudSampleMap.getOmics("1_1");
-		verify(dataService, atLeastOnce()).findAll(eq(REF_OMICS_DATA_TYPES), streamCaptor.capture());
+		verify(dataService, atLeastOnce()).findAll(eq(REF_EXP_DATA_TYPES), streamCaptor.capture());
 		assertEquals(streamCaptor.getValue().collect(toSet()), newHashSet("NAV"));
 	}
 
