@@ -186,7 +186,7 @@ class RadboudSampleMap
 
 	Iterable<Entity> getSex(String biobankId) throws RuntimeException
 	{
-		return getTypeEntities(REF_GENDER_TYPES, sampleInfos.get(biobankId).getSexIds());
+		return getTypeEntities(REF_SEX_TYPES, sampleInfos.get(biobankId).getSexIds());
 	}
 
 	Integer getAgeMin(String biobankId)
