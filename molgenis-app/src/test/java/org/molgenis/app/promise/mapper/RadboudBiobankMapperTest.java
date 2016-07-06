@@ -97,6 +97,7 @@ public class RadboudBiobankMapperTest
 		when(SAMPLE_COLLECTIONS_METADATA.getAttribute(BIOBANK_DATA_ACCESS_JOINT_PROJECTS)).thenReturn(boolAttr);
 		when(SAMPLE_COLLECTIONS_METADATA.getAttribute(BIOBANK_DATA_ACCESS_DESCRIPTION)).thenReturn(stringAttr);
 		when(PERSON_METADATA.getAttribute(ID)).thenReturn(stringAttr);
+		when(PERSON_METADATA.getAttribute(FIRST_NAME)).thenReturn(stringAttr);
 		when(PERSON_METADATA.getAttribute(COUNTRY)).thenReturn(xrefAttr);
 
 		radboudBiobankMapper = new RadboudBiobankMapper(dataService);
@@ -211,8 +212,10 @@ public class RadboudBiobankMapperTest
 		verify(dataService, atLeastOnce()).findOne(eq(REF_PERSONS), any(String.class));
 		verify(dataService, atLeastOnce()).add(eq(REF_PERSONS), entityCaptor.capture());
 		Iterator<Entity> contactIterator = mappedEntity.getEntities(CONTACT_PERSON).iterator();
-		assertEquals(contactIterator.next(), entityCaptor.getValue());
+		Entity contactPerson = contactIterator.next();
 		assertFalse(contactIterator.hasNext());
+		assertEquals(contactPerson, entityCaptor.getValue());
+		assertEquals(contactPerson.get(FIRST_NAME), "Dr. Abc de Fgh");
 	}
 
 	/**
