@@ -70,7 +70,9 @@ class RadboudMapper implements PromiseMapper, ApplicationListener<ContextRefresh
 			Entity credentials = project.getEntity(CREDENTIALS);
 
 			LOG.info("Reading RADBOUD samples");
-			promiseDataParser.parse(credentials, 1, samples::addSample);
+			promiseDataParser.parse(credentials, 1, sampleEntity -> {
+				if (shouldMap(sampleEntity)) samples.addSample(sampleEntity);
+			});
 			LOG.info("Processed {} RADBOUD samples", samples.getNumberOfSamples());
 
 			LOG.info("Reading RADBOUD disease types");
@@ -81,6 +83,8 @@ class RadboudMapper implements PromiseMapper, ApplicationListener<ContextRefresh
 			newBiobanks = 0;
 			existingBiobanks = 0;
 			promiseDataParser.parse(credentials, 0, biobankEntity -> {
+				if (!shouldMap(biobankEntity)) return;
+
 				String biobankId = getBiobankId(biobankEntity);
 				Entity bbmriSampleCollection = dataService.findOne(SAMPLE_COLLECTIONS_ENTITY, biobankId);
 				if (bbmriSampleCollection == null)
@@ -114,6 +118,13 @@ class RadboudMapper implements PromiseMapper, ApplicationListener<ContextRefresh
 	static String getBiobankId(Entity radboudEntity)
 	{
 		return radboudEntity.getString(XML_ID) + "_" + radboudEntity.getString(XML_IDAA);
+	}
 
+	/**
+	 * Biobanks with an IDAA < 100 (the "parels") should not be included in the catalogue.
+	 */
+	private boolean shouldMap(Entity radboudEntity)
+	{
+		return radboudEntity.getInt(XML_IDAA) >= 100;
 	}
 }
