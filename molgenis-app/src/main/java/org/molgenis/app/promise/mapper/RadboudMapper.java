@@ -81,7 +81,7 @@ class RadboudMapper implements PromiseMapper, ApplicationListener<ContextRefresh
 			newBiobanks = 0;
 			existingBiobanks = 0;
 			promiseDataParser.parse(credentials, 0, biobankEntity -> {
-				String biobankId = biobankEntity.getString(XML_ID) + biobankEntity.getString(XML_IDAA);
+				String biobankId = getBiobankId(biobankEntity);
 				Entity bbmriSampleCollection = dataService.findOne(SAMPLE_COLLECTIONS_ENTITY, biobankId);
 				if (bbmriSampleCollection == null)
 				{
