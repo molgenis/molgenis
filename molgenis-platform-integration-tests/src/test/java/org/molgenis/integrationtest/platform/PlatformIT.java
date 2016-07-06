@@ -9,6 +9,7 @@ import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.test.data.EntitySelfXrefTestHarness;
 import org.molgenis.test.data.EntityTestHarness;
 import org.molgenis.test.data.TestEntity;
 import org.slf4j.Logger;
@@ -44,6 +45,7 @@ import static org.molgenis.data.Sort.Direction.DESC;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
 public class PlatformIT extends AbstractTestNGSpringContextTests
@@ -52,11 +54,14 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 	private EntityMetaData entityMetaData;
 	private EntityMetaData refEntityMetaData;
+	private EntityMetaData selfXrefEntityMetaData;
 
 	@Autowired
 	private ReindexService reindexService;
 	@Autowired
 	private EntityTestHarness testHarness;
+	@Autowired
+	private EntitySelfXrefTestHarness entitySelfXrefTestHarness;
 	@Autowired
 	private DataService dataService;
 	@Autowired
@@ -128,9 +133,15 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		refEntityMetaData = testHarness.createDynamicRefEntityMetaData();
 		entityMetaData = testHarness.createDynamicTestEntityMetaData();
+
+		// Create a self refer entity
+		selfXrefEntityMetaData = entitySelfXrefTestHarness.createDynamicEntityMetaData();
+		selfXrefEntityMetaData.getAttribute(ATTR_XREF).setRefEntity(selfXrefEntityMetaData);
+
 		RunAsSystemProxy.runAsSystem(() -> {
 			metaDataService.addEntityMeta(refEntityMetaData);
 			metaDataService.addEntityMeta(entityMetaData);
+			metaDataService.addEntityMeta(selfXrefEntityMetaData);
 		});
 		this.waitForWorkToBeFinished();
 		setAuthentication();
@@ -147,9 +158,15 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		String readTestRefEntity = "ROLE_ENTITY_READ_" + refEntityMetaData.getName().toUpperCase();
 		String countTestRefEntity = "ROLE_ENTITY_COUNT_" + refEntityMetaData.getName().toUpperCase();
 
+		// Permissions selfXrefEntityMetaData.getName()
+		String writeSelfXrefEntity = "ROLE_ENTITY_WRITE_" + selfXrefEntityMetaData.getName().toUpperCase();
+		String readSelfXrefEntity = "ROLE_ENTITY_READ_" + selfXrefEntityMetaData.getName().toUpperCase();
+		String countSelfXrefEntity = "ROLE_ENTITY_COUNT_" + selfXrefEntityMetaData.getName().toUpperCase();
+
 		SecurityContextHolder.getContext().setAuthentication(
 				new TestingAuthenticationToken("user", "user", writeTestEntity, readTestEntity, readTestRefEntity,
-						countTestEntity, countTestRefEntity, "ROLE_ENTITY_READ_SYS_MD_ENTITIES",
+						countTestEntity, countTestRefEntity, writeSelfXrefEntity, readSelfXrefEntity,
+						countSelfXrefEntity, "ROLE_ENTITY_READ_SYS_MD_ENTITIES",
 						"ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES", "ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
 	}
 
@@ -158,6 +175,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		runAsSystem(() -> {
 			dataService.deleteAll(entityMetaData.getName());
+			dataService.deleteAll(refEntityMetaData.getName());
 			dataService.deleteAll(refEntityMetaData.getName());
 		});
 		waitForIndexToBeStable(entityMetaData.getName());
@@ -198,7 +216,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			dataService.update(entityMetaData.getName(), entities.stream());
 			assertEquals(updateCalled.get(), 1);
 			waitForIndexToBeStable(entityMetaData.getName());
-			assertPresent(entities);
+			assertPresent(entityMetaData, entities);
 		}
 		finally
 		{
@@ -207,7 +225,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			dataService.update(entityMetaData.getName(), entities.stream());
 			assertEquals(updateCalled.get(), 0);
 			waitForIndexToBeStable(entityMetaData.getName());
-			assertPresent(entities);
+			assertPresent(entityMetaData, entities);
 		}
 	}
 
@@ -220,7 +238,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForIndexToBeStable(entityMetaData.getName());
 		assertEquals(dataService.count(entityMetaData.getName(), new QueryImpl<>()), 2);
 		assertEquals(searchService.count(entityMetaData), 2);
-		assertPresent(entities);
+		assertPresent(entityMetaData, entities);
 	}
 
 	@Test
@@ -231,7 +249,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForIndexToBeStable(entityMetaData.getName());
 		assertEquals(dataService.count(entityMetaData.getName(), new QueryImpl<>()), 2);
 		assertEquals(searchService.count(entityMetaData), 2);
-		assertPresent(entities);
+		assertPresent(entityMetaData, entities);
 	}
 
 	@Test
@@ -240,7 +258,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		Entity entity = create(1).findFirst().get();
 		dataService.add(entityMetaData.getName(), entity);
 		waitForIndexToBeStable(entityMetaData.getName());
-		assertPresent(entity);
+		assertPresent(entityMetaData, entity);
 
 		dataService.delete(entityMetaData.getName(), entity);
 		waitForIndexToBeStable(entityMetaData.getName());
@@ -253,7 +271,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		Entity entity = create(1).findFirst().get();
 		dataService.add(entityMetaData.getName(), entity);
 		waitForIndexToBeStable(entityMetaData.getName());
-		assertPresent(entity);
+		assertPresent(entityMetaData, entity);
 
 		dataService.deleteById(entityMetaData.getName(), entity.getIdValue());
 		waitForIndexToBeStable(entityMetaData.getName());
@@ -544,7 +562,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		Query<Entity> q = new QueryImpl<>();
 		q.eq(ATTR_STRING, "qwerty");
-
 		entity.set(ATTR_STRING, "qwerty");
 
 		assertEquals(searchService.count(q, entityMetaData), 0);
@@ -552,7 +569,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForIndexToBeStable(entityMetaData.getName());
 		assertEquals(searchService.count(q, entityMetaData), 1);
 
-		assertPresent(entity);
+		assertPresent(entityMetaData, entity);
 
 		entity = dataService.findOneById(entityMetaData.getName(), entity.getIdValue());
 		assertNotNull(entity.get(ATTR_STRING));
@@ -607,7 +624,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		dataService.add(entityMetaData.getName(), entity);
 		waitForIndexToBeStable(entityMetaData.getName());
-		assertPresent(entity);
+		assertPresent(entityMetaData, entity);
 
 		entity = dataService.findOneById(entityMetaData.getName(), entity.getIdValue());
 		assertNotNull(entity);
@@ -624,7 +641,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		assertEquals(searchService.count(q, entityMetaData), 1);
 
-		assertPresent(entity);
+		assertPresent(entityMetaData, entity);
 		entity = dataService.findOneById(entityMetaData.getName(), entity.getIdValue());
 		assertNotNull(entity.get(ATTR_STRING));
 		assertEquals(entity.get(ATTR_STRING), "qwerty");
@@ -637,20 +654,20 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		return testHarness.createTestEntities(entityMetaData, count, refEntities);
 	}
 
-	private void assertPresent(List<Entity> entities)
+	private void assertPresent(EntityMetaData emd, List<Entity> entities)
 	{
-		entities.forEach(this::assertPresent);
+		entities.forEach(e -> assertPresent(emd, e));
 	}
 
-	private void assertPresent(Entity entity)
+	private void assertPresent(EntityMetaData emd, Entity entity)
 	{
 		// Found in PostgreSQL
-		assertNotNull(dataService.findOneById(entityMetaData.getName(), entity.getIdValue()));
+		assertNotNull(dataService.findOneById(emd.getName(), entity.getIdValue()));
 
 		// Found in index Elasticsearch
 		Query<Entity> q = new QueryImpl<>();
-		q.eq(entityMetaData.getIdAttribute().getName(), entity.getIdValue());
-		assertEquals(searchService.count(q, entityMetaData), 1);
+		q.eq(emd.getIdAttribute().getName(), entity.getIdValue());
+		assertEquals(searchService.count(q, emd), 1);
 	}
 
 	private void assertNotPresent(Entity entity)
@@ -662,5 +679,44 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		Query<Entity> q = new QueryImpl<>();
 		q.eq(entityMetaData.getIdAttribute().getName(), entity.getIdValue());
 		assertEquals(searchService.count(q, entityMetaData), 0);
+	}
+
+	@Test
+	public void testCreateSelfXref()
+	{
+		Entity entitySelfXref = entitySelfXrefTestHarness.createTestEntities(selfXrefEntityMetaData, 1).collect(Collectors.toList()).get(0);
+
+		//Create
+		dataService.add(selfXrefEntityMetaData.getName(), entitySelfXref);
+		waitForIndexToBeStable(selfXrefEntityMetaData.getName());
+		Entity entity = dataService.findOneById(selfXrefEntityMetaData.getName(), entitySelfXref.getIdValue());
+		assertPresent(selfXrefEntityMetaData, entity);
+
+		Query<Entity> q1 = new QueryImpl<>();
+		q1.eq(ATTR_STRING, "attr_string_old");
+		Query<Entity> q2 = new QueryImpl<>();
+		q2.eq(ATTR_STRING, "attr_string_new");
+		entity.set(ATTR_STRING, "attr_string_new");
+
+		// Verify value in elasticsearch before update
+		assertEquals(searchService.count(q1, selfXrefEntityMetaData), 1);
+		assertEquals(searchService.count(q2, selfXrefEntityMetaData), 0);
+
+		// Update
+		dataService.update(selfXrefEntityMetaData.getName(), entity);
+		waitForIndexToBeStable(selfXrefEntityMetaData.getName());
+		assertPresent(selfXrefEntityMetaData, entity);
+
+		// Verify value in elasticsearch after update
+		assertEquals(searchService.count(q2, selfXrefEntityMetaData), 1);
+		assertEquals(searchService.count(q1, selfXrefEntityMetaData), 0);
+
+		// Verify value in PostgreSQL after update
+		entity = dataService.findOneById(selfXrefEntityMetaData.getName(), entity.getIdValue());
+		assertNotNull(entity.get(ATTR_STRING));
+		assertEquals(entity.get(ATTR_STRING), "attr_string_new");
+
+		// Check id are equals
+		assertEquals(entity.getEntity(ATTR_XREF).getIdValue(), entity.getIdValue());
 	}
 }

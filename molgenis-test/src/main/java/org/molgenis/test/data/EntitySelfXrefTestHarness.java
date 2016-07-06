@@ -28,6 +28,7 @@ public class EntitySelfXrefTestHarness
 {
 	public static final String ATTR_ID = "id_attr";
 	public static final String ATTR_XREF = "xref_attr";
+	public static final String ATTR_STRING = "string_attr";
 
 	@Autowired
 	private PackageFactory packageFactory;
@@ -43,14 +44,14 @@ public class EntitySelfXrefTestHarness
 	@PostConstruct
 	public void postConstruct()
 	{
-		testPackage = packageFactory.create("test");
 	}
 
 	public EntityMetaData createDynamicEntityMetaData()
 	{
 		return entityMetaDataFactory.create().setPackage(testPackage).setSimpleName("SelfRef")
 				.addAttribute(createAttribute(ATTR_ID, STRING), ROLE_ID)
-				.addAttribute(createAttribute(ATTR_XREF, STRING), ROLE_LABEL);
+				.addAttribute(createAttribute(ATTR_XREF, XREF), null)
+				.addAttribute(createAttribute(ATTR_STRING, STRING), ROLE_LABEL);
 	}
 
 	private AttributeMetaData createAttribute(String name, AttributeType dataType)
@@ -69,6 +70,7 @@ public class EntitySelfXrefTestHarness
 		Entity entity1 = new DynamicEntity(entityMetaData);
 		entity1.set(ATTR_ID, "" + id);
 		entity1.set(ATTR_XREF, entity1);
+		entity1.set(ATTR_STRING, "attr_string_old");
 		return entity1;
 	}
 }
