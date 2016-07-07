@@ -16,6 +16,10 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.cache.utils.CachingUtils.*;
 import static org.slf4j.LoggerFactory.getLogger;
 
+/**
+ * Caches entities within a transaction to speed up queries within those transactions. Each transaction has its own
+ * cache. When the transaction is committed the cache is removed.
+ */
 @Component
 public class L1Cache extends DefaultMolgenisTransactionListener
 {

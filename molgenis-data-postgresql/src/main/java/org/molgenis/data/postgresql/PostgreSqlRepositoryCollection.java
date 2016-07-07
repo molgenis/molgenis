@@ -57,7 +57,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 	@Override
 	public Set<RepositoryCollectionCapability> getCapabilities()
 	{
-		return immutableEnumSet(of(WRITABLE, UPDATABLE, META_DATA_PERSISTABLE, CACHEABLE));
+		return immutableEnumSet(of(WRITABLE, UPDATABLE, META_DATA_PERSISTABLE));
 	}
 
 	@Override

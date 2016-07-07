@@ -15,10 +15,5 @@ public enum RepositoryCollectionCapability
 	/**
 	 * Repository collections persist meta data
 	 */
-	META_DATA_PERSISTABLE,
-
-	/**
-	 * Repository can store data in an L1, L2 or L3 cache
-	 */
-	CACHEABLE
+	META_DATA_PERSISTABLE
 }
