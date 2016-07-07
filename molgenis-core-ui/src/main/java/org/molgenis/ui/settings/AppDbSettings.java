@@ -1,12 +1,5 @@
 package org.molgenis.ui.settings;
 
-import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.MolgenisFieldTypes.COMPOUND;
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.SCRIPT;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.settings.DefaultSettingsEntity;
@@ -15,6 +8,13 @@ import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
+
+import static org.molgenis.MolgenisFieldTypes.BOOL;
+import static org.molgenis.MolgenisFieldTypes.COMPOUND;
+import static org.molgenis.MolgenisFieldTypes.INT;
+import static org.molgenis.MolgenisFieldTypes.SCRIPT;
+import static org.molgenis.MolgenisFieldTypes.STRING;
+import static org.molgenis.MolgenisFieldTypes.TEXT;
 
 /**
  * Application settings that are read from a data source and persisted to a data source.
@@ -68,6 +68,8 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private static final boolean DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS = false;
 		private static final boolean DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS = true;
 
+		private static final String CUSTOM_JAVASCRIPT = "custom_javascript";
+
 		public Meta()
 		{
 			super(ID);
@@ -109,6 +111,10 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 			addAttribute(AGGREGATE_THRESHOLD).setDataType(INT).setNillable(true).setLabel("Aggregate threshold")
 					.setDescription(
 							"Aggregate value counts below this threshold are reported as the threshold. (e.g. a count of 100 is reported as <= 10)");
+
+			addAttribute(CUSTOM_JAVASCRIPT).setDataType(TEXT).setNillable(true).setLabel("Custom javascript headers")
+					.setDescription(
+							"Custom javascript headers, specified as comma separated list. These headers will be included in the molgenis header before the applications own javascript headers.");
 
 			// tracking settings
 			DefaultAttributeMetaData trackingAttr = addAttribute(TRACKING).setDataType(COMPOUND).setLabel("Tracking");
@@ -385,5 +391,17 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 	public String getGoogleAppClientId()
 	{
 		return getString(Meta.GOOGLE_APP_CLIENT_ID);
+	}
+
+	@Override
+	public void setCustomJavascript(String customJavascript)
+	{
+		set(Meta.CUSTOM_JAVASCRIPT, customJavascript);
+	}
+
+	@Override
+	public String getCustomJavascript()
+	{
+		return getString(Meta.CUSTOM_JAVASCRIPT);
 	}
 }
