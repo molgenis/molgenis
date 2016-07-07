@@ -1,10 +1,10 @@
 package org.molgenis.data;
 
-import java.util.Map;
-
-import org.molgenis.data.meta.model.EntityMetaData;
-
 import com.google.common.collect.Maps;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 /**
  * Registry containing all static entity factories.
@@ -12,6 +12,7 @@ import com.google.common.collect.Maps;
  * @see EntityFactory
  * @see org.molgenis.data.support.StaticEntity
  */
+@Component
 public class EntityFactoryRegistry
 {
 	private final Map<String, EntityFactory<? extends Entity, ?>> staticEntityFactoryMap;

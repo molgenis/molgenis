@@ -3,6 +3,7 @@ package org.molgenis.bootstrap;
 import org.molgenis.data.annotation.bootstrap.AnnotatorBootstrapper;
 import org.molgenis.data.idcard.IdCardBootstrapper;
 import org.molgenis.data.jobs.JobBootstrapper;
+import org.molgenis.data.platform.bootstrap.SystemEntityMetaDataBootstrapper;
 import org.molgenis.file.ingest.FileIngesterJobRegistrar;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;

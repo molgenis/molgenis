@@ -91,7 +91,8 @@ public class L1CacheRepositoryDecorator implements Repository<Entity>
 		{
 			Iterator<List<Object>> idBatches = partition(ids.iterator(), 2);
 			Iterator<List<Entity>> entityBatches = Iterators.transform(idBatches, this::findAllBatch);
-			return stream(spliteratorUnknownSize(entityBatches, SORTED | ORDERED), false).flatMap(List::stream);
+			return stream(spliteratorUnknownSize(entityBatches, SORTED | ORDERED), false).flatMap(List::stream)
+					.filter(e -> e != null);
 		}
 		return decoratedRepository.findAll(ids);
 	}

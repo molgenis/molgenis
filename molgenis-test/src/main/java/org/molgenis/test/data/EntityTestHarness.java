@@ -61,7 +61,6 @@ public class EntityTestHarness
 	@PostConstruct
 	public void postConstruct()
 	{
-		//		testPackage = packageFactory.create("test");
 	}
 
 	public EntityMetaData createDynamicRefEntityMetaData()
@@ -103,7 +102,7 @@ public class EntityTestHarness
 	public Stream<Entity> createTestEntities(EntityMetaData entityMetaData, int numberOfEntities,
 			List<Entity> refEntities)
 	{
-		return IntStream.range(0, numberOfEntities + 1)
+		return IntStream.range(0, numberOfEntities)
 				.mapToObj(i -> createEntity(entityMetaData, i, refEntities.get(i % refEntities.size())));
 	}
 
@@ -138,6 +137,8 @@ public class EntityTestHarness
 		entity1.set(ATTR_MREF, Collections.singletonList(refEntity));
 		return entity1;
 	}
+
+
 
 	private void generateDateAndDateTime()
 	{
