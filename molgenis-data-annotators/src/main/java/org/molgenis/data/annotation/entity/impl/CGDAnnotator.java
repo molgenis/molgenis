@@ -9,18 +9,20 @@ import org.molgenis.data.annotation.cmd.cmdlineannotatorsettingsconfigurer.Singl
 import org.molgenis.data.annotation.entity.*;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Type;
+import org.molgenis.data.annotation.entity.impl.framework.AnnotatorImpl;
+import org.molgenis.data.annotation.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.filter.FirstResultFilter;
+import org.molgenis.data.annotation.meta.effects.EffectsMetaData;
 import org.molgenis.data.annotation.query.AttributeEqualsQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
+import org.molgenis.data.annotation.resources.impl.GeneCsvRepository;
 import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
-import org.molgenis.data.support.EffectsMetaData;
-import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -32,11 +34,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.LONG;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.CGDAttributeName.*;
 import static org.molgenis.data.annotation.entity.impl.CGDAnnotator.GeneralizedInheritance.*;
-import static org.molgenis.data.annotator.websettings.CGDAnnotatorSettings.Meta.CGD_LOCATION;
+import static org.molgenis.data.annotation.resources.websettings.CGDAnnotatorSettings.Meta.CGD_LOCATION;
 
 /**
  * Annotator that can add HGNC_ID and ENTREZ_GENE_ID and other attributes to an entityMetaData that has a attribute named 'GENE'
@@ -54,10 +56,10 @@ public class CGDAnnotator implements AnnotatorConfig
 	private static final char SEPARATOR = '\t';
 
 	// Output attribute labels
-	private static final String CONDITION_LABEL = "CGDCOND";
-	private static final String AGE_GROUP_LABEL = "CGDAGE";
-	private static final String INHERITANCE_LABEL = "CGDINH";
-	private static final String GENERALIZED_INHERITANCE_LABEL = "CGDGIN";
+	static final String CONDITION_LABEL = "CGDCOND";
+	static final String AGE_GROUP_LABEL = "CGDAGE";
+	static final String INHERITANCE_LABEL = "CGDINH";
+	static final String GENERALIZED_INHERITANCE_LABEL = "CGDGIN";
 
 	@Autowired
 	private Entity CGDAnnotatorSettings;
@@ -181,7 +183,7 @@ public class CGDAnnotator implements AnnotatorConfig
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
 
-		attributes.add(attributeMetaDataFactory.create().setName(HGNC_ID.getAttributeName()).setDataType(LONG));
+		attributes.add(attributeMetaDataFactory.create().setName(HGNC_ID.getAttributeName()).setDataType(STRING));
 		attributes.add(attributeMetaDataFactory.create().setName(ENTREZ_GENE_ID.getAttributeName()).setDataType(TEXT));
 		attributes.add(attributeMetaDataFactory.create().setName(CONDITION.getAttributeName()).setDataType(TEXT)
 				.setLabel(CONDITION_LABEL));
@@ -228,7 +230,7 @@ public class CGDAnnotator implements AnnotatorConfig
 			return sourceEntity.get(sourceName);
 		}
 
-		private GeneralizedInheritance getGeneralizedInheritance(Entity sourceEntity)
+		private String getGeneralizedInheritance(Entity sourceEntity)
 		{
 			GeneralizedInheritance inherMode = OTHER;
 			String value = sourceEntity.getString(INHERITANCE.getCgdName());
@@ -252,7 +254,7 @@ public class CGDAnnotator implements AnnotatorConfig
 				}
 			}
 
-			return inherMode;
+			return inherMode.toString();
 		}
 	}
 

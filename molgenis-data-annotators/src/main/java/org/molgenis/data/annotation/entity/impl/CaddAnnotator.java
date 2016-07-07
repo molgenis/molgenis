@@ -7,6 +7,8 @@ import org.molgenis.data.annotation.cmd.cmdlineannotatorsettingsconfigurer.Singl
 import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
+import org.molgenis.data.annotation.entity.impl.framework.AnnotatorImpl;
+import org.molgenis.data.annotation.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
@@ -15,7 +17,7 @@ import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.resources.impl.TabixRepositoryFactory;
-import org.molgenis.data.annotator.websettings.CaddAnnotatorSettings;
+import org.molgenis.data.annotation.resources.websettings.CaddAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -62,7 +64,8 @@ public class CaddAnnotator implements AnnotatorConfig
 	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
-	public RepositoryAnnotator cadd(){
+	public RepositoryAnnotator cadd()
+	{
 		annotator = new RepositoryAnnotatorImpl(NAME);
 		return annotator;
 	}
@@ -71,8 +74,8 @@ public class CaddAnnotator implements AnnotatorConfig
 	public void init()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
-		AttributeMetaData cadd_abs = getCaddAbsAttr();
-		AttributeMetaData cadd_scaled = getCaddScaledAttr();
+		AttributeMetaData cadd_abs = getCaddAbsAttr(attributeMetaDataFactory);
+		AttributeMetaData cadd_scaled = getCaddScaledAttr(attributeMetaDataFactory);
 
 		attributes.add(cadd_abs);
 		attributes.add(cadd_scaled);
@@ -94,34 +97,33 @@ public class CaddAnnotator implements AnnotatorConfig
 								+ "causal variation in both research and clinical settings. (source: http://cadd.gs.washington.edu/info)",
 						attributes);
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(CADD_TABIX_RESOURCE, caddInfo,
-				new LocusQueryCreator(vcfAttributes), new MultiAllelicResultFilter(attributes, true), dataService,
+				new LocusQueryCreator(vcfAttributes), new MultiAllelicResultFilter(attributes, true, vcfAttributes),
+				dataService,
 				resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CaddAnnotatorSettings.Meta.CADD_LOCATION,
 						caddAnnotatorSettings));
 		annotator.init(entityAnnotator);
 	}
 
-	public AttributeMetaData getCaddScaledAttr()
+	public static AttributeMetaData getCaddScaledAttr(AttributeMetaDataFactory attributeMetaDataFactory)
 	{
-		return attributeMetaDataFactory.create().setName(CADD_SCALED).setDataType(STRING)
-					.setDescription(
-							"Since the raw scores do have relative meaning, one can take a specific group of variants, define the rank for each variant within that group, and then use "
-									+ "that value as a \"normalized\" and now externally comparable unit of analysis. In our case, we scored and ranked all ~8.6 billion SNVs of the "
-									+ "GRCh37/hg19 reference and then \"PHRED-scaled\" those values by expressing the rank in order of magnitude terms rather than the precise rank itself. "
-									+ "For example, reference genome single nucleotide variants at the 10th-% of CADD scores are assigned to CADD-10, top 1% to CADD-20, top 0.1% to CADD-30, etc. "
-									+ "The results of this transformation are the \"scaled\" CADD scores.(source: http://cadd.gs.washington.edu/info)")
-					.setLabel(CADD_SCALED_LABEL);
+		return attributeMetaDataFactory.create().setName(CADD_SCALED).setDataType(STRING).setDescription(
+				"Since the raw scores do have relative meaning, one can take a specific group of variants, define the rank for each variant within that group, and then use "
+						+ "that value as a \"normalized\" and now externally comparable unit of analysis. In our case, we scored and ranked all ~8.6 billion SNVs of the "
+						+ "GRCh37/hg19 reference and then \"PHRED-scaled\" those values by expressing the rank in order of magnitude terms rather than the precise rank itself. "
+						+ "For example, reference genome single nucleotide variants at the 10th-% of CADD scores are assigned to CADD-10, top 1% to CADD-20, top 0.1% to CADD-30, etc. "
+						+ "The results of this transformation are the \"scaled\" CADD scores.(source: http://cadd.gs.washington.edu/info)")
+				.setLabel(CADD_SCALED_LABEL);
 	}
 
-	public AttributeMetaData getCaddAbsAttr()
+	public static AttributeMetaData getCaddAbsAttr(AttributeMetaDataFactory attributeMetaDataFactory)
 	{
-		return attributeMetaDataFactory.create().setName(CADD_ABS).setDataType(STRING)
-					.setDescription(
-							"\"Raw\" CADD scores come straight from the model, and are interpretable as the extent to which the annotation profile for a given variant suggests that "
-									+ "that variant is likely to be \"observed\" (negative values) vs \"simulated\" (positive values). These values have no absolute unit of meaning and are "
-									+ "incomparable across distinct annotation combinations, training sets, or model parameters. However, raw values do have relative meaning, with higher values "
-									+ "indicating that a variant is more likely to be simulated (or \"not observed\") and therefore more likely to have deleterious effects."
-									+ "(source: http://cadd.gs.washington.edu/info)").setLabel(CADD_ABS_LABEL);
+		return attributeMetaDataFactory.create().setName(CADD_ABS).setDataType(STRING).setDescription(
+				"\"Raw\" CADD scores come straight from the model, and are interpretable as the extent to which the annotation profile for a given variant suggests that "
+						+ "that variant is likely to be \"observed\" (negative values) vs \"simulated\" (positive values). These values have no absolute unit of meaning and are "
+						+ "incomparable across distinct annotation combinations, training sets, or model parameters. However, raw values do have relative meaning, with higher values "
+						+ "indicating that a variant is more likely to be simulated (or \"not observed\") and therefore more likely to have deleterious effects."
+						+ "(source: http://cadd.gs.washington.edu/info)").setLabel(CADD_ABS_LABEL);
 	}
 
 	@Bean

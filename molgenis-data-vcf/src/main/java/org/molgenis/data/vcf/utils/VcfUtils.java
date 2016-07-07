@@ -59,9 +59,9 @@ public class VcfUtils
 				"_" +
 				StringUtils.strip(vcfEntity.get(ID).toString()) +
 				"_" +
-				StringUtils.strip(vcfEntity.get(QUAL).toString()) +
+				StringUtils.strip(vcfEntity.get(QUAL) != null ? vcfEntity.get(QUAL).toString() : "") +
 				"_" +
-				StringUtils.strip(vcfEntity.get(FILTER).toString());
+				StringUtils.strip(vcfEntity.get(FILTER) != null ? vcfEntity.get(FILTER).toString() : "");
 
 		// use MD5 hash to prevent ids that are too long
 		MessageDigest messageDigest;

@@ -9,6 +9,8 @@ import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
+import org.molgenis.data.annotation.entity.impl.framework.QueryAnnotatorImpl;
+import org.molgenis.data.annotation.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.resources.Resource;
@@ -19,7 +21,6 @@ import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.TabixVcfRepositoryFactory;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +33,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.data.annotator.websettings.GoNLAnnotatorSettings.Meta.*;
+import static org.molgenis.data.annotation.resources.websettings.GoNLAnnotatorSettings.Meta.*;
 
 @Configuration
 public class GoNLAnnotator implements AnnotatorConfig
@@ -188,8 +189,8 @@ public class GoNLAnnotator implements AnnotatorConfig
 
 					if (!Iterables.all(alleleMatches, Predicates.isNull()))
 					{
-						afs = alleleMatches.stream().map(gonl ->
-								gonl == null ? "." : Double.toString(gonl.getDouble(INFO_AC) / gonl.getDouble(INFO_AN)))
+						afs = alleleMatches.stream().map(gonl -> gonl == null ? "." : Double
+								.toString(Integer.valueOf(gonl.getString(INFO_AC)) / gonl.getInt(INFO_AN)))
 								.collect(Collectors.joining(","));
 						//update GTC field to separate allele combinations by pipe instead of comma, since we use comma to separate alt allele info
 						gtcs = alleleMatches.stream()

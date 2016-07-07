@@ -2,13 +2,10 @@ package org.molgenis.data.annotation.resources.impl;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.annotation.query.GeneNameQueryCreator;
-import org.molgenis.data.annotator.tabix.TabixVcfRepository;
+import org.molgenis.data.annotation.resources.tabix.TabixVcfRepository;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;

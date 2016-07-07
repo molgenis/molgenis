@@ -1,7 +1,7 @@
 package org.molgenis.data.annotation;
 
 import org.molgenis.data.annotation.entity.EntityAnnotator;
-import org.molgenis.data.annotation.entity.impl.RepositoryAnnotatorImpl;
+import org.molgenis.data.annotation.entity.impl.framework.RepositoryAnnotatorImpl;
 
 public class EffectsAnnotator extends RepositoryAnnotatorImpl {
     public EffectsAnnotator(String NAME) {

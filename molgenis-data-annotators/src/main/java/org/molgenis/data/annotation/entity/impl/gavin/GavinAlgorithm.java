@@ -6,26 +6,11 @@ import org.molgenis.data.annotation.entity.impl.snpEff.Impact;
 
 public class GavinAlgorithm
 {
-	public static final String NAME = "GavinAnnotator";
-	public static final String RESOURCE = "gavin";
-	public static final String RESOURCE_ENTITY_NAME = "ccgg";
-
 	public static final String PATHOMAFTHRESHOLD = "PathoMAFThreshold";
 	public static final String MEANPATHOGENICCADDSCORE = "MeanPathogenicCADDScore";
 	public static final String SPEC95THPERCADDTHRESHOLD = "Spec95thPerCADDThreshold";
-	private static final String CATEGORY = "Category";
-
-	public static final String CLASSIFICATION = "Classification";
-	public static final String CONFIDENCE = "Confidence";
-	public static final String REASON = "Reason";
-	public static final String VARIANT_ENTITY = "Variant";
-
-	public static final int CADD_MAXIMUM_THRESHOLD = 25;
-	public static final int CADD_MINIMUM_THRESHOLD = 5;
-	public static final double MAF_THRESHOLD = 0.00474;
 
 	/**
-	 *
 	 * @param impact
 	 * @param caddScaled
 	 * @param exacMAF
@@ -34,19 +19,26 @@ public class GavinAlgorithm
 	 * @param annotationSourceEntity
 	 * @return
 	 */
-	public Judgment classifyVariant(Impact impact, Double caddScaled, Double exacMAF, Category category,
-									String gene, Entity annotationSourceEntity)
+	public Judgment classifyVariant(Impact impact, Double caddScaled, Double exacMAF, Category category, String gene,
+			Entity annotationSourceEntity)
 	{
 
-		Double pathoMAFThreshold = annotationSourceEntity.getDouble(PATHOMAFTHRESHOLD);
-		Double meanPathogenicCADDScore = annotationSourceEntity.getDouble(MEANPATHOGENICCADDSCORE);
-		Double spec95thPerCADDThreshold = annotationSourceEntity.getDouble(SPEC95THPERCADDTHRESHOLD);
+		String pathoMAFThresholdString = annotationSourceEntity.getString(PATHOMAFTHRESHOLD);
+		String meanPathogenicCADDScoreString = annotationSourceEntity.getString(MEANPATHOGENICCADDSCORE);
+		String spec95thPerCADDThresholdString = annotationSourceEntity.getString(SPEC95THPERCADDTHRESHOLD);
+
+		Double pathoMAFThreshold = pathoMAFThresholdString != null ? Double.parseDouble(pathoMAFThresholdString) : null;
+		Double meanPathogenicCADDScore =
+				meanPathogenicCADDScoreString != null ? Double.parseDouble(meanPathogenicCADDScoreString) : null;
+		Double spec95thPerCADDThreshold =
+				spec95thPerCADDThresholdString != null ? Double.parseDouble(spec95thPerCADDThresholdString) : null;
 
 		// MAF based classification, calibrated
 		if (exacMAF > pathoMAFThreshold)
 		{
-			return new Judgment(Judgment.Classification.Benign, Judgment.Method.calibrated, "Variant MAF of " + exacMAF
-					+ " is greater than the pathogenic 95th percentile MAF of " + pathoMAFThreshold + ".");
+			return new Judgment(Judgment.Classification.Benign, Judgment.Method.calibrated,
+					"Variant MAF of " + exacMAF + " is greater than the pathogenic 95th percentile MAF of "
+							+ pathoMAFThreshold + ".");
 		}
 
 		String mafReason = "the variant MAF of " + exacMAF + " is lesser than the pathogenic 95th percentile MAF of "
@@ -61,15 +53,14 @@ public class GavinAlgorithm
 						"Variant is of high impact, while there are no known high impact variants in the population. Also, "
 								+ mafReason);
 			}
-			else if (category.equals(Category.I2)
-					&& (impact.equals(Impact.MODERATE) || impact.equals(Impact.HIGH)))
+			else if (category.equals(Category.I2) && (impact.equals(Impact.MODERATE) || impact.equals(Impact.HIGH)))
 			{
 				return new Judgment(Judgment.Classification.Pathognic, Judgment.Method.calibrated,
 						"Variant is of high/moderate impact, while there are no known high/moderate impact variants in the population. Also, "
 								+ mafReason);
 			}
-			else if (category.equals(Category.I3) && (impact.equals(Impact.LOW)
-					|| impact.equals(Impact.MODERATE) || impact.equals(Impact.HIGH)))
+			else if (category.equals(Category.I3) && (impact.equals(Impact.LOW) || impact.equals(Impact.MODERATE)
+					|| impact.equals(Impact.HIGH)))
 			{
 				return new Judgment(Judgment.Classification.Pathognic, Judgment.Method.calibrated,
 						"Variant is of high/moderate/low impact, while there are no known high/moderate/low impact variants in the population. Also, "
@@ -131,8 +122,7 @@ public class GavinAlgorithm
 	 * @param gene
 	 * @return
 	 */
-	public Judgment genomewideClassifyVariant(Impact impact, Double caddScaled, Double exacMAF,
-			String gene)
+	public Judgment genomewideClassifyVariant(Impact impact, Double caddScaled, Double exacMAF, String gene)
 	{
 
 		exacMAF = exacMAF != null ? exacMAF : 0;

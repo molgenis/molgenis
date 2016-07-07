@@ -6,14 +6,14 @@ import com.google.common.collect.PeekingIterator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.annotation.meta.effects.EffectsMetaData;
+import org.molgenis.data.annotation.resources.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.annotation.utils.JarRunner;
-import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.data.support.EffectsMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -33,22 +33,18 @@ import static com.google.common.collect.Iterators.peekingIterator;
 import static java.io.File.createTempFile;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
-import static org.molgenis.data.support.EffectsMetaData.*;
+import static org.molgenis.data.annotation.meta.effects.EffectsMetaData.*;
 
 @Component
 public class SnpEffRunner
 {
-	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
-
-	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
-
-	@Autowired
-	VcfAttributes vcfAttributes;
-
-	@Autowired
-	EffectsMetaData effectsMetaData;
+	private final JarRunner jarRunner;
+	private final Entity snpEffAnnotatorSettings;
+	private final IdGenerator idGenerator;
+	private final EntityMetaDataFactory entityMetaDataFactory;
+	private final AttributeMetaDataFactory attributeMetaDataFactory;
+	private final VcfAttributes vcfAttributes;
+	private final EffectsMetaData effectsMetaData;
 
 	private static final Logger LOG = LoggerFactory.getLogger(SnpEffAnnotator.class);
 
@@ -67,16 +63,18 @@ public class SnpEffRunner
 		MODIFIER, LOW, MODERATE, HIGH
 	}
 
-	private final JarRunner jarRunner;
-	private final Entity snpEffAnnotatorSettings;
-	private final IdGenerator idGenerator;
-
 	@Autowired
-	public SnpEffRunner(JarRunner jarRunner, Entity snpEffAnnotatorSettings, IdGenerator idGenerator)
+	public SnpEffRunner(JarRunner jarRunner, Entity snpEffAnnotatorSettings, IdGenerator idGenerator,
+			VcfAttributes vcfAttributes, EffectsMetaData effectsMetaData, EntityMetaDataFactory entityMetaDataFactory,
+			AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		this.jarRunner = jarRunner;
 		this.snpEffAnnotatorSettings = snpEffAnnotatorSettings;
 		this.idGenerator = idGenerator;
+		this.vcfAttributes = vcfAttributes;
+		this.effectsMetaData = effectsMetaData;
+		this.entityMetaDataFactory = entityMetaDataFactory;
+		this.attributeMetaDataFactory = attributeMetaDataFactory;
 	}
 
 	public Iterator<Entity> getSnpEffects(Iterable<Entity> source)
@@ -131,7 +129,7 @@ public class SnpEffRunner
 						// go to next source entity and get effects
 						Entity sourceEntity = peekingSourceIterator.next();
 						String chromosome = sourceEntity.getString(VcfAttributes.CHROM);
-						Long position = sourceEntity.getLong(VcfAttributes.POS);
+						Integer position = sourceEntity.getInt(VcfAttributes.POS);
 
 						if (chromosome != null && position != null)
 						{
@@ -139,16 +137,16 @@ public class SnpEffRunner
 							if (snpEffEntity != null)
 							{
 								effects.addAll(getSnpEffectsFromSnpEffEntity(sourceEntity, snpEffEntity,
-										getOutputMetaData(sourceEMD)));
+										getTargetEntityMetaData(sourceEMD)));
 							}
 							else
 							{
-								effects.add(getEmptyEffectsEntity(sourceEntity, getOutputMetaData(sourceEMD)));
+								effects.add(getEmptyEffectsEntity(sourceEntity, getTargetEntityMetaData(sourceEMD)));
 							}
 						}
 						else
 						{
-							effects.add(getEmptyEffectsEntity(sourceEntity, getOutputMetaData(sourceEMD)));
+							effects.add(getEmptyEffectsEntity(sourceEntity, getTargetEntityMetaData(sourceEMD)));
 						}
 					}
 					return effects.removeFirst();
@@ -175,13 +173,13 @@ public class SnpEffRunner
 	 * @param pos
 	 * @return {@link Entity}
 	 */
-	public Entity getSnpEffEntity(PeekingIterator<Entity> snpEffResultIterator, String chrom, long pos)
+	public Entity getSnpEffEntity(PeekingIterator<Entity> snpEffResultIterator, String chrom, int pos)
 	{
 		if (snpEffResultIterator.hasNext())
 		{
 			Entity entityCandidate = snpEffResultIterator.peek();
 			if (chrom.equals(entityCandidate.getString(VcfAttributes.CHROM)) && pos == entityCandidate
-					.getLong(VcfAttributes.POS))
+					.getInt(VcfAttributes.POS))
 			{
 				snpEffResultIterator.next();
 				return entityCandidate;
@@ -211,7 +209,7 @@ public class SnpEffRunner
 		if (lof != null || nmd != null)
 		{
 			LOG.info("LOF / NMD found for CHROM:{} POS:{} ANN:{} LOF:{} NMD:{} ",
-					snpEffEntity.getString(VcfAttributes.CHROM), snpEffEntity.getString(VcfAttributes.POS),
+					snpEffEntity.getString(VcfAttributes.CHROM), snpEffEntity.getInt(VcfAttributes.POS),
 					snpEffEntity.getString(SnpEffRunner.ANN), lof, nmd);
 		}
 
@@ -303,17 +301,23 @@ public class SnpEffRunner
 		File vcf = createTempFile(NAME, ".vcf");
 		try (BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(vcf), CHARSET)))
 		{
+			bw.write(VcfAttributes.CHROM + "\t" + VcfAttributes.POS + "\t" + VcfAttributes.ID + "\t" + VcfAttributes.REF
+					+ "\t" + VcfAttributes.ALT + "\t" + VcfAttributes.QUAL + "\t" + VcfAttributes.FILTER + "\t"
+					+ VcfAttributes.INFO + "\n");
 			while (source.hasNext())
 			{
 				Entity entity = source.next();
 				StringBuilder builder = new StringBuilder();
 				builder.append(entity.getString(VcfAttributes.CHROM));
 				builder.append("\t");
-				builder.append(entity.getString(VcfAttributes.POS));
-				builder.append("\t.\t");
+				builder.append(entity.getInt(VcfAttributes.POS));
+				builder.append("\t.\t");//ID
 				builder.append(entity.getString(VcfAttributes.REF));
 				builder.append("\t");
 				builder.append(entity.getString(VcfAttributes.ALT));
+				builder.append("\t.\t");//QUAL
+				builder.append("\t.\t");//FILTER
+				builder.append(".");//INFO
 
 				if (source.hasNext())
 				{
@@ -361,10 +365,12 @@ public class SnpEffRunner
 	 * @param sourceEMD
 	 * @return
 	 */
-	public EntityMetaData getOutputMetaData(EntityMetaData sourceEMD)
+	public EntityMetaData getTargetEntityMetaData(EntityMetaData sourceEMD)
 	{
-		EntityMetaData emd = entityMetaDataFactory.create().setName(sourceEMD.getSimpleName() + ENTITY_NAME_SUFFIX)
-				.setPackage(sourceEMD.getPackage());
+		EntityMetaData emd = entityMetaDataFactory.create()
+				.setSimpleName(sourceEMD.getSimpleName() + ENTITY_NAME_SUFFIX).setPackage(sourceEMD.getPackage());
+		String sourcePackage = emd.getPackage() != null ? emd.getPackage().getName() : "SnpEff";
+		emd.setName(sourcePackage + "_" + emd.getSimpleName());
 		emd.setBackend(sourceEMD.getBackend());
 		AttributeMetaData id = attributeMetaDataFactory.create().setName(EffectsMetaData.ID).setAuto(true)
 				.setVisible(false);

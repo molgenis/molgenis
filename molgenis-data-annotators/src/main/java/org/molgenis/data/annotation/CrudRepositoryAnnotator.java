@@ -15,10 +15,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+import java.util.stream.StreamSupport;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 
@@ -53,9 +51,9 @@ public class CrudRepositoryAnnotator
 	 * @param annotator
 	 * @param repository
 	 */
-	public Repository<Entity> annotate(RepositoryAnnotator annotator, Repository<Entity> repository) throws IOException
+	public void annotate(RepositoryAnnotator annotator, Repository<Entity> repository) throws IOException
 	{
-		return annotate(annotator, repository, DatabaseAction.UPDATE);
+		annotate(annotator, repository, DatabaseAction.UPDATE);
 	}
 
 	/**
@@ -63,8 +61,8 @@ public class CrudRepositoryAnnotator
 	 * @param repository
 	 * @param action
 	 */
-	public Repository<Entity> annotate(RepositoryAnnotator annotator, Repository<Entity> repository,
-			DatabaseAction action) throws IOException
+	public void annotate(RepositoryAnnotator annotator, Repository<Entity> repository, DatabaseAction action)
+			throws IOException
 	{
 		if (!repository.getCapabilities().contains(RepositoryCapability.WRITABLE))
 		{
@@ -78,17 +76,16 @@ public class CrudRepositoryAnnotator
 			RunAsSystemProxy.runAsSystem(
 					() -> addAnnotatorMetadataToRepositories(entityMetaData, annotator.getSimpleName(),
 							attributeMetaDatas));
-			Repository<Entity> crudRepository;
 			if (annotator instanceof RefEntityAnnotator)
 			{
-				targetMetaData = ((RefEntityAnnotator) annotator).getOutputAttributes(entityMetaData);
+				targetMetaData = ((RefEntityAnnotator) annotator).getTargetEntityMetaData(entityMetaData);
 				if (!dataService.hasRepository(targetMetaData.getName()))
 				{
 					// add new entities to new repo
 					Repository externalRepository = dataService.getMeta().addEntityMeta(targetMetaData);
 					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 							Collections.singletonList(externalRepository.getName()));
-					crudRepository = iterateOverEntitiesAndAnnotate(repository, annotator, DatabaseAction.ADD);
+					iterateOverEntitiesAndAnnotate(repository, annotator, DatabaseAction.ADD);
 				}
 				else
 				{
@@ -102,10 +99,8 @@ public class CrudRepositoryAnnotator
 						() -> addAnnotatorMetadataToRepositories(entityMetaData, annotator.getSimpleName(),
 								attributeMetaDatas));
 
-				crudRepository = iterateOverEntitiesAndAnnotate(dataService.getRepository(repository.getName()),
-						annotator, action);
+				iterateOverEntitiesAndAnnotate(dataService.getRepository(repository.getName()), annotator, action);
 			}
-			return crudRepository;
 		}
 		catch (Exception e)
 		{
@@ -136,44 +131,34 @@ public class CrudRepositoryAnnotator
 	/**
 	 * Iterates over all the entities within a repository and annotates.
 	 */
-	private Repository<Entity> iterateOverEntitiesAndAnnotate(Repository<Entity> repository,
-			RepositoryAnnotator annotator, DatabaseAction action)
+	private void iterateOverEntitiesAndAnnotate(Repository<Entity> repository, RepositoryAnnotator annotator,
+			DatabaseAction action)
 	{
 		Iterator<Entity> it = annotator.annotate(repository);
 
-		List<Entity> batch = new ArrayList<>();
-		while (it.hasNext())
+		String entityName;
+		if (annotator instanceof RefEntityAnnotator)
 		{
-			batch.add(it.next());
-			if (batch.size() == BATCH_SIZE)
-			{
-				processBatch(batch, repository, action);
-				batch.clear();
-			}
+			entityName = ((RefEntityAnnotator) annotator).getTargetEntityMetaData(repository.getEntityMetaData())
+					.getName();
 		}
-
-		if (!batch.isEmpty())
+		else
 		{
-			processBatch(batch, repository, action);
+			entityName = repository.getName();
 		}
-
-		return repository;
-	}
-
-	private void processBatch(List<Entity> batch, Repository<Entity> repository, DatabaseAction action)
-	{
 		switch (action)
 		{
 			case UPDATE:
-				repository.update(batch.stream());
+				dataService.update(entityName,
+						StreamSupport.stream(Spliterators.spliteratorUnknownSize(it, Spliterator.ORDERED), false));
 				break;
 			case ADD:
-				repository.add(batch.stream());
+				dataService.add(entityName,
+						StreamSupport.stream(Spliterators.spliteratorUnknownSize(it, Spliterator.ORDERED), false));
 				break;
 			default:
 				throw new UnsupportedOperationException();
 		}
-
 	}
 
 	/**

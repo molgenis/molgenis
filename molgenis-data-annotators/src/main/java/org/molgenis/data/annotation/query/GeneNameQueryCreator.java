@@ -3,9 +3,9 @@ package org.molgenis.data.annotation.query;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.entity.QueryCreator;
+import org.molgenis.data.annotation.meta.effects.EffectsMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.support.EffectsMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 

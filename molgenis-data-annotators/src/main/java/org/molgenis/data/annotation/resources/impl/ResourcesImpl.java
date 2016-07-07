@@ -1,21 +1,20 @@
 package org.molgenis.data.annotation.resources.impl;
 
-import static java.util.stream.Collectors.toMap;
-
-import java.util.Map;
-import java.util.Set;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
-import org.molgenis.util.ApplicationContextProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.stream.Collectors.toMap;
 
 @Component
 public class ResourcesImpl implements Resources
@@ -24,6 +23,9 @@ public class ResourcesImpl implements Resources
 
 	@Autowired
 	private DataService dataService;
+
+	@Autowired
+	private ApplicationContext applicationContext;
 
 	private Map<String, Resource> resources = null;
 
@@ -71,7 +73,6 @@ public class ResourcesImpl implements Resources
 	{
 		if (resources == null)
 		{
-			ApplicationContext applicationContext = ApplicationContextProvider.getApplicationContext();
 			this.resources = applicationContext.getBeansOfType(Resource.class).values().stream()
 					.collect(toMap(Resource::getName, r -> r));
 		}

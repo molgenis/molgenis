@@ -8,6 +8,8 @@ import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
+import org.molgenis.data.annotation.entity.impl.framework.AnnotatorImpl;
+import org.molgenis.data.annotation.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
@@ -29,7 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.annotator.websettings.ExacAnnotatorSettings.Meta.EXAC_LOCATION;
+import static org.molgenis.data.annotation.resources.websettings.ExacAnnotatorSettings.Meta.EXAC_LOCATION;
 
 @Configuration
 public class ExacAnnotator implements AnnotatorConfig
@@ -78,9 +80,9 @@ public class ExacAnnotator implements AnnotatorConfig
 	public void init()
 	{
 
-		AttributeMetaData outputAttribute_AF = getExacAFAttr();
-		AttributeMetaData outputAttribute_AC_HOM = getExacAcHomAttr();
-		AttributeMetaData outputAttribute_AC_HET = ExacAcHetAttr();
+		AttributeMetaData outputAttribute_AF = getExacAFAttr(attributeMetaDataFactory);
+		AttributeMetaData outputAttribute_AC_HOM = getExacAcHomAttr(attributeMetaDataFactory);
+		AttributeMetaData outputAttribute_AC_HET = getExacAcHetAttr(attributeMetaDataFactory);
 
 		List<AttributeMetaData> outputMetaData = new ArrayList<AttributeMetaData>(Arrays.asList(
 				new AttributeMetaData[] { outputAttribute_AF, outputAttribute_AC_HOM, outputAttribute_AC_HET }));
@@ -101,7 +103,8 @@ public class ExacAnnotator implements AnnotatorConfig
 
 		// TODO: properly test multiAllelicFresultFilter
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator(vcfAttributes);
-		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(resourceMetaData);
+		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(resourceMetaData,
+				vcfAttributes);
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(EXAC_TABIX_RESOURCE, exacInfo, locusQueryCreator,
 				multiAllelicResultFilter, dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(EXAC_LOCATION, exacAnnotatorSettings))
@@ -119,20 +122,20 @@ public class ExacAnnotator implements AnnotatorConfig
 		annotator.init(entityAnnotator);
 	}
 
-	public AttributeMetaData ExacAcHetAttr()
+	public static AttributeMetaData getExacAcHetAttr(AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		return attributeMetaDataFactory.create().setName(EXAC_AC_HET)
 					.setDataType(STRING).setDescription("The ExAC heterozygous genotype count").setLabel(EXAC_AC_HET_LABEL);
 	}
 
-	public AttributeMetaData getExacAcHomAttr()
+	public static AttributeMetaData getExacAcHomAttr(AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		return attributeMetaDataFactory.create().setName(EXAC_AC_HOM)
 					.setDataType(STRING).setDescription("The ExAC homozygous alternative genotype count")
 					.setLabel(EXAC_AC_HOM_LABEL);
 	}
 
-	public AttributeMetaData getExacAFAttr()
+	public static AttributeMetaData getExacAFAttr(AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		return attributeMetaDataFactory.create().setName(EXAC_AF).setDataType(STRING)
 					.setDescription("The ExAC allele frequency").setLabel(EXAC_AF_LABEL);

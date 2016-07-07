@@ -1,33 +1,100 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import com.google.common.collect.Iterators;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.entity.impl.omim.OmimRepository;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.testng.Assert;
+import org.molgenis.data.vcf.model.VcfAttributes;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.molgenis.util.EntityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
+import java.util.Iterator;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.annotation.entity.impl.omim.OmimRepository.*;
 import static org.molgenis.util.ResourceUtils.getFile;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
-public class OmimRepositoryTest
+@ContextConfiguration(classes = { OmimAnnotatorTest.Config.class })
+public class OmimRepositoryTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	ApplicationContext context;
+
+	@Autowired
+	AttributeMetaDataFactory attributeMetaDataFactory;
+
+	@Autowired
+	EntityMetaDataFactory entityMetaDataFactory;
+
+	@Autowired
+	VcfAttributes vcfAttributes;
 	private OmimRepository repo;
 	private File omimFile = getFile(getClass(), "/omim/omim.txt");
 
+	private Entity entity1;
+	private Entity entity2;
+	private Entity entity3;
+	private Entity entity4;
+	private Entity entity5;
+
 	@BeforeClass
-	public void setUp()
+	public void beforeClass() throws IOException
 	{
-		repo = new OmimRepository(omimFile);
+		repo = new OmimRepository(omimFile, entityMetaDataFactory, attributeMetaDataFactory);
+
+		entity1 = new DynamicEntity(repo.getEntityMetaData());
+		entity1.set(OMIM_PHENOTYPE_COL_NAME, "{Thyroid cancer, nonmedullary, 4}");
+		entity1.set(OMIM_GENE_SYMBOLS_COL_NAME, "FOXE1");
+		entity1.set(OMIM_MIM_NUMBER_COL_NAME, "602617");
+		entity1.set(OMIM_CYTO_LOCATION_COL_NAME, "9q22.33");
+		entity1.set(OMIM_ENTRY_COL_NAME, "616534");
+		entity1.set(OMIM_TYPE_COL_NAME, "3");
+
+		entity2 = new DynamicEntity(repo.getEntityMetaData());
+		entity2.set(OMIM_PHENOTYPE_COL_NAME, "17,20-lyase deficiency, isolated");
+		entity2.set(OMIM_GENE_SYMBOLS_COL_NAME, "CYP17A1");
+		entity2.set(OMIM_MIM_NUMBER_COL_NAME, "609300");
+		entity2.set(OMIM_CYTO_LOCATION_COL_NAME, "10q24.32");
+		entity2.set(OMIM_ENTRY_COL_NAME, "202110");
+		entity2.set(OMIM_TYPE_COL_NAME, "3");
+
+		entity3 = new DynamicEntity(repo.getEntityMetaData());
+		entity3.set(OMIM_PHENOTYPE_COL_NAME, "17,20-lyase deficiency, isolated");
+		entity3.set(OMIM_GENE_SYMBOLS_COL_NAME, "CYP17");
+		entity3.set(OMIM_MIM_NUMBER_COL_NAME, "609300");
+		entity3.set(OMIM_CYTO_LOCATION_COL_NAME, "10q24.32");
+		entity3.set(OMIM_ENTRY_COL_NAME, "202110");
+		entity3.set(OMIM_TYPE_COL_NAME, "3");
+
+		entity4 = new DynamicEntity(repo.getEntityMetaData());
+		entity4.set(OMIM_PHENOTYPE_COL_NAME, "{Thyroid cancer, monmedullary, 1}");
+		entity4.set(OMIM_GENE_SYMBOLS_COL_NAME, "NKX2-1");
+		entity4.set(OMIM_MIM_NUMBER_COL_NAME, "600635");
+		entity4.set(OMIM_CYTO_LOCATION_COL_NAME, "14q13.3");
+		entity4.set(OMIM_ENTRY_COL_NAME, "188550");
+		entity4.set(OMIM_TYPE_COL_NAME, "3");
+
+		entity5 = new DynamicEntity(repo.getEntityMetaData());
+		entity5.set(OMIM_PHENOTYPE_COL_NAME, "{Thyroid cancer, monmedullary, 1}");
+		entity5.set(OMIM_GENE_SYMBOLS_COL_NAME, "NMTC1");
+		entity5.set(OMIM_MIM_NUMBER_COL_NAME, "600635");
+		entity5.set(OMIM_CYTO_LOCATION_COL_NAME, "14q13.3");
+		entity5.set(OMIM_ENTRY_COL_NAME, "188550");
+		entity5.set(OMIM_TYPE_COL_NAME, "3");
 	}
 
 	@AfterClass
@@ -39,33 +106,37 @@ public class OmimRepositoryTest
 	@Test
 	public void count()
 	{
-		assertEquals(repo.count(), 42);
+		assertEquals(repo.count(), 5);
 	}
 
 	@Test
 	public void iterator()
 	{
-		List<String> iterator = newArrayList(Iterators.transform(repo.iterator(), Object::toString));
-		List<String> expectedIteratorContent = getExpectedIteratorContentList();
-		Assert.assertEquals(iterator, expectedIteratorContent);
+		Iterator<Entity> it = repo.iterator();
+		assertTrue(EntityUtils.equals(it.next(), entity1));
+		assertTrue(EntityUtils.equals(it.next(), entity4));
+		assertTrue(EntityUtils.equals(it.next(), entity3));
+		assertTrue(EntityUtils.equals(it.next(), entity5));
+		assertTrue(EntityUtils.equals(it.next(), entity2));
+
 	}
 
 	@Test
 	public void findAllWithEmptyQuery() throws IOException
 	{
-		List<Entity> omimEntities = repo.findAll(new QueryImpl<Entity>()).collect(toList());
-		assertEquals(omimEntities.toString(),
-				"[OMIM=[Gene_Name=HADH2,Phenotype=17-beta-hydroxysteroid dehydrogenase X deficiency,MIMNumber=300256,CytoLocation=Xp11.22,OmimEntry=300438,OmimType=3], OMIM=[Gene_Name=CR3A,Phenotype={Systemic lupus erythematous, association with susceptibility to, 6},MIMNumber=120980,CytoLocation=16p11.2,OmimEntry=609939,OmimType=3], OMIM=[Gene_Name=ITGAM,Phenotype={Systemic lupus erythematous, association with susceptibility to, 6},MIMNumber=120980,CytoLocation=16p11.2,OmimEntry=609939,OmimType=3], OMIM=[Gene_Name=MAC1A,Phenotype={Systemic lupus erythematous, association with susceptibility to, 6},MIMNumber=120980,CytoLocation=16p11.2,OmimEntry=609939,OmimType=3], OMIM=[Gene_Name=FOXE1,Phenotype={Thyroid cancer, nonmedullary, 4},MIMNumber=602617,CytoLocation=9q22.33,OmimEntry=616534,OmimType=3], OMIM=[Gene_Name=CRV,Phenotype={Systemic lupus erythematosus, susceptibility to},MIMNumber=606609,CytoLocation=3p21.31,OmimEntry=152700,OmimType=3], OMIM=[Gene_Name=THPH2,Phenotype={Thrombophilia, susceptibility to, due to factor V Leiden},MIMNumber=612309,CytoLocation=1q24.2,OmimEntry=188055,OmimType=3], OMIM=[Gene_Name=IFG,Phenotype={TSC2 angiomyolipomas, renal, modifier of},MIMNumber=147570,CytoLocation=12q15,OmimEntry=613254,OmimType=3], OMIM=[Gene_Name=TTF2,Phenotype={Thyroid cancer, nonmedullary, 4},MIMNumber=602617,CytoLocation=9q22.33,OmimEntry=616534,OmimType=3], OMIM=[Gene_Name=TTF1,Phenotype={Thyroid cancer, monmedullary, 1},MIMNumber=600635,CytoLocation=14q13.3,OmimEntry=188550,OmimType=3], OMIM=[Gene_Name=HSD17B10,Phenotype=17-beta-hydroxysteroid dehydrogenase X deficiency,MIMNumber=300256,CytoLocation=Xp11.22,OmimEntry=300438,OmimType=3], OMIM=[Gene_Name=IFI,Phenotype={TSC2 angiomyolipomas, renal, modifier of},MIMNumber=147570,CytoLocation=12q15,OmimEntry=613254,OmimType=3], OMIM=[Gene_Name=CYP17A1,Phenotype=17,20-lyase deficiency, isolated,17-alpha-hydroxylase/17,20-lyase deficiency,MIMNumber=609300,609300,CytoLocation=10q24.32,10q24.32,OmimEntry=202110,202110,OmimType=3,3], OMIM=[Gene_Name=DHTKD1,Phenotype=2-aminoadipic 2-oxoadipic aciduria,MIMNumber=614984,CytoLocation=10p14,OmimEntry=204750,OmimType=3], OMIM=[Gene_Name=KIAA1304,Phenotype={Thyroid cancer, nonmedullary, 2},MIMNumber=606523,CytoLocation=12q14.2,OmimEntry=188470,OmimType=3], OMIM=[Gene_Name=NKX2-1,Phenotype={Thyroid cancer, monmedullary, 1},MIMNumber=600635,CytoLocation=14q13.3,OmimEntry=188550,OmimType=3], OMIM=[Gene_Name=FKHL15,Phenotype={Thyroid cancer, nonmedullary, 4},MIMNumber=602617,CytoLocation=9q22.33,OmimEntry=616534,OmimType=3], OMIM=[Gene_Name=CYP17,Phenotype=17,20-lyase deficiency, isolated,17-alpha-hydroxylase/17,20-lyase deficiency,MIMNumber=609300,609300,CytoLocation=10q24.32,10q24.32,OmimEntry=202110,202110,OmimType=3,3], OMIM=[Gene_Name=CMT2Q,Phenotype=2-aminoadipic 2-oxoadipic aciduria,MIMNumber=614984,CytoLocation=10p14,OmimEntry=204750,OmimType=3], OMIM=[Gene_Name=SRGAP1,Phenotype={Thyroid cancer, nonmedullary, 2},MIMNumber=606523,CytoLocation=12q14.2,OmimEntry=188470,OmimType=3], OMIM=[Gene_Name=CD32,Phenotype={Systemic lupus erythematosus, susceptibility to},MIMNumber=604590,CytoLocation=1q23.3,OmimEntry=152700,OmimType=3], OMIM=[Gene_Name=RPRGL1,Phenotype={Thrombophilia, susceptibility to, due to factor V Leiden},MIMNumber=612309,CytoLocation=1q24.2,OmimEntry=188055,OmimType=3], OMIM=[Gene_Name=NKX2A,Phenotype={Thyroid cancer, monmedullary, 1},MIMNumber=600635,CytoLocation=14q13.3,OmimEntry=188550,OmimType=3], OMIM=[Gene_Name=TREX1,Phenotype={Systemic lupus erythematosus, susceptibility to},MIMNumber=606609,CytoLocation=3p21.31,OmimEntry=152700,OmimType=3], OMIM=[Gene_Name=TITF1,Phenotype={Thyroid cancer, monmedullary, 1},MIMNumber=600635,CytoLocation=14q13.3,OmimEntry=188550,OmimType=3], OMIM=[Gene_Name=MTHFR,Phenotype={Thromboembolism, susceptibility to},MIMNumber=607093,CytoLocation=1p36.22,OmimEntry=188050,OmimType=3], OMIM=[Gene_Name=TITF2,Phenotype={Thyroid cancer, nonmedullary, 4},MIMNumber=602617,CytoLocation=9q22.33,OmimEntry=616534,OmimType=3], OMIM=[Gene_Name=NMTC4,Phenotype={Thyroid cancer, nonmedullary, 4},MIMNumber=602617,CytoLocation=9q22.33,OmimEntry=616534,OmimType=3], OMIM=[Gene_Name=NMTC2,Phenotype={Thyroid cancer, nonmedullary, 2},MIMNumber=606523,CytoLocation=12q14.2,OmimEntry=188470,OmimType=3], OMIM=[Gene_Name=NMTC1,Phenotype={Thyroid cancer, monmedullary, 1},MIMNumber=600635,CytoLocation=14q13.3,OmimEntry=188550,OmimType=3], OMIM=[Gene_Name=HERNS,Phenotype={Systemic lupus erythematosus, susceptibility to},MIMNumber=606609,CytoLocation=3p21.31,OmimEntry=152700,OmimType=3], OMIM=[Gene_Name=ERAB,Phenotype=17-beta-hydroxysteroid dehydrogenase X deficiency,MIMNumber=300256,CytoLocation=Xp11.22,OmimEntry=300438,OmimType=3], OMIM=[Gene_Name=MRXS10,Phenotype=17-beta-hydroxysteroid dehydrogenase X deficiency,MIMNumber=300256,CytoLocation=Xp11.22,OmimEntry=300438,OmimType=3], OMIM=[Gene_Name=CD11B,Phenotype={Systemic lupus erythematous, association with susceptibility to, 6},MIMNumber=120980,CytoLocation=16p11.2,OmimEntry=609939,OmimType=3], OMIM=[Gene_Name=F5,Phenotype={Thrombophilia, susceptibility to, due to factor V Leiden},MIMNumber=612309,CytoLocation=1q24.2,OmimEntry=188055,OmimType=3], OMIM=[Gene_Name=IFNG,Phenotype={TSC2 angiomyolipomas, renal, modifier of},MIMNumber=147570,CytoLocation=12q15,OmimEntry=613254,OmimType=3], OMIM=[Gene_Name=KIAA1630,Phenotype=2-aminoadipic 2-oxoadipic aciduria,MIMNumber=614984,CytoLocation=10p14,OmimEntry=204750,OmimType=3], OMIM=[Gene_Name=AMOXAD,Phenotype=2-aminoadipic 2-oxoadipic aciduria,MIMNumber=614984,CytoLocation=10p14,OmimEntry=204750,OmimType=3], OMIM=[Gene_Name=SLEB6,Phenotype={Systemic lupus erythematous, association with susceptibility to, 6},MIMNumber=120980,CytoLocation=16p11.2,OmimEntry=609939,OmimType=3], OMIM=[Gene_Name=P450C17,Phenotype=17,20-lyase deficiency, isolated,17-alpha-hydroxylase/17,20-lyase deficiency,MIMNumber=609300,609300,CytoLocation=10q24.32,10q24.32,OmimEntry=202110,202110,OmimType=3,3], OMIM=[Gene_Name=AGS1,Phenotype={Systemic lupus erythematosus, susceptibility to},MIMNumber=606609,CytoLocation=3p21.31,OmimEntry=152700,OmimType=3], OMIM=[Gene_Name=FCGR2B,Phenotype={Systemic lupus erythematosus, susceptibility to},MIMNumber=604590,CytoLocation=1q23.3,OmimEntry=152700,OmimType=3]]");
+		Iterator<Entity> it = repo.findAll(new QueryImpl<Entity>()).iterator();
+		assertTrue(EntityUtils.equals(it.next(), entity1));
+		assertTrue(EntityUtils.equals(it.next(), entity4));
+		assertTrue(EntityUtils.equals(it.next(), entity3));
+		assertTrue(EntityUtils.equals(it.next(), entity5));
+		assertTrue(EntityUtils.equals(it.next(), entity2));
 	}
 
 	@Test
 	public void findAllWithQuery() throws IOException
 	{
-		List<Entity> omimEntities = repo
-				.findAll(new QueryImpl<Entity>().eq(OmimRepository.OMIM_GENE_SYMBOLS_COL_NAME, "CYP17A1")).collect(toList());
-		assertEquals(omimEntities.toString(),
-				"[OMIM=[Gene_Name=CYP17A1,Phenotype=17,20-lyase deficiency, isolated,17-alpha-hydroxylase/17,20-lyase deficiency,MIMNumber=609300,609300,CytoLocation=10q24.32,10q24.32,OmimEntry=202110,202110,OmimType=3,3]]");
-
+		Iterator<Entity> it = repo.findAll(new QueryImpl<>().eq(OMIM_GENE_SYMBOLS_COL_NAME, "CYP17A1")).iterator();
+		assertTrue(EntityUtils.equals(it.next(), entity2));
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "The only query allowed on this Repository is gene EQUALS")
@@ -74,50 +145,9 @@ public class OmimRepositoryTest
 		repo.findAll(new QueryImpl<Entity>().like(OmimRepository.OMIM_PHENOTYPE_COL_NAME, "test_phenotype"));
 	}
 
-	private List<String> getExpectedIteratorContentList()
+	@Configuration
+	@ComponentScan({ "org.molgenis.data.vcf.model" })
+	public static class Config
 	{
-		return newArrayList(
-				"OMIM=[Gene_Name=HADH2,Phenotype=17-beta-hydroxysteroid dehydrogenase X deficiency,MIMNumber=300256,CytoLocation=Xp11.22,OmimEntry=300438,OmimType=3]",
-				"OMIM=[Gene_Name=CR3A,Phenotype={Systemic lupus erythematous, association with susceptibility to, 6},MIMNumber=120980,CytoLocation=16p11.2,OmimEntry=609939,OmimType=3]",
-				"OMIM=[Gene_Name=ITGAM,Phenotype={Systemic lupus erythematous, association with susceptibility to, 6},MIMNumber=120980,CytoLocation=16p11.2,OmimEntry=609939,OmimType=3]",
-				"OMIM=[Gene_Name=MAC1A,Phenotype={Systemic lupus erythematous, association with susceptibility to, 6},MIMNumber=120980,CytoLocation=16p11.2,OmimEntry=609939,OmimType=3]",
-				"OMIM=[Gene_Name=FOXE1,Phenotype={Thyroid cancer, nonmedullary, 4},MIMNumber=602617,CytoLocation=9q22.33,OmimEntry=616534,OmimType=3]",
-				"OMIM=[Gene_Name=CRV,Phenotype={Systemic lupus erythematosus, susceptibility to},MIMNumber=606609,CytoLocation=3p21.31,OmimEntry=152700,OmimType=3]",
-				"OMIM=[Gene_Name=THPH2,Phenotype={Thrombophilia, susceptibility to, due to factor V Leiden},MIMNumber=612309,CytoLocation=1q24.2,OmimEntry=188055,OmimType=3]",
-				"OMIM=[Gene_Name=IFG,Phenotype={TSC2 angiomyolipomas, renal, modifier of},MIMNumber=147570,CytoLocation=12q15,OmimEntry=613254,OmimType=3]",
-				"OMIM=[Gene_Name=TTF2,Phenotype={Thyroid cancer, nonmedullary, 4},MIMNumber=602617,CytoLocation=9q22.33,OmimEntry=616534,OmimType=3]",
-				"OMIM=[Gene_Name=TTF1,Phenotype={Thyroid cancer, monmedullary, 1},MIMNumber=600635,CytoLocation=14q13.3,OmimEntry=188550,OmimType=3]",
-				"OMIM=[Gene_Name=HSD17B10,Phenotype=17-beta-hydroxysteroid dehydrogenase X deficiency,MIMNumber=300256,CytoLocation=Xp11.22,OmimEntry=300438,OmimType=3]",
-				"OMIM=[Gene_Name=IFI,Phenotype={TSC2 angiomyolipomas, renal, modifier of},MIMNumber=147570,CytoLocation=12q15,OmimEntry=613254,OmimType=3]",
-				"OMIM=[Gene_Name=CYP17A1,Phenotype=17,20-lyase deficiency, isolated,17-alpha-hydroxylase/17,20-lyase deficiency,MIMNumber=609300,609300,CytoLocation=10q24.32,10q24.32,OmimEntry=202110,202110,OmimType=3,3]",
-				"OMIM=[Gene_Name=DHTKD1,Phenotype=2-aminoadipic 2-oxoadipic aciduria,MIMNumber=614984,CytoLocation=10p14,OmimEntry=204750,OmimType=3]",
-				"OMIM=[Gene_Name=KIAA1304,Phenotype={Thyroid cancer, nonmedullary, 2},MIMNumber=606523,CytoLocation=12q14.2,OmimEntry=188470,OmimType=3]",
-				"OMIM=[Gene_Name=NKX2-1,Phenotype={Thyroid cancer, monmedullary, 1},MIMNumber=600635,CytoLocation=14q13.3,OmimEntry=188550,OmimType=3]",
-				"OMIM=[Gene_Name=FKHL15,Phenotype={Thyroid cancer, nonmedullary, 4},MIMNumber=602617,CytoLocation=9q22.33,OmimEntry=616534,OmimType=3]",
-				"OMIM=[Gene_Name=CYP17,Phenotype=17,20-lyase deficiency, isolated,17-alpha-hydroxylase/17,20-lyase deficiency,MIMNumber=609300,609300,CytoLocation=10q24.32,10q24.32,OmimEntry=202110,202110,OmimType=3,3]",
-				"OMIM=[Gene_Name=CMT2Q,Phenotype=2-aminoadipic 2-oxoadipic aciduria,MIMNumber=614984,CytoLocation=10p14,OmimEntry=204750,OmimType=3]",
-				"OMIM=[Gene_Name=SRGAP1,Phenotype={Thyroid cancer, nonmedullary, 2},MIMNumber=606523,CytoLocation=12q14.2,OmimEntry=188470,OmimType=3]",
-				"OMIM=[Gene_Name=CD32,Phenotype={Systemic lupus erythematosus, susceptibility to},MIMNumber=604590,CytoLocation=1q23.3,OmimEntry=152700,OmimType=3]",
-				"OMIM=[Gene_Name=RPRGL1,Phenotype={Thrombophilia, susceptibility to, due to factor V Leiden},MIMNumber=612309,CytoLocation=1q24.2,OmimEntry=188055,OmimType=3]",
-				"OMIM=[Gene_Name=NKX2A,Phenotype={Thyroid cancer, monmedullary, 1},MIMNumber=600635,CytoLocation=14q13.3,OmimEntry=188550,OmimType=3]",
-				"OMIM=[Gene_Name=TREX1,Phenotype={Systemic lupus erythematosus, susceptibility to},MIMNumber=606609,CytoLocation=3p21.31,OmimEntry=152700,OmimType=3]",
-				"OMIM=[Gene_Name=TITF1,Phenotype={Thyroid cancer, monmedullary, 1},MIMNumber=600635,CytoLocation=14q13.3,OmimEntry=188550,OmimType=3]",
-				"OMIM=[Gene_Name=MTHFR,Phenotype={Thromboembolism, susceptibility to},MIMNumber=607093,CytoLocation=1p36.22,OmimEntry=188050,OmimType=3]",
-				"OMIM=[Gene_Name=TITF2,Phenotype={Thyroid cancer, nonmedullary, 4},MIMNumber=602617,CytoLocation=9q22.33,OmimEntry=616534,OmimType=3]",
-				"OMIM=[Gene_Name=NMTC4,Phenotype={Thyroid cancer, nonmedullary, 4},MIMNumber=602617,CytoLocation=9q22.33,OmimEntry=616534,OmimType=3]",
-				"OMIM=[Gene_Name=NMTC2,Phenotype={Thyroid cancer, nonmedullary, 2},MIMNumber=606523,CytoLocation=12q14.2,OmimEntry=188470,OmimType=3]",
-				"OMIM=[Gene_Name=NMTC1,Phenotype={Thyroid cancer, monmedullary, 1},MIMNumber=600635,CytoLocation=14q13.3,OmimEntry=188550,OmimType=3]",
-				"OMIM=[Gene_Name=HERNS,Phenotype={Systemic lupus erythematosus, susceptibility to},MIMNumber=606609,CytoLocation=3p21.31,OmimEntry=152700,OmimType=3]",
-				"OMIM=[Gene_Name=ERAB,Phenotype=17-beta-hydroxysteroid dehydrogenase X deficiency,MIMNumber=300256,CytoLocation=Xp11.22,OmimEntry=300438,OmimType=3]",
-				"OMIM=[Gene_Name=MRXS10,Phenotype=17-beta-hydroxysteroid dehydrogenase X deficiency,MIMNumber=300256,CytoLocation=Xp11.22,OmimEntry=300438,OmimType=3]",
-				"OMIM=[Gene_Name=CD11B,Phenotype={Systemic lupus erythematous, association with susceptibility to, 6},MIMNumber=120980,CytoLocation=16p11.2,OmimEntry=609939,OmimType=3]",
-				"OMIM=[Gene_Name=F5,Phenotype={Thrombophilia, susceptibility to, due to factor V Leiden},MIMNumber=612309,CytoLocation=1q24.2,OmimEntry=188055,OmimType=3]",
-				"OMIM=[Gene_Name=IFNG,Phenotype={TSC2 angiomyolipomas, renal, modifier of},MIMNumber=147570,CytoLocation=12q15,OmimEntry=613254,OmimType=3]",
-				"OMIM=[Gene_Name=KIAA1630,Phenotype=2-aminoadipic 2-oxoadipic aciduria,MIMNumber=614984,CytoLocation=10p14,OmimEntry=204750,OmimType=3]",
-				"OMIM=[Gene_Name=AMOXAD,Phenotype=2-aminoadipic 2-oxoadipic aciduria,MIMNumber=614984,CytoLocation=10p14,OmimEntry=204750,OmimType=3]",
-				"OMIM=[Gene_Name=SLEB6,Phenotype={Systemic lupus erythematous, association with susceptibility to, 6},MIMNumber=120980,CytoLocation=16p11.2,OmimEntry=609939,OmimType=3]",
-				"OMIM=[Gene_Name=P450C17,Phenotype=17,20-lyase deficiency, isolated,17-alpha-hydroxylase/17,20-lyase deficiency,MIMNumber=609300,609300,CytoLocation=10q24.32,10q24.32,OmimEntry=202110,202110,OmimType=3,3]",
-				"OMIM=[Gene_Name=AGS1,Phenotype={Systemic lupus erythematosus, susceptibility to},MIMNumber=606609,CytoLocation=3p21.31,OmimEntry=152700,OmimType=3]",
-				"OMIM=[Gene_Name=FCGR2B,Phenotype={Systemic lupus erythematosus, susceptibility to},MIMNumber=604590,CytoLocation=1q23.3,OmimEntry=152700,OmimType=3]");
 	}
 }
