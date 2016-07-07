@@ -25,6 +25,11 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
+/**
+ * Adds, removes and retrieves entities from the {@link L1Cache} when a {@link Repository} is {@link RepositoryCapability#CACHEABLE}.
+ * Delegates to the underlying repository when an action is not supported by the cache or when the cache doesn't contain
+ * the needed entity.
+ */
 public class L1CacheRepositoryDecorator implements Repository<Entity>
 {
 	private static final int ID_BATCH_SIZE = 1000;

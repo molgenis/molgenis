@@ -1,6 +1,7 @@
 package org.molgenis.data.cache.utils;
 
 import com.google.common.cache.Cache;
+import com.google.common.cache.CacheLoader;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -66,7 +67,7 @@ public class CachingUtils
 	}
 
 	/**
-	 * Do not store entity in the cache since it might be updated by client code, instead store the values requires to
+	 * Do not store entity in the cache since it might be updated by client code, instead store the values required to
 	 * rebuild this entity. For references to other entities only store the ids.
 	 *
 	 * @param entity
@@ -82,7 +83,7 @@ public class CachingUtils
 			String name = attribute.getName();
 			AttributeType type = attribute.getDataType();
 
-			dehydratedEntity.put(name, getValueBasedonType(entity, name, type));
+			dehydratedEntity.put(name, getValueBasedOnType(entity, name, type));
 		});
 
 		return dehydratedEntity;
@@ -98,7 +99,7 @@ public class CachingUtils
 		return entityName + "__" + id.toString();
 	}
 
-	private static Object getValueBasedonType(Entity entity, String name, AttributeType type)
+	private static Object getValueBasedOnType(Entity entity, String name, AttributeType type)
 	{
 		Object value;
 		switch (type)
