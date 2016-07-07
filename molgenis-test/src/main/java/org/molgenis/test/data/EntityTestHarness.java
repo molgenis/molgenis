@@ -61,7 +61,6 @@ public class EntityTestHarness
 	@PostConstruct
 	public void postConstruct()
 	{
-		//		testPackage = packageFactory.create("test");
 	}
 
 	public EntityMetaData createDynamicRefEntityMetaData()
@@ -138,6 +137,8 @@ public class EntityTestHarness
 		entity1.set(ATTR_MREF, Collections.singletonList(refEntity));
 		return entity1;
 	}
+
+
 
 	private void generateDateAndDateTime()
 	{
