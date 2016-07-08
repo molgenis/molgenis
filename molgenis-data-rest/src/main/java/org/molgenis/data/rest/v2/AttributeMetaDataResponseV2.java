@@ -66,7 +66,7 @@ class AttributeMetaDataResponseV2
 		this.name = attrName;
 		this.label = attr.getLabel(languageService.getCurrentUserLanguageCode());
 		this.description = attr.getDescription(languageService.getCurrentUserLanguageCode());
-		this.enumOptions = attr.getEnumOptions();
+		this.enumOptions = attr.getDataType() == AttributeType.ENUM ? attr.getEnumOptions() : null;
 		this.maxLength = getType(getValueString(attr.getDataType())).getMaxLength();
 		this.expression = attr.getExpression();
 

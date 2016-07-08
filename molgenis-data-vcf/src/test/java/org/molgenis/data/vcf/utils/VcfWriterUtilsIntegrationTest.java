@@ -17,6 +17,9 @@ import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -30,15 +33,19 @@ import static org.molgenis.data.vcf.model.VcfAttributes.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-@Test
+@ContextConfiguration(classes = {VcfWriterUtilsIntegrationTest.Config.class})
 public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
-{		@Autowired EntityMetaDataFactory entityMetaDataFactory;
+{
+	@Autowired
+	EntityMetaDataFactory entityMetaDataFactory;
 
-		@Autowired AttributeMetaDataFactory attributeMetaDataFactory;
+	@Autowired
+	AttributeMetaDataFactory attributeMetaDataFactory;
 
-		@Autowired VcfAttributes vcfAttributes;
+	@Autowired
+	VcfAttributes vcfAttributes;
 
-		private static final Logger LOG = LoggerFactory.getLogger(VcfWriterUtilsIntegrationTest.class);
+	private static final Logger LOG = LoggerFactory.getLogger(VcfWriterUtilsIntegrationTest.class);
 	public static final String ID = "ID";
 	public static final String PUTATIVE_IMPACT = "Putative_impact";
 	public static final String TYPE = "TYPE";
@@ -55,25 +62,18 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 	private static AttributeMetaData PUTATIVE_IMPACT_ATTR;
 	private static AttributeMetaData EFFECT_ATTR;
 	private static AttributeMetaData GENES_ATTR;
-	private final EntityMetaData annotatedEntityMetadata = entityMetaDataFactory.create().setName("test");
-	public EntityMetaData metaDataCanAnnotate = entityMetaDataFactory.create().setName("test");
-	public EntityMetaData metaDataCantAnnotate = entityMetaDataFactory.create().setName("test");
-	public EntityMetaData geneMeta = entityMetaDataFactory.create().setName(GENES);
-
-	EntityMetaData effectMeta = entityMetaDataFactory.create().setName(EFFECT);
-	EntityMetaData vcfMeta = entityMetaDataFactory.create().setName("vcfMeta");
-	EntityMetaData sampleEntityMeta = entityMetaDataFactory.create().setName("vcfSampleEntity");
-	public AttributeMetaData attributeMetaDataChrom = attributeMetaDataFactory.create().setName(CHROM).setDataType(
-			STRING);
-
-	public AttributeMetaData attributeMetaDataPos = attributeMetaDataFactory.create().setName(POS).setDataType(
-			LONG);
-	public AttributeMetaData attributeMetaDataRef = attributeMetaDataFactory.create().setName(REF).setDataType(
-			STRING);
-	public AttributeMetaData attributeMetaDataAlt = attributeMetaDataFactory.create().setName(ALT).setDataType(
-			STRING);
-	public AttributeMetaData attributeMetaDataCantAnnotateChrom =  attributeMetaDataFactory.create().setName(CHROM).setDataType(
-			LONG);
+	private EntityMetaData annotatedEntityMetadata;
+	public EntityMetaData metaDataCanAnnotate;
+	public EntityMetaData metaDataCantAnnotate;
+	public EntityMetaData geneMeta;
+	EntityMetaData effectMeta;
+	EntityMetaData vcfMeta;
+	EntityMetaData sampleEntityMeta;
+	public AttributeMetaData attributeMetaDataChrom;
+	public AttributeMetaData attributeMetaDataPos;
+	public AttributeMetaData attributeMetaDataRef;
+	public AttributeMetaData attributeMetaDataAlt;
+	public AttributeMetaData attributeMetaDataCantAnnotateChrom;
 	public Entity entity;
 	public Entity entity1;
 	public Entity entity2;
@@ -84,6 +84,20 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
+		annotatedEntityMetadata = entityMetaDataFactory.create().setName("test");
+		metaDataCanAnnotate = entityMetaDataFactory.create().setName("test");
+		metaDataCantAnnotate = entityMetaDataFactory.create().setName("test");
+		geneMeta = entityMetaDataFactory.create().setName(GENES);
+
+		effectMeta = entityMetaDataFactory.create().setName(EFFECT);
+		vcfMeta = entityMetaDataFactory.create().setName("vcfMeta");
+		sampleEntityMeta = entityMetaDataFactory.create().setName("vcfSampleEntity");
+		attributeMetaDataChrom = attributeMetaDataFactory.create().setName(CHROM).setDataType(STRING);
+		attributeMetaDataPos = attributeMetaDataFactory.create().setName(POS).setDataType(LONG);
+		attributeMetaDataRef = attributeMetaDataFactory.create().setName(REF).setDataType(STRING);
+		attributeMetaDataAlt = attributeMetaDataFactory.create().setName(ALT).setDataType(STRING);
+		attributeMetaDataCantAnnotateChrom = attributeMetaDataFactory.create().setName(CHROM).setDataType(LONG);
+
 		metaDataCanAnnotate.addAttribute(attributeMetaDataPos);
 		metaDataCanAnnotate.addAttribute(attributeMetaDataChrom);
 
@@ -529,5 +543,10 @@ public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 		}
 
 		return effectEntities;
+	}
+
+	@Configuration
+	@Import(VcfAttributes.class)
+	public static class Config {
 	}
 }

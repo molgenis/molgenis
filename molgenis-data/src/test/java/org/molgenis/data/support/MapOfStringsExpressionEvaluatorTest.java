@@ -1,70 +1,69 @@
 package org.molgenis.data.support;
 
 import com.google.gson.JsonSyntaxException;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.testng.annotations.BeforeTest;
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.model.*;
+import org.molgenis.util.EntityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.testng.Assert.*;
 
-public class MapOfStringsExpressionEvaluatorTest
+@ContextConfiguration(classes = { MapOfStringsExpressionEvaluatorTest.Config.class })
+public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringContextTests
 {
 	private Entity entity;
 	private EntityMetaData emd;
 	private EntityMetaData refEmd;
 
-	@BeforeTest
+	@Autowired
+	private EntityMetaDataFactory entityMetaDataFactory;
+	@Autowired
+	private AttributeMetaDataFactory attributeMetaDataFactory;
+
+	private EntityMetaData createDynamicLocationMetaData()
+	{
+		return entityMetaDataFactory.create().setSimpleName("Location")
+				.addAttribute(attributeMetaDataFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
+				.addAttribute(attributeMetaDataFactory.create().setName("Chromosome").setDataType(STRING))
+				.addAttribute(attributeMetaDataFactory.create().setName("Position").setDataType(STRING));
+	}
+
+	private EntityMetaData createDynamicSourceMetaData()
+	{
+		return entityMetaDataFactory.create().setSimpleName("Source")
+				.addAttribute(attributeMetaDataFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
+				.addAttribute(attributeMetaDataFactory.create().setName("Int").setDataType(INT))
+				.addAttribute(attributeMetaDataFactory.create().setName("String").setDataType(STRING))
+				.addAttribute(attributeMetaDataFactory.create().setName("NonNumericString").setDataType(STRING))
+				.addAttribute(attributeMetaDataFactory.create().setName("Long").setDataType(LONG));
+	}
+
+	@BeforeMethod
 	public void createEntity()
 	{
-		emd = when(mock(EntityMetaData.class).getName()).thenReturn("Source").getMock();
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("Identifier").getMock();
-		when(idAttr.getDataType()).thenReturn(INT);
-		when(idAttr.getEntityMetaData()).thenReturn(mock(EntityMetaData.class));
-		AttributeMetaData intAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("Int").getMock();
-		when(intAttr.getDataType()).thenReturn(INT);
-		when(intAttr.getEntityMetaData()).thenReturn(mock(EntityMetaData.class));
-		AttributeMetaData stringAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("String").getMock();
-		when(stringAttr.getDataType()).thenReturn(STRING);
-		when(stringAttr.getEntityMetaData()).thenReturn(mock(EntityMetaData.class));
-		AttributeMetaData nonNumericStringAttr = when(mock(AttributeMetaData.class).getName())
-				.thenReturn("NonNumericString").getMock();
-		when(nonNumericStringAttr.getDataType()).thenReturn(STRING);
-		when(nonNumericStringAttr.getEntityMetaData()).thenReturn(mock(EntityMetaData.class));
-		AttributeMetaData longAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("Long").getMock();
-		when(longAttr.getDataType()).thenReturn(STRING);
-		when(longAttr.getEntityMetaData()).thenReturn(mock(EntityMetaData.class));
-		when(emd.getIdAttribute()).thenReturn(idAttr);
-		when(emd.getAttribute("Identifier")).thenReturn(idAttr);
-		when(emd.getAttribute("Int")).thenReturn(intAttr);
-		when(emd.getAttribute("String")).thenReturn(stringAttr);
-		when(emd.getAttribute("NonNumericString")).thenReturn(nonNumericStringAttr);
-		when(emd.getAttribute("Long")).thenReturn(longAttr);
-
-		refEmd = when(mock(EntityMetaData.class).getName()).thenReturn("RefEntity").getMock();
-		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("Identifier").getMock();
-		when(refIdAttr.getDataType()).thenReturn(STRING);
-		when(refIdAttr.getEntityMetaData()).thenReturn(mock(EntityMetaData.class));
-		AttributeMetaData chromAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("Chromosome").getMock();
-		when(chromAttr.getDataType()).thenReturn(STRING);
-		when(chromAttr.getEntityMetaData()).thenReturn(mock(EntityMetaData.class));
-		AttributeMetaData posAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("Position").getMock();
-		when(posAttr.getDataType()).thenReturn(LONG);
-		when(posAttr.getEntityMetaData()).thenReturn(mock(EntityMetaData.class));
-		when(refEmd.getIdAttribute()).thenReturn(refIdAttr);
-		when(refEmd.getAttribute("Identifier")).thenReturn(idAttr);
-		when(refEmd.getAttribute("Chromosome")).thenReturn(idAttr);
-		when(refEmd.getAttribute("Position")).thenReturn(idAttr);
+		emd = createDynamicSourceMetaData();
+		refEmd = createDynamicLocationMetaData();
 
 		entity = new DynamicEntity(emd);
 		entity.set("Int", 1);
 		entity.set("String", "12");
-		entity.set("Long", "10");
+		entity.set("Long", 10L);
 		entity.set("NonNumericString", "Hello World!");
 	}
 
@@ -183,10 +182,32 @@ public class MapOfStringsExpressionEvaluatorTest
 		when(amd.getRefEntity()).thenReturn(refEmd);
 		when(amd.getExpression()).thenReturn("{'Chromosome':String, 'Position':Int}");
 		when(amd.getEntityMetaData()).thenReturn(mock(EntityMetaData.class));
+		when(amd.getDataType()).thenReturn(MolgenisFieldTypes.AttributeType.XREF);
 		ExpressionEvaluator evaluator = new MapOfStringsExpressionEvaluator(amd, emd);
 		Entity expected = new DynamicEntity(refEmd);
 		expected.set("Chromosome", "12");
-		expected.set("Position", 1L);
-		assertEquals(evaluator.evaluate(entity), expected);
+		expected.set("Position", "1");
+		Entity actual = (Entity) evaluator.evaluate(entity);
+		assertTrue(EntityUtils.equals(actual, expected));
+	}
+
+	@Autowired
+	ApplicationContext applicationContext;
+
+	@BeforeClass
+	public void bootstrap()
+	{
+		// bootstrap meta data
+		EntityMetaDataMetaData entityMetaMeta = applicationContext.getBean(EntityMetaDataMetaData.class);
+		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityMetaMeta);
+		Map<String, SystemEntityMetaData> systemEntityMetaMap = applicationContext
+				.getBeansOfType(SystemEntityMetaData.class);
+		systemEntityMetaMap.values().forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityMetaMeta));
+	}
+
+	@Configuration
+	@ComponentScan({ "org.molgenis.data.meta.model", "org.molgenis.data.system.model" })
+	public static class Config
+	{
 	}
 }

@@ -1,50 +1,26 @@
 package org.molgenis.data.elasticsearch;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.QueryRule.Operator.AND;
-import static org.molgenis.data.QueryRule.Operator.EQUALS;
-import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH;
-import static org.molgenis.data.QueryRule.Operator.IN;
-import static org.molgenis.data.QueryRule.Operator.LESS;
-import static org.molgenis.data.QueryRule.Operator.OR;
-import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
-import static org.molgenis.data.RepositoryCapability.MANAGABLE;
-import static org.molgenis.data.RepositoryCapability.QUERYABLE;
-import static org.molgenis.data.RepositoryCapability.VALIDATE_NOTNULL_CONSTRAINT;
-import static org.testng.Assert.assertEquals;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.google.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
+import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static org.mockito.Mockito.*;
+import static org.molgenis.data.QueryRule.Operator.*;
+import static org.molgenis.data.RepositoryCapability.*;
+import static org.testng.Assert.assertEquals;
 
 public class IndexedRepositoryDecoratorTest
 {
@@ -238,12 +214,11 @@ public class IndexedRepositoryDecoratorTest
 	public void findOneQueryUnsupported()
 	{
 		Entity entity0 = mock(Entity.class);
-		Entity entity1 = mock(Entity.class);
-		when(elasticSearchService.search(unsupportedQuery, repositoryEntityMetaData))
-				.thenReturn(Arrays.<Entity>asList(entity0, entity1));
+		when(elasticSearchService.findOne(unsupportedQuery, repositoryEntityMetaData))
+				.thenReturn(entity0);
 
 		indexedRepositoryDecorator.findOne(unsupportedQuery);
-		verify(elasticSearchService).search(unsupportedQuery, repositoryEntityMetaData);
+		verify(elasticSearchService).findOne(unsupportedQuery, repositoryEntityMetaData);
 		verify(decoratedRepo, never()).findOne(unsupportedQuery);
 	}
 
