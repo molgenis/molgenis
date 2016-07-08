@@ -67,10 +67,12 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	}
 
 	@Override
+	// TODO I do not think it is necessary to decorate the repo's again..
 	public Repository<Entity> getRepository(EntityMetaData entityMeta)
 	{
 		Repository<Entity> repository = decoratedRepositoryCollection.getRepository(entityMeta);
 		return repository != null ? repositoryDecoratorFactory.createDecoratedRepository(repository) : null;
+//		return decoratedRepositoryCollection.getRepository(entityMeta);
 	}
 
 	@Override
