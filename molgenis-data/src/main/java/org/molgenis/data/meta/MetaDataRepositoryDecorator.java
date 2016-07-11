@@ -11,7 +11,7 @@ import java.util.stream.Stream;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;

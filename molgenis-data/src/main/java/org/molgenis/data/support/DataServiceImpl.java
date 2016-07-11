@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import org.molgenis.data.*;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;

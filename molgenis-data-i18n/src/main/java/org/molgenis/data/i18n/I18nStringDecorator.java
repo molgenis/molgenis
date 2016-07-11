@@ -2,6 +2,7 @@ package org.molgenis.data.i18n;
 
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.io.IOException;

@@ -2,8 +2,8 @@ package org.molgenis.data;
 
 import java.util.Set;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityMetaData;
 

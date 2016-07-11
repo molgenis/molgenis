@@ -8,7 +8,7 @@ import java.util.ResourceBundle;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.util.EntityUtils;

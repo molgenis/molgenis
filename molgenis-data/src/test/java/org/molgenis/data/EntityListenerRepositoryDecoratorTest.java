@@ -2,7 +2,11 @@ package org.molgenis.data;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
+import org.molgenis.data.listeners.EntityListener;
+import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
+import org.molgenis.data.listeners.EntityListenersService;
 import org.testng.Assert;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -16,19 +20,30 @@ public class EntityListenerRepositoryDecoratorTest
 {
 	private Repository<Entity> decoratedRepository;
 	private EntityListenerRepositoryDecorator entityListenerRepositoryDecorator;
+	private EntityListenersService entityListenersService = new EntityListenersService();
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		decoratedRepository = Mockito.mock(Repository.class);
-		entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(decoratedRepository);
+		entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(decoratedRepository,
+				entityListenersService);
+	}
+
+	@AfterMethod
+	public void afterMethod()
+	{
+		Assert.assertFalse(entityListenersService.getEntityListeners(entityListenerRepositoryDecorator.getName()).isEmpty());
+		entityListenersService.removeEntityListeners(entityListenerRepositoryDecorator.getName());
+		Assert.assertTrue(entityListenersService.getEntityListeners(entityListenerRepositoryDecorator.getName()).isEmpty());
+		entityListenerRepositoryDecorator = null;
 	}
 
 	@SuppressWarnings("resource")
 	@Test(expectedExceptions = NullPointerException.class)
 	public void EntityListenerRepositoryDecorator()
 	{
-		new EntityListenerRepositoryDecorator(null);
+		new EntityListenerRepositoryDecorator(null, entityListenersService);
 	}
 
 	@Test
@@ -53,9 +68,9 @@ public class EntityListenerRepositoryDecoratorTest
 	{
 		Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
-				decoratedRepository);
-		EntityListener entityListener0 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(1))
-				.getMock();
+				decoratedRepository, entityListenersService);
+		EntityListener entityListener0 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
+				.thenReturn(Integer.valueOf(1)).getMock();
 		entityListenerRepositoryDecorator.addEntityListener(entityListener0);
 
 		Entity entity = Mockito.when(Mockito.mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
@@ -71,11 +86,11 @@ public class EntityListenerRepositoryDecoratorTest
 	{
 		Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
-				decoratedRepository);
-		EntityListener entityListener0 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(1))
-				.getMock();
-		EntityListener entityListener1 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(1))
-				.getMock();
+				decoratedRepository, entityListenersService);
+		EntityListener entityListener0 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
+				.thenReturn(Integer.valueOf(1)).getMock();
+		EntityListener entityListener1 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
+				.thenReturn(Integer.valueOf(1)).getMock();
 		entityListenerRepositoryDecorator.addEntityListener(entityListener0);
 		entityListenerRepositoryDecorator.addEntityListener(entityListener1);
 
@@ -93,9 +108,9 @@ public class EntityListenerRepositoryDecoratorTest
 	{
 		Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
-				decoratedRepository);
-		EntityListener entityListener0 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(-1))
-				.getMock();
+				decoratedRepository, entityListenersService);
+		EntityListener entityListener0 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
+				.thenReturn(Integer.valueOf(-1)).getMock();
 		entityListenerRepositoryDecorator.addEntityListener(entityListener0);
 
 		Entity entity = Mockito.when(Mockito.mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
@@ -111,7 +126,7 @@ public class EntityListenerRepositoryDecoratorTest
 	{
 		Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
-				decoratedRepository);
+				decoratedRepository, entityListenersService);
 
 		Entity entity = Mockito.when(Mockito.mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
 		entityListenerRepositoryDecorator.update(entity);
@@ -119,18 +134,17 @@ public class EntityListenerRepositoryDecoratorTest
 		Mockito.verify(decoratedRepository).update(entity);
 	}
 
-	@SuppressWarnings(
-	{ "resource", "unchecked", "rawtypes" })
+	@SuppressWarnings({ "resource", "unchecked", "rawtypes" })
 	@Test
 	public void updateStreamWithListeners()
 	{
 		Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
-				decoratedRepository);
-		EntityListener entityListener0 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(1))
-				.getMock();
-		EntityListener entityListener1 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(2))
-				.getMock();
+				decoratedRepository, entityListenersService);
+		EntityListener entityListener0 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
+				.thenReturn(Integer.valueOf(1)).getMock();
+		EntityListener entityListener1 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
+				.thenReturn(Integer.valueOf(2)).getMock();
 		entityListenerRepositoryDecorator.addEntityListener(entityListener0);
 		entityListenerRepositoryDecorator.addEntityListener(entityListener1);
 
@@ -147,16 +161,15 @@ public class EntityListenerRepositoryDecoratorTest
 		Mockito.verify(entityListener1, Mockito.times(1)).postUpdate(entity1);
 	}
 
-	@SuppressWarnings(
-	{ "resource", "unchecked", "rawtypes" })
+	@SuppressWarnings({ "resource", "unchecked", "rawtypes" })
 	@Test
 	public void updateStreamWithSomeListeners()
 	{
 		Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
-				decoratedRepository);
-		EntityListener entityListener1 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(2))
-				.getMock();
+				decoratedRepository, entityListenersService);
+		EntityListener entityListener1 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
+				.thenReturn(Integer.valueOf(2)).getMock();
 		entityListenerRepositoryDecorator.addEntityListener(entityListener1);
 
 		Entity entity0 = Mockito.when(Mockito.mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
@@ -170,14 +183,13 @@ public class EntityListenerRepositoryDecoratorTest
 		Mockito.verify(entityListener1, Mockito.times(1)).postUpdate(entity1);
 	}
 
-	@SuppressWarnings(
-	{ "resource", "unchecked", "rawtypes" })
+	@SuppressWarnings({ "resource", "unchecked", "rawtypes" })
 	@Test
 	public void updateStreamNoListeners()
 	{
 		Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
-				decoratedRepository);
+				decoratedRepository, entityListenersService);
 
 		Entity entity0 = Mockito.when(Mockito.mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
 		Entity entity1 = Mockito.when(Mockito.mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(2)).getMock();
@@ -195,9 +207,9 @@ public class EntityListenerRepositoryDecoratorTest
 	{
 		Repository<Entity> decoratedRepository = Mockito.mock(Repository.class);
 		EntityListenerRepositoryDecorator entityListenerRepositoryDecorator = new EntityListenerRepositoryDecorator(
-				decoratedRepository);
-		EntityListener entityListener0 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId()).thenReturn(Integer.valueOf(1))
-				.getMock();
+				decoratedRepository, entityListenersService);
+		EntityListener entityListener0 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
+				.thenReturn(Integer.valueOf(1)).getMock();
 		entityListenerRepositoryDecorator.addEntityListener(entityListener0);
 		entityListenerRepositoryDecorator.removeEntityListener(entityListener0);
 

@@ -3,6 +3,7 @@ package org.molgenis.data.cache.L1;
 import autovalue.shaded.com.google.common.common.collect.Lists;
 import com.google.common.collect.Iterators;
 import org.molgenis.data.*;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.io.IOException;
