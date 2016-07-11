@@ -167,8 +167,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		SecurityContextHolder.getContext().setAuthentication(
 				new TestingAuthenticationToken("user", "user", writeTestEntity, readTestEntity, readTestRefEntity,
 						countTestEntity, countTestRefEntity, writeSelfXrefEntity, readSelfXrefEntity,
-						countSelfXrefEntity, "ROLE_ENTITY_READ_SYS_MD_ENTITIES",
-						"ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES", "ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
+						countSelfXrefEntity, "ROLE_ENTITY_READ_SYS_MD_ENTITIES", "ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES",
+						"ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
 	}
 
 	@AfterMethod
@@ -198,7 +198,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		EntityListener listener = new EntityListener()
 		{
 			@Override
-			public Object getEntityId(){
+			public Object getEntityId()
+			{
 				return entities.get(0).getIdValue();
 			}
 
@@ -686,7 +687,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCreateSelfXref()
 	{
-		Entity entitySelfXref = entitySelfXrefTestHarness.createTestEntities(selfXrefEntityMetaData, 1).collect(Collectors.toList()).get(0);
+		Entity entitySelfXref = entitySelfXrefTestHarness.createTestEntities(selfXrefEntityMetaData, 1)
+				.collect(Collectors.toList()).get(0);
 
 		//Create
 		dataService.add(selfXrefEntityMetaData.getName(), entitySelfXref);
