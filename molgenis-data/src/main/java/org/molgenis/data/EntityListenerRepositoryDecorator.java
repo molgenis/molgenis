@@ -4,6 +4,8 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.SetMultimap;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -16,11 +18,13 @@ import static java.util.Objects.requireNonNull;
 
 public class EntityListenerRepositoryDecorator implements Repository<Entity>
 {
+	private static final Logger LOG = LoggerFactory.getLogger(EntityListenerRepositoryDecorator.class);
 	private final Repository<Entity> decoratedRepository;
-	private SetMultimap<Object, EntityListener> entityListeners;
+	private static SetMultimap<Object, EntityListener> entityListeners;
 
 	public EntityListenerRepositoryDecorator(Repository<Entity> decoratedRepository)
 	{
+		LOG.info("EntityListenerRepositoryDecorator: [{}]", decoratedRepository.getName());
 		this.decoratedRepository = requireNonNull(decoratedRepository);
 	}
 
