@@ -8,10 +8,11 @@ import java.util.Comparator;
 import java.util.List;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -37,7 +38,7 @@ public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexM
 		// collect indexed repos
 		List<EntityMetaData> indexedEntityMetaDataList = new ArrayList<EntityMetaData>();
 		dataService.getEntityNames().forEach(entityName -> {
-			Repository repository = dataService.getRepository(entityName);
+			Repository<Entity> repository = dataService.getRepository(entityName);
 			if (repository.getCapabilities().contains(RepositoryCapability.INDEXABLE))
 			{
 				indexedEntityMetaDataList.add(repository.getEntityMetaData());
@@ -60,7 +61,7 @@ public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexM
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	public void rebuildIndex(String entityName)
 	{
-		Repository repository = dataService.getRepository(entityName);
+		Repository<Entity> repository = dataService.getRepository(entityName);
 		if (!repository.getCapabilities().contains(RepositoryCapability.INDEXABLE))
 		{
 			throw new MolgenisDataAccessException("Repository [" + entityName + "] is not an indexed repository");

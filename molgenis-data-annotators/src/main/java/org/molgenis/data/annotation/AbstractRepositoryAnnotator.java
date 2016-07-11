@@ -1,19 +1,18 @@
 package org.molgenis.data.annotation;
 
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+
 import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.annotation.entity.AnnotatorInfo;
-import org.springframework.transaction.annotation.Transactional;
-
 public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 {
-	@Override
+    @Override
 	public String canAnnotate(EntityMetaData repoMetaData)
 	{
 		Iterable<AttributeMetaData> annotatorAttributes = getRequiredAttributes();
@@ -26,8 +25,8 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 			}
 
 			// one of the needed attributes not of the correct type? we can not annotate
-			if (!repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
-					.equals(annotatorAttribute.getDataType()))
+			if (repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType() != annotatorAttribute
+					.getDataType())
 			{
 				// allow type string when required attribute is text (for backward compatibility)
 				if (!(repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType().equals(
@@ -64,7 +63,6 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 	}
 
 	@Override
-	@Transactional
 	public Iterator<Entity> annotate(final Iterator<Entity> sourceIterable)
 	{
 		return this.annotate(new Iterable<Entity>()

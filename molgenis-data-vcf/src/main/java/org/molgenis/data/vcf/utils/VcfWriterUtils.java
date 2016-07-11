@@ -1,55 +1,39 @@
 package org.molgenis.data.vcf.utils;
 
 import autovalue.shaded.com.google.common.common.collect.Lists;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.model.VcfAttributes;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Iterables.transform;
-import static org.molgenis.MolgenisFieldTypes.MREF;
-import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.FILTER;
-import static org.molgenis.data.vcf.VcfRepository.FORMAT_GT;
-import static org.molgenis.data.vcf.VcfRepository.ID;
-import static org.molgenis.data.vcf.VcfRepository.INFO;
-import static org.molgenis.data.vcf.VcfRepository.POS;
-import static org.molgenis.data.vcf.VcfRepository.QUAL;
-import static org.molgenis.data.vcf.VcfRepository.REF;
-import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.data.vcf.model.VcfAttributes.*;
 
 public class VcfWriterUtils
 {
 	public static final String VARIANT = "VARIANT";
 	public static final String EFFECT = "EFFECT";
-	public static final char ANNOTATION_FIELD_SEPARATOR = ';';
-	public static final String SPACE_PIPE_SEPERATOR = " | ";
+	private static final char ANNOTATION_FIELD_SEPARATOR = ';';
+	private static final String SPACE_PIPE_SEPERATOR = " | ";
 
-	private static final LinkedList<String> VCF_ATTRIBUTE_NAMES = new LinkedList<>(Arrays.asList(new String[]
-	{ CHROM, POS, ID, REF, ALT, QUAL, FILTER }));
+	private static final LinkedList<String> VCF_ATTRIBUTE_NAMES = new LinkedList<>(Arrays.asList(CHROM, POS, ID, REF,
+			ALT, QUAL, FILTER));
 	private static final char PIPE_SEPARATOR = '|';
 
 	/**
@@ -119,7 +103,7 @@ public class VcfWriterUtils
 	 */
 	public static void writeToVcf(Entity vcfEntity, BufferedWriter writer) throws MolgenisDataException, IOException
 	{
-		writeToVcf(vcfEntity, new ArrayList<AttributeMetaData>(), new ArrayList<String>(), writer);
+		writeToVcf(vcfEntity, new ArrayList<>(), new ArrayList<>(), writer);
 	}
 
 	/**
@@ -155,7 +139,7 @@ public class VcfWriterUtils
 	{
 		while (inputVcfFileScanner.hasNextLine())
 		{
-			if (line.startsWith(VcfRepository.PREFIX + VcfRepository.INFO))
+			if (line.startsWith(VcfRepository.PREFIX + VcfAttributes.INFO))
 			{
 				infoHeaderLinesMap.put(VcfUtils.getIdFromInfoField(line), line);
 			}
@@ -233,7 +217,7 @@ public class VcfWriterUtils
 		// FIXME: once we support list of primitives we can calculate based on combination of type and nillable
 		sb.append(",Number=.");
 		sb.append(",Type=");
-		sb.append(VcfUtils.toVcfDataType(infoAttributeMetaData.getDataType().getEnumType()));
+		sb.append(VcfUtils.toVcfDataType(infoAttributeMetaData.getDataType()));
 		sb.append(",Description=\"");
 
 		// http://samtools.github.io/hts-specs/VCFv4.1.pdf --> "The Description
@@ -282,15 +266,9 @@ public class VcfWriterUtils
 	private static String refAttributesToString(Iterable<AttributeMetaData> atomicAttributes,
 			List<String> attributesToInclude)
 	{
-		Iterable<AttributeMetaData> attributes = Iterables.filter(atomicAttributes, new Predicate<AttributeMetaData>()
-		{
-			@Override
-			public boolean apply(AttributeMetaData attributeMetaData)
-			{
-				return (attributeMetaData.isVisible() && isOutputAttribute(attributeMetaData,
-						Lists.newArrayList(atomicAttributes), attributesToInclude));
-			}
-		});
+		Iterable<AttributeMetaData> attributes = StreamSupport.stream(atomicAttributes.spliterator(), false)
+				.filter(attributeMetaData -> (attributeMetaData.isVisible() && isOutputAttribute(attributeMetaData,
+						Lists.newArrayList(atomicAttributes), attributesToInclude))).collect(Collectors.toList());
 		return on(SPACE_PIPE_SEPERATOR).join(transform(attributes, AttributeMetaData::getName));
 	}
 
@@ -382,7 +360,7 @@ public class VcfWriterUtils
 			AttributeMetaData attributeMetaData) throws IOException
 	{
 		String infoAttrName = attributeMetaData.getName();
-		if (attributeMetaData.getDataType().getEnumType() == FieldTypeEnum.BOOL)
+		if (attributeMetaData.getDataType() == MolgenisFieldTypes.AttributeType.BOOL)
 		{
 			Boolean infoAttrBoolValue = vcfEntity.getBoolean(infoAttrName);
 			if (infoAttrBoolValue != null && infoAttrBoolValue)
@@ -573,12 +551,9 @@ public class VcfWriterUtils
 
 		List<String> annotatorAttributeNames = expandedAddedAttributes.stream().map(AttributeMetaData::getName)
 				.collect(Collectors.toList());
-		if (!annotatorAttributeNames.contains(attribute.getName()))
-		{
-			// always write all fields that were not added by this annotation run.
-			return true;
-		}
+		// always write all fields that were not added by this annotation run.
 		// else write the field if it was specified or if nothing was sepcified at all.
-		else return attributesToInclude.contains(attribute.getName()) || attributesToInclude.isEmpty();
+		return !annotatorAttributeNames.contains(attribute.getName()) || attributesToInclude
+				.contains(attribute.getName()) || attributesToInclude.isEmpty();
 	}
 }

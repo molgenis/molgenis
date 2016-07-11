@@ -1,7 +1,6 @@
-import { Table } from './Table'
-import React, { Component } from 'react'
-import $ from 'jquery'
-import { Button } from './Button'
+import {Table} from "./Table";
+import React, {Component} from "react";
+import $ from "jquery";
 
 class FileIngestPlugin extends Component {
 	constructor(props) {
@@ -19,14 +18,14 @@ class FileIngestPlugin extends Component {
     	return <div>
     		<legend>Automatic imports</legend>
     		<div className='ingest-table'>
-    			<Table entity='FileIngest' 
-    					attrs={{name: null, url: null, entityMetaData: null, cronexpression: null, active: null}} 
-    					defaultSelectFirstRow={true}
-    					selectedRow={this.state.selectedFileIngest}
-    					onRowClick={this.onFileIngestSelect}
-    					enableExecute={true}
-    					onExecute={this.onExecute}
-						onRowDelete={this.onFileIngestDelete}/>
+				<Table entity='sys_FileIngest'
+					   attrs={{name: null, url: null, entityMetaData: null, cronexpression: null, active: null}}
+					   defaultSelectFirstRow={true}
+					   selectedRow={this.state.selectedFileIngest}
+					   onRowClick={this.onFileIngestSelect}
+					   enableExecute={true}
+					   onExecute={this.onExecute}
+					   onRowDelete={this.onFileIngestDelete}/>
     		</div>
     		{fileIngest === null ? '' :
     			<div>
@@ -36,11 +35,11 @@ class FileIngestPlugin extends Component {
     				</legend>
     				
     				<div className='ingest-table'>
-    					<Table entity='FileIngestJobExecution'
-    							enableAdd={false}
-    							sort={{attr: {name: 'startDate'}, order: 'desc', path: []}}
-    							attrs={{status:null, startDate: null, endDate: null, progressMessage: null, file: null}}
-    							query={{q: [{field: 'fileIngest', operator: 'EQUALS', value: fileIngest.id}]}} />
+						<Table entity='sys_FileIngestJobExecution'
+							   enableAdd={false}
+							   sort={{attr: {name: 'startDate'}, order: 'desc', path: []}}
+							   attrs={{status:null, startDate: null, endDate: null, progressMessage: null, file: null}}
+							   query={{q: [{field: 'fileIngest', operator: 'EQUALS', value: fileIngest.id}]}}/>
     				</div>
     			</div>}
     	</div>

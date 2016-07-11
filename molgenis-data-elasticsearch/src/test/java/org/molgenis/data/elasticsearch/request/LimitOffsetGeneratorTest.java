@@ -6,6 +6,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -24,7 +25,7 @@ public class LimitOffsetGeneratorTest
 	public void testGenerateSize()
 	{
 		LimitOffsetGenerator gen = new LimitOffsetGenerator();
-		gen.generate(searchRequestBuilderMock, new QueryImpl().pageSize(20), null);
+		gen.generate(searchRequestBuilderMock, new QueryImpl<Entity>().pageSize(20), null);
 		verify(searchRequestBuilderMock).setSize(20);
 	}
 
@@ -32,7 +33,7 @@ public class LimitOffsetGeneratorTest
 	public void testGenerateSizeUndefined()
 	{
 		LimitOffsetGenerator gen = new LimitOffsetGenerator();
-		gen.generate(searchRequestBuilderMock, new QueryImpl(), null);
+		gen.generate(searchRequestBuilderMock, new QueryImpl<>(), null);
 		verify(searchRequestBuilderMock, times(0)).setSize(any(Integer.class));
 	}
 
@@ -40,7 +41,7 @@ public class LimitOffsetGeneratorTest
 	public void testGenerateFrom()
 	{
 		LimitOffsetGenerator gen = new LimitOffsetGenerator();
-		gen.generate(searchRequestBuilderMock, new QueryImpl().offset(20), null);
+		gen.generate(searchRequestBuilderMock, new QueryImpl<Entity>().offset(20), null);
 		verify(searchRequestBuilderMock).setFrom(20);
 	}
 
@@ -48,7 +49,7 @@ public class LimitOffsetGeneratorTest
 	public void testGenerateFromUndefined()
 	{
 		LimitOffsetGenerator gen = new LimitOffsetGenerator();
-		gen.generate(searchRequestBuilderMock, new QueryImpl(), null);
+		gen.generate(searchRequestBuilderMock, new QueryImpl<>(), null);
 		verify(searchRequestBuilderMock).setFrom(0);
 	}
 

@@ -1,61 +1,28 @@
 package org.molgenis.data.mapper.controller;
 
-import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
-import static org.molgenis.data.mapper.mapping.model.CategoryMapping.create;
-import static org.molgenis.data.mapper.mapping.model.CategoryMapping.createEmpty;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import javax.validation.Valid;
-
+import com.google.common.base.Function;
+import com.google.common.collect.*;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.*;
 import org.molgenis.data.importer.ImportWizardController;
 import org.molgenis.data.mapper.data.request.GenerateAlgorithmRequest;
 import org.molgenis.data.mapper.data.request.MappingServiceRequest;
-import org.molgenis.data.mapper.mapping.model.AlgorithmResult;
-import org.molgenis.data.mapper.mapping.model.AttributeMapping;
+import org.molgenis.data.mapper.mapping.model.*;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
-import org.molgenis.data.mapper.mapping.model.CategoryMapping;
-import org.molgenis.data.mapper.mapping.model.EntityMapping;
-import org.molgenis.data.mapper.mapping.model.MappingProject;
-import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.mapper.service.impl.AlgorithmEvaluation;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.AggregateQueryImpl;
+import org.molgenis.data.support.EntityMetaDataUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
-import org.molgenis.fieldtypes.CategoricalField;
-import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.fieldtypes.MrefField;
-import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserService;
@@ -68,24 +35,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
+import javax.validation.Valid;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import autovalue.shaded.com.google.common.common.collect.Sets;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.mapper.controller.MappingServiceController.URI;
+import static org.molgenis.data.mapper.mapping.model.CategoryMapping.create;
+import static org.molgenis.data.mapper.mapping.model.CategoryMapping.createEmpty;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Controller
 @RequestMapping(URI)
@@ -280,7 +242,7 @@ public class MappingServiceController extends MolgenisPluginController
 		String algorithm = mappingServiceRequest.getAlgorithm();
 		Long offset = mappingServiceRequest.getOffset();
 		Long num = mappingServiceRequest.getNum();
-		Query query = new QueryImpl().offset(offset.intValue()).pageSize(num.intValue());
+		Query<Entity> query = new QueryImpl<Entity>().offset(offset.intValue()).pageSize(num.intValue());
 		String sourceEntityName = mappingServiceRequest.getSourceEntityName();
 		Iterable<Entity> sourceEntities = new Iterable<Entity>()
 		{
@@ -291,7 +253,7 @@ public class MappingServiceController extends MolgenisPluginController
 			}
 		};
 
-		long total = dataService.count(sourceEntityName, new QueryImpl());
+		long total = dataService.count(sourceEntityName, new QueryImpl<>());
 		long nrSuccess = 0, nrErrors = 0;
 		Map<String, String> errorMessages = new LinkedHashMap<String, String>();
 		for (AlgorithmEvaluation evaluation : algorithmService.applyAlgorithm(targetAttr, algorithm, sourceEntities))
@@ -404,7 +366,7 @@ public class MappingServiceController extends MolgenisPluginController
 	 *            ID of the mapping project
 	 * @param target
 	 *            name of the target entity
-	 * @param algorithmStates
+	 * @param skipAlgorithmStates
 	 *            the mapping algorithm states that should skip
 	 */
 	@RequestMapping(value = "/firstattributemapping", method = RequestMethod.POST)
@@ -755,15 +717,13 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("attributeMapping", attributeMapping);
 
 		// set variables for the target column in the mapping editor
-		FieldType targetAttributeDataType = dataService.getEntityMetaData(target).getAttribute(targetAttribute)
-				.getDataType();
+		AttributeMetaData targetAttr = dataService.getEntityMetaData(target).getAttribute(targetAttribute);
 
 		Stream<Entity> targetAttributeEntities;
 		String targetAttributeIdAttribute = null;
 		String targetAttributeLabelAttribute = null;
 
-		if (targetAttributeDataType instanceof XrefField || targetAttributeDataType instanceof MrefField
-				|| targetAttributeDataType instanceof CategoricalField)
+		if (EntityMetaDataUtils.isMultipleReferenceType(targetAttr))
 		{
 			targetAttributeEntities = dataService.findAll(
 					dataService.getEntityMetaData(target).getAttribute(targetAttribute).getRefEntity().getName());
@@ -793,15 +753,13 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("targetAttributeLabelAttribute", targetAttributeLabelAttribute);
 
 		// set variables for the source column in the mapping editor
-		FieldType sourceAttributeDataType = dataService.getEntityMetaData(source).getAttribute(sourceAttribute)
-				.getDataType();
+		AttributeMetaData sourceAttr = dataService.getEntityMetaData(source).getAttribute(sourceAttribute);
 
 		Stream<Entity> sourceAttributeEntities;
 		String sourceAttributeIdAttribute = null;
 		String sourceAttributeLabelAttribute = null;
 
-		if (sourceAttributeDataType instanceof XrefField || sourceAttributeDataType instanceof MrefField
-				|| sourceAttributeDataType instanceof CategoricalField)
+		if (EntityMetaDataUtils.isMultipleReferenceType(sourceAttr))
 		{
 			sourceAttributeEntities = dataService.findAll(
 					dataService.getEntityMetaData(source).getAttribute(sourceAttribute).getRefEntity().getName());
@@ -829,10 +787,10 @@ public class MappingServiceController extends MolgenisPluginController
 		// Check if the selected source attribute is aggregateable
 		AttributeMetaData sourceAttributeAttributeMetaData = dataService.getEntityMetaData(source)
 				.getAttribute(sourceAttribute);
-		if (sourceAttributeAttributeMetaData.isAggregateable())
+		if (sourceAttributeAttributeMetaData.isAggregatable())
 		{
 			AggregateResult aggregate = dataService.aggregate(source,
-					new AggregateQueryImpl().attrX(sourceAttributeAttributeMetaData).query(new QueryImpl()));
+					new AggregateQueryImpl().attrX(sourceAttributeAttributeMetaData).query(new QueryImpl<Entity>()));
 			List<Long> aggregateCounts = new ArrayList<Long>();
 			for (List<Long> count : aggregate.getMatrix())
 			{
@@ -904,7 +862,7 @@ public class MappingServiceController extends MolgenisPluginController
 				.getEntityMetaData(mappingServiceRequest.getTargetEntityName());
 		AttributeMetaData targetAttribute = targetEntityMetaData != null
 				? targetEntityMetaData.getAttribute(mappingServiceRequest.getTargetAttributeName()) : null;
-		Repository sourceRepo = dataService.getRepository(mappingServiceRequest.getSourceEntityName());
+		Repository<Entity> sourceRepo = dataService.getRepository(mappingServiceRequest.getSourceEntityName());
 
 		Iterable<AlgorithmEvaluation> algorithmEvaluations = algorithmService.applyAlgorithm(targetAttribute,
 				mappingServiceRequest.getAlgorithm(), sourceRepo);

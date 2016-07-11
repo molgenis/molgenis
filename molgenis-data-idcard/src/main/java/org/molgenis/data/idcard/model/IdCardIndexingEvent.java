@@ -1,44 +1,49 @@
 package org.molgenis.data.idcard.model;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultEntity;
+import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.ID;
+import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.MESSAGE;
+import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.STATUS;
 
-public class IdCardIndexingEvent extends DefaultEntity
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.StaticEntity;
+
+public class IdCardIndexingEvent extends StaticEntity
 {
-	private static final long serialVersionUID = 1L;
-
-	public static final String ENTITY_NAME = "IdCardIndexingEvent";
-	public static final EntityMetaData META_DATA = new IdCardIndexingEventMetaData();
-
-	public static final String ID = "id";
-	public static final String DATE = "date";
-	public static final String STATUS = "status";
-	public static final String MESSAGE = "message";
-
-	public IdCardIndexingEvent(DataService dataService)
+	public IdCardIndexingEvent(Entity entity)
 	{
-		super(META_DATA, dataService);
+		super(entity);
+	}
+
+	public IdCardIndexingEvent(EntityMetaData entityMeta)
+	{
+		super(entityMeta);
+	}
+
+	public IdCardIndexingEvent(String id, EntityMetaData entityMeta)
+	{
+		super(entityMeta);
+		set(ID, id);
 	}
 
 	public IdCardIndexingEventStatus getStatus()
 	{
-		String statusStr = getString(IdCardIndexingEvent.STATUS);
+		String statusStr = getString(STATUS);
 		return statusStr != null ? IdCardIndexingEventStatus.valueOf(statusStr) : null;
 	}
 
 	public void setStatus(IdCardIndexingEventStatus idCardIndexingEventStatus)
 	{
-		set(IdCardIndexingEvent.STATUS, idCardIndexingEventStatus.toString());
+		set(STATUS, idCardIndexingEventStatus.toString());
 	}
 
 	public String getMessage()
 	{
-		return getString(IdCardIndexingEvent.MESSAGE);
+		return getString(MESSAGE);
 	}
 
 	public void setMessage(String message)
 	{
-		set(IdCardIndexingEvent.MESSAGE, message);
+		set(MESSAGE, message);
 	}
 }

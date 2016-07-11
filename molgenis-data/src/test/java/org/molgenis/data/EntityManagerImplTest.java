@@ -1,39 +1,37 @@
 package org.molgenis.data;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.DynamicEntity;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.molgenis.data.support.DefaultEntity;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 public class EntityManagerImplTest
 {
 	private DataService dataService;
 	private EntityManagerImpl entityManagerImpl;
+	private EntityFactoryRegistry entityFactoryRegistry;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		dataService = mock(DataService.class);
-		entityManagerImpl = new EntityManagerImpl(dataService);
+		entityFactoryRegistry = mock(EntityFactoryRegistry.class);
+		entityManagerImpl = new EntityManagerImpl(dataService, entityFactoryRegistry);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void EntityManagerImpl()
 	{
-		new EntityManagerImpl(null);
+		new EntityManagerImpl(null, null);
 	}
 
 	@Test
@@ -49,13 +47,13 @@ public class EntityManagerImplTest
 		String label = "label";
 		Integer id = Integer.valueOf(0);
 		Entity entity = when(mock(Entity.class).getLabelValue()).thenReturn(label).getMock();
-		when(dataService.findOne(entityName, id)).thenReturn(entity);
+		when(dataService.findOneById(entityName, id)).thenReturn(entity);
 
 		Entity entityReference = entityManagerImpl.getReference(entityMeta, id);
 		assertEquals(entityReference.getIdValue(), id);
 		verifyNoMoreInteractions(dataService);
 		assertEquals(label, entityReference.getLabelValue());
-		verify(dataService, times(1)).findOne(entityName, id);
+		verify(dataService, times(1)).findOneById(entityName, id);
 	}
 
 	@Test
@@ -71,12 +69,12 @@ public class EntityManagerImplTest
 		String label0 = "label0";
 		Integer id0 = Integer.valueOf(0);
 		Entity entity0 = when(mock(Entity.class).getLabelValue()).thenReturn(label0).getMock();
-		when(dataService.findOne(entityName, id0)).thenReturn(entity0);
+		when(dataService.findOneById(entityName, id0)).thenReturn(entity0);
 
 		String label1 = "label1";
 		Integer id1 = Integer.valueOf(1);
 		Entity entity1 = when(mock(Entity.class).getLabelValue()).thenReturn(label1).getMock();
-		when(dataService.findOne(entityName, id1)).thenReturn(entity1);
+		when(dataService.findOneById(entityName, id1)).thenReturn(entity1);
 
 		Iterable<Entity> entityReferences = entityManagerImpl.getReferences(entityMeta, Arrays.asList(id0, id1));
 		Iterator<Entity> it = entityReferences.iterator();
@@ -86,14 +84,14 @@ public class EntityManagerImplTest
 		assertEquals(entityReference0.getIdValue(), id0);
 		verifyNoMoreInteractions(dataService);
 		assertEquals(entityReference0.getLabelValue(), label0);
-		verify(dataService, times(1)).findOne(entityName, id0);
+		verify(dataService, times(1)).findOneById(entityName, id0);
 
 		assertTrue(it.hasNext());
 		Entity entityReference1 = it.next();
 		assertEquals(entityReference1.getIdValue(), id1);
 		verifyNoMoreInteractions(dataService);
 		assertEquals(entityReference1.getLabelValue(), label1);
-		verify(dataService, times(1)).findOne(entityName, id1);
+		verify(dataService, times(1)).findOneById(entityName, id1);
 
 		assertFalse(it.hasNext());
 	}
@@ -103,8 +101,8 @@ public class EntityManagerImplTest
 	{
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
 
-		Entity entity0 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called
-		Entity entity1 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called
+		Entity entity0 = new DynamicEntity(entityMeta); // do not mock, setters will be called
+		Entity entity1 = new DynamicEntity(entityMeta); // do not mock, setters will be called
 		Stream<Entity> entities = Stream.of(entity0, entity1);
 
 		Fetch fetch = null;
@@ -117,8 +115,8 @@ public class EntityManagerImplTest
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
 		AttributeMetaData labelAttr = mock(AttributeMetaData.class);
 		when(entityMeta.getLabelAttribute()).thenReturn(labelAttr);
-		Entity entity0 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called
-		Entity entity1 = new DefaultEntity(entityMeta, dataService); // do not mock, setters will be called
+		Entity entity0 = new DynamicEntity(entityMeta); // do not mock, setters will be called
+		Entity entity1 = new DynamicEntity(entityMeta); // do not mock, setters will be called
 
 		Fetch fetch = null;
 		Stream<Entity> entities = entityManagerImpl.resolveReferences(entityMeta, Stream.of(entity0, entity1), fetch);

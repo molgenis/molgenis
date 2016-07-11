@@ -11,10 +11,10 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.convert.DateToStringConverter;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable;
@@ -193,7 +193,8 @@ public class CsvWriter extends AbstractWritable
 						value = ((Entity) obj).getIdValue().toString();
 						break;
 					case ENTITY_LABELS:
-						value = ((Entity) obj).getLabelValue();
+						Object labelValue = ((Entity) obj).getLabelValue();
+						value = labelValue != null ? labelValue.toString() : null;
 						break;
 					default:
 						throw new RuntimeException("Unknown write mode [" + getEntityWriteMode() + "]");
@@ -201,7 +202,8 @@ public class CsvWriter extends AbstractWritable
 			}
 			else
 			{
-				value = ((Entity) obj).getLabelValue();
+				Object labelValue = ((Entity) obj).getLabelValue();
+				value = labelValue != null ? labelValue.toString() : null;
 			}
 		}
 		else if (obj instanceof Iterable<?>)

@@ -36,7 +36,6 @@ public class EmxImportService implements ImportService
 	@Autowired
 	public EmxImportService(MetaDataParser parser, ImportWriter writer, DataService dataService)
 	{
-		LOG.debug("EmxImportService created");
 		this.parser = requireNonNull(parser);
 		this.writer = requireNonNull(writer);
 		this.dataService = requireNonNull(dataService);
@@ -50,9 +49,9 @@ public class EmxImportService implements ImportService
 		{
 			for (String entityName : source.getEntityNames())
 			{
-				if (entityName.equalsIgnoreCase(EmxMetaDataParser.ATTRIBUTES)) return true;
-				if (entityName.equalsIgnoreCase(EmxMetaDataParser.LANGUAGES)) return true;
-				if (entityName.equalsIgnoreCase(EmxMetaDataParser.I18NSTRINGS)) return true;
+				if (entityName.equalsIgnoreCase(EmxMetaDataParser.EMX_ATTRIBUTES)) return true;
+				if (entityName.equalsIgnoreCase(EmxMetaDataParser.EMX_LANGUAGES)) return true;
+				if (entityName.equalsIgnoreCase(EmxMetaDataParser.EMX_I18NSTRINGS)) return true;
 				if (dataService.getMeta().getEntityMetaData(entityName) != null) return true;
 			}
 		}
@@ -85,16 +84,6 @@ public class EmxImportService implements ImportService
 		catch (Exception e)
 		{
 			LOG.error("Error handling EmxImportJob", e);
-			try
-			{
-				// TODO rollback of languages
-				writer.rollbackSchemaChanges(job);
-				dataService.getMeta().refreshCaches();
-			}
-			catch (Exception ignore)
-			{
-				LOG.error("Error rolling back schema changes", ignore);
-			}
 			throw e;
 		}
 	}
@@ -133,8 +122,8 @@ public class EmxImportService implements ImportService
 	public LinkedHashMap<String, Boolean> integrationTestMetaData(MetaDataService metaDataService,
 			RepositoryCollection repositoryCollection, String defaultPackage)
 	{
-		List<String> skipEntities = Arrays.asList(EmxMetaDataParser.ATTRIBUTES, EmxMetaDataParser.PACKAGES,
-				EmxMetaDataParser.ENTITIES, EmxMetaDataParser.TAGS);
+		List<String> skipEntities = Arrays.asList(EmxMetaDataParser.EMX_ATTRIBUTES, EmxMetaDataParser.EMX_PACKAGES,
+				EmxMetaDataParser.EMX_ENTITIES, EmxMetaDataParser.EMX_TAGS);
 		ParsedMetaData parsedMetaData = parser.parse(repositoryCollection, defaultPackage);
 		return metaDataService.integrationTestMetaData(parsedMetaData.getEntityMap(), skipEntities, defaultPackage);
 	}

@@ -1,36 +1,26 @@
 package org.molgenis.data.annotation.entity.impl.hpo;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Stream;
-
+import au.com.bytecode.opencsv.CSVParser;
+import au.com.bytecode.opencsv.CSVReader;
+import com.google.common.collect.Iterables;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 
-import com.google.common.collect.Iterables;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.*;
+import java.util.stream.Stream;
 
-import au.com.bytecode.opencsv.CSVParser;
-import au.com.bytecode.opencsv.CSVReader;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 public class HPORepository extends AbstractRepository
 {
@@ -55,11 +45,14 @@ public class HPORepository extends AbstractRepository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		DefaultEntityMetaData entityMeta = new DefaultEntityMetaData("HPO");
-		entityMeta.addAttribute(HPO_DISEASE_ID_COL_NAME);
-		entityMeta.addAttribute(HPO_GENE_SYMBOL_COL_NAME);
-		entityMeta.addAttribute(HPO_ID_COL_NAME, ROLE_ID);
-		entityMeta.addAttribute(HPO_TERM_COL_NAME);
+		EntityMetaDataFactory entityMetaFactory = getApplicationContext().getBean(EntityMetaDataFactory.class);
+		AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
+
+		EntityMetaData entityMeta = entityMetaFactory.create().setSimpleName("HPO");
+		entityMeta.addAttribute(attrMetaFactory.create().setName(HPO_DISEASE_ID_COL_NAME));
+		entityMeta.addAttribute(attrMetaFactory.create().setName(HPO_GENE_SYMBOL_COL_NAME));
+		entityMeta.addAttribute(attrMetaFactory.create().setName(HPO_ID_COL_NAME), ROLE_ID);
+		entityMeta.addAttribute(attrMetaFactory.create().setName(HPO_TERM_COL_NAME));
 		return entityMeta;
 	}
 
@@ -70,7 +63,7 @@ public class HPORepository extends AbstractRepository
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		if (q.getRules().isEmpty()) return getEntities().stream();
 		if ((q.getRules().size() != 1) || (q.getRules().get(0).getOperator() != Operator.EQUALS))
@@ -112,7 +105,7 @@ public class HPORepository extends AbstractRepository
 				{
 					String geneSymbol = values[1];
 
-					Entity entity = new MapEntity(getEntityMetaData());
+					Entity entity = new DynamicEntity(getEntityMetaData());
 					entity.set(HPO_DISEASE_ID_COL_NAME, values[0]);
 					entity.set(HPO_GENE_SYMBOL_COL_NAME, geneSymbol);
 					entity.set(HPO_ID_COL_NAME, values[3]);

@@ -1,12 +1,7 @@
 package org.molgenis.data.annotation.cmd;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.molgenis.CommandLineOnlyConfiguration;
+import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.AnnotationService;
@@ -17,7 +12,7 @@ import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.support.AnnotationServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.ApplicationContextProvider;
@@ -27,6 +22,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+
+import java.util.*;
 
 /**
  * Commandline-specific annotator configuration.
@@ -43,10 +40,9 @@ public class CommandLineAnnotatorConfig
 
 	/**
 	 * Needed to make @Value annotations with property placeholders work!
-	 * 
-	 * @see https
-	 *      ://stackoverflow.com/questions/17097521/spring-3-2-value-annotation-with-pure-java-configuration-does-not
-	 *      -work-but-env
+	 *
+	 * https://stackoverflow.com/questions/17097521/spring-3-2-value-annotation-with-pure-java-configuration-does-not
+	 * -work-but-env
 	 */
 	@Bean
 	public static PropertySourcesPlaceholderConfigurer propertyPlaceholderConfigurer()
@@ -70,7 +66,7 @@ public class CommandLineAnnotatorConfig
 
 	/**
 	 * Beans that allows referencing Spring managed beans from Java code which is not managed by Spring
-	 * 
+	 *
 	 * @return
 	 */
 	@Bean
@@ -91,7 +87,7 @@ public class CommandLineAnnotatorConfig
 	@Bean
 	public Entity caddAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
@@ -109,67 +105,68 @@ public class CommandLineAnnotatorConfig
 	@Bean
 	public Entity snpEffAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
 	public Entity goNLAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
 	public Entity thousendGenomesAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
 	public Entity CGDAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
 	public Entity clinvarAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
 	public Entity dannAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
 	public Entity exacAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
 	public Entity fitConAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
 	public Entity HPOAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
+
 
 	@Bean
 	public Entity gavinAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null);
 	}
 
 	@Bean
 	public Entity omimAnnotatorSettings()
 	{
-		return new MapEntity();
+		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
 	}
 
 	@Bean
@@ -179,9 +176,15 @@ public class CommandLineAnnotatorConfig
 	}
 
 	@Bean
+	UserAuthorityFactory userAuthorityFactory()
+	{
+		return null;//FIXME
+	}
+
+	@Bean
 	PermissionSystemService permissionSystemService()
 	{
-		return new PermissionSystemService(dataService);
+		return new PermissionSystemService(dataService, userAuthorityFactory());
 	}
 
 	@Bean
@@ -192,7 +195,7 @@ public class CommandLineAnnotatorConfig
 
 	/**
 	 * Helper function to select the annotators that have received a recent brush up for the new way of configuring
-	 * 
+	 *
 	 * @param configuredAnnotators
 	 * @return
 	 */
@@ -202,8 +205,8 @@ public class CommandLineAnnotatorConfig
 		HashMap<String, RepositoryAnnotator> configuredFreshAnnotators = new HashMap<String, RepositoryAnnotator>();
 		for (String annotator : configuredAnnotators.keySet())
 		{
-			if (configuredAnnotators.get(annotator).getInfo() != null
-					&& configuredAnnotators.get(annotator).getInfo().getStatus().equals(AnnotatorInfo.Status.READY))
+			if (configuredAnnotators.get(annotator).getInfo() != null && configuredAnnotators.get(annotator).getInfo()
+					.getStatus().equals(AnnotatorInfo.Status.READY))
 			{
 				configuredFreshAnnotators.put(annotator, configuredAnnotators.get(annotator));
 			}
@@ -213,7 +216,7 @@ public class CommandLineAnnotatorConfig
 
 	/**
 	 * Helper function to print annotators per type
-	 * 
+	 *
 	 * @param annotators
 	 * @return
 	 */
@@ -229,8 +232,7 @@ public class CommandLineAnnotatorConfig
 			}
 			else
 			{
-				annotatorsPerType.put(type, new ArrayList<String>(Arrays.asList(new String[]
-				{ annotator })));
+				annotatorsPerType.put(type, new ArrayList<String>(Arrays.asList(new String[] { annotator })));
 			}
 
 		}

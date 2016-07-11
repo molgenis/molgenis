@@ -4,8 +4,10 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
+import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
 import static org.testng.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -15,9 +17,12 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.auth.MolgenisGroupMember;
+import org.molgenis.auth.MolgenisGroupMemberFactory;
+import org.molgenis.auth.MolgenisGroupMemberMetaData;
+import org.molgenis.auth.MolgenisGroupMetaData;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -44,8 +49,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(classes =
-{ Config.class })
+@ContextConfiguration(classes = { Config.class })
 public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 {
 	private static Authentication AUTHENTICATION_PREVIOUS;
@@ -64,7 +68,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		@Bean
 		public UserManagerService userManagerService()
 		{
-			return new UserManagerServiceImpl(dataService());
+			return new UserManagerServiceImpl(dataService(), molgenisGroupMemberFactory());
 		}
 
 		@Override
@@ -93,7 +97,16 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		{
 			auth.inMemoryAuthentication().withUser("user").password("password").authorities("ROLE_USER");
 		}
+
+		@Bean
+		MolgenisGroupMemberFactory molgenisGroupMemberFactory()
+		{
+			return mock(MolgenisGroupMemberFactory.class);
+		}
 	}
+
+	@Autowired
+	private MolgenisGroupMemberFactory molgenisGroupMemberFactory;
 
 	@Autowired
 	private UserManagerService userManagerService;
@@ -113,10 +126,10 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		SecurityContextHolder.getContext().setAuthentication(AUTHENTICATION_PREVIOUS);
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
+	@Test(expectedExceptions = NullPointerException.class)
 	public void userManagerServiceImpl()
 	{
-		new UserManagerServiceImpl(null);
+		new UserManagerServiceImpl(null, molgenisGroupMemberFactory);
 	}
 
 	@Test
@@ -130,11 +143,11 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		String molgenisUserName1 = "user1";
 		MolgenisUser molgenisUser1 = when(mock(MolgenisUser.class).getId()).thenReturn(molgenisUserId1).getMock();
 		when(molgenisUser1.getUsername()).thenReturn(molgenisUserName1);
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, molgenisUserId0, MolgenisUser.class))
+		when(dataService.findOneById(MolgenisUserMetaData.MOLGENIS_USER, molgenisUserId0, MolgenisUser.class))
 				.thenReturn(molgenisUser0);
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, molgenisUserId1, MolgenisUser.class))
+		when(dataService.findOneById(MolgenisUserMetaData.MOLGENIS_USER, molgenisUserId1, MolgenisUser.class))
 				.thenReturn(molgenisUser1);
-		when(dataService.findAll(MolgenisUser.ENTITY_NAME, MolgenisUser.class))
+		when(dataService.findAll(MolgenisUserMetaData.MOLGENIS_USER, MolgenisUser.class))
 				.thenReturn(Stream.of(molgenisUser0, molgenisUser1));
 		MolgenisGroupMember molgenisGroupMember0 = mock(MolgenisGroupMember.class);
 		MolgenisGroup molgenisGroup0 = mock(MolgenisGroup.class);
@@ -142,12 +155,12 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		MolgenisGroupMember molgenisGroupMember1 = mock(MolgenisGroupMember.class);
 		MolgenisGroup molgenisGroup1 = mock(MolgenisGroup.class);
 		when(molgenisGroupMember1.getMolgenisGroup()).thenReturn(molgenisGroup1);
-		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser0), MolgenisGroupMember.class))
-						.thenReturn(Stream.of(molgenisGroupMember0));
-		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, molgenisUser1), MolgenisGroupMember.class))
-						.thenReturn(Stream.of(molgenisGroupMember1));
+		when(dataService.findAll(MOLGENIS_GROUP_MEMBER,
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser0),
+				MolgenisGroupMember.class)).thenReturn(Stream.of(molgenisGroupMember0));
+		when(dataService.findAll(MOLGENIS_GROUP_MEMBER,
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser1),
+				MolgenisGroupMember.class)).thenReturn(Stream.of(molgenisGroupMember1));
 		this.setSecurityContextSuperUser();
 		assertEquals(userManagerService.getAllMolgenisUsers(),
 				Arrays.asList(new MolgenisUserViewData(molgenisUser0, singletonList(molgenisGroup0)),
@@ -166,7 +179,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		MolgenisGroup molgenisGroup0 = mock(MolgenisGroup.class);
 		MolgenisGroup molgenisGroup1 = mock(MolgenisGroup.class);
-		when(dataService.findAll(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class))
+		when(dataService.findAll(MolgenisGroupMetaData.MOLGENIS_GROUP, MolgenisGroup.class))
 				.thenReturn(Stream.of(molgenisGroup0, molgenisGroup1));
 		this.setSecurityContextSuperUser();
 		assertEquals(userManagerService.getAllMolgenisGroups(), Arrays.asList(molgenisGroup0, molgenisGroup1));
@@ -203,17 +216,17 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		molgenisGroupMemberTwo.setMolgenisGroup(group21);
 		molgenisGroupMemberTwo.setMolgenisUser(user1);
 
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, "1", MolgenisUser.class)).thenReturn(user1);
-		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user1), MolgenisGroupMember.class))
-						.thenReturn(Stream.of(molgenisGroupMemberOne, molgenisGroupMemberTwo));
+		when(dataService.findOneById(MolgenisUserMetaData.MOLGENIS_USER, "1", MolgenisUser.class)).thenReturn(user1);
+		when(dataService.findAll(MOLGENIS_GROUP_MEMBER,
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user1),
+				MolgenisGroupMember.class)).thenReturn(Stream.of(molgenisGroupMemberOne, molgenisGroupMemberTwo));
 		List<MolgenisGroup> groups = this.userManagerService.getGroupsWhereUserIsMember("1");
 
 		assertEquals(groups.size(), 2);
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
-	public void getUsersMemberInGroupNonUs()
+	public void getUsersMemberInGroupNonSu()
 	{
 		this.setSecurityContextNonSuperUserWrite();
 		this.userManagerService.getUsersMemberInGroup("22");
@@ -236,30 +249,31 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(molgenisGroupMember.getMolgenisUser()).thenReturn(user1);
 		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
 
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, "1", MolgenisUser.class)).thenReturn(user1);
-		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, "22", MolgenisGroup.class)).thenReturn(group22);
+		when(dataService.findOneById(MolgenisUserMetaData.MOLGENIS_USER, "1", MolgenisUser.class)).thenReturn(user1);
+		when(dataService.findOneById(MolgenisGroupMetaData.MOLGENIS_GROUP, "22", MolgenisGroup.class))
+				.thenReturn(group22);
 
-		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user1), MolgenisGroupMember.class))
-						.thenAnswer(new Answer<Stream<Entity>>()
-						{
-							@Override
-							public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
-							{
-								return Stream.of(molgenisGroupMember);
-							}
-						});
+		when(dataService.findAll(MOLGENIS_GROUP_MEMBER,
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user1),
+				MolgenisGroupMember.class)).thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
+		{
+			@Override
+			public Stream<MolgenisGroupMember> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Stream.of(molgenisGroupMember);
+			}
+		});
 
-		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroupMember.MOLGENISGROUP, group22), MolgenisGroupMember.class))
-						.thenAnswer(new Answer<Stream<Entity>>()
-						{
-							@Override
-							public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
-							{
-								return Stream.of(molgenisGroupMember);
-							}
-						});
+		when(dataService.findAll(MOLGENIS_GROUP_MEMBER,
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_GROUP, group22),
+				MolgenisGroupMember.class)).thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
+		{
+			@Override
+			public Stream<MolgenisGroupMember> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Stream.of(molgenisGroupMember);
+			}
+		});
 
 		List<MolgenisUserViewData> users = this.userManagerService.getUsersMemberInGroup("22");
 		assertEquals(users.size(), 1);
@@ -273,7 +287,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void getGroupsWhereUserIsNotMemberUs()
+	public void getGroupsWhereUserIsNotMemberSu()
 	{
 		setSecurityContextSuperUser();
 
@@ -286,13 +300,23 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(molgenisGroupMember.getMolgenisUser()).thenReturn(user1);
 		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
 
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, "1", MolgenisUser.class)).thenReturn(user1);
+		when(dataService.findOneById(MolgenisUserMetaData.MOLGENIS_USER, "1", MolgenisUser.class)).thenReturn(user1);
 
-		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user1), MolgenisGroupMember.class))
-						.thenReturn(Stream.of(molgenisGroupMember));
-		when(dataService.findAll(MolgenisGroup.ENTITY_NAME, MolgenisGroup.class))
+		when(dataService.findAll(MolgenisGroupMemberMetaData.MOLGENIS_USER,
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user1),
+				MolgenisGroupMember.class)).thenReturn(Stream.of(molgenisGroupMember));
+		when(dataService.findAll(MolgenisGroupMetaData.MOLGENIS_GROUP, MolgenisGroup.class))
 				.thenReturn(Stream.of(group22, group33, group44));
+
+		molgenisGroupMember = mock(MolgenisGroupMember.class);
+		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
+
+		List groupMemberships = new ArrayList<MolgenisGroupMember>();
+		groupMemberships.add(molgenisGroupMember);
+
+		when(dataService.findAll(MOLGENIS_GROUP_MEMBER,
+				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user1),
+				MolgenisGroupMember.class)).thenReturn(groupMemberships.stream());
 
 		List<MolgenisGroup> groups = this.userManagerService.getGroupsWhereUserIsNotMember("1");
 		assertEquals(groups.size(), 2);
@@ -301,6 +325,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void addUserToGroupSu() throws NumberFormatException
 	{
+		when(molgenisGroupMemberFactory.create()).thenReturn(mock(MolgenisGroupMember.class));
 		setSecurityContextSuperUser();
 		this.userManagerService.addUserToGroup("22", "1");
 	}
@@ -323,13 +348,15 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		when(molgenisGroupMember.getMolgenisUser()).thenReturn(user1);
 		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
 
-		when(dataService.findOne(MolgenisUser.ENTITY_NAME, "1", MolgenisUser.class)).thenReturn(user1);
-		when(dataService.findOne(MolgenisGroup.ENTITY_NAME, "22", MolgenisGroup.class)).thenReturn(group22);
+		when(dataService.findOneById(MolgenisUserMetaData.MOLGENIS_USER, "1", MolgenisUser.class)).thenReturn(user1);
+		when(dataService.findOneById(MolgenisGroupMetaData.MOLGENIS_GROUP, "22", MolgenisGroup.class))
+				.thenReturn(group22);
 
-		Query q = new QueryImpl().eq(MolgenisGroupMember.MOLGENISUSER, user1).and()
-				.eq(MolgenisGroupMember.MOLGENISGROUP, group22);
+		Query<MolgenisGroupMember> q = new QueryImpl<MolgenisGroupMember>()
+				.eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user1).and()
+				.eq(MolgenisGroupMemberMetaData.MOLGENIS_GROUP, group22);
 
-		when(dataService.findAll(MolgenisGroupMember.ENTITY_NAME, q, MolgenisGroupMember.class))
+		when(dataService.findAll(MOLGENIS_GROUP_MEMBER, q, MolgenisGroupMember.class))
 				.thenReturn(Stream.of(molgenisGroupMember));
 
 		this.userManagerService.removeUserFromGroup("22", "1");
@@ -344,15 +371,15 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 
 	private void setSecurityContextSuperUser()
 	{
-		Collection<? extends GrantedAuthority> authorities = Arrays
-				.<SimpleGrantedAuthority> asList(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
+		Collection<? extends GrantedAuthority> authorities = Arrays.<SimpleGrantedAuthority>asList(
+				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
 		SecurityContextHolder.getContext()
 				.setAuthentication(new UsernamePasswordAuthenticationToken(null, null, authorities));
 	}
 
 	private void setSecurityContextNonSuperUserWrite()
 	{
-		Collection<? extends GrantedAuthority> authorities = Arrays.<SimpleGrantedAuthority> asList(
+		Collection<? extends GrantedAuthority> authorities = Arrays.<SimpleGrantedAuthority>asList(
 				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "USERMANAGER"),
 				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + "USERMANAGER"));
 		SecurityContextHolder.getContext()

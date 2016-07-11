@@ -1,7 +1,8 @@
 package org.molgenis.ontology.sorta.repo;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.io.File;
 import java.util.Arrays;
@@ -11,23 +12,23 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.csv.CsvRepository;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 
 public class SortaCsvRepository extends AbstractRepository
 {
-	private DefaultEntityMetaData entityMetaData = null;
+	private EntityMetaData entityMetaData = null;
 	private final CsvRepository csvRepository;
 	private final String entityName;
 	private final String entityLabel;
@@ -35,16 +36,20 @@ public class SortaCsvRepository extends AbstractRepository
 	private final static List<CellProcessor> LOWERCASE_AND_TRIM = Arrays.asList(new LowerCaseProcessor(),
 			new TrimProcessor());
 
-	public SortaCsvRepository(File file)
+	public SortaCsvRepository(File file, EntityMetaDataFactory entityMetaFactory,
+			AttributeMetaDataFactory attrMetaFactory)
 	{
-		this.csvRepository = new CsvRepository(file, LOWERCASE_AND_TRIM, SortaServiceImpl.DEFAULT_SEPARATOR);
+		this.csvRepository = new CsvRepository(file, entityMetaFactory, attrMetaFactory, LOWERCASE_AND_TRIM,
+				SortaServiceImpl.DEFAULT_SEPARATOR);
 		this.entityName = file.getName();
 		this.entityLabel = file.getName();
 	}
 
-	public SortaCsvRepository(String entityName, String entityLabel, File uploadedFile)
+	public SortaCsvRepository(String entityName, String entityLabel, File uploadedFile,
+			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
 	{
-		this.csvRepository = new CsvRepository(uploadedFile, LOWERCASE_AND_TRIM, SortaServiceImpl.DEFAULT_SEPARATOR);
+		this.csvRepository = new CsvRepository(uploadedFile, entityMetaFactory, attrMetaFactory, LOWERCASE_AND_TRIM,
+				SortaServiceImpl.DEFAULT_SEPARATOR);
 		this.entityName = entityName;
 		this.entityLabel = entityLabel;
 	}
@@ -54,10 +59,13 @@ public class SortaCsvRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			entityMetaData = new DefaultEntityMetaData(entityName, csvRepository.getEntityMetaData());
+			AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
+
+			entityMetaData = EntityMetaData.newInstance(csvRepository.getEntityMetaData());
+			entityMetaData.setName(entityName);
 			entityMetaData.setLabel(entityLabel);
-			entityMetaData.addAttributeMetaData(new DefaultAttributeMetaData(ALLOWED_IDENTIFIER).setNillable(false),
-					ROLE_ID);
+			entityMetaData
+					.addAttribute(attrMetaFactory.create().setName(ALLOWED_IDENTIFIER).setNillable(false), ROLE_ID);
 			AttributeMetaData nameAttribute = entityMetaData.getAttribute(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
 			if (nameAttribute != null)
 			{
@@ -86,7 +94,10 @@ public class SortaCsvRepository extends AbstractRepository
 				Entity entity = iterator.next();
 				if (isEmpty(entity.getString(ALLOWED_IDENTIFIER)))
 				{
-					entity = new MapEntity(entity);
+					DynamicEntity dynamicEntity = new DynamicEntity(
+							null); // FIXME pass entity meta data instead of null
+					dynamicEntity.set(entity);
+					entity = dynamicEntity;
 					entity.set(ALLOWED_IDENTIFIER, count.incrementAndGet());
 				}
 				return entity;

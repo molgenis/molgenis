@@ -10,8 +10,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.Arrays;
 
+import org.molgenis.auth.GroupAuthorityFactory;
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
@@ -34,17 +36,29 @@ import org.testng.annotations.Test;
 
 //TODO add additional test
 @WebAppConfiguration
-@ContextConfiguration(classes =
-{ Config.class, GsonConfig.class })
+@ContextConfiguration(classes = { Config.class, GsonConfig.class })
 public class PermissionManagerControllerTest extends AbstractTestNGSpringContextTests
 {
 	@Configuration
 	public static class Config extends WebMvcConfigurerAdapter
 	{
 		@Bean
+		public UserAuthorityFactory userAuthorityFactory()
+		{
+			return mock(UserAuthorityFactory.class);
+		}
+
+		@Bean
+		public GroupAuthorityFactory groupAuthorityFactory()
+		{
+			return mock(GroupAuthorityFactory.class);
+		}
+
+		@Bean
 		public PermissionManagerController permissionManagerController()
 		{
-			return new PermissionManagerController(permissionManagerService());
+			return new PermissionManagerController(permissionManagerService(), userAuthorityFactory(),
+					groupAuthorityFactory());
 		}
 
 		@Bean
@@ -90,15 +104,15 @@ public class PermissionManagerControllerTest extends AbstractTestNGSpringContext
 		when(user1.isSuperuser()).thenReturn(true);
 		user2 = when(mock(MolgenisUser.class).getId()).thenReturn("2").getMock();
 		when(user2.isSuperuser()).thenReturn(false);
-		when(permissionManagerService.getUsers()).thenReturn(Arrays.<MolgenisUser> asList(user1, user2));
-		when(permissionManagerService.getGroups()).thenReturn(Arrays.<MolgenisGroup> asList(group1, group2));
+		when(permissionManagerService.getUsers()).thenReturn(Arrays.<MolgenisUser>asList(user1, user2));
+		when(permissionManagerService.getGroups()).thenReturn(Arrays.<MolgenisGroup>asList(group1, group2));
 
 	}
 
-	@Test(expectedExceptions = IllegalArgumentException.class)
+	@Test(expectedExceptions = NullPointerException.class)
 	public void PermissionManagerController()
 	{
-		new PermissionManagerController(null);
+		new PermissionManagerController(null, null, null);
 	}
 
 	@Test

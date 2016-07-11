@@ -1,9 +1,10 @@
 package org.molgenis.data.annotation.filter;
 
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.POS;
+import static org.molgenis.data.vcf.model.VcfAttributes.CHROM;
+import static org.molgenis.data.vcf.model.VcfAttributes.POS;
 
 import org.molgenis.data.Entity;
+
 import com.google.auto.value.AutoValue;
 
 /**
@@ -16,10 +17,10 @@ abstract class Location
 {
 	public abstract String getChrom();
 
-	public abstract long getPos();
+	public abstract int getPos();
 
 	public static Location create(Entity entity)
 	{
-		return new AutoValue_Location(entity.getString(CHROM), entity.getLong(POS));
+		return new AutoValue_Location(entity.getString(CHROM), entity.getInt(POS));
 	}
 }

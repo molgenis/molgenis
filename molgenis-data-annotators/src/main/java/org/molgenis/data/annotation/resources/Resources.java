@@ -1,9 +1,9 @@
 package org.molgenis.data.annotation.resources;
 
-import java.util.Set;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+
+import java.util.Set;
 
 public interface Resources
 {
@@ -24,7 +24,7 @@ public interface Resources
 	 *            the Query to use
 	 * @return {@link Entity}s found
 	 */
-	Iterable<Entity> findAll(String name, Query q);
+	Iterable<Entity> findAll(String name, Query<Entity> q);
 
 	Set<String> getResourcesNames();
 }

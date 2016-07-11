@@ -11,9 +11,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class AnnotatorUpdateIT
 {
@@ -41,7 +39,7 @@ public class AnnotatorUpdateIT
 	{
 		File vcf = new File("src/test/resources/annotatorUpdateIT.vcf");
 
-		try (VcfRepository repo = new VcfRepository(vcf, "vcf"))
+		try (VcfRepository repo = new VcfRepository(vcf, "vcf",null,null,null))//FIXME
 		{
 			try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(
 					"org.molgenis.data.annotation"))

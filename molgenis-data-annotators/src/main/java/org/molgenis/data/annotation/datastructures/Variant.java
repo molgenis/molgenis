@@ -13,7 +13,7 @@ public class Variant extends Locus
 	String alt;
 	String info;
 
-	public Variant(String chrom, Long pos, String id, String ref, String alt, String info)
+	public Variant(String chrom, Integer pos, String id, String ref, String alt, String info)
 	{
 		super(chrom, pos);
 		this.id = id;

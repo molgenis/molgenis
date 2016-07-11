@@ -1,25 +1,43 @@
 package org.molgenis.data.mapper.meta;
 
-import static org.molgenis.MolgenisFieldTypes.MREF;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-
-import org.molgenis.data.mapper.repository.impl.EntityMappingRepositoryImpl;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
+import static org.molgenis.data.mapper.meta.MapperPackage.PACKAGE_MAPPER;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+
 @Component
-public class MappingTargetMetaData extends DefaultEntityMetaData
+public class MappingTargetMetaData extends SystemEntityMetaData
 {
-	public static final String ENTITY_NAME = "MappingTarget";
+	private static final String SIMPLE_NAME = "MappingTarget";
+	public static final String MAPPING_TARGET = PACKAGE_MAPPER + PACKAGE_SEPARATOR + SIMPLE_NAME;
+
 	public static final String IDENTIFIER = "identifier";
-	public static final String ENTITYMAPPINGS = "entityMappings";
+	public static final String ENTITY_MAPPINGS = "entityMappings";
 	public static final String TARGET = "target";
 
-	public MappingTargetMetaData()
+	private final MapperPackage mapperPackage;
+	private final EntityMappingMetaData entityMappingMetaData;
+
+	@Autowired
+	public MappingTargetMetaData(MapperPackage mapperPackage, EntityMappingMetaData entityMappingMetaData)
 	{
-		super(ENTITY_NAME);
+		super(SIMPLE_NAME, PACKAGE_MAPPER);
+		this.mapperPackage = requireNonNull(mapperPackage);
+		this.entityMappingMetaData = requireNonNull(entityMappingMetaData);
+	}
+
+	@Override
+	public void init()
+	{
+		setPackage(mapperPackage);
+
 		addAttribute(IDENTIFIER, ROLE_ID);
-		addAttribute(ENTITYMAPPINGS).setDataType(MREF).setRefEntity(EntityMappingRepositoryImpl.META_DATA);
+		addAttribute(ENTITY_MAPPINGS).setDataType(MREF).setRefEntity(entityMappingMetaData);
 		addAttribute(TARGET).setNillable(false);
 	}
 }

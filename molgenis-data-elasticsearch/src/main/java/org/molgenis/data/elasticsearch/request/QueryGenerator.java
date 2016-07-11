@@ -1,33 +1,23 @@
 package org.molgenis.data.elasticsearch.request;
 
-import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DEFAULT_ANALYZER;
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.index.query.*;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.data.*;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
+import org.molgenis.data.elasticsearch.index.MappingsBuilder;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.util.MolgenisDateFormat;
 
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.DisMaxQueryBuilder;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisQueryException;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.elasticsearch.ElasticsearchService;
-import org.molgenis.data.elasticsearch.index.MappingsBuilder;
-import org.molgenis.util.MolgenisDateFormat;
-
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
+import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DEFAULT_ANALYZER;
 
 /**
  * Creates Elasticsearch query from MOLGENIS query
@@ -37,7 +27,7 @@ public class QueryGenerator implements QueryPartGenerator
 	public static final String ATTRIBUTE_SEPARATOR = ".";
 
 	@Override
-	public void generate(SearchRequestBuilder searchRequestBuilder, Query query, EntityMetaData entityMetaData)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Query<Entity> query, EntityMetaData entityMetaData)
 	{
 		List<QueryRule> queryRules = query.getRules();
 		if (queryRules == null || queryRules.isEmpty()) return;
@@ -194,7 +184,7 @@ public class QueryGenerator implements QueryPartGenerator
 					// construct query part
 					if (queryValue != null)
 					{
-						FieldTypeEnum dataType = attr.getDataType().getEnumType();
+						AttributeType dataType = attr.getDataType();
 						switch (dataType)
 						{
 							case BOOL:
@@ -250,7 +240,7 @@ public class QueryGenerator implements QueryPartGenerator
 					}
 					else
 					{
-						FieldTypeEnum dataType = attr.getDataType().getEnumType();
+						AttributeType dataType = attr.getDataType();
 						switch (dataType)
 						{
 							case BOOL:
@@ -344,7 +334,7 @@ public class QueryGenerator implements QueryPartGenerator
 
 				String[] attributePath = parseAttributePath(queryField);
 				AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
-				FieldTypeEnum dataType = attr.getDataType().getEnumType();
+				AttributeType dataType = attr.getDataType();
 
 				FilterBuilder filterBuilder;
 				switch (dataType)
@@ -496,7 +486,7 @@ public class QueryGenerator implements QueryPartGenerator
 				AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
 
 				// construct query part
-				FieldTypeEnum dataType = attr.getDataType().getEnumType();
+				AttributeType dataType = attr.getDataType();
 				switch (dataType)
 				{
 					case BOOL:
@@ -549,7 +539,7 @@ public class QueryGenerator implements QueryPartGenerator
 					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
 
 					// construct query part
-					FieldTypeEnum dataType = attr.getDataType().getEnumType();
+					AttributeType dataType = attr.getDataType();
 					switch (dataType)
 					{
 						case BOOL:
@@ -605,7 +595,7 @@ public class QueryGenerator implements QueryPartGenerator
 					AttributeMetaData attr = entityMetaData.getAttribute(queryField);
 					if (attr == null) throw new UnknownAttributeException(queryField);
 					// construct query part
-					FieldTypeEnum dataType = attr.getDataType().getEnumType();
+					AttributeType dataType = attr.getDataType();
 					switch (dataType)
 					{
 						case DATE:
@@ -656,7 +646,7 @@ public class QueryGenerator implements QueryPartGenerator
 					AttributeMetaData attr = entityMetaData.getAttribute(queryField);
 					if (attr == null) throw new UnknownAttributeException(queryField);
 					// construct query part
-					FieldTypeEnum dataType = attr.getDataType().getEnumType();
+					AttributeType dataType = attr.getDataType();
 					switch (dataType)
 					{
 						case DATE:
@@ -697,7 +687,7 @@ public class QueryGenerator implements QueryPartGenerator
 
 	private String getFieldName(AttributeMetaData attr, String queryField)
 	{
-		FieldTypeEnum dataType = attr.getDataType().getEnumType();
+		AttributeType dataType = attr.getDataType();
 
 		switch (dataType)
 		{
@@ -739,7 +729,7 @@ public class QueryGenerator implements QueryPartGenerator
 	{
 		String[] attributePath = parseAttributePath(queryField);
 
-		FieldTypeEnum dataType = getAttribute(entityMetaData, attributePath).getDataType().getEnumType();
+		AttributeType dataType = getAttribute(entityMetaData, attributePath).getDataType();
 
 		switch (dataType)
 		{
@@ -848,7 +838,7 @@ public class QueryGenerator implements QueryPartGenerator
 
 	private String getESDateQueryValue(Date queryValue, AttributeMetaData attr)
 	{
-		if (attr.getDataType().getEnumType() == FieldTypeEnum.DATE_TIME)
+		if (attr.getDataType() == AttributeType.DATE_TIME)
 		{
 			return MolgenisDateFormat.getDateTimeFormat().format(queryValue);
 		}

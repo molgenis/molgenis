@@ -9,5 +9,7 @@ import java.util.Map;
  */
 public interface ScriptRunner
 {
+	String getName();
+
 	String runScript(Script script, Map<String, Object> parameters);
 }

@@ -1,16 +1,18 @@
 package org.molgenis.data.mapper.repository.impl;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.mapper.meta.MappingProjectMetaData.ENTITY_NAME;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.IDENTIFIER;
-import static org.molgenis.data.mapper.meta.MappingProjectMetaData.MAPPINGTARGETS;
+import static org.molgenis.data.mapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
+import static org.molgenis.data.mapper.meta.MappingProjectMetaData.MAPPING_TARGETS;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.OWNER;
-import static org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl.META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.TagMetaData.TAG;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.fail;
@@ -18,8 +20,9 @@ import static org.testng.Assert.fail;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.mockito.Mockito;
+import org.mockito.ArgumentCaptor;
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
@@ -27,25 +30,38 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
+import org.molgenis.data.mapper.meta.MappingProjectMetaData;
 import org.molgenis.data.mapper.meta.MappingTargetMetaData;
 import org.molgenis.data.mapper.repository.MappingTargetRepository;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 @ContextConfiguration(classes = MappingProjectRepositoryImplTest.Config.class)
-public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContextTests
+public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
+	@Autowired
 	private MappingProjectRepositoryImpl mappingProjectRepositoryImpl;
+
+	@Autowired
+	private MolgenisUserFactory molgenisUserFactory;
 
 	@Autowired
 	private DataService dataService;
@@ -58,6 +74,12 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 
 	@Autowired
 	private MolgenisUserService userService;
+
+	@Autowired
+	private MappingProjectMetaData mappingProjectMeta;
+
+	@Autowired
+	private MappingTargetMetaData mappingTargetMeta;
 
 	private MolgenisUser owner;
 
@@ -74,7 +96,7 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		owner = new MolgenisUser();
+		owner = molgenisUserFactory.create();
 		owner.setUsername("flup");
 		owner.setPassword("geheim");
 		owner.setId("12345");
@@ -83,26 +105,26 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 		owner.setFirstName("Flup");
 		owner.setLastName("de Flap");
 
-		DefaultEntityMetaData target1 = new DefaultEntityMetaData("target1");
-		target1.addAttribute("id", ROLE_ID);
-		DefaultEntityMetaData target2 = new DefaultEntityMetaData("target2");
-		target2.addAttribute("id", ROLE_ID);
+		EntityMetaData target1 = entityMetaFactory.create("target1");
+		target1.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
+		EntityMetaData target2 = entityMetaFactory.create("target2");
+		target2.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
 
 		mappingProject = new MappingProject("My first mapping project", owner);
 		mappingTarget1 = mappingProject.addTarget(target1);
 		mappingTarget2 = mappingProject.addTarget(target2);
 
-		Entity mappingTargetEntity = new MapEntity(MappingTargetRepositoryImpl.META_DATA);
+		Entity mappingTargetEntity = new DynamicEntity(mappingTargetMeta);
 		mappingTargetEntity.set(MappingTargetMetaData.TARGET, "target1");
 		mappingTargetEntity.set(MappingTargetMetaData.IDENTIFIER, "mappingTargetID1");
-		Entity mappingTargetEntity2 = new MapEntity(MappingTargetRepositoryImpl.META_DATA);
+		Entity mappingTargetEntity2 = new DynamicEntity(mappingTargetMeta);
 		mappingTargetEntity2.set(MappingTargetMetaData.TARGET, "target2");
 		mappingTargetEntity2.set(MappingTargetMetaData.IDENTIFIER, "mappingTargetID2");
 		mappingTargetEntities = asList(mappingTargetEntity, mappingTargetEntity2);
 
-		mappingProjectEntity = new MapEntity(META_DATA);
+		mappingProjectEntity = new DynamicEntity(mappingProjectMeta);
 		mappingProjectEntity.set(IDENTIFIER, "mappingProjectID");
-		mappingProjectEntity.set(MAPPINGTARGETS, mappingTargetEntities);
+		mappingProjectEntity.set(MAPPING_TARGETS, mappingTargetEntities);
 		mappingProjectEntity.set(OWNER, owner);
 		mappingProjectEntity.set(NAME, "My first mapping project");
 	}
@@ -115,7 +137,9 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 
 		mappingProjectRepositoryImpl.add(mappingProject);
 
-		Mockito.verify(dataService).add(ENTITY_NAME, mappingProjectEntity);
+		ArgumentCaptor<DynamicEntity> argumentCaptor = ArgumentCaptor.forClass(DynamicEntity.class);
+		verify(dataService).add(eq(MAPPING_PROJECT), argumentCaptor.capture());
+		assertEquals(argumentCaptor.getValue().getString(IDENTIFIER), "mappingProjectID");
 		assertNull(mappingTarget1.getIdentifier());
 		assertNull(mappingTarget2.getIdentifier());
 	}
@@ -139,42 +163,42 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 	public void testDelete()
 	{
 		mappingProjectRepositoryImpl.delete("abc");
-		verify(dataService).delete(ENTITY_NAME, "abc");
+		verify(dataService).deleteById(MAPPING_PROJECT, "abc");
 	}
 
 	@Test
 	public void testQuery()
 	{
-		Query q = new QueryImpl();
+		Query<Entity> q = new QueryImpl<>();
 		q.eq(OWNER, "flup");
-		when(dataService.findAll(ENTITY_NAME, q)).thenReturn(Stream.of(mappingProjectEntity));
+		when(dataService.findAll(MAPPING_PROJECT, q)).thenReturn(Stream.of(mappingProjectEntity));
 		when(userService.getUser("flup")).thenReturn(owner);
 		when(mappingTargetRepository.toMappingTargets(mappingTargetEntities))
 				.thenReturn(asList(mappingTarget1, mappingTarget2));
 		List<MappingProject> result = mappingProjectRepositoryImpl.getMappingProjects(q);
 		mappingProject.setIdentifier("mappingProjectID");
-		assertEquals(result, asList(mappingProject));
+		assertEquals(result, singletonList(mappingProject));
 	}
 
 	@Test
 	public void testFindAll()
 	{
-		Query q = new QueryImpl();
+		Query<Entity> q = new QueryImpl<>();
 		q.eq(OWNER, "flup");
-		when(dataService.findAll(ENTITY_NAME)).thenReturn(Stream.of(mappingProjectEntity));
+		when(dataService.findAll(MAPPING_PROJECT)).thenReturn(Stream.of(mappingProjectEntity));
 		when(userService.getUser("flup")).thenReturn(owner);
 		when(mappingTargetRepository.toMappingTargets(mappingTargetEntities))
 				.thenReturn(asList(mappingTarget1, mappingTarget2));
 		List<MappingProject> result = mappingProjectRepositoryImpl.getAllMappingProjects();
 		mappingProject.setIdentifier("mappingProjectID");
-		assertEquals(result, asList(mappingProject));
+		assertEquals(result, singletonList(mappingProject));
 	}
 
 	@Test
 	public void testUpdateUnknown()
 	{
 		mappingProject.setIdentifier("mappingProjectID");
-		when(dataService.findOne(ENTITY_NAME, "mappingProjectID")).thenReturn(null);
+		when(dataService.findOneById(TAG, "mappingProjectID")).thenReturn(null);
 		try
 		{
 			mappingProjectRepositoryImpl.update(mappingProject);
@@ -187,8 +211,12 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 	}
 
 	@Configuration
+	@ComponentScan({ "org.molgenis.data.mapper.meta", "org.molgenis.auth" })
 	public static class Config
 	{
+		@Autowired
+		private MappingProjectMetaData mappingProjectMeta;
+
 		@Bean
 		public DataService dataService()
 		{
@@ -216,7 +244,8 @@ public class MappingProjectRepositoryImplTest extends AbstractTestNGSpringContex
 		@Bean
 		public MappingProjectRepositoryImpl mappingProjectRepositoryImpl()
 		{
-			return new MappingProjectRepositoryImpl(dataService(), mappingTargetRepository());
+			return new MappingProjectRepositoryImpl(dataService(), mappingTargetRepository(), molgenisUserService(),
+					idGenerator(), mappingProjectMeta);
 		}
 
 	}

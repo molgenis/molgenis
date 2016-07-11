@@ -5,14 +5,25 @@ import static org.testng.Assert.assertTrue;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.molgenis.data.jobs.model.JobExecution;
+import org.molgenis.data.jobs.model.JobExecutionMetaData;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class ProgressImplTest
+@ContextConfiguration(classes = { ProgressImplTest.Config.class })
+public class ProgressImplTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private JobExecutionMetaData jobExecutionMeta;
+
 	private ProgressImpl progress;
 	@Mock
 	private JobExecutionUpdater updater;
@@ -29,7 +40,9 @@ public class ProgressImplTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		jobExecution = new JobExecution(null);
+		jobExecution = new JobExecution(jobExecutionMeta)
+		{
+		};
 		jobExecution.setIdentifier("ABCDE");
 		jobExecution.setType("Annotator");
 		progress = new ProgressImpl(jobExecution, updater, mailSender);
@@ -42,7 +55,7 @@ public class ProgressImplTest
 		progress.status("Working....");
 		progress.success();
 		System.out.println(jobExecution.getLog());
-		assertTrue(jobExecution.getLog().contains("INFO  - start ()" + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("INFO  - Execution started." + System.lineSeparator()));
 		assertTrue(jobExecution.getLog().contains("INFO  - Working...." + System.lineSeparator()));
 		assertTrue(jobExecution.getLog().contains("INFO  - Execution successful. Time spent: "));
 	}
@@ -55,13 +68,12 @@ public class ProgressImplTest
 		progress.status("Working....");
 		progress.success();
 		System.out.println(jobExecution.getLog());
-		assertTrue(jobExecution.getLog().contains("INFO  - start ()" + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("INFO  - Execution started." + System.lineSeparator()));
 		assertTrue(jobExecution.getLog().contains("INFO  - Working...." + System.lineSeparator()));
 		assertTrue(jobExecution.getLog().contains("INFO  - Execution successful. Time spent: "));
 
 		SimpleMailMessage mail = new SimpleMailMessage();
-		mail.setTo(new String[]
-		{ "a@b.c", "d@e.f" });
+		mail.setTo(new String[] { "a@b.c", "d@e.f" });
 		mail.setSubject("Annotator job succeeded.");
 		mail.setText(jobExecution.getLog());
 		Mockito.verify(mailSender).send(mail);
@@ -76,16 +88,22 @@ public class ProgressImplTest
 		Exception ex = new IllegalArgumentException("blah");
 		progress.failed(ex);
 		System.out.println(jobExecution.getLog());
-		assertTrue(jobExecution.getLog().contains("INFO  - start ()" + System.lineSeparator()));
+		assertTrue(jobExecution.getLog().contains("INFO  - Execution started." + System.lineSeparator()));
 		assertTrue(jobExecution.getLog().contains("INFO  - Working...." + System.lineSeparator()));
 		assertTrue(jobExecution.getLog().contains("ERROR - Failed"));
 		assertTrue(jobExecution.getLog().contains(ex.getMessage()));
 
 		SimpleMailMessage mail = new SimpleMailMessage();
-		mail.setTo(new String[]
-		{ "a@b.c", "d@e.f" });
+		mail.setTo(new String[] { "a@b.c", "d@e.f" });
 		mail.setSubject("Annotator job failed.");
 		mail.setText(jobExecution.getLog());
 		Mockito.verify(mailSender).send(mail);
+	}
+
+	@Configuration
+	@ComponentScan({ "org.molgenis.data.jobs.model" })
+	public static class Config
+	{
+
 	}
 }

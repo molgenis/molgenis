@@ -39,9 +39,9 @@ public class MultiFileResourceTest
 	@Mock
 	private ResourceConfig chrom4Config;
 	@Mock
-	private Repository chrom3Repository;
+	private Repository<Entity> chrom3Repository;
 	@Mock
-	private Repository chrom4Repository;
+	private Repository<Entity> chrom4Repository;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -49,7 +49,14 @@ public class MultiFileResourceTest
 		MockitoAnnotations.initMocks(this);
 		configs = ImmutableMap.of("3", chrom3Config, "4", chrom4Config);
 		when(config.getConfigs()).thenReturn(configs);
-		multiFileResource = new MultiFileResource("name", config, factory);
+		multiFileResource = new MultiFileResource("name", config)
+		{
+			@Override
+			public RepositoryFactory getRepositoryFactory()
+			{
+				return factory;
+			}
+		};
 	}
 
 	@Test
@@ -58,7 +65,7 @@ public class MultiFileResourceTest
 		File chrom3File = File.createTempFile("chrom3", "tmp");
 		when(chrom3Config.getFile()).thenReturn(chrom3File);
 		when(factory.createRepository(chrom3File)).thenReturn(chrom3Repository);
-		Query q = QueryImpl.EQ("#CHROM", "3").and().eq("POS", 12345);
+		Query<Entity> q = QueryImpl.EQ("#CHROM", "3").and().eq("POS", 12345);
 		List<Entity> result = Lists.newArrayList();
 		when(chrom3Repository.findAll(q)).thenReturn(Stream.empty());
 		assertEquals(result, Lists.newArrayList(multiFileResource.findAll(q)));

@@ -1,39 +1,49 @@
 package org.molgenis.data.annotation.query;
 
-import java.util.Arrays;
-import java.util.Collection;
-
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.datastructures.Locus;
 import org.molgenis.data.annotation.entity.QueryCreator;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.model.VcfAttributes;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Creates a Locus query that finds rows that match chromosome/position
  */
 public class LocusQueryCreator implements QueryCreator
 {
-	@Override
-	public Query createQuery(Entity entity)
+	private final VcfAttributes vcfAttributes;
+
+	public LocusQueryCreator(VcfAttributes vcfAttributes)
 	{
-		String chromosome = entity.getString(VcfRepository.CHROM);
-		Long position = entity.getLong(VcfRepository.POS);
+
+		this.vcfAttributes = requireNonNull(vcfAttributes);
+	}
+
+	@Override
+	public Query<Entity> createQuery(Entity entity)
+	{
+		String chromosome = entity.getString(VcfAttributes.CHROM);
+		Integer position = entity.getInt(VcfAttributes.POS);
 		Locus locus = new Locus(chromosome, position);
 		return createQuery(locus);
 	}
 
-	public static Query createQuery(Locus locus)
+	public static Query<Entity> createQuery(Locus locus)
 	{
-		return QueryImpl.EQ(VcfRepository.CHROM, locus.getChrom()).and().eq(VcfRepository.POS, locus.getPos());
+		return QueryImpl.EQ(VcfAttributes.CHROM, locus.getChrom()).and().eq(VcfAttributes.POS, locus.getPos());
 	}
 
 	@Override
 	public Collection<AttributeMetaData> getRequiredAttributes()
 	{
-		return Arrays.asList(VcfRepository.CHROM_META, VcfRepository.POS_META);
+		return Arrays.asList(vcfAttributes.getChromAttribute(), vcfAttributes.getPosAttribute());
 	}
 
 }

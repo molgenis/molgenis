@@ -2,16 +2,17 @@ package org.molgenis.data.vcf.format;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.MetaValidationUtils;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.genotype.Allele;
 import org.molgenis.genotype.GenotypeDataException;
@@ -22,132 +23,139 @@ import org.molgenis.vcf.meta.VcfMeta;
 import org.molgenis.vcf.meta.VcfMetaFormat;
 import org.molgenis.vcf.meta.VcfMetaInfo;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.elasticsearch.common.base.Preconditions.checkNotNull;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.ALT_META;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
-import static org.molgenis.data.vcf.VcfRepository.FILTER;
-import static org.molgenis.data.vcf.VcfRepository.FILTER_META;
-import static org.molgenis.data.vcf.VcfRepository.ID;
-import static org.molgenis.data.vcf.VcfRepository.ID_META;
-import static org.molgenis.data.vcf.VcfRepository.INFO;
-import static org.molgenis.data.vcf.VcfRepository.INTERNAL_ID;
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
 import static org.molgenis.data.vcf.VcfRepository.NAME;
 import static org.molgenis.data.vcf.VcfRepository.ORIGINAL_NAME;
-import static org.molgenis.data.vcf.VcfRepository.POS;
-import static org.molgenis.data.vcf.VcfRepository.POS_META;
-import static org.molgenis.data.vcf.VcfRepository.QUAL;
-import static org.molgenis.data.vcf.VcfRepository.QUAL_META;
-import static org.molgenis.data.vcf.VcfRepository.REF;
-import static org.molgenis.data.vcf.VcfRepository.REF_META;
-import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
+import static org.molgenis.data.vcf.model.VcfAttributes.*;
+import static org.molgenis.util.EntityUtils.getTypedValue;
 
 public class VcfToEntity
 {
+	private final VcfMeta vcfMeta;
+	private final VcfAttributes vcfAttributes;
+	private final EntityMetaDataFactory entityMetaFactory;
+	private final AttributeMetaDataFactory attrMetaFactory;
 	private final EntityMetaData entityMetaData;
 	private final EntityMetaData sampleEntityMetaData;
-	private final VcfMeta vcfMeta;
 
-	public VcfToEntity(String entityName, VcfMeta vcfMeta)
+	public VcfToEntity(String entityName, VcfMeta vcfMeta, VcfAttributes vcfAttributes,
+			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
 	{
-		this.vcfMeta = checkNotNull(vcfMeta);
-		sampleEntityMetaData = createSampleEntityMetaData(checkNotNull(entityName),
-				checkNotNull(vcfMeta.getFormatMeta()));
+		this.vcfMeta = requireNonNull(vcfMeta);
+		this.vcfAttributes = requireNonNull(vcfAttributes);
+		this.entityMetaFactory = requireNonNull(entityMetaFactory);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
+
+		sampleEntityMetaData = createSampleEntityMetaData(requireNonNull(entityName),
+				requireNonNull((vcfMeta.getFormatMeta())));
 		entityMetaData = createEntityMetaData(entityName, vcfMeta);
-	}
-
-	private EntityMetaData createSampleEntityMetaData(String entityName, Iterable<VcfMetaFormat> formatMetaData)
-	{
-		DefaultEntityMetaData result = null;
-		if (formatMetaData.iterator().hasNext())
-		{
-			result = new DefaultEntityMetaData(entityName + "_Sample");
-			DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(ID,
-					MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true);
-			idAttributeMetaData.setVisible(false);
-
-			result.addAttributeMetaData(idAttributeMetaData, ROLE_ID);
-			DefaultAttributeMetaData nameAttributeMetaData = new DefaultAttributeMetaData(NAME,
-					MolgenisFieldTypes.FieldTypeEnum.TEXT).setAggregateable(true);
-			result.addAttributeMetaData(nameAttributeMetaData, ROLE_LABEL, ROLE_LOOKUP);
-			for (VcfMetaFormat meta : formatMetaData)
-			{
-				String name = meta.getId();
-				if (MetaValidationUtils.KEYWORDS.contains(name)
-						|| MetaValidationUtils.KEYWORDS.contains(name.toUpperCase()))
-				{
-					name = name + "_";
-				}
-				AttributeMetaData attributeMetaData = new DefaultAttributeMetaData(
-						name.replaceAll("[-.*$&%^()#!@?]", "_"), vcfFieldTypeToMolgenisFieldType(meta))
-								.setAggregateable(true).setLabel(meta.getId());
-
-				result.addAttributeMetaData(attributeMetaData);
-			}
-		}
-		return result;
 	}
 
 	private EntityMetaData createEntityMetaData(String entityName, VcfMeta vcfMeta)
 	{
-		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(entityName);
-		entityMetaData.addAttributeMetaData(CHROM_META);
-		entityMetaData.addAttributeMetaData(ALT_META);
-		entityMetaData.addAttributeMetaData(POS_META);
-		entityMetaData.addAttributeMetaData(REF_META);
-		entityMetaData.addAttributeMetaData(FILTER_META);
-		entityMetaData.addAttributeMetaData(QUAL_META);
-		entityMetaData.addAttributeMetaData(ID_META);
-		DefaultAttributeMetaData idAttributeMetaData = new DefaultAttributeMetaData(INTERNAL_ID,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		AttributeMetaData idAttributeMetaData = attrMetaFactory.create().setName(INTERNAL_ID).setDataType(STRING);
 		idAttributeMetaData.setVisible(false);
-		entityMetaData.addAttributeMetaData(idAttributeMetaData, ROLE_ID);
-		DefaultAttributeMetaData infoMetaData = new DefaultAttributeMetaData(INFO,
-				MolgenisFieldTypes.FieldTypeEnum.COMPOUND).setNillable(true);
-		List<AttributeMetaData> metadataInfoField = new ArrayList<AttributeMetaData>();
+
+		EntityMetaData entityMeta = entityMetaFactory.create().setSimpleName(entityName);
+		entityMeta.addAttribute(vcfAttributes.getChromAttribute());
+		entityMeta.addAttribute(vcfAttributes.getAltAttribute());
+		entityMeta.addAttribute(vcfAttributes.getPosAttribute());
+		entityMeta.addAttribute(vcfAttributes.getRefAttribute());
+		entityMeta.addAttribute(vcfAttributes.getFilterAttribute());
+		entityMeta.addAttribute(vcfAttributes.getQualAttribute());
+		entityMeta.addAttribute(vcfAttributes.getIdAttribute());
+		entityMeta.addAttribute(idAttributeMetaData, ROLE_ID);
+
+		AttributeMetaData infoMetaData = attrMetaFactory.create().setName(INFO).setDataType(COMPOUND).setNillable(true);
+		List<AttributeMetaData> metadataInfoField = new ArrayList<>();
 		for (VcfMetaInfo info : vcfMeta.getInfoMeta())
 		{
+			// according to the VCF standard it is allowed to have info columns with names that equal default VCF cols.
+			// rename these info columns in the meta data to prevent collisions.
 			String postFix = "";
-			for (AttributeMetaData attributeMetaData : entityMetaData.getAtomicAttributes())
+			switch (info.getId())
 			{
-				if (attributeMetaData.getName().equals(info.getId()))
-				{
-					postFix = "_" + entityName;
-				}
+				case INTERNAL_ID:
+				case CHROM:
+				case ALT:
+				case POS:
+				case REF:
+				case FILTER:
+				case QUAL:
+				case ID:
+					postFix = '_' + entityName;
+					break;
+				default:
+					break;
 			}
+
 			String name = info.getId();
-			if (MetaValidationUtils.KEYWORDS.contains(name)
-					|| MetaValidationUtils.KEYWORDS.contains(name.toUpperCase()))
+			if (MetaValidationUtils.KEYWORDS.contains(name) || MetaValidationUtils.KEYWORDS
+					.contains(name.toUpperCase()))
 			{
 				name = name + "_";
 			}
-			DefaultAttributeMetaData attributeMetaData = new DefaultAttributeMetaData(name + postFix,
-					vcfReaderFormatToMolgenisType(info)).setAggregateable(true);
+			AttributeMetaData attributeMetaData = attrMetaFactory.create().setName(name + postFix)
+					.setDataType(vcfReaderFormatToMolgenisType(info)).setAggregatable(true);
 
-			attributeMetaData.setDescription(StringUtils.isBlank(info.getDescription())
-					? VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION : info.getDescription());
+			attributeMetaData.setDescription(
+					StringUtils.isBlank(info.getDescription()) ? VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION : info
+							.getDescription());
 			metadataInfoField.add(attributeMetaData);
 		}
-		infoMetaData.setAttributesMetaData(metadataInfoField);
-		entityMetaData.addAttributeMetaData(infoMetaData);
+		infoMetaData.setAttributeParts(metadataInfoField);
+		entityMeta.addAttribute(infoMetaData);
 		if (sampleEntityMetaData != null)
 		{
-			DefaultAttributeMetaData samplesAttributeMeta = new DefaultAttributeMetaData(SAMPLES,
-					MolgenisFieldTypes.FieldTypeEnum.MREF).setRefEntity(sampleEntityMetaData).setLabel("SAMPLES");
-			entityMetaData.addAttributeMetaData(samplesAttributeMeta);
+			AttributeMetaData samplesAttributeMeta = attrMetaFactory.create().setName(SAMPLES).setDataType(MREF)
+					.setRefEntity(sampleEntityMetaData).setLabel("SAMPLES");
+			entityMeta.addAttribute(samplesAttributeMeta);
 		}
-		return entityMetaData;
+		return entityMeta;
 	}
 
-	private static MolgenisFieldTypes.FieldTypeEnum vcfReaderFormatToMolgenisType(VcfMetaInfo vcfMetaInfo)
+	private EntityMetaData createSampleEntityMetaData(String entityName, Iterable<VcfMetaFormat> formatMetaData)
+	{
+		EntityMetaData result = null;
+		if (formatMetaData.iterator().hasNext())
+		{
+			result = entityMetaFactory.create().setSimpleName(entityName + "_Sample");
+
+			AttributeMetaData idAttr = attrMetaFactory.create().setName(ID).setAggregatable(true).setVisible(false);
+			AttributeMetaData nameAttr = attrMetaFactory.create().setName(NAME).setDataType(TEXT).setAggregatable(true);
+			AttributeMetaData originalNameAttr = attrMetaFactory.create().setName(ORIGINAL_NAME).setDataType(TEXT);
+
+			result.addAttribute(idAttr, ROLE_ID);
+			result.addAttribute(nameAttr, ROLE_LABEL, ROLE_LOOKUP);
+			for (VcfMetaFormat meta : formatMetaData)
+			{
+				String name = meta.getId();
+				if (MetaValidationUtils.KEYWORDS.contains(name) || MetaValidationUtils.KEYWORDS
+						.contains(name.toUpperCase()))
+				{
+					name = name + "_";
+				}
+				AttributeMetaData attr = attrMetaFactory.create().setName(name.replaceAll("[-.*$&%^()#!@?]", "_"))
+						.setDataType(vcfFieldTypeToMolgenisFieldType(meta)).setAggregatable(true)
+						.setLabel(meta.getId());
+
+				result.addAttribute(attr);
+			}
+
+			result.addAttribute(originalNameAttr);
+		}
+		return result;
+	}
+
+	private static AttributeType vcfReaderFormatToMolgenisType(VcfMetaInfo vcfMetaInfo)
 	{
 		String number = vcfMetaInfo.getNumber();
 		boolean isListValue;
@@ -167,38 +175,38 @@ public class VcfToEntity
 				if (isListValue)
 				{
 					// TODO support list of primitives datatype
-					return MolgenisFieldTypes.FieldTypeEnum.STRING;
+					return STRING;
 				}
-				return MolgenisFieldTypes.FieldTypeEnum.STRING;
+				return STRING;
 			case FLAG:
-				return MolgenisFieldTypes.FieldTypeEnum.BOOL;
+				return BOOL;
 			case FLOAT:
 				if (isListValue)
 				{
 					// TODO support list of primitives datatype
-					return MolgenisFieldTypes.FieldTypeEnum.STRING;
+					return STRING;
 				}
-				return MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
+				return DECIMAL;
 			case INTEGER:
 				if (isListValue)
 				{
 					// TODO support list of primitives datatype
-					return MolgenisFieldTypes.FieldTypeEnum.STRING;
+					return STRING;
 				}
-				return MolgenisFieldTypes.FieldTypeEnum.INT;
+				return INT;
 			case STRING:
 				if (isListValue)
 				{
 					// TODO support list of primitives datatype
-					return MolgenisFieldTypes.FieldTypeEnum.TEXT;
+					return TEXT;
 				}
-				return MolgenisFieldTypes.FieldTypeEnum.TEXT;
+				return TEXT;
 			default:
-				throw new MolgenisDataException("unknown vcf info type [" + vcfMetaInfo.getType() + "]");
+				throw new MolgenisDataException(format("Unknown vcf info type [%s]", vcfMetaInfo.getType()));
 		}
 	}
 
-	private static MolgenisFieldTypes.FieldTypeEnum vcfFieldTypeToMolgenisFieldType(VcfMetaFormat format)
+	private static AttributeType vcfFieldTypeToMolgenisFieldType(VcfMetaFormat format)
 	{
 		String number = format.getNumber();
 		boolean isListValue;
@@ -218,32 +226,32 @@ public class VcfToEntity
 				if (isListValue)
 				{
 					// TODO support list of primitives datatype
-					return MolgenisFieldTypes.FieldTypeEnum.STRING;
+					return STRING;
 				}
-				return MolgenisFieldTypes.FieldTypeEnum.STRING;
+				return STRING;
 			case FLOAT:
 				if (isListValue)
 				{
 					// TODO support list of primitives datatype
-					return MolgenisFieldTypes.FieldTypeEnum.STRING;
+					return STRING;
 				}
-				return MolgenisFieldTypes.FieldTypeEnum.DECIMAL;
+				return DECIMAL;
 			case INTEGER:
 				if (isListValue)
 				{
 					// TODO support list of primitives datatype
-					return MolgenisFieldTypes.FieldTypeEnum.STRING;
+					return STRING;
 				}
-				return MolgenisFieldTypes.FieldTypeEnum.INT;
+				return INT;
 			case STRING:
 				if (isListValue)
 				{
 					// TODO support list of primitives datatype
-					return MolgenisFieldTypes.FieldTypeEnum.STRING;
+					return STRING;
 				}
-				return MolgenisFieldTypes.FieldTypeEnum.STRING;
+				return STRING;
 			default:
-				throw new MolgenisDataException("unknown vcf field type [" + format.getType() + "]");
+				throw new MolgenisDataException(format("Unknown vcf field type [%s]", format.getType()));
 		}
 	}
 
@@ -254,7 +262,7 @@ public class VcfToEntity
 
 	public Entity toEntity(VcfRecord vcfRecord)
 	{
-		Entity entity = new MapEntity(entityMetaData);
+		Entity entity = new DynamicEntity(entityMetaData);
 		entity.set(CHROM, vcfRecord.getChromosome());
 		entity.set(ALT, StringUtils.join(Lists.transform(vcfRecord.getAlternateAlleles(), Allele::toString), ','));
 		entity.set(POS, vcfRecord.getPosition());
@@ -275,9 +283,9 @@ public class VcfToEntity
 		return entity;
 	}
 
-	protected List<Entity> createSampleEntities(VcfRecord vcfRecord, String entityPosAlt, String entityId)
+	private List<Entity> createSampleEntities(VcfRecord vcfRecord, String entityPosAlt, String entityId)
 	{
-		List<Entity> samples = new ArrayList<Entity>();
+		List<Entity> samples = new ArrayList<>();
 		Iterator<VcfSample> sampleIterator = vcfRecord.getSamples().iterator();
 		if (vcfRecord.getNrSamples() > 0)
 		{
@@ -286,10 +294,12 @@ public class VcfToEntity
 			{
 				String[] format = vcfRecord.getFormat();
 				VcfSample sample = sampleIterator.next();
-				Entity sampleEntity = new MapEntity(sampleEntityMetaData);
+				Entity sampleEntity = new DynamicEntity(sampleEntityMetaData);
 				for (int i = 0; i < format.length; i = i + 1)
 				{
-					sampleEntity.set(format[i], sample.getData(i));
+					String strValue = sample.getData(i);
+					Object value = getTypedValue(strValue, sampleEntity.getEntityMetaData().getAttribute(format[i]));
+					sampleEntity.set(format[i], value);
 				}
 				sampleEntity.set(ID, entityId + j);
 
@@ -304,7 +314,7 @@ public class VcfToEntity
 		return samples;
 	}
 
-	protected void writeInfoFieldsToEntity(VcfRecord vcfRecord, Entity entity)
+	private void writeInfoFieldsToEntity(VcfRecord vcfRecord, Entity entity)
 	{
 		// set all flag fields default on false.
 		for (VcfMetaInfo info : vcfMeta.getInfoMeta())
@@ -346,9 +356,17 @@ public class VcfToEntity
 				// TODO support list of primitives datatype
 				val = StringUtils.join((List<?>) val, ',');
 			}
-			if (val instanceof Float && Float.isNaN((Float) val))
+			if (val instanceof Float)
 			{
-				val = null;
+				if (Float.isNaN((Float) val))
+				{
+					val = null;
+				}
+				else if (val != null)
+				{
+					val = new BigDecimal(String.valueOf(val)).doubleValue();
+				}
+
 			}
 			// if a flag field exists in the line, then this field is true, although the value is null
 
@@ -359,9 +377,8 @@ public class VcfToEntity
 					postFix = "_" + entity.getEntityMetaData().getName();
 				}
 				if (!(vcfInfo.getKey() + postFix).equals(".")
-						&& entityMetaData.getAttribute(vcfInfo.getKey() + postFix) != null
-						&& entityMetaData.getAttribute(vcfInfo.getKey() + postFix).getDataType().getEnumType()
-								.equals(MolgenisFieldTypes.FieldTypeEnum.BOOL))
+						&& entityMetaData.getAttribute(vcfInfo.getKey() + postFix) != null && entityMetaData
+						.getAttribute(vcfInfo.getKey() + postFix).getDataType().equals(AttributeType.BOOL))
 				{
 					val = true;
 				}

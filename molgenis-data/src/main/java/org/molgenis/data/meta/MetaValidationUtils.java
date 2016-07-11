@@ -1,15 +1,18 @@
 package org.molgenis.data.meta;
 
+import com.google.common.collect.Sets;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.ReservedKeywords;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+
 import java.util.Set;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.fieldtypes.CompoundField;
-import org.molgenis.model.ReservedKeywords;
-
-import com.google.common.collect.Sets;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 
 /**
  * Validates if metadata is internally consistent and correct.
@@ -23,10 +26,7 @@ public class MetaValidationUtils
 	static
 	{
 		// we can generate java(script) files with freemarker, so prevent use of reserved words
-		KEYWORDS.addAll(ReservedKeywords.JAVA_KEYWORDS);
 		KEYWORDS.addAll(ReservedKeywords.JAVASCRIPT_KEYWORDS);
-
-		KEYWORDS.addAll(ReservedKeywords.MYSQL_KEYWORDS);
 
 		// some words are reserved for the RestAPI and default packages/entities/attributes, etc.
 		KEYWORDS.addAll(ReservedKeywords.MOLGENIS_KEYWORDS);
@@ -79,7 +79,7 @@ public class MetaValidationUtils
 		for (AttributeMetaData amd : amds)
 		{
 			validateAttribute(amd);
-			if (amd.getDataType() instanceof CompoundField)
+			if (amd.getDataType() == COMPOUND)
 			{
 				validateAttributes(amd.getAttributeParts());
 			}
@@ -101,8 +101,8 @@ public class MetaValidationUtils
 				throw new MolgenisDataException("Computed attribute " + amd.getName() + " cannot have default value");
 			}
 
-			FieldTypeEnum fieldType = amd.getDataType().getEnumType();
-			if (fieldType == FieldTypeEnum.XREF || fieldType == FieldTypeEnum.MREF)
+			AttributeType fieldType = amd.getDataType();
+			if (fieldType == AttributeType.XREF || fieldType == AttributeType.MREF)
 			{
 				throw new MolgenisDataException("Attribute " + amd.getName()
 						+ " cannot have default value since specifying a default value for XREF and MREF data types is not yet supported.");
@@ -117,8 +117,12 @@ public class MetaValidationUtils
 	{
 		try
 		{
-			validateName(emd.getSimpleName());
-			validateAttributes(emd.getAttributes());
+			if (!emd.getName().equals(ATTRIBUTE_META_DATA) && !emd.getName().equals(ENTITY_META_DATA) && !emd.getName()
+					.equals(PACKAGE))
+			{
+				validateName(emd.getSimpleName());
+				validateAttributes(emd.getAttributes());
+			}
 
 			if (emd.getIdAttribute() != null && emd.getIdAttribute().getDefaultValue() != null)
 			{

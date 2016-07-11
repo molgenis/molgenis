@@ -1,6 +1,6 @@
 package org.molgenis.data.annotation;
 
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 public interface RefEntityAnnotator
 {
@@ -11,5 +11,5 @@ public interface RefEntityAnnotator
 	 *            the meta data of the source repository
 	 * @return the meta data of the new repository
 	 */
-	EntityMetaData getOutputMetaData(EntityMetaData sourceEMD);
+	EntityMetaData getOutputAttributes(EntityMetaData sourceEMD);
 }

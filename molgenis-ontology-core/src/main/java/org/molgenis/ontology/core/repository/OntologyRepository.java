@@ -1,7 +1,7 @@
 package org.molgenis.ontology.core.repository;
 
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ENTITY_NAME;
 import static org.molgenis.ontology.core.meta.OntologyMetaData.ID;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
 import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_IRI;
 import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_NAME;
 
@@ -27,7 +27,7 @@ public class OntologyRepository
 	 */
 	public Stream<Ontology> getOntologies()
 	{
-		return dataService.findAll(ENTITY_NAME).map(OntologyRepository::toOntology);
+		return dataService.findAll(ONTOLOGY).map(OntologyRepository::toOntology);
 	}
 
 	/**
@@ -39,7 +39,7 @@ public class OntologyRepository
 	 */
 	public Ontology getOntology(String IRI)
 	{
-		return toOntology(dataService.findOne(ENTITY_NAME, QueryImpl.EQ(ONTOLOGY_IRI, IRI)));
+		return toOntology(dataService.findOne(ONTOLOGY, QueryImpl.EQ(ONTOLOGY_IRI, IRI)));
 	}
 
 	private static Ontology toOntology(Entity entity)

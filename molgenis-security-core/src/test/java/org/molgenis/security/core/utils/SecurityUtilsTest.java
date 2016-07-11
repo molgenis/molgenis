@@ -3,6 +3,7 @@ package org.molgenis.security.core.utils;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.when;
+import static org.molgenis.security.core.runas.SystemSecurityToken.USER_SYSTEM;
 import static org.molgenis.security.core.utils.SecurityUtils.ANONYMOUS_USERNAME;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX;
@@ -102,6 +103,20 @@ public class SecurityUtilsTest
 		when((Collection<GrantedAuthority>) authentication.getAuthorities()).thenReturn(
 				Arrays.<GrantedAuthority> asList(authoritySu));
 		assertTrue(SecurityUtils.currentUserIsSu());
+	}
+
+	@Test
+	public void currentUserIsSystemTrue() throws Exception
+	{
+		when(userDetails.getUsername()).thenReturn(USER_SYSTEM);
+		assertTrue(SecurityUtils.currentUserisSystem());
+	}
+
+	@Test
+	public void currentUserIsSystemFalse() throws Exception
+	{
+		when(userDetails.getUsername()).thenReturn("user");
+		assertFalse(SecurityUtils.currentUserisSystem());
 	}
 
 	@Test

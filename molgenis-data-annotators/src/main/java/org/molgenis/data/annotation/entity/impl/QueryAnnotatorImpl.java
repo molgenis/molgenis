@@ -1,7 +1,5 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -10,9 +8,9 @@ import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.resources.Resources;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.util.ApplicationContextProvider;
+import org.springframework.context.ApplicationContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,15 +22,15 @@ import static java.util.Objects.requireNonNull;
 /**
  * Base class for any {@link EntityAnnotator} that uses a {@link QueryCreator} to query the {@link DataService} or
  * {@link Resources}. It leaves it up to concrete implementations how they wish to process the results by implementing
- * {@link #processQueryResults(Entity, Iterable, Entity)}.
- * 
+ * {@link #processQueryResults(Entity, Iterable, boolean)}.
+ * <p>
  * See {@link AnnotatorImpl} for the most standard implementation of
- * {@link #processQueryResults(Entity, Iterable, Entity)}.
+ * {@link #processQueryResults(Entity, Iterable, boolean)}.
  */
 public abstract class QueryAnnotatorImpl implements EntityAnnotator
 {
 	private final QueryCreator queryCreator;
-	private final Resources resources;
+	private Resources resources;
 	private final DataService dataService;
 	private final String sourceRepositoryName;
 	private final AnnotatorInfo info;
@@ -57,19 +55,25 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	}
 
 	@Override
-	public AttributeMetaData getAnnotationAttributeMetaData()
+	public List<AttributeMetaData> getAnnotationAttributeMetaDatas()
 	{
-		DefaultAttributeMetaData result = new DefaultAttributeMetaData(ANNOTATORPREFIX + info.getCode(),
-				FieldTypeEnum.COMPOUND).setLabel(info.getCode());
-		getInfo().getOutputAttributes().forEach(result::addAttributePart);
-
-		return result;
+		return getInfo().getOutputAttributes();
 	}
 
 	@Override
 	public boolean sourceExists()
 	{
+		getResources();
 		return resources.hasRepository(sourceRepositoryName) || dataService.hasRepository(sourceRepositoryName);
+	}
+
+	private void getResources()
+	{
+		if (resources == null)
+		{
+			ApplicationContext applicationContext = ApplicationContextProvider.getApplicationContext();
+			resources = applicationContext.getBean(Resources.class);
+		}
 	}
 
 	@Override
@@ -83,7 +87,8 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	@Override
 	public List<Entity> annotateEntity(Entity entity, boolean updateMode)
 	{
-		Query q = queryCreator.createQuery(entity);
+		getResources();
+		Query<Entity> q = queryCreator.createQuery(entity);
 		Iterable<Entity> annotatationSourceEntities;
 		if (resources.hasRepository(sourceRepositoryName))
 		{
@@ -100,11 +105,8 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 				}
 			};
 		}
-		DefaultEntityMetaData meta = new DefaultEntityMetaData(entity.getEntityMetaData());
-		info.getOutputAttributes().forEach(meta::addAttributeMetaData);
-		Entity resultEntity = new MapEntity(entity, meta);
-		processQueryResults(entity, annotatationSourceEntities, resultEntity, updateMode);
-		return Collections.singletonList(resultEntity);
+		processQueryResults(entity, annotatationSourceEntities, updateMode);
+		return Collections.singletonList(entity);
 	}
 
 	@Override
@@ -115,15 +117,11 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 
 	/**
 	 * Processes the query results.
-	 * 
-	 * @param inputEntity
-	 *            the input entity that is being annotated
-	 * @param annotationSourceEntities
-	 *            the entities resulting from the query on the annotation source
-	 * @param resultEntity
-	 *            the result entity to write the annotation attributes to
+	 *
+	 * @param inputEntity              the input entity that is being annotated
+	 * @param annotationSourceEntities the entities resulting from the query on the annotation source
 	 */
 	protected abstract void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
-			Entity resultEntity, boolean updateMode);
+			boolean updateMode);
 
 }

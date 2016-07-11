@@ -1,17 +1,17 @@
 package org.molgenis.data.rest.v2;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.molgenis.data.AggregateAnonymizer;
+import org.molgenis.data.AggregateResult;
+import org.molgenis.data.AnonymizedAggregateResult;
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.AttributeMetaData;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.molgenis.data.AggregateAnonymizer;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.AnonymizedAggregateResult;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class EntityAggregatesResponse extends EntityCollectionResponseV2
 {
@@ -100,7 +100,7 @@ public class EntityAggregatesResponse extends EntityCollectionResponseV2
 					Entity entity = (Entity) xLabel;
 					for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
 					{
-						switch (attr.getDataType().getEnumType())
+						switch (attr.getDataType())
 						{
 							case XREF:
 							case CATEGORICAL:

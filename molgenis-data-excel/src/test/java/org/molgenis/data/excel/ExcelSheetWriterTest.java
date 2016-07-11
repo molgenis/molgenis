@@ -9,14 +9,21 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.processor.CellProcessor;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class ExcelSheetWriterTest
+public class ExcelSheetWriterTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
 	private ExcelWriter excelWriter;
 	private ByteArrayOutputStream bos;
 	private ExcelSheetWriter excelSheetWriter;
@@ -25,7 +32,7 @@ public class ExcelSheetWriterTest
 	public void setUp() throws IOException
 	{
 		bos = new ByteArrayOutputStream();
-		excelWriter = new ExcelWriter(bos);
+		excelWriter = new ExcelWriter(bos, attrMetaFactory);
 		excelSheetWriter = excelWriter.createWritable("sheet", Arrays.asList("col1", "col2"));
 	}
 
@@ -40,7 +47,14 @@ public class ExcelSheetWriterTest
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
 
-		Entity entity = new MapEntity();
+		Entity entity = new DynamicEntity(mock(EntityMetaData.class))
+		{
+			@Override
+			protected void validateValueType(String attrName, Object value)
+			{
+				// noop
+			}
+		};
 		entity.set("col1", "val1");
 		entity.set("col2", "val2");
 
@@ -54,18 +68,30 @@ public class ExcelSheetWriterTest
 	@Test
 	public void write() throws IOException
 	{
-		Entity entity1 = new MapEntity();
+		Entity entity1 = new DynamicEntity(mock(EntityMetaData.class))
+		{
+			@Override
+			protected void validateValueType(String attrName, Object value)
+			{
+				// noop
+			}
+		};
 		entity1.set("col1", "val1");
 		entity1.set("col2", "val2");
 		excelSheetWriter.add(entity1);
 
-		Entity entity2 = new MapEntity();
+		Entity entity2 = new DynamicEntity(mock(EntityMetaData.class))
+		{
+			@Override
+			protected void validateValueType(String attrName, Object value)
+			{
+				// noop
+			}
+		};
 		entity2.set("col1", "val3");
 		entity2.set("col2", "val4");
 		excelSheetWriter.add(entity2);
 
 		excelWriter.close();
-
 	}
-
 }

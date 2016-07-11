@@ -2,7 +2,7 @@ package org.molgenis.data.validation;
 
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 public interface EntityValidator
 {

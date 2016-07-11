@@ -2,6 +2,7 @@ package org.molgenis.data.annotation.resources;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 
 /**
  * A Resource that can be queried and that may be unavailable. Used to annotate entities.
@@ -25,5 +26,7 @@ public interface Resource
 	 *            the Query to use
 	 * @return the {@link Entity}s found
 	 */
-	Iterable<Entity> findAll(Query q);
+	Iterable<Entity> findAll(Query<Entity> q);
+
+	RepositoryFactory getRepositoryFactory();
 }

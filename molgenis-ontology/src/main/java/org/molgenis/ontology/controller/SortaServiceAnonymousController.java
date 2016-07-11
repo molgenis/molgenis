@@ -26,11 +26,13 @@ import javax.servlet.http.Part;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.csv.CsvWriter;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.file.FileStore;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -64,7 +66,13 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 
 	@Autowired
 	private FileStore fileStore;
-	
+
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
 	public static final String VIEW_NAME = "sorta-match-anonymous-view";
 	public static final String ID = "sorta_anonymous";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
@@ -119,7 +127,8 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		if (filePath != null && ontologyIriObject != null)
 		{
 			File uploadFile = new File(filePath.toString());
-			SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile.getName(), uploadFile.getName(), uploadFile);
+			SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile.getName(), uploadFile.getName(),
+					uploadFile, entityMetaFactory, attrMetaFactory);
 
 			if (validateUserInputHeader(csvRepository) && validateUserInputContent(csvRepository))
 			{
@@ -149,7 +158,8 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 
 				String ontologyIri = ontologyIriObject.toString();
 				File uploadFile = new File(filePath.toString());
-				SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile);
+				SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile, entityMetaFactory,
+						attrMetaFactory);
 
 				List<String> columnHeaders = createDownloadTableHeaders(csvRepository);
 				csvWriter = new CsvWriter(response.getOutputStream(), SortaServiceImpl.DEFAULT_SEPARATOR);
@@ -160,10 +170,11 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 					int count = 0;
 					for (Entity ontologyTermEntity : sortaService.findOntologyTermEntities(ontologyIri, inputEntity))
 					{
-						MapEntity mapEntity = new MapEntity();
+						Entity mapEntity = new DynamicEntity(null); // FIXME pass entity meta data instead of null
 						if (count == 0)
 						{
-							mapEntity = new MapEntity(inputEntity);
+							mapEntity = new DynamicEntity(null); // FIXME pass entity meta data instead of null
+							mapEntity.set(inputEntity);
 						}
 
 						if (count >= 20)
@@ -212,7 +223,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		return columnHeaders;
 	}
 
-	private List<Map<String, Object>> matchInputWithOntologyTerm(Repository repository, String ontologyIri)
+	private List<Map<String, Object>> matchInputWithOntologyTerm(Repository<Entity> repository, String ontologyIri)
 	{
 		return FluentIterable.from(repository).transform(new Function<Entity, Map<String, Object>>()
 		{
@@ -230,7 +241,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	private void validateSortaInput(String ontologyIri, File uploadFile, HttpServletRequest httpServletRequest,
 			Model model)
 	{
-		SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile);
+		SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile, entityMetaFactory, attrMetaFactory);
 
 		HttpSession session = httpServletRequest.getSession();
 		session.setAttribute("filePath", uploadFile.getAbsoluteFile());
@@ -253,7 +264,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		}
 	}
 
-	private boolean validateUserInputHeader(Repository repository)
+	private boolean validateUserInputHeader(Repository<Entity> repository)
 	{
 		return Iterables.any(repository.getEntityMetaData().getAtomicAttributes(), new Predicate<AttributeMetaData>()
 		{

@@ -2,61 +2,49 @@ package org.molgenis.data.vcf.utils;
 
 import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.model.VcfAttributes;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.ResourceUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.io.*;
+import java.util.*;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.molgenis.MolgenisFieldTypes.COMPOUND;
-import static org.molgenis.MolgenisFieldTypes.LONG;
-import static org.molgenis.MolgenisFieldTypes.MREF;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.ALT_META;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.CHROM_META;
-import static org.molgenis.data.vcf.VcfRepository.FILTER;
-import static org.molgenis.data.vcf.VcfRepository.FILTER_META;
-import static org.molgenis.data.vcf.VcfRepository.ID_META;
-import static org.molgenis.data.vcf.VcfRepository.INFO;
-import static org.molgenis.data.vcf.VcfRepository.POS;
-import static org.molgenis.data.vcf.VcfRepository.POS_META;
-import static org.molgenis.data.vcf.VcfRepository.QUAL;
-import static org.molgenis.data.vcf.VcfRepository.QUAL_META;
-import static org.molgenis.data.vcf.VcfRepository.REF;
-import static org.molgenis.data.vcf.VcfRepository.REF_META;
-import static org.molgenis.data.vcf.VcfRepository.SAMPLES;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.vcf.model.VcfAttributes.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-@Test
-public class VcfWriterUtilsIntegrationTest
+@ContextConfiguration(classes = {VcfWriterUtilsIntegrationTest.Config.class})
+public class VcfWriterUtilsIntegrationTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	EntityMetaDataFactory entityMetaDataFactory;
+
+	@Autowired
+	AttributeMetaDataFactory attributeMetaDataFactory;
+
+	@Autowired
+	VcfAttributes vcfAttributes;
+
 	private static final Logger LOG = LoggerFactory.getLogger(VcfWriterUtilsIntegrationTest.class);
 	public static final String ID = "ID";
 	public static final String PUTATIVE_IMPACT = "Putative_impact";
@@ -67,32 +55,25 @@ public class VcfWriterUtilsIntegrationTest
 	public static final String GTC = "GTC";
 	public static final String AN = "AN";
 	public static final String AC = "AC";
-	private static DefaultAttributeMetaData INFO_ATTR;
-	private static DefaultAttributeMetaData GTC_ATTR;
-	private static DefaultAttributeMetaData AC_ATTR;
-	private static DefaultAttributeMetaData AN_ATTR;
-	private static DefaultAttributeMetaData PUTATIVE_IMPACT_ATTR;
-	private static DefaultAttributeMetaData EFFECT_ATTR;
-	private static DefaultAttributeMetaData GENES_ATTR;
-	private final DefaultEntityMetaData annotatedEntityMetadata = new DefaultEntityMetaData("test");
-	public DefaultEntityMetaData metaDataCanAnnotate = new DefaultEntityMetaData("test");
-	public DefaultEntityMetaData metaDataCantAnnotate = new DefaultEntityMetaData("test");
-	public DefaultEntityMetaData geneMeta = new DefaultEntityMetaData(GENES);
-
-	DefaultEntityMetaData effectMeta = new DefaultEntityMetaData(EFFECT);
-	DefaultEntityMetaData vcfMeta = new DefaultEntityMetaData("vcfMeta");
-	DefaultEntityMetaData sampleEntityMeta = new DefaultEntityMetaData("vcfSampleEntity");
-	public AttributeMetaData attributeMetaDataChrom = new DefaultAttributeMetaData(CHROM,
-			MolgenisFieldTypes.FieldTypeEnum.STRING);
-
-	public AttributeMetaData attributeMetaDataPos = new DefaultAttributeMetaData(POS,
-			MolgenisFieldTypes.FieldTypeEnum.LONG);
-	public AttributeMetaData attributeMetaDataRef = new DefaultAttributeMetaData(REF,
-			MolgenisFieldTypes.FieldTypeEnum.STRING);
-	public AttributeMetaData attributeMetaDataAlt = new DefaultAttributeMetaData(ALT,
-			MolgenisFieldTypes.FieldTypeEnum.STRING);
-	public AttributeMetaData attributeMetaDataCantAnnotateChrom = new DefaultAttributeMetaData(CHROM,
-			MolgenisFieldTypes.FieldTypeEnum.LONG);
+	private static AttributeMetaData INFO_ATTR;
+	private static AttributeMetaData GTC_ATTR;
+	private static AttributeMetaData AC_ATTR;
+	private static AttributeMetaData AN_ATTR;
+	private static AttributeMetaData PUTATIVE_IMPACT_ATTR;
+	private static AttributeMetaData EFFECT_ATTR;
+	private static AttributeMetaData GENES_ATTR;
+	private EntityMetaData annotatedEntityMetadata;
+	public EntityMetaData metaDataCanAnnotate;
+	public EntityMetaData metaDataCantAnnotate;
+	public EntityMetaData geneMeta;
+	EntityMetaData effectMeta;
+	EntityMetaData vcfMeta;
+	EntityMetaData sampleEntityMeta;
+	public AttributeMetaData attributeMetaDataChrom;
+	public AttributeMetaData attributeMetaDataPos;
+	public AttributeMetaData attributeMetaDataRef;
+	public AttributeMetaData attributeMetaDataAlt;
+	public AttributeMetaData attributeMetaDataCantAnnotateChrom;
 	public Entity entity;
 	public Entity entity1;
 	public Entity entity2;
@@ -103,114 +84,139 @@ public class VcfWriterUtilsIntegrationTest
 	@BeforeMethod
 	public void beforeMethod() throws IOException
 	{
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom, ROLE_ID);
+		annotatedEntityMetadata = entityMetaDataFactory.create().setName("test");
+		metaDataCanAnnotate = entityMetaDataFactory.create().setName("test");
+		metaDataCantAnnotate = entityMetaDataFactory.create().setName("test");
+		geneMeta = entityMetaDataFactory.create().setName(GENES);
 
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataCantAnnotateChrom);
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataPos);
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataRef);
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataAlt);
+		effectMeta = entityMetaDataFactory.create().setName(EFFECT);
+		vcfMeta = entityMetaDataFactory.create().setName("vcfMeta");
+		sampleEntityMeta = entityMetaDataFactory.create().setName("vcfSampleEntity");
+		attributeMetaDataChrom = attributeMetaDataFactory.create().setName(CHROM).setDataType(STRING);
+		attributeMetaDataPos = attributeMetaDataFactory.create().setName(POS).setDataType(LONG);
+		attributeMetaDataRef = attributeMetaDataFactory.create().setName(REF).setDataType(STRING);
+		attributeMetaDataAlt = attributeMetaDataFactory.create().setName(ALT).setDataType(STRING);
+		attributeMetaDataCantAnnotateChrom = attributeMetaDataFactory.create().setName(CHROM).setDataType(LONG);
 
-		entity = new MapEntity(metaDataCanAnnotate);
-		entity1 = new MapEntity(metaDataCanAnnotate);
-		entity2 = new MapEntity(metaDataCanAnnotate);
-		entity3 = new MapEntity(metaDataCanAnnotate);
-		entity4 = new MapEntity(metaDataCanAnnotate);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataPos);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataChrom);
 
-		metaDataCanAnnotate.addAttributeMetaData(
-				new DefaultAttributeMetaData(VcfRepository.ID, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
-		metaDataCanAnnotate.addAttributeMetaData(
-				new DefaultAttributeMetaData(VcfRepository.QUAL, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		metaDataCanAnnotate.addAttributeMetaData(
-				new DefaultAttributeMetaData(VcfRepository.FILTER, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		INFO_ATTR = new DefaultAttributeMetaData(VcfRepository.INFO,
-				MolgenisFieldTypes.FieldTypeEnum.COMPOUND);
-		AC_ATTR = new DefaultAttributeMetaData(VcfWriterUtilsIntegrationTest.AC,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
-		AN_ATTR = new DefaultAttributeMetaData(VcfWriterUtilsIntegrationTest.AN,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
-		GTC_ATTR = new DefaultAttributeMetaData(VcfWriterUtilsIntegrationTest.GTC,
-				MolgenisFieldTypes.FieldTypeEnum.STRING);
+		metaDataCantAnnotate.addAttribute(attributeMetaDataCantAnnotateChrom);
+		metaDataCantAnnotate.addAttribute(attributeMetaDataPos);
+		metaDataCantAnnotate.addAttribute(attributeMetaDataRef);
+		metaDataCantAnnotate.addAttribute(attributeMetaDataAlt);
+
+		metaDataCanAnnotate.setIdAttribute(attributeMetaDataChrom);
+		metaDataCantAnnotate.setIdAttribute(attributeMetaDataCantAnnotateChrom);
+
+
+		entity = new DynamicEntity(metaDataCanAnnotate);
+		entity1 = new DynamicEntity(metaDataCanAnnotate);
+		entity2 = new DynamicEntity(metaDataCanAnnotate);
+		entity3 = new DynamicEntity(metaDataCanAnnotate);
+		entity4 = new DynamicEntity(metaDataCanAnnotate);
+
+		metaDataCanAnnotate.addAttribute(
+				attributeMetaDataFactory.create().setName(ID).setDataType(STRING));
+		metaDataCanAnnotate.addAttribute(attributeMetaDataRef);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataAlt);
+		metaDataCanAnnotate.addAttribute(
+				attributeMetaDataFactory.create().setName(QUAL).setDataType(STRING));
+		metaDataCanAnnotate.addAttribute(
+				attributeMetaDataFactory.create().setName(FILTER).setDataType(STRING));
+		INFO_ATTR = attributeMetaDataFactory.create().setName(INFO).setDataType(
+				COMPOUND);
+		AC_ATTR = attributeMetaDataFactory.create().setName(VcfWriterUtilsIntegrationTest.AC).setDataType(
+				STRING);
+		AN_ATTR = attributeMetaDataFactory.create().setName(VcfWriterUtilsIntegrationTest.AN).setDataType(
+				STRING);
+		GTC_ATTR =attributeMetaDataFactory.create().setName(VcfWriterUtilsIntegrationTest.GTC).setDataType(
+				STRING);
 		INFO_ATTR.addAttributePart(AC_ATTR);
 		INFO_ATTR.addAttributePart(AN_ATTR);
 		INFO_ATTR.addAttributePart(GTC_ATTR);
-		metaDataCanAnnotate.addAttributeMetaData(INFO_ATTR);
+		metaDataCanAnnotate.addAttribute(INFO_ATTR);
 
-		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataChrom, ROLE_ID);
-		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataPos);
-		annotatedEntityMetadata.addAttributeMetaData(
-				new DefaultAttributeMetaData(VcfRepository.ID, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataRef);
-		annotatedEntityMetadata.addAttributeMetaData(attributeMetaDataAlt);
+		annotatedEntityMetadata.addAttribute(attributeMetaDataChrom);
+		annotatedEntityMetadata.setIdAttribute(attributeMetaDataChrom);
+		annotatedEntityMetadata.addAttribute(attributeMetaDataPos);
+		annotatedEntityMetadata.addAttribute(
+				attributeMetaDataFactory.create().setName(ID).setDataType(STRING));
+		annotatedEntityMetadata.addAttribute(attributeMetaDataRef);
+		annotatedEntityMetadata.addAttribute(attributeMetaDataAlt);
 
-		annotatedEntityMetadata.addAttributeMetaData(
-				new DefaultAttributeMetaData(VcfRepository.QUAL, MolgenisFieldTypes.FieldTypeEnum.STRING));
-		annotatedEntityMetadata.addAttributeMetaData(
-				(new DefaultAttributeMetaData(VcfRepository.FILTER, MolgenisFieldTypes.FieldTypeEnum.STRING))
+		annotatedEntityMetadata.addAttribute(
+				attributeMetaDataFactory.create().setName(QUAL).setDataType(STRING));
+		annotatedEntityMetadata.addAttribute(
+				attributeMetaDataFactory.create().setName(FILTER).setDataType(STRING))
 						.setDescription(
-								"Test that description is not: '" + VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION + "'"));
-		INFO_ATTR.addAttributePart(new DefaultAttributeMetaData("ANNO", MolgenisFieldTypes.FieldTypeEnum.STRING));
-		annotatedEntityMetadata.addAttributeMetaData(INFO_ATTR);
+								"Test that description is not: '" + VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION + "'");
+		INFO_ATTR.addAttributePart(attributeMetaDataFactory.create().setName("ANNO").setDataType(STRING));
+		annotatedEntityMetadata.addAttribute(INFO_ATTR);
 
-		entity1.set(VcfRepository.CHROM, "1");
-		entity1.set(VcfRepository.POS, 10050000);
-		entity1.set(VcfRepository.ID, "test21");
-		entity1.set(VcfRepository.REF, "G");
-		entity1.set(VcfRepository.ALT, "A");
-		entity1.set(VcfRepository.QUAL, ".");
-		entity1.set(VcfRepository.FILTER, "PASS");
+		entity1.set(CHROM, "1");
+		entity1.set(POS, 10050000);
+		entity1.set(ID, "test21");
+		entity1.set(REF, "G");
+		entity1.set(ALT, "A");
+		entity1.set(QUAL, ".");
+		entity1.set(FILTER, "PASS");
 		entity1.set(VcfWriterUtilsIntegrationTest.AC, "21");
 		entity1.set(VcfWriterUtilsIntegrationTest.AN, "22");
 		entity1.set(VcfWriterUtilsIntegrationTest.GTC, "0,1,10");
 
-		entity2.set(VcfRepository.CHROM, "1");
-		entity2.set(VcfRepository.POS, 10050001);
-		entity2.set(VcfRepository.ID, "test22");
-		entity2.set(VcfRepository.REF, "G");
-		entity2.set(VcfRepository.ALT, "A");
-		entity2.set(VcfRepository.QUAL, ".");
-		entity2.set(VcfRepository.FILTER, "PASS");
+		entity2.set(CHROM, "1");
+		entity2.set(POS, 10050001);
+		entity2.set(ID, "test22");
+		entity2.set(REF, "G");
+		entity2.set(ALT, "A");
+		entity2.set(QUAL, ".");
+		entity2.set(FILTER, "PASS");
 
-		entity3.set(VcfRepository.CHROM, "1");
-		entity3.set(VcfRepository.POS, 10050002);
-		entity3.set(VcfRepository.ID, "test23");
-		entity3.set(VcfRepository.REF, "G");
-		entity3.set(VcfRepository.ALT, "A");
-		entity3.set(VcfRepository.QUAL, ".");
-		entity3.set(VcfRepository.FILTER, "PASS");
+		entity3.set(CHROM, "1");
+		entity3.set(POS, 10050002);
+		entity3.set(ID, "test23");
+		entity3.set(REF, "G");
+		entity3.set(ALT, "A");
+		entity3.set(QUAL, ".");
+		entity3.set(FILTER, "PASS");
 
 		entities = new ArrayList<>();
 		entities.add(entity1);
 		entities.add(entity2);
 		entities.add(entity3);
 
-		geneMeta.addAttribute("id", ROLE_ID).setDataType(STRING).setDescription("Random generated ID")
+		AttributeMetaData geneId = attributeMetaDataFactory.create().setName("id").setDataType(STRING).setDescription("Random generated ID")
 				.setVisible(false);
-		geneMeta.addAttribute("Gene").setDataType(STRING).setDescription("HGNC symbol");
-		effectMeta.addAttribute("id", ROLE_ID).setDataType(STRING).setDescription("effect identifier")
+		geneMeta.addAttribute(geneId);
+		geneMeta.setIdAttribute(geneId);
+		geneMeta.addAttribute(attributeMetaDataFactory.create().setName("Gene").setDataType(STRING).setDescription("HGNC symbol"));
+		AttributeMetaData id = attributeMetaDataFactory.create().setName("id").setDataType(STRING).setDescription("effect identifier")
 				.setVisible(false);
-		effectMeta.addAttribute(ALT).setDataType(STRING).setDescription("Alternative allele");
-		effectMeta.addAttribute("ALT_GENE").setDataType(STRING).setDescription("Alternative allele and gene");
-		effectMeta.addAttribute("GENE").setDataType(STRING).setDescription("Gene identifier (HGNC symbol)");
-		effectMeta.addAttribute(PUTATIVE_IMPACT).setDataType(STRING).setDescription("Level of effect on the gene");
-		effectMeta.addAttribute(TYPE).setDataType(STRING).setDescription("Type of mutation");
+		effectMeta.addAttribute(id);
+		effectMeta.setIdAttribute(id);
+		effectMeta.addAttribute(attributeMetaDataFactory.create().setName(ALT).setDataType(STRING).setDescription("Alternative allele"));
+		effectMeta.addAttribute(attributeMetaDataFactory.create().setName("ALT_GENE").setDataType(STRING).setDescription("Alternative allele and gene"));
+		effectMeta.addAttribute(attributeMetaDataFactory.create().setName("GENE").setDataType(STRING).setDescription("Gene identifier (HGNC symbol)"));
+		effectMeta.addAttribute(attributeMetaDataFactory.create().setName(PUTATIVE_IMPACT).setDataType(STRING).setDescription("Level of effect on the gene"));
+		effectMeta.addAttribute(attributeMetaDataFactory.create().setName(TYPE).setDataType(STRING).setDescription("Type of mutation"));
 
-		PUTATIVE_IMPACT_ATTR = new DefaultAttributeMetaData(PUTATIVE_IMPACT, MolgenisFieldTypes.FieldTypeEnum.STRING);
-		EFFECT_ATTR = new DefaultAttributeMetaData(EFFECT, MolgenisFieldTypes.FieldTypeEnum.MREF)
+		PUTATIVE_IMPACT_ATTR = attributeMetaDataFactory.create().setName(PUTATIVE_IMPACT).setDataType(STRING);
+		EFFECT_ATTR = attributeMetaDataFactory.create().setName(EFFECT).setDataType(MREF)
 				.setRefEntity(effectMeta);
-		GENES_ATTR = new DefaultAttributeMetaData(GENES, MolgenisFieldTypes.FieldTypeEnum.MREF).setRefEntity(geneMeta);
+		GENES_ATTR = attributeMetaDataFactory.create().setName(GENES).setDataType(MREF).setRefEntity(geneMeta);
 
 		String formatDpAttrName = "DP";
 		String formatEcAttrName = "EC";
-		String formatGtAttrName = VcfRepository.FORMAT_GT;
+		String formatGtAttrName = FORMAT_GT;
 		String sampleIdAttrName = VcfRepository.NAME;
 
-		sampleEntityMeta.addAttribute(sampleIdAttrName, ROLE_ID);
-		sampleEntityMeta.addAttribute(formatDpAttrName);
-		sampleEntityMeta.addAttribute(formatEcAttrName);
-		sampleEntityMeta.addAttribute(formatGtAttrName);
+		AttributeMetaData sampleId = attributeMetaDataFactory.create().setName(sampleIdAttrName);
+		sampleEntityMeta.addAttribute(sampleId);
+		sampleEntityMeta.setIdAttribute(sampleId);
+		sampleEntityMeta.addAttribute(attributeMetaDataFactory.create().setName(formatDpAttrName));
+		sampleEntityMeta.addAttribute(attributeMetaDataFactory.create().setName(formatEcAttrName));
+		sampleEntityMeta.addAttribute(attributeMetaDataFactory.create().setName(formatGtAttrName));
 	}
 
 	// regression test for https://github.com/molgenis/molgenis/issues/3643
@@ -219,40 +225,44 @@ public class VcfWriterUtilsIntegrationTest
 	{
 		String formatDpAttrName = "DP";
 		String formatEcAttrName = "EC";
-		String formatGtAttrName = VcfRepository.FORMAT_GT;
+		String formatGtAttrName = FORMAT_GT;
 
 		String idAttrName = "idAttr";
 		String sampleIdAttrName = VcfRepository.NAME;
 
-		DefaultEntityMetaData sampleEntityMeta = new DefaultEntityMetaData("vcfSampleEntity");
-		sampleEntityMeta.addAttribute(sampleIdAttrName, ROLE_ID);
-		sampleEntityMeta.addAttribute(formatDpAttrName);
-		sampleEntityMeta.addAttribute(formatEcAttrName);
-		sampleEntityMeta.addAttribute(formatGtAttrName);
+		EntityMetaData sampleEntityMeta = entityMetaDataFactory.create().setName("vcfSampleEntity");
+		AttributeMetaData sampleId = attributeMetaDataFactory.create().setName(sampleIdAttrName);
+		sampleEntityMeta.addAttribute(sampleId);
+		sampleEntityMeta.setIdAttribute(sampleId);
+		sampleEntityMeta.addAttribute(attributeMetaDataFactory.create().setName(formatDpAttrName));
+		sampleEntityMeta.addAttribute(attributeMetaDataFactory.create().setName(formatEcAttrName));
+		sampleEntityMeta.addAttribute(attributeMetaDataFactory.create().setName(formatGtAttrName));
 
-		DefaultEntityMetaData entityMeta = new DefaultEntityMetaData("vcfEntity");
-		entityMeta.addAttribute(idAttrName, ROLE_ID);
-		entityMeta.addAttributeMetaData(CHROM_META);
-		entityMeta.addAttributeMetaData(POS_META);
-		entityMeta.addAttributeMetaData(ID_META);
-		entityMeta.addAttributeMetaData(REF_META);
-		entityMeta.addAttributeMetaData(ALT_META);
-		entityMeta.addAttributeMetaData(QUAL_META);
-		entityMeta.addAttributeMetaData(FILTER_META);
-		entityMeta.addAttribute(VcfRepository.INFO).setDataType(MolgenisFieldTypes.COMPOUND);
-		entityMeta.addAttribute(SAMPLES).setDataType(MolgenisFieldTypes.MREF).setRefEntity(sampleEntityMeta);
+		EntityMetaData entityMeta = entityMetaDataFactory.create().setName("vcfEntity");
+		AttributeMetaData id = attributeMetaDataFactory.create().setName(idAttrName);
+		entityMeta.addAttribute(id);
+		entityMeta.setIdAttribute(id);
+		entityMeta.addAttribute(vcfAttributes.getChromAttribute());
+		entityMeta.addAttribute(vcfAttributes.getPosAttribute());
+		entityMeta.addAttribute(vcfAttributes.getIdAttribute());
+		entityMeta.addAttribute(vcfAttributes.getRefAttribute());
+		entityMeta.addAttribute(vcfAttributes.getAltAttribute());
+		entityMeta.addAttribute(vcfAttributes.getQualAttribute());
+		entityMeta.addAttribute(vcfAttributes.getFilterAttribute());
+		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(INFO).setDataType(COMPOUND));
+		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(SAMPLES).setDataType(MREF).setRefEntity(sampleEntityMeta));
 
-		Entity sampleEntity = new MapEntity(sampleEntityMeta);
+		Entity sampleEntity = new DynamicEntity(sampleEntityMeta);
 		sampleEntity.set(sampleIdAttrName, "0");
 		sampleEntity.set(formatDpAttrName, "5");
 		sampleEntity.set(formatEcAttrName, "5");
 		sampleEntity.set(formatGtAttrName, "1/1");
 
-		Entity vcfEntity = new MapEntity(entityMeta);
+		Entity vcfEntity = new DynamicEntity(entityMeta);
 		vcfEntity.set(idAttrName, "0");
 		vcfEntity.set(CHROM, "1");
 		vcfEntity.set(POS, "565286");
-		vcfEntity.set(VcfRepository.ID, "rs1578391");
+		vcfEntity.set(ID, "rs1578391");
 		vcfEntity.set(REF, "C");
 		vcfEntity.set(ALT, "T");
 		vcfEntity.set(QUAL, null);
@@ -321,11 +331,12 @@ public class VcfWriterUtilsIntegrationTest
 			File resultVCFWriter = new File(ResourceUtils.getFile(getClass(), "/result_vcfWriter.vcf").getPath());
 
 			VcfWriterUtils.writeVcfHeader(inputVcfFile, outputVCFWriter,
-					Lists.newArrayList(Collections.singletonList(new DefaultAttributeMetaData("ANNO"))));
+					Lists.newArrayList(Collections.singletonList(attributeMetaDataFactory.create().setName("ANNO"))));
 
 			for (Entity entity : entities)
 			{
-				MapEntity mapEntity = new MapEntity(entity, annotatedEntityMetadata);
+				Entity mapEntity = new DynamicEntity(annotatedEntityMetadata);
+				mapEntity.set(entity);
 				VcfWriterUtils.writeToVcf(mapEntity, new ArrayList<>(), new ArrayList<>(), outputVCFWriter);
 				outputVCFWriter.newLine();
 			}
@@ -348,31 +359,34 @@ public class VcfWriterUtilsIntegrationTest
 		INFO_ATTR.addAttributePart(AC_ATTR);
 		INFO_ATTR.addAttributePart(AN_ATTR);
 		INFO_ATTR.addAttributePart(GTC_ATTR);
-		vcfMeta.addAttribute(CHROM, ROLE_ID).setDataType(STRING);
-		vcfMeta.addAttribute(POS).setDataType(LONG);
-		vcfMeta.addAttribute(VcfRepository.ID).setDataType(STRING);
-		vcfMeta.addAttribute(REF).setDataType(STRING);
-		vcfMeta.addAttribute(ALT).setDataType(STRING);
-		vcfMeta.addAttribute(FILTER).setDataType(COMPOUND);
-		vcfMeta.addAttribute(QUAL).setDataType(STRING);
-		vcfMeta.addAttributeMetaData(INFO_ATTR);
-		vcfMeta.addAttribute(EFFECT).setDataType(MREF).setRefEntity(effectMeta);
-		vcfMeta.addAttribute(GENES).setDataType(MREF).setRefEntity(geneMeta);
-		vcfMeta.addAttribute(SAMPLES).setDataType(MolgenisFieldTypes.MREF).setRefEntity(sampleEntityMeta);
 
-		Entity sampleEntity1 = new MapEntity(sampleEntityMeta);
+		AttributeMetaData attr = attributeMetaDataFactory.create().setName(CHROM).setDataType(STRING);
+		vcfMeta.addAttribute(attr);
+		vcfMeta.setIdAttribute(attr);
+		vcfMeta.addAttribute(attributeMetaDataFactory.create().setName(POS).setDataType(LONG));
+		vcfMeta.addAttribute(attributeMetaDataFactory.create().setName(ID).setDataType(STRING));
+		vcfMeta.addAttribute(attributeMetaDataFactory.create().setName(REF).setDataType(STRING));
+		vcfMeta.addAttribute(attributeMetaDataFactory.create().setName(ALT).setDataType(STRING));
+		vcfMeta.addAttribute(attributeMetaDataFactory.create().setName(FILTER).setDataType(COMPOUND));
+		vcfMeta.addAttribute(attributeMetaDataFactory.create().setName(QUAL).setDataType(STRING));
+		vcfMeta.addAttribute(INFO_ATTR);
+		vcfMeta.addAttribute(attributeMetaDataFactory.create().setName(EFFECT).setDataType(MREF).setRefEntity(effectMeta));
+		vcfMeta.addAttribute(attributeMetaDataFactory.create().setName(GENES).setDataType(MREF).setRefEntity(geneMeta));
+		vcfMeta.addAttribute(attributeMetaDataFactory.create().setName(SAMPLES).setDataType(MREF).setRefEntity(sampleEntityMeta));
+
+		Entity sampleEntity1 = new DynamicEntity(sampleEntityMeta);
 		sampleEntity1.set(VcfRepository.NAME, "0");
-		sampleEntity1.set(VcfRepository.FORMAT_GT, "0/1");
+		sampleEntity1.set(FORMAT_GT, "0/1");
 
-		Entity sampleEntity2 = new MapEntity(sampleEntityMeta);
+		Entity sampleEntity2 = new DynamicEntity(sampleEntityMeta);
 		sampleEntity2.set(VcfRepository.NAME, "0");
-		sampleEntity2.set(VcfRepository.FORMAT_GT, "1/0");
+		sampleEntity2.set(FORMAT_GT, "1/0");
 
 		// 1 48554748 . T A,G 100 PASS AC=0;AN=6;GTC=1,0,10 GT 0|1
-		Entity vcfEntity1 = new MapEntity(vcfMeta);
+		Entity vcfEntity1 = new DynamicEntity(vcfMeta);
 		vcfEntity1.set(CHROM, "1");
 		vcfEntity1.set(POS, "48554748");
-		vcfEntity1.set(VcfRepository.ID, ".");
+		vcfEntity1.set(ID, ".");
 		vcfEntity1.set(REF, "T");
 		vcfEntity1.set(ALT, "A,G");
 		vcfEntity1.set(QUAL, "100");
@@ -385,10 +399,10 @@ public class VcfWriterUtilsIntegrationTest
 		vcfEntity1.set(SAMPLES, Arrays.asList(sampleEntity1));
 
 		// 7 50356137 . T A,C 100 PASS AC=0;AN=6;GTC=1,0,10 GT 1|0
-		Entity vcfEntity2 = new MapEntity(vcfMeta);
+		Entity vcfEntity2 = new DynamicEntity(vcfMeta);
 		vcfEntity2.set(CHROM, "7");
 		vcfEntity2.set(POS, "50356137");
-		vcfEntity2.set(VcfRepository.ID, ".");
+		vcfEntity2.set(ID, ".");
 		vcfEntity2.set(REF, "T");
 		vcfEntity2.set(ALT, "A,C");
 		vcfEntity2.set(QUAL, "100");
@@ -401,10 +415,10 @@ public class VcfWriterUtilsIntegrationTest
 		vcfEntity2.set(SAMPLES, Arrays.asList(sampleEntity2));
 
 		// 17 57281092 . A G,T 100 PASS AC=0;AN=6;GTC=10,1,0 GT 0|1
-		Entity vcfEntity3 = new MapEntity(vcfMeta);
+		Entity vcfEntity3 = new DynamicEntity(vcfMeta);
 		vcfEntity3.set(CHROM, "17");
 		vcfEntity3.set(POS, "57281092");
-		vcfEntity3.set(VcfRepository.ID, ".");
+		vcfEntity3.set(ID, ".");
 		vcfEntity3.set(REF, "A");
 		vcfEntity3.set(ALT, "G,T");
 		vcfEntity3.set(QUAL, "100");
@@ -417,10 +431,10 @@ public class VcfWriterUtilsIntegrationTest
 		vcfEntity3.set(SAMPLES, Arrays.asList(sampleEntity1));
 
 		// X 48536966 . T A,C,G 100 PASS AC=0;AN=6;GTC=0,10,1 GT 0|1
-		Entity vcfEntity4 = new MapEntity(vcfMeta);
+		Entity vcfEntity4 = new DynamicEntity(vcfMeta);
 		vcfEntity4.set(CHROM, "X");
 		vcfEntity4.set(POS, "48536966");
-		vcfEntity4.set(VcfRepository.ID, ".");
+		vcfEntity4.set(ID, ".");
 		vcfEntity4.set(REF, "T");
 		vcfEntity4.set(ALT, "A,C,G");
 		vcfEntity4.set(QUAL, "100");
@@ -433,10 +447,10 @@ public class VcfWriterUtilsIntegrationTest
 		vcfEntity4.set(SAMPLES, Arrays.asList(sampleEntity1));
 
 		// X 56032934 . G T,C,A 100 PASS AC=0;AN=3;GTC=1,2,3 GT 1|1
-		Entity vcfEntity5 = new MapEntity(vcfMeta);
+		Entity vcfEntity5 = new DynamicEntity(vcfMeta);
 		vcfEntity5.set(CHROM, "X");
 		vcfEntity5.set(POS, "56032934");
-		vcfEntity5.set(VcfRepository.ID, ".");
+		vcfEntity5.set(ID, ".");
 		vcfEntity5.set(REF, "G");
 		vcfEntity5.set(ALT, "T,C,A");
 		vcfEntity5.set(QUAL, "100");
@@ -462,7 +476,8 @@ public class VcfWriterUtilsIntegrationTest
 
 			for (Entity entity : vcfEntities)
 			{
-				MapEntity mapEntity = new MapEntity(entity, vcfMeta);
+				Entity mapEntity = new DynamicEntity(vcfMeta);
+				mapEntity.set(entity);
 				VcfWriterUtils.writeToVcf(mapEntity, Arrays.asList(EFFECT_ATTR, GENES_ATTR), Collections.emptyList(),
 						actualOutputFileWriter);
 				actualOutputFileWriter.newLine();
@@ -483,7 +498,7 @@ public class VcfWriterUtilsIntegrationTest
 		List<Entity> geneEntities = newArrayList();
 		for (String allele : altAlleles)
 		{
-			Entity geneEntity = new MapEntity(geneMeta);
+			Entity geneEntity = new DynamicEntity(geneMeta);
 			geneEntity.set("id", UUID.randomUUID().toString());
 			switch (allele)
 			{
@@ -515,7 +530,7 @@ public class VcfWriterUtilsIntegrationTest
 		for (int i = 0; i < altAlleles.size(); i++)
 		{
 			String gene = "BRCA" + (i + 1);
-			Entity effectEntity = new MapEntity(effectMeta);
+			Entity effectEntity = new DynamicEntity(effectMeta);
 			String altAllele = altAlleles.get(i);
 			effectEntity.set("id", "eff" + (i + 1));
 			effectEntity.set(ALT, altAllele);
@@ -528,5 +543,10 @@ public class VcfWriterUtilsIntegrationTest
 		}
 
 		return effectEntities;
+	}
+
+	@Configuration
+	@Import(VcfAttributes.class)
+	public static class Config {
 	}
 }

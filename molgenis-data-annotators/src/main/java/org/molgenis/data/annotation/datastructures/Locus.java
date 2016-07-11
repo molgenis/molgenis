@@ -7,9 +7,9 @@ public class Locus
 {
 
 	String chrom;
-	Long pos;
+	Integer pos;
 
-	public Locus(String chrom, Long pos)
+	public Locus(String chrom, Integer pos)
 	{
 		this.chrom = chrom;
 		this.pos = pos;
@@ -20,7 +20,7 @@ public class Locus
 		return chrom;
 	}
 
-	public Long getPos()
+	public Integer getPos()
 	{
 		return pos;
 	}

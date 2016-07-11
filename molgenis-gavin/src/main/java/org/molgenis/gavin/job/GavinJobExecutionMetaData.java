@@ -1,22 +1,42 @@
 package org.molgenis.gavin.job;
 
-import org.molgenis.data.jobs.JobExecutionMetaData;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.jobs.model.JobExecutionMetaData;
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.reindex.meta.IndexPackage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.STRING;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.data.reindex.meta.IndexPackage.PACKAGE_INDEX;
 
 @Component
-public class GavinJobExecutionMetaData extends DefaultEntityMetaData
+public class GavinJobExecutionMetaData extends SystemEntityMetaData
 {
+	private final JobExecutionMetaData jobExecutionMetaData;
+	@Autowired
+	AttributeMetaDataFactory attributeMetaDataFactory;
+
 	public static final String GAVIN_JOB_EXECUTION = "GavinJobExecution";
 	public static final String FILENAME = "filename";
 
-	public GavinJobExecutionMetaData()
+	private final IndexPackage indexPackage;
+
+	@Autowired
+	public GavinJobExecutionMetaData(IndexPackage indexPackage, JobExecutionMetaData jobExecutionMetaData)
 	{
-		super(GAVIN_JOB_EXECUTION, GavinJobExecution.class);
-		setExtends(new JobExecutionMetaData());
-		addAttributeMetaData(new DefaultAttributeMetaData(FILENAME, STRING).setNillable(false));
+		super(GAVIN_JOB_EXECUTION, PACKAGE_INDEX);
+		this.indexPackage = requireNonNull(indexPackage);
+		this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);
+	}
+
+	@Override
+	public void init()
+	{
+		setPackage(indexPackage);
+
+		setExtends(jobExecutionMetaData);
+		addAttribute(attributeMetaDataFactory.create().setName(FILENAME).setDataType(STRING).setNillable(false));
 	}
 }

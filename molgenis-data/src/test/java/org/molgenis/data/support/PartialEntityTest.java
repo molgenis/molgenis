@@ -5,11 +5,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -20,13 +21,14 @@ public class PartialEntityTest
 	private Entity decoratedEntity;
 	private Fetch fetch;
 	private EntityManager entityManager;
-	private DefaultEntityMetaData meta;
+	private EntityMetaData meta;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		meta = new DefaultEntityMetaData("entity");
-		meta.addAttribute("id", ROLE_ID);
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		meta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		when(meta.getIdAttribute()).thenReturn(idAttr);
 
 		originalEntity = mock(Entity.class);
 
@@ -172,36 +174,6 @@ public class PartialEntityTest
 	public void getIntNotInFetch()
 	{
 		partialEntity.getInt("label");
-		verify(entityManager, times(1)).getReference(meta, "id");
-	}
-
-	@Test
-	public void getIntList()
-	{
-		partialEntity.getIntList("id");
-		verify(decoratedEntity, times(1)).getIntList("id");
-		verifyZeroInteractions(entityManager);
-	}
-
-	@Test
-	public void getIntListNotInFetch()
-	{
-		partialEntity.getIntList("label");
-		verify(entityManager, times(1)).getReference(meta, "id");
-	}
-
-	@Test
-	public void getList()
-	{
-		partialEntity.getList("id");
-		verify(decoratedEntity, times(1)).getList("id");
-		verifyZeroInteractions(entityManager);
-	}
-
-	@Test
-	public void getListNotInFetch()
-	{
-		partialEntity.getList("label");
 		verify(entityManager, times(1)).getReference(meta, "id");
 	}
 

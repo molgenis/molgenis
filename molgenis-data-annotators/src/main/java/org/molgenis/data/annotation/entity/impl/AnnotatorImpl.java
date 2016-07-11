@@ -1,7 +1,6 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import com.google.common.base.Optional;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
@@ -10,6 +9,7 @@ import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.QueryCreator;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.annotation.resources.Resources;
+import org.molgenis.data.meta.model.AttributeMetaData;
 
 import java.util.List;
 
@@ -31,7 +31,7 @@ public class AnnotatorImpl extends QueryAnnotatorImpl implements EntityAnnotator
 	}
 
 	@Override
-	protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities, Entity resultEntity,
+	protected void processQueryResults(Entity entity, Iterable<Entity> annotationSourceEntities,
 			boolean updateMode)
 	{
 		Optional<Entity> filteredResult = resultFilter.filterResults(annotationSourceEntities, entity, updateMode);
@@ -39,16 +39,16 @@ public class AnnotatorImpl extends QueryAnnotatorImpl implements EntityAnnotator
 		{
 			for (AttributeMetaData attr : getInfo().getOutputAttributes())
 			{
-				resultEntity.set(attr.getName(), getResourceAttributeValue(attr, filteredResult.get()));
+				entity.set(attr.getName(), getResourceAttributeValue(attr, filteredResult.get()));
 			}
 		}
 		else
 		{
 			for (AttributeMetaData attr : getInfo().getOutputAttributes())
 			{
-				if (!updateMode || resultEntity.get(attr.getName()) == null)
+				if (!updateMode || entity.get(attr.getName()) == null)
 				{
-					resultEntity.set(attr.getName(), null);
+					entity.set(attr.getName(), null);
 				}
 			}
 		}

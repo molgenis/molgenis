@@ -1,13 +1,18 @@
 package org.molgenis.data.meta;
 
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
+
 import java.util.List;
 import java.util.ListIterator;
 
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.Package;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.PackageMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,9 +49,9 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		else
 		{
 			// Search in packages
-			Query q = new QueryImpl().search(searchTerm);
-			// for (Entity packageEntity : dataService.findAllAsIterable(PackageMetaData.ENTITY_NAME, q))
-			dataService.findAll(PackageMetaData.ENTITY_NAME, q).forEach(packageEntity -> {
+			Query<Entity> q = new QueryImpl<>().search(searchTerm);
+			// for (Entity packageEntity : dataService.findAllAsIterable(PackageMetaData.MOLGENIS_GROUP_MEMBER, q))
+			dataService.findAll(PACKAGE, q).forEach(packageEntity -> {
 				Package p = metaDataService.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));
 				if ((p != null) && (p.getParent() == null))
 				{
@@ -56,7 +61,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 			});
 
 			// Search in entities
-			dataService.findAll(EntityMetaDataMetaData.ENTITY_NAME, q).forEach(entityMetaData -> {
+			dataService.findAll(ENTITY_META_DATA, q).forEach(entityMetaData -> {
 				Package p = getRootPackage(entityMetaData);
 				if (p != null)
 				{

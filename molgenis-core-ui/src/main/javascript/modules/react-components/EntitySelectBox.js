@@ -7,7 +7,7 @@ import Spinner from "./Spinner";
 import Select2 from "./wrapper/Select2";
 import Form from "./Form";
 import _ from "underscore";
-import { htmlEscape } from '../utils/HtmlUtils';
+import {htmlEscape} from "../utils/HtmlUtils";
 
 var div = React.DOM.div;
 

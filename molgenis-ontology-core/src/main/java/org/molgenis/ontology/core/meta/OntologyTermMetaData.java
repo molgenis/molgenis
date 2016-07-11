@@ -1,17 +1,23 @@
 package org.molgenis.ontology.core.meta;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
+
 @Component
-public class OntologyTermMetaData extends DefaultEntityMetaData
+public class OntologyTermMetaData extends SystemEntityMetaData
 {
+	public static final String SIMPLE_NAME = "OntologyTerm";
+	public final static String ONTOLOGY_TERM = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+
 	public final static String ID = "id";
 	public final static String ONTOLOGY_TERM_IRI = "ontologyTermIRI";
 	public final static String ONTOLOGY_TERM_NAME = "ontologyTermName";
@@ -19,25 +25,41 @@ public class OntologyTermMetaData extends DefaultEntityMetaData
 	public final static String ONTOLOGY_TERM_DYNAMIC_ANNOTATION = "ontologyTermDynamicAnnotation";
 	public final static String ONTOLOGY_TERM_NODE_PATH = "nodePath";
 	public final static String ONTOLOGY = "ontology";
-	public final static String SIMPLE_NAME = "OntologyTerm";
-	public final static String ENTITY_NAME = OntologyPackage.PACKAGE_NAME + "_" + SIMPLE_NAME;
-	public final static OntologyTermMetaData INSTANCE = new OntologyTermMetaData();
 
-	private OntologyTermMetaData()
+	private final OntologyPackage ontologyPackage;
+	private final OntologyTermSynonymMetaData ontologyTermSynonymMetaData;
+	private final OntologyTermDynamicAnnotationMetaData ontologyTermDynamicAnnotationMetaData;
+	private final OntologyTermNodePathMetaData ontologyTermNodePathMetaData;
+	private final OntologyMetaData ontologyMetaData;
+
+	@Autowired
+	public OntologyTermMetaData(OntologyPackage ontologyPackage,
+			OntologyTermSynonymMetaData ontologyTermSynonymMetaData,
+			OntologyTermDynamicAnnotationMetaData ontologyTermDynamicAnnotationMetaData,
+			OntologyTermNodePathMetaData ontologyTermNodePathMetaData, OntologyMetaData ontologyMetaData)
 	{
-		super(SIMPLE_NAME, OntologyPackage.getPackageInstance());
+		super(SIMPLE_NAME, PACKAGE_ONTOLOGY);
+		this.ontologyPackage = requireNonNull(ontologyPackage);
+		this.ontologyTermSynonymMetaData = requireNonNull(ontologyTermSynonymMetaData);
+		this.ontologyTermDynamicAnnotationMetaData = requireNonNull(ontologyTermDynamicAnnotationMetaData);
+		this.ontologyTermNodePathMetaData = requireNonNull(ontologyTermNodePathMetaData);
+		this.ontologyMetaData = requireNonNull(ontologyMetaData);
+	}
 
-		addAttributeMetaData(new DefaultAttributeMetaData(ID).setVisible(false), ROLE_ID);
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_IRI, FieldTypeEnum.STRING).setNillable(false));
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_NAME, FieldTypeEnum.TEXT).setNillable(false),
-				ROLE_LABEL);
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_SYNONYM, FieldTypeEnum.MREF).setNillable(true)
-				.setRefEntity(OntologyTermSynonymMetaData.INSTANCE));
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_DYNAMIC_ANNOTATION, FieldTypeEnum.MREF)
-				.setNillable(true).setRefEntity(OntologyTermDynamicAnnotationMetaData.INSTANCE));
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_TERM_NODE_PATH, FieldTypeEnum.MREF).setNillable(true)
-				.setRefEntity(OntologyTermNodePathMetaData.INSTANCE));
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY, FieldTypeEnum.XREF).setNillable(false)
-				.setRefEntity(OntologyMetaData.INSTANCE));
+	@Override
+	public void init()
+	{
+		setPackage(ontologyPackage);
+
+		addAttribute(ID, ROLE_ID).setVisible(false);
+		addAttribute(ONTOLOGY_TERM_IRI).setNillable(false);
+		addAttribute(ONTOLOGY_TERM_NAME, ROLE_LABEL).setDataType(TEXT).setNillable(false);
+		addAttribute(ONTOLOGY_TERM_SYNONYM).setDataType(MREF).setNillable(true)
+				.setRefEntity(ontologyTermSynonymMetaData);
+		addAttribute(ONTOLOGY_TERM_DYNAMIC_ANNOTATION).setDataType(MREF).setNillable(true)
+				.setRefEntity(ontologyTermDynamicAnnotationMetaData);
+		addAttribute(ONTOLOGY_TERM_NODE_PATH).setDataType(MREF).setNillable(true)
+				.setRefEntity(ontologyTermNodePathMetaData);
+		addAttribute(ONTOLOGY).setDataType(XREF).setNillable(false).setRefEntity(ontologyMetaData);
 	}
 }

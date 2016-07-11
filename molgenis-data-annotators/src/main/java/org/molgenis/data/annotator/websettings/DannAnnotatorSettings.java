@@ -25,6 +25,12 @@ public class DannAnnotatorSettings extends DefaultSettingsEntity
 		public Meta()
 		{
 			super(ID);
+		}
+
+		@Override
+		public void init()
+		{
+			super.init();
 			setLabel("Dann annotator settings");
 			String defaultLocation = AnnotatorUtils.getAnnotatorResourceDir() + "/dann/dann.tsv.bgz";
 			addAttribute(DANN_LOCATION).setLabel("Dann file location").setDefaultValue(defaultLocation);

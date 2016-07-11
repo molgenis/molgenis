@@ -11,12 +11,14 @@ import org.springframework.security.core.userdetails.User;
  */
 public class SystemSecurityToken extends UsernamePasswordAuthenticationToken
 {
-	public static final String ROLE_SYSTEM = "ROLE_SYSTEM";
 	private static final long serialVersionUID = 2019504169566855264L;
+
+	public static final String ROLE_SYSTEM = "ROLE_SYSTEM";
+	public static final String USER_SYSTEM = "SYSTEM";
 
 	public SystemSecurityToken()
 	{
-		super(new User("SYSTEM", "", Arrays.asList(new SimpleGrantedAuthority(ROLE_SYSTEM))), "", Arrays
+		super(new User(USER_SYSTEM, "", Arrays.asList(new SimpleGrantedAuthority(ROLE_SYSTEM))), "", Arrays
 				.asList(new SimpleGrantedAuthority(ROLE_SYSTEM)));
 	}
 }

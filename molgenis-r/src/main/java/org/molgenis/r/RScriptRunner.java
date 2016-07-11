@@ -26,6 +26,8 @@ import freemarker.template.TemplateException;
 @Service
 public class RScriptRunner implements ScriptRunner
 {
+	private static final String NAME = "R";
+
 	private static final Charset CHARSET = Charset.forName("utf-8");
 	private final RScriptExecutor rScriptExecutor;
 	private final FileStore fileStore;
@@ -42,8 +44,7 @@ public class RScriptRunner implements ScriptRunner
 	/**
 	 * Run an R script as freemarker template
 	 * 
-	 * @param scriptName
-	 * @param template
+	 * @param templateName
 	 * @param parameters
 	 * @throws IOException
 	 * @throws TemplateException
@@ -59,7 +60,7 @@ public class RScriptRunner implements ScriptRunner
 	 * Run an R script as freemarker template
 	 * 
 	 * @param scriptName
-	 * @param template
+	 * @param templateName
 	 * @param parameters
 	 * @throws IOException
 	 * @throws TemplateException
@@ -99,6 +100,12 @@ public class RScriptRunner implements ScriptRunner
 		FileCopyUtils.copy(script, new OutputStreamWriter(new FileOutputStream(file), CHARSET));
 
 		rScriptExecutor.executeScript(file, outputHandler);
+	}
+
+	@Override
+	public String getName()
+	{
+		return NAME;
 	}
 
 	@Override

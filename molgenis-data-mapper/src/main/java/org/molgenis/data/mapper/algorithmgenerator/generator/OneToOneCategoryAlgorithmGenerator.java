@@ -2,9 +2,7 @@ package org.molgenis.data.mapper.algorithmgenerator.generator;
 
 import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapper;
 import org.molgenis.data.mapper.algorithmgenerator.categorymapper.FrequencyCategoryMapper;
@@ -13,6 +11,8 @@ import org.molgenis.data.mapper.algorithmgenerator.rules.CategoryRule;
 import org.molgenis.data.mapper.algorithmgenerator.rules.impl.MissingCategoryRule;
 import org.molgenis.data.mapper.algorithmgenerator.rules.impl.NegativeCategoryRule;
 import org.molgenis.data.mapper.algorithmgenerator.rules.impl.PositiveCategoryRule;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import com.google.common.collect.Lists;
 

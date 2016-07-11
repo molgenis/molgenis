@@ -11,7 +11,6 @@ import java.util.List;
 public abstract class AbstractRepositoryEntityAnnotator extends AbstractRepositoryAnnotator
 {
 	@Override
-	@Transactional
 	@RunAsSystem
 	public Iterator<Entity> annotate(final Iterable<Entity> sourceIterable)
 	{ // default update mode is false

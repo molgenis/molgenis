@@ -1,26 +1,24 @@
 package org.molgenis.data.rest.v2;
 
-import static org.molgenis.data.rest.v2.AttributeMetaDataResponseV2.filterAttributes;
-import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
-
-import java.util.List;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.rest.Href;
-import org.molgenis.fieldtypes.MrefField;
-import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.security.core.MolgenisPermissionService;
-import org.molgenis.security.core.Permission;
-
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.rest.Href;
+import org.molgenis.data.support.EntityMetaDataUtils;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
+
+import java.util.List;
+
+import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
+import static org.molgenis.data.rest.v2.AttributeMetaDataResponseV2.filterAttributes;
+import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 
 class EntityMetaDataResponseV2
 {
@@ -52,7 +50,7 @@ class EntityMetaDataResponseV2
 	/**
 	 * 
 	 * @param meta
-	 * @param attrFilter
+	 * @param fetch
 	 *            set of lowercase attribute names to include in response
 	 */
 	public EntityMetaDataResponseV2(EntityMetaData meta, Fetch fetch, MolgenisPermissionService permissionService,
@@ -78,7 +76,7 @@ class EntityMetaDataResponseV2
 						Fetch subAttrFetch;
 						if (fetch != null)
 						{
-							if (attr.getDataType().getEnumType() == FieldTypeEnum.COMPOUND)
+							if (attr.getDataType() == COMPOUND)
 							{
 								subAttrFetch = fetch;
 							}
@@ -87,7 +85,7 @@ class EntityMetaDataResponseV2
 								subAttrFetch = fetch.getFetch(attr);
 							}
 						}
-						else if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
+						else if (EntityMetaDataUtils.isReferenceType(attr))
 						{
 							subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr,
 									languageCode);

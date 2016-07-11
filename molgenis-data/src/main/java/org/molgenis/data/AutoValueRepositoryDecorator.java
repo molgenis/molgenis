@@ -1,34 +1,31 @@
 package org.molgenis.data;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.DATE;
-import static org.molgenis.MolgenisFieldTypes.DATETIME;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.data.listeners.EntityListener;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.fieldtypes.StringField;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 
 /**
  * Adds auto id capabilities to a Repository
  */
-public class AutoValueRepositoryDecorator implements Repository
+public class AutoValueRepositoryDecorator implements Repository<Entity>
 {
-	private final Repository decoratedRepository;
+	private final Repository<Entity> decoratedRepository;
 	private final IdGenerator idGenerator;
 
-	public AutoValueRepositoryDecorator(Repository decoratedRepository, IdGenerator idGenerator)
+	public AutoValueRepositoryDecorator(Repository<Entity> decoratedRepository, IdGenerator idGenerator)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
 		this.idGenerator = requireNonNull(idGenerator);
@@ -42,8 +39,7 @@ public class AutoValueRepositoryDecorator implements Repository
 
 		// auto id
 		AttributeMetaData idAttr = getEntityMetaData().getIdAttribute();
-		if (idAttr != null && idAttr.isAuto() && entity.getIdValue() == null
-				&& (idAttr.getDataType() instanceof StringField))
+		if (idAttr != null && idAttr.isAuto() && entity.getIdValue() == null && (idAttr.getDataType() == STRING))
 		{
 			entity.set(idAttr.getName(), idGenerator.generateId());
 		}
@@ -52,7 +48,7 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		List<AttributeMetaData> autoAttrs = getAutoAttrs();
 		if (!autoAttrs.isEmpty())
@@ -69,9 +65,9 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Stream<Entity> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		return decoratedRepository.stream(fetch);
+		decoratedRepository.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override
@@ -84,6 +80,12 @@ public class AutoValueRepositoryDecorator implements Repository
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		return decoratedRepository.getCapabilities();
+	}
+
+	@Override
+	public Set<QueryRule.Operator> getQueryOperators()
+	{
+		return decoratedRepository.getQueryOperators();
 	}
 
 	@Override
@@ -105,39 +107,39 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decoratedRepository.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return decoratedRepository.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return decoratedRepository.findAll(q);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		return decoratedRepository.findOne(q);
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
-		return decoratedRepository.findOne(id);
+		return decoratedRepository.findOneById(id);
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
-		return decoratedRepository.findOne(id, fetch);
+		return decoratedRepository.findOneById(id, fetch);
 	}
 
 	@Override
@@ -165,7 +167,7 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		decoratedRepository.update(entities);
 	}
@@ -177,7 +179,7 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		decoratedRepository.delete(entities);
 	}
@@ -189,9 +191,9 @@ public class AutoValueRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
-		decoratedRepository.deleteById(ids);
+		decoratedRepository.deleteAll(ids);
 	}
 
 	@Override
@@ -222,8 +224,8 @@ public class AutoValueRepositoryDecorator implements Repository
 			{
 				if (attr.isAuto())
 				{
-					FieldTypeEnum type = attr.getDataType().getEnumType();
-					return type == FieldTypeEnum.DATE || type == FieldTypeEnum.DATE_TIME;
+					AttributeType type = attr.getDataType();
+					return type == DATE || type == DATE_TIME;
 				}
 				else
 				{
@@ -238,12 +240,12 @@ public class AutoValueRepositoryDecorator implements Repository
 		{
 			for (AttributeMetaData attr : autoAttrs)
 			{
-				FieldTypeEnum type = attr.getDataType().getEnumType();
-				if (type == FieldTypeEnum.DATE)
+				AttributeType type = attr.getDataType();
+				if (type == DATE)
 				{
 					entity.set(attr.getName(), dateNow);
 				}
-				else if (type == FieldTypeEnum.DATE_TIME)
+				else if (type == DATE_TIME)
 				{
 					entity.set(attr.getName(), dateNow);
 				}
@@ -254,18 +256,6 @@ public class AutoValueRepositoryDecorator implements Repository
 
 			}
 		}
-	}
-
-	@Override
-	public void create()
-	{
-		decoratedRepository.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		decoratedRepository.drop();
 	}
 
 	@Override
@@ -296,16 +286,15 @@ public class AutoValueRepositoryDecorator implements Repository
 	{
 		for (AttributeMetaData autoAttr : autoAttrs)
 		{
-			// autoAttrs.forEach(autoAttr -> {
 			// set auto values unless a value already exists
 			String autoAttrName = autoAttr.getName();
 			if (entity.get(autoAttrName) == null)
 			{
-				if (autoAttr.equals(getEntityMetaData().getIdAttribute()))
+				if (autoAttrName.equals(getEntityMetaData().getIdAttribute().getName()))
 				{
 					entity.set(autoAttrName, idGenerator.generateId());
 				}
-				else if (autoAttr.getDataType().equals(DATE) || autoAttr.getDataType().equals(DATETIME))
+				else if (autoAttr.getDataType() == DATE || autoAttr.getDataType() == DATE_TIME)
 				{
 					entity.set(autoAttrName, new Date());
 				}
@@ -314,7 +303,6 @@ public class AutoValueRepositoryDecorator implements Repository
 					throw new RuntimeException("Invalid auto attribute: " + autoAttr.toString());
 				}
 			}
-			// });
 		}
 		return entity;
 	}

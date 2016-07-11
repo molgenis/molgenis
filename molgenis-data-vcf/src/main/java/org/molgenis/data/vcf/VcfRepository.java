@@ -1,22 +1,6 @@
 package org.molgenis.data.vcf;
 
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.vcf.format.VcfToEntity;
-import org.molgenis.vcf.VcfReader;
-import org.molgenis.vcf.VcfRecord;
-import org.molgenis.vcf.meta.VcfMeta;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static java.util.Objects.requireNonNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -24,7 +8,24 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 
-import static java.util.Objects.requireNonNull;
+import org.molgenis.data.Entity;
+import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.support.AbstractRepository;
+import org.molgenis.data.vcf.format.VcfToEntity;
+import org.molgenis.data.vcf.model.VcfAttributes;
+import org.molgenis.vcf.VcfReader;
+import org.molgenis.vcf.VcfRecord;
+import org.molgenis.vcf.meta.VcfMeta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 
 /**
  * Repository implementation for vcf files.
@@ -36,61 +37,32 @@ public class VcfRepository extends AbstractRepository
 	private static final Logger LOG = LoggerFactory.getLogger(VcfRepository.class);
 	public static final String DEFAULT_ATTRIBUTE_DESCRIPTION = "Description not provided";
 
-	public static final String CHROM = "#CHROM";
-	public static final String ALT = "ALT";
-	public static final String POS = "POS";
-	public static final String REF = "REF";
-	public static final String FILTER = "FILTER";
-	public static final String QUAL = "QUAL";
-	public static final String ID = "ID";
-	public static final String INTERNAL_ID = "INTERNAL_ID";
-	public static final String INFO = "INFO";
-	public static final String FORMAT_GT = "GT";
-	public static final String SAMPLES = "SAMPLES_ENTITIES";
 	public static final String NAME = "NAME";
 	public static final String ORIGINAL_NAME = "ORIGINAL_NAME";
 	public static final String PREFIX = "##";
 
-	public static final AttributeMetaData CHROM_META = new DefaultAttributeMetaData(CHROM,
-			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(false)
-					.setDescription("The chromosome on which the variant is observed");
-	// TEXT instead of STRING to handle large insertions/deletions
-	public static final AttributeMetaData ALT_META = new DefaultAttributeMetaData(ALT,
-			MolgenisFieldTypes.FieldTypeEnum.TEXT).setAggregateable(true).setNillable(false)
-					.setDescription("The alternative allele observed");
-	public static final AttributeMetaData POS_META = new DefaultAttributeMetaData(POS,
-			MolgenisFieldTypes.FieldTypeEnum.LONG).setAggregateable(true).setNillable(false)
-					.setDescription("The position on the chromosome which the variant is observed");
-	// TEXT instead of STRING to handle large insertions/deletions
-	public static final AttributeMetaData REF_META = new DefaultAttributeMetaData(REF,
-			MolgenisFieldTypes.FieldTypeEnum.TEXT).setAggregateable(true).setNillable(false)
-					.setDescription("The reference allele");
-	public static final AttributeMetaData FILTER_META = new DefaultAttributeMetaData(FILTER,
-			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true)
-					.setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
-	public static final AttributeMetaData QUAL_META = new DefaultAttributeMetaData(QUAL,
-			MolgenisFieldTypes.FieldTypeEnum.STRING).setAggregateable(true).setNillable(true)
-					.setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
-	public static final AttributeMetaData ID_META = new DefaultAttributeMetaData(ID,
-			MolgenisFieldTypes.FieldTypeEnum.STRING).setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
-	public static final AttributeMetaData INFO_META = new DefaultAttributeMetaData(INFO,
-			MolgenisFieldTypes.FieldTypeEnum.COMPOUND).setNillable(true);
-
-
+	private final VcfReaderFactory vcfReaderFactory;
 	private final String entityName;
-	protected Supplier<VcfToEntity> vcfToEntitySupplier;
-	private VcfReaderFactory vcfReaderFactory;
+	private final VcfAttributes vcfAttributes;
+	private final EntityMetaDataFactory entityMetaFactory;
+	private final AttributeMetaDataFactory attrMetaFactory;
+	protected final Supplier<VcfToEntity> vcfToEntitySupplier;
 
-	public VcfRepository(File file, String entityName) throws IOException
+	public VcfRepository(File file, String entityName, VcfAttributes vcfAttributes,
+			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory) throws IOException
 	{
-		this(new VcfReaderFactoryImpl(file), entityName);
+		this(new VcfReaderFactoryImpl(file), entityName, vcfAttributes, entityMetaFactory, attrMetaFactory);
 	}
 
-	protected VcfRepository(VcfReaderFactory vcfReaderFactory, String entityName)
+	protected VcfRepository(VcfReaderFactory vcfReaderFactory, String entityName, VcfAttributes vcfAttributes,
+			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
 	{
+		this.vcfReaderFactory = requireNonNull(vcfReaderFactory);
 		this.entityName = requireNonNull(entityName);
-		this.vcfReaderFactory = vcfReaderFactory;
-		this.vcfToEntitySupplier = Suppliers.<VcfToEntity> memoize(this::parseVcfMeta);
+		this.vcfAttributes = requireNonNull(vcfAttributes);
+		this.entityMetaFactory = requireNonNull(entityMetaFactory);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
+		this.vcfToEntitySupplier = Suppliers.memoize(this::parseVcfMeta);
 	}
 
 	private VcfToEntity parseVcfMeta()
@@ -99,7 +71,7 @@ public class VcfRepository extends AbstractRepository
 		try
 		{
 			VcfMeta vcfMeta = reader.getVcfMeta();
-			return new VcfToEntity(entityName, vcfMeta);
+			return new VcfToEntity(entityName, vcfMeta, vcfAttributes, entityMetaFactory, attrMetaFactory);
 		}
 		catch (Exception e)
 		{
@@ -119,13 +91,6 @@ public class VcfRepository extends AbstractRepository
 		}
 	}
 
-	/**
-	 * Returns an iterator for this repository.
-	 * 
-	 * Use with caution! Multiple iterators will all point to the same line in the VCF file, leading to unpredictable
-	 * behaviour. If you want to get the EntityMetaData of this repository and you can't access getEntityMetaData(),
-	 * convert the iterator to a PeekingIterator and peek the first Entity.
-	 */
 	@Override
 	public Iterator<Entity> iterator()
 	{

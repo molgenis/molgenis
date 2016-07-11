@@ -1,19 +1,23 @@
 package org.molgenis.data.meta;
 
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Repository decorator for entities, attributes and packages repositories.
@@ -21,11 +25,11 @@ import org.molgenis.data.RepositoryCapability;
  * Removes the WRITABLE and MANAGEABLE capabilities, because the user must not directly edit these repos but use the
  * MetaDataServices
  */
-public class MetaDataRepositoryDecorator implements Repository
+public class MetaDataRepositoryDecorator implements Repository<Entity>
 {
-	private final Repository decorated;
+	private final Repository<Entity> decorated;
 
-	public MetaDataRepositoryDecorator(Repository decorated)
+	public MetaDataRepositoryDecorator(Repository<Entity> decorated)
 	{
 		this.decorated = decorated;
 	}
@@ -37,9 +41,9 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Stream<Entity> stream(Fetch fetch)
+	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		return decorated.stream(fetch);
+		decorated.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override
@@ -51,10 +55,16 @@ public class MetaDataRepositoryDecorator implements Repository
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		Set<RepositoryCapability> capabilities = decorated.getCapabilities();
+		Set<RepositoryCapability> capabilities = new HashSet<>(decorated.getCapabilities());
 		capabilities.remove(RepositoryCapability.WRITABLE);
 		capabilities.remove(RepositoryCapability.MANAGABLE);
 		return capabilities;
+	}
+
+	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return decorated.getQueryOperators();
 	}
 
 	@Override
@@ -76,39 +86,39 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decorated.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return decorated.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return decorated.findAll(q);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		return decorated.findOne(q);
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
-		return decorated.findOne(id);
+		return decorated.findOneById(id);
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
-		return decorated.findOne(id, fetch);
+		return decorated.findOneById(id, fetch);
 	}
 
 	@Override
@@ -136,7 +146,7 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		decorated.update(entities);
 	}
@@ -148,7 +158,7 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		decorated.delete(entities);
 	}
@@ -160,9 +170,9 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
-		decorated.deleteById(ids);
+		decorated.deleteAll(ids);
 	}
 
 	@Override
@@ -178,7 +188,7 @@ public class MetaDataRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		return decorated.add(entities);
 	}
@@ -193,18 +203,6 @@ public class MetaDataRepositoryDecorator implements Repository
 	public void clearCache()
 	{
 		decorated.clearCache();
-	}
-
-	@Override
-	public void create()
-	{
-		decorated.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		decorated.drop();
 	}
 
 	@Override

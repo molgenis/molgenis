@@ -15,15 +15,14 @@ import org.slf4j.LoggerFactory;
  * Implementation of {@link Resource}, a file-based repository. The location of the file is configured in
  * MolgenisSettings.
  */
-public class ResourceImpl implements Resource
+public abstract class ResourceImpl implements Resource
 {
 	private final String name;
-	private final RepositoryFactory repositoryFactory;
 	private final ResourceConfig config;
 	// the file the current repository works on
 	private volatile File file;
 	// the current repository
-	private volatile Repository repository;
+	private volatile Repository<Entity> repository;
 
 	private static final Logger LOG = LoggerFactory.getLogger(ResourceImpl.class);
 
@@ -34,14 +33,11 @@ public class ResourceImpl implements Resource
 	 *            the name of the Resource
 	 * @param config
 	 *            ResourceConfig that configure the location of the file
-	 * @param repositoryFactory
-	 *            Factory used to create the Repository when the file becomes available
 	 */
-	public ResourceImpl(String name, ResourceConfig config, RepositoryFactory repositoryFactory)
+	public ResourceImpl(String name, ResourceConfig config)
 	{
 		this.name = name;
 		this.config = config;
-		this.repositoryFactory = repositoryFactory;
 	}
 
 	/**
@@ -71,7 +67,7 @@ public class ResourceImpl implements Resource
 	 *             if the repository is not available
 	 */
 	@Override
-	public Iterable<Entity> findAll(Query q)
+	public Iterable<Entity> findAll(Query<Entity> q)
 	{
 		return new Iterable<Entity>()
 		{
@@ -95,7 +91,7 @@ public class ResourceImpl implements Resource
 		return repository == null;
 	}
 
-	private Repository getRepository()
+	private Repository<Entity> getRepository()
 	{
 		if (repository == null && isAvailable())
 		{
@@ -106,6 +102,7 @@ public class ResourceImpl implements Resource
 
 	private synchronized void initialize()
 	{
+		RepositoryFactory repositoryFactory = getRepositoryFactory();
 		if (isAvailable() && repository == null)
 		{
 			try

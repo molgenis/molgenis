@@ -1,9 +1,10 @@
 package org.molgenis.data.annotation;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.util.Iterator;
 import java.util.List;
@@ -19,7 +20,16 @@ public interface RepositoryAnnotator
 	AnnotatorInfo getInfo();
 
 	// add entityAnnotator
-	Iterator<Entity> annotate(Iterable<Entity> source);
+	default Iterator<Entity> annotate(Iterable<Entity> source, boolean updateMode)
+	{
+		if (updateMode == true)
+		{
+			throw new MolgenisDataException("This annotator/filter does not support updating of values");
+		}
+		return this.annotate(source);
+	}
+
+	public Iterator<Entity> annotate(Iterable<Entity> source);
 
 	/**
 	 * Checks if folder and files that were set with a runtime property actually exist, or if a webservice can be
@@ -32,15 +42,12 @@ public interface RepositoryAnnotator
 	// alternative constructor that allows seamless chaining
 	Iterator<Entity> annotate(Iterator<Entity> source);
 
-	// add entityAnnotator, choose if you want to refresh or update existing annotations
-	Iterator<Entity> annotate(Iterable<Entity> source, boolean updateMode);
-
 	/**
-	 * returns an list of attributeMetadata containing the attributes the annotator will add
+	 * returns an entityMetaData containing the attributes the annotator will add
 	 * 
 	 * @return ouputMetadata
 	 */
-	List<AttributeMetaData> getOutputMetaData();
+	List<AttributeMetaData> getOutputAttributes();
 
 	/**
 	 * Returns a entityMetaData containing the attributes needed for the annotator to work
@@ -72,5 +79,6 @@ public interface RepositoryAnnotator
 	{
 		return getInfo() == null ? "no description" : getInfo().getDescription();
 	}
+
 
 }

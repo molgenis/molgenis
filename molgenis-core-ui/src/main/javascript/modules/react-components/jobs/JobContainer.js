@@ -6,15 +6,12 @@
  *
  * @exports JobContainer factory
  */
-import React from 'react';
-import RestClient from "rest-client/RestClientV2";
-import { Spinner } from '../Spinner'
-import $ from 'jquery';
-
-import { Job } from './Job';
-
-import DeepPureRenderMixin from '../mixin/DeepPureRenderMixin';
-import SetIntervalMixin from '../mixin/SetIntervalMixin';
+import React from "react";
+import {Spinner} from "../Spinner";
+import $ from "jquery";
+import {Job} from "./Job";
+import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
+import SetIntervalMixin from "../mixin/SetIntervalMixin";
 
 var JobContainer = React.createClass({
     mixins: [DeepPureRenderMixin, SetIntervalMixin],

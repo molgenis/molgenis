@@ -1,6 +1,6 @@
 package org.molgenis.fieldtypes;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.model.MolgenisModelException;
 
 public class BoolField extends FieldType
@@ -30,6 +30,12 @@ public class BoolField extends FieldType
 	public String getMysqlType() throws MolgenisModelException
 	{
 		return "BOOL";
+	}
+
+	@Override
+	public String getPostgreSqlType()
+	{
+		return "boolean";
 	}
 
 	@Override
@@ -81,9 +87,9 @@ public class BoolField extends FieldType
 	}
 
 	@Override
-	public FieldTypeEnum getEnumType()
+	public AttributeType getEnumType()
 	{
-		return FieldTypeEnum.BOOL;
+		return AttributeType.BOOL;
 	}
 
 	@Override
@@ -96,7 +102,7 @@ public class BoolField extends FieldType
 	public Object convert(Object value)
 	{
 		if (value == null) return null;
-		if (value instanceof Boolean) return (Boolean) value;
+		if (value instanceof Boolean) return value;
 		if (value instanceof String) return Boolean.parseBoolean(value.toString());
 		if (value instanceof Integer) return (Integer) value > 0;
 		throw new RuntimeException("BoolField.convert(" + value + ") failed");

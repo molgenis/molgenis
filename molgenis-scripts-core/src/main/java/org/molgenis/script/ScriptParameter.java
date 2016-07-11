@@ -1,35 +1,37 @@
 package org.molgenis.script;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.support.DefaultEntity;
+import static org.molgenis.script.ScriptParameterMetaData.NAME;
 
-public class ScriptParameter extends DefaultEntity
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.StaticEntity;
+
+public class ScriptParameter extends StaticEntity
 {
-	private static final long serialVersionUID = 2005285224629134983L;
-	public static final String ENTITY_NAME = "ScriptParameter";
-	public static final String NAME = "name";
-	public static final EntityMetaData META_DATA = new ScriptParameterMetaData();
-
-	public ScriptParameter(DataService dataService)
+	public ScriptParameter(Entity entity)
 	{
-		super(META_DATA, dataService);
+		super(entity);
 	}
 
-	public void setName(String name)
+	public ScriptParameter(EntityMetaData entityMeta)
+	{
+		super(entityMeta);
+	}
+
+	public ScriptParameter(String name, EntityMetaData entityMeta)
+	{
+		super(entityMeta);
+		setName(name);
+	}
+
+	public ScriptParameter setName(String name)
 	{
 		set(NAME, name);
+		return this;
 	}
 
 	public String getName()
 	{
 		return getString(NAME);
 	}
-
-	@Override
-	public EntityMetaData getEntityMetaData()
-	{
-		return META_DATA;
-	}
-
 }

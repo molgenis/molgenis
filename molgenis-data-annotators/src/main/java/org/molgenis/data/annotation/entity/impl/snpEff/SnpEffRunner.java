@@ -1,68 +1,55 @@
 package org.molgenis.data.annotation.entity.impl.snpEff;
 
-import static com.google.common.collect.Iterators.peekingIterator;
-import static java.io.File.createTempFile;
-import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.support.EffectsMetaData.ALT;
-import static org.molgenis.data.support.EffectsMetaData.ANNOTATION;
-import static org.molgenis.data.support.EffectsMetaData.CDS_POSITION;
-import static org.molgenis.data.support.EffectsMetaData.C_DNA_POSITION;
-import static org.molgenis.data.support.EffectsMetaData.DISTANCE_TO_FEATURE;
-import static org.molgenis.data.support.EffectsMetaData.ERRORS;
-import static org.molgenis.data.support.EffectsMetaData.FEATURE_ID;
-import static org.molgenis.data.support.EffectsMetaData.FEATURE_TYPE;
-import static org.molgenis.data.support.EffectsMetaData.GENE_ID;
-import static org.molgenis.data.support.EffectsMetaData.GENE_NAME;
-import static org.molgenis.data.support.EffectsMetaData.HGVS_C;
-import static org.molgenis.data.support.EffectsMetaData.HGVS_P;
-import static org.molgenis.data.support.EffectsMetaData.ID;
-import static org.molgenis.data.support.EffectsMetaData.PROTEIN_POSITION;
-import static org.molgenis.data.support.EffectsMetaData.PUTATIVE_IMPACT;
-import static org.molgenis.data.support.EffectsMetaData.RANK_TOTAL;
-import static org.molgenis.data.support.EffectsMetaData.TRANSCRIPT_BIOTYPE;
-import static org.molgenis.data.support.EffectsMetaData.VARIANT;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.UncheckedIOException;
-import java.io.Writer;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
+import com.google.common.collect.PeekingIterator;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.utils.JarRunner;
 import org.molgenis.data.annotator.websettings.SnpEffAnnotatorSettings;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EffectsMetaData;
-import org.molgenis.data.support.MapEntity;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
-import com.google.common.collect.PeekingIterator;
+import java.io.*;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import static com.google.common.collect.Iterators.peekingIterator;
+import static java.io.File.createTempFile;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.data.support.EffectsMetaData.*;
 
 @Component
 public class SnpEffRunner
 {
+	@Autowired
+	AttributeMetaDataFactory attributeMetaDataFactory;
+
+	@Autowired
+	EntityMetaDataFactory entityMetaDataFactory;
+
+	@Autowired
+	VcfAttributes vcfAttributes;
+
+	@Autowired
+	EffectsMetaData effectsMetaData;
+
 	private static final Logger LOG = LoggerFactory.getLogger(SnpEffAnnotator.class);
 
 	private String snpEffPath;
@@ -74,8 +61,6 @@ public class SnpEffRunner
 	public static final String LOF = "LOF";
 	public static final String NMD = "NMD";
 	public static final String ANN = "ANN";
-
-	private EffectsMetaData effectsMetaData = new EffectsMetaData();
 
 	public enum Impact
 	{
@@ -118,12 +103,13 @@ public class SnpEffRunner
 			PeekingIterator<Entity> peekingSourceIterator = Iterators.peekingIterator(source);
 			EntityMetaData sourceEMD = peekingSourceIterator.peek().getEntityMetaData();
 
-			List<String> params = Arrays.asList("-Xmx2g", getSnpEffPath(), "hg19", "-noStats", "-noLog", "-lof",
-					"-canon", "-ud", "0", "-spliceSiteSize", "5");
+			List<String> params = Arrays
+					.asList("-Xmx2g", getSnpEffPath(), "hg19", "-noStats", "-noLog", "-lof", "-canon", "-ud", "0",
+							"-spliceSiteSize", "5");
 			File outputVcf = jarRunner.runJar(NAME, params, inputVcf);
 
-			File snpEffOutputWithMetaData = addVcfMetaDataToOutputVcf(outputVcf);
-			VcfRepository repo = new VcfRepository(snpEffOutputWithMetaData, "SNPEFF_OUTPUT_VCF_" + inputVcf.getName());
+			VcfRepository repo = new VcfRepository(outputVcf, "SNPEFF_OUTPUT_VCF_" + inputVcf.getName(), vcfAttributes,
+					entityMetaDataFactory, attributeMetaDataFactory);
 
 			PeekingIterator<Entity> snpEffResultIterator = peekingIterator(repo.iterator());
 
@@ -144,12 +130,12 @@ public class SnpEffRunner
 					{
 						// go to next source entity and get effects
 						Entity sourceEntity = peekingSourceIterator.next();
-						String chromosome = sourceEntity.getString(VcfRepository.CHROM);
-						Long position = sourceEntity.getLong(VcfRepository.POS);
+						String chromosome = sourceEntity.getString(VcfAttributes.CHROM);
+						Long position = sourceEntity.getLong(VcfAttributes.POS);
 
 						if (chromosome != null && position != null)
 						{
-							Entity snpEffEntity = getSnpEffEntity(snpEffResultIterator,chromosome, position);
+							Entity snpEffEntity = getSnpEffEntity(snpEffResultIterator, chromosome, position);
 							if (snpEffEntity != null)
 							{
 								effects.addAll(getSnpEffectsFromSnpEffEntity(sourceEntity, snpEffEntity,
@@ -184,11 +170,9 @@ public class SnpEffRunner
 	 * Returns the next entity containing SnpEff annotations if its Chrom and Pos match. This implementation works
 	 * because SnpEff always returns output in the same order as the input
 	 *
-	 *
 	 * @param snpEffResultIterator
 	 * @param chrom
 	 * @param pos
-	 *
 	 * @return {@link Entity}
 	 */
 	public Entity getSnpEffEntity(PeekingIterator<Entity> snpEffResultIterator, String chrom, long pos)
@@ -196,8 +180,8 @@ public class SnpEffRunner
 		if (snpEffResultIterator.hasNext())
 		{
 			Entity entityCandidate = snpEffResultIterator.peek();
-			if (chrom.equals(entityCandidate.getString(VcfRepository.CHROM))
-					&& pos == entityCandidate.getLong(VcfRepository.POS))
+			if (chrom.equals(entityCandidate.getString(VcfAttributes.CHROM)) && pos == entityCandidate
+					.getLong(VcfAttributes.POS))
 			{
 				snpEffResultIterator.next();
 				return entityCandidate;
@@ -208,7 +192,7 @@ public class SnpEffRunner
 
 	private Entity getEmptyEffectsEntity(Entity sourceEntity, EntityMetaData effectsEMD)
 	{
-		MapEntity effect = new MapEntity(effectsEMD);
+		Entity effect = new DynamicEntity(effectsEMD);
 		effect.set(ID, idGenerator.generateId());
 		effect.set(VARIANT, sourceEntity);
 
@@ -227,7 +211,7 @@ public class SnpEffRunner
 		if (lof != null || nmd != null)
 		{
 			LOG.info("LOF / NMD found for CHROM:{} POS:{} ANN:{} LOF:{} NMD:{} ",
-					snpEffEntity.getString(VcfRepository.CHROM), snpEffEntity.getString(VcfRepository.POS),
+					snpEffEntity.getString(VcfAttributes.CHROM), snpEffEntity.getString(VcfAttributes.POS),
 					snpEffEntity.getString(SnpEffRunner.ANN), lof, nmd);
 		}
 
@@ -236,7 +220,7 @@ public class SnpEffRunner
 		{
 			String[] fields = annotation.split(Pattern.quote("|"), -1);
 
-			MapEntity effect = new MapEntity(effectsEMD);
+			Entity effect = new DynamicEntity(effectsEMD);
 
 			if (fields.length >= 15)
 			{
@@ -263,9 +247,9 @@ public class SnpEffRunner
 			}
 			else
 			{
-				LOG.info("No results for CHROM:{} POS:{} REF:{} ALT:{} ", effect.getString(VcfRepository.CHROM),
-						effect.getString(VcfRepository.POS), effect.getString(VcfRepository.REF),
-						effect.getString(VcfRepository.ALT));
+				LOG.info("No results for CHROM:{} POS:{} REF:{} ALT:{} ", effect.getString(VcfAttributes.CHROM),
+						effect.getString(VcfAttributes.POS), effect.getString(VcfAttributes.REF),
+						effect.getString(VcfAttributes.ALT));
 			}
 
 			effects.add(effect);
@@ -276,7 +260,7 @@ public class SnpEffRunner
 
 	/**
 	 * Takes the VCF produced by SnpEff, adds metadata, and returns a file that can be used to create a VcfRepository
-	 * 
+	 *
 	 * @param outputVcf
 	 * @return
 	 * @throws IOException
@@ -296,9 +280,9 @@ public class SnpEffRunner
 		{
 			if (!line.startsWith(VcfRepository.PREFIX) && metaDone == false)
 			{
-				writer.write(VcfRepository.CHROM + "\t" + VcfRepository.POS + "\t" + VcfRepository.ID + "\t"
-						+ VcfRepository.REF + "\t" + VcfRepository.ALT + "\t" + VcfRepository.QUAL + "\t"
-						+ VcfRepository.FILTER + "\t" + VcfRepository.INFO + "\n");
+				writer.write(VcfAttributes.CHROM + "\t" + VcfAttributes.POS + "\t" + VcfAttributes.ID + "\t"
+						+ VcfAttributes.REF + "\t" + VcfAttributes.ALT + "\t" + VcfAttributes.QUAL + "\t"
+						+ VcfAttributes.FILTER + "\t" + VcfAttributes.INFO + "\n");
 				metaDone = true;
 			}
 			writer.write(line + "\n");
@@ -310,9 +294,8 @@ public class SnpEffRunner
 
 	/**
 	 * Converts entities to a VCF file that can be passed to SnpEff.
-	 * 
-	 * @param source
-	 *            the Entities to convert to VCF
+	 *
+	 * @param source the Entities to convert to VCF
 	 * @return a VCF file
 	 */
 	public File getInputVcfFile(Iterator<Entity> source) throws IOException
@@ -324,13 +307,13 @@ public class SnpEffRunner
 			{
 				Entity entity = source.next();
 				StringBuilder builder = new StringBuilder();
-				builder.append(entity.getString(VcfRepository.CHROM));
+				builder.append(entity.getString(VcfAttributes.CHROM));
 				builder.append("\t");
-				builder.append(entity.getString(VcfRepository.POS));
+				builder.append(entity.getString(VcfAttributes.POS));
 				builder.append("\t.\t");
-				builder.append(entity.getString(VcfRepository.REF));
+				builder.append(entity.getString(VcfAttributes.REF));
 				builder.append("\t");
-				builder.append(entity.getString(VcfRepository.ALT));
+				builder.append(entity.getString(VcfAttributes.ALT));
 
 				if (source.hasNext())
 				{
@@ -346,7 +329,7 @@ public class SnpEffRunner
 
 	/**
 	 * Gets the path to the SnpEff JAR. Returns null when the path is not found or snpEffAnnotatorSettings is null.
-	 * 
+	 *
 	 * @return the path to the SnpEff JAR, or null
 	 */
 	public String getSnpEffPath()
@@ -375,22 +358,25 @@ public class SnpEffRunner
 	}
 
 	/**
-	 *
 	 * @param sourceEMD
 	 * @return
-     */
+	 */
 	public EntityMetaData getOutputMetaData(EntityMetaData sourceEMD)
 	{
-		DefaultEntityMetaData emd = new DefaultEntityMetaData(sourceEMD.getSimpleName() + ENTITY_NAME_SUFFIX,
-				sourceEMD.getPackage());
+		EntityMetaData emd = entityMetaDataFactory.create().setName(sourceEMD.getSimpleName() + ENTITY_NAME_SUFFIX)
+				.setPackage(sourceEMD.getPackage());
 		emd.setBackend(sourceEMD.getBackend());
-		emd.addAttribute(EffectsMetaData.ID, EntityMetaData.AttributeRole.ROLE_ID).setAuto(true).setVisible(false);
+		AttributeMetaData id = attributeMetaDataFactory.create().setName(EffectsMetaData.ID).setAuto(true)
+				.setVisible(false);
+		emd.addAttribute(id);
+		emd.setIdAttribute(id);
 		for (AttributeMetaData attr : effectsMetaData.getOrderedAttributes())
 		{
-			emd.addAttributeMetaData(attr);
+			emd.addAttribute(attr);
 		}
-		emd.addAttribute(EffectsMetaData.VARIANT).setNillable(false).setDataType(MolgenisFieldTypes.XREF)
-				.setRefEntity(sourceEMD);
+		emd.addAttribute(
+				attributeMetaDataFactory.create().setName(EffectsMetaData.VARIANT).setNillable(false).setDataType(XREF)
+						.setRefEntity(sourceEMD));
 		return emd;
 	}
 }

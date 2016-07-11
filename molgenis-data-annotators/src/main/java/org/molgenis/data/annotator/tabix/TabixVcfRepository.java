@@ -19,6 +19,7 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.vcf.VcfReaderFactory;
 import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,13 +36,13 @@ public class TabixVcfRepository extends VcfRepository
 
 	public TabixVcfRepository(File file, String entityName) throws IOException
 	{
-		super(file, entityName);
+		super(file, entityName, null, null, null);
 		tabixReader = new TabixReader(file.getCanonicalPath());
 	}
 
 	TabixVcfRepository(VcfReaderFactory readerFactory, TabixReader tabixReader, String entityName)
 	{
-		super(readerFactory, entityName);
+		super(readerFactory, entityName, null, null, null);
 		this.tabixReader = tabixReader;
 	}
 
@@ -61,7 +62,7 @@ public class TabixVcfRepository extends VcfRepository
 	 *            the query to search in
 	 * @return the value from the first matching query rule
 	 */
-	private static Object getFirstEqualsValueFor(String attributeName, Query q)
+	private static Object getFirstEqualsValueFor(String attributeName, Query<Entity> q)
 	{
 		return q.getRules().stream()
 				.filter(rule -> attributeName.equals(rule.getField()) && rule.getOperator() == Operator.EQUALS)
@@ -69,10 +70,10 @@ public class TabixVcfRepository extends VcfRepository
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
-		Object posValue = getFirstEqualsValueFor(VcfRepository.POS, q);
-		Object chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q);
+		Object posValue = getFirstEqualsValueFor(VcfAttributes.POS, q);
+		Object chromValue = getFirstEqualsValueFor(VcfAttributes.CHROM, q);
 		List<Entity> result = new ArrayList<Entity>();
 
 		// if one of both required attributes is null, skip the query and return an empty list
@@ -137,7 +138,7 @@ public class TabixVcfRepository extends VcfRepository
 	 */
 	private boolean positionMatches(Entity entity, long posFrom, long posTo)
 	{
-		long entityPos = entity.getLong(VcfRepository.POS);
+		long entityPos = entity.getLong(VcfAttributes.POS);
 		return entityPos >= posFrom && entityPos <= posTo;
 	}
 

@@ -12,21 +12,21 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.ResourceConfig;
-import org.molgenis.data.vcf.VcfRepository;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MultiFileResource implements Resource {
+public abstract class MultiFileResource implements Resource
+{
     private final String name;
     private final Map<String, ResourceImpl> resources = new HashMap<>();
     private final MultiResourceConfig config;
-    private final RepositoryFactory factory;
     private static final Logger LOG = LoggerFactory.getLogger(MultiFileResource.class);
 
-    public MultiFileResource(String name, MultiResourceConfig config, RepositoryFactory factory) {
+    public MultiFileResource(String name, MultiResourceConfig config)
+    {
         this.name = name;
         this.config = config;
-        this.factory = factory;
     }
 
     private void initializeResources() {
@@ -34,12 +34,15 @@ public class MultiFileResource implements Resource {
 
         for (Entry<String, ResourceConfig> chromConfig : config.getConfigs().entrySet()) {
             final String key = chromConfig.getKey();
-            this.resources.put(key, new ResourceImpl(name + key, new ResourceConfig() {
+            this.resources.put(key, new ResourceImpl(name + key, new ResourceConfig()
+            {
                 // Config may change so keep querying the MultiResourceConfig for the current File
                 @Override
-                public File getFile() {
+                public File getFile()
+                {
                     ResourceConfig resourceConfig = config.getConfigs().get(key);
-                    if (resourceConfig == null) {
+                    if (resourceConfig == null)
+                    {
                         initializeResources();
                         return null;
                     }
@@ -47,11 +50,18 @@ public class MultiFileResource implements Resource {
                     return file;
                 }
 
-            }, factory));
+            })
+            {
+                @Override
+                public RepositoryFactory getRepositoryFactory()
+                {
+                    return getRepositoryFactory();
+                }
+            });
         }
     }
 
-    private static Object getFirstEqualsValueFor(String attributeName, Query q) {
+    private static Object getFirstEqualsValueFor(String attributeName, Query<Entity> q) {
         return q.getRules()
                 .stream()
                 .filter(rule -> attributeName.equals(rule.getField())
@@ -79,10 +89,10 @@ public class MultiFileResource implements Resource {
     }
 
     @Override
-    public Iterable<Entity> findAll(Query q) {
+    public Iterable<Entity> findAll(Query<Entity> q) {
         // initialize after autowiring is complete and resources is empty
         isAvailable();
-        Object chromValue = getFirstEqualsValueFor(VcfRepository.CHROM, q);
+        Object chromValue = getFirstEqualsValueFor(VcfAttributes.CHROM, q);
         Iterable<Entity> result = new ArrayList<Entity>();
 
         if (chromValue != null) {
@@ -98,5 +108,4 @@ public class MultiFileResource implements Resource {
 
         return result;
     }
-
 }

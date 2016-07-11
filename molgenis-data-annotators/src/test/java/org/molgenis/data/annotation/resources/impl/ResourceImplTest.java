@@ -6,6 +6,7 @@ import java.io.File;
 
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.resources.ResourceConfig;
 import org.molgenis.data.support.QueryImpl;
@@ -29,7 +30,14 @@ public class ResourceImplTest
 	public void beforeMethod()
 	{
 		MockitoAnnotations.initMocks(this);
-		resource = new ResourceImpl("cadd_test", config, new TabixVcfRepositoryFactory("cadd"));
+		resource = new ResourceImpl("cadd_test", config)
+		{
+			@Override
+			public RepositoryFactory getRepositoryFactory()
+			{
+				return new TabixVcfRepositoryFactory("cadd");
+			}
+		};
 	}
 
 	@Test
@@ -56,7 +64,7 @@ public class ResourceImplTest
 	{
 		File file = ResourceUtils.getFile(getClass(), "/gonl/gonl.chr1.snps_indels.r5.vcf.gz");
 		when(config.getFile()).thenReturn(file);
-		Query query = QueryImpl.EQ("#CHROM", "1").and().eq("POS", 126108);
+		Query<Entity> query = QueryImpl.EQ("#CHROM", "1").and().eq("POS", 126108);
 
 		System.out.println(resource.findAll(query));
 	}
@@ -68,7 +76,7 @@ public class ResourceImplTest
 				"/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");
 		when(config.getFile()).thenReturn(file);
 
-		Query query = QueryImpl.EQ("#CHROM", "1").and().eq("POS", 10352);
+		Query<Entity> query = QueryImpl.EQ("#CHROM", "1").and().eq("POS", 10352);
 
 		System.out.println(resource.findAll(query));
 	}

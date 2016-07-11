@@ -9,8 +9,8 @@ import java.util.Collections;
 
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

@@ -1,9 +1,9 @@
 package org.molgenis.fieldtypes;
 
-import java.text.ParseException;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.model.MolgenisModelException;
+
+import java.text.ParseException;
 
 public class StringField extends FieldType
 {
@@ -36,6 +36,12 @@ public class StringField extends FieldType
 	{
 		// Changed from varchar to text to allow for more columns
 		return "TEXT";
+	}
+
+	@Override
+	public String getPostgreSqlType()
+	{
+		return "character varying(255)"; // alias: varchar(255)
 	}
 
 	@Override
@@ -87,9 +93,9 @@ public class StringField extends FieldType
 	}
 
 	@Override
-	public FieldTypeEnum getEnumType()
+	public AttributeType getEnumType()
 	{
-		return FieldTypeEnum.STRING;
+		return AttributeType.STRING;
 	}
 
 	@Override
