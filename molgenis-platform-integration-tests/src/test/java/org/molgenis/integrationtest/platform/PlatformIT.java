@@ -199,7 +199,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		{
 			@Override
 			public Object getEntityId(){
-//				updateCalled.incrementAndGet();
 				return entities.get(0).getIdValue();
 			}
 
@@ -225,9 +224,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			// Test that the listener is actually removed and not called anymore
 			dataService.removeEntityListener(entityMetaData.getName(), listener);
 			updateCalled.set(0);
-			LOG.info("value: {}", updateCalled.get());
 			dataService.update(entityMetaData.getName(), entities.stream());
-			assertEquals(updateCalled.get(), 0);//
+			assertEquals(updateCalled.get(), 0);
 			waitForIndexToBeStable(entityMetaData.getName());
 			assertPresent(entityMetaData, entities);
 		}
