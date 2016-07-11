@@ -9,9 +9,6 @@ import org.springframework.stereotype.Service;
 import javax.annotation.PreDestroy;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Created by jonathanjetten on 7/8/16.Í
- */
 @Service
 public class EntityListenersService
 {
