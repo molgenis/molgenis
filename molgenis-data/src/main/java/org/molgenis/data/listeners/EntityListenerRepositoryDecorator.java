@@ -19,7 +19,6 @@ import static java.util.Objects.requireNonNull;
 
 public class EntityListenerRepositoryDecorator implements Repository<Entity>
 {
-	private static final Logger LOG = LoggerFactory.getLogger(EntityListenerRepositoryDecorator.class);
 	private final Repository<Entity> decoratedRepository;
 	private SetMultimap<Object, EntityListener> entityListeners;
 
