@@ -3,8 +3,10 @@ package org.molgenis.data.cache.utils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.test.data.EntityTestHarness;
+import org.molgenis.util.EntityUtils;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -25,6 +27,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 @ContextConfiguration(classes = { EntityHydrationTest.Config.class })
 public class EntityHydrationTest extends AbstractMolgenisSpringTest
@@ -73,8 +76,8 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 		dehydratedEntity.put(ATTR_MREF, singletonList("0"));
 
 		// mock entity manager
-		EntityManager entityManager = when(mock(EntityManager.class).create(entityMetaData)).thenReturn(hydratedEntity)
-				.getMock();
+		EntityManager entityManager = when(mock(EntityManager.class).create(entityMetaData))
+				.thenReturn(new DynamicEntity(entityMetaData)).getMock();
 		entityHydration = new EntityHydration(entityManager);
 	}
 
@@ -82,7 +85,7 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 	public void hydrateTest()
 	{
 		Entity actualHydratedEntity = entityHydration.hydrate(dehydratedEntity, entityMetaData);
-		assertEquals(actualHydratedEntity, hydratedEntity);
+		assertTrue(EntityUtils.equals(actualHydratedEntity, hydratedEntity));
 	}
 
 	@Test
