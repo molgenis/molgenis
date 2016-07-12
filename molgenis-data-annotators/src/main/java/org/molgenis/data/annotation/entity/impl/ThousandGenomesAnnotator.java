@@ -7,6 +7,8 @@ import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
+import org.molgenis.data.annotation.entity.impl.framework.AnnotatorImpl;
+import org.molgenis.data.annotation.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.MultiResourceConfig;
@@ -28,7 +30,7 @@ import java.util.Collections;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.DECIMAL;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.data.annotator.websettings.ThousendGenomesAnnotatorSettings.Meta.*;
+import static org.molgenis.data.annotation.resources.websettings.ThousendGenomesAnnotatorSettings.Meta.*;
 
 @Configuration
 public class ThousandGenomesAnnotator implements AnnotatorConfig
@@ -91,7 +93,7 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 
 		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(Collections.singletonList(
 				attributeMetaDataFactory.create().setName(THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME)
-						.setDataType(DECIMAL)));
+						.setDataType(DECIMAL)), vcfAttributes);
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(THOUSAND_GENOME_MULTI_FILE_RESOURCE, thousandGenomeInfo,
 				locusQueryCreator, multiAllelicResultFilter, dataService, resources, (annotationSourceFileName) -> {
@@ -125,7 +127,7 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory(THOUSAND_GENOME_MULTI_FILE_RESOURCE);
+				return new TabixVcfRepositoryFactory(THOUSAND_GENOME_MULTI_FILE_RESOURCE, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory);
 			}
 		};
 	}

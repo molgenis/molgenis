@@ -1,19 +1,19 @@
 package org.molgenis.data.annotation.entity.impl;
 
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Map;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.vcf.VcfRepository;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.testng.annotations.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.Map;
+
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class AnnotatorChainingIT
 {
@@ -31,10 +31,10 @@ public class AnnotatorChainingIT
 				Map<String, RepositoryAnnotator> annotators = ctx.getBeansOfType(RepositoryAnnotator.class);
 
 				RepositoryAnnotator gonlAnnotator = annotators.get("gonl");
-				//gonlAnnotator.getCmdLineAnnotatorSettingsConfigurer().addSettings("src/test/resources/gonl");
+				gonlAnnotator.getCmdLineAnnotatorSettingsConfigurer().addSettings("src/test/resources/gonl");
 
 				RepositoryAnnotator tgAnnotator = annotators.get("thousandGenomes");
-				//tgAnnotator.getCmdLineAnnotatorSettingsConfigurer().addSettings("src/test/resources/1000g");
+				tgAnnotator.getCmdLineAnnotatorSettingsConfigurer().addSettings("src/test/resources/1000g");
 
 				Iterator<Entity> it = gonlAnnotator.annotate(repo);
 				assertNotNull(it);

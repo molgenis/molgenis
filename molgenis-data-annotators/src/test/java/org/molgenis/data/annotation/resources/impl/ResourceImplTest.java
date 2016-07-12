@@ -1,25 +1,42 @@
 package org.molgenis.data.annotation.resources.impl;
 
-import static org.mockito.Mockito.when;
-
-import java.io.File;
-
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.resources.ResourceConfig;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.vcf.model.VcfAttributes;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.ResourceUtils;
-import org.testng.Assert;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-public class ResourceImplTest
+import java.io.File;
+
+import static org.mockito.Mockito.when;
+
+@ContextConfiguration(classes = { ResourceImplTest.Config.class })
+public class ResourceImplTest extends AbstractMolgenisSpringTest
 {
+
+	@Autowired
+	AttributeMetaDataFactory attributeMetaDataFactory;
+
+	@Autowired
+	EntityMetaDataFactory entityMetaDataFactory;
 
 	@Mock
 	ResourceConfig config;
+
+	@Autowired
+	VcfAttributes vcfAttributes;
 
 	@Mock
 	TabixRepositoryFactory factory;
@@ -35,29 +52,11 @@ public class ResourceImplTest
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory("cadd");
+				return new TabixVcfRepositoryFactory("cadd", vcfAttributes, entityMetaDataFactory,
+						attributeMetaDataFactory);
 			}
 		};
 	}
-
-	@Test
-	public void ifSettingIsNotDefinedResourceIsUnavailable()
-	{
-		Assert.assertFalse(resource.isAvailable());
-	}
-
-	/**
-	 * FIXME: reuse in config test
-	 * 
-	 * @Test public void ifSettingBecomesDefinedAndFileExistsResourceBecomesAvailable() {
-	 *       Assert.assertFalse(resource.isAvailable()); when(molgenisSettings.getProperty("cadd_key",
-	 *       null)).thenReturn("src/test/resources/cadd_test.vcf.gz"); Assert.assertTrue(resource.isAvailable());
-	 *       when(molgenisSettings.getProperty("cadd_key", null)).thenReturn("nonsense");
-	 *       Assert.assertFalse(resource.isAvailable()); when(molgenisSettings.getProperty("cadd_key",
-	 *       null)).thenReturn("src/test/resources/cadd_test.vcf.gz"); Assert.assertTrue(resource.isAvailable()); }
-	 * @Test public void ifDefaultDoesNotExistResourceIsUnavailable() { resource = new ResourceImpl("cadd_test", config,
-	 *       new TabixVcfRepositoryFactory("cadd")); Assert.assertFalse(resource.isAvailable()); }
-	 **/
 
 	@Test
 	public void testFindAllReturnsResult()
@@ -73,11 +72,18 @@ public class ResourceImplTest
 	public void testFindAllReturnsResultFile2()
 	{
 		File file = ResourceUtils.getFile(getClass(),
-				"/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");
+				"/1000g/ALL.chr1.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");
 		when(config.getFile()).thenReturn(file);
 
 		Query<Entity> query = QueryImpl.EQ("#CHROM", "1").and().eq("POS", 10352);
 
 		System.out.println(resource.findAll(query));
 	}
+
+	@Configuration
+	@ComponentScan({ "org.molgenis.data.vcf.model", "org.molgenis.data.annotation.meta.effects" })
+	public static class Config
+	{
+	}
+
 }

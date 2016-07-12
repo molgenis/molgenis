@@ -1,22 +1,33 @@
 package org.molgenis.data.annotation.entity.impl;
 
 import org.molgenis.data.annotation.entity.impl.hpo.HPORepository;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.molgenis.util.ResourceUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.Assert;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.io.File;
 import java.io.IOException;
 
-public class HPORepositoryTest
+public class HPORepositoryTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private AttributeMetaDataFactory attributeMetaDataFactory;
+
+	@Autowired
+	private EntityMetaDataFactory entityMetaDataFactory;
+
 	private HPORepository repo;
 
 	@BeforeClass
 	public void setUp()
 	{
-		repo = new HPORepository(new File("src/test/resources/hpo/hpo.txt"));
+		repo = new HPORepository(ResourceUtils.getFile(getClass(), "/hpo/hpo.txt"), entityMetaDataFactory,
+				attributeMetaDataFactory);
 	}
 
 	@AfterClass

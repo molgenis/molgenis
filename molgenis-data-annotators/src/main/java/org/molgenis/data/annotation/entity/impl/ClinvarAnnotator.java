@@ -8,6 +8,8 @@ import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
+import org.molgenis.data.annotation.entity.impl.framework.AnnotatorImpl;
+import org.molgenis.data.annotation.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.filter.ClinvarMultiAllelicResultFilter;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
@@ -28,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.data.annotator.websettings.ClinvarAnnotatorSettings.Meta.CLINVAR_LOCATION;
+import static org.molgenis.data.annotation.resources.websettings.ClinvarAnnotatorSettings.Meta.CLINVAR_LOCATION;
 
 @Configuration
 public class ClinvarAnnotator implements AnnotatorConfig
@@ -55,10 +57,11 @@ public class ClinvarAnnotator implements AnnotatorConfig
 	private VcfAttributes vcfAttributes;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private EntityMetaDataFactory entityMetaDataFactory;
+
 	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
@@ -139,7 +142,7 @@ public class ClinvarAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory(CLINVAR_TABIX_RESOURCE);
+				return new TabixVcfRepositoryFactory(CLINVAR_TABIX_RESOURCE, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory);
 			}
 		};
 

@@ -11,5 +11,5 @@ public interface RefEntityAnnotator
 	 *            the meta data of the source repository
 	 * @return the meta data of the new repository
 	 */
-	EntityMetaData getOutputAttributes(EntityMetaData sourceEMD);
+	EntityMetaData getTargetEntityMetaData(EntityMetaData sourceEMD);
 }

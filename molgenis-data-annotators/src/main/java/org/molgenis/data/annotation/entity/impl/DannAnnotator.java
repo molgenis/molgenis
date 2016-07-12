@@ -7,6 +7,8 @@ import org.molgenis.data.annotation.cmd.cmdlineannotatorsettingsconfigurer.Singl
 import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
+import org.molgenis.data.annotation.entity.impl.framework.AnnotatorImpl;
+import org.molgenis.data.annotation.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
@@ -27,8 +29,8 @@ import org.springframework.context.annotation.Configuration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.DECIMAL;
-import static org.molgenis.data.annotator.websettings.DannAnnotatorSettings.Meta.DANN_LOCATION;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.data.annotation.resources.websettings.DannAnnotatorSettings.Meta.DANN_LOCATION;
 
 @Configuration
 public class DannAnnotator implements AnnotatorConfig
@@ -69,7 +71,7 @@ public class DannAnnotator implements AnnotatorConfig
 	public void init()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
-		AttributeMetaData dann_score = attributeMetaDataFactory.create().setName(DANN_SCORE).setDataType(DECIMAL)
+		AttributeMetaData dann_score = attributeMetaDataFactory.create().setName(DANN_SCORE).setDataType(STRING)
 				.setDescription("deleterious score of genetic variants using neural networks.")
 				.setLabel(DANN_SCORE_LABEL);
 
@@ -97,7 +99,8 @@ public class DannAnnotator implements AnnotatorConfig
 						attributes);
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(DANN_TABIX_RESOURCE, dannInfo,
-				new LocusQueryCreator(vcfAttributes), new MultiAllelicResultFilter(attributes), dataService, resources,
+				new LocusQueryCreator(vcfAttributes), new MultiAllelicResultFilter(attributes, vcfAttributes),
+				dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(DANN_LOCATION, dannAnnotatorSettings));
 
 		annotator.init(entityAnnotator);
@@ -121,7 +124,7 @@ public class DannAnnotator implements AnnotatorConfig
 				repoMetaData.addAttribute(vcfAttributes.getPosAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getRefAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getAltAttribute());
-				repoMetaData.addAttribute(attributeMetaDataFactory.create().setName("DANN_SCORE").setDataType(DECIMAL));
+				repoMetaData.addAttribute(attributeMetaDataFactory.create().setName("DANN_SCORE").setDataType(STRING));
 				AttributeMetaData idAttributeMetaData = attributeMetaDataFactory.create().setName(idAttrName)
 						.setVisible(false);
 				repoMetaData.addAttribute(idAttributeMetaData);

@@ -1,11 +1,5 @@
 package org.molgenis.data.annotation.resources.impl;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
@@ -15,6 +9,12 @@ import org.molgenis.data.annotation.resources.ResourceConfig;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 public abstract class MultiFileResource implements Resource
 {
@@ -55,7 +55,7 @@ public abstract class MultiFileResource implements Resource
                 @Override
                 public RepositoryFactory getRepositoryFactory()
                 {
-                    return getRepositoryFactory();
+                    return MultiFileResource.this.getRepositoryFactory();
                 }
             });
         }

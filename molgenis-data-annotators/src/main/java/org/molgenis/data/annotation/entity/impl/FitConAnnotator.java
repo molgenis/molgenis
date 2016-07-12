@@ -7,6 +7,8 @@ import org.molgenis.data.annotation.cmd.cmdlineannotatorsettingsconfigurer.Singl
 import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
+import org.molgenis.data.annotation.entity.impl.framework.AnnotatorImpl;
+import org.molgenis.data.annotation.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.filter.MultiAllelicResultFilter;
 import org.molgenis.data.annotation.query.LocusQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
@@ -28,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.DECIMAL;
-import static org.molgenis.data.annotator.websettings.FitConAnnotatorSettings.Meta.FITCON_LOCATION;
+import static org.molgenis.data.annotation.resources.websettings.FitConAnnotatorSettings.Meta.FITCON_LOCATION;
 
 @Configuration
 public class FitConAnnotator implements AnnotatorConfig
@@ -95,7 +97,8 @@ public class FitConAnnotator implements AnnotatorConfig
 								+ " All data and source code are available at https://cbcl.ics.uci.edu/ public_data/FITCON/. Contact:",
 						attributes);
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(FITCON_TABIX_RESOURCE, fitconInfo,
-				new LocusQueryCreator(vcfAttributes), new MultiAllelicResultFilter(attributes), dataService, resources,
+				new LocusQueryCreator(vcfAttributes), new MultiAllelicResultFilter(attributes, vcfAttributes),
+				dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(FITCON_LOCATION, fitConAnnotatorSettings));
 
 		annotator.init(entityAnnotator);

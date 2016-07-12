@@ -1,6 +1,6 @@
 package org.molgenis.bootstrap;
 
-import org.molgenis.data.bootstrap.AnnotatorBootstrapper;
+import org.molgenis.data.annotation.bootstrap.AnnotatorBootstrapper;
 import org.molgenis.data.idcard.IdCardBootstrapper;
 import org.molgenis.data.jobs.JobBootstrapper;
 import org.molgenis.data.platform.bootstrap.SystemEntityMetaDataBootstrapper;

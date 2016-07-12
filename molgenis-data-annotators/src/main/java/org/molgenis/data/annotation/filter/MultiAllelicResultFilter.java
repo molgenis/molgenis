@@ -4,6 +4,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.*;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.annotation.datastructures.Location;
 import org.molgenis.data.annotation.entity.ResultFilter;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -14,8 +15,6 @@ import static com.google.common.collect.FluentIterable.from;
 import static java.util.Arrays.asList;
 import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
 import static org.molgenis.data.vcf.model.VcfAttributes.REF;
-import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
-
 
 /**
  * TODO: Support multi-allelic combination fields. These fields contain not only info for ref-alt pairs, but also values
@@ -49,30 +48,31 @@ import static org.molgenis.util.ApplicationContextProvider.getApplicationContext
  * But here denoted as "TTCCTCCTCC/TTCCTCC". In both cases, a TCC was deleted, but in ExAC this variant is trailed with
  * another TCC. Finding and parsing these variants to correctly match them against databases such as 1000 Genomes and
  * ExAC would be very valuable.
- *
  */
 public class MultiAllelicResultFilter implements ResultFilter
 {
 	private final List<AttributeMetaData> attributes;
 	private final boolean mergeMultilineResourceResults;
+	private final VcfAttributes vcfAttributes;
 
 	public MultiAllelicResultFilter(List<AttributeMetaData> alleleSpecificAttributes,
-			boolean mergeMultilineResourceResults)
+			boolean mergeMultilineResourceResults, VcfAttributes vcfAttributes)
 	{
 		this.attributes = alleleSpecificAttributes;
 		this.mergeMultilineResourceResults = mergeMultilineResourceResults;
+		this.vcfAttributes = vcfAttributes;
 	}
 
-	public MultiAllelicResultFilter(List<AttributeMetaData> alleleSpecificAttributes)
+	public MultiAllelicResultFilter(List<AttributeMetaData> alleleSpecificAttributes, VcfAttributes vcfAttributes)
 	{
 		this.attributes = alleleSpecificAttributes;
 		this.mergeMultilineResourceResults = false;
+		this.vcfAttributes = vcfAttributes;
 	}
 
 	@Override
 	public Collection<AttributeMetaData> getRequiredAttributes()
 	{
-		VcfAttributes vcfAttributes = getApplicationContext().getBean(VcfAttributes.class);
 		return asList(vcfAttributes.getRefAttribute(), vcfAttributes.getAltAttribute());
 	}
 
@@ -140,8 +140,8 @@ public class MultiAllelicResultFilter implements ResultFilter
 				String[] sourceValues = sourceEntity.getString(attributeMetaData.getName()).split(",", -1);
 				for (int i = 0; i < sourceAlts.length; i++)
 				{
-					sourceAlleleValueMap.put(sourceAlts[i] + resourcePostfix,
-							sourceValues[i].isEmpty() ? "." : sourceValues[i]);
+					sourceAlleleValueMap
+							.put(sourceAlts[i] + resourcePostfix, sourceValues[i].isEmpty() ? "." : sourceValues[i]);
 				}
 			}
 
@@ -205,15 +205,15 @@ public class MultiAllelicResultFilter implements ResultFilter
 	 * 3	300	C	GX	-0.002|2.3
 	 * 3	300	C	GC	0.5|14.5
 	 * <p>
-	 *
+	 * <p>
 	 * So we want to support this hypothetical example: 3 300 G A 0.2|23.1 3 300 G T -2.4|0.123 3 300 G X -0.002|2.3 3
 	 * 300 G C 0.5|14.5 3 300 GC A 0.2|23.1 3 300 GC T -2.4|0.123 3 300 C GX -0.002|2.3 3 300 C GC 0.5|14.5
-	 *
+	 * <p>
 	 * and it should become:
-	 * 
+	 * <p>
 	 * 3 300 G A,T,X,C 0.2|23.1,-2.4|0.123,-0.002|2.3,0.5|14.5 3 300 GC A,T 0.2|23.1,-2.4|0.123 3 300 C GX,GC
 	 * -0.002|2.3,0.5|14.5
-	 * 
+	 * <p>
 	 * <p>
 	 * 3	300	G	A,T,X,C	0.2|23.1,-2.4|0.123,-0.002|2.3,0.5|14.5
 	 * 3	300	GC	A,T	0.2|23.1,-2.4|0.123

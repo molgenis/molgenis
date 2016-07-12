@@ -9,23 +9,24 @@ import org.molgenis.data.annotation.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.entity.EntityAnnotator;
 import org.molgenis.data.annotation.entity.impl.CaddAnnotator;
-import org.molgenis.data.annotation.entity.impl.EmxResourceImpl;
 import org.molgenis.data.annotation.entity.impl.ExacAnnotator;
-import org.molgenis.data.annotation.entity.impl.QueryAnnotatorImpl;
+import org.molgenis.data.annotation.entity.impl.framework.QueryAnnotatorImpl;
 import org.molgenis.data.annotation.entity.impl.snpEff.Impact;
+import org.molgenis.data.annotation.meta.effects.EffectsMetaData;
 import org.molgenis.data.annotation.query.GeneNameQueryCreator;
 import org.molgenis.data.annotation.resources.Resource;
 import org.molgenis.data.annotation.resources.Resources;
+import org.molgenis.data.annotation.resources.impl.EmxResourceImpl;
 import org.molgenis.data.annotation.resources.impl.InMemoryRepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.resources.impl.SingleResourceConfig;
+import org.molgenis.data.annotation.resources.websettings.GavinAnnotatorSettings;
 import org.molgenis.data.annotation.utils.AnnotatorUtils;
-import org.molgenis.data.annotator.websettings.GavinAnnotatorSettings;
 import org.molgenis.data.importer.EmxFileOnlyMetaDataParser;
 import org.molgenis.data.meta.model.*;
-import org.molgenis.data.support.EffectsMetaData;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -67,12 +68,6 @@ public class GavinAnnotator implements AnnotatorConfig
 	private VcfAttributes vcfAttributes;
 
 	@Autowired
-	private CaddAnnotator caddAnnotator;
-
-	@Autowired
-	private ExacAnnotator exacAnnotator;
-
-	@Autowired
 	private PackageFactory packageFactory;
 
 	@Autowired
@@ -87,6 +82,9 @@ public class GavinAnnotator implements AnnotatorConfig
 	@Autowired
 	GeneNameQueryCreator geneNameQueryCreator;
 
+	@Autowired
+	ApplicationContext applicationContext;
+
 	@Bean
 	Resource GavinResource()
 	{
@@ -97,7 +95,8 @@ public class GavinAnnotator implements AnnotatorConfig
 			public RepositoryFactory getRepositoryFactory()
 			{
 				return new InMemoryRepositoryFactory(RESOURCE_ENTITY_NAME,
-						new EmxFileOnlyMetaDataParser(packageFactory, attributeMetaDataFactory));
+						new EmxFileOnlyMetaDataParser(packageFactory, attributeMetaDataFactory, applicationContext),
+						entityMetaDataFactory, attributeMetaDataFactory);
 			}
 		};
 
@@ -140,8 +139,9 @@ public class GavinAnnotator implements AnnotatorConfig
 			{
 				List<AttributeMetaData> requiredAttributes = new ArrayList<>();
 				EntityMetaData entityMetaData = entityMetaDataFactory.create().setName(VARIANT_ENTITY);
-				List<AttributeMetaData> refAttributesList = Arrays.asList(caddAnnotator.getCaddScaledAttr(),
-						exacAnnotator.getExacAFAttr(), vcfAttributes.getAltAttribute());
+				List<AttributeMetaData> refAttributesList = Arrays
+						.asList(CaddAnnotator.getCaddScaledAttr(attributeMetaDataFactory),
+								ExacAnnotator.getExacAFAttr(attributeMetaDataFactory), vcfAttributes.getAltAttribute());
 				entityMetaData.addAttributes(refAttributesList);
 				AttributeMetaData refAttr = attributeMetaDataFactory.create().setName(VARIANT_ENTITY).setDataType(XREF)
 								.setRefEntity(entityMetaData)
