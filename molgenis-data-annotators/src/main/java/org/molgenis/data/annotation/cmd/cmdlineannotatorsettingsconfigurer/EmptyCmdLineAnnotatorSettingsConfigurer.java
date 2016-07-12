@@ -1,6 +1,6 @@
 package org.molgenis.data.annotation.cmd.cmdlineannotatorsettingsconfigurer;
 
-import org.molgenis.data.annotation.CmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.cmd.CmdLineAnnotatorSettingsConfigurer;
 
 /**
  * CmdLineAnnotatorSettingsConfigurer that adds no properties
