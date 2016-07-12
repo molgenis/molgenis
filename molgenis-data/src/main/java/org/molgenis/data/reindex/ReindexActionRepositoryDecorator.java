@@ -1,19 +1,17 @@
 package org.molgenis.data.reindex;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.CREATE;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.DELETE;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.UPDATE;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType.DATA;
+import org.molgenis.data.AbstractRepositoryDecorator;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCapability;
 
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
-import org.molgenis.data.AbstractRepositoryDecorator;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.*;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType.DATA;
 
 /**
  * {@link Repository} decorator that registers changes with a {@link ReindexActionRegisterService}.
@@ -21,12 +19,19 @@ import org.molgenis.data.RepositoryCapability;
 public class ReindexActionRepositoryDecorator extends AbstractRepositoryDecorator
 {
 	private final ReindexActionRegisterService reindexActionRegisterService;
+	private final Repository<Entity> decorated;
 
 	public ReindexActionRepositoryDecorator(Repository<Entity> decorated,
 			ReindexActionRegisterService reindexActionRegisterService)
 	{
-		super(decorated);
+		this.decorated = decorated;
 		this.reindexActionRegisterService = requireNonNull(reindexActionRegisterService);
+	}
+
+	@Override
+	protected Repository<Entity> delegate()
+	{
+		return decorated;
 	}
 
 	@Override
@@ -34,14 +39,14 @@ public class ReindexActionRepositoryDecorator extends AbstractRepositoryDecorato
 	{
 		Set<RepositoryCapability> capabilities = new HashSet<>();
 		capabilities.add(RepositoryCapability.INDEXABLE);
-		capabilities.addAll(decorated.getCapabilities());
+		capabilities.addAll(delegate().getCapabilities());
 		return capabilities;
 	}
 
 	@Override
 	public void update(Entity entity)
 	{
-		decorated.update(entity);
+		delegate().update(entity);
 		reindexActionRegisterService.register(getName(), UPDATE, DATA, entity.getIdValue().toString());
 	}
 
@@ -49,27 +54,27 @@ public class ReindexActionRepositoryDecorator extends AbstractRepositoryDecorato
 	public void delete(Entity entity)
 	{
 		reindexActionRegisterService.register(getName(), DELETE, DATA, entity.getIdValue().toString());
-		decorated.delete(entity);
+		delegate().delete(entity);
 	}
 
 	@Override
 	public void deleteById(Object id)
 	{
 		reindexActionRegisterService.register(getName(), DELETE, DATA, id.toString());
-		decorated.deleteById(id);
+		delegate().deleteById(id);
 	}
 
 	@Override
 	public void deleteAll()
 	{
 		reindexActionRegisterService.register(getName(), DELETE, DATA, null);
-		decorated.deleteAll();
+		delegate().deleteAll();
 	}
 
 	@Override
 	public void add(Entity entity)
 	{
-		decorated.add(entity);
+		delegate().add(entity);
 		reindexActionRegisterService.register(getName(), CREATE, DATA, entity.getIdValue().toString());
 	}
 
@@ -77,27 +82,27 @@ public class ReindexActionRepositoryDecorator extends AbstractRepositoryDecorato
 	public Integer add(Stream<Entity> entities)
 	{
 		reindexActionRegisterService.register(getName(), CREATE, DATA, null);
-		return decorated.add(entities);
+		return delegate().add(entities);
 	}
 
 	@Override
 	public void update(Stream<Entity> entities)
 	{
 		reindexActionRegisterService.register(getName(), UPDATE, DATA, null);
-		decorated.update(entities);
+		delegate().update(entities);
 	}
 
 	@Override
 	public void delete(Stream<Entity> entities)
 	{
 		reindexActionRegisterService.register(getName(), DELETE, DATA, null);
-		decorated.delete(entities);
+		delegate().delete(entities);
 	}
 
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
 		reindexActionRegisterService.register(getName(), DELETE, DATA, null);
-		decorated.deleteAll(ids);
+		delegate().deleteAll(ids);
 	}
 }
