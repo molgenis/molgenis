@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <soap:Body>
+        <getDataResponse xmlns="http://tempuri.org/">
+            <getDataResult>
+                <xs:schema xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="NewDataSet">
+                    <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:MainDataTable="TDIC_PRM" msdata:UseCurrentLocale="true">
+                        <xs:complexType>
+                            <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                <xs:element name="TDIC_PRM">
+                                    <xs:complexType>
+                                        <xs:sequence>
+                                            <xs:element name="COPYRMES" minOccurs="0">
+                                                <xs:simpleType>
+                                                    <xs:restriction base="xs:string">
+                                                        <xs:maxLength value="2147483647"/>
+                                                    </xs:restriction>
+                                                </xs:simpleType>
+                                            </xs:element>
+                                            <xs:element name="RV" msdata:ReadOnly="true" minOccurs="0">
+                                                <xs:simpleType>
+                                                    <xs:restriction base="xs:string">
+                                                        <xs:maxLength value="20"/>
+                                                    </xs:restriction>
+                                                </xs:simpleType>
+                                            </xs:element>
+                                            <xs:element name="isAuthorized" msdata:ReadOnly="true" type="xs:int" minOccurs="0"/>
+                                            <xs:element name="RC" msdata:ReadOnly="true" type="xs:short" minOccurs="0"/>
+                                            <xs:element name="RM" msdata:ReadOnly="true" minOccurs="0">
+                                                <xs:simpleType>
+                                                    <xs:restriction base="xs:string">
+                                                        <xs:maxLength value="2147483647"/>
+                                                    </xs:restriction>
+                                                </xs:simpleType>
+                                            </xs:element>
+                                        </xs:sequence>
+                                    </xs:complexType>
+                                </xs:element>
+                            </xs:choice>
+                        </xs:complexType>
+                    </xs:element>
+                </xs:schema>
+                <diffgr:diffgram xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:diffgr="urn:schemas-microsoft-com:xml-diffgram-v1">
+                    <DocumentElement xmlns="">
+                        <TDIC_PRM diffgr:id="TDIC_PRM1" msdata:rowOrder="0">
+                            <COPYRMES/>
+                            <RV>Security Violation:</RV>
+                            <isAuthorized>0</isAuthorized>
+                            <RC>890</RC>
+                            <RM>Username-Password combination not found&lt;BR&gt;Combinatie Gebruikersnaam-Wachtwoord niet gevonden</RM>
+                        </TDIC_PRM>
+                    </DocumentElement>
+                </diffgr:diffgram>
+            </getDataResult>
+        </getDataResponse>
+    </soap:Body>
+</soap:Envelope>
