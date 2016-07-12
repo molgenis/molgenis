@@ -5,6 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.MapEntity;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.xml.stream.XMLInputFactory;
@@ -31,8 +32,8 @@ public class PromiseDataParserTest
 	@Captor
 	private ArgumentCaptor<Consumer<XMLStreamReader>> consumerArgumentCaptor;
 
-	@BeforeClass
-	public void beforeClass()
+	@BeforeMethod
+	public void beforeMethod()
 	{
 		MockitoAnnotations.initMocks(this);
 		parser = new PromiseDataParser(promiseClient);
