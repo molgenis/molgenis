@@ -4,7 +4,7 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.cache.utils.EntityHydration;
-import org.molgenis.data.cache.utils.EntityCache;
+import org.molgenis.data.cache.utils.CombinedEntityCache;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
@@ -27,7 +27,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 {
 	private static final Logger LOG = getLogger(L1Cache.class);
 	private static final int MAX_CACHE_SIZE = 1000;
-	private final ThreadLocal<EntityCache> caches;
+	private final ThreadLocal<CombinedEntityCache> caches;
 	private final EntityHydration entityHydration;
 
 	@Autowired
@@ -45,16 +45,17 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 		caches.set(createCache());
 	}
 
-	private EntityCache createCache()
+	private CombinedEntityCache createCache()
 	{
-		Cache<String, Map<String, Object>> cache = CacheBuilder.newBuilder().maximumSize(MAX_CACHE_SIZE).build();
-		return new EntityCache(entityHydration, cache);
+		Cache<String, Optional<Map<String, Object>>> cache = CacheBuilder.newBuilder().maximumSize(MAX_CACHE_SIZE)
+				.build();
+		return new CombinedEntityCache(entityHydration, cache);
 	}
 
 	@Override
 	public void doCleanupAfterCompletion(String transactionId)
 	{
-		EntityCache entityCache = caches.get();
+		CombinedEntityCache entityCache = caches.get();
 		if (entityCache != null)
 		{
 			LOG.trace("Cleaning up L1 cache after transaction [{}]", transactionId);
@@ -70,7 +71,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	 */
 	public void evict(String entityName, Object entityId)
 	{
-		EntityCache entityCache = caches.get();
+		CombinedEntityCache entityCache = caches.get();
 		if (entityCache != null)
 		{
 			LOG.trace("Removing  entity [{}] from L1 cache that belongs to {}", entityId, entityName);
@@ -80,7 +81,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 
 	public void evictAll(String entityName)
 	{
-		EntityCache entityCache = caches.get();
+		CombinedEntityCache entityCache = caches.get();
 		if (entityCache != null)
 		{
 			LOG.trace("Removing all entities from L1 cache that belong to {}", entityName);
@@ -118,7 +119,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	 */
 	public void put(String entityName, Entity entity)
 	{
-		EntityCache entityCache = caches.get();
+		CombinedEntityCache entityCache = caches.get();
 		if (entityCache != null)
 		{
 			entityCache.put(entity);

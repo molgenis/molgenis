@@ -35,7 +35,7 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 	private EntityMetaData entityMetaData;
 	private Entity hydratedEntity;
 	private Map<String, Object> dehydratedEntity;
-	private EntityHydration cachingUtils;
+	private EntityHydration entityHydration;
 
 	@BeforeClass
 	public void beforeClass() throws ParseException
@@ -75,20 +75,20 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 		// mock entity manager
 		EntityManager entityManager = when(mock(EntityManager.class).create(entityMetaData)).thenReturn(hydratedEntity)
 				.getMock();
-		cachingUtils = new EntityHydration(entityManager);
+		entityHydration = new EntityHydration(entityManager);
 	}
 
 	@Test
 	public void hydrateTest()
 	{
-		Entity actualHydratedEntity = cachingUtils.hydrate(dehydratedEntity, entityMetaData);
+		Entity actualHydratedEntity = entityHydration.hydrate(dehydratedEntity, entityMetaData);
 		assertEquals(actualHydratedEntity, hydratedEntity);
 	}
 
 	@Test
 	public void dehydrateTest()
 	{
-		Map<String, Object> actualDehydratedEntity = cachingUtils.dehydrate(hydratedEntity);
+		Map<String, Object> actualDehydratedEntity = entityHydration.dehydrate(hydratedEntity);
 		assertEquals(actualDehydratedEntity, dehydratedEntity);
 	}
 

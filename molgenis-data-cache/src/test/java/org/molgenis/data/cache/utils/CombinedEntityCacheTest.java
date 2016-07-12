@@ -8,25 +8,26 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
 import static org.testng.Assert.assertEquals;
 
-public class EntityCacheTest
+public class CombinedEntityCacheTest
 {
-	private EntityCache entityCache;
+	private CombinedEntityCache entityCache;
 	@Mock
-	private EntityHydration cachingUtils;
+	private EntityHydration entityHydration;
 	@Mock
-	private Cache<String, Map<String, Object>> cache;
+	private Cache<String, Optional<Map<String, Object>>> cache;
 
 	@BeforeClass
 	public void beforeClass()
 	{
 		MockitoAnnotations.initMocks(this);
-		entityCache = new EntityCache(cachingUtils, cache);
+		entityCache = new CombinedEntityCache(entityHydration, cache);
 	}
 
 	@Test

@@ -11,22 +11,23 @@ import java.util.function.Predicate;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Caches {@link org.molgenis.data.Entity}s from different repositories in dehydrated form in a Guava {@link Cache}.
+ * Caches {@link org.molgenis.data.Entity}s from different repositories in dehydrated form in a single combined
+ * Guava {@link Cache}.
  */
-public class EntityCache
+public class CombinedEntityCache
 {
-	private final EntityHydration cachingUtils;
-	private final Cache<String, Map<String, Object>> cache;
+	private final EntityHydration entityHydration;
+	private final Cache<String, Optional<Map<String, Object>>> cache;
 
 	/**
-	 * Creates a new {@link EntityCache}
+	 * Creates a new {@link CombinedEntityCache}
 	 *
-	 * @param cachingUtils {@link EntityHydration} used to hydrate and dehydrate the entities and generate cache keys
+	 * @param entityHydration {@link EntityHydration} used to hydrate and dehydrate the entities and generate cache keys
 	 * @param cache        the {@link Cache} to store the entities in
 	 */
-	public EntityCache(EntityHydration cachingUtils, Cache<String, Map<String, Object>> cache)
+	public CombinedEntityCache(EntityHydration entityHydration, Cache<String, Optional<Map<String, Object>>> cache)
 	{
-		this.cachingUtils = requireNonNull(cachingUtils);
+		this.entityHydration = requireNonNull(entityHydration);
 		this.cache = requireNonNull(cache);
 	}
 
@@ -63,8 +64,8 @@ public class EntityCache
 	{
 		String entityName = entityMetaData.getName();
 		String key = generateCacheKey(entityName, id);
-		return Optional.ofNullable(cache.getIfPresent(key))
-				.map(dehydratedEntity -> cachingUtils.hydrate(dehydratedEntity, entityMetaData));
+		return Optional.ofNullable(cache.getIfPresent(key)).flatMap(optionalEntry -> optionalEntry)
+				.map(dehydratedEntity -> entityHydration.hydrate(dehydratedEntity, entityMetaData));
 	}
 
 	/**
@@ -76,12 +77,12 @@ public class EntityCache
 	{
 		String entityName = entity.getEntityMetaData().getName();
 		String key = generateCacheKey(entityName, entity.getIdValue());
-		cache.put(key, cachingUtils.dehydrate(entity));
+		cache.put(key, Optional.of(entityHydration.dehydrate(entity)));
 	}
 
 	String generateCacheKey(String entityName, Object id)
 	{
-		return entityName + "__" + id.toString();
+		return entityName + "__" + id;
 	}
 
 	Predicate<String> getKeyFilter(String entityName)
