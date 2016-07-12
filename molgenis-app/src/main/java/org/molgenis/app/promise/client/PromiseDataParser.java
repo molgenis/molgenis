@@ -1,6 +1,7 @@
 package org.molgenis.app.promise.client;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.MapEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +49,12 @@ public class PromiseDataParser
 							{
 								if (inDocumentElement)
 								{
-									entityConsumer.accept(parseContent(reader));
+									Entity entity = parseContent(reader);
+									if (entity.getString("RM") != null)
+									{
+										throw new MolgenisDataException(entity.getString("RM"));
+									}
+									entityConsumer.accept(entity);
 								}
 							}
 							break;

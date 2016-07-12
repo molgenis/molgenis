@@ -1,11 +1,11 @@
 package org.molgenis.app.promise.client;
 
-import com.google.common.collect.Lists;
 import org.mockito.*;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.support.MapEntity;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import javax.xml.stream.XMLInputFactory;
@@ -15,6 +15,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.function.Consumer;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static org.testng.Assert.assertEquals;
 
 public class PromiseDataParserTest
 {
@@ -29,8 +32,8 @@ public class PromiseDataParserTest
 	@Captor
 	private ArgumentCaptor<Consumer<XMLStreamReader>> consumerArgumentCaptor;
 
-	@BeforeClass
-	public void beforeClass()
+	@BeforeMethod
+	public void beforeMethod()
 	{
 		MockitoAnnotations.initMocks(this);
 		parser = new PromiseDataParser(promiseClient);
@@ -39,7 +42,7 @@ public class PromiseDataParserTest
 	@Test
 	public void testParse() throws IOException, XMLStreamException
 	{
-		List<Entity> entities = Lists.newArrayList();
+		List<Entity> entities = newArrayList();
 		parser.parse(credentials, 0, entities::add);
 
 		Mockito.verify(promiseClient)
@@ -57,6 +60,20 @@ public class PromiseDataParserTest
 		entity2.set("PSI_REG_ID", "1042");
 		entity2.set("MATERIAL_TYPES", "OORSMEER");
 
-		Assert.assertEquals(entities, Lists.newArrayList(entity1, entity2));
+		assertEquals(entities, newArrayList(entity1, entity2));
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Username-Password combination not found<BR>Combinatie Gebruikersnaam-Wachtwoord niet gevonden")
+	public void testErroneousParse() throws IOException, XMLStreamException
+	{
+		List<Entity> entities = newArrayList();
+		parser.parse(credentials, 0, entities::add);
+
+		Mockito.verify(promiseClient)
+				.getData(Mockito.eq(credentials), Mockito.eq("0"), consumerArgumentCaptor.capture());
+
+		InputStream is = getClass().getResourceAsStream("/erroneous_biobank_response.xml");
+		XMLStreamReader xmlStreamReader = XMLInputFactory.newInstance().createXMLStreamReader(is);
+		consumerArgumentCaptor.getValue().accept(xmlStreamReader);
 	}
 }
