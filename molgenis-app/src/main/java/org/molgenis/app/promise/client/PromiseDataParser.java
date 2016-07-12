@@ -54,7 +54,7 @@ public class PromiseDataParser
 									{
 										throw new MolgenisDataException(entity.getString("RM"));
 									}
-									entityConsumer.accept(parseContent(reader));
+									entityConsumer.accept(entity);
 								}
 							}
 							break;
