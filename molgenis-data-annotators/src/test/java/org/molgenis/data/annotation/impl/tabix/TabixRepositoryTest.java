@@ -2,7 +2,7 @@ package org.molgenis.data.annotation.impl.tabix;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.annotation.resources.tabix.TabixRepository;
+import org.molgenis.data.annotation.core.resources.impl.tabix.TabixRepository;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;

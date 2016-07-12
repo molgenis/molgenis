@@ -1,6 +1,7 @@
 package org.molgenis.data.annotation;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
