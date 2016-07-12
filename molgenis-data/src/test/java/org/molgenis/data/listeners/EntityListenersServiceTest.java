@@ -5,6 +5,8 @@ import com.google.common.collect.SetMultimap;
 import junit.framework.Assert;
 import org.mockito.Mockito;
 import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisDataException;
+import org.testng.TestException;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -26,50 +28,6 @@ public class EntityListenersServiceTest
 	}
 
 	@Test
-	public void updateEntitiesTest()
-	{
-		String repoFullName = "EntityRepo";
-		Entity entity1 = Mockito.mock(Entity.class);
-		Entity entity2 = Mockito.mock(Entity.class);
-		entityListenersService.register(repoFullName);
-		EntityListener entityListener1 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
-				.thenReturn(Integer.valueOf(1)).getMock();
-		EntityListener entityListener2 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
-				.thenReturn(Integer.valueOf(2)).getMock();
-		Mockito.when(entity1.getIdValue())
-				.thenReturn(Integer.valueOf(1)).getMock();
-		Mockito.when(entity2.getIdValue())
-				.thenReturn(Integer.valueOf(2)).getMock();
-		entityListenersService.addEntityListener(repoFullName, entityListener1);
-		entityListenersService.addEntityListener(repoFullName, entityListener2);
-		entityListenersService.updateEntities(repoFullName, Arrays.asList(entity1, entity2).stream()).collect(Collectors.toList());
-		Mockito.verify(entityListener1).postUpdate(entity1);
-		Mockito.verify(entityListener2).postUpdate(entity2);
-		entityListenersService.removeEntityListener(repoFullName, entityListener1);
-		entityListenersService.removeEntityListener(repoFullName, entityListener2);
-	}
-
-	@Test
-	public void updateEntityTest(){
-		String repoFullName = "EntityRepo";
-		Entity entity = Mockito.mock(Entity.class);
-		EntityListener entityListener1 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
-				.thenReturn(Integer.valueOf(1)).getMock();
-		EntityListener entityListener2 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
-				.thenReturn(Integer.valueOf(1)).getMock();
-		Mockito.when(entity.getIdValue())
-				.thenReturn(Integer.valueOf(1)).getMock();
-		entityListenersService.register(repoFullName);
-		entityListenersService.addEntityListener(repoFullName, entityListener1);
-		entityListenersService.addEntityListener(repoFullName, entityListener2);
-		entityListenersService.updateEntity(repoFullName, entity);
-		Mockito.verify(entityListener1).postUpdate(entity);
-		Mockito.verify(entityListener2).postUpdate(entity);
-		entityListenersService.removeEntityListener(repoFullName, entityListener1);
-		entityListenersService.removeEntityListener(repoFullName, entityListener2);
-	}
-
-	@Test
 	public void registerTest()
 	{
 		String repoFullName = "EntityRepo";
@@ -83,6 +41,109 @@ public class EntityListenersServiceTest
 		Assert.assertFalse(entityListenersService.isEmpty(repoFullName));
 		entityListenersService.register(repoFullName);
 		Assert.assertFalse(entityListenersService.isEmpty(repoFullName));
+		entityListenersService.removeEntityListener(repoFullName, entityListener1);
+		entityListenersService.removeEntityListener(repoFullName, entityListener2);
+		Assert.assertTrue(entityListenersService.isEmpty(repoFullName));
+	}
+
+	@Test
+	public void updateEntitiesTest()
+	{
+		String repoFullName = "EntityRepo";
+		Entity entity1 = Mockito.mock(Entity.class);
+		Entity entity2 = Mockito.mock(Entity.class);
+		entityListenersService.register(repoFullName);
+		EntityListener entityListener1 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
+				.thenReturn(Integer.valueOf(1)).getMock();
+		EntityListener entityListener2 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
+				.thenReturn(Integer.valueOf(2)).getMock();
+		Mockito.when(entity1.getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
+		Mockito.when(entity2.getIdValue()).thenReturn(Integer.valueOf(2)).getMock();
+		entityListenersService.addEntityListener(repoFullName, entityListener1);
+		entityListenersService.addEntityListener(repoFullName, entityListener2);
+		entityListenersService.updateEntities(repoFullName, Arrays.asList(entity1, entity2).stream())
+				.collect(Collectors.toList());
+		Mockito.verify(entityListener1).postUpdate(entity1);
+		Mockito.verify(entityListener2).postUpdate(entity2);
+		entityListenersService.removeEntityListener(repoFullName, entityListener1);
+		entityListenersService.removeEntityListener(repoFullName, entityListener2);
+		Assert.assertTrue(entityListenersService.isEmpty(repoFullName));
+	}
+
+	@Test
+	public void updateEntityTest()
+	{
+		String repoFullName = "EntityRepo";
+		Entity entity = Mockito.mock(Entity.class);
+		EntityListener entityListener1 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
+				.thenReturn(Integer.valueOf(1)).getMock();
+		EntityListener entityListener2 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
+				.thenReturn(Integer.valueOf(1)).getMock();
+		Mockito.when(entity.getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
+		entityListenersService.register(repoFullName);
+		entityListenersService.addEntityListener(repoFullName, entityListener1);
+		entityListenersService.addEntityListener(repoFullName, entityListener2);
+		entityListenersService.updateEntity(repoFullName, entity);
+		Mockito.verify(entityListener1).postUpdate(entity);
+		Mockito.verify(entityListener2).postUpdate(entity);
+		entityListenersService.removeEntityListener(repoFullName, entityListener1);
+		entityListenersService.removeEntityListener(repoFullName, entityListener2);
+		Assert.assertTrue(entityListenersService.isEmpty(repoFullName));
+	}
+
+	@Test
+	public void addEntityListenerTest()
+	{
+		String repoFullName = "EntityRepo";
+		EntityListener entityListener = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
+				.thenReturn(Integer.valueOf(1)).getMock();
+		entityListenersService.register(repoFullName);
+		entityListenersService.addEntityListener(repoFullName, entityListener);
+		Mockito.verify(entityListener).getEntityId();
+		entityListenersService.removeEntityListener(repoFullName, entityListener);
+		Assert.assertTrue(entityListenersService.isEmpty(repoFullName));
+	}
+
+	@Test
+	public void removeEntityListenerTest()
+	{
+		String repoFullName = "EntityRepo";
+		EntityListener entityListener = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
+				.thenReturn(Integer.valueOf(1)).getMock();
+		entityListenersService.register(repoFullName);
+		entityListenersService.addEntityListener(repoFullName, entityListener);
+		Assert.assertFalse(entityListenersService.isEmpty(repoFullName));
+		entityListenersService.removeEntityListener(repoFullName, entityListener);
+		Assert.assertTrue(entityListenersService.isEmpty(repoFullName));
+	}
+
+	@Test
+	public void isEmptyTest()
+	{
+		String repoFullName = "EntityRepo";
+		entityListenersService.register(repoFullName);
+		Assert.assertTrue(entityListenersService.isEmpty(repoFullName));
+	}
+
+	@Test
+	public void verifyRepoRegistered()
+	{
+		this.entityListenersService = new EntityListenersService();
+		String repoFullName = "EntityRepo";
+		EntityListener entityListener = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
+				.thenReturn(Integer.valueOf(1)).getMock();
+		try
+		{
+			entityListenersService.addEntityListener(repoFullName, entityListener);
+		}
+		catch (MolgenisDataException mde)
+		{
+			entityListenersService.register(repoFullName);
+			Assert.assertTrue(entityListenersService.isEmpty(repoFullName));
+			Assert.assertEquals(mde.getMessage(), "Repository [EntityRepo] is not registered, please contact your administrator");
+			return;
+		}
+		Assert.fail();
 	}
 
 	@Test

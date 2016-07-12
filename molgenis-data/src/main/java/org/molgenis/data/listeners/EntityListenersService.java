@@ -19,7 +19,7 @@ import static java.util.Objects.requireNonNull;
 public final class EntityListenersService
 {
 	private final Logger LOG = LoggerFactory.getLogger(EntityListenersService.class);
-	private static final ConcurrentHashMap<String, SetMultimap<Object, EntityListener>> entityListeners = new ConcurrentHashMap<>();
+	private final ConcurrentHashMap<String, SetMultimap<Object, EntityListener>> entityListeners = new ConcurrentHashMap<>();
 
 	/**
 	 * Register a repository to the entity listeners service once
@@ -29,7 +29,8 @@ public final class EntityListenersService
 	 */
 	void register(String repoFullName)
 	{
-		if (!entityListeners.containsKey(requireNonNull(repoFullName))){
+		if (!entityListeners.containsKey(requireNonNull(repoFullName)))
+		{
 			entityListeners.put(repoFullName, HashMultimap.create());
 		}
 	}
@@ -37,10 +38,9 @@ public final class EntityListenersService
 	Stream<Entity> updateEntities(String repoFullName, Stream<Entity> entities)
 	{
 		verifyRepoRegistered(repoFullName);
-
-		SetMultimap<Object, EntityListener> entityListeners = this.getEntityListeners(repoFullName);
-
-		synchronized(entityListeners){
+		SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
+		synchronized (entityListeners)
+		{
 			return entities.filter(entity -> {
 				Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
 				entityEntityListeners.forEach(entityListener -> {
@@ -54,54 +54,52 @@ public final class EntityListenersService
 	void updateEntity(String repoFullName, Entity entity)
 	{
 		verifyRepoRegistered(repoFullName);
-		SetMultimap<Object, EntityListener> entityListeners = this.getEntityListeners(repoFullName);
+		SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
 		Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
 		entityEntityListeners.forEach(entityListener -> {
 			entityListener.postUpdate(entity);
 		});
 	}
 
-	void addEntityListener(String repoFullName, EntityListener entityListener){
+	void addEntityListener(String repoFullName, EntityListener entityListener)
+	{
 		verifyRepoRegistered(repoFullName);
-		SetMultimap<Object, EntityListener> entityListeners = this.getEntityListeners(repoFullName);
-		synchronized(entityListeners)
+		SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
+		synchronized (entityListeners)
 		{
 			entityListeners.put(entityListener.getEntityId(), entityListener);
 		}
 	}
 
-	void removeEntityListener(String repoFullName, EntityListener entityListener){
+	boolean removeEntityListener(String repoFullName, EntityListener entityListener)
+	{
 		verifyRepoRegistered(repoFullName);
-		SetMultimap<Object, EntityListener> entityListeners = this.getEntityListeners(repoFullName);
-		synchronized(entityListeners)
+		SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
+		synchronized (entityListeners)
 		{
-			entityListeners.remove(entityListener.getEntityId(), entityListener);
+			if (entityListeners.containsKey(entityListener.getEntityId()))
+			{
+				entityListeners.remove(entityListener.getEntityId(), entityListener);
+				return true;
+			}
+			return false;
 		}
 	}
 
-	boolean isEmpty(String repoFullName){
+	boolean isEmpty(String repoFullName)
+	{
 		verifyRepoRegistered(repoFullName);
-		return this.getEntityListeners(repoFullName).isEmpty();
+		return entityListeners.get(repoFullName).isEmpty();
 	}
 
-	protected void verifyRepoRegistered(String repoFullName){
+	protected void verifyRepoRegistered(String repoFullName)
+	{
 		if (!entityListeners.containsKey(requireNonNull(repoFullName)))
 		{
 			LOG.error("Repository [" + repoFullName + "] is not registered in the entity listeners service");
 			throw new MolgenisDataException(
-					"Cannot find entity [" + repoFullName + "], please contact your administrator");
+					"Repository [" + repoFullName + "] is not registered, please contact your administrator");
 		}
-	}
-
-	/**
-	 * returns a SetMultimap<Object, EntityListener> where the object is the id of the entity and the EntityListener is listener interface
-	 *
-	 * @param repoFullName
-	 * @return SetMultimap<Object, EntityListener>
-	 */
-	private SetMultimap<Object, EntityListener> getEntityListeners(String repoFullName)
-	{
-		return entityListeners.get(repoFullName);
 	}
 }
 
