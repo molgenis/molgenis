@@ -5,8 +5,6 @@ import com.google.common.collect.SetMultimap;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -20,12 +18,14 @@ import static java.util.Objects.requireNonNull;
 public class EntityListenerRepositoryDecorator implements Repository<Entity>
 {
 	private final Repository<Entity> decoratedRepository;
-	private SetMultimap<Object, EntityListener> entityListeners;
+	private final EntityListenersService entityListenersService;
 
-	public EntityListenerRepositoryDecorator(Repository<Entity> decoratedRepository, EntityListenersService entityListenersService)
+	public EntityListenerRepositoryDecorator(Repository<Entity> decoratedRepository,
+			EntityListenersService entityListenersService)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
-		entityListeners = requireNonNull(entityListenersService).getEntityListeners(decoratedRepository.getName());
+		requireNonNull(entityListenersService).register(decoratedRepository.getName());
+		this.entityListenersService = entityListenersService;
 	}
 
 	@Override
@@ -133,30 +133,14 @@ public class EntityListenerRepositoryDecorator implements Repository<Entity>
 	@Override
 	public void update(Entity entity)
 	{
+		entityListenersService.updateEntity(decoratedRepository.getName(), entity);
 		decoratedRepository.update(entity);
-
-		if (entityListeners != null)
-		{
-			Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
-			entityEntityListeners.forEach(entityListener -> {
-				entityListener.postUpdate(entity);
-			});
-		}
 	}
 
 	@Override
 	public void update(Stream<Entity> entities)
 	{
-		if (entityListeners != null)
-		{
-			entities = entities.filter(entity -> {
-				Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
-				entityEntityListeners.forEach(entityListener -> {
-					entityListener.postUpdate(entity);
-				});
-				return true;
-			});
-		}
+		entities = entityListenersService.updateEntities(decoratedRepository.getName(), entities);
 		decoratedRepository.update(entities);
 	}
 
@@ -223,19 +207,12 @@ public class EntityListenerRepositoryDecorator implements Repository<Entity>
 	@Override
 	public void addEntityListener(EntityListener entityListener)
 	{
-		if (entityListeners == null)
-		{
-			entityListeners = HashMultimap.<Object, EntityListener> create();
-		}
-		entityListeners.put(entityListener.getEntityId(), entityListener);
+		entityListenersService.addEntityListener(decoratedRepository.getName(), entityListener);
 	}
 
 	@Override
 	public void removeEntityListener(EntityListener entityListener)
 	{
-		if (entityListeners != null)
-		{
-			entityListeners.remove(entityListener.getEntityId(), entityListener);
-		}
+		entityListenersService.removeEntityListener(decoratedRepository.getName(), entityListener);
 	}
 }
