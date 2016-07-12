@@ -1,4 +1,4 @@
-package org.molgenis.data.cache.L1;
+package org.molgenis.data.cache.l1;
 
 import autovalue.shaded.com.google.common.common.collect.Lists;
 import com.google.common.collect.Iterators;

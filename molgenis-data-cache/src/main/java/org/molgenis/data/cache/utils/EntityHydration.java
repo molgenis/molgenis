@@ -1,36 +1,47 @@
 package org.molgenis.data.cache.utils;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheLoader;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
-import static com.google.common.cache.CacheBuilder.newBuilder;
 import static com.google.common.collect.Maps.newHashMap;
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
 import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
 
-public class CachingUtils
+/**
+ * Hydrates and dehydrates entities.
+ */
+@Component
+public class EntityHydration
 {
-	private static final Logger LOG = LoggerFactory.getLogger(CachingUtils.class);
+	private static final Logger LOG = LoggerFactory.getLogger(EntityHydration.class);
+	private final EntityManager entityManager;
+
+	@Autowired
+	public EntityHydration(EntityManager entityManager)
+	{
+		this.entityManager = requireNonNull(entityManager);
+	}
 
 	/**
-	 * Rebuild entity from a map with key value pairs representing this entity.
+	 * Rehydrate an entity.
 	 *
-	 * @param dehydratedEntity
+	 * @param entityMetaData   metadata of the entity to rehydrate
+	 * @param dehydratedEntity map with key value pairs representing this entity
 	 * @return hydrated entity
 	 */
-	public static Entity hydrate(Map<String, Object> dehydratedEntity, EntityMetaData entityMetaData,
-			EntityManager entityManager)
+	public Entity hydrate(Map<String, Object> dehydratedEntity, EntityMetaData entityMetaData)
 	{
 		LOG.trace("Hydrating entity: {} for entity {}", dehydratedEntity, entityMetaData.getName());
 
@@ -41,8 +52,6 @@ public class CachingUtils
 			Object value = dehydratedEntity.get(name);
 			if (value != null)
 			{
-				AttributeType type = attr.getDataType();
-
 				if (isMultipleReferenceType(attr))
 				{
 					// We can do this cast because during dehydration, mrefs and categorical mrefs are stored as a List of Object
@@ -62,18 +71,18 @@ public class CachingUtils
 			}
 
 		});
-		
+
 		return hydratedEntity;
 	}
 
 	/**
-	 * Do not store entity in the cache since it might be updated by client code, instead store the values required to
-	 * rebuild this entity. For references to other entities only store the ids.
+	 * Creates a Map containing the values required to rebuild this entity.
+	 * For references to other entities only stores the ids.
 	 *
-	 * @param entity
-	 * @return
+	 * @param entity the {@link Entity} to dehydrate
+	 * @return Map representation of the entity
 	 */
-	public static Map<String, Object> dehydrate(Entity entity)
+	public Map<String, Object> dehydrate(Entity entity)
 	{
 		LOG.trace("Dehydrating entity {}", entity);
 		Map<String, Object> dehydratedEntity = newHashMap();
@@ -89,17 +98,7 @@ public class CachingUtils
 		return dehydratedEntity;
 	}
 
-	public static Cache<String, Map<String, Object>> createCache(int maximumSize)
-	{
-		return newBuilder().maximumSize(maximumSize).build();
-	}
-
-	public static String generateCacheKey(String entityName, Object id)
-	{
-		return entityName + "__" + id.toString();
-	}
-
-	private static Object getValueBasedOnType(Entity entity, String name, AttributeType type)
+	private Object getValueBasedOnType(Entity entity, String name, AttributeType type)
 	{
 		Object value;
 		switch (type)
