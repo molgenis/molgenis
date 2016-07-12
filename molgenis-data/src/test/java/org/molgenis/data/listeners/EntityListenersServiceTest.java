@@ -150,10 +150,10 @@ public class EntityListenersServiceTest
 	public void noExceptionsStressTest()
 	{
 		List<Thread> ts = new ArrayList<>();
-		ts.add(new NewThread("EntityRepo1", 100, 200).getThread());
-		ts.add(new NewThread("EntityRepo1", 100, 200).getThread());
-		ts.add(new NewThread("EntityRepo2", 100, 200).getThread());
-		ts.add(new NewThread("EntityRepo2", 100, 200).getThread());
+		ts.add(new NewThread("EntityRepo1", 0, 10).getThread());
+		ts.add(new NewThread("EntityRepo1", 0, 10).getThread());
+		ts.add(new NewThread("EntityRepo2", 0, 10).getThread());
+		ts.add(new NewThread("EntityRepo2", 0, 10).getThread());
 
 		ts.stream().forEach(t -> {
 			try
