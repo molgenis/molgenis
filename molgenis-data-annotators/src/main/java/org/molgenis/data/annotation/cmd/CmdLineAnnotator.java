@@ -11,10 +11,10 @@ import joptsimple.OptionParser;
 import joptsimple.OptionSet;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisInvalidFormatException;
-import org.molgenis.data.annotation.EffectsAnnotator;
-import org.molgenis.data.annotation.RefEntityAnnotator;
-import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.core.EffectsAnnotator;
+import org.molgenis.data.annotation.core.RefEntityAnnotator;
+import org.molgenis.data.annotation.core.RepositoryAnnotator;
+import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -50,7 +50,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
  */
 public class CmdLineAnnotator
 {
-	public static final String EFFECT = "EFFECT";
+	private static final String EFFECT = "EFFECT";
 	@Autowired
 	private ApplicationContext applicationContext;
 
@@ -61,13 +61,16 @@ public class CmdLineAnnotator
 	VcfAttributes vcfAttributes;
 
 	@Autowired
+	VcfUtils vcfUtils;
+
+	@Autowired
 	EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
 	AttributeMetaDataFactory attributeMetaDataFactory;
 
 	// Default settings for running vcf-validator
-	public void run(OptionSet options, OptionParser parser) throws Exception
+	private void run(OptionSet options, OptionParser parser) throws Exception
 	{
 		Map<String, RepositoryAnnotator> configuredAnnotators = applicationContext
 				.getBeansOfType(RepositoryAnnotator.class);
@@ -197,7 +200,7 @@ public class CmdLineAnnotator
 
 	}
 
-	protected static OptionParser createOptionParser()
+	private static OptionParser createOptionParser()
 	{
 		OptionParser parser = new OptionParser();
 		parser.acceptsAll(asList("i", "input"), "Input VCF file").withRequiredArg().ofType(File.class);
@@ -231,7 +234,7 @@ public class CmdLineAnnotator
 	 *            , the attributes of the annotator to include in the output vcf, if empty outputs all
 	 * @throws Exception
 	 */
-	public void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile, OptionSet options)
+	private void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile, OptionSet options)
 			throws Exception
 	{
 		List<String> attributesToInclude = options.nonOptionArguments().stream().map(Object::toString)
@@ -243,21 +246,22 @@ public class CmdLineAnnotator
 			List<String> attributesToInclude, boolean validate, boolean update) throws IOException,
 			MolgenisInvalidFormatException
 	{
-		BufferedWriter outputVCFWriter = new BufferedWriter(
-				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
-		VcfRepository vcfRepo = new VcfRepository(inputVcfFile, inputVcfFile.getName(), vcfAttributes ,entityMetaDataFactory, attributeMetaDataFactory);
 
-		try
+		try (BufferedWriter outputVCFWriter = new BufferedWriter(
+				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
+				VcfRepository vcfRepo = new VcfRepository(inputVcfFile, inputVcfFile.getName(), vcfAttributes,
+						entityMetaDataFactory, attributeMetaDataFactory))
 		{
 			if (!attributesToInclude.isEmpty())
 			{
 				// Check attribute names
-				List<String> outputAttributeNames = VcfUtils.getAtomicAttributesFromList(annotator.getOutputAttributes())
-						.stream().map((attr) -> attr.getName()).collect(Collectors.toList());
+				List<String> outputAttributeNames = VcfUtils
+						.getAtomicAttributesFromList(annotator.getOutputAttributes()).stream()
+						.map(AttributeMetaData::getName).collect(Collectors.toList());
 
 				List<String> inputAttributeNames = VcfUtils
 						.getAtomicAttributesFromList(vcfRepo.getEntityMetaData().getAtomicAttributes()).stream()
-						.map((attr) -> attr.getName()).collect(Collectors.toList());
+						.map(AttributeMetaData::getName).collect(Collectors.toList());
 
 				boolean stop = false;
 				for (Object attrName : attributesToInclude)
@@ -283,8 +287,8 @@ public class CmdLineAnnotator
 			List<AttributeMetaData> outputMetaData = newArrayList();
 			if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
 			{
-				EntityMetaData effectRefEntity =entityMetaDataFactory.create().setName(
-						annotator.getSimpleName() + "_EFFECTS");
+				EntityMetaData effectRefEntity = entityMetaDataFactory.create()
+						.setName(annotator.getSimpleName() + "_EFFECTS");
 				for (AttributeMetaData outputAttribute : annotator.getOutputAttributes())
 				{
 					effectRefEntity.addAttribute(outputAttribute);
@@ -298,12 +302,13 @@ public class CmdLineAnnotator
 				outputMetaData = annotator.getOutputAttributes();
 			}
 
-			VcfWriterUtils.writeVcfHeader(inputVcfFile, outputVCFWriter,
-					VcfUtils.getAtomicAttributesFromList(outputMetaData), attributesToInclude);
+			VcfWriterUtils
+					.writeVcfHeader(inputVcfFile, outputVCFWriter, VcfUtils.getAtomicAttributesFromList(outputMetaData),
+							attributesToInclude);
 			System.out.println("Now starting to process the data.");
 
-			EntityMetaData emd = (EntityMetaData) vcfRepo.getEntityMetaData();
-			AttributeMetaData infoAttribute = (AttributeMetaData) emd.getAttribute(VcfAttributes.INFO);
+			EntityMetaData emd = vcfRepo.getEntityMetaData();
+			AttributeMetaData infoAttribute = emd.getAttribute(VcfAttributes.INFO);
 			for (AttributeMetaData attribute : annotator.getOutputAttributes())
 			{
 				for (AttributeMetaData atomicAttribute : attribute.getAttributeParts())
@@ -314,8 +319,8 @@ public class CmdLineAnnotator
 			Iterable<Entity> entitiesToAnnotate;
 			if (annotator instanceof EffectsAnnotator)
 			{
-				entitiesToAnnotate = VcfUtils.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT,
-						vcfRepo.findAll(new QueryImpl<Entity>()));
+				entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT,
+						vcfRepo.findAll(new QueryImpl<>()));
 			}
 			else
 			{
@@ -325,7 +330,7 @@ public class CmdLineAnnotator
 
 			if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
 			{
-				annotatedRecords = VcfUtils.reverseXrefMrefRelation(annotatedRecords);
+				annotatedRecords = vcfUtils.reverseXrefMrefRelation(annotatedRecords);
 			}
 
 			while (annotatedRecords.hasNext())
@@ -336,13 +341,6 @@ public class CmdLineAnnotator
 				outputVCFWriter.newLine();
 			}
 
-		}
-
-		finally
-		{
-			outputVCFWriter.close();
-
-			vcfRepo.close();
 		}
 		if (validate)
 		{

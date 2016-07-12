@@ -1,10 +1,10 @@
 package org.molgenis.gavin.job;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.annotation.CrudRepositoryAnnotator;
-import org.molgenis.data.annotation.EffectsAnnotator;
-import org.molgenis.data.annotation.RepositoryAnnotator;
 import org.molgenis.data.annotation.cmd.CmdLineAnnotator;
+import org.molgenis.data.annotation.core.EffectsAnnotator;
+import org.molgenis.data.annotation.core.RepositoryAnnotator;
+import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.file.FileStore;
