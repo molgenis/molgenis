@@ -17,6 +17,8 @@ import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+
 /**
  * Converts entities to Elasticsearch documents
  */
@@ -124,7 +126,8 @@ public class EntityToSourceConverter
 			case CATEGORICAL_MREF:
 			case MREF:
 			{
-				final Iterable<Entity> refEntities = entity.getEntities(attrName);
+				Entity finalEntity = entity;
+				final Iterable<Entity> refEntities = runAsSystem(() -> finalEntity.getEntities(attrName));
 				if (refEntities != null && !Iterables.isEmpty(refEntities))
 				{
 					final EntityMetaData refEntityMetaData = attributeMetaData.getRefEntity();
