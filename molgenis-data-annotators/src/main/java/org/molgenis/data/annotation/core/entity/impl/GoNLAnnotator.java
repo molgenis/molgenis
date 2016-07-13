@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.data.annotation.core.settings.GoNLAnnotatorSettings.Meta.*;
+import static org.molgenis.data.annotation.web.settings.GoNLAnnotatorSettings.Meta.*;
 
 @Configuration
 public class GoNLAnnotator implements AnnotatorConfig
@@ -66,7 +66,7 @@ public class GoNLAnnotator implements AnnotatorConfig
 	private AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityMetaDataFactory entityMetaDataFactory;
 
 	private RepositoryAnnotatorImpl annotator;
 
@@ -190,7 +190,7 @@ public class GoNLAnnotator implements AnnotatorConfig
 					if (!Iterables.all(alleleMatches, Predicates.isNull()))
 					{
 						afs = alleleMatches.stream().map(gonl -> gonl == null ? "." : Double
-								.toString(Integer.valueOf(gonl.getString(INFO_AC)) / gonl.getInt(INFO_AN)))
+								.toString(Double.valueOf(gonl.getString(INFO_AC)) / gonl.getInt(INFO_AN)))
 								.collect(Collectors.joining(","));
 						//update GTC field to separate allele combinations by pipe instead of comma, since we use comma to separate alt allele info
 						gtcs = alleleMatches.stream()
@@ -218,7 +218,7 @@ public class GoNLAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory(GONL_MULTI_FILE_RESOURCE, vcfAttributes, entityMetaFactory, attributeMetaDataFactory);
+				return new TabixVcfRepositoryFactory(GONL_MULTI_FILE_RESOURCE, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory);
 			}
 		};
 	}

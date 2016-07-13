@@ -15,7 +15,8 @@ import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
-import org.molgenis.data.annotation.core.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.web.settings.OmimAnnotatorSettings;
+import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -31,7 +32,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
-import static org.molgenis.data.annotation.core.settings.OmimAnnotatorSettings.Meta.OMIM_LOCATION;
+import static org.molgenis.data.annotation.web.settings.OmimAnnotatorSettings.Meta.OMIM_LOCATION;
 
 @Configuration
 public class OmimAnnotator implements AnnotatorConfig

@@ -18,6 +18,7 @@ import org.molgenis.data.annotation.core.resources.impl.MultiFileResource;
 import org.molgenis.data.annotation.core.resources.impl.MultiResourceConfigImpl;
 import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepositoryFactory;
+import org.molgenis.data.annotation.web.settings.ThousendGenomesAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -30,7 +31,7 @@ import java.util.Collections;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.DECIMAL;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.data.annotation.core.settings.ThousendGenomesAnnotatorSettings.Meta.*;
+import static org.molgenis.data.annotation.web.settings.ThousendGenomesAnnotatorSettings.Meta.*;
 
 @Configuration
 public class ThousandGenomesAnnotator implements AnnotatorConfig

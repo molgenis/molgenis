@@ -12,7 +12,7 @@ import org.molgenis.data.annotation.core.entity.impl.CaddAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.ExacAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.framework.QueryAnnotatorImpl;
 import org.molgenis.data.annotation.core.entity.impl.snpeff.Impact;
-import org.molgenis.data.annotation.core.meta.effects.EffectsMetaData;
+import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.query.GeneNameQueryCreator;
 import org.molgenis.data.annotation.core.resources.Resource;
 import org.molgenis.data.annotation.core.resources.Resources;
@@ -20,13 +20,12 @@ import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.core.resources.impl.emx.EmxResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.emx.InMemoryRepositoryFactory;
-import org.molgenis.data.annotation.core.settings.GavinAnnotatorSettings;
+import org.molgenis.data.annotation.web.settings.GavinAnnotatorSettings;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.importer.EmxFileOnlyMetaDataParser;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -82,9 +81,6 @@ public class GavinAnnotator implements AnnotatorConfig
 	@Autowired
 	GeneNameQueryCreator geneNameQueryCreator;
 
-	@Autowired
-	ApplicationContext applicationContext;
-
 	@Bean
 	Resource GavinResource()
 	{
@@ -95,7 +91,7 @@ public class GavinAnnotator implements AnnotatorConfig
 			public RepositoryFactory getRepositoryFactory()
 			{
 				return new InMemoryRepositoryFactory(RESOURCE_ENTITY_NAME,
-						new EmxFileOnlyMetaDataParser(packageFactory, attributeMetaDataFactory, applicationContext),
+						new EmxFileOnlyMetaDataParser(packageFactory, attributeMetaDataFactory, entityMetaDataFactory),
 						entityMetaDataFactory, attributeMetaDataFactory);
 			}
 		};

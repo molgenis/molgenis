@@ -15,6 +15,5 @@ public class AnnotatorBootstrapper
 		ApplicationContext ctx = event.getApplicationContext();
 		Map<String, AnnotatorConfig> annotatorMap = ctx.getBeansOfType(AnnotatorConfig.class);
 		annotatorMap.values().forEach(AnnotatorConfig::init);
-
 	}
 }

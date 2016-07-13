@@ -17,7 +17,7 @@ import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepositoryFactory;
-import org.molgenis.data.annotation.core.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.data.annotation.core.settings.ClinvarAnnotatorSettings.Meta.CLINVAR_LOCATION;
+import static org.molgenis.data.annotation.web.settings.ClinvarAnnotatorSettings.Meta.CLINVAR_LOCATION;
 
 @Configuration
 public class ClinvarAnnotator implements AnnotatorConfig
