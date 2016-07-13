@@ -14,9 +14,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * Created by jonathanjetten on 7/11/16.
- */
 public class EntityListenersServiceTest
 {
 	private EntityListenersService entityListenersService = new EntityListenersService();
