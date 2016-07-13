@@ -6,6 +6,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
 import org.molgenis.data.listeners.EntityListener;
+import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
@@ -71,6 +72,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private MetaDataServiceImpl metaDataService;
 	@Autowired
 	private ConfigurableApplicationContext applicationContext;
+	@Autowired
+	private EntityListenersService entityListenersService;
 
 	/**
 	 * Wait till the whole index is stable. Reindex job is done a-synchronized.
@@ -214,7 +217,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		try
 		{
 			// Test that the listener is being called
-			dataService.addEntityListener(entityMetaData.getName(), listener);
+			entityListenersService.addEntityListener(entityMetaData.getName(), listener);
 			dataService.update(entityMetaData.getName(), entities.stream());
 			assertEquals(updateCalled.get(), 1);
 			waitForIndexToBeStable(entityMetaData.getName());
@@ -223,7 +226,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		finally
 		{
 			// Test that the listener is actually removed and not called anymore
-			dataService.removeEntityListener(entityMetaData.getName(), listener);
+			entityListenersService.removeEntityListener(entityMetaData.getName(), listener);
 			updateCalled.set(0);
 			dataService.update(entityMetaData.getName(), entities.stream());
 			assertEquals(updateCalled.get(), 0);

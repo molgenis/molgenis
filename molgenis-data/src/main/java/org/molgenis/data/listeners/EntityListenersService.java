@@ -72,12 +72,12 @@ public final class EntityListenersService
 	}
 
 	/**
-	 * add a listener to a repository
+	 * Adds an entity listener for a entity of the given class that listens to entity changes
 	 *
 	 * @param repoFullName
-	 * @param entityListener
+	 * @param entityListener entity listener for a entity
 	 */
-	void addEntityListener(String repoFullName, EntityListener entityListener)
+	public void addEntityListener(String repoFullName, EntityListener entityListener)
 	{
 		verifyRepoRegistered(repoFullName);
 		SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
@@ -88,13 +88,13 @@ public final class EntityListenersService
 	}
 
 	/**
-	 * remove a listener from a repository
+	 * Removes an entity listener for a entity of the given class
 	 *
 	 * @param repoFullName
-	 * @param entityListener
+	 * @param entityListener entity listener for a entity
 	 * @return
 	 */
-	boolean removeEntityListener(String repoFullName, EntityListener entityListener)
+	public boolean removeEntityListener(String repoFullName, EntityListener entityListener)
 	{
 		verifyRepoRegistered(repoFullName);
 		SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);

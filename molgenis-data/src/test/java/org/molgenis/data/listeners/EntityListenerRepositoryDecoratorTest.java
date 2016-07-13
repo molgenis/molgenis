@@ -72,7 +72,7 @@ public class EntityListenerRepositoryDecoratorTest
 				decoratedRepository, entityListenersService);
 		EntityListener entityListener0 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
 				.thenReturn(Integer.valueOf(1)).getMock();
-		entityListenerRepositoryDecorator.addEntityListener(entityListener0);
+		entityListenersService.addEntityListener("entityFullName", entityListener0);
 
 		Entity entity = Mockito.when(Mockito.mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
 		entityListenerRepositoryDecorator.update(entity);
@@ -93,8 +93,8 @@ public class EntityListenerRepositoryDecoratorTest
 				.thenReturn(Integer.valueOf(1)).getMock();
 		EntityListener entityListener1 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
 				.thenReturn(Integer.valueOf(1)).getMock();
-		entityListenerRepositoryDecorator.addEntityListener(entityListener0);
-		entityListenerRepositoryDecorator.addEntityListener(entityListener1);
+		entityListenersService.addEntityListener("entityFullName", entityListener0);
+		entityListenersService.addEntityListener("entityFullName", entityListener1);
 
 		Entity entity = Mockito.when(Mockito.mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
 		entityListenerRepositoryDecorator.update(entity);
@@ -114,7 +114,7 @@ public class EntityListenerRepositoryDecoratorTest
 				decoratedRepository, entityListenersService);
 		EntityListener entityListener0 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
 				.thenReturn(Integer.valueOf(-1)).getMock();
-		entityListenerRepositoryDecorator.addEntityListener(entityListener0);
+		entityListenersService.addEntityListener("entityFullName", entityListener0);
 
 		Entity entity = Mockito.when(Mockito.mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
 		entityListenerRepositoryDecorator.update(entity);
@@ -150,8 +150,8 @@ public class EntityListenerRepositoryDecoratorTest
 				.thenReturn(Integer.valueOf(1)).getMock();
 		EntityListener entityListener1 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
 				.thenReturn(Integer.valueOf(2)).getMock();
-		entityListenerRepositoryDecorator.addEntityListener(entityListener0);
-		entityListenerRepositoryDecorator.addEntityListener(entityListener1);
+		entityListenersService.addEntityListener("entityFullName", entityListener0);
+		entityListenersService.addEntityListener("entityFullName", entityListener1);
 
 		Entity entity0 = Mockito.when(Mockito.mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
 		Entity entity1 = Mockito.when(Mockito.mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(2)).getMock();
@@ -176,7 +176,7 @@ public class EntityListenerRepositoryDecoratorTest
 				decoratedRepository, entityListenersService);
 		EntityListener entityListener1 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
 				.thenReturn(Integer.valueOf(2)).getMock();
-		entityListenerRepositoryDecorator.addEntityListener(entityListener1);
+		entityListenersService.addEntityListener("entityFullName", entityListener1);
 
 		Entity entity0 = Mockito.when(Mockito.mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
 		Entity entity1 = Mockito.when(Mockito.mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(2)).getMock();
@@ -218,8 +218,8 @@ public class EntityListenerRepositoryDecoratorTest
 				decoratedRepository, entityListenersService);
 		EntityListener entityListener0 = Mockito.when(Mockito.mock(EntityListener.class).getEntityId())
 				.thenReturn(Integer.valueOf(1)).getMock();
-		entityListenerRepositoryDecorator.addEntityListener(entityListener0);
-		entityListenerRepositoryDecorator.removeEntityListener(entityListener0);
+		entityListenersService.addEntityListener("entityFullName", entityListener0);
+		entityListenersService.removeEntityListener("entityFullName", entityListener0);
 
 		Entity entity = Mockito.when(Mockito.mock(Entity.class).getIdValue()).thenReturn(Integer.valueOf(1)).getMock();
 		entityListenerRepositoryDecorator.update(entity);

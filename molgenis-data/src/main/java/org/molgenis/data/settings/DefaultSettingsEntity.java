@@ -1,18 +1,19 @@
 package org.molgenis.data.settings;
 
-import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.listeners.EntityListener;
+import org.molgenis.data.listeners.EntityListenersService;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.util.EntityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ResourceBundle;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.listeners.EntityListener;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
-import org.molgenis.util.EntityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 
 /**
  * Base class for application and plugin settings entities. Settings are read/written from/to data source.
@@ -25,6 +26,9 @@ public abstract class DefaultSettingsEntity implements Entity
 
 	@Autowired
 	private DataService dataService;
+
+	@Autowired
+	private EntityListenersService entityListenersService;
 
 	private transient Entity cachedEntity;
 
@@ -161,14 +165,14 @@ public abstract class DefaultSettingsEntity implements Entity
 
 	/**
 	 * Adds a listener for this settings entity that fires on entity updates
-	 * 
+	 *
 	 * @param settingsEntityListener
 	 *            listener for this settings entity
 	 */
 	public void addListener(SettingsEntityListener settingsEntityListener)
 	{
 		RunAsSystemProxy.runAsSystem(() -> {
-			dataService.addEntityListener(entityName, new EntityListener()
+			entityListenersService.addEntityListener(entityName, new EntityListener()
 			{
 				@Override
 				public void postUpdate(Entity entity)
@@ -187,14 +191,14 @@ public abstract class DefaultSettingsEntity implements Entity
 
 	/**
 	 * Removes a listener for this settings entity that fires on entity updates
-	 * 
+	 *
 	 * @param settingsEntityListener
 	 *            listener for this settings entity
 	 */
 	public void removeListener(SettingsEntityListener settingsEntityListener)
 	{
 		RunAsSystemProxy.runAsSystem(() -> {
-			dataService.removeEntityListener(entityName, new EntityListener()
+			entityListenersService.removeEntityListener(entityName, new EntityListener()
 			{
 
 				@Override
@@ -235,7 +239,7 @@ public abstract class DefaultSettingsEntity implements Entity
 				Entity entity = dataService.findOneById(entityName, id);
 
 				// refresh cache on settings update
-					dataService.addEntityListener(entityName, new EntityListener()
+				entityListenersService.addEntityListener(entityName, new EntityListener()
 					{
 						@Override
 						public void postUpdate(Entity entity)
