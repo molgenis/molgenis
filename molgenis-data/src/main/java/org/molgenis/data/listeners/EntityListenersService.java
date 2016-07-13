@@ -35,6 +35,13 @@ public final class EntityListenersService
 		}
 	}
 
+	/**
+	 * Update all registered listeners of the entities
+	 *
+	 * @param repoFullName
+	 * @param entities
+	 * @return Stream<Entity>
+	 */
 	Stream<Entity> updateEntities(String repoFullName, Stream<Entity> entities)
 	{
 		verifyRepoRegistered(repoFullName);
@@ -48,6 +55,12 @@ public final class EntityListenersService
 		});
 	}
 
+	/**
+	 * Update all registered listeners of an entity
+	 *
+	 * @param repoFullName
+	 * @param entity
+	 */
 	void updateEntity(String repoFullName, Entity entity)
 	{
 		verifyRepoRegistered(repoFullName);
@@ -58,6 +71,12 @@ public final class EntityListenersService
 		});
 	}
 
+	/**
+	 * add a listener to a repository
+	 *
+	 * @param repoFullName
+	 * @param entityListener
+	 */
 	void addEntityListener(String repoFullName, EntityListener entityListener)
 	{
 		verifyRepoRegistered(repoFullName);
@@ -68,6 +87,13 @@ public final class EntityListenersService
 		}
 	}
 
+	/**
+	 * remove a listener from a repository
+	 *
+	 * @param repoFullName
+	 * @param entityListener
+	 * @return
+	 */
 	boolean removeEntityListener(String repoFullName, EntityListener entityListener)
 	{
 		verifyRepoRegistered(repoFullName);
@@ -83,12 +109,24 @@ public final class EntityListenersService
 		}
 	}
 
+	/**
+	 * Check if a repository has no listeners
+	 * Repository must be registered
+	 *
+	 * @param repoFullName
+	 * @return boolean
+	 */
 	boolean isEmpty(String repoFullName)
 	{
 		verifyRepoRegistered(repoFullName);
 		return entityListeners.get(repoFullName).isEmpty();
 	}
 
+	/**
+	 * Verify that the repository is registered
+	 *
+	 * @param repoFullName
+	 */
 	protected void verifyRepoRegistered(String repoFullName)
 	{
 		if (!entityListeners.containsKey(requireNonNull(repoFullName)))
