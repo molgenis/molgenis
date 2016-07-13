@@ -221,18 +221,6 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 		decoratedRepo.rebuildIndex();
 	}
 
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decoratedRepo.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decoratedRepo.removeEntityListener(entityListener);
-	}
-
 	private void validateUpdate(AttributeMetaData currentAttr, AttributeMetaData newAttr)
 	{
 		// data type

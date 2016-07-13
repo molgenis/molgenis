@@ -170,20 +170,4 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable
 	 * TODO move to RepositoryCollection
 	 */
 	void rebuildIndex();
-
-	/**
-	 * Adds an entity listener for a entity that listens to entity changes
-	 * 
-	 * @param entityListener
-	 *            entity listener for a entity
-	 */
-	void addEntityListener(EntityListener entityListener);
-
-	/**
-	 * Removes an entity listener
-	 * 
-	 * @param entityListener
-	 *            entity listener for a entity
-	 */
-	void removeEntityListener(EntityListener entityListener);
 }

@@ -387,22 +387,6 @@ public class IndexedRepositoryDecoratorTest
 	}
 
 	@Test
-	public void addEntityListener()
-	{
-		EntityListener listener = mock(EntityListener.class);
-		indexedRepositoryDecorator.addEntityListener(listener);
-		verify(decoratedRepo, times(1)).addEntityListener(listener);
-	}
-
-	@Test
-	public void removeEntityListener()
-	{
-		EntityListener listener = mock(EntityListener.class);
-		indexedRepositoryDecorator.removeEntityListener(listener);
-		verify(decoratedRepo, times(1)).removeEntityListener(listener);
-	}
-
-	@Test
 	public void unsupportedQueryWithComputedAttributes()
 	{
 		@SuppressWarnings("unchecked") Query<Entity> q = mock(Query.class);

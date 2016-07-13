@@ -203,16 +203,4 @@ public class EntityListenerRepositoryDecorator implements Repository<Entity>
 	{
 		decoratedRepository.rebuildIndex();
 	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		entityListenersService.addEntityListener(decoratedRepository.getName(), entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		entityListenersService.removeEntityListener(decoratedRepository.getName(), entityListener);
-	}
 }

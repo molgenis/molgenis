@@ -334,16 +334,4 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	{
 		decorated.rebuildIndex();
 	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decorated.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decorated.removeEntityListener(entityListener);
-	}
 }

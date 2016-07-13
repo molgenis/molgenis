@@ -111,18 +111,6 @@ public abstract class AbstractRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decorated.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decorated.removeEntityListener(entityListener);
-	}
-
-	@Override
 	public Entity findOneById(Object id)
 	{
 		return decorated.findOneById(id);

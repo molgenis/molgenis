@@ -354,18 +354,6 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 		decoratedRepo.rebuildIndex();
 	}
 
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decoratedRepo.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decoratedRepo.removeEntityListener(entityListener);
-	}
-
 	private boolean currentUserIsOwner(Entity entity)
 	{
 		if (null == entity) return false;

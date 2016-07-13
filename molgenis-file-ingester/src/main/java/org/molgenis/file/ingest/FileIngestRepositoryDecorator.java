@@ -249,18 +249,6 @@ public class FileIngestRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decorated.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decorated.removeEntityListener(entityListener);
-	}
-
-	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
 		decorated.forEachBatched(fetch, consumer, 1000);

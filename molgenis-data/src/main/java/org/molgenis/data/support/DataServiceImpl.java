@@ -230,18 +230,6 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public void addEntityListener(String entityName, EntityListener entityListener)
-	{
-		getRepository(entityName).addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(String entityName, EntityListener entityListener)
-	{
-		getRepository(entityName).removeEntityListener(entityListener);
-	}
-
-	@Override
 	public Stream<Entity> findAll(String entityName, Stream<Object> ids)
 	{
 		return getRepository(entityName).findAll(ids);

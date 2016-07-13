@@ -210,16 +210,4 @@ public class MetaDataRepositoryDecorator implements Repository<Entity>
 	{
 		decorated.rebuildIndex();
 	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decorated.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decorated.removeEntityListener(entityListener);
-	}
 }

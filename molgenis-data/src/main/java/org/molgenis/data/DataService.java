@@ -332,20 +332,6 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 */
 	Stream<String> getEntityNames();
 
-	/**
-	 * Adds an entity listener for a entity of the given class that listens to entity changes
-	 *
-	 * @param entityListener entity listener for a entity
-	 */
-	void addEntityListener(String entityName, EntityListener entityListener);
-
-	/**
-	 * Removes an entity listener for a entity of the given class
-	 *
-	 * @param entityListener entity listener for a entity
-	 */
-	void removeEntityListener(String entityName, EntityListener entityListener);
-
 	Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId, String newRepositoryLabel);
 
 	Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId, String newRepositoryLabel,

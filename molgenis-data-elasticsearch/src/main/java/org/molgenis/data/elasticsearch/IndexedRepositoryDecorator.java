@@ -288,18 +288,6 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		return elasticSearchService.aggregate(aggregateQuery, getEntityMetaData());
 	}
 
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decoratedRepository.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decoratedRepository.removeEntityListener(entityListener);
-	}
-
 	/**
 	 * Checks if the underlying repository can handle this query. Queries with unsupported operators or queries that use
 	 * attributes with computed values are delegated to the index.

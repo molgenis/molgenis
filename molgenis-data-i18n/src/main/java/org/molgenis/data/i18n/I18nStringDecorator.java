@@ -213,16 +213,4 @@ public class I18nStringDecorator implements Repository<Entity>
 		decorated.rebuildIndex();
 		ResourceBundle.clearCache();
 	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decorated.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decorated.removeEntityListener(entityListener);
-	}
 }

@@ -297,16 +297,4 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 	{
 		decoratedRepository.rebuildIndex();
 	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decoratedRepository.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decoratedRepository.removeEntityListener(entityListener);
-	}
 }

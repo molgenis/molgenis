@@ -271,18 +271,6 @@ public class L1CacheRepositoryDecorator implements Repository<Entity>
 		decoratedRepository.rebuildIndex();
 	}
 
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decoratedRepository.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decoratedRepository.removeEntityListener(entityListener);
-	}
-
 	/**
 	 * Looks up the Entities for a List of entity IDs.
 	 * Those present in the cache are returned from cache. The missing ones are retrieved from the decoratedRepository.

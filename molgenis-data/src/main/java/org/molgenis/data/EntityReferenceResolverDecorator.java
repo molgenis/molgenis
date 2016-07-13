@@ -218,18 +218,6 @@ public class EntityReferenceResolverDecorator implements Repository<Entity>
 		decoratedRepo.rebuildIndex();
 	}
 
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decoratedRepo.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decoratedRepo.removeEntityListener(entityListener);
-	}
-
 	private Entity resolveEntityReferences(Entity entity)
 	{
 		return entityManager.resolveReferences(getEntityMetaData(), entity, null);

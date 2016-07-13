@@ -231,18 +231,6 @@ public class PackageRepositoryDecorator implements Repository<Package>
 		decoratedRepo.rebuildIndex();
 	}
 
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decoratedRepo.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decoratedRepo.removeEntityListener(entityListener);
-	}
-
 	private void validateAddAllowed(Package package_)
 	{
 		Entity existingEntity = findOneById(package_.getIdValue(), new Fetch().field(PackageMetaData.FULL_NAME));

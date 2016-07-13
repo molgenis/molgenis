@@ -224,18 +224,6 @@ public abstract class AbstractRepository implements Repository<Entity>
 	}
 
 	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
 		// by default: ignore fetch

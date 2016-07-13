@@ -256,16 +256,4 @@ public class InMemoryRepository implements Repository<Entity>
 		// Repo is not INDEXABLE
 		throw new UnsupportedOperationException();
 	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		throw new UnsupportedOperationException();
-	}
 }

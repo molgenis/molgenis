@@ -259,18 +259,6 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		decoratedRepo.rebuildIndex();
 	}
 
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decoratedRepo.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decoratedRepo.removeEntityListener(entityListener);
-	}
-
 	private void addEntityMetaData(EntityMetaData entityMetaData)
 	{
 		validateAddAllowed(entityMetaData);
