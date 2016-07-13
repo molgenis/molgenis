@@ -39,16 +39,13 @@ public final class EntityListenersService
 	{
 		verifyRepoRegistered(repoFullName);
 		SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
-		synchronized (entityListeners)
-		{
-			return entities.filter(entity -> {
-				Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
-				entityEntityListeners.forEach(entityListener -> {
-					entityListener.postUpdate(entity);
-				});
-				return true;
+		return entities.filter(entity -> {
+			Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
+			entityEntityListeners.forEach(entityListener -> {
+				entityListener.postUpdate(entity);
 			});
-		}
+			return true;
+		});
 	}
 
 	void updateEntity(String repoFullName, Entity entity)
