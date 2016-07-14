@@ -325,8 +325,8 @@ public class CmdLineAnnotator
 					.addAnnotatorMetadataToRepositories(vcfRepo.getEntityMetaData(), annotator.getOutputAttributes());
 			if (annotator instanceof EffectsAnnotator)
 			{
-				entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(newMetaData, EFFECT,
-						vcfRepo.findAll(new QueryImpl<>()));
+				entitiesToAnnotate = vcfUtils
+						.createEntityStructureForVcf(newMetaData, EFFECT, vcfRepo.findAll(new QueryImpl<>()));
 			}
 			else
 			{

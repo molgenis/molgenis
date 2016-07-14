@@ -142,7 +142,8 @@ public class ClinvarAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory(CLINVAR_TABIX_RESOURCE, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory);
+				return new TabixVcfRepositoryFactory(CLINVAR_TABIX_RESOURCE, vcfAttributes, entityMetaDataFactory,
+						attributeMetaDataFactory);
 			}
 		};
 

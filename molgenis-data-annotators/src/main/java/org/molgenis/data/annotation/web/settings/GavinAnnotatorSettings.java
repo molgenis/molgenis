@@ -26,14 +26,17 @@ public class GavinAnnotatorSettings extends DefaultSettingsEntity
 		{
 			super(ID);
 		}
+
 		@Override
 		public void init()
 		{
 			super.init();
 			setLabel(GavinAnnotator.NAME + " annotator settings");
 
-			String defaultLocation = AnnotatorUtils.getAnnotatorResourceDir() + "/variant/variantinterpretation_emx.xlsx";
-			addAttribute(VARIANT_FILE_LOCATION).setLabel("Variant classification file location").setDefaultValue(defaultLocation);
+			String defaultLocation =
+					AnnotatorUtils.getAnnotatorResourceDir() + "/variant/variantinterpretation_emx.xlsx";
+			addAttribute(VARIANT_FILE_LOCATION).setLabel("Variant classification file location")
+					.setDefaultValue(defaultLocation);
 		}
 	}
 }

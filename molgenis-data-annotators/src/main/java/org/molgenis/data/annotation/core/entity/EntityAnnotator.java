@@ -8,19 +8,16 @@ import java.util.List;
 
 /**
  * Simple interface to implement for fine-grained annotators.
- * 
- * @author fkelpin
  *
+ * @author fkelpin
  */
 public interface EntityAnnotator extends Annotator
 {
 	/**
 	 * Annotates a single entity.
 	 *
-	 * @param sourceEntity
-	 *            the entity to annotate
-	 * @param updateMode
-	 *            boolean indicating if existing annotations should be updated
+	 * @param sourceEntity the entity to annotate
+	 * @param updateMode   boolean indicating if existing annotations should be updated
 	 * @return {@link Iterable} for the annotated data
 	 */
 	Iterable<Entity> annotateEntity(Entity sourceEntity, boolean updateMode);
@@ -31,6 +28,7 @@ public interface EntityAnnotator extends Annotator
 	List<AttributeMetaData> getRequiredAttributes();
 
 	// TODO: plus aanwijzing wat er ontbreekt
+
 	/**
 	 * @return Indication if the required source repository is present in the dataService
 	 */

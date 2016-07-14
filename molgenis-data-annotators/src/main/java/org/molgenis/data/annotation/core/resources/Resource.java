@@ -21,9 +21,8 @@ public interface Resource
 
 	/**
 	 * Queries this Resource
-	 * 
-	 * @param q
-	 *            the Query to use
+	 *
+	 * @param q the Query to use
 	 * @return the {@link Entity}s found
 	 */
 	Iterable<Entity> findAll(Query<Entity> q);

@@ -127,7 +127,8 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory(THOUSAND_GENOME_MULTI_FILE_RESOURCE, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory);
+				return new TabixVcfRepositoryFactory(THOUSAND_GENOME_MULTI_FILE_RESOURCE, vcfAttributes,
+						entityMetaDataFactory, attributeMetaDataFactory);
 			}
 		};
 	}

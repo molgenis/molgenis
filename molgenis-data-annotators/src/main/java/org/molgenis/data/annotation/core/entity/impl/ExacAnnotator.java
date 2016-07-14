@@ -124,21 +124,20 @@ public class ExacAnnotator implements AnnotatorConfig
 
 	public static AttributeMetaData getExacAcHetAttr(AttributeMetaDataFactory attributeMetaDataFactory)
 	{
-		return attributeMetaDataFactory.create().setName(EXAC_AC_HET)
-					.setDataType(STRING).setDescription("The ExAC heterozygous genotype count").setLabel(EXAC_AC_HET_LABEL);
+		return attributeMetaDataFactory.create().setName(EXAC_AC_HET).setDataType(STRING)
+				.setDescription("The ExAC heterozygous genotype count").setLabel(EXAC_AC_HET_LABEL);
 	}
 
 	public static AttributeMetaData getExacAcHomAttr(AttributeMetaDataFactory attributeMetaDataFactory)
 	{
-		return attributeMetaDataFactory.create().setName(EXAC_AC_HOM)
-					.setDataType(STRING).setDescription("The ExAC homozygous alternative genotype count")
-					.setLabel(EXAC_AC_HOM_LABEL);
+		return attributeMetaDataFactory.create().setName(EXAC_AC_HOM).setDataType(STRING)
+				.setDescription("The ExAC homozygous alternative genotype count").setLabel(EXAC_AC_HOM_LABEL);
 	}
 
 	public static AttributeMetaData getExacAFAttr(AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		return attributeMetaDataFactory.create().setName(EXAC_AF).setDataType(STRING)
-					.setDescription("The ExAC allele frequency").setLabel(EXAC_AF_LABEL);
+				.setDescription("The ExAC allele frequency").setLabel(EXAC_AF_LABEL);
 	}
 
 	@Bean
@@ -150,7 +149,8 @@ public class ExacAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory(EXAC_TABIX_RESOURCE, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory);
+				return new TabixVcfRepositoryFactory(EXAC_TABIX_RESOURCE, vcfAttributes, entityMetaDataFactory,
+						attributeMetaDataFactory);
 			}
 		};
 

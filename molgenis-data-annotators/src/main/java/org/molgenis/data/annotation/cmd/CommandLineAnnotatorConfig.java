@@ -38,8 +38,7 @@ public class CommandLineAnnotatorConfig
 	@PostConstruct
 	public void bootstrap()
 	{
-		// bootstrap meta data
-		EntityMetaDataMetaData entityMetaMeta = applicationContext.getBean(EntityMetaDataMetaData.class);
+		Fdata EntityMetaDataMetaData entityMetaMeta = applicationContext.getBean(EntityMetaDataMetaData.class);
 		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityMetaMeta);
 		Map<String, SystemEntityMetaData> systemEntityMetaMap = applicationContext
 				.getBeansOfType(SystemEntityMetaData.class);
@@ -173,7 +172,6 @@ public class CommandLineAnnotatorConfig
 	{
 		return new CmdLineSettingsEntity();
 	}
-
 
 	@Bean
 	public Entity gavinAnnotatorSettings()

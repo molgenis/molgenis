@@ -29,7 +29,7 @@ public class AnnotatorUtils
 	public static Map<String, Double> toAlleleMap(String alternatives, String annotations)
 	{
 		if (annotations == null) annotations = "";
-		if(alternatives==null) return Collections.emptyMap();
+		if (alternatives == null) return Collections.emptyMap();
 		String[] altArray = alternatives.split(",");
 		String[] annotationsArray = annotations.split(",");
 

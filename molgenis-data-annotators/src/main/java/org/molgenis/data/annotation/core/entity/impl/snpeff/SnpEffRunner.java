@@ -7,8 +7,8 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
-import org.molgenis.data.annotation.web.settings.SnpEffAnnotatorSettings;
 import org.molgenis.data.annotation.core.utils.JarRunner;
+import org.molgenis.data.annotation.web.settings.SnpEffAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -163,8 +163,8 @@ public class SnpEffRunner
 	 * because SnpEff always returns output in the same order as the input
 	 *
 	 * @param snpEffResultIterator the snpEff results
-	 * @param chromosome chromosome for the entity that is being annotated
-	 * @param position position for the entity that is being annotated
+	 * @param chromosome           chromosome for the entity that is being annotated
+	 * @param position             position for the entity that is being annotated
 	 * @return {@link Entity}
 	 */
 	private Entity getSnpEffEntity(PeekingIterator<Entity> snpEffResultIterator, String chromosome, int position)

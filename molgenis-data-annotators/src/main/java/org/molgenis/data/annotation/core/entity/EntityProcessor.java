@@ -7,15 +7,14 @@ import java.util.Collection;
 
 /**
  * A step to use in the Annotator. Each step has requirements on the annotated entity's metadata.
- * 
- * @author fkelpin
  *
+ * @author fkelpin
  */
 public interface EntityProcessor
 {
 	/**
 	 * @return {@link Collection} of atomic {@link AttributeMetaData} that must be present in the annotated
-	 *         {@link Entity}.
+	 * {@link Entity}.
 	 */
 	Collection<AttributeMetaData> getRequiredAttributes();
 }

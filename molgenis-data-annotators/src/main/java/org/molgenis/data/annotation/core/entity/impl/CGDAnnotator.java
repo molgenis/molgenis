@@ -170,7 +170,6 @@ public class CGDAnnotator implements AnnotatorConfig
 			}
 		};
 
-
 	}
 
 	private AnnotatorInfo getAnnotatorInfo()

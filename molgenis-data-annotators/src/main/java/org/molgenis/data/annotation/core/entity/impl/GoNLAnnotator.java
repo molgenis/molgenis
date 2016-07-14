@@ -218,7 +218,8 @@ public class GoNLAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory(GONL_MULTI_FILE_RESOURCE, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory);
+				return new TabixVcfRepositoryFactory(GONL_MULTI_FILE_RESOURCE, vcfAttributes, entityMetaDataFactory,
+						attributeMetaDataFactory);
 			}
 		};
 	}

@@ -28,12 +28,12 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 	}
 
 	@Override
-		public Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity, boolean updateMode)
-{
-			if(updateMode == true)
-			{
-				throw new MolgenisDataException("This annotator/filter does not support updating of values");
-			}
+	public Optional<Entity> filterResults(Iterable<Entity> results, Entity annotatedEntity, boolean updateMode)
+	{
+		if (updateMode == true)
+		{
+			throw new MolgenisDataException("This annotator/filter does not support updating of values");
+		}
 		Map<String, String> clnallValueMap = new LinkedHashMap<>();
 		Map<String, String> clnsigValueMap = new LinkedHashMap<>();
 		List<Entity> processedResults = new ArrayList<>();
@@ -57,7 +57,7 @@ public class ClinvarMultiAllelicResultFilter implements ResultFilter
 					// this means the no allele is associated with the gene of interest
 					if (significantAlleleIndex == -1) continue;
 
-					// this means the allele is based on the reference
+						// this means the allele is based on the reference
 					else if (significantAlleleIndex == 0)
 					{
 

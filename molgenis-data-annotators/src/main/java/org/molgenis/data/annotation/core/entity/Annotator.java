@@ -6,14 +6,15 @@ import java.util.List;
 
 /**
  * An Annotator.
- * 
+ * <p>
  * Annotators enrich source data with extra attributes.
- * 
+ *
  * @author fkelpin
  */
 public interface Annotator
 {
 	public static final String ANNOTATORPREFIX = "MOLGENIS_";
+
 	/**
 	 * @return {@link AnnotatorInfo} for the {@link Annotator}
 	 */

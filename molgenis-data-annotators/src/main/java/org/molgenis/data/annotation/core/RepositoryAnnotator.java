@@ -45,21 +45,21 @@ public interface RepositoryAnnotator
 
 	/**
 	 * returns an entityMetaData containing the attributes the annotator will add
-	 * 
+	 *
 	 * @return ouputMetadata
 	 */
 	List<AttributeMetaData> getOutputAttributes();
 
 	/**
 	 * Returns a entityMetaData containing the attributes needed for the annotator to work
-	 * 
+	 *
 	 * @return inputMetaData;
 	 */
 	List<AttributeMetaData> getRequiredAttributes();
 
 	/**
 	 * Returns null if the annotator will work for the given metadata, a reason if not so
-	 * 
+	 *
 	 * @param inputMetaData
 	 * @return canAnnotate
 	 */
@@ -67,7 +67,7 @@ public interface RepositoryAnnotator
 
 	/**
 	 * Return the name of the annotator
-	 * 
+	 *
 	 * @return name
 	 */
 	String getSimpleName();
@@ -80,6 +80,5 @@ public interface RepositoryAnnotator
 	{
 		return getInfo() == null ? "no description" : getInfo().getDescription();
 	}
-
 
 }

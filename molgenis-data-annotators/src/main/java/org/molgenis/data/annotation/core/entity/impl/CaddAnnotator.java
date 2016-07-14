@@ -98,8 +98,7 @@ public class CaddAnnotator implements AnnotatorConfig
 						attributes);
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(CADD_TABIX_RESOURCE, caddInfo,
 				new LocusQueryCreator(vcfAttributes), new MultiAllelicResultFilter(attributes, true, vcfAttributes),
-				dataService,
-				resources,
+				dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CaddAnnotatorSettings.Meta.CADD_LOCATION,
 						caddAnnotatorSettings));
 		annotator.init(entityAnnotator);
