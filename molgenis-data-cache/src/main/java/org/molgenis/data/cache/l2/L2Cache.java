@@ -1,14 +1,14 @@
 package org.molgenis.data.cache.l2;
 
-import autovalue.shaded.com.google.common.common.collect.Iterables;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.cache.utils.EntityHydration;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.EntityKey;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.slf4j.Logger;
@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.ExecutionException;
@@ -27,25 +26,46 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.cache.CacheBuilder.newBuilder;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.concurrent.TimeUnit.MINUTES;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.DataConverter.convert;
 
+/**
+ * In-memory cache of entities read from cacheable repositories.
+ */
 @Service
 public class L2Cache extends DefaultMolgenisTransactionListener
 {
 	public static final Logger LOG = LoggerFactory.getLogger(L2Cache.class);
 	private static final int MAX_CACHE_SIZE_PER_ENTITY = 1000;
-	private final ConcurrentMap<String, LoadingCache<String, Optional<Map<String, Object>>>> caches;
+	/**
+	 * maps entity name to the loading cache with Object key and Optional dehydrated entity value
+ 	 */
+	private final ConcurrentMap<String, LoadingCache<Object, Optional<Map<String, Object>>>> caches;
 	private final EntityHydration entityHydration;
+	private final TransactionInformation transactionInformation;
 
 	@Autowired
-	public L2Cache(EntityHydration entityHydration)
+	public L2Cache(EntityHydration entityHydration, TransactionInformation transactionInformation)
 	{
-		this.entityHydration = Objects.requireNonNull(entityHydration);
+		this.entityHydration = requireNonNull(entityHydration);
+		this.transactionInformation = requireNonNull(transactionInformation);
 		caches = Maps.newConcurrentMap();
+	}
+
+	@Override
+	public void afterCommitTransaction(String transactionId)
+	{
+		//TODO: trace logging + unit test this
+		transactionInformation.getDirtyRepositories().forEach(caches::remove);
+		transactionInformation.getDirtyEntities().forEach(this::evict);
+	}
+
+	private void evict(EntityKey entityKey)
+	{
+		caches.get(entityKey.getEntityName()).invalidate(entityKey.getId());
 	}
 
 	/**
@@ -59,58 +79,63 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	 */
 	public Entity get(Repository<Entity> repository, Object id)
 	{
-		LoadingCache<String, Optional<Map<String, Object>>> cache = getEntityCache(repository);
+		LoadingCache<Object, Optional<Map<String, Object>>> cache = getEntityCache(repository);
 		EntityMetaData entityMetaData = repository.getEntityMetaData();
 		return cache.getUnchecked(id.toString()).map(e -> entityHydration.hydrate(e, entityMetaData)).orElse(null);
 	}
 
 	/**
-	 * Retrieves a list of entities from the cache.
+	 * Retrieves a list of entities from the cache. If the cache doesn't yet exist, will create the cache.
 	 *
-	 * @param repository
-	 * @param ids
-	 * @return
+	 * @param repository the underlying repository, used to create the cache loader or to retrieve the existing cache
+	 * @param ids        {@link Iterable} of the ids of the entities to retrieve
+	 * @return List containing the retrieved entities
+	 * @throws RuntimeException if the cache failed to load the
 	 */
 	public List<Entity> getBatch(Repository<Entity> repository, Iterable<Object> ids)
 	{
 		try
 		{
-			Iterable<String> idStrings = Iterables.transform(ids, Object::toString);
-			Stream<Map<String, Object>> presentEntities = getEntityCache(repository).getAll(idStrings).values().stream()
-					.filter(Optional::isPresent).map(Optional::get);
-			return presentEntities.map(e -> entityHydration.hydrate(e, repository.getEntityMetaData()))
+			return getEntityCache(repository).getAll(ids).values().stream().filter(Optional::isPresent)
+					.map(Optional::get).map(e -> entityHydration.hydrate(e, repository.getEntityMetaData()))
 					.collect(Collectors.toList());
 		}
 		catch (ExecutionException exception)
 		{
-			rethrowUnchecked(exception);
-			return null;
+			// rethrow unchecked
+			if (exception.getCause() != null && exception.getCause() instanceof RuntimeException)
+			{
+				throw (RuntimeException) exception.getCause();
+			}
+			throw new MolgenisDataException(exception);
 		}
 	}
 
+	/**
+	 * Logs cumulative cache statistics for all known caches.
+	 */
 	@Scheduled(fixedRate = 60000)
 	public void logStatistics()
 	{
-		if(LOG.isDebugEnabled())
+		//TODO: do we want to log diff with last log instead?
+		if (LOG.isDebugEnabled())
 		{
 			LOG.debug("Cache stats:");
-			for (Map.Entry<String, LoadingCache<String, Optional<Map<String, Object>>>> cacheEntry : caches.entrySet())
+			for (Map.Entry<String, LoadingCache<Object, Optional<Map<String, Object>>>> cacheEntry : caches.entrySet())
 			{
 				LOG.debug("{}:{}", cacheEntry.getKey(), cacheEntry.getValue().stats());
 			}
 		}
 	}
 
-	private void rethrowUnchecked(Exception exception)
-	{
-		if (exception.getCause() != null && exception.getCause() instanceof RuntimeException)
-		{
-			throw (RuntimeException) exception.getCause();
-		}
-		throw new MolgenisDataException(exception);
-	}
-
-	private LoadingCache<String, Optional<Map<String, Object>>> getEntityCache(Repository<Entity> repository)
+	/**
+	 * Gets the existing entity cache for a {@link Repository} or creates a new one if no cache exists yet.
+	 *
+	 * @param repository the Repository used to create a new cache if none found, otherwise only the name of the
+	 *                   repository is used to look up the existing cache
+	 * @return the LoadingCache for the repository
+	 */
+	private LoadingCache<Object, Optional<Map<String, Object>>> getEntityCache(Repository<Entity> repository)
 	{
 		String name = repository.getName();
 		if (!caches.containsKey(name))
@@ -120,45 +145,56 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 		return caches.get(name);
 	}
 
-	private LoadingCache<String, Optional<Map<String, Object>>> createEntityCache(Repository<Entity> repository)
+	/**
+	 * Creates a new Entity cache
+	 *
+	 * @param repository the {@link Repository} to load the entities from
+	 * @return newly created LoadingCache
+	 */
+	private LoadingCache<Object, Optional<Map<String, Object>>> createEntityCache(Repository<Entity> repository)
 	{
-		AttributeMetaData idAttribute = repository.getEntityMetaData().getIdAttribute();
 		return newBuilder().recordStats().maximumSize(MAX_CACHE_SIZE_PER_ENTITY).expireAfterAccess(10, MINUTES)
-				.build(createCacheLoader(repository, idAttribute));
+				.build(createCacheLoader(repository));
 	}
 
-	private CacheLoader<String, Optional<Map<String, Object>>> createCacheLoader(final Repository<Entity> repository,
-			final AttributeMetaData idAttribute)
+	/**
+	 * Creates a CacheLoader that loads entities from the repository and dehydrates them.
+	 *
+	 * @param repository the Repository to load the entities from
+	 * @return the {@link CacheLoader}
+	 */
+	private CacheLoader<Object, Optional<Map<String, Object>>> createCacheLoader(final Repository<Entity> repository)
 	{
-		return new CacheLoader<String, Optional<Map<String, Object>>>()
+		return new CacheLoader<Object, Optional<Map<String, Object>>>()
 		{
-			public Optional<Map<String, Object>> load(String key)
+			/**
+			 * Loads a single entity from the repository.
+			 * @param id ID value of the entity to retrieve
+			 * @return dehydrated entity or empty if the entity was not present in the repository
+			 */
+			@Override
+			public Optional<Map<String, Object>> load(Object id)
 			{
-				return Optional.ofNullable(repository.findOneById(key)).map(entityHydration::dehydrate);
+				return Optional.ofNullable(repository.findOneById(id)).map(entityHydration::dehydrate);
 			}
 
+			/**
+			 * Loads multiple entities from the repository.
+			 * @param ids Iterable of String representations of the ID values
+			 * @return Map mapping id to loaded entity, or to empty optional if the entity was not present in the repository
+			 */
 			@Override
-			public Map<String, Optional<Map<String, Object>>> loadAll(Iterable<? extends String> keys)
+			public Map<Object, Optional<Map<String, Object>>> loadAll(Iterable<? extends Object> ids)
 			{
-				Stream<Object> typedIds = stream(keys.spliterator(), false).map(this::getIdObject);
-				Map<String, Optional<Map<String, Object>>> result = repository.findAll(typedIds)
-						.collect(toMap(this::getIdString, this::dehydrateEntity));
-				for (String key : keys)
+				Stream<Object> typedIds = stream(ids.spliterator(), false).map(id -> id);
+				Map<Object, Optional<Map<String, Object>>> result = repository.findAll(typedIds)
+						.collect(toMap(Entity::getIdValue, this::dehydrateEntity));
+				for (Object key : ids)
 				{
-					// add empty entry for ids not present in the backend
+					// cache the absence of these entities in the backend as empty values
 					result.putIfAbsent(key, empty());
 				}
 				return result;
-			}
-
-			private Object getIdObject(String idString)
-			{
-				return convert(idString, idAttribute);
-			}
-
-			private String getIdString(Entity entity)
-			{
-				return entity.getIdValue().toString();
 			}
 
 			private Optional<Map<String, Object>> dehydrateEntity(Entity entity)

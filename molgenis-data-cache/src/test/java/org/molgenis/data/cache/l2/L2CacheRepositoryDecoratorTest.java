@@ -1,9 +1,10 @@
 package org.molgenis.data.cache.l2;
 
-import autovalue.shaded.com.google.common.common.collect.Sets;
+import com.google.common.collect.Sets;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
+import org.molgenis.data.transaction.TransactionInformation;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -23,13 +24,15 @@ public class L2CacheRepositoryDecoratorTest
 	private Repository<Entity> cacheableRepository;
 	@Mock
 	private Entity entity;
+	@Mock
+	private TransactionInformation transactionInformation;
 
 	@BeforeClass
 	public void beforeClass()
 	{
 		initMocks(this);
 		when(cacheableRepository.getCapabilities()).thenReturn(Sets.newHashSet(CACHEABLE, WRITABLE));
-		cacheableDecorator = new L2CacheRepositoryDecorator(cacheableRepository, l2Cache);
+		cacheableDecorator = new L2CacheRepositoryDecorator(cacheableRepository, l2Cache, transactionInformation);
 	}
 
 	@Test

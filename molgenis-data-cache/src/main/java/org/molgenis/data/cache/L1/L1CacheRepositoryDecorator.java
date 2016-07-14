@@ -6,7 +6,7 @@ import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.cache.utils.EntityKey;
+import org.molgenis.data.EntityKey;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.util.Iterator;

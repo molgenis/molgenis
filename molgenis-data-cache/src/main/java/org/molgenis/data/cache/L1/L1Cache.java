@@ -5,7 +5,7 @@ import com.google.common.cache.CacheBuilder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.cache.utils.CombinedEntityCache;
 import org.molgenis.data.cache.utils.EntityHydration;
-import org.molgenis.data.cache.utils.EntityKey;
+import org.molgenis.data.EntityKey;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
@@ -73,6 +73,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 		}
 	}
 
+	//TODO: Call this also when repository metadata changes!
 	public void evictAll(String entityName)
 	{
 		CombinedEntityCache entityCache = caches.get();

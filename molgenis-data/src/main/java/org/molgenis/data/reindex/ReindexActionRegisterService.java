@@ -4,12 +4,13 @@ import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
+import org.molgenis.data.EntityKey;
 import org.molgenis.data.reindex.meta.ReindexAction;
 import org.molgenis.data.reindex.meta.ReindexActionFactory;
 import org.molgenis.data.reindex.meta.ReindexActionGroupFactory;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType;
 import org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType;
+import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +19,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
+import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.reindex.meta.ReindexActionGroupMetaData.REINDEX_ACTION_GROUP;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.REINDEX_ACTION;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.PENDING;
@@ -31,14 +35,14 @@ import static org.molgenis.data.transaction.MolgenisTransactionManager.TRANSACTI
  * the relevant data.
  */
 @Service
-public class ReindexActionRegisterService
+public class ReindexActionRegisterService implements TransactionInformation
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ReindexActionRegisterService.class);
 	private static final int LOG_EVERY = 1000;
 
 	private final Set<String> excludedEntities = Sets.newConcurrentHashSet();
 
-	private final Multimap<String, Entity> reindexActionsPerTransaction = synchronizedListMultimap(
+	private final Multimap<String, ReindexAction> reindexActionsPerTransaction = synchronizedListMultimap(
 			ArrayListMultimap.create());
 
 	@Autowired
@@ -76,31 +80,31 @@ public class ReindexActionRegisterService
 	 */
 	public synchronized void register(String entityFullName, CudType cudType, DataType dataType, String entityId)
 	{
-		if (!excludedEntities.contains(entityFullName))
+		//		if (!excludedEntities.contains(entityFullName))
+		//		{
+		String transactionId = (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);
+		if (transactionId != null)
 		{
-			String transactionId = (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);
-			if (transactionId != null)
+			LOG.debug("register(entityFullName: [{}], cudType [{}], dataType: [{}], entityId: [{}])", entityFullName,
+					cudType, dataType, entityId);
+			final int actionOrder = reindexActionsPerTransaction.get(transactionId).size();
+			if (actionOrder % LOG_EVERY == 0 && actionOrder / LOG_EVERY > 0)
 			{
-				LOG.debug("register(entityFullName: [{}], cudType [{}], dataType: [{}], entityId: [{}])",
-						entityFullName, cudType, dataType, entityId);
-				final int actionOrder = reindexActionsPerTransaction.get(transactionId).size();
-				if (actionOrder % LOG_EVERY == 0 && actionOrder / LOG_EVERY > 0)
-				{
-					LOG.warn(
-							"Transaction {} has caused {} ReindexActions to be created. Consider streaming your data manipulations.",
-							transactionId, actionOrder);
-				}
-				ReindexAction reindexAction = reindexActionFactory.create()
-						.setReindexActionGroup(reindexActionGroupFactory.create(transactionId))
-						.setEntityFullName(entityFullName).setCudType(cudType).setDataType(dataType)
-						.setEntityId(entityId).setActionOrder(actionOrder).setReindexStatus(PENDING);
-				reindexActionsPerTransaction.put(transactionId, reindexAction);
+				LOG.warn(
+						"Transaction {} has caused {} ReindexActions to be created. Consider streaming your data manipulations.",
+						transactionId, actionOrder);
 			}
-			else
-			{
-				LOG.warn("Transaction id is unknown");
-			}
+			ReindexAction reindexAction = reindexActionFactory.create()
+					.setReindexActionGroup(reindexActionGroupFactory.create(transactionId))
+					.setEntityFullName(entityFullName).setCudType(cudType).setDataType(dataType).setEntityId(entityId)
+					.setActionOrder(actionOrder).setReindexStatus(PENDING);
+			reindexActionsPerTransaction.put(transactionId, reindexAction);
 		}
+		else
+		{
+			LOG.warn("Transaction id is unknown");
+		}
+		//		}
 	}
 
 	/**
@@ -112,7 +116,8 @@ public class ReindexActionRegisterService
 	@RunAsSystem
 	public void storeReindexActions(String transactionId)
 	{
-		Collection<Entity> entities = reindexActionsPerTransaction.get(transactionId);
+		Collection<ReindexAction> entities = reindexActionsPerTransaction.get(transactionId);
+		//TODO: Filter out the excluded entities
 		if (!entities.isEmpty())
 		{
 			LOG.debug("Store reindex actions for transaction {}", transactionId);
@@ -134,4 +139,42 @@ public class ReindexActionRegisterService
 		return !reindexActionsPerTransaction.removeAll(transactionId).isEmpty();
 	}
 
+	private Collection<ReindexAction> getReindexActionsForCurrentTransaction()
+	{
+		String transactionId = (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);
+		return Optional.of(reindexActionsPerTransaction.get(transactionId)).orElse(emptyList());
+	}
+
+	@Override
+	public boolean isEntityDirty(EntityKey entityKey)
+	{
+		return getReindexActionsForCurrentTransaction().stream().anyMatch(
+				reindexAction -> reindexAction.getEntityId() != null && entityKey
+						.equals(EntityKey.create(reindexAction.getEntityFullName(), reindexAction.getEntityId())));
+	}
+
+	@Override
+	public boolean isRepositoryDirty(String entityName)
+	{
+		return getReindexActionsForCurrentTransaction().stream().anyMatch(
+				reindexAction -> reindexAction.getEntityId() == null && reindexAction.getEntityFullName()
+						.equals(entityName));
+	}
+
+	@Override
+	public Set<EntityKey> getDirtyEntities()
+	{
+		return getReindexActionsForCurrentTransaction().stream()
+				.filter(reindexAction -> reindexAction.getEntityId() != null)
+				.map(reindexAction -> EntityKey.create(reindexAction.getEntityFullName(), reindexAction.getEntityId()))
+				.collect(toSet());
+	}
+
+	@Override
+	public Set<String> getDirtyRepositories()
+	{
+		return getReindexActionsForCurrentTransaction().stream()
+				.filter(reindexAction -> reindexAction.getEntityId() == null).map(ReindexAction::getEntityFullName)
+				.collect(toSet());
+	}
 }

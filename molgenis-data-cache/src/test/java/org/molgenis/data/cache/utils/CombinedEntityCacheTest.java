@@ -3,6 +3,7 @@ package org.molgenis.data.cache.utils;
 import com.google.common.cache.Cache;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityKey;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;

@@ -1,13 +1,17 @@
 package org.molgenis.data.cache.l2;
 
-import com.google.common.collect.Iterators;
+import com.google.common.collect.*;
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.transaction.TransactionInformation;
+import org.molgenis.data.EntityKey;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Iterators.partition;
@@ -16,11 +20,15 @@ import static java.util.Objects.requireNonNull;
 import static java.util.Spliterator.ORDERED;
 import static java.util.Spliterator.SORTED;
 import static java.util.Spliterators.spliteratorUnknownSize;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 
 /**
- * Adds, removes and retrieves entities from the {@link L2Cache} when a {@link Repository} is {@link RepositoryCapability#CACHEABLE}.
+ * Adds, removes and retrieves entities from the {@link L2Cache} when a {@link Repository} is
+ * {@link RepositoryCapability#CACHEABLE}.
+ * <p>
  * Delegates to the underlying repository when an action is not supported by the cache or when the cache doesn't contain
  * the needed entity.
  */
@@ -34,11 +42,15 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator
 
 	private final Repository<Entity> decoratedRepository;
 
-	public L2CacheRepositoryDecorator(Repository<Entity> decoratedRepository, L2Cache l2Cache)
+	private final TransactionInformation transactionInformation;
+
+	public L2CacheRepositoryDecorator(Repository<Entity> decoratedRepository, L2Cache l2Cache,
+			TransactionInformation transactionInformation)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
 		this.l2Cache = requireNonNull(l2Cache);
 		this.cacheable = decoratedRepository.getCapabilities().containsAll(newArrayList(CACHEABLE));
+		this.transactionInformation = transactionInformation;
 	}
 
 	@Override
@@ -47,36 +59,67 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator
 		return decoratedRepository;
 	}
 
+	/**
+	 * Retrieves a single entity by id.
+	 *
+	 * @param id the entity's ID value
+	 * @return the retrieved Entity, or null if not present.
+	 */
 	@Override
 	public Entity findOneById(Object id)
 	{
-		if (!cacheable) //TODO and entity id not touched in current transaction
+		if (cacheable && !transactionInformation.isRepositoryDirty(getName())
+				&& !transactionInformation.isEntityDirty(EntityKey.create(getEntityMetaData(), id)))
 		{
-			return delegate().findOneById(id);
+			return l2Cache.get(delegate(), id);
 		}
-		return l2Cache.get(delegate(), id);
+		return delegate().findOneById(id);
 	}
 
+	/**
+	 * Retrieves multiple entities by id.
+	 * <p>
+	 * If the repository is cacheable and the current transaction hasn't completely dirtied it, will split the stream
+	 * into batches and load the batches through {@link #findAllBatch(List)}.
+	 * <p>
+	 * Otherwise, will delegate this call to the decorated repository.
+	 *
+	 * @param ids {@link Stream} of ids to retrieve
+	 * @return {@link Stream} of retrieved {@link Entity}s, missing ones excluded
+	 */
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
-		if (cacheable) //TODO split on entities touched and untouched by current transaction
+		if (cacheable && !transactionInformation.isRepositoryDirty(getName()))
 		{
 			Iterator<List<Object>> idBatches = partition(ids.iterator(), ID_BATCH_SIZE);
 			Iterator<List<Entity>> entityBatches = Iterators.transform(idBatches, this::findAllBatch);
 			return stream(spliteratorUnknownSize(entityBatches, SORTED | ORDERED), false).flatMap(List::stream);
 		}
-		return decoratedRepository.findAll(ids);
+		return delegate().findAll(ids);
 	}
 
 	/**
-	 * Retrieves a batch of Entity IDs from the L2Cache or underlying repository.
+	 * Retrieves a batch of Entity IDs.
+	 * <p>
+	 * If currently in transaction, splits the ids into those that have been dirtied in the current transaction
+	 * and those that have been left untouched. The untouched ids are loaded through the cache, the dirtied ids
+	 * are loaded from the decorated repository directly.
 	 *
 	 * @param ids list of entity IDs to retrieve
 	 * @return List of {@link Entity}s, missing ones excluded.
 	 */
 	private List<Entity> findAllBatch(List<Object> ids)
 	{
-		return l2Cache.getBatch(delegate(), ids);
+		String entityName = getEntityMetaData().getName();
+		Multimap<Boolean, Object> partitionedIds = Multimaps
+				.index(ids, id -> transactionInformation.isEntityDirty(EntityKey.create(entityName, id)));
+		Collection<Object> cleanIds = partitionedIds.get(false);
+		Collection<Object> dirtyIds = partitionedIds.get(true);
+
+		Map<Object, Entity> result = Maps.uniqueIndex(l2Cache.getBatch(delegate(), cleanIds), Entity::getIdValue);
+		result.putAll(delegate().findAll(dirtyIds.stream()).collect(toMap(Entity::getIdValue, e -> e)));
+
+		return ids.stream().filter(result::containsKey).map(result::get).collect(toList());
 	}
 }

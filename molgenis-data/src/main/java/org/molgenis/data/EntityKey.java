@@ -1,7 +1,6 @@
-package org.molgenis.data.cache.utils;
+package org.molgenis.data;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 /**

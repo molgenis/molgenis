@@ -99,7 +99,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		Repository<Entity> decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
 
 		// 11. Query the L2 cache before querying the database
-		decoratedRepository = new L2CacheRepositoryDecorator(decoratedRepository, l2Cache);
+		decoratedRepository = new L2CacheRepositoryDecorator(decoratedRepository, l2Cache, reindexActionRegisterService);
 
 		// 10. Query the L1 cache before querying the database
 		decoratedRepository = new L1CacheRepositoryDecorator(decoratedRepository, l1Cache);

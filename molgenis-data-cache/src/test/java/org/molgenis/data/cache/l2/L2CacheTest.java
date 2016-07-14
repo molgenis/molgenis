@@ -6,6 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
@@ -22,14 +23,17 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
-import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
 @ContextConfiguration(classes = L2CacheTest.Config.class)
@@ -48,6 +52,8 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 
 	@Mock
 	private Repository<Entity> repository;
+	@Mock
+	private TransactionInformation transactionInformation;
 	private List<Entity> testEntities;
 	private EntityMetaData emd;
 
@@ -72,11 +78,11 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		reset(repository);
+		reset(repository,transactionInformation);
 		when(repository.getEntityMetaData()).thenReturn(emd);
 		when(repository.getName()).thenReturn(emd.getName());
 
-		l2Cache = new L2Cache(entityHydration);
+		l2Cache = new L2Cache(entityHydration, transactionInformation);
 	}
 
 	@Test
@@ -108,6 +114,16 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 		when(repository.findAll(any(Stream.class)))
 				.thenThrow(new MolgenisDataException("Table is missing for entity TestEntity"));
 		l2Cache.getBatch(repository, newArrayList("1", "2"));
+	}
+
+	@Test
+	public void testFindAll()
+	{
+		when(repository.findAll(any(Stream.class))).thenReturn(testEntities.stream());
+		List<Entity> result = l2Cache.getBatch(repository, newArrayList("1", "2", "3", "4"));
+		Map<Object, Entity> retrievedEntities = result.stream().collect(toMap(Entity::getIdValue, e -> e));
+		assertEquals(retrievedEntities.size(), 4);
+		assertTrue(EntityUtils.equals(retrievedEntities.get("1"), testEntities.get(1)));
 	}
 
 	@Configuration
