@@ -4,9 +4,9 @@ import com.google.common.collect.*;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.Range;
-import org.molgenis.data.i18n.I18nStringMetaData;
 import org.molgenis.data.i18n.I18nUtils;
-import org.molgenis.data.i18n.LanguageMetaData;
+import org.molgenis.data.i18n.model.I18nStringMetaData;
+import org.molgenis.data.i18n.model.LanguageMetaData;
 import org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState;
 import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.meta.SystemEntityMetaData;
@@ -90,13 +90,15 @@ public class EmxMetaDataParser implements MetaDataParser
 	private final DataService dataService;
 	private final PackageFactory packageFactory;
 	private final AttributeMetaDataFactory attrMetaFactory;
+	private final EntityMetaDataFactory entityMetaDataFactory;
 
 	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory,
-			AttributeMetaDataFactory attrMetaFactory)
+			AttributeMetaDataFactory attrMetaFactory, EntityMetaDataFactory entityMetaDataFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.packageFactory = requireNonNull(packageFactory);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
+		this.entityMetaDataFactory = entityMetaDataFactory;
 	}
 
 	/**
@@ -140,7 +142,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 */
 	private IntermediateParseResults parseTagsSheet(Repository<Entity> tagRepository)
 	{
-		IntermediateParseResults result = new IntermediateParseResults();
+		IntermediateParseResults result = new IntermediateParseResults(entityMetaDataFactory);
 		if (tagRepository != null)
 		{
 			for (Entity tag : tagRepository)
@@ -622,7 +624,11 @@ public class EmxMetaDataParser implements MetaDataParser
 					}
 				}
 
-				if (entity.getBoolean(ABSTRACT) != null) md.setAbstract(entity.getBoolean(ABSTRACT));
+				String abstractStr = entity.getString(ABSTRACT);
+				if (abstractStr != null)
+				{
+					md.setAbstract(parseBoolean(abstractStr, i, ABSTRACT));
+				}
 				List<String> tagIds = DataConverter.toList(entity.get(TAGS));
 
 				String extendsEntityName = entity.getString(EXTENDS);
@@ -991,7 +997,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			if (EMX_PACKAGES.equals(sheet))
 			{
-				IntermediateParseResults parseResult = new IntermediateParseResults();
+				IntermediateParseResults parseResult = new IntermediateParseResults(entityMetaDataFactory);
 				parsePackagesSheet(source.getRepository(sheet), parseResult);
 				for (String packageName : parseResult.getPackages().keySet())
 				{

@@ -1,28 +1,21 @@
 package org.molgenis.data.importer;
 
-import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
+import com.google.common.collect.*;
+import org.molgenis.data.Entity;
+import org.molgenis.data.i18n.model.I18nStringMetaData;
+import org.molgenis.data.i18n.model.LanguageMetaData;
+import org.molgenis.data.importer.EmxMetaDataParser.EmxAttribute;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.semantic.LabeledResource;
+import org.molgenis.data.semantic.SemanticTag;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.molgenis.data.Entity;
-import org.molgenis.data.i18n.I18nStringMetaData;
-import org.molgenis.data.i18n.LanguageMetaData;
-import org.molgenis.data.importer.EmxMetaDataParser.EmxAttribute;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
-import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.semantic.LabeledResource;
-import org.molgenis.data.semantic.SemanticTag;
-
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.SetMultimap;
 
 /**
  * Mutable bean to store intermediate parse results. Uses lookup tables to map simple names to the parsed objects. Is
@@ -58,8 +51,9 @@ public final class IntermediateParseResults
 	 * Contains all i18nString entities from the i18nstrings sheet
 	 */
 	private final Map<String, Entity> i18nStrings;
+	private final EntityMetaDataFactory entityMetaDataFactory;
 
-	public IntermediateParseResults()
+	public IntermediateParseResults(EntityMetaDataFactory entityMetaDataFactory)
 	{
 		this.tags = new LinkedHashMap<>();
 		this.entities = new LinkedHashMap<>();
@@ -68,6 +62,7 @@ public final class IntermediateParseResults
 		this.entityTags = new ArrayList<>();
 		this.languages = new LinkedHashMap<>();
 		this.i18nStrings = new LinkedHashMap<>();
+		this.entityMetaDataFactory = entityMetaDataFactory;
 	}
 
 	public void addTagEntity(String identifier, Entity tagEntity)
@@ -112,8 +107,7 @@ public final class IntermediateParseResults
 			}
 		}
 
-		EntityMetaData emd = new EntityMetaData(simpleName,
-				getApplicationContext().getBean(EntityMetaDataMetaData.class));
+		EntityMetaData emd = entityMetaDataFactory.create().setName(simpleName);
 		entities.put(name, emd);
 		return emd;
 	}

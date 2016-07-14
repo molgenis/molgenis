@@ -1,28 +1,13 @@
 package org.molgenis.ui;
 
-import static freemarker.template.Configuration.VERSION_2_3_23;
-import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_CSS;
-import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
-import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_IMG;
-import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_JS;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-
-import javax.annotation.PostConstruct;
-
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntityFactoryRegistry;
-import org.molgenis.data.EntityManager;
-import org.molgenis.data.EntityManagerImpl;
+import com.google.common.collect.Maps;
+import freemarker.template.Configuration;
+import freemarker.template.TemplateException;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.framework.ui.MolgenisPluginRegistryImpl;
@@ -44,6 +29,7 @@ import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
@@ -51,6 +37,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.converter.BufferedImageHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.web.multipart.MultipartResolver;
@@ -63,11 +50,17 @@ import org.springframework.web.servlet.handler.MappedInterceptor;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver;
 
-import com.google.common.collect.Maps;
+import javax.annotation.PostConstruct;
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
-import freemarker.template.Configuration;
-import freemarker.template.TemplateException;
+import static freemarker.template.Configuration.VERSION_2_3_23;
+import static org.molgenis.framework.ui.ResourcePathPatterns.*;
 
+@Import(PlatformConfig.class)
 public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 {
 	@Autowired
@@ -115,6 +108,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 		converters.add(gsonHttpMessageConverter);
 		converters.add(new BufferedImageHttpMessageConverter());
 		converters.add(new CsvHttpMessageConverter());
+		converters.add(new ResourceHttpMessageConverter());
 	}
 
 	@Bean
@@ -352,29 +346,5 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 			throw new RuntimeException("Invalid value '" + environment + "' for property 'environment' in " + path
 					+ ", allowed values are [development, production].");
 		}
-	}
-
-	@Bean
-	public DataService dataService()
-	{
-		return new DataServiceImpl();
-	}
-
-	@Bean
-	public EntityManager entityManager()
-	{
-		return new EntityManagerImpl(dataService(), entityFactoryRegistry());
-	}
-
-	@Bean
-	public RepositoryDecoratorRegistry repositoryDecoratorRegistry()
-	{
-		return new RepositoryDecoratorRegistry();
-	}
-
-	@Bean
-	public EntityFactoryRegistry entityFactoryRegistry()
-	{
-		return new EntityFactoryRegistry();
 	}
 }

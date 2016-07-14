@@ -8,7 +8,8 @@ import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.test.data.EntitySelfXrefTestHarness;
 import org.molgenis.test.data.EntityTestHarness;
 import org.molgenis.test.data.TestEntity;
 import org.slf4j.Logger;
@@ -18,6 +19,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -43,21 +45,23 @@ import static org.molgenis.data.Sort.Direction.DESC;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
-public class PlatformIT extends AbstractMolgenisSpringTest
+public class PlatformIT extends AbstractTestNGSpringContextTests
 {
 	private final Logger LOG = LoggerFactory.getLogger(PlatformIT.class);
 
-	private static final String ENTITY_NAME = "test_TestEntity";
-	private static final String REF_ENTITY_NAME = "test_TestRefEntity";
 	private EntityMetaData entityMetaData;
 	private EntityMetaData refEntityMetaData;
+	private EntityMetaData selfXrefEntityMetaData;
 
 	@Autowired
 	private ReindexService reindexService;
 	@Autowired
 	private EntityTestHarness testHarness;
+	@Autowired
+	private EntitySelfXrefTestHarness entitySelfXrefTestHarness;
 	@Autowired
 	private DataService dataService;
 	@Autowired
@@ -129,36 +133,52 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	{
 		refEntityMetaData = testHarness.createDynamicRefEntityMetaData();
 		entityMetaData = testHarness.createDynamicTestEntityMetaData();
-		metaDataService.addEntityMeta(refEntityMetaData);
-		metaDataService.addEntityMeta(entityMetaData);
+
+		// Create a self refer entity
+		selfXrefEntityMetaData = entitySelfXrefTestHarness.createDynamicEntityMetaData();
+		selfXrefEntityMetaData.getAttribute(ATTR_XREF).setRefEntity(selfXrefEntityMetaData);
+
+		RunAsSystemProxy.runAsSystem(() -> {
+			metaDataService.addEntityMeta(refEntityMetaData);
+			metaDataService.addEntityMeta(entityMetaData);
+			metaDataService.addEntityMeta(selfXrefEntityMetaData);
+		});
 		this.waitForWorkToBeFinished();
 		setAuthentication();
 	}
 
 	private void setAuthentication()
 	{
-		// Permissions ENTITY_NAME
-		String writeTestEntity = "ROLE_ENTITY_WRITE_" + ENTITY_NAME.toUpperCase();
-		String readTestEntity = "ROLE_ENTITY_READ_" + ENTITY_NAME.toUpperCase();
-		String countTestEntity = "ROLE_ENTITY_COUNT_" + ENTITY_NAME.toUpperCase();
+		// Permissions entityMetaData.getName()
+		String writeTestEntity = "ROLE_ENTITY_WRITE_" + entityMetaData.getName().toUpperCase();
+		String readTestEntity = "ROLE_ENTITY_READ_" + entityMetaData.getName().toUpperCase();
+		String countTestEntity = "ROLE_ENTITY_COUNT_" + entityMetaData.getName().toUpperCase();
 
-		// Permissions REF_ENTITY_NAME
-		String readTestRefEntity = "ROLE_ENTITY_READ_" + REF_ENTITY_NAME.toUpperCase();
-		String countTestRefEntity = "ROLE_ENTITY_COUNT_" + REF_ENTITY_NAME.toUpperCase();
+		// Permissions refEntityMetaData.getName()
+		String readTestRefEntity = "ROLE_ENTITY_READ_" + refEntityMetaData.getName().toUpperCase();
+		String countTestRefEntity = "ROLE_ENTITY_COUNT_" + refEntityMetaData.getName().toUpperCase();
+
+		// Permissions selfXrefEntityMetaData.getName()
+		String writeSelfXrefEntity = "ROLE_ENTITY_WRITE_" + selfXrefEntityMetaData.getName().toUpperCase();
+		String readSelfXrefEntity = "ROLE_ENTITY_READ_" + selfXrefEntityMetaData.getName().toUpperCase();
+		String countSelfXrefEntity = "ROLE_ENTITY_COUNT_" + selfXrefEntityMetaData.getName().toUpperCase();
 
 		SecurityContextHolder.getContext().setAuthentication(
 				new TestingAuthenticationToken("user", "user", writeTestEntity, readTestEntity, readTestRefEntity,
-						countTestEntity, countTestRefEntity));
+						countTestEntity, countTestRefEntity, writeSelfXrefEntity, readSelfXrefEntity,
+						countSelfXrefEntity, "ROLE_ENTITY_READ_SYS_MD_ENTITIES",
+						"ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES", "ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
 	}
 
 	@AfterMethod
 	public void afterMethod()
 	{
 		runAsSystem(() -> {
-			dataService.deleteAll(ENTITY_NAME);
-			dataService.deleteAll(REF_ENTITY_NAME);
+			dataService.deleteAll(entityMetaData.getName());
+			dataService.deleteAll(refEntityMetaData.getName());
+			dataService.deleteAll(refEntityMetaData.getName());
 		});
-		waitForIndexToBeStable(ENTITY_NAME);
+		waitForIndexToBeStable(entityMetaData.getName());
 	}
 
 	@Test
@@ -168,10 +188,10 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 		List<Entity> entities = testHarness.createTestEntities(entityMetaData, 2, refEntities)
 				.collect(Collectors.toList());
 		runAsSystem(() -> {
-			dataService.add(REF_ENTITY_NAME, refEntities.stream());
-			dataService.add(ENTITY_NAME, entities.stream());
+			dataService.add(refEntityMetaData.getName(), refEntities.stream());
+			dataService.add(entityMetaData.getName(), entities.stream());
+			waitForIndexToBeStable(entityMetaData.getName());
 		});
-		waitForIndexToBeStable(ENTITY_NAME);
 
 		AtomicInteger updateCalled = new AtomicInteger(0);
 		EntityListener listener = new EntityListener()
@@ -192,20 +212,20 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 
 		try
 		{
-			dataService.addEntityListener(ENTITY_NAME, listener);
-			dataService.update(ENTITY_NAME, entities.stream());
+			dataService.addEntityListener(entityMetaData.getName(), listener);
+			dataService.update(entityMetaData.getName(), entities.stream());
 			assertEquals(updateCalled.get(), 1);
-			waitForIndexToBeStable(ENTITY_NAME);
-			assertPresent(entities);
+			waitForIndexToBeStable(entityMetaData.getName());
+			assertPresent(entityMetaData, entities);
 		}
 		finally
 		{
-			dataService.removeEntityListener(ENTITY_NAME, listener);
+			dataService.removeEntityListener(entityMetaData.getName(), listener);
 			updateCalled.set(0);
-			dataService.update(ENTITY_NAME, entities.stream());
+			dataService.update(entityMetaData.getName(), entities.stream());
 			assertEquals(updateCalled.get(), 0);
-			waitForIndexToBeStable(ENTITY_NAME);
-			assertPresent(entities);
+			waitForIndexToBeStable(entityMetaData.getName());
+			assertPresent(entityMetaData, entities);
 		}
 	}
 
@@ -214,34 +234,34 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	{
 		List<Entity> entities = create(2).collect(Collectors.toList());
 		assertEquals(searchService.count(entityMetaData), 0);
-		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME);
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 2);
+		dataService.add(entityMetaData.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaData.getName());
+		assertEquals(dataService.count(entityMetaData.getName(), new QueryImpl<>()), 2);
 		assertEquals(searchService.count(entityMetaData), 2);
-		assertPresent(entities);
+		assertPresent(entityMetaData, entities);
 	}
 
 	@Test
 	public void testCount()
 	{
 		List<Entity> entities = create(2).collect(Collectors.toList());
-		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME);
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 2);
+		dataService.add(entityMetaData.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaData.getName());
+		assertEquals(dataService.count(entityMetaData.getName(), new QueryImpl<>()), 2);
 		assertEquals(searchService.count(entityMetaData), 2);
-		assertPresent(entities);
+		assertPresent(entityMetaData, entities);
 	}
 
 	@Test
 	public void testDelete()
 	{
 		Entity entity = create(1).findFirst().get();
-		dataService.add(ENTITY_NAME, entity);
-		waitForIndexToBeStable(ENTITY_NAME);
-		assertPresent(entity);
+		dataService.add(entityMetaData.getName(), entity);
+		waitForIndexToBeStable(entityMetaData.getName());
+		assertPresent(entityMetaData, entity);
 
-		dataService.delete(ENTITY_NAME, entity);
-		waitForIndexToBeStable(ENTITY_NAME);
+		dataService.delete(entityMetaData.getName(), entity);
+		waitForIndexToBeStable(entityMetaData.getName());
 		assertNotPresent(entity);
 	}
 
@@ -249,12 +269,12 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	public void testDeleteById()
 	{
 		Entity entity = create(1).findFirst().get();
-		dataService.add(ENTITY_NAME, entity);
-		waitForIndexToBeStable(ENTITY_NAME);
-		assertPresent(entity);
+		dataService.add(entityMetaData.getName(), entity);
+		waitForIndexToBeStable(entityMetaData.getName());
+		assertPresent(entityMetaData, entity);
 
-		dataService.deleteById(ENTITY_NAME, entity.getIdValue());
-		waitForIndexToBeStable(ENTITY_NAME);
+		dataService.deleteById(entityMetaData.getName(), entity.getIdValue());
+		waitForIndexToBeStable(entityMetaData.getName());
 		assertNotPresent(entity);
 	}
 
@@ -262,32 +282,32 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	public void testDeleteStream()
 	{
 		List<Entity> entities = create(2).collect(Collectors.toList());
-		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME);
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), entities.size());
+		dataService.add(entityMetaData.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaData.getName());
+		assertEquals(dataService.count(entityMetaData.getName(), new QueryImpl<>()), entities.size());
 
-		dataService.delete(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME);
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 0);
+		dataService.delete(entityMetaData.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaData.getName());
+		assertEquals(dataService.count(entityMetaData.getName(), new QueryImpl<>()), 0);
 	}
 
 	@Test
 	public void testDeleteAll()
 	{
 		List<Entity> entities = create(5).collect(Collectors.toList());
-		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME);
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), entities.size());
+		dataService.add(entityMetaData.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaData.getName());
+		assertEquals(dataService.count(entityMetaData.getName(), new QueryImpl<>()), entities.size());
 
-		dataService.deleteAll(ENTITY_NAME);
-		waitForIndexToBeStable(ENTITY_NAME);
-		assertEquals(dataService.count(ENTITY_NAME, new QueryImpl<>()), 0);
+		dataService.deleteAll(entityMetaData.getName());
+		waitForIndexToBeStable(entityMetaData.getName());
+		assertEquals(dataService.count(entityMetaData.getName(), new QueryImpl<>()), 0);
 	}
 
 	@Test
 	public void testFindAllEmpty()
 	{
-		Stream<Entity> retrieved = dataService.findAll(ENTITY_NAME);
+		Stream<Entity> retrieved = dataService.findAll(entityMetaData.getName());
 		assertEquals(retrieved.count(), 0);
 	}
 
@@ -295,9 +315,9 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	public void testFindAll()
 	{
 		List<Entity> entities = create(5).collect(Collectors.toList());
-		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME);
-		Stream<Entity> retrieved = dataService.findAll(ENTITY_NAME);
+		dataService.add(entityMetaData.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaData.getName());
+		Stream<Entity> retrieved = dataService.findAll(entityMetaData.getName());
 		assertEquals(retrieved.count(), entities.size());
 	}
 
@@ -305,9 +325,9 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	public void testFindAllTyped()
 	{
 		List<Entity> entities = create(1).collect(Collectors.toList());
-		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME);
-		Supplier<Stream<TestEntity>> retrieved = () -> dataService.findAll(ENTITY_NAME, TestEntity.class);
+		dataService.add(entityMetaData.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaData.getName());
+		Supplier<Stream<TestEntity>> retrieved = () -> dataService.findAll(entityMetaData.getName(), TestEntity.class);
 		assertEquals(retrieved.get().count(), 1);
 		assertEquals(retrieved.get().iterator().next().getId(), entities.get(0).getIdValue());
 	}
@@ -316,10 +336,10 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	public void testFindAllByIds()
 	{
 		List<Entity> entities = create(5).collect(Collectors.toList());
-		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME);
+		dataService.add(entityMetaData.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaData.getName());
 		Stream<Object> ids = Stream.concat(entities.stream().map(Entity::getIdValue), of("bogus"));
-		Stream<Entity> retrieved = dataService.findAll(ENTITY_NAME, ids);
+		Stream<Entity> retrieved = dataService.findAll(entityMetaData.getName(), ids);
 		assertEquals(retrieved.count(), entities.size());
 	}
 
@@ -327,12 +347,11 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	public void testFindAllByIdsTyped()
 	{
 		List<Entity> entities = create(5).collect(Collectors.toList());
-		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME);
+		dataService.add(entityMetaData.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaData.getName());
 
-		Supplier<Stream<TestEntity>> retrieved = () -> dataService
-				.findAll(ENTITY_NAME, Stream.concat(entities.stream().map(Entity::getIdValue), of("bogus")),
-						TestEntity.class);
+		Supplier<Stream<TestEntity>> retrieved = () -> dataService.findAll(entityMetaData.getName(),
+				Stream.concat(entities.stream().map(Entity::getIdValue), of("bogus")), TestEntity.class);
 		assertEquals(retrieved.get().count(), entities.size());
 		assertEquals(retrieved.get().iterator().next().getId(), entities.get(0).getIdValue());
 	}
@@ -341,10 +360,10 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	public void testFindAllStreamFetch()
 	{
 		List<Entity> entities = create(5).collect(Collectors.toList());
-		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME);
+		dataService.add(entityMetaData.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaData.getName());
 		Stream<Object> ids = concat(entities.stream().map(Entity::getIdValue), of("bogus"));
-		Stream<Entity> retrieved = dataService.findAll(ENTITY_NAME, ids, new Fetch().field(ATTR_ID));
+		Stream<Entity> retrieved = dataService.findAll(entityMetaData.getName(), ids, new Fetch().field(ATTR_ID));
 		assertEquals(retrieved.count(), entities.size());
 	}
 
@@ -352,10 +371,10 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	public void testFindQuery()
 	{
 		List<Entity> entities = create(5).collect(Collectors.toList());
-		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME);
+		dataService.add(entityMetaData.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaData.getName());
 		Supplier<Stream<Entity>> found = () -> dataService
-				.findAll(ENTITY_NAME, new QueryImpl<>().eq(ATTR_ID, entities.get(0).getIdValue()));
+				.findAll(entityMetaData.getName(), new QueryImpl<>().eq(ATTR_ID, entities.get(0).getIdValue()));
 		assertEquals(found.get().count(), 1);
 		assertEquals(found.get().findFirst().get().getIdValue(), entities.get(0).getIdValue());
 	}
@@ -367,13 +386,13 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 		List<Entity> testEntities = testHarness.createTestEntities(entityMetaData, 10, testRefEntities)
 				.collect(Collectors.toList());
 		runAsSystem(() -> {
-			dataService.add(REF_ENTITY_NAME, testRefEntities.stream());
-			dataService.add(ENTITY_NAME, testEntities.stream());
+			dataService.add(refEntityMetaData.getName(), testRefEntities.stream());
+			dataService.add(entityMetaData.getName(), testEntities.stream());
 		});
-		waitForIndexToBeStable(REF_ENTITY_NAME);
-		waitForIndexToBeStable(ENTITY_NAME);
-		Supplier<Stream<Entity>> found = () -> dataService
-				.findAll(ENTITY_NAME, new QueryImpl<>().pageSize(2).offset(2).sort(new Sort(ATTR_ID, DESC)));
+		waitForIndexToBeStable(refEntityMetaData.getName());
+		waitForIndexToBeStable(entityMetaData.getName());
+		Supplier<Stream<Entity>> found = () -> dataService.findAll(entityMetaData.getName(),
+				new QueryImpl<>().pageSize(2).offset(2).sort(new Sort(ATTR_ID, DESC)));
 		assertEquals(found.get().count(), 2);
 		assertEquals(found.get().collect(toList()), Arrays.asList(testEntities.get(7), testEntities.get(6)));
 	}
@@ -382,11 +401,10 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	public void testFindQueryTyped()
 	{
 		List<Entity> entities = create(5).collect(Collectors.toList());
-		dataService.add(ENTITY_NAME, entities.stream());
-		waitForIndexToBeStable(ENTITY_NAME);
-		Supplier<Stream<TestEntity>> found = () -> dataService
-				.findAll(ENTITY_NAME, new QueryImpl<TestEntity>().eq(ATTR_ID, entities.get(0).getIdValue()),
-						TestEntity.class);
+		dataService.add(entityMetaData.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaData.getName());
+		Supplier<Stream<TestEntity>> found = () -> dataService.findAll(entityMetaData.getName(),
+				new QueryImpl<TestEntity>().eq(ATTR_ID, entities.get(0).getIdValue()), TestEntity.class);
 		assertEquals(found.get().count(), 1);
 		assertEquals(found.get().findFirst().get().getId(), entities.get(0).getIdValue());
 	}
@@ -395,18 +413,19 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	public void testFindOne()
 	{
 		Entity entity = create(1).findFirst().get();
-		dataService.add(ENTITY_NAME, Stream.of(entity));
-		waitForIndexToBeStable(ENTITY_NAME);
-		assertNotNull(dataService.findOneById(ENTITY_NAME, entity.getIdValue()));
+		dataService.add(entityMetaData.getName(), Stream.of(entity));
+		waitForIndexToBeStable(entityMetaData.getName());
+		assertNotNull(dataService.findOneById(entityMetaData.getName(), entity.getIdValue()));
 	}
 
 	@Test
 	public void testFindOneTyped()
 	{
 		Entity entity = create(1).findFirst().get();
-		dataService.add(ENTITY_NAME, Stream.of(entity));
-		waitForIndexToBeStable(ENTITY_NAME);
-		TestEntity testEntity = dataService.findOneById(ENTITY_NAME, entity.getIdValue(), TestEntity.class);
+		dataService.add(entityMetaData.getName(), Stream.of(entity));
+		waitForIndexToBeStable(entityMetaData.getName());
+		TestEntity testEntity = dataService
+				.findOneById(entityMetaData.getName(), entity.getIdValue(), TestEntity.class);
 		assertNotNull(testEntity);
 		assertEquals(testEntity.getId(), entity.getIdValue());
 	}
@@ -415,19 +434,21 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	public void testFindOneFetch()
 	{
 		Entity entity = create(1).findFirst().get();
-		dataService.add(ENTITY_NAME, Stream.of(entity));
-		waitForIndexToBeStable(ENTITY_NAME);
-		assertNotNull(dataService.findOneById(ENTITY_NAME, entity.getIdValue(), new Fetch().field(ATTR_ID)));
+		dataService.add(entityMetaData.getName(), Stream.of(entity));
+		waitForIndexToBeStable(entityMetaData.getName());
+		assertNotNull(
+				dataService.findOneById(entityMetaData.getName(), entity.getIdValue(), new Fetch().field(ATTR_ID)));
 	}
 
 	@Test
 	public void testFindOneFetchTyped()
 	{
 		Entity entity = create(1).findFirst().get();
-		dataService.add(ENTITY_NAME, Stream.of(entity));
-		waitForIndexToBeStable(ENTITY_NAME);
+		dataService.add(entityMetaData.getName(), Stream.of(entity));
+		waitForIndexToBeStable(entityMetaData.getName());
 		TestEntity testEntity = dataService
-				.findOneById(ENTITY_NAME, entity.getIdValue(), new Fetch().field(ATTR_ID), TestEntity.class);
+				.findOneById(entityMetaData.getName(), entity.getIdValue(), new Fetch().field(ATTR_ID),
+						TestEntity.class);
 		assertNotNull(testEntity);
 		assertEquals(testEntity.getId(), entity.getIdValue());
 	}
@@ -436,9 +457,9 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	public void testFindOneQuery()
 	{
 		Entity entity = create(1).findFirst().get();
-		dataService.add(ENTITY_NAME, create(1));
-		waitForIndexToBeStable(ENTITY_NAME);
-		entity = dataService.findOne(ENTITY_NAME, new QueryImpl<>().eq(ATTR_ID, entity.getIdValue()));
+		dataService.add(entityMetaData.getName(), entity);
+		waitForIndexToBeStable(entityMetaData.getName());
+		entity = dataService.findOne(entityMetaData.getName(), new QueryImpl<>().eq(ATTR_ID, entity.getIdValue()));
 		assertNotNull(entity);
 	}
 
@@ -446,10 +467,11 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	public void testFindOneQueryTyped()
 	{
 		Entity entity = create(1).findFirst().get();
-		dataService.add(ENTITY_NAME, Stream.of(entity));
-		waitForIndexToBeStable(ENTITY_NAME);
+		dataService.add(entityMetaData.getName(), entity);
+		waitForIndexToBeStable(entityMetaData.getName());
 		TestEntity testEntity = dataService
-				.findOne(ENTITY_NAME, new QueryImpl<TestEntity>().eq(ATTR_ID, entity.getIdValue()), TestEntity.class);
+				.findOne(entityMetaData.getName(), new QueryImpl<TestEntity>().eq(ATTR_ID, entity.getIdValue()),
+						TestEntity.class);
 		assertNotNull(testEntity);
 		assertEquals(testEntity.getId(), entity.getIdValue());
 	}
@@ -457,7 +479,7 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	@Test
 	public void testGetCapabilities()
 	{
-		Set<RepositoryCapability> capabilities = dataService.getCapabilities(ENTITY_NAME);
+		Set<RepositoryCapability> capabilities = dataService.getCapabilities(entityMetaData.getName());
 		assertNotNull(capabilities);
 		assertTrue(capabilities.containsAll(asList(MANAGABLE, QUERYABLE, WRITABLE, VALIDATE_REFERENCE_CONSTRAINT)));
 	}
@@ -465,7 +487,7 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	@Test
 	public void testGetEntityMetaData()
 	{
-		EntityMetaData emd = dataService.getEntityMetaData(ENTITY_NAME);
+		EntityMetaData emd = dataService.getEntityMetaData(entityMetaData.getName());
 		assertNotNull(emd);
 		assertEquals(emd, entityMetaData);
 	}
@@ -475,7 +497,7 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	{
 		Stream<String> names = dataService.getEntityNames();
 		assertNotNull(names);
-		assertTrue(names.filter(ENTITY_NAME::equals).findFirst().isPresent());
+		assertTrue(names.filter(entityMetaData.getName()::equals).findFirst().isPresent());
 	}
 
 	@Test
@@ -487,9 +509,9 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	@Test()
 	public void testGetKnownRepository()
 	{
-		Repository<Entity> repo = dataService.getRepository(ENTITY_NAME);
+		Repository<Entity> repo = dataService.getRepository(entityMetaData.getName());
 		assertNotNull(repo);
-		assertEquals(repo.getName(), ENTITY_NAME);
+		assertEquals(repo.getName(), entityMetaData.getName());
 	}
 
 	@Test(expectedExceptions = UnknownEntityException.class)
@@ -501,7 +523,7 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	@Test
 	public void testHasRepository()
 	{
-		assertTrue(dataService.hasRepository(ENTITY_NAME));
+		assertTrue(dataService.hasRepository(entityMetaData.getName()));
 		assertFalse(dataService.hasRepository("bogus"));
 	}
 
@@ -509,13 +531,13 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	public void testIterator()
 	{
 		assertNotNull(dataService.iterator());
-		assertTrue(Iterators.contains(dataService.iterator(), dataService.getRepository(ENTITY_NAME)));
+		assertTrue(Iterators.contains(dataService.iterator(), dataService.getRepository(entityMetaData.getName())));
 	}
 
 	@Test
 	public void testQuery()
 	{
-		assertNotNull(dataService.query(ENTITY_NAME));
+		assertNotNull(dataService.query(entityMetaData.getName()));
 		try
 		{
 			dataService.query("bogus");
@@ -531,26 +553,25 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	public void testUpdate()
 	{
 		Entity entity = create(1).findFirst().get();
-		dataService.add(ENTITY_NAME, entity);
-		waitForIndexToBeStable(ENTITY_NAME);
+		dataService.add(entityMetaData.getName(), entity);
+		waitForIndexToBeStable(entityMetaData.getName());
 
-		entity = dataService.findOneById(ENTITY_NAME, entity.getIdValue());
+		entity = dataService.findOneById(entityMetaData.getName(), entity.getIdValue());
 		assertNotNull(entity);
 		assertEquals(entity.get(ATTR_STRING), "string1");
 
 		Query<Entity> q = new QueryImpl<>();
 		q.eq(ATTR_STRING, "qwerty");
-
 		entity.set(ATTR_STRING, "qwerty");
 
 		assertEquals(searchService.count(q, entityMetaData), 0);
-		dataService.update(ENTITY_NAME, entity);
-		waitForIndexToBeStable(ENTITY_NAME);
+		dataService.update(entityMetaData.getName(), entity);
+		waitForIndexToBeStable(entityMetaData.getName());
 		assertEquals(searchService.count(q, entityMetaData), 1);
 
-		assertPresent(entity);
+		assertPresent(entityMetaData, entity);
 
-		entity = dataService.findOneById(ENTITY_NAME, entity.getIdValue());
+		entity = dataService.findOneById(entityMetaData.getName(), entity.getIdValue());
 		assertNotNull(entity.get(ATTR_STRING));
 		assertEquals(entity.get(ATTR_STRING), "qwerty");
 	}
@@ -558,39 +579,39 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	@Test
 	public void testUpdateSingleRefEntityReindexesReferencingEntities()
 	{
-		dataService.add(ENTITY_NAME, create(30));
-		waitForIndexToBeStable(ENTITY_NAME);
+		dataService.add(entityMetaData.getName(), create(30));
+		waitForIndexToBeStable(entityMetaData.getName());
 
-		Entity refEntity4 = dataService.findOneById(REF_ENTITY_NAME, "4");
+		Entity refEntity4 = dataService.findOneById(refEntityMetaData.getName(), "4");
 
 		Query<Entity> q = new QueryImpl<>().search("refstring4");
 
 		assertEquals(searchService.count(q, entityMetaData), 5);
 		refEntity4.set(ATTR_REF_STRING, "qwerty");
-		runAsSystem(() -> dataService.update(REF_ENTITY_NAME, refEntity4));
-		waitForIndexToBeStable(ENTITY_NAME);
+		runAsSystem(() -> dataService.update(refEntityMetaData.getName(), refEntity4));
+		waitForIndexToBeStable(entityMetaData.getName());
 		assertEquals(searchService.count(q, entityMetaData), 0);
 		assertEquals(searchService.count(new QueryImpl<>().search("qwerty"), entityMetaData), 5);
 	}
 
-	@Test
+	@Test(enabled = false) //FIXME: sys_md_attributes spam
 	public void testUpdateSingleRefEntityReindexesLargeAmountOfReferencingEntities()
 	{
-		dataService.add(ENTITY_NAME, create(10000));
-		waitForIndexToBeStable(ENTITY_NAME);
+		dataService.add(entityMetaData.getName(), create(10000));
+		waitForIndexToBeStable(entityMetaData.getName());
 
 		Query<Entity> q = new QueryImpl<>().search("refstring4").or().search("refstring5");
 
 		assertEquals(searchService.count(q, entityMetaData), 3333);
-		Entity refEntity4 = dataService.findOneById(REF_ENTITY_NAME, "4");
+		Entity refEntity4 = dataService.findOneById(refEntityMetaData.getName(), "4");
 		refEntity4.set(ATTR_REF_STRING, "qwerty");
-		runAsSystem(() -> dataService.update(REF_ENTITY_NAME, refEntity4));
+		runAsSystem(() -> dataService.update(refEntityMetaData.getName(), refEntity4));
 
-		Entity refEntity5 = dataService.findOneById(REF_ENTITY_NAME, "5");
+		Entity refEntity5 = dataService.findOneById(refEntityMetaData.getName(), "5");
 		refEntity5.set(ATTR_REF_STRING, "qwerty");
-		runAsSystem(() -> dataService.update(REF_ENTITY_NAME, refEntity5));
+		runAsSystem(() -> dataService.update(refEntityMetaData.getName(), refEntity5));
 
-		waitForIndexToBeStable(ENTITY_NAME);
+		waitForIndexToBeStable(entityMetaData.getName());
 		assertEquals(searchService.count(q, entityMetaData), 0);
 
 		assertEquals(searchService.count(new QueryImpl<>().search("qwerty"), entityMetaData), 3333);
@@ -601,11 +622,11 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	{
 		Entity entity = create(1).findFirst().get();
 
-		dataService.add(ENTITY_NAME, entity);
-		waitForIndexToBeStable(ENTITY_NAME);
-		assertPresent(entity);
+		dataService.add(entityMetaData.getName(), entity);
+		waitForIndexToBeStable(entityMetaData.getName());
+		assertPresent(entityMetaData, entity);
 
-		entity = dataService.findOneById(ENTITY_NAME, entity.getIdValue());
+		entity = dataService.findOneById(entityMetaData.getName(), entity.getIdValue());
 		assertNotNull(entity);
 		assertEquals(entity.get(ATTR_STRING), "string1");
 
@@ -615,13 +636,13 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 
 		assertEquals(searchService.count(q, entityMetaData), 0);
 
-		dataService.update(ENTITY_NAME, of(entity));
-		waitForIndexToBeStable(ENTITY_NAME);
+		dataService.update(entityMetaData.getName(), of(entity));
+		waitForIndexToBeStable(entityMetaData.getName());
 
 		assertEquals(searchService.count(q, entityMetaData), 1);
 
-		assertPresent(entity);
-		entity = dataService.findOneById(ENTITY_NAME, entity.getIdValue());
+		assertPresent(entityMetaData, entity);
+		entity = dataService.findOneById(entityMetaData.getName(), entity.getIdValue());
 		assertNotNull(entity.get(ATTR_STRING));
 		assertEquals(entity.get(ATTR_STRING), "qwerty");
 	}
@@ -629,24 +650,24 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 	private Stream<Entity> create(int count)
 	{
 		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityMetaData, 6);
-		runAsSystem(() -> dataService.add(REF_ENTITY_NAME, refEntities.stream()));
+		runAsSystem(() -> dataService.add(refEntityMetaData.getName(), refEntities.stream()));
 		return testHarness.createTestEntities(entityMetaData, count, refEntities);
 	}
 
-	private void assertPresent(List<Entity> entities)
+	private void assertPresent(EntityMetaData emd, List<Entity> entities)
 	{
-		entities.forEach(this::assertPresent);
+		entities.forEach(e -> assertPresent(emd, e));
 	}
 
-	private void assertPresent(Entity entity)
+	private void assertPresent(EntityMetaData emd, Entity entity)
 	{
 		// Found in PostgreSQL
-		assertNotNull(dataService.findOneById(entityMetaData.getName(), entity.getIdValue()));
+		assertNotNull(dataService.findOneById(emd.getName(), entity.getIdValue()));
 
 		// Found in index Elasticsearch
 		Query<Entity> q = new QueryImpl<>();
-		q.eq(entityMetaData.getIdAttribute().getName(), entity.getIdValue());
-		assertEquals(searchService.count(q, entityMetaData), 1);
+		q.eq(emd.getIdAttribute().getName(), entity.getIdValue());
+		assertEquals(searchService.count(q, emd), 1);
 	}
 
 	private void assertNotPresent(Entity entity)
@@ -658,5 +679,44 @@ public class PlatformIT extends AbstractMolgenisSpringTest
 		Query<Entity> q = new QueryImpl<>();
 		q.eq(entityMetaData.getIdAttribute().getName(), entity.getIdValue());
 		assertEquals(searchService.count(q, entityMetaData), 0);
+	}
+
+	@Test
+	public void testCreateSelfXref()
+	{
+		Entity entitySelfXref = entitySelfXrefTestHarness.createTestEntities(selfXrefEntityMetaData, 1).collect(Collectors.toList()).get(0);
+
+		//Create
+		dataService.add(selfXrefEntityMetaData.getName(), entitySelfXref);
+		waitForIndexToBeStable(selfXrefEntityMetaData.getName());
+		Entity entity = dataService.findOneById(selfXrefEntityMetaData.getName(), entitySelfXref.getIdValue());
+		assertPresent(selfXrefEntityMetaData, entity);
+
+		Query<Entity> q1 = new QueryImpl<>();
+		q1.eq(ATTR_STRING, "attr_string_old");
+		Query<Entity> q2 = new QueryImpl<>();
+		q2.eq(ATTR_STRING, "attr_string_new");
+		entity.set(ATTR_STRING, "attr_string_new");
+
+		// Verify value in elasticsearch before update
+		assertEquals(searchService.count(q1, selfXrefEntityMetaData), 1);
+		assertEquals(searchService.count(q2, selfXrefEntityMetaData), 0);
+
+		// Update
+		dataService.update(selfXrefEntityMetaData.getName(), entity);
+		waitForIndexToBeStable(selfXrefEntityMetaData.getName());
+		assertPresent(selfXrefEntityMetaData, entity);
+
+		// Verify value in elasticsearch after update
+		assertEquals(searchService.count(q2, selfXrefEntityMetaData), 1);
+		assertEquals(searchService.count(q1, selfXrefEntityMetaData), 0);
+
+		// Verify value in PostgreSQL after update
+		entity = dataService.findOneById(selfXrefEntityMetaData.getName(), entity.getIdValue());
+		assertNotNull(entity.get(ATTR_STRING));
+		assertEquals(entity.get(ATTR_STRING), "attr_string_new");
+
+		// Check id are equals
+		assertEquals(entity.getEntity(ATTR_XREF).getIdValue(), entity.getIdValue());
 	}
 }

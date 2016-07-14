@@ -1,20 +1,6 @@
 package org.molgenis.security;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
-import static org.molgenis.data.i18n.LanguageMetaData.LANGUAGE;
-
-import org.molgenis.auth.GroupAuthority;
-import org.molgenis.auth.GroupAuthorityFactory;
-import org.molgenis.auth.MolgenisGroup;
-import org.molgenis.auth.MolgenisGroupFactory;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserFactory;
-import org.molgenis.auth.UserAuthority;
-import org.molgenis.auth.UserAuthorityFactory;
+import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -23,6 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 
 @Service
 public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
@@ -114,7 +106,8 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 		// allow all users to read the app languages
 		GroupAuthority usersGroupLanguagesAuthority = groupAuthorityFactory.create();
 		usersGroupLanguagesAuthority.setMolgenisGroup(allUsersGroup);
-		usersGroupLanguagesAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + LANGUAGE.toUpperCase());
+		// FIXME do not hardcode default language code
+		usersGroupLanguagesAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "SYS_LANGUAGES");
 		dataService.add(GROUP_AUTHORITY, usersGroupLanguagesAuthority);
 	}
 

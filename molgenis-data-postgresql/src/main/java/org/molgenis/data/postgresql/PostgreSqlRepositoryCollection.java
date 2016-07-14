@@ -12,7 +12,6 @@ import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
@@ -20,10 +19,11 @@ import java.util.stream.Stream;
 
 import static autovalue.shaded.com.google.common.common.collect.Sets.immutableEnumSet;
 import static java.lang.String.format;
+import static java.util.EnumSet.of;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.data.RepositoryCollectionCapability.*;
-import static org.molgenis.data.i18n.LanguageMetaData.*;
+import static org.molgenis.data.i18n.model.LanguageMetaData.*;
 import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
@@ -57,7 +57,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 	@Override
 	public Set<RepositoryCollectionCapability> getCapabilities()
 	{
-		return immutableEnumSet(EnumSet.of(WRITABLE, UPDATABLE, META_DATA_PERSISTABLE));
+		return immutableEnumSet(of(WRITABLE, UPDATABLE, META_DATA_PERSISTABLE));
 	}
 
 	@Override
@@ -219,6 +219,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 			jdbcTemplate.execute(addColumnSql);
 		}
 
+		// FIXME Code duplication
 		if (isSingleReferenceType(attr) && isPersistedInPostgreSql(attr.getRefEntity()))
 		{
 			String createForeignKeySql = getSqlCreateForeignKey(entityMetaData, attr);
@@ -453,7 +454,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 		String createTableSql = getSqlCreateTable(entityMeta);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Creating table for entity [{}]", getName());
+			LOG.debug("Creating table for entity [{}]", entityMeta.getName());
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", createTableSql);
@@ -469,7 +470,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 				String createJunctionTableSql = getSqlCreateJunctionTable(entityMeta, attr);
 				if (LOG.isDebugEnabled())
 				{
-					LOG.debug("Creating junction table for entity [{}] attribute [{}]", getName(), attr.getName());
+					LOG.debug("Creating junction table for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
 					if (LOG.isTraceEnabled())
 					{
 						LOG.trace("SQL: {}", createJunctionTableSql);
@@ -477,12 +478,13 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 				}
 				jdbcTemplate.execute(createJunctionTableSql);
 			}
+			// FIXME Code duplication
 			else if (isSingleReferenceType(attr) && isPersistedInPostgreSql(attr.getRefEntity()))
 			{
 				String createForeignKeySql = getSqlCreateForeignKey(entityMeta, attr);
 				if (LOG.isDebugEnabled())
 				{
-					LOG.debug("Creating foreign key for entity [{}] attribute [{}]", getName(), attr.getName());
+					LOG.debug("Creating foreign key for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
 					if (LOG.isTraceEnabled())
 					{
 						LOG.trace("SQL: {}", createForeignKeySql);
@@ -496,7 +498,7 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 				String createUniqueSql = getSqlCreateUniqueKey(entityMeta, attr);
 				if (LOG.isDebugEnabled())
 				{
-					LOG.debug("Creating unique key for entity [{}] attribute [{}]", getName(), attr.getName());
+					LOG.debug("Creating unique key for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
 					if (LOG.isTraceEnabled())
 					{
 						LOG.trace("SQL: {}", createUniqueSql);

@@ -1,9 +1,9 @@
 package org.molgenis.data;
 
+import org.molgenis.data.meta.model.EntityMetaData;
+
 import java.io.Serializable;
 import java.sql.Timestamp;
-
-import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Entity is a data record which can contain a hash of attribute values. Attribute names are unique. Synonyms are
@@ -12,15 +12,24 @@ import org.molgenis.data.meta.model.EntityMetaData;
  */
 public interface Entity extends Serializable
 {
+	/**
+	 * Returns entity meta data
+	 *
+	 * @return entity meta data, never null
+	 */
 	EntityMetaData getEntityMetaData();
 
 	/**
 	 * Get all attribute names
+	 *
+	 * TODO remove, use getEntityMetaData to retrieve entity meta data
 	 */
 	Iterable<String> getAttributeNames();
 
 	/**
 	 * Optional unique id to identify this Entity. Otherwise return null
+	 *
+	 * // TODO getIdValue should return id of type of entity (requires generic on Entity)
 	 */
 	Object getIdValue();
 
@@ -108,6 +117,8 @@ public interface Entity extends Serializable
 
 	/**
 	 * Copy attribute values from another entity
+	 *
+	 * TODO remove method, move to utility class
 	 */
 	void set(Entity values);
 }

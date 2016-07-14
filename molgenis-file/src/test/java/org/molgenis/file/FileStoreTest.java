@@ -1,13 +1,12 @@
 package org.molgenis.file;
 
+import org.apache.commons.io.FileUtils;
+import org.testng.Assert;
+import org.testng.annotations.Test;
+
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-
-import org.apache.commons.io.FileUtils;
-import org.molgenis.file.FileStore;
-import org.testng.Assert;
-import org.testng.annotations.Test;
 
 public class FileStoreTest
 {
@@ -18,6 +17,15 @@ public class FileStoreTest
 		new FileStore(null);
 	}
 
+	@Test
+	public void createDirectory() throws IOException
+	{
+		FileStore fileStore = new FileStore(System.getProperty("java.io.tmpdir"));
+		Assert.assertTrue(fileStore.createDirectory("testDir"));
+		Assert.assertTrue(fileStore.getFile("testDir").isDirectory());
+		fileStore.delete("testDir");
+	}
+	
 	@Test
 	public void store() throws IOException
 	{

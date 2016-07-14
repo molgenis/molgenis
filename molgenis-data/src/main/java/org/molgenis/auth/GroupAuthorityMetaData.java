@@ -4,6 +4,9 @@ import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
+
+import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
@@ -43,5 +46,11 @@ public class GroupAuthorityMetaData extends SystemEntityMetaData
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
 		addAttribute(MOLGENIS_GROUP).setDataType(XREF).setRefEntity(molgenisGroupMetaData).setAggregatable(true)
 				.setDescription("").setNillable(false);
+	}
+
+	@Override
+	public Set<SystemEntityMetaData> getDependencies()
+	{
+		return singleton(authorityMetaData);
 	}
 }

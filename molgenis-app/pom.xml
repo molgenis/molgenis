@@ -250,5 +250,15 @@
 			<artifactId>molgenis-file-ingester</artifactId>
 			<version>${project.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-gavin</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.molgenis</groupId>
+			<artifactId>molgenis-data-i18n</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 	</dependencies>
 </project>

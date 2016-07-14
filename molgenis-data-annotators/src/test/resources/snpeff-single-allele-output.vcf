@@ -1,0 +1,14 @@
+##SnpEffVersion="4.1b (build 2015-02-13), by Pablo Cingolani"
+##SnpEffCmd="SnpEff  hg19 -noStats -lof /var/folders/cb/3p23l0796lsdm2jpm33d54nr0000gn/T/snpEff2334597592675646279.vcf "
+##INFO=<ID=ANN,Number=.,Type=String,Description="Functional annotations: 'Allele | Annotation | Annotation_Impact | Gene_Name | Gene_ID | Feature_Type | Feature_ID | Transcript_BioType | Rank | HGVS.c | HGVS.p | cDNA.pos / cDNA.length | CDS.pos / CDS.length | AA.pos / AA.length | Distance | ERRORS / WARNINGS / INFO' ">
+##INFO=<ID=LOF,Number=.,Type=String,Description="Predicted loss of function effects for this variant. Format: 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected' ">
+##INFO=<ID=NMD,Number=.,Type=String,Description="Predicted nonsense mediated decay effects for this variant. Format: 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected' ">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+1	13380	.	C	G	.	.	ANN=G|non_coding_exon_variant|MODIFIER|DDX11L1|DDX11L1|transcript|NR_046018.2|Noncoding|3/3|n.623C>G||||||
+1	13980	.	T	C	.	.	ANN=C|non_coding_exon_variant|MODIFIER|DDX11L1|DDX11L1|transcript|NR_046018.2|Noncoding|3/3|n.1223T>C||||||
+1	78383467	.	G	A	.	.	ANN=A|intron_variant|MODIFIER|NEXN|NEXN|transcript|NM_144573.3|Coding|3/12|c.219+25G>A||||||
+21	46924425	.	CGGCCCCCCA	C	.	.	ANN=C|frameshift_variant&splice_acceptor_variant&splice_donor_variant&splice_region_variant&splice_region_variant&splice_region_variant&intron_variant|HIGH|COL18A1|COL18A1|transcript|NM_030582.3|Coding|33/42|c.3364_3365-2delGGCCCCCCA|p.Gly1122fs|3385/5894|3364/4551|1122/1516||;LOF=(COL18A1|COL18A1|1|1.00)
+X	79943569	.	T	C	.	.	ANN=C|missense_variant&splice_region_variant|MODERATE|BRWD3|BRWD3|transcript|NM_153252.4|Coding|34/41|c.3863A>G|p.Lys1288Arg|4126/12793|3863/5409|1288/1802||
+2	191904021	.	G	T	.	.	ANN=T|splice_region_variant&synonymous_variant|LOW|STAT4|STAT4|transcript|NM_001243835.1|Coding|16/24|c.1338C>A|p.Thr446Thr|1602/2775|1338/2247|446/748||
+3	53219680	.	G	C	.	.	ANN=C|missense_variant|MODERATE|PRKCD|PRKCD|transcript|NM_006254.3|Coding|11/19|c.949G>C|p.Glu317Gln|1302/2835|949/2031|317/676||
+1	1115548	.	G	A	.	.	ANN=A|missense_variant|MODERATE|TTLL10|TTLL10|transcript|NM_001130045.1|Coding|6/16|c.334G>A|p.Gly112Arg|485/2259|334/2022|112/673||

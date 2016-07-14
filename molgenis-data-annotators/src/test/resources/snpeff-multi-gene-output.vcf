@@ -1,0 +1,8 @@
+##SnpEffVersion="4.1b (build 2015-02-13), by Pablo Cingolani"
+##SnpEffCmd="SnpEff  hg19 -noStats -lof /var/folders/cb/3p23l0796lsdm2jpm33d54nr0000gn/T/snpEff2334597592675646279.vcf "
+##INFO=<ID=ANN,Number=.,Type=String,Description="Functional annotations: 'Allele | Annotation | Annotation_Impact | Gene_Name | Gene_ID | Feature_Type | Feature_ID | Transcript_BioType | Rank | HGVS.c | HGVS.p | cDNA.pos / cDNA.length | CDS.pos / CDS.length | AA.pos / AA.length | Distance | ERRORS / WARNINGS / INFO' ">
+##INFO=<ID=LOF,Number=.,Type=String,Description="Predicted loss of function effects for this variant. Format: 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected' ">
+##INFO=<ID=NMD,Number=.,Type=String,Description="Predicted nonsense mediated decay effects for this variant. Format: 'Gene_Name | Gene_ID | Number_of_transcripts_in_gene | Percent_of_transcripts_affected' ">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+2	171570151	.	C	T	.	.	ANN=T|intron_variant|MODIFIER|LOC101926913|LOC101926913|transcript|NR_110185.1|Noncoding|5/5|n.376+9863G>A||||||,T|non_coding_exon_variant|MODIFIER|LINC01124|LINC01124|transcript|NR_027433.1|Noncoding|1/1|n.927G>A||||||
+2	219142023	.	G	A	.	.	ANN=A|intron_variant|MODIFIER|PNKD|PNKD|transcript|NM_015488.4|Coding|2/9|c.236+5751G>A||||||,A|intron_variant|MODIFIER|TMBIM1|TMBIM1|transcript|NM_022152.4|Coding|9/11|c.639+66C>T||||||

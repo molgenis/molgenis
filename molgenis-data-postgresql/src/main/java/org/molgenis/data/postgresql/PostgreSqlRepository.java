@@ -68,7 +68,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	 */
 	private static final Set<RepositoryCapability> REPO_CAPABILITIES = unmodifiableSet(new HashSet<>(
 			asList(WRITABLE, MANAGABLE, QUERYABLE, VALIDATE_REFERENCE_CONSTRAINT, VALIDATE_UNIQUE_CONSTRAINT,
-					VALIDATE_NOTNULL_CONSTRAINT)));
+					VALIDATE_NOTNULL_CONSTRAINT, CACHEABLE)));
 
 	/**
 	 * Supported query operators
@@ -293,8 +293,9 @@ public class PostgreSqlRepository extends AbstractRepository
 		LOG.debug("Fetching [{}] data...", getName());
 		LOG.trace("SQL: {}", allRowsSelect);
 		RowMapper<Entity> rowMapper = postgreSqlEntityFactory.createRowMapper(entityMeta, fetch);
-		template.query(allRowsSelect, (ResultSetExtractor) resultSet ->
-				processResultSet(consumer, batchSize, entityMeta, rowMapper, resultSet));
+		template.query(allRowsSelect,
+				(ResultSetExtractor) resultSet -> processResultSet(consumer, batchSize, entityMeta, rowMapper,
+						resultSet));
 		LOG.debug("Streamed entire repository in batches of size {} in {}.", batchSize, stopwatch);
 	}
 
@@ -394,7 +395,8 @@ public class PostgreSqlRepository extends AbstractRepository
 				LOG.debug("Fetching [{}] data for query [{}]", getName(), batchQuery);
 				LOG.trace("SQL: {}, parameters: {}", sql, parameters);
 				Stopwatch sw = createStarted();
-				List<Entity> result = jdbcTemplate.query(sql, parameters.toArray(new Object[parameters.size()]), entityMapper);
+				List<Entity> result = jdbcTemplate
+						.query(sql, parameters.toArray(new Object[parameters.size()]), entityMapper);
 				LOG.trace("That took {}", sw);
 				return result;
 			}

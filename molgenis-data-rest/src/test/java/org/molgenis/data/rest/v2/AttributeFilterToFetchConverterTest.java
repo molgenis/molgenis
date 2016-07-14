@@ -1,22 +1,32 @@
 package org.molgenis.data.rest.v2;
 
+import org.molgenis.auth.SecurityPackage;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.system.model.RootSystemPackage;
 import org.molgenis.file.model.FileMetaMetaData;
+import org.molgenis.security.owned.OwnedEntityMetaData;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static java.util.Arrays.asList;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-public class AttributeFilterToFetchConverterTest
+@ContextConfiguration(classes = { AttributeFilterToFetchConverterTest.Config.class })
+public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringTest
 {
 	private static final String ID_ATTR_NAME = "attrId";
 	private static final String LABEL_ATTR_NAME = "attrLabel";
@@ -32,149 +42,87 @@ public class AttributeFilterToFetchConverterTest
 	private static final String REF_LABEL_ATTR_NAME = "refAttrLabel";
 	private static final String REF_ATTR_NAME = "refAttr";
 
+	/**
+	 * <ul>
+	 * <li>
+	 * entity
+	 * <ul>
+	 * <li>attrId</li>
+	 * <li>attrLabel</li>
+	 * <li>attrCompound
+	 * <ul>
+	 * <li>attrCompoundPart</li>
+	 * <li>attrCompoundPartFile</li>
+	 * <li>attrCompoundPartCompound
+	 * <ul>
+	 * <li>attrCompoundPartCompoundPart</li>
+	 * <li>attr2CompoundPartCompoundPart</li>
+	 * </ul>
+	 * </li>
+	 * </ul>
+	 * </li>
+	 * </ul>
+	 * </li>
+	 */
 	private EntityMetaData entityMeta;
 	private AttributeMetaData labelAttr;
 	private AttributeMetaData xrefAttr;
 	private EntityMetaData xrefEntityMeta;
 	private EntityMetaData selfRefEntityMetaData;
 
+	@Autowired
+	private EntityMetaDataFactory entityMetaDataFactory;
+	@Autowired
+	private AttributeMetaDataFactory attributeMetaDataFactory;
+	@Autowired
+	private FileMetaMetaData fileMetaMeta;
+
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		selfRefEntityMetaData = when(mock(EntityMetaData.class).getName()).thenReturn("SelfRefEntity").getMock();
-		AttributeMetaData selfRefIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
-		when(selfRefIdAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData selfRefLabelAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("label")
-				.getMock();
-		when(selfRefLabelAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData selfRefXrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("selfRef")
-				.getMock();
-		when(selfRefXrefAttr.getDataType()).thenReturn(XREF);
-		when(selfRefXrefAttr.getRefEntity()).thenReturn(selfRefEntityMetaData);
-		when(selfRefEntityMetaData.getIdAttribute()).thenReturn(selfRefIdAttr);
-		when(selfRefEntityMetaData.getLabelAttribute()).thenReturn(selfRefLabelAttr);
-		when(selfRefEntityMetaData.getAttribute("id")).thenReturn(selfRefIdAttr);
-		when(selfRefEntityMetaData.getAttribute("label")).thenReturn(selfRefLabelAttr);
-		when(selfRefEntityMetaData.getAttribute("selfRef")).thenReturn(selfRefXrefAttr);
-		when(selfRefEntityMetaData.getLabelAttribute(anyString())).thenReturn(selfRefLabelAttr);
-		when(selfRefEntityMetaData.getAtomicAttributes())
-				.thenReturn(asList(selfRefIdAttr, selfRefLabelAttr, selfRefXrefAttr));
-		xrefEntityMeta = mock(EntityMetaData.class);
-		when(xrefEntityMeta.getName()).thenReturn("xrefEntity");
-		AttributeMetaData refAttr0 = when(mock(AttributeMetaData.class).getName()).thenReturn(REF_ID_ATTR_NAME)
-				.getMock();
-		when(refAttr0.getDataType()).thenReturn(STRING);
-		AttributeMetaData refAttr1 = when(mock(AttributeMetaData.class).getName()).thenReturn(REF_LABEL_ATTR_NAME)
-				.getMock();
-		when(refAttr1.getDataType()).thenReturn(STRING);
-		AttributeMetaData refAttr2 = when(mock(AttributeMetaData.class).getName()).thenReturn(REF_ATTR_NAME).getMock();
-		when(refAttr2.getDataType()).thenReturn(STRING);
-		when(xrefEntityMeta.getAttribute(REF_ID_ATTR_NAME.toLowerCase())).thenReturn(refAttr0);
-		when(xrefEntityMeta.getAttribute(REF_ID_ATTR_NAME)).thenReturn(refAttr0);
-		when(xrefEntityMeta.getAttribute(REF_LABEL_ATTR_NAME.toLowerCase())).thenReturn(refAttr1);
-		when(xrefEntityMeta.getAttribute(REF_LABEL_ATTR_NAME)).thenReturn(refAttr1);
-		when(xrefEntityMeta.getAttribute(REF_ATTR_NAME.toLowerCase())).thenReturn(refAttr2);
-		when(xrefEntityMeta.getAttribute(REF_ATTR_NAME)).thenReturn(refAttr2);
-		when(xrefEntityMeta.getAttributes()).thenReturn(asList(refAttr0, refAttr1, refAttr2));
-		when(xrefEntityMeta.getAtomicAttributes()).thenReturn(asList(refAttr0, refAttr1, refAttr2));
-		when(xrefEntityMeta.getIdAttribute()).thenReturn(refAttr0);
-		when(xrefEntityMeta.getLabelAttribute("en")).thenReturn(refAttr1);
+		selfRefEntityMetaData = entityMetaDataFactory.create().setName("SelfRefEntity");
+		AttributeMetaData selfRefIdAttr = attributeMetaDataFactory.create().setName("id");
+		selfRefEntityMetaData.addAttribute(selfRefIdAttr, ROLE_ID)
+				.addAttribute(attributeMetaDataFactory.create().setName("label"), ROLE_LABEL).addAttribute(
+				attributeMetaDataFactory.create().setName("selfRef").setDataType(XREF)
+						.setRefEntity(selfRefEntityMetaData));
 
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(ID_ATTR_NAME).getMock();
-		when(idAttr.getDataType()).thenReturn(STRING);
-		labelAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(LABEL_ATTR_NAME).getMock();
-		when(labelAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundPartAttr = when(mock(AttributeMetaData.class).getName())
-				.thenReturn(COMPOUND_PART_ATTR_NAME).getMock();
-		when(compoundPartAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData compoundPartFileAttr = when(mock(AttributeMetaData.class).getName())
-				.thenReturn(COMPOUND_PART_FILE_ATTR_NAME).getMock();
-		when(compoundPartFileAttr.getDataType()).thenReturn(FILE);
-		FileMetaMetaData fileMetaMeta = when(mock(FileMetaMetaData.class).getName()).thenReturn("FileMeta").getMock();
-		AttributeMetaData fileMetaMetaIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
-		AttributeMetaData fileMetaMetaLabelAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("filename")
-				.getMock();
-		when(fileMetaMeta.getIdAttribute()).thenReturn(fileMetaMetaIdAttr);
-		when(fileMetaMeta.getLabelAttribute(anyString())).thenReturn(fileMetaMetaLabelAttr);
-		when(compoundPartFileAttr.getRefEntity()).thenReturn(fileMetaMeta);
-		AttributeMetaData compoundAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(COMPOUND_ATTR_NAME)
-				.getMock();
-		AttributeMetaData compoundPartCompoundAttr = when(mock(AttributeMetaData.class).getName())
-				.thenReturn(COMPOUND_PART_COMPOUND_ATTR_NAME).getMock();
-		when(compoundPartCompoundAttr.getDataType()).thenReturn(COMPOUND);
+		labelAttr = attributeMetaDataFactory.create().setName(REF_LABEL_ATTR_NAME);
+		xrefEntityMeta = entityMetaDataFactory.create().setName("xrefEntity")
+				.addAttribute(attributeMetaDataFactory.create().setName(REF_ID_ATTR_NAME), ROLE_ID)
+				.addAttribute(labelAttr, ROLE_LABEL)
+				.addAttribute(attributeMetaDataFactory.create().setName(REF_ATTR_NAME));
 
-		AttributeMetaData compoundPartCompoundPartAttr = when(mock(AttributeMetaData.class).getName())
-				.thenReturn(COMPOUND_PART_COMPOUND_PART_ATTR_NAME).getMock();
-		when(compoundPartCompoundPartAttr.getDataType()).thenReturn(STRING);
+		entityMeta = entityMetaDataFactory.create().setName("entity")
+				.addAttribute(attributeMetaDataFactory.create().setName(ID_ATTR_NAME), ROLE_ID)
+				.addAttribute(attributeMetaDataFactory.create().setName(LABEL_ATTR_NAME), ROLE_LABEL);
 
-		AttributeMetaData compoundPartCompoundPartAttr2 = when(mock(AttributeMetaData.class).getName())
-				.thenReturn(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME).getMock();
-		when(compoundPartCompoundPartAttr2.getDataType()).thenReturn(STRING);
+		AttributeMetaData compoundPartAttr = attributeMetaDataFactory.create().setName(COMPOUND_PART_ATTR_NAME)
+				.setDataType(COMPOUND);
+		AttributeMetaData compoundPartFileAttr = attributeMetaDataFactory.create().setName(COMPOUND_PART_FILE_ATTR_NAME)
+				.setDataType(FILE).setRefEntity(fileMetaMeta);
+		AttributeMetaData compoundAttr = attributeMetaDataFactory.create().setName(COMPOUND_ATTR_NAME)
+				.setDataType(COMPOUND);
+		AttributeMetaData compoundPartCompoundAttr = attributeMetaDataFactory.create()
+				.setName(COMPOUND_PART_COMPOUND_ATTR_NAME).setDataType(COMPOUND);
+		AttributeMetaData compoundPartCompoundPartAttr = attributeMetaDataFactory.create()
+				.setName(COMPOUND_PART_COMPOUND_PART_ATTR_NAME);
+		AttributeMetaData compoundPartCompoundPartAttr2 = attributeMetaDataFactory.create()
+				.setName(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME);
+		compoundAttr.setAttributeParts(asList(compoundPartAttr, compoundPartFileAttr, compoundPartCompoundAttr));
+		compoundPartCompoundAttr.setAttributeParts(asList(compoundPartCompoundPartAttr, compoundPartCompoundPartAttr2));
+		entityMeta.addAttribute(compoundAttr);
 
-		when(compoundPartCompoundAttr.getAttributeParts())
-				.thenReturn(asList(compoundPartCompoundPartAttr, compoundPartCompoundPartAttr2));
-		when(compoundPartCompoundAttr.getAttributePart(COMPOUND_PART_COMPOUND_PART_ATTR_NAME))
-				.thenReturn(compoundPartCompoundPartAttr);
-		when(compoundPartCompoundAttr.getAttributePart(COMPOUND_PART_COMPOUND_PART_ATTR_NAME.toLowerCase()))
-				.thenReturn(compoundPartCompoundPartAttr);
-
-		when(compoundPartCompoundAttr.getAttributePart(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME))
-				.thenReturn(compoundPartCompoundPartAttr2);
-		when(compoundPartCompoundAttr.getAttributePart(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME.toLowerCase()))
-				.thenReturn(compoundPartCompoundPartAttr2);
-
-		when(compoundAttr.getDataType()).thenReturn(COMPOUND);
-		when(compoundAttr.getAttributeParts())
-				.thenReturn(asList(compoundPartAttr, compoundPartFileAttr, compoundPartCompoundAttr));
-		when(compoundAttr.getAttributePart(COMPOUND_PART_ATTR_NAME.toLowerCase())).thenReturn(compoundPartAttr);
-		when(compoundAttr.getAttributePart(COMPOUND_PART_ATTR_NAME)).thenReturn(compoundPartAttr);
-		when(compoundAttr.getAttributePart(COMPOUND_PART_FILE_ATTR_NAME.toLowerCase()))
-				.thenReturn(compoundPartFileAttr);
-		when(compoundAttr.getAttributePart(COMPOUND_PART_FILE_ATTR_NAME)).thenReturn(compoundPartFileAttr);
-		when(compoundAttr.getAttributePart(COMPOUND_PART_COMPOUND_ATTR_NAME.toLowerCase()))
-				.thenReturn(compoundPartCompoundAttr);
-		when(compoundAttr.getAttributePart(COMPOUND_PART_COMPOUND_ATTR_NAME)).thenReturn(compoundPartCompoundAttr);
-
-		xrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(XREF_ATTR_NAME).getMock();
-		when(xrefAttr.getDataType()).thenReturn(XREF);
-		when(xrefAttr.getRefEntity()).thenReturn(xrefEntityMeta);
-
-		entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getName()).thenReturn("entity");
-		when(entityMeta.getAttribute(ID_ATTR_NAME.toLowerCase())).thenReturn(idAttr);
-		when(entityMeta.getAttribute(ID_ATTR_NAME)).thenReturn(idAttr);
-		when(entityMeta.getAttribute(LABEL_ATTR_NAME.toLowerCase())).thenReturn(labelAttr);
-		when(entityMeta.getAttribute(LABEL_ATTR_NAME)).thenReturn(labelAttr);
-		when(entityMeta.getAttribute(COMPOUND_ATTR_NAME.toLowerCase())).thenReturn(compoundAttr);
-		when(entityMeta.getAttribute(COMPOUND_ATTR_NAME)).thenReturn(compoundAttr);
-		when(entityMeta.getAttribute(COMPOUND_PART_ATTR_NAME.toLowerCase())).thenReturn(compoundPartAttr);
-		when(entityMeta.getAttribute(COMPOUND_PART_ATTR_NAME)).thenReturn(compoundPartAttr);
-		when(entityMeta.getAttribute(XREF_ATTR_NAME.toLowerCase())).thenReturn(xrefAttr);
-		when(entityMeta.getAttribute(XREF_ATTR_NAME)).thenReturn(xrefAttr);
-		when(entityMeta.getAttribute(COMPOUND_PART_COMPOUND_ATTR_NAME)).thenReturn(compoundPartCompoundAttr);
-		when(entityMeta.getAttribute(COMPOUND_PART_COMPOUND_ATTR_NAME.toLowerCase()))
-				.thenReturn(compoundPartCompoundAttr);
-		when(entityMeta.getAttribute(COMPOUND_PART_COMPOUND_PART_ATTR_NAME)).thenReturn(compoundPartCompoundPartAttr);
-		when(entityMeta.getAttribute(COMPOUND_PART_COMPOUND_PART_ATTR_NAME.toLowerCase()))
-				.thenReturn(compoundPartCompoundPartAttr);
-		when(entityMeta.getAttribute(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME)).thenReturn(compoundPartCompoundPartAttr2);
-		when(entityMeta.getAttribute(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME.toLowerCase()))
-				.thenReturn(compoundPartCompoundPartAttr2);
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
-		when(entityMeta.getLabelAttribute("en")).thenReturn(labelAttr);
-		when(entityMeta.getAttributes()).thenReturn(asList(idAttr, labelAttr, compoundAttr, xrefAttr));
-		when(entityMeta.getAtomicAttributes()).thenReturn(
-				asList(idAttr, labelAttr, compoundPartAttr, compoundPartFileAttr, compoundPartCompoundPartAttr,
-						compoundPartCompoundPartAttr2, xrefAttr));
+		xrefAttr = attributeMetaDataFactory.create().setName(XREF_ATTR_NAME).setDataType(XREF)
+				.setRefEntity(xrefEntityMeta);
+		entityMeta.addAttribute(xrefAttr);
 	}
 
 	@Test
 	public void convertNoAttrFilter()
 	{
-		Fetch fetch = new Fetch().field(ID_ATTR_NAME).field(LABEL_ATTR_NAME).field(COMPOUND_PART_ATTR_NAME)
-				.field(COMPOUND_PART_FILE_ATTR_NAME,
-						new Fetch().field(FileMetaMetaData.ID).field(FileMetaMetaData.FILENAME)
-								.field(FileMetaMetaData.URL))
+		Fetch fetch = new Fetch().field(ID_ATTR_NAME).field(LABEL_ATTR_NAME).field(COMPOUND_PART_FILE_ATTR_NAME,
+				new Fetch().field(FileMetaMetaData.ID).field(FileMetaMetaData.FILENAME).field(FileMetaMetaData.URL))
 				.field(XREF_ATTR_NAME, new Fetch().field(REF_ID_ATTR_NAME).field(REF_LABEL_ATTR_NAME))
 				.field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME).field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME);
 		assertEquals(AttributeFilterToFetchConverter.convert(null, entityMeta, "en"), fetch);
@@ -185,7 +133,7 @@ public class AttributeFilterToFetchConverterTest
 	{
 		AttributeFilter attrFilter = new AttributeFilter().setIncludeAllAttrs(true);
 		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta, "en"),
-				new Fetch().field("attrId").field("attrLabel").field("attrCompoundPart")
+				new Fetch().field("attrId").field("attrLabel")
 						.field("attrCompoundPartFile", new Fetch().field("id").field("filename").field("url"))
 						.field("attrCompoundPartCompoundPart").field("attr2CompoundPartCompoundPart")
 						.field("xrefAttr", new Fetch().field("refAttrId").field("refAttrLabel")));
@@ -211,20 +159,20 @@ public class AttributeFilterToFetchConverterTest
 	public void convertAttrFilterCompoundAttr()
 	{
 		AttributeFilter attrFilter = new AttributeFilter().add(COMPOUND_ATTR_NAME);
-		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta, "en"),
-				new Fetch().field(COMPOUND_PART_ATTR_NAME).field(COMPOUND_PART_FILE_ATTR_NAME,
+		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta, "en"), new Fetch()
+				.field(COMPOUND_PART_FILE_ATTR_NAME,
 						new Fetch().field(FileMetaMetaData.ID).field(FileMetaMetaData.FILENAME)
 								.field(FileMetaMetaData.URL)).field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME)
-						.field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME));
+				.field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME));
 	}
 
 	@Test
 	public void convertAttrFilterCompoundAttrPart()
 	{
 		AttributeFilter attrFilter = new AttributeFilter()
-				.add(COMPOUND_ATTR_NAME, new AttributeFilter().add(COMPOUND_PART_ATTR_NAME));
+				.add(COMPOUND_ATTR_NAME, new AttributeFilter().add(COMPOUND_PART_COMPOUND_ATTR_NAME));
 		assertEquals(AttributeFilterToFetchConverter.convert(attrFilter, entityMeta, "en"),
-				new Fetch().field(COMPOUND_PART_ATTR_NAME));
+				new Fetch().field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME).field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME));
 	}
 
 	@Test
@@ -256,10 +204,8 @@ public class AttributeFilterToFetchConverterTest
 	@Test
 	public void createDefaultEntityFetchRefs()
 	{
-		Fetch fetch = new Fetch().field(ID_ATTR_NAME).field(LABEL_ATTR_NAME).field(COMPOUND_PART_ATTR_NAME)
-				.field(COMPOUND_PART_FILE_ATTR_NAME,
-						new Fetch().field(FileMetaMetaData.ID).field(FileMetaMetaData.FILENAME)
-								.field(FileMetaMetaData.URL))
+		Fetch fetch = new Fetch().field(ID_ATTR_NAME).field(LABEL_ATTR_NAME).field(COMPOUND_PART_FILE_ATTR_NAME,
+				new Fetch().field(FileMetaMetaData.ID).field(FileMetaMetaData.FILENAME).field(FileMetaMetaData.URL))
 				.field(XREF_ATTR_NAME, new Fetch().field(REF_ID_ATTR_NAME).field(REF_LABEL_ATTR_NAME))
 				.field(COMPOUND_PART_COMPOUND_PART_ATTR_NAME).field(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME);
 		assertEquals(AttributeFilterToFetchConverter.createDefaultEntityFetch(entityMeta, "en"), fetch);
@@ -329,5 +275,12 @@ public class AttributeFilterToFetchConverterTest
 		assertEquals(fetch, new Fetch().field("id").field("label").field("selfRef",
 				new Fetch().field("id").field("label").field("selfRef", new Fetch().field("id").field("label")
 						.field("selfRef", new Fetch().field("id").field("label")))));
+	}
+
+	@Configuration
+	@Import({ FileMetaMetaData.class, OwnedEntityMetaData.class, SecurityPackage.class, RootSystemPackage.class })
+	public static class Config
+	{
+
 	}
 }

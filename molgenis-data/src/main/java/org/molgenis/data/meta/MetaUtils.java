@@ -10,7 +10,6 @@ import org.molgenis.util.EntityUtils;
 
 import java.util.List;
 
-import static org.molgenis.data.i18n.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
@@ -19,11 +18,9 @@ public class MetaUtils
 	public static Fetch getEntityMetaDataFetch()
 	{
 		// TODO simplify fetch creation (in this case *all* attributes and expand xref/mrefs)
-		return new Fetch().field(FULL_NAME).field(SIMPLE_NAME).field(PACKAGE).field(LABEL)
-				.field(LABEL + '-' + DEFAULT_LANGUAGE_CODE).field(DESCRIPTION)
-				.field(DESCRIPTION + '-' + DEFAULT_LANGUAGE_CODE).field(ATTRIBUTES).field(ID_ATTRIBUTE)
-				.field(LABEL_ATTRIBUTE).field(LOOKUP_ATTRIBUTES).field(ABSTRACT).field(EXTENDS).field(TAGS)
-				.field(BACKEND);
+		return new Fetch().field(FULL_NAME).field(SIMPLE_NAME).field(PACKAGE).field(LABEL).field(DESCRIPTION)
+				.field(ATTRIBUTES).field(ID_ATTRIBUTE).field(LABEL_ATTRIBUTE).field(LOOKUP_ATTRIBUTES).field(ABSTRACT)
+				.field(EXTENDS).field(TAGS).field(BACKEND);
 	}
 
 	public static List<AttributeMetaData> updateEntityMeta(MetaDataService metaDataService, EntityMetaData entityMeta)

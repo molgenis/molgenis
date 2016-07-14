@@ -1,17 +1,16 @@
 package org.molgenis.das.impl;
 
-import java.util.EnumSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.WebApplicationInitializer;
+import uk.ac.ebi.mydas.controller.MydasServlet;
 
 import javax.servlet.DispatcherType;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration.Dynamic;
+import java.util.EnumSet;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.WebApplicationInitializer;
-
-import uk.ac.ebi.mydas.controller.MydasServlet;
 
 public class WebAppInitializer implements WebApplicationInitializer
 {

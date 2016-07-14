@@ -4,6 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
+import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
