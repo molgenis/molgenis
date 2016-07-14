@@ -38,11 +38,11 @@ public class TabixVcfRepository extends VcfRepository
 		tabixReader = new TabixReader(file.getCanonicalPath());
 	}
 
-	TabixVcfRepository(VcfReaderFactory readerFactory, TabixReader tabixReader, String entityName, VcfAttributes vcfAttributes,
-			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
+	TabixVcfRepository(VcfReaderFactory readerFactory, TabixReader tabixReader, String entityName,
+			VcfAttributes vcfAttributes, EntityMetaDataFactory entityMetaFactory,
+			AttributeMetaDataFactory attrMetaFactory)
 	{
-		super(readerFactory, entityName, vcfAttributes,
-				entityMetaFactory, attrMetaFactory);
+		super(readerFactory, entityName, vcfAttributes, entityMetaFactory, attrMetaFactory);
 		this.tabixReader = tabixReader;
 	}
 

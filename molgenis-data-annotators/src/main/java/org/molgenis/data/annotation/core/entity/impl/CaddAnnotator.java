@@ -16,8 +16,8 @@ import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixRepositoryFactory;
-import org.molgenis.data.annotation.core.settings.CaddAnnotatorSettings;
-import org.molgenis.data.annotation.core.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.web.settings.CaddAnnotatorSettings;
+import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -98,8 +98,7 @@ public class CaddAnnotator implements AnnotatorConfig
 						attributes);
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(CADD_TABIX_RESOURCE, caddInfo,
 				new LocusQueryCreator(vcfAttributes), new MultiAllelicResultFilter(attributes, true, vcfAttributes),
-				dataService,
-				resources,
+				dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(CaddAnnotatorSettings.Meta.CADD_LOCATION,
 						caddAnnotatorSettings));
 		annotator.init(entityAnnotator);

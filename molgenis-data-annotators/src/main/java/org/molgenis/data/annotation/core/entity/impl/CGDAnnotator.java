@@ -5,13 +5,13 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
+import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.entity.*;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo.Status;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo.Type;
 import org.molgenis.data.annotation.core.entity.impl.framework.AnnotatorImpl;
 import org.molgenis.data.annotation.core.entity.impl.framework.RepositoryAnnotatorImpl;
 import org.molgenis.data.annotation.core.filter.FirstResultFilter;
-import org.molgenis.data.annotation.core.meta.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.query.AttributeEqualsQueryCreator;
 import org.molgenis.data.annotation.core.resources.Resource;
 import org.molgenis.data.annotation.core.resources.Resources;
@@ -19,7 +19,7 @@ import org.molgenis.data.annotation.core.resources.impl.GeneCsvRepository;
 import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
-import org.molgenis.data.annotation.core.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -38,7 +38,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
 import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.CGDAttributeName.*;
 import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.GeneralizedInheritance.*;
-import static org.molgenis.data.annotation.core.settings.CGDAnnotatorSettings.Meta.CGD_LOCATION;
+import static org.molgenis.data.annotation.web.settings.CGDAnnotatorSettings.Meta.CGD_LOCATION;
 
 /**
  * Annotator that can add HGNC_ID and ENTREZ_GENE_ID and other attributes to an entityMetaData that has a attribute named 'GENE'
@@ -56,10 +56,10 @@ public class CGDAnnotator implements AnnotatorConfig
 	private static final char SEPARATOR = '\t';
 
 	// Output attribute labels
-	static final String CONDITION_LABEL = "CGDCOND";
-	static final String AGE_GROUP_LABEL = "CGDAGE";
-	static final String INHERITANCE_LABEL = "CGDINH";
-	static final String GENERALIZED_INHERITANCE_LABEL = "CGDGIN";
+	public static final String CONDITION_LABEL = "CGDCOND";
+	public static final String AGE_GROUP_LABEL = "CGDAGE";
+	public static final String INHERITANCE_LABEL = "CGDINH";
+	public static final String GENERALIZED_INHERITANCE_LABEL = "CGDGIN";
 
 	@Autowired
 	private Entity CGDAnnotatorSettings;
@@ -169,7 +169,6 @@ public class CGDAnnotator implements AnnotatorConfig
 				};
 			}
 		};
-
 
 	}
 

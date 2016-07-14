@@ -15,11 +15,10 @@ import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
-import org.molgenis.data.annotation.core.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
-import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -30,7 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
-import static org.molgenis.data.annotation.core.settings.HPOAnnotatorSettings.Meta.HPO_LOCATION;
+import static org.molgenis.data.annotation.web.settings.HPOAnnotatorSettings.Meta.HPO_LOCATION;
 
 /**
  * Typical HPO terms for a gene dataType (already present via SnpEff) Source:
@@ -59,9 +58,6 @@ public class HPOAnnotator implements AnnotatorConfig
 	private Resources resources;
 
 	@Autowired
-	private VcfAttributes vcfAttributes;
-
-	@Autowired
 	private EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
@@ -87,6 +83,7 @@ public class HPOAnnotator implements AnnotatorConfig
 	{
 		return attributeMetaDataFactory.create().setName(HPO_TERMS).setDataType(TEXT).setDescription("HPO terms");
 	}
+
 	@Override
 	public void init()
 	{

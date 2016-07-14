@@ -9,7 +9,7 @@ import static org.molgenis.data.vcf.model.VcfAttributes.POS;
 
 /**
  * Used to compare equality of Chrom/Pos values in the {@link MultiAllelicResultFilter}.
- * 
+ * <p>
  * Bit curious though: How come we've never needed this class more generally?
  */
 @AutoValue

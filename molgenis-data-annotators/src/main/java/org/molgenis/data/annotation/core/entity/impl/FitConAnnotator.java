@@ -16,7 +16,7 @@ import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixRepositoryFactory;
-import org.molgenis.data.annotation.core.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -29,8 +29,8 @@ import org.springframework.context.annotation.Configuration;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.DECIMAL;
-import static org.molgenis.data.annotation.core.settings.FitConAnnotatorSettings.Meta.FITCON_LOCATION;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.data.annotation.web.settings.FitConAnnotatorSettings.Meta.FITCON_LOCATION;
 
 @Configuration
 public class FitConAnnotator implements AnnotatorConfig
@@ -71,7 +71,7 @@ public class FitConAnnotator implements AnnotatorConfig
 	public void init()
 	{
 		List<AttributeMetaData> attributes = new ArrayList<>();
-		AttributeMetaData dann_score = attributeMetaDataFactory.create().setName(FITCON_SCORE).setDataType(DECIMAL)
+		AttributeMetaData dann_score = attributeMetaDataFactory.create().setName(FITCON_SCORE).setDataType(STRING)
 				.setDescription("fitness consequence score annotation of genetic variants using Fitcon scoring.")
 				.setLabel(FITCON_SCORE_LABEL);
 

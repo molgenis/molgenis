@@ -1,12 +1,12 @@
 package org.molgenis.data.settings;
 
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
-
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 
 @Component
 public class SettingsEntityMeta extends SystemEntityMetaData
@@ -18,7 +18,7 @@ public class SettingsEntityMeta extends SystemEntityMetaData
 
 	private SettingsPackage settingsPackage;
 
-	SettingsEntityMeta()
+	public SettingsEntityMeta()
 	{
 		super(SIMPLE_NAME, PACKAGE_SETTINGS);
 	}

@@ -7,9 +7,8 @@ import java.util.List;
 
 /**
  * Informatin about an {@link Annotator}
- * 
- * @author fkelpin
  *
+ * @author fkelpin
  */
 @AutoValue
 public abstract class AnnotatorInfo
@@ -46,25 +45,24 @@ public abstract class AnnotatorInfo
  * cadd dann fitcon ccgg Population references: gonl 1kg exac vkgl Phenotype associations: cgd hpo omim phewascatalog
  * gwascatalog clinvar phenomizer Genomic features: ase proteinatlas vistaenhancers splicingcode Unused: kegg cosmic
  * dbnsfp
- * 
+ * <p>
  * Bron heeft Chrom Pos en evt Ref Alt
- * 
+ * <p>
  * Wordt altijd weer 1 rij
- * 
+ * <p>
  * Tabix metadata kan in principe uit de file komen, zie VCFRepository
- * 
+ * <p>
  * CADD: Query op Chrom/Pos, Post-Process de resultaten m.b.v. Ref/Alts, Dan moet het er 0 of 1 zijn.
- * 
+ * <p>
  * 1000G: Query op Chrom/Pos, Parse de INFO kolom, Post-Process de resultaten m.b.v. Ref/Alts. Dan moet het er 0 of 1
  * zijn.
- * 
+ * <p>
  * GoNL : Query op Chrom/Pos, Parse de INFO kolom, Post-Process de resultaten m.b.v. Ref/Alts. Dan moet het er 0 of 1
  * zijn.
- * 
+ * <p>
  * ClinVar: Query op Chrom/Pos, Parse de INFO kolom, Post-Process de resultaten m.b.v. Ref/Alts. Dan moet het er 0 of 1
  * zijn.
- * 
+ * <p>
  * ExAC: Query op Chrom/Pos, Parse de INFO kolom, Post-Process de resultaten m.b.v. Ref/Alts (doet iets met MAF). Dan
  * moet het er 0 of 1 zijn.
- * 
  */

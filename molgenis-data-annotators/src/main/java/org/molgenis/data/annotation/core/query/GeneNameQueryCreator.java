@@ -2,8 +2,8 @@ package org.molgenis.data.annotation.core.query;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.entity.QueryCreator;
-import org.molgenis.data.annotation.core.meta.effects.EffectsMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.springframework.beans.factory.annotation.Autowired;

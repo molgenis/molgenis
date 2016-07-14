@@ -14,7 +14,6 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.util.DependencyResolver;
-import org.springframework.context.ApplicationContext;
 import org.springframework.util.StringUtils;
 
 import java.util.*;
@@ -89,13 +88,13 @@ public class EmxFileOnlyMetaDataParser implements MetaDataParser
 
 	private final PackageFactory packageFactory;
 	private final AttributeMetaDataFactory attrMetaFactory;
-	private final ApplicationContext applicationContext;
+	private final EntityMetaDataFactory entityMetaDataFactory;
 
 	public EmxFileOnlyMetaDataParser(PackageFactory packageFactory, AttributeMetaDataFactory attrMetaFactory,
-			ApplicationContext applicationContext)
+			EntityMetaDataFactory entityMetaDataFactory)
 	{
 		this.packageFactory = requireNonNull(packageFactory);
-		this.applicationContext = applicationContext;
+		this.entityMetaDataFactory = entityMetaDataFactory;
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 	}
 
@@ -140,7 +139,7 @@ public class EmxFileOnlyMetaDataParser implements MetaDataParser
 	 */
 	private IntermediateParseResults parseTagsSheet(Repository<Entity> tagRepository)
 	{
-		IntermediateParseResults result = new IntermediateParseResults(applicationContext);
+		IntermediateParseResults result = new IntermediateParseResults(entityMetaDataFactory);
 		if (tagRepository != null)
 		{
 			for (Entity tag : tagRepository)
@@ -908,7 +907,7 @@ public class EmxFileOnlyMetaDataParser implements MetaDataParser
 		{
 			if (EMX_PACKAGES.equals(sheet))
 			{
-				IntermediateParseResults parseResult = new IntermediateParseResults(applicationContext);
+				IntermediateParseResults parseResult = new IntermediateParseResults(entityMetaDataFactory);
 				parsePackagesSheet(source.getRepository(sheet), parseResult);
 				for (String packageName : parseResult.getPackages().keySet())
 				{

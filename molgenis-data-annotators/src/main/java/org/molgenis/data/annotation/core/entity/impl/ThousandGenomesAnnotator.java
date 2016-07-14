@@ -30,7 +30,7 @@ import java.util.Collections;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.DECIMAL;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.data.annotation.core.settings.ThousendGenomesAnnotatorSettings.Meta.*;
+import static org.molgenis.data.annotation.web.settings.ThousendGenomesAnnotatorSettings.Meta.*;
 
 @Configuration
 public class ThousandGenomesAnnotator implements AnnotatorConfig
@@ -127,7 +127,8 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory(THOUSAND_GENOME_MULTI_FILE_RESOURCE, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory);
+				return new TabixVcfRepositoryFactory(THOUSAND_GENOME_MULTI_FILE_RESOURCE, vcfAttributes,
+						entityMetaDataFactory, attributeMetaDataFactory);
 			}
 		};
 	}

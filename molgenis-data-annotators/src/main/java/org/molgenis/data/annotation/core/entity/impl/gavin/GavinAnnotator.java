@@ -5,6 +5,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.EffectsAnnotator;
+import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.entity.EntityAnnotator;
@@ -12,7 +13,6 @@ import org.molgenis.data.annotation.core.entity.impl.CaddAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.ExacAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.framework.QueryAnnotatorImpl;
 import org.molgenis.data.annotation.core.entity.impl.snpeff.Impact;
-import org.molgenis.data.annotation.core.meta.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.query.GeneNameQueryCreator;
 import org.molgenis.data.annotation.core.resources.Resource;
 import org.molgenis.data.annotation.core.resources.Resources;
@@ -20,13 +20,12 @@ import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.core.resources.impl.emx.EmxResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.emx.InMemoryRepositoryFactory;
-import org.molgenis.data.annotation.core.settings.GavinAnnotatorSettings;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
+import org.molgenis.data.annotation.web.settings.GavinAnnotatorSettings;
 import org.molgenis.data.importer.EmxFileOnlyMetaDataParser;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -82,9 +81,6 @@ public class GavinAnnotator implements AnnotatorConfig
 	@Autowired
 	GeneNameQueryCreator geneNameQueryCreator;
 
-	@Autowired
-	ApplicationContext applicationContext;
-
 	@Bean
 	Resource GavinResource()
 	{
@@ -95,7 +91,7 @@ public class GavinAnnotator implements AnnotatorConfig
 			public RepositoryFactory getRepositoryFactory()
 			{
 				return new InMemoryRepositoryFactory(RESOURCE_ENTITY_NAME,
-						new EmxFileOnlyMetaDataParser(packageFactory, attributeMetaDataFactory, applicationContext),
+						new EmxFileOnlyMetaDataParser(packageFactory, attributeMetaDataFactory, entityMetaDataFactory),
 						entityMetaDataFactory, attributeMetaDataFactory);
 			}
 		};
@@ -115,8 +111,10 @@ public class GavinAnnotator implements AnnotatorConfig
 	public void init()
 	{
 		LinkedList<AttributeMetaData> attributes = new LinkedList<>();
-		AttributeMetaData classification = attributeMetaDataFactory.create().setName(CLASSIFICATION).setDataType(STRING).setDescription(CLASSIFICATION).setLabel(CLASSIFICATION);
-		AttributeMetaData confidence = attributeMetaDataFactory.create().setName(CONFIDENCE).setDataType(STRING).setDescription(CONFIDENCE).setLabel(CONFIDENCE);
+		AttributeMetaData classification = attributeMetaDataFactory.create().setName(CLASSIFICATION).setDataType(STRING)
+				.setDescription(CLASSIFICATION).setLabel(CLASSIFICATION);
+		AttributeMetaData confidence = attributeMetaDataFactory.create().setName(CONFIDENCE).setDataType(STRING)
+				.setDescription(CONFIDENCE).setLabel(CONFIDENCE);
 		AttributeMetaData reason = attributeMetaDataFactory.create().setName(REASON).setDataType(STRING)
 				.setDescription(REASON).setLabel(REASON);
 
@@ -126,13 +124,13 @@ public class GavinAnnotator implements AnnotatorConfig
 
 		String description = "Please note that this annotator processes the results from a SnpEff annotation\nTherefor it should be used on the result entity rather than the variant entity itself.\nThe corresponding variant entity should also be annotated with CADD and EXaC";
 
-		AnnotatorInfo gavinInfo = AnnotatorInfo.create(AnnotatorInfo.Status.READY,
-				AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME, description, attributes);
-		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(RESOURCE, gavinInfo, geneNameQueryCreator,
-				dataService, resources, (annotationSourceFileName) -> {
-					gavinAnnotatorSettings.set(GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION,
-							annotationSourceFileName);
-				})
+		AnnotatorInfo gavinInfo = AnnotatorInfo
+				.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME, description,
+						attributes);
+		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(RESOURCE, gavinInfo, geneNameQueryCreator, dataService,
+				resources, (annotationSourceFileName) -> {
+			gavinAnnotatorSettings.set(GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION, annotationSourceFileName);
+		})
 		{
 			@Override
 			public List<AttributeMetaData> getRequiredAttributes()
@@ -144,13 +142,14 @@ public class GavinAnnotator implements AnnotatorConfig
 								ExacAnnotator.getExacAFAttr(attributeMetaDataFactory), vcfAttributes.getAltAttribute());
 				entityMetaData.addAttributes(refAttributesList);
 				AttributeMetaData refAttr = attributeMetaDataFactory.create().setName(VARIANT_ENTITY).setDataType(XREF)
-								.setRefEntity(entityMetaData)
-								.setDescription("This annotator needs a references to an entity containing: "
-										+ StreamSupport.stream(refAttributesList.spliterator(), false)
-												.map(AttributeMetaData::getName).collect(Collectors.joining(", ")));
+						.setRefEntity(entityMetaData).setDescription(
+								"This annotator needs a references to an entity containing: " + StreamSupport
+										.stream(refAttributesList.spliterator(), false).map(AttributeMetaData::getName)
+										.collect(Collectors.joining(", ")));
 
-				requiredAttributes.addAll(Arrays.asList(effectsMetaData.getGeneNameAttr(),
-						effectsMetaData.getPutativeImpactAttr(), refAttr, effectsMetaData.getAltAttr()));
+				requiredAttributes.addAll(Arrays
+						.asList(effectsMetaData.getGeneNameAttr(), effectsMetaData.getPutativeImpactAttr(), refAttr,
+								effectsMetaData.getAltAttr()));
 				return requiredAttributes;
 			}
 
@@ -199,8 +198,8 @@ public class GavinAnnotator implements AnnotatorConfig
 
 					Category category = Category.valueOf(annotationSourceEntity.getString(CATEGORY));
 
-					Judgment judgment = gavinAlgorithm.classifyVariant(impact, caddScaled, exacMAF, category, gene,
-							annotationSourceEntity);
+					Judgment judgment = gavinAlgorithm
+							.classifyVariant(impact, caddScaled, exacMAF, category, gene, annotationSourceEntity);
 					entity.set(CLASSIFICATION, judgment.getClassification().toString());
 					entity.set(CONFIDENCE, judgment.getConfidence().toString());
 					entity.set(REASON, judgment.getReason());

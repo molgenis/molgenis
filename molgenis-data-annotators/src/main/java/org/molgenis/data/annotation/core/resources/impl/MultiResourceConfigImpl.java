@@ -27,9 +27,9 @@ public class MultiResourceConfigImpl implements MultiResourceConfig
 	 * overrideChromosomeFiles contains the chromosome that do not comply with the pattern. those chromosomes and
 	 * corresponding filenames should be stated comma separated per chromosome, and the chromosome and filename itself
 	 * should be colon separated. e.g. 1:file1.vcf,2:file2.txt,X:XYZ.vcf
-	 * */
-	public MultiResourceConfigImpl(String chromosomesProperty, String filePatternProperty,
-			String rootDirectoryProperty, String overrideChromosomeFilesProperty, Entity molgenisSettings)
+	 */
+	public MultiResourceConfigImpl(String chromosomesProperty, String filePatternProperty, String rootDirectoryProperty,
+			String overrideChromosomeFilesProperty, Entity molgenisSettings)
 	{
 		this.chromosomesProperty = chromosomesProperty;
 		this.filePatternProperty = filePatternProperty;

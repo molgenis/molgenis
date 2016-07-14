@@ -12,7 +12,7 @@ import java.util.stream.StreamSupport;
 
 public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 {
-    @Override
+	@Override
 	public String canAnnotate(EntityMetaData repoMetaData)
 	{
 		Iterable<AttributeMetaData> annotatorAttributes = getRequiredAttributes();
@@ -29,8 +29,8 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 					.getDataType())
 			{
 				// allow type string when required attribute is text (for backward compatibility)
-				if (!(repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType().equals(
-						MolgenisFieldTypes.AttributeType.STRING) && annotatorAttribute.getDataType()
+				if (!(repoMetaData.getAttribute(annotatorAttribute.getName()).getDataType()
+						.equals(MolgenisFieldTypes.AttributeType.STRING) && annotatorAttribute.getDataType()
 						.equals(MolgenisFieldTypes.AttributeType.TEXT)))
 				{
 					return "a required attribute has the wrong datatype";
@@ -43,11 +43,9 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 				{
 					if (refEntity.getAttribute(refAttribute.getName()) == null)
 					{
-						return "the required referenced entity ["
-								+ StreamSupport
-										.stream(annotatorAttribute.getRefEntity().getAtomicAttributes().spliterator(),
-												false)
-										.map(AttributeMetaData::getName).collect(Collectors.joining(", "))
+						return "the required referenced entity [" + StreamSupport
+								.stream(annotatorAttribute.getRefEntity().getAtomicAttributes().spliterator(), false)
+								.map(AttributeMetaData::getName).collect(Collectors.joining(", "))
 								+ "] is missing a required attribute";
 					}
 				}

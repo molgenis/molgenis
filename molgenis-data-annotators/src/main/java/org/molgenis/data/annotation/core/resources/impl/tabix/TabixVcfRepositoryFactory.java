@@ -10,6 +10,8 @@ import org.molgenis.data.vcf.model.VcfAttributes;
 import java.io.File;
 import java.io.IOException;
 
+import static java.util.Objects.requireNonNull;
+
 /**
  * Factory that can create a {@link TabixVcfRepository}. The name of the repository is configured in the factory.
  */
@@ -24,10 +26,10 @@ public class TabixVcfRepositoryFactory implements RepositoryFactory
 	public TabixVcfRepositoryFactory(String name, VcfAttributes vcfAttributes, EntityMetaDataFactory entityMetaFactory,
 			AttributeMetaDataFactory attrMetaFactory)
 	{
-		this.name = name;
-		this.entityMetaDataFactory = entityMetaFactory;
-		this.attributeMetaDataFactory = attrMetaFactory;
-		this.vcfAttributes = vcfAttributes;
+		this.name = requireNonNull(name);
+		this.entityMetaDataFactory = requireNonNull(entityMetaFactory);
+		this.attributeMetaDataFactory = requireNonNull(attrMetaFactory);
+		this.vcfAttributes = requireNonNull(vcfAttributes);
 	}
 
 	@Override

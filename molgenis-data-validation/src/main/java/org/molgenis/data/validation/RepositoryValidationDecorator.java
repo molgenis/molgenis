@@ -563,15 +563,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		validationResource.getReadonlyAttrs().forEach(readonlyAttr -> {
 			Object value = entity.get(readonlyAttr.getName());
 
-			Object existingValue = null;
-			try
-			{
-				existingValue = entityToUpdate.get(readonlyAttr.getName());
-			}
-			catch (Exception e)
-			{
-				System.out.print("test");
-			}
+			Object existingValue = entityToUpdate.get(readonlyAttr.getName());
 
 			if (isSingleReferenceType(readonlyAttr))
 			{
