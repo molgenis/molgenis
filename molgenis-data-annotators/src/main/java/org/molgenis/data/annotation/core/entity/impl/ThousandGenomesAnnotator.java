@@ -18,7 +18,6 @@ import org.molgenis.data.annotation.core.resources.impl.MultiFileResource;
 import org.molgenis.data.annotation.core.resources.impl.MultiResourceConfigImpl;
 import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepositoryFactory;
-import org.molgenis.data.annotation.web.settings.ThousendGenomesAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -102,7 +101,7 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 			thousendGenomesAnnotatorSettings
 					.set(FILEPATTERN, "ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");
 			thousendGenomesAnnotatorSettings
-					.set(CHROMOSOMES, "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22");
+					.set(CHROMOSOMES, "1,2,3,4,5,6,7,8,9");//,10,11,12,13,14,15,16,17,18,19,20,21,22
 		})
 		{
 			@Override

@@ -1,6 +1,6 @@
 package org.molgenis.data.annotation.core.effects;
 
-import org.molgenis.data.annotation.core.meta.AnnotatorEntityMetaData;
+import org.molgenis.data.annotation.web.meta.AnnotatorEntityMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
 public class EffectsMetaData implements AnnotatorEntityMetaData
 {
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeMetaDataFactory attributeMetaDataFactory;
 
 	public static String ID = "id";
 	public static String VARIANT = "Variant";

@@ -1,46 +1,57 @@
 package org.molgenis.data.annotation.cmd;
 
 import org.molgenis.CommandLineOnlyConfiguration;
-import org.molgenis.auth.UserAuthorityFactory;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.core.RepositoryAnnotator;
-import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
+import org.molgenis.data.*;
 import org.molgenis.data.annotation.core.utils.JarRunnerImpl;
-import org.molgenis.data.annotation.web.AnnotationService;
-import org.molgenis.data.annotation.web.AnnotationServiceImpl;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
-import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.support.UuidGenerator;
-import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.util.ApplicationContextProvider;
+import org.molgenis.data.vcf.utils.VcfUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
 
-import java.util.*;
+import javax.annotation.PostConstruct;
+import java.util.Map;
 
 /**
  * Commandline-specific annotator configuration.
  */
 @Configuration
 @CommandLineOnlyConfiguration
+@ComponentScan({ "org.molgenis.data.meta.model", "org.molgenis.data.system.model", "org.molgenis.data.vcf.model",
+		"org.molgenis.data.annotation.core.effects" })
 public class CommandLineAnnotatorConfig
 {
+	@Autowired
+	ApplicationContext applicationContext;
 
-	private DataServiceImpl dataService = new DataServiceImpl();
+	@PostConstruct
+	public void bootstrap()
+	{
+		// bootstrap meta data
+		EntityMetaDataMetaData entityMetaMeta = applicationContext.getBean(EntityMetaDataMetaData.class);
+		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityMetaMeta);
+		Map<String, SystemEntityMetaData> systemEntityMetaMap = applicationContext
+				.getBeansOfType(SystemEntityMetaData.class);
+		systemEntityMetaMap.values().forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityMetaMeta));
+	}
 
 	@Value("${vcf-validator-location:@null}")
 	private String vcfValidatorLocation;
 
 	/**
 	 * Needed to make @Value annotations with property placeholders work!
-	 *
+	 * <p>
 	 * https://stackoverflow.com/questions/17097521/spring-3-2-value-annotation-with-pure-java-configuration-does-not
 	 * -work-but-env
 	 */
@@ -53,26 +64,21 @@ public class CommandLineAnnotatorConfig
 	}
 
 	@Bean
-	public CmdLineAnnotator cmdLineAnnotator()
+	VcfUtils vcfUtils()
 	{
-		return new CmdLineAnnotator();
+		return new VcfUtils();
+	}
+
+	@Bean
+	public DataService dataService()
+	{
+		return new CmdLineDataService();
 	}
 
 	@Bean
 	public VcfValidator vcfValidator()
 	{
 		return new VcfValidator(vcfValidatorLocation);
-	}
-
-	/**
-	 * Beans that allows referencing Spring managed beans from Java code which is not managed by Spring
-	 *
-	 * @return
-	 */
-	@Bean
-	public ApplicationContextProvider applicationContextProvider()
-	{
-		return new ApplicationContextProvider();
 	}
 
 	@Bean
@@ -85,9 +91,15 @@ public class CommandLineAnnotatorConfig
 	}
 
 	@Bean
-	public Entity caddAnnotatorSettings()
+	EntityManager entityManager()
 	{
-		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
+		return new EntityManagerImpl(dataService(), new EntityFactoryRegistry());
+	}
+
+	@Bean
+	public CmdLineAnnotator cmdLineAnnotator()
+	{
+		return new CmdLineAnnotator();
 	}
 
 	@Bean
@@ -105,149 +117,73 @@ public class CommandLineAnnotatorConfig
 	@Bean
 	public Entity snpEffAnnotatorSettings()
 	{
-		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
+		return new CmdLineSettingsEntity();
 	}
 
 	@Bean
 	public Entity goNLAnnotatorSettings()
 	{
-		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
+		return new CmdLineSettingsEntity();
 	}
 
 	@Bean
 	public Entity thousendGenomesAnnotatorSettings()
 	{
-		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
+		return new CmdLineSettingsEntity();
 	}
 
 	@Bean
 	public Entity CGDAnnotatorSettings()
 	{
-		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
+		return new CmdLineSettingsEntity();
 	}
 
 	@Bean
 	public Entity clinvarAnnotatorSettings()
 	{
-		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
+		return new CmdLineSettingsEntity();
 	}
 
 	@Bean
 	public Entity dannAnnotatorSettings()
 	{
-		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
+		return new CmdLineSettingsEntity();
 	}
 
 	@Bean
 	public Entity exacAnnotatorSettings()
 	{
-		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
+		return new CmdLineSettingsEntity();
+	}
+
+	@Bean
+	public Entity caddAnnotatorSettings()
+	{
+		return new CmdLineSettingsEntity();
 	}
 
 	@Bean
 	public Entity fitConAnnotatorSettings()
 	{
-		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
+		return new CmdLineSettingsEntity();
 	}
 
 	@Bean
 	public Entity HPOAnnotatorSettings()
 	{
-		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
+		return new CmdLineSettingsEntity();
 	}
 
 
 	@Bean
 	public Entity gavinAnnotatorSettings()
 	{
-		return new DynamicEntity(null);
+		return new CmdLineSettingsEntity();
 	}
 
 	@Bean
 	public Entity omimAnnotatorSettings()
 	{
-		return new DynamicEntity(null); // FIXME pass entity meta data instead of null
-	}
-
-	@Bean
-	DataService dataService()
-	{
-		return dataService;
-	}
-
-	@Bean
-	UserAuthorityFactory userAuthorityFactory()
-	{
-		return null;//FIXME
-	}
-
-	@Bean
-	PermissionSystemService permissionSystemService()
-	{
-		return new PermissionSystemService(dataService, userAuthorityFactory());
-	}
-
-	@Bean
-	AnnotationService annotationService()
-	{
-		return new AnnotationServiceImpl();
-	}
-
-	/**
-	 * Helper function to select the annotators that have received a recent brush up for the new way of configuring
-	 *
-	 * @param configuredAnnotators
-	 * @return
-	 */
-	static HashMap<String, RepositoryAnnotator> getFreshAnnotators(
-			Map<String, RepositoryAnnotator> configuredAnnotators)
-	{
-		HashMap<String, RepositoryAnnotator> configuredFreshAnnotators = new HashMap<String, RepositoryAnnotator>();
-		for (String annotator : configuredAnnotators.keySet())
-		{
-			if (configuredAnnotators.get(annotator).getInfo() != null && configuredAnnotators.get(annotator).getInfo()
-					.getStatus().equals(AnnotatorInfo.Status.READY))
-			{
-				configuredFreshAnnotators.put(annotator, configuredAnnotators.get(annotator));
-			}
-		}
-		return configuredFreshAnnotators;
-	}
-
-	/**
-	 * Helper function to print annotators per type
-	 *
-	 * @param annotators
-	 * @return
-	 */
-	static String printAnnotatorsPerType(Map<String, RepositoryAnnotator> annotators)
-	{
-		Map<AnnotatorInfo.Type, List<String>> annotatorsPerType = new HashMap<AnnotatorInfo.Type, List<String>>();
-		for (String annotator : annotators.keySet())
-		{
-			AnnotatorInfo.Type type = annotators.get(annotator).getInfo().getType();
-			if (annotatorsPerType.containsKey(type))
-			{
-				annotatorsPerType.get(type).add(annotator);
-			}
-			else
-			{
-				annotatorsPerType.put(type, new ArrayList<String>(Arrays.asList(new String[] { annotator })));
-			}
-
-		}
-		StringBuilder sb = new StringBuilder();
-		for (AnnotatorInfo.Type type : annotatorsPerType.keySet())
-		{
-			sb.append("### " + type + " ###\n");
-			for (String annotatorName : annotatorsPerType.get(type))
-			{
-				sb.append("* " + annotatorName + "\n");
-			}
-
-			sb.append("\n");
-		}
-
-		return sb.toString();
+		return new CmdLineSettingsEntity();
 	}
 }

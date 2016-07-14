@@ -279,6 +279,8 @@ public class EntityUtils
 		{
 			return false;
 		}
+		//NB Thsi is at such a low level that we do not know the default backend
+		// so we don't check if the other one is the default if the backend is null.
 		String backend = entityMeta.getBackend();
 		String otherBackend = otherEntityMeta.getBackend();
 		if (backend == null && otherBackend != null)

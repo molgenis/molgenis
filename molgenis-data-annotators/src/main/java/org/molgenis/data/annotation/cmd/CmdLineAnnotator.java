@@ -14,7 +14,9 @@ import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.annotation.core.EffectsAnnotator;
 import org.molgenis.data.annotation.core.RefEntityAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
+import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -31,10 +33,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 import org.springframework.core.env.JOptCommandLinePropertySource;
 
 import java.io.*;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -43,14 +42,16 @@ import static java.util.Arrays.asList;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
 
 /**
- * 
  * Build JAR file...............: mvn clean install -pl molgenis-data-annotators/ -am -DskipTests -P create-delivery
  * Run..........................: java -jar molgenis-data-annotators/target/CmdLineAnnotator.jar
- * 
  */
 public class CmdLineAnnotator
 {
 	private static final String EFFECT = "EFFECT";
+
+	@Autowired
+	CommandLineAnnotatorConfig commandLineAnnotatorConfig;
+
 	@Autowired
 	private ApplicationContext applicationContext;
 
@@ -72,12 +73,14 @@ public class CmdLineAnnotator
 	// Default settings for running vcf-validator
 	private void run(OptionSet options, OptionParser parser) throws Exception
 	{
+		Map<String, AnnotatorConfig> annotatorMap = applicationContext.getBeansOfType(AnnotatorConfig.class);
+		annotatorMap.values().forEach(AnnotatorConfig::init);
+
 		Map<String, RepositoryAnnotator> configuredAnnotators = applicationContext
 				.getBeansOfType(RepositoryAnnotator.class);
 
 		// for now, only get the annotators that have recieved a recent brush up for the new way of configuring
-		Map<String, RepositoryAnnotator> configuredFreshAnnotators = CommandLineAnnotatorConfig
-				.getFreshAnnotators(configuredAnnotators);
+		Map<String, RepositoryAnnotator> configuredFreshAnnotators = getFreshAnnotators(configuredAnnotators);
 
 		Set<String> annotatorNames = configuredFreshAnnotators.keySet();
 
@@ -107,8 +110,8 @@ public class CmdLineAnnotator
 					+ "java -jar CmdLineAnnotator.jar -a [Annotator] -s [Annotation source file] <column1> <column2>\n\n"
 					+ "----------------------------------------------------\n");
 
-			System.out.println("List of available annotators per category:\n\n"
-					+ CommandLineAnnotatorConfig.printAnnotatorsPerType(configuredFreshAnnotators));
+			System.out.println("List of available annotators per category:\n\n" + printAnnotatorsPerType(
+					configuredFreshAnnotators));
 
 			return;
 		}
@@ -154,8 +157,8 @@ public class CmdLineAnnotator
 		{
 			if (options.has("replace"))
 			{
-				System.out.println("Override enabled, replacing existing vcf with specified output: "
-						+ outputVCFFile.getAbsolutePath());
+				System.out.println("Override enabled, replacing existing vcf with specified output: " + outputVCFFile
+						.getAbsolutePath());
 			}
 			else
 			{
@@ -184,7 +187,8 @@ public class CmdLineAnnotator
 
 			ctx.getEnvironment().getPropertySources().addFirst(propertySource);
 			ctx.register(CommandLineAnnotatorConfig.class);
-			ctx.scan("org.molgenis.data.annotation", "org.molgenis.data.annotation.cmd");
+			ctx.scan("org.molgenis.data.annotation.core", "org.molgenis.data.annotation.cmd");
+
 			ctx.refresh();
 
 			CmdLineAnnotator main = ctx.getBean(CmdLineAnnotator.class);
@@ -212,8 +216,9 @@ public class CmdLineAnnotator
 		parser.acceptsAll(asList("v", "validate"), "Use VCF validator on the output file");
 		parser.acceptsAll(asList("t", "vcf-validator-location"),
 				"Location of the vcf-validator executable from the vcf-tools suite").withRequiredArg()
-				.ofType(String.class).defaultsTo(System.getProperty("user.home") + File.separator + ".molgenis"
-						+ File.separator + "vcf-tools" + File.separator + "bin" + File.separator + "vcf-validator");
+				.ofType(String.class).defaultsTo(
+				System.getProperty("user.home") + File.separator + ".molgenis" + File.separator + "vcf-tools"
+						+ File.separator + "bin" + File.separator + "vcf-validator");
 		parser.acceptsAll(asList("h", "help"), "Prints this help text");
 		parser.acceptsAll(asList("r", "replace"),
 				"Enables output file override, replacing a file with the same name as the argument for the -o option");
@@ -225,13 +230,11 @@ public class CmdLineAnnotator
 
 	/**
 	 * Annotate VCF file
-	 * 
-	 * 
+	 *
 	 * @param annotator
 	 * @param inputVcfFile
 	 * @param outputVCFFile
-	 * @param options
-	 *            , the attributes of the annotator to include in the output vcf, if empty outputs all
+	 * @param options       , the attributes of the annotator to include in the output vcf, if empty outputs all
 	 * @throws Exception
 	 */
 	private void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile, OptionSet options)
@@ -239,12 +242,13 @@ public class CmdLineAnnotator
 	{
 		List<String> attributesToInclude = options.nonOptionArguments().stream().map(Object::toString)
 				.collect(Collectors.toList());
-		annotate(annotator, inputVcfFile, outputVCFFile, attributesToInclude, options.has("validate"), options.has("u"));
+		annotate(annotator, inputVcfFile, outputVCFFile, attributesToInclude, options.has("validate"),
+				options.has("u"));
 	}
 
 	public void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile,
-			List<String> attributesToInclude, boolean validate, boolean update) throws IOException,
-			MolgenisInvalidFormatException
+			List<String> attributesToInclude, boolean validate, boolean update)
+			throws IOException, MolgenisInvalidFormatException
 	{
 
 		try (BufferedWriter outputVCFWriter = new BufferedWriter(
@@ -317,9 +321,11 @@ public class CmdLineAnnotator
 				}
 			}
 			Iterable<Entity> entitiesToAnnotate;
+			EntityMetaData newMetaData = AnnotatorUtils
+					.addAnnotatorMetadataToRepositories(vcfRepo.getEntityMetaData(), annotator.getOutputAttributes());
 			if (annotator instanceof EffectsAnnotator)
 			{
-				entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT,
+				entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(newMetaData, EFFECT,
 						vcfRepo.findAll(new QueryImpl<>()));
 			}
 			else
@@ -399,6 +405,64 @@ public class CmdLineAnnotator
 		molgenisLogger.addAppender(consoleAppender);
 		molgenisLogger.setLevel(Level.INFO);
 		molgenisLogger.setAdditive(false);
+	}
+
+	/**
+	 * Helper function to print annotators per type
+	 *
+	 * @param annotators
+	 * @return
+	 */
+	static String printAnnotatorsPerType(Map<String, RepositoryAnnotator> annotators)
+	{
+		Map<AnnotatorInfo.Type, List<String>> annotatorsPerType = new HashMap<AnnotatorInfo.Type, List<String>>();
+		for (String annotator : annotators.keySet())
+		{
+			AnnotatorInfo.Type type = annotators.get(annotator).getInfo().getType();
+			if (annotatorsPerType.containsKey(type))
+			{
+				annotatorsPerType.get(type).add(annotator);
+			}
+			else
+			{
+				annotatorsPerType.put(type, new ArrayList<String>(Arrays.asList(new String[] { annotator })));
+			}
+
+		}
+		StringBuilder sb = new StringBuilder();
+		for (AnnotatorInfo.Type type : annotatorsPerType.keySet())
+		{
+			sb.append("### " + type + " ###\n");
+			for (String annotatorName : annotatorsPerType.get(type))
+			{
+				sb.append("* " + annotatorName + "\n");
+			}
+
+			sb.append("\n");
+		}
+
+		return sb.toString();
+	}
+
+	/**
+	 * Helper function to select the annotators that have received a recent brush up for the new way of configuring
+	 *
+	 * @param configuredAnnotators
+	 * @return
+	 */
+	static HashMap<String, RepositoryAnnotator> getFreshAnnotators(
+			Map<String, RepositoryAnnotator> configuredAnnotators)
+	{
+		HashMap<String, RepositoryAnnotator> configuredFreshAnnotators = new HashMap<String, RepositoryAnnotator>();
+		for (String annotator : configuredAnnotators.keySet())
+		{
+			if (configuredAnnotators.get(annotator).getInfo() != null && configuredAnnotators.get(annotator).getInfo()
+					.getStatus().equals(AnnotatorInfo.Status.READY))
+			{
+				configuredFreshAnnotators.put(annotator, configuredAnnotators.get(annotator));
+			}
+		}
+		return configuredFreshAnnotators;
 	}
 
 }

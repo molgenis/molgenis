@@ -298,7 +298,11 @@ public class VcfToEntity
 				for (int i = 0; i < format.length; i = i + 1)
 				{
 					String strValue = sample.getData(i);
-					Object value = getTypedValue(strValue, sampleEntity.getEntityMetaData().getAttribute(format[i]));
+					Object value = null;
+					if (strValue != null)
+					{
+						value = getTypedValue(strValue, sampleEntity.getEntityMetaData().getAttribute(format[i]));
+					}
 					sampleEntity.set(format[i], value);
 				}
 				sampleEntity.set(ID, entityId + j);

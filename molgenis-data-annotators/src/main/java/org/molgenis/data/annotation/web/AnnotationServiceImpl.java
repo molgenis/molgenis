@@ -12,11 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Created with IntelliJ IDEA. User: charbonb Date: 19/02/14 Time: 12:50 To change this template use File | Settings |
- * File Templates.
- */
-
 @Component
 public class AnnotationServiceImpl implements AnnotationService
 {

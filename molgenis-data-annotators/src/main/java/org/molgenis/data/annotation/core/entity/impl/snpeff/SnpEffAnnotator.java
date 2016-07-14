@@ -1,10 +1,10 @@
 package org.molgenis.data.annotation.core.entity.impl.snpeff;
 
+import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
-import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
-import org.molgenis.data.annotation.web.settings.SnpEffAnnotatorSettings;
+import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -43,6 +43,9 @@ public class SnpEffAnnotator implements AnnotatorConfig
 	private VcfAttributes vcfAttributes;
 
 	@Autowired
+	DataService dataService;
+
+	@Autowired
 	private EffectsMetaData effectsMetaData;
 	private SnpEffRepositoryAnnotator annotator;
 
@@ -56,6 +59,6 @@ public class SnpEffAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		annotator.init(snpEffRunner, snpEffAnnotatorSettings, vcfAttributes, effectsMetaData);
+		annotator.init(snpEffRunner, snpEffAnnotatorSettings, vcfAttributes, effectsMetaData, dataService);
 	}
 }
