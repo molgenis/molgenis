@@ -13,7 +13,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;

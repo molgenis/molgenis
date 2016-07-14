@@ -2,18 +2,21 @@ package org.molgenis.data.cache.utils;
 
 import com.google.common.cache.Cache;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
-import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
+import static java.util.Optional.empty;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertSame;
 
 public class CombinedEntityCacheTest
 {
@@ -21,36 +24,47 @@ public class CombinedEntityCacheTest
 	@Mock
 	private EntityHydration entityHydration;
 	@Mock
-	private Cache<String, Optional<Map<String, Object>>> cache;
+	private Cache<EntityKey, Optional<Map<String, Object>>> cache;
+	@Mock
+	EntityMetaData entityMetaData;
+	@Mock
+	Entity entity;
+	@Mock
+	Map<String, Object> dehydratedEntity;
 
 	@BeforeClass
 	public void beforeClass()
 	{
-		MockitoAnnotations.initMocks(this);
+		initMocks(this);
 		entityCache = new CombinedEntityCache(entityHydration, cache);
 	}
 
-	@Test
-	public void generateCacheKeyTest()
+	@BeforeMethod
+	public void beforeMethod()
 	{
-		String expectedKey = "TestEntity__id1";
-		assertEquals(entityCache.generateCacheKey("TestEntity", "id1"), expectedKey);
-
-		String expectedKey2 = "TestEntity__2";
-		assertEquals(entityCache.generateCacheKey("TestEntity", 2), expectedKey2);
+		reset(entityHydration, cache, entityMetaData);
+		when(entityMetaData.getName()).thenReturn("TestEntity");
 	}
 
 	@Test
-	public void testGetKeyFilter()
+	public void getIfPresentIntegerIdEntityNotPresentInCache()
 	{
-		Predicate<String> filter = entityCache.getKeyFilter("TestEntity");
+		when(cache.getIfPresent(EntityKey.create("TestEntity", 123))).thenReturn(null);
+		assertEquals(entityCache.getIfPresent(entityMetaData, 123), null);
+	}
 
-		List<String> testEntityKeys = newArrayList("TestEntity__id1", "TestEntity__id2", "org_TestEntity__id3",
-				"MyTestEntity__id1").stream().filter(filter).collect(Collectors.toList());
+	@Test
+	public void getIfPresentIntegerIdDeletionLoggedInCache()
+	{
+		when(cache.getIfPresent(EntityKey.create("TestEntity", 123))).thenReturn(empty());
+		assertEquals(entityCache.getIfPresent(entityMetaData, 123), empty());
+	}
 
-		assertEquals(testEntityKeys, newArrayList("TestEntity__id1", "TestEntity__id2"));
-
-		String expectedKey2 = "TestEntity__2";
-		assertEquals(entityCache.generateCacheKey("TestEntity", 2), expectedKey2);
+	@Test
+	public void getIfPresentIntegerIdEntityPresentInCache()
+	{
+		when(cache.getIfPresent(EntityKey.create("TestEntity", 123))).thenReturn(Optional.of(dehydratedEntity));
+		when(entityHydration.hydrate(dehydratedEntity, entityMetaData)).thenReturn(entity);
+		assertSame(entityCache.getIfPresent(entityMetaData, 123).get(), entity);
 	}
 }

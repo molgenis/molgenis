@@ -3,8 +3,9 @@ package org.molgenis.data.cache.l1;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import org.molgenis.data.Entity;
-import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.cache.utils.CombinedEntityCache;
+import org.molgenis.data.cache.utils.EntityHydration;
+import org.molgenis.data.cache.utils.EntityKey;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
@@ -47,8 +48,8 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 
 	private CombinedEntityCache createCache()
 	{
-		Cache<String, Optional<Map<String, Object>>> cache = CacheBuilder.newBuilder().maximumSize(MAX_CACHE_SIZE)
-				.build();
+		Cache<EntityKey, Optional<Map<String, Object>>> cache = CacheBuilder.newBuilder().maximumSize(MAX_CACHE_SIZE)
+				.recordStats().build();
 		return new CombinedEntityCache(entityHydration, cache);
 	}
 
@@ -63,19 +64,12 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 		}
 	}
 
-	/**
-	 * Evicts an entity from the cache.
-	 *
-	 * @param entityName name of the entity to evict
-	 * @param entityId   id value of the entity to evict
-	 */
-	public void evict(String entityName, Object entityId)
+	public void putDeletion(EntityKey entityKey)
 	{
 		CombinedEntityCache entityCache = caches.get();
 		if (entityCache != null)
 		{
-			LOG.trace("Removing  entity [{}] from L1 cache that belongs to {}", entityId, entityName);
-			entityCache.evict(entityName, entityId);
+			entityCache.putDeletion(entityKey);
 		}
 	}
 
@@ -94,13 +88,18 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	 *
 	 * @param entityName name of the entity to retrieve
 	 * @param id         id value of the entity to retrieve
-	 * @return the retrieved {@link Entity} or null if none found
+	 * @return the retrieved {@link Entity} or Optional.empty() if deletion of this entity is stored in the cache or
+	 * null if no information available about this entity in the cache
 	 */
-	public Entity get(String entityName, Object id, EntityMetaData entityMetaData)
+	public Optional<Entity> get(String entityName, Object id, EntityMetaData entityMetaData)
 	{
-		Optional<Entity> result = Optional.ofNullable(caches.get())
-				.flatMap(cache -> cache.getIfPresent(entityMetaData, id));
-		if (result.isPresent())
+		CombinedEntityCache cache = caches.get();
+		if (cache == null)
+		{
+			return null;
+		}
+		Optional<Entity> result = cache.getIfPresent(entityMetaData, id);
+		if (result != null)
 		{
 			LOG.debug("Retrieved entity [{}] from L1 cache that belongs to {}", id, entityName);
 		}
@@ -108,7 +107,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 		{
 			LOG.trace("No entity with id [{}] present in L1 cache that belongs to {}", id, entityName);
 		}
-		return result.orElse(null);
+		return result;
 	}
 
 	/**
