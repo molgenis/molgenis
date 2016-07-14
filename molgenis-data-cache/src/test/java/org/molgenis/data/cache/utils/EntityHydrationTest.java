@@ -1,5 +1,7 @@
 package org.molgenis.data.cache.utils;
 
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -20,11 +22,14 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -40,15 +45,19 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 	private Map<String, Object> dehydratedEntity;
 	private EntityHydration entityHydration;
 
+	@Captor
+	private ArgumentCaptor<EntityMetaData> entityMetaDataArgumentCaptor;
+
 	@BeforeClass
 	public void beforeClass() throws ParseException
 	{
+		initMocks(this);
 		// create metadata
 		entityMetaData = entityTestHarness.createDynamicTestEntityMetaData();
 
 		// create referenced entities
-		List<Entity> refEntities = entityTestHarness
-				.createTestRefEntities(entityTestHarness.createDynamicRefEntityMetaData(), 1);
+		EntityMetaData refEntityMetaData = entityTestHarness.createDynamicRefEntityMetaData();
+		List<Entity> refEntities = entityTestHarness.createTestRefEntities(refEntityMetaData, 1);
 
 		// create hydrated entity
 		hydratedEntity = entityTestHarness.createTestEntities(entityMetaData, 1, refEntities).collect(toList()).get(0);
@@ -78,6 +87,10 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 		// mock entity manager
 		EntityManager entityManager = when(mock(EntityManager.class).create(entityMetaData))
 				.thenReturn(new DynamicEntity(entityMetaData)).getMock();
+		when(entityManager.getReference(entityMetaDataArgumentCaptor.capture(), eq("0")))
+				.thenReturn(refEntities.get(0));
+		when(entityManager.getReferences(entityMetaDataArgumentCaptor.capture(), eq(newArrayList("0"))))
+				.thenReturn(refEntities);
 		entityHydration = new EntityHydration(entityManager);
 	}
 
@@ -86,6 +99,9 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 	{
 		Entity actualHydratedEntity = entityHydration.hydrate(dehydratedEntity, entityMetaData);
 		assertTrue(EntityUtils.equals(actualHydratedEntity, hydratedEntity));
+		// check that it has retrieved references of type TypeTestRef
+		assertTrue(entityMetaDataArgumentCaptor.getAllValues().stream()
+				.allMatch(emd -> emd.getName().equals("TypeTestRef")));
 	}
 
 	@Test
