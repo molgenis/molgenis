@@ -8,9 +8,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PreDestroy;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
@@ -19,7 +20,8 @@ import static java.util.Objects.requireNonNull;
 public final class EntityListenersService
 {
 	private final Logger LOG = LoggerFactory.getLogger(EntityListenersService.class);
-	private final ConcurrentHashMap<String, SetMultimap<Object, EntityListener>> entityListeners = new ConcurrentHashMap<>();
+	private final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+	private final Map<String, SetMultimap<Object, EntityListener>> entityListeners = new HashMap<>();
 
 	/**
 	 * Register a repository to the entity listeners service once
@@ -29,9 +31,17 @@ public final class EntityListenersService
 	 */
 	void register(String repoFullName)
 	{
-		if (!entityListeners.containsKey(requireNonNull(repoFullName)))
+		lock.writeLock().lock();
+		try
 		{
-			entityListeners.put(repoFullName, HashMultimap.create());
+			if (!entityListeners.containsKey(requireNonNull(repoFullName)))
+			{
+				entityListeners.put(repoFullName, HashMultimap.create());
+			}
+		}
+		finally
+		{
+			lock.writeLock().unlock();
 		}
 	}
 
@@ -44,15 +54,23 @@ public final class EntityListenersService
 	 */
 	Stream<Entity> updateEntities(String repoFullName, Stream<Entity> entities)
 	{
-		verifyRepoRegistered(repoFullName);
-		SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
-		return entities.filter(entity -> {
-			Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
-			entityEntityListeners.forEach(entityListener -> {
-				entityListener.postUpdate(entity);
+		lock.readLock().lock();
+		try
+		{
+			verifyRepoRegistered(repoFullName);
+			SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
+			return entities.filter(entity -> {
+				Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
+				entityEntityListeners.forEach(entityListener -> {
+					entityListener.postUpdate(entity);
+				});
+				return true;
 			});
-			return true;
-		});
+		}
+		finally
+		{
+			lock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -63,12 +81,20 @@ public final class EntityListenersService
 	 */
 	void updateEntity(String repoFullName, Entity entity)
 	{
-		verifyRepoRegistered(repoFullName);
-		SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
-		Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
-		entityEntityListeners.forEach(entityListener -> {
-			entityListener.postUpdate(entity);
-		});
+		lock.readLock().lock();
+		try
+		{
+			verifyRepoRegistered(repoFullName);
+			SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
+			Set<EntityListener> entityEntityListeners = entityListeners.get(entity.getIdValue());
+			entityEntityListeners.forEach(entityListener -> {
+				entityListener.postUpdate(entity);
+			});
+		}
+		finally
+		{
+			lock.readLock().unlock();
+		}
 	}
 
 	/**
@@ -77,13 +103,19 @@ public final class EntityListenersService
 	 * @param repoFullName
 	 * @param entityListener entity listener for a entity
 	 */
+
 	public void addEntityListener(String repoFullName, EntityListener entityListener)
 	{
-		verifyRepoRegistered(repoFullName);
-		SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
-		synchronized (entityListeners)
+		lock.writeLock().lock();
+		try
 		{
+			verifyRepoRegistered(repoFullName);
+			SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
 			entityListeners.put(entityListener.getEntityId(), entityListener);
+		}
+		finally
+		{
+			lock.writeLock().unlock();
 		}
 	}
 
@@ -96,16 +128,21 @@ public final class EntityListenersService
 	 */
 	public boolean removeEntityListener(String repoFullName, EntityListener entityListener)
 	{
-		verifyRepoRegistered(repoFullName);
-		SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
-		synchronized (entityListeners)
+		lock.writeLock().lock();
+		try
 		{
+			verifyRepoRegistered(repoFullName);
+			SetMultimap<Object, EntityListener> entityListeners = this.entityListeners.get(repoFullName);
 			if (entityListeners.containsKey(entityListener.getEntityId()))
 			{
 				entityListeners.remove(entityListener.getEntityId(), entityListener);
 				return true;
 			}
 			return false;
+		}
+		finally
+		{
+			lock.writeLock().unlock();
 		}
 	}
 
@@ -118,8 +155,16 @@ public final class EntityListenersService
 	 */
 	boolean isEmpty(String repoFullName)
 	{
-		verifyRepoRegistered(repoFullName);
-		return entityListeners.get(repoFullName).isEmpty();
+		lock.readLock().lock();
+		try
+		{
+			verifyRepoRegistered(repoFullName);
+			return entityListeners.get(repoFullName).isEmpty();
+		}
+		finally
+		{
+			lock.readLock().unlock();
+		}
 	}
 
 	/**
