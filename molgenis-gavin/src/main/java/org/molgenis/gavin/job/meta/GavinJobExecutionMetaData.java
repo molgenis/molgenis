@@ -1,4 +1,4 @@
-package org.molgenis.gavin.job;
+package org.molgenis.gavin.job.meta;
 
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.SystemEntityMetaData;
@@ -15,7 +15,6 @@ import static org.molgenis.data.reindex.meta.IndexPackage.PACKAGE_INDEX;
 public class GavinJobExecutionMetaData extends SystemEntityMetaData
 {
 	private final JobExecutionMetaData jobExecutionMetaData;
-	@Autowired
 	AttributeMetaDataFactory attributeMetaDataFactory;
 
 	public static final String GAVIN_JOB_EXECUTION = "GavinJobExecution";
@@ -24,11 +23,13 @@ public class GavinJobExecutionMetaData extends SystemEntityMetaData
 	private final IndexPackage indexPackage;
 
 	@Autowired
-	public GavinJobExecutionMetaData(IndexPackage indexPackage, JobExecutionMetaData jobExecutionMetaData)
+	public GavinJobExecutionMetaData(IndexPackage indexPackage, JobExecutionMetaData jobExecutionMetaData,
+			AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		super(GAVIN_JOB_EXECUTION, PACKAGE_INDEX);
 		this.indexPackage = requireNonNull(indexPackage);
 		this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);
+		this.attributeMetaDataFactory = requireNonNull(attributeMetaDataFactory);
 	}
 
 	@Override
