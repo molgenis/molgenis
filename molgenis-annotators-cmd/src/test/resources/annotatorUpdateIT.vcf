@@ -1,0 +1,9 @@
+##fileformat=VCFv4.0
+##INFO=<ID=CADD,Number=.,Type=String,Description="\"Raw\" CADD scores come straight from the model, and are interpretable as the extent to which the annotation profile for a given variant suggests that that variant is likely to be \"observed\" (negative values) vs \"simulated\" (positive values). These values have no absolute unit of meaning and are incomparable across distinct annotation combinations, training sets, or model parameters. However, raw values do have relative meaning, with higher values indicating that a variant is more likely to be simulated (or \"not observed\") and therefore more likely to have deleterious effects.(source: http://cadd.gs.washington.edu/info)">
+##INFO=<ID=CADD_SCALED,Number=.,Type=String,Description="Since the raw scores do have relative meaning, one can take a specific group of variants, define the rank for each variant within that group, and then use that value as a \"normalized\" and now externally comparable unit of analysis. In our case, we scored and ranked all ~8.6 billion SNVs of the GRCh37/hg19 reference and then \"PHRED-scaled\" those values by expressing the rank in order of magnitude terms rather than the precise rank itself. For example, reference genome single nucleotide variants at the 10th-% of CADD scores are assigned to CADD-10, top 1% to CADD-20, top 0.1% to CADD-30, etc. The results of this transformation are the \"scaled\" CADD scores.(source: http://cadd.gs.washington.edu/info)">
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+22	25599848	.	C	T,TA	.	.	CADD=1.0,2.0;CADD_SCALED=3.0,4.0;
+22	25599849	.	G	AT	.	.	CADD=5.0;CADD_SCALED=6.0;
+22	25599863	.	G	C,T	.	.	CADD=.,.;CADD_SCALED=.,.;
+22	25601151	.	T	C,GA	.	.	CADD=.,7.0;CADD_SCALED=.,8.0;
+22	25601188	.	A	G	.	.	CADD=9.0;CADD_SCALED=10.0;

@@ -1,0 +1,25 @@
+#Format: diseaseId<tab>gene-symbol<tab>gene-id(entrez)<tab>HPO-ID<tab>HPO-term-name
+OMIM:201810	HSD3B2	3284	HP:0000037	Male pseudohermaphroditism
+OMIM:201810	HSD3B2	3284	HP:0008221	Adrenal hyperplasia
+OMIM:201810	HSD3B2	3284	HP:0000047	Hypospadias
+OMIM:606070	MATR3	9782	HP:0001260	Dysarthria
+OMIM:606070	MATR3	9782	HP:0003805	Rimmed vacuoles
+OMIM:606070	MATR3	9782	HP:0002127	Abnormal upper motor neuron morphology
+OMIM:606070	MATR3	9782	HP:0003828	Variable expressivity
+OMIM:606070	MATR3	9782	HP:0003547	Shoulder girdle muscle weakness
+OMIM:606070	MATR3	9782	HP:0000006	Autosomal dominant inheritance
+OMIM:606070	MATR3	9782	HP:0002366	Abnormal lower motor neuron morphology
+OMIM:606070	MATR3	9782	HP:0008756	Bowing of the vocal cords
+OMIM:606070	MATR3	9782	HP:0001347	Hyperreflexia
+OMIM:606070	MATR3	9782	HP:0007354	Amyotrophic lateral sclerosis
+OMIM:606070	MATR3	9782	HP:0003236	Elevated serum creatine phosphokinase
+OMIM:606070	MATR3	9782	HP:0002015	Dysphagia
+OMIM:606070	MATR3	9782	HP:0002460	Distal muscle weakness
+OMIM:606070	MATR3	9782	HP:0003581	Adult onset
+OMIM:606070	MATR3	9782	HP:0000762	Decreased nerve conduction velocity
+OMIM:606070	MATR3	9782	HP:0002835	Aspiration
+OMIM:606070	MATR3	9782	HP:0001609	Hoarse voice
+OMIM:606070	MATR3	9782	HP:0002747	Respiratory insufficiency due to muscle weakness
+OMIM:606070	MATR3	9782	HP:0002483	Bulbar signs
+OMIM:606070	MATR3	9782	HP:0001283	Bulbar palsy
+OMIM:606070	MATR3	9782	HP:0001739	Abnormality of the nasopharynx

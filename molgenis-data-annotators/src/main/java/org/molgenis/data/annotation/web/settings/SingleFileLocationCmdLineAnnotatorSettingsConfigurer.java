@@ -1,7 +1,7 @@
 package org.molgenis.data.annotation.web.settings;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.cmd.CmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfigurer;
 
 /**
  * CmdLineAnnotatorSettingsConfigurer that defines a single property

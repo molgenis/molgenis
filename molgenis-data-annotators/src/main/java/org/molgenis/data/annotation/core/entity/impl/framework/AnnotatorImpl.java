@@ -3,11 +3,11 @@ package org.molgenis.data.annotation.core.entity.impl.framework;
 import com.google.common.base.Optional;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.cmd.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.entity.EntityAnnotator;
 import org.molgenis.data.annotation.core.entity.QueryCreator;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
+import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.meta.model.AttributeMetaData;
 
