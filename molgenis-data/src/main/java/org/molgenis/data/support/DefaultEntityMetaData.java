@@ -129,8 +129,8 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 		this.ownLookupAttrs = stream(entityMetaData.getOwnLookupAttributes().spliterator(), false)
 				.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData> identity(), (u, v) -> {
 					throw new IllegalStateException(String.format("Duplicate key %s", u));
-				} , LinkedCaseInsensitiveMap::new));
-
+				}, LinkedCaseInsensitiveMap::new));
+		if (ownLookupAttrs.isEmpty()) ownLookupAttrs = null;
 		this.isRowLevelSecured = entityMetaData.isRowLevelSecured();
 	}
 
@@ -449,7 +449,8 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 		this.ownLookupAttrs = lookupAttrs
 				.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData> identity(), (u, v) -> {
 					throw new IllegalStateException(String.format("Duplicate key %s", u));
-				} , LinkedCaseInsensitiveMap::new));
+				}, LinkedCaseInsensitiveMap::new));
+		if (ownLookupAttrs.isEmpty()) ownLookupAttrs = null;
 		clearCache();
 	}
 
