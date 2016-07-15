@@ -34,13 +34,10 @@ public class TabixRepository extends AbstractRepository
 
 	/**
 	 * Creates a new {@link TabixRepository}
-	 * 
-	 * @param file
-	 *            the Tabix file
-	 * @param entityMetaData
-	 *            {@link EntityMetaData} for the tabix file. Attributes should be in the order of the file's columns
-	 * @throws IOException
-	 *             if something goes wrong creating the {@link TabixReader} for the file
+	 *
+	 * @param file           the Tabix file
+	 * @param entityMetaData {@link EntityMetaData} for the tabix file. Attributes should be in the order of the file's columns
+	 * @throws IOException if something goes wrong creating the {@link TabixReader} for the file
 	 */
 	public TabixRepository(File file, EntityMetaData entityMetaData) throws IOException
 	{
@@ -101,18 +98,16 @@ public class TabixRepository extends AbstractRepository
 
 	/**
 	 * Queries the tabix reader.
-	 * 
-	 * @param chrom
-	 *            name of the chromosome
-	 * @param pos
-	 *            position
+	 *
+	 * @param chrom name of the chromosome
+	 * @param pos   position
 	 * @return {@link ImmutableList} of entities found
 	 */
 	private synchronized ImmutableList<Entity> query(String chrom, int pos)
 	{
 		String queryString = String.format("%s:%s-%2$s", chrom, pos);
 		LOG.debug("query({})", queryString);
-		Builder<Entity> builder = ImmutableList.<Entity> builder();
+		Builder<Entity> builder = ImmutableList.<Entity>builder();
 		try
 		{
 			org.molgenis.data.annotation.core.resources.impl.tabix.TabixReader.Iterator iterator = reader

@@ -17,7 +17,7 @@ import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepositoryFactory;
-import org.molgenis.data.annotation.core.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -31,7 +31,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.annotation.core.settings.ExacAnnotatorSettings.Meta.EXAC_LOCATION;
+import static org.molgenis.data.annotation.web.settings.ExacAnnotatorSettings.Meta.EXAC_LOCATION;
 
 @Configuration
 public class ExacAnnotator implements AnnotatorConfig
@@ -124,21 +124,20 @@ public class ExacAnnotator implements AnnotatorConfig
 
 	public static AttributeMetaData getExacAcHetAttr(AttributeMetaDataFactory attributeMetaDataFactory)
 	{
-		return attributeMetaDataFactory.create().setName(EXAC_AC_HET)
-					.setDataType(STRING).setDescription("The ExAC heterozygous genotype count").setLabel(EXAC_AC_HET_LABEL);
+		return attributeMetaDataFactory.create().setName(EXAC_AC_HET).setDataType(STRING)
+				.setDescription("The ExAC heterozygous genotype count").setLabel(EXAC_AC_HET_LABEL);
 	}
 
 	public static AttributeMetaData getExacAcHomAttr(AttributeMetaDataFactory attributeMetaDataFactory)
 	{
-		return attributeMetaDataFactory.create().setName(EXAC_AC_HOM)
-					.setDataType(STRING).setDescription("The ExAC homozygous alternative genotype count")
-					.setLabel(EXAC_AC_HOM_LABEL);
+		return attributeMetaDataFactory.create().setName(EXAC_AC_HOM).setDataType(STRING)
+				.setDescription("The ExAC homozygous alternative genotype count").setLabel(EXAC_AC_HOM_LABEL);
 	}
 
 	public static AttributeMetaData getExacAFAttr(AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		return attributeMetaDataFactory.create().setName(EXAC_AF).setDataType(STRING)
-					.setDescription("The ExAC allele frequency").setLabel(EXAC_AF_LABEL);
+				.setDescription("The ExAC allele frequency").setLabel(EXAC_AF_LABEL);
 	}
 
 	@Bean
@@ -150,7 +149,8 @@ public class ExacAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory(EXAC_TABIX_RESOURCE, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory);
+				return new TabixVcfRepositoryFactory(EXAC_TABIX_RESOURCE, vcfAttributes, entityMetaDataFactory,
+						attributeMetaDataFactory);
 			}
 		};
 

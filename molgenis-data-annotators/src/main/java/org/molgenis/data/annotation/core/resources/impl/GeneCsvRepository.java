@@ -55,8 +55,8 @@ public class GeneCsvRepository extends AbstractRepository
 	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		if (q.getRules().isEmpty()) return getIndex().values().stream();
-		if ((q.getRules().size() != 1) || (q.getRules().get(0).getOperator() != Operator.EQUALS)
-				|| !targetAttributeName.equals(q.getRules().get(0).getField()))
+		if ((q.getRules().size() != 1) || (q.getRules().get(0).getOperator() != Operator.EQUALS) || !targetAttributeName
+				.equals(q.getRules().get(0).getField()))
 		{
 			throw new MolgenisDataException(
 					"The only query allowed on this Repository is '" + targetAttributeName + " EQUALS'");

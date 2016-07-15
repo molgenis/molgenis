@@ -10,10 +10,10 @@ public abstract class EmxResourceImpl extends ResourceImpl
 		super(variantResource, singleResourceConfig);
 	}
 
-    @Override
-    public synchronized boolean isAvailable()
-    {
-        //FIXME: check attributes and entityName
-        return super.isAvailable();
-    }
+	@Override
+	public synchronized boolean isAvailable()
+	{
+		//FIXME: check attributes and entityName
+		return super.isAvailable();
+	}
 }

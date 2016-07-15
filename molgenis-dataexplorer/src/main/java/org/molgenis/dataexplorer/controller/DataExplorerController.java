@@ -3,7 +3,7 @@ package org.molgenis.dataexplorer.controller;
 import com.google.gson.Gson;
 import freemarker.core.ParseException;
 import org.molgenis.data.*;
-import org.molgenis.data.annotation.core.meta.AnnotationJobExecutionMetaData;
+import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -43,7 +43,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.molgenis.data.annotation.core.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
+import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.Permission.WRITE;

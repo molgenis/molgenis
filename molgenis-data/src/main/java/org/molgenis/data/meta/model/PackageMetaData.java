@@ -26,7 +26,7 @@ public class PackageMetaData extends SystemEntityMetaData
 
 	private TagMetaData tagMetaData;
 
-	PackageMetaData()
+	public PackageMetaData()
 	{
 		super(SIMPLE_NAME_, PACKAGE_META);
 	}

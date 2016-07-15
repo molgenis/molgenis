@@ -1,5 +1,5 @@
 ##fileformat=VCFv4.1
-##INFO=<ID=FITCON_SCORE,Number=.,Type=Float,Description="fitness consequence score annotation of genetic variants using Fitcon scoring.">
+##INFO=<ID=FITCON_SCORE,Number=.,Type=String,Description="fitness consequence score annotation of genetic variants using Fitcon scoring.">
 #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
 1	10054	test	C	G	0.5	.	FITCON_SCORE=0.069834;
 17	10025653	test2	T	A	.	.	FITCON_SCORE=0.119763;

@@ -29,10 +29,12 @@ public abstract class MultiFileResource implements Resource
         this.config = config;
     }
 
-    private void initializeResources() {
+    private void initializeResources()
+    {
         this.resources.clear();
 
-        for (Entry<String, ResourceConfig> chromConfig : config.getConfigs().entrySet()) {
+        for (Entry<String, ResourceConfig> chromConfig : config.getConfigs().entrySet())
+        {
             final String key = chromConfig.getKey();
             this.resources.put(key, new ResourceImpl(name + key, new ResourceConfig()
             {
@@ -61,22 +63,25 @@ public abstract class MultiFileResource implements Resource
         }
     }
 
-    private static Object getFirstEqualsValueFor(String attributeName, Query<Entity> q) {
-        return q.getRules()
-                .stream()
-                .filter(rule -> attributeName.equals(rule.getField())
-                        && rule.getOperator() == QueryRule.Operator.EQUALS).findFirst().get().getValue();
+    private static Object getFirstEqualsValueFor(String attributeName, Query<Entity> q)
+    {
+        return q.getRules().stream().filter(rule -> attributeName.equals(rule.getField())
+                && rule.getOperator() == QueryRule.Operator.EQUALS).findFirst().get().getValue();
     }
 
     @Override
-    public boolean isAvailable() {
+    public boolean isAvailable()
+    {
         // initialize after autowiring is complete and resources is empty
-        if (resources.isEmpty()) {
+        if (resources.isEmpty())
+        {
             initializeResources();
         }
 
-        for (Resource chrom : resources.values()) {
-            if (!chrom.isAvailable()) {
+        for (Resource chrom : resources.values())
+        {
+            if (!chrom.isAvailable())
+            {
                 return false;
             }
         }
@@ -84,24 +89,30 @@ public abstract class MultiFileResource implements Resource
     }
 
     @Override
-    public String getName() {
+    public String getName()
+    {
         return name;
     }
 
     @Override
-    public Iterable<Entity> findAll(Query<Entity> q) {
+    public Iterable<Entity> findAll(Query<Entity> q)
+    {
         // initialize after autowiring is complete and resources is empty
         isAvailable();
         Object chromValue = getFirstEqualsValueFor(VcfAttributes.CHROM, q);
         Iterable<Entity> result = new ArrayList<Entity>();
 
-        if (chromValue != null) {
+        if (chromValue != null)
+        {
             String chromStringValue = chromValue.toString();
             Resource resource = resources.get(chromStringValue);
 
-            try {
+            try
+            {
                 result = resource.findAll(q);
-            } catch (NullPointerException e) {
+            }
+            catch (NullPointerException e)
+            {
                 LOG.debug("No file for chromosome %s skipping..", chromStringValue);
             }
         }

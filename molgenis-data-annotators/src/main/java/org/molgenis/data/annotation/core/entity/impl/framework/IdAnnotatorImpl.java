@@ -26,7 +26,7 @@ import static java.util.Objects.requireNonNull;
  * Base class for any {@link EntityAnnotator} that uses a {@link QueryCreator} to query the {@link DataService} or
  * {@link Resources}. It leaves it up to concrete implementations how they wish to process the results by implementing
  * {@link #processQueryResults(Entity, Iterable, Entity)}.
- * 
+ * <p>
  * See {@link AnnotatorImpl} for the most standard implementation of
  * {@link #processQueryResults(Entity, Iterable, Entity)}.
  */
@@ -43,7 +43,8 @@ public abstract class IdAnnotatorImpl implements EntityAnnotator
 
 	public IdAnnotatorImpl(String sourceRepositoryName, AnnotatorInfo info, QueryCreator queryCreator,
 			DataService dataService, Resources resources,
-			CmdLineAnnotatorSettingsConfigurer cmdLineAnnotatorSettingsConfigurer, AttributeMetaDataFactory attributeMetaDataFactory, EntityMetaDataFactory entityMetaDataFactory)
+			CmdLineAnnotatorSettingsConfigurer cmdLineAnnotatorSettingsConfigurer,
+			AttributeMetaDataFactory attributeMetaDataFactory, EntityMetaDataFactory entityMetaDataFactory)
 	{
 		this.sourceRepositoryName = sourceRepositoryName;
 		this.dataService = dataService;
@@ -115,13 +116,10 @@ public abstract class IdAnnotatorImpl implements EntityAnnotator
 
 	/**
 	 * Processes the query results.
-	 * 
-	 * @param inputEntity
-	 *            the input entity that is being annotated
-	 * @param annotationSourceEntities
-	 *            the entities resulting from the query on the annotation source
-	 * @param resultEntity
-	 *            the result entity to write the annotation attributes to
+	 *
+	 * @param inputEntity              the input entity that is being annotated
+	 * @param annotationSourceEntities the entities resulting from the query on the annotation source
+	 * @param resultEntity             the result entity to write the annotation attributes to
 	 */
 	protected abstract void processQueryResults(Entity inputEntity, Iterable<Entity> annotationSourceEntities,
 			Entity resultEntity);

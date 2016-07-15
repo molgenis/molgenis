@@ -28,11 +28,9 @@ public abstract class ResourceImpl implements Resource
 
 	/**
 	 * Creates a new {@link Resource}
-	 * 
-	 * @param name
-	 *            the name of the Resource
-	 * @param config
-	 *            ResourceConfig that configure the location of the file
+	 *
+	 * @param name   the name of the Resource
+	 * @param config ResourceConfig that configure the location of the file
 	 */
 	public ResourceImpl(String name, ResourceConfig config)
 	{
@@ -42,7 +40,7 @@ public abstract class ResourceImpl implements Resource
 
 	/**
 	 * Indicates if the resource is available.
-	 * 
+	 *
 	 * @return indication if this resource is available
 	 */
 	@Override
@@ -59,12 +57,10 @@ public abstract class ResourceImpl implements Resource
 
 	/**
 	 * Searches the repository if it is available.
-	 * 
-	 * @param q
-	 *            the {@link Query} to use
+	 *
+	 * @param q the {@link Query} to use
 	 * @return {@link Entity}s found
-	 * @throws NullPointerException
-	 *             if the repository is not available
+	 * @throws NullPointerException if the repository is not available
 	 */
 	@Override
 	public Iterable<Entity> findAll(Query<Entity> q)

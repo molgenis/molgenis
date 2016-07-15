@@ -3,6 +3,7 @@ package org.molgenis.data.annotation.web;
 import org.molgenis.data.*;
 import org.molgenis.data.annotation.core.RefEntityAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
+import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -59,9 +60,8 @@ public class CrudRepositoryAnnotator
 			EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(repository.getName());
 			List<AttributeMetaData> attributeMetaDatas = annotator.getOutputAttributes();
 
-			RunAsSystemProxy.runAsSystem(
-					() -> addAnnotatorMetadataToRepositories(entityMetaData, annotator.getSimpleName(),
-							attributeMetaDatas));
+			RunAsSystemProxy.runAsSystem(() -> dataService.getMeta().updateEntityMeta(
+					AnnotatorUtils.addAnnotatorMetadataToRepositories(entityMetaData, attributeMetaDatas)));
 			if (annotator instanceof RefEntityAnnotator)
 			{
 				targetMetaData = ((RefEntityAnnotator) annotator).getTargetEntityMetaData(entityMetaData);
@@ -81,9 +81,8 @@ public class CrudRepositoryAnnotator
 			}
 			else
 			{
-				RunAsSystemProxy.runAsSystem(
-						() -> addAnnotatorMetadataToRepositories(entityMetaData, annotator.getSimpleName(),
-								attributeMetaDatas));
+				RunAsSystemProxy.runAsSystem(() -> dataService.getMeta().updateEntityMeta(
+						AnnotatorUtils.addAnnotatorMetadataToRepositories(entityMetaData, attributeMetaDatas)));
 
 				iterateOverEntitiesAndAnnotate(dataService.getRepository(repository.getName()), annotator, action);
 			}
@@ -146,28 +145,4 @@ public class CrudRepositoryAnnotator
 				throw new UnsupportedOperationException();
 		}
 	}
-
-	/**
-	 * Adds a new compound attribute to an existing CrudRepository
-	 *
-	 * @param entityMetaData {@link EntityMetaData} for the existing repository
-	 * @param annotatorName
-	 */
-	private void addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData, String annotatorName,
-			List<AttributeMetaData> attributeMetaDatas)
-	{
-		//FIXME: add the attributes in the compound once the generating of id's in the factory is implemented
-		//currently this would nullpointer
-		//AttributeMetaData compoundAttributeMetaData = attributeMetaDataFactory.create()
-		//		.setName("MOLGENIS_" + annotatorName).setDataType(COMPOUND);
-		if (entityMetaData.getAttribute("MOLGENIS_" + annotatorName) == null)
-		{
-			//compoundAttributeMetaData.addAttributePart(part);
-			attributeMetaDatas.stream().filter(part -> entityMetaData.getAttribute(part.getName()) == null)
-					.forEachOrdered(part -> entityMetaData.addAttribute(part));
-			//entityMetaData.addAttribute(compoundAttributeMetaData);
-			dataService.getMeta().updateEntityMeta(entityMetaData);
-		}
-	}
-
 }
