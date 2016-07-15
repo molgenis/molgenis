@@ -5,6 +5,8 @@ import org.apache.commons.io.FileUtils;
 import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
+import org.molgenis.data.listeners.EntityListener;
+import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
@@ -70,6 +72,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private MetaDataServiceImpl metaDataService;
 	@Autowired
 	private ConfigurableApplicationContext applicationContext;
+	@Autowired
+	private EntityListenersService entityListenersService;
 
 	/**
 	 * Wait till the whole index is stable. Reindex job is done a-synchronized.
@@ -166,8 +170,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		SecurityContextHolder.getContext().setAuthentication(
 				new TestingAuthenticationToken("user", "user", writeTestEntity, readTestEntity, readTestRefEntity,
 						countTestEntity, countTestRefEntity, writeSelfXrefEntity, readSelfXrefEntity,
-						countSelfXrefEntity, "ROLE_ENTITY_READ_SYS_MD_ENTITIES",
-						"ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES", "ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
+						countSelfXrefEntity, "ROLE_ENTITY_READ_SYS_MD_ENTITIES", "ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES",
+						"ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
 	}
 
 	@AfterMethod
@@ -212,7 +216,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		try
 		{
-			dataService.addEntityListener(entityMetaData.getName(), listener);
+			// Test that the listener is being called
+			entityListenersService.addEntityListener(entityMetaData.getName(), listener);
 			dataService.update(entityMetaData.getName(), entities.stream());
 			assertEquals(updateCalled.get(), 1);
 			waitForIndexToBeStable(entityMetaData.getName());
@@ -220,7 +225,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		}
 		finally
 		{
-			dataService.removeEntityListener(entityMetaData.getName(), listener);
+			// Test that the listener is actually removed and not called anymore
+			entityListenersService.removeEntityListener(entityMetaData.getName(), listener);
 			updateCalled.set(0);
 			dataService.update(entityMetaData.getName(), entities.stream());
 			assertEquals(updateCalled.get(), 0);
@@ -684,7 +690,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCreateSelfXref()
 	{
-		Entity entitySelfXref = entitySelfXrefTestHarness.createTestEntities(selfXrefEntityMetaData, 1).collect(Collectors.toList()).get(0);
+		Entity entitySelfXref = entitySelfXrefTestHarness.createTestEntities(selfXrefEntityMetaData, 1)
+				.collect(Collectors.toList()).get(0);
 
 		//Create
 		dataService.add(selfXrefEntityMetaData.getName(), entitySelfXref);

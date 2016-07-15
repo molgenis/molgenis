@@ -1,4 +1,6 @@
-package org.molgenis.data;
+package org.molgenis.data.listeners;
+
+import org.molgenis.data.Entity;
 
 /**
  * Entity listeners can be added to repositories to listen to changes in entities with a given id.
