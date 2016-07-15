@@ -2,10 +2,10 @@ package org.molgenis.data.annotation.core.entity.impl.framework;
 
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.cmd.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.core.AbstractRepositoryEntityAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.entity.EntityAnnotator;
+import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.AttributeMetaData;
 
 import java.io.IOException;
