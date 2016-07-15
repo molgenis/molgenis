@@ -174,11 +174,19 @@ public final class EntityListenersService
 	 */
 	protected void verifyRepoRegistered(String repoFullName)
 	{
-		if (!entityListeners.containsKey(requireNonNull(repoFullName)))
+		lock.readLock().lock();
+		try
 		{
-			LOG.error("Repository [" + repoFullName + "] is not registered in the entity listeners service");
-			throw new MolgenisDataException(
-					"Repository [" + repoFullName + "] is not registered, please contact your administrator");
+			if (!entityListeners.containsKey(requireNonNull(repoFullName)))
+			{
+				LOG.error("Repository [" + repoFullName + "] is not registered in the entity listeners service");
+				throw new MolgenisDataException(
+						"Repository [" + repoFullName + "] is not registered, please contact your administrator");
+			}
+		}
+		finally
+		{
+			lock.readLock().unlock();
 		}
 	}
 }
