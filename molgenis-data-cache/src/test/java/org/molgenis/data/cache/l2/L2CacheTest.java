@@ -89,7 +89,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 		when(repository.getEntityMetaData()).thenReturn(emd);
 		when(repository.getName()).thenReturn(emd.getName());
 
-		l2Cache = new L2Cache(molgenisTransactionManager, transactionInformation);
+		l2Cache = new L2Cache(molgenisTransactionManager, entityHydration, transactionInformation);
 	}
 
 	@Test
