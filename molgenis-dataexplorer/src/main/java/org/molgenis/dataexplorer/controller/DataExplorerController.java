@@ -1,37 +1,9 @@
 package org.molgenis.dataexplorer.controller;
 
-import static org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
-import static org.molgenis.dataexplorer.controller.DataExplorerController.ATTR_GALAXY_API_KEY;
-import static org.molgenis.dataexplorer.controller.DataExplorerController.ATTR_GALAXY_URL;
-import static org.molgenis.dataexplorer.controller.DataExplorerController.URI;
-import static org.molgenis.security.core.Permission.READ;
-import static org.molgenis.security.core.Permission.WRITE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URLDecoder;
-import java.text.SimpleDateFormat;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.stream.Collectors;
-
-import javax.servlet.ServletOutputStream;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.Sort;
-import org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData;
+import com.google.gson.Gson;
+import freemarker.core.ParseException;
+import org.molgenis.data.*;
+import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -57,20 +29,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.SessionAttributes;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
-import com.google.gson.Gson;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import freemarker.core.ParseException;
+import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
+import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
+import static org.molgenis.security.core.Permission.READ;
+import static org.molgenis.security.core.Permission.WRITE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * Controller class for the data explorer.

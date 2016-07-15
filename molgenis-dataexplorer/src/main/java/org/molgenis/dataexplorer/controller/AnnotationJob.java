@@ -1,20 +1,19 @@
 package org.molgenis.dataexplorer.controller;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.annotation.CrudRepositoryAnnotator;
-import org.molgenis.data.annotation.RepositoryAnnotator;
+import org.molgenis.data.annotation.core.RepositoryAnnotator;
+import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import com.google.common.collect.Lists;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
 
 public class AnnotationJob extends Job<Void>
 {

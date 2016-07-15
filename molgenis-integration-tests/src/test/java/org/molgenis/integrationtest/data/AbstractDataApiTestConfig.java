@@ -7,6 +7,7 @@ import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
@@ -21,8 +22,8 @@ import org.molgenis.security.core.MolgenisPasswordEncoder;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
 import org.molgenis.security.owned.OwnedEntityMetaData;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.ui.MolgenisRepositoryDecoratorFactory;
-import org.molgenis.ui.RepositoryDecoratorRegistry;
+import org.molgenis.data.platform.decorators.MolgenisRepositoryDecoratorFactory;
+import org.molgenis.data.platform.decorators.RepositoryDecoratorRegistry;
 import org.molgenis.util.ApplicationContextProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -42,12 +43,10 @@ import javax.sql.DataSource;
 import static org.mockito.Mockito.mock;
 
 @EnableTransactionManagement(proxyTargetClass = true)
-@ComponentScan(
-{ "org.molgenis.data.meta", "org.molgenis.data.elasticsearch.index", "org.molgenis.auth" })
-@Import(
-{ EmbeddedElasticSearchConfig.class, ElasticsearchEntityFactory.class,
-		RunAsSystemBeanPostProcessor.class, FileMetaMetaData.class, OwnedEntityMetaData.class, RhinoConfig.class,
-		DatabaseConfig.class, UuidGenerator.class, ExpressionValidator.class, LanguageService.class, ReindexActionRegisterService.class })
+@ComponentScan({ "org.molgenis.data.meta", "org.molgenis.data.elasticsearch.index", "org.molgenis.auth" })
+@Import({ EmbeddedElasticSearchConfig.class, ElasticsearchEntityFactory.class, RunAsSystemBeanPostProcessor.class,
+		FileMetaMetaData.class, OwnedEntityMetaData.class, RhinoConfig.class, DatabaseConfig.class, UuidGenerator.class,
+		ExpressionValidator.class, LanguageService.class, ReindexActionRegisterService.class, EntityListenersService.class})
 public abstract class AbstractDataApiTestConfig
 {
 	@Autowired
@@ -139,11 +138,18 @@ public abstract class AbstractDataApiTestConfig
 			@Override
 			public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 			{
-				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(),
-						idGenerator, appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry(),
-						reindexActionRegisterService, searchService).createDecoratedRepository(repository);
+				return new MolgenisRepositoryDecoratorFactory(entityManager(), entityAttributesValidator(), idGenerator,
+						appSettings(), dataService(), expressionValidator, repositoryDecoratorRegistry(),
+						reindexActionRegisterService, searchService)
+						.createDecoratedRepository(repository);
 			}
 		};
+	}
+
+	@Bean
+	public EntityListenersService entityListenersService()
+	{
+		return new EntityListenersService();
 	}
 
 	@Bean
@@ -169,5 +175,5 @@ public abstract class AbstractDataApiTestConfig
 	{
 		return new MolgenisPasswordEncoder(new BCryptPasswordEncoder());
 	}
-	
+
 }

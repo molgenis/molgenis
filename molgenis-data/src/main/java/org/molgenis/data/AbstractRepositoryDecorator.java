@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import org.molgenis.data.listeners.EntityListener;
+
 /**
  * Abstract superclass for {@link Repository} decorators that delegates everything to the
  * decorated repository.
@@ -102,18 +104,6 @@ public abstract class AbstractRepositoryDecorator extends ForwardingObject imple
 	{
 		// FIXME GitHub #4809
 		delegate().rebuildIndex();
-	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		delegate().addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		delegate().removeEntityListener(entityListener);
 	}
 
 	@Override

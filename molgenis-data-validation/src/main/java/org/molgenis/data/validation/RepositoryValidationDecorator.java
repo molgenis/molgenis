@@ -2,6 +2,7 @@ package org.molgenis.data.validation;
 
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
@@ -232,18 +233,6 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	public void rebuildIndex()
 	{
 		decoratedRepository.rebuildIndex();
-	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decoratedRepository.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decoratedRepository.removeEntityListener(entityListener);
 	}
 
 	private Stream<Entity> validate(Stream<Entity> entities, ValidationResource validationResource,
@@ -562,6 +551,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		Entity entityToUpdate = findOneById(entity.getIdValue());
 		validationResource.getReadonlyAttrs().forEach(readonlyAttr -> {
 			Object value = entity.get(readonlyAttr.getName());
+
 			Object existingValue = entityToUpdate.get(readonlyAttr.getName());
 
 			if (isSingleReferenceType(readonlyAttr))

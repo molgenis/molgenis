@@ -3,6 +3,7 @@ package org.molgenis.data.mem;
 import com.google.common.collect.Sets;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 
@@ -253,18 +254,6 @@ public class InMemoryRepository implements Repository<Entity>
 	public void rebuildIndex()
 	{
 		// Repo is not INDEXABLE
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
 		throw new UnsupportedOperationException();
 	}
 }

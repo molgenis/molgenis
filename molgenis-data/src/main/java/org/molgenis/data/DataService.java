@@ -2,8 +2,8 @@ package org.molgenis.data;
 
 import java.util.Set;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityMetaData;
 
@@ -331,20 +331,6 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * Get names of all the entities in this source
 	 */
 	Stream<String> getEntityNames();
-
-	/**
-	 * Adds an entity listener for a entity of the given class that listens to entity changes
-	 *
-	 * @param entityListener entity listener for a entity
-	 */
-	void addEntityListener(String entityName, EntityListener entityListener);
-
-	/**
-	 * Removes an entity listener for a entity of the given class
-	 *
-	 * @param entityListener entity listener for a entity
-	 */
-	void removeEntityListener(String entityName, EntityListener entityListener);
 
 	Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId, String newRepositoryLabel);
 

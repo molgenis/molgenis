@@ -3,8 +3,10 @@ package org.molgenis.test.data;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.*;
-import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.test.data.staticentity.TestEntityStaticMetaData;
+import org.molgenis.test.data.staticentity.TestRefEntityStatic;
+import org.molgenis.test.data.staticentity.TestRefEntityStaticMetaData;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -54,7 +56,15 @@ public class EntityTestHarness
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
 
-	private Package testPackage;
+	@Autowired
+	TestEntityStaticMetaData staticTestEntityStaticMetaData;
+
+	@Autowired
+	TestRefEntityStaticMetaData staticTestRefEntityStaticMetaData;
+
+	@Autowired
+	private TestPackage testPackage;
+
 	private Date date;
 	private Date dateTime;
 
@@ -63,9 +73,19 @@ public class EntityTestHarness
 	{
 	}
 
+	public EntityMetaData createStaticRefTestEntityMetaData()
+	{
+		return staticTestRefEntityStaticMetaData;
+	}
+
+	public EntityMetaData createStaticTestEntityMetaData()
+	{
+		return staticTestEntityStaticMetaData;
+	}
+
 	public EntityMetaData createDynamicRefEntityMetaData()
 	{
-		return entityMetaDataFactory.create().setPackage(testPackage).setSimpleName("TypeTestRef")
+		return entityMetaDataFactory.create().setPackage(testPackage).setSimpleName("TypeTestRefDynamic")
 				.addAttribute(createAttribute(ATTR_REF_ID, STRING), ROLE_ID)
 				.addAttribute(createAttribute(ATTR_REF_STRING, STRING), ROLE_LABEL);
 	}
@@ -73,7 +93,7 @@ public class EntityTestHarness
 	public EntityMetaData createDynamicTestEntityMetaData()
 	{
 		EntityMetaData refEntityMetaData = createDynamicRefEntityMetaData();
-		return entityMetaDataFactory.create().setPackage(testPackage).setSimpleName("TypeTest")
+		return entityMetaDataFactory.create().setPackage(testPackage).setSimpleName("TypeTestDynamic")
 				.addAttribute(createAttribute(ATTR_ID, STRING).setAuto(true), ROLE_ID)
 				.addAttribute(createAttribute(ATTR_STRING, STRING), ROLE_LABEL)
 				.addAttribute(createAttribute(ATTR_BOOL, BOOL))
@@ -108,7 +128,7 @@ public class EntityTestHarness
 
 	private Entity createRefEntity(EntityMetaData refEntityMetaData, int id)
 	{
-		Entity refEntity = new DynamicEntity(refEntityMetaData);
+		TestRefEntityStatic refEntity = new TestRefEntityStatic(refEntityMetaData);
 		refEntity.set(ATTR_REF_ID, "" + id);
 		refEntity.set(ATTR_REF_STRING, "refstring" + id);
 		return refEntity;
@@ -137,8 +157,6 @@ public class EntityTestHarness
 		entity1.set(ATTR_MREF, Collections.singletonList(refEntity));
 		return entity1;
 	}
-
-
 
 	private void generateDateAndDateTime()
 	{

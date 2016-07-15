@@ -90,13 +90,15 @@ public class EmxMetaDataParser implements MetaDataParser
 	private final DataService dataService;
 	private final PackageFactory packageFactory;
 	private final AttributeMetaDataFactory attrMetaFactory;
+	private final EntityMetaDataFactory entityMetaDataFactory;
 
 	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory,
-			AttributeMetaDataFactory attrMetaFactory)
+			AttributeMetaDataFactory attrMetaFactory, EntityMetaDataFactory entityMetaDataFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.packageFactory = requireNonNull(packageFactory);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
+		this.entityMetaDataFactory = entityMetaDataFactory;
 	}
 
 	/**
@@ -140,7 +142,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 */
 	private IntermediateParseResults parseTagsSheet(Repository<Entity> tagRepository)
 	{
-		IntermediateParseResults result = new IntermediateParseResults();
+		IntermediateParseResults result = new IntermediateParseResults(entityMetaDataFactory);
 		if (tagRepository != null)
 		{
 			for (Entity tag : tagRepository)
@@ -995,7 +997,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			if (EMX_PACKAGES.equals(sheet))
 			{
-				IntermediateParseResults parseResult = new IntermediateParseResults();
+				IntermediateParseResults parseResult = new IntermediateParseResults(entityMetaDataFactory);
 				parsePackagesSheet(source.getRepository(sheet), parseResult);
 				for (String packageName : parseResult.getPackages().keySet())
 				{
