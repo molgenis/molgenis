@@ -3,6 +3,7 @@ package org.molgenis.integrationtest.platform;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.*;
 import org.molgenis.data.Entity;
+import org.molgenis.data.cache.l2.L2Cache;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
 import org.molgenis.data.listeners.EntityListener;
@@ -75,6 +76,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private ConfigurableApplicationContext applicationContext;
 	@Autowired
 	private EntityListenersService entityListenersService;
+	@Autowired
+	private L2Cache l2Cache;
 
 	/**
 	 * Wait till the whole index is stable. Reindex job is done a-synchronized.
@@ -131,6 +134,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		{
 			LOG.error("Error removing molgenis home directory", e);
 		}
+		l2Cache.logStatistics();
 	}
 
 	@BeforeClass
