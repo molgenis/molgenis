@@ -94,10 +94,10 @@ public class CachingUtilsTest extends AbstractMolgenisSpringTest
 	@Test
 	public void generateCacheKeyTest()
 	{
-		String expectedKey = "TestEntity__id1";
+		String expectedKey = "TestEntityStatic__id1";
 		assertEquals(generateCacheKey("TestEntityStatic", "id1"), expectedKey);
 
-		String expectedKey2 = "TestEntity__2";
+		String expectedKey2 = "TestEntityStatic__2";
 		assertEquals(generateCacheKey("TestEntityStatic", 2), expectedKey2);
 	}
 
