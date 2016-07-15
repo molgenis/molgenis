@@ -224,18 +224,6 @@ public class CmdLineDataService implements DataService
 	}
 
 	@Override
-	public void addEntityListener(String entityName, EntityListener entityListener)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void removeEntityListener(String entityName, EntityListener entityListener)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
 	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId,
 			String newRepositoryLabel)
 	{
