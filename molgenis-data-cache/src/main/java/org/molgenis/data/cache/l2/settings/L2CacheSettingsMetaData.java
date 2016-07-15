@@ -59,23 +59,20 @@ public class L2CacheSettingsMetaData extends SystemEntityMetaData
 				.setDescription("Sets the minimum total size for the internal hash tables.").setDefaultValue("16")
 				.setNillable(false);
 		addAttribute(MAXIMUM_SIZE).setDataType(LONG).setRangeMin(0L).setNillable(true);
-		addAttribute(EXPIRE_AFTER_ACCESS)
-				.setValidationExpression("$('" + EXPIRE_AFTER_ACCESS + "').matches(" + DURATION_REGEX + ").value()")
+		addAttribute(EXPIRE_AFTER_ACCESS).setValidationExpression(getDurationValidationExpression(EXPIRE_AFTER_ACCESS))
 				.setDescription(
 						"Specifies that each entry should be automatically removed from the cache once a fixed duration has "
 								+ "elapsed after the entry's creation, the most recent replacement of its value, or its last "
 								+ "access. Durations are represented by an integer, followed by one of \"d\", \"h\", \"m\", or "
 								+ "\"s\", representing days, hours, minutes, or seconds respectively.")
 				.setNillable(true);
-		addAttribute(EXPIRE_AFTER_WRITE)
-				.setValidationExpression("$('" + EXPIRE_AFTER_WRITE + "').matches(" + DURATION_REGEX + ").value()")
+		addAttribute(EXPIRE_AFTER_WRITE).setValidationExpression(getDurationValidationExpression(EXPIRE_AFTER_WRITE))
 				.setDescription("Specifies that each entry should be automatically removed from "
 						+ "the cache once a fixed duration has elapsed after the entry's creation, or the most recent "
 						+ "replacement of its value. Durations are represented by an integer, followed by one of "
 						+ "\"d\", \"h\", \"m\", or \"s\", representing days, hours, minutes, or seconds respectively.")
 				.setNillable(true);
-		addAttribute(REFRESH_AFTER_WRITE)
-				.setValidationExpression("$('" + REFRESH_AFTER_WRITE + "').matches(" + DURATION_REGEX + ").value()")
+		addAttribute(REFRESH_AFTER_WRITE).setValidationExpression(getDurationValidationExpression(REFRESH_AFTER_WRITE))
 				.setDescription(
 						"Specifies that active entries are eligible for automatic refresh once a fixed duration has elapsed "
 								+ "after the entry's creation, or the most recent replacement of its value. Durations are "
@@ -90,5 +87,11 @@ public class L2CacheSettingsMetaData extends SystemEntityMetaData
 				+ "Soft means that SoftReference is used. Softly-referenced objects will be garbage-collected in a "
 				+ "globally least-recently-used manner, in response to memory demand.");
 		addAttribute(RECORD_STATS).setDataType(BOOL).setNillable(false).setDefaultValue("true");
+	}
+
+	private static String getDurationValidationExpression(String attributeName)
+	{
+		return "$('" + attributeName + "').isNull().or($('" + attributeName + "').matches(" + DURATION_REGEX
+				+ ")).value()";
 	}
 }
