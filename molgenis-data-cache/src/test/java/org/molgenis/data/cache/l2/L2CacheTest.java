@@ -4,6 +4,8 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
@@ -46,6 +48,9 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	private L2Cache l2Cache;
 
 	@Autowired
+	private EntityHydration entityHydration;
+
+	@Autowired
 	private EntityTestHarness entityTestHarness;
 
 	@Autowired
@@ -60,7 +65,6 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	@Captor
 	private ArgumentCaptor<Stream<Object>> idStreamCaptor;
 
-
 	private List<Entity> testEntities;
 	private EntityMetaData emd;
 
@@ -73,7 +77,14 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 		List<Entity> refEntities = entityTestHarness.createTestRefEntities(refEntityMetaData, 2);
 		testEntities = entityTestHarness.createTestEntities(emd, 4, refEntities).collect(toList());
 
-		when(entityManager.create(emd)).thenReturn(new DynamicEntity(emd));
+		when(entityManager.create(emd)).thenAnswer(new Answer<Entity>()
+		{
+			@Override
+			public Entity answer(InvocationOnMock invocation) throws Throwable
+			{
+				return new DynamicEntity(emd);
+			}
+		});
 		when(entityManager.getReference(any(EntityMetaData.class), eq("0"))).thenReturn(refEntities.get(0));
 		when(entityManager.getReference(any(EntityMetaData.class), eq("1"))).thenReturn(refEntities.get(1));
 		when(entityManager.getReferences(any(EntityMetaData.class), eq(newArrayList("0"))))
