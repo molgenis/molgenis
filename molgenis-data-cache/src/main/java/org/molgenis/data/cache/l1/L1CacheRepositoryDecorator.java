@@ -2,11 +2,7 @@ package org.molgenis.data.cache.l1;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import org.molgenis.data.AbstractRepositoryDecorator;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.EntityKey;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.util.Iterator;
@@ -68,10 +64,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator
 	@Override
 	public void add(Entity entity)
 	{
-		if (cacheable)
-		{
-			l1Cache.put(getName(), entity);
-		}
+		if (cacheable) l1Cache.put(getName(), entity);
 		delegate().add(entity);
 	}
 
@@ -119,8 +112,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator
 		Map<Object, Entity> missingEntities = delegate().findAll(missingIds.stream())
 				.collect(toMap(Entity::getIdValue, e -> e));
 
-		return Lists.transform(batch, id ->
-		{
+		return Lists.transform(batch, id -> {
 			Optional<Entity> result = l1Cache.get(entityName, id, getEntityMetaData());
 			if (result == null)
 			{
@@ -142,8 +134,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator
 	{
 		if (cacheable)
 		{
-			entities = entities.filter(entity ->
-			{
+			entities = entities.filter(entity -> {
 				l1Cache.put(getName(), entity);
 				return true;
 			});
@@ -179,7 +170,8 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator
 		{
 			String entityName = getName();
 			ids = ids.peek(id -> l1Cache.putDeletion(EntityKey.create(entityName, id)));
-		} delegate().deleteAll(ids);
+		}
+		delegate().deleteAll(ids);
 	}
 
 	@Override
