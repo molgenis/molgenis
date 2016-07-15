@@ -1,12 +1,10 @@
 package org.molgenis.data.cache.l2;
 
-import com.google.common.collect.*;
-import org.molgenis.data.AbstractRepositoryDecorator;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+import org.molgenis.data.*;
 import org.molgenis.data.transaction.TransactionInformation;
-import org.molgenis.data.EntityKey;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -16,6 +14,8 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Iterators.partition;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Maps.uniqueIndex;
 import static java.util.Objects.requireNonNull;
 import static java.util.Spliterator.ORDERED;
 import static java.util.Spliterator.SORTED;
@@ -68,8 +68,8 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator
 	@Override
 	public Entity findOneById(Object id)
 	{
-		if (cacheable && !transactionInformation.isRepositoryDirty(getName())
-				&& !transactionInformation.isEntityDirty(EntityKey.create(getEntityMetaData(), id)))
+		if (cacheable && !transactionInformation.isRepositoryDirty(getName()) && !transactionInformation
+				.isEntityDirty(EntityKey.create(getEntityMetaData(), id)))
 		{
 			return l2Cache.get(delegate(), id);
 		}
@@ -99,6 +99,18 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator
 		return delegate().findAll(ids);
 	}
 
+	@Override
+	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	{
+		return findAll(ids);
+	}
+
+	@Override
+	public Entity findOneById(Object id, Fetch fetch)
+	{
+		return findOneById(id);
+	}
+
 	/**
 	 * Retrieves a batch of Entity IDs.
 	 * <p>
@@ -117,7 +129,7 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator
 		Collection<Object> cleanIds = partitionedIds.get(false);
 		Collection<Object> dirtyIds = partitionedIds.get(true);
 
-		Map<Object, Entity> result = Maps.uniqueIndex(l2Cache.getBatch(delegate(), cleanIds), Entity::getIdValue);
+		Map<Object, Entity> result = newHashMap(uniqueIndex(l2Cache.getBatch(delegate(), cleanIds), Entity::getIdValue));
 		result.putAll(delegate().findAll(dirtyIds.stream()).collect(toMap(Entity::getIdValue, e -> e)));
 
 		return ids.stream().filter(result::containsKey).map(result::get).collect(toList());

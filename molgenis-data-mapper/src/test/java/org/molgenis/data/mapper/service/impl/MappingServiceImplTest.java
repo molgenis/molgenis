@@ -20,6 +20,7 @@ import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
+import org.molgenis.data.reindex.ReindexActionRegisterServiceImpl;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DataServiceImpl;
@@ -572,7 +573,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		@Bean
 		ReindexActionRegisterService reindexActionRegisterService()
 		{
-			return new ReindexActionRegisterService();
+			return new ReindexActionRegisterServiceImpl();
 		}
 
 		@Bean

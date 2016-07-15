@@ -7,9 +7,6 @@ import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.reindex.ReindexConfig;
-import org.molgenis.data.elasticsearch.reindex.job.ReindexJobExecutionFactory;
-import org.molgenis.data.reindex.ReindexActionRegisterService;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,14 +39,14 @@ public class EmbeddedElasticSearchConfig
 	@Autowired
 	private ElasticsearchEntityFactory elasticsearchEntityFactory;
 
-	@Autowired
-	private MolgenisTransactionManager molgenisTransactionManager;
+//	@Autowired
+//	private MolgenisTransactionManager molgenisTransactionManager;
+//
+//	@Autowired
+//	private ReindexJobExecutionFactory reindexJobExecutionFactory;
 
-	@Autowired
-	private ReindexJobExecutionFactory reindexJobExecutionFactory;
-
-	@Autowired
-	private ReindexActionRegisterService reindexActionRegisterService;
+//	@Autowired
+//	private ReindexActionRegisterService reindexActionRegisterService;
 
 	@Bean(destroyMethod = "close")
 	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory()

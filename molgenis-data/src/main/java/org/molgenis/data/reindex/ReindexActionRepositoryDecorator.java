@@ -14,7 +14,7 @@ import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.*;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType.DATA;
 
 /**
- * {@link Repository} decorator that registers changes with a {@link ReindexActionRegisterService}.
+ * {@link Repository} decorator that registers changes with a {@link ReindexActionRegisterServiceImpl}.
  */
 public class ReindexActionRepositoryDecorator extends AbstractRepositoryDecorator
 {

@@ -28,7 +28,7 @@ import static org.testng.Assert.assertEquals;
 public class ReindexActionRegisterServiceTest
 {
 	@InjectMocks
-	private ReindexActionRegisterService reindexActionRegisterService = new ReindexActionRegisterService();
+	private ReindexActionRegisterService reindexActionRegisterService = new ReindexActionRegisterServiceImpl();
 	@Mock
 	private ReindexActionGroupFactory reindexActionGroupFactory;
 	@Mock

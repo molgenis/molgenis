@@ -18,6 +18,7 @@ import org.springframework.context.annotation.Configuration;
 
 import javax.annotation.PostConstruct;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import static org.molgenis.data.elasticsearch.reindex.meta.ReindexJobExecutionMeta.REINDEX_JOB_EXECUTION;
 
@@ -40,8 +41,7 @@ public class ReindexConfig
 	@Autowired
 	private ReindexJobExecutionFactory reindexJobExecutionFactory;
 
-	@Autowired
-	private ExecutorService executorService;
+	private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
 	@PostConstruct
 	public void register()

@@ -23,6 +23,7 @@ import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.data.reindex.ReindexActionRepositoryDecorator;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
@@ -61,7 +62,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final I18nStringMetaData i18nStringMeta;
 	private final L1Cache l1Cache;
 	private final L2Cache l2Cache;
-
+	private final TransactionInformation transactionInformation;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -71,7 +72,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, UserAuthorityFactory userAuthorityFactory,
 			ReindexActionRegisterService reindexActionRegisterService, SearchService searchService,
 			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder,
-			EntityMetaDataMetaData entityMetaMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache)
+			EntityMetaDataMetaData entityMetaMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache,
+			TransactionInformation transactionInformation)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -91,6 +93,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.i18nStringMeta = requireNonNull(i18nStringMeta);
 		this.l1Cache = requireNonNull(l1Cache);
 		this.l2Cache = requireNonNull(l2Cache);
+		this.transactionInformation = requireNonNull(transactionInformation);
 	}
 
 	@Override
@@ -99,7 +102,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		Repository<Entity> decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
 
 		// 11. Query the L2 cache before querying the database
-		decoratedRepository = new L2CacheRepositoryDecorator(decoratedRepository, l2Cache, reindexActionRegisterService);
+		decoratedRepository = new L2CacheRepositoryDecorator(decoratedRepository, l2Cache, transactionInformation);
 
 		// 10. Query the L1 cache before querying the database
 		decoratedRepository = new L1CacheRepositoryDecorator(decoratedRepository, l1Cache);

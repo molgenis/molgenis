@@ -45,7 +45,6 @@ import static org.molgenis.data.Sort.Direction.DESC;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.testng.Assert.*;
-import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
 public class PlatformIT extends AbstractTestNGSpringContextTests
@@ -138,7 +137,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		selfXrefEntityMetaData = entitySelfXrefTestHarness.createDynamicEntityMetaData();
 		selfXrefEntityMetaData.getAttribute(ATTR_XREF).setRefEntity(selfXrefEntityMetaData);
 
-		RunAsSystemProxy.runAsSystem(() -> {
+		RunAsSystemProxy.runAsSystem(() ->
+		{
 			metaDataService.addEntityMeta(refEntityMetaData);
 			metaDataService.addEntityMeta(entityMetaData);
 			metaDataService.addEntityMeta(selfXrefEntityMetaData);
@@ -166,14 +166,15 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		SecurityContextHolder.getContext().setAuthentication(
 				new TestingAuthenticationToken("user", "user", writeTestEntity, readTestEntity, readTestRefEntity,
 						countTestEntity, countTestRefEntity, writeSelfXrefEntity, readSelfXrefEntity,
-						countSelfXrefEntity, "ROLE_ENTITY_READ_SYS_MD_ENTITIES",
-						"ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES", "ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
+						countSelfXrefEntity, "ROLE_ENTITY_READ_SYS_MD_ENTITIES", "ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES",
+						"ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
 	}
 
 	@AfterMethod
 	public void afterMethod()
 	{
-		runAsSystem(() -> {
+		runAsSystem(() ->
+		{
 			dataService.deleteAll(entityMetaData.getName());
 			dataService.deleteAll(refEntityMetaData.getName());
 			dataService.deleteAll(refEntityMetaData.getName());
@@ -187,7 +188,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityMetaData, 6);
 		List<Entity> entities = testHarness.createTestEntities(entityMetaData, 2, refEntities)
 				.collect(Collectors.toList());
-		runAsSystem(() -> {
+		runAsSystem(() ->
+		{
 			dataService.add(refEntityMetaData.getName(), refEntities.stream());
 			dataService.add(entityMetaData.getName(), entities.stream());
 			waitForIndexToBeStable(entityMetaData.getName());
@@ -385,7 +387,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> testRefEntities = testHarness.createTestRefEntities(refEntityMetaData, 6);
 		List<Entity> testEntities = testHarness.createTestEntities(entityMetaData, 10, testRefEntities)
 				.collect(Collectors.toList());
-		runAsSystem(() -> {
+		runAsSystem(() ->
+		{
 			dataService.add(refEntityMetaData.getName(), testRefEntities.stream());
 			dataService.add(entityMetaData.getName(), testEntities.stream());
 		});
@@ -446,6 +449,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		Entity entity = create(1).findFirst().get();
 		dataService.add(entityMetaData.getName(), Stream.of(entity));
 		waitForIndexToBeStable(entityMetaData.getName());
+
 		TestEntity testEntity = dataService
 				.findOneById(entityMetaData.getName(), entity.getIdValue(), new Fetch().field(ATTR_ID),
 						TestEntity.class);
@@ -594,6 +598,18 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(searchService.count(new QueryImpl<>().search("qwerty"), entityMetaData), 5);
 	}
 
+	@Test
+	public void testCache() throws InterruptedException
+	{
+		dataService.add(entityMetaData.getName(), create(100));
+		waitForIndexToBeStable(entityMetaData.getName());
+
+		for (int i = 0; i < 100000; i++)
+		{
+			dataService.findOneById(entityMetaData.getName(), i % 100);
+		}
+	}
+
 	@Test(enabled = false) //FIXME: sys_md_attributes spam
 	public void testUpdateSingleRefEntityReindexesLargeAmountOfReferencingEntities()
 	{
@@ -684,7 +700,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCreateSelfXref()
 	{
-		Entity entitySelfXref = entitySelfXrefTestHarness.createTestEntities(selfXrefEntityMetaData, 1).collect(Collectors.toList()).get(0);
+		Entity entitySelfXref = entitySelfXrefTestHarness.createTestEntities(selfXrefEntityMetaData, 1)
+				.collect(Collectors.toList()).get(0);
 
 		//Create
 		dataService.add(selfXrefEntityMetaData.getName(), entitySelfXref);

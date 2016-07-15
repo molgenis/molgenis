@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.EntityKey;
@@ -42,17 +43,19 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	private static final int MAX_CACHE_SIZE_PER_ENTITY = 1000;
 	/**
 	 * maps entity name to the loading cache with Object key and Optional dehydrated entity value
- 	 */
+	 */
 	private final ConcurrentMap<String, LoadingCache<Object, Optional<Map<String, Object>>>> caches;
 	private final EntityHydration entityHydration;
 	private final TransactionInformation transactionInformation;
 
 	@Autowired
-	public L2Cache(EntityHydration entityHydration, TransactionInformation transactionInformation)
+	public L2Cache(MolgenisTransactionManager molgenisTransactionManager, EntityHydration entityHydration,
+			TransactionInformation transactionInformation)
 	{
 		this.entityHydration = requireNonNull(entityHydration);
 		this.transactionInformation = requireNonNull(transactionInformation);
 		caches = Maps.newConcurrentMap();
+		requireNonNull(molgenisTransactionManager).addTransactionListener(this);
 	}
 
 	@Override
@@ -65,7 +68,11 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 
 	private void evict(EntityKey entityKey)
 	{
-		caches.get(entityKey.getEntityName()).invalidate(entityKey.getId());
+		LoadingCache<Object, Optional<Map<String, Object>>> cache = caches.get(entityKey.getEntityName());
+		if (cache != null)
+		{
+			cache.invalidate(entityKey.getId());
+		}
 	}
 
 	/**

@@ -6,6 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -51,6 +52,8 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	private EntityManager entityManager;
 
 	@Mock
+	private MolgenisTransactionManager molgenisTransactionManager;
+	@Mock
 	private Repository<Entity> repository;
 	@Mock
 	private TransactionInformation transactionInformation;
@@ -82,7 +85,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 		when(repository.getEntityMetaData()).thenReturn(emd);
 		when(repository.getName()).thenReturn(emd.getName());
 
-		l2Cache = new L2Cache(entityHydration, transactionInformation);
+		l2Cache = new L2Cache(molgenisTransactionManager, entityHydration, transactionInformation);
 	}
 
 	@Test
