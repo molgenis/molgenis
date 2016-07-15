@@ -1,16 +1,18 @@
 package org.molgenis.data.cache.l2;
 
 import com.google.common.util.concurrent.UncheckedExecutionException;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
-import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.transaction.MolgenisTransactionManager;
+import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.test.data.EntityTestHarness;
 import org.molgenis.util.EntityUtils;
@@ -25,6 +27,7 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -43,9 +46,6 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	private L2Cache l2Cache;
 
 	@Autowired
-	private EntityHydration entityHydration;
-
-	@Autowired
 	private EntityTestHarness entityTestHarness;
 
 	@Autowired
@@ -57,6 +57,10 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	private Repository<Entity> repository;
 	@Mock
 	private TransactionInformation transactionInformation;
+	@Captor
+	private ArgumentCaptor<Stream<Object>> idStreamCaptor;
+
+
 	private List<Entity> testEntities;
 	private EntityMetaData emd;
 
@@ -81,7 +85,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		reset(repository,transactionInformation);
+		reset(repository, transactionInformation);
 		when(repository.getEntityMetaData()).thenReturn(emd);
 		when(repository.getName()).thenReturn(emd.getName());
 
@@ -122,11 +126,12 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testFindAll()
 	{
-		when(repository.findAll(any(Stream.class))).thenReturn(testEntities.stream());
-		List<Entity> result = l2Cache.getBatch(repository, newArrayList("1", "2", "3", "4"));
+		when(repository.findAll(idStreamCaptor.capture())).thenReturn(testEntities.stream());
+		List<Entity> result = l2Cache.getBatch(repository, newArrayList("0", "1", "2", "3"));
 		Map<Object, Entity> retrievedEntities = result.stream().collect(toMap(Entity::getIdValue, e -> e));
 		assertEquals(retrievedEntities.size(), 4);
 		assertTrue(EntityUtils.equals(retrievedEntities.get("1"), testEntities.get(1)));
+		assertEquals(idStreamCaptor.getValue().collect(Collectors.toList()), newArrayList("0", "1", "2", "3"));
 	}
 
 	@Configuration
