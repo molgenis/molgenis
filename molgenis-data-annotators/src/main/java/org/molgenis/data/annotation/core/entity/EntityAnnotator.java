@@ -1,7 +1,7 @@
 package org.molgenis.data.annotation.core.entity;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.annotation.cmd.CmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.AttributeMetaData;
 
 import java.util.List;
