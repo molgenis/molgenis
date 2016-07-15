@@ -42,8 +42,8 @@ import static java.util.Arrays.asList;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
 
 /**
- * Build JAR file...............: mvn clean install -pl molgenis-data-annotators/ -am -DskipTests -P create-delivery
- * Run..........................: java -jar molgenis-data-annotators/target/CmdLineAnnotator.jar
+ * Build JAR file...............: mvn clean install -pl molgenis-annotators-cmd/ -am -DskipTests -P create-delivery
+ * Run..........................: java -jar molgenis-annotators-cmd/target/CmdLineAnnotator.jar
  */
 public class CmdLineAnnotator
 {
