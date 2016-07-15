@@ -1,4 +1,4 @@
-package org.molgenis.data.cache.l11;
+package org.molgenis.data.cache.l1;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
