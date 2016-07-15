@@ -1,5 +1,6 @@
 package org.molgenis.data.support;
 
+import autovalue.shaded.com.google.common.common.collect.Maps;
 import com.google.common.collect.Iterables;
 import org.molgenis.data.*;
 import org.molgenis.data.Package;
@@ -116,6 +117,7 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 				.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData>identity(), (u, v) -> {
 					throw new IllegalStateException(String.format("Duplicate key %s", u));
 				}, LinkedCaseInsensitiveMap::new));
+		if (ownLookupAttrs.isEmpty()) ownLookupAttrs = null;
 	}
 
 	@Override
@@ -213,6 +215,7 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	public EditableEntityMetaData setExtends(EntityMetaData extends_)
 	{
 		this.extends_ = extends_;
+		clearCache();
 		return this;
 	}
 
@@ -434,6 +437,7 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 				.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData>identity(), (u, v) -> {
 					throw new IllegalStateException(String.format("Duplicate key %s", u));
 				}, LinkedCaseInsensitiveMap::new));
+		if (ownLookupAttrs.isEmpty()) ownLookupAttrs = null;
 		clearCache();
 	}
 
