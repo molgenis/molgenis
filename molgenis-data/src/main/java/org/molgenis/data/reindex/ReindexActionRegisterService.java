@@ -4,7 +4,8 @@ import org.molgenis.data.reindex.meta.ReindexActionMetaData;
 import org.molgenis.security.core.runas.RunAsSystem;
 
 /**
- * Created by fkelpin on 15/07/16.
+ * Registers changes made to an indexed repository that need to be fixed by reindexing
+ * the relevant data.
  */
 public interface ReindexActionRegisterService
 {
