@@ -3,6 +3,7 @@ package org.molgenis.data.elasticsearch;
 import org.elasticsearch.common.collect.Iterators;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -285,18 +286,6 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		return elasticSearchService.aggregate(aggregateQuery, getEntityMetaData());
-	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decoratedRepository.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decoratedRepository.removeEntityListener(entityListener);
 	}
 
 	/**

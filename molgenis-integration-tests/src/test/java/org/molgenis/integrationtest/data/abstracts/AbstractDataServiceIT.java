@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCapability;
