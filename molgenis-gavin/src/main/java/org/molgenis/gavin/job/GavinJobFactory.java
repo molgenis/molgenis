@@ -1,10 +1,10 @@
 package org.molgenis.gavin.job;
 
+import org.molgenis.annotation.cmd.CmdLineAnnotator;
 import org.molgenis.data.DataService;
-import org.molgenis.data.annotation.CrudRepositoryAnnotator;
-import org.molgenis.data.annotation.EffectsAnnotator;
-import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.cmd.CmdLineAnnotator;
+import org.molgenis.data.annotation.core.EffectsAnnotator;
+import org.molgenis.data.annotation.core.RepositoryAnnotator;
+import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.file.FileStore;
@@ -20,48 +20,47 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.of;
-import static org.molgenis.gavin.job.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
+import static org.molgenis.gavin.job.meta.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
 
 @Component
 public class GavinJobFactory
 {
-	@Autowired
 	CrudRepositoryAnnotator crudRepositoryAnnotator;
-
-	@Autowired
 	DataService dataService;
-
-	@Autowired
 	private PlatformTransactionManager transactionManager;
-
-	@Autowired
 	private UserDetailsService userDetailsService;
-
-	@Autowired
 	private JobExecutionUpdater jobExecutionUpdater;
-
-	@Autowired
 	private MailSender mailSender;
-
-	@Autowired
 	FileStore fileStore;
-
-	@Autowired
 	private RepositoryAnnotator cadd;
-
-	@Autowired
 	private RepositoryAnnotator exac;
-
-	@Autowired
 	private RepositoryAnnotator snpEff;
-
-	@Autowired
 	private EffectsAnnotator gavin;
+	private MenuReaderService menuReaderService;
 
 	@Autowired
-	private MenuReaderService menuReaderService;
+	public GavinJobFactory(CrudRepositoryAnnotator crudRepositoryAnnotator, DataService dataService,
+			PlatformTransactionManager transactionManager, UserDetailsService userDetailsService,
+			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, FileStore fileStore,
+			RepositoryAnnotator cadd, RepositoryAnnotator exac, RepositoryAnnotator snpEff, EffectsAnnotator gavin,
+			MenuReaderService menuReaderService)
+	{
+		this.crudRepositoryAnnotator = requireNonNull(crudRepositoryAnnotator);
+		this.dataService = requireNonNull(dataService);
+		this.transactionManager = requireNonNull(transactionManager);
+		this.userDetailsService = requireNonNull(userDetailsService);
+		this.jobExecutionUpdater = requireNonNull(jobExecutionUpdater);
+		this.mailSender = requireNonNull(mailSender);
+		this.fileStore = requireNonNull(fileStore);
+		this.cadd = requireNonNull(cadd);
+		this.exac = requireNonNull(exac);
+		this.snpEff = requireNonNull(snpEff);
+		this.gavin = requireNonNull(gavin);
+		this.menuReaderService = requireNonNull(menuReaderService);
+	}
 
 	@RunAsSystem
 	public GavinJob createJob(GavinJobExecution gavinJobExecution)
@@ -73,9 +72,10 @@ public class GavinJobFactory
 		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 
-		return new GavinJob(new CmdLineAnnotator(), new ProgressImpl(gavinJobExecution, jobExecutionUpdater, mailSender),
-				new TransactionTemplate(transactionManager), runAsAuthentication, gavinJobExecution.getIdentifier(), fileStore,
-				menuReaderService, cadd, exac, snpEff, gavin);
+		return new GavinJob(new CmdLineAnnotator(),
+				new ProgressImpl(gavinJobExecution, jobExecutionUpdater, mailSender),
+				new TransactionTemplate(transactionManager), runAsAuthentication, gavinJobExecution.getIdentifier(),
+				fileStore, menuReaderService, cadd, exac, snpEff, gavin);
 	}
 
 	public List<String> getAnnotatorsWithMissingResources()

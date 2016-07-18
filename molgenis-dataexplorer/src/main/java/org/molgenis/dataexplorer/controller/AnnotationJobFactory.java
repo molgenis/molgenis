@@ -4,14 +4,14 @@ import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.annotation.AnnotationService;
-import org.molgenis.data.annotation.CrudRepositoryAnnotator;
-import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.meta.AnnotationJobExecution;
+import org.molgenis.data.annotation.core.RepositoryAnnotator;
+import org.molgenis.data.annotation.core.utils.AnnotatorDependencyOrderResolver;
+import org.molgenis.data.annotation.web.AnnotationService;
+import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
+import org.molgenis.data.annotation.web.meta.AnnotationJobExecution;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
-import org.molgenis.data.support.AnnotatorDependencyOrderResolver;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,7 +27,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.annotation.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
+import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 
 /**
  * Creates AnnotationJob based on its {@link AnnotationJobExecution}. Is a bean so that it can use {@link Autowired}

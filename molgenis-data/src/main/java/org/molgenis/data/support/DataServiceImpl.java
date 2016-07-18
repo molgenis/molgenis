@@ -1,6 +1,7 @@
 package org.molgenis.data.support;
 
 import org.molgenis.data.*;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
@@ -226,18 +227,6 @@ public class DataServiceImpl implements DataService
 	public <E extends Entity> E findOneById(String entityName, Object id, Fetch fetch, Class<E> clazz)
 	{
 		return getRepository(entityName, clazz).findOneById(id, fetch);
-	}
-
-	@Override
-	public void addEntityListener(String entityName, EntityListener entityListener)
-	{
-		getRepository(entityName).addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(String entityName, EntityListener entityListener)
-	{
-		getRepository(entityName).removeEntityListener(entityListener);
 	}
 
 	@Override

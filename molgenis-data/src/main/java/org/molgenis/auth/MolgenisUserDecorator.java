@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
-import org.molgenis.data.EntityListener;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
@@ -296,17 +296,5 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 	public void rebuildIndex()
 	{
 		decoratedRepository.rebuildIndex();
-	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decoratedRepository.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decoratedRepository.removeEntityListener(entityListener);
 	}
 }

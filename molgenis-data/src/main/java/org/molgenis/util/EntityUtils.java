@@ -15,6 +15,7 @@ import org.molgenis.data.meta.model.Tag;
 
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -278,7 +279,19 @@ public class EntityUtils
 		{
 			return false;
 		}
-		if (!entityMeta.getBackend().equals(otherEntityMeta.getBackend()))
+		//NB Thsi is at such a low level that we do not know the default backend
+		// so we don't check if the other one is the default if the backend is null.
+		String backend = entityMeta.getBackend();
+		String otherBackend = otherEntityMeta.getBackend();
+		if (backend == null && otherBackend != null)
+		{
+			return false;
+		}
+		else if (backend != null && otherBackend == null)
+		{
+			return false;
+		}
+		else if (backend != null && !backend.equals(otherBackend))
 		{
 			return false;
 		}
@@ -774,5 +787,22 @@ public class EntityUtils
 
 		int result = entity.getEntityMetaData().getName().hashCode();
 		return 31 * result + h;
+	}
+
+	public static boolean entitiesEquals(Iterable<Entity> entities, Iterable<Entity> other)
+	{
+		if (Iterables.size(entities) != Iterables.size(other))
+		{
+			return false;
+		}
+		Iterator<Entity> otherIt = other.iterator();
+		for (Entity entity : entities)
+		{
+			if (!equals(entity, otherIt.next()))
+			{
+				return false;
+			}
+		}
+		return true;
 	}
 }

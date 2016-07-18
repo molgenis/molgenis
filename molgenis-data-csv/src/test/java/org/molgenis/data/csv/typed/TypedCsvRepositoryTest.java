@@ -24,15 +24,15 @@ public class TypedCsvRepositoryTest
 	//		File csvFile = new File(FileUtils.getTempDirectory(), "testdata.csv");
 	//		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
 	//
-	//		TypedCsvRepository<TestEntity> repo = new TypedCsvRepository<TestEntity>(csvFile, ENTITY_META_DATA, ',', 1,
+	//		TypedCsvRepository<TestEntityStatic> repo = new TypedCsvRepository<TestEntityStatic>(csvFile, ENTITY_META_DATA, ',', 1,
 	//				new TestEntityLineMapper());
 	//
 	//		assertEquals(Iterables.size(repo), 5);
 	//
-	//		CloseableIterator<TestEntity> it = repo.typedIterator();
+	//		CloseableIterator<TestEntityStatic> it = repo.typedIterator();
 	//		try
 	//		{
-	//			TestEntity entity = it.next();
+	//			TestEntityStatic entity = it.next();
 	//			assertEquals(entity.getCol1(), "val1");
 	//			assertEquals(entity.getCol2(), "val2");
 	//		}
@@ -42,23 +42,23 @@ public class TypedCsvRepositoryTest
 	//		}
 	//	}
 	//
-	//	private static class TestEntityLineMapper implements LineMapper<TestEntity>
+	//	private static class TestEntityLineMapper implements LineMapper<TestEntityStatic>
 	//	{
 	//		@Override
-	//		public TestEntity mapLine(String[] values, int lineNumber)
+	//		public TestEntityStatic mapLine(String[] values, int lineNumber)
 	//		{
-	//			return new TestEntity(lineNumber, values[0], values[1]);
+	//			return new TestEntityStatic(lineNumber, values[0], values[1]);
 	//		}
 	//	}
 	//
-	//	private static class TestEntity extends AbstractEntity
+	//	private static class TestEntityStatic extends AbstractEntity
 	//	{
 	//		private static final long serialVersionUID = -2658561504524427609L;
 	//		private final Integer index;
 	//		private final String col1;
 	//		private final String col2;
 	//
-	//		public TestEntity(Integer index, String col1, String col2)
+	//		public TestEntityStatic(Integer index, String col1, String col2)
 	//		{
 	//			super();
 	//			this.index = index;

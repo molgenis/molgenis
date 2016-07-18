@@ -5,6 +5,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AggregateQueryImpl;
@@ -383,22 +384,6 @@ public class IndexedRepositoryDecoratorTest
 		indexedRepositoryDecorator.query();
 		verify(decoratedRepo, times(1)).query();
 		verifyZeroInteractions(elasticSearchService);
-	}
-
-	@Test
-	public void addEntityListener()
-	{
-		EntityListener listener = mock(EntityListener.class);
-		indexedRepositoryDecorator.addEntityListener(listener);
-		verify(decoratedRepo, times(1)).addEntityListener(listener);
-	}
-
-	@Test
-	public void removeEntityListener()
-	{
-		EntityListener listener = mock(EntityListener.class);
-		indexedRepositoryDecorator.removeEntityListener(listener);
-		verify(decoratedRepo, times(1)).removeEntityListener(listener);
 	}
 
 	@Test

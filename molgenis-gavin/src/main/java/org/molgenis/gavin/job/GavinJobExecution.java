@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.meta.model.EntityMetaData;
 
-import static org.molgenis.gavin.job.GavinJobExecutionMetaData.FILENAME;
+import static org.molgenis.gavin.job.meta.GavinJobExecutionMetaData.FILENAME;
 
 public class GavinJobExecution extends JobExecution
 {

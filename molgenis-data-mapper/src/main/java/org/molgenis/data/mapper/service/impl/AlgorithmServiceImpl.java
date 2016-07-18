@@ -126,12 +126,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		Entity mapEntity = new DynamicEntity(entity.getEntityMetaData());
 		for (String attributeName : attributeNames)
 		{
-			Object value = entity.get(attributeName);
-			if (value instanceof Entity)
-			{
-				value = ((Entity) value).getIdValue();
-			}
-			mapEntity.set(attributeName, value);
+			mapEntity.set(attributeName, entity.get(attributeName));
 		}
 		return mapEntity;
 	}

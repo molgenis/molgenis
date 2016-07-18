@@ -101,7 +101,7 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 		assertTrue(EntityUtils.equals(actualHydratedEntity, hydratedEntity));
 		// check that it has retrieved references of type TypeTestRef
 		assertTrue(entityMetaDataArgumentCaptor.getAllValues().stream()
-				.allMatch(emd -> emd.getName().equals("TypeTestRef")));
+				.allMatch(emd -> emd.getName().equals("test_TypeTestRefDynamic")));
 	}
 
 	@Test
