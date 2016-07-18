@@ -16,5 +16,10 @@ public interface MetaDataParser
 	 */
 	ParsedMetaData parse(RepositoryCollection source, String defaultPackage);
 
+	/**
+	 * TODO documentation
+	 * @param source
+	 * @return
+	 */
 	EntitiesValidationReport validate(RepositoryCollection source);
 }

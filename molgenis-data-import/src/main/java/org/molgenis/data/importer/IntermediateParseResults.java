@@ -4,7 +4,7 @@ import com.google.common.collect.*;
 import org.molgenis.data.Entity;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.LanguageMetaData;
-import org.molgenis.data.importer.EmxMetaDataParser.EmxAttribute;
+import org.molgenis.data.importer.EmxMetaDataParserUtils.EmxAttribute;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -129,9 +129,8 @@ public final class IntermediateParseResults
 
 	/**
 	 * Checks if it knows entity with given simple name.
-	 * 
-	 * @param name
-	 *            simple name of the entity
+	 *
+	 * @param name simple name of the entity
 	 * @return true if entity with simple name name is known, false otherwise
 	 */
 	public boolean knowsEntity(String name)
@@ -249,9 +248,8 @@ public final class IntermediateParseResults
 
 	/**
 	 * Gets a specific package
-	 * 
-	 * @param name
-	 *            the name of the package
+	 *
+	 * @param name the name of the package
 	 * @return
 	 */
 	public Package getPackage(String name)
@@ -273,5 +271,4 @@ public final class IntermediateParseResults
 	{
 		attributeTags.put(entityName, tag);
 	}
-
 }
