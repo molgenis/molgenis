@@ -1,7 +1,11 @@
 package org.molgenis.data.importer;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.mysql.EmxImportServiceRegistrator;
+import org.molgenis.data.i18n.model.I18nStringMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.PackageFactory;
+import org.molgenis.data.meta.model.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -15,14 +19,33 @@ public class ImporterConfiguration
 {
 	@Autowired
 	private DataService dataService;
+
 	@Autowired
 	private PermissionSystemService permissionSystemService;
+
 	@Autowired
 	private TagService<LabeledResource, LabeledResource> tagService;
+
 	@Autowired
 	private ImportServiceFactory importServiceFactory;
+
 	@Autowired
 	private MolgenisPermissionService molgenisPermissionService;
+
+	@Autowired
+	private TagMetaData tagMetaData;
+
+	@Autowired
+	private I18nStringMetaData i18nStringMetaData;
+
+	@Autowired
+	private PackageFactory packageFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
+	@Autowired
+	private EntityMetaDataFactory entityMetaDataFactory;
 
 	@Bean
 	public ImportService emxImportService()
@@ -33,18 +56,13 @@ public class ImporterConfiguration
 	@Bean
 	public ImportWriter importWriter()
 	{
-		return new ImportWriter(dataService, permissionSystemService, tagService, molgenisPermissionService);
+		return new ImportWriter(dataService, permissionSystemService, tagService, molgenisPermissionService,
+				tagMetaData, i18nStringMetaData);
 	}
 
 	@Bean
 	public MetaDataParser emxMetaDataParser()
 	{
-		return new EmxMetaDataParser(dataService);
-	}
-
-	@Bean
-	public EmxImportServiceRegistrator mysqlRepositoryRegistrator()
-	{
-		return new EmxImportServiceRegistrator(importServiceFactory, emxImportService());
+		return new EmxMetaDataParser(dataService, packageFactory, attrMetaFactory, entityMetaDataFactory);
 	}
 }

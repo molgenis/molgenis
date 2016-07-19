@@ -1,9 +1,9 @@
 package org.molgenis.fieldtypes;
 
-import java.text.ParseException;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.model.MolgenisModelException;
+
+import java.text.ParseException;
 
 public class TextField extends FieldType
 {
@@ -27,6 +27,12 @@ public class TextField extends FieldType
 	public String getMysqlType() throws MolgenisModelException
 	{
 		return "TEXT";
+	}
+
+	@Override
+	public String getPostgreSqlType()
+	{
+		return "text";
 	}
 
 	@Override
@@ -85,9 +91,9 @@ public class TextField extends FieldType
 	}
 
 	@Override
-	public FieldTypeEnum getEnumType()
+	public AttributeType getEnumType()
 	{
-		return FieldTypeEnum.TEXT;
+		return AttributeType.TEXT;
 	}
 
 	@Override

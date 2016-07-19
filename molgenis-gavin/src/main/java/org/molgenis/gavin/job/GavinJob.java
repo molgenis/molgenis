@@ -1,7 +1,7 @@
 package org.molgenis.gavin.job;
 
-import org.molgenis.data.annotation.RepositoryAnnotator;
-import org.molgenis.data.annotation.cmd.CmdLineAnnotator;
+import org.molgenis.annotation.cmd.CmdLineAnnotator;
+import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.file.FileStore;

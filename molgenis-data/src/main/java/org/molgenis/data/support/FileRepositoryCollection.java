@@ -1,16 +1,15 @@
 package org.molgenis.data.support;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.processor.CellProcessor;
 
 import com.google.common.collect.Lists;
 
-public abstract class FileRepositoryCollection implements RepositoryCollection
+public abstract class FileRepositoryCollection extends AbstractRepositoryCollection
 {
 	/** process cells after reading */
 	protected List<CellProcessor> cellProcessors;
@@ -27,6 +26,11 @@ public abstract class FileRepositoryCollection implements RepositoryCollection
 		}
 	}
 
+	/**
+	 * Initialize this file repository collection
+	 */
+	public abstract void init() throws IOException;
+
 	public Set<String> getFileNameExtensions()
 	{
 		return fileNameExtensions;
@@ -41,10 +45,4 @@ public abstract class FileRepositoryCollection implements RepositoryCollection
 
 		cellProcessors.add(cellProcessor);
 	}
-
-	@Override
-	public abstract Iterable<String> getEntityNames();
-
-	@Override
-	public abstract Repository getRepository(String name);
 }

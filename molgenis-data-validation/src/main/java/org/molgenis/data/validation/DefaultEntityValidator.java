@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
@@ -127,7 +127,7 @@ public class DefaultEntityValidator implements EntityValidator
 					String entityName = attr.getName().equalsIgnoreCase("identifier") ? "Characteristic"
 							: meta.getName();
 
-					long count = dataService.count(entityName, new QueryImpl().in(attr.getName(), values));
+					long count = dataService.count(entityName, new QueryImpl<Entity>().in(attr.getName(), values));
 					if (count > 0)
 					{
 						// Go through the list to find the violators
@@ -140,7 +140,7 @@ public class DefaultEntityValidator implements EntityValidator
 
 							Object value = entity.get(attr.getName());
 							Entity existing = dataService.findOne(entityName,
-									new QueryImpl().eq(attr.getName(), value));
+									new QueryImpl<Entity>().eq(attr.getName(), value));
 
 							if (existing != null)
 							{

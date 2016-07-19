@@ -1,13 +1,6 @@
 package org.molgenis.charts.highcharts.convert;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
-import java.util.TimeZone;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.charts.MolgenisSerieType;
 import org.molgenis.charts.data.BoxPlotSerie;
 import org.molgenis.charts.data.XYData;
@@ -16,6 +9,8 @@ import org.molgenis.charts.highcharts.basic.Marker;
 import org.molgenis.charts.highcharts.basic.Series;
 import org.molgenis.charts.highcharts.basic.SeriesType;
 import org.springframework.stereotype.Component;
+
+import java.util.*;
 
 /**
  * This data util is made for converting the Molgenis charts structure to the Highchart structure
@@ -73,8 +68,8 @@ public class HighchartSeriesUtil
 		series.setData(parseXYDataToList(xYDataSerie.getData(), xYDataSerie.getAttributeXFieldTypeEnum(),
 				xYDataSerie.getAttributeYFieldTypeEnum()));
 
-		if (MolgenisSerieType.SCATTER.equals(xYDataSerie.getType())
-				&& (FieldTypeEnum.DATE.equals(xYDataSerie.getAttributeXFieldTypeEnum()) || FieldTypeEnum.DATE_TIME
+		if (MolgenisSerieType.SCATTER.equals(xYDataSerie.getType()) && (
+				AttributeType.DATE.equals(xYDataSerie.getAttributeXFieldTypeEnum()) || AttributeType.DATE_TIME
 						.equals(xYDataSerie.getAttributeXFieldTypeEnum())))
 		{
 			series.setLineWidth(0);
@@ -106,8 +101,8 @@ public class HighchartSeriesUtil
 	 * @param yValueFieldTypeEnum
 	 * @return List<Object>
 	 */
-	public List<Object> parseXYDataToList(List<XYData> xydata, FieldTypeEnum xValueFieldTypeEnum,
-			FieldTypeEnum yValueFieldTypeEnum)
+	public List<Object> parseXYDataToList(List<XYData> xydata, AttributeType xValueFieldTypeEnum,
+			AttributeType yValueFieldTypeEnum)
 	{
 		List<Object> data = new ArrayList<Object>();
 		for (XYData xYData : xydata)
@@ -127,13 +122,13 @@ public class HighchartSeriesUtil
 	 * @param value
 	 * @return Object
 	 */
-	public Object convertValue(FieldTypeEnum fieldTypeEnum, Object value)
+	public Object convertValue(AttributeType fieldTypeEnum, Object value)
 	{
-		if (FieldTypeEnum.DATE_TIME.equals(fieldTypeEnum))
+		if (AttributeType.DATE_TIME.equals(fieldTypeEnum))
 		{
 			return (convertDateTimeToMilliseconds((Date) value));
 		}
-		else if (FieldTypeEnum.DATE.equals(fieldTypeEnum))
+		else if (AttributeType.DATE.equals(fieldTypeEnum))
 		{
 			return (convertDateToMilliseconds((Date) value));
 		}

@@ -7,11 +7,7 @@ import org.molgenis.vcf.VcfReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Enumeration;
 import java.util.List;
@@ -52,7 +48,7 @@ public class VcfReaderFactoryImpl implements VcfReaderFactory
 				   inputStream = zipFile.getInputStream(entry);
 			}
 			VcfReader reader = new VcfReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
-			// register reader so close() can close all readers
+			// bootstrap reader so close() can close all readers
 			vcfReaderRegistry.add(reader);
 			return reader;
 

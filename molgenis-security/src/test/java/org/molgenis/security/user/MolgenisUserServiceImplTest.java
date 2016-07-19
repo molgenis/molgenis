@@ -2,9 +2,11 @@ package org.molgenis.security.user;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
 import static org.testng.Assert.assertEquals;
 
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.user.MolgenisUserServiceImplTest.Config;
@@ -80,8 +82,8 @@ public class MolgenisUserServiceImplTest extends AbstractTestNGSpringContextTest
 		when(existingMolgenisUser.getUsername()).thenReturn(username);
 		when(existingMolgenisUser.getPassword()).thenReturn("encrypted-password");
 
-		when(
-				dataService.findOne(MolgenisUser.ENTITY_NAME, new QueryImpl().eq(MolgenisUser.USERNAME, username),
+		when(dataService
+				.findOne(MOLGENIS_USER, new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.USERNAME, username),
 						MolgenisUser.class)).thenReturn(existingMolgenisUser);
 
 		assertEquals(molgenisUserServiceImpl.getUser(username), existingMolgenisUser);

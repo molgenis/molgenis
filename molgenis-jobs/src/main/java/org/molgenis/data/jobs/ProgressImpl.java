@@ -1,24 +1,19 @@
 package org.molgenis.data.jobs;
 
-import static org.molgenis.data.jobs.JobExecution.Status.CANCELED;
-import static org.molgenis.data.jobs.JobExecution.Status.FAILED;
-import static org.molgenis.data.jobs.JobExecution.Status.RUNNING;
-import static org.molgenis.data.jobs.JobExecution.Status.SUCCESS;
-
-import java.util.Date;
-
 import org.joda.time.Duration;
 import org.joda.time.Period;
 import org.joda.time.format.PeriodFormatter;
 import org.joda.time.format.PeriodFormatterBuilder;
+import org.molgenis.data.jobs.model.JobExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.LoggerContext;
+import java.util.Date;
+
+import static org.molgenis.data.jobs.model.JobExecution.Status.*;
 
 /**
  * Tracks progress and stores it in a {@link JobExecution} entity.
@@ -26,26 +21,18 @@ import ch.qos.logback.classic.LoggerContext;
  */
 public class ProgressImpl implements Progress
 {
+	private static final Logger LOG = LoggerFactory.getLogger(ProgressImpl.class);
+	private static final Logger JOB_EXECUTION_LOG = LoggerFactory.getLogger(JobExecution.class);
+
 	private final JobExecution jobExecution;
-	private ch.qos.logback.classic.Logger executionLogger;
-	private final static Logger LOG = LoggerFactory.getLogger(ProgressImpl.class);
-	private final EntityLogAppender appender;
 	private final JobExecutionUpdater updater;
 	private final MailSender mailSender;
 
 	public ProgressImpl(JobExecution jobExecution, JobExecutionUpdater updater, MailSender mailSender)
 	{
 		this.jobExecution = jobExecution;
-		this.executionLogger = (ch.qos.logback.classic.Logger) LoggerFactory
-				.getLogger("Job Execution[" + jobExecution.getIdentifier() + "]");
-		executionLogger.setLevel(Level.ALL);
 		this.mailSender = mailSender;
 		this.updater = updater;
-		LoggerContext loggerContext = executionLogger.getLoggerContext();
-		appender = new EntityLogAppender(jobExecution, loggerContext);
-		appender.start();
-		appender.setContext(loggerContext);
-		executionLogger.addAppender(appender);
 	}
 
 	private void update()
@@ -56,8 +43,8 @@ public class ProgressImpl implements Progress
 	@Override
 	public void start()
 	{
-		executionLogger.info("start ()");
-		LOG.info("start()");
+		JobExecutionContext.set(jobExecution);
+		JOB_EXECUTION_LOG.info("Execution started.");
 		jobExecution.setStartDate(new Date());
 		jobExecution.setStatus(RUNNING);
 		update();
@@ -68,7 +55,7 @@ public class ProgressImpl implements Progress
 	{
 		jobExecution.setProgressInt(progress);
 		jobExecution.setProgressMessage(message);
-		executionLogger.info("progress ({}, {})", progress, message);
+		JOB_EXECUTION_LOG.info("progress ({}, {})", progress, message);
 		update();
 	}
 
@@ -80,16 +67,13 @@ public class ProgressImpl implements Progress
 		jobExecution.setProgressInt(jobExecution.getProgressMax());
 		Duration yourDuration = Duration.millis(timeRunning());
 		Period period = yourDuration.toPeriod();
-		PeriodFormatter periodFormatter = new PeriodFormatterBuilder().printZeroAlways().minimumPrintedDigits(2)
-				.appendHours().appendSeparator(":").appendMinutes().appendSeparator(":").appendSeconds()
-				.appendSeparator(".").appendMillis3Digit().toFormatter();
-		periodFormatter = new PeriodFormatterBuilder().appendDays().appendSuffix("d ").appendMinutes()
+		PeriodFormatter periodFormatter = new PeriodFormatterBuilder().appendDays().appendSuffix("d ").appendMinutes()
 				.appendSuffix("m ").appendSeconds().appendSuffix("s ").appendMillis().appendSuffix("ms ").toFormatter();
 		String timeSpent = periodFormatter.print(period);
-		executionLogger.info("Execution successful. Time spent: {}", timeSpent);
-		appender.stop();
+		JOB_EXECUTION_LOG.info("Execution successful. Time spent: {}", timeSpent);
 		sendEmail(jobExecution.getSuccessEmail(), jobExecution.getType() + " job succeeded.", jobExecution.getLog());
 		update();
+		JobExecutionContext.unset();
 	}
 
 	private void sendEmail(String[] to, String subject, String text) throws MailException
@@ -107,24 +91,24 @@ public class ProgressImpl implements Progress
 	@Override
 	public void failed(Exception ex)
 	{
-		executionLogger.error("Failed", ex);
+		JOB_EXECUTION_LOG.error("Failed", ex);
 		jobExecution.setEndDate(new Date());
 		jobExecution.setStatus(FAILED);
 		jobExecution.setProgressMessage(ex.getMessage());
-		appender.stop();
 		sendEmail(jobExecution.getFailureEmail(), jobExecution.getType() + " job failed.", jobExecution.getLog());
 		update();
+		JobExecutionContext.unset();
 	}
 
 	@Override
 	public void canceled()
 	{
-		executionLogger.warn("Canceled");
+		JOB_EXECUTION_LOG.warn("Canceled");
 		jobExecution.setEndDate(new Date());
 		jobExecution.setStatus(CANCELED);
-		appender.stop();
 		sendEmail(jobExecution.getFailureEmail(), jobExecution.getType() + " job failed.", jobExecution.getLog());
 		update();
+		JobExecutionContext.unset();
 	}
 
 	@Override
@@ -148,7 +132,7 @@ public class ProgressImpl implements Progress
 	@Override
 	public void status(String message)
 	{
-		executionLogger.info(message);
+		JOB_EXECUTION_LOG.info(message);
 		jobExecution.setProgressMessage(message);
 		update();
 	}

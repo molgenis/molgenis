@@ -4,8 +4,8 @@ import java.util.Collections;
 import java.util.List;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.js.ScriptEvaluator;
 import org.mozilla.javascript.EcmaError;
 import org.slf4j.Logger;

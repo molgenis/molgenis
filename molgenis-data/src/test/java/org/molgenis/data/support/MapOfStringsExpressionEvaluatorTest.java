@@ -1,42 +1,66 @@
 package org.molgenis.data.support;
 
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.LONG;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.fail;
-
-import org.molgenis.data.AttributeMetaData;
+import com.google.gson.JsonSyntaxException;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
-import org.testng.annotations.BeforeTest;
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.model.*;
+import org.molgenis.util.EntityUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.gson.JsonSyntaxException;
+import java.util.Map;
 
-public class MapOfStringsExpressionEvaluatorTest
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.testng.Assert.*;
+
+@ContextConfiguration(classes = { MapOfStringsExpressionEvaluatorTest.Config.class })
+public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringContextTests
 {
 	private Entity entity;
-	private DefaultEntityMetaData emd;
-	private DefaultEntityMetaData refEmd;
+	private EntityMetaData emd;
+	private EntityMetaData refEmd;
 
-	@BeforeTest
+	@Autowired
+	private EntityMetaDataFactory entityMetaDataFactory;
+	@Autowired
+	private AttributeMetaDataFactory attributeMetaDataFactory;
+
+	private EntityMetaData createDynamicLocationMetaData()
+	{
+		return entityMetaDataFactory.create().setSimpleName("Location")
+				.addAttribute(attributeMetaDataFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
+				.addAttribute(attributeMetaDataFactory.create().setName("Chromosome").setDataType(STRING))
+				.addAttribute(attributeMetaDataFactory.create().setName("Position").setDataType(STRING));
+	}
+
+	private EntityMetaData createDynamicSourceMetaData()
+	{
+		return entityMetaDataFactory.create().setSimpleName("Source")
+				.addAttribute(attributeMetaDataFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
+				.addAttribute(attributeMetaDataFactory.create().setName("Int").setDataType(INT))
+				.addAttribute(attributeMetaDataFactory.create().setName("String").setDataType(STRING))
+				.addAttribute(attributeMetaDataFactory.create().setName("NonNumericString").setDataType(STRING))
+				.addAttribute(attributeMetaDataFactory.create().setName("Long").setDataType(LONG));
+	}
+
+	@BeforeMethod
 	public void createEntity()
 	{
-		emd = new DefaultEntityMetaData("Source");
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("Identifier").setDataType(INT), ROLE_ID);
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("Int").setDataType(INT));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("String").setDataType(STRING));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("NonNumericString").setDataType(STRING));
-		emd.addAttributeMetaData(new DefaultAttributeMetaData("Long").setDataType(STRING));
+		emd = createDynamicSourceMetaData();
+		refEmd = createDynamicLocationMetaData();
 
-		refEmd = new DefaultEntityMetaData("RefEntity");
-		refEmd.addAttributeMetaData(new DefaultAttributeMetaData("Identifier"), ROLE_ID);
-		refEmd.addAttributeMetaData(new DefaultAttributeMetaData("Chromosome"));
-		refEmd.addAttributeMetaData(new DefaultAttributeMetaData("Position").setDataType(LONG));
-
-		entity = new MapEntity(emd);
+		entity = new DynamicEntity(emd);
 		entity.set("Int", 1);
 		entity.set("String", "12");
 		entity.set("Long", 10L);
@@ -46,7 +70,8 @@ public class MapOfStringsExpressionEvaluatorTest
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfAttributeHasExpression()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(STRING);
+		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		when(amd.getDataType()).thenReturn(STRING);
 		try
 		{
 			new MapOfStringsExpressionEvaluator(amd, emd);
@@ -61,7 +86,9 @@ public class MapOfStringsExpressionEvaluatorTest
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfAttributeHasRefEntity()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("location").setDataType(XREF).setExpression("{'a':b}");
+		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("location").getMock();
+		when(amd.getDataType()).thenReturn(XREF);
+		when(amd.getExpression()).thenReturn("{'a':b}");
 		try
 		{
 			new MapOfStringsExpressionEvaluator(amd, emd);
@@ -76,8 +103,10 @@ public class MapOfStringsExpressionEvaluatorTest
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfExpressionIsMap()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("Location").setDataType(XREF).setExpression("hallo")
-				.setRefEntity(refEmd);
+		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("location").getMock();
+		when(amd.getDataType()).thenReturn(XREF);
+		when(amd.getRefEntity()).thenReturn(refEmd);
+		when(amd.getExpression()).thenReturn("hallo");
 		try
 		{
 			new MapOfStringsExpressionEvaluator(amd, emd);
@@ -92,8 +121,10 @@ public class MapOfStringsExpressionEvaluatorTest
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksThatExpressionIsMapOfStrings()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(XREF)
-				.setExpression("{'Chromosome':{'hallo1':'bla'}}").setRefEntity(refEmd);
+		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		when(amd.getDataType()).thenReturn(XREF);
+		when(amd.getRefEntity()).thenReturn(refEmd);
+		when(amd.getExpression()).thenReturn("{'Chromosome':{'hallo1':'bla'}}");
 		try
 		{
 			new MapOfStringsExpressionEvaluator(amd, emd);
@@ -109,8 +140,10 @@ public class MapOfStringsExpressionEvaluatorTest
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfCalculatedAttributesAllExist()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(STRING)
-				.setExpression("{'hallo':String}").setRefEntity(refEmd);
+		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		when(amd.getDataType()).thenReturn(STRING);
+		when(amd.getRefEntity()).thenReturn(refEmd);
+		when(amd.getExpression()).thenReturn("{'hallo':String}");
 		try
 		{
 			new MapOfStringsExpressionEvaluator(amd, emd);
@@ -125,8 +158,10 @@ public class MapOfStringsExpressionEvaluatorTest
 	@Test
 	public void testMapOfStringsEvaluatorConstructorChecksIfMentionedAttributesAllExist()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(STRING)
-				.setExpression("{'Chromosome':hallo}").setRefEntity(refEmd);
+		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		when(amd.getDataType()).thenReturn(STRING);
+		when(amd.getRefEntity()).thenReturn(refEmd);
+		when(amd.getExpression()).thenReturn("{'Chromosome':hallo}");
 		try
 		{
 			new MapOfStringsExpressionEvaluator(amd, emd);
@@ -142,12 +177,37 @@ public class MapOfStringsExpressionEvaluatorTest
 	@Test
 	public void testEvaluate()
 	{
-		AttributeMetaData amd = new DefaultAttributeMetaData("#CHROM").setDataType(XREF)
-				.setExpression("{'Chromosome':String, 'Position':Int}").setRefEntity(refEmd);
+		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		when(amd.getDataType()).thenReturn(XREF);
+		when(amd.getRefEntity()).thenReturn(refEmd);
+		when(amd.getExpression()).thenReturn("{'Chromosome':String, 'Position':Int}");
+		when(amd.getEntityMetaData()).thenReturn(mock(EntityMetaData.class));
+		when(amd.getDataType()).thenReturn(MolgenisFieldTypes.AttributeType.XREF);
 		ExpressionEvaluator evaluator = new MapOfStringsExpressionEvaluator(amd, emd);
-		Entity expected = new MapEntity(refEmd);
+		Entity expected = new DynamicEntity(refEmd);
 		expected.set("Chromosome", "12");
-		expected.set("Position", 1L);
-		assertEquals(evaluator.evaluate(entity), expected);
+		expected.set("Position", "1");
+		Entity actual = (Entity) evaluator.evaluate(entity);
+		assertTrue(EntityUtils.equals(actual, expected));
+	}
+
+	@Autowired
+	ApplicationContext applicationContext;
+
+	@BeforeClass
+	public void bootstrap()
+	{
+		// bootstrap meta data
+		EntityMetaDataMetaData entityMetaMeta = applicationContext.getBean(EntityMetaDataMetaData.class);
+		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityMetaMeta);
+		Map<String, SystemEntityMetaData> systemEntityMetaMap = applicationContext
+				.getBeansOfType(SystemEntityMetaData.class);
+		systemEntityMetaMap.values().forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityMetaMeta));
+	}
+
+	@Configuration
+	@ComponentScan({ "org.molgenis.data.meta.model", "org.molgenis.data.system.model" })
+	public static class Config
+	{
 	}
 }

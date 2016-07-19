@@ -1,13 +1,14 @@
 package org.molgenis.data.elasticsearch.request;
 
-import java.util.Arrays;
-import java.util.List;
-
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchType;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Builds a ElasticSearch search request
@@ -23,15 +24,14 @@ public class SearchRequestGenerator
 	public SearchRequestGenerator()
 	{
 		aggregateQueryGenerator = new AggregateQueryGenerator();
-		queryGenerators = Arrays.asList(new QueryGenerator(), new SortGenerator(), new LimitOffsetGenerator(),
-				new SourceFilteringGenerator());
+		queryGenerators = Arrays.asList(new QueryGenerator(), new SortGenerator(), new LimitOffsetGenerator());
 	}
 
 	/**
-	 * Add the 'searchType', 'fields', 'types' and 'query' of the SearchRequestBuilder
+	 * Writes a query to a {@link SearchRequestBuilder}.
 	 * 
 	 * @param searchRequestBuilder
-	 * @param entityNames
+	 * @param entityName
 	 * @param searchType
 	 * @param query
 	 * @param aggAttr1
@@ -40,16 +40,16 @@ public class SearchRequestGenerator
 	 *            Second Field to aggregate on
 	 * @param entityMetaData
 	 */
-	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, List<String> entityNames,
-			SearchType searchType, Query query, AttributeMetaData aggAttr1, AttributeMetaData aggAttr2,
+	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, String entityName,
+			SearchType searchType, Query<Entity> query, AttributeMetaData aggAttr1, AttributeMetaData aggAttr2,
 			AttributeMetaData aggAttrDistinct, EntityMetaData entityMetaData)
 	{
 		searchRequestBuilder.setSearchType(searchType);
 
 		// Document type
-		if (entityNames != null)
+		if (entityName != null)
 		{
-			searchRequestBuilder.setTypes(entityNames.toArray(new String[entityNames.size()]));
+			searchRequestBuilder.setTypes(entityName);
 		}
 
 		// Generate query
@@ -67,13 +67,5 @@ public class SearchRequestGenerator
 			aggregateQueryGenerator.generate(searchRequestBuilder, aggAttr1, aggAttr2, aggAttrDistinct);
 		}
 
-	}
-
-	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, String entityName, SearchType searchType,
-			Query query, AttributeMetaData aggregateField1, AttributeMetaData aggregateField2,
-			AttributeMetaData aggregateFieldDistinct, EntityMetaData entityMetaData)
-	{
-		buildSearchRequest(searchRequestBuilder, entityName == null ? null : Arrays.asList(entityName), searchType,
-				query, aggregateField1, aggregateField2, aggregateFieldDistinct, entityMetaData);
 	}
 }

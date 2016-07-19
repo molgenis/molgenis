@@ -3,6 +3,7 @@ package org.molgenis.ontology.sorta.job;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.SCORE;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -12,7 +13,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.controller.SortaServiceController;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
@@ -54,15 +55,20 @@ public class SortaJobProcessor
 	public void process()
 	{
 		RunAsSystemProxy.runAsSystem(() -> {
-			long maxCount = dataService.count(inputRepositoryName, new QueryImpl());
+			long maxCount = dataService.count(inputRepositoryName, new QueryImpl<>());
 			progress.status("Matching " + maxCount + " input terms from " + inputRepositoryName
 					+ ".\nStoring results in " + resultRepositoryName);
 
 			progress.setProgressMax((int) maxCount);
+
+			// FIXME get rid of getApplicationContext reference
+			MatchingTaskContentEntityMetaData matchingTaskContentEntityMetaData = getApplicationContext()
+					.getBean(MatchingTaskContentEntityMetaData.class);
+
 			// Match input terms with code
 			List<Entity> entitiesToAdd = newArrayList();
 			dataService.findAll(inputRepositoryName).forEach(inputRow -> {
-				MapEntity resultEntity = new MapEntity();
+				Entity resultEntity = new DynamicEntity(matchingTaskContentEntityMetaData);
 				resultEntity.set(MatchingTaskContentEntityMetaData.INPUT_TERM, inputRow);
 				resultEntity.set(MatchingTaskContentEntityMetaData.IDENTIFIER, idGenerator.generateId());
 				resultEntity.set(MatchingTaskContentEntityMetaData.VALIDATED, false);
@@ -71,7 +77,8 @@ public class SortaJobProcessor
 				Iterable<Entity> ontologyTermEntities = sortaService.findOntologyTermEntities(ontologyIri, inputRow);
 				if (Iterables.size(ontologyTermEntities) > 0)
 				{
-					Entity firstMatchedOntologyTerm = Iterables.getFirst(ontologyTermEntities, new MapEntity());
+					Entity firstMatchedOntologyTerm = Iterables
+							.getFirst(ontologyTermEntities, new DynamicEntity(matchingTaskContentEntityMetaData));
 					resultEntity.set(MatchingTaskContentEntityMetaData.MATCHED_TERM,
 							firstMatchedOntologyTerm.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
 					resultEntity.set(MatchingTaskContentEntityMetaData.SCORE, firstMatchedOntologyTerm.get(SCORE));

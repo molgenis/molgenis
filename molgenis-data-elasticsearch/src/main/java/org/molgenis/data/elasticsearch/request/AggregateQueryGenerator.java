@@ -1,16 +1,5 @@
 package org.molgenis.data.elasticsearch.request;
 
-import static java.lang.Integer.MAX_VALUE;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL_MREF;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.search.aggregations.AbstractAggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilder;
@@ -18,9 +7,17 @@ import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.nested.NestedBuilder;
 import org.elasticsearch.search.aggregations.bucket.nested.ReverseNestedBuilder;
 import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
+import org.molgenis.data.meta.model.AttributeMetaData;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
+import static java.lang.Integer.MAX_VALUE;
+import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
 
 public class AggregateQueryGenerator
 {
@@ -38,11 +35,11 @@ public class AggregateQueryGenerator
 		{
 			throw new IllegalArgumentException("Aggregation requires at least one aggregateable attribute");
 		}
-		if (aggAttr1 != null && !aggAttr1.isAggregateable())
+		if (!aggAttr1.isAggregatable())
 		{
 			throw new IllegalArgumentException("Attribute is not aggregateable [ " + aggAttr1.getName() + "]");
 		}
-		if (aggAttr2 != null && !aggAttr2.isAggregateable())
+		if (aggAttr2 != null && !aggAttr2.isAggregatable())
 		{
 			throw new IllegalArgumentException("Attribute is not aggregateable [ " + aggAttr2.getName() + "]");
 		}
@@ -51,22 +48,21 @@ public class AggregateQueryGenerator
 			// see: https://github.com/molgenis/molgenis/issues/1938
 			throw new IllegalArgumentException("Distinct aggregateable attribute cannot be nillable");
 		}
-		FieldTypeEnum dataType1 = aggAttr1.getDataType().getEnumType();
-		if (aggAttr1.isNillable()
-				&& (dataType1 == CATEGORICAL || dataType1 == CATEGORICAL_MREF || dataType1 == XREF || dataType1 == MREF))
+		AttributeType dataType1 = aggAttr1.getDataType();
+		if (aggAttr1.isNillable() && isReferenceType(aggAttr1))
 		{
 			// see: https://github.com/molgenis/molgenis/issues/1937
-			throw new IllegalArgumentException("Aggregateable attribute of type [" + dataType1 + "] cannot be nillable");
+			throw new IllegalArgumentException(
+					"Aggregateable attribute of type [" + dataType1 + "] cannot be nillable");
 		}
 		if (aggAttr2 != null)
 		{
 			// see: https://github.com/molgenis/molgenis/issues/1937
-			FieldTypeEnum dataType2 = aggAttr2.getDataType().getEnumType();
-			if (aggAttr2.isNillable()
-					&& (dataType2 == CATEGORICAL || dataType2 == CATEGORICAL_MREF || dataType2 == XREF || dataType2 == MREF))
+			AttributeType dataType2 = aggAttr2.getDataType();
+			if (aggAttr2.isNillable() && isReferenceType(aggAttr2))
 			{
-				throw new IllegalArgumentException("Aggregateable attribute of type [" + dataType2
-						+ "] cannot be nillable");
+				throw new IllegalArgumentException(
+						"Aggregateable attribute of type [" + dataType2 + "] cannot be nillable");
 			}
 		}
 
@@ -107,8 +103,8 @@ public class AggregateQueryGenerator
 		{
 			String missingAggName = attr.getName() + AGGREGATION_MISSING_POSTFIX;
 			String missingAggFieldName = attr.getName();
-			AggregationBuilder<?> missingTermsAgg = AggregationBuilders.missing(missingAggName).field(
-					missingAggFieldName);
+			AggregationBuilder<?> missingTermsAgg = AggregationBuilders.missing(missingAggName)
+					.field(missingAggFieldName);
 			aggs.add(missingTermsAgg);
 		}
 
@@ -191,7 +187,7 @@ public class AggregateQueryGenerator
 			{
 				nestedAgg.subAggregation(agg);
 			}
-			aggs = Collections.<AggregationBuilder<?>> singletonList(nestedAgg);
+			aggs = Collections.<AggregationBuilder<?>>singletonList(nestedAgg);
 		}
 
 		// wrap in reverse nested aggregation if parent aggregation is nested
@@ -203,7 +199,7 @@ public class AggregateQueryGenerator
 			{
 				reverseNestedAgg.subAggregation(agg);
 			}
-			aggs = Collections.<AggregationBuilder<?>> singletonList(reverseNestedAgg);
+			aggs = Collections.<AggregationBuilder<?>>singletonList(reverseNestedAgg);
 		}
 
 		return aggs;
@@ -211,15 +207,13 @@ public class AggregateQueryGenerator
 
 	public static boolean isNestedType(AttributeMetaData attr)
 	{
-		FieldTypeEnum dataType = attr.getDataType().getEnumType();
-		return dataType == FieldTypeEnum.CATEGORICAL || dataType == FieldTypeEnum.CATEGORICAL_MREF
-				|| dataType == FieldTypeEnum.XREF || dataType == FieldTypeEnum.MREF;
+		return isReferenceType(attr);
 	}
 
 	private String getAggregateFieldName(AttributeMetaData attr)
 	{
 		String attrName = attr.getName();
-		FieldTypeEnum dataType = attr.getDataType().getEnumType();
+		AttributeType dataType = attr.getDataType();
 		switch (dataType)
 		{
 			case BOOL:

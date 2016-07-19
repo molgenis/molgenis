@@ -1,14 +1,8 @@
 package org.molgenis.security.google;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
+import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
+import org.molgenis.auth.MolgenisGroupMemberFactory;
+import org.molgenis.auth.MolgenisUserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.token.UnknownTokenException;
@@ -18,7 +12,13 @@ import org.springframework.security.core.AuthenticationException;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class GoogleAuthenticationProcessingFilterTest
 {
@@ -34,8 +34,10 @@ public class GoogleAuthenticationProcessingFilterTest
 		MolgenisUserDetailsService molgenisUserDetailsService = mock(MolgenisUserDetailsService.class);
 		DataService dataService = mock(DataService.class);
 		GooglePublicKeysManager googlePublicKeysManager = mock(GooglePublicKeysManager.class);
+		MolgenisUserFactory molgenisUserFactory = mock(MolgenisUserFactory.class);
+		MolgenisGroupMemberFactory molgenisGroupMemberFactory = mock(MolgenisGroupMemberFactory.class);
 		googleAuthenticationProcessingFilter = new GoogleAuthenticationProcessingFilter(googlePublicKeysManager,
-				dataService, molgenisUserDetailsService, appSettings);
+				dataService, molgenisUserDetailsService, appSettings, molgenisUserFactory, molgenisGroupMemberFactory);
 		request = mock(HttpServletRequest.class);
 		response = mock(HttpServletResponse.class);
 	}
@@ -43,7 +45,7 @@ public class GoogleAuthenticationProcessingFilterTest
 	@Test(expectedExceptions = NullPointerException.class)
 	public void GoogleAuthenticationProcessingFilter()
 	{
-		new GoogleAuthenticationProcessingFilter(null, null, null, null);
+		new GoogleAuthenticationProcessingFilter(null, null, null, null, null, null);
 	}
 
 	@Test(expectedExceptions = AuthenticationServiceException.class)

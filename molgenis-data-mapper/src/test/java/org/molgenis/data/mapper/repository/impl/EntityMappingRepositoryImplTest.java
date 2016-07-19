@@ -1,16 +1,14 @@
 package org.molgenis.data.mapper.repository.impl;
 
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
@@ -19,31 +17,45 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(classes =
-{ EntityMappingRepositoryImplTest.Config.class, MappingConfig.class })
-public class EntityMappingRepositoryImplTest extends AbstractTestNGSpringContextTests
+import com.google.common.collect.Lists;
+
+@ContextConfiguration(classes = { EntityMappingRepositoryImplTest.Config.class, MappingConfig.class })
+public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private DataService dataService;
+	private EntityMetaDataFactory entityMetaFactory;
 
 	@Autowired
-	private AttributeMappingRepositoryImpl attributeMappingRepository;
+	private AttributeMetaDataFactory attrMetaFactory;
+
+	@Autowired
+	private AttributeMappingMetaData attrMappingMeta;
+
+	@Autowired
+	private EntityMappingMetaData entityMappingMeta;
+
+	@Autowired
+	private DataService dataService;
 
 	@Autowired
 	private EntityMappingRepositoryImpl entityMappingRepository;
@@ -53,40 +65,41 @@ public class EntityMappingRepositoryImplTest extends AbstractTestNGSpringContext
 	@Test
 	public void testToEntityMappings()
 	{
-		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("targetAttribute");
-		List<AttributeMetaData> sourceAttributeMetaDatas = new ArrayList<AttributeMetaData>();
-		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
-		DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
-		targetEntityMetaData.addAttributeMetaData(targetAttributeMetaData);
+		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName("targetAttribute");
+		List<AttributeMetaData> sourceAttributeMetaDatas = Lists.newArrayList();
+		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
+		EntityMetaData targetEntityMetaData = entityMetaFactory.create("target");
+		targetEntityMetaData.addAttribute(targetAttributeMetaData);
 
-		List<AttributeMapping> attributeMappings = new ArrayList<AttributeMapping>();
+		List<AttributeMapping> attributeMappings = Lists.newArrayList();
 		attributeMappings
 				.add(new AttributeMapping("1", targetAttributeMetaData, "algorithm", sourceAttributeMetaDatas));
 
-		List<EntityMapping> entityMappings = Arrays.asList(new EntityMapping(AUTO_ID, sourceEntityMetaData,
-				targetEntityMetaData, attributeMappings));
+		List<EntityMapping> entityMappings = singletonList(
+				new EntityMapping(AUTO_ID, sourceEntityMetaData, targetEntityMetaData, attributeMappings));
 
-		Entity attributeMappingEntity = new MapEntity(new AttributeMappingMetaData());
+		Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
 		attributeMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
 		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA, "targetAttribute");
 		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS, "sourceAttributes");
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, "algorithm");
 
-		List<Entity> attributeMappingEntities = new ArrayList<Entity>();
+		List<Entity> attributeMappingEntities = Lists.newArrayList();
 		attributeMappingEntities.add(attributeMappingEntity);
 
-		List<Entity> entityMappingEntities = new ArrayList<Entity>();
-		Entity entityMappingEntity = new MapEntity(new EntityMappingMetaData());
+		List<Entity> entityMappingEntities = Lists.newArrayList();
+		Entity entityMappingEntity = new DynamicEntity(entityMappingMeta);
 		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
-		entityMappingEntity.set(EntityMappingMetaData.TARGETENTITYMETADATA, "targetAttribute");
-		entityMappingEntity.set(AttributeMappingMetaData.ALGORITHM, "algorithm");
-		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTEMAPPINGS, attributeMappingEntities);
+		entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_META_DATA, "targetAttribute");
+		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
 
 		entityMappingEntities.add(entityMappingEntity);
 
-		when(dataService.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.TARGETENTITYMETADATA)))
+		when(dataService
+				.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.TARGET_ENTITY_META_DATA)))
 				.thenReturn(targetEntityMetaData);
-		when(dataService.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.SOURCEENTITYMETADATA)))
+		when(dataService
+				.getEntityMetaData(entityMappingEntity.getString(EntityMappingMetaData.SOURCE_ENTITY_META_DATA)))
 				.thenReturn(sourceEntityMetaData);
 
 		assertEquals(entityMappingRepository.toEntityMappings(entityMappingEntities), entityMappings);
@@ -95,45 +108,48 @@ public class EntityMappingRepositoryImplTest extends AbstractTestNGSpringContext
 	@Test
 	public void testUpsert()
 	{
-		DefaultAttributeMetaData targetAttributeMetaData = new DefaultAttributeMetaData("targetAttribute");
-		List<AttributeMetaData> sourceAttributeMetaDatas = new ArrayList<AttributeMetaData>();
-		DefaultEntityMetaData sourceEntityMetaData = new DefaultEntityMetaData("source");
-		DefaultEntityMetaData targetEntityMetaData = new DefaultEntityMetaData("target");
-		targetEntityMetaData.addAttributeMetaData(targetAttributeMetaData);
+		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName("targetAttribute");
+		List<AttributeMetaData> sourceAttributeMetaDatas = Lists.newArrayList();
+		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
+		EntityMetaData targetEntityMetaData = entityMetaFactory.create("target");
+		targetEntityMetaData.addAttribute(targetAttributeMetaData);
 
-		List<AttributeMapping> attributeMappings = new ArrayList<AttributeMapping>();
+		List<AttributeMapping> attributeMappings = Lists.newArrayList();
 		attributeMappings
 				.add(new AttributeMapping("1", targetAttributeMetaData, "algorithm", sourceAttributeMetaDatas));
 
-		Collection<EntityMapping> entityMappings = Arrays.asList(new EntityMapping(AUTO_ID, sourceEntityMetaData,
-				targetEntityMetaData, attributeMappings));
+		Collection<EntityMapping> entityMappings = singletonList(
+				new EntityMapping(AUTO_ID, sourceEntityMetaData, targetEntityMetaData, attributeMappings));
 
-		Entity attributeMappingEntity = new MapEntity(new AttributeMappingMetaData());
+		Entity attributeMappingEntity = new DynamicEntity(attrMappingMeta);
 		attributeMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
 		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA, "targetAttribute");
-		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS, sourceAttributeMetaDatas);
+		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS, "");
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, "algorithm");
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHMSTATE, null);
 
-		List<Entity> attributeMappingEntities = new ArrayList<Entity>();
+		List<Entity> attributeMappingEntities = Lists.newArrayList();
 		attributeMappingEntities.add(attributeMappingEntity);
 
-		List<Entity> entityMappingEntities = new ArrayList<Entity>();
-		Entity entityMappingEntity = new MapEntity(new EntityMappingMetaData());
+		List<Entity> entityMappingEntities = Lists.newArrayList();
+		Entity entityMappingEntity = new DynamicEntity(entityMappingMeta);
 		entityMappingEntity.set(EntityMappingMetaData.IDENTIFIER, AUTO_ID);
-		entityMappingEntity.set(EntityMappingMetaData.SOURCEENTITYMETADATA, "source");
-		entityMappingEntity.set(EntityMappingMetaData.TARGETENTITYMETADATA, "target");
-		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTEMAPPINGS, attributeMappingEntities);
+		entityMappingEntity.set(EntityMappingMetaData.SOURCE_ENTITY_META_DATA, "source");
+		entityMappingEntity.set(EntityMappingMetaData.TARGET_ENTITY_META_DATA, "target");
+		entityMappingEntity.set(EntityMappingMetaData.ATTRIBUTE_MAPPINGS, attributeMappingEntities);
 		entityMappingEntities.add(entityMappingEntity);
 
-		assertEquals(entityMappingRepository.upsert(entityMappings).get(0), entityMappingEntities.get(0));
-
-		verify(dataService).update(EntityMappingRepositoryImpl.META_DATA.getName(), entityMappingEntity);
+		assertTrue(EntityUtils
+				.equals(entityMappingRepository.upsert(entityMappings).get(0), entityMappingEntities.get(0)));
 	}
 
 	@Configuration
+	@ComponentScan({ "org.molgenis.data.mapper.meta", "org.molgenis.auth" })
 	public static class Config
 	{
+		@Autowired
+		private AttributeMappingMetaData attrMappingMeta;
+
 		@Bean
 		DataServiceImpl dataService()
 		{
@@ -149,7 +165,7 @@ public class EntityMappingRepositoryImplTest extends AbstractTestNGSpringContext
 		@Bean
 		AttributeMappingRepositoryImpl attributeMappingRepository()
 		{
-			return new AttributeMappingRepositoryImpl(dataService());
+			return new AttributeMappingRepositoryImpl(dataService(), attrMappingMeta);
 		}
 
 		@Bean

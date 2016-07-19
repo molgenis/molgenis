@@ -1,33 +1,24 @@
 package org.molgenis.data.rsql;
 
-import java.util.Iterator;
-import java.util.List;
-
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataConverter;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisQueryException;
-import org.molgenis.data.Query;
-import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.support.QueryImpl;
-
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
+import cz.jirutka.rsql.parser.ast.*;
+import org.molgenis.data.*;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.QueryImpl;
 
-import cz.jirutka.rsql.parser.ast.AndNode;
-import cz.jirutka.rsql.parser.ast.ComparisonNode;
-import cz.jirutka.rsql.parser.ast.NoArgRSQLVisitorAdapter;
-import cz.jirutka.rsql.parser.ast.Node;
-import cz.jirutka.rsql.parser.ast.OrNode;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * RSQLVisitor implementation for molgenis Query.
  * 
  * @see https://github.com/jirutka/rsql-parser
  */
-public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
+public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
 {
-	private final QueryImpl q = new QueryImpl();
+	private final QueryImpl<Entity> q = new QueryImpl<Entity>();
 	private final EntityMetaData entityMetaData;
 
 	public MolgenisRSQLVisitor(EntityMetaData entityMetaData)
@@ -36,7 +27,7 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
 	}
 
 	@Override
-	public Query visit(AndNode node)
+	public Query<Entity> visit(AndNode node)
 	{
 		q.nest(); // TODO only nest if more than one child
 
@@ -57,7 +48,7 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
 	}
 
 	@Override
-	public Query visit(OrNode node)
+	public Query<Entity> visit(OrNode node)
 	{
 		q.nest(); // TODO only nest if more than one child
 
@@ -78,7 +69,7 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
 	}
 
 	@Override
-	public Query visit(ComparisonNode node)
+	public Query<Entity> visit(ComparisonNode node)
 	{
 		String attrName = node.getSelector();
 		String symbol = node.getOperator().getSymbol();
@@ -171,7 +162,7 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query>
 
 	private void validateNumericOrDate(AttributeMetaData attr, String symbol)
 	{
-		switch (attr.getDataType().getEnumType())
+		switch (attr.getDataType())
 		{
 			case DATE:
 			case DATE_TIME:

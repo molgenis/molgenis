@@ -2,8 +2,8 @@ package org.molgenis.data.idcard.indexer;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.idcard.indexer.IdCardIndexerController.URI;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.ID_CARD_BIOBANK;
 
-import org.molgenis.data.idcard.model.IdCardBiobank;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
@@ -45,7 +45,7 @@ public class IdCardIndexerController extends MolgenisPluginController
 	@PreAuthorize("hasAnyRole('ROLE_SU, ROLE_ENTITY_READ_IDCARDINDEXER')")
 	public String init(Model model) throws Exception
 	{
-		model.addAttribute("id_card_biobank_registry_entity_name", IdCardBiobank.ENTITY_NAME);
+		model.addAttribute("id_card_biobank_registry_entity_name", ID_CARD_BIOBANK);
 		return "view-idcardbiobankindexer";
 	}
 

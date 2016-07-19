@@ -1,5 +1,6 @@
 package org.molgenis.questionnaires;
 
+import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.QueryImpl.EQ;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX;
@@ -12,12 +13,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.EntityManager;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.support.DefaultEntity;
-import org.molgenis.data.support.OwnedEntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.security.owned.OwnedEntityMetaData;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -36,29 +37,29 @@ public class QuestionnairePluginController extends MolgenisPluginController
 	private final DataService dataService;
 	private final ThankYouTextService thankYouTextService;
 	private final LanguageService languageService;
+	private final EntityManager entityManager;
 
 	@Autowired
 	public QuestionnairePluginController(DataService dataService, ThankYouTextService thankYouTextService,
-			LanguageService languageService)
+			LanguageService languageService, EntityManager entityManager)
 	{
 		super(URI);
-		this.dataService = dataService;
-		this.thankYouTextService = thankYouTextService;
-		this.languageService = languageService;
+		this.dataService = requireNonNull(dataService);
+		this.thankYouTextService = requireNonNull(thankYouTextService);
+		this.languageService = requireNonNull(languageService);
+		this.entityManager = requireNonNull(entityManager);
 	}
 
 	@RequestMapping(method = RequestMethod.GET)
 	public String showView(Model model)
 	{
-		List<Entity> questionnaireMeta = runAsSystem(() -> QuestionnaireUtils.findQuestionnairesMetaData(dataService)
-				.collect(Collectors.toList()));
+		List<Entity> questionnaireMeta = runAsSystem(
+				() -> QuestionnaireUtils.findQuestionnairesMetaData(dataService).collect(Collectors.toList()));
 
-		List<Questionnaire> questionnaires = questionnaireMeta
-				.stream()
+		List<Questionnaire> questionnaires = questionnaireMeta.stream()
 				.map(e -> e.getString(EntityMetaDataMetaData.FULL_NAME))
-				.filter(name -> SecurityUtils.currentUserIsSu()
-						|| SecurityUtils.currentUserHasRole(AUTHORITY_ENTITY_WRITE_PREFIX + name.toUpperCase()))
-				.map(name -> {
+				.filter(name -> SecurityUtils.currentUserIsSu() || SecurityUtils
+						.currentUserHasRole(AUTHORITY_ENTITY_WRITE_PREFIX + name.toUpperCase())).map(name -> {
 					// Create entity if not yet exists for current user
 					EntityMetaData emd = dataService.getMeta().getEntityMetaData(name);
 					Entity entity = findQuestionnaireEntity(name);
@@ -117,8 +118,8 @@ public class QuestionnairePluginController extends MolgenisPluginController
 
 	private Entity createQuestionnaireEntity(EntityMetaData emd, QuestionnaireStatus status)
 	{
-		Entity entity = new DefaultEntity(emd, dataService);
-		entity.set(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername());
+		Entity entity = entityManager.create(emd);
+		entity.set(OwnedEntityMetaData.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		entity.set(QuestionnaireMetaData.ATTR_STATUS, status.toString());
 		dataService.add(emd.getName(), entity);
 
@@ -134,8 +135,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 
 	private Entity findQuestionnaireEntity(String name)
 	{
-		return dataService.findOne(name,
-				EQ(OwnedEntityMetaData.ATTR_OWNER_USERNAME, SecurityUtils.getCurrentUsername()));
+		return dataService.findOne(name, EQ(OwnedEntityMetaData.OWNER_USERNAME, SecurityUtils.getCurrentUsername()));
 	}
 
 	public String getThankYouText(String questionnaireName)

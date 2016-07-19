@@ -1,42 +1,23 @@
 package org.molgenis;
 
-import static java.util.stream.Collectors.toList;
+import org.molgenis.fieldtypes.*;
+import org.molgenis.model.MolgenisModelException;
+import org.molgenis.model.elements.Field;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.molgenis.fieldtypes.BoolField;
-import org.molgenis.fieldtypes.CategoricalField;
-import org.molgenis.fieldtypes.CategoricalMrefField;
-import org.molgenis.fieldtypes.CompoundField;
-import org.molgenis.fieldtypes.DateField;
-import org.molgenis.fieldtypes.DatetimeField;
-import org.molgenis.fieldtypes.DecimalField;
-import org.molgenis.fieldtypes.EmailField;
-import org.molgenis.fieldtypes.EnumField;
-import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.fieldtypes.FileField;
-import org.molgenis.fieldtypes.HtmlField;
-import org.molgenis.fieldtypes.HyperlinkField;
-import org.molgenis.fieldtypes.ImageField;
-import org.molgenis.fieldtypes.IntField;
-import org.molgenis.fieldtypes.LongField;
-import org.molgenis.fieldtypes.MrefField;
-import org.molgenis.fieldtypes.ScriptField;
-import org.molgenis.fieldtypes.StringField;
-import org.molgenis.fieldtypes.TextField;
-import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.model.MolgenisModelException;
-import org.molgenis.model.elements.Field;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import static com.google.common.collect.Maps.newHashMapWithExpectedSize;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Singleton class that holds all known field types in MOLGENIS. For each FieldType it can be defined how to behave in
  * mysql, java, etc. <br>
- * 
+ *
  * @see FieldType interface
  */
 public class MolgenisFieldTypes
@@ -46,15 +27,57 @@ public class MolgenisFieldTypes
 	private static Map<String, FieldType> types = new TreeMap<String, FieldType>();
 	private static boolean init = false;
 
-	public enum FieldTypeEnum
+	public enum AttributeType
 	{
 		BOOL, CATEGORICAL, CATEGORICAL_MREF, COMPOUND, DATE, DATE_TIME, DECIMAL, EMAIL, ENUM, FILE, HTML, HYPERLINK, INT, LONG, MREF, SCRIPT, STRING, TEXT, XREF;
 
+		private static final Map<String, AttributeType> strValMap;
+
+		static
+		{
+			AttributeType[] dataTypes = AttributeType.values();
+			strValMap = newHashMapWithExpectedSize(dataTypes.length);
+			for (AttributeType dataType : dataTypes)
+			{
+				strValMap.put(getValueString(dataType), dataType);
+			}
+		}
+
+		/**
+		 * Returns the enum value for the given value string
+		 *
+		 * @param valueString value string
+		 * @return enum value
+		 */
+		public static AttributeType toEnum(String valueString)
+		{
+			return strValMap.get(normalize(valueString));
+		}
+
+		/**
+		 * Returns the value string for the given enum value
+		 *
+		 * @param value enum value
+		 * @return value string
+		 */
+		public static String getValueString(AttributeType value)
+		{
+			return normalize(value.toString());
+		}
+
+		/**
+		 * Returns the value strings for all enum types in the defined enum order
+		 *
+		 * @return value strings
+		 */
 		public static List<String> getOptionsLowercase()
 		{
-			return Arrays.stream(values()).map(value -> {
-				return value.toString().replace("_", "");
-			}).map(String::toLowerCase).collect(toList());
+			return Arrays.stream(values()).map(AttributeType::getValueString).collect(toList());
+		}
+
+		private static String normalize(String valueString)
+		{
+			return valueString.replace("_", "").toLowerCase();
 		}
 	}
 
@@ -81,7 +104,9 @@ public class MolgenisFieldTypes
 	// FIXME Do not add public static final ENUM here, as it holds the enum options so it is different per attribute,
 	// this should be fixed. The options should not be added to the field
 
-	/** Initialize default field types */
+	/**
+	 * Initialize default field types
+	 */
 	private static void init()
 	{
 		if (!init)

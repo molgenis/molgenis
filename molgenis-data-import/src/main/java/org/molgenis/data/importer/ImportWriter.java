@@ -1,80 +1,59 @@
 package org.molgenis.data.importer;
 
-import static com.google.common.base.Predicates.notNull;
-import static com.google.common.collect.FluentIterable.from;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataConverter;
-import org.molgenis.data.DataService;
-import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Package;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.i18n.I18nStringMetaData;
-import org.molgenis.data.i18n.LanguageMetaData;
-import org.molgenis.data.meta.TagMetaData;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.data.*;
+import org.molgenis.data.i18n.model.I18nStringMetaData;
+import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
-import org.molgenis.data.semantic.Tag;
+import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
-import org.molgenis.data.support.ConvertingIterable;
-import org.molgenis.data.support.DefaultEntity;
 import org.molgenis.data.support.EntityMetaDataUtils;
 import org.molgenis.data.support.LazyEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.fieldtypes.IntField;
-import org.molgenis.fieldtypes.MrefField;
-import org.molgenis.fieldtypes.StringField;
-import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.framework.db.EntityImportReport;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.DependencyResolver;
+import org.molgenis.util.EntityUtils;
 import org.molgenis.util.HugeSet;
 import org.molgenis.util.MolgenisDateFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.util.*;
+
+import static com.google.common.base.Predicates.notNull;
+import static com.google.common.collect.FluentIterable.from;
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
+import static org.molgenis.data.meta.model.TagMetaData.TAG;
+import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 /**
  * Writes the imported metadata and data to target {@link RepositoryCollection}.
@@ -87,39 +66,58 @@ public class ImportWriter
 	private final PermissionSystemService permissionSystemService;
 	private final TagService<LabeledResource, LabeledResource> tagService;
 	private final MolgenisPermissionService molgenisPermissionService;
+	private final TagMetaData tagMetaData;
+	private final I18nStringMetaData i18nStringMetaData;
 
 	/**
 	 * Creates the ImportWriter
-	 * 
-	 * @param dataService
-	 *            {@link DataService} to query existing repositories and transform entities
-	 * @param permissionSystemService
-	 *            {@link PermissionSystemService} to give permissions on uploaded entities
+	 *
+	 * @param dataService             {@link DataService} to query existing repositories and transform entities
+	 * @param permissionSystemService {@link PermissionSystemService} to give permissions on uploaded entities
+	 * @param tagMetaData
+	 * @param i18nStringMetaData
 	 */
 	public ImportWriter(DataService dataService, PermissionSystemService permissionSystemService,
 			TagService<LabeledResource, LabeledResource> tagService,
-			MolgenisPermissionService molgenisPermissionService)
+			MolgenisPermissionService molgenisPermissionService, TagMetaData tagMetaData,
+			I18nStringMetaData i18nStringMetaData)
 	{
-		this.dataService = dataService;
-		this.permissionSystemService = permissionSystemService;
-		this.tagService = tagService;
-		this.molgenisPermissionService = molgenisPermissionService;
+		this.dataService = requireNonNull(dataService);
+		this.permissionSystemService = requireNonNull(permissionSystemService);
+		this.tagService = requireNonNull(tagService);
+		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
+		this.tagMetaData = requireNonNull(tagMetaData);
+		this.i18nStringMetaData = requireNonNull(i18nStringMetaData);
 	}
 
-	// Use transaction isolation level SERIALIZABLE to prevent problems with the async template, to do ddl statements
-	// without influencing on the current transaction
-	@Transactional(isolation = Isolation.SERIALIZABLE)
+	@Transactional
 	public EntityImportReport doImport(EmxImportJob job)
 	{
 		// languages first
 		importLanguages(job.report, job.parsedMetaData.getLanguages(), job.dbAction, job.metaDataChanges);
-
 		runAsSystem(() -> importTags(job.source));
 		importPackages(job.parsedMetaData);
 		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges);
 		addEntityPermissions(job.metaDataChanges);
 		runAsSystem(() -> importEntityAndAttributeTags(job.parsedMetaData));
-		importData(job.report, job.parsedMetaData.getEntities(), job.source, job.dbAction, job.defaultPackage);
+		Iterable<EntityMetaData> existingMetaData = dataService.getMeta().getEntityMetaDatas()::iterator;
+		Map<String, EntityMetaData> allEntityMetaDataMap = new HashMap<>();
+		for (EntityMetaData emd : job.parsedMetaData.getEntities())
+		{
+			allEntityMetaDataMap.put(emd.getName(), emd);
+		}
+		for (EntityMetaData emd : existingMetaData)
+		{
+			if (!allEntityMetaDataMap.containsKey(emd.getName())) allEntityMetaDataMap.put(emd.getName(), emd);
+			else if ((!EntityUtils.equals(emd, allEntityMetaDataMap.get(emd.getName())))
+					&& emd instanceof SystemEntityMetaData)
+			{
+				throw new MolgenisDataException(
+						"SystemEntityMetaData in the database conflicts with the metadta for this import");
+			}
+		}
+		importData(job.report, DependencyResolver.resolve(Sets.newLinkedHashSet(allEntityMetaDataMap.values())),
+				job.source, job.dbAction, job.defaultPackage);
 		importI18nStrings(job.report, job.parsedMetaData.getI18nStrings(), job.dbAction);
 
 		return job.report;
@@ -130,7 +128,7 @@ public class ImportWriter
 	{
 		if (!languages.isEmpty())
 		{
-			Repository repo = dataService.getRepository(LanguageMetaData.ENTITY_NAME);
+			Repository<Entity> repo = dataService.getRepository(LANGUAGE);
 
 			List<Entity> transformed = languages.values().stream()
 					.map(e -> new DefaultEntityImporter(repo.getEntityMetaData(), dataService, e, false))
@@ -138,14 +136,14 @@ public class ImportWriter
 
 			// Find new ones
 			transformed.stream().map(Entity::getIdValue).forEach(id -> {
-				if (repo.findOne(id) == null)
+				if (repo.findOneById(id) == null)
 				{
 					metaDataChanges.addLanguage(languages.get(id));
 				}
 			});
 
 			int count = update(repo, transformed, dbAction);
-			report.addEntityCount(LanguageMetaData.ENTITY_NAME, count);
+			report.addEntityCount(LANGUAGE, count);
 		}
 	}
 
@@ -153,28 +151,27 @@ public class ImportWriter
 	{
 		if (!i18nStrings.isEmpty())
 		{
-			Repository repo = dataService.getRepository(I18nStringMetaData.ENTITY_NAME);
+			Repository<Entity> repo = dataService.getRepository(I18N_STRING);
 
 			List<Entity> transformed = i18nStrings.values().stream()
-					.map(e -> new DefaultEntityImporter(I18nStringMetaData.INSTANCE, dataService, e, false))
-					.collect(toList());
+					.map(e -> new DefaultEntityImporter(i18nStringMetaData, dataService, e, false)).collect(toList());
 
 			int count = update(repo, transformed, dbAction);
-			report.addEntityCount(I18nStringMetaData.ENTITY_NAME, count);
+			report.addEntityCount(I18N_STRING, count);
 		}
 	}
 
 	private void importEntityAndAttributeTags(ParsedMetaData parsedMetaData)
 	{
-		for (Tag<EntityMetaData, LabeledResource, LabeledResource> tag : parsedMetaData.getEntityTags())
+		for (SemanticTag<EntityMetaData, LabeledResource, LabeledResource> tag : parsedMetaData.getEntityTags())
 		{
 			tagService.addEntityTag(tag);
 		}
 
 		for (EntityMetaData emd : parsedMetaData.getAttributeTags().keySet())
 		{
-			for (Tag<AttributeMetaData, LabeledResource, LabeledResource> tag : parsedMetaData.getAttributeTags()
-					.get(emd))
+			for (SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> tag : parsedMetaData
+					.getAttributeTags().get(emd))
 			{
 				tagService.addAttributeTag(emd, tag);
 			}
@@ -182,7 +179,7 @@ public class ImportWriter
 	}
 
 	/**
-	 * Imports entity data for all entities in {@link #resolved} from {@link #source}
+	 * Imports entity data for all entities in resolved from source
 	 */
 	private void importData(EntityImportReport report, Iterable<EntityMetaData> resolved, RepositoryCollection source,
 			DatabaseAction dbAction, String defaultPackage)
@@ -192,15 +189,15 @@ public class ImportWriter
 			String name = entityMetaData.getName();
 
 			// Languages and i18nstrings are already done
-			if (!name.equalsIgnoreCase(LanguageMetaData.ENTITY_NAME)
-					&& !name.equalsIgnoreCase(I18nStringMetaData.ENTITY_NAME) && dataService.hasRepository(name))
+			if (!name.equalsIgnoreCase(LANGUAGE) && !name.equalsIgnoreCase(I18N_STRING) && dataService
+					.hasRepository(name))
 			{
-				Repository repository = dataService.getRepository(name);
-				Repository fileEntityRepository = source.getRepository(entityMetaData.getName());
+				Repository<Entity> repository = dataService.getRepository(name);
+				Repository<Entity> fileEntityRepository = source.getRepository(entityMetaData.getName());
 
 				// Try without default package
-				if ((fileEntityRepository == null) && (defaultPackage != null)
-						&& entityMetaData.getName().toLowerCase().startsWith(defaultPackage.toLowerCase() + "_"))
+				if ((fileEntityRepository == null) && (defaultPackage != null) && entityMetaData.getName().toLowerCase()
+						.startsWith(defaultPackage.toLowerCase() + "_"))
 				{
 					fileEntityRepository = source
 							.getRepository(entityMetaData.getName().substring(defaultPackage.length() + 1));
@@ -239,7 +236,7 @@ public class ImportWriter
 
 	/**
 	 * Keeps the entities that have: 1. A reference to themselves. 2. Minimal one value.
-	 * 
+	 *
 	 * @param entities
 	 * @return Iterable<Entity> - filtered entities;
 	 */
@@ -254,15 +251,16 @@ public class ImportWriter
 				while (attributes.hasNext())
 				{
 					AttributeMetaData attribute = attributes.next();
-					if (attribute.getRefEntity() != null
-							&& attribute.getRefEntity().getName().equals(entity.getEntityMetaData().getName()))
+					if (attribute.getRefEntity() != null && attribute.getRefEntity().getName()
+							.equals(entity.getEntityMetaData().getName()))
 					{
-						List<String> ids = entity.getList(attribute.getName());
+						List<String> ids = DataConverter.toList(entity.get(attribute.getName()));
 						Iterable<Entity> refEntities = entity.getEntities(attribute.getName());
 						if (ids != null && ids.size() != Iterators.size(refEntities.iterator()))
 						{
 							throw new UnknownEntityException(
-									"One or more values [" + ids + "] from " + attribute.getDataType() + " field "
+									"One or more values [" + ids + "] from " + attribute.getDataType().toString()
+											+ " field "
 											+ attribute.getName() + " could not be resolved");
 						}
 						return true;
@@ -282,8 +280,8 @@ public class ImportWriter
 	{
 		if (!SecurityUtils.currentUserIsSu())
 		{
-			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-					metaDataChanges.getAddedEntities());
+			permissionSystemService
+					.giveUserEntityPermissions(SecurityContextHolder.getContext(), metaDataChanges.getAddedEntities());
 		}
 	}
 
@@ -293,18 +291,36 @@ public class ImportWriter
 	private void addEntityMetaData(ParsedMetaData parsedMetaData, EntityImportReport report,
 			MetaDataChanges metaDataChanges)
 	{
-		for (EntityMetaData entityMetaData : parsedMetaData.getEntities())
+		Iterable<EntityMetaData> existingMetaData = dataService.getMeta().getEntityMetaDatas()::iterator;
+		Map<String, EntityMetaData> allEntityMetaDataMap = new HashMap<>();
+		for (EntityMetaData emd : parsedMetaData.getEntities())
+		{
+			allEntityMetaDataMap.put(emd.getName(), emd);
+		}
+		for (EntityMetaData emd : existingMetaData)
+		{
+			if (!allEntityMetaDataMap.containsKey(emd.getName())) allEntityMetaDataMap.put(emd.getName(), emd);
+			else if ((!EntityUtils.equals(emd, allEntityMetaDataMap.get(emd.getName())))
+					&& emd instanceof SystemEntityMetaData)
+			{
+				throw new MolgenisDataException(
+						"SystemEntityMetaData in the database conflicts with the metadta for this import");
+			}
+		}
+		List<EntityMetaData> resolve = DependencyResolver
+				.resolve(new HashSet<EntityMetaData>(Sets.newLinkedHashSet(allEntityMetaDataMap.values())));
+		for (EntityMetaData entityMetaData : resolve)
 		{
 			String name = entityMetaData.getName();
-			if (!EmxMetaDataParser.ENTITIES.equals(name) && !EmxMetaDataParser.ATTRIBUTES.equals(name)
-					&& !EmxMetaDataParser.PACKAGES.equals(name) && !EmxMetaDataParser.TAGS.equals(name)
-					&& !EmxMetaDataParser.LANGUAGES.equals(name) && !EmxMetaDataParser.I18NSTRINGS.equals(name))
+			if (!EmxMetaDataParser.EMX_ENTITIES.equals(name) && !EmxMetaDataParser.EMX_ATTRIBUTES.equals(name)
+					&& !EmxMetaDataParser.EMX_PACKAGES.equals(name) && !EmxMetaDataParser.EMX_TAGS.equals(name)
+					&& !EmxMetaDataParser.EMX_LANGUAGES.equals(name) && !EmxMetaDataParser.EMX_I18NSTRINGS.equals(name))
 			{
 				if (dataService.getMeta().getEntityMetaData(entityMetaData.getName()) == null)
 				{
 					LOG.debug("trying to create: " + name);
 					metaDataChanges.addEntity(name);
-					Repository repo = dataService.getMeta().addEntityMeta(entityMetaData);
+					Repository<Entity> repo = dataService.getMeta().addEntityMeta(entityMetaData);
 					if (repo != null)
 					{
 						report.addNewEntity(name);
@@ -320,7 +336,7 @@ public class ImportWriter
 	}
 
 	/**
-	 * Adds the packages from the packages sheet to the {@link #metaDataService}.
+	 * Adds the packages from the packages sheet to the {@link org.molgenis.data.meta.MetaDataService}.
 	 */
 	private void importPackages(ParsedMetaData parsedMetaData)
 	{
@@ -339,119 +355,36 @@ public class ImportWriter
 	// FIXME: can everybody always update a tag?
 	private void importTags(RepositoryCollection source)
 	{
-		Repository tagRepo = source.getRepository(TagMetaData.ENTITY_NAME);
+		Repository<Entity> tagRepo = source.getRepository(TAG);
 		if (tagRepo != null)
 		{
 			for (Entity tag : tagRepo)
 			{
-				Entity transformed = new DefaultEntity(TagMetaData.INSTANCE, dataService, tag);
-				Entity existingTag = dataService.findOne(TagMetaData.ENTITY_NAME,
-						tag.getString(TagMetaData.IDENTIFIER));
+				Tag transformed = new Tag(tagMetaData);
+				transformed.set(tag);
+				Entity existingTag = dataService.findOneById(TAG, tag.getString(TagMetaData.IDENTIFIER));
 
 				if (existingTag == null)
 				{
-					dataService.add(TagMetaData.ENTITY_NAME, transformed);
+					dataService.add(TAG, transformed);
 				}
 				else
 				{
-					dataService.update(TagMetaData.ENTITY_NAME, transformed);
+					dataService.update(TAG, transformed);
 				}
 			}
 		}
-	}
-
-	/**
-	 * Drops entities and added attributes and reindexes the entities whose attributes were modified.
-	 */
-	@RunAsSystem
-	public void rollbackSchemaChanges(EmxImportJob job)
-	{
-		LOG.info("Rolling back changes.");
-		dataService.delete(LanguageMetaData.ENTITY_NAME, job.metaDataChanges.getAddedLanguages().stream());
-		dropAddedEntities(job.metaDataChanges.getAddedEntities());
-		List<String> entities = dropAddedAttributes(job.metaDataChanges.getAddedAttributes());
-
-		// FIXME import is not transactional, but uses corrective measures to rollback
-		// Reindex
-		Set<String> entitiesToIndex = Sets.newLinkedHashSet(job.source.getEntityNames());
-		entitiesToIndex.addAll(entities);
-		entitiesToIndex.add("tags");
-		entitiesToIndex.add("packages");
-		entitiesToIndex.add("entities");
-		entitiesToIndex.add("attributes");
-
-		reindex(entitiesToIndex);
-	}
-
-	/**
-	 * Reindexes entities
-	 * 
-	 * @param entitiesToIndex
-	 *            Set of entity names
-	 */
-	private void reindex(Set<String> entitiesToIndex)
-	{
-		for (String entity : entitiesToIndex)
-		{
-			if (dataService.hasRepository(entity))
-			{
-				Repository repo = dataService.getRepository(entity);
-				if (repo.getCapabilities().contains(RepositoryCapability.INDEXABLE))
-				{
-					repo.rebuildIndex();
-				}
-			}
-		}
-	}
-
-	/**
-	 * Drops attributes from entities
-	 */
-	private List<String> dropAddedAttributes(ImmutableMap<String, Collection<AttributeMetaData>> addedAttributes)
-	{
-		List<String> entities = Lists.newArrayList(addedAttributes.keySet());
-		Collections.reverse(entities);
-
-		for (String entityName : entities)
-		{
-			for (AttributeMetaData attribute : addedAttributes.get(entityName))
-			{
-				dataService.getMeta().deleteAttribute(entityName, attribute.getName());
-			}
-		}
-		return entities;
-	}
-
-	/**
-	 * Drops added entities in the reverse order in which they were created.
-	 */
-	private void dropAddedEntities(List<String> addedEntities)
-	{
-		// Rollback metadata, create table statements cannot be rolled back, we have to do it ourselves
-		Lists.reverse(addedEntities).forEach(entity -> {
-			try
-			{
-				dataService.getMeta().deleteEntityMeta(entity);
-			}
-			catch (Exception ex)
-			{
-				LOG.error("Failed to rollback creation of entity {}", entity);
-			}
-		});
 	}
 
 	/**
 	 * Updates a repository with entities.
-	 * 
-	 * @param repo
-	 *            the {@link Repository} to update
-	 * @param entities
-	 *            the entities to
-	 * @param dbAction
-	 *            {@link DatabaseAction} describing how to merge the existing entities
+	 *
+	 * @param repo     the {@link Repository} to update
+	 * @param entities the entities to
+	 * @param dbAction {@link DatabaseAction} describing how to merge the existing entities
 	 * @return number of updated entities
 	 */
-	public int update(Repository repo, Iterable<? extends Entity> entities, DatabaseAction dbAction)
+	private int update(Repository<Entity> repo, Iterable<Entity> entities, DatabaseAction dbAction)
 	{
 		if (entities == null) return 0;
 
@@ -462,8 +395,8 @@ public class ImportWriter
 		}
 
 		String idAttributeName = repo.getEntityMetaData().getIdAttribute().getName();
-		FieldType idDataType = repo.getEntityMetaData().getIdAttribute().getDataType();
-
+		AttributeType dataType = repo.getEntityMetaData().getIdAttribute().getDataType();
+		FieldType idFieldType = MolgenisFieldTypes.getType(AttributeType.getValueString(dataType));
 		HugeSet<Object> existingIds = new HugeSet<Object>();
 		HugeSet<Object> ids = new HugeSet<Object>();
 		try
@@ -483,7 +416,7 @@ public class ImportWriter
 				if (repo.count() > 0)
 				{
 					int batchSize = 100;
-					Query q = new QueryImpl();
+					Query<Entity> q = new QueryImpl<Entity>();
 					Iterator<Object> it = ids.iterator();
 					int batchCount = 0;
 					while (it.hasNext())
@@ -496,7 +429,7 @@ public class ImportWriter
 							repo.findAll(q).forEach(existing -> {
 								existingIds.add(existing.getIdValue());
 							});
-							q = new QueryImpl();
+							q = new QueryImpl<Entity>();
 							batchCount = 0;
 						}
 						else
@@ -548,7 +481,7 @@ public class ImportWriter
 					{
 						Entity entity = it.next();
 						count++;
-						Object id = idDataType.convert(entity.get(idAttributeName));
+						Object id = idFieldType.convert(entity.get(idAttributeName));
 						if (!existingIds.contains(id))
 						{
 							newEntities.add(entity);
@@ -578,7 +511,7 @@ public class ImportWriter
 					{
 						Entity entity = it.next();
 						count++;
-						Object id = idDataType.convert(entity.get(idAttributeName));
+						Object id = idFieldType.convert(entity.get(idAttributeName));
 						if (existingIds.contains(id))
 						{
 							existingEntitiesRowIndex.add(count);
@@ -616,7 +549,7 @@ public class ImportWriter
 					for (Entity entity : entities)
 					{
 						count++;
-						Object id = idDataType.convert(entity.get(idAttributeName));
+						Object id = idFieldType.convert(entity.get(idAttributeName));
 						if (!existingIds.contains(id))
 						{
 							if (++errorCount == 6)
@@ -657,7 +590,8 @@ public class ImportWriter
 		}
 	}
 
-	private void updateInRepo(Repository repo, List<Entity> existingEntities, List<Integer> existingEntitiesRowIndex)
+	private void updateInRepo(Repository<Entity> repo, List<Entity> existingEntities,
+			List<Integer> existingEntitiesRowIndex)
 	{
 		try
 		{
@@ -672,7 +606,7 @@ public class ImportWriter
 		existingEntitiesRowIndex.clear();
 	}
 
-	private void insertIntoRepo(Repository repo, List<Entity> newEntities, List<Integer> newEntitiesRowIndex)
+	private void insertIntoRepo(Repository<Entity> repo, List<Entity> newEntities, List<Integer> newEntitiesRowIndex)
 	{
 		try
 		{
@@ -689,7 +623,7 @@ public class ImportWriter
 
 	/**
 	 * A wrapper for a to import entity
-	 * 
+	 * <p>
 	 * When importing, some references (Entity) are still not imported. This wrapper accepts this inconsistency in the
 	 * dataService. For example xref and mref.
 	 */
@@ -730,7 +664,19 @@ public class ImportWriter
 		}
 
 		@Override
-		public String getLabelValue()
+		public void setIdValue(Object id)
+		{
+			AttributeMetaData idAttr = entityMetaData.getIdAttribute();
+			if (idAttr == null)
+			{
+				throw new IllegalArgumentException(
+						format("Entity [%s] doesn't have an id attribute", entityMetaData.getName()));
+			}
+			set(idAttr.getName(), id);
+		}
+
+		@Override
+		public Object getLabelValue()
 		{
 			return getString(entityMetaData.getLabelAttribute().getName());
 		}
@@ -741,7 +687,7 @@ public class ImportWriter
 			AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
 			if (attribute == null) throw new UnknownAttributeException(attributeName);
 
-			FieldTypeEnum dataType = attribute.getDataType().getEnumType();
+			AttributeType dataType = attribute.getDataType();
 			switch (dataType)
 			{
 				case BOOL:
@@ -784,8 +730,7 @@ public class ImportWriter
 			AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
 			if (attribute != null)
 			{
-				FieldType dataType = attribute.getDataType();
-				if (dataType instanceof XrefField)
+				if (attribute.getDataType() == XREF)
 				{
 					return DataConverter.toString(getEntity(attributeName));
 				}
@@ -817,13 +762,11 @@ public class ImportWriter
 			return DataConverter.toDouble(entity.get(attributeName));
 		}
 
-		@Override
 		public List<String> getList(String attributeName)
 		{
 			return DataConverter.toList(entity.get(attributeName));
 		}
 
-		@Override
 		public List<Integer> getIntList(String attributeName)
 		{
 			return DataConverter.toIntList(entity.get(attributeName));
@@ -848,7 +791,7 @@ public class ImportWriter
 				AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
 				if (attribute == null) throw new UnknownAttributeException(attributeName);
 
-				FieldTypeEnum dataType = attribute.getDataType().getEnumType();
+				AttributeType dataType = attribute.getDataType();
 				switch (dataType)
 				{
 					case DATE:
@@ -894,9 +837,8 @@ public class ImportWriter
 		}
 
 		/**
-		 * Similar to {@link org.molgenis.data.support.DefaultEntity#getEntity(String)} but returns lazy references if
-		 * the decorated entity doesn't have self-references improving import performance.
-		 * 
+		 * Returns lazy references if the decorated entity doesn't have self-references improving import performance.
+		 *
 		 * @param attributeName
 		 * @return
 		 */
@@ -910,25 +852,22 @@ public class ImportWriter
 			AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
 			if (attribute == null) throw new UnknownAttributeException(attributeName);
 
-			if (value instanceof Map)
-				return new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) value);
-
-			FieldType dataType = attribute.getDataType();
-			if (!(dataType instanceof XrefField))
+			if (!isSingleReferenceType(attribute))
 			{
 				throw new MolgenisDataException(
 						"can't use getEntity() on something that's not an xref, categorical or file");
 			}
 
+			FieldType dataType = MolgenisFieldTypes.getType(AttributeType.getValueString(attribute.getDataType()));
 			value = dataType.convert(value);
 
 			// referenced entity id value must match referenced entity id attribute data type
-			FieldType refIdAttr = attribute.getRefEntity().getIdAttribute().getDataType();
-			if (refIdAttr instanceof StringField && !(value instanceof String))
+			AttributeMetaData refIdAttr = attribute.getRefEntity().getIdAttribute();
+			if (isSingleReferenceType(refIdAttr) && !(value instanceof String))
 			{
 				value = String.valueOf(value);
 			}
-			else if (refIdAttr instanceof IntField && !(value instanceof Integer))
+			else if (refIdAttr.getDataType() == INT && !(value instanceof Integer))
 			{
 				value = Integer.valueOf(value.toString());
 			}
@@ -936,9 +875,10 @@ public class ImportWriter
 			Entity refEntity;
 			if (selfReferencing)
 			{
-				refEntity = dataService.findOne(attribute.getRefEntity().getName(), value);
-				if (refEntity == null) throw new UnknownEntityException(attribute.getRefEntity().getName() + " with "
-						+ attribute.getRefEntity().getIdAttribute().getName() + " [" + value + "] does not exist");
+				refEntity = dataService.findOneById(attribute.getRefEntity().getName(), value);
+				if (refEntity == null) throw new UnknownEntityException(
+						attribute.getRefEntity().getName() + " with " + attribute.getRefEntity().getIdAttribute()
+								.getName() + " [" + value + "] does not exist");
 			}
 			else
 			{
@@ -951,9 +891,10 @@ public class ImportWriter
 		@Override
 		public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
 		{
-			Entity entity = getEntity(attributeName);
-			return entity != null
-					? new ConvertingIterable<E>(clazz, Arrays.asList(entity), dataService).iterator().next() : null;
+			throw new UnsupportedOperationException("FIXME"); // FIXME
+			//			Entity entity = getEntity(attributeName);
+			//			return entity != null
+			//					? new ConvertingIterable<E>(clazz, Arrays.asList(entity)).iterator().next() : null;
 		}
 
 		@Override
@@ -970,9 +911,8 @@ public class ImportWriter
 		}
 
 		/**
-		 * Similar to {@link org.molgenis.data.support.DefaultEntity#getEntities(String)} but returns lazy references if
-		 * the decorated entity doesn't have self-references improving import performance.
-		 * 
+		 * Returns lazy references if the decorated entity doesn't have self-references improving import performance.
+		 *
 		 * @param attributeName
 		 * @return
 		 */
@@ -981,12 +921,8 @@ public class ImportWriter
 			AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
 			if (attribute == null) throw new UnknownAttributeException(attributeName);
 
-			FieldType dataType = attribute.getDataType();
-
-			// FIXME this should fail on anything other than instanceof MrefField. requires an extensive code base
-			// review to
-			// find illegal use of getEntities()
-			if (!(dataType instanceof MrefField) && !(dataType instanceof XrefField))
+			// FIXME this should fail on anything other than instanceof MrefField. requires an extensive code base review to find illegal use of getEntities()
+			if (!EntityMetaDataUtils.isReferenceType(attribute))
 			{
 				throw new MolgenisDataException(
 						"can't use getEntities() on something that's not an xref, mref, categorical, categorical_mref or file");
@@ -995,7 +931,13 @@ public class ImportWriter
 			Iterable<?> ids;
 
 			Object value = entity.get(attributeName);
-			if (value instanceof String) ids = getList(attributeName);
+			if (value instanceof String)
+			{
+				List<String> values = DataConverter.toList(value);
+				// FIXME remove dependency on application context
+				return getApplicationContext().getBean(EntityManager.class)
+						.getReferences(attribute.getRefEntity(), values);
+			}
 			else if (value instanceof Entity) return Collections.singletonList((Entity) value);
 			else ids = (Iterable<?>) value;
 
@@ -1004,16 +946,11 @@ public class ImportWriter
 			Object firstItem = ids.iterator().next();
 			if (firstItem instanceof Entity) return (Iterable<Entity>) ids;
 
-			if (firstItem instanceof Map)
-			{
-				return stream(ids.spliterator(), false)
-						.map(id -> new DefaultEntity(attribute.getRefEntity(), dataService, (Map<String, Object>) id))
-						.collect(Collectors.toList());
-			}
 			if (selfReferencing)
 			{
+				FieldType dataType = MolgenisFieldTypes.getType(AttributeType.getValueString(attribute.getDataType()));
 				return from(ids).transform(dataType::convert).transform(
-						convertedId -> (dataService.findOne(attribute.getRefEntity().getName(), convertedId)));
+						convertedId -> (dataService.findOneById(attribute.getRefEntity().getName(), convertedId)));
 			}
 			else
 			{
@@ -1025,12 +962,12 @@ public class ImportWriter
 					{
 						return stream(ids.spliterator(), false).map(id -> {
 							// referenced entity id value must match referenced entity id attribute data type
-							if (refEntityMeta.getIdAttribute().getDataType() instanceof StringField
+							if (EntityMetaDataUtils.isStringType(refEntityMeta.getIdAttribute())
 									&& !(id instanceof String))
 							{
 								return String.valueOf(id);
 							}
-							else if (refEntityMeta.getIdAttribute().getDataType() instanceof IntField
+							else if (refEntityMeta.getIdAttribute().getDataType() == INT
 									&& !(id instanceof Integer))
 							{
 								return Integer.valueOf(id.toString());
@@ -1039,7 +976,7 @@ public class ImportWriter
 							{
 								return id;
 							}
-						}).<Entity> map(id -> new LazyEntity(refEntityMeta, dataService, id)).iterator();
+						}).<Entity>map(id -> new LazyEntity(refEntityMeta, dataService, id)).iterator();
 					}
 				};
 			}
@@ -1048,8 +985,9 @@ public class ImportWriter
 		@Override
 		public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz)
 		{
-			Iterable<Entity> entities = getEntities(attributeName);
-			return entities != null ? new ConvertingIterable<E>(clazz, entities, dataService) : null;
+			throw new UnsupportedOperationException("FIXME"); // FIXME
+			//			Iterable<Entity> entities = getEntities(attributeName);
+			//			return entities != null ? new ConvertingIterable<E>(clazz, entities) : null;
 		}
 
 		@Override
@@ -1067,7 +1005,8 @@ public class ImportWriter
 		@Override
 		public String toString()
 		{
-			return getLabelValue();
+			Object labelValue = getLabelValue();
+			return labelValue != null ? labelValue.toString() : null;
 		}
 
 		@Override

@@ -12,7 +12,7 @@
     <script>
     	$(function (){
 	 		var ProgressBar = React.render(molgenis.ui.jobs.JobContainer({
-	    	 	'jobHref' : '/api/v1/AnnotationJobExecution/${annotationRun.identifier}'
+                'jobHref': '/api/v1/sys_AnnotationJobExecution/${annotationRun.identifier}'
 			}), $('#annotateRun')[0]);
         });
     </script>
@@ -179,7 +179,7 @@
                 molgenis.createAlert([{'message': 'This entity has most recently been annotated with: ${annotationRun.annotators}'}], 'info');
             }
             if ('${annotationRun.status}' === "FAILED") {
-                molgenis.createAlert([{'message': 'The last annotation run for this entity has failed'}], 'error');
+                molgenis.createAlert([{'message': 'The last annotation run for this entity has failed'}], 'warning');
             }
     </script>
 </#if>

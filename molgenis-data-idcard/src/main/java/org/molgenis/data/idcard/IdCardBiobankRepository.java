@@ -2,7 +2,6 @@ package org.molgenis.data.idcard;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
-import static org.molgenis.data.RepositoryCapability.MANAGABLE;
 import static org.molgenis.data.RepositoryCapability.QUERYABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
@@ -15,7 +14,6 @@ import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCapability;
@@ -23,8 +21,10 @@ import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.idcard.client.IdCardClient;
 import org.molgenis.data.idcard.model.IdCardBiobank;
+import org.molgenis.data.idcard.model.IdCardBiobankFactory;
 import org.molgenis.data.idcard.model.IdCardBiobankMetaData;
 import org.molgenis.data.idcard.settings.IdCardIndexerSettings;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,17 +40,19 @@ public class IdCardBiobankRepository extends AbstractRepository
 	private final ElasticsearchService elasticsearchService;
 	private final DataService dataService;
 	private final IdCardIndexerSettings idCardIndexerSettings;
+	private final IdCardBiobankFactory idCardBiobankFactory;
 
 	@Autowired
 	public IdCardBiobankRepository(IdCardBiobankMetaData idCardBiobankMetaData, IdCardClient idCardClient,
 			ElasticsearchService elasticsearchService, DataService dataService,
-			IdCardIndexerSettings idCardIndexerSettings)
+			IdCardIndexerSettings idCardIndexerSettings, IdCardBiobankFactory idCardBiobankFactory)
 	{
 		this.idCardBiobankMetaData = idCardBiobankMetaData;
 		this.idCardClient = requireNonNull(idCardClient);
 		this.elasticsearchService = requireNonNull(elasticsearchService);
 		this.dataService = requireNonNull(dataService);
 		this.idCardIndexerSettings = requireNonNull(idCardIndexerSettings);
+		this.idCardBiobankFactory = requireNonNull(idCardBiobankFactory);
 	}
 
 	@Override
@@ -75,26 +77,26 @@ public class IdCardBiobankRepository extends AbstractRepository
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return elasticsearchService.count(q, getEntityMetaData());
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return elasticsearchService.searchAsStream(q, getEntityMetaData());
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		Iterator<Entity> it = findAll(q).iterator();
 		return it.hasNext() ? it.next() : null;
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
 		try
 		{
@@ -107,9 +109,9 @@ public class IdCardBiobankRepository extends AbstractRepository
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
-		return findOne(id);
+		return findOneById(id);
 	}
 
 	@Override
@@ -140,7 +142,7 @@ public class IdCardBiobankRepository extends AbstractRepository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
 		throw new UnsupportedOperationException(
 				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));
@@ -184,23 +186,8 @@ public class IdCardBiobankRepository extends AbstractRepository
 
 	private IdCardBiobank createErrorIdCardBiobank(Object id)
 	{
-		IdCardBiobank idCardBiobank = new IdCardBiobank(dataService);
-		idCardBiobank.set(IdCardBiobank.ORGANIZATION_ID, id);
-		idCardBiobank.set(IdCardBiobank.NAME, "Error loading data");
+		IdCardBiobank idCardBiobank = idCardBiobankFactory.create(Integer.valueOf(id.toString()));
+		idCardBiobank.set(IdCardBiobankMetaData.NAME, "Error loading data");
 		return idCardBiobank;
-	}
-
-	@Override
-	public void create()
-	{
-		throw new UnsupportedOperationException(
-				String.format("Repository [%s] is not %s", getName(), MANAGABLE.toString()));
-	}
-
-	@Override
-	public void drop()
-	{
-		throw new UnsupportedOperationException(
-				String.format("Repository [%s] is not %s", getName(), MANAGABLE.toString()));
 	}
 }

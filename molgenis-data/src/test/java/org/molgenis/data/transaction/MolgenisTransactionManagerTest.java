@@ -4,22 +4,15 @@ import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
+import javax.sql.DataSource;
 
 import org.molgenis.data.support.UuidGenerator;
-import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import javax.sql.DataSource;
 
 public class MolgenisTransactionManagerTest
 {
-	private MolgenisTransactionManager molgenisTransactionManager;
-
-	@BeforeMethod
-	public void beforeMethod()
-	{
-		molgenisTransactionManager = new MolgenisTransactionManager(new UuidGenerator(), mock(DataSource.class));
-	}
+	private MolgenisTransactionManager molgenisTransactionManager = new MolgenisTransactionManager(new UuidGenerator(),
+			mock(DataSource.class));
 
 	@Test
 	public void doGetTransaction()

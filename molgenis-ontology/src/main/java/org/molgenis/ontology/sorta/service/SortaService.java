@@ -29,16 +29,6 @@ public interface SortaService
 	Entity getOntologyTermEntity(String ontologyTermIri, String ontologyIri);
 
 	/**
-	 * Find a list of relevant ontologyterm entities using lexical matching (elasticsearch + ngram) in generic type
-	 * based on given ontologyIri and queryString
-	 * 
-	 * @param ontologyUrl
-	 * @param queryString
-	 * @return a list of ontologyterm entities in generic type
-	 */
-	Iterable<Entity> findOntologyTermEntities(String ontologyUrl, String queryString);
-
-	/**
 	 * Find a list of relevant ontologyterm typed entities using lexical matching (elasticsearch + ngram) in generic
 	 * type based on given ontologyIri and a set of query inputs (name, synonym, ontology database id, e.g. hpo, omim)
 	 * 

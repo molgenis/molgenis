@@ -32,9 +32,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.google.common.primitives.Ints;
 import com.google.gson.stream.JsonReader;
-
-import autovalue.shaded.com.google.common.common.primitives.Ints;
 
 @Service
 public class IdCardClientImpl implements IdCardClient

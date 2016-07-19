@@ -1,14 +1,14 @@
 package org.molgenis.fieldtypes;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 
 public class ScriptField extends TextField
 {
 	private static final long serialVersionUID = -3323081217879835712L;
 
 	@Override
-	public FieldTypeEnum getEnumType()
+	public AttributeType getEnumType()
 	{
-		return FieldTypeEnum.SCRIPT;
+		return AttributeType.SCRIPT;
 	}
 }

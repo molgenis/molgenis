@@ -1,65 +1,128 @@
 package org.molgenis.file.ingest.meta;
 
+import static org.molgenis.file.ingest.meta.FileIngestMetaData.ACTIVE;
+import static org.molgenis.file.ingest.meta.FileIngestMetaData.CRONEXPRESSION;
+import static org.molgenis.file.ingest.meta.FileIngestMetaData.DESCRIPTION;
+import static org.molgenis.file.ingest.meta.FileIngestMetaData.ENTITY_META_DATA;
+import static org.molgenis.file.ingest.meta.FileIngestMetaData.FAILURE_EMAIL;
+import static org.molgenis.file.ingest.meta.FileIngestMetaData.ID;
+import static org.molgenis.file.ingest.meta.FileIngestMetaData.LOADER;
+import static org.molgenis.file.ingest.meta.FileIngestMetaData.NAME;
+import static org.molgenis.file.ingest.meta.FileIngestMetaData.URL;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.meta.EntityMetaDataMetaData;
-import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.StaticEntity;
 
-public class FileIngest extends DefaultEntity
+public class FileIngest extends StaticEntity
 {
-	private static final long serialVersionUID = 1L;
-	public static final EntityMetaData META_DATA = new FileIngestMetaData();
-
-	public FileIngest(DataService dataService)
+	public FileIngest(Entity entity)
 	{
-		super(META_DATA, dataService);
+		super(entity);
 	}
 
-	public String getIdentifier()
+	public FileIngest(EntityMetaData entityMeta)
 	{
-		return getString(FileIngestMetaData.ID);
+		super(entityMeta);
+	}
+
+	public FileIngest(String id, EntityMetaData entityMeta)
+	{
+		super(entityMeta);
+		setId(id);
+	}
+
+	public void setId(String identifier)
+	{
+		set(ID, identifier);
+	}
+
+	public String getId()
+	{
+		return getString(ID);
+	}
+
+	public void setName(String name)
+	{
+		set(NAME, name);
 	}
 
 	public String getName()
 	{
-		return getString(FileIngestMetaData.NAME);
+		return getString(NAME);
+	}
+
+	public void setDescription(String description)
+	{
+		set(DESCRIPTION, description);
 	}
 
 	public String getDescription()
 	{
-		return getString(FileIngestMetaData.DESCRIPTION);
+		return getString(DESCRIPTION);
+	}
+
+	public void setUrl(URL url)
+	{
+		set(URL, url != null ? url.toString() : null);
 	}
 
 	public URL getUrl() throws MalformedURLException
 	{
-		return new URL(getString(FileIngestMetaData.URL));
+		return new URL(getString(URL));
+	}
+
+	public void setLoader(String loader)
+	{
+		set(LOADER, loader);
 	}
 
 	public String getLoader()
 	{
-		return getString(FileIngestMetaData.LOADER);
+		return getString(LOADER);
+	}
+
+	public void setTargetEntity(EntityMetaData entityMetaData)
+	{
+		set(ENTITY_META_DATA, entityMetaData);
 	}
 
 	public String getTargetEntityName()
 	{
-		return getEntity(FileIngestMetaData.ENTITY_META_DATA).getString(EntityMetaDataMetaData.FULL_NAME);
+		return getEntity(ENTITY_META_DATA, EntityMetaData.class).getName();
+	}
+
+	public void setCronExpression(String cronExpression)
+	{
+		set(CRONEXPRESSION, cronExpression);
 	}
 
 	public String getCronExpression()
 	{
-		return getString(FileIngestMetaData.CRONEXPRESSION);
+		return getString(CRONEXPRESSION);
+	}
+
+	public void setActive(boolean active)
+	{
+		set(ACTIVE, active);
 	}
 
 	public boolean isActive()
 	{
-		return getBoolean(FileIngestMetaData.ACTIVE);
+		Boolean active = getBoolean(ACTIVE);
+		return active != null ? active.booleanValue() : false;
+	}
+
+	public void setFailureEmail(String failureEmail)
+	{
+		set(FAILURE_EMAIL, failureEmail);
 	}
 
 	public String getFailureEmail()
 	{
-		return getString(FileIngestMetaData.FAILURE_EMAIL);
+		return getString(FAILURE_EMAIL);
 	}
 }

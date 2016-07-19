@@ -1,20 +1,18 @@
 package org.molgenis.ui.settings;
 
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
-import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
 
-import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.MolgenisFieldTypes.COMPOUND;
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.SCRIPT;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 
 /**
  * Application settings that are read from a data source and persisted to a data source.
@@ -70,9 +68,19 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 
 		private static final String CUSTOM_JAVASCRIPT = "custom_javascript";
 
-		public Meta()
+		private final MenuManagerServiceImpl menuManagerServiceImpl;
+
+		@Autowired
+		public Meta(MenuManagerServiceImpl menuManagerServiceImpl)
 		{
 			super(ID);
+			this.menuManagerServiceImpl = requireNonNull(menuManagerServiceImpl);
+		}
+
+		@Override
+		public void init()
+		{
+			super.init();
 			setLabel("Application settings");
 			setDescription("General application settings.");
 
@@ -87,7 +95,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 			addAttribute(GOOGLE_SIGN_IN).setDataType(BOOL).setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_GOOGLE_SIGN_IN)).setLabel("Enable Google Sign-In")
 					.setDescription("Enable users to sign in with their existing Google account").setVisibleExpression(
-							"$('" + SIGNUP + "').eq(true).value() && $('" + SIGNUP_MODERATION + "').eq(false).value()");
+					"$('" + SIGNUP + "').eq(true).value() && $('" + SIGNUP_MODERATION + "').eq(false).value()");
 			addAttribute(GOOGLE_APP_CLIENT_ID).setDataType(STRING).setNillable(false)
 					.setDefaultValue(DEFAULT_GOOGLE_APP_CLIENT_ID).setLabel("Google app client ID")
 					.setDescription("Google app client ID used during Google Sign-In")
@@ -98,7 +106,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 			addAttribute(LOGO_TOP_HREF).setDataType(STRING).setNillable(true).setLabel("Logo above navigation bar")
 					.setDescription("HREF to logo image");
 			addAttribute(FOOTER).setDataType(TEXT).setNillable(true).setLabel("Footer text");
-			addAttribute(MENU).setDataType(TEXT).setNillable(true).setLabel("Menu")
+			addAttribute(MENU).setDataType(TEXT).setNillable(true).setDefaultValue(getDefaultMenuValue()).setLabel("Menu")
 					.setDescription("JSON object that describes menu content.");
 			addAttribute(LANGUAGE_CODE).setDataType(STRING).setNillable(false).setDefaultValue(DEFAULT_LANGUAGE_CODE)
 					.setLabel("Language code").setDescription("ISO 639 alpha-2 or alpha-3 language code.");
@@ -117,43 +125,39 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 							"Custom javascript headers, specified as comma separated list. These headers will be included in the molgenis header before the applications own javascript headers.");
 
 			// tracking settings
-			DefaultAttributeMetaData trackingAttr = addAttribute(TRACKING).setDataType(COMPOUND).setLabel("Tracking");
+			AttributeMetaData trackingAttr = addAttribute(TRACKING).setDataType(COMPOUND).setLabel("Tracking");
 
-			DefaultAttributeMetaData gaTrackingPrivacyFriendlyAttr = new DefaultAttributeMetaData(
-					GOOGLE_ANALYTICS_IP_ANONYMIZATION).setDataType(BOOL).setNillable(false)
-							.setDefaultValue(String.valueOf(DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION))
-							.setLabel("IP anonymization").setDescription(
-									"Disables the cookie wall by using privacy friendly tracking (only works if google analytics accounts are configured correctly, see below)");
-			DefaultAttributeMetaData gaTrackingIdAttr = new DefaultAttributeMetaData(GOOGLE_ANALYTICS_TRACKING_ID)
+			addAttribute(GOOGLE_ANALYTICS_IP_ANONYMIZATION, trackingAttr).setDataType(BOOL).setNillable(false)
+					.setDefaultValue(String.valueOf(DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION))
+					.setLabel("IP anonymization").setDescription(
+							"Disables the cookie wall by using privacy friendly tracking (only works if google analytics accounts are configured correctly, see below)");
+			addAttribute(GOOGLE_ANALYTICS_TRACKING_ID, trackingAttr)
 					.setDataType(STRING).setNillable(true).setLabel("Google analytics tracking ID")
 					.setDescription("Google analytics tracking ID (e.g. UA-XXXX-Y)");
-			DefaultAttributeMetaData gaAccountPrivacyFriendlyAttr = new DefaultAttributeMetaData(
-					GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS).setDataType(BOOL).setNillable(false)
-							.setDefaultValue(String.valueOf(DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS))
-							.setLabel("Google analytics account privacy friendly").setDescription(
-									"Confirm that you have configured your Google Analytics account as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf");
-			DefaultAttributeMetaData gaTrackingIdMolgenisAttr = new DefaultAttributeMetaData(
-					GOOGLE_ANALYTICS_TRACKING_ID_MOLGENIS).setDataType(STRING).setNillable(true)
-							.setLabel("Google analytics tracking ID (MOLGENIS)")
-							.setDescription("Google analytics tracking ID used by MOLGENIS");
-			DefaultAttributeMetaData gaAccountPrivacyFriendlyMolgenisAttr = new DefaultAttributeMetaData(
-					GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS).setDataType(BOOL)
-							.setNillable(false)
-							.setDefaultValue(
-									String.valueOf(DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS))
-							.setReadOnly(true).setLabel("Google analytics account privacy friendly (MOLGENIS)")
-							.setDescription(
-									"Confirm that the MOLGENIS Google Analytics account is configured as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf");
-			DefaultAttributeMetaData trackingFooterAttr = new DefaultAttributeMetaData(TRACKING_CODE_FOOTER)
+			addAttribute(
+					GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS, trackingAttr).setDataType(BOOL).setNillable(false)
+					.setDefaultValue(String.valueOf(DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS))
+					.setLabel("Google analytics account privacy friendly").setDescription(
+							"Confirm that you have configured your Google Analytics account as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf");
+			addAttribute(GOOGLE_ANALYTICS_TRACKING_ID_MOLGENIS, trackingAttr).setDataType(STRING).setNillable(true)
+					.setLabel("Google analytics tracking ID (MOLGENIS)")
+					.setDescription("Google analytics tracking ID used by MOLGENIS");
+			addAttribute(
+					GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS, trackingAttr).setDataType(BOOL)
+					.setNillable(false)
+					.setDefaultValue(
+							String.valueOf(DEFAULT_GOOGLE_ANALYTICS_ACCOUNT_PRIVACY_FRIENDLY_SETTINGS_MOLGENIS))
+					.setReadOnly(true).setLabel("Google analytics account privacy friendly (MOLGENIS)")
+					.setDescription(
+							"Confirm that the MOLGENIS Google Analytics account is configured as described here: https://cbpweb.nl/sites/default/files/atoms/files/handleiding_privacyvriendelijk_instellen_google_analytics_0.pdf");
+			addAttribute(TRACKING_CODE_FOOTER, trackingAttr)
 					.setDataType(SCRIPT).setNillable(true).setLabel("Tracking code footer").setDescription(
 							"JS tracking code that is placed in the footer HTML (e.g. PiWik). This enables the cookie wall.");
+		}
 
-			trackingAttr.addAttributePart(gaTrackingPrivacyFriendlyAttr);
-			trackingAttr.addAttributePart(gaTrackingIdAttr);
-			trackingAttr.addAttributePart(gaAccountPrivacyFriendlyAttr);
-			trackingAttr.addAttributePart(gaTrackingIdMolgenisAttr);
-			trackingAttr.addAttributePart(gaAccountPrivacyFriendlyMolgenisAttr);
-			trackingAttr.addAttributePart(trackingFooterAttr);
+		private String getDefaultMenuValue()
+		{
+			return menuManagerServiceImpl.getDefaultMenuValue();
 		}
 	}
 

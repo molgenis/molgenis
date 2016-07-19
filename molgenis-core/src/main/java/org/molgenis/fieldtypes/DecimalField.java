@@ -1,12 +1,12 @@
 package org.molgenis.fieldtypes;
 
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.model.MolgenisModelException;
+
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.model.MolgenisModelException;
 
 public class DecimalField extends FieldType
 {
@@ -35,6 +35,12 @@ public class DecimalField extends FieldType
 	public String getMysqlType() throws MolgenisModelException
 	{
 		return "DOUBLE";
+	}
+
+	@Override
+	public String getPostgreSqlType()
+	{
+		return "double precision"; // alias: float8
 	}
 
 	@Override
@@ -86,9 +92,9 @@ public class DecimalField extends FieldType
 	}
 
 	@Override
-	public FieldTypeEnum getEnumType()
+	public AttributeType getEnumType()
 	{
-		return FieldTypeEnum.DECIMAL;
+		return AttributeType.DECIMAL;
 	}
 
 	@Override
@@ -107,7 +113,7 @@ public class DecimalField extends FieldType
 	public Object convert(Object value)
 	{
 		if (value == null) return null;
-		else if (value instanceof Double) return value;
+		else if (value instanceof Number) return ((Number) value).doubleValue();
 		else if (value instanceof String || value instanceof Integer) return Double.parseDouble(value.toString());
 		else if (value instanceof BigDecimal)
 		{

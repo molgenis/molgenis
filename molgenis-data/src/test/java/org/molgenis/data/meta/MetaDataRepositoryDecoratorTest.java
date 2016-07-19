@@ -11,6 +11,7 @@ import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.testng.Assert.assertEquals;
 
 import org.apache.commons.io.IOUtils;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.testng.annotations.BeforeMethod;
@@ -18,10 +19,13 @@ import org.testng.annotations.Test;
 
 import com.google.common.collect.Sets;
 
+import java.util.List;
+import java.util.function.Consumer;
+
 public class MetaDataRepositoryDecoratorTest
 {
-	private Repository repo;
-	private Repository decorator;
+	private Repository<Entity> repo;
+	private Repository<Entity> decorator;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -39,10 +43,11 @@ public class MetaDataRepositoryDecoratorTest
 	}
 
 	@Test
-	public void streamFetch()
+	public void forEachBatchedFetch()
 	{
 		Fetch fetch = new Fetch();
-		decorator.stream(fetch);
-		verify(repo, times(1)).stream(fetch);
+		Consumer<List<Entity>> consumer = mock(Consumer.class);
+		repo.forEachBatched(fetch, consumer, 234);
+		verify(repo, times(1)).forEachBatched(fetch, consumer, 234);
 	}
 }
