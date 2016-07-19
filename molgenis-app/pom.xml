@@ -3,8 +3,8 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>org.molgenis</groupId>
-		<artifactId>molgenis</artifactId>
-		<version>1.21.1-BBMRI-NL</version>
+		<artifactId>molgenis-bbmri-nl</artifactId>
+		<version>1.0</version>
 	</parent>
 	<artifactId>molgenis-app</artifactId>
 	<packaging>war</packaging>
