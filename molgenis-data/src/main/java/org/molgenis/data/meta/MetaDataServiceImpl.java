@@ -121,6 +121,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	/**
 	 * Removes entity meta data if it exists.
 	 */
+	@Transactional
 	@Override
 	public void deleteEntityMeta(String entityName)
 	{
@@ -293,8 +294,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	public LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection)
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<>();
-		stream(repositoryCollection.getEntityNames().spliterator(), false)
-				.forEach(entityName -> entitiesImportable.put(entityName, this.canIntegrateEntityMetadataCheck(
+		stream(repositoryCollection.getEntityNames().spliterator(), false).forEach(entityName -> entitiesImportable
+				.put(entityName, this.canIntegrateEntityMetadataCheck(
 						repositoryCollection.getRepository(entityName).getEntityMetaData())));
 
 		return entitiesImportable;
@@ -307,8 +308,8 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<>();
 
-		stream(newEntitiesMetaDataMap.keySet().spliterator(), false)
-				.forEach(entityName -> entitiesImportable.put(entityName, skipEntities.contains(entityName) || this
+		stream(newEntitiesMetaDataMap.keySet().spliterator(), false).forEach(entityName -> entitiesImportable
+				.put(entityName, skipEntities.contains(entityName) || this
 						.canIntegrateEntityMetadataCheck(newEntitiesMetaDataMap.get(entityName))));
 
 		return entitiesImportable;

@@ -98,7 +98,7 @@ public class ReindexActionRegisterService
 			}
 			else
 			{
-				LOG.warn("Transaction id is unknown");
+				LOG.error("Transaction id is unknown, register of entityFullName [{}], cudType [{}], dataType [{}], entityId [{}]", entityFullName, cudType, dataType, entityId);
 			}
 		}
 	}
