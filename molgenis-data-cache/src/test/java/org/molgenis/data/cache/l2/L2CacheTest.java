@@ -6,10 +6,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityManager;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
 import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
@@ -33,6 +30,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.mockito.Matchers.any;
@@ -104,6 +103,76 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
+	public void testAfterCommitTransactionRemovesCacheForDirtyRepository()
+	{
+		// load the entity through the cache
+		Entity entity2 = testEntities.get(2);
+		when(repository.findOneById("2")).thenReturn(entity2);
+		Entity result = l2Cache.get(repository, "2");
+		assertTrue(EntityUtils.equals(result, entity2));
+
+		// get the entity from the cache without touching the repository
+		result = l2Cache.get(repository, "2");
+		assertTrue(EntityUtils.equals(result, entity2));
+		verify(repository, times(1)).findOneById("2");
+
+		// Commit a transaction that has dirtied the repository
+		when(transactionInformation.getDirtyRepositories()).thenReturn(singleton(emd.getName()));
+		l2Cache.afterCommitTransaction("transactionID");
+
+		// get the entity a third time
+		result = l2Cache.get(repository, "2");
+		assertTrue(EntityUtils.equals(result, entity2));
+
+		// it was no longer present in the cache and got loaded through the repository
+		verify(repository, times(2)).findOneById("2");
+
+		// But now it sits in the cache again
+		result = l2Cache.get(repository, "2");
+		assertTrue(EntityUtils.equals(result, entity2));
+		verify(repository, times(2)).findOneById("2");
+	}
+
+	@Test
+	public void testAfterCommitTransactionRemovesEntityForDirtyEntity()
+	{
+		Entity entity2 = testEntities.get(2);
+		Entity entity3 = testEntities.get(3);
+		when(repository.findOneById("2")).thenReturn(entity2);
+		when(repository.findOneById("3")).thenReturn(entity3);
+
+		// load the entities through the cache
+		assertTrue(EntityUtils.equals(l2Cache.get(repository, "2"), entity2));
+		assertTrue(EntityUtils.equals(l2Cache.get(repository, "3"), entity3));
+
+		// get the entities from the cache without touching the repository
+		assertTrue(EntityUtils.equals(l2Cache.get(repository, "2"), entity2));
+		assertTrue(EntityUtils.equals(l2Cache.get(repository, "3"), entity3));
+		verify(repository, times(1)).findOneById("2");
+		verify(repository, times(1)).findOneById("3");
+
+		// Commit a transaction that has dirtied entity3, but not entity2
+		when(transactionInformation.getDirtyRepositories()).thenReturn(emptySet());
+		when(transactionInformation.getDirtyEntities()).thenReturn(singleton(EntityKey.create(entity3)));
+		l2Cache.afterCommitTransaction("transactionID");
+
+		// get the entities for a third time
+		assertTrue(EntityUtils.equals(l2Cache.get(repository, "2"), entity2));
+		assertTrue(EntityUtils.equals(l2Cache.get(repository, "3"), entity3));
+
+		// entity2 was still in the cache
+		// entity3 was no longer present in the cache and got loaded through the repository
+		verify(repository, times(1)).findOneById("2");
+		verify(repository, times(2)).findOneById("3");
+
+		// From now on, both sit in the cache again
+		assertTrue(EntityUtils.equals(l2Cache.get(repository, "2"), entity2));
+		assertTrue(EntityUtils.equals(l2Cache.get(repository, "3"), entity3));
+		verify(repository, times(1)).findOneById("2");
+		verify(repository, times(2)).findOneById("3");
+	}
+
+	@Test
 	public void testGetStringIdCachesLoadedData()
 	{
 		Entity entity2 = testEntities.get(2);
@@ -115,7 +184,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 		result = l2Cache.get(repository, "2");
 		assertTrue(EntityUtils.equals(result, entity2));
 
-		verify(repository, atMost(1)).findOneById("2");
+		verify(repository, times(1)).findOneById("2");
 	}
 
 	@Test(expectedExceptions = UncheckedExecutionException.class)
