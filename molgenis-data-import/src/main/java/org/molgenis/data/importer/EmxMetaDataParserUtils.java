@@ -42,9 +42,6 @@ import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
 import static org.molgenis.data.support.EntityMetaDataUtils.isStringType;
 import static org.molgenis.util.DependencyResolver.resolve;
 
-/**
- * Created by mdehaan on 18/07/16.
- */
 public class EmxMetaDataParserUtils
 {
 	private final DataService dataService;
@@ -481,9 +478,9 @@ public class EmxMetaDataParserUtils
 							rowIndex));
 
 			// If there is no entities sheet, we still have to register EntityMetaData for these attributes
-//			EntityMetaData entityMetaData = intermediateResults.getEntityMetaData(entityName);
-//			if(entityMetaData == null)
-//				intermediateResults.addEntityMetaData(entityName);
+			//			EntityMetaData entityMetaData = intermediateResults.getEntityMetaData(entityName);
+			//			if(entityMetaData == null)
+			//				intermediateResults.addEntityMetaData(entityName);
 
 			// create attribute
 			AttributeMetaData attribute = attrMetaFactory.create().setName(attributeName);

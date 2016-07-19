@@ -38,7 +38,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 		this.entityMetaDataFactory = entityMetaDataFactory;
 		this.emxMetaDataParserUtils = new EmxMetaDataParserUtils(packageFactory, attrMetaFactory, entityMetaDataFactory,
-				null);
+				dataService);
 	}
 
 	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory,
