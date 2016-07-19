@@ -1,9 +1,11 @@
 package org.molgenis.data.importer;
 
+import com.google.common.collect.ImmutableMap;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
@@ -20,7 +22,9 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.importer.EmxMetaDataParser.*;
 
 @Component
@@ -118,11 +122,21 @@ public class EmxImportService implements ImportService
 	}
 
 	@Override
-	public LinkedHashMap<String, Boolean> integrationTestMetaData(MetaDataService metaDataService,
-			RepositoryCollection repositoryCollection, String defaultPackage)
+	public LinkedHashMap<String, Boolean> determineImportableEntities(MetaDataService metaDataService,
+			RepositoryCollection repositoryCollection, String selectedPackage)
 	{
 		List<String> skipEntities = newArrayList(EMX_ATTRIBUTES, EMX_PACKAGES, EMX_ENTITIES, EMX_TAGS);
-		ParsedMetaData parsedMetaData = parser.parse(repositoryCollection, defaultPackage);
-		return metaDataService.integrationTestMetaData(parsedMetaData.getEntityMap(), skipEntities, defaultPackage);
+		ImmutableMap<String, EntityMetaData> entityMetaDataMap = parser.parse(repositoryCollection, selectedPackage)
+				.getEntityMap();
+
+		LinkedHashMap<String, Boolean> importableEntitiesMap = newLinkedHashMap();
+		stream(entityMetaDataMap.keySet().spliterator(), false).forEach(entityName -> {
+			boolean importable = skipEntities.contains(entityName) || metaDataService
+					.canIntegrateEntityMetadataCheck(entityMetaDataMap.get(entityName));
+
+			importableEntitiesMap.put(entityName, importable);
+		});
+
+		return importableEntitiesMap;
 	}
 }

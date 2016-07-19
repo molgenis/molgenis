@@ -1,16 +1,16 @@
 package org.molgenis.data.importer;
 
-import java.io.File;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
-
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
 import org.springframework.core.Ordered;
+
+import java.io.File;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
 
 public interface ImportService extends Ordered
 {
@@ -26,6 +26,6 @@ public interface ImportService extends Ordered
 
 	Set<String> getSupportedFileExtensions();
 
-	LinkedHashMap<String, Boolean> integrationTestMetaData(MetaDataService metaDataService,
+	LinkedHashMap<String, Boolean> determineImportableEntities(MetaDataService metaDataService,
 			RepositoryCollection repositoryCollection, String defaultPackage);
 }

@@ -246,7 +246,7 @@ public class VcfImporterService implements ImportService
 	}
 
 	@Override
-	public LinkedHashMap<String, Boolean> integrationTestMetaData(MetaDataService metaDataService,
+	public LinkedHashMap<String, Boolean> determineImportableEntities(MetaDataService metaDataService,
 			RepositoryCollection repositoryCollection, String defaultPackage)
 	{
 		return metaDataService.integrationTestMetaData(repositoryCollection);
