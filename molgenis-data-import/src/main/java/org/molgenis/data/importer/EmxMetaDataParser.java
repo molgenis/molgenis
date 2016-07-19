@@ -180,7 +180,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		return buildValidationReport(source, report, metaDataMap);
 	}
 
-	public ImmutableMap<String, EntityMetaData> getEntityMetaDataMap(DataService dataService,
+	private ImmutableMap<String, EntityMetaData> getEntityMetaDataMap(DataService dataService,
 			RepositoryCollection source)
 	{
 		// FIXME: So if there is no attribute sheet, we assume it is already in the dataservice?
@@ -189,13 +189,27 @@ public class EmxMetaDataParser implements MetaDataParser
 		else return getEntityMetaDataFromDataService(dataService, source.getEntityNames());
 	}
 
+	private EntitiesValidationReport buildValidationReport(RepositoryCollection source,
+			MyEntitiesValidationReport report, Map<String, EntityMetaData> metaDataMap)
+	{
+		metaDataMap.values().forEach(MetaValidationUtils::validateEntityMetaData);
+		report = parseSheets(source, report, metaDataMap);
+
+		// Add entities without data
+		for (String entityName : metaDataMap.keySet())
+		{
+			if (!report.getSheetsImportable().containsKey(entityName)) report.addEntity(entityName, true);
+		}
+		return report;
+	}
+
 	/**
 	 * Parses metadata from a collection of repositories.
 	 *
 	 * @param source the {@link RepositoryCollection} containing the metadata to parse
 	 * @return {@link IntermediateParseResults} containing the parsed metadata
 	 */
-	public IntermediateParseResults getEntityMetaDataFromSource(RepositoryCollection source)
+	private IntermediateParseResults getEntityMetaDataFromSource(RepositoryCollection source)
 	{
 		// TODO: this task is actually a 'merge' instead of 'import'
 		// so we need to consider both new metadata and existing ...
@@ -224,7 +238,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * @param tagRepository the {@link Repository} that contains the tags entity
 	 * @return Map mapping tag Identifier to tag {@link Entity}, will be empty if no tags repository was found
 	 */
-	public IntermediateParseResults parseTagsSheet(Repository<Entity> tagRepository)
+	private IntermediateParseResults parseTagsSheet(Repository<Entity> tagRepository)
 	{
 		IntermediateParseResults result = new IntermediateParseResults(entityMetaDataFactory);
 		if (tagRepository != null)
@@ -247,7 +261,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * @param repo                {@link Repository} for the packages
 	 * @param intermediateResults {@link IntermediateParseResults} containing the parsed tag entities
 	 */
-	public void parsePackagesSheet(Repository<Entity> repo, IntermediateParseResults intermediateResults)
+	private void parsePackagesSheet(Repository<Entity> repo, IntermediateParseResults intermediateResults)
 	{
 		if (repo == null) return;
 
@@ -284,7 +298,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * @param repo
 	 * @param intermediateResults
 	 */
-	public void parsePackageTags(Repository<Entity> repo, IntermediateParseResults intermediateResults)
+	private void parsePackageTags(Repository<Entity> repo, IntermediateParseResults intermediateResults)
 	{
 		if (repo != null)
 		{
@@ -318,7 +332,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * @param entitiesRepo        the Repository for the entities
 	 * @param intermediateResults {@link IntermediateParseResults} containing the attributes already parsed
 	 */
-	public void parseEntitiesSheet(Repository<Entity> entitiesRepo, IntermediateParseResults intermediateResults)
+	private void parseEntitiesSheet(Repository<Entity> entitiesRepo, IntermediateParseResults intermediateResults)
 	{
 		if (entitiesRepo != null)
 		{
@@ -529,7 +543,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * @param attributesRepo      Repository for the attributes
 	 * @param intermediateResults {@link IntermediateParseResults} with the tags already parsed
 	 */
-	public void parseAttributesSheet(Repository<Entity> attributesRepo, IntermediateParseResults intermediateResults)
+	private void parseAttributesSheet(Repository<Entity> attributesRepo, IntermediateParseResults intermediateResults)
 	{
 		for (AttributeMetaData attr : attributesRepo.getEntityMetaData().getAtomicAttributes())
 		{
@@ -932,7 +946,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * @param defaultPackageName
 	 * @return
 	 */
-	public List<EntityMetaData> putEntitiesInDefaultPackage(IntermediateParseResults intermediateResults,
+	private List<EntityMetaData> putEntitiesInDefaultPackage(IntermediateParseResults intermediateResults,
 			String defaultPackageName)
 	{
 		Package p = intermediateResults.getPackage(defaultPackageName);
@@ -959,27 +973,13 @@ public class EmxMetaDataParser implements MetaDataParser
 		return builder.build();
 	}
 
-	public EntitiesValidationReport buildValidationReport(RepositoryCollection source,
-			MyEntitiesValidationReport report, Map<String, EntityMetaData> metaDataMap)
-	{
-		metaDataMap.values().forEach(MetaValidationUtils::validateEntityMetaData);
-		report = parseSheets(source, report, metaDataMap);
-
-		// Add entities without data
-		for (String entityName : metaDataMap.keySet())
-		{
-			if (!report.getSheetsImportable().containsKey(entityName)) report.addEntity(entityName, true);
-		}
-		return report;
-	}
-
 	/**
 	 * Puts EntityMetaData in the right import order.
 	 *
 	 * @param metaDataList {@link EntityMetaData} to put in the right order
 	 * @return List of {@link EntityMetaData}, in the import order
 	 */
-	public List<EntityMetaData> resolveEntityDependencies(List<? extends EntityMetaData> metaDataList)
+	private List<EntityMetaData> resolveEntityDependencies(List<? extends EntityMetaData> metaDataList)
 	{
 		Map<String, EntityMetaData> allEntityMetaDataMap = new HashMap<>();
 		Set<EntityMetaData> allMetaData = newLinkedHashSet(metaDataList);
@@ -1000,6 +1000,12 @@ public class EmxMetaDataParser implements MetaDataParser
 		return resolved;
 	}
 
+	/**
+	 * Throws Exception if an import is trying to update metadata of a system entity
+	 *
+	 * @param allEntityMetaDataMap
+	 * @param existingMetaData
+	 */
 	public static void scanMetaDataForSystemEntityMetaData(Map<String, EntityMetaData> allEntityMetaDataMap,
 			Iterable<EntityMetaData> existingMetaData)
 	{
@@ -1023,7 +1029,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * @return true or false
 	 * @throws IllegalArgumentException if the given boolean string value if not one of [true, false] (case insensitive)
 	 */
-	public boolean parseBoolean(String booleanString, int rowIndex, String columnName)
+	private boolean parseBoolean(String booleanString, int rowIndex, String columnName)
 	{
 		if (booleanString.equalsIgnoreCase(TRUE.toString())) return true;
 		else if (booleanString.equalsIgnoreCase(FALSE.toString())) return false;
@@ -1038,7 +1044,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * @param repository
 	 * @param intermediateParseResults
 	 */
-	public void parseLanguages(Repository<Entity> repository, IntermediateParseResults intermediateParseResults)
+	private void parseLanguages(Repository<Entity> repository, IntermediateParseResults intermediateParseResults)
 	{
 		repository.forEach(intermediateParseResults::addLanguage);
 	}
@@ -1049,7 +1055,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * @param repository
 	 * @param intermediateParseResults
 	 */
-	public void parseI18nStrings(Repository<Entity> repository, IntermediateParseResults intermediateParseResults)
+	private void parseI18nStrings(Repository<Entity> repository, IntermediateParseResults intermediateParseResults)
 	{
 		repository.forEach(intermediateParseResults::addI18nString);
 
@@ -1063,7 +1069,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 * @param metaDataMap
 	 * @return
 	 */
-	public MyEntitiesValidationReport parseSheets(RepositoryCollection source, MyEntitiesValidationReport report,
+	private MyEntitiesValidationReport parseSheets(RepositoryCollection source, MyEntitiesValidationReport report,
 			Map<String, EntityMetaData> metaDataMap)
 	{
 		for (String sheet : source.getEntityNames())
