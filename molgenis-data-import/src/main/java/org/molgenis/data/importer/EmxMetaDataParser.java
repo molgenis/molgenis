@@ -46,8 +46,6 @@ import static org.molgenis.util.DependencyResolver.resolve;
 /**
  * Parser for the EMX metadata. This class is stateless, but it passes state between methods using
  * {@link IntermediateParseResults}.
- * <p>
- * This class is constructed with a dataservice
  */
 public class EmxMetaDataParser implements MetaDataParser
 {
@@ -571,10 +569,6 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (entityName == null) throw new IllegalArgumentException(
 					format("attributes.entity is missing for attribute named: %s on line [%d]", attributeName,
 							rowIndex));
-
-			//			 If there is no entities sheet, we still have to register EntityMetaData for these attributes
-			EntityMetaData entityMetaData = intermediateResults.getEntityMetaData(entityName);
-			if (entityMetaData == null) intermediateResults.addEntityMetaData(entityName);
 
 			// create attribute
 			AttributeMetaData attribute = attrMetaFactory.create().setName(attributeName);

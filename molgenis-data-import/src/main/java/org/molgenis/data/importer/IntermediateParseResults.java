@@ -102,7 +102,7 @@ public final class IntermediateParseResults
 			}
 		}
 
-		EntityMetaData emd = entityMetaDataFactory.create().setName(simpleName).setSimpleName(simpleName);
+		EntityMetaData emd = entityMetaDataFactory.create().setName(name).setSimpleName(simpleName);
 		entities.put(name, emd);
 		return emd;
 	}
