@@ -96,8 +96,8 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	 *
 	 * @param repository the underlying repository, used to create the cache loader or to retrieve the existing cache
 	 * @param ids        {@link Iterable} of the ids of the entities to retrieve
-	 * @return List containing the retrieved entities
-	 * @throws RuntimeException if the cache failed to load the
+	 * @return List containing the retrieved entities, missing values are excluded
+	 * @throws RuntimeException if the cache failed to load the entities
 	 */
 	public List<Entity> getBatch(Repository<Entity> repository, Iterable<Object> ids)
 	{
