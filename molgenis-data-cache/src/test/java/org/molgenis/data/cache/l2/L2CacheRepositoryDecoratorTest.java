@@ -30,9 +30,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 {
@@ -73,17 +71,35 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void testFindOneByIdCacheableAndPresent()
+	public void testFindOneByIdNotDirtyCacheableAndPresent()
 	{
+		when(transactionInformation.isEntityDirty(EntityKey.create(emd, "0"))).thenReturn(false);
 		when(l2Cache.get(decoratedRepository, "0")).thenReturn(entities.get(0));
 		assertEquals(l2CacheRepositoryDecorator.findOneById("0"), entities.get(0));
 	}
 
 	@Test
-	public void testFindOneByIdCacheableNotPresent()
+	public void testFindOneByIdNotDirtyCacheableNotPresent()
 	{
+		when(transactionInformation.isEntityDirty(EntityKey.create(emd, "0"))).thenReturn(false);
 		when(l2Cache.get(decoratedRepository, "abcde")).thenReturn(null);
 		assertNull(l2CacheRepositoryDecorator.findOneById("abcde"));
+	}
+
+	@Test
+	public void testFindOneByIdDirty()
+	{
+		when(transactionInformation.isEntityDirty(EntityKey.create(emd, "0"))).thenReturn(true);
+		when(decoratedRepository.findOneById("0")).thenReturn(entities.get(0));
+		assertEquals(l2CacheRepositoryDecorator.findOneById("0"), entities.get(0));
+	}
+
+	@Test
+	public void testFindOneByIdEntireRepositoryDirty()
+	{
+		when(transactionInformation.isRepositoryDirty(emd.getName())).thenReturn(true);
+		when(decoratedRepository.findOneById("0")).thenReturn(entities.get(0));
+		assertEquals(l2CacheRepositoryDecorator.findOneById("0"), entities.get(0));
 	}
 
 	@Test
