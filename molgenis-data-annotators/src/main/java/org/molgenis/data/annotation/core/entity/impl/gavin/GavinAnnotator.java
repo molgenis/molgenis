@@ -22,7 +22,6 @@ import org.molgenis.data.annotation.core.resources.impl.emx.EmxResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.emx.InMemoryRepositoryFactory;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.web.settings.GavinAnnotatorSettings;
-import org.molgenis.data.importer.EmxFileOnlyMetaDataParser;
 import org.molgenis.data.importer.EmxMetaDataParser;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.vcf.model.VcfAttributes;

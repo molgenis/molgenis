@@ -1,6 +1,5 @@
 package org.molgenis.data.importer;
 
-import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
@@ -16,13 +15,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.importer.EmxMetaDataParserUtils.*;
+import static org.molgenis.data.importer.EmxMetaDataParser.*;
 
 @Component
 public class EmxImportService implements ImportService
@@ -103,7 +102,7 @@ public class EmxImportService implements ImportService
 	@Override
 	public List<DatabaseAction> getSupportedDatabaseActions()
 	{
-		return Lists.newArrayList(DatabaseAction.values());
+		return newArrayList(DatabaseAction.values());
 	}
 
 	@Override
@@ -122,7 +121,7 @@ public class EmxImportService implements ImportService
 	public LinkedHashMap<String, Boolean> integrationTestMetaData(MetaDataService metaDataService,
 			RepositoryCollection repositoryCollection, String defaultPackage)
 	{
-		List<String> skipEntities = Arrays.asList(EMX_ATTRIBUTES, EMX_PACKAGES, EMX_ENTITIES, EMX_TAGS);
+		List<String> skipEntities = newArrayList(EMX_ATTRIBUTES, EMX_PACKAGES, EMX_ENTITIES, EMX_TAGS);
 		ParsedMetaData parsedMetaData = parser.parse(repositoryCollection, defaultPackage);
 		return metaDataService.integrationTestMetaData(parsedMetaData.getEntityMap(), skipEntities, defaultPackage);
 	}

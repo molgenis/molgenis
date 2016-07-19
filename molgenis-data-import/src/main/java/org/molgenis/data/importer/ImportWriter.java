@@ -48,7 +48,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
-import static org.molgenis.data.importer.EmxMetaDataParserUtils.*;
+import static org.molgenis.data.importer.EmxMetaDataParser.*;
 import static org.molgenis.data.meta.model.TagMetaData.TAG;
 import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
