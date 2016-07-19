@@ -7,6 +7,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.transaction.TransactionInformation;
@@ -75,7 +76,7 @@ public class L2CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	{
 		when(transactionInformation.isEntityDirty(EntityKey.create(emd, "0"))).thenReturn(false);
 		when(l2Cache.get(decoratedRepository, "0")).thenReturn(entities.get(0));
-		assertEquals(l2CacheRepositoryDecorator.findOneById("0"), entities.get(0));
+		assertEquals(l2CacheRepositoryDecorator.findOneById("0", new Fetch().field("id")), entities.get(0));
 	}
 
 	@Test
