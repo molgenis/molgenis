@@ -30,6 +30,17 @@ public class EmxMetaDataParser implements MetaDataParser
 	private final EntityMetaDataFactory entityMetaDataFactory;
 	private final EmxMetaDataParserUtils emxMetaDataParserUtils;
 
+	public EmxMetaDataParser(PackageFactory packageFactory, AttributeMetaDataFactory attrMetaFactory,
+			EntityMetaDataFactory entityMetaDataFactory)
+	{
+		this.dataService = null;
+		this.packageFactory = requireNonNull(packageFactory);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
+		this.entityMetaDataFactory = entityMetaDataFactory;
+		this.emxMetaDataParserUtils = new EmxMetaDataParserUtils(packageFactory, attrMetaFactory, entityMetaDataFactory,
+				null);
+	}
+
 	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory,
 			AttributeMetaDataFactory attrMetaFactory, EntityMetaDataFactory entityMetaDataFactory)
 	{
@@ -64,32 +75,39 @@ public class EmxMetaDataParser implements MetaDataParser
 		}
 		else
 		{
-			List<EntityMetaData> metadataList = new ArrayList<>();
-			for (String emxName : source.getEntityNames())
+			if (dataService != null)
 			{
-				String repoName = EMX_NAME_TO_REPO_NAME_MAP.get(emxName);
-				if (repoName == null) repoName = emxName;
-				metadataList.add(dataService.getRepository(repoName).getEntityMetaData());
-			}
-			IntermediateParseResults intermediateResults = emxMetaDataParserUtils
-					.parseTagsSheet(source.getRepository(EMX_TAGS));
-			emxMetaDataParserUtils.parsePackagesSheet(source.getRepository(EMX_PACKAGES), intermediateResults);
-			emxMetaDataParserUtils.parsePackageTags(source.getRepository(EMX_PACKAGES), intermediateResults);
+				List<EntityMetaData> metadataList = new ArrayList<>();
+				for (String emxName : source.getEntityNames())
+				{
+					String repoName = EMX_NAME_TO_REPO_NAME_MAP.get(emxName);
+					if (repoName == null) repoName = emxName;
+					metadataList.add(dataService.getRepository(repoName).getEntityMetaData());
+				}
+				IntermediateParseResults intermediateResults = emxMetaDataParserUtils
+						.parseTagsSheet(source.getRepository(EMX_TAGS));
+				emxMetaDataParserUtils.parsePackagesSheet(source.getRepository(EMX_PACKAGES), intermediateResults);
+				emxMetaDataParserUtils.parsePackageTags(source.getRepository(EMX_PACKAGES), intermediateResults);
 
-			if (source.hasRepository(EMX_LANGUAGES))
+				if (source.hasRepository(EMX_LANGUAGES))
+				{
+					emxMetaDataParserUtils.parseLanguages(source.getRepository(EMX_LANGUAGES), intermediateResults);
+				}
+
+				if (source.hasRepository(EMX_I18NSTRINGS))
+				{
+					emxMetaDataParserUtils.parseI18nStrings(source.getRepository(EMX_I18NSTRINGS), intermediateResults);
+				}
+
+				return new ParsedMetaData(emxMetaDataParserUtils.resolveEntityDependencies(metadataList),
+						intermediateResults.getPackages(), intermediateResults.getAttributeTags(),
+						intermediateResults.getEntityTags(), intermediateResults.getLanguages(),
+						intermediateResults.getI18nStrings());
+			}
+			else
 			{
-				emxMetaDataParserUtils.parseLanguages(source.getRepository(EMX_LANGUAGES), intermediateResults);
+				throw new UnsupportedOperationException();
 			}
-
-			if (source.hasRepository(EMX_I18NSTRINGS))
-			{
-				emxMetaDataParserUtils.parseI18nStrings(source.getRepository(EMX_I18NSTRINGS), intermediateResults);
-			}
-
-			return new ParsedMetaData(emxMetaDataParserUtils.resolveEntityDependencies(metadataList),
-					intermediateResults.getPackages(), intermediateResults.getAttributeTags(),
-					intermediateResults.getEntityTags(), intermediateResults.getLanguages(),
-					intermediateResults.getI18nStrings());
 		}
 	}
 
