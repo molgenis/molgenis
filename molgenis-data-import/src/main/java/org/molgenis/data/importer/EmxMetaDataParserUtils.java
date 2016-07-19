@@ -100,6 +100,17 @@ public class EmxMetaDataParserUtils
 		EMX_NAME_TO_REPO_NAME_MAP.put(EMX_I18NSTRINGS, I18nStringMetaData.I18N_STRING);
 	}
 
+	public ImmutableMap<String, EntityMetaData> getEntityMetaDataMap(DataService dataService,
+			RepositoryCollection source)
+	{
+		// FIXME: So if there is no attribute sheet, we assume it is already in the dataservice?
+		Repository attributeSourceRepository = source.getRepository(EMX_ATTRIBUTES);
+		Repository entitiesSourceRepository = source.getRepository(EMX_ENTITIES);
+
+		if (attributeSourceRepository != null) return getEntityMetaDataFromSource(source).getEntityMap();
+		else return getEntityMetaDataFromDataService(dataService, source.getEntityNames());
+	}
+
 	/**
 	 * Parses metadata from a collection of repositories.
 	 *
@@ -468,6 +479,11 @@ public class EmxMetaDataParserUtils
 			if (entityName == null) throw new IllegalArgumentException(
 					format("attributes.entity is missing for attribute named: %s on line [%d]", attributeName,
 							rowIndex));
+
+			// If there is no entities sheet, we still have to register EntityMetaData for these attributes
+//			EntityMetaData entityMetaData = intermediateResults.getEntityMetaData(entityName);
+//			if(entityMetaData == null)
+//				intermediateResults.addEntityMetaData(entityName);
 
 			// create attribute
 			AttributeMetaData attribute = attrMetaFactory.create().setName(attributeName);
@@ -852,14 +868,6 @@ public class EmxMetaDataParserUtils
 			entities.add(entityMetaData);
 		}
 		return entities;
-	}
-
-	public ImmutableMap<String, EntityMetaData> getEntityMetaDataMap(DataService dataService,
-			RepositoryCollection source)
-	{
-		// FIXME: So if there is no attribute sheet, we assume it is already in the dataservice?
-		if (source.getRepository(EMX_ATTRIBUTES) != null) return getEntityMetaDataFromSource(source).getEntityMap();
-		else return getEntityMetaDataFromDataService(dataService, source.getEntityNames());
 	}
 
 	private ImmutableMap<String, EntityMetaData> getEntityMetaDataFromDataService(DataService dataService,
