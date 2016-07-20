@@ -22,7 +22,7 @@ import org.molgenis.data.annotation.core.resources.impl.emx.EmxResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.emx.InMemoryRepositoryFactory;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.web.settings.GavinAnnotatorSettings;
-import org.molgenis.data.importer.EmxFileOnlyMetaDataParser;
+import org.molgenis.data.importer.EmxMetaDataParser;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -91,7 +91,7 @@ public class GavinAnnotator implements AnnotatorConfig
 			public RepositoryFactory getRepositoryFactory()
 			{
 				return new InMemoryRepositoryFactory(RESOURCE_ENTITY_NAME,
-						new EmxFileOnlyMetaDataParser(packageFactory, attributeMetaDataFactory, entityMetaDataFactory),
+						new EmxMetaDataParser(packageFactory, attributeMetaDataFactory, entityMetaDataFactory),
 						entityMetaDataFactory, attributeMetaDataFactory);
 			}
 		};

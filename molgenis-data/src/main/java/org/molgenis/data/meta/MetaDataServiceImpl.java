@@ -1,6 +1,5 @@
 package org.molgenis.data.meta;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.google.common.collect.TreeTraverser;
 import org.molgenis.data.*;
@@ -22,6 +21,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.reverse;
+import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
@@ -45,6 +45,12 @@ public class MetaDataServiceImpl implements MetaDataService
 	private final DataService dataService;
 	private final RepositoryCollectionRegistry repoCollectionRegistry;
 	private final SystemEntityMetaDataRegistry systemEntityMetaRegistry;
+
+	// Table names in the source
+	public static final String EMX_ENTITIES = "entities";
+	public static final String EMX_PACKAGES = "packages";
+	public static final String EMX_TAGS = "tags";
+	public static final String EMX_ATTRIBUTES = "attributes";
 
 	@Autowired
 	public MetaDataServiceImpl(DataService dataService, RepositoryCollectionRegistry repoCollectionRegistry,
@@ -293,52 +299,33 @@ public class MetaDataServiceImpl implements MetaDataService
 	public LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection)
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<>();
-		stream(repositoryCollection.getEntityNames().spliterator(), false)
-				.forEach(entityName -> entitiesImportable.put(entityName, this.canIntegrateEntityMetadataCheck(
+		stream(repositoryCollection.getEntityNames().spliterator(), false).forEach(entityName -> entitiesImportable
+				.put(entityName, this.isEntityMetaDataCompatible(
 						repositoryCollection.getRepository(entityName).getEntityMetaData())));
 
 		return entitiesImportable;
 	}
 
 	@Override
-	public LinkedHashMap<String, Boolean> integrationTestMetaData(
-			ImmutableMap<String, EntityMetaData> newEntitiesMetaDataMap, List<String> skipEntities,
-			String defaultPackage)
-	{
-		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<>();
-
-		stream(newEntitiesMetaDataMap.keySet().spliterator(), false)
-				.forEach(entityName -> entitiesImportable.put(entityName, skipEntities.contains(entityName) || this
-						.canIntegrateEntityMetadataCheck(newEntitiesMetaDataMap.get(entityName))));
-
-		return entitiesImportable;
-	}
-
-	private boolean canIntegrateEntityMetadataCheck(EntityMetaData newEntityMetaData)
+	public boolean isEntityMetaDataCompatible(EntityMetaData newEntityMetaData)
 	{
 		String entityName = newEntityMetaData.getName();
 		if (dataService.hasRepository(entityName))
 		{
-			EntityMetaData oldEntity = dataService.getEntityMetaData(entityName);
+			EntityMetaData oldEntityMetaData = dataService.getEntityMetaData(entityName);
 
-			List<AttributeMetaData> oldAtomicAttributes = stream(oldEntity.getAtomicAttributes().spliterator(), false)
-					.collect(toList());
+			List<AttributeMetaData> oldAtomicAttributes = stream(oldEntityMetaData.getAtomicAttributes().spliterator(),
+					false).collect(toList());
 
-			LinkedHashMap<String, AttributeMetaData> newAtomicAttributesMap = new LinkedHashMap<>();
+			LinkedHashMap<String, AttributeMetaData> newAtomicAttributesMap = newLinkedHashMap();
 			stream(newEntityMetaData.getAtomicAttributes().spliterator(), false)
 					.forEach(attribute -> newAtomicAttributesMap.put(attribute.getName(), attribute));
 
 			for (AttributeMetaData oldAttribute : oldAtomicAttributes)
 			{
-				if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName()))
-				{
-					return false;
-				}
-
-				if (!EntityUtils.equals(oldAttribute, newAtomicAttributesMap.get(oldAttribute.getName())))
-				{
-					return false;
-				}
+				if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName())) return false;
+				// FIXME This implies that an attribute can never be different when doing an update import?
+				if (!EntityUtils.equals(oldAttribute, newAtomicAttributesMap.get(oldAttribute.getName()))) return false;
 			}
 		}
 
