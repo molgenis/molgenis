@@ -9,7 +9,6 @@ import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.test.data.EntitySelfXrefTestHarness;
@@ -789,10 +788,17 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testReindexUpdateMetaData()
+	public void testReindexUpdateMetaDataUpdateAttribute()
 	{
 		ReindexMetadataCUDOperationsPlatformIT
-				.testReindexUpdateMetaData(searchService, entityMetaDataDynamic, metaDataService, reindexService);
+				.testReindexUpdateMetaDataUpdateAttribute(searchService, entityMetaDataDynamic, metaDataService, reindexService);
+	}
+
+	@Test
+	public void testReindexUpdateMetaDataRemoveAttribute()
+	{
+		ReindexMetadataCUDOperationsPlatformIT
+				.testReindexUpdateMetaDataRemoveAttribute(searchService, entityMetaDataDynamic, metaDataService, reindexService);
 	}
 }
 
