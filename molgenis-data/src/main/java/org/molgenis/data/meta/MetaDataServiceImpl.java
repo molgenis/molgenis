@@ -307,7 +307,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection)
+	public LinkedHashMap<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection)
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<>();
 		stream(repositoryCollection.getEntityNames().spliterator(), false).forEach(entityName -> entitiesImportable

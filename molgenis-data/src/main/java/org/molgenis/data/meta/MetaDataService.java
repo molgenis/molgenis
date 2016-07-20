@@ -203,7 +203,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @param repositoryCollection the new entities
 	 * @return
 	 */
-	LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection);
+	LinkedHashMap<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection);
 
 	/**
 	 * Has backend will check if the requested backend already exists and is registered.
