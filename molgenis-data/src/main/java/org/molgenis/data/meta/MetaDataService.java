@@ -1,9 +1,5 @@
 package org.molgenis.data.meta;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.stream.Stream;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
@@ -13,7 +9,9 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.meta.model.Package;
 
-import com.google.common.collect.ImmutableMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.stream.Stream;
 
 public interface MetaDataService extends Iterable<RepositoryCollection>
 {
@@ -203,19 +201,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @param repositoryCollection the new entities
 	 * @return
 	 */
-	LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection);
-
-	/**
-	 * Check the integration of an entity meta data with existing entities Check only if the existing attributes are the
-	 * same as the new attributes
-	 *
-	 * @param newEntitiesMetaDataMap the new entities in a map where the keys are the names
-	 * @param skipEntities           do not check the entities, returns true.
-	 * @param defaultPackage         the default package for the entities that does not have a package
-	 * @return
-	 */
-	LinkedHashMap<String, Boolean> integrationTestMetaData(ImmutableMap<String, EntityMetaData> newEntitiesMetaDataMap,
-			List<String> skipEntities, String defaultPackage);
+	LinkedHashMap<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection);
 
 	/**
 	 * Has backend will check if the requested backend already exists and is registered.
@@ -233,4 +219,13 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @return
 	 */
 	boolean isMetaEntityMetaData(EntityMetaData entityMetaData);
+
+	/**
+	 * Returns whether the given {@link EntityMetaData} attributes are compatible with
+	 * the attributes of an existing repository with the same name
+	 *
+	 * @param entityMetaData
+	 * @return
+	 */
+	boolean isEntityMetaDataCompatible(EntityMetaData entityMetaData);
 }

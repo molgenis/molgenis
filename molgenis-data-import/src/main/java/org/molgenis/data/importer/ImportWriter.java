@@ -11,9 +11,10 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
-import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.data.meta.model.*;
-import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Tag;
+import org.molgenis.data.meta.model.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
@@ -28,7 +29,6 @@ import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.util.DependencyResolver;
-import org.molgenis.util.EntityUtils;
 import org.molgenis.util.HugeSet;
 import org.molgenis.util.MolgenisDateFormat;
 import org.slf4j.Logger;
@@ -50,6 +50,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
+import static org.molgenis.data.importer.EmxMetaDataParser.*;
 import static org.molgenis.data.meta.model.TagMetaData.TAG;
 import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
@@ -106,16 +107,7 @@ public class ImportWriter
 		{
 			allEntityMetaDataMap.put(emd.getName(), emd);
 		}
-		for (EntityMetaData emd : existingMetaData)
-		{
-			if (!allEntityMetaDataMap.containsKey(emd.getName())) allEntityMetaDataMap.put(emd.getName(), emd);
-			else if ((!EntityUtils.equals(emd, allEntityMetaDataMap.get(emd.getName())))
-					&& emd instanceof SystemEntityMetaData)
-			{
-				throw new MolgenisDataException(
-						"SystemEntityMetaData in the database conflicts with the metadta for this import");
-			}
-		}
+		scanMetaDataForSystemEntityMetaData(allEntityMetaDataMap, existingMetaData);
 		importData(job.report, DependencyResolver.resolve(Sets.newLinkedHashSet(allEntityMetaDataMap.values())),
 				job.source, job.dbAction, job.defaultPackage);
 		importI18nStrings(job.report, job.parsedMetaData.getI18nStrings(), job.dbAction);
@@ -260,8 +252,7 @@ public class ImportWriter
 						{
 							throw new UnknownEntityException(
 									"One or more values [" + ids + "] from " + attribute.getDataType().toString()
-											+ " field "
-											+ attribute.getName() + " could not be resolved");
+											+ " field " + attribute.getName() + " could not be resolved");
 						}
 						return true;
 					}
@@ -297,24 +288,14 @@ public class ImportWriter
 		{
 			allEntityMetaDataMap.put(emd.getName(), emd);
 		}
-		for (EntityMetaData emd : existingMetaData)
-		{
-			if (!allEntityMetaDataMap.containsKey(emd.getName())) allEntityMetaDataMap.put(emd.getName(), emd);
-			else if ((!EntityUtils.equals(emd, allEntityMetaDataMap.get(emd.getName())))
-					&& emd instanceof SystemEntityMetaData)
-			{
-				throw new MolgenisDataException(
-						"SystemEntityMetaData in the database conflicts with the metadta for this import");
-			}
-		}
+		scanMetaDataForSystemEntityMetaData(allEntityMetaDataMap, existingMetaData);
 		List<EntityMetaData> resolve = DependencyResolver
 				.resolve(new HashSet<EntityMetaData>(Sets.newLinkedHashSet(allEntityMetaDataMap.values())));
 		for (EntityMetaData entityMetaData : resolve)
 		{
 			String name = entityMetaData.getName();
-			if (!EmxMetaDataParser.EMX_ENTITIES.equals(name) && !EmxMetaDataParser.EMX_ATTRIBUTES.equals(name)
-					&& !EmxMetaDataParser.EMX_PACKAGES.equals(name) && !EmxMetaDataParser.EMX_TAGS.equals(name)
-					&& !EmxMetaDataParser.EMX_LANGUAGES.equals(name) && !EmxMetaDataParser.EMX_I18NSTRINGS.equals(name))
+			if (!EMX_ENTITIES.equals(name) && !EMX_ATTRIBUTES.equals(name) && !EMX_PACKAGES.equals(name) && !EMX_TAGS
+					.equals(name) && !EMX_LANGUAGES.equals(name) && !EMX_I18NSTRINGS.equals(name))
 			{
 				if (dataService.getMeta().getEntityMetaData(entityMetaData.getName()) == null)
 				{
@@ -340,13 +321,9 @@ public class ImportWriter
 	 */
 	private void importPackages(ParsedMetaData parsedMetaData)
 	{
-		for (Package p : parsedMetaData.getPackages().values())
-		{
-			if (p != null)
-			{
-				dataService.getMeta().addPackage(p);
-			}
-		}
+		parsedMetaData.getPackages().values().forEach(package_ -> {
+			if (package_ != null) dataService.getMeta().addPackage(package_);
+		});
 	}
 
 	/**
@@ -967,8 +944,7 @@ public class ImportWriter
 							{
 								return String.valueOf(id);
 							}
-							else if (refEntityMeta.getIdAttribute().getDataType() == INT
-									&& !(id instanceof Integer))
+							else if (refEntityMeta.getIdAttribute().getDataType() == INT && !(id instanceof Integer))
 							{
 								return Integer.valueOf(id.toString());
 							}

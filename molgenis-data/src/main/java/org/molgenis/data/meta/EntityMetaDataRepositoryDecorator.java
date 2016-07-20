@@ -1,17 +1,15 @@
 package org.molgenis.data.meta;
 
-import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toMap;
-import static org.molgenis.auth.AuthorityMetaData.ROLE;
-import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.meta.model.TagMetaData.TAG;
-import static org.molgenis.security.core.utils.SecurityUtils.currentUserisSystem;
-import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
+import com.google.common.collect.Sets;
+import com.google.common.collect.TreeTraverser;
+import org.molgenis.data.*;
+import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
+import org.molgenis.security.core.Permission;
+import org.molgenis.security.core.utils.SecurityUtils;
+import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -23,32 +21,17 @@ import java.util.function.Function;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import javax.annotation.Nonnull;
-
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.RepositoryCollection;
-import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
-import org.molgenis.data.meta.model.Tag;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
-import org.molgenis.security.core.Permission;
-import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.collect.Sets;
-import com.google.common.collect.TreeTraverser;
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toMap;
+import static org.molgenis.auth.AuthorityMetaData.ROLE;
+import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.TagMetaData.TAG;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserisSystem;
+import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaData>
 {
@@ -288,6 +271,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 			throw new MolgenisDataException(format("Adding existing entity meta data [%s] is not allowed", entityName));
 		}
 
+		// FIXME: Importer validates emd twice!!
 		MetaValidationUtils.validateEntityMetaData(entityMetaData);
 	}
 
