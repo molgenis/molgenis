@@ -17,6 +17,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.ImmutableList.copyOf;
+import static com.google.common.collect.ImmutableMap.copyOf;
+import static com.google.common.collect.ImmutableSetMultimap.copyOf;
+
 /**
  * Mutable bean to store intermediate parse results. Uses lookup tables to map simple names to the parsed objects. Is
  * used by the {@link EmxMetaDataParser}
@@ -81,18 +85,9 @@ public final class IntermediateParseResults
 			entityMeta.addAttribute(attr);
 
 			// set attribute roles
-			if (emxAttr.isIdAttr())
-			{
-				entityMeta.setIdAttribute(attr);
-			}
-			if (emxAttr.isLabelAttr())
-			{
-				entityMeta.setLabelAttribute(attr);
-			}
-			if (emxAttr.isLookupAttr())
-			{
-				entityMeta.addLookupAttribute(attr);
-			}
+			if (emxAttr.isIdAttr()) entityMeta.setIdAttribute(attr);
+			if (emxAttr.isLabelAttr()) entityMeta.setLabelAttribute(attr);
+			if (emxAttr.isLookupAttr()) entityMeta.addLookupAttribute(attr);
 		}
 	}
 
@@ -107,7 +102,7 @@ public final class IntermediateParseResults
 			}
 		}
 
-		EntityMetaData emd = entityMetaDataFactory.create().setName(simpleName);
+		EntityMetaData emd = entityMetaDataFactory.create().setName(name).setSimpleName(simpleName);
 		entities.put(name, emd);
 		return emd;
 	}
@@ -129,9 +124,8 @@ public final class IntermediateParseResults
 
 	/**
 	 * Checks if it knows entity with given simple name.
-	 * 
-	 * @param name
-	 *            simple name of the entity
+	 *
+	 * @param name simple name of the entity
 	 * @return true if entity with simple name name is known, false otherwise
 	 */
 	public boolean knowsEntity(String name)
@@ -146,37 +140,37 @@ public final class IntermediateParseResults
 
 	public ImmutableMap<String, EntityMetaData> getEntityMap()
 	{
-		return ImmutableMap.copyOf(entities);
+		return copyOf(entities);
 	}
 
 	public ImmutableList<EntityMetaData> getEntities()
 	{
-		return ImmutableList.copyOf(entities.values());
+		return copyOf(entities.values());
 	}
 
 	public ImmutableMap<String, Package> getPackages()
 	{
-		return ImmutableMap.copyOf(packages);
+		return copyOf(packages);
 	}
 
 	public ImmutableSetMultimap<String, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> getAttributeTags()
 	{
-		return ImmutableSetMultimap.copyOf(attributeTags);
+		return copyOf(attributeTags);
 	}
 
 	public ImmutableList<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> getEntityTags()
 	{
-		return ImmutableList.copyOf(entityTags);
+		return copyOf(entityTags);
 	}
 
 	public ImmutableMap<String, Entity> getLanguages()
 	{
-		return ImmutableMap.copyOf(languages);
+		return copyOf(languages);
 	}
 
 	public ImmutableMap<String, Entity> getI18nStrings()
 	{
-		return ImmutableMap.copyOf(i18nStrings);
+		return copyOf(i18nStrings);
 	}
 
 	@Override
@@ -249,9 +243,8 @@ public final class IntermediateParseResults
 
 	/**
 	 * Gets a specific package
-	 * 
-	 * @param name
-	 *            the name of the package
+	 *
+	 * @param name the name of the package
 	 * @return
 	 */
 	public Package getPackage(String name)
@@ -273,5 +266,4 @@ public final class IntermediateParseResults
 	{
 		attributeTags.put(entityName, tag);
 	}
-
 }

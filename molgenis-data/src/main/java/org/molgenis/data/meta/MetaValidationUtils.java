@@ -1,6 +1,5 @@
 package org.molgenis.data.meta;
 
-import com.google.common.collect.Sets;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.ReservedKeywords;
 import org.molgenis.data.MolgenisDataException;
@@ -9,6 +8,7 @@ import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.util.Set;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
@@ -21,7 +21,7 @@ public class MetaValidationUtils
 {
 	public static final int MAX_ATTRIBUTE_LENGTH = 30;
 
-	public static final Set<String> KEYWORDS = Sets.newHashSet();
+	public static final Set<String> KEYWORDS = newHashSet();
 
 	static
 	{
