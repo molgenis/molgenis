@@ -1,10 +1,5 @@
 package org.molgenis.data.transaction;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.sql.DataSource;
-
 import org.apache.commons.logging.LogFactory;
 import org.molgenis.data.IdGenerator;
 import org.slf4j.Logger;
@@ -14,6 +9,10 @@ import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * TransactionManager used by Molgenis.
@@ -42,6 +41,7 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 
 	public void addTransactionListener(MolgenisTransactionListener transactionListener)
 	{
+		//FIXME: make concurrent using ReeentrantReadWriteLock.
 		transactionListeners.add(transactionListener);
 	}
 

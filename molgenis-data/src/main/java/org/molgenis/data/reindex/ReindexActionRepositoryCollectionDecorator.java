@@ -19,7 +19,7 @@ import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Decorator around a {@link Repository} that registers changes made to its data with the
- * {@link ReindexActionRegisterService}.
+ * {@link ReindexActionRegisterServiceImpl}.
  */
 public class ReindexActionRepositoryCollectionDecorator implements RepositoryCollection
 {

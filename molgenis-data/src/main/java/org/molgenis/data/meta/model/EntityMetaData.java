@@ -1,7 +1,7 @@
 package org.molgenis.data.meta.model;
 
-import autovalue.shaded.com.google.common.common.collect.Maps;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.StaticEntity;
 

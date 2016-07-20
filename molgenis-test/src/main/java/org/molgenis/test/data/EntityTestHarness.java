@@ -5,7 +5,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.test.data.staticentity.TestEntityStaticMetaData;
-import org.molgenis.test.data.staticentity.TestRefEntityStatic;
 import org.molgenis.test.data.staticentity.TestRefEntityStaticMetaData;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -128,7 +127,7 @@ public class EntityTestHarness
 
 	private Entity createRefEntity(EntityMetaData refEntityMetaData, int id)
 	{
-		TestRefEntityStatic refEntity = new TestRefEntityStatic(refEntityMetaData);
+		Entity refEntity = new DynamicEntity(refEntityMetaData);
 		refEntity.set(ATTR_REF_ID, "" + id);
 		refEntity.set(ATTR_REF_STRING, "refstring" + id);
 		return refEntity;
