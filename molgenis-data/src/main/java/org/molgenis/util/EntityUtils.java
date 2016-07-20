@@ -353,15 +353,20 @@ public class EntityUtils
 			if (attr == null && otherAttr == null) return true;
 			return false;
 		}
+
 		// identifier might be null if attribute hasn't been persisted yet
-		if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) return false;
-		if (!attr.getName().equals(otherAttr.getName())) return false;
-		if (!attr.getLabel().equals(otherAttr.getLabel())) return false;
+		if (otherAttr.getIdentifier() != null)
+		{
+			if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) return false;
+		}
+
+		if (!Objects.equals(attr.getName(), otherAttr.getName())) return false;
+		if (!Objects.equals(attr.getLabel(), otherAttr.getLabel())) return false;
 		if (!Objects.equals(attr.getDescription(), otherAttr.getDescription())) return false;
-		if (attr.getDataType() != otherAttr.getDataType()) return false;
+		if (!Objects.equals(attr.getDataType(), otherAttr.getDataType())) return false;
 
 		// recursively compare attribute parts
-		if (!equals(attr.getAttributeParts(), otherAttr.getAttributeParts())) return false;
+		if (!EntityUtils.equals(attr.getAttributeParts(), otherAttr.getAttributeParts())) return false;
 
 		// compare entity identifier
 		EntityMetaData refEntity = attr.getRefEntity();
@@ -372,15 +377,15 @@ public class EntityUtils
 			return false;
 
 		if (!Objects.equals(attr.getExpression(), otherAttr.getExpression())) return false;
-		if (attr.isNillable() != otherAttr.isNillable()) return false;
-		if (attr.isAuto() != otherAttr.isAuto()) return false;
-		if (attr.isVisible() != otherAttr.isVisible()) return false;
-		if (attr.isAggregatable() != otherAttr.isAggregatable()) return false;
-		if (!attr.getEnumOptions().equals(otherAttr.getEnumOptions())) return false;
+		if (!Objects.equals(attr.isNillable(), otherAttr.isNillable())) return false;
+		if (!Objects.equals(attr.isAuto(), otherAttr.isAuto())) return false;
+		if (!Objects.equals(attr.isVisible(), otherAttr.isVisible())) return false;
+		if (!Objects.equals(attr.isAggregatable(), otherAttr.isAggregatable())) return false;
+		if (!Objects.equals(attr.getEnumOptions(), otherAttr.getEnumOptions())) return false;
 		if (!Objects.equals(attr.getRangeMin(), otherAttr.getRangeMin())) return false;
 		if (!Objects.equals(attr.getRangeMax(), otherAttr.getRangeMax())) return false;
-		if (attr.isReadOnly() != otherAttr.isReadOnly()) return false;
-		if (attr.isUnique() != otherAttr.isUnique()) return false;
+		if (!Objects.equals(attr.isReadOnly(), otherAttr.isReadOnly())) return false;
+		if (!Objects.equals(attr.isUnique(), otherAttr.isUnique())) return false;
 		if (!Objects.equals(attr.getVisibleExpression(), otherAttr.getVisibleExpression())) return false;
 		if (!Objects.equals(attr.getValidationExpression(), otherAttr.getValidationExpression())) return false;
 		if (!Objects.equals(attr.getDefaultValue(), otherAttr.getDefaultValue())) return false;
@@ -391,7 +396,7 @@ public class EntityUtils
 		if (tags.size() != otherTags.size()) return false;
 		for (int i = 0; i < tags.size(); ++i)
 		{
-			if (!tags.get(i).getIdentifier().equals(otherTags.get(i).getIdentifier())) return false;
+			if (!Objects.equals(tags.get(i).getIdentifier(), otherTags.get(i).getIdentifier())) return false;
 		}
 		return true;
 	}
