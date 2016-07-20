@@ -9,8 +9,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
-import static autovalue.shaded.com.google.common.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Sets.newHashSet;
 
 @Component
 public class GenericDependencyResolver
