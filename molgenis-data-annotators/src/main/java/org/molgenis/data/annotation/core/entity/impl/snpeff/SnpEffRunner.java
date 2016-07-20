@@ -298,7 +298,7 @@ public class SnpEffRunner
 	 */
 	public String getSnpEffPath()
 	{
-		if ((snpEffAnnotatorSettings != null) && (snpEffPath == null))
+		if (snpEffAnnotatorSettings != null)
 		{
 			snpEffPath = RunAsSystemProxy.runAsSystem(
 					() -> snpEffAnnotatorSettings.getString(SnpEffAnnotatorSettings.Meta.SNPEFF_JAR_LOCATION));

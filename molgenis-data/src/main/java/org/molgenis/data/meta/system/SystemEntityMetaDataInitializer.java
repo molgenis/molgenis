@@ -7,6 +7,7 @@ import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.meta.model.MetaPackage;
 import org.molgenis.data.system.model.RootSystemPackage;
+import org.molgenis.util.GenericDependencyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -26,14 +27,16 @@ public class SystemEntityMetaDataInitializer
 	private final MetaDataService metaDataService;
 	private final RootSystemPackage rootSystemPackage;
 	private final MetaPackage metaPackage;
+	private final GenericDependencyResolver genericDependencyResolver;
 
 	@Autowired
 	public SystemEntityMetaDataInitializer(MetaDataService metaDataService, RootSystemPackage rootSystemPackage,
-			MetaPackage metaPackage)
+			MetaPackage metaPackage, GenericDependencyResolver genericDependencyResolver)
 	{
 		this.metaDataService = requireNonNull(metaDataService);
 		this.rootSystemPackage = requireNonNull(rootSystemPackage);
 		this.metaPackage = requireNonNull(metaPackage);
+		this.genericDependencyResolver = genericDependencyResolver;
 	}
 
 	public void initialize(ContextRefreshedEvent event)
@@ -44,23 +47,41 @@ public class SystemEntityMetaDataInitializer
 
 		EntityMetaDataMetaData entityMetaDataMetaData = ctx.getBean(EntityMetaDataMetaData.class);
 		ctx.getBean(AttributeMetaDataMetaData.class).bootstrap(entityMetaDataMetaData);
+		//TODO: doesn't this mean all attributes get added twice?
+
 		Map<String, SystemEntityMetaData> systemEntityMetaDataMap = ctx.getBeansOfType(SystemEntityMetaData.class);
-		//FIXME: can we do this cleaner than with the hardcoded "Owned". Problem: even the "isAbstract" nullpoiters at this point.
-		systemEntityMetaDataMap.values().stream()
-				.filter(systemEntityMetaData -> systemEntityMetaData.getSimpleName().equals("Owned"))
-				.forEach(systemEntityMetaData -> initialize(systemEntityMetaData, entityMetaDataMetaData));
-		systemEntityMetaDataMap.values().stream()
-				.filter(systemEntityMetaData -> !systemEntityMetaData.getSimpleName().equals("Owned"))
-				.forEach(systemEntityMetaData -> initialize(systemEntityMetaData, entityMetaDataMetaData));
+		genericDependencyResolver.resolve(systemEntityMetaDataMap.values(), SystemEntityMetaData::getDependencies)
+				.stream().forEach(systemEntityMetaData -> initialize(systemEntityMetaData, entityMetaDataMetaData));
 	}
 
 	private void initialize(SystemEntityMetaData systemEntityMetaData, EntityMetaDataMetaData entityMetaDataMetaData)
 	{
 		systemEntityMetaData.bootstrap(entityMetaDataMetaData);
+		setDefaultBackend(systemEntityMetaData);
+		setPackage(systemEntityMetaData);
+		checkPackage(systemEntityMetaData);
+	}
+
+	private void setDefaultBackend(SystemEntityMetaData systemEntityMetaData)
+	{
 		if (systemEntityMetaData.getBackend() == null)
 		{
 			systemEntityMetaData.setBackend(metaDataService.getDefaultBackend().getName());
 		}
+	}
+
+	private void checkPackage(SystemEntityMetaData systemEntityMetaData)
+	{
+		if (!systemEntityMetaData.getPackage().getRootPackage().getName().equals(rootSystemPackage.getName()))
+		{
+			throw new RuntimeException(
+					format("System entity [%s] must be in package [%s]", systemEntityMetaData.getName(),
+							rootSystemPackage.getName()));
+		}
+	}
+
+	private void setPackage(SystemEntityMetaData systemEntityMetaData)
+	{
 		if (systemEntityMetaData.getPackage() == null)
 		{
 			if (metaDataService.isMetaEntityMetaData(systemEntityMetaData))
@@ -71,12 +92,6 @@ public class SystemEntityMetaDataInitializer
 			{
 				systemEntityMetaData.setPackage(rootSystemPackage);
 			}
-		}
-		else if (!systemEntityMetaData.getPackage().getRootPackage().getName().equals(rootSystemPackage.getName()))
-		{
-			throw new RuntimeException(
-					format("System entity [%s] must be in package [%s]", systemEntityMetaData.getName(),
-							rootSystemPackage.getName()));
 		}
 	}
 }

@@ -2,6 +2,7 @@ package org.molgenis.data.meta;
 
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
@@ -218,18 +219,6 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	public void rebuildIndex()
 	{
 		decoratedRepo.rebuildIndex();
-	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decoratedRepo.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decoratedRepo.removeEntityListener(entityListener);
 	}
 
 	private void validateUpdate(AttributeMetaData currentAttr, AttributeMetaData newAttr)

@@ -126,7 +126,7 @@ public class ReindexJobTest extends AbstractMolgenisSpringTest
 	{
 		Query<ReindexAction> q = ReindexJob.createQueryGetAllReindexActions("testme");
 		assertEquals(q.toString(),
-				"rules=['sys_idx_ReindexActionGroup' = 'testme'], sort=Sort [orders=[Order [attr=actionOrder, direction=ASC]]]");
+				"rules=['reindexActionGroup' = 'testme'], sort=Sort [orders=[Order [attr=actionOrder, direction=ASC]]]");
 	}
 
 	@Test

@@ -1,6 +1,7 @@
 package org.molgenis.data;
 
-import static java.util.Objects.requireNonNull;
+import com.google.common.collect.ForwardingObject;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -9,206 +10,190 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.listeners.EntityListener;
 
 /**
  * Abstract superclass for {@link Repository} decorators that delegates everything to the
  * decorated repository.
  */
-public abstract class AbstractRepositoryDecorator implements Repository<Entity>
+public abstract class AbstractRepositoryDecorator extends ForwardingObject implements Repository<Entity>
 {
-	protected final Repository<Entity> decorated;
-
-	public AbstractRepositoryDecorator(Repository<Entity> decoratedRepository)
-	{
-		this.decorated = requireNonNull(decoratedRepository);
-	}
+	@Override
+	protected abstract Repository<Entity> delegate();
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		return decorated.iterator();
+		return delegate().iterator();
 	}
 
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		decorated.forEachBatched(fetch, consumer, batchSize);
+		delegate().forEachBatched(fetch, consumer, batchSize);
 	}
 
 	@Override
 	public void close() throws IOException
 	{
-		decorated.close();
+		delegate().close();
 	}
 
 	@Override
 	public String getName()
 	{
-		return decorated.getName();
+		return delegate().getName();
 	}
 
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return decorated.getEntityMetaData();
+		return delegate().getEntityMetaData();
 	}
 
 	@Override
 	public long count()
 	{
-		return decorated.count();
+		return delegate().count();
 	}
 
 	@Override
 	public Query<Entity> query()
 	{
-		return decorated.query();
+		return delegate().query();
 	}
 
 	@Override
 	public long count(Query<Entity> q)
 	{
-		return decorated.count(q);
+		return delegate().count(q);
 	}
 
 	@Override
 	public Stream<Entity> findAll(Query<Entity> q)
 	{
-		return decorated.findAll(q);
+		return delegate().findAll(q);
 	}
 
 	@Override
 	public Entity findOne(Query<Entity> q)
 	{
-		return decorated.findOne(q);
+		return delegate().findOne(q);
 	}
 
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		return decorated.aggregate(aggregateQuery);
+		return delegate().aggregate(aggregateQuery);
 	}
 
 	@Override
 	public void flush()
 	{
-		decorated.flush();
+		delegate().flush();
 	}
 
 	@Override
 	public void clearCache()
 	{
-		decorated.clearCache();
+		delegate().clearCache();
 	}
 
 	@Override
 	public void rebuildIndex()
 	{
 		// FIXME GitHub #4809
-		decorated.rebuildIndex();
-	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decorated.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decorated.removeEntityListener(entityListener);
+		delegate().rebuildIndex();
 	}
 
 	@Override
 	public Entity findOneById(Object id)
 	{
-		return decorated.findOneById(id);
+		return delegate().findOneById(id);
 	}
 
 	@Override
 	public Entity findOneById(Object id, Fetch fetch)
 	{
-		return decorated.findOneById(id, fetch);
+		return delegate().findOneById(id, fetch);
 	}
 
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
-		return decorated.findAll(ids);
+		return delegate().findAll(ids);
 	}
 
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		return decorated.findAll(ids, fetch);
+		return delegate().findAll(ids, fetch);
 	}
 
 	@Override
 	public Set<QueryRule.Operator> getQueryOperators()
 	{
-		return decorated.getQueryOperators();
+		return delegate().getQueryOperators();
 	}
 
 	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
-		return decorated.getCapabilities();
+		return delegate().getCapabilities();
 	}
 
 	@Override
 	public void update(Entity entity)
 	{
-		decorated.update(entity);
+		delegate().update(entity);
 	}
 
 	@Override
 	public void delete(Entity entity)
 	{
-		decorated.delete(entity);
+		delegate().delete(entity);
 	}
 
 	@Override
 	public void deleteById(Object id)
 	{
-		decorated.deleteById(id);
+		delegate().deleteById(id);
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		decorated.deleteAll();
+		delegate().deleteAll();
 	}
 
 	@Override
 	public void add(Entity entity)
 	{
-		decorated.add(entity);
+		delegate().add(entity);
 	}
 
 	@Override
 	public Integer add(Stream<Entity> entities)
 	{
-		return decorated.add(entities);
+		return delegate().add(entities);
 	}
 
 	@Override
 	public void update(Stream<Entity> entities)
 	{
-		decorated.update(entities);
+		delegate().update(entities);
 	}
 
 	@Override
 	public void delete(Stream<Entity> entities)
 	{
-		decorated.delete(entities);
+		delegate().delete(entities);
 	}
 
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		decorated.deleteAll(ids);
+		delegate().deleteAll(ids);
 	}
 
 }

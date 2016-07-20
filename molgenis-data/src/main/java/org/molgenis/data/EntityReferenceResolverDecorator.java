@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 
@@ -215,18 +216,6 @@ public class EntityReferenceResolverDecorator implements Repository<Entity>
 	public void rebuildIndex()
 	{
 		decoratedRepo.rebuildIndex();
-	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decoratedRepo.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decoratedRepo.removeEntityListener(entityListener);
 	}
 
 	private Entity resolveEntityReferences(Entity entity)

@@ -5,6 +5,7 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageMetaData;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -332,17 +333,5 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	public void rebuildIndex()
 	{
 		decorated.rebuildIndex();
-	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decorated.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decorated.removeEntityListener(entityListener);
 	}
 }

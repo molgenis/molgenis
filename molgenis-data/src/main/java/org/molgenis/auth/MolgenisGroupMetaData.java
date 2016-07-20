@@ -4,6 +4,9 @@ import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
+
+import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.BOOL;
 import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
@@ -42,5 +45,11 @@ public class MolgenisGroupMetaData extends SystemEntityMetaData
 		addAttribute(ACTIVE).setLabel("Active").setDataType(BOOL).setDefaultValue("true")
 				.setDescription("Boolean to indicate whether this group is in use.").setAggregatable(true)
 				.setNillable(false);
+	}
+
+	@Override
+	public Set<SystemEntityMetaData> getDependencies()
+	{
+		return singleton(authorityMetaData);
 	}
 }

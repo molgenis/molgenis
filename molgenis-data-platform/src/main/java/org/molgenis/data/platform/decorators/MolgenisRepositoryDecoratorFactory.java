@@ -4,14 +4,18 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserDecorator;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.*;
-import org.molgenis.data.cache.L1.L1Cache;
-import org.molgenis.data.cache.L1.L1CacheRepositoryDecorator;
+import org.molgenis.data.cache.l1.L1Cache;
+import org.molgenis.data.cache.l1.L1CacheRepositoryDecorator;
+import org.molgenis.data.cache.l2.L2Cache;
+import org.molgenis.data.cache.l2.L2CacheRepositoryDecorator;
 import org.molgenis.data.elasticsearch.IndexedRepositoryDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.i18n.I18nStringDecorator;
 import org.molgenis.data.i18n.LanguageRepositoryDecorator;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.Language;
+import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
+import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.AttributeMetaDataRepositoryDecorator;
 import org.molgenis.data.meta.EntityMetaDataRepositoryDecorator;
 import org.molgenis.data.meta.PackageRepositoryDecorator;
@@ -21,6 +25,7 @@ import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.data.reindex.ReindexActionRepositoryDecorator;
 import org.molgenis.data.settings.AppSettings;
+import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
@@ -58,6 +63,9 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final EntityMetaDataMetaData entityMetaMeta;
 	private final I18nStringMetaData i18nStringMeta;
 	private final L1Cache l1Cache;
+	private final EntityListenersService entityListenersService;
+	private final L2Cache l2Cache;
+	private final TransactionInformation transactionInformation;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -67,7 +75,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, UserAuthorityFactory userAuthorityFactory,
 			ReindexActionRegisterService reindexActionRegisterService, SearchService searchService,
 			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder,
-			EntityMetaDataMetaData entityMetaMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache)
+			EntityMetaDataMetaData entityMetaMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache,
+			TransactionInformation transactionInformation, EntityListenersService entityListenersService)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -86,12 +95,18 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.entityMetaMeta = requireNonNull(entityMetaMeta);
 		this.i18nStringMeta = requireNonNull(i18nStringMeta);
 		this.l1Cache = requireNonNull(l1Cache);
+		this.entityListenersService = requireNonNull(entityListenersService);
+		this.l2Cache = requireNonNull(l2Cache);
+		this.transactionInformation = requireNonNull(transactionInformation);
 	}
 
 	@Override
 	public Repository<Entity> createDecoratedRepository(Repository<Entity> repository)
 	{
 		Repository<Entity> decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
+
+		// 11. Query the L2 cache before querying the database
+		decoratedRepository = new L2CacheRepositoryDecorator(decoratedRepository, l2Cache, transactionInformation);
 
 		// 10. Query the L1 cache before querying the database
 		decoratedRepository = new L1CacheRepositoryDecorator(decoratedRepository, l1Cache);
@@ -115,7 +130,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		decoratedRepository = new EntityReferenceResolverDecorator(decoratedRepository, entityManager);
 
 		// 4. Entity listener
-		decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository);
+		decoratedRepository = new EntityListenerRepositoryDecorator(decoratedRepository, entityListenersService);
 
 		// 3. validation decorator
 		decoratedRepository = new RepositoryValidationDecorator(dataService, decoratedRepository,

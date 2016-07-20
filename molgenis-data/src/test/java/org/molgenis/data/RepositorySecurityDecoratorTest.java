@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.settings.AppSettings;
 import org.springframework.security.authentication.TestingAuthenticationToken;
@@ -277,70 +278,6 @@ public class RepositorySecurityDecoratorTest
 		Entity entity = mock(Entity.class);
 		when(decoratedRepository.findOneById(id, fetch)).thenReturn(entity);
 		repositorySecurityDecorator.findOneById(id, fetch);
-	}
-
-	@Test
-	public void addEntityListener() throws IOException
-	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_MYENTITY");
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		Repository<Entity> repo = when(mock(Repository.class).getName()).thenReturn("myentity").getMock();
-
-		@SuppressWarnings("resource")
-		RepositorySecurityDecorator repoSecurityDecorator = new RepositorySecurityDecorator(repo,
-				mock(AppSettings.class));
-		repoSecurityDecorator.addEntityListener(mock(EntityListener.class));
-	}
-
-	@Test
-	public void removeEntityListener()
-	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_MYENTITY");
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		Repository<Entity> repo = when(mock(Repository.class).getName()).thenReturn("myentity").getMock();
-
-		@SuppressWarnings("resource")
-		RepositorySecurityDecorator repoSecurityDecorator = new RepositorySecurityDecorator(repo,
-				mock(AppSettings.class));
-		repoSecurityDecorator.removeEntityListener(mock(EntityListener.class));
-	}
-
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
-	public void addEntityListenerNotAllowed() throws IOException
-	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_MYENTITY");
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		Repository<Entity> repo = when(mock(Repository.class).getName()).thenReturn("yourentity").getMock();
-
-		@SuppressWarnings("resource")
-		RepositorySecurityDecorator repoSecurityDecorator = new RepositorySecurityDecorator(repo,
-				mock(AppSettings.class));
-		repoSecurityDecorator.addEntityListener(mock(EntityListener.class));
-	}
-
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
-	public void removeEntityListenerNotAllowed()
-	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_MYENTITY");
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		Repository<Entity> repo = when(mock(Repository.class).getName()).thenReturn("yourentity").getMock();
-
-		@SuppressWarnings("resource")
-		RepositorySecurityDecorator repoSecurityDecorator = new RepositorySecurityDecorator(repo,
-				mock(AppSettings.class));
-		repoSecurityDecorator.removeEntityListener(mock(EntityListener.class));
 	}
 
 	@Test

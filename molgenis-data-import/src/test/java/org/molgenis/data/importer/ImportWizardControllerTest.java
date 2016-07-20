@@ -1,48 +1,13 @@
 package org.molgenis.data.importer;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
-import static org.molgenis.security.core.Permission.COUNT;
-import static org.molgenis.security.core.Permission.WRITE;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_PREFIX;
-import static org.springframework.http.MediaType.TEXT_PLAIN;
-import static org.testng.Assert.assertEquals;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URISyntaxException;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.stream.Stream;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.google.common.collect.Lists;
 import org.apache.commons.fileupload.disk.DiskFileItem;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.molgenis.auth.GroupAuthority;
-import org.molgenis.auth.GroupAuthorityFactory;
-import org.molgenis.auth.GroupAuthorityMetaData;
-import org.molgenis.auth.MolgenisGroup;
-import org.molgenis.auth.MolgenisGroupFactory;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.FileRepositoryCollectionFactory;
@@ -81,7 +46,33 @@ import org.springframework.web.multipart.commons.CommonsMultipartFile;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Lists;
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
+import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
+import static org.molgenis.security.core.Permission.COUNT;
+import static org.molgenis.security.core.Permission.WRITE;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_PREFIX;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { Config.class })
 public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
@@ -107,6 +98,9 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private GroupAuthorityFactory groupAuthorityFactory;
 
+	@Captor
+	private ArgumentCaptor<GroupAuthority> groupAuthorityArgumentCaptor;
+
 	private ImportServiceFactory importServiceFactory;
 	private FileStore fileStore;
 	private FileRepositoryCollectionFactory fileRepositoryCollectionFactory;
@@ -119,6 +113,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void setUp() throws ParseException
 	{
+		MockitoAnnotations.initMocks(this);
 		reset(dataService);
 		UploadWizardPage uploadWizardPage = mock(UploadWizardPage.class);
 		OptionsWizardPage optionsWizardPage = mock(OptionsWizardPage.class);
@@ -258,7 +253,7 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 
 		controller.addGroupEntityClassPermissions("ID", webRequest);
 
-		verify(dataService, times(2)).add(eq(GROUP_AUTHORITY), any(GroupAuthority.class));
+		verify(dataService, times(2)).update(eq(GROUP_AUTHORITY), any(GroupAuthority.class));
 	}
 
 	@Test(expectedExceptions = MolgenisDataAccessException.class)
@@ -288,14 +283,17 @@ public class ImportWizardControllerTest extends AbstractMolgenisSpringTest
 		when(webRequest.getParameter("radio-entity3")).thenReturn(COUNT.toString());
 		when(webRequest.getParameter("radio-entity5")).thenReturn(WRITE.toString());
 
-		GroupAuthority authority = groupAuthorityFactory.create();
-		authority.setMolgenisGroup(dataService.findOneById(MOLGENIS_GROUP, "ID", MolgenisGroup.class));
-		authority.setRole(AUTHORITY_ENTITY_PREFIX + COUNT.toString().toUpperCase() + '_' + "entity3".toUpperCase());
-
 		controller.addGroupEntityClassPermissions("ID", webRequest);
 
-		verify(dataService, times(2)).add(GROUP_AUTHORITY, authority);
+		verify(dataService).update(eq(GROUP_AUTHORITY), groupAuthorityArgumentCaptor.capture());
+		assertEquals(groupAuthorityArgumentCaptor.getValue().getRole(), "ROLE_ENTITY_COUNT_ENTITY3");
+		assertEquals(groupAuthorityArgumentCaptor.getValue().getMolgenisGroup(),
+				dataService.findOneById(MOLGENIS_GROUP, "ID", MolgenisGroup.class));
 
+		verify(dataService).add(eq(GROUP_AUTHORITY), groupAuthorityArgumentCaptor.capture());
+		assertEquals(groupAuthorityArgumentCaptor.getValue().getRole(), "ROLE_ENTITY_WRITE_ENTITY5");
+		assertEquals(groupAuthorityArgumentCaptor.getValue().getMolgenisGroup(),
+				dataService.findOneById(MOLGENIS_GROUP, "ID", MolgenisGroup.class));
 	}
 
 	@Test

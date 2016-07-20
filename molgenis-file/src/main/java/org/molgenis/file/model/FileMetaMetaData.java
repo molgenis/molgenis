@@ -5,6 +5,9 @@ import org.molgenis.security.owned.OwnedEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
+
+import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
@@ -41,5 +44,11 @@ public class FileMetaMetaData extends SystemEntityMetaData
 		addAttribute(CONTENT_TYPE, ROLE_LOOKUP).setDataType(STRING).setLabel("Content-type");
 		addAttribute(SIZE).setDataType(LONG).setLabel("Size").setDescription("File size in bytes");
 		addAttribute(URL).setDataType(HYPERLINK).setLabel("URL").setDescription("File download URL").setUnique(true);
+	}
+
+	@Override
+	public Set<SystemEntityMetaData> getDependencies()
+	{
+		return singleton(ownedEntityMetaData);
 	}
 }

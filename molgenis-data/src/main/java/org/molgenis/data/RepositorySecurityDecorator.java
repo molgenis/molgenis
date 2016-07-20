@@ -1,7 +1,11 @@
 package org.molgenis.data;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.settings.AppSettings;
+import org.molgenis.data.support.AggregateAnonymizerImpl;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.Permission;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -10,12 +14,8 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.support.AggregateAnonymizerImpl;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.Permission;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 public class RepositorySecurityDecorator implements Repository<Entity>
 {
@@ -234,19 +234,5 @@ public class RepositorySecurityDecorator implements Repository<Entity>
 	{
 		validatePermission(decoratedRepository.getName(), Permission.WRITE);
 		decoratedRepository.rebuildIndex();
-	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
-		decoratedRepository.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		validatePermission(decoratedRepository.getName(), Permission.READ);
-		decoratedRepository.removeEntityListener(entityListener);
 	}
 }

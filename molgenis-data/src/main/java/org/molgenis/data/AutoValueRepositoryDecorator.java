@@ -3,6 +3,7 @@ package org.molgenis.data;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 
@@ -261,18 +262,6 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 	public void rebuildIndex()
 	{
 		decoratedRepository.rebuildIndex();
-	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decoratedRepository.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decoratedRepository.removeEntityListener(entityListener);
 	}
 
 	private List<AttributeMetaData> getAutoAttrs()
