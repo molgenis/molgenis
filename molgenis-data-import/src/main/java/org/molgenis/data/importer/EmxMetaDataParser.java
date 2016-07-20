@@ -191,7 +191,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			MyEntitiesValidationReport report, Map<String, EntityMetaData> metaDataMap)
 	{
 		metaDataMap.values().forEach(MetaValidationUtils::validateEntityMetaData);
-		report = parseSheets(source, report, metaDataMap);
+		report = generateEntityValidationReport(source, report, metaDataMap);
 
 		// Add entities without data
 		for (String entityName : metaDataMap.keySet())
@@ -291,7 +291,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	}
 
 	/**
-	 * TODO: documentation
+	 * Retrieves the tags from the package sheet and adds these tags to their respective packages
 	 *
 	 * @param repo
 	 * @param intermediateResults
@@ -479,7 +479,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	}
 
 	/**
-	 * TODO documentation
+	 * Resolves package fullNames by looping through all the packages and their parents
 	 *
 	 * @param packageRepo
 	 * @return
@@ -884,7 +884,8 @@ public class EmxMetaDataParser implements MetaDataParser
 	}
 
 	/**
-	 * re-iterate to map the mrefs/xref refEntity (or give error if not found) TODO consider also those in existing db
+	 * re-iterate to map the mrefs/xref refEntity (or give error if not found)
+	 * TODO consider also those in existing db
 	 *
 	 * @param attributeRepo       the attributes {@link Repository}
 	 * @param intermediateResults {@link ParsedMetaData} to add the ref entities to
@@ -1034,23 +1035,11 @@ public class EmxMetaDataParser implements MetaDataParser
 							columnName, rowIndex, booleanString));
 	}
 
-	/**
-	 * TODO documentation
-	 *
-	 * @param repository
-	 * @param intermediateParseResults
-	 */
 	private void parseLanguages(Repository<Entity> repository, IntermediateParseResults intermediateParseResults)
 	{
 		repository.forEach(intermediateParseResults::addLanguage);
 	}
 
-	/**
-	 * TODO documentation
-	 *
-	 * @param repository
-	 * @param intermediateParseResults
-	 */
 	private void parseI18nStrings(Repository<Entity> repository, IntermediateParseResults intermediateParseResults)
 	{
 		repository.forEach(intermediateParseResults::addI18nString);
@@ -1058,15 +1047,15 @@ public class EmxMetaDataParser implements MetaDataParser
 	}
 
 	/**
-	 * TODO documentation
+	 * Goes through all the sheets in the source EMX and creates an {@link MyEntitiesValidationReport}
 	 *
 	 * @param source
 	 * @param report
 	 * @param metaDataMap
 	 * @return
 	 */
-	private MyEntitiesValidationReport parseSheets(RepositoryCollection source, MyEntitiesValidationReport report,
-			Map<String, EntityMetaData> metaDataMap)
+	private MyEntitiesValidationReport generateEntityValidationReport(RepositoryCollection source,
+			MyEntitiesValidationReport report, Map<String, EntityMetaData> metaDataMap)
 	{
 		for (String sheet : source.getEntityNames())
 		{

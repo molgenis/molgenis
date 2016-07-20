@@ -17,7 +17,7 @@ public interface MetaDataParser
 	ParsedMetaData parse(RepositoryCollection source, String defaultPackage);
 
 	/**
-	 * TODO documentation
+	 * Generates a {@link EntitiesValidationReport} by parsing all data from a supplied source
 	 * @param source
 	 * @return
 	 */

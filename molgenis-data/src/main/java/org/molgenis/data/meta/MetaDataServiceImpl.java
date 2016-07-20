@@ -17,6 +17,7 @@ import javax.annotation.Nonnull;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -211,9 +212,19 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public void addPackage(Package p)
+	public void addPackage(Package package_)
 	{
-		getPackageRepository().add(p);
+		Package existingPackage = getPackageRepository().findOneById(package_.getName());
+		if (existingPackage == null) getPackageRepository().add(package_);
+		else
+		{
+			// Only perform an update on this package if the fullName is equal to the existing package
+			// i.e. You are only allowed to update the package description
+			if (Objects.equals(package_.getName(), existingPackage.getName())) getPackageRepository().update(package_);
+			else throw new MolgenisDataException(
+					format("Changing the name or the parents of an existing package [%s] is not allowed",
+							package_.getSimpleName()));
+		}
 	}
 
 	@Override
@@ -296,7 +307,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public LinkedHashMap<String, Boolean> integrationTestMetaData(RepositoryCollection repositoryCollection)
+	public LinkedHashMap<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection)
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<>();
 		stream(repositoryCollection.getEntityNames().spliterator(), false).forEach(entityName -> entitiesImportable

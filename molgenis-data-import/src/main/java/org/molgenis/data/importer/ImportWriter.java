@@ -11,8 +11,10 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
-import org.molgenis.data.meta.model.*;
-import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Tag;
+import org.molgenis.data.meta.model.TagMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
@@ -319,13 +321,9 @@ public class ImportWriter
 	 */
 	private void importPackages(ParsedMetaData parsedMetaData)
 	{
-		for (Package p : parsedMetaData.getPackages().values())
-		{
-			if (p != null)
-			{
-				dataService.getMeta().addPackage(p);
-			}
-		}
+		parsedMetaData.getPackages().values().forEach(package_ -> {
+			if (package_ != null) dataService.getMeta().addPackage(package_);
+		});
 	}
 
 	/**
