@@ -73,7 +73,7 @@ public class MetaUtils
 			{
 				validatePermission(entityMeta.getName(), Permission.WRITEMETA);
 
-				metaDataService.addAttribute(entityMeta.getName(), attr);
+				metaDataService.addAttribute(attr);
 
 				addedAttributes.add(attr);
 			}

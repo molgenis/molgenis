@@ -9,6 +9,7 @@ import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.EntityMetaData;
+
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.test.data.EntitySelfXrefTestHarness;
@@ -186,8 +187,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				new TestingAuthenticationToken("user", "user", writeTestEntity, readTestEntity, readTestRefEntity,
 						countTestEntity, countTestRefEntity, writeSelfXrefEntity, readSelfXrefEntity,
 						countSelfXrefEntity, writeTestEntityStatic, readTestEntityStatic, countTestEntityStatic,
-						writeTestRefEntityStatic, readTestRefEntityStatic, countTestRefEntityStatic,writeEntitiesEntity,
-						"ROLE_ENTITY_READ_SYS_MD_ENTITIES", "ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES",
+						writeTestRefEntityStatic, readTestRefEntityStatic, countTestRefEntityStatic,
+						writeEntitiesEntity, "ROLE_ENTITY_READ_SYS_MD_ENTITIES", "ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES",
 						"ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
 	}
 
@@ -784,21 +785,60 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	public void testReindexDeleteMetaData()
 	{
 		ReindexMetadataCUDOperationsPlatformIT
-				.testReindexDeleteMetaData(searchService, dataService, entityMetaDataDynamic, metaDataService, reindexService);
+				.testReindexDeleteMetaData(searchService, dataService, entityMetaDataDynamic, metaDataService,
+						reindexService);
 	}
 
 	@Test
 	public void testReindexUpdateMetaDataUpdateAttribute()
 	{
 		ReindexMetadataCUDOperationsPlatformIT
-				.testReindexUpdateMetaDataUpdateAttribute(searchService, entityMetaDataDynamic, metaDataService, reindexService);
+				.testReindexUpdateMetaDataUpdateAttribute(searchService, entityMetaDataDynamic, metaDataService,
+						reindexService);
 	}
 
 	@Test
 	public void testReindexUpdateMetaDataRemoveAttribute()
 	{
 		ReindexMetadataCUDOperationsPlatformIT
-				.testReindexUpdateMetaDataRemoveAttribute(searchService, entityMetaDataDynamic, metaDataService, reindexService);
+				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_CATEGORICAL,
+						searchService, metaDataService, reindexService);
+
+		ReindexMetadataCUDOperationsPlatformIT
+				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_BOOL,
+						searchService, metaDataService, reindexService);
+
+		ReindexMetadataCUDOperationsPlatformIT
+				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_DATE,
+						searchService, metaDataService, reindexService);
+
+		ReindexMetadataCUDOperationsPlatformIT
+				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_XREF,
+						searchService, metaDataService, reindexService);
+
+		ReindexMetadataCUDOperationsPlatformIT
+				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_DATETIME,
+						searchService, metaDataService, reindexService);
+
+		ReindexMetadataCUDOperationsPlatformIT
+				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_DECIMAL,
+						searchService, metaDataService, reindexService);
+
+		ReindexMetadataCUDOperationsPlatformIT
+				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_EMAIL,
+						searchService, metaDataService, reindexService);
+
+		ReindexMetadataCUDOperationsPlatformIT
+				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_HTML,
+						searchService, metaDataService, reindexService);
+
+		ReindexMetadataCUDOperationsPlatformIT
+				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_INT,
+						searchService, metaDataService, reindexService);
+
+		ReindexMetadataCUDOperationsPlatformIT
+				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_HYPERLINK,
+						searchService, metaDataService, reindexService);
 	}
 }
 

@@ -185,18 +185,16 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	/**
 	 * Adds an Attribute to an EntityMeta
 	 *
-	 * @param entityName
 	 * @param attribute
 	 */
-	void addAttribute(String entityName, AttributeMetaData attribute);
+	void addAttribute(AttributeMetaData attribute);
 
 	/**
-	 * Deletes an Attribute
+	 * Deletes an Attribute from an Entity
 	 *
-	 * @param entityName
-	 * @param attributeName
+	 * @param id
 	 */
-	void deleteAttribute(String entityName, String attributeName);
+	void deleteAttributeById(Object id);
 
 	/**
 	 * Check the integration of an entity meta data with existing entities Check only if the existing attributes are the

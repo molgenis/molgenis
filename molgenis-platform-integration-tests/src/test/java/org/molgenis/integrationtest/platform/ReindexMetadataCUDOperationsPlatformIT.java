@@ -47,8 +47,8 @@ public class ReindexMetadataCUDOperationsPlatformIT
 	 * Test delete only for dynamic entity metadata
 	 * static entity metadata cannot be deleted
 	 */
-	public static void testReindexDeleteMetaData(SearchService searchService, DataService dataService, EntityMetaData entityMetaDataDynamic,
-			MetaDataService metaDataService, ReindexService reindexService)
+	public static void testReindexDeleteMetaData(SearchService searchService, DataService dataService,
+			EntityMetaData entityMetaDataDynamic, MetaDataService metaDataService, ReindexService reindexService)
 	{
 
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
@@ -77,8 +77,8 @@ public class ReindexMetadataCUDOperationsPlatformIT
 	/**
 	 * Test update metadata
 	 */
-	public static void testReindexUpdateMetaDataUpdateAttribute(SearchService searchService, EntityMetaData entityMetaDataDynamic,
-			MetaDataService metaDataService, ReindexService reindexService)
+	public static void testReindexUpdateMetaDataUpdateAttribute(SearchService searchService,
+			EntityMetaData entityMetaDataDynamic, MetaDataService metaDataService, ReindexService reindexService)
 	{
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
 		Query<Entity> q = new QueryImpl<>();
@@ -104,8 +104,7 @@ public class ReindexMetadataCUDOperationsPlatformIT
 		q2.eq(AttributeMetaDataMetaData.IDENTIFIER, toUpdateAttributeId);
 		q2.and();
 		q2.eq(AttributeMetaDataMetaData.DATA_TYPE, MolgenisFieldTypes.STRING);
-		assertEquals(searchService.count(q2, emdActual),
-				1);
+		assertEquals(searchService.count(q2, emdActual), 1);
 
 		// Reset context
 		toUpdateAttribute.setDataType(MolgenisFieldTypes.AttributeType.EMAIL);
@@ -118,41 +117,36 @@ public class ReindexMetadataCUDOperationsPlatformIT
 
 	/**
 	 * Test metadata removing an attribute
-	 *
-	 * FIXME
 	 */
-	public static void testReindexUpdateMetaDataRemoveAttribute(SearchService searchService, EntityMetaData entityMetaDataDynamic,
+	public static void testReindexUpdateMetaDataRemoveAttribute(EntityMetaData emd, String attributeName, SearchService searchService,
 			MetaDataService metaDataService, ReindexService reindexService)
 	{
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
 		Query<Entity> q = new QueryImpl<>();
-		q.eq(EntityMetaDataMetaData.FULL_NAME, entityMetaDataDynamic.getName());
+		q.eq(EntityMetaDataMetaData.FULL_NAME, emd.getName());
 		assertEquals(searchService.count(q, metaDataService.getEntityMetaData(EntityMetaDataMetaData.ENTITY_META_DATA)),
 				1);
 
 		// 2. remove attribute
-		AttributeMetaData toRemoveAttribute = entityMetaDataDynamic.getAttribute(EntityTestHarness.ATTR_STRING);
+		AttributeMetaData toRemoveAttribute = emd.getAttribute(attributeName);
 		Object toRemoveAttributeId = toRemoveAttribute.getIdValue();
-		// entityMetaDataDynamic.removeAttribute(toRemoveAttribute);
 
 		// 3. Preform update
 		runAsSystem(() -> {
-			metaDataService.deleteAttribute(entityMetaDataDynamic.getName(), toRemoveAttribute.getName());
+			metaDataService.deleteAttributeById(toRemoveAttribute.getIdValue());
 		});
 		PlatformIT.waitForWorkToBeFinished(reindexService, LOG);
-		assertTrue(searchService.hasMapping(entityMetaDataDynamic));
+		assertTrue(searchService.hasMapping(emd));
 
 		// 4. Verify metadata changed
 		Query<Entity> q2 = new QueryImpl<>();
 		EntityMetaData emdActual = metaDataService.getEntityMetaData(AttributeMetaDataMetaData.ATTRIBUTE_META_DATA);
 		q2.eq(AttributeMetaDataMetaData.IDENTIFIER, toRemoveAttributeId);
-		assertEquals(searchService.count(q2, emdActual),
-				0);
+		assertEquals(searchService.count(q2, emdActual), 0);
 
 		// Reset context
-		entityMetaDataDynamic.addAttribute(toRemoveAttribute);
 		runAsSystem(() -> {
-			metaDataService.addAttribute(entityMetaDataDynamic.getName(), toRemoveAttribute);
+			metaDataService.addAttribute(toRemoveAttribute);
 		});
 		PlatformIT.waitForWorkToBeFinished(reindexService, LOG);
 	}

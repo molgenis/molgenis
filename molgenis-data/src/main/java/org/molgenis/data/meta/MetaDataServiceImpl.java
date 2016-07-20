@@ -143,9 +143,9 @@ public class MetaDataServiceImpl implements MetaDataService
 	 */
 	@Transactional
 	@Override
-	public void deleteAttribute(String entityName, String attributeName)
+	public void deleteAttributeById(Object id)
 	{
-		getAttributeRepository().deleteById(attributeName);
+		getAttributeRepository().deleteById(id);
 	}
 
 	@Override
@@ -178,7 +178,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public void addAttribute(String fullyQualifiedEntityName, AttributeMetaData attr)
+	public void addAttribute(AttributeMetaData attr)
 	{
 		getAttributeRepository().add(attr);
 	}
