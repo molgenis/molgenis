@@ -1,7 +1,7 @@
 package org.molgenis.data.importer;
 
 import com.google.common.collect.ImmutableMap;
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.I18nUtils;
 import org.molgenis.data.meta.MetaValidationUtils;
@@ -600,10 +600,13 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			if (emxDataType != null)
 			{
-				MolgenisFieldTypes.AttributeType type = toEnum(emxDataType);
-				if (type == null) throw new IllegalArgumentException(
-						"attributes.dataType error on line " + rowIndex + ": " + emxDataType + " unknown data type");
-
+				AttributeType type = toEnum(emxDataType);
+				if (type == null)
+				{
+					throw new IllegalArgumentException(
+							"attributes.dataType error on line " + rowIndex + ": " + emxDataType
+									+ " unknown data type");
+				}
 				attr.setDataType(type);
 			}
 			else
@@ -612,7 +615,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			}
 
 			String emxAttrNillable = emxAttrEntity.getString(NILLABLE);
-			String emxIsIdAttr = emxAttrEntity.getString(ID_ATTRIBUTE);
+			String emxIdAttrValue = emxAttrEntity.getString(ID_ATTRIBUTE);
 			String emxAttrVisible = emxAttrEntity.getString(VISIBLE);
 			String emxAggregateable = emxAttrEntity.getString(AGGREGATEABLE);
 			String emxIsLookupAttr = emxAttrEntity.getString(LOOKUP_ATTRIBUTE);
@@ -625,10 +628,27 @@ public class EmxMetaDataParser implements MetaDataParser
 			String defaultValue = emxAttrEntity.getString(DEFAULT_VALUE);
 
 			if (emxAttrNillable != null) attr.setNillable(parseBoolean(emxAttrNillable, rowIndex, NILLABLE));
+			if (emxIdAttrValue != null)
+			{
+				if (!emxIdAttrValue.equalsIgnoreCase("true") && !emxIdAttrValue.equalsIgnoreCase("false")
+						&& !emxIdAttrValue.equalsIgnoreCase(AUTO))
+				{
+					throw new IllegalArgumentException(
+							format("Attributes error on line [%d]. Illegal idAttribute value. Allowed values are 'TRUE', 'FALSE' or 'AUTO'",
+									rowIndex));
+				}
 
-			if (emxIsIdAttr != null) emxAttr.setIdAttr(
-					emxIsIdAttr.equalsIgnoreCase(AUTO) || parseBoolean(emxIsIdAttr, rowIndex, ID_ATTRIBUTE));
+				attr.setAuto(emxIdAttrValue.equalsIgnoreCase(AUTO));
+				if (!attr.isAuto()) emxAttr.setIdAttr(parseBoolean(emxIdAttrValue, rowIndex, ID_ATTRIBUTE));
+				else emxAttr.setIdAttr(true); // If it is auto, set idAttr to true
+			}
 
+			if (attr.isAuto() && !isStringType(attr))
+			{
+				throw new IllegalArgumentException(
+						format("Attributes error on line [%d]. Auto attributes can only be of data type 'string'",
+								rowIndex));
+			}
 			if (emxAttrVisible != null)
 			{
 				if (emxAttrVisible.equalsIgnoreCase("true") || emxAttrVisible.equalsIgnoreCase("false"))
@@ -646,24 +666,6 @@ public class EmxMetaDataParser implements MetaDataParser
 			if (expression != null) attr.setExpression(expression);
 			if (validationExpression != null) attr.setValidationExpression(validationExpression);
 			if (defaultValue != null) attr.setDefaultValue(defaultValue);
-
-			attr.setAuto(emxIsIdAttr != null && emxIsIdAttr.equalsIgnoreCase(AUTO));
-
-			if ((emxIsIdAttr != null) && !emxIsIdAttr.equalsIgnoreCase("true") && !emxIsIdAttr.equalsIgnoreCase("false")
-					&& !emxIsIdAttr.equalsIgnoreCase(AUTO))
-			{
-				throw new IllegalArgumentException(
-						format("Attributes error on line [%d]. Illegal idAttribute value. Allowed values are 'TRUE', 'FALSE' or 'AUTO'",
-								rowIndex));
-			}
-
-			if (attr.isAuto() && !isStringType(attr))
-			{
-				throw new IllegalArgumentException(
-						format("Attributes error on line [%d]. Auto attributes can only be of data type 'string'",
-								rowIndex));
-			}
-
 			if (emxIsLookupAttr != null)
 			{
 				boolean isLookAttr = parseBoolean(emxIsLookupAttr, rowIndex, LOOKUP_ATTRIBUTE);

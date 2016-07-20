@@ -300,14 +300,14 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		LinkedHashMap<String, Boolean> entitiesImportable = new LinkedHashMap<>();
 		stream(repositoryCollection.getEntityNames().spliterator(), false).forEach(entityName -> entitiesImportable
-				.put(entityName, this.canIntegrateEntityMetadataCheck(
+				.put(entityName, this.isEntityMetaDataCompatible(
 						repositoryCollection.getRepository(entityName).getEntityMetaData())));
 
 		return entitiesImportable;
 	}
 
 	@Override
-	public boolean canIntegrateEntityMetadataCheck(EntityMetaData newEntityMetaData)
+	public boolean isEntityMetaDataCompatible(EntityMetaData newEntityMetaData)
 	{
 		String entityName = newEntityMetaData.getName();
 		if (dataService.hasRepository(entityName))

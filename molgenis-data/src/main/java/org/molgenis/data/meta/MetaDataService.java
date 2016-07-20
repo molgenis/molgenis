@@ -229,5 +229,5 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @param entityMetaData
 	 * @return
 	 */
-	boolean canIntegrateEntityMetadataCheck(EntityMetaData entityMetaData);
+	boolean isEntityMetaDataCompatible(EntityMetaData entityMetaData);
 }
