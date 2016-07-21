@@ -118,6 +118,7 @@ class ReindexJob extends Job
 		requireNonNull(reindexAction.getEntityMetaData());
 
 		updateReindexActionStatus(reindexAction, STARTED);
+
 		try
 		{
 			if (reindexAction.getEntityId() != null)

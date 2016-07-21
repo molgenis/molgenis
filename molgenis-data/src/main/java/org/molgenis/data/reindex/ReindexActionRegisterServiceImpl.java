@@ -91,7 +91,10 @@ public class ReindexActionRegisterServiceImpl implements TransactionInformation,
 		}
 		else
 		{
-			LOG.warn("Transaction id is unknown");
+			LOG.error(
+					"Transaction id is unknown, register of entityFullName [{}], cudType [{}], dataType [{}], entityId [{}]",
+					entityFullName, cudType, dataType, entityId);
+
 		}
 	}
 

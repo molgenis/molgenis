@@ -47,15 +47,15 @@ public class ReindexActionRepositoryCollectionDecorator implements RepositoryCol
 	@Override
 	public void deleteRepository(EntityMetaData entityMeta)
 	{
-		this.decorated.deleteRepository(entityMeta);
 		this.reindexActionRegisterService.register(entityMeta.getName(), DELETE, METADATA, null);
+		this.decorated.deleteRepository(entityMeta);
 	}
 
 	@Override
 	public void addAttribute(String entityFullName, AttributeMetaData attribute)
 	{
-		this.decorated.addAttribute(entityFullName, attribute);
 		this.reindexActionRegisterService.register(entityFullName, UPDATE, METADATA, null);
+		this.decorated.addAttribute(entityFullName, attribute);
 	}
 
 	@Override
@@ -68,8 +68,8 @@ public class ReindexActionRepositoryCollectionDecorator implements RepositoryCol
 	@Override
 	public void deleteAttribute(String entityFullName, String attributeName)
 	{
-		this.decorated.deleteAttribute(entityFullName, attributeName);
 		this.reindexActionRegisterService.register(entityFullName, UPDATE, METADATA, null);
+		this.decorated.deleteAttribute(entityFullName, attributeName);
 	}
 
 	@Override
