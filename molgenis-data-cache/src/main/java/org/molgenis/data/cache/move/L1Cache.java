@@ -1,4 +1,4 @@
-package org.molgenis.data.cache.l1;
+package org.molgenis.data.cache.move;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;

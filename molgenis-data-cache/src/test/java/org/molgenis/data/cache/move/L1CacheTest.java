@@ -1,4 +1,4 @@
-package org.molgenis.data.cache.l1;
+package org.molgenis.data.cache.move;
 
 import org.mockito.Mock;
 import org.mockito.Mockito;

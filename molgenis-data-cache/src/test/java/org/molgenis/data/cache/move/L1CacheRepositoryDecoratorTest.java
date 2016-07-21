@@ -1,4 +1,4 @@
-package org.molgenis.data.cache.l1;
+package org.molgenis.data.cache.move;
 
 import com.google.common.collect.Sets;
 import org.mockito.Mock;
