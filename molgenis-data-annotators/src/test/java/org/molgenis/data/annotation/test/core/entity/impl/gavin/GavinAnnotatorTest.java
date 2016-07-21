@@ -13,6 +13,7 @@ import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.GavinAnnotatorSettings;
+import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -289,5 +290,10 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 			return new GeneNameQueryCreator();
 		}
 
+		@Bean
+		public EntityListenersService entityListenersService()
+		{
+			return new EntityListenersService();
+		}
 	}
 }
