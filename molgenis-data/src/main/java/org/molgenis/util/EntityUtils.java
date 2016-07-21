@@ -1,6 +1,5 @@
 package org.molgenis.util;
 
-import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -20,6 +19,7 @@ import static com.google.common.collect.Iterables.*;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 
@@ -176,8 +176,7 @@ public class EntityUtils
 
 		// compound
 		Iterable<String> compoundAttributes = transform(filter(entityMetaData.getAttributes(),
-				attributeMetaData -> attributeMetaData.getDataType() == AttributeType.COMPOUND),
-				AttributeMetaData::getName);
+				attributeMetaData -> attributeMetaData.getDataType() == COMPOUND), AttributeMetaData::getName);
 
 		// all = atomic + compound
 		return concat(atomicAttributes, compoundAttributes);
