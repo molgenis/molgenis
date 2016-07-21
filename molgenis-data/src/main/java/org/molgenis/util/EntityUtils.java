@@ -340,6 +340,33 @@ public class EntityUtils
 
 	/**
 	 * Returns true if an attribute equals another attribute.
+	 * Skips the identifier in case of the other attribute being null.
+	 * <p>
+	 * Other attribute can be null when importing and this attribute
+	 * has not been persisted to the db yet
+	 * </p>
+	 *
+	 * @param attr
+	 * @param otherAttr
+	 * @return
+	 */
+	public static boolean equalsIgnoreId(AttributeMetaData attr, AttributeMetaData otherAttr)
+	{
+		if (attr == null || otherAttr == null)
+		{
+			if (attr == null && otherAttr == null) return true;
+			return false;
+		}
+
+		// identifier might be null if attribute hasn't been persisted yet
+		if (otherAttr.getIdentifier() != null)
+			if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) return false;
+		return compareAttributeAttributes(attr, otherAttr);
+	}
+
+	/**
+	 * Returns true if an attribute equals another attribute.
+	 * Includes the identifier, even if the identifier is null
 	 *
 	 * @param attr
 	 * @param otherAttr
@@ -353,12 +380,19 @@ public class EntityUtils
 			return false;
 		}
 
-		// identifier might be null if attribute hasn't been persisted yet
-		if (otherAttr.getIdentifier() != null)
-		{
-			if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) return false;
-		}
+		if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) return false;
+		return compareAttributeAttributes(attr, otherAttr);
+	}
 
+	/**
+	 * Compares two attributes except their identifier
+	 *
+	 * @param attr
+	 * @param otherAttr
+	 * @return
+	 */
+	private static boolean compareAttributeAttributes(AttributeMetaData attr, AttributeMetaData otherAttr)
+	{
 		if (!Objects.equals(attr.getName(), otherAttr.getName())) return false;
 		if (!Objects.equals(attr.getLabel(), otherAttr.getLabel())) return false;
 		if (!Objects.equals(attr.getDescription(), otherAttr.getDescription())) return false;

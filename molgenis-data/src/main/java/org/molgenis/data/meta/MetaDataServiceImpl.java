@@ -339,10 +339,10 @@ public class MetaDataServiceImpl implements MetaDataService
 			{
 				if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName())) return false;
 				// FIXME This implies that an attribute can never be different when doing an update import?
-				if (!EntityUtils.equals(oldAttribute, newAtomicAttributesMap.get(oldAttribute.getName()))) return false;
+				if (!EntityUtils.equalsIgnoreId(oldAttribute, newAtomicAttributesMap.get(oldAttribute.getName())))
+					return false;
 			}
 		}
-
 		return true;
 	}
 
