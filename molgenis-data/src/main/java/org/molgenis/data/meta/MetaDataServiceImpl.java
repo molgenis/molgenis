@@ -272,8 +272,10 @@ public class MetaDataServiceImpl implements MetaDataService
 			throw new UnknownEntityException(format("Unknown entity [%s]", entityMeta.getName()));
 		}
 
-		// add/update attributes, attributes are deleted when deleting entity meta data if no more references exist
-		Iterable<AttributeMetaData> ownAttrs = entityMeta.getOwnAttributes();
+		// FIXME Is this true??
+		// FIXME add/update attributes, attributes are deleted when deleting entity meta data if no more references exist
+		Iterable<AttributeMetaData> ownAttrs = entityMeta.getCompoundOrderedAttributes();
+
 		ownAttrs.forEach(attr -> {
 			if (attr.getIdentifier() == null)
 			{
