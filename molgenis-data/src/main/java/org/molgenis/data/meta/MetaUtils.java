@@ -30,10 +30,7 @@ public class MetaUtils
 				.getName();
 
 		EntityMetaData existingEntityMetaData = metaDataService.getEntityMetaData(entityMeta.getName());
-		String existingBackend = existingEntityMetaData.getBackend() != null ? entityMeta.getBackend() : metaDataService
-				.getDefaultBackend().getName();
-
-		if (!Objects.equal(backend, existingBackend))
+		if (!Objects.equal(backend, existingEntityMetaData.getBackend()))
 		{
 			throw new MolgenisDataException(
 					"Changing the backend of an entity is not supported. You tried to change the backend of entity '"
