@@ -184,15 +184,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		String readSelfXrefEntity = "ROLE_ENTITY_READ_" + selfXrefEntityMetaData.getName().toUpperCase();
 		String countSelfXrefEntity = "ROLE_ENTITY_COUNT_" + selfXrefEntityMetaData.getName().toUpperCase();
 
-		// Permissions selfXrefEntityMetaData.getName()
-		String writeEntitiesEntity = "ROLE_ENTITY_WRITE_" + "sys_md_entities";
-
 		SecurityContextHolder.getContext().setAuthentication(
 				new TestingAuthenticationToken("user", "user", writeTestEntity, readTestEntity, readTestRefEntity,
 						countTestEntity, countTestRefEntity, writeSelfXrefEntity, readSelfXrefEntity,
 						countSelfXrefEntity, writeTestEntityStatic, readTestEntityStatic, countTestEntityStatic,
-						writeTestRefEntityStatic, readTestRefEntityStatic, countTestRefEntityStatic,
-						writeEntitiesEntity, "ROLE_ENTITY_READ_SYS_MD_ENTITIES", "ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES",
+						writeTestRefEntityStatic, readTestRefEntityStatic, countTestRefEntityStatic, "ROLE_ENTITY_READ_SYS_MD_ENTITIES", "ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES",
 						"ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
 	}
 
