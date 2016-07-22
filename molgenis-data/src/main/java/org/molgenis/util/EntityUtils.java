@@ -357,11 +357,7 @@ public class EntityUtils
 			if (attr == null && otherAttr == null) return true;
 			return false;
 		}
-
-		// identifier might be null if attribute hasn't been persisted yet
-		if (otherAttr.getIdentifier() != null)
-			if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) return false;
-		return compareAttributeAttributes(attr, otherAttr);
+		return compareOtherAttributes(attr, otherAttr);
 	}
 
 	/**
@@ -379,19 +375,18 @@ public class EntityUtils
 			if (attr == null && otherAttr == null) return true;
 			return false;
 		}
-
 		if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) return false;
-		return compareAttributeAttributes(attr, otherAttr);
+		return compareOtherAttributes(attr, otherAttr);
 	}
 
 	/**
-	 * Compares two attributes except their identifier
+	 * Compares all fields between two attributes except their identifier
 	 *
 	 * @param attr
 	 * @param otherAttr
 	 * @return
 	 */
-	private static boolean compareAttributeAttributes(AttributeMetaData attr, AttributeMetaData otherAttr)
+	private static boolean compareOtherAttributes(AttributeMetaData attr, AttributeMetaData otherAttr)
 	{
 		if (!Objects.equals(attr.getName(), otherAttr.getName())) return false;
 		if (!Objects.equals(attr.getLabel(), otherAttr.getLabel())) return false;
