@@ -340,29 +340,6 @@ public class EntityUtils
 
 	/**
 	 * Returns true if an attribute equals another attribute.
-	 * Skips the identifier in case of the other attribute being null.
-	 * <p>
-	 * Other attribute can be null when importing and this attribute
-	 * has not been persisted to the db yet
-	 * </p>
-	 *
-	 * @param attr
-	 * @param otherAttr
-	 * @return
-	 */
-	public static boolean equalsIgnoreId(AttributeMetaData attr, AttributeMetaData otherAttr)
-	{
-		if (attr == null || otherAttr == null)
-		{
-			if (attr == null && otherAttr == null) return true;
-			return false;
-		}
-		return compareOtherAttributes(attr, otherAttr);
-	}
-
-	/**
-	 * Returns true if an attribute equals another attribute.
-	 * Includes the identifier, even if the identifier is null
 	 *
 	 * @param attr
 	 * @param otherAttr
@@ -370,24 +347,31 @@ public class EntityUtils
 	 */
 	public static boolean equals(AttributeMetaData attr, AttributeMetaData otherAttr)
 	{
+		return equals(attr, otherAttr, true);
+	}
+
+	/**
+	 * Returns true if an attribute equals another attribute.
+	 * Skips the identifier if checkIdentifier is set to false
+	 * <p>
+	 * Other attribute identifiers can be null when importing and this attribute
+	 * has not been persisted to the db yet
+	 * </p>
+	 *
+	 * @param attr
+	 * @param otherAttr
+	 * @param checkIdentifier
+	 * @return
+	 */
+	public static boolean equals(AttributeMetaData attr, AttributeMetaData otherAttr, boolean checkIdentifier)
+	{
 		if (attr == null || otherAttr == null)
 		{
 			if (attr == null && otherAttr == null) return true;
 			return false;
 		}
-		if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) return false;
-		return compareOtherAttributes(attr, otherAttr);
-	}
 
-	/**
-	 * Compares all fields between two attributes except their identifier
-	 *
-	 * @param attr
-	 * @param otherAttr
-	 * @return
-	 */
-	private static boolean compareOtherAttributes(AttributeMetaData attr, AttributeMetaData otherAttr)
-	{
+		if (checkIdentifier) if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) return false;
 		if (!Objects.equals(attr.getName(), otherAttr.getName())) return false;
 		if (!Objects.equals(attr.getLabel(), otherAttr.getLabel())) return false;
 		if (!Objects.equals(attr.getDescription(), otherAttr.getDescription())) return false;
