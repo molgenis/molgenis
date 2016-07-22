@@ -16,4 +16,6 @@ public interface ReindexService
 	void waitForAllIndicesStable() throws InterruptedException;
 
 	void waitForIndexToBeStableIncludingReferences(String entityName) throws InterruptedException;
+
+	void cleanupJobExecutions();
 }
