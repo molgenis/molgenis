@@ -85,7 +85,7 @@ public class ReindexServiceImplTest extends AbstractMolgenisSpringTest
 	private MolgenisUserService molgenisUserService;
 
 	@Autowired
-	private ReindexServiceImpl reindexService;
+	private ReindexService reindexService;
 
 	@Mock
 	private Stream<Entity> jobExecutions;
