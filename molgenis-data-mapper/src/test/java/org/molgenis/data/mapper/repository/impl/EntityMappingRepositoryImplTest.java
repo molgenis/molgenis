@@ -1,14 +1,6 @@
 package org.molgenis.data.mapper.repository.impl;
 
-import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Collection;
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
@@ -37,7 +29,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Lists;
+import java.util.Collection;
+import java.util.List;
+
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.CURATED;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 @ContextConfiguration(classes = { EntityMappingRepositoryImplTest.Config.class, MappingConfig.class })
 public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
@@ -116,7 +116,7 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 
 		List<AttributeMapping> attributeMappings = Lists.newArrayList();
 		attributeMappings
-				.add(new AttributeMapping("1", targetAttributeMetaData, "algorithm", sourceAttributeMetaDatas));
+				.add(new AttributeMapping("1", targetAttributeMetaData, "algorithm", sourceAttributeMetaDatas, CURATED.toString()));
 
 		Collection<EntityMapping> entityMappings = singletonList(
 				new EntityMapping(AUTO_ID, sourceEntityMetaData, targetEntityMetaData, attributeMappings));
@@ -126,7 +126,7 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 		attributeMappingEntity.set(AttributeMappingMetaData.TARGETATTRIBUTEMETADATA, "targetAttribute");
 		attributeMappingEntity.set(AttributeMappingMetaData.SOURCEATTRIBUTEMETADATAS, "");
 		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHM, "algorithm");
-		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHMSTATE, null);
+		attributeMappingEntity.set(AttributeMappingMetaData.ALGORITHMSTATE, CURATED.toString());
 
 		List<Entity> attributeMappingEntities = Lists.newArrayList();
 		attributeMappingEntities.add(attributeMappingEntity);
