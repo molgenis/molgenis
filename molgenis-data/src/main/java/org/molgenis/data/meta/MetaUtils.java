@@ -1,5 +1,6 @@
 package org.molgenis.data.meta;
 
+import com.google.common.base.Objects;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -29,7 +30,7 @@ public class MetaUtils
 				.getName();
 
 		EntityMetaData existingEntityMetaData = metaDataService.getEntityMetaData(entityMeta.getName());
-		if (!existingEntityMetaData.getBackend().equals(backend))
+		if (!Objects.equal(backend, existingEntityMetaData.getBackend()))
 		{
 			throw new MolgenisDataException(
 					"Changing the backend of an entity is not supported. You tried to change the backend of entity '"

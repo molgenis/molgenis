@@ -115,6 +115,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	}
 
 	@Override
+	//FIXME The source is parsed twice!!! Once by dermineImportableEntities and once by doImport
 	public ParsedMetaData parse(final RepositoryCollection source, String defaultPackage)
 	{
 		if (source.getRepository(EMX_ATTRIBUTES) != null)
@@ -590,6 +591,15 @@ public class EmxMetaDataParser implements MetaDataParser
 
 			String emxEntityName = emxAttrEntity.getString(ENTITY);
 			Map<String, EmxAttribute> entityMap = attributesMap.get(emxEntityName);
+
+			// If an entity is defined in the attribute sheet only,
+			// make sure to create EntityMetaData and set the backend
+			EntityMetaData md = intermediateResults.getEntityMetaData(emxEntityName);
+			if (md == null)
+			{
+				md = intermediateResults.addEntityMetaData(emxEntityName);
+				if (dataService != null) md.setBackend(dataService.getMeta().getDefaultBackend().getName());
+			}
 
 			String emxName = emxAttrEntity.getString(NAME);
 			EmxAttribute emxAttr = entityMap.get(emxName);

@@ -272,9 +272,10 @@ public class MetaDataServiceImpl implements MetaDataService
 			throw new UnknownEntityException(format("Unknown entity [%s]", entityMeta.getName()));
 		}
 
-		// add/update attributes, attributes are deleted when deleting entity meta data if no more references exist
-		Iterable<AttributeMetaData> ownAttrs = entityMeta.getOwnAttributes();
-		ownAttrs.forEach(attr -> {
+		// FIXME please check if true: add/update attributes, attributes are deleted when deleting entity meta data if no more references exist
+		Iterable<AttributeMetaData> compoundOrderedAttributes = entityMeta.getCompoundOrderedAttributes();
+
+		compoundOrderedAttributes.forEach(attr -> {
 			if (attr.getIdentifier() == null)
 			{
 				dataService.add(ATTRIBUTE_META_DATA, attr);
@@ -337,10 +338,10 @@ public class MetaDataServiceImpl implements MetaDataService
 			{
 				if (!newAtomicAttributesMap.keySet().contains(oldAttribute.getName())) return false;
 				// FIXME This implies that an attribute can never be different when doing an update import?
-				if (!EntityUtils.equals(oldAttribute, newAtomicAttributesMap.get(oldAttribute.getName()))) return false;
+				if (!EntityUtils.equals(oldAttribute, newAtomicAttributesMap.get(oldAttribute.getName()), false))
+					return false;
 			}
 		}
-
 		return true;
 	}
 

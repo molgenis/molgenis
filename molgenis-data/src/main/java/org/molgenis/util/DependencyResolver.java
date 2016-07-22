@@ -2,7 +2,6 @@ package org.molgenis.util;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -16,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
@@ -53,10 +53,10 @@ public class DependencyResolver
 	public static List<EntityMetaData> resolve(Set<EntityMetaData> coll)
 	{
 		// EntityMetaData by entityname
-		Map<String, EntityMetaData> metaDataByName = Maps.newHashMap();
+		Map<String, EntityMetaData> metaDataByName = newHashMap();
 
 		// All dependencies of EntityMetaData
-		Map<String, Set<String>> dependenciesByName = Maps.newHashMap();
+		Map<String, Set<String>> dependenciesByName = newHashMap();
 
 		for (EntityMetaData meta : coll)
 		{
@@ -174,10 +174,10 @@ public class DependencyResolver
 		}
 
 		// You can't have a self reference if you provide id'ds. So we have id's
-		Map<Object, Entity> entitiesById = Maps.newHashMap();
+		Map<Object, Entity> entitiesById = newHashMap();
 
 		// All self-references of an entity
-		Map<Object, Set<Object>> dependenciesById = Maps.newHashMap();
+		Map<Object, Set<Object>> dependenciesById = newHashMap();
 
 		// Fill maps
 		for (Entity entity : entities)

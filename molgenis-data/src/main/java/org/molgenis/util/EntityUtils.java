@@ -1,6 +1,5 @@
 package org.molgenis.util;
 
-import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -20,6 +19,7 @@ import static com.google.common.collect.Iterables.*;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 
@@ -176,8 +176,7 @@ public class EntityUtils
 
 		// compound
 		Iterable<String> compoundAttributes = transform(filter(entityMetaData.getAttributes(),
-				attributeMetaData -> attributeMetaData.getDataType() == AttributeType.COMPOUND),
-				AttributeMetaData::getName);
+				attributeMetaData -> attributeMetaData.getDataType() == COMPOUND), AttributeMetaData::getName);
 
 		// all = atomic + compound
 		return concat(atomicAttributes, compoundAttributes);
@@ -348,18 +347,31 @@ public class EntityUtils
 	 */
 	public static boolean equals(AttributeMetaData attr, AttributeMetaData otherAttr)
 	{
+		return equals(attr, otherAttr, true);
+	}
+
+	/**
+	 * Returns true if an attribute equals another attribute.
+	 * Skips the identifier if checkIdentifier is set to false
+	 * <p>
+	 * Other attribute identifiers can be null when importing and this attribute
+	 * has not been persisted to the db yet
+	 * </p>
+	 *
+	 * @param attr
+	 * @param otherAttr
+	 * @param checkIdentifier
+	 * @return
+	 */
+	public static boolean equals(AttributeMetaData attr, AttributeMetaData otherAttr, boolean checkIdentifier)
+	{
 		if (attr == null || otherAttr == null)
 		{
 			if (attr == null && otherAttr == null) return true;
 			return false;
 		}
 
-		// identifier might be null if attribute hasn't been persisted yet
-		if (otherAttr.getIdentifier() != null)
-		{
-			if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) return false;
-		}
-
+		if (checkIdentifier) if (!Objects.equals(attr.getIdentifier(), otherAttr.getIdentifier())) return false;
 		if (!Objects.equals(attr.getName(), otherAttr.getName())) return false;
 		if (!Objects.equals(attr.getLabel(), otherAttr.getLabel())) return false;
 		if (!Objects.equals(attr.getDescription(), otherAttr.getDescription())) return false;

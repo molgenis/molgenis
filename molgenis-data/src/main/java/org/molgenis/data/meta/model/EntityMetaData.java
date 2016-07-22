@@ -8,9 +8,11 @@ import org.molgenis.data.support.StaticEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -426,6 +428,44 @@ public class EntityMetaData extends StaticEntity
 	public Iterable<AttributeMetaData> getOwnAttributes()
 	{
 		return getEntities(ATTRIBUTES, AttributeMetaData.class);
+	}
+
+	/**
+	 * Returns a list of {@link AttributeMetaData} which is ordered in case of compound attributes.
+	 * Order: 1. attributeParts 2. parentAttribute
+	 * <p>
+	 * When adding attributes through the {@link org.molgenis.data.DataService}, adding a compound attribute is immediately
+	 * persisted to the attributes_parts linking table. This will fail if the corresponding attributeParts have not yet been
+	 * added to the database.
+	 * <p>
+	 * By adding attributeParts before the parent compound attribute, import errors are prevented
+	 *
+	 * @return A {@link List} of {@link AttributeMetaData} containing all own attributes, with compound attributes being placed after
+	 * their respective attribute parts
+	 */
+	public Set<AttributeMetaData> getCompoundOrderedAttributes()
+	{
+		Set<AttributeMetaData> attributes = newHashSet();
+		getEntities(ATTRIBUTES, AttributeMetaData.class).forEach(attribute -> {
+			if (attribute.getDataType() == COMPOUND)
+			{
+				attribute.getAttributeParts()
+						.forEach(attributePart -> resolvePossibleNestedCompounds(attributePart, attributes));
+			}
+			attributes.add(attribute);
+		});
+		return attributes;
+	}
+
+	private void resolvePossibleNestedCompounds(AttributeMetaData attribute, Set<AttributeMetaData> attributes)
+	{
+		if (attribute.getDataType() == COMPOUND)
+		{
+			attribute.getAttributeParts()
+					.forEach(attributePart -> resolvePossibleNestedCompounds(attributePart, attributes));
+		}
+		attributes.add(attribute);
+		return;
 	}
 
 	public EntityMetaData setOwnAttributes(Iterable<AttributeMetaData> attrs)
