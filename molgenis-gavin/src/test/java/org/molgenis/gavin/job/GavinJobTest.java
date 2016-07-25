@@ -14,6 +14,7 @@ import org.testng.annotations.Test;
 
 import java.io.File;
 
+import static java.io.File.separator;
 import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -65,11 +66,13 @@ public class GavinJobTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(GAVIN_APP)).thenReturn("/menu/plugins/gavin-app");
 
-		when(fileStore.getFile("gavin-app/ABCDE/input.vcf")).thenReturn(inputFile);
-		when(fileStore.getFile("gavin-app/ABCDE/temp-cadd.vcf")).thenReturn(caddResult);
-		when(fileStore.getFile("gavin-app/ABCDE/temp-exac.vcf")).thenReturn(exacResult);
-		when(fileStore.getFile("gavin-app/ABCDE/temp-snpeff.vcf")).thenReturn(snpEffResult);
-		when(fileStore.getFile("gavin-app/ABCDE/gavin-result.vcf")).thenReturn(gavinResult);
+		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "input.vcf")).thenReturn(inputFile);
+		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "temp-cadd.vcf")).thenReturn(caddResult);
+		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "temp-exac.vcf")).thenReturn(exacResult);
+		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "temp-snpeff.vcf"))
+				.thenReturn(snpEffResult);
+		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "gavin-result.vcf"))
+				.thenReturn(gavinResult);
 
 		job = new GavinJob(cmdLineAnnotator, progress, transactionTemplate, authentication, "ABCDE", fileStore,
 				menuReaderService, cadd, exac, snpeff, gavin);
