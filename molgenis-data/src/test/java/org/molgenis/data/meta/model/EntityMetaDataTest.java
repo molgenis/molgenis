@@ -4,10 +4,9 @@ import org.molgenis.data.Entity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Set;
+import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newHashSet;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
@@ -33,12 +32,16 @@ public class EntityMetaDataTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		// Setup for single level compound
+		// Listup for single level compound
 		randomAttribute = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
+		when(randomAttribute.getName()).thenReturn("randomAttribute");
+
 		attributePart = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
+		when(attributePart.getName()).thenReturn("attributePart");
 		Iterable<AttributeMetaData> attributeParts = newArrayList(attributePart);
 
 		compoundAttribute = when(mock(AttributeMetaData.class).getDataType()).thenReturn(COMPOUND).getMock();
+		when(compoundAttribute.getName()).thenReturn("compoundAttribute");
 		when(compoundAttribute.getAttributeParts()).thenReturn(attributeParts);
 
 		Iterable<AttributeMetaData> mockedAttributes = newArrayList(compoundAttribute, randomAttribute);
@@ -47,7 +50,7 @@ public class EntityMetaDataTest
 				.getMock();
 		entityMetaData = new EntityMetaData(entity);
 
-		// Setup for nested compound test
+		// Listup for nested compound test
 		nestedAttributePart = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
 		Iterable<AttributeMetaData> nestedCompoundAttributeParts = newArrayList(nestedAttributePart);
 
@@ -68,28 +71,27 @@ public class EntityMetaDataTest
 	@Test
 	public void getCompoundOrderedAttributesCorrectOrderTest()
 	{
-		Set<AttributeMetaData> expectedAttributes = newHashSet(attributePart, compoundAttribute, randomAttribute);
+		List<AttributeMetaData> expectedAttributes = newArrayList(attributePart, compoundAttribute, randomAttribute);
+		List<AttributeMetaData> actualAttributes = entityMetaData.getCompoundOrderedAttributes();
 
-		Set<AttributeMetaData> actualAttributes = entityMetaData.getCompoundOrderedAttributes();
 		assertEquals(actualAttributes, expectedAttributes);
 	}
 
 	@Test
 	public void getCompoundOrderedAttributesIncorrectOrderTest()
 	{
-		Set<AttributeMetaData> expectedAttributes = newHashSet(compoundAttribute, attributePart, randomAttribute);
-
-		Set<AttributeMetaData> actualAttributes = entityMetaData.getCompoundOrderedAttributes();
+		List<AttributeMetaData> expectedAttributes = newArrayList(compoundAttribute, randomAttribute, attributePart);
+		List<AttributeMetaData> actualAttributes = entityMetaData.getCompoundOrderedAttributes();
 		assertNotEquals(actualAttributes, expectedAttributes);
 	}
 
 	@Test
 	public void getCompoundOrderedAttributesWithNestedCompoundsTest()
 	{
-		Set<AttributeMetaData> expectedAttributes = newHashSet(nestedAttributePart, nestedCompoundPart, attributePart,
-				nestedCompoundParent, randomAttribute);
+		List<AttributeMetaData> expectedAttributes = newArrayList(nestedAttributePart, nestedCompoundPart,
+				attributePart, nestedCompoundParent, randomAttribute);
+		List<AttributeMetaData> actualAttributes = nestedEntityMetaData.getCompoundOrderedAttributes();
 
-		Set<AttributeMetaData> actualAttributes = nestedEntityMetaData.getCompoundOrderedAttributes();
 		assertEquals(actualAttributes, expectedAttributes);
 	}
 }

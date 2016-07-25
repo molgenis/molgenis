@@ -8,11 +8,10 @@ import org.molgenis.data.support.StaticEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
-import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
@@ -443,28 +442,28 @@ public class EntityMetaData extends StaticEntity
 	 * @return A {@link List} of {@link AttributeMetaData} containing all own attributes, with compound attributes being placed after
 	 * their respective attribute parts
 	 */
-	public Set<AttributeMetaData> getCompoundOrderedAttributes()
+	public List<AttributeMetaData> getCompoundOrderedAttributes()
 	{
-		Set<AttributeMetaData> attributes = newHashSet();
+		List<AttributeMetaData> attributes = newArrayList();
 		getEntities(ATTRIBUTES, AttributeMetaData.class).forEach(attribute -> {
 			if (attribute.getDataType() == COMPOUND)
 			{
 				attribute.getAttributeParts()
 						.forEach(attributePart -> resolvePossibleNestedCompounds(attributePart, attributes));
 			}
-			attributes.add(attribute);
+			if (!attributes.contains(attribute)) attributes.add(attribute);
 		});
 		return attributes;
 	}
 
-	private void resolvePossibleNestedCompounds(AttributeMetaData attribute, Set<AttributeMetaData> attributes)
+	private void resolvePossibleNestedCompounds(AttributeMetaData attribute, List<AttributeMetaData> attributes)
 	{
 		if (attribute.getDataType() == COMPOUND)
 		{
 			attribute.getAttributeParts()
 					.forEach(attributePart -> resolvePossibleNestedCompounds(attributePart, attributes));
 		}
-		attributes.add(attribute);
+		if (!attributes.contains(attribute)) attributes.add(attribute);
 		return;
 	}
 
