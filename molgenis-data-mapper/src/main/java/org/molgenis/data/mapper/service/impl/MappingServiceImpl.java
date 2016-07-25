@@ -19,6 +19,7 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.permission.PermissionSystemService;
+import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -154,6 +155,7 @@ public class MappingServiceImpl implements MappingService
 		return mappingProjectRepository.getMappingProject(identifier);
 	}
 
+	// TODO discuss: why isn't this method transactional?
 	@Override
 	public String applyMappings(MappingTarget mappingTarget, String entityName)
 	{
@@ -215,8 +217,8 @@ public class MappingServiceImpl implements MappingService
 		for (AttributeMetaData mappingTargetAttr : mappingTargetMetaData.getAtomicAttributes())
 		{
 			String mappingTargetAttrName = mappingTargetAttr.getName();
-			if (targetRepoAttributeMap.containsKey(mappingTargetAttrName) && targetRepoAttributeMap
-					.get(mappingTargetAttrName).equals(mappingTargetAttr))
+			if (targetRepoAttributeMap.containsKey(mappingTargetAttrName) && EntityUtils
+					.equals(targetRepoAttributeMap.get(mappingTargetAttrName), mappingTargetAttr))
 			{
 				continue;
 			}
@@ -242,7 +244,7 @@ public class MappingServiceImpl implements MappingService
 		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
 
 		// delete all target entities from this source
-		List<Entity> deleteEntities = targetRepo.findAll(new QueryImpl<Entity>().eq("source", sourceRepo.getName()))
+		List<Entity> deleteEntities = targetRepo.query().eq("source", sourceRepo.getName()).findAll()
 				.filter(Objects::nonNull).collect(Collectors.toList());
 		targetRepo.delete(deleteEntities.stream());
 
