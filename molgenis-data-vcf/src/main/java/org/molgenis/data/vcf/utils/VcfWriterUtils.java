@@ -20,8 +20,9 @@ import java.util.stream.StreamSupport;
 import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Iterables.transform;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.BOOL;
 import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
+import static org.molgenis.data.vcf.VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
 
 public class VcfWriterUtils
@@ -194,7 +195,7 @@ public class VcfWriterUtils
 		for (AttributeMetaData annotatorInfoAttr : annotatorAttributes.values())
 		{
 			if (attributesToInclude.isEmpty() || attributesToInclude.contains(annotatorInfoAttr.getName())
-					|| annotatorInfoAttr.getDataType().equals(XREF) || annotatorInfoAttr.getDataType().equals(MREF))
+					|| isReferenceType(annotatorInfoAttr))
 			{
 				outputVCFWriter
 						.write(createInfoStringFromAttribute(annotatorAttributes.get(annotatorInfoAttr.getName()),
@@ -223,8 +224,7 @@ public class VcfWriterUtils
 		// backslash as \\."
 		if (StringUtils.isBlank(infoAttributeMetaData.getDescription()))
 		{
-			if ((infoAttributeMetaData.getDataType().equals(MREF) || infoAttributeMetaData.getDataType().equals(XREF))
-					&& !attributeName.equals(SAMPLES))
+			if (isReferenceType(infoAttributeMetaData) && !attributeName.equals(SAMPLES))
 			{
 				String currentAttributesString = currentInfoField != null ? currentInfoField
 						.substring((currentInfoField.indexOf("'") + 1), currentInfoField.lastIndexOf("'")) : "";
@@ -233,7 +233,7 @@ public class VcfWriterUtils
 			}
 			else
 			{
-				sb.append(VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION);
+				sb.append(DEFAULT_ATTRIBUTE_DESCRIPTION);
 			}
 		}
 		else
@@ -337,13 +337,13 @@ public class VcfWriterUtils
 		for (AttributeMetaData attribute : attributes)
 		{
 			String attributeName = attribute.getName();
-			if ((attribute.getDataType().equals(MREF) || attribute.getDataType().equals(XREF)) && !attributeName
-					.equals(SAMPLES))
+			if (isReferenceType(attribute) && !attributeName.equals(SAMPLES))
 			{
 				// If the MREF field is empty, no effects were found, so we do not add an EFFECT field to this entity
 				if (vcfEntity.get(attributeName) != null && isOutputAttribute(attribute, annotatorAttributes,
 						attributesToInclude))
 				{
+
 					parseRefFieldsToInfoField(vcfEntity.getEntities(attributeName), attribute, refEntityInfoFields,
 							annotatorAttributes, attributesToInclude);
 				}
@@ -422,8 +422,8 @@ public class VcfWriterUtils
 		boolean previousValuePresent = false;
 		for (AttributeMetaData refAttribute : refAttributes)
 		{
-			if (refAttribute.isVisible() && (refAttribute.getDataType() != XREF) && !refAttribute.getDataType()
-					.equals(MREF) && isOutputAttribute(refAttribute, annotatorAttributes, attributesToInclude))
+			if (refAttribute.isVisible() && !isReferenceType(refAttribute) && isOutputAttribute(refAttribute,
+					annotatorAttributes, attributesToInclude))
 			{
 				if (previousValuePresent) refEntityInfoFields.append(PIPE_SEPARATOR);
 				String value = refEntity.getString(refAttribute.getName()) == null ? "" : refEntity
@@ -541,7 +541,7 @@ public class VcfWriterUtils
 		List<AttributeMetaData> expandedAddedAttributes = new ArrayList<>();
 		for (AttributeMetaData annotatorAttr : addedAttributes)
 		{
-			if (annotatorAttr.getDataType().equals(XREF) || annotatorAttr.getDataType().equals(MREF))
+			if (isReferenceType(annotatorAttr))
 				expandedAddedAttributes.addAll(Lists.newArrayList(annotatorAttr.getRefEntity().getAtomicAttributes()));
 			else expandedAddedAttributes.add(annotatorAttr);
 		}
