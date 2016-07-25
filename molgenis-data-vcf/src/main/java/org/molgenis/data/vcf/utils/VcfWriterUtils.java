@@ -2,7 +2,6 @@ package org.molgenis.data.vcf.utils;
 
 import autovalue.shaded.com.google.common.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.MolgenisInvalidFormatException;
@@ -22,6 +21,7 @@ import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Iterables.transform;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
 
 public class VcfWriterUtils
@@ -357,8 +357,7 @@ public class VcfWriterUtils
 			AttributeMetaData attributeMetaData) throws IOException
 	{
 		String infoAttrName = attributeMetaData.getName();
-		MolgenisFieldTypes.AttributeType dataType = attributeMetaData.getDataType();
-		if (dataType == BOOL)
+		if (attributeMetaData.getDataType() == BOOL)
 		{
 			Boolean infoAttrBoolValue = vcfEntity.getBoolean(infoAttrName);
 			if (infoAttrBoolValue != null && infoAttrBoolValue)
@@ -368,7 +367,7 @@ public class VcfWriterUtils
 				hasInfoFields = true;
 			}
 		}
-		else if (dataType != MREF && dataType != XREF && dataType != CATEGORICAL_MREF && dataType != CATEGORICAL)
+		else if (!isReferenceType(attributeMetaData))
 		{
 
 			Object infoAttrStringValue = vcfEntity.get(infoAttrName);
