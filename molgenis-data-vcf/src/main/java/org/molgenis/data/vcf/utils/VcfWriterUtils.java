@@ -21,8 +21,7 @@ import java.util.stream.StreamSupport;
 import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Iterables.transform;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
 
 public class VcfWriterUtils
@@ -358,7 +357,8 @@ public class VcfWriterUtils
 			AttributeMetaData attributeMetaData) throws IOException
 	{
 		String infoAttrName = attributeMetaData.getName();
-		if (attributeMetaData.getDataType() == MolgenisFieldTypes.AttributeType.BOOL)
+		MolgenisFieldTypes.AttributeType dataType = attributeMetaData.getDataType();
+		if (dataType == BOOL)
 		{
 			Boolean infoAttrBoolValue = vcfEntity.getBoolean(infoAttrName);
 			if (infoAttrBoolValue != null && infoAttrBoolValue)
@@ -368,8 +368,9 @@ public class VcfWriterUtils
 				hasInfoFields = true;
 			}
 		}
-		else
+		else if (dataType != MREF && dataType != XREF && dataType != CATEGORICAL_MREF && dataType != CATEGORICAL)
 		{
+
 			Object infoAttrStringValue = vcfEntity.get(infoAttrName);
 			if (infoAttrStringValue != null)
 			{
