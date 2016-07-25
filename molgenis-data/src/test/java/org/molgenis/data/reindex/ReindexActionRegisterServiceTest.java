@@ -64,6 +64,7 @@ public class ReindexActionRegisterServiceTest
 		when(reindexActionFactory.create()).thenReturn(reindexAction);
 		when(reindexAction.setReindexActionGroup(reindexActionGroup)).thenReturn(reindexAction);
 		when(reindexAction.setEntityFullName("TestEntityName")).thenReturn(reindexAction);
+		when(reindexAction.getEntityFullName()).thenReturn("TestEntityName");
 		when(reindexAction.setCudType(CudType.CREATE)).thenReturn(reindexAction);
 		when(reindexAction.setDataType(DataType.DATA)).thenReturn(reindexAction);
 		when(reindexAction.setEntityId("123")).thenReturn(reindexAction);
@@ -91,6 +92,7 @@ public class ReindexActionRegisterServiceTest
 		when(reindexActionFactory.create()).thenReturn(reindexAction);
 		when(reindexAction.setReindexActionGroup(reindexActionGroup)).thenReturn(reindexAction);
 		when(reindexAction.setEntityFullName("TestEntityName")).thenReturn(reindexAction);
+		when(reindexAction.getEntityFullName()).thenReturn("TestEntityName");
 		when(reindexAction.setCudType(CudType.CREATE)).thenReturn(reindexAction);
 		when(reindexAction.setDataType(DataType.DATA)).thenReturn(reindexAction);
 		when(reindexAction.setEntityId("123")).thenReturn(reindexAction);
@@ -113,6 +115,19 @@ public class ReindexActionRegisterServiceTest
 	@Test
 	public void testRegisterExcludedEntities()
 	{
+		when(reindexActionGroupFactory.create("1")).thenReturn(reindexActionGroup);
+		when(reindexActionGroup.setCount(1)).thenReturn(reindexActionGroup);
+
+		when(reindexActionFactory.create()).thenReturn(reindexAction);
+		when(reindexAction.setReindexActionGroup(reindexActionGroup)).thenReturn(reindexAction);
+		when(reindexAction.setEntityFullName("ABC")).thenReturn(reindexAction);
+		when(reindexAction.getEntityFullName()).thenReturn("ABC");
+		when(reindexAction.setCudType(CudType.CREATE)).thenReturn(reindexAction);
+		when(reindexAction.setDataType(DataType.DATA)).thenReturn(reindexAction);
+		when(reindexAction.setEntityId("123")).thenReturn(reindexAction);
+		when(reindexAction.setActionOrder(0)).thenReturn(reindexAction);
+		when(reindexAction.setReindexStatus(PENDING)).thenReturn(reindexAction);
+
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(entityMetaData.getName()).thenReturn("ABC");
 		reindexActionRegisterService.addExcludedEntity("ABC");

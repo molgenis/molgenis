@@ -31,24 +31,21 @@ public class CmdLineAnnotatorIT
 	@Test
 	public void hpo() throws Exception
 	{
-		testAnnotator("hpo",
-				ResourceUtils.getFile(getClass(), File.separator + "hpo" + File.separator + "hpo.txt").getPath(),
+		testAnnotator("hpo", ResourceUtils.getFile(getClass(), "/hpo/hpo.txt").getPath(),
 				"test.vcf", "test-out-expected.vcf");
 	}
 
 	@Test
 	public void hpoTermsOnly() throws Exception
 	{
-		testAnnotator("hpo",
-				ResourceUtils.getFile(getClass(), File.separator + "hpo" + File.separator + "hpo.txt").getPath(),
+		testAnnotator("hpo", ResourceUtils.getFile(getClass(), "/hpo/hpo.txt").getPath(),
 				"test.vcf", "test-out-terms-expected.vcf", Arrays.asList("HPOTERMS"));
 	}
 
 	@Test
 	public void fitcon() throws Exception
 	{
-		testAnnotator("fitcon",
-				ResourceUtils.getFile(getClass(), File.separator + "fitcon" + File.separator + "fitcon_test_set.tsv.gz")
+		testAnnotator("fitcon", ResourceUtils.getFile(getClass(), "/fitcon/fitcon_test_set.tsv.gz")
 						.getPath(), "test.vcf", "test-out-expected.vcf");
 	}
 
