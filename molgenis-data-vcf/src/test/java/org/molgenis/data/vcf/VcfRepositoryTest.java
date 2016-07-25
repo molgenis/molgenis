@@ -1,23 +1,12 @@
 package org.molgenis.data.vcf;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
-
 import org.apache.commons.io.FileUtils;
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -26,6 +15,15 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
+
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { VcfRepositoryTest.Config.class })
 public class VcfRepositoryTest extends AbstractMolgenisSpringTest
@@ -63,30 +61,30 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest
 			assertEquals(vcfRepository.getName(), "testData");
 			Iterator<AttributeMetaData> it = vcfRepository.getEntityMetaData().getAttributes().iterator();
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfAttributes.CHROM, MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), VcfAttributes.CHROM, STRING);
 			assertTrue(it.hasNext());
 			// TEXT to handle large insertions/deletions
-			testAttribute(it.next(), VcfAttributes.ALT, MolgenisFieldTypes.TEXT);
+			testAttribute(it.next(), VcfAttributes.ALT, TEXT);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfAttributes.POS, MolgenisFieldTypes.INT);
+			testAttribute(it.next(), VcfAttributes.POS, INT);
 			assertTrue(it.hasNext());
 			// TEXT to handle large insertions/deletions
-			testAttribute(it.next(), VcfAttributes.REF, MolgenisFieldTypes.TEXT);
+			testAttribute(it.next(), VcfAttributes.REF, TEXT);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfAttributes.FILTER, MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), VcfAttributes.FILTER, STRING);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfAttributes.QUAL, MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), VcfAttributes.QUAL, STRING);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfAttributes.ID, MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), VcfAttributes.ID, STRING);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfAttributes.INTERNAL_ID, MolgenisFieldTypes.STRING);
+			testAttribute(it.next(), VcfAttributes.INTERNAL_ID, STRING);
 			assertTrue(it.hasNext());
-			testAttribute(it.next(), VcfAttributes.INFO, MolgenisFieldTypes.COMPOUND);
+			testAttribute(it.next(), VcfAttributes.INFO, COMPOUND);
 			assertTrue(it.hasNext());
 		}
 	}
 
-	private static void testAttribute(AttributeMetaData metadata, String name, FieldType type)
+	private static void testAttribute(AttributeMetaData metadata, String name, AttributeType type)
 	{
 		assertEquals(metadata.getName(), name);
 		assertEquals(metadata.getDataType(), type);
