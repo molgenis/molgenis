@@ -525,19 +525,28 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@Test
-	public void testFindQueryOperatorRange()
+	@DataProvider(name = "findQueryOperatorRange")
+	private static Object[][] findQueryOperatorRange()
 	{
-		List<Entity> entities = createDynamic(5).collect(toList());
+		return new Object[][] { { 0, 9, emptyList() }, { 0, 10, asList(0) }, { 10, 10, asList(0) },
+				{ 10, 11, asList(0, 1) }, { 10, 12, asList(0, 1, 2) }, { 12, 20, asList(2) } };
+	}
+
+	@Test(dataProvider = "findQueryOperatorRange")
+	public void testFindQueryOperatorRange(int low, int high, List<Integer> expectedEntityIndices)
+	{
+		List<Entity> entities = createDynamic(3).collect(toList());
 		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityMetaDataDynamic.getName()).rng(ATTR_INT, 11, 13)
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityMetaDataDynamic.getName())
+				.rng(ATTR_INT, low, high)
 				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
-		assertEquals(foundAsList.size(), 3);
-		assertTrue(EntityUtils.equals(foundAsList.get(0), entities.get(1)));
-		assertTrue(EntityUtils.equals(foundAsList.get(1), entities.get(2)));
-		assertTrue(EntityUtils.equals(foundAsList.get(2), entities.get(3)));
+		assertEquals(foundAsList.size(), expectedEntityIndices.size());
+		for (int i = 0; i < expectedEntityIndices.size(); ++i)
+		{
+			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
+		}
 	}
 
 	@DataProvider(name = "findQueryOperatorLike")
