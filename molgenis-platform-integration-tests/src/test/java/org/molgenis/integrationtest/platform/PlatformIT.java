@@ -571,6 +571,124 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
+	@DataProvider(name = "findQueryOperatorNot")
+	private static Object[][] findQueryOperatorNot()
+	{
+		return new Object[][] { { 9, asList(0, 1, 2) }, { 10, asList(1, 2) }, { 11, asList(0, 2) },
+				{ 12, asList(0, 1) }, { 13, asList(0, 1, 2) } };
+	}
+
+	@Test(dataProvider = "findQueryOperatorNot")
+	public void testFindQueryOperatorNot(int value, List<Integer> expectedEntityIndices)
+	{
+		List<Entity> entities = createDynamic(3).collect(toList());
+		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityMetaDataDynamic.getName()).not()
+				.eq(ATTR_INT, value).findAll();
+		List<Entity> foundAsList = found.get().collect(toList());
+		assertEquals(foundAsList.size(), expectedEntityIndices.size());
+		for (int i = 0; i < expectedEntityIndices.size(); ++i)
+		{
+			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
+		}
+	}
+
+	@DataProvider(name = "findQueryOperatorAnd")
+	private static Object[][] findQueryOperatorAnd()
+	{
+		return new Object[][] { { "string1", 10, asList(0) }, { "unknownString", 10, emptyList() },
+				{ "string1", -1, emptyList() }, { "unknownString", -1, emptyList() } };
+	}
+
+	@Test(dataProvider = "findQueryOperatorAnd")
+	public void testFindQueryOperatorAnd(String strValue, int value, List<Integer> expectedEntityIndices)
+	{
+		List<Entity> entities = createDynamic(3).collect(toList());
+		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityMetaDataDynamic.getName())
+				.eq(ATTR_STRING, strValue).and().eq(ATTR_INT, value).findAll();
+		List<Entity> foundAsList = found.get().collect(toList());
+		assertEquals(foundAsList.size(), expectedEntityIndices.size());
+		for (int i = 0; i < expectedEntityIndices.size(); ++i)
+		{
+			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
+		}
+	}
+
+	@DataProvider(name = "findQueryOperatorOr")
+	private static Object[][] findQueryOperatorOr()
+	{
+		return new Object[][] { { "string1", 10, asList(0, 1, 2) }, { "unknownString", 10, asList(0) },
+				{ "string1", -1, asList(0, 1, 2) }, { "unknownString", -1, emptyList() } };
+	}
+
+	@Test(dataProvider = "findQueryOperatorOr")
+	public void testFindQueryOperatorOr(String strValue, int value, List<Integer> expectedEntityIndices)
+	{
+		List<Entity> entities = createDynamic(3).collect(toList());
+		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityMetaDataDynamic.getName())
+				.eq(ATTR_STRING, strValue).or().eq(ATTR_INT, value).findAll();
+		List<Entity> foundAsList = found.get().collect(toList());
+		assertEquals(foundAsList.size(), expectedEntityIndices.size());
+		for (int i = 0; i < expectedEntityIndices.size(); ++i)
+		{
+			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
+		}
+	}
+
+	@DataProvider(name = "findQueryOperatorNested")
+	private static Object[][] findQueryOperatorNested()
+	{
+		return new Object[][] { { true, "string1", 10, asList(0, 1, 2) }, { true, "unknownString", 10, asList(0) },
+				{ true, "string1", -1, asList(0, 1, 2) }, { true, "unknownString", -1, emptyList() },
+				{ false, "string1", 10, emptyList() }, { false, "unknownString", 10, emptyList() },
+				{ false, "string1", -1, emptyList() }, { false, "unknownString", -1, emptyList() } };
+	}
+
+	@Test(dataProvider = "findQueryOperatorNested")
+	public void testFindQueryOperatorNested(boolean boolValue, String strValue, int value,
+			List<Integer> expectedEntityIndices)
+	{
+		List<Entity> entities = createDynamic(3).collect(toList());
+		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityMetaDataDynamic.getName())
+				.eq(ATTR_BOOL, boolValue).and().nest().eq(ATTR_STRING, strValue).or().eq(ATTR_INT, value).unnest()
+				.findAll();
+		List<Entity> foundAsList = found.get().collect(toList());
+		assertEquals(foundAsList.size(), expectedEntityIndices.size());
+		for (int i = 0; i < expectedEntityIndices.size(); ++i)
+		{
+			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
+		}
+	}
+
+	@DataProvider(name = "findQueryOperatorSearch")
+	private static Object[][] findQueryOperatorSearch()
+	{
+		return new Object[][] { { "body", asList(0, 1) }, { "head", asList(0, 1) }, { "unknownString", emptyList() } };
+	}
+
+	@Test(dataProvider = "findQueryOperatorSearch")
+	public void testFindQueryOperatorSearch(String searchStr, List<Integer> expectedEntityIndices)
+	{
+		List<Entity> entities = createDynamic(2).collect(toList());
+		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityMetaDataDynamic.getName())
+				.search(ATTR_HTML, searchStr).findAll();
+		List<Entity> foundAsList = found.get().collect(toList());
+		assertEquals(foundAsList.size(), expectedEntityIndices.size());
+		for (int i = 0; i < expectedEntityIndices.size(); ++i)
+		{
+			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
+		}
+	}
+
 	@Test
 	public void testFindQueryLimit2_Offset2_sortOnInt()
 	{
