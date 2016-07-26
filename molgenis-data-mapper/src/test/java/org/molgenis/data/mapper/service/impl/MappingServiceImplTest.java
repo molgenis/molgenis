@@ -43,6 +43,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -350,7 +351,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		ArgumentCaptor<Stream<Entity>> streamCaptor = forClass((Class) Stream.class);
 		verify(addEntityRepo).add(streamCaptor.capture());
 
-		assertTrue(EntityUtils.entitiesEquals(streamCaptor.getValue(), expectedEntities.stream()));
+		assertTrue(EntityUtils.entitiesEquals(streamCaptor.getValue().collect(toList()), expectedEntities));
 
 		verify(permissionSystemService)
 				.giveUserEntityPermissions(SecurityContextHolder.getContext(), singletonList(entityName));
@@ -420,11 +421,11 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		ArgumentCaptor<Stream<Entity>> deleteStreamCaptor = forClass((Class) Stream.class);
 		verify(updateEntityRepo).delete(deleteStreamCaptor.capture());
-		assertTrue(EntityUtils.entitiesEquals(deleteStreamCaptor.getValue(), expectedEntities.stream()));
+		assertTrue(EntityUtils.entitiesEquals(deleteStreamCaptor.getValue().collect(toList()), expectedEntities));
 
 		ArgumentCaptor<Stream<Entity>> addStreamCaptor = forClass((Class) Stream.class);
 		verify(updateEntityRepo).add(addStreamCaptor.capture());
-		assertTrue(EntityUtils.entitiesEquals(addStreamCaptor.getValue(), expectedEntities.stream()));
+		assertTrue(EntityUtils.entitiesEquals(addStreamCaptor.getValue().collect(toList()), expectedEntities));
 
 		verifyZeroInteractions(permissionSystemService);
 	}
