@@ -150,7 +150,7 @@ public class EntityTestHarness
 		entity1.set(ATTR_HTML, "<html>where is my head and where is my body</html>");
 		entity1.set(ATTR_HYPERLINK, "http://www.molgenis.org");
 		entity1.set(ATTR_LONG, new Long(1000000));
-		entity1.set(ATTR_INT, 18);
+		entity1.set(ATTR_INT, 10 + id);
 		entity1.set(ATTR_SCRIPT, "/bin/blaat/script.sh");
 		entity1.set(ATTR_XREF, refEntity);
 		entity1.set(ATTR_MREF, Collections.singletonList(refEntity));

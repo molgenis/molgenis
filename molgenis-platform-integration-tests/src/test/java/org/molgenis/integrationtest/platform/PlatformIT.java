@@ -2,7 +2,6 @@ package org.molgenis.integrationtest.platform;
 
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.*;
-import org.molgenis.data.Entity;
 import org.molgenis.data.cache.l2.L2Cache;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
@@ -10,7 +9,6 @@ import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.EntityMetaData;
-
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.test.data.EntitySelfXrefTestHarness;
@@ -25,10 +23,7 @@ import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.Test;
+import org.testng.annotations.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -37,18 +32,19 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.testng.Assert.*;
-import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
 public class PlatformIT extends AbstractTestNGSpringContextTests
@@ -149,7 +145,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		selfXrefEntityMetaData = entitySelfXrefTestHarness.createDynamicEntityMetaData();
 		selfXrefEntityMetaData.getAttribute(ATTR_XREF).setRefEntity(selfXrefEntityMetaData);
 
-		RunAsSystemProxy.runAsSystem(() -> {
+		RunAsSystemProxy.runAsSystem(() ->
+		{
 			metaDataService.addEntityMeta(refEntityMetaDataDynamic);
 			metaDataService.addEntityMeta(entityMetaDataDynamic);
 			metaDataService.addEntityMeta(selfXrefEntityMetaData);
@@ -188,14 +185,16 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				new TestingAuthenticationToken("user", "user", writeTestEntity, readTestEntity, readTestRefEntity,
 						countTestEntity, countTestRefEntity, writeSelfXrefEntity, readSelfXrefEntity,
 						countSelfXrefEntity, writeTestEntityStatic, readTestEntityStatic, countTestEntityStatic,
-						writeTestRefEntityStatic, readTestRefEntityStatic, countTestRefEntityStatic, "ROLE_ENTITY_READ_SYS_MD_ENTITIES", "ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES",
+						writeTestRefEntityStatic, readTestRefEntityStatic, countTestRefEntityStatic,
+						"ROLE_ENTITY_READ_SYS_MD_ENTITIES", "ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES",
 						"ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
 	}
 
 	@AfterMethod
 	public void afterMethod()
 	{
-		runAsSystem(() -> {
+		runAsSystem(() ->
+		{
 			dataService.deleteAll(entityMetaDataStatic.getName());
 			dataService.deleteAll(refEntityMetaDataStatic.getName());
 			dataService.deleteAll(entityMetaDataDynamic.getName());
@@ -213,9 +212,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	public void testEntityListener()
 	{
 		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityMetaDataDynamic, 6);
-		List<Entity> entities = testHarness.createTestEntities(entityMetaDataDynamic, 2, refEntities)
-				.collect(Collectors.toList());
-		runAsSystem(() -> {
+		List<Entity> entities = testHarness.createTestEntities(entityMetaDataDynamic, 2, refEntities).collect(toList());
+		runAsSystem(() ->
+		{
 			dataService.add(refEntityMetaDataDynamic.getName(), refEntities.stream());
 			dataService.add(entityMetaDataDynamic.getName(), entities.stream());
 			waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
@@ -262,7 +261,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testAdd()
 	{
-		List<Entity> entities = createDynamic(2).collect(Collectors.toList());
+		List<Entity> entities = createDynamic(2).collect(toList());
 		assertEquals(searchService.count(entityMetaDataDynamic), 0);
 		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
@@ -274,7 +273,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testCount()
 	{
-		List<Entity> entities = createDynamic(2).collect(Collectors.toList());
+		List<Entity> entities = createDynamic(2).collect(toList());
 		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
 		assertEquals(dataService.count(entityMetaDataDynamic.getName(), new QueryImpl<>()), 2);
@@ -311,7 +310,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testDeleteStream()
 	{
-		List<Entity> entities = createDynamic(2).collect(Collectors.toList());
+		List<Entity> entities = createDynamic(2).collect(toList());
 		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
 		assertEquals(dataService.count(entityMetaDataDynamic.getName(), new QueryImpl<>()), entities.size());
@@ -324,7 +323,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testDeleteAll()
 	{
-		List<Entity> entities = createDynamic(5).collect(Collectors.toList());
+		List<Entity> entities = createDynamic(5).collect(toList());
 		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
 		assertEquals(dataService.count(entityMetaDataDynamic.getName(), new QueryImpl<>()), entities.size());
@@ -344,7 +343,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testFindAll()
 	{
-		List<Entity> entities = createDynamic(5).collect(Collectors.toList());
+		List<Entity> entities = createDynamic(5).collect(toList());
 		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
 		Stream<Entity> retrieved = dataService.findAll(entityMetaDataDynamic.getName());
@@ -354,7 +353,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testFindAllTyped()
 	{
-		List<Entity> entities = createDynamic(1).collect(Collectors.toList());
+		List<Entity> entities = createDynamic(1).collect(toList());
 		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
 		Supplier<Stream<Entity>> retrieved = () -> dataService.findAll(entityMetaDataDynamic.getName(), Entity.class);
@@ -365,7 +364,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testFindAllByIds()
 	{
-		List<Entity> entities = createDynamic(5).collect(Collectors.toList());
+		List<Entity> entities = createDynamic(5).collect(toList());
 		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
 		Stream<Object> ids = Stream.concat(entities.stream().map(Entity::getIdValue), of("bogus"));
@@ -376,7 +375,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testFindAllByIdsTyped()
 	{
-		List<Entity> entities = createStatic(5).collect(Collectors.toList());
+		List<Entity> entities = createStatic(5).collect(toList());
 		dataService.add(entityMetaDataStatic.getName(), entities.stream());
 		waitForIndexToBeStable(entityMetaDataStatic.getName(), reindexService, LOG);
 
@@ -390,7 +389,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testFindAllStreamFetch()
 	{
-		List<Entity> entities = createDynamic(5).collect(Collectors.toList());
+		List<Entity> entities = createDynamic(5).collect(toList());
 		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
 		Stream<Object> ids = concat(entities.stream().map(Entity::getIdValue), of("bogus"));
@@ -402,7 +401,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testFindQuery()
 	{
-		List<Entity> entities = createDynamic(5).collect(Collectors.toList());
+		List<Entity> entities = createDynamic(5).collect(toList());
 		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
 		Supplier<Stream<Entity>> found = () -> dataService
@@ -411,13 +410,166 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(found.get().findFirst().get().getIdValue(), entities.get(0).getIdValue());
 	}
 
+	@DataProvider(name = "findQueryOperatorIn")
+	private static Object[][] findQueryOperatorIn()
+	{
+		return new Object[][] { { singletonList("-1"), emptyList() }, { asList("-1", "0"), singletonList(0) },
+				{ asList("0", "1"), asList(0, 1) }, { asList("1", "2"), singletonList(1) } };
+	}
+
+	@Test(dataProvider = "findQueryOperatorIn")
+	public void testFindQueryOperatorIn(List<String> ids, List<Integer> expectedEntityIndices)
+	{
+		List<Entity> entities = createDynamic(2).collect(toList());
+		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityMetaDataDynamic.getName()).in(ATTR_ID, ids)
+				.findAll();
+		List<Entity> foundAsList = found.get().collect(toList());
+		assertEquals(foundAsList.size(), expectedEntityIndices.size());
+		for (int i = 0; i < expectedEntityIndices.size(); ++i)
+		{
+			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
+		}
+	}
+
+	@DataProvider(name = "findQueryOperatorLess")
+	private static Object[][] findQueryOperatorLess()
+	{
+		return new Object[][] { { 9, emptyList() }, { 10, emptyList() }, { 11, singletonList(0) }, { 12, asList(0, 1) },
+				{ 13, asList(0, 1, 2) } };
+	}
+
+	@Test(dataProvider = "findQueryOperatorLess")
+	public void testFindQueryOperatorLess(int value, List<Integer> expectedEntityIndices)
+	{
+		List<Entity> entities = createDynamic(5).collect(toList());
+		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityMetaDataDynamic.getName()).lt(ATTR_INT, value)
+				.findAll();
+		List<Entity> foundAsList = found.get().collect(toList());
+		assertEquals(foundAsList.size(), expectedEntityIndices.size());
+		for (int i = 0; i < expectedEntityIndices.size(); ++i)
+		{
+			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
+		}
+	}
+
+	@DataProvider(name = "findQueryOperatorLessEqual")
+	private static Object[][] findQueryOperatorLessEqual()
+	{
+		return new Object[][] { { 9, emptyList() }, { 10, singletonList(0) }, { 11, asList(0, 1) },
+				{ 12, asList(0, 1, 2) }, { 13, asList(0, 1, 2, 3) } };
+	}
+
+	@Test(dataProvider = "findQueryOperatorLessEqual")
+	public void testFindQueryOperatorLessEqual(int value, List<Integer> expectedEntityIndices)
+	{
+		List<Entity> entities = createDynamic(5).collect(toList());
+		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityMetaDataDynamic.getName()).le(ATTR_INT, value)
+				.findAll();
+		List<Entity> foundAsList = found.get().collect(toList());
+		assertEquals(foundAsList.size(), expectedEntityIndices.size());
+		for (int i = 0; i < expectedEntityIndices.size(); ++i)
+		{
+			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
+		}
+	}
+
+	@DataProvider(name = "findQueryOperatorGreater")
+	private static Object[][] findQueryOperatorGreater()
+	{
+		return new Object[][] { { 9, asList(0, 1, 2) }, { 10, asList(1, 2) }, { 11, singletonList(2) },
+				{ 12, emptyList() } };
+	}
+
+	@Test(dataProvider = "findQueryOperatorGreater")
+	public void testFindQueryOperatorGreater(int value, List<Integer> expectedEntityIndices)
+	{
+		List<Entity> entities = createDynamic(3).collect(toList());
+		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityMetaDataDynamic.getName()).gt(ATTR_INT, value)
+				.findAll();
+		List<Entity> foundAsList = found.get().collect(toList());
+		assertEquals(foundAsList.size(), expectedEntityIndices.size());
+		for (int i = 0; i < expectedEntityIndices.size(); ++i)
+		{
+			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
+		}
+	}
+
+	@DataProvider(name = "findQueryOperatorGreaterEqual")
+	private static Object[][] findQueryOperatorGreaterEqual()
+	{
+		return new Object[][] { { 9, asList(0, 1, 2) }, { 10, asList(0, 1, 2) }, { 11, asList(1, 2) },
+				{ 12, singletonList(2) }, { 13, emptyList() } };
+	}
+
+	@Test(dataProvider = "findQueryOperatorGreaterEqual")
+	public void testFindQueryOperatorGreaterEqual(int value, List<Integer> expectedEntityIndices)
+	{
+		List<Entity> entities = createDynamic(3).collect(toList());
+		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityMetaDataDynamic.getName()).ge(ATTR_INT, value)
+				.findAll();
+		List<Entity> foundAsList = found.get().collect(toList());
+		assertEquals(foundAsList.size(), expectedEntityIndices.size());
+		for (int i = 0; i < expectedEntityIndices.size(); ++i)
+		{
+			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
+		}
+	}
+
+	@Test
+	public void testFindQueryOperatorRange()
+	{
+		List<Entity> entities = createDynamic(5).collect(toList());
+		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityMetaDataDynamic.getName()).rng(ATTR_INT, 11, 13)
+				.findAll();
+		List<Entity> foundAsList = found.get().collect(toList());
+		assertEquals(foundAsList.size(), 3);
+		assertTrue(EntityUtils.equals(foundAsList.get(0), entities.get(1)));
+		assertTrue(EntityUtils.equals(foundAsList.get(1), entities.get(2)));
+		assertTrue(EntityUtils.equals(foundAsList.get(2), entities.get(3)));
+	}
+
+	@DataProvider(name = "findQueryOperatorLike")
+	private static Object[][] findQueryOperatorLike()
+	{
+		return new Object[][] { { "ring", asList(0, 1) }, { "Ring", emptyList() }, { "nomatch", emptyList() } };
+	}
+
+	@Test(dataProvider = "findQueryOperatorLike")
+	public void testFindQueryOperatorLike(String likeStr, List<Integer> expectedEntityIndices)
+	{
+		List<Entity> entities = createDynamic(2).collect(toList());
+		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityMetaDataDynamic.getName())
+				.like(ATTR_STRING, likeStr).findAll();
+		List<Entity> foundAsList = found.get().collect(toList());
+		assertEquals(foundAsList.size(), expectedEntityIndices.size());
+		for (int i = 0; i < expectedEntityIndices.size(); ++i)
+		{
+			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
+		}
+	}
+
 	@Test
 	public void testFindQueryLimit2_Offset2_sortOnInt()
 	{
 		List<Entity> testRefEntities = testHarness.createTestRefEntities(refEntityMetaDataDynamic, 6);
 		List<Entity> testEntities = testHarness.createTestEntities(entityMetaDataDynamic, 10, testRefEntities)
-				.collect(Collectors.toList());
-		runAsSystem(() -> {
+				.collect(toList());
+		runAsSystem(() ->
+		{
 			dataService.add(refEntityMetaDataDynamic.getName(), testRefEntities.stream());
 			dataService.add(entityMetaDataDynamic.getName(), testEntities.stream());
 		});
@@ -425,7 +577,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
 		Supplier<Stream<Entity>> found = () -> dataService.findAll(entityMetaDataDynamic.getName(),
 				new QueryImpl<>().pageSize(2).offset(2).sort(new Sort(ATTR_ID, Sort.Direction.DESC)));
-		List<Entity> foundAsList = found.get().collect(Collectors.toList());
+		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), 2);
 		assertTrue(EntityUtils.equals(foundAsList.get(0), testEntities.get(7)));
 		assertTrue(EntityUtils.equals(foundAsList.get(1), testEntities.get(6)));
@@ -434,7 +586,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testFindQueryTypedStatic()
 	{
-		List<Entity> entities = createStatic(5).collect(Collectors.toList());
+		List<Entity> entities = createStatic(5).collect(toList());
 		dataService.add(entityMetaDataStatic.getName(), entities.stream());
 		waitForIndexToBeStable(entityMetaDataStatic.getName(), reindexService, LOG);
 		Supplier<Stream<TestEntityStatic>> found = () -> dataService.findAll(entityMetaDataStatic.getName(),
@@ -738,7 +890,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	public void testCreateSelfXref()
 	{
 		Entity entitySelfXref = entitySelfXrefTestHarness.createTestEntities(selfXrefEntityMetaData, 1)
-				.collect(Collectors.toList()).get(0);
+				.collect(toList()).get(0);
 
 		//Create
 		dataService.add(selfXrefEntityMetaData.getName(), entitySelfXref);
