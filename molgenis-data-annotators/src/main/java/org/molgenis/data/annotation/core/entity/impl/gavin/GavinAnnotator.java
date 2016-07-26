@@ -35,6 +35,11 @@ import java.util.stream.StreamSupport;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.data.annotation.core.effects.EffectsMetaData.GENE_NAME;
+import static org.molgenis.data.annotation.core.effects.EffectsMetaData.PUTATIVE_IMPACT;
+import static org.molgenis.data.annotation.core.entity.impl.CaddAnnotator.CADD_SCALED;
+import static org.molgenis.data.annotation.core.entity.impl.ExacAnnotator.EXAC_AF;
+import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
 
 @Configuration
 public class GavinAnnotator implements AnnotatorConfig
@@ -42,16 +47,12 @@ public class GavinAnnotator implements AnnotatorConfig
 	public static final String NAME = "Gavin";
 	public static final String RESOURCE = "gavin";
 	public static final String RESOURCE_ENTITY_NAME = "gavin";
-	private static final String CATEGORY = "Category";
 
 	public static final String CLASSIFICATION = "Classification";
 	public static final String CONFIDENCE = "Confidence";
 	public static final String REASON = "Reason";
 	public static final String VARIANT_ENTITY = "Variant";
 
-	public static final int CADD_MAXIMUM_THRESHOLD = 15;
-	public static final int CADD_MINIMUM_THRESHOLD = 15;
-	public static final double MAF_THRESHOLD = 0.00474;
 	private final GavinAlgorithm gavinAlgorithm = new GavinAlgorithm();
 
 	@Autowired
@@ -178,15 +179,15 @@ public class GavinAnnotator implements AnnotatorConfig
 
 				Entity variantEntity = entity.getEntity(VARIANT_ENTITY);
 
-				Map<String, Double> caddMap = AnnotatorUtils.toAlleleMap(variantEntity.getString(VcfAttributes.ALT),
-						variantEntity.getString(CaddAnnotator.CADD_SCALED));
-				Map<String, Double> exacMap = AnnotatorUtils.toAlleleMap(variantEntity.getString(VcfAttributes.ALT),
-						variantEntity.getString(ExacAnnotator.EXAC_AF));
+				Map<String, Double> caddMap = AnnotatorUtils
+						.toAlleleMap(variantEntity.getString(ALT), variantEntity.getString(CADD_SCALED));
+				Map<String, Double> exacMap = AnnotatorUtils
+						.toAlleleMap(variantEntity.getString(ALT), variantEntity.getString(EXAC_AF));
 
-				Impact impact = Impact.valueOf(entity.getString(EffectsMetaData.PUTATIVE_IMPACT));
+				Impact impact = Impact.valueOf(entity.getString(PUTATIVE_IMPACT));
 				Double exacMAF = exacMap.get(alt);
 				Double caddScaled = caddMap.get(alt);
-				String gene = entity.getString(EffectsMetaData.GENE_NAME);
+				String gene = entity.getString(GENE_NAME);
 				if (exacMAF == null)
 				{
 					exacMAF = 0.0;
@@ -196,10 +197,8 @@ public class GavinAnnotator implements AnnotatorConfig
 				{
 					Entity annotationSourceEntity = annotationSourceEntities.iterator().next();
 
-					Category category = Category.valueOf(annotationSourceEntity.getString(CATEGORY));
-
 					Judgment judgment = gavinAlgorithm
-							.classifyVariant(impact, caddScaled, exacMAF, category, gene, annotationSourceEntity);
+							.classifyVariant(impact, caddScaled, exacMAF, gene, annotationSourceEntity, null);
 					entity.set(CLASSIFICATION, judgment.getClassification().toString());
 					entity.set(CONFIDENCE, judgment.getConfidence().toString());
 					entity.set(REASON, judgment.getReason());

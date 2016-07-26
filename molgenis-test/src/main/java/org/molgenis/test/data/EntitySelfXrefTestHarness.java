@@ -5,21 +5,15 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
 
@@ -61,8 +55,7 @@ public class EntitySelfXrefTestHarness
 
 	public Stream<Entity> createTestEntities(EntityMetaData entityMetaData, int numberOfEntities)
 	{
-		return IntStream.range(0, numberOfEntities)
-				.mapToObj(i -> createEntity(entityMetaData, i));
+		return IntStream.range(0, numberOfEntities).mapToObj(i -> createEntity(entityMetaData, i));
 	}
 
 	private Entity createEntity(EntityMetaData entityMetaData, int id)

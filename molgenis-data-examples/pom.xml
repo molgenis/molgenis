@@ -3,37 +3,33 @@
     <parent>
         <artifactId>molgenis</artifactId>
         <groupId>org.molgenis</groupId>
-	<version>2.0.0-SNAPSHOT</version>
+        <version>1.21.4-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>molgenis-catalogue</artifactId>
+    <artifactId>molgenis-data-examples</artifactId>
 
-    <build>
-        <plugins>
-            <!-- minify css/js -->
-            <plugin>
-                <groupId>com.samaxes.maven</groupId>
-                <artifactId>minify-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
-    
     <dependencies>
-    	<dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.molgenis</groupId>
-            <artifactId>molgenis-core-ui</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>
             <artifactId>molgenis-data</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-elasticsearch</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-data-csv</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.molgenis</groupId>
+            <artifactId>molgenis-file</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
+
 </project>
