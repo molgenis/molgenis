@@ -34,7 +34,7 @@ public class EntityMetaDataTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		// Listup for single level compound
+		// Setup for single level compound
 		randomAttribute = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
 		when(randomAttribute.getName()).thenReturn("randomAttribute");
 
@@ -52,7 +52,7 @@ public class EntityMetaDataTest
 				.getMock();
 		entityMetaData = new EntityMetaData(entity);
 
-		// Listup for nested compound test
+		// Setup for nested compound test
 		nestedAttributePart = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
 		Iterable<AttributeMetaData> nestedCompoundAttributeParts = newArrayList(nestedAttributePart);
 
