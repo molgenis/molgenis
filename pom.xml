@@ -699,7 +699,6 @@
 		<module>molgenis-catalogue</module>
 		<module>molgenis-file-ingester</module>
         <module>molgenis-gavin</module>
-        <!--<module>molgenis-integration-tests</module>-->
         <module>molgenis-jobs</module>
         <module>molgenis-platform-integration-tests</module>
         <module>molgenis-test</module>
