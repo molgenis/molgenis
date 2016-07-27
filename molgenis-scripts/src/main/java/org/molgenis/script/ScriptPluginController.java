@@ -1,6 +1,8 @@
 package org.molgenis.script;
 
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.script.ScriptMetaData.SCRIPT;
+import static org.molgenis.script.ScriptParameterMetaData.SCRIPT_PARAMETER;
 import static org.molgenis.script.ScriptPluginController.URI;
 
 import org.molgenis.data.DataService;
@@ -30,9 +32,9 @@ public class ScriptPluginController extends MolgenisPluginController
 	public String listScripts(Model model)
 	{
 
-		model.addAttribute("scripts", dataService.findAll(Script.ENTITY_NAME, Script.class).collect(toList()));
+		model.addAttribute("scripts", dataService.findAll(SCRIPT, Script.class).collect(toList()));
 		model.addAttribute("parameters",
-				dataService.findAll(ScriptParameter.ENTITY_NAME, ScriptParameter.class).collect(toList()));
+				dataService.findAll(SCRIPT_PARAMETER, ScriptParameter.class).collect(toList()));
 		return "view-scripts";
 	}
 }

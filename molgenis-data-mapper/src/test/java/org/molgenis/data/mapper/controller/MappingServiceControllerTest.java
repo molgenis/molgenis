@@ -1,30 +1,23 @@
 package org.molgenis.data.mapper.controller;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
-import static org.testng.Assert.assertEquals;
-
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
-import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
 import org.molgenis.util.GsonConfig;
@@ -34,7 +27,6 @@ import org.springframework.http.MediaType;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -44,10 +36,25 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.DATE;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.redirectedUrl;
+import static org.testng.Assert.assertEquals;
+
 @WebAppConfiguration
 @ContextConfiguration(classes = GsonConfig.class)
-public class MappingServiceControllerTest extends AbstractTestNGSpringContextTests
+public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
 	@InjectMocks
 	private MappingServiceController controller = new MappingServiceController();
 
@@ -75,9 +82,10 @@ public class MappingServiceControllerTest extends AbstractTestNGSpringContextTes
 	@Mock
 	private MenuReaderService menuReaderService;
 
-	private MolgenisUser me = new MolgenisUser();
-	private DefaultEntityMetaData lifeLines;
-	private DefaultEntityMetaData hop;
+	private MolgenisUser me;
+
+	private EntityMetaData lifeLines;
+	private EntityMetaData hop;
 	private MappingProject mappingProject;
 	private static final String ID = "mappingservice";
 
@@ -86,15 +94,16 @@ public class MappingServiceControllerTest extends AbstractTestNGSpringContextTes
 	@BeforeMethod
 	public void beforeTest()
 	{
-		me.setUsername("fdlk");
+		me = mock(MolgenisUser.class);
+		when(me.getUsername()).thenReturn("fdlk");
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("fdlk", null);
 		authentication.setAuthenticated(true);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		hop = new DefaultEntityMetaData("HOP");
-		hop.addAttributeMetaData(new DefaultAttributeMetaData("age", FieldTypeEnum.INT));
-		lifeLines = new DefaultEntityMetaData("LifeLines");
-		hop.addAttributeMetaData(new DefaultAttributeMetaData("dob", FieldTypeEnum.DATE));
+		hop = entityMetaFactory.create("HOP");
+		hop.addAttribute(attrMetaFactory.create().setName("age").setDataType(INT));
+		lifeLines = entityMetaFactory.create("LifeLines");
+		hop.addAttribute(attrMetaFactory.create().setName("dob").setDataType(DATE));
 
 		mappingProject = new MappingProject("hop hop hop", me);
 		mappingProject.setIdentifier("asdf");
@@ -126,7 +135,7 @@ public class MappingServiceControllerTest extends AbstractTestNGSpringContextTes
 		EntityMapping entityMapping = mappingTarget.addSource(lifeLines);
 		AttributeMapping ageMapping = entityMapping.addAttributeMapping("age");
 		ageMapping.setAlgorithm("$('length').value()");
-		ageMapping.setAlgorithmState(AlgorithmState.CURATED);
+		ageMapping.setAlgorithmState(AttributeMapping.AlgorithmState.CURATED);
 
 		Mockito.verify(mappingService).updateMappingProject(expected);
 	}
@@ -153,7 +162,7 @@ public class MappingServiceControllerTest extends AbstractTestNGSpringContextTes
 		ageMapping.setAlgorithm("$('dob').age()");
 		AttributeMapping heightMapping = entityMapping.addAttributeMapping("height");
 		heightMapping.setAlgorithm("$('length').value()");
-		heightMapping.setAlgorithmState(AlgorithmState.CURATED);
+		heightMapping.setAlgorithmState(AttributeMapping.AlgorithmState.CURATED);
 
 		Mockito.verify(mappingService).updateMappingProject(expected);
 	}
@@ -186,8 +195,8 @@ public class MappingServiceControllerTest extends AbstractTestNGSpringContextTes
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
-		MvcResult result = mockMvc
-				.perform(MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
+		MvcResult result = mockMvc.perform(
+				MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
 						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
 						.param("skipAlgorithmStates[]", "CURATED", "DISCUSS").accept(MediaType.APPLICATION_JSON))
 				.andReturn();
@@ -207,10 +216,10 @@ public class MappingServiceControllerTest extends AbstractTestNGSpringContextTes
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
 		mappingProject.getMappingTarget("HOP").getMappingForSource("LifeLines").getAttributeMapping("age")
-				.setAlgorithmState(AlgorithmState.CURATED);
+				.setAlgorithmState(AttributeMapping.AlgorithmState.CURATED);
 
-		MvcResult result2 = mockMvc
-				.perform(MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
+		MvcResult result2 = mockMvc.perform(
+				MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
 						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
 						.param("skipAlgorithmStates[]", "CURATED", "DISCUSS").accept(MediaType.APPLICATION_JSON))
 				.andReturn();
@@ -230,16 +239,16 @@ public class MappingServiceControllerTest extends AbstractTestNGSpringContextTes
 		when(menu.findMenuItemPath(ID)).thenReturn("/menu/main/mappingservice");
 
 		mappingProject.getMappingTarget("HOP").getMappingForSource("LifeLines").getAttributeMapping("age")
-				.setAlgorithmState(AlgorithmState.DISCUSS);
+				.setAlgorithmState(AttributeMapping.AlgorithmState.DISCUSS);
 
 		MappingTarget mappingTarget = mappingProject.getMappingTarget("HOP");
 		EntityMapping entityMapping = mappingTarget.getMappingForSource("LifeLines");
 		AttributeMapping attributeMapping = entityMapping.addAttributeMapping("dob");
 		attributeMapping.setAlgorithm("$('dob').age()");
-		attributeMapping.setAlgorithmState(AlgorithmState.DISCUSS);
+		attributeMapping.setAlgorithmState(AttributeMapping.AlgorithmState.DISCUSS);
 
-		MvcResult result3 = mockMvc
-				.perform(MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
+		MvcResult result3 = mockMvc.perform(
+				MockMvcRequestBuilders.post(MappingServiceController.URI + "/firstattributemapping")
 						.param("mappingProjectId", "asdf").param("target", "HOP").param("source", "LifeLines")
 						.param("skipAlgorithmStates[]", "CURATED", "DISCUSS").accept(MediaType.APPLICATION_JSON))
 				.andReturn();

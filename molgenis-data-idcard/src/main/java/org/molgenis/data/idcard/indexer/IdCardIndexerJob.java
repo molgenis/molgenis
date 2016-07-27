@@ -1,11 +1,14 @@
 package org.molgenis.data.idcard.indexer;
 
+import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.ID_CARD_INDEXING_EVENT;
+
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.idcard.IdCardBiobankRepository;
 import org.molgenis.data.idcard.model.IdCardIndexingEvent;
+import org.molgenis.data.idcard.model.IdCardIndexingEventFactory;
 import org.molgenis.data.idcard.model.IdCardIndexingEventStatus;
 import org.molgenis.data.idcard.settings.IdCardIndexerSettings;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -40,6 +43,9 @@ public class IdCardIndexerJob implements Job
 	@Autowired
 	private JavaMailSender mailSender;
 
+	@Autowired
+	private IdCardIndexingEventFactory idCardIndexingEventFactory;
+
 	@Override
 	public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException
 	{
@@ -58,7 +64,7 @@ public class IdCardIndexerJob implements Job
 
 	private void rebuildIndex(String username)
 	{
-		IdCardIndexingEvent idCardIndexingEvent = new IdCardIndexingEvent(dataService);
+		IdCardIndexingEvent idCardIndexingEvent = idCardIndexingEventFactory.create();
 		RuntimeException runtimeException = null;
 		try
 		{
@@ -76,7 +82,7 @@ public class IdCardIndexerJob implements Job
 		}
 
 		RunAsSystemProxy.runAsSystem(() -> {
-			dataService.add(IdCardIndexingEvent.ENTITY_NAME, idCardIndexingEvent);
+			dataService.add(ID_CARD_INDEXING_EVENT, idCardIndexingEvent);
 		});
 
 		if (idCardIndexingEvent.getStatus() == IdCardIndexingEventStatus.FAILED)

@@ -1,5 +1,7 @@
 package org.molgenis.data.excel;
 
+import static java.util.Objects.requireNonNull;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -13,12 +15,12 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.WritableFactory;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 
 /**
  * Creates new Excel sheets
@@ -27,6 +29,7 @@ public class ExcelWriter implements WritableFactory
 {
 	private final Workbook workbook;
 	private final OutputStream os;
+	private final AttributeMetaDataFactory attrMetaFactory;
 	private List<CellProcessor> cellProcessors;
 
 	public enum FileFormat
@@ -34,32 +37,32 @@ public class ExcelWriter implements WritableFactory
 		XLS, XLSX
 	}
 
-	public ExcelWriter(OutputStream os)
+	public ExcelWriter(OutputStream os, AttributeMetaDataFactory attrMetaFactory)
 	{
-		this(os, FileFormat.XLS);
+		this(os, attrMetaFactory, FileFormat.XLS);
 	}
 
-	public ExcelWriter(OutputStream os, FileFormat format)
+	public ExcelWriter(OutputStream os, AttributeMetaDataFactory attrMetaFactory, FileFormat format)
 	{
-		if (os == null) throw new IllegalArgumentException("output stream is null");
-		if (format == null) throw new IllegalArgumentException("format is null");
-		this.os = os;
-		this.workbook = format == FileFormat.XLS ? new HSSFWorkbook() : new XSSFWorkbook();
+		this.os = requireNonNull(os);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
+		this.workbook = requireNonNull(format) == FileFormat.XLS ? new HSSFWorkbook() : new XSSFWorkbook();
 	}
 
-	public ExcelWriter(File file) throws FileNotFoundException
+	public ExcelWriter(File file, AttributeMetaDataFactory attrMetaFactory) throws FileNotFoundException
 	{
-		this(new FileOutputStream(file), FileFormat.XLS);
+		this(new FileOutputStream(file), attrMetaFactory, FileFormat.XLS);
 	}
 
-	public ExcelWriter(File file, FileFormat format) throws FileNotFoundException
+	public ExcelWriter(File file, AttributeMetaDataFactory attrMetaFactory, FileFormat format)
+			throws FileNotFoundException
 	{
-		this(new FileOutputStream(file), format);
+		this(new FileOutputStream(file), attrMetaFactory, format);
 	}
 
 	public void addCellProcessor(CellProcessor cellProcessor)
 	{
-		if (cellProcessors == null) cellProcessors = new ArrayList<CellProcessor>();
+		if (cellProcessors == null) cellProcessors = new ArrayList<>();
 		cellProcessors.add(cellProcessor);
 	}
 
@@ -88,10 +91,9 @@ public class ExcelWriter implements WritableFactory
 	@Override
 	public ExcelSheetWriter createWritable(String entityName, List<String> attributeNames)
 	{
-		List<AttributeMetaData> attributes = attributeNames != null ? attributeNames.stream()
-				.<AttributeMetaData> map(attr -> new DefaultAttributeMetaData(attr)).collect(Collectors.toList()) : null;
+		List<AttributeMetaData> attributes = attributeNames != null ? attributeNames.stream().map(
+				attrName -> attrMetaFactory.create().setName(attrName)).collect(Collectors.toList()) : null;
 
 		return createWritable(entityName, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);
 	}
-
 }

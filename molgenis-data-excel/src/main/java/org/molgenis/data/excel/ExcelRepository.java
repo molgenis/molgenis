@@ -1,60 +1,61 @@
 package org.molgenis.data.excel;
 
-import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.util.CellReference;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.EditableEntityMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
-import com.google.common.collect.Iterables;
+import java.util.*;
+
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 
 /**
  * ExcelSheet {@link org.molgenis.data.Repository} implementation
- * 
+ * <p>
  * It is assumed that the first row of the sheet is the header row.
- * 
+ * <p>
  * All attributes will be of the string type. The cell values are converted to string.
- * 
+ * <p>
  * The url of this Repository is defined as excel://${filename}/${sheetname}
  */
 public class ExcelRepository extends AbstractRepository
 {
 	private final Sheet sheet;
+	private final EntityMetaDataFactory entityMetaFactory;
+	private final AttributeMetaDataFactory attrMetaFactory;
 
-	/** process cells after reading */
+	/**
+	 * process cells after reading
+	 */
 	private List<CellProcessor> cellProcessors;
-	/** column names index */
+	/**
+	 * column names index
+	 */
 	private Map<String, Integer> colNamesMap;
 	private EntityMetaData entityMetaData;
 
-	public ExcelRepository(String fileName, Sheet sheet)
+	public ExcelRepository(String fileName, Sheet sheet, EntityMetaDataFactory entityMetaFactory,
+			AttributeMetaDataFactory attrMetaFactory)
 	{
-		this(fileName, sheet, null);
+		this(fileName, sheet, entityMetaFactory, attrMetaFactory, null);
 	}
 
-	public ExcelRepository(String fileName, Sheet sheet, List<CellProcessor> cellProcessors)
+	public ExcelRepository(String fileName, Sheet sheet, EntityMetaDataFactory entityMetaFactory,
+			AttributeMetaDataFactory attrMetaFactory, List<CellProcessor> cellProcessors)
 	{
 		this.sheet = requireNonNull(sheet);
 		if (sheet.getNumMergedRegions() > 0)
@@ -62,6 +63,8 @@ public class ExcelRepository extends AbstractRepository
 			throw new MolgenisDataException(
 					format("Sheet [%s] contains merged regions which is not supported", sheet.getSheetName()));
 		}
+		this.entityMetaFactory = requireNonNull(entityMetaFactory);
+		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 		this.cellProcessors = cellProcessors;
 	}
 
@@ -74,7 +77,7 @@ public class ExcelRepository extends AbstractRepository
 	public Iterator<Entity> iterator()
 	{
 		final Iterator<Row> it = sheet.iterator();
-		if (!it.hasNext()) return Collections.<Entity> emptyList().iterator();
+		if (!it.hasNext()) return Collections.<Entity>emptyList().iterator();
 
 		// create column header index once and reuse
 		Row headerRow = it.next();
@@ -83,7 +86,7 @@ public class ExcelRepository extends AbstractRepository
 			colNamesMap = toColNamesMap(headerRow);
 		}
 
-		if (!it.hasNext()) return Collections.<Entity> emptyList().iterator();
+		if (!it.hasNext()) return Collections.<Entity>emptyList().iterator();
 
 		return new Iterator<Entity>()
 		{
@@ -134,7 +137,7 @@ public class ExcelRepository extends AbstractRepository
 
 	public void addCellProcessor(CellProcessor cellProcessor)
 	{
-		if (cellProcessors == null) cellProcessors = new ArrayList<CellProcessor>();
+		if (cellProcessors == null) cellProcessors = new ArrayList<>();
 		cellProcessors.add(cellProcessor);
 	}
 
@@ -143,8 +146,7 @@ public class ExcelRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			EditableEntityMetaData editableEntityMetaData = new DefaultEntityMetaData(sheet.getSheetName(),
-					ExcelEntity.class);
+			EntityMetaData entityMetaData = entityMetaFactory.create().setName(sheet.getSheetName());
 
 			if (colNamesMap == null)
 			{
@@ -160,11 +162,10 @@ public class ExcelRepository extends AbstractRepository
 			{
 				for (String colName : colNamesMap.keySet())
 				{
-					editableEntityMetaData
-							.addAttributeMetaData(new DefaultAttributeMetaData(colName, FieldTypeEnum.STRING));
+					entityMetaData.addAttribute(attrMetaFactory.create().setName(colName).setDataType(STRING));
 				}
 			}
-			entityMetaData = editableEntityMetaData;
+			this.entityMetaData = entityMetaData;
 		}
 
 		return entityMetaData;
@@ -176,7 +177,7 @@ public class ExcelRepository extends AbstractRepository
 
 		Map<String, Integer> columnIdx = new LinkedCaseInsensitiveMap<>();
 		int i = 0;
-		for (Iterator<Cell> it = headerRow.cellIterator(); it.hasNext();)
+		for (Iterator<Cell> it = headerRow.cellIterator(); it.hasNext(); )
 		{
 			try
 			{

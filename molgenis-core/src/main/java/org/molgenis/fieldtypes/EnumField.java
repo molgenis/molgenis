@@ -1,12 +1,14 @@
 package org.molgenis.fieldtypes;
 
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.model.MolgenisModelException;
+import org.molgenis.model.elements.Field;
+
 import java.text.ParseException;
 import java.util.List;
 import java.util.Vector;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.model.MolgenisModelException;
-import org.molgenis.model.elements.Field;
+import static org.molgenis.MolgenisFieldTypes.STRING;
 
 public class EnumField extends FieldType
 {
@@ -36,6 +38,12 @@ public class EnumField extends FieldType
 	public String getMysqlType() throws MolgenisModelException
 	{
 		return "ENUM(" + this.toCsv(f.getEnumOptions()) + ")";
+	}
+
+	@Override
+	public String getPostgreSqlType()
+	{
+		return STRING.getPostgreSqlType();
 	}
 
 	@Override
@@ -87,9 +95,9 @@ public class EnumField extends FieldType
 	}
 
 	@Override
-	public FieldTypeEnum getEnumType()
+	public AttributeType getEnumType()
 	{
-		return FieldTypeEnum.ENUM;
+		return AttributeType.ENUM;
 	}
 
 	@Override

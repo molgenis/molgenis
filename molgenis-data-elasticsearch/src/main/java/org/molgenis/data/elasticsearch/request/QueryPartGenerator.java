@@ -1,8 +1,9 @@
 package org.molgenis.data.elasticsearch.request;
 
 import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Generates a part of the elasticsearch query of the SearchRequestBuilder.
@@ -22,5 +23,5 @@ public interface QueryPartGenerator
 	 * 
 	 * @param searchRequestBuilder
 	 */
-	void generate(SearchRequestBuilder searchRequestBuilder, Query query, EntityMetaData entityMetaData);
+	void generate(SearchRequestBuilder searchRequestBuilder, Query<Entity> query, EntityMetaData entityMetaData);
 }

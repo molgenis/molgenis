@@ -1,15 +1,12 @@
 package org.molgenis.data.idcard.settings;
 
-import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.MolgenisFieldTypes.EMAIL;
-import static org.molgenis.MolgenisFieldTypes.LONG;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-
 import org.molgenis.data.idcard.indexer.IdCardIndexerController;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
 import org.molgenis.fieldtypes.StringField;
 import org.springframework.stereotype.Component;
+
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 
 @Component
 public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements IdCardIndexerSettings
@@ -50,6 +47,12 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 		public Meta()
 		{
 			super(ID);
+		}
+
+		@Override
+		public void init()
+		{
+			super.init();
 			setLabel("ID-Card biobank indexer settings");
 			addAttribute(API_BASE_URI).setDataType(STRING).setLabel("API base URI")
 					.setDefaultValue(DEFAULT_API_BASE_URI);

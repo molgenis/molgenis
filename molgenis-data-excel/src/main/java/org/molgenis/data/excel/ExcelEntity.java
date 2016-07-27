@@ -6,18 +6,17 @@ import java.util.Map;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.processor.CellProcessor;
-import org.molgenis.data.support.AbstractMetaDataEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.springframework.util.LinkedCaseInsensitiveMap;
 
 /**
  * Entity implementation for Excel.
- * 
+ * <p>
  * All attributes are of type String, values are processed using the given CellProcessors
- * 
  */
-public class ExcelEntity extends AbstractMetaDataEntity
+public class ExcelEntity extends DynamicEntity
 {
 	private static final long serialVersionUID = 8928375571009145452L;
 	private final transient Row row;
@@ -41,7 +40,7 @@ public class ExcelEntity extends AbstractMetaDataEntity
 
 	/**
 	 * Gets an Attribute (Cell value).
-	 * 
+	 * <p>
 	 * All values are retrieved as String, returns null if the attributeName is unknown
 	 */
 	@Override

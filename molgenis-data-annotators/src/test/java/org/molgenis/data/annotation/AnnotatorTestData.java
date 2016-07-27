@@ -1,31 +1,44 @@
 package org.molgenis.data.annotation;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.core.RepositoryAnnotator;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.vcf.model.VcfAttributes;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
-import org.molgenis.data.vcf.VcfRepository;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.LONG;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.vcf.model.VcfAttributes.*;
 
-public abstract class AnnotatorTestData
+public abstract class AnnotatorTestData extends AbstractMolgenisSpringTest
 {
-	public DefaultEntityMetaData metaDataCanAnnotate = new DefaultEntityMetaData("test");
-	public DefaultEntityMetaData metaDataCantAnnotate = new DefaultEntityMetaData("test");
+	@Autowired
+	AttributeMetaDataFactory attributeMetaDataFactory;
 
-	public AttributeMetaData attributeMetaDataChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
-			FieldTypeEnum.STRING);
-	public AttributeMetaData attributeMetaDataPos = new DefaultAttributeMetaData(VcfRepository.POS, FieldTypeEnum.LONG);
-	public AttributeMetaData attributeMetaDataRef = new DefaultAttributeMetaData(VcfRepository.REF,
-			FieldTypeEnum.STRING);
-	public AttributeMetaData attributeMetaDataAlt = new DefaultAttributeMetaData(VcfRepository.ALT,
-			FieldTypeEnum.STRING);
-	public AttributeMetaData attributeMetaDataCantAnnotateChrom = new DefaultAttributeMetaData(VcfRepository.CHROM,
-			FieldTypeEnum.LONG);
+	@Autowired
+	EntityMetaDataFactory entityMetaDataFactory;
+
+	@Autowired
+	VcfAttributes vcfAttributes;
+
+	public EntityMetaData metaDataCanAnnotate = entityMetaDataFactory.create().setName("test");
+	public EntityMetaData metaDataCantAnnotate = entityMetaDataFactory.create().setName("test");
+
+	public AttributeMetaData attributeMetaDataChrom = attributeMetaDataFactory.create().setName(CHROM)
+			.setDataType(STRING);
+	public AttributeMetaData attributeMetaDataPos = attributeMetaDataFactory.create().setName(POS).setDataType(LONG);
+	public AttributeMetaData attributeMetaDataRef = attributeMetaDataFactory.create().setName(REF).setDataType(STRING);
+	public AttributeMetaData attributeMetaDataAlt = attributeMetaDataFactory.create().setName(ALT).setDataType(STRING);
+	public AttributeMetaData attributeMetaDataCantAnnotateChrom = attributeMetaDataFactory.create().setName(CHROM)
+			.setDataType(LONG);
 	public ArrayList<Entity> input = new ArrayList<>();
 	public ArrayList<Entity> input1 = new ArrayList<>();
 	public ArrayList<Entity> input2 = new ArrayList<>();
@@ -48,21 +61,21 @@ public abstract class AnnotatorTestData
 
 	public void setValues()
 	{
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataChrom, ROLE_ID);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataPos);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataRef);
-		metaDataCanAnnotate.addAttributeMetaData(attributeMetaDataAlt);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataChrom, ROLE_ID);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataPos);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataRef);
+		metaDataCanAnnotate.addAttribute(attributeMetaDataAlt);
 
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataCantAnnotateChrom);
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataPos);
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataRef);
-		metaDataCantAnnotate.addAttributeMetaData(attributeMetaDataAlt);
+		metaDataCantAnnotate.addAttribute(attributeMetaDataCantAnnotateChrom);
+		metaDataCantAnnotate.addAttribute(attributeMetaDataPos);
+		metaDataCantAnnotate.addAttribute(attributeMetaDataRef);
+		metaDataCantAnnotate.addAttribute(attributeMetaDataAlt);
 
-		entity = new MapEntity(metaDataCanAnnotate);
-		entity1 = new MapEntity(metaDataCanAnnotate);
-		entity2 = new MapEntity(metaDataCanAnnotate);
-		entity3 = new MapEntity(metaDataCanAnnotate);
-		entity4 = new MapEntity(metaDataCanAnnotate);
+		entity = new DynamicEntity(metaDataCanAnnotate);
+		entity1 = new DynamicEntity(metaDataCanAnnotate);
+		entity2 = new DynamicEntity(metaDataCanAnnotate);
+		entity3 = new DynamicEntity(metaDataCanAnnotate);
+		entity4 = new DynamicEntity(metaDataCanAnnotate);
 
 		entities = new ArrayList<>();
 		entities.add(entity);

@@ -1,23 +1,34 @@
 package org.molgenis.das.impl;
 
-import com.google.common.collect.Iterables;
+import static com.google.common.collect.Iterables.toArray;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
+
+import java.util.*;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import javax.servlet.ServletContext;
+
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.das.RangeHandlingDataSource;
-import org.molgenis.data.*;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
+
+import com.google.common.collect.Iterables;
+
 import uk.ac.ebi.mydas.configuration.DataSourceConfiguration;
 import uk.ac.ebi.mydas.configuration.PropertyType;
 import uk.ac.ebi.mydas.datasource.RangeHandlingAnnotationDataSource;
 import uk.ac.ebi.mydas.exceptions.BadReferenceObjectException;
 import uk.ac.ebi.mydas.exceptions.DataSourceException;
-import uk.ac.ebi.mydas.model.*;
-
-import javax.servlet.ServletContext;
-import java.util.*;
-import java.util.stream.Stream;
-
-import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
+import uk.ac.ebi.mydas.model.DasAnnotatedSegment;
+import uk.ac.ebi.mydas.model.DasFeature;
+import uk.ac.ebi.mydas.model.DasMethod;
+import uk.ac.ebi.mydas.model.DasType;
 
 public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 		implements RangeHandlingAnnotationDataSource
@@ -113,8 +124,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 				break;
 			}
 			// no end position? assume mutation of 1 position, so stop == start
-			Iterable<String> attributes = entity.getAttributeNames();
-
+			List<String> attributes = Lists.newArrayList(entity.getAttributeNames().iterator());
 			valueStop = Iterables.contains(attributes, stopAttribute) ? entity.getInt(stopAttribute) : valueStart;
 			valueDescription = Iterables.contains(attributes, descriptionAttribute)
 					? entity.getString(descriptionAttribute) : "";
@@ -162,8 +172,10 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 					++score;
 				}
 
+				Object labelValue = entity.getLabelValue();
 				feature = createDasFeature(valueStart, valueStop, entity.getIdValue().toString(),
-						entity.getLabelValue(), valueDescription, valueLink, type, method, dataSet, valuePatient,
+						labelValue != null ? labelValue.toString() : null, valueDescription, valueLink, type, method,
+						dataSet, valuePatient,
 						notes);
 				features.add(feature);
 			}
@@ -186,7 +198,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 
 		String chromosomeAttribute = config.getAttributeNameForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM,
 				dataService.getEntityMetaData(dataSet));
-		Query q = new QueryImpl().eq(chromosomeAttribute, segmentId);
+		Query<Entity> q = new QueryImpl<Entity>().eq(chromosomeAttribute, segmentId);
 		q.pageSize(maxbins);
 		return dataService.findAll(dataSet, q);
 	}

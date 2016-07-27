@@ -4,7 +4,7 @@ import Spinner from "./Spinner";
 import Select2 from "./wrapper/Select2";
 import React from "react";
 
-	var api = new RestClient();
+var api = new RestClient();
 	
 	/**
 	 * Shows a Select2 box for switching the user language
@@ -46,7 +46,7 @@ import React from "react";
 		},
 		_loadLanguages: function() {
 			var self = this;
-			api.getAsync('/api/v2/languages').done(function(languages) {
+			api.getAsync('/api/v2/sys_languages').done(function (languages) {
 				var selectedLanguage = null;
 				var select2Data = languages.items.map(function(item){
 					if (item.code === languages.meta.languageCode) {

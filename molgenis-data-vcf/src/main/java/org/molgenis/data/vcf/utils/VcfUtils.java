@@ -6,42 +6,41 @@ import com.google.common.collect.PeekingIterator;
 import com.google.common.io.BaseEncoding;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
 import org.molgenis.data.vcf.datastructures.Trio;
+import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.vcf.meta.VcfMetaInfo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Scanner;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.molgenis.MolgenisFieldTypes.MREF;
-import static org.molgenis.data.vcf.VcfRepository.ALT;
-import static org.molgenis.data.vcf.VcfRepository.CHROM;
-import static org.molgenis.data.vcf.VcfRepository.POS;
-import static org.molgenis.data.vcf.VcfRepository.REF;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
+import static org.molgenis.data.vcf.model.VcfAttributes.*;
 
+@Component
 public class VcfUtils
 {
+	@Autowired
+	private EntityMetaDataFactory entityMetaDataFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attributeMetaDataFactory;
 	/**
 	 * Creates a internal molgenis id from a vcf entity
 	 *
@@ -50,15 +49,19 @@ public class VcfUtils
 	 */
 	public static String createId(Entity vcfEntity)
 	{
-		StringBuilder strBuilder = new StringBuilder();
-		strBuilder.append(StringUtils.strip(vcfEntity.get(CHROM).toString()));
-		strBuilder.append("_");
-		strBuilder.append(StringUtils.strip(vcfEntity.get(POS).toString()));
-		strBuilder.append("_");
-		strBuilder.append(StringUtils.strip(vcfEntity.get(REF).toString()));
-		strBuilder.append("_");
-		strBuilder.append(StringUtils.strip(vcfEntity.get(ALT).toString()));
-		String idStr = strBuilder.toString();
+		String idStr = StringUtils.strip(vcfEntity.get(CHROM).toString()) +
+				"_" +
+				StringUtils.strip(vcfEntity.get(POS).toString()) +
+				"_" +
+				StringUtils.strip(vcfEntity.get(REF).toString()) +
+				"_" +
+				StringUtils.strip(vcfEntity.get(ALT).toString()) +
+				"_" +
+				StringUtils.strip(vcfEntity.get(ID).toString()) +
+				"_" +
+				StringUtils.strip(vcfEntity.get(QUAL) != null ? vcfEntity.get(QUAL).toString() : "") +
+				"_" +
+				StringUtils.strip(vcfEntity.get(FILTER) != null ? vcfEntity.get(FILTER).toString() : "");
 
 		// use MD5 hash to prevent ids that are too long
 		MessageDigest messageDigest;
@@ -73,9 +76,8 @@ public class VcfUtils
 		byte[] md5Hash = messageDigest.digest(idStr.getBytes(Charset.forName("UTF-8")));
 
 		// convert MD5 hash to string ids that can be safely used in URLs
-		String id = BaseEncoding.base64Url().omitPadding().encode(md5Hash);
 
-		return id;
+		return BaseEncoding.base64Url().omitPadding().encode(md5Hash);
 	}
 
 	public static String getIdFromInfoField(String line)
@@ -90,7 +92,7 @@ public class VcfUtils
 		List<AttributeMetaData> result = new ArrayList<>();
 		for (AttributeMetaData attributeMetaData : outputAttrs)
 		{
-			if (attributeMetaData.getDataType().getEnumType().equals(MolgenisFieldTypes.FieldTypeEnum.COMPOUND))
+			if (attributeMetaData.getDataType() == COMPOUND)
 			{
 				result.addAll(getAtomicAttributesFromList(attributeMetaData.getAttributeParts()));
 			}
@@ -113,7 +115,7 @@ public class VcfUtils
 		return attributeMap;
 	}
 
-	public static String toVcfDataType(MolgenisFieldTypes.FieldTypeEnum dataType)
+	protected static String toVcfDataType(MolgenisFieldTypes.AttributeType dataType)
 	{
 		switch (dataType)
 		{
@@ -139,18 +141,19 @@ public class VcfUtils
 				return VcfMetaInfo.Type.STRING.toString();
 			case COMPOUND:
 			case FILE:
+				throw new RuntimeException("invalid vcf data type " + dataType);
 			default:
 				throw new RuntimeException("unsupported vcf data type " + dataType);
 		}
 	}
 
-	public static Iterator<Entity> reverseXrefMrefRelation(Iterator<Entity> annotatedRecords)
+	public Iterator<Entity> reverseXrefMrefRelation(Iterator<Entity> annotatedRecords)
 	{
 		return new Iterator<Entity>()
 		{
-			PeekingIterator<Entity> effects = Iterators.peekingIterator(annotatedRecords);
+			final PeekingIterator<Entity> effects = Iterators.peekingIterator(annotatedRecords);
 
-			DefaultEntityMetaData resultEMD;
+			EntityMetaData resultEMD;
 			EntityMetaData effectsEMD;
 
 			private void createResultEntityMetaData(Entity effect, EntityMetaData variantEMD)
@@ -158,8 +161,9 @@ public class VcfUtils
 				if (resultEMD == null || effectsEMD == null)
 				{
 					effectsEMD = effect.getEntityMetaData();
-					resultEMD = new DefaultEntityMetaData(variantEMD);
-					resultEMD.addAttribute(VcfWriterUtils.EFFECT).setDataType(MREF).setRefEntity(effectsEMD);
+					resultEMD = entityMetaDataFactory.create(variantEMD);
+					resultEMD.addAttribute(attributeMetaDataFactory.create().setName(VcfWriterUtils.EFFECT).setDataType(
+							MolgenisFieldTypes.AttributeType.MREF).setRefEntity(effectsEMD));
 				}
 			}
 
@@ -172,7 +176,8 @@ public class VcfUtils
 			private Entity createEntityStructure(Entity variant, List<Entity> effectsForVariant)
 			{
 				createResultEntityMetaData(effectsForVariant.get(0), variant.getEntityMetaData());
-				Entity newVariant = new MapEntity(variant, resultEMD);
+				Entity newVariant = new DynamicEntity(resultEMD);
+				newVariant.set(variant);
 
 				if (effectsForVariant.size() > 1)
 				{
@@ -188,7 +193,6 @@ public class VcfUtils
 						if (attr.getName().equals(effectsEMD.getIdAttribute().getName())
 								|| attr.getName().equals(VcfWriterUtils.VARIANT))
 						{
-							continue;
 						}
 						else if (entity.get(attr.getName()) != null)
 						{
@@ -227,13 +231,13 @@ public class VcfUtils
 		};
 	}
 
-	public static List<Entity> createEntityStructureForVcf(EntityMetaData entityMetaData, String attributeName,
+	public List<Entity> createEntityStructureForVcf(EntityMetaData entityMetaData, String attributeName,
 			Stream<Entity> inputStream)
 	{
 		return createEntityStructureForVcf(entityMetaData, attributeName, inputStream, Collections.emptyList());
 	}
 
-	public static List<Entity> createEntityStructureForVcf(EntityMetaData entityMetaData, String attributeName,
+	private List<Entity> createEntityStructureForVcf(EntityMetaData entityMetaData, String attributeName,
 			Stream<Entity> inputStream, List<AttributeMetaData> annotatorAttributes)
 	{
 		AttributeMetaData attributeToParse = entityMetaData.getAttribute(attributeName);
@@ -249,13 +253,14 @@ public class VcfUtils
 		String value = step1[1].replaceAll("^\\s'|'$", "");
 
 		Map<Integer, AttributeMetaData> metadataMap = parseDescription(value, annotatorAttributes);
-		DefaultEntityMetaData xrefMetaData = getXrefEntityMetaData(metadataMap, entityName);
+		EntityMetaData xrefMetaData = getXrefEntityMetaData(metadataMap, entityName);
 
 		List<Entity> results = new ArrayList<>();
 		for (Entity inputEntity : inputStream.collect(Collectors.toList()))
 		{
-			DefaultEntityMetaData newEntityMetadata = removeRefFieldFromInfoMetadata(attributeToParse, inputEntity);
-			Entity originalEntity = new MapEntity(inputEntity, newEntityMetadata);
+			EntityMetaData newEntityMetadata = removeRefFieldFromInfoMetadata(attributeToParse, inputEntity);
+			Entity originalEntity = new DynamicEntity(newEntityMetadata);
+			originalEntity.set(inputEntity);
 
 			results.addAll(parseValue(xrefMetaData, metadataMap, inputEntity.getString(attributeToParse.getName()),
 					originalEntity));
@@ -263,32 +268,32 @@ public class VcfUtils
 		return results;
 	}
 
-	private static DefaultEntityMetaData getXrefEntityMetaData(Map<Integer, AttributeMetaData> metadataMap,
+	private EntityMetaData getXrefEntityMetaData(Map<Integer, AttributeMetaData> metadataMap,
 			String entityName)
 	{
-		DefaultEntityMetaData xrefMetaData = new DefaultEntityMetaData(entityName);
-		xrefMetaData.addAttributeMetaData(new DefaultAttributeMetaData("identifier").setAuto(true).setVisible(false),
+		EntityMetaData xrefMetaData = entityMetaDataFactory.create().setName(entityName);
+		xrefMetaData.addAttribute(attributeMetaDataFactory.create().setName("identifier").setAuto(true).setVisible(false),
 				EntityMetaData.AttributeRole.ROLE_ID);
-		xrefMetaData.addAllAttributeMetaData(com.google.common.collect.Lists.newArrayList(metadataMap.values()));
+		xrefMetaData.addAttributes(com.google.common.collect.Lists.newArrayList(metadataMap.values()));
 		xrefMetaData
-				.addAttributeMetaData(new DefaultAttributeMetaData("Variant", MolgenisFieldTypes.FieldTypeEnum.MREF));
+				.addAttribute(attributeMetaDataFactory.create().setName("Variant").setDataType(MolgenisFieldTypes.AttributeType.MREF));
 		return xrefMetaData;
 	}
 
-	private static DefaultEntityMetaData removeRefFieldFromInfoMetadata(AttributeMetaData attributeToParse,
+	private static EntityMetaData removeRefFieldFromInfoMetadata(AttributeMetaData attributeToParse,
 			Entity inputEntity)
 	{
-		DefaultEntityMetaData newMeta = (DefaultEntityMetaData) inputEntity.getEntityMetaData();
-		DefaultAttributeMetaData newInfoMetadata = (DefaultAttributeMetaData) newMeta.getAttribute(VcfRepository.INFO);
-		newInfoMetadata.setAttributesMetaData(StreamSupport
-				.stream(newMeta.getAttribute(VcfRepository.INFO).getAttributeParts().spliterator(), false)
+		EntityMetaData newMeta = inputEntity.getEntityMetaData();
+		AttributeMetaData newInfoMetadata = newMeta.getAttribute(VcfAttributes.INFO);
+		newInfoMetadata.setAttributeParts(StreamSupport
+				.stream(newMeta.getAttribute(VcfAttributes.INFO).getAttributeParts().spliterator(), false)
 				.filter(attr -> !attr.getName().equals(attributeToParse.getName())).collect(Collectors.toList()));
-		newMeta.removeAttributeMetaData(VcfRepository.INFO_META);
-		newMeta.addAttributeMetaData(newInfoMetadata);
+		newMeta.removeAttribute(newMeta.getAttribute(VcfAttributes.INFO));
+		newMeta.addAttribute(newInfoMetadata);
 		return newMeta;
 	}
 
-	private static Map<Integer, AttributeMetaData> parseDescription(String description,
+	private Map<Integer, AttributeMetaData> parseDescription(String description,
 			List<AttributeMetaData> annotatorAttributes)
 	{
 		String value = description.replaceAll("^\\s'|'$", "");
@@ -299,11 +304,11 @@ public class VcfUtils
 		for (int i = 0; i < attributeStrings.length; i++)
 		{
 			String attribute = attributeStrings[i];
-			MolgenisFieldTypes.FieldTypeEnum type = annotatorAttributeMap.containsKey(attribute)
-					? annotatorAttributeMap.get(attribute).getDataType().getEnumType()
-					: MolgenisFieldTypes.FieldTypeEnum.STRING;
-			AttributeMetaData attr = new DefaultAttributeMetaData(
-					org.apache.commons.lang.StringUtils.deleteWhitespace(attribute), type).setLabel(attribute);
+			MolgenisFieldTypes.AttributeType type = annotatorAttributeMap.containsKey(attribute)
+					? annotatorAttributeMap.get(attribute).getDataType()
+					: MolgenisFieldTypes.AttributeType.STRING;
+			AttributeMetaData attr = attributeMetaDataFactory.create().setName(
+					org.apache.commons.lang.StringUtils.deleteWhitespace(attribute)).setDataType(type).setLabel(attribute);
 			attributeMap.put(i, attr);
 		}
 		return attributeMap;
@@ -315,11 +320,11 @@ public class VcfUtils
 		List<Entity> result = new ArrayList<>();
 		String[] valuesPerEntity = value.split(",");
 
-		for (Integer i = 0; i < valuesPerEntity.length; i++)
+		for (String aValuesPerEntity : valuesPerEntity)
 		{
-			String[] values = valuesPerEntity[i].split("\\|");
+			String[] values = aValuesPerEntity.split("\\|");
 
-			MapEntity singleResult = new MapEntity(metadata);
+			DynamicEntity singleResult = new DynamicEntity(metadata);
 			for (Integer j = 0; j < values.length; j++)
 			{
 				String attributeName = attributesMap.get(j).getName().replaceAll("^\'|\'$", "");
@@ -342,7 +347,7 @@ public class VcfUtils
 	 * @return
 	 * @throws FileNotFoundException
 	 */
-	public static HashMap<String, Trio> getPedigree(Scanner inputVcfFileScanner) throws FileNotFoundException
+	public static HashMap<String, Trio> getPedigree(Scanner inputVcfFileScanner)
 	{
 		HashMap<String, Trio> result = new HashMap<>();
 

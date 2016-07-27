@@ -1,72 +1,27 @@
 package org.molgenis.data.rest;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL_MREF;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.COMPOUND;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.DATE_TIME;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.FILE;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.MREF;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
-import static org.molgenis.data.rest.RestController.BASE_URI;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-import static org.springframework.web.bind.annotation.RequestMethod.PUT;
-
-import java.io.IOException;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+import com.google.common.collect.Sets.SetView;
+import cz.jirutka.rsql.parser.RSQLParserException;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityCollection;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.MolgenisReferencedEntityException;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.Repository;
-import org.molgenis.data.Sort;
-import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.UnknownEntityException;
+import org.molgenis.auth.MolgenisUserMetaData;
+import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DefaultEntityCollection;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
+import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.core.token.TokenService;
@@ -75,7 +30,6 @@ import org.molgenis.security.token.TokenExtractor;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.molgenis.util.MolgenisDateFormat;
-import org.molgenis.util.ResourceFingerprintRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,23 +46,28 @@ import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
-import com.google.common.collect.Sets.SetView;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.io.IOException;
+import java.sql.Date;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import cz.jirutka.rsql.parser.RSQLParserException;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.data.rest.RestController.BASE_URI;
+import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.web.bind.annotation.RequestMethod.*;
 
 /**
  * Rest endpoint for the DataService
@@ -140,8 +99,7 @@ public class RestController
 	@Autowired
 	public RestController(DataService dataService, TokenService tokenService,
 			AuthenticationManager authenticationManager, MolgenisPermissionService molgenisPermissionService,
-			ResourceFingerprintRegistry resourceFingerprintRegistry, MolgenisRSQL molgenisRSQL,
-			RestService restService, LanguageService languageService)
+			MolgenisRSQL molgenisRSQL, RestService restService, LanguageService languageService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.tokenService = requireNonNull(tokenService);
@@ -272,7 +230,7 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		Entity entity = dataService.findOne(entityName, id);
+		Entity entity = dataService.findOneById(entityName, id);
 
 		if (entity == null)
 		{
@@ -299,7 +257,7 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		Entity entity = dataService.findOne(entityName, id);
+		Entity entity = dataService.findOneById(entityName, id);
 
 		if (entity == null)
 		{
@@ -449,7 +407,7 @@ public class RestController
 		try
 		{
 			meta = dataService.getEntityMetaData(entityName);
-			Query q = new QueryStringParser(meta, molgenisRSQL).parseQueryString(req.getParameterMap());
+			Query<Entity> q = new QueryStringParser(meta, molgenisRSQL).parseQueryString(req.getParameterMap());
 
 			String[] sortAttributeArray = req.getParameterMap().get("sortColumn");
 			if (sortAttributeArray != null && sortAttributeArray.length == 1
@@ -661,7 +619,7 @@ public class RestController
 			@PathVariable("attributeName") String attributeName, @PathVariable("id") Object id,
 			@RequestBody Object paramValue)
 	{
-		Entity entity = dataService.findOne(entityName, id);
+		Entity entity = dataService.findOneById(entityName, id);
 		if (entity == null)
 		{
 			throw new UnknownEntityException("Entity of type " + entityName + " with id " + id + " not found");
@@ -675,7 +633,7 @@ public class RestController
 					+ "' does not exist");
 		}
 
-		if (attr.isReadonly())
+		if (attr.isReadOnly())
 		{
 			throw new MolgenisDataAccessException("Attribute '" + attributeName + "' of entity '" + entityName
 					+ "' is readonly");
@@ -703,8 +661,7 @@ public class RestController
 	public void updateFromFormPostMultiPart(@PathVariable("entityName") String entityName,
 			@PathVariable("id") Object id, MultipartHttpServletRequest request)
 	{
-		Object typedId = dataService.getRepository(entityName).getEntityMetaData().getIdAttribute().getDataType()
-				.convert(id);
+		Object typedId = convert(dataService.getRepository(entityName).getEntityMetaData().getIdAttribute(), id);
 
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (String param : request.getParameterMap().keySet())
@@ -745,8 +702,7 @@ public class RestController
 	public void updateFromFormPost(@PathVariable("entityName") String entityName, @PathVariable("id") Object id,
 			HttpServletRequest request)
 	{
-		Object typedId = dataService.getRepository(entityName).getEntityMetaData().getIdAttribute().getDataType()
-				.convert(id);
+		Object typedId = convert(dataService.getRepository(entityName).getEntityMetaData().getIdAttribute(), id);
 
 		Map<String, Object> paramMap = new HashMap<String, Object>();
 		for (String param : request.getParameterMap().keySet())
@@ -769,9 +725,8 @@ public class RestController
 	@ResponseStatus(NO_CONTENT)
 	public void delete(@PathVariable("entityName") String entityName, @PathVariable Object id)
 	{
-		Object typedId = dataService.getRepository(entityName).getEntityMetaData().getIdAttribute().getDataType()
-				.convert(id);
-		dataService.delete(entityName, typedId);
+		Object typedId = convert(dataService.getRepository(entityName).getEntityMetaData().getIdAttribute(), id);
+		dataService.deleteById(entityName, typedId);
 	}
 
 	/**
@@ -793,7 +748,6 @@ public class RestController
 	 * Deletes all entities for the given entity name
 	 * 
 	 * @param entityName
-	 * @param id
 	 */
 	@RequestMapping(value = "/{entityName}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
@@ -806,7 +760,6 @@ public class RestController
 	 * Deletes all entities for the given entity name but tunnels DELETE through POST
 	 * 
 	 * @param entityName
-	 * @param id
 	 */
 	@RequestMapping(value = "/{entityName}", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
@@ -819,7 +772,6 @@ public class RestController
 	 * Deletes all entities and entity meta data for the given entity name
 	 * 
 	 * @param entityName
-	 * @param id
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
@@ -832,7 +784,6 @@ public class RestController
 	 * Deletes all entities and entity meta data for the given entity name but tunnels DELETE through POST
 	 * 
 	 * @param entityName
-	 * @param id
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = POST, params = "_method=DELETE")
 	@ResponseStatus(NO_CONTENT)
@@ -883,8 +834,9 @@ public class RestController
 			throw new BadCredentialsException("Unknown username or password");
 		}
 
-		MolgenisUser user = dataService.findOne(MolgenisUser.ENTITY_NAME,
-				new QueryImpl().eq(MolgenisUser.USERNAME, authentication.getName()), MolgenisUser.class);
+		MolgenisUser user = dataService.findOne(MOLGENIS_USER,
+				new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.USERNAME, authentication.getName()),
+				MolgenisUser.class);
 
 		// User authenticated, log the user in
 		SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -1051,7 +1003,7 @@ public class RestController
 			throw new IllegalArgumentException(entityName + " does not have an id attribute");
 		}
 
-		Entity existing = dataService.findOne(entityName, id);
+		Entity existing = dataService.findOneById(entityName, id);
 		if (existing == null)
 		{
 			throw new UnknownEntityException("Entity of type " + entityName + " with id " + id + " not found");
@@ -1108,7 +1060,7 @@ public class RestController
 		}
 
 		// Get the entity
-		Entity entity = dataService.findOne(entityName, id);
+		Entity entity = dataService.findOneById(entityName, id);
 		if (entity == null)
 		{
 			throw new UnknownEntityException(entityName + " " + id + " not found");
@@ -1116,7 +1068,7 @@ public class RestController
 
 		String attrHref = Href.concatAttributeHref(RestController.BASE_URI, meta.getName(), entity.getIdValue(),
 				refAttributeName);
-		switch (attr.getDataType().getEnumType())
+		switch (attr.getDataType())
 		{
 			case COMPOUND:
 				Map<String, Object> entityHasAttributeMap = new LinkedHashMap<String, Object>();
@@ -1168,7 +1120,7 @@ public class RestController
 			EntityCollectionRequest request, Set<String> attributesSet, Map<String, Set<String>> attributeExpandsSet)
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		Repository repository = dataService.getRepository(entityName);
+		Repository<Entity> repository = dataService.getRepository(entityName);
 
 		// convert sort
 		Sort sort;
@@ -1188,7 +1140,7 @@ public class RestController
 		}
 
 		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule> emptyList() : request.getQ();
-		Query q = new QueryImpl(queryRules).pageSize(request.getNum()).offset(request.getStart()).sort(sort);
+		Query<Entity> q = new QueryImpl<>(queryRules).pageSize(request.getNum()).offset(request.getStart()).sort(sort);
 
 		Iterable<Entity> it = new Iterable<Entity>()
 		{
@@ -1233,7 +1185,7 @@ public class RestController
 			if (!attr.getName().equals("__Type"))
 			{
 				String attrName = attr.getName();
-				FieldTypeEnum attrType = attr.getDataType().getEnumType();
+				AttributeType attrType = attr.getDataType();
 
 				if (attrType == COMPOUND)
 				{
@@ -1384,5 +1336,11 @@ public class RestController
 			return expandMap;
 		}
 		return null;
+	}
+
+	private static Object convert(AttributeMetaData attr, Object value)
+	{
+		FieldType fieldType = MolgenisFieldTypes.getType(getValueString(attr.getDataType()));
+		return fieldType.convert(value);
 	}
 }

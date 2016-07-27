@@ -2,391 +2,328 @@ package org.molgenis.data;
 
 import java.util.Set;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
+import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
- * DataService is a façade that manages data sources Entity names should be unique over all data sources.
- * 
+ * DataService is a facade that manages data sources Entity names should be unique over all data sources.
+ * <p>
  * Main entry point for the DataApi
  */
-public interface DataService extends Iterable<Repository>
+public interface DataService extends Iterable<Repository<Entity>>
 {
-	/**
-	 * Streams the {@link Repository}s
-	 */
-	default Stream<Repository> stream()
-	{
-		return StreamSupport.stream(spliterator(), false);
-	}
-
-	/**
-	 * Streams the {@link Entity}s
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param fetch
-	 *            fetch defining which attributes to retrieve
-	 * @return Stream of all entities
-	 */
-	Stream<Entity> stream(String entityName, Fetch fetch);
-
-	/**
-	 * Streams the {@link Entity}s
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param fetch
-	 *            fetch defining which attributes to retrieve
-	 * @param clazz
-	 *            typed entity class
-	 * 
-	 * @return Stream of all entities of the give type
-	 */
-	<E extends Entity> Stream<E> stream(String entityName, Fetch fetch, Class<E> clazz);
-
-	void setMeta(MetaDataService metaDataService);
+	void setMetaDataService(MetaDataService metaDataService);
 
 	/**
 	 * Get the MetaDataService
-	 * 
-	 * @return
+	 *
+	 * @return meta data service
 	 */
 	MetaDataService getMeta();
 
 	/**
 	 * Get the capabilities of a repository
-	 * 
-	 * @param repositoryName
-	 * @return
+	 *
+	 * @param repositoryName repository name
+	 * @return repository capabilities
 	 */
 	Set<RepositoryCapability> getCapabilities(String repositoryName);
 
 	/**
 	 * check if a repository for this entity already exists
-	 * 
-	 * @param entityName
+	 *
+	 * @param entityName entity name
 	 */
 	boolean hasRepository(String entityName);
 
 	/**
 	 * Get a CrudRepository by entity name
-	 * 
-	 * @throws UnknownEntityException
-	 *             when the repository can not be found
-	 * 
-	 * @throws MolgenisDataException
-	 *             if the repository doesn't implement CrudRepository
+	 *
+	 * @param entityName entity name (case insensitive)
+	 * @throws UnknownEntityException      when the repository can not be found
+	 * @throws MolgenisDataException       if the repository doesn't implement CrudRepository
 	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
 	 */
-	Repository getRepository(String entityName);
+	Repository<Entity> getRepository(String entityName);
+
+	/**
+	 * Returns a {@link Repository} for the given entity of the given type.
+	 *
+	 * @param entityName  entity name
+	 * @param entityClass entity class
+	 * @param <E>         entity type
+	 * @return typed entity {@link Repository}
+	 */
+	<E extends Entity> Repository<E> getRepository(String entityName, Class<E> entityClass);
 
 	/**
 	 * Returns the meta data for the given entity
-	 * 
+	 *
+	 * @param entityName entity name
+	 * @return entity meta data
 	 * @throws UnknownEntityException
-	 * @param entityName
-	 * @return
 	 */
 	EntityMetaData getEntityMetaData(String entityName);
 
 	/**
-	 * return number of entities matched by query
-	 * 
-	 * @throws MolgenisDataException
-	 *             if the repository of the entity isn't a Queryable
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
+	 * Returns the number of entities of the given type.
+	 *
+	 * @param entityName entity name
+	 * @return number of entities
 	 */
-	long count(String entityName, Query q);
+	long count(String entityName);
+
+	/**
+	 * return number of entities matched by query
+	 *
+	 * @param entityName entity name (case insensitive)
+	 * @throws MolgenisDataException       if the repository of the entity isn't a Queryable
+	 * @throws MolgenisDataAccessException
+	 */
+	long count(String entityName, Query<Entity> q);
 
 	/**
 	 * Find all entities of the given type. Returns empty Stream if no matches.
-	 * 
-	 * @throws MolgenisDataException
-	 *             if the repository of the entity isn't a Queryable
+	 *
+	 * @param entityName entity name (case insensitive)
+	 * @throws MolgenisDataException       if the repository of the entity isn't a Queryable
 	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
 	 */
 	Stream<Entity> findAll(String entityName);
 
 	/**
 	 * type-safe find all entities
-	 * 
+	 *
+	 * @param entityName entity name (case insensitive)
 	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
 	 */
 	<E extends Entity> Stream<E> findAll(String entityName, Class<E> clazz);
 
 	/**
 	 * Find entities that match a query. Returns empty stream if no matches.
-	 * 
+	 * <p>
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
-	 * 
+	 *
+	 * @param entityName entity name (case insensitive)
 	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
 	 */
-	Stream<Entity> findAll(String entityName, Query q);
+	Stream<Entity> findAll(String entityName, Query<Entity> q);
 
 	/**
 	 * Type-safe find entities that match a query
-	 * 
+	 *
+	 * @param entityName entity name
+	 * @param q          query
 	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
 	 */
-	<E extends Entity> Stream<E> findAll(String entityName, Query q, Class<E> clazz);
+	<E extends Entity> Stream<E> findAll(String entityName, Query<E> q, Class<E> clazz);
 
 	/**
 	 * Finds all entities with the given IDs. Returns empty stream if no matches.
-	 * 
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param ids
-	 *            entity ids
+	 *
+	 * @param entityName entity name (case insensitive)
+	 * @param ids        entity ids
 	 * @return (empty) Stream where the order of entities matches the order of ids, never null
+	 * @throws MolgenisDataAccessException
 	 */
 	Stream<Entity> findAll(String entityName, Stream<Object> ids);
 
 	/**
 	 * Finds all entities with the given IDs, type-safely. Returns empty stream if no matches.
-	 * 
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
+	 *
+	 * @param entityName entity name (case insensitive)
 	 * @return (empty) Stream where the order of entities matches the order of ids, never null
+	 * @throws MolgenisDataAccessException
 	 */
 	<E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Class<E> clazz);
 
 	/**
 	 * Finds all entities with the given IDs, with a fetch. Returns empty stream if no matches.
-	 * 
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param ids
-	 *            entity ids
-	 * @param fetch
-	 *            fetch defining which attributes to retrieve
+	 *
+	 * @param entityName entity name (case insensitive)
+	 * @param ids        entity ids
+	 * @param fetch      fetch defining which attributes to retrieve
 	 * @return (empty) Stream where the order of entities matches the order of ids, never null
+	 * @throws MolgenisDataAccessException
 	 */
 	Stream<Entity> findAll(String entityName, Stream<Object> ids, Fetch fetch);
 
 	/**
 	 * Finds all entities with the given IDs, type-safely and with a fetch. Returns empty stream if no matches.
-	 * 
-	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param ids
-	 *            entity ids
-	 * @param fetch
-	 *            fetch defining which attributes to retrieve
-	 * @param clazz
-	 *            typed entity class
+	 *
+	 * @param entityName entity name (case insensitive)
+	 * @param ids        entity ids
+	 * @param fetch      fetch defining which attributes to retrieve
+	 * @param clazz      typed entity class
 	 * @return (empty) Stream of entities of the give type where the order of entities matches the order of ids, never
-	 *         null
+	 * null
+	 * @throws MolgenisDataAccessException
 	 */
 	<E extends Entity> Stream<E> findAll(String entityName, Stream<Object> ids, Fetch fetch, Class<E> clazz);
 
 	/**
 	 * Find one entity based on id. Returns null if not exists
-	 * 
+	 * <p>
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
-	 * 
+	 *
+	 * @param entityName entity name (case insensitive)
 	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
 	 */
-	Entity findOne(String entityName, Object id);
+	Entity findOneById(String entityName, Object id);
 
 	/**
-	 * 
+	 * @param entityName entity name (case insensitive)
+	 * @param id         entity id
+	 * @param clazz      entity type
+	 * @return typed entity
 	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param id
-	 * @param clazz
-	 * @return
 	 */
-	<E extends Entity> E findOne(String entityName, Object id, Class<E> clazz);
+	<E extends Entity> E findOneById(String entityName, Object id, Class<E> clazz);
 
 	/**
 	 * Find one entity based on id. Returns null if not exists
-	 * 
+	 *
 	 * throws MolgenisDataException if the repository of the entity isn't a Queryable
-	 * 
+	 *
 	 * @throws MolgenisDataAccessException
-	 * 
+	 *
 	 * @param entityName
 	 *            entity name (case insensitive)
 	 */
 
 	/**
 	 * Find one entity based on id.
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param id
-	 *            entity id
-	 * @param fetch
-	 *            fetch defining which attributes to retrieve
+	 *
+	 * @param entityName entity name (case insensitive)
+	 * @param id         entity id
+	 * @param fetch      fetch defining which attributes to retrieve
 	 * @return entity or null
 	 * @throws MolgenisDataAccessException
 	 */
-	Entity findOne(String entityName, Object id, Fetch fetch);
+	Entity findOneById(String entityName, Object id, Fetch fetch);
 
 	/**
 	 * Type-safe find one entity based on id.
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param id
-	 *            entity id
-	 * @param fetch
-	 *            fetch defining which attributes to retrieve
-	 * @param clazz
-	 *            typed entity class
+	 *
+	 * @param entityName entity name (case insensitive)
+	 * @param id         entity id
+	 * @param fetch      fetch defining which attributes to retrieve
+	 * @param clazz      typed entity class
 	 * @return entity of the given type or null
 	 * @throws MolgenisDataAccessException
 	 */
-	<E extends Entity> E findOne(String entityName, Object id, Fetch fetch, Class<E> clazz);
+	<E extends Entity> E findOneById(String entityName, Object id, Fetch fetch, Class<E> clazz);
 
 	/**
 	 * Find one entity based on id. Returns null if not exists
-	 * 
-	 * @throws MolgenisDataException
-	 *             if the repository of the entity isn't a Queryable
+	 *
+	 * @param entityName entity name (case insensitive)
+	 * @throws MolgenisDataException       if the repository of the entity isn't a Queryable
 	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
 	 */
-	Entity findOne(String entityName, Query q);
+	Entity findOne(String entityName, Query<Entity> q);
 
 	/**
 	 * type-save find an entity by it's id
-	 * 
+	 *
+	 * @param entityName entity name
+	 * @param q query
 	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
 	 */
-	<E extends Entity> E findOne(String entityName, Query q, Class<E> clazz);
+	<E extends Entity> E findOne(String entityName, Query<E> q, Class<E> clazz);
 
 	/**
 	 * Adds an entity to it's repository
-	 * 
-	 * @throws MolgenisDataException
-	 *             if the repository of the entity isn't a Writable
+	 *
+	 * @param entityName entity name (case insensitive)
+	 * @throws MolgenisDataException       if the repository of the entity isn't a Writable
 	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @return the id of the entity
 	 */
 	void add(String entityName, Entity entity);
 
 	/**
 	 * Adds entities to it's repository
 	 *
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param entities
-	 *            entity stream
+	 * @param entityName entity name (case insensitive)
+	 * @param entities entities
 	 */
-	void add(String entityName, Stream<? extends Entity> entities);
+	<E extends Entity> void add(String entityName, Stream<E> entities);
 
 	/**
 	 * Updates an entity
-	 * 
-	 * @throws MolgenisDataException
-	 *             if the repository of the entity isn't an Updateable
+	 *
+	 * @param entityName entity name (case insensitive)
+	 * @throws MolgenisDataException       if the repository of the entity isn't an Updateable
 	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
 	 */
 	void update(String entityName, Entity entity);
 
 	/**
 	 * Updates entities
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param entities
-	 *            entity stream
+	 *
+	 * @param entityName entity name (case insensitive)
+	 * @param entities entities
 	 */
-	void update(String entityName, Stream<? extends Entity> entities);
+	<E extends Entity> void update(String entityName, Stream<E> entities);
 
 	/**
 	 * Deletes an entity
-	 * 
-	 * @throws MolgenisDataException
-	 *             if the repository of the entity isn't an Updateable
+	 *
+	 * @param entityName entity name (case insensitive)
+	 * @throws MolgenisDataException       if the repository of the entity isn't an Updateable
 	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
 	 */
 	void delete(String entityName, Entity entity);
 
 	/**
 	 * Delete entities from it's repository
 	 *
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param entities
-	 *            entity stream
+	 * @param entityName entity name (case insensitive)
+	 * @param entities entities
 	 */
-	void delete(String entityName, Stream<? extends Entity> entities);
+	<E extends Entity> void delete(String entityName, Stream<E> entities);
 
 	/**
 	 * Deletes an entity by it's id
-	 * 
+	 *
+	 * @param entityName entity name (case insensitive)
+	 * @param id entity id
 	 * @throws MolgenisDataAccessException
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
-	 * @param id
 	 */
-	void delete(String entityName, Object id);
+	void deleteById(String entityName, Object id);
 
 	/**
 	 * Deletes all entities
-	 * 
-	 * @param entityName
-	 *            entity name (case insensitive)
+	 *
+	 * @param entityName entity name (case insensitive)
 	 */
 	void deleteAll(String entityName);
 
-	Query query(String entityName);
+	/**
+	 * Returns an untyped query
+	 *
+	 * @param entityName entity name
+	 * @return an untyped query
+	 */
+	Query<Entity> query(String entityName);
+
+	/**
+	 * Returns a typed query
+	 *
+	 * @param entityName  entity name
+	 * @param entityClass entity class
+	 * @param <E>         entity type
+	 * @return a typed query
+	 */
+	<E extends Entity> Query<E> query(String entityName, Class<E> entityClass);
 
 	/**
 	 * Creates counts off all possible combinations of xAttr and yAttr attributes of an entity
-	 * 
-	 * @param aggregateQuery
-	 * @return
+	 *
+	 * @param aggregateQuery aggregation query
+	 * @return aggregation results
 	 */
 	AggregateResult aggregate(String entityName, AggregateQuery aggregateQuery);
 
@@ -395,23 +332,8 @@ public interface DataService extends Iterable<Repository>
 	 */
 	Stream<String> getEntityNames();
 
-	/**
-	 * Adds an entity listener for a entity of the given class that listens to entity changes
-	 * 
-	 * @param entityListener
-	 *            entity listener for a entity
-	 */
-	void addEntityListener(String entityName, EntityListener entityListener);
+	Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId, String newRepositoryLabel);
 
-	/**
-	 * Removes an entity listener for a entity of the given class
-	 * 
-	 * @param entityListener
-	 *            entity listener for a entity
-	 */
-	void removeEntityListener(String entityName, EntityListener entityListener);
-
-	Repository copyRepository(Repository repository, String newRepositoryId, String newRepositoryLabel);
-
-	Repository copyRepository(Repository repository, String newRepositoryId, String newRepositoryLabel, Query query);
+	Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId, String newRepositoryLabel,
+			Query<Entity> query);
 }

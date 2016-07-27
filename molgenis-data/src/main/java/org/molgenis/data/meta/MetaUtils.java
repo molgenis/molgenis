@@ -1,30 +1,36 @@
 package org.molgenis.data.meta;
 
-import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
+import com.google.common.base.Objects;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.security.core.Permission;
+import org.molgenis.util.EntityUtils;
 
 import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.security.core.Permission;
-
-import com.google.common.base.Function;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Lists;
+import static com.google.common.collect.Lists.newArrayList;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
+import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 public class MetaUtils
 {
-	public static List<AttributeMetaData> updateEntityMeta(MetaDataService metaDataService, EntityMetaData entityMeta,
-			boolean sync)
+	public static Fetch getEntityMetaDataFetch()
 	{
-		String backend = entityMeta.getBackend() != null ? entityMeta.getBackend() : metaDataService
-				.getDefaultBackend().getName();
+		// TODO simplify fetch creation (in this case *all* attributes and expand xref/mrefs)
+		return new Fetch().field(FULL_NAME).field(SIMPLE_NAME).field(PACKAGE).field(LABEL).field(DESCRIPTION)
+				.field(ATTRIBUTES).field(ID_ATTRIBUTE).field(LABEL_ATTRIBUTE).field(LOOKUP_ATTRIBUTES).field(ABSTRACT)
+				.field(EXTENDS).field(TAGS).field(BACKEND);
+	}
+
+	public static List<AttributeMetaData> updateEntityMeta(MetaDataService metaDataService, EntityMetaData entityMeta)
+	{
+		String backend = entityMeta.getBackend() != null ? entityMeta.getBackend() : metaDataService.getDefaultBackend()
+				.getName();
 
 		EntityMetaData existingEntityMetaData = metaDataService.getEntityMetaData(entityMeta.getName());
-		if (!existingEntityMetaData.getBackend().equals(backend))
+		if (!Objects.equal(backend, existingEntityMetaData.getBackend()))
 		{
 			throw new MolgenisDataException(
 					"Changing the backend of an entity is not supported. You tried to change the backend of entity '"
@@ -32,7 +38,7 @@ public class MetaUtils
 							+ backend + "'");
 		}
 
-		List<AttributeMetaData> addedAttributes = Lists.newArrayList();
+		List<AttributeMetaData> addedAttributes = newArrayList();
 
 		for (AttributeMetaData attr : existingEntityMetaData.getAttributes())
 		{
@@ -49,8 +55,9 @@ public class MetaUtils
 			AttributeMetaData currentAttribute = existingEntityMetaData.getAttribute(attr.getName());
 			if (currentAttribute != null)
 			{
-				if (!currentAttribute.isSameAs(attr))
+				if (!EntityUtils.equals(currentAttribute, attr))
 				{
+					//FIXME This is no longer true, we are allowed to change existing attributes, it just needs to adhere to type conversion rules
 					throw new MolgenisDataException(
 							"Changing existing attributes is not currently supported. You tried to alter attribute ["
 									+ attr.getName() + "] of entity [" + entityMeta.getName()
@@ -59,6 +66,7 @@ public class MetaUtils
 			}
 			else if (!attr.isNillable())
 			{
+				// FIXME Needs checking, dont know if this is still true
 				throw new MolgenisDataException(
 						"Adding non-nillable attributes is not currently supported.  You tried to add non-nillable attribute ["
 								+ attr.getName() + "] of entity [" + entityMeta.getName() + "].");
@@ -66,38 +74,11 @@ public class MetaUtils
 			else
 			{
 				validatePermission(entityMeta.getName(), Permission.WRITEMETA);
-
-				if (sync) metaDataService.addAttributeSync(entityMeta.getName(), attr);
-				else metaDataService.addAttribute(entityMeta.getName(), attr);
-
+				metaDataService.addAttribute(attr);
 				addedAttributes.add(attr);
 			}
 		}
 
 		return addedAttributes;
-	}
-
-	/**
-	 * Convert a list of AttributeMetaDataEntity to AttributeMetaData
-	 * 
-	 * @param entityMetaData
-	 * @param attributeMetaDataEntities
-	 * @return
-	 */
-	public static Iterable<AttributeMetaData> toExistingAttributeMetaData(EntityMetaData entityMetaData,
-			Iterable<Entity> attributeMetaDataEntities)
-	{
-		return FluentIterable.from(attributeMetaDataEntities).transform(new Function<Entity, AttributeMetaData>()
-		{
-			@Override
-			public AttributeMetaData apply(Entity attributeMetaDataEntity)
-			{
-				String attributeName = attributeMetaDataEntity.getString(AttributeMetaDataMetaData.NAME);
-				AttributeMetaData attribute = entityMetaData.getAttribute(attributeName);
-				if (attribute == null) throw new MolgenisDataAccessException("The attributeMetaData : " + attributeName
-						+ " does not exsit in EntityMetaData : " + entityMetaData.getName());
-				return attribute;
-			}
-		}).toList();
 	}
 }

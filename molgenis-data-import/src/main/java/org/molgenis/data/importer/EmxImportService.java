@@ -1,17 +1,11 @@
 package org.molgenis.data.importer;
 
-import static java.util.Objects.requireNonNull;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
-
+import com.google.common.collect.ImmutableMap;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.framework.db.EntitiesValidationReport;
 import org.molgenis.framework.db.EntityImportReport;
@@ -22,7 +16,16 @@ import org.springframework.core.Ordered;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.google.common.collect.Lists;
+import java.io.File;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
+
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Maps.newLinkedHashMap;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.importer.EmxMetaDataParser.*;
 
 @Component
 public class EmxImportService implements ImportService
@@ -36,7 +39,6 @@ public class EmxImportService implements ImportService
 	@Autowired
 	public EmxImportService(MetaDataParser parser, ImportWriter writer, DataService dataService)
 	{
-		LOG.debug("EmxImportService created");
 		this.parser = requireNonNull(parser);
 		this.writer = requireNonNull(writer);
 		this.dataService = requireNonNull(dataService);
@@ -50,9 +52,9 @@ public class EmxImportService implements ImportService
 		{
 			for (String entityName : source.getEntityNames())
 			{
-				if (entityName.equalsIgnoreCase(EmxMetaDataParser.ATTRIBUTES)) return true;
-				if (entityName.equalsIgnoreCase(EmxMetaDataParser.LANGUAGES)) return true;
-				if (entityName.equalsIgnoreCase(EmxMetaDataParser.I18NSTRINGS)) return true;
+				if (entityName.equalsIgnoreCase(EMX_ATTRIBUTES)) return true;
+				if (entityName.equalsIgnoreCase(EMX_LANGUAGES)) return true;
+				if (entityName.equalsIgnoreCase(EMX_I18NSTRINGS)) return true;
 				if (dataService.getMeta().getEntityMetaData(entityName) != null) return true;
 			}
 		}
@@ -73,7 +75,7 @@ public class EmxImportService implements ImportService
 	/**
 	 * Does the import in a transaction. Manually rolls back schema changes if something goes wrong. Refreshes the
 	 * metadata.
-	 * 
+	 *
 	 * @return {@link EntityImportReport} describing what happened
 	 */
 	public EntityImportReport doImport(EmxImportJob job)
@@ -85,16 +87,6 @@ public class EmxImportService implements ImportService
 		catch (Exception e)
 		{
 			LOG.error("Error handling EmxImportJob", e);
-			try
-			{
-				// TODO rollback of languages
-				writer.rollbackSchemaChanges(job);
-				dataService.getMeta().refreshCaches();
-			}
-			catch (Exception ignore)
-			{
-				LOG.error("Error rolling back schema changes", ignore);
-			}
 			throw e;
 		}
 	}
@@ -114,7 +106,7 @@ public class EmxImportService implements ImportService
 	@Override
 	public List<DatabaseAction> getSupportedDatabaseActions()
 	{
-		return Lists.newArrayList(DatabaseAction.values());
+		return newArrayList(DatabaseAction.values());
 	}
 
 	@Override
@@ -130,12 +122,21 @@ public class EmxImportService implements ImportService
 	}
 
 	@Override
-	public LinkedHashMap<String, Boolean> integrationTestMetaData(MetaDataService metaDataService,
-			RepositoryCollection repositoryCollection, String defaultPackage)
+	public LinkedHashMap<String, Boolean> determineImportableEntities(MetaDataService metaDataService,
+			RepositoryCollection repositoryCollection, String selectedPackage)
 	{
-		List<String> skipEntities = Arrays.asList(EmxMetaDataParser.ATTRIBUTES, EmxMetaDataParser.PACKAGES,
-				EmxMetaDataParser.ENTITIES, EmxMetaDataParser.TAGS);
-		ParsedMetaData parsedMetaData = parser.parse(repositoryCollection, defaultPackage);
-		return metaDataService.integrationTestMetaData(parsedMetaData.getEntityMap(), skipEntities, defaultPackage);
+		List<String> skipEntities = newArrayList(EMX_ATTRIBUTES, EMX_PACKAGES, EMX_ENTITIES, EMX_TAGS);
+		ImmutableMap<String, EntityMetaData> entityMetaDataMap = parser.parse(repositoryCollection, selectedPackage)
+				.getEntityMap();
+
+		LinkedHashMap<String, Boolean> importableEntitiesMap = newLinkedHashMap();
+		stream(entityMetaDataMap.keySet().spliterator(), false).forEach(entityName -> {
+			boolean importable = skipEntities.contains(entityName) || metaDataService
+					.isEntityMetaDataCompatible(entityMetaDataMap.get(entityName));
+
+			importableEntitiesMap.put(entityName, importable);
+		});
+
+		return importableEntitiesMap;
 	}
 }

@@ -1,16 +1,19 @@
 package org.molgenis.data.settings;
 
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.ResourceBundle;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.listeners.EntityListener;
+import org.molgenis.data.listeners.EntityListenersService;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.ResourceBundle;
+
+import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 
 /**
  * Base class for application and plugin settings entities. Settings are read/written from/to data source.
@@ -24,11 +27,14 @@ public abstract class DefaultSettingsEntity implements Entity
 	@Autowired
 	private DataService dataService;
 
+	@Autowired
+	private EntityListenersService entityListenersService;
+
 	private transient Entity cachedEntity;
 
 	public DefaultSettingsEntity(String entityId)
 	{
-		this.entityName = SettingsEntityMeta.PACKAGE_NAME + '_' + entityId;
+		this.entityName = PACKAGE_SETTINGS + '_' + entityId;
 	}
 
 	@Override
@@ -52,7 +58,13 @@ public abstract class DefaultSettingsEntity implements Entity
 	}
 
 	@Override
-	public String getLabelValue()
+	public void setIdValue(Object id)
+	{
+		getEntity().setIdValue(id);
+	}
+
+	@Override
+	public Object getLabelValue()
 	{
 		return getEntity().getLabelValue();
 	}
@@ -136,18 +148,6 @@ public abstract class DefaultSettingsEntity implements Entity
 	}
 
 	@Override
-	public List<String> getList(String attributeName)
-	{
-		return getEntity().getList(attributeName);
-	}
-
-	@Override
-	public List<Integer> getIntList(String attributeName)
-	{
-		return getEntity().getIntList(attributeName);
-	}
-
-	@Override
 	public void set(String attributeName, Object value)
 	{
 		Entity entity = getEntity();
@@ -165,14 +165,14 @@ public abstract class DefaultSettingsEntity implements Entity
 
 	/**
 	 * Adds a listener for this settings entity that fires on entity updates
-	 * 
+	 *
 	 * @param settingsEntityListener
 	 *            listener for this settings entity
 	 */
 	public void addListener(SettingsEntityListener settingsEntityListener)
 	{
 		RunAsSystemProxy.runAsSystem(() -> {
-			dataService.addEntityListener(entityName, new EntityListener()
+			entityListenersService.addEntityListener(entityName, new EntityListener()
 			{
 				@Override
 				public void postUpdate(Entity entity)
@@ -191,14 +191,14 @@ public abstract class DefaultSettingsEntity implements Entity
 
 	/**
 	 * Removes a listener for this settings entity that fires on entity updates
-	 * 
+	 *
 	 * @param settingsEntityListener
 	 *            listener for this settings entity
 	 */
 	public void removeListener(SettingsEntityListener settingsEntityListener)
 	{
 		RunAsSystemProxy.runAsSystem(() -> {
-			dataService.removeEntityListener(entityName, new EntityListener()
+			entityListenersService.removeEntityListener(entityName, new EntityListener()
 			{
 
 				@Override
@@ -216,16 +216,30 @@ public abstract class DefaultSettingsEntity implements Entity
 		});
 	}
 
+	@Override
+	public boolean equals(Object o)
+	{
+		if (this == o) return true;
+		if (!(o instanceof Entity)) return false;
+		return EntityUtils.equals(this, (Entity) o);
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return EntityUtils.hashCode(this);
+	}
+
 	private Entity getEntity()
 	{
 		if (cachedEntity == null)
 		{
 			String id = getEntityMetaData().getSimpleName();
 			cachedEntity = RunAsSystemProxy.runAsSystem(() -> {
-				Entity entity = dataService.findOne(entityName, id);
+				Entity entity = dataService.findOneById(entityName, id);
 
 				// refresh cache on settings update
-					dataService.addEntityListener(entityName, new EntityListener()
+				entityListenersService.addEntityListener(entityName, new EntityListener()
 					{
 						@Override
 						public void postUpdate(Entity entity)

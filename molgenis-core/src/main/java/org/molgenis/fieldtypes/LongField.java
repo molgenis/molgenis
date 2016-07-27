@@ -1,11 +1,11 @@
 package org.molgenis.fieldtypes;
 
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.model.MolgenisModelException;
+
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.model.MolgenisModelException;
 
 public class LongField extends FieldType
 {
@@ -34,6 +34,12 @@ public class LongField extends FieldType
 	public String getMysqlType() throws MolgenisModelException
 	{
 		return "BIGINT";
+	}
+
+	@Override
+	public String getPostgreSqlType()
+	{
+		return "bigint"; // alias: int8
 	}
 
 	@Override
@@ -85,9 +91,9 @@ public class LongField extends FieldType
 	}
 
 	@Override
-	public FieldTypeEnum getEnumType()
+	public AttributeType getEnumType()
 	{
-		return FieldTypeEnum.LONG;
+		return AttributeType.LONG;
 	}
 
 	@Override
@@ -106,7 +112,7 @@ public class LongField extends FieldType
 	public Object convert(Object value)
 	{
 		if (value == null) return null;
-		if (value instanceof Long) return value;
+		if (value instanceof Number) return ((Number) value).longValue();
 		if (value instanceof String) return Long.parseLong(value.toString());
 		throw new RuntimeException("LongField.convert(" + value + ") failed");
 	}

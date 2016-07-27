@@ -1,16 +1,15 @@
 package org.molgenis.data.elasticsearch.util;
 
-import java.util.List;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
-import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.support.QueryImpl;
 
 public class SearchRequest
 {
 	private String documentType;
-	private QueryImpl query;
+	private QueryImpl<Entity> query;
 	private AttributeMetaData aggregateField1;
 	private AttributeMetaData aggregateField2;
 	private AttributeMetaData aggregateFieldDistinct;
@@ -19,13 +18,13 @@ public class SearchRequest
 	{
 	}
 
-	public SearchRequest(String documentType, Query query)
+	public SearchRequest(String documentType, Query<Entity> query)
 	{
 		this.documentType = documentType;
-		this.query = new QueryImpl(query);
+		this.query = new QueryImpl<>(query);
 	}
 
-	public SearchRequest(String documentType, Query query, List<String> fieldsToReturn,
+	public SearchRequest(String documentType, Query<Entity> query,
 			AttributeMetaData aggregateField1, AttributeMetaData aggregateField2,
 			AttributeMetaData aggregateFieldDistinct)
 	{
@@ -40,11 +39,11 @@ public class SearchRequest
 		return documentType;
 	}
 
-	public Query getQuery()
+	public Query<Entity> getQuery()
 	{
 		if (query == null)
 		{
-			query = new QueryImpl();
+			query = new QueryImpl<>();
 		}
 
 		return query;
@@ -79,7 +78,7 @@ public class SearchRequest
 		result = prime * result + ((documentType == null) ? 0 : documentType.hashCode());
 		result = prime * result + ((aggregateField1 == null) ? 0 : aggregateField1.hashCode());
 		result = prime * result + ((aggregateField2 == null) ? 0 : aggregateField2.hashCode());
-		result = prime * result + ((aggregateFieldDistinct == null) ? 0 : aggregateField2.hashCode());
+		result = prime * result + ((aggregateFieldDistinct == null) ? 0 : aggregateFieldDistinct.hashCode());
 		result = prime * result + ((query == null) ? 0 : query.hashCode());
 		return result;
 	}

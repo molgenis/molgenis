@@ -1,11 +1,11 @@
 package org.molgenis.fieldtypes;
 
-import java.text.ParseException;
-
 import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Field;
+
+import java.text.ParseException;
 
 public class XrefField extends FieldType
 {
@@ -43,6 +43,19 @@ public class XrefField extends FieldType
 	{
 		if (f == null) return MolgenisFieldTypes.INT.getMysqlType();
 		return getFieldType(f.getXrefField()).getMysqlType();
+	}
+
+	@Override
+	public String getPostgreSqlType()
+	{
+		try
+		{
+			return getFieldType(f.getXrefField()).getPostgreSqlType();
+		}
+		catch (MolgenisModelException e)
+		{
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -96,9 +109,9 @@ public class XrefField extends FieldType
 	}
 
 	@Override
-	public FieldTypeEnum getEnumType()
+	public AttributeType getEnumType()
 	{
-		return FieldTypeEnum.XREF;
+		return AttributeType.XREF;
 	}
 
 	@Override

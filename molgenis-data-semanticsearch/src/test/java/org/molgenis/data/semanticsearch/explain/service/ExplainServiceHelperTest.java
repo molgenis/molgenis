@@ -12,7 +12,7 @@ import java.util.Set;
 import org.apache.lucene.search.Explanation;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.Test;
 

@@ -28,7 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.google.gson.GsonBuilder;
 
-public class MenuManagerServiceImpl implements MenuManagerService, ApplicationListener<ContextRefreshedEvent>
+public class MenuManagerServiceImpl implements MenuManagerService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MenuManagerServiceImpl.class);
 
@@ -70,38 +70,27 @@ public class MenuManagerServiceImpl implements MenuManagerService, ApplicationLi
 		appSettings.setMenu(menuJson);
 	}
 
-	/**
-	 * Backwards compatibility: load default menu on application startup if no menu exists
-	 * 
-	 * @param event
-	 */
-	@Override
-	@RunAsSystem
-	public void onApplicationEvent(ContextRefreshedEvent event)
-	{
-		if (appSettings.getMenu() == null)
+	public String getDefaultMenuValue() {
+		Molgenis molgenis;
+		try
 		{
-			Molgenis molgenis;
-			try
-			{
-				molgenis = new XmlMolgenisUiLoader().load();
-			}
-			catch (IOException e)
-			{
-				// default menu does not exist, no op
-				return;
-			}
-
-			LOG.info("Creating default menu from XML");
-			loadDefaultMenu(molgenis);
+			molgenis = new XmlMolgenisUiLoader().load();
 		}
+		catch (IOException e)
+		{
+			// default menu does not exist, no op
+			return null;
+		}
+
+		Menu defaultMenu = loadDefaultMenu(molgenis);
+		return defaultMenu != null ? new GsonBuilder().create().toJson(defaultMenu) : null;
 	}
 
-	private void loadDefaultMenu(Molgenis molgenis)
+	private Menu loadDefaultMenu(Molgenis molgenis)
 	{
 		Menu molgenisMenu = new Menu();
 		parseDefaultMenuRec(molgenisMenu, molgenis.getMenu());
-		saveMenu(molgenisMenu);
+		return molgenisMenu;
 	}
 
 	private void parseDefaultMenuRec(MenuItem menuItem, Object defaultMenuObj)

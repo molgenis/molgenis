@@ -1,26 +1,25 @@
 package org.molgenis.data.mem;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import com.google.common.collect.Lists;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.QueryImpl;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.support.QueryImpl;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import com.google.common.collect.Lists;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 public class InMemoryRepositoryTest
 {
@@ -114,7 +113,7 @@ public class InMemoryRepositoryTest
 			Entity entity = when(mock(Entity.class).get(idAttrName)).thenReturn(id).getMock();
 			inMemoryRepository.add(entity);
 			Fetch fetch = new Fetch();
-			assertEquals(inMemoryRepository.findOne(id, fetch), entity);
+			assertEquals(inMemoryRepository.findOneById(id, fetch), entity);
 		}
 		finally
 		{
@@ -134,7 +133,7 @@ public class InMemoryRepositoryTest
 		{
 			Object id = Integer.valueOf(0);
 			Fetch fetch = new Fetch();
-			assertNull(inMemoryRepository.findOne(id, fetch));
+			assertNull(inMemoryRepository.findOneById(id, fetch));
 		}
 		finally
 		{
@@ -211,7 +210,7 @@ public class InMemoryRepositoryTest
 			Entity entity1 = when(mock(Entity.class).get(idAttrName)).thenReturn(id1).getMock();
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);
-			List<Entity> entities = inMemoryRepository.findAll(new QueryImpl()).collect(Collectors.toList());
+			List<Entity> entities = inMemoryRepository.findAll(new QueryImpl<Entity>()).collect(Collectors.toList());
 			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
 		}
 		finally
@@ -245,7 +244,7 @@ public class InMemoryRepositoryTest
 
 			System.out.println(entity0.get(idAttrName));
 
-			List<Entity> entities = inMemoryRepository.findAll(new QueryImpl().eq("attr", "a")).filter(Objects::nonNull)
+			List<Entity> entities = inMemoryRepository.findAll(new QueryImpl<Entity>().eq("attr", "a")).filter(Objects::nonNull)
 					.collect(Collectors.toList());
 			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
 		}
@@ -262,7 +261,7 @@ public class InMemoryRepositoryTest
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(entityMeta);
 		try
 		{
-			inMemoryRepository.findAll(new QueryImpl().eq("attr", "val").and().eq("attr2", "val"))
+			inMemoryRepository.findAll(new QueryImpl<Entity>().eq("attr", "val").and().eq("attr2", "val"))
 					.collect(Collectors.toList());
 		}
 		finally
@@ -288,8 +287,10 @@ public class InMemoryRepositoryTest
 			inMemoryRepository.add(entity0);
 			inMemoryRepository.add(entity1);
 			Fetch fetch = new Fetch();
-			List<Entity> entities = inMemoryRepository.stream(fetch).collect(Collectors.toList());
-			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
+
+			Consumer<List<Entity>> consumer = mock(Consumer.class);
+			inMemoryRepository.forEachBatched(fetch, consumer, 1000);
+			verify(consumer).accept(Arrays.asList(entity0, entity1));
 		}
 		finally
 		{

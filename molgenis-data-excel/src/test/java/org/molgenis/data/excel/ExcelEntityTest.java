@@ -15,10 +15,10 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -43,8 +43,7 @@ public class ExcelEntityTest
 		colNamesMap = new LinkedHashMap<String, Integer>();
 		colNamesMap.put("attr1", 0);
 
-		excelEntity = new ExcelEntity(row, colNamesMap, cellProcessors,
-				new DefaultEntityMetaData("Entity1", ExcelEntity.class));
+		excelEntity = new ExcelEntity(row, colNamesMap, cellProcessors, mock(EntityMetaData.class));
 	}
 
 	@Test
@@ -116,7 +115,14 @@ public class ExcelEntityTest
 	@Test
 	public void setEntity()
 	{
-		Entity entity = new MapEntity();
+		Entity entity = new DynamicEntity(mock(EntityMetaData.class))
+		{
+			@Override
+			protected void validateValueType(String attrName, Object value)
+			{
+				// noop
+			}
+		};
 		entity.set("attr1", "test1");
 		entity.set("attr2", "test2");
 

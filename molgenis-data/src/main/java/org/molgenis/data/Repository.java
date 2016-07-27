@@ -1,33 +1,43 @@
 package org.molgenis.data;
 
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.listeners.EntityListener;
+import org.molgenis.data.meta.model.EntityMetaData;
+
 import java.io.Closeable;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * Repository gives access to a collection of Entity. Synonyms: EntityReader, EntitySource, EntityCollection
  */
-public interface Repository extends Iterable<Entity>, Closeable
+public interface Repository<E extends Entity> extends Iterable<E>, Closeable
 {
 	/**
-	 * Streams the {@link Entity}s
+	 *  Executes a function for each batch of entities.
+	 *
+	 * @param consumer  function to call for each batch of entities
+	 * @param batchSize size of the batches to feed to the consumer
 	 */
-	default Stream<Entity> stream()
+	default void forEachBatched(Consumer<List<E>> consumer, int batchSize)
 	{
-		return StreamSupport.stream(spliterator(), false);
+		forEachBatched(null, consumer, batchSize);
 	}
 
 	/**
-	 * Streams the {@link Entity}s
-	 * 
-	 * @param fetch
-	 *            fetch defining which attributes to retrieve
-	 * @return Stream of all entities
+	 * Executes a function for each batch of entities.
+	 *
+	 * @param fetch     fetch defining which attributes to retrieve
+	 * @param consumer  function to call for each batch of entities
+	 * @param batchSize size of the batches to feed to the consumer
 	 */
-	Stream<Entity> stream(Fetch fetch);
+	void forEachBatched(Fetch fetch, Consumer<List<E>> consumer, int batchSize);
 
 	Set<RepositoryCapability> getCapabilities();
+
+	Set<Operator> getQueryOperators();
 
 	String getName();
 
@@ -35,19 +45,21 @@ public interface Repository extends Iterable<Entity>, Closeable
 
 	long count();
 
-	Query query();
+	Query<E> query();
 
 	/**
 	 * return number of entities matched by query
-	 **/
-	long count(Query q);
+	 *
+	 * @param q*/
+	long count(Query<E> q);
 
 	/**
 	 * Find entities that match a query. Returns empty stream if no matches.
 	 * 
 	 * @return (empty) Stream, never null
+	 * @param q
 	 */
-	Stream<Entity> findAll(Query q);
+	Stream<E> findAll(Query<E> q);
 
 	/**
 	 * Find an entity base on a query
@@ -55,13 +67,14 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 * Returns null if not exists.
 	 * 
 	 * Returns first result if multiple found
+	 * @param q
 	 */
-	Entity findOne(Query q);
+	E findOne(Query<E> q);
 
 	/**
 	 * Type-safe find one entity based on id. Returns null if not exists
 	 */
-	Entity findOne(Object id);
+	E findOneById(Object id);
 
 	/**
 	 * Find one entity based on id.
@@ -73,17 +86,17 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 * @return entity or null
 	 * @throws MolgenisDataAccessException
 	 */
-	Entity findOne(Object id, Fetch fetch);
+	E findOneById(Object id, Fetch fetch);
 
 	/**
 	 * Finds all entities with the given IDs. Returns empty stream if no matches.
 	 * 
 	 * @param ids
 	 *            entity ids
-	 * 
+	 *
 	 * @return (empty) Stream where the order of entities matches the order of ids, never null
 	 */
-	Stream<Entity> findAll(Stream<Object> ids);
+	Stream<E> findAll(Stream<Object> ids);
 
 	/**
 	 * Finds all entities with the given IDs, with a fetch. Returns empty stream if no matches.
@@ -96,7 +109,7 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 *            fetch defining which attributes to retrieve
 	 * @return (empty) Stream where the order of entities matches the order of ids, never null
 	 */
-	Stream<Entity> findAll(Stream<Object> ids, Fetch fetch);
+	Stream<E> findAll(Stream<Object> ids, Fetch fetch);
 
 	/**
 	 * 
@@ -106,37 +119,38 @@ public interface Repository extends Iterable<Entity>, Closeable
 	AggregateResult aggregate(AggregateQuery aggregateQuery);
 
 	/* Update one entity */
-	void update(Entity entity);
+	void update(E entity);
 
 	/**
 	 * Updates the given entities
-	 * 
+	 *
 	 * @param entities
 	 */
-	void update(Stream<? extends Entity> entities);
+	void update(Stream<E> entities);
 
 	/* Delete one entity */
-	void delete(Entity entity);
+	void delete(E entity);
 
 	/**
 	 * Delete entities from repository
-	 * 
+	 *
 	 * @param entities
 	 *            entity stream
 	 */
-	void delete(Stream<? extends Entity> entities);
+	void delete(Stream<E> entities);
 
 	/* Delete one entity based on id */
 	void deleteById(Object id);
 
 	/* Streaming delete based on multiple ids */
-	void deleteById(Stream<Object> ids);
+	void deleteAll(Stream<Object> ids);
 
 	/* Delete all entities */
 	void deleteAll();
 
-	/** Add one entity */
-	void add(Entity entity);
+	/** Add one entity
+	 * @param entity*/
+	void add(E entity);
 
 	/**
 	 * Add entities to repisotory
@@ -144,40 +158,16 @@ public interface Repository extends Iterable<Entity>, Closeable
 	 * @param entities
 	 * @return number of added entities
 	 */
-	Integer add(Stream<? extends Entity> entities);
+	Integer add(Stream<E> entities);
 
 	void flush();
 
 	void clearCache();
 
 	/**
-	 * Create a new repository backend (e.g., create a table in a database; add a sheet to Excel)
-	 */
-	public void create();
-
-	/**
-	 * Drop a repository backend (e.g. drop a table in a database; remove a sheet from Excel)
-	 */
-	public void drop();
-
-	/**
 	 * Rebuild current index
-	 */
-	public void rebuildIndex();
-
-	/**
-	 * Adds an entity listener for a entity that listens to entity changes
 	 * 
-	 * @param entityListener
-	 *            entity listener for a entity
+	 * TODO move to RepositoryCollection
 	 */
-	void addEntityListener(EntityListener entityListener);
-
-	/**
-	 * Removes an entity listener
-	 * 
-	 * @param entityListener
-	 *            entity listener for a entity
-	 */
-	void removeEntityListener(EntityListener entityListener);
+	void rebuildIndex();
 }

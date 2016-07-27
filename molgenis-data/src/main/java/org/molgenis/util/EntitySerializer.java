@@ -1,17 +1,11 @@
 package org.molgenis.util;
 
+import com.google.gson.*;
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.AttributeMetaData;
+
 import java.lang.reflect.Type;
 import java.util.Date;
-
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 
 /**
  * Serializer for concrete Entity subclasses. This allows you to return Entities in your Controllers, without having to
@@ -24,7 +18,7 @@ public class EntitySerializer implements JsonSerializer<Entity>
 		JsonObject result = new JsonObject();
 		result.addProperty("__entityName", entity.getEntityMetaData().getName());
 		result.add("__idValue", context.serialize(entity.getIdValue()));
-		result.addProperty("__labelValue", entity.getLabelValue());
+		result.add("__labelValue", context.serialize(entity.getLabelValue()));
 		return result;
 	}
 
@@ -39,7 +33,7 @@ public class EntitySerializer implements JsonSerializer<Entity>
 			Object value = entity.get(attributeName);
 			if (value != null)
 			{
-				switch (attr.getDataType().getEnumType())
+				switch (attr.getDataType())
 				{
 					case BOOL:
 						result.addProperty(attributeName, entity.getBoolean(attributeName));

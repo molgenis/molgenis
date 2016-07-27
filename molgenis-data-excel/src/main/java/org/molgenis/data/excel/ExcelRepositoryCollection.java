@@ -13,16 +13,19 @@ import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
-import org.molgenis.data.support.DefaultAttributeMetaData;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Lists;
 
@@ -37,6 +40,9 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 
 	private final String name;
 	private final Workbook workbook;
+
+	private EntityMetaDataFactory entityMetaFactory;
+	private AttributeMetaDataFactory attrMetaFactory;
 
 	public ExcelRepositoryCollection(File file) throws IOException, MolgenisInvalidFormatException
 	{
@@ -65,6 +71,12 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
+	public void init() throws IOException
+	{
+		// no operation
+	}
+
+	@Override
 	public Iterable<String> getEntityNames()
 	{
 		int count = getNumberOfSheets();
@@ -79,7 +91,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Repository getRepository(String name)
+	public Repository<Entity> getRepository(String name)
 	{
 		Sheet poiSheet = workbook.getSheet(name);
 		if (poiSheet == null)
@@ -87,7 +99,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 			return null;
 		}
 
-		return new ExcelRepository(name, poiSheet, cellProcessors);
+		return new ExcelRepository(name, poiSheet, entityMetaFactory, attrMetaFactory, cellProcessors);
 	}
 
 	public int getNumberOfSheets()
@@ -108,7 +120,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 			return null;
 		}
 
-		return new ExcelRepository(name, poiSheet, cellProcessors);
+		return new ExcelRepository(name, poiSheet, entityMetaFactory, attrMetaFactory, cellProcessors);
 	}
 
 	public ExcelSheetWriter createWritable(String entityName, List<AttributeMetaData> attributes,
@@ -120,8 +132,8 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 
 	public ExcelSheetWriter createWritable(String entityName, List<String> attributeNames)
 	{
-		List<AttributeMetaData> attributes = attributeNames != null ? attributeNames.stream()
-				.<AttributeMetaData> map(attr -> new DefaultAttributeMetaData(attr)).collect(Collectors.toList()) : null;
+		List<AttributeMetaData> attributes = attributeNames != null ? attributeNames.stream().<AttributeMetaData>map(
+				attrName -> attrMetaFactory.create().setName(attrName)).collect(Collectors.toList()) : null;
 
 		return createWritable(entityName, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);
 	}
@@ -138,15 +150,9 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public Repository addEntityMeta(EntityMetaData entityMeta)
+	public Iterator<Repository<Entity>> iterator()
 	{
-		return getRepository(entityMeta.getName());
-	}
-
-	@Override
-	public Iterator<Repository> iterator()
-	{
-		return new Iterator<Repository>()
+		return new Iterator<Repository<Entity>>()
 		{
 			Iterator<String> it = getEntityNames().iterator();
 
@@ -157,7 +163,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 			}
 
 			@Override
-			public Repository next()
+			public Repository<Entity> next()
 			{
 				return getRepository(it.next());
 			}
@@ -177,4 +183,21 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 		return false;
 	}
 
+	@Override
+	public boolean hasRepository(EntityMetaData entityMeta)
+	{
+		return hasRepository(entityMeta.getName());
+	}
+
+	@Autowired
+	public void setEntityMetaDataFactory(EntityMetaDataFactory entityMetaFactory)
+	{
+		this.entityMetaFactory = entityMetaFactory;
+	}
+
+	@Autowired
+	public void setAttributeMetaDataFactory(AttributeMetaDataFactory attrMetaFactory)
+	{
+		this.attrMetaFactory = attrMetaFactory;
+	}
 }

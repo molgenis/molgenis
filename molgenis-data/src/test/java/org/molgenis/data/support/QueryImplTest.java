@@ -7,6 +7,7 @@ import static org.testng.Assert.assertNotEquals;
 import java.util.Arrays;
 import java.util.List;
 
+import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
@@ -18,7 +19,7 @@ public class QueryImplTest
 	@Test
 	public void rng()
 	{
-		Query q = new QueryImpl().rng("field", "min", "max");
+		Query<Entity> q = new QueryImpl<Entity>().rng("field", "min", "max");
 		QueryRule expectedRule = new QueryRule("field", Operator.RANGE, Arrays.asList("min", "max"));
 		assertEquals(q.getRules(), Arrays.asList(expectedRule));
 	}
@@ -26,7 +27,7 @@ public class QueryImplTest
 	@Test
 	public void nest()
 	{
-		Query q = new QueryImpl().nest().eq("field", "value").unnest();
+		Query<Entity> q = new QueryImpl<>().nest().eq("field", "value").unnest();
 		QueryRule expectedRule = new QueryRule(Arrays.asList(new QueryRule("field", Operator.EQUALS, "value")));
 		assertEquals(q.getRules(), Arrays.asList(expectedRule));
 	}
@@ -34,7 +35,7 @@ public class QueryImplTest
 	@Test
 	public void nestOr()
 	{
-		Query q = new QueryImpl().nest().eq("field", "value1").or().eq("field", "value2").unnest();
+		Query<Entity> q = new QueryImpl<>().nest().eq("field", "value1").or().eq("field", "value2").unnest();
 		QueryRule expectedRule = new QueryRule(Arrays.asList(new QueryRule("field", Operator.EQUALS, "value1"),
 				new QueryRule(Operator.OR), new QueryRule("field", Operator.EQUALS, "value2")));
 		assertEquals(q.getRules(), Arrays.asList(expectedRule));
@@ -43,7 +44,7 @@ public class QueryImplTest
 	@Test
 	public void nestAnd()
 	{
-		Query q = new QueryImpl().nest().eq("field", "value1").and().eq("field", "value2").unnest();
+		Query<Entity> q = new QueryImpl<>().nest().eq("field", "value1").and().eq("field", "value2").unnest();
 		QueryRule expectedRule = new QueryRule(Arrays.asList(new QueryRule("field", Operator.EQUALS, "value1"),
 				new QueryRule(Operator.AND), new QueryRule("field", Operator.EQUALS, "value2")));
 		assertEquals(q.getRules(), Arrays.asList(expectedRule));
@@ -53,7 +54,7 @@ public class QueryImplTest
 	public void nestDeep()
 	{
 		// A OR (B AND (C OR D))
-		Query q = new QueryImpl().eq("field1", "value1").or().nest().eq("field2", "value2").and().nest()
+		Query<Entity> q = new QueryImpl<>().eq("field1", "value1").or().nest().eq("field2", "value2").and().nest()
 				.eq("field3", "value3").or().eq("field4", "value4").unnest().unnest();
 		QueryRule expectedRule1 = new QueryRule("field1", Operator.EQUALS, "value1");
 		QueryRule expectedRule1a = new QueryRule("field2", Operator.EQUALS, "value2");
@@ -70,7 +71,7 @@ public class QueryImplTest
 	public void setFetch()
 	{
 		Fetch fetch = new Fetch();
-		QueryImpl q = new QueryImpl();
+		QueryImpl<Entity> q = new QueryImpl<>();
 		q.setFetch(fetch);
 		assertEquals(fetch, q.getFetch());
 	}
@@ -78,7 +79,7 @@ public class QueryImplTest
 	@Test
 	public void fetch()
 	{
-		Fetch fetch = new QueryImpl().fetch();
+		Fetch fetch = new QueryImpl<>().fetch();
 		assertFalse(fetch.iterator().hasNext());
 	}
 
@@ -86,16 +87,16 @@ public class QueryImplTest
 	public void fetchFetch()
 	{
 		Fetch fetch = new Fetch().field("field0");
-		assertEquals(fetch, new QueryImpl().fetch(fetch).getFetch());
+		assertEquals(fetch, new QueryImpl<>().fetch(fetch).getFetch());
 	}
 
 	@Test
 	public void equalsFetch()
 	{
-		QueryImpl q1 = new QueryImpl();
+		QueryImpl<Entity> q1 = new QueryImpl<>();
 		q1.fetch().field("field0");
 
-		QueryImpl q2 = new QueryImpl();
+		QueryImpl<Entity> q2 = new QueryImpl<>();
 		q2.fetch().field("field0");
 		assertEquals(q1, q2);
 	}
@@ -103,10 +104,10 @@ public class QueryImplTest
 	@Test
 	public void equalsFetchFalse()
 	{
-		QueryImpl q1 = new QueryImpl();
+		QueryImpl<Entity> q1 = new QueryImpl<>();
 		q1.fetch().field("field0");
 
-		QueryImpl q2 = new QueryImpl();
+		QueryImpl<Entity> q2 = new QueryImpl<>();
 		q2.fetch().field("field1");
 		assertEquals(q1, q2);
 	}
@@ -114,17 +115,17 @@ public class QueryImplTest
 	@Test
 	public void queryImplQueryFetch()
 	{
-		Query q1 = new QueryImpl();
+		Query<Entity> q1 = new QueryImpl<>();
 		q1.fetch().field("field0");
 
-		QueryImpl q2 = new QueryImpl(q1);
+		QueryImpl<Entity> q2 = new QueryImpl<>(q1);
 		assertEquals(q1.getFetch(), q2.getFetch());
 	}
 
 	@Test
 	public void equals()
 	{
-		QueryImpl q1 = new QueryImpl();
+		QueryImpl<Entity> q1 = new QueryImpl<>();
 		{
 			QueryRule geRule = new QueryRule("jaar", Operator.GREATER_EQUAL, "1995");
 			QueryRule andRule = new QueryRule(Operator.AND);
@@ -135,7 +136,7 @@ public class QueryImplTest
 			QueryRule rule = new QueryRule(nestedRules);
 			q1.addRule(rule);
 		}
-		QueryImpl q2 = new QueryImpl();
+		QueryImpl<Entity> q2 = new QueryImpl<>();
 		{
 			QueryRule geRule = new QueryRule("jaar", Operator.GREATER_EQUAL, "1996");
 			QueryRule andRule = new QueryRule(Operator.AND);

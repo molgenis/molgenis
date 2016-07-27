@@ -1,14 +1,14 @@
 package org.molgenis.fieldtypes;
 
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.model.MolgenisModelException;
+import org.molgenis.util.MolgenisDateFormat;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.model.MolgenisModelException;
-import org.molgenis.util.MolgenisDateFormat;
 
 public class DateField extends FieldType
 {
@@ -38,6 +38,12 @@ public class DateField extends FieldType
 	public String getMysqlType() throws MolgenisModelException
 	{
 		return "DATE";
+	}
+
+	@Override
+	public String getPostgreSqlType()
+	{
+		return "date";
 	}
 
 	@Override
@@ -95,9 +101,9 @@ public class DateField extends FieldType
 	}
 
 	@Override
-	public FieldTypeEnum getEnumType()
+	public AttributeType getEnumType()
 	{
-		return FieldTypeEnum.DATE;
+		return AttributeType.DATE;
 	}
 
 	@Override

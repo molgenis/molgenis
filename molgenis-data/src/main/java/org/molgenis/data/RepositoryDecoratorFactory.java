@@ -7,10 +7,10 @@ package org.molgenis.data;
 public interface RepositoryDecoratorFactory
 {
 	/**
-	 * Creates a decorated repository based on the given repository
-	 * 
+	 * Creates a decorated repository based on the given {@link Repository}
+	 *
 	 * @param repository
 	 * @return
 	 */
-	Repository createDecoratedRepository(Repository repository);
+	Repository<Entity> createDecoratedRepository(Repository<Entity> repository);
 }

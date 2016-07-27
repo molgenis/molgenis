@@ -1,7 +1,6 @@
 package org.molgenis.migrate.version.v1_21;
 
 import org.molgenis.framework.MolgenisUpgrade;
-import org.molgenis.migrate.version.v1_16.Step26migrateJpaBackend;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

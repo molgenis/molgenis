@@ -1,20 +1,17 @@
 package org.molgenis.data.mapper.algorithmgenerator.generator;
 
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.CATEGORICAL;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.XREF;
+import com.google.common.base.Preconditions;
+import org.molgenis.data.DataConverter;
+import org.molgenis.data.DataService;
+import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
+import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapperUtil;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataConverter;
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
-import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapperUtil;
-
-import com.google.common.base.Preconditions;
+import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
 
 public abstract class AbstractCategoryAlgorithmGenerator implements AlgorithmGenerator
 {
@@ -27,8 +24,7 @@ public abstract class AbstractCategoryAlgorithmGenerator implements AlgorithmGen
 
 	boolean isXrefOrCategorialDataType(AttributeMetaData attribute)
 	{
-		FieldTypeEnum enumType = attribute.getDataType().getEnumType();
-		return enumType == CATEGORICAL || enumType == XREF;
+		return isSingleReferenceType(attribute);
 	}
 
 	public List<Category> convertToCategory(AttributeMetaData attributeMetaData)

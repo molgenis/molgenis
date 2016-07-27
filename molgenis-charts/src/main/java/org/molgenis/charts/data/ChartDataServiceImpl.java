@@ -1,32 +1,17 @@
 package org.molgenis.charts.data;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.charts.BoxPlotChart;
-import org.molgenis.charts.ChartDataService;
-import org.molgenis.charts.MolgenisAxisType;
-import org.molgenis.charts.MolgenisChartException;
-import org.molgenis.charts.MolgenisSerieType;
-import org.molgenis.charts.XYDataChart;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.charts.*;
 import org.molgenis.charts.calculations.BoxPlotCalcUtil;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.Repository;
-import org.molgenis.data.Sort;
+import org.molgenis.data.*;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 @Component
 public class ChartDataServiceImpl implements ChartDataService
@@ -44,25 +29,21 @@ public class ChartDataServiceImpl implements ChartDataService
 	public XYDataChart getXYDataChart(String entityName, String attributeNameXaxis, String attributeNameYaxis,
 			String split, List<QueryRule> queryRules)
 	{
-		Repository repo = dataService.getRepository(entityName);
+		Repository<Entity> repo = dataService.getRepository(entityName);
 		EntityMetaData entityMetaData = repo.getEntityMetaData();
 
-		final FieldTypeEnum attributeXFieldTypeEnum = entityMetaData.getAttribute(attributeNameXaxis).getDataType()
-				.getEnumType();
-		final FieldTypeEnum attributeYFieldTypeEnum = entityMetaData.getAttribute(attributeNameYaxis).getDataType()
-				.getEnumType();
+		final AttributeType attributeXFieldTypeEnum = entityMetaData.getAttribute(attributeNameXaxis).getDataType();
+		final AttributeType attributeYFieldTypeEnum = entityMetaData.getAttribute(attributeNameYaxis).getDataType();
 		final List<XYDataSerie> xYDataSeries;
 
 		// Sanity check
-		if (FieldTypeEnum.DECIMAL.equals(attributeXFieldTypeEnum) || FieldTypeEnum.INT.equals(attributeXFieldTypeEnum)
-				|| FieldTypeEnum.LONG.equals(attributeXFieldTypeEnum)
-				|| FieldTypeEnum.DATE.equals(attributeXFieldTypeEnum)
-				|| FieldTypeEnum.DATE_TIME.equals(attributeXFieldTypeEnum)
-				|| FieldTypeEnum.DECIMAL.equals(attributeYFieldTypeEnum)
-				|| FieldTypeEnum.INT.equals(attributeYFieldTypeEnum)
-				|| FieldTypeEnum.LONG.equals(attributeYFieldTypeEnum)
-				|| FieldTypeEnum.DATE.equals(attributeYFieldTypeEnum)
-				|| FieldTypeEnum.DATE_TIME.equals(attributeYFieldTypeEnum))
+		if (AttributeType.DECIMAL.equals(attributeXFieldTypeEnum) || AttributeType.INT.equals(attributeXFieldTypeEnum)
+				|| AttributeType.LONG.equals(attributeXFieldTypeEnum) || AttributeType.DATE
+				.equals(attributeXFieldTypeEnum) || AttributeType.DATE_TIME.equals(attributeXFieldTypeEnum)
+				|| AttributeType.DECIMAL.equals(attributeYFieldTypeEnum) || AttributeType.INT
+				.equals(attributeYFieldTypeEnum) || AttributeType.LONG.equals(attributeYFieldTypeEnum)
+				|| AttributeType.DATE.equals(attributeYFieldTypeEnum) || AttributeType.DATE_TIME
+				.equals(attributeYFieldTypeEnum))
 		{
 			if (!StringUtils.isNotBlank(split))
 			{
@@ -86,8 +67,8 @@ public class ChartDataServiceImpl implements ChartDataService
 	}
 
 	@Override
-	public XYDataSerie getXYDataSerie(Repository repo, String entityName, String attributeNameXaxis,
-			String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum, FieldTypeEnum attributeYFieldTypeEnum,
+	public XYDataSerie getXYDataSerie(Repository<Entity> repo, String entityName, String attributeNameXaxis,
+			String attributeNameYaxis, AttributeType attributeXFieldTypeEnum, AttributeType attributeYFieldTypeEnum,
 			List<QueryRule> queryRules)
 	{
 		EntityMetaData entityMetaData = repo.getEntityMetaData();
@@ -111,8 +92,8 @@ public class ChartDataServiceImpl implements ChartDataService
 	}
 
 	@Override
-	public List<XYDataSerie> getXYDataSeries(Repository repo, String entityName, String attributeNameXaxis,
-			String attributeNameYaxis, FieldTypeEnum attributeXFieldTypeEnum, FieldTypeEnum attributeYFieldTypeEnum,
+	public List<XYDataSerie> getXYDataSeries(Repository<Entity> repo, String entityName, String attributeNameXaxis,
+			String attributeNameYaxis, AttributeType attributeXFieldTypeEnum, AttributeType attributeYFieldTypeEnum,
 			String split, List<QueryRule> queryRules)
 
 	{
@@ -151,7 +132,8 @@ public class ChartDataServiceImpl implements ChartDataService
 		Object o = entity.get(split);
 		if (o instanceof Entity)
 		{
-			return ((Entity) o).getLabelValue();
+			Object labelValue = ((Entity) o).getLabelValue();
+			return labelValue != null ? labelValue.toString() : null;
 		}
 		else if (o instanceof List)
 		{
@@ -167,7 +149,8 @@ public class ChartDataServiceImpl implements ChartDataService
 
 				if (ob instanceof Entity)
 				{
-					strBuilder.append(((Entity) ob).getLabelValue());
+					Object labelValue = ((Entity) ob).getLabelValue();
+					strBuilder.append(labelValue != null ? labelValue.toString() : null);
 				}
 				else
 				{
@@ -213,7 +196,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	public BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules,
 			String split, double scaleToCalcOutliers)
 	{
-		Repository repo = dataService.getRepository(entityName);
+		Repository<Entity> repo = dataService.getRepository(entityName);
 		EntityMetaData entityMetaData = repo.getEntityMetaData();
 
 		BoxPlotChart boxPlotChart = new BoxPlotChart();
@@ -330,17 +313,17 @@ public class ChartDataServiceImpl implements ChartDataService
 	 * @return
 	 */
 
-	private Iterable<Entity> getIterable(String entityName, Repository repo, List<QueryRule> queryRules, Sort sort)
+	private Iterable<Entity> getIterable(String entityName, Repository<Entity> repo, List<QueryRule> queryRules, Sort sort)
 	{
 
-		final Query q;
+		final Query<Entity> q;
 		if (queryRules == null)
 		{
-			q = new QueryImpl();
+			q = new QueryImpl<Entity>();
 		}
 		else
 		{
-			q = new QueryImpl(queryRules);
+			q = new QueryImpl<Entity>(queryRules);
 		}
 
 		if (null != sort)
@@ -364,28 +347,28 @@ public class ChartDataServiceImpl implements ChartDataService
 	 * 
 	 * @param entity
 	 * @param attributeName
-	 * @param attributeJavaType
+	 * @param attributeFieldTypeEnum
 	 * @return value (Object)
 	 */
-	private Object getJavaValue(Entity entity, String attributeName, FieldTypeEnum attributeFieldTypeEnum)
+	private Object getJavaValue(Entity entity, String attributeName, AttributeType attributeFieldTypeEnum)
 	{
-		if (FieldTypeEnum.DECIMAL.equals(attributeFieldTypeEnum))
+		if (AttributeType.DECIMAL.equals(attributeFieldTypeEnum))
 		{
 			return entity.getDouble(attributeName);
 		}
-		else if (FieldTypeEnum.INT.equals(attributeFieldTypeEnum))
+		else if (AttributeType.INT.equals(attributeFieldTypeEnum))
 		{
 			return entity.getInt(attributeName);
 		}
-		else if (FieldTypeEnum.LONG.equals(attributeFieldTypeEnum))
+		else if (AttributeType.LONG.equals(attributeFieldTypeEnum))
 		{
 			return entity.getLong(attributeName);
 		}
-		else if (FieldTypeEnum.DATE_TIME.equals(attributeFieldTypeEnum))
+		else if (AttributeType.DATE_TIME.equals(attributeFieldTypeEnum))
 		{
 			return entity.getUtilDate(attributeName);
 		}
-		else if (FieldTypeEnum.DATE.equals(attributeFieldTypeEnum))
+		else if (AttributeType.DATE.equals(attributeFieldTypeEnum))
 		{
 			return entity.getDate(attributeName);
 		}
@@ -403,7 +386,7 @@ public class ChartDataServiceImpl implements ChartDataService
 
 		if (queryRules != null && !queryRules.isEmpty())
 		{
-			QueryImpl q = new QueryImpl();
+			QueryImpl<Entity> q = new QueryImpl<Entity>();
 			for (QueryRule queryRule : queryRules)
 			{
 				q.addRule(queryRule);
@@ -415,7 +398,7 @@ public class ChartDataServiceImpl implements ChartDataService
 				@Override
 				public Iterator<Entity> iterator()
 				{
-					return ((Repository) AllEntitiesIterable).findAll(q).iterator();
+					return ((Repository<Entity>) AllEntitiesIterable).findAll(q).iterator();
 				}
 			};
 		}

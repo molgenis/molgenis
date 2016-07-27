@@ -1,8 +1,7 @@
-import React from 'react';
-import { UploadForm } from './UploadForm';
-import $ from 'jquery';
-import AlertMessage from './AlertMessage';
-import { JobContainer } from './jobs/JobContainer';
+import React from "react";
+import {UploadForm} from "./UploadForm";
+import $ from "jquery";
+import {JobContainer} from "./jobs/JobContainer";
 
 var UploadContainer = React.createClass({
 	displayName:'UploadContainer',

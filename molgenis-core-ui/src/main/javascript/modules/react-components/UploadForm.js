@@ -1,7 +1,7 @@
-import React from 'react';
-import { Button } from './Button';
-import { Input } from './Input';
-import { RadioGroup } from './RadioGroup';
+import React from "react";
+import {Button} from "./Button";
+import {Input} from "./Input";
+import {RadioGroup} from "./RadioGroup";
 
 var UploadForm = React.createClass({
 	displayName: 'UploadForm',

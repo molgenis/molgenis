@@ -13,6 +13,9 @@ import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Creates ElasticSearch indices.
+ */
 public class ElasticsearchIndexCreator
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ElasticsearchIndexCreator.class);
