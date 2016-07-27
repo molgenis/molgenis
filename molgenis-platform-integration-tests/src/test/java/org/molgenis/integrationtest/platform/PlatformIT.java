@@ -27,6 +27,7 @@ import org.testng.annotations.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -44,6 +45,8 @@ import static java.util.stream.Stream.of;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.test.data.EntityTestHarness.*;
+import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
+import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
@@ -398,16 +401,42 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(retrieved.count(), entities.size());
 	}
 
-	@Test
-	public void testFindQuery()
+	@DataProvider(name = "findQueryOperatorEq")
+	private static Object[][] findQueryOperatorEq() throws ParseException
 	{
-		List<Entity> entities = createDynamic(5).collect(toList());
+		return new Object[][] { { ATTR_ID, "1", singletonList(1) }, { ATTR_STRING, "string1", asList(0, 1, 2) },
+				{ ATTR_BOOL, true, asList(0, 2) }, { ATTR_DATE, getDateFormat().parse("2012-12-21"), asList(0, 1, 2) },
+				{ ATTR_DATETIME, getDateTimeFormat().parse("1985-08-12T11:12:13+0500"), asList(0, 1, 2) },
+				{ ATTR_DECIMAL, 1.123, singletonList(1) },
+				{ ATTR_HTML, "<html>where is my head and where is my body</html>", singletonList(1) },
+				{ ATTR_HYPERLINK, "http://www.molgenis.org", asList(0, 1, 2) },
+				{ ATTR_LONG, 1000000L, singletonList(1) }, { ATTR_INT, 11, singletonList(1) },
+				{ ATTR_SCRIPT, "/bin/blaat/script.sh", asList(0, 1, 2) },
+				{ ATTR_EMAIL, "this.is@mail.address", asList(0, 1, 2) },
+				// null checks
+				{ ATTR_ID, null, emptyList() }, { ATTR_STRING, null, emptyList() }, { ATTR_BOOL, null, emptyList() },
+				{ ATTR_CATEGORICAL, null, emptyList() }, { ATTR_CATEGORICAL_MREF, null, emptyList() },
+				{ ATTR_DATE, null, emptyList() }, { ATTR_DATETIME, null, emptyList() },
+				{ ATTR_DECIMAL, null, emptyList() }, { ATTR_HTML, null, asList(0, 2) },
+				{ ATTR_HYPERLINK, null, emptyList() }, { ATTR_LONG, null, emptyList() },
+				{ ATTR_INT, 11, singletonList(1) }, { ATTR_SCRIPT, null, emptyList() },
+				{ ATTR_EMAIL, null, emptyList() }, { ATTR_XREF, null, emptyList() }, { ATTR_MREF, null, emptyList() } };
+	}
+
+	@Test(dataProvider = "findQueryOperatorEq")
+	public void testFindQueryOperatorEq(String attrName, Object value, List<Integer> expectedEntityIndices)
+	{
+		List<Entity> entities = createDynamic(3).collect(toList());
 		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService
-				.findAll(entityMetaDataDynamic.getName(), new QueryImpl<>().eq(ATTR_ID, entities.get(0).getIdValue()));
-		assertEquals(found.get().count(), 1);
-		assertEquals(found.get().findFirst().get().getIdValue(), entities.get(0).getIdValue());
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityMetaDataDynamic.getName()).eq(attrName, value)
+				.findAll();
+		List<Entity> foundAsList = found.get().collect(toList());
+		assertEquals(foundAsList.size(), expectedEntityIndices.size());
+		for (int i = 0; i < expectedEntityIndices.size(); ++i)
+		{
+			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
+		}
 	}
 
 	@DataProvider(name = "findQueryOperatorIn")
@@ -539,8 +568,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
 		Supplier<Stream<Entity>> found = () -> dataService.query(entityMetaDataDynamic.getName())
-				.rng(ATTR_INT, low, high)
-				.findAll();
+				.rng(ATTR_INT, low, high).findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -643,10 +671,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@DataProvider(name = "findQueryOperatorNested")
 	private static Object[][] findQueryOperatorNested()
 	{
-		return new Object[][] { { true, "string1", 10, asList(0, 1, 2) }, { true, "unknownString", 10, asList(0) },
-				{ true, "string1", -1, asList(0, 1, 2) }, { true, "unknownString", -1, emptyList() },
-				{ false, "string1", 10, emptyList() }, { false, "unknownString", 10, emptyList() },
-				{ false, "string1", -1, emptyList() }, { false, "unknownString", -1, emptyList() } };
+		return new Object[][] { { true, "string1", 10, asList(0, 2) }, { true, "unknownString", 10, asList(0) },
+				{ true, "string1", -1, asList(0, 2) }, { true, "unknownString", -1, emptyList() },
+				{ false, "string1", 10, singletonList(1) }, { false, "unknownString", 10, emptyList() },
+				{ false, "string1", -1, asList(1) }, { false, "unknownString", -1, emptyList() } };
 	}
 
 	@Test(dataProvider = "findQueryOperatorNested")
@@ -670,7 +698,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@DataProvider(name = "findQueryOperatorSearch")
 	private static Object[][] findQueryOperatorSearch()
 	{
-		return new Object[][] { { "body", asList(0, 1) }, { "head", asList(0, 1) }, { "unknownString", emptyList() } };
+		return new Object[][] { { "body", asList(1) }, { "head", asList(1) }, { "unknownString", emptyList() } };
 	}
 
 	@Test(dataProvider = "findQueryOperatorSearch")
