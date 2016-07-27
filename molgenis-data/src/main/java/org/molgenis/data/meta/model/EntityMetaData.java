@@ -1,7 +1,7 @@
 package org.molgenis.data.meta.model;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.StaticEntity;
@@ -83,7 +83,7 @@ public class EntityMetaData extends StaticEntity
 	/**
 	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #EntityMetaData(EntityMetaData)})
 	 *
-	 * @param entityMeta           entity meta data
+	 * @param entityMeta entity meta data
 	 * @param copiedEntityMetaData Map<entity full name, entity meta data>
 	 * @return deep copy of entity meta data
 	 */
@@ -108,17 +108,16 @@ public class EntityMetaData extends StaticEntity
 
 		// Own id attribute
 		AttributeMetaData idAttr = entityMeta.getOwnIdAttribute();
-		entityMetaCopy
-				.setIdAttribute(idAttr != null ? AttributeMetaData.newInstance(idAttr, copiedEntityMetaData) : null);
+		entityMetaCopy.setIdAttribute(idAttr != null ? AttributeMetaData.newInstance(idAttr, copiedEntityMetaData) : null);
 
 		// Own label attribute
 		AttributeMetaData labelAttr = entityMeta.getOwnLabelAttribute();
-		entityMetaCopy.setLabelAttribute(
-				labelAttr != null ? AttributeMetaData.newInstance(labelAttr, copiedEntityMetaData) : null);
+		entityMetaCopy.setLabelAttribute(labelAttr != null ? AttributeMetaData.newInstance(labelAttr) : null);
 
 		// Own lookup attrs
 		Iterable<AttributeMetaData> ownLookupAttrs = entityMeta.getOwnLookupAttributes();
-		entityMetaCopy.setLookupAttributes(stream(ownLookupAttrs.spliterator(), false).map(e -> e.newInstance(e, copiedEntityMetaData)).collect(toList()));
+		entityMetaCopy.setLookupAttributes(
+				stream(ownLookupAttrs.spliterator(), false).map(AttributeMetaData::newInstance).collect(toList()));
 		entityMetaCopy.setAbstract(entityMeta.isAbstract());
 
 		// Extends
@@ -133,7 +132,7 @@ public class EntityMetaData extends StaticEntity
 		// Own attributes
 		Iterable<AttributeMetaData> ownAttributes = entityMeta.getOwnAttributes();
 		entityMetaCopy.setOwnAttributes(
-				stream(ownAttributes.spliterator(), false).map(e -> e.newInstance(e ,copiedEntityMetaData)).collect(toList()));
+				stream(ownAttributes.spliterator(), false).map(AttributeMetaData::newInstance).collect(toList()));
 		return entityMetaCopy;
 	}
 
