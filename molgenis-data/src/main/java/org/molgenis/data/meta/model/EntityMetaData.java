@@ -1,5 +1,6 @@
 package org.molgenis.data.meta.model;
 
+import autovalue.shaded.com.google.common.common.collect.Lists;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
@@ -76,26 +77,63 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public static EntityMetaData newInstance(EntityMetaData entityMeta)
 	{
+		return newInstance(entityMeta, Maps.newConcurrentMap());
+	}
+
+	/**
+	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #EntityMetaData(EntityMetaData)})
+	 *
+	 * @param entityMeta           entity meta data
+	 * @param copiedEntityMetaData Map<entity full name, entity meta data>
+	 * @return deep copy of entity meta data
+	 */
+	static EntityMetaData newInstance(EntityMetaData entityMeta, Map<String, EntityMetaData> copiedEntityMetaData)
+	{
+		copiedEntityMetaData.put(entityMeta.getName(), entityMeta);
+
 		EntityMetaData entityMetaCopy = new EntityMetaData(entityMeta.getEntityMetaData());
+
+		// name
 		entityMetaCopy.setName(entityMeta.getName());
+
+		// Simple name
 		entityMetaCopy.setSimpleName(entityMeta.getSimpleName());
+
+		// Package
 		Package package_ = entityMeta.getPackage();
 		entityMetaCopy.setPackage(package_ != null ? Package.newInstance(package_) : null);
+
 		entityMetaCopy.setLabel(entityMeta.getLabel());
 		entityMetaCopy.setDescription(entityMeta.getDescription());
-		AttributeMetaData idAttr = entityMeta.getIdAttribute();
-		entityMetaCopy.setIdAttribute(idAttr != null ? AttributeMetaData.newInstance(idAttr) : null);
-		AttributeMetaData labelAttr = entityMeta.getLabelAttribute();
-		entityMetaCopy.setLabelAttribute(idAttr != null ? AttributeMetaData.newInstance(labelAttr) : null);
-		Iterable<AttributeMetaData> lookupAttrs = entityMeta.getLookupAttributes();
-		entityMetaCopy.setLookupAttributes(
-				stream(lookupAttrs.spliterator(), false).map(AttributeMetaData::newInstance).collect(toList()));
+
+		// Own id attribute
+		AttributeMetaData idAttr = entityMeta.getOwnIdAttribute();
+		entityMetaCopy
+				.setIdAttribute(idAttr != null ? AttributeMetaData.newInstance(idAttr, copiedEntityMetaData) : null);
+
+		// Own label attribute
+		AttributeMetaData labelAttr = entityMeta.getOwnLabelAttribute();
+		entityMetaCopy.setLabelAttribute(
+				labelAttr != null ? AttributeMetaData.newInstance(labelAttr, copiedEntityMetaData) : null);
+
+		// Own lookup attrs
+		Iterable<AttributeMetaData> ownLookupAttrs = entityMeta.getOwnLookupAttributes();
+		entityMetaCopy.setLookupAttributes(stream(ownLookupAttrs.spliterator(), false).map(e -> e.newInstance(e, copiedEntityMetaData)).collect(toList()));
 		entityMetaCopy.setAbstract(entityMeta.isAbstract());
+
+		// Extends
 		EntityMetaData extends_ = entityMeta.getExtends();
-		entityMetaCopy.setExtends(extends_ != null ? EntityMetaData.newInstance(extends_) : null);
+		entityMetaCopy.setExtends(extends_ != null ? EntityMetaData.newInstance(extends_, copiedEntityMetaData) : null);
+
+		// Tags
 		Iterable<Tag> tags = entityMeta.getTags();
 		entityMeta.setTags(stream(tags.spliterator(), false).map(Tag::newInstance).collect(toList()));
 		entityMetaCopy.setBackend(entityMeta.getBackend());
+
+		// Own attributes
+		Iterable<AttributeMetaData> ownAttributes = entityMeta.getOwnAttributes();
+		entityMetaCopy.setOwnAttributes(
+				stream(ownAttributes.spliterator(), false).map(e -> e.newInstance(e ,copiedEntityMetaData)).collect(toList()));
 		return entityMetaCopy;
 	}
 
