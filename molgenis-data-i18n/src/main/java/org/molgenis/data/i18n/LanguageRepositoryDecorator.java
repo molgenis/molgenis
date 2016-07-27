@@ -265,11 +265,6 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 
 			runAsSystem(() -> dataService.update(ENTITY_META_DATA, attrMeta));
 
-			// hack: update in memory representation
-			EntityMetaData attrMetaUpdated = dataService.getEntityMetaData(ATTRIBUTE_META_DATA);
-			attrMetaUpdated.addAttribute(attrLabel);
-			attrMetaUpdated.addAttribute(attrDescription);
-
 			// Add language attributes for entity meta data
 			AttributeMetaData entityLabel = attrMetaFactory.create()
 					.setName(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true)
@@ -284,11 +279,6 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 			entityMeta.addAttribute(entityDescription);
 
 			runAsSystem(() -> dataService.update(ENTITY_META_DATA, entityMeta));
-
-			// hack: update in memory representation
-			EntityMetaData entityMetaUpdated = dataService.getEntityMetaData(ENTITY_META_DATA);
-			entityMetaUpdated.addAttribute(entityLabel);
-			entityMetaUpdated.addAttribute(entityDescription);
 
 			// Add language attributes for i18n string
 			AttributeMetaData languageCodeAttr = attrMetaFactory.create().setName(languageCode).setNillable(true)
