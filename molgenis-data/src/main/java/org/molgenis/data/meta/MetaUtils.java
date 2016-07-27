@@ -55,7 +55,8 @@ public class MetaUtils
 			AttributeMetaData currentAttribute = existingEntityMetaData.getAttribute(attr.getName());
 			if (currentAttribute != null)
 			{
-				if (!EntityUtils.equals(currentAttribute, attr))
+				// FIXME During import the attr.identifier is null causing this check to be false, workaround by ignoring the ID
+				if (!EntityUtils.equals(currentAttribute, attr, false))
 				{
 					//FIXME This is no longer true, we are allowed to change existing attributes, it just needs to adhere to type conversion rules
 					throw new MolgenisDataException(
