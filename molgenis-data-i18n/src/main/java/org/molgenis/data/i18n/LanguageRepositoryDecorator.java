@@ -290,10 +290,6 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 			entityMetaUpdated.addAttribute(entityLabel);
 			entityMetaUpdated.addAttribute(entityDescription);
 
-
-			// remove i18n attributes from i18n string meta data
-			//AttributeMetaData attrLanguageCode = i18nStringMeta.getAttribute(languageCode);
-
 			// Add language attributes for i18n string
 			AttributeMetaData languageCodeAttr = attrMetaFactory.create().setName(languageCode).setNillable(true)
 					.setDataType(TEXT);
