@@ -74,21 +74,30 @@ public class AttributeMetaData extends StaticEntity
 	 * @param attrMeta attribute
 	 * @return deep copy of attribute
 	 */
-	static AttributeMetaData newInstance(AttributeMetaData attrMeta, Map<String, EntityMetaData> copiedEntityMetaData)
+	static AttributeMetaData newInstance(AttributeMetaData attrMeta, Map<String, StaticEntity> copied)
 	{
+		if(null == attrMeta) {
+			return null;
+		}
+
+		requireNonNull(attrMeta.getName());
+
+		if(copied.containsKey(attrMeta.getName()))
+		{
+			return (AttributeMetaData) copied.get(attrMeta.getName());
+		}
+
 		EntityMetaData entityMeta = attrMeta.getEntityMetaData();
 		AttributeMetaData attrMetaCopy = new AttributeMetaData(entityMeta);
 		attrMetaCopy.setIdentifier(attrMeta.getIdentifier());
 		attrMetaCopy.setName(attrMeta.getName());
+
+		// Put the copy into the copied registry
+		copied.put(attrMetaCopy.getName(), attrMetaCopy);
+
 		attrMetaCopy.setDataType(attrMeta.getDataType());
 		EntityMetaData refEntity = attrMeta.getRefEntity();
-
-		if (refEntity != null)
-		{
-			attrMetaCopy.setRefEntity(copiedEntityMetaData.containsKey(refEntity.getName()) ? copiedEntityMetaData
-					.get(refEntity.getName()) : EntityMetaData.newInstance(refEntity, copiedEntityMetaData));
-		}
-
+		attrMetaCopy.setRefEntity(EntityMetaData.newInstance(refEntity, copied));
 		attrMetaCopy.setExpression(attrMeta.getExpression());
 		attrMetaCopy.setNillable(attrMeta.isNillable());
 		attrMetaCopy.setAuto(attrMeta.isAuto());
@@ -102,7 +111,7 @@ public class AttributeMetaData extends StaticEntity
 		attrMetaCopy.setUnique(attrMeta.isUnique());
 		Iterable<AttributeMetaData> attrParts = attrMeta.getAttributeParts();
 		attrMetaCopy.setAttributeParts(
-				stream(attrParts.spliterator(), false).map(e -> newInstance(e, copiedEntityMetaData))
+				stream(attrParts.spliterator(), false).map(e -> newInstance(e, copied))
 						.collect(toList()));
 		Iterable<Tag> tags = attrMeta.getTags();
 		attrMetaCopy.setTags(stream(tags.spliterator(), false).map(Tag::newInstance).collect(toList()));

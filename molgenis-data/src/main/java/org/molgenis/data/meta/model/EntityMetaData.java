@@ -3,6 +3,9 @@ package org.molgenis.data.meta.model;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+import static java.util.Objects.requireNonNull;
+
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.StaticEntity;
 
@@ -84,17 +87,30 @@ public class EntityMetaData extends StaticEntity
 	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #EntityMetaData(EntityMetaData)})
 	 *
 	 * @param entityMeta entity meta data
-	 * @param copiedEntityMetaData Map<entity full name, entity meta data>
+	 * @param copied     Map<entity full name, entity meta data>
 	 * @return deep copy of entity meta data
 	 */
-	static EntityMetaData newInstance(EntityMetaData entityMeta, Map<String, EntityMetaData> copiedEntityMetaData)
+	static EntityMetaData newInstance(EntityMetaData entityMeta, Map<String, StaticEntity> copied)
 	{
-		copiedEntityMetaData.put(entityMeta.getName(), entityMeta);
+		if (null == entityMeta)
+		{
+			return null;
+		}
+
+		requireNonNull(entityMeta.getName());
+
+		if (copied.containsKey(entityMeta.getName()))
+		{
+			return (EntityMetaData) copied.get(entityMeta.getName());
+		}
 
 		EntityMetaData entityMetaCopy = new EntityMetaData(entityMeta.getEntityMetaData());
 
 		// name
 		entityMetaCopy.setName(entityMeta.getName());
+
+		// Put the copy into the copied registry
+		copied.put(entityMetaCopy.getName(), entityMetaCopy);
 
 		// Simple name
 		entityMetaCopy.setSimpleName(entityMeta.getSimpleName());
@@ -103,12 +119,14 @@ public class EntityMetaData extends StaticEntity
 		Package package_ = entityMeta.getPackage();
 		entityMetaCopy.setPackage(package_ != null ? Package.newInstance(package_) : null);
 
+		// Label
 		entityMetaCopy.setLabel(entityMeta.getLabel());
 		entityMetaCopy.setDescription(entityMeta.getDescription());
 
 		// Own id attribute
-		AttributeMetaData idAttr = entityMeta.getOwnIdAttribute();
-		entityMetaCopy.setIdAttribute(idAttr != null ? AttributeMetaData.newInstance(idAttr, copiedEntityMetaData) : null);
+		AttributeMetaData ownIdAttribute = entityMeta.getOwnIdAttribute();
+		entityMetaCopy
+				.setIdAttribute(ownIdAttribute != null ? AttributeMetaData.newInstance(ownIdAttribute, copied) : null);
 
 		// Own label attribute
 		AttributeMetaData labelAttr = entityMeta.getOwnLabelAttribute();
@@ -122,7 +140,7 @@ public class EntityMetaData extends StaticEntity
 
 		// Extends
 		EntityMetaData extends_ = entityMeta.getExtends();
-		entityMetaCopy.setExtends(extends_ != null ? EntityMetaData.newInstance(extends_, copiedEntityMetaData) : null);
+		entityMetaCopy.setExtends(extends_ != null ? EntityMetaData.newInstance(extends_, copied) : null);
 
 		// Tags
 		Iterable<Tag> tags = entityMeta.getTags();
@@ -132,7 +150,9 @@ public class EntityMetaData extends StaticEntity
 		// Own attributes
 		Iterable<AttributeMetaData> ownAttributes = entityMeta.getOwnAttributes();
 		entityMetaCopy.setOwnAttributes(
-				stream(ownAttributes.spliterator(), false).map(AttributeMetaData::newInstance).collect(toList()));
+				stream(ownAttributes.spliterator(), false).map(e -> AttributeMetaData.newInstance(e, copied))
+						.collect(toList()));
+
 		return entityMetaCopy;
 	}
 
@@ -636,6 +656,7 @@ public class EntityMetaData extends StaticEntity
 
 	public void removeAttribute(AttributeMetaData attr)
 	{
+		requireNonNull(attr);
 		// FIXME does not remove attr if attr is located in a compound attr
 		Iterable<AttributeMetaData> existingAttrs = getEntities(ATTRIBUTES, AttributeMetaData.class);
 		List<AttributeMetaData> filteredAttrs = stream(existingAttrs.spliterator(), false)
