@@ -1,5 +1,6 @@
 package org.molgenis;
 
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.fieldtypes.*;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.model.elements.Field;
@@ -77,7 +78,7 @@ public class MolgenisFieldTypes
 
 		private static String normalize(String valueString)
 		{
-			return valueString.replace("_", "").toLowerCase();
+			return StringUtils.remove(valueString, '_').toLowerCase();
 		}
 	}
 
