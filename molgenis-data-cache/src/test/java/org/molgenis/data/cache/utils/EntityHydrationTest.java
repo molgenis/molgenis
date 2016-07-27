@@ -75,11 +75,11 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 		dehydratedEntity.put(ATTR_DATE, date);
 		dehydratedEntity.put(ATTR_DATETIME, dateTime);
 		dehydratedEntity.put(ATTR_EMAIL, "this.is@mail.address");
-		dehydratedEntity.put(ATTR_DECIMAL, 1.123);
-		dehydratedEntity.put(ATTR_HTML, "<html>where is my head and where is my body</html>");
+		dehydratedEntity.put(ATTR_DECIMAL, 0.123);
+		dehydratedEntity.put(ATTR_HTML, null);
 		dehydratedEntity.put(ATTR_HYPERLINK, "http://www.molgenis.org");
-		dehydratedEntity.put(ATTR_LONG, 1000000L);
-		dehydratedEntity.put(ATTR_INT, 18);
+		dehydratedEntity.put(ATTR_LONG, 0L);
+		dehydratedEntity.put(ATTR_INT, 10);
 		dehydratedEntity.put(ATTR_SCRIPT, "/bin/blaat/script.sh");
 		dehydratedEntity.put(ATTR_XREF, "0");
 		dehydratedEntity.put(ATTR_MREF, singletonList("0"));
