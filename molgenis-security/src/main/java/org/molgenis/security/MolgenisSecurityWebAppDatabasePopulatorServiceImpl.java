@@ -10,11 +10,20 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
 import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
+import static org.molgenis.security.core.utils.SecurityUtils.*;
 
 @Service
 public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
@@ -33,9 +42,7 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 	@Value("${anonymous.email:molgenis+anonymous@gmail.com}")
 	private String anonymousEmail;
 
-	private MolgenisUser userAdmin;
 	private MolgenisUser anonymousUser;
-	private MolgenisGroup allUsersGroup;
 
 	@Autowired
 	MolgenisSecurityWebAppDatabasePopulatorServiceImpl(MolgenisUserFactory molgenisUserFactory,
@@ -58,7 +65,7 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 				"please configure the admin.password property in your molgenis-server.properties");
 
 		// create admin user
-		userAdmin = molgenisUserFactory.create();
+		MolgenisUser userAdmin = molgenisUserFactory.create();
 		userAdmin.setUsername(USERNAME_ADMIN);
 		userAdmin.setPassword(adminPassword);
 		userAdmin.setEmail(adminEmail);
@@ -84,7 +91,7 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 		dataService.add(USER_AUTHORITY, anonymousAuthority);
 
 		// create all users group
-		allUsersGroup = molgenisGroupFactory.create();
+		MolgenisGroup allUsersGroup = molgenisGroupFactory.create();
 		allUsersGroup.setName(AccountService.ALL_USER_GROUP);
 		dataService.add(MOLGENIS_GROUP, allUsersGroup);
 		dataService.getRepository(MOLGENIS_GROUP).flush();
@@ -92,23 +99,25 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 		// allow all users to see the home plugin
 		GroupAuthority usersGroupHomeAuthority = groupAuthorityFactory.create();
 		usersGroupHomeAuthority.setMolgenisGroup(allUsersGroup);
-		usersGroupHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + homeControllerId.toUpperCase());
+		usersGroupHomeAuthority.setRole(AUTHORITY_PLUGIN_READ_PREFIX + homeControllerId.toUpperCase());
 		dataService.add(GROUP_AUTHORITY, usersGroupHomeAuthority);
 
 		// allow all users to update their profile
 		GroupAuthority usersGroupUserAccountAuthority = groupAuthorityFactory.create();
 		usersGroupUserAccountAuthority.setMolgenisGroup(allUsersGroup);
-		usersGroupUserAccountAuthority
-				.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + "useraccount".toUpperCase()); // FIXME do not
-		// hardcode
+		// FIXME do not hardcode useraccount plugin name
+		usersGroupUserAccountAuthority.setRole(AUTHORITY_PLUGIN_WRITE_PREFIX + "useraccount".toUpperCase());
 		dataService.add(GROUP_AUTHORITY, usersGroupUserAccountAuthority);
 
-		// allow all users to read the app languages
-		GroupAuthority usersGroupLanguagesAuthority = groupAuthorityFactory.create();
-		usersGroupLanguagesAuthority.setMolgenisGroup(allUsersGroup);
-		// FIXME do not hardcode default language code
-		usersGroupLanguagesAuthority.setRole(SecurityUtils.AUTHORITY_ENTITY_READ_PREFIX + "SYS_LANGUAGES");
-		dataService.add(GROUP_AUTHORITY, usersGroupLanguagesAuthority);
+		// allow all users to read meta data entities
+		List<String> entityNames = Arrays.asList(ENTITY_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, LANGUAGE, I18N_STRING);
+		entityNames.forEach(entityName ->
+		{
+			GroupAuthority usersGroupAuthority = groupAuthorityFactory.create();
+			usersGroupAuthority.setMolgenisGroup(allUsersGroup);
+			usersGroupAuthority.setRole(AUTHORITY_ENTITY_READ_PREFIX + entityName);
+			dataService.add(GROUP_AUTHORITY, usersGroupAuthority);
+		});
 	}
 
 	@Override

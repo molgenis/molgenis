@@ -41,8 +41,8 @@ import java.io.IOException;
 import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData.ANNOTATION_JOB_EXECUTION;
 import static org.molgenis.dataexplorer.controller.DataExplorerController.*;
 import static org.molgenis.security.core.Permission.READ;
@@ -113,8 +113,8 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		boolean entityExists = false;
 		boolean hasEntityPermission = false;
-		List<EntityMetaData> entitiesMeta = dataService.getEntityNames().map(dataService::getEntityMetaData)
-				.collect(Collectors.toList());
+		List<EntityMetaData> entitiesMeta = dataService.getMeta().getEntityMetaDatas()
+				.filter(entityMeta -> !entityMeta.isAbstract()).collect(toList());
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityName != null)
 		{
@@ -276,7 +276,8 @@ public class DataExplorerController extends MolgenisPluginController
 	private Map<String, String> getGenomeBrowserEntities()
 	{
 		Map<String, String> genomeEntities = new HashMap<>();
-		dataService.getMeta().getEntityMetaDatas().filter(this::isGenomeBrowserEntity).forEach(entityMeta -> {
+		dataService.getMeta().getEntityMetaDatas().filter(this::isGenomeBrowserEntity).forEach(entityMeta ->
+		{
 			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityMeta.getName(), READ);
 			boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityMeta.getName(), WRITE);
 			if (canRead || canWrite)
