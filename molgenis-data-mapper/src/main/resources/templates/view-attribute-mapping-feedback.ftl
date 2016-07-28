@@ -41,7 +41,7 @@
 									<td>${feedbackRow.value?datetime}</td>
 								<#elseif feedbackRow.value?is_hash> <!-- its a dynamic entity -->
                                     <td>
-										${feedbackRow.value?html}
+										${feedbackRow.value.getLabelValue()}
 									</td>
 								<#elseif feedbackRow.value?is_sequence> <!-- its mref values -->
 									<td>
