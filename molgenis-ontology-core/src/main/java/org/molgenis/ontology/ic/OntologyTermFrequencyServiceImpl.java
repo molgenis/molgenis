@@ -33,14 +33,16 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 	public Double getTermFrequency(String term)
 	{
 		Entity entity = getTermFrequencyEntity(term);
-		return entity.getDouble(FREQUENCY);
+		if (entity == null) return null
+		else return entity.getDouble(FREQUENCY);
 	}
 
 	@Override
 	public Integer getTermOccurrence(String term)
 	{
 		Entity entity = getTermFrequencyEntity(term);
-		return entity.getInt(OCCURRENCE);
+		if (entity == null) return null
+		else return entity.getInt(OCCURRENCE);
 	}
 
 	private Entity getTermFrequencyEntity(String term)
