@@ -33,12 +33,12 @@ import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
@@ -49,6 +49,9 @@ import static org.testng.Assert.*;
 @ContextConfiguration(classes = { GavinAnnotatorTest.Config.class, GavinAnnotator.class })
 public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 {
+	private static final String BENIGN = "Benign";
+	private static final String CALIBRATED = "calibrated";
+
 	@Autowired
 	ApplicationContext context;
 
@@ -112,71 +115,62 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
+	public void testGeneWithNullFields()
+	{
+		Entity variantEntity = getVariantEntity("A,T", "6,80", "0.00001,0.00001");
+		Entity effectEntity = getEffectEntity("T", "HIGH", "ABCD1", variantEntity);
+
+		Iterator<Entity> results = annotator.annotate(singletonList(effectEntity));
+		assertTrue(results.hasNext());
+		Entity resultEntity = results.next();
+		assertFalse(results.hasNext());
+
+		assertEquals(resultEntity.get(CLASSIFICATION), BENIGN);
+		assertEquals(resultEntity.get(CONFIDENCE), CALIBRATED);
+		assertEquals(resultEntity.get(REASON), "Variant MAF of 1.0E-5 is greater than 0.0.");
+	}
+
+	@Test
 	public void testAnnotateHighMafBenign()
 	{
-		Entity variant_entity = new DynamicEntity(entityMetaData);
+		Entity variant_entity = getVariantEntity("A,T", "1,2", "2,3");
+		Entity effect_entity = getEffectEntity("A", "HIGH", null, variant_entity);
 
-		variant_entity.set(VcfAttributes.ALT, "A,T");
-		variant_entity.set(CaddAnnotator.CADD_SCALED, "1,2");
-		variant_entity.set(ExacAnnotator.EXAC_AF, "2,3");
-
-		Entity effect_entity = new DynamicEntity(emd);
-		effect_entity.set(EffectsMetaData.ALT, "A");
-		effect_entity.set(EffectsMetaData.PUTATIVE_IMPACT, "HIGH");
-		effect_entity.set(GavinAnnotator.VARIANT_ENTITY, variant_entity);
-
-		Iterator<Entity> results = annotator.annotate(Collections.singletonList(effect_entity));
+		Iterator<Entity> results = annotator.annotate(singletonList(effect_entity));
 		assertTrue(results.hasNext());
 		Entity resultEntity = results.next();
 		assertFalse(results.hasNext());
 
 		assertEquals(resultEntity.get(CLASSIFICATION), "Benign");
 		assertEquals(resultEntity.get(CONFIDENCE), "genomewide");
-		assertEquals(resultEntity.get(REASON), "MAF > 0.00474");
-
+		assertEquals(resultEntity.get(REASON),
+				"Variant MAF of 2.0 is not rare enough to generally be considered pathogenic.");
 	}
 
 	@Test
 	public void testAnnotateLowCaddBenign()
 	{
-		Entity variant_entity = new DynamicEntity(entityMetaData);
+		Entity variant_entity = getVariantEntity("A,T", "1,2", "0.00001,0.00001");
+		Entity effect_entity = getEffectEntity("A", "HIGH", null, variant_entity);
 
-		variant_entity.set(VcfAttributes.ALT, "A,T");
-		variant_entity.set(CaddAnnotator.CADD_SCALED, "1,2");
-		variant_entity.set(ExacAnnotator.EXAC_AF, "0.00001,0.00001");
-
-		Entity effect_entity = new DynamicEntity(emd);
-		effect_entity.set(EffectsMetaData.ALT, "A");
-		effect_entity.set(EffectsMetaData.PUTATIVE_IMPACT, "HIGH");
-		effect_entity.set(GavinAnnotator.VARIANT_ENTITY, variant_entity);
-
-		Iterator<Entity> results = annotator.annotate(Collections.singletonList(effect_entity));
+		Iterator<Entity> results = annotator.annotate(singletonList(effect_entity));
 		assertTrue(results.hasNext());
 		Entity resultEntity = results.next();
 		assertFalse(results.hasNext());
 
 		assertEquals(resultEntity.get(CLASSIFICATION), "Benign");
 		assertEquals(resultEntity.get(CONFIDENCE), "genomewide");
-		assertEquals(resultEntity.get(REASON), "CADDscore <= 15");
-
+		assertEquals(resultEntity.get(REASON),
+				"Variant CADD score of 1.0 is less than a global threshold of 15, although the variant MAF of 1.0E-5 is rare enough to be potentially pathogenic.");
 	}
 
 	@Test
 	public void testAnnotateNoCaddVOUS()
 	{
-		Entity variant_entity = new DynamicEntity(entityMetaData);
+		Entity variant_entity = getVariantEntity("A,T", null, "0.00001,0.00001");
+		Entity effect_entity = getEffectEntity("A", "HIGH", "TFR2", variant_entity);
 
-		variant_entity.set(VcfAttributes.ALT, "A,T");
-		// variant_entity.set(CaddAnnotator.CADD_SCALED, "16,6");
-		variant_entity.set(ExacAnnotator.EXAC_AF, "0.00001,0.00001");
-
-		Entity effect_entity = new DynamicEntity(emd);
-		effect_entity.set(EffectsMetaData.ALT, "A");
-		effect_entity.set(EffectsMetaData.PUTATIVE_IMPACT, "HIGH");
-		effect_entity.set(EffectsMetaData.GENE_NAME, "TFR2");
-		effect_entity.set(GavinAnnotator.VARIANT_ENTITY, variant_entity);
-
-		Iterator<Entity> results = annotator.annotate(Collections.singletonList(effect_entity));
+		Iterator<Entity> results = annotator.annotate(singletonList(effect_entity));
 		assertTrue(results.hasNext());
 		Entity resultEntity = results.next();
 		assertFalse(results.hasNext());
@@ -184,26 +178,17 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 		assertEquals(resultEntity.get(CLASSIFICATION), "VOUS");
 		assertEquals(resultEntity.get(CONFIDENCE), "genomewide");
 		assertEquals(resultEntity.get(REASON),
-				"Unable to classify variant as benign or pathogenic. The combination of HIGH impact, a CADD score [missing] and MAF of 1.0E-5 in TFR2 is inconclusive.");
+				"Unable to classify variant as benign or pathogenic. The combination of HIGH impact, a CADD score of null and MAF of 1.0E-5 in TFR2 is inconclusive.");
 
 	}
 
 	@Test
 	public void testAnnotateLowVariantCaddBenign()
 	{
-		Entity variant_entity = new DynamicEntity(entityMetaData);
+		Entity variant_entity = getVariantEntity("A,T", "6,80", "0.00001,0.00001");
+		Entity effect_entity = getEffectEntity("A", "HIGH", "TFR2", variant_entity);
 
-		variant_entity.set(VcfAttributes.ALT, "A,T");
-		variant_entity.set(CaddAnnotator.CADD_SCALED, "6,80");
-		variant_entity.set(ExacAnnotator.EXAC_AF, "0.00001,0.00001");
-
-		Entity effect_entity = new DynamicEntity(emd);
-		effect_entity.set(EffectsMetaData.ALT, "A");
-		effect_entity.set(EffectsMetaData.PUTATIVE_IMPACT, "HIGH");
-		effect_entity.set(EffectsMetaData.GENE_NAME, "TFR2");
-		effect_entity.set(GavinAnnotator.VARIANT_ENTITY, variant_entity);
-
-		Iterator<Entity> results = annotator.annotate(Collections.singletonList(effect_entity));
+		Iterator<Entity> results = annotator.annotate(singletonList(effect_entity));
 		assertTrue(results.hasNext());
 		Entity resultEntity = results.next();
 		assertFalse(results.hasNext());
@@ -211,33 +196,42 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 		assertEquals(resultEntity.get(CLASSIFICATION), "Benign");
 		assertEquals(resultEntity.get(CONFIDENCE), "calibrated");
 		assertEquals(resultEntity.get(REASON),
-				"Variant CADD score of 6.0 is lesser than the 95% sensitivity threshold of 35.35 for this gene, although the variant MAF of 1.0E-5 is lesser than the pathogenic 95th percentile MAF of 1.9269599999999953E-4.");
+				"Variant CADD score of 6.0 is less than 13.329999999999998 for this gene.");
 	}
 
 	@Test
 	public void testAnnotateHighCaddPathogenic()
 	{
-		Entity variant_entity = new DynamicEntity(entityMetaData);
+		Entity variant_entity = getVariantEntity("A,T", "6,80", "0.00001,0.00001");
+		Entity effect_entity = getEffectEntity("T", "HIGH", "TFR2", variant_entity);
 
-		variant_entity.set(VcfAttributes.ALT, "A,T");
-		variant_entity.set(CaddAnnotator.CADD_SCALED, "6,80");
-		variant_entity.set(ExacAnnotator.EXAC_AF, "0.00001,0.00001");
-
-		Entity effect_entity = new DynamicEntity(emd);
-		effect_entity.set(EffectsMetaData.ALT, "T");
-		effect_entity.set(EffectsMetaData.PUTATIVE_IMPACT, "HIGH");
-		effect_entity.set(EffectsMetaData.GENE_NAME, "TFR2");
-		effect_entity.set(GavinAnnotator.VARIANT_ENTITY, variant_entity);
-
-		Iterator<Entity> results = annotator.annotate(Collections.singletonList(effect_entity));
+		Iterator<Entity> results = annotator.annotate(singletonList(effect_entity));
 		assertTrue(results.hasNext());
 		Entity resultEntity = results.next();
 		assertFalse(results.hasNext());
 
-		assertEquals(resultEntity.get(CLASSIFICATION), "Pathognic");
+		assertEquals(resultEntity.get(CLASSIFICATION), "Pathogenic");
 		assertEquals(resultEntity.get(CONFIDENCE), "calibrated");
-		assertEquals(resultEntity.get(REASON),
-				"Variant CADD score of 80.0 is greater than the 95% specificity threshold of 35.35 for this gene. Also, the variant MAF of 1.0E-5 is lesser than the pathogenic 95th percentile MAF of 1.9269599999999953E-4.");
+		assertEquals(resultEntity.get(REASON), "Variant CADD score of 80.0 is greater than 30.35 for this gene.");
+	}
+
+	private Entity getEffectEntity(String alt, String putativeImpact, String geneName, Entity variantEntity)
+	{
+		Entity effectEntity = new DynamicEntity(emd);
+		effectEntity.set(EffectsMetaData.ALT, alt);
+		effectEntity.set(EffectsMetaData.PUTATIVE_IMPACT, putativeImpact);
+		effectEntity.set(EffectsMetaData.GENE_NAME, geneName);
+		effectEntity.set(GavinAnnotator.VARIANT_ENTITY, variantEntity);
+		return effectEntity;
+	}
+
+	private Entity getVariantEntity(String alt, String caddScaled, String exacAF)
+	{
+		Entity variantEntity = new DynamicEntity(entityMetaData);
+		variantEntity.set(VcfAttributes.ALT, alt);
+		variantEntity.set(CaddAnnotator.CADD_SCALED, caddScaled);
+		variantEntity.set(ExacAnnotator.EXAC_AF, exacAF);
+		return variantEntity;
 	}
 
 	@Configuration
