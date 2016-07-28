@@ -22,7 +22,8 @@ import org.molgenis.fieldtypes.FieldType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.*;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
@@ -83,15 +84,17 @@ public class PostgreSqlRepository extends AbstractRepository
 	private final PostgreSqlEntityFactory postgreSqlEntityFactory;
 	private final JdbcTemplate jdbcTemplate;
 	private final DataSource dataSource;
+	private final PlatformTransactionManager transactionManager;
 
 	private EntityMetaData metaData;
 
 	public PostgreSqlRepository(PostgreSqlEntityFactory postgreSqlEntityFactory, JdbcTemplate jdbcTemplate,
-			DataSource dataSource)
+			DataSource dataSource, PlatformTransactionManager transactionManager)
 	{
 		this.postgreSqlEntityFactory = requireNonNull(postgreSqlEntityFactory);
-		this.dataSource = requireNonNull(dataSource);
 		this.jdbcTemplate = requireNonNull(jdbcTemplate);
+		this.dataSource = requireNonNull(dataSource);
+		this.transactionManager = requireNonNull(transactionManager);
 	}
 
 	void setMetaData(EntityMetaData metaData)
@@ -100,11 +103,16 @@ public class PostgreSqlRepository extends AbstractRepository
 	}
 
 	@Override
-	@Transactional(readOnly = true)
 	public Iterator<Entity> iterator()
 	{
-		Query<Entity> q = new QueryImpl<>();
-		return findAllBatching(q).iterator();
+		TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+		transactionTemplate.setReadOnly(true);
+
+		return transactionTemplate.execute((status) ->
+		{
+			Query<Entity> q = new QueryImpl<>();
+			return findAllBatching(q).iterator();
+		});
 	}
 
 	@Override
@@ -143,10 +151,12 @@ public class PostgreSqlRepository extends AbstractRepository
 	}
 
 	@Override
-	@Transactional(readOnly = true)
 	public Stream<Entity> findAll(Query<Entity> q)
 	{
-		return stream(findAllBatching(q).spliterator(), false);
+		TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+		transactionTemplate.setReadOnly(true);
+
+		return transactionTemplate.execute((status) -> stream(findAllBatching(q).spliterator(), false));
 	}
 
 	@Override
