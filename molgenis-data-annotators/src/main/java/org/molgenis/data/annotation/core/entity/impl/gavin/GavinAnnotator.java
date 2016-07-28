@@ -25,6 +25,7 @@ import org.molgenis.data.annotation.web.settings.GavinAnnotatorSettings;
 import org.molgenis.data.importer.EmxMetaDataParser;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.vcf.model.VcfAttributes;
+import org.molgenis.data.vcf.utils.VcfWriterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -40,6 +41,7 @@ import static org.molgenis.data.annotation.core.effects.EffectsMetaData.PUTATIVE
 import static org.molgenis.data.annotation.core.entity.impl.CaddAnnotator.CADD_SCALED;
 import static org.molgenis.data.annotation.core.entity.impl.ExacAnnotator.EXAC_AF;
 import static org.molgenis.data.vcf.model.VcfAttributes.ALT;
+import static org.molgenis.data.vcf.utils.VcfWriterUtils.VARIANT;
 
 @Configuration
 public class GavinAnnotator implements AnnotatorConfig
@@ -51,7 +53,6 @@ public class GavinAnnotator implements AnnotatorConfig
 	public static final String CLASSIFICATION = "Classification";
 	public static final String CONFIDENCE = "Confidence";
 	public static final String REASON = "Reason";
-	public static final String VARIANT_ENTITY = "Variant";
 
 	private final GavinAlgorithm gavinAlgorithm = new GavinAlgorithm();
 
@@ -137,12 +138,12 @@ public class GavinAnnotator implements AnnotatorConfig
 			public List<AttributeMetaData> getRequiredAttributes()
 			{
 				List<AttributeMetaData> requiredAttributes = new ArrayList<>();
-				EntityMetaData entityMetaData = entityMetaDataFactory.create().setName(VARIANT_ENTITY);
+				EntityMetaData entityMetaData = entityMetaDataFactory.create().setName(VARIANT);
 				List<AttributeMetaData> refAttributesList = Arrays
 						.asList(CaddAnnotator.getCaddScaledAttr(attributeMetaDataFactory),
 								ExacAnnotator.getExacAFAttr(attributeMetaDataFactory), vcfAttributes.getAltAttribute());
 				entityMetaData.addAttributes(refAttributesList);
-				AttributeMetaData refAttr = attributeMetaDataFactory.create().setName(VARIANT_ENTITY).setDataType(XREF)
+				AttributeMetaData refAttr = attributeMetaDataFactory.create().setName(VARIANT).setDataType(XREF)
 						.setRefEntity(entityMetaData).setDescription(
 								"This annotator needs a references to an entity containing: " + StreamSupport
 										.stream(refAttributesList.spliterator(), false).map(AttributeMetaData::getName)
@@ -177,7 +178,7 @@ public class GavinAnnotator implements AnnotatorConfig
 				}
 				int sourceEntitiesSize = Iterables.size(annotationSourceEntities);
 
-				Entity variantEntity = entity.getEntity(VARIANT_ENTITY);
+				Entity variantEntity = entity.getEntity(VARIANT);
 
 				Map<String, Double> caddMap = AnnotatorUtils
 						.toAlleleMap(variantEntity.getString(ALT), variantEntity.getString(CADD_SCALED));
