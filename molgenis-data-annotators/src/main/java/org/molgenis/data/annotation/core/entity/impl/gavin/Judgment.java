@@ -7,7 +7,7 @@ public class Judgment
 {
 	public enum Classification
 	{
-		Benign, Pathognic, VOUS
+		Benign, Pathogenic, VOUS
 	}
 
 	public enum Method
@@ -18,12 +18,14 @@ public class Judgment
 	String reason;
 	Classification classification;
 	Method method;
+	String gene;
 
-	public Judgment(Classification classification, Method method, String reason)
+	public Judgment(Classification classification, Method method, String gene, String reason)
 	{
 		this.reason = reason;
 		this.classification = classification;
 		this.method = method;
+		this.gene = gene;
 	}
 
 	public String getReason()
@@ -39,6 +41,11 @@ public class Judgment
 	public Method getConfidence()
 	{
 		return method;
+	}
+
+	public String getGene()
+	{
+		return gene;
 	}
 
 	@Override
