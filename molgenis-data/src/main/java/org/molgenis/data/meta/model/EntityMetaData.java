@@ -31,6 +31,7 @@ import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeN
 public class EntityMetaData extends StaticEntity
 {
 	private transient Map<String, AttributeMetaData> cachedAttrs;
+	private transient List<AttributeMetaData> cachedOwnAtomicAttrs;
 
 	public EntityMetaData(Entity entity)
 	{
@@ -446,7 +447,8 @@ public class EntityMetaData extends StaticEntity
 	public LinkedHashSet<AttributeMetaData> getCompoundOrderedAttributes()
 	{
 		LinkedHashSet<AttributeMetaData> attributes = newLinkedHashSet();
-		getEntities(ATTRIBUTES, AttributeMetaData.class).forEach(attribute -> {
+		getEntities(ATTRIBUTES, AttributeMetaData.class).forEach(attribute ->
+		{
 			if (attribute.getDataType() == COMPOUND)
 			{
 				attribute.getAttributeParts()
@@ -508,11 +510,11 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public Iterable<AttributeMetaData> getAtomicAttributes()
 	{
-		Iterable<AttributeMetaData> atomicAttrs = getOwnAtomicAttributes();
+		Iterable<AttributeMetaData> atomicAttrs = getCachedOwnAtomicAttrs();
 		EntityMetaData extends_ = getExtends();
 		if (extends_ != null)
 		{
-			atomicAttrs = concat(atomicAttrs, extends_.getAtomicAttributes());
+			atomicAttrs = Iterables.concat(extends_.getAtomicAttributes(), atomicAttrs);
 		}
 		return atomicAttrs;
 	}
@@ -557,6 +559,8 @@ public class EntityMetaData extends StaticEntity
 
 	public EntityMetaData addAttribute(AttributeMetaData attr, AttributeRole... attrTypes)
 	{
+		invalidateCachedAttrs();
+
 		Iterable<AttributeMetaData> attrs = getEntities(ATTRIBUTES, AttributeMetaData.class);
 		set(ATTRIBUTES, concat(attrs, singletonList(attr)));
 		if (attrTypes != null)
@@ -679,16 +683,20 @@ public class EntityMetaData extends StaticEntity
 	public void set(String attributeName, Object value)
 	{
 		super.set(attributeName, value);
-		if (attributeName.equals(ATTRIBUTES))
+		switch (attributeName)
 		{
-			// clear cache
-			cachedAttrs = null;
+			case ATTRIBUTES:
+				invalidateCachedAttrs();
+				break;
+			default:
+				break;
 		}
 	}
 
 	private void getOwnAtomicAttributesRec(Iterable<AttributeMetaData> attrs, List<AttributeMetaData> atomicAttrs)
 	{
-		attrs.forEach(attr -> {
+		for (AttributeMetaData attr : attrs)
+		{
 			if (attr.getDataType() == COMPOUND)
 			{
 				getOwnAtomicAttributesRec(attr.getAttributeParts(), atomicAttrs);
@@ -697,18 +705,19 @@ public class EntityMetaData extends StaticEntity
 			{
 				atomicAttrs.add(attr);
 			}
-		});
+		}
 	}
 
 	private void getOwnAllAttributesRec(Iterable<AttributeMetaData> attrs, List<AttributeMetaData> allAttrs)
 	{
-		attrs.forEach(attr -> {
+		for (AttributeMetaData attr : attrs)
+		{
 			if (attr.getDataType() == COMPOUND)
 			{
 				getOwnAllAttributesRec(attr.getAttributeParts(), allAttrs);
 			}
 			allAttrs.add(attr);
-		});
+		}
 	}
 
 	private void updateFullName()
@@ -748,13 +757,45 @@ public class EntityMetaData extends StaticEntity
 
 	private void fillCachedAttrsRec(Iterable<AttributeMetaData> attrs)
 	{
-		attrs.forEach(attr -> {
+		for (AttributeMetaData attr : attrs)
+		{
 			cachedAttrs.put(attr.getName(), attr);
 			if (attr.getDataType() == COMPOUND)
 			{
 				fillCachedAttrsRec(attr.getAttributeParts());
 			}
-		});
+		}
+	}
+
+	private List<AttributeMetaData> getCachedOwnAtomicAttrs()
+	{
+		if (cachedOwnAtomicAttrs == null)
+		{
+			cachedOwnAtomicAttrs = new ArrayList<>();
+			fillCachedAtomicAttrsRec(getOwnAttributes());
+		}
+		return cachedOwnAtomicAttrs;
+	}
+
+	private void fillCachedAtomicAttrsRec(Iterable<AttributeMetaData> attrs)
+	{
+		for (AttributeMetaData attr : attrs)
+		{
+			if (attr.getDataType() == COMPOUND)
+			{
+				fillCachedAtomicAttrsRec(attr.getAttributeParts());
+			}
+			else
+			{
+				cachedOwnAtomicAttrs.add(attr);
+			}
+		}
+	}
+
+	private void invalidateCachedAttrs()
+	{
+		cachedAttrs = null;
+		cachedOwnAtomicAttrs = null;
 	}
 
 	public enum AttributeRole

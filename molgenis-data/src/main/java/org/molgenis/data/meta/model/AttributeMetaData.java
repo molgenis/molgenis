@@ -26,6 +26,8 @@ import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeN
  */
 public class AttributeMetaData extends StaticEntity
 {
+	private transient AttributeType cachedDataType;
+
 	public AttributeMetaData(Entity entity)
 	{
 		super(entity);
@@ -192,12 +194,13 @@ public class AttributeMetaData extends StaticEntity
 	 */
 	public AttributeType getDataType()
 	{
-		String dataTypeStr = getString(DATA_TYPE);
-		return dataTypeStr != null ? AttributeType.toEnum(dataTypeStr) : null;
+		return getCachedDataType();
 	}
 
 	public AttributeMetaData setDataType(AttributeType dataType)
 	{
+		invalidateCachedDataType();
+
 		set(DATA_TYPE, AttributeType.getValueString(dataType));
 		return this;
 	}
@@ -533,5 +536,20 @@ public class AttributeMetaData extends StaticEntity
 	private static String toEnumOptionsString(List<String> enumOptions)
 	{
 		return !enumOptions.isEmpty() ? enumOptions.stream().collect(joining(",")) : null;
+	}
+
+	private AttributeType getCachedDataType()
+	{
+		if (cachedDataType == null)
+		{
+			String dataTypeStr = getString(DATA_TYPE);
+			cachedDataType = dataTypeStr != null ? AttributeType.toEnum(dataTypeStr) : null;
+		}
+		return cachedDataType;
+	}
+
+	private void invalidateCachedDataType()
+	{
+		cachedDataType = null;
 	}
 }
