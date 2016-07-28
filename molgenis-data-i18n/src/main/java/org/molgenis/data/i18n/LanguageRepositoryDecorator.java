@@ -175,7 +175,7 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 		// remove i18n attributes from i18n string meta data
 		AttributeMetaData attrLanguageCode = i18nStringMeta.getAttribute(languageCode);
 
-		EntityMetaData i18nMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(I18N_STRING));
+		EntityMetaData i18nMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(I18nStringMetaData.I18N_STRING));
 		i18nMeta.removeAttribute(attrLanguageCode);
 
 		runAsSystem(() -> dataService.update(ENTITY_META_DATA, i18nMeta));
