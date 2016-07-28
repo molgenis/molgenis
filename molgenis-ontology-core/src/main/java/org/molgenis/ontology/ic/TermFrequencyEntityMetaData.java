@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.DECIMAL;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
@@ -38,6 +39,6 @@ public class TermFrequencyEntityMetaData extends SystemEntityMetaData
 		addAttribute(ID, ROLE_ID).setAuto(true);
 		addAttribute(TERM).setNillable(false);
 		addAttribute(FREQUENCY).setDataType(DECIMAL).setNillable(false);
-		addAttribute(OCCURRENCE).setDataType(DECIMAL).setNillable(false);
+		addAttribute(OCCURRENCE).setDataType(INT).setNillable(false);
 	}
 }
