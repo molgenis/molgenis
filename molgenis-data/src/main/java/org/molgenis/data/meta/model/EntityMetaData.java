@@ -32,6 +32,7 @@ public class EntityMetaData extends StaticEntity
 {
 	private transient Map<String, AttributeMetaData> cachedAttrs;
 	private transient List<AttributeMetaData> cachedOwnAtomicAttrs;
+	private transient Boolean cachedHasAttrWithExpession;
 
 	public EntityMetaData(Entity entity)
 	{
@@ -598,7 +599,17 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public boolean hasAttributeWithExpression()
 	{
-		return stream(getAtomicAttributes().spliterator(), false).anyMatch(attr -> attr.getExpression() != null);
+		return getCachedHasAttrWithExpession();
+	}
+
+	private boolean getCachedHasAttrWithExpession()
+	{
+		if (cachedHasAttrWithExpession == null)
+		{
+			cachedHasAttrWithExpession = stream(getAtomicAttributes().spliterator(), false)
+					.anyMatch(attr -> attr.getExpression() != null);
+		}
+		return cachedHasAttrWithExpession;
 	}
 
 	public void removeAttribute(AttributeMetaData attr)
@@ -796,6 +807,7 @@ public class EntityMetaData extends StaticEntity
 	{
 		cachedAttrs = null;
 		cachedOwnAtomicAttrs = null;
+		cachedHasAttrWithExpession = null;
 	}
 
 	public enum AttributeRole
