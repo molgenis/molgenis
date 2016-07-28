@@ -33,7 +33,7 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 	public Double getTermFrequency(String term)
 	{
 		Entity entity = getTermFrequencyEntity(term);
-		if (entity == null) return null
+		if (entity == null) return null;
 		else return entity.getDouble(FREQUENCY);
 	}
 
@@ -41,7 +41,7 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 	public Integer getTermOccurrence(String term)
 	{
 		Entity entity = getTermFrequencyEntity(term);
-		if (entity == null) return null
+		if (entity == null) return null;
 		else return entity.getInt(OCCURRENCE);
 	}
 
