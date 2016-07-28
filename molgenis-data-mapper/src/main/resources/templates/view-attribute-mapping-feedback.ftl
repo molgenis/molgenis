@@ -17,14 +17,14 @@
     				    <td><a class="btn btn-default btn-xs" href="javascript:window.location='${dataexplorerUri?html}?entity=${source?html}&q=' + molgenis.createRsqlQuery([{field: '${feedbackRow.sourceEntity.getEntityMetaData().getIdAttribute().getName()?html}', operator: 'EQUALS', value: '${feedbackRow.sourceEntity.getIdValue()?string?html}' }]);" role="button"><span class="glyphicon glyphicon-search"></span></a></td>
     					<#if (sourceAttributes)?has_content>
     						<#list sourceAttributes as sourceAttribute>
-								<#if sourceAttribute.dataType == "xref" || sourceAttribute.dataType == "categorical">
+								<#if sourceAttribute.dataType == "XREF" || sourceAttribute.dataType == "CATEGORICAL">
 									<#if feedbackRow.sourceEntity.get(sourceAttribute.name)??>
 	    								<td>
 	    									<#assign refEntity = feedbackRow.sourceEntity.get(sourceAttribute.name)>
 	    									<#assign refEntityMetaData = sourceAttribute.refEntity>
 											<#list refEntityMetaData.attributes as refAttribute>
 												<#assign refAttributeName = refAttribute.name>
-												${refEntity[refAttributeName]} <#if refEntityMetaData.attributes?seq_index_of(refAttribute) != refEntityMetaData.attributes?size - 1>=</#if>
+                                                ${refEntity[refAttributeName]} <#if refAttribute?has_next>=</#if>
 											</#list> 
 	    								</td>
 	    							</#if>
