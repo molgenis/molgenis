@@ -20,6 +20,7 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
+import org.molgenis.data.vcf.utils.VcfWriterUtils;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.ResourceUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -221,7 +222,7 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 		effectEntity.set(EffectsMetaData.ALT, alt);
 		effectEntity.set(EffectsMetaData.PUTATIVE_IMPACT, putativeImpact);
 		effectEntity.set(EffectsMetaData.GENE_NAME, geneName);
-		effectEntity.set(GavinAnnotator.VARIANT_ENTITY, variantEntity);
+		effectEntity.set(VcfWriterUtils.VARIANT, variantEntity);
 		return effectEntity;
 	}
 
