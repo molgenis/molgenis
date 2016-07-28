@@ -29,8 +29,8 @@
 	    								</td>
 	    							</#if>
 								<#else>
-									<#if feedbackRow.sourceEntity.getString(sourceAttribute.name)??>
-	    								<td>${feedbackRow.sourceEntity.getString(sourceAttribute.name)?html}</td>
+									<#if feedbackRow.sourceEntity.get(sourceAttribute.name)??>
+	    								<td>${feedbackRow.sourceEntity.get(sourceAttribute.name)?html}</td>
 	    							</#if>
 								</#if>
     						</#list>
