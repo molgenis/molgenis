@@ -91,6 +91,13 @@ public class VcfRepository extends AbstractRepository
 		}
 	}
 
+	/**
+	 * Returns an iterator for this repository.
+	 *
+	 * Use with caution! Multiple iterators will all point to the same line in the VCF file, leading to unpredictable
+	 * behaviour. If you want to get the EntityMetaData of this repository and you can't access getEntityMetaData(),
+	 * convert the iterator to a PeekingIterator and peek the first Entity.
+	 */
 	@Override
 	public Iterator<Entity> iterator()
 	{

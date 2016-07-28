@@ -35,6 +35,7 @@ import org.springframework.core.env.JOptCommandLinePropertySource;
 import java.io.*;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -79,7 +80,7 @@ public class CmdLineAnnotator
 		Map<String, RepositoryAnnotator> configuredAnnotators = applicationContext
 				.getBeansOfType(RepositoryAnnotator.class);
 
-		// for now, only get the annotators that have recieved a recent brush up for the new way of configuring
+		// for now, only get the annotators that have received a recent brush up for the new way of configuring
 		Map<String, RepositoryAnnotator> configuredFreshAnnotators = getFreshAnnotators(configuredAnnotators);
 
 		Set<String> annotatorNames = configuredFreshAnnotators.keySet();
@@ -321,12 +322,14 @@ public class CmdLineAnnotator
 				}
 			}
 			Iterable<Entity> entitiesToAnnotate;
-			EntityMetaData newMetaData = AnnotatorUtils
-					.addAnnotatorMetadataToRepositories(vcfRepo.getEntityMetaData(), annotator.getOutputAttributes());
 			if (annotator instanceof EffectsAnnotator)
 			{
 				entitiesToAnnotate = vcfUtils
-						.createEntityStructureForVcf(newMetaData, EFFECT, vcfRepo.findAll(new QueryImpl<>()));
+						.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT, StreamSupport.stream(vcfRepo.spliterator(), false));
+				for(Entity entity : entitiesToAnnotate)
+				{
+					entity.getEntityMetaData().addAttributes(annotator.getOutputAttributes());
+				}
 			}
 			else
 			{

@@ -32,6 +32,7 @@ import java.util.stream.StreamSupport;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
+import static org.molgenis.data.vcf.utils.VcfWriterUtils.VARIANT;
 
 @Component
 public class VcfUtils
@@ -191,7 +192,7 @@ public class VcfUtils
 					for (AttributeMetaData attr : effectsEMD.getAtomicAttributes())
 					{
 						if (attr.getName().equals(effectsEMD.getIdAttribute().getName())
-								|| attr.getName().equals(VcfWriterUtils.VARIANT))
+								|| attr.getName().equals(VARIANT))
 						{
 						}
 						else if (entity.get(attr.getName()) != null)
@@ -214,11 +215,11 @@ public class VcfUtils
 				List<Entity> effectsForVariant = Lists.newArrayList();
 				while (effects.hasNext())
 				{
-					peekedId = effects.peek().getEntity(VcfWriterUtils.VARIANT).getIdValue().toString();
+					peekedId = effects.peek().getEntity(VARIANT).getIdValue().toString();
 					if (variant == null || variant.getIdValue().toString().equals(peekedId))
 					{
 						Entity effect = effects.next();
-						variant = effect.getEntity(VcfWriterUtils.VARIANT);
+						variant = effect.getEntity(VARIANT);
 						effectsForVariant.add(effect);
 					}
 					else
@@ -276,7 +277,7 @@ public class VcfUtils
 				EntityMetaData.AttributeRole.ROLE_ID);
 		xrefMetaData.addAttributes(com.google.common.collect.Lists.newArrayList(metadataMap.values()));
 		xrefMetaData
-				.addAttribute(attributeMetaDataFactory.create().setName("Variant").setDataType(MolgenisFieldTypes.AttributeType.MREF));
+				.addAttribute(attributeMetaDataFactory.create().setName(VARIANT).setDataType(MolgenisFieldTypes.AttributeType.XREF));
 		return xrefMetaData;
 	}
 
@@ -330,9 +331,8 @@ public class VcfUtils
 				String attributeName = attributesMap.get(j).getName().replaceAll("^\'|\'$", "");
 				String attributeValue = values[j];
 				singleResult.set(attributeName, attributeValue);
-				singleResult.set("Variant", originalEntity);
-
 			}
+			singleResult.set(VARIANT, originalEntity);
 			result.add(singleResult);
 		}
 		return result;

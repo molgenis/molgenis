@@ -253,7 +253,7 @@ public class MappingServiceImpl implements MappingService
 		while (sourceEntities.hasNext())
 		{
 			Entity sourceEntity = sourceEntities.next();
-			Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
+ 			Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
 					sourceMapping.getSourceEntityMetaData(), targetRepo);
 			mappedEntities.add(mappedEntity);
 
