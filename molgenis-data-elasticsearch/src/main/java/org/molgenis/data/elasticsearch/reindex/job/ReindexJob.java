@@ -5,6 +5,7 @@ import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.reindex.meta.ReindexAction;
 import org.molgenis.data.reindex.meta.ReindexActionGroup;
 import org.molgenis.data.reindex.meta.ReindexActionGroupMetaData;
@@ -23,8 +24,10 @@ import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.reindex.meta.ReindexActionGroupMetaData.REINDEX_ACTION_GROUP;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.*;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.CREATE;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.DELETE;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType.DATA;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType.METADATA;
 import static org.molgenis.data.reindex.meta.ReindexActionMetaData.ReindexStatus.*;
 
 /**
@@ -128,6 +131,16 @@ class ReindexJob extends Job
 								reindexAction.getEntityId(), reindexAction.getCudType()));
 				rebuildIndexOneEntity(reindexAction.getEntityFullName(), reindexAction.getEntityId(),
 						reindexAction.getCudType());
+			}
+			else if (reindexAction.getDataType().equals(METADATA) && reindexAction.getCudType() == CREATE)
+			{
+				progress.progress(progressCount,
+						format("Create index mappings {0}. CUDType = {1}", reindexAction.getEntityFullName(),
+								reindexAction.getCudType()));
+
+				String entityFullName = reindexAction.getEntityFullName();
+				EntityMetaData entityMeta = dataService.getEntityMetaData(entityFullName);
+				searchService.createMappings(entityMeta);
 			}
 			else if (reindexAction.getDataType().equals(DATA) || reindexAction.getCudType() != DELETE)
 			{
