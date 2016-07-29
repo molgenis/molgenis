@@ -1,13 +1,12 @@
 package org.molgenis.script;
 
-import static java.lang.String.format;
-
-import java.util.Map;
-import java.util.stream.Stream;
-
+import com.google.common.collect.Maps;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Maps;
+import java.util.Collection;
+import java.util.Map;
+
+import static java.lang.String.format;
 
 /**
  * Register script types.
@@ -24,17 +23,17 @@ public class ScriptRunnerFactory
 		scriptRunners = Maps.newHashMap();
 	}
 
-	public void registerScriptExecutor(ScriptRunner scriptExecutor)
+	void registerScriptExecutor(ScriptRunner scriptExecutor)
 	{
 		scriptRunners.put(scriptExecutor.getName(), scriptExecutor);
 	}
 
-	public Stream<ScriptRunner> getScriptRunners()
+	Collection<ScriptRunner> getScriptRunners()
 	{
-		return scriptRunners.values().stream();
+		return scriptRunners.values();
 	}
 
-	public ScriptRunner getScriptRunner(String type)
+	ScriptRunner getScriptRunner(String type)
 	{
 		ScriptRunner scriptRunner = scriptRunners.get(type);
 		if (scriptRunner == null)
