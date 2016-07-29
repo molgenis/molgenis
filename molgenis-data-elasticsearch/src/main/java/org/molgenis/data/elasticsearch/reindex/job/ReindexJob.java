@@ -187,7 +187,7 @@ class ReindexJob extends Job
 	 */
 	private void rebuildIndexOneEntity(String entityFullName, String entityId, CudType cudType)
 	{
-		LOG.debug("Reindexing [{}].[{}]... cud: [{}]", entityFullName, entityId, cudType);
+		LOG.trace("Reindexing [{}].[{}]... cud: [{}]", entityFullName, entityId, cudType);
 		switch (cudType)
 		{
 			case CREATE:
@@ -204,7 +204,7 @@ class ReindexJob extends Job
 			default:
 				throw new IllegalStateException("Unknown CudType");
 		}
-		LOG.info("Reindexed [{}].[{}].", entityFullName, entityId);
+		LOG.debug("Reindexed [{}].[{}].", entityFullName, entityId);
 	}
 
 	/**
@@ -214,11 +214,11 @@ class ReindexJob extends Job
 	 */
 	private void rebuildIndexBatchEntities(String entityFullName)
 	{
-		LOG.debug("Reindexing [{}]...", entityFullName);
+		LOG.trace("Reindexing [{}]...", entityFullName);
 		//FIXME: Deze is gedecorate, kan in foute gevallen dus de IDs uit de index halen
 		final Repository<Entity> repository = dataService.getRepository(entityFullName);
 		searchService.rebuildIndex(repository);
-		LOG.info("Reindexed [{}].", entityFullName);
+		LOG.debug("Reindexed [{}].", entityFullName);
 	}
 
 	/**

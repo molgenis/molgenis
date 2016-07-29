@@ -55,7 +55,7 @@ public class ProgressImpl implements Progress
 	{
 		jobExecution.setProgressInt(progress);
 		jobExecution.setProgressMessage(message);
-		JOB_EXECUTION_LOG.info("progress ({}, {})", progress, message);
+		JOB_EXECUTION_LOG.debug("progress ({}, {})", progress, message);
 		update();
 	}
 
@@ -70,7 +70,7 @@ public class ProgressImpl implements Progress
 		PeriodFormatter periodFormatter = new PeriodFormatterBuilder().appendDays().appendSuffix("d ").appendMinutes()
 				.appendSuffix("m ").appendSeconds().appendSuffix("s ").appendMillis().appendSuffix("ms ").toFormatter();
 		String timeSpent = periodFormatter.print(period);
-		JOB_EXECUTION_LOG.info("Execution successful. Time spent: {}", timeSpent);
+		JOB_EXECUTION_LOG.debug("Execution successful. Time spent: {}", timeSpent);
 		sendEmail(jobExecution.getSuccessEmail(), jobExecution.getType() + " job succeeded.", jobExecution.getLog());
 		update();
 		JobExecutionContext.unset();
@@ -132,7 +132,7 @@ public class ProgressImpl implements Progress
 	@Override
 	public void status(String message)
 	{
-		JOB_EXECUTION_LOG.info(message);
+		JOB_EXECUTION_LOG.debug(message);
 		jobExecution.setProgressMessage(message);
 		update();
 	}
