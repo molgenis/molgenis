@@ -1,22 +1,19 @@
 package org.molgenis.app;
 
 import org.molgenis.app.controller.HomeController;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.UserAuthority;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.framework.db.WebAppDatabasePopulatorService;
 import org.molgenis.security.MolgenisSecurityWebAppDatabasePopulatorService;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.security.core.utils.SecurityUtils;
+import org.molgenis.ui.admin.user.UserAccountController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.data.i18n.model.LanguageMetaData.*;
 
 @Service
@@ -44,13 +41,8 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 	@RunAsSystem
 	public void populateDatabase()
 	{
-		molgenisSecurityWebAppDatabasePopulatorService.populateDatabase(this.dataService, HomeController.ID);
-
-		MolgenisUser anonymousUser = molgenisSecurityWebAppDatabasePopulatorService.getAnonymousUser();
-		UserAuthority anonymousHomeAuthority = userAuthorityFactory.create();
-		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
-		anonymousHomeAuthority.setRole(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + HomeController.ID.toUpperCase());
-		dataService.add(USER_AUTHORITY, anonymousHomeAuthority);
+		molgenisSecurityWebAppDatabasePopulatorService
+				.populateDatabase(this.dataService, HomeController.ID, UserAccountController.ID);
 
 		// add default language
 		dataService.add(LANGUAGE, languageFactory.create(DEFAULT_LANGUAGE_CODE, DEFAULT_LANGUAGE_NAME));
