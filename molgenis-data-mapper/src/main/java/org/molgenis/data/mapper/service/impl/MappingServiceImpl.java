@@ -19,7 +19,6 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,10 +177,10 @@ public class MappingServiceImpl implements MappingService
 		{
 			targetRepo = dataService.getRepository(entityName);
 
-			if (!isTargetMetaCompatible(targetRepo, targetMetaData))
+			String reason = isTargetMetaCompatible(targetRepo, targetMetaData);
+			if (reason != null)
 			{
-				throw new MolgenisDataException(
-						"Target entity " + entityName + " exists but is not compatible with the target mappings.");
+				throw new MolgenisDataException(reason);
 			}
 		}
 
@@ -208,7 +207,7 @@ public class MappingServiceImpl implements MappingService
 	 * @param mappingTargetMetaData the metadata of the mapping result entity
 	 * @return true if the mapping can be written to the target repository
 	 */
-	private boolean isTargetMetaCompatible(Repository<Entity> targetRepository, EntityMetaData mappingTargetMetaData)
+	private String isTargetMetaCompatible(Repository<Entity> targetRepository, EntityMetaData mappingTargetMetaData)
 	{
 		Map<String, AttributeMetaData> targetRepoAttributeMap = Maps.newHashMap();
 		targetRepository.getEntityMetaData().getAtomicAttributes()
@@ -217,17 +216,26 @@ public class MappingServiceImpl implements MappingService
 		for (AttributeMetaData mappingTargetAttr : mappingTargetMetaData.getAtomicAttributes())
 		{
 			String mappingTargetAttrName = mappingTargetAttr.getName();
-			if (targetRepoAttributeMap.containsKey(mappingTargetAttrName) && EntityUtils
-					.equals(targetRepoAttributeMap.get(mappingTargetAttrName), mappingTargetAttr))
+			if (!targetRepoAttributeMap.containsKey(mappingTargetAttrName))
 			{
-				continue;
+				return "Target repository does not contain attrbibute [" + mappingTargetAttrName + "]";
 			}
-			else
+			else if (!(mappingTargetAttr.getDataType() == targetRepoAttributeMap.get(mappingTargetAttrName)
+					.getDataType()))
 			{
-				return false;
+				return "attribute [" + mappingTargetAttrName
+						+ "] does not have the same datatype in the target repository";
+			}
+			else if (mappingTargetAttr.getDataType() == XREF)
+			{
+				if (mappingTargetAttr.getRefEntity().getName()
+						.equals(targetRepoAttributeMap.get(mappingTargetAttrName).getRefEntity().getName()))
+					return "attribute [" + mappingTargetAttrName + "] of type XREF does not have the same refentity ["
+							+ mappingTargetAttr.getRefEntity().getName() + "] in the target repository ["
+							+ targetRepoAttributeMap.get(mappingTargetAttrName).getRefEntity().getName() + "]";
 			}
 		}
-		return true;
+		return null;
 	}
 
 	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo)
@@ -253,7 +261,7 @@ public class MappingServiceImpl implements MappingService
 		while (sourceEntities.hasNext())
 		{
 			Entity sourceEntity = sourceEntities.next();
- 			Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
+			Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
 					sourceMapping.getSourceEntityMetaData(), targetRepo);
 			mappedEntities.add(mappedEntity);
 
