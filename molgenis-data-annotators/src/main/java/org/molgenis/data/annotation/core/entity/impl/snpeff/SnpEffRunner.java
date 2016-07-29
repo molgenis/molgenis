@@ -37,13 +37,9 @@ import static org.molgenis.data.annotation.core.effects.EffectsMetaData.*;
 @Component
 public class SnpEffRunner
 {
-	private final JarRunner jarRunner;
-	private final Entity snpEffAnnotatorSettings;
-	private final IdGenerator idGenerator;
 	private final EntityMetaDataFactory entityMetaDataFactory;
 	private final AttributeMetaDataFactory attributeMetaDataFactory;
 	private final VcfAttributes vcfAttributes;
-	private final EffectsMetaData effectsMetaData;
 
 	private static final Logger LOG = LoggerFactory.getLogger(SnpEffAnnotator.class);
 
@@ -52,10 +48,16 @@ public class SnpEffRunner
 	private static final String CHARSET = "UTF-8";
 	public static final String ENTITY_NAME_SUFFIX = "_EFFECTS";
 
-	private static final String NAME = "snpEff";
-	private static final String LOF = "LOF";
-	private static final String NMD = "NMD";
-	private static final String ANN = "ANN";
+	public static final String NAME = "snpEff";
+	public static final String LOF = "LOF";
+	public static final String NMD = "NMD";
+	public static final String ANN = "ANN";
+
+	private EffectsMetaData effectsMetaData = new EffectsMetaData();
+
+	private final JarRunner jarRunner;
+	private final Entity snpEffAnnotatorSettings;
+	private final IdGenerator idGenerator;
 
 	@Autowired
 	public SnpEffRunner(JarRunner jarRunner, Entity snpEffAnnotatorSettings, IdGenerator idGenerator,

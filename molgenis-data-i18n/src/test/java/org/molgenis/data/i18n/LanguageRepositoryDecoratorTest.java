@@ -6,11 +6,11 @@ import org.mockito.MockitoAnnotations;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.Language;
+import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.i18n.model.LanguageMetaData;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.*;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -29,6 +29,8 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.DESCRIPTION;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.LABEL;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.testng.Assert.assertEquals;
 
@@ -45,6 +47,9 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	private I18nStringMetaData i18nStringMetaData;
 
 	@Autowired
+	private LanguageFactory languageFactory;
+
+	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;
 
 	@Mock
@@ -57,6 +62,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	private RepositoryCollection defaultBackend;
 	@Mock
 	private LanguageMetaData languageMeta;
+
 	private LanguageRepositoryDecorator languageRepositoryDecorator;
 
 	@BeforeMethod
@@ -92,17 +98,57 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void deleteStream()
 	{
-		Language language0 = mock(Language.class);
-		when(language0.getEntityMetaData()).thenReturn(languageMeta);
-		when(language0.getCode()).thenReturn("nl");
+		String nl = "nl";
+		String de = "de";
 
-		Language language1 = mock(Language.class);
-		when(language1.getEntityMetaData()).thenReturn(languageMeta);
-		when(language1.getCode()).thenReturn("de");
+		// Add NL to language
+		Language languageNL = languageFactory.create(nl, "Nederlands");
 
-		languageRepositoryDecorator.delete(Stream.of(language0, language1));
-		verify(decoratedRepo, times(1)).delete(language0);
-		verify(decoratedRepo, times(1)).delete(language1);
+		// Add DE to language
+		Language languageDE = languageFactory.create(de, "Deutsch");
+
+		// Add NL attribute to i18n
+		i18nStringMetaData.addAttribute(attrMetaFactory.create().setName(nl));
+
+		// Add DE attributes to i18n
+		i18nStringMetaData.addAttribute(attrMetaFactory.create().setName(de));
+
+		// Add language NL attributes for entity meta data
+		AttributeMetaData entityLabelNL = attrMetaFactory.create()
+				.setName(EntityMetaDataMetaData.LABEL + '-' + nl);
+		AttributeMetaData entityDescriptionNL = attrMetaFactory.create()
+				.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + nl);
+		entityMetaMeta.addAttribute(entityLabelNL);
+		entityMetaMeta.addAttribute(entityDescriptionNL);
+
+		// Add language DE attributes for entity meta data
+		AttributeMetaData entityLabelDE = attrMetaFactory.create()
+				.setName(EntityMetaDataMetaData.LABEL + '-' + de);
+		AttributeMetaData entityDescriptionDE = attrMetaFactory.create()
+				.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + de);
+		entityMetaMeta.addAttribute(entityLabelDE);
+		entityMetaMeta.addAttribute(entityDescriptionDE);
+
+		// Add language NL attributes for attribute meta data
+		AttributeMetaData attributeLabelNL = attrMetaFactory.create()
+				.setName(AttributeMetaDataMetaData.LABEL + '-' + nl);
+		AttributeMetaData attributeDescriptionNL = attrMetaFactory.create()
+				.setName(AttributeMetaDataMetaData.DESCRIPTION + '-' + nl);
+		attrMetaMeta.addAttribute(attributeLabelNL);
+		attrMetaMeta.addAttribute(attributeDescriptionNL);
+
+		// Add language DE attributes for attribute meta data
+		AttributeMetaData attributeLabelDE = attrMetaFactory.create()
+				.setName(AttributeMetaDataMetaData.LABEL + '-' + de);
+		AttributeMetaData attributeDescriptionDE = attrMetaFactory.create()
+				.setName(AttributeMetaDataMetaData.DESCRIPTION + '-' + de);
+		attrMetaMeta.addAttribute(attributeLabelDE);
+		attrMetaMeta.addAttribute(attributeDescriptionDE);
+
+		languageRepositoryDecorator.delete(Stream.of(languageNL, languageDE));
+
+		verify(decoratedRepo, times(1)).delete(languageNL);
+		verify(decoratedRepo, times(1)).delete(languageDE);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })

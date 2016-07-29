@@ -22,7 +22,8 @@ import org.molgenis.fieldtypes.FieldType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.*;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.sql.DataSource;
 import java.sql.PreparedStatement;
@@ -44,13 +45,12 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.getValueString;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
 import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
-import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
 
 /**
  * Repository that persists entities in a PostgreSQL database
@@ -84,15 +84,17 @@ public class PostgreSqlRepository extends AbstractRepository
 	private final PostgreSqlEntityFactory postgreSqlEntityFactory;
 	private final JdbcTemplate jdbcTemplate;
 	private final DataSource dataSource;
+	private final PlatformTransactionManager transactionManager;
 
 	private EntityMetaData metaData;
 
 	public PostgreSqlRepository(PostgreSqlEntityFactory postgreSqlEntityFactory, JdbcTemplate jdbcTemplate,
-			DataSource dataSource)
+			DataSource dataSource, PlatformTransactionManager transactionManager)
 	{
 		this.postgreSqlEntityFactory = requireNonNull(postgreSqlEntityFactory);
-		this.dataSource = requireNonNull(dataSource);
 		this.jdbcTemplate = requireNonNull(jdbcTemplate);
+		this.dataSource = requireNonNull(dataSource);
+		this.transactionManager = requireNonNull(transactionManager);
 	}
 
 	void setMetaData(EntityMetaData metaData)
@@ -101,11 +103,16 @@ public class PostgreSqlRepository extends AbstractRepository
 	}
 
 	@Override
-	@Transactional(readOnly = true)
 	public Iterator<Entity> iterator()
 	{
-		Query<Entity> q = new QueryImpl<>();
-		return findAllBatching(q).iterator();
+		TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+		transactionTemplate.setReadOnly(true);
+
+		return transactionTemplate.execute((status) ->
+		{
+			Query<Entity> q = new QueryImpl<>();
+			return findAllBatching(q).iterator();
+		});
 	}
 
 	@Override
@@ -144,10 +151,12 @@ public class PostgreSqlRepository extends AbstractRepository
 	}
 
 	@Override
-	@Transactional(readOnly = true)
 	public Stream<Entity> findAll(Query<Entity> q)
 	{
-		return stream(findAllBatching(q).spliterator(), false);
+		TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+		transactionTemplate.setReadOnly(true);
+
+		return transactionTemplate.execute((status) -> stream(findAllBatching(q).spliterator(), false));
 	}
 
 	@Override
@@ -555,7 +564,7 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	private void updateBatching(Iterator<? extends Entity> entities)
 	{
-		final AttributeMetaData idAttribute = metaData.getIdAttribute();
+		final AttributeMetaData idAttr = metaData.getIdAttribute();
 		List<AttributeMetaData> persistedAttrs = getPersistedAttributes(metaData).collect(toList());
 		final List<AttributeMetaData> persistedNonMrefAttrs = persistedAttrs.stream()
 				.filter(attr -> !isMultipleReferenceType(attr)).collect(toList());
@@ -563,11 +572,9 @@ public class PostgreSqlRepository extends AbstractRepository
 				.filter(EntityMetaDataUtils::isMultipleReferenceType).collect(toList());
 		final String updateSql = getSqlUpdate(metaData);
 
+		// update values in entity table
 		Iterators.partition(entities, BATCH_SIZE).forEachRemaining(entitiesBatch ->
 		{
-			final List<Object> ids = new ArrayList<>();
-			final Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
-
 			if (LOG.isDebugEnabled())
 			{
 				LOG.debug("Updating {} [{}] entities", entitiesBatch.size(), getName());
@@ -583,49 +590,30 @@ public class PostgreSqlRepository extends AbstractRepository
 				{
 					Entity entity = entitiesBatch.get(rowIndex);
 
-					Object idValue = convert(idAttribute, entity.get(idAttribute.getName()));
-					ids.add(idValue);
 					int fieldIndex = 1;
 					for (AttributeMetaData attr : persistedNonMrefAttrs)
 					{
-						if (entity.get(attr.getName()) == null)
-						{
-							// repository should not fill in default value, the form should
-							preparedStatement.setObject(fieldIndex++, null);
-						}
-						else
-						{
-							if (isSingleReferenceType(attr))
-							{
-								Object value = entity.get(attr.getName());
-								if (value instanceof Entity)
-								{
-									preparedStatement.setObject(fieldIndex++,
-											convert(attr.getRefEntity().getIdAttribute(), ((Entity) value)
-													.get(attr.getRefEntity().getIdAttribute().getName())));
-								}
-								else
-								{
-									preparedStatement.setObject(fieldIndex++,
-											convert(attr.getRefEntity().getIdAttribute(), value));
-								}
-							}
-							else
-							{
-								Object value = convert(attr, entity.get(attr.getName()));
-								if (attr.getDataType() == DATE)
-								{
-									value = new java.sql.Date(((java.util.Date) value).getTime());
-								}
-								else if (attr.getDataType() == DATE_TIME)
-								{
-									value = new java.sql.Timestamp(((java.util.Date) value).getTime());
-								}
-								preparedStatement.setObject(fieldIndex++, value);
-							}
-						}
+						Object postgreSqlValue = getPostgreSqlValue(entity, attr);
+						preparedStatement.setObject(fieldIndex++, postgreSqlValue);
 					}
 
+					preparedStatement.setObject(fieldIndex++, getPostgreSqlValue(entity, idAttr));
+				}
+
+				@Override
+				public int getBatchSize()
+				{
+					return entitiesBatch.size();
+				}
+			});
+
+			// update values in entity junction table
+			if (!persistedMrefAttrs.isEmpty())
+			{
+				Map<String, List<Map<String, Object>>> mrefs = new HashMap<>();
+
+				for (Entity entity : entitiesBatch)
+				{
 					// create the mref records
 					for (AttributeMetaData attr : persistedMrefAttrs)
 					{
@@ -637,29 +625,23 @@ public class PostgreSqlRepository extends AbstractRepository
 							{
 								Map<String, Object> mref = new HashMap<>();
 								mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
-								mref.put(idAttribute.getName(), idValue);
+								mref.put(idAttr.getName(), entity.get(idAttr.getName()));
 								mref.put(attr.getName(), val);
 								mrefs.get(attr.getName()).add(mref);
 							}
 						}
 					}
-					preparedStatement.setObject(fieldIndex++, idValue);
 				}
-
-				@Override
-				public int getBatchSize()
+				// update mrefs
+				List<Object> ids = entitiesBatch.stream().map(entity -> getPostgreSqlValue(entity, idAttr))
+						.collect(toList());
+				for (AttributeMetaData attr : persistedMrefAttrs)
 				{
-					return entitiesBatch.size();
-				}
-			});
-
-			// update mrefs
-			for (AttributeMetaData attr : persistedMrefAttrs)
-			{
-				if (isMultipleReferenceType(attr))
-				{
-					removeMrefs(ids, attr);
-					addMrefs(mrefs.get(attr.getName()), attr);
+					if (isMultipleReferenceType(attr))
+					{
+						removeMrefs(ids, attr);
+						addMrefs(mrefs.get(attr.getName()), attr);
+					}
 				}
 			}
 		});
