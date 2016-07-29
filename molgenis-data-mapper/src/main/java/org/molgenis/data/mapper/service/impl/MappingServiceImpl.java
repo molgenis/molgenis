@@ -16,6 +16,7 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.support.EntityMetaDataUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -200,7 +201,8 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	/**
-	 * Compares the attributes of the target repository with the results of the mapping and sees if they're compatible.
+	 * Compares the attributes of the target repository with the results of the mapping and sees if they're
+	 * compatible. (present in both entities, same datatype and for reference types: same ref entity)
 	 * The repository is compatible when all attributes resulting from the mapping can be written to it.
 	 *
 	 * @param targetRepository      the target repository
@@ -226,13 +228,14 @@ public class MappingServiceImpl implements MappingService
 				return "attribute [" + mappingTargetAttrName
 						+ "] does not have the same datatype in the target repository";
 			}
-			else if (mappingTargetAttr.getDataType() == XREF)
+			else if (EntityMetaDataUtils.isReferenceType(mappingTargetAttr))
 			{
 				if (mappingTargetAttr.getRefEntity().getName()
 						.equals(targetRepoAttributeMap.get(mappingTargetAttrName).getRefEntity().getName()))
-					return "attribute [" + mappingTargetAttrName + "] of type XREF does not have the same refentity ["
-							+ mappingTargetAttr.getRefEntity().getName() + "] in the target repository ["
-							+ targetRepoAttributeMap.get(mappingTargetAttrName).getRefEntity().getName() + "]";
+					return "attribute [" + mappingTargetAttrName + "] of type [" + mappingTargetAttr.getDataType()
+							.name() + "] does not have the same refentity [" + mappingTargetAttr.getRefEntity()
+							.getName() + "] in the target repository [" + targetRepoAttributeMap
+							.get(mappingTargetAttrName).getRefEntity().getName() + "]";
 			}
 		}
 		return null;//return null if all is well
