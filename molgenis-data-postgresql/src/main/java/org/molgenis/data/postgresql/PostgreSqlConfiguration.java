@@ -1,14 +1,14 @@
 package org.molgenis.data.postgresql;
 
-import javax.sql.DataSource;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Scope;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
+
+import javax.sql.DataSource;
 
 @Configuration
 public class PostgreSqlConfiguration
@@ -22,12 +22,8 @@ public class PostgreSqlConfiguration
 	@Autowired
 	private DataService dataService;
 
-	@Bean
-	@Scope("prototype")
-	public PostgreSqlRepository postgreSqlRepository()
-	{
-		return new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate(), dataSource);
-	}
+	@Autowired
+	private PlatformTransactionManager transactionManager;
 
 	@Bean
 	public JdbcTemplate jdbcTemplate()
@@ -37,25 +33,10 @@ public class PostgreSqlConfiguration
 		return jdbcTemplate;
 	}
 
-	@Bean(name =
-	{ "PostgreSqlRepositoryCollection" })
+	@Bean
 	public RepositoryCollection postgreSqlRepositoryCollection()
 	{
-		PostgreSqlRepositoryCollection postgreSqlRepositoryCollection = new PostgreSqlRepositoryCollection(dataSource,
-				jdbcTemplate(), dataService)
-		{
-			@Override
-			public boolean hasRepository(String name)
-			{
-				throw new UnsupportedOperationException();
-			}
-
-			@Override
-			protected PostgreSqlRepository createPostgreSqlRepository()
-			{
-				return postgreSqlRepository();
-			}
-		};
-		return postgreSqlRepositoryCollection;
+		return new PostgreSqlRepositoryCollection(postgreSqlEntityFactory, dataSource, jdbcTemplate(), dataService,
+				transactionManager);
 	}
 }

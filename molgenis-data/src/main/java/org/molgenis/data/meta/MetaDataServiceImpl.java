@@ -1,5 +1,6 @@
 package org.molgenis.data.meta;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.collect.TreeTraverser;
 import org.molgenis.data.*;
@@ -175,7 +176,11 @@ public class MetaDataServiceImpl implements MetaDataService
 		getAttributeRepository().add(attrEntities);
 
 		// create tags
-		getTagRepository().add(stream(entityMeta.getTags().spliterator(), false));
+		Iterable<Tag> tags = entityMeta.getTags();
+		if (!Iterables.isEmpty(tags))
+		{
+			getTagRepository().add(stream(tags.spliterator(), false));
+		}
 
 		// create entity
 		getEntityRepository().add(entityMeta);

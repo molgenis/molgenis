@@ -1,32 +1,29 @@
 package org.molgenis.auth;
 
+import com.google.common.collect.Iterators;
+import org.molgenis.data.*;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.AuthorityMetaData.ROLE;
 import static org.molgenis.auth.UserAuthorityMetaData.MOLGENIS_USER;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.DataService;
-import org.molgenis.data.listeners.EntityListener;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.springframework.security.crypto.password.PasswordEncoder;
-
 public class MolgenisUserDecorator implements Repository<MolgenisUser>
 {
+	private static final int BATCH_SIZE = 1000;
+
 	private final Repository<MolgenisUser> decoratedRepository;
 	private final UserAuthorityFactory userAuthorityFactory;
 	private final DataService dataService;
@@ -66,18 +63,24 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 	@Override
 	public Integer add(Stream<MolgenisUser> entities)
 	{
-		entities = entities.map(entity -> {
-			encodePassword(entity);
-			addSuperuserAuthority(entity);
-			return entity;
+		AtomicInteger count = new AtomicInteger();
+		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(molgenisUsers ->
+		{
+			molgenisUsers.forEach(this::encodePassword);
+
+			Integer batchCount = decoratedRepository.add(molgenisUsers.stream());
+			count.addAndGet(batchCount);
+
+			molgenisUsers.forEach(this::addSuperuserAuthority);
 		});
-		return decoratedRepository.add(entities);
+		return count.get();
 	}
 
 	@Override
 	public void update(Stream<MolgenisUser> entities)
 	{
-		entities = entities.map(entity -> {
+		entities = entities.map(entity ->
+		{
 			updatePassword(entity);
 			return entity;
 		});

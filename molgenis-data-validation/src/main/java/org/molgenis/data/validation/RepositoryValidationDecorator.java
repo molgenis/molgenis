@@ -2,7 +2,6 @@ package org.molgenis.data.validation;
 
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
@@ -14,13 +13,13 @@ import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
 import static java.util.Collections.*;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.support.EntityMetaDataUtils.*;
 
@@ -245,7 +244,8 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		boolean validateUniqueness = !getCapabilities().contains(VALIDATE_UNIQUE_CONSTRAINT);
 
 		// add validation operation to stream
-		return entities.filter(entity -> {
+		return entities.filter(entity ->
+		{
 			validationResource.incrementRow();
 
 			validateEntityValueTypes(entity, validationResource);
@@ -299,7 +299,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		{
 			List<AttributeMetaData> requiredValueAttrs = StreamSupport
 					.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-					.filter(attr -> !attr.isNillable() && attr.getExpression() == null).collect(Collectors.toList());
+					.filter(attr -> !attr.isNillable() && attr.getExpression() == null).collect(toList());
 
 			validationResource.setRequiredValueAttrs(requiredValueAttrs);
 		}
@@ -313,7 +313,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		{
 			// get reference attrs
 			refAttrs = StreamSupport.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-					.filter(attr -> isReferenceType(attr) && attr.getExpression() == null).collect(Collectors.toList());
+					.filter(attr -> isReferenceType(attr) && attr.getExpression() == null).collect(toList());
 		}
 		else
 		{
@@ -322,14 +322,15 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			String backend = dataService.getMeta().getBackend(getEntityMetaData()).getName();
 			refAttrs = StreamSupport.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
 					.filter(attr -> isReferenceType(attr) && attr.getExpression() == null && isDifferentBackend(backend,
-							attr)).collect(Collectors.toList());
+							attr)).collect(toList());
 		}
 
 		// get referenced entity ids
 		if (!refAttrs.isEmpty())
 		{
 			Map<String, HugeSet<Object>> refEntitiesIds = new HashMap<>();
-			refAttrs.forEach(refAttr -> {
+			refAttrs.forEach(refAttr ->
+			{
 				EntityMetaData refEntityMeta = refAttr.getRefEntity();
 				String refEntityName = refEntityMeta.getName();
 				HugeSet<Object> refEntityIds = refEntitiesIds.get(refEntityName);
@@ -369,7 +370,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			// get unique attributes
 			List<AttributeMetaData> uniqueAttrs = StreamSupport
 					.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-					.filter(attr -> attr.isUnique() && attr.getExpression() == null).collect(Collectors.toList());
+					.filter(attr -> attr.isUnique() && attr.getExpression() == null).collect(toList());
 
 			// get existing values for each attributes
 			if (!uniqueAttrs.isEmpty())
@@ -377,14 +378,17 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 				Map<String, HugeMap<Object, Object>> uniqueAttrsValues = new HashMap<>();
 
 				Fetch fetch = new Fetch();
-				uniqueAttrs.forEach(uniqueAttr -> {
+				uniqueAttrs.forEach(uniqueAttr ->
+				{
 					uniqueAttrsValues.put(uniqueAttr.getName(), new HugeMap<>());
 					fetch.field(uniqueAttr.getName());
 				});
 
 				Query<Entity> q = new QueryImpl<>().fetch(fetch);
-				decoratedRepository.findAll(q).forEach(entity -> {
-					uniqueAttrs.forEach(uniqueAttr -> {
+				decoratedRepository.findAll(q).forEach(entity ->
+				{
+					uniqueAttrs.forEach(uniqueAttr ->
+					{
 						HugeMap<Object, Object> uniqueAttrValues = uniqueAttrsValues.get(uniqueAttr.getName());
 						Object attrValue = entity.get(uniqueAttr.getName());
 						if (attrValue != null)
@@ -407,16 +411,19 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 
 	private void initReadonlyValidation(ValidationResource validationResource)
 	{
+		String idAttrName = getEntityMetaData().getIdAttribute().getName();
 		List<AttributeMetaData> readonlyAttrs = StreamSupport
 				.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-				.filter(attr -> attr.isReadOnly() && attr.getExpression() == null).collect(Collectors.toList());
+				.filter(attr -> attr.isReadOnly() && attr.getExpression() == null && !attr.getName().equals(idAttrName))
+				.collect(toList());
 
 		validationResource.setReadonlyAttrs(readonlyAttrs);
 	}
 
 	private void validateEntityValueRequired(Entity entity, ValidationResource validationResource)
 	{
-		validationResource.getRequiredValueAttrs().forEach(nonNillableAttr -> {
+		validationResource.getRequiredValueAttrs().forEach(nonNillableAttr ->
+		{
 			Object value = entity.get(nonNillableAttr.getName());
 			if (value == null || (isMultipleReferenceType(nonNillableAttr) && !entity
 					.getEntities(nonNillableAttr.getName()).iterator().hasNext()))
@@ -457,7 +464,8 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		Set<ConstraintViolation> attrViolations = entityAttributesValidator.validate(entity, getEntityMetaData());
 		if (attrViolations != null && !attrViolations.isEmpty())
 		{
-			attrViolations.forEach(attrViolation -> {
+			attrViolations.forEach(attrViolation ->
+			{
 				validationResource.addViolation(attrViolation);
 			});
 		}
@@ -466,7 +474,8 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	private void validateEntityValueUniqueness(Entity entity, ValidationResource validationResource,
 			ValidationMode validationMode)
 	{
-		validationResource.getUniqueAttrs().forEach(uniqueAttr -> {
+		validationResource.getUniqueAttrs().forEach(uniqueAttr ->
+		{
 			Object attrValue = entity.get(uniqueAttr.getName());
 			if (attrValue != null)
 			{
@@ -498,7 +507,8 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 
 	private void validateEntityValueReferences(Entity entity, ValidationResource validationResource)
 	{
-		validationResource.getRefAttrs().forEach(refAttr -> {
+		validationResource.getRefAttrs().forEach(refAttr ->
+		{
 			HugeSet<Object> refEntityIds = validationResource.getRefEntitiesIds().get(refAttr.getRefEntity().getName());
 
 			Iterable<Entity> refEntities;
@@ -548,8 +558,14 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	@SuppressWarnings("unchecked")
 	private void validateEntityValueReadOnly(Entity entity, ValidationResource validationResource)
 	{
+		if (validationResource.getReadonlyAttrs().isEmpty())
+		{
+			return;
+		}
+
 		Entity entityToUpdate = findOneById(entity.getIdValue());
-		validationResource.getReadonlyAttrs().forEach(readonlyAttr -> {
+		validationResource.getReadonlyAttrs().forEach(readonlyAttr ->
+		{
 			Object value = entity.get(readonlyAttr.getName());
 
 			Object existingValue = entityToUpdate.get(readonlyAttr.getName());
@@ -568,13 +584,15 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			else if (isMultipleReferenceType(readonlyAttr))
 			{
 				List<Object> entityIds = new ArrayList<>();
-				((Iterable<Entity>) value).forEach(mrefEntity -> {
+				((Iterable<Entity>) value).forEach(mrefEntity ->
+				{
 					entityIds.add(mrefEntity.getIdValue());
 				});
 				value = entityIds;
 
 				List<Object> existingEntityIds = new ArrayList<>();
-				((Iterable<Entity>) existingValue).forEach(mrefEntity -> {
+				((Iterable<Entity>) existingValue).forEach(mrefEntity ->
+				{
 					existingEntityIds.add(mrefEntity.getIdValue());
 				});
 				existingValue = existingEntityIds;
