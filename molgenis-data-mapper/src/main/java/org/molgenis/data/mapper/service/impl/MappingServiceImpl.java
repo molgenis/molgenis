@@ -205,7 +205,7 @@ public class MappingServiceImpl implements MappingService
 	 *
 	 * @param targetRepository      the target repository
 	 * @param mappingTargetMetaData the metadata of the mapping result entity
-	 * @return true if the mapping can be written to the target repository
+	 * @return message if metadata is not compatible, null if they are
 	 */
 	private String isTargetMetaCompatible(Repository<Entity> targetRepository, EntityMetaData mappingTargetMetaData)
 	{
@@ -235,7 +235,7 @@ public class MappingServiceImpl implements MappingService
 							+ targetRepoAttributeMap.get(mappingTargetAttrName).getRefEntity().getName() + "]";
 			}
 		}
-		return null;
+		return null;//return null if all is well
 	}
 
 	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo)
