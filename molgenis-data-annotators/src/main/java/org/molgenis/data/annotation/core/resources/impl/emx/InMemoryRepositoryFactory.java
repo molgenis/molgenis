@@ -1,5 +1,6 @@
 package org.molgenis.data.annotation.core.resources.impl.emx;
 
+import com.google.common.collect.ImmutableMap;
 import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.excel.ExcelRepositoryCollection;
@@ -52,14 +53,18 @@ public class InMemoryRepositoryFactory implements RepositoryFactory
 			throw new RuntimeException(
 					"Unable to create ExcelRepositoryCollection for file:" + file.getName() + " exception: " + e);
 		}
-		// FIXME nullpointers
-		EntityMetaData metaData = parser.parse(repositoryCollection, DefaultPackage.PACKAGE_DEFAULT).getEntityMap()
-				.get(name);
+
+		ImmutableMap<String, EntityMetaData> entityMap = parser.parse(repositoryCollection, DefaultPackage.PACKAGE_DEFAULT).getEntityMap();
+		if(!entityMap.containsKey(name)) {
+			throw new RuntimeException(
+					"Entity [" + name + "] is not found. Entities found: " + entityMap.keySet());
+		}
+
+		EntityMetaData metaData = entityMap.get(name);
 		InMemoryRepository inMemoryRepository = new InMemoryRepository(metaData);
 		inMemoryRepository.add(StreamSupport.stream(Spliterators
 						.spliteratorUnknownSize(repositoryCollection.getRepository(name).iterator(), Spliterator.ORDERED),
 				false));
 		return inMemoryRepository;
 	}
-
 }
