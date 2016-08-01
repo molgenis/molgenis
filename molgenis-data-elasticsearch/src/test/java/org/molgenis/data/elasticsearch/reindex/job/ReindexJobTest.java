@@ -257,11 +257,24 @@ public class ReindexJobTest extends AbstractMolgenisSpringTest
 		reindexJob.call(this.progress);
 		assertEquals(reindexAction.getReindexStatus(), FINISHED);
 
-		verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"));
-
+		if (cudType == CudType.CREATE)
+		{
+			verify(this.searchService).createMappings(any());
+		}
+		else
+		{
+			verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"));
+		}
 		verify(progress).status("######## START Reindex transaction id: [aabbcc] ########");
 		verify(progress).setProgressMax(1);
-		verify(progress).progress(0, "Reindexing repository test. CUDType = " + cudType.name());
+		if (cudType == CudType.CREATE)
+		{
+			verify(progress).progress(0, "Create index mappings test. CUDType = " + cudType.name());
+		}
+		else
+		{
+			verify(progress).progress(0, "Reindexing repository test. CUDType = " + cudType.name());
+		}
 		verify(progress).progress(1, "Executed all reindex actions, cleaning up the actions...");
 		verify(progress).status("refreshIndex...");
 		verify(progress).status("refreshIndex done.");
