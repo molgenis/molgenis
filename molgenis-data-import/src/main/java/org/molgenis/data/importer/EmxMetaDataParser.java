@@ -318,7 +318,8 @@ public class EmxMetaDataParser implements MetaDataParser
 							throw new IllegalArgumentException("Unknown tag '" + tagIdentifier + "'");
 						}
 						//p.addTag(Tag.<Package> asTag(p, tagEntity)); // FIXME
-						throw new UnsupportedOperationException("Applying tags to packages is currently disabled in 2.0");
+						throw new UnsupportedOperationException(
+								"Applying tags to packages is currently disabled in 2.0");
 					}
 				}
 			}
@@ -647,6 +648,16 @@ public class EmxMetaDataParser implements MetaDataParser
 							format("Attributes error on line [%d]. Illegal idAttribute value. Allowed values are 'TRUE', 'FALSE' or 'AUTO'",
 									rowIndex));
 				}
+				if (emxIdAttrValue.equalsIgnoreCase("true"))
+				{
+					AttributeType type = attr.getDataType();
+					List<AttributeType> acceptedIdTypes = newArrayList(STRING, INT, LONG);
+					if (!acceptedIdTypes.contains(type))
+					{
+						throw new MolgenisDataException("Identifier is of type [" + type
+								+ "]. Id attributes can only be of type 'STRING', 'INT' or 'LONG'");
+					}
+				}
 
 				attr.setAuto(emxIdAttrValue.equalsIgnoreCase(AUTO));
 				if (!attr.isAuto()) emxAttr.setIdAttr(parseBoolean(emxIdAttrValue, rowIndex, ID_ATTRIBUTE));
@@ -659,7 +670,7 @@ public class EmxMetaDataParser implements MetaDataParser
 						format("Attributes error on line [%d]. Auto attributes can only be of data type 'string'",
 								rowIndex));
 			}
-			if (emxAttrVisible != null)
+			if (emxAttr.isIdAttr()) if (emxAttrVisible != null)
 			{
 				if (emxAttrVisible.equalsIgnoreCase("true") || emxAttrVisible.equalsIgnoreCase("false"))
 				{
