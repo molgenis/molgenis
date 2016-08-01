@@ -651,7 +651,11 @@ public class EmxMetaDataParser implements MetaDataParser
 				}
 				if (emxIdAttrValue.equalsIgnoreCase("true"))
 				{
-					isIdAttributeTypeAllowed(attr);
+					if (isIdAttributeTypeAllowed(attr))
+					{
+						throw new MolgenisDataException("Identifier is of type [" + attr.getDataType()
+								+ "]. Id attributes can only be of type 'STRING', 'INT' or 'LONG'");
+					}
 				}
 
 				attr.setAuto(emxIdAttrValue.equalsIgnoreCase(AUTO));
