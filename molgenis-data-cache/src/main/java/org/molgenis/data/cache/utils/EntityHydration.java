@@ -3,7 +3,9 @@ package org.molgenis.data.cache.utils;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +37,8 @@ public class EntityHydration
 	}
 
 	/**
-	 * Rehydrate an entity.
+	 * Rehydrate an entity. Entity can be an {@link EntityWithComputedAttributes}
+	 * if there are attributes present with an expression
 	 *
 	 * @param entityMetaData   metadata of the entity to rehydrate
 	 * @param dehydratedEntity map with key value pairs representing this entity
@@ -46,8 +49,15 @@ public class EntityHydration
 		LOG.trace("Hydrating entity: {} for entity {}", dehydratedEntity, entityMetaData.getName());
 
 		Entity hydratedEntity = entityManager.create(entityMetaData);
-		entityMetaData.getAtomicAttributes().forEach(attribute -> {
 
+		// If there is a computed attribute in the metadata, we create a EntityWithComputedAttributes
+		if (entityMetaData.hasAttributeWithExpression())
+		{
+			hydratedEntity = new EntityWithComputedAttributes(hydratedEntity);
+		}
+
+		for (AttributeMetaData attribute : entityMetaData.getAtomicAttributes())
+		{
 			// Only hydrate the attribute if it is NOT computed.
 			// Computed attributes will be calculated based on the metadata
 			if (attribute.getExpression() == null)
@@ -73,8 +83,12 @@ public class EntityHydration
 						hydratedEntity.set(name, value);
 					}
 				}
+				else
+				{
+					hydratedEntity.set(name, value);
+				}
 			}
-		});
+		}
 
 		return hydratedEntity;
 	}
