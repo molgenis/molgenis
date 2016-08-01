@@ -658,14 +658,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("source", source);
 		model.addAttribute("targetAttribute", dataService.getEntityMetaData(target).getAttribute(targetAttribute));
 
-		FluentIterable<Entity> sourceEntities = FluentIterable.from(new Iterable<Entity>()
-		{
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				return dataService.findAll(source).iterator();
-			}
-		}).limit(10);
+		FluentIterable<Entity> sourceEntities = FluentIterable.from(() -> dataService.findAll(source).iterator()).limit(10);
 		ImmutableList<AlgorithmResult> algorithmResults = sourceEntities.transform(sourceEntity -> {
 			try
 			{
