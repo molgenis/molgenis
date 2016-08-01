@@ -3,6 +3,8 @@ package org.molgenis.data.annotation.core.effects;
 import org.molgenis.data.annotation.web.meta.AnnotatorEntityMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.vcf.utils.VcfUtils;
+import org.molgenis.data.vcf.utils.VcfWriterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +20,7 @@ public class EffectsMetaData implements AnnotatorEntityMetaData
 	AttributeMetaDataFactory attributeMetaDataFactory;
 
 	public static String ID = "id";
-	public static String VARIANT = "Variant";
+	public static String VARIANT = VcfWriterUtils.VARIANT;
 
 	public static String ALT = "Alt_Allele";
 	public static String ANNOTATION = "Annotation";

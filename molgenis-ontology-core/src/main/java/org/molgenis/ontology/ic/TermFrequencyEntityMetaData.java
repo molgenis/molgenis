@@ -38,7 +38,7 @@ public class TermFrequencyEntityMetaData extends SystemEntityMetaData
 
 		addAttribute(ID, ROLE_ID).setAuto(true);
 		addAttribute(TERM).setNillable(false);
-		addAttribute(FREQUENCY).setDataType(INT).setNillable(false);
-		addAttribute(OCCURRENCE).setDataType(DECIMAL).setNillable(false);
+		addAttribute(FREQUENCY).setDataType(DECIMAL).setNillable(false);
+		addAttribute(OCCURRENCE).setDataType(INT).setNillable(false);
 	}
 }

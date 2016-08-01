@@ -318,7 +318,7 @@ public class EmxMetaDataParser implements MetaDataParser
 							throw new IllegalArgumentException("Unknown tag '" + tagIdentifier + "'");
 						}
 						//p.addTag(Tag.<Package> asTag(p, tagEntity)); // FIXME
-						throw new UnsupportedOperationException();
+						throw new UnsupportedOperationException("Applying tags to packages is currently disabled in 2.0");
 					}
 				}
 			}
