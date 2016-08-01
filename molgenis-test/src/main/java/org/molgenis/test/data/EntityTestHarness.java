@@ -4,6 +4,7 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.test.data.staticentity.TestEntityStaticMetaData;
 import org.molgenis.test.data.staticentity.TestRefEntityStaticMetaData;
 import org.molgenis.util.MolgenisDateFormat;
@@ -45,6 +46,7 @@ public class EntityTestHarness
 	public static final String ATTR_MREF = "mref_attr";
 	public static final String ATTR_REF_ID = "ref_id_attr";
 	public static final String ATTR_REF_STRING = "ref_string_attr";
+	public static final String ATTR_COMPUTED_INT = "computed_int_attr";
 
 	@Autowired
 	private PackageFactory packageFactory;
@@ -104,7 +106,8 @@ public class EntityTestHarness
 				.addAttribute(createAttribute(ATTR_LONG, LONG)).addAttribute(createAttribute(ATTR_INT, INT))
 				.addAttribute(createAttribute(ATTR_SCRIPT, SCRIPT))
 				.addAttribute(createAttribute(ATTR_XREF, XREF).setRefEntity(refEntityMetaData))
-				.addAttribute(createAttribute(ATTR_MREF, MREF).setRefEntity(refEntityMetaData));
+				.addAttribute(createAttribute(ATTR_MREF, MREF).setRefEntity(refEntityMetaData))
+				.addAttribute(createAttribute(ATTR_COMPUTED_INT, INT).setExpression(ATTR_INT));
 	}
 
 	private AttributeMetaData createAttribute(String name, AttributeType dataType)
@@ -137,24 +140,25 @@ public class EntityTestHarness
 	{
 		if (date == null || dateTime == null) generateDateAndDateTime();
 
-		Entity entity1 = new DynamicEntity(entityMetaData);
-		entity1.set(ATTR_ID, "" + id);
-		entity1.set(ATTR_STRING, "string1");
-		entity1.set(ATTR_BOOL, id % 2 == 0);
-		entity1.set(ATTR_CATEGORICAL, refEntity);
-		entity1.set(ATTR_CATEGORICAL_MREF, Collections.singletonList(refEntity));
-		entity1.set(ATTR_DATE, date);
-		entity1.set(ATTR_DATETIME, dateTime);
-		entity1.set(ATTR_EMAIL, "this.is@mail.address");
-		entity1.set(ATTR_DECIMAL, id + 0.123);
-		entity1.set(ATTR_HTML, id % 2 == 1 ? "<html>where is my head and where is my body</html>" : null);
-		entity1.set(ATTR_HYPERLINK, "http://www.molgenis.org");
-		entity1.set(ATTR_LONG, id * 1000000L);
-		entity1.set(ATTR_INT, 10 + id);
-		entity1.set(ATTR_SCRIPT, "/bin/blaat/script.sh");
-		entity1.set(ATTR_XREF, refEntity);
-		entity1.set(ATTR_MREF, Collections.singletonList(refEntity));
-		return entity1;
+		Entity entity = new DynamicEntity(entityMetaData);
+		entity.set(ATTR_ID, "" + id);
+		entity.set(ATTR_STRING, "string1");
+		entity.set(ATTR_BOOL, id % 2 == 0);
+		entity.set(ATTR_CATEGORICAL, refEntity);
+		entity.set(ATTR_CATEGORICAL_MREF, Collections.singletonList(refEntity));
+		entity.set(ATTR_DATE, date);
+		entity.set(ATTR_DATETIME, dateTime);
+		entity.set(ATTR_EMAIL, "this.is@mail.address");
+		entity.set(ATTR_DECIMAL, id + 0.123);
+		entity.set(ATTR_HTML, id % 2 == 1 ? "<html>where is my head and where is my body</html>" : null);
+		entity.set(ATTR_HYPERLINK, "http://www.molgenis.org");
+		entity.set(ATTR_LONG, id * 1000000L);
+		entity.set(ATTR_INT, 10 + id);
+		entity.set(ATTR_SCRIPT, "/bin/blaat/script.sh");
+		entity.set(ATTR_XREF, refEntity);
+		entity.set(ATTR_MREF, Collections.singletonList(refEntity));
+
+		return new EntityWithComputedAttributes(entity);
 	}
 
 	private void generateDateAndDateTime()
