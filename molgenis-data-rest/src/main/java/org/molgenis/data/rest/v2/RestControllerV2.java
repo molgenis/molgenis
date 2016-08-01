@@ -38,9 +38,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.transform;
+import static java.lang.Integer.parseInt;
+import static java.lang.Long.parseLong;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
@@ -193,16 +194,25 @@ class RestControllerV2
 	public void deleteEntity(@PathVariable("entityName") String entityName, @PathVariable("id") Object id)
 	{
 		// PostGreSQL is very strict with typing.
-		// If the idAttribute is of type int, passing a string or object will cause typing errors
+		// If the idAttribute is of type int, passing a string will cause typing errors
 		// Determine the type and set the value accordingly
 		AttributeType type = dataService.getMeta().getEntityMetaData(entityName).getIdAttribute().getDataType();
 		if (type == INT)
 		{
-			id = Integer.parseInt(id.toString());
+			id = parseInt(id.toString());
 		}
 		else if (type == STRING)
 		{
 			id = id.toString();
+		}
+		else if (type == LONG)
+		{
+			id = parseLong(id.toString());
+		}
+		else
+		{
+			throw new MolgenisDataException(
+					"Identifier is of type [" + type + "]. Id attributes can only be of type STRING, INT or LONG");
 		}
 		dataService.deleteById(entityName, id);
 	}
