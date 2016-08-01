@@ -16,10 +16,10 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.support.EntityMetaDataUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,10 +178,10 @@ public class MappingServiceImpl implements MappingService
 		{
 			targetRepo = dataService.getRepository(entityName);
 
-			if (!isTargetMetaCompatible(targetRepo, targetMetaData))
+			String reason = isTargetMetaCompatible(targetRepo, targetMetaData);
+			if (reason != null)
 			{
-				throw new MolgenisDataException(
-						"Target entity " + entityName + " exists but is not compatible with the target mappings.");
+				throw new MolgenisDataException(reason);
 			}
 		}
 
@@ -201,14 +201,15 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	/**
-	 * Compares the attributes of the target repository with the results of the mapping and sees if they're compatible.
+	 * Compares the attributes of the target repository with the results of the mapping and sees if they're
+	 * compatible. (present in both entities, same datatype and for reference types: same ref entity)
 	 * The repository is compatible when all attributes resulting from the mapping can be written to it.
 	 *
 	 * @param targetRepository      the target repository
 	 * @param mappingTargetMetaData the metadata of the mapping result entity
-	 * @return true if the mapping can be written to the target repository
+	 * @return message if metadata is not compatible, null if they are
 	 */
-	private boolean isTargetMetaCompatible(Repository<Entity> targetRepository, EntityMetaData mappingTargetMetaData)
+	private String isTargetMetaCompatible(Repository<Entity> targetRepository, EntityMetaData mappingTargetMetaData)
 	{
 		Map<String, AttributeMetaData> targetRepoAttributeMap = Maps.newHashMap();
 		targetRepository.getEntityMetaData().getAtomicAttributes()
@@ -217,17 +218,27 @@ public class MappingServiceImpl implements MappingService
 		for (AttributeMetaData mappingTargetAttr : mappingTargetMetaData.getAtomicAttributes())
 		{
 			String mappingTargetAttrName = mappingTargetAttr.getName();
-			if (targetRepoAttributeMap.containsKey(mappingTargetAttrName) && EntityUtils
-					.equals(targetRepoAttributeMap.get(mappingTargetAttrName), mappingTargetAttr))
+			if (!targetRepoAttributeMap.containsKey(mappingTargetAttrName))
 			{
-				continue;
+				return "Target repository does not contain attrbibute [" + mappingTargetAttrName + "]";
 			}
-			else
+			else if (!(mappingTargetAttr.getDataType() == targetRepoAttributeMap.get(mappingTargetAttrName)
+					.getDataType()))
 			{
-				return false;
+				return "attribute [" + mappingTargetAttrName
+						+ "] does not have the same datatype in the target repository";
+			}
+			else if (EntityMetaDataUtils.isReferenceType(mappingTargetAttr))
+			{
+				if (mappingTargetAttr.getRefEntity().getName()
+						.equals(targetRepoAttributeMap.get(mappingTargetAttrName).getRefEntity().getName()))
+					return "attribute [" + mappingTargetAttrName + "] of type [" + mappingTargetAttr.getDataType()
+							.name() + "] does not have the same refentity [" + mappingTargetAttr.getRefEntity()
+							.getName() + "] in the target repository [" + targetRepoAttributeMap
+							.get(mappingTargetAttrName).getRefEntity().getName() + "]";
 			}
 		}
-		return true;
+		return null;//return null if all is well
 	}
 
 	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo)
@@ -253,7 +264,7 @@ public class MappingServiceImpl implements MappingService
 		while (sourceEntities.hasNext())
 		{
 			Entity sourceEntity = sourceEntities.next();
- 			Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
+			Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
 					sourceMapping.getSourceEntityMetaData(), targetRepo);
 			mappedEntities.add(mappedEntity);
 
