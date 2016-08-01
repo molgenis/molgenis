@@ -1,6 +1,5 @@
 package org.molgenis.data.support;
 
-import autovalue.shaded.com.google.common.common.collect.Maps;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -10,8 +9,10 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Map;
 
+import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.support.ExpressionEvaluatorFactory.createExpressionEvaluator;
 
 /**
  * Entity decorator that computes computed attributes.
@@ -26,13 +27,13 @@ public class EntityWithComputedAttributes implements Entity
 	public EntityWithComputedAttributes(Entity decoratedEntity)
 	{
 		this.decoratedEntity = requireNonNull(decoratedEntity);
-		expressionEvaluators = Maps.newHashMap();
+		expressionEvaluators = newHashMap();
 		EntityMetaData emd = decoratedEntity.getEntityMetaData();
 		for (AttributeMetaData amd : emd.getAtomicAttributes())
 		{
 			if (amd.getExpression() != null)
 			{
-				expressionEvaluators.put(amd.getName(), ExpressionEvaluatorFactory.createExpressionEvaluator(amd, emd));
+				expressionEvaluators.put(amd.getName(), createExpressionEvaluator(amd, emd));
 			}
 		}
 	}
