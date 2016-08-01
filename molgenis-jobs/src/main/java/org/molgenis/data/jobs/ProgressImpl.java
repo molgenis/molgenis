@@ -55,7 +55,7 @@ public class ProgressImpl implements Progress
 	{
 		jobExecution.setProgressInt(progress);
 		jobExecution.setProgressMessage(message);
-		JOB_EXECUTION_LOG.info("progress ({}, {})", progress, message);
+		JOB_EXECUTION_LOG.debug("progress ({}, {})", progress, message);
 		update();
 	}
 
