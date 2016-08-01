@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -285,9 +284,9 @@ public class ElasticsearchService implements SearchService
 	private IndexRequest createIndexRequestForEntity(Entity entity, EntityMetaData entityMetaData, String type)
 	{
 		String id = toElasticsearchId(entity, entityMetaData);
-		Map<String, Object> source = elasticsearchEntityFactory.create(entityMetaData, entity);
+		XContentBuilder xContentBuilder = elasticsearchEntityFactory.create(entity);
 		LOG.trace("Indexing [{}] with id [{}] in index [{}]...", type, id, indexName);
-		return new IndexRequest().index(indexName).type(type).id(id).source(source);
+		return new IndexRequest().index(indexName).type(type).id(id).source(xContentBuilder);
 	}
 
 	@Override

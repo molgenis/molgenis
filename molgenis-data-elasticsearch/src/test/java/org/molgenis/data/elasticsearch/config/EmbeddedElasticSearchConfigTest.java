@@ -1,19 +1,12 @@
 package org.molgenis.data.elasticsearch.config;
 
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.io.File;
-import java.io.IOException;
-
+import com.google.common.io.Files;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
-import org.molgenis.data.elasticsearch.index.EntityToSourceConverter;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.reindex.ReindexActionRegisterService;
@@ -29,7 +22,12 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.io.Files;
+import java.io.File;
+import java.io.IOException;
+
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class EmbeddedElasticSearchConfigTest
 {
@@ -68,12 +66,6 @@ public class EmbeddedElasticSearchConfigTest
 		public SourceToEntityConverter sourceToEntityConverter()
 		{
 			return mock(SourceToEntityConverter.class);
-		}
-
-		@Bean
-		public EntityToSourceConverter entityToSourceConverter()
-		{
-			return mock(EntityToSourceConverter.class);
 		}
 
 		@Bean
