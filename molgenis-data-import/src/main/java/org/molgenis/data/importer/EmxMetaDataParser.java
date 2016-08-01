@@ -665,7 +665,7 @@ public class EmxMetaDataParser implements MetaDataParser
 						format("Attributes error on line [%d]. Auto attributes can only be of data type 'string'",
 								rowIndex));
 			}
-			if (emxAttr.isIdAttr()) if (emxAttrVisible != null)
+			if (emxAttrVisible != null)
 			{
 				if (emxAttrVisible.equalsIgnoreCase("true") || emxAttrVisible.equalsIgnoreCase("false"))
 				{
