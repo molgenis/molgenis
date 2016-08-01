@@ -39,6 +39,8 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.transform;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
@@ -84,15 +86,15 @@ class RestControllerV2
 
 	static UnknownAttributeException createUnknownAttributeException(String entityName, String attributeName)
 	{
-		return new UnknownAttributeException("Operation failed. Unknown attribute: '" + attributeName
-				+ "', of entity: '" + entityName + "'");
+		return new UnknownAttributeException(
+				"Operation failed. Unknown attribute: '" + attributeName + "', of entity: '" + entityName + "'");
 	}
 
 	static MolgenisDataAccessException createMolgenisDataAccessExceptionReadOnlyAttribute(String entityName,
 			String attributeName)
 	{
-		return new MolgenisDataAccessException("Operation failed. Attribute '" + attributeName + "' of entity '"
-				+ entityName + "' is readonly");
+		return new MolgenisDataAccessException(
+				"Operation failed. Attribute '" + attributeName + "' of entity '" + entityName + "' is readonly");
 	}
 
 	static MolgenisDataException createMolgenisDataExceptionUnknownIdentifier(int count)
@@ -129,8 +131,9 @@ class RestControllerV2
 	{
 		if (molgenisVersion == null) throw new IllegalArgumentException("molgenisVersion is null");
 		if (molgenisBuildDate == null) throw new IllegalArgumentException("molgenisBuildDate is null");
-		molgenisBuildDate = molgenisBuildDate.equals("${maven.build.timestamp}") ? new SimpleDateFormat(
-				"yyyy-MM-dd HH:mm").format(new java.util.Date()) + " by Eclipse" : molgenisBuildDate;
+		molgenisBuildDate = molgenisBuildDate.equals("${maven.build.timestamp}") ?
+				new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new java.util.Date())
+						+ " by Eclipse" : molgenisBuildDate;
 
 		Map<String, String> result = new HashMap<>();
 		result.put("molgenisVersion", molgenisVersion);
@@ -141,7 +144,7 @@ class RestControllerV2
 
 	/**
 	 * Retrieve an entity instance by id, optionally specify which attributes to include in the response.
-	 * 
+	 *
 	 * @param entityName
 	 * @param id
 	 * @param attributeFilter
@@ -154,8 +157,8 @@ class RestControllerV2
 			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
 	{
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
-		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityMeta,
-				languageService.getCurrentUserLanguageCode());
+		Fetch fetch = AttributeFilterToFetchConverter
+				.convert(attributeFilter, entityMeta, languageService.getCurrentUserLanguageCode());
 
 		Entity entity = dataService.findOneById(entityName, id, fetch);
 		if (entity == null)
@@ -173,8 +176,8 @@ class RestControllerV2
 			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
 	{
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
-		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityMeta,
-				languageService.getCurrentUserLanguageCode());
+		Fetch fetch = AttributeFilterToFetchConverter
+				.convert(attributeFilter, entityMeta, languageService.getCurrentUserLanguageCode());
 
 		Entity entity = dataService.findOneById(entityName, id, fetch);
 		if (entity == null)
@@ -189,12 +192,24 @@ class RestControllerV2
 	@ResponseStatus(NO_CONTENT)
 	public void deleteEntity(@PathVariable("entityName") String entityName, @PathVariable("id") Object id)
 	{
+		// PostGreSQL is very strict with typing.
+		// If the idAttribute is of type int, passing a string or object will cause typing errors
+		// Determine the type and set the value accordingly
+		AttributeType type = dataService.getMeta().getEntityMetaData(entityName).getIdAttribute().getDataType();
+		if (type == INT)
+		{
+			id = Integer.parseInt(id.toString());
+		}
+		else if (type == STRING)
+		{
+			id = id.toString();
+		}
 		dataService.deleteById(entityName, id);
 	}
 
 	/**
 	 * Retrieve an entity collection, optionally specify which attributes to include in the response.
-	 * 
+	 *
 	 * @param entityName
 	 * @param request
 	 * @param httpRequest
@@ -218,7 +233,7 @@ class RestControllerV2
 
 	/**
 	 * Retrieve attribute meta data
-	 * 
+	 *
 	 * @param entityName
 	 * @param attributeName
 	 * @return
@@ -241,13 +256,10 @@ class RestControllerV2
 
 	/**
 	 * Try to create multiple entities in one transaction. If one fails all fails.
-	 * 
-	 * @param entityName
-	 *            name of the entity where the entities are going to be added.
-	 * @param request
-	 *            EntityCollectionCreateRequestV2
-	 * @param response
-	 *            HttpServletResponse
+	 *
+	 * @param entityName name of the entity where the entities are going to be added.
+	 * @param request    EntityCollectionCreateRequestV2
+	 * @param response   HttpServletResponse
 	 * @return EntityCollectionCreateResponseBodyV2
 	 * @throws Exception
 	 */
@@ -275,13 +287,12 @@ class RestControllerV2
 			entities.forEach(entity -> {
 				String id = entity.getIdValue().toString();
 				ids.add(id.toString());
-				responseBody.getResources().add(
-						new AutoValue_ResourcesResponseV2(Href.concatEntityHref(RestControllerV2.BASE_URI, entityName,
-								id)));
+				responseBody.getResources().add(new AutoValue_ResourcesResponseV2(
+						Href.concatEntityHref(RestControllerV2.BASE_URI, entityName, id)));
 			});
 
-			responseBody.setLocation(Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName, meta
-					.getIdAttribute().getName(), ids));
+			responseBody.setLocation(Href.concatEntityCollectionHref(RestControllerV2.BASE_URI, entityName,
+					meta.getIdAttribute().getName(), ids));
 
 			response.setStatus(HttpServletResponse.SC_CREATED);
 			return responseBody;
@@ -295,13 +306,10 @@ class RestControllerV2
 
 	/**
 	 * Copy an entity.
-	 * 
-	 * @param entityName
-	 *            name of the entity that will be copied.
-	 * @param request
-	 *            CopyEntityRequestV2
-	 * @param response
-	 *            HttpServletResponse
+	 *
+	 * @param entityName name of the entity that will be copied.
+	 * @param request    CopyEntityRequestV2
+	 * @param response   HttpServletResponse
 	 * @return String name of the new entity
 	 * @throws Exception
 	 */
@@ -316,21 +324,21 @@ class RestControllerV2
 		Repository<Entity> repositoryToCopyFrom = dataService.getRepository(entityName);
 
 		// Check if the entity already exists
-		String newFullName = EntityMetaDataUtils.buildFullName(repositoryToCopyFrom.getEntityMetaData().getPackage(),
-				request.getNewEntityName());
+		String newFullName = EntityMetaDataUtils
+				.buildFullName(repositoryToCopyFrom.getEntityMetaData().getPackage(), request.getNewEntityName());
 		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
 
 		// Validate the new name
 		MetaValidationUtils.validateName(request.getNewEntityName());
 
 		// Permission
-		boolean readPermission = permissionService.hasPermissionOnEntity(repositoryToCopyFrom.getName(),
-				Permission.READ);
+		boolean readPermission = permissionService
+				.hasPermissionOnEntity(repositoryToCopyFrom.getName(), Permission.READ);
 		if (!readPermission) throw createNoReadPermissionOnEntityException(entityName);
 
 		// Capabilities
-		boolean writableCapabilities = dataService.getCapabilities(repositoryToCopyFrom.getName()).contains(
-				RepositoryCapability.WRITABLE);
+		boolean writableCapabilities = dataService.getCapabilities(repositoryToCopyFrom.getName())
+				.contains(RepositoryCapability.WRITABLE);
 		if (!writableCapabilities) throw createNoWriteCapabilitiesOnEntityException(entityName);
 
 		// Copy
@@ -351,19 +359,16 @@ class RestControllerV2
 	private void copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String newRepositoryId,
 			String newRepositoryLabel)
 	{
-		RunAsSystemProxy.runAsSystem(() -> dataService.copyRepository(repositoryToCopyFrom, newRepositoryId,
-				newRepositoryLabel));
+		RunAsSystemProxy.runAsSystem(
+				() -> dataService.copyRepository(repositoryToCopyFrom, newRepositoryId, newRepositoryLabel));
 	}
 
 	/**
 	 * Try to update multiple entities in one transaction. If one fails all fails.
-	 * 
-	 * @param entityName
-	 *            name of the entity where the entities are going to be added.
-	 * @param request
-	 *            EntityCollectionCreateRequestV2
-	 * @param response
-	 *            HttpServletResponse
+	 *
+	 * @param entityName name of the entity where the entities are going to be added.
+	 * @param request    EntityCollectionCreateRequestV2
+	 * @param response   HttpServletResponse
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/{entityName}", method = PUT)
@@ -392,15 +397,10 @@ class RestControllerV2
 	}
 
 	/**
-	 * 
-	 * @param entityName
-	 *            The name of the entity to update
-	 * @param attributeName
-	 *            The name of the attribute to update
-	 * @param request
-	 *            EntityCollectionBatchRequestV2
-	 * @param response
-	 *            HttpServletResponse
+	 * @param entityName    The name of the entity to update
+	 * @param attributeName The name of the attribute to update
+	 * @param request       EntityCollectionBatchRequestV2
+	 * @param response      HttpServletResponse
 	 * @throws Exception
 	 */
 	@RequestMapping(value = "/{entityName}/{attributeName}", method = PUT)
@@ -484,7 +484,7 @@ class RestControllerV2
 
 	/**
 	 * Get entity id and perform a check, throwing an MolgenisDataException when necessary
-	 * 
+	 *
 	 * @param entity
 	 * @param count
 	 * @return
@@ -501,8 +501,9 @@ class RestControllerV2
 
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(BAD_REQUEST)
-	public @ResponseBody ErrorMessageResponse handleMethodArgumentNotValidException(
-			MethodArgumentNotValidException exception)
+	public
+	@ResponseBody
+	ErrorMessageResponse handleMethodArgumentNotValidException(MethodArgumentNotValidException exception)
 	{
 		LOG.info("Invalid method arguments.", exception);
 		return new ErrorMessageResponse(transform(exception.getBindingResult().getFieldErrors(),
@@ -570,8 +571,8 @@ class RestControllerV2
 
 		Query<Entity> q = request.getQ() != null ? request.getQ().createQuery(meta) : new QueryImpl<>();
 		q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());
-		Fetch fetch = AttributeFilterToFetchConverter.convert(request.getAttrs(), meta,
-				languageService.getCurrentUserLanguageCode());
+		Fetch fetch = AttributeFilterToFetchConverter
+				.convert(request.getAttrs(), meta, languageService.getCurrentUserLanguageCode());
 		if (fetch != null)
 		{
 			q.fetch(fetch);
@@ -588,10 +589,12 @@ class RestControllerV2
 				throw new MolgenisQueryException("Aggregate query is missing 'x' or 'y' attribute");
 			}
 			AggregateResult aggs = dataService.aggregate(entityName, aggsQ);
-			AttributeMetaDataResponseV2 xAttrResponse = xAttr != null ? new AttributeMetaDataResponseV2(entityName,
-					meta, xAttr, fetch, permissionService, dataService, languageService) : null;
-			AttributeMetaDataResponseV2 yAttrResponse = yAttr != null ? new AttributeMetaDataResponseV2(entityName,
-					meta, yAttr, fetch, permissionService, dataService, languageService) : null;
+			AttributeMetaDataResponseV2 xAttrResponse =
+					xAttr != null ? new AttributeMetaDataResponseV2(entityName, meta, xAttr, fetch, permissionService,
+							dataService, languageService) : null;
+			AttributeMetaDataResponseV2 yAttrResponse =
+					yAttr != null ? new AttributeMetaDataResponseV2(entityName, meta, yAttr, fetch, permissionService,
+							dataService, languageService) : null;
 			return new EntityAggregatesResponse(aggs, xAttrResponse, yAttrResponse, BASE_URI + '/' + entityName);
 		}
 		else
@@ -665,8 +668,8 @@ class RestControllerV2
 
 	private void createEntityMetaResponse(EntityMetaData entityMetaData, Fetch fetch, Map<String, Object> responseData)
 	{
-		responseData.put("_meta", new EntityMetaDataResponseV2(entityMetaData, fetch, permissionService, dataService,
-				languageService));
+		responseData.put("_meta",
+				new EntityMetaDataResponseV2(entityMetaData, fetch, permissionService, dataService, languageService));
 	}
 
 	private void createEntityValuesResponse(Entity entity, Fetch fetch, Map<String, Object> responseData)
@@ -735,7 +738,8 @@ class RestControllerV2
 						break;
 					case DATE_TIME:
 						Date dateTimeValue = entity.getDate(attrName);
-						String dateTimeValueStr = dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue) : null;
+						String dateTimeValueStr =
+								dateTimeValue != null ? getDateTimeFormat().format(dateTimeValue) : null;
 						responseData.put(attrName, dateTimeValueStr);
 						break;
 					case DECIMAL:
