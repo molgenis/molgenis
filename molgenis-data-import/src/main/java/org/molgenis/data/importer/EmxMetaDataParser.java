@@ -39,6 +39,7 @@ import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.TAGS;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.model.TagMetaData.TAG;
+import static org.molgenis.data.support.AttributeMetaDataUtils.isIdAttributeTypeAllowed;
 import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
 import static org.molgenis.data.support.EntityMetaDataUtils.isStringType;
 import static org.molgenis.util.DependencyResolver.resolve;
@@ -650,13 +651,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				}
 				if (emxIdAttrValue.equalsIgnoreCase("true"))
 				{
-					AttributeType type = attr.getDataType();
-					List<AttributeType> acceptedIdTypes = newArrayList(STRING, INT, LONG);
-					if (!acceptedIdTypes.contains(type))
-					{
-						throw new MolgenisDataException("Identifier is of type [" + type
-								+ "]. Id attributes can only be of type 'STRING', 'INT' or 'LONG'");
-					}
+					isIdAttributeTypeAllowed(attr);
 				}
 
 				attr.setAuto(emxIdAttrValue.equalsIgnoreCase(AUTO));

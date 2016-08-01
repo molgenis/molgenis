@@ -197,23 +197,11 @@ class RestControllerV2
 		// If the idAttribute is of type int, passing a string will cause typing errors
 		// Determine the type and set the value accordingly
 		AttributeType type = dataService.getMeta().getEntityMetaData(entityName).getIdAttribute().getDataType();
-		if (type == INT)
-		{
-			id = parseInt(id.toString());
-		}
-		else if (type == STRING)
-		{
-			id = id.toString();
-		}
-		else if (type == LONG)
-		{
-			id = parseLong(id.toString());
-		}
-		else
-		{
-			throw new MolgenisDataException(
-					"Identifier is of type [" + type + "]. Id attributes can only be of type STRING, INT or LONG");
-		}
+
+		if (type == INT) id = parseInt(id.toString());
+		else if (type == STRING) id = id.toString();
+		else if (type == LONG) id = parseLong(id.toString());
+
 		dataService.deleteById(entityName, id);
 	}
 
