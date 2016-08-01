@@ -46,30 +46,34 @@ public class EntityHydration
 		LOG.trace("Hydrating entity: {} for entity {}", dehydratedEntity, entityMetaData.getName());
 
 		Entity hydratedEntity = entityManager.create(entityMetaData);
-		entityMetaData.getAtomicAttributes().forEach(attr -> {
+		entityMetaData.getAtomicAttributes().forEach(attribute -> {
 
-			String name = attr.getName();
-			Object value = dehydratedEntity.get(name);
-			if (value != null)
+			// Only hydrate the attribute if it is NOT computed.
+			// Computed attributes will be calculated based on the metadata
+			if (attribute.getExpression() == null)
 			{
-				if (isMultipleReferenceType(attr))
+				String name = attribute.getName();
+				Object value = dehydratedEntity.get(name);
+				if (value != null)
 				{
-					// We can do this cast because during dehydration, mrefs and categorical mrefs are stored as a List of Object
-					Iterable<Entity> referenceEntities = entityManager
-							.getReferences(attr.getRefEntity(), (List<Object>) value);
-					hydratedEntity.set(name, referenceEntities);
-				}
-				else if (isSingleReferenceType(attr))
-				{
-					Entity referenceEntity = entityManager.getReference(attr.getRefEntity(), value);
-					hydratedEntity.set(name, referenceEntity);
-				}
-				else
-				{
-					hydratedEntity.set(name, value);
+					if (isMultipleReferenceType(attribute))
+					{
+						// We can do this cast because during dehydration, mrefs and categorical mrefs are stored as a List of Object
+						Iterable<Entity> referenceEntities = entityManager
+								.getReferences(attribute.getRefEntity(), (List<Object>) value);
+						hydratedEntity.set(name, referenceEntities);
+					}
+					else if (isSingleReferenceType(attribute))
+					{
+						Entity referenceEntity = entityManager.getReference(attribute.getRefEntity(), value);
+						hydratedEntity.set(name, referenceEntity);
+					}
+					else
+					{
+						hydratedEntity.set(name, value);
+					}
 				}
 			}
-
 		});
 
 		return hydratedEntity;
@@ -89,10 +93,15 @@ public class EntityHydration
 		EntityMetaData entityMetaData = entity.getEntityMetaData();
 
 		entityMetaData.getAtomicAttributes().forEach(attribute -> {
-			String name = attribute.getName();
-			AttributeType type = attribute.getDataType();
 
-			dehydratedEntity.put(name, getValueBasedOnType(entity, name, type));
+			// Only dehydrate if the attribute is NOT computed
+			if (attribute.getExpression() == null)
+			{
+				String name = attribute.getName();
+				AttributeType type = attribute.getDataType();
+
+				dehydratedEntity.put(name, getValueBasedOnType(entity, name, type));
+			}
 		});
 
 		return dehydratedEntity;
