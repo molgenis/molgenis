@@ -3,7 +3,6 @@ package org.molgenis.data.elasticsearch;
 import org.elasticsearch.common.collect.Iterators;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,18 +74,6 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 			count.addAndGet(batchCount);
 		});
 		return count.get();
-	}
-
-	@Override
-	public void flush()
-	{
-		decoratedRepository.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		decoratedRepository.clearCache();
 	}
 
 	@Override
@@ -212,12 +199,6 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
 		decoratedRepository.forEachBatched(fetch, consumer, batchSize);
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		elasticSearchService.rebuildIndex(decoratedRepository);
 	}
 
 	/**

@@ -121,18 +121,6 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public void flush()
-	{
-		decoratedRepository.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		decoratedRepository.clearCache();
-	}
-
-	@Override
 	public long count()
 	{
 		return decoratedRepository.count();
@@ -226,12 +214,6 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 	public Set<Operator> getQueryOperators()
 	{
 		return decoratedRepository.getQueryOperators();
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		decoratedRepository.rebuildIndex();
 	}
 
 	private Stream<Entity> validate(Stream<Entity> entities, ValidationResource validationResource,

@@ -327,24 +327,6 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		return count.get();
 	}
 
-	@Override
-	public void flush()
-	{
-		decoratedRepo.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		decoratedRepo.clearCache();
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		decoratedRepo.rebuildIndex();
-	}
-
 	private void addEntityMetaData(EntityMetaData entityMetaData)
 	{
 		validateAddAllowed(entityMetaData);
