@@ -50,12 +50,6 @@ public class EntityHydration
 
 		Entity hydratedEntity = entityManager.create(entityMetaData);
 
-		// If there is a computed attribute in the metadata, we create a EntityWithComputedAttributes
-		if (entityMetaData.hasAttributeWithExpression())
-		{
-			hydratedEntity = new EntityWithComputedAttributes(hydratedEntity);
-		}
-
 		for (AttributeMetaData attribute : entityMetaData.getAtomicAttributes())
 		{
 			// Only hydrate the attribute if it is NOT computed.
