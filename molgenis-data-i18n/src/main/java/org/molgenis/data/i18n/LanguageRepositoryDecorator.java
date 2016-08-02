@@ -5,7 +5,6 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageMetaData;
-import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -315,23 +314,5 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 			count.incrementAndGet();
 		});
 		return count.get();
-	}
-
-	@Override
-	public void flush()
-	{
-		decorated.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		decorated.clearCache();
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		decorated.rebuildIndex();
 	}
 }

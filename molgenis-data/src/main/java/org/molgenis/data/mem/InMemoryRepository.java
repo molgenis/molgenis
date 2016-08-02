@@ -3,7 +3,6 @@ package org.molgenis.data.mem;
 import com.google.common.collect.Sets;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 
@@ -221,18 +220,6 @@ public class InMemoryRepository implements Repository<Entity>
 	}
 
 	@Override
-	public void flush()
-	{
-
-	}
-
-	@Override
-	public void clearCache()
-	{
-
-	}
-
-	@Override
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		return Sets.newHashSet(RepositoryCapability.QUERYABLE, RepositoryCapability.WRITABLE);
@@ -247,13 +234,6 @@ public class InMemoryRepository implements Repository<Entity>
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		// Repo is not INDEXABLE
 		throw new UnsupportedOperationException();
 	}
 }

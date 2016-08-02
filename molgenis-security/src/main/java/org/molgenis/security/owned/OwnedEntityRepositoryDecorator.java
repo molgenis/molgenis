@@ -2,7 +2,6 @@ package org.molgenis.security.owned;
 
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.SystemSecurityToken;
@@ -309,18 +308,6 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 		return decoratedRepo.add(entities);
 	}
 
-	@Override
-	public void flush()
-	{
-		decoratedRepo.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		decoratedRepo.clearCache();
-	}
-
 	private boolean mustAddRowLevelSecurity()
 	{
 		if (SecurityUtils.currentUserIsSu() || SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
@@ -346,12 +333,6 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	private String getOwnerUserName(Entity questionnaire)
 	{
 		return questionnaire.getString(OwnedEntityMetaData.OWNER_USERNAME);
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		decoratedRepo.rebuildIndex();
 	}
 
 	private boolean currentUserIsOwner(Entity entity)

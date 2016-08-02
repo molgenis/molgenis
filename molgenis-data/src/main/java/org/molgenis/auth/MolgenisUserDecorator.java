@@ -43,9 +43,6 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 	{
 		encodePassword(entity);
 		decoratedRepository.add(entity);
-
-		// id is only guaranteed to be generated at flush time
-		decoratedRepository.flush();
 		addSuperuserAuthority(entity);
 	}
 
@@ -54,9 +51,6 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 	{
 		updatePassword(entity);
 		decoratedRepository.update(entity);
-
-		// id is only guaranteed to be generated at flush time
-		decoratedRepository.flush();
 		updateSuperuserAuthority(entity);
 	}
 
@@ -182,18 +176,6 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 	}
 
 	@Override
-	public void flush()
-	{
-		decoratedRepository.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		decoratedRepository.clearCache();
-	}
-
-	@Override
 	public long count()
 	{
 		return decoratedRepository.count();
@@ -293,11 +275,5 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 	public Set<Operator> getQueryOperators()
 	{
 		return decoratedRepository.getQueryOperators();
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		decoratedRepository.rebuildIndex();
 	}
 }

@@ -114,10 +114,4 @@ public class ReindexActionRepositoryDecoratorTest
 	//		verify(decoratedRepo, times(1)).add(entities);
 	//		verify(reindexActionRegisterService).bootstrap("entity", CudType.CREATE, DataType.DATA, null);
 	//	}
-	//
-	//	@Test
-	//	public void rebuildIndex()
-	//	{
-	//		// FIXME GitHub #4809
-	//	}
 }

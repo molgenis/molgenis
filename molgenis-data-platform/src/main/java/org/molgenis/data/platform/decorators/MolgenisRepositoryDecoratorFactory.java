@@ -4,8 +4,8 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserDecorator;
 import org.molgenis.auth.UserAuthorityFactory;
 import org.molgenis.data.*;
-import org.molgenis.data.cache.l1.L1CacheRepositoryDecorator;
 import org.molgenis.data.cache.l1.L1Cache;
+import org.molgenis.data.cache.l1.L1CacheRepositoryDecorator;
 import org.molgenis.data.cache.l2.L2Cache;
 import org.molgenis.data.cache.l2.L2CacheRepositoryDecorator;
 import org.molgenis.data.elasticsearch.IndexedRepositoryDecorator;
@@ -29,6 +29,7 @@ import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final EntityListenersService entityListenersService;
 	private final L2Cache l2Cache;
 	private final TransactionInformation transactionInformation;
+	private final MolgenisPermissionService permissionService;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -76,7 +78,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			ReindexActionRegisterService reindexActionRegisterService, SearchService searchService,
 			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder,
 			EntityMetaDataMetaData entityMetaMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache,
-			TransactionInformation transactionInformation, EntityListenersService entityListenersService)
+			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
+			MolgenisPermissionService permissionService)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -98,6 +101,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.entityListenersService = requireNonNull(entityListenersService);
 		this.l2Cache = requireNonNull(l2Cache);
 		this.transactionInformation = requireNonNull(transactionInformation);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@Override
@@ -169,7 +173,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		{
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityMetaDataRepositoryDecorator(
 					(Repository<EntityMetaData>) (Repository<? extends Entity>) repo, dataService,
-					systemEntityMetaDataRegistry);
+					systemEntityMetaDataRegistry, permissionService);
 		}
 		else if (repo.getName().equals(PACKAGE))
 		{
