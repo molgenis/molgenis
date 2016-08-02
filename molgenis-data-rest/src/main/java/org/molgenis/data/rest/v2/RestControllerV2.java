@@ -38,8 +38,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.transform;
-import static java.lang.Integer.parseInt;
-import static java.lang.Long.parseLong;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
@@ -157,24 +155,27 @@ class RestControllerV2
 			@PathVariable("id") Object id,
 			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
 	{
-		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
-		Fetch fetch = AttributeFilterToFetchConverter
-				.convert(attributeFilter, entityMeta, languageService.getCurrentUserLanguageCode());
-
-		Entity entity = dataService.findOneById(entityName, id, fetch);
-		if (entity == null)
-		{
-			throw new UnknownEntityException(entityName + " [" + id + "] not found");
-		}
-
-		return createEntityResponse(entity, fetch, true);
+		return getEntityResponse(entityName, id, attributeFilter);
 	}
 
+	/**
+	 * Tunnel retrieveEntity through a POST request
+	 *
+	 * @param entityName
+	 * @param id
+	 * @param attributeFilter
+	 * @return
+	 */
 	@RequestMapping(value = "/{entityName}/{id:.+}", method = POST, params = "_method=GET")
 	@ResponseBody
 	public Map<String, Object> retrieveEntityPost(@PathVariable("entityName") String entityName,
 			@PathVariable("id") Object id,
 			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
+	{
+		return getEntityResponse(entityName, id, attributeFilter);
+	}
+
+	private Map<String, Object> getEntityResponse(String entityName, Object id, AttributeFilter attributeFilter)
 	{
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
 		Fetch fetch = AttributeFilterToFetchConverter
