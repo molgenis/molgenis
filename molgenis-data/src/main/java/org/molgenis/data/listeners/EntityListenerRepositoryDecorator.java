@@ -1,7 +1,5 @@
 package org.molgenis.data.listeners;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.SetMultimap;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -184,23 +182,5 @@ public class EntityListenerRepositoryDecorator implements Repository<Entity>
 	public Integer add(Stream<Entity> entities)
 	{
 		return decoratedRepository.add(entities);
-	}
-
-	@Override
-	public void flush()
-	{
-		decoratedRepository.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		decoratedRepository.clearCache();
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		decoratedRepository.rebuildIndex();
 	}
 }

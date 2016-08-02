@@ -97,8 +97,8 @@ public class ImportWriter
 		// languages first
 		importLanguages(job.report, job.parsedMetaData.getLanguages(), job.dbAction, job.metaDataChanges);
 		runAsSystem(() -> importTags(job.source));
-		importPackages(job.parsedMetaData);
-		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges);
+		runAsSystem(() -> importPackages(job.parsedMetaData));
+		runAsSystem(() -> addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges));
 		addEntityPermissions(job.metaDataChanges);
 		runAsSystem(() -> importEntityAndAttributeTags(job.parsedMetaData));
 		Iterable<EntityMetaData> existingMetaData = dataService.getMeta().getEntityMetaDatas()::iterator;

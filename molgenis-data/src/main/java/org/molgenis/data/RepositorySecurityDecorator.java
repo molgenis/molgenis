@@ -189,20 +189,6 @@ public class RepositorySecurityDecorator implements Repository<Entity>
 	}
 
 	@Override
-	public void flush()
-	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
-		decoratedRepository.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
-		decoratedRepository.clearCache();
-	}
-
-	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
 		validatePermission(decoratedRepository.getName(), Permission.COUNT);
@@ -227,12 +213,5 @@ public class RepositorySecurityDecorator implements Repository<Entity>
 	public Set<Operator> getQueryOperators()
 	{
 		return decoratedRepository.getQueryOperators();
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		validatePermission(decoratedRepository.getName(), Permission.WRITE);
-		decoratedRepository.rebuildIndex();
 	}
 }
