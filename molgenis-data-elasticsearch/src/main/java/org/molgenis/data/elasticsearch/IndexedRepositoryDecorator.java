@@ -58,23 +58,15 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	@Transactional
 	public void add(Entity entity)
 	{
 		decoratedRepository.add(entity);
 	}
 
 	@Override
-	@Transactional
 	public Integer add(Stream<Entity> entities)
 	{
-		// TODO look into performance improvements
-		AtomicInteger count = new AtomicInteger();
-		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
-			Integer batchCount = decoratedRepository.add(batch.stream());
-			count.addAndGet(batchCount);
-		});
-		return count.get();
+		return decoratedRepository.add(entities);
 	}
 
 	@Override
@@ -90,14 +82,12 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	@Transactional
 	public void update(Entity entity)
 	{
 		decoratedRepository.update(entity);
 	}
 
 	@Override
-	@Transactional
 	public void update(Stream<Entity> entities)
 	{
 		// TODO look into performance improvements
@@ -106,14 +96,12 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	@Transactional
 	public void delete(Entity entity)
 	{
 		decoratedRepository.delete(entity);
 	}
 
 	@Override
-	@Transactional
 	public void delete(Stream<Entity> entities)
 	{
 		// TODO look into performance improvements
@@ -122,14 +110,12 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	@Transactional
 	public void deleteById(Object id)
 	{
 		decoratedRepository.deleteById(id);
 	}
 
 	@Override
-	@Transactional
 	public void deleteAll(Stream<Object> ids)
 	{
 		// TODO look into performance improvements
@@ -137,7 +123,6 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	@Transactional
 	public void deleteAll()
 	{
 		decoratedRepository.deleteAll();
