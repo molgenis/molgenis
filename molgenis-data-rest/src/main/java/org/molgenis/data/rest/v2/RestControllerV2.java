@@ -193,16 +193,18 @@ class RestControllerV2
 	@ResponseStatus(NO_CONTENT)
 	public void deleteEntity(@PathVariable("entityName") String entityName, @PathVariable("id") Object id)
 	{
-		// PostGreSQL is very strict with typing.
-		// If the idAttribute is of type int, passing a string will cause typing errors
-		// Determine the type and set the value accordingly
-		AttributeType type = dataService.getMeta().getEntityMetaData(entityName).getIdAttribute().getDataType();
+		AttributeType type = getIdAttributeAttributeType(entityName);
 
-		if (type == INT) id = parseInt(id.toString());
+		if (type == INT) id = Integer.valueOf(id.toString());
 		else if (type == STRING) id = id.toString();
-		else if (type == LONG) id = parseLong(id.toString());
+		else if (type == LONG) id = Long.valueOf(id.toString());
 
 		dataService.deleteById(entityName, id);
+	}
+
+	private AttributeType getIdAttributeAttributeType(@PathVariable("entityName") String entityName)
+	{
+		return dataService.getMeta().getEntityMetaData(entityName).getIdAttribute().getDataType();
 	}
 
 	/**
