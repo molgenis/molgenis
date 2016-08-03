@@ -418,11 +418,11 @@ public class EntityAttributesValidator
 			EntityMetaData meta, String message)
 	{
 		String fullMessage = format("Invalid %s value '%s' for attribute '%s' of entity '%s'.",
-				attribute.getDataType().toString().toLowerCase(), entity.getString(attribute.getName()),
+				attribute.getDataType().toString().toLowerCase(), entity.get(attribute.getName()),
 				attribute.getLabel(), meta.getName());
 		fullMessage += " " + message;
 
-		return new ConstraintViolation(fullMessage, entity.getString(attribute.getName()), entity, attribute, meta,
+		return new ConstraintViolation(fullMessage, entity.get(attribute.getName()), entity, attribute, meta,
 				null);
 	}
 }
