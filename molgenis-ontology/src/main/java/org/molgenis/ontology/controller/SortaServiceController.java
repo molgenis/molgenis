@@ -507,12 +507,12 @@ public class SortaServiceController extends MolgenisPluginController
 	{
 		final List<Entity> jobs = new ArrayList<>();
 		MolgenisUser currentUser = userAccountService.getCurrentUser();
-		Query<Entity> query = QueryImpl.EQ(JobExecutionMetaData.USER, currentUser);
+		Query<Entity> query = QueryImpl.EQ(JobExecutionMetaData.USER, currentUser.getUsername());
 		query.sort().on(JobExecutionMetaData.START_DATE, DESC);
 		RunAsSystemProxy.runAsSystem(() -> {
 			dataService.findAll(SORTA_JOB_EXECUTION, query).forEach(job -> {
 				// TODO: fetch the user as well
-				job.set(JobExecutionMetaData.USER, currentUser);
+				job.set(JobExecutionMetaData.USER, currentUser.getUsername());
 				jobs.add(job);
 			});
 		});
