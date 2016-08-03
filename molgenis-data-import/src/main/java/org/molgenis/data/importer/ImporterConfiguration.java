@@ -57,7 +57,7 @@ public class ImporterConfiguration
 	public ImportWriter importWriter()
 	{
 		return new ImportWriter(dataService, permissionSystemService, tagService, molgenisPermissionService,
-				tagMetaData, i18nStringMetaData);
+				tagMetaData, i18nStringMetaData, tagFactory);
 	}
 
 	@Bean
