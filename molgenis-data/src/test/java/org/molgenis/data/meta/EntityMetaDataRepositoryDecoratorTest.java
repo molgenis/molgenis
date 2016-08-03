@@ -1,6 +1,5 @@
 package org.molgenis.data.meta;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
@@ -18,6 +17,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
@@ -34,13 +34,9 @@ import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-/**
- * Created by Dennis on 8/1/2016.
- */
 public class EntityMetaDataRepositoryDecoratorTest
 {
 	private EntityMetaDataRepositoryDecorator repo;
-
 	private Repository<EntityMetaData> decoratedRepo;
 	private DataService dataService;
 	private SystemEntityMetaDataRegistry systemEntityMetaRegistry;
@@ -264,7 +260,7 @@ public class EntityMetaDataRepositoryDecoratorTest
 		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
 		EntityMetaData entityMeta1 = mock(EntityMetaData.class);
 		when(decoratedRepo.iterator()).thenReturn(asList(entityMeta0, entityMeta1).iterator());
-		assertEquals(Lists.newArrayList(repo.iterator()), asList(entityMeta0, entityMeta1));
+		assertEquals(newArrayList(repo.iterator()), asList(entityMeta0, entityMeta1));
 	}
 
 	@Test
@@ -281,7 +277,7 @@ public class EntityMetaDataRepositoryDecoratorTest
 		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(true);
 		when(permissionService.hasPermissionOnEntity(entityMeta1Name, READ)).thenReturn(false);
 		when(permissionService.hasPermissionOnEntity(entityMeta2Name, READ)).thenReturn(true);
-		assertEquals(Lists.newArrayList(repo.iterator()), asList(entityMeta0, entityMeta2));
+		assertEquals(newArrayList(repo.iterator()), asList(entityMeta0, entityMeta2));
 	}
 
 	@Test

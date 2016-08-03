@@ -319,8 +319,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 	public Integer add(Stream<EntityMetaData> entities)
 	{
 		AtomicInteger count = new AtomicInteger();
-		entities.filter(entity ->
-		{
+		entities.filter(entity -> {
 			count.incrementAndGet();
 			return true;
 		}).forEach(this::addEntityMetaData);
@@ -421,8 +420,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 
 			if (!deletedAttrNames.isEmpty())
 			{
-				deletedAttrNames.forEach(deletedAttrName ->
-				{
+				deletedAttrNames.forEach(deletedAttrName -> {
 					repoCollection.deleteAttribute(entityName, deletedAttrName);
 
 					if (entityMetaData.getName().equals(ENTITY_META_DATA))
@@ -436,8 +434,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 
 			if (!addedAttrNames.isEmpty())
 			{
-				addedAttrNames.stream().map(updateAttrMap::get).forEach(addedAttrEntity ->
-				{
+				addedAttrNames.stream().map(updateAttrMap::get).forEach(addedAttrEntity -> {
 					repoCollection.addAttribute(entityName, addedAttrEntity);
 
 					if (entityMetaData.getName().equals(ENTITY_META_DATA))
