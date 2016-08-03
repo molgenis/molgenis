@@ -1,30 +1,34 @@
 package org.molgenis.data.rest.service;
 
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaFactory;
+import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
-import java.util.Collections;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
+import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
+import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 
 @Service
 public class RestService
@@ -42,16 +46,17 @@ public class RestService
 		this.dataService = requireNonNull(dataService);
 		this.idGenerator = requireNonNull(idGenerator);
 		this.fileStore = requireNonNull(fileStore);
-		this.fileMetaFactory = fileMetaFactory;
-		this.entityManager = entityManager;
+		this.fileMetaFactory = requireNonNull(fileMetaFactory);
+		this.entityManager = requireNonNull(entityManager);
 	}
 
 	/**
-	 * Creates a new entity based from a HttpServletRequest
-	 * 
-	 * @param meta
-	 * @param request
-	 * @return
+	 * Creates a new entity based from a HttpServletRequest. For file attributes persists the file in the file store
+	 * and persist a file meta data entity.
+	 *
+	 * @param meta    entity meta data
+	 * @param request HTTP request parameters
+	 * @return entity created from HTTP request parameters
 	 */
 	public Entity toEntity(final EntityMetaData meta, final Map<String, Object> request)
 	{
@@ -59,107 +64,384 @@ public class RestService
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
-			String paramName = attr.getName();
-			final Object paramValue = request.get(paramName);
-			final Object value = this.toEntityValue(attr, paramValue);
-			entity.set(attr.getName(), value);
+			if (attr.getExpression() == null)
+			{
+				String paramName = attr.getName();
+				final Object paramValue = request.get(paramName);
+				final Object value = this.toEntityValue(attr, paramValue);
+				entity.set(attr.getName(), value);
+			}
 		}
 
 		return entity;
 	}
 
 	/**
-	 * Transform the request values to match the metadata
-	 * 
-	 * @param attr
-	 * @param paramValue
+	 * Converts a HTTP request parameter to a entity value of which the type is defined by the attribute. For file
+	 * attributes persists the file in the file store and persist a file meta data entity.
+	 *
+	 * @param attr       attribute
+	 * @param paramValue HTTP parameter value
 	 * @return Object
 	 */
 	public Object toEntityValue(AttributeMetaData attr, Object paramValue)
 	{
-		Object value = null;
-
 		// Treat empty strings as null
-		if ((paramValue != null) && (paramValue instanceof String) && StringUtils.isEmpty((String) paramValue))
+		if (paramValue != null && (paramValue instanceof String) && ((String) paramValue).isEmpty())
 		{
 			paramValue = null;
 		}
 
-		// boolean false is not posted (http feature), so if null and required, should be false
-		if ((paramValue == null) && (attr.getDataType() == BOOL) && !attr.isNillable())
+		Object value;
+		AttributeType attrType = attr.getDataType();
+		switch (attrType)
 		{
-			value = false;
-		}
-
-		// Treat null lists as empty lists
-		if (paramValue == null && (attr.getDataType() == MREF || attr.getDataType() == CATEGORICAL_MREF))
-		{
-			value = Collections.emptyList();
-		}
-
-		if (paramValue != null)
-		{
-			if (attr.getDataType() == AttributeType.FILE)
-			{
-				MultipartFile multipartFile = (MultipartFile) paramValue;
-
-				String id = idGenerator.generateId();
-				try
-				{
-					fileStore.store(multipartFile.getInputStream(), id);
-				}
-				catch (IOException e)
-				{
-					throw new MolgenisDataException(e);
-				}
-
-				FileMeta fileEntity = fileMetaFactory.create(id);
-				fileEntity.setFilename(multipartFile.getOriginalFilename());
-				fileEntity.setContentType(multipartFile.getContentType());
-				fileEntity.setSize(multipartFile.getSize());
-				fileEntity.setUrl(ServletUriComponentsBuilder.fromCurrentRequest()
-						.replacePath(FileDownloadController.URI + "/" + id).replaceQuery(null).build().toUriString());
-				dataService.add(FILE_META, fileEntity);
-
-				return fileEntity;
-			}
-
-			if (attr.getDataType() == XREF || attr.getDataType() == CATEGORICAL)
-			{
-				value = dataService.findOneById(attr.getRefEntity().getName(), paramValue);
-				if (value == null)
-				{
-					throw new IllegalArgumentException(
-							"No " + attr.getRefEntity().getName() + " with id " + paramValue + " found");
-				}
-			}
-			else if (attr.getDataType() == MREF || attr.getDataType() == CATEGORICAL_MREF)
-			{
-				List<Object> ids = DataConverter.toObjectList(paramValue);
-				if ((ids != null) && !ids.isEmpty())
-				{
-					AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
-					List<Entity> mrefList = dataService.findAll(attr.getRefEntity().getName(),
-							ids.stream().map(id -> convert(refIdAttr, id))).collect(toList());
-					if (mrefList.size() != ids.size())
-					{
-						throw new IllegalArgumentException("Could not find all referencing ids for  " + attr.getName());
-					}
-
-					value = mrefList;
-				}
-			}
-			else
-			{
-				value = DataConverter.convert(paramValue, attr);
-			}
+			case BOOL:
+				value = convertBool(attr, paramValue);
+				break;
+			case EMAIL:
+			case ENUM:
+			case HTML:
+			case HYPERLINK:
+			case SCRIPT:
+			case STRING:
+			case TEXT:
+				value = convertString(attr, paramValue);
+				break;
+			case CATEGORICAL:
+			case XREF:
+				value = convertRef(attr, paramValue);
+				break;
+			case CATEGORICAL_MREF:
+			case MREF:
+				value = convertMref(attr, paramValue);
+				break;
+			case DATE:
+				value = convertDate(attr, paramValue);
+				break;
+			case DATE_TIME:
+				value = convertDateTime(attr, paramValue);
+				break;
+			case DECIMAL:
+				value = convertDecimal(attr, paramValue);
+				break;
+			case FILE:
+				value = convertFile(attr, paramValue);
+				break;
+			case INT:
+				value = convertInt(attr, paramValue);
+				break;
+			case LONG:
+				value = convertLong(attr, paramValue);
+				break;
+			case COMPOUND:
+				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+			default:
+				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 		}
 		return value;
 	}
 
-	private static Object convert(AttributeMetaData attr, Object value)
+	private static Long convertLong(AttributeMetaData attr, Object paramValue)
 	{
-		FieldType fieldType = MolgenisFieldTypes.getType(getValueString(attr.getDataType()));
-		return fieldType.convert(value);
+		Long value;
+		if (paramValue != null)
+		{
+			if (paramValue instanceof String)
+			{
+				value = Long.valueOf((String) paramValue);
+			}
+			// javascript number converted to double
+			else if (paramValue instanceof Number)
+			{
+				value = ((Number) paramValue).longValue();
+			}
+			else
+			{
+				throw new MolgenisDataException(
+						format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
+								paramValue.getClass().getSimpleName(), String.class.getSimpleName(),
+								Number.class.getSimpleName()));
+			}
+		}
+		else
+		{
+			value = null;
+		}
+		return value;
+	}
+
+	private static Integer convertInt(AttributeMetaData attr, Object paramValue)
+	{
+		Integer value;
+		if (paramValue != null)
+		{
+			if (paramValue instanceof String)
+			{
+				value = Integer.valueOf((String) paramValue);
+			}
+			// javascript number converted to double
+			else if ((paramValue instanceof Number))
+			{
+				value = ((Number) paramValue).intValue();
+			}
+			else
+			{
+				throw new MolgenisDataException(
+						format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
+								paramValue.getClass().getSimpleName(), String.class.getSimpleName(),
+								Number.class.getSimpleName()));
+			}
+		}
+		else
+		{
+			value = null;
+		}
+		return value;
+	}
+
+	private FileMeta convertFile(AttributeMetaData attr, Object paramValue)
+	{
+		FileMeta value;
+		if (paramValue != null)
+		{
+			if (!(paramValue instanceof MultipartFile))
+			{
+				throw new MolgenisDataException(
+						format("Attribute [%s] value is of type [%s] instead of [%s]", attr.getName(),
+								paramValue.getClass().getSimpleName(), MultipartFile.class.getSimpleName()));
+			}
+			MultipartFile multipartFile = (MultipartFile) paramValue;
+
+			String id = idGenerator.generateId();
+			try
+			{
+				fileStore.store(multipartFile.getInputStream(), id);
+			}
+			catch (IOException e)
+			{
+				throw new MolgenisDataException(e);
+			}
+
+			FileMeta fileEntity = fileMetaFactory.create(id);
+			fileEntity.setFilename(multipartFile.getOriginalFilename());
+			fileEntity.setContentType(multipartFile.getContentType());
+			fileEntity.setSize(multipartFile.getSize());
+			fileEntity.setUrl(ServletUriComponentsBuilder.fromCurrentRequest()
+					.replacePath(FileDownloadController.URI + '/' + id).replaceQuery(null).build().toUriString());
+			dataService.add(FILE_META, fileEntity);
+
+			value = fileEntity;
+		}
+		else
+		{
+			value = null;
+		}
+		return value;
+	}
+
+	private static Double convertDecimal(AttributeMetaData attr, Object paramValue)
+	{
+		Double value;
+		if (paramValue != null)
+		{
+			if (paramValue instanceof String)
+			{
+				value = Double.valueOf((String) paramValue);
+			}
+			// javascript number converted to double
+			else if (paramValue instanceof Number)
+			{
+				value = ((Number) paramValue).doubleValue();
+			}
+			else
+			{
+				throw new MolgenisDataException(
+						format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
+								paramValue.getClass().getSimpleName(), String.class.getSimpleName(),
+								Number.class.getSimpleName()));
+			}
+		}
+		else
+		{
+			value = null;
+		}
+		return value;
+	}
+
+	private static Date convertDateTime(AttributeMetaData attr, Object paramValue)
+	{
+		Date value;
+		if (paramValue != null)
+		{
+			if (paramValue instanceof Date)
+			{
+				value = (Date) paramValue;
+			}
+			else if (paramValue instanceof String)
+			{
+				String paramStrValue = (String) paramValue;
+				try
+				{
+					value = getDateTimeFormat().parse(paramStrValue);
+				}
+				catch (ParseException e)
+				{
+					throw new MolgenisDataException(
+							format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(),
+									paramStrValue, MolgenisDateFormat.DATEFORMAT_DATETIME));
+				}
+			}
+			else
+			{
+				throw new MolgenisDataException(
+						format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
+								paramValue.getClass().getSimpleName(), String.class.getSimpleName(),
+								Date.class.getSimpleName()));
+			}
+		}
+		else
+		{
+			value = null;
+		}
+		return value;
+	}
+
+	private static Date convertDate(AttributeMetaData attr, Object paramValue)
+	{
+		Date value;
+		if (paramValue != null)
+		{
+			if (paramValue instanceof Date)
+			{
+				value = (Date) paramValue;
+			}
+			else if (paramValue instanceof String)
+			{
+				String paramStrValue = (String) paramValue;
+				try
+				{
+					value = getDateFormat().parse(paramStrValue);
+				}
+				catch (ParseException e)
+				{
+					throw new MolgenisDataException(
+							format("Attribute [%s] value [%s] does not match date format [%s] or [%s]", attr.getName(),
+									paramStrValue, MolgenisDateFormat.DATEFORMAT_DATE));
+				}
+			}
+			else
+			{
+				throw new MolgenisDataException(
+						format("Attribute [%s] value is of type [%s] instead of [%s]", attr.getName(),
+								paramValue.getClass().getSimpleName(), String.class.getSimpleName()));
+			}
+		}
+		else
+		{
+			value = null;
+		}
+		return value;
+	}
+
+	private List<?> convertMref(AttributeMetaData attr, Object paramValue)
+	{
+		List<?> value;
+		if (paramValue != null)
+		{
+			List<?> mrefParamValues;
+			if (paramValue instanceof String)
+			{
+				mrefParamValues = asList(StringUtils.split((String) paramValue, ','));
+			}
+			else if (paramValue instanceof List<?>)
+			{
+				mrefParamValues = (List<?>) paramValue;
+			}
+			else
+			{
+				throw new MolgenisDataException(
+						format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
+								paramValue.getClass().getSimpleName(), String.class.getSimpleName(),
+								List.class.getSimpleName()));
+			}
+
+			EntityMetaData mrefEntity = attr.getRefEntity();
+			AttributeMetaData mrefEntityIdAttr = mrefEntity.getIdAttribute();
+			value = mrefParamValues.stream().map(mrefParamValue -> toEntityValue(mrefEntityIdAttr, mrefParamValue))
+					.map(mrefIdValue -> entityManager.getReference(mrefEntity, mrefIdValue)).collect(toList());
+		}
+		else
+		{
+			value = emptyList();
+		}
+		return value;
+	}
+
+	private Object convertRef(AttributeMetaData attr, Object paramValue)
+	{
+		Object value;
+		if (paramValue != null)
+		{
+			Object idValue = toEntityValue(attr.getRefEntity().getIdAttribute(), paramValue);
+			value = entityManager.getReference(attr.getRefEntity(), idValue);
+		}
+		else
+		{
+			value = null;
+		}
+		return value;
+	}
+
+	private static String convertString(AttributeMetaData attr, Object paramValue)
+	{
+		String value;
+		if (paramValue != null)
+		{
+			if (paramValue instanceof String)
+			{
+				value = (String) paramValue;
+			}
+			else
+			{
+				throw new MolgenisDataException(
+						format("Attribute [%s] value is of type [%s] instead of [%s]", attr.getName(),
+								paramValue.getClass().getSimpleName(), String.class.getSimpleName()));
+			}
+		}
+		else
+		{
+			value = null;
+		}
+		return value;
+	}
+
+	private static Boolean convertBool(AttributeMetaData attr, Object paramValue)
+	{
+		Boolean value;
+		if (paramValue != null)
+		{
+			if (paramValue instanceof String)
+			{
+				value = Boolean.valueOf((String) paramValue);
+			}
+			else if (paramValue instanceof Boolean)
+			{
+				value = (Boolean) paramValue;
+			}
+			else
+			{
+				throw new MolgenisDataException(
+						format("Attribute [%s] value is of type [%s] instead of [%s] or [%s]", attr.getName(),
+								paramValue.getClass().getSimpleName(), String.class.getSimpleName(),
+								Boolean.class.getSimpleName()));
+			}
+		}
+		else
+		{
+			// boolean false is not posted (http feature), so if null and required, should be false
+			value = !attr.isNillable() ? false : null;
+		}
+		return value;
 	}
 }
