@@ -10,6 +10,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -81,7 +82,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 			@Override
 			public Entity answer(InvocationOnMock invocation) throws Throwable
 			{
-				return new DynamicEntity(emd);
+				return new EntityWithComputedAttributes(new DynamicEntity(emd));
 			}
 		});
 		when(entityManager.getReference(any(EntityMetaData.class), eq("0"))).thenReturn(refEntities.get(0));
