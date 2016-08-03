@@ -87,8 +87,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 					LOG.trace("SQL: {}", sql);
 				}
 			}
-			return jdbcTemplate.query(sql, (rs, rowNum) ->
-			{
+			return jdbcTemplate.query(sql, (rs, rowNum) -> {
 				return rs.getString(CODE);
 			}).stream();
 		}
@@ -155,8 +154,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			throw new UnknownRepositoryException(entityMeta.getName());
 		}
 
-		getPersistedAttributesMref(entityMeta).forEach(mrefAttr ->
-		{
+		getPersistedAttributesMref(entityMeta).forEach(mrefAttr -> {
 			String sqlDropJunctionTable = getSqlDropJunctionTable(entityMeta, mrefAttr);
 			if (LOG.isDebugEnabled())
 			{
@@ -185,9 +183,13 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	public void addAttribute(String entityName, AttributeMetaData attribute)
 	{
 		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+		if (null != entityMetaData.getAttribute(requireNonNull(attribute).getName()))
+		{
+			throw new UnknownEntityException(format("Adding attribute operation failed. Attribute already exists [%s]", attribute.getName()));
+		}
 		if (entityMetaData == null)
 		{
-			throw new UnknownEntityException(format("Unknown entity [%s]", entityName));
+			throw new UnknownEntityException(format("Adding attribute operation failed. Unknown entity [%s]", entityName));
 		}
 		addAttributeRec(entityMetaData, attribute);
 	}
@@ -480,8 +482,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		jdbcTemplate.execute(createTableSql);
 
 		String idAttrName = entityMeta.getIdAttribute().getName();
-		getPersistedAttributes(entityMeta).forEach(attr ->
-		{
+		getPersistedAttributes(entityMeta).forEach(attr -> {
 			// add mref tables
 			if (isMultipleReferenceType(attr))
 			{
