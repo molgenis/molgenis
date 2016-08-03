@@ -267,8 +267,11 @@ public class DataServiceImpl implements DataService
 		LOG.info("Creating a copy of " + repository.getName() + " repository, with ID: " + newRepositoryId
 				+ ", and label: " + newRepositoryLabel);
 		EntityMetaData emd = EntityMetaData.newInstance(repository.getEntityMetaData());
+		emd.setIdValue(null);
 		emd.setName(newRepositoryId);
 		emd.setLabel(newRepositoryLabel);
+		emd.getOwnAllAttributes().forEach(e -> e.setIdValue(null));
+
 		Repository<Entity> repositoryCopy = metaDataService.addEntityMeta(emd);
 		try
 		{
