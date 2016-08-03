@@ -132,7 +132,7 @@ class RestControllerV2
 		if (molgenisBuildDate == null) throw new IllegalArgumentException("molgenisBuildDate is null");
 		molgenisBuildDate = molgenisBuildDate.equals("${maven.build.timestamp}") ?
 				new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new java.util.Date())
-						+ " by Eclipse" : molgenisBuildDate;
+						+ " by IntelliJ" : molgenisBuildDate;
 
 		Map<String, String> result = new HashMap<>();
 		result.put("molgenisVersion", molgenisVersion);
