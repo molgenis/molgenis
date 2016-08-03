@@ -13,8 +13,15 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
+/**
+ * PostgreSQL utilities such as entity value to PostgreSQL value conversion.
+ */
 class PostgreSqlUtils
 {
+	private PostgreSqlUtils()
+	{
+	}
+
 	/**
 	 * Returns the PostgreSQL value for the given entity attribute
 	 *
@@ -79,7 +86,7 @@ class PostgreSqlUtils
 	 * @param attr       attribute
 	 * @return PostgreSQL value
 	 */
-	static Object getPostgreSqlValue(Object queryValue, AttributeMetaData attr)
+	static Object getPostgreSqlQueryValue(Object queryValue, AttributeMetaData attr)
 	{
 		String attrName = attr.getName();
 		MolgenisFieldTypes.AttributeType attrType = attr.getDataType();
@@ -104,7 +111,7 @@ class PostgreSqlUtils
 					{
 						queryValue = ((Entity) queryValue).getIdValue();
 					}
-					return getPostgreSqlValue(queryValue, attr.getRefEntity().getIdAttribute());
+					return getPostgreSqlQueryValue(queryValue, attr.getRefEntity().getIdAttribute());
 				}
 				else
 				{
@@ -122,8 +129,8 @@ class PostgreSqlUtils
 				Stream<Object> queryIdValues = stream(((Iterable<?>) queryValue).spliterator(), false)
 						.map(queryMrefValue -> queryMrefValue instanceof Entity ? ((Entity) queryMrefValue)
 								.getIdValue() : queryMrefValue);
-				return queryIdValues
-						.map(mrefEntityId -> getPostgreSqlValue(mrefEntityId, attr.getRefEntity().getIdAttribute()))
+				return queryIdValues.map(queryIdValue -> getPostgreSqlQueryValue(queryIdValue,
+						attr.getRefEntity().getIdAttribute()))
 						.collect(toList());
 			case DATE:
 				if (queryValue != null && !(queryValue instanceof Date))
@@ -171,7 +178,10 @@ class PostgreSqlUtils
 										Enum.class.getSimpleName()));
 					}
 				}
-				return queryValue;
+				else
+				{
+					return null;
+				}
 			case EMAIL:
 			case HTML:
 			case HYPERLINK:

@@ -2,6 +2,7 @@ package org.molgenis.data.postgresql;
 
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.*;
+import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
@@ -12,10 +13,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.IntStream.range;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
 import static org.molgenis.data.support.EntityMetaDataUtils.*;
@@ -30,14 +33,14 @@ class PostgreSqlQueryGenerator
 
 	}
 
-	public static String getSqlCreateForeignKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlCreateForeignKey(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ADD FOREIGN KEY (")
 				.append(getColumnName(attr)).append(") REFERENCES ").append(getTableName(attr.getRefEntity()))
 				.append('(').append(getColumnName(attr.getRefEntity().getIdAttribute())).append(")").toString();
 	}
 
-	public static String getSqlCreateUniqueKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlCreateUniqueKey(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		// PostgreSQL name convention
 		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ADD CONSTRAINT ")
@@ -45,33 +48,33 @@ class PostgreSqlQueryGenerator
 				.toString();
 	}
 
-	public static String getSqlDropUniqueKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlDropUniqueKey(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		// PostgreSQL name convention
 		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" DROP CONSTRAINT ")
 				.append(getUniqueKeyName(entityMeta, attr)).toString();
 	}
 
-	public static String getSqlSetNotNull(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlSetNotNull(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ALTER COLUMN ")
 				.append(getColumnName(attr)).append(" SET NOT NULL").toString();
 	}
 
-	public static String getSqlDropNotNull(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlDropNotNull(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ALTER COLUMN ")
 				.append(getColumnName(attr)).append(" DROP NOT NULL").toString();
 	}
 
-	public static String getSqlSetDataType(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlSetDataType(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ALTER COLUMN ")
 				.append(getColumnName(attr)).append(" SET DATA TYPE ").append(getPostgreSqlType(attr))
 				.append(" USING ").append(getColumnName(attr)).append("::").append(getPostgreSqlType(attr)).toString();
 	}
 
-	public static String getSqlAddColumn(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlAddColumn(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ADD ");
@@ -79,7 +82,7 @@ class PostgreSqlQueryGenerator
 		return sql.toString();
 	}
 
-	public static String getSqlCreateTable(EntityMetaData entityMeta)
+	static String getSqlCreateTable(EntityMetaData entityMeta)
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE ").append(getTableName(entityMeta)).append('(');
@@ -115,7 +118,7 @@ class PostgreSqlQueryGenerator
 		return sql.toString();
 	}
 
-	public static String getSqlCreateJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlCreateJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		AttributeMetaData idAttr = entityMeta.getIdAttribute();
 		StringBuilder sql = new StringBuilder();
@@ -152,23 +155,23 @@ class PostgreSqlQueryGenerator
 				entityMeta.getIdAttribute()) + ")";
 	}
 
-	public static String getSqlDropJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getSqlDropJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		return getSqlDropTable(getJunctionTableName(entityMeta, attr));
 	}
 
-	public static String getSqlDropTable(EntityMetaData entityMeta)
+	static String getSqlDropTable(EntityMetaData entityMeta)
 	{
 		return getSqlDropTable(getTableName(entityMeta));
 	}
 
-	public static String getSqlDropColumn(EntityMetaData entityMeta, String attrName)
+	static String getSqlDropColumn(EntityMetaData entityMeta, String attrName)
 	{
 		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" DROP COLUMN ")
 				.append(getColumnName(attrName)).toString();
 	}
 
-	public static String getSqlInsert(EntityMetaData entityMeta)
+	static String getSqlInsert(EntityMetaData entityMeta)
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO ").append(getTableName(entityMeta)).append(" (");
@@ -186,24 +189,24 @@ class PostgreSqlQueryGenerator
 		return sql.toString();
 	}
 
-	public static String getSqlInsertMref(EntityMetaData entityMeta, AttributeMetaData attr, AttributeMetaData idAttr)
+	static String getSqlInsertMref(EntityMetaData entityMeta, AttributeMetaData attr, AttributeMetaData idAttr)
 	{
 		return new StringBuilder().append("INSERT INTO ").append(getJunctionTableName(entityMeta, attr)).append(" (")
 				.append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(',').append(getColumnName(idAttr))
 				.append(',').append(getColumnName(attr)).append(") VALUES (?,?,?)").toString();
 	}
 
-	public static String getSqlDeleteAll(EntityMetaData entityMeta)
+	static String getSqlDeleteAll(EntityMetaData entityMeta)
 	{
 		return new StringBuilder().append("DELETE FROM ").append(getTableName(entityMeta)).toString();
 	}
 
-	public static String getSqlDelete(EntityMetaData entityMeta)
+	static String getSqlDelete(EntityMetaData entityMeta)
 	{
 		return getSqlDelete(getTableName(entityMeta), entityMeta.getIdAttribute());
 	}
 
-	public static String getSqlDelete(String tableName, AttributeMetaData attr)
+	static String getSqlDelete(String tableName, AttributeMetaData attr)
 	{
 		return new StringBuilder().append("DELETE FROM ").append(tableName).append(" WHERE ")
 				.append(getColumnName(attr)).append(" = ?").toString();
@@ -218,7 +221,7 @@ class PostgreSqlQueryGenerator
 				+ "\"";
 	}
 
-	public static <E extends Entity> String getSqlSelect(EntityMetaData entityMeta, Query<E> q, List<Object> parameters,
+	static <E extends Entity> String getSqlSelect(EntityMetaData entityMeta, Query<E> q, List<Object> parameters,
 			boolean includeMrefs)
 	{
 		final StringBuilder select = new StringBuilder("SELECT ");
@@ -290,7 +293,7 @@ class PostgreSqlQueryGenerator
 		return result.toString().trim();
 	}
 
-	public static String getSqlUpdate(EntityMetaData entityMeta)
+	static String getSqlUpdate(EntityMetaData entityMeta)
 	{
 		// use (readonly) identifier
 		AttributeMetaData idAttribute = entityMeta.getIdAttribute();
@@ -315,7 +318,7 @@ class PostgreSqlQueryGenerator
 	 * @param parameters
 	 * @return
 	 */
-	public static <E extends Entity> String getSqlCount(EntityMetaData entityMeta, Query<E> q, List<Object> parameters)
+	static <E extends Entity> String getSqlCount(EntityMetaData entityMeta, Query<E> q, List<Object> parameters)
 	{
 		StringBuilder sqlBuilder = new StringBuilder("SELECT COUNT");
 		String idAttribute = getColumnName(entityMeta.getIdAttribute());
@@ -435,13 +438,14 @@ class PostgreSqlQueryGenerator
 			}
 
 			StringBuilder predicate = new StringBuilder();
-			switch (r.getOperator())
+			Operator operator = r.getOperator();
+			switch (operator)
 			{
 				case AND:
 					result.append(" AND ");
 					break;
 				case NESTED:
-					QueryImpl<Entity> nestedQ = new QueryImpl<Entity>(r.getNestedRules());
+					QueryImpl<Entity> nestedQ = new QueryImpl<>(r.getNestedRules());
 					result.append('(').append(getSqlWhere(entityMeta, nestedQ, parameters, mrefFilterIndex))
 							.append(')');
 					break;
@@ -470,7 +474,7 @@ class PostgreSqlQueryGenerator
 					}
 
 					result.append(" LIKE ?");
-					parameters.add("%" + DataConverter.toString(r.getValue()) + "%");
+					parameters.add("%" + PostgreSqlUtils.getPostgreSqlQueryValue(r.getValue(), attr) + "%");
 					break;
 				case IN:
 					Object inValue = r.getValue();
@@ -485,27 +489,18 @@ class PostgreSqlQueryGenerator
 					}
 
 					StringBuilder in = new StringBuilder();
-
-					@SuppressWarnings("unchecked") Iterable<Object> inValueIterable = (Iterable<Object>) inValue;
-					for (Iterator<Object> it = inValueIterable.iterator(); it.hasNext(); )
+					AttributeMetaData inAttr = attr;
+					Stream<Object> postgreSqlIds = stream(((Iterable<?>) inValue).spliterator(), false)
+							.map(idValue -> PostgreSqlUtils.getPostgreSqlQueryValue(idValue, inAttr));
+					for (Iterator<Object> it = postgreSqlIds.iterator(); it.hasNext(); )
 					{
-						Object inValueItem = it.next();
-
+						Object postgreSqlId = it.next();
 						in.append('?');
 						if (it.hasNext())
 						{
 							in.append(',');
 						}
-
-						if (isReferenceType(attr))
-						{
-							// According to Query documentation value can be an entity or an entity id
-							if (inValueItem instanceof Entity)
-							{
-								inValueItem = ((Entity) inValueItem).getIdValue();
-							}
-						}
-						parameters.add(convert(attr, inValueItem));
+						parameters.add(postgreSqlId);
 					}
 
 					if (isMultipleReferenceType(attr))
@@ -568,16 +563,12 @@ class PostgreSqlQueryGenerator
 					}
 					else
 					{
-						Object convertedVal = convert(attr, r.getValue());
-						if (convertedVal instanceof Entity)
-						{
-							convertedVal = ((Entity) convertedVal).getIdValue();
-						}
+						Object postgreSqlVal = PostgreSqlUtils.getPostgreSqlQueryValue(r.getValue(), attr);
 						//Postgres does not return the rows with an empty value in a boolean field when queried with for example "... NOT abstract = TRUE"
 						//It does however return those rows when queried with "... NOT abstract IS TRUE"
 						if (attr.getDataType() == BOOL)
 						{
-							Boolean bool = new Boolean(convertedVal.toString());
+							Boolean bool = (Boolean) postgreSqlVal;
 							if (bool) predicate.append(" IS TRUE");
 							else predicate.append(" IS FALSE");
 						}
@@ -586,7 +577,7 @@ class PostgreSqlQueryGenerator
 							predicate.append(" =");
 							predicate.append(" ? ");
 
-							parameters.add(convertedVal);
+							parameters.add(postgreSqlVal);
 						}
 					}
 					if (result.length() > 0 && !result.toString().endsWith(" OR ") && !result.toString()
@@ -610,7 +601,7 @@ class PostgreSqlQueryGenerator
 					}
 
 					predicate.append('.').append(getColumnName(r.getField()));
-					switch (r.getOperator())
+					switch (operator)
 					{
 						case EQUALS:
 							predicate.append(" =");
@@ -629,16 +620,11 @@ class PostgreSqlQueryGenerator
 							break;
 						// $CASES-OMITTED$
 						default:
-							throw new RuntimeException(format("Unexpected query operator [%s]", r.getOperator()));
+							throw new RuntimeException(format("Unexpected query operator [%s]", operator));
 					}
 					predicate.append(" ? ");
 
-					Object convertedVal = convert(attr, r.getValue());
-					if (convertedVal instanceof Entity)
-					{
-						convertedVal = ((Entity) convertedVal).getIdValue();
-					}
-					parameters.add(convertedVal);
+					parameters.add(PostgreSqlUtils.getPostgreSqlQueryValue(r.getValue(), attr));
 
 					if (result.length() > 0 && !result.toString().endsWith(" OR ") && !result.toString()
 							.endsWith(" AND ") && !result.toString().endsWith(" NOT "))
@@ -654,10 +640,9 @@ class PostgreSqlQueryGenerator
 				case SHOULD:
 					// PostgreSQL does not support semantic searching and sorting matching rows on relevance.
 					throw new UnsupportedOperationException(
-							format("Query operator [%s] not supported by PostgreSQL repository",
-									r.getOperator().toString()));
+							format("Query operator [%s] not supported by PostgreSQL repository", operator.toString()));
 				default:
-					throw new RuntimeException(format("Unknown query operator [%s]", r.getOperator().toString()));
+					throw new RuntimeException(format("Unknown query operator [%s]", operator.toString()));
 			}
 		}
 
@@ -794,12 +779,6 @@ class PostgreSqlQueryGenerator
 	{
 		FieldType fieldType = MolgenisFieldTypes.getType(getValueString(attr.getDataType()));
 		return fieldType.getPostgreSqlType();
-	}
-
-	private static Object convert(AttributeMetaData attr, Object value)
-	{
-		FieldType fieldType = MolgenisFieldTypes.getType(getValueString(attr.getDataType()));
-		return fieldType.convert(value);
 	}
 }
 
