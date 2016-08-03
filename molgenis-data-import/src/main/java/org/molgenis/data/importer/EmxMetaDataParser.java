@@ -96,6 +96,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private final PackageFactory packageFactory;
 	private final AttributeMetaDataFactory attrMetaFactory;
 	private final EntityMetaDataFactory entityMetaDataFactory;
+	private final TagFactory tagFactory;
 
 	public EmxMetaDataParser(PackageFactory packageFactory, AttributeMetaDataFactory attrMetaFactory,
 			EntityMetaDataFactory entityMetaDataFactory)
@@ -103,16 +104,19 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.dataService = null;
 		this.packageFactory = requireNonNull(packageFactory);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
-		this.entityMetaDataFactory = entityMetaDataFactory;
+		this.entityMetaDataFactory = requireNonNull(entityMetaDataFactory);
+		this.tagFactory = null;
 	}
 
 	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory,
-			AttributeMetaDataFactory attrMetaFactory, EntityMetaDataFactory entityMetaDataFactory)
+			AttributeMetaDataFactory attrMetaFactory, EntityMetaDataFactory entityMetaDataFactory,
+			TagFactory tagFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.packageFactory = requireNonNull(packageFactory);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
-		this.entityMetaDataFactory = entityMetaDataFactory;
+		this.entityMetaDataFactory = requireNonNull(entityMetaDataFactory);
+		this.tagFactory = requireNonNull(tagFactory);
 	}
 
 	@Override
