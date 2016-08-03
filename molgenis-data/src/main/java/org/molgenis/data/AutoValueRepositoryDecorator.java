@@ -3,7 +3,6 @@ package org.molgenis.data;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
-import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 
@@ -202,18 +201,6 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 		decoratedRepository.deleteAll();
 	}
 
-	@Override
-	public void flush()
-	{
-		decoratedRepository.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		decoratedRepository.clearCache();
-	}
-
 	private void generateAutoDateOrDateTime(Iterable<? extends Entity> entities, Iterable<AttributeMetaData> attrs)
 	{
 		// get auto date and datetime attributes
@@ -256,12 +243,6 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 
 			}
 		}
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		decoratedRepository.rebuildIndex();
 	}
 
 	private List<AttributeMetaData> getAutoAttrs()

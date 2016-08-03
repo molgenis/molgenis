@@ -78,14 +78,6 @@ public class EntityReferenceResolverDecoratorTest
 	}
 
 	@Test
-	public void clearCache()
-	{
-		entityReferenceResolverDecorator.clearCache();
-		verify(decoratedRepo, times(1)).clearCache();
-		verifyZeroInteractions(entityManager);
-	}
-
-	@Test
 	public void close() throws IOException
 	{
 		entityReferenceResolverDecorator.close();
@@ -309,14 +301,6 @@ public class EntityReferenceResolverDecoratorTest
 	}
 
 	@Test
-	public void flush()
-	{
-		entityReferenceResolverDecorator.flush();
-		verify(decoratedRepo, times(1)).flush();
-		verifyZeroInteractions(entityManager);
-	}
-
-	@Test
 	public void getCapabilities()
 	{
 		entityReferenceResolverDecorator.getCapabilities();
@@ -357,14 +341,6 @@ public class EntityReferenceResolverDecoratorTest
 	{
 		entityReferenceResolverDecorator.query();
 		verify(decoratedRepo, times(1)).query();
-		verifyZeroInteractions(entityManager);
-	}
-
-	@Test
-	public void rebuildIndex()
-	{
-		entityReferenceResolverDecorator.rebuildIndex();
-		verify(decoratedRepo, times(1)).rebuildIndex();
 		verifyZeroInteractions(entityManager);
 	}
 

@@ -114,10 +114,9 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		}
 		else
 		{
-			Query<EntityMetaData> qWithoutLimitOffset = new QueryImpl<>(q);
-			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
-			Stream<EntityMetaData> entityMetaDatas = decoratedRepo.findAll(qWithoutLimitOffset);
-			return filterCountPermission(entityMetaDatas).skip(q.getOffset()).limit(q.getPageSize()).count();
+			// ignore query offset and page size
+			Stream<EntityMetaData> entityMetaDatas = decoratedRepo.findAll(q);
+			return filterCountPermission(entityMetaDatas).count();
 		}
 	}
 
@@ -133,7 +132,16 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 			Query<EntityMetaData> qWithoutLimitOffset = new QueryImpl<>(q);
 			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
 			Stream<EntityMetaData> entityMetaDatas = decoratedRepo.findAll(qWithoutLimitOffset);
-			return filterReadPermission(entityMetaDatas).skip(q.getOffset()).limit(q.getPageSize());
+			Stream<EntityMetaData> filteredEntityMetaDatas = filterReadPermission(entityMetaDatas);
+			if (q.getOffset() > 0)
+			{
+				filteredEntityMetaDatas = filteredEntityMetaDatas.skip(q.getOffset());
+			}
+			if (q.getPageSize() > 0)
+			{
+				filteredEntityMetaDatas = filteredEntityMetaDatas.limit(q.getPageSize());
+			}
+			return filteredEntityMetaDatas;
 		}
 	}
 
@@ -174,6 +182,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		}
 		else
 		{
+			// ignore query offset and page size
 			return filterReadPermission(decoratedRepo.findOne(q));
 		}
 	}
@@ -310,30 +319,11 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 	public Integer add(Stream<EntityMetaData> entities)
 	{
 		AtomicInteger count = new AtomicInteger();
-		entities.filter(entity ->
-		{
+		entities.filter(entity -> {
 			count.incrementAndGet();
 			return true;
 		}).forEach(this::addEntityMetaData);
 		return count.get();
-	}
-
-	@Override
-	public void flush()
-	{
-		decoratedRepo.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		decoratedRepo.clearCache();
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		decoratedRepo.rebuildIndex();
 	}
 
 	private void addEntityMetaData(EntityMetaData entityMetaData)
@@ -430,8 +420,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 
 			if (!deletedAttrNames.isEmpty())
 			{
-				deletedAttrNames.forEach(deletedAttrName ->
-				{
+				deletedAttrNames.forEach(deletedAttrName -> {
 					repoCollection.deleteAttribute(entityName, deletedAttrName);
 
 					if (entityMetaData.getName().equals(ENTITY_META_DATA))
@@ -445,8 +434,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 
 			if (!addedAttrNames.isEmpty())
 			{
-				addedAttrNames.stream().map(updateAttrMap::get).forEach(addedAttrEntity ->
-				{
+				addedAttrNames.stream().map(updateAttrMap::get).forEach(addedAttrEntity -> {
 					repoCollection.addAttribute(entityName, addedAttrEntity);
 
 					if (entityMetaData.getName().equals(ENTITY_META_DATA))
@@ -566,15 +554,8 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 
 	private Stream<EntityMetaData> filterPermission(Stream<EntityMetaData> entityMetaDataStream, Permission permission)
 	{
-		if (currentUserIsSu() || currentUserisSystem())
-		{
-			return entityMetaDataStream;
-		}
-		else
-		{
-			return entityMetaDataStream
-					.filter(entityMeta -> permissionService.hasPermissionOnEntity(entityMeta.getName(), permission));
-		}
+		return entityMetaDataStream
+				.filter(entityMeta -> permissionService.hasPermissionOnEntity(entityMeta.getName(), permission));
 	}
 
 	private static class FilteredConsumer

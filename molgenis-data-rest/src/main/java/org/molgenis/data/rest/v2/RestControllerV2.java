@@ -349,7 +349,6 @@ class RestControllerV2
 		Repository<Entity> repository = dataService.getRepository(newFullName);
 		permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 				Collections.singletonList(repository.getName()));
-		repository.rebuildIndex();
 
 		response.addHeader("Location", Href.concatMetaEntityHrefV2(RestControllerV2.BASE_URI, repository.getName()));
 		response.setStatus(HttpServletResponse.SC_CREATED);

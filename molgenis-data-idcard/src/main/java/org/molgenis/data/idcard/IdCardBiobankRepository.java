@@ -1,22 +1,6 @@
 package org.molgenis.data.idcard;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.RepositoryCapability.AGGREGATEABLE;
-import static org.molgenis.data.RepositoryCapability.QUERYABLE;
-import static org.molgenis.data.RepositoryCapability.WRITABLE;
-
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.idcard.client.IdCardClient;
@@ -29,6 +13,14 @@ import org.molgenis.data.support.AbstractRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.RepositoryCapability.*;
 
 @org.springframework.stereotype.Repository
 public class IdCardBiobankRepository extends AbstractRepository
@@ -162,13 +154,6 @@ public class IdCardBiobankRepository extends AbstractRepository
 				String.format("Repository [%s] is not %s", getName(), WRITABLE.toString()));
 	}
 
-	@Override
-	public void flush()
-	{
-		elasticsearchService.flush();
-	}
-
-	@Override
 	public void rebuildIndex()
 	{
 		LOG.trace("Indexing ID-Card biobanks ...");

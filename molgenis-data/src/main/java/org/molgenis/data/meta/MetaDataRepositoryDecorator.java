@@ -1,5 +1,9 @@
 package org.molgenis.data.meta;
 
+import org.molgenis.data.*;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.model.EntityMetaData;
+
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -7,17 +11,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
-
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Entity;
-import org.molgenis.data.listeners.EntityListener;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Repository decorator for entities, attributes and packages repositories.
@@ -191,23 +184,5 @@ public class MetaDataRepositoryDecorator implements Repository<Entity>
 	public Integer add(Stream<Entity> entities)
 	{
 		return decorated.add(entities);
-	}
-
-	@Override
-	public void flush()
-	{
-		decorated.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		decorated.clearCache();
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		decorated.rebuildIndex();
 	}
 }

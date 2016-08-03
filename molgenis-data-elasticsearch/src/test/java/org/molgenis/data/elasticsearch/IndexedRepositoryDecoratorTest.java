@@ -5,7 +5,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Matchers;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AggregateQueryImpl;
@@ -101,8 +100,7 @@ public class IndexedRepositoryDecoratorTest
 			entities.add(mock(Entity.class));
 		}
 		indexedRepositoryDecorator.add(entities.stream());
-		verify(decoratedRepo, times(2)).add(Matchers.<Stream<Entity>>any());
-
+		verify(decoratedRepo, times(1)).add(Matchers.<Stream<Entity>>any());
 		verifyZeroInteractions(elasticSearchService);
 	}
 
@@ -121,14 +119,6 @@ public class IndexedRepositoryDecoratorTest
 
 		indexedRepositoryDecorator.aggregate(aggregateQuery);
 		verify(elasticSearchService).aggregate(aggregateQuery, repositoryEntityMetaData);
-	}
-
-	@Test
-	public void clearCache()
-	{
-		indexedRepositoryDecorator.clearCache();
-		verify(decoratedRepo).clearCache();
-		verifyZeroInteractions(elasticSearchService);
 	}
 
 	@Test
@@ -246,14 +236,6 @@ public class IndexedRepositoryDecoratorTest
 	}
 
 	@Test
-	public void flush()
-	{
-		indexedRepositoryDecorator.flush();
-		verify(decoratedRepo).flush();
-		verifyZeroInteractions(elasticSearchService);
-	}
-
-	@Test
 	public void getEntityMetaData()
 	{
 		assertEquals(indexedRepositoryDecorator.getEntityMetaData(), repositoryEntityMetaData);
@@ -294,13 +276,6 @@ public class IndexedRepositoryDecoratorTest
 		assertEquals(decoratedRepoValues.get(1).collect(Collectors.toList()), entities.subList(1000, 1100));
 
 		verifyZeroInteractions(elasticSearchService);
-	}
-
-	@Test
-	public void rebuildIndex()
-	{
-		indexedRepositoryDecorator.rebuildIndex();
-		verify(elasticSearchService).rebuildIndex(decoratedRepo);
 	}
 
 	@Test

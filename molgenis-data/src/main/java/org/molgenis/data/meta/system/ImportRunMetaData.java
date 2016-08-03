@@ -34,6 +34,8 @@ public class ImportRunMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Import");
+		setDescription("Data import reports");
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false)
 				.setDescription("automatically generated internal id, only for internal use.");
 		addAttribute(STARTDATE).setDataType(DATE_TIME).setNillable(false).setDescription("");
