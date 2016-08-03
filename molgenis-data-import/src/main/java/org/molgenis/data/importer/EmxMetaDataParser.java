@@ -358,10 +358,9 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			for (AttributeMetaData attr : entitiesRepo.getEntityMetaData().getAtomicAttributes())
 			{
-				if (!SUPPORTED_ENTITY_ATTRIBUTES.contains(attr.getName().toLowerCase()) && !(
-						I18nUtils.isI18n(attr.getName()) && (
-								attr.getName().startsWith(EntityMetaDataMetaData.DESCRIPTION) || attr.getName()
-										.startsWith(EntityMetaDataMetaData.LABEL))))
+				if (!SUPPORTED_ENTITY_ATTRIBUTES.contains(attr.getName().toLowerCase()) && !(isI18n(attr.getName()) && (
+						attr.getName().startsWith(EntityMetaDataMetaData.DESCRIPTION) || attr.getName()
+								.startsWith(EntityMetaDataMetaData.LABEL))))
 				{
 					throw new IllegalArgumentException("Unsupported entity metadata: entities." + attr.getName());
 				}
@@ -448,7 +447,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 				String abstractString = entity.getString(ABSTRACT);
 				if (abstractString != null) md.setAbstract(parseBoolean(abstractString, i, ABSTRACT));
-				List<String> tagIds = DataConverter.toList(entity.get(TAGS));
+				List<String> tagIds = toList(entity.get(TAGS));
 
 				String extendsEntityName = entity.getString(EXTENDS);
 				if (extendsEntityName != null)
@@ -474,30 +473,28 @@ public class EmxMetaDataParser implements MetaDataParser
 					md.setExtends(extendsEntityMeta);
 				}
 
-				ImportTags(intermediateResults, entityName, md, tagIds);
+				if (tagIds != null && !tagIds.isEmpty())
+				{
+					importTags(intermediateResults, entityName, md, tagIds);
+				}
 			}
 		}
 	}
 
-	/**
-	 * FIXME fix tag import
-	 */
-	private void ImportTags(IntermediateParseResults intermediateResults, String entityName, EntityMetaData md,
+	private void importTags(IntermediateParseResults intermediateResults, String entityName, EntityMetaData md,
 			List<String> tagIds)
 	{
-		//		if (tagIds != null)
-		//		{
-		//			for (String tagId : tagIds)
-		//			{
-		//				Entity tagEntity = intermediateResults.getTagEntity(tagId);
-		//				if (tagEntity == null)
-		//				{
-		//					throw new MolgenisDataException("Unknown tag: " + tagId + " for entity [" + entityName
-		//							+ "]). Please specify on the " + EMX_TAGS + " sheet.");
-		//				}
-		//				intermediateResults.addEntityTag(Tag.<EntityMetaData>asTag(md, tagEntity));
-		//			}
-		//		}
+		for (String tagId : tagIds)
+		{
+			Entity tagEntity = intermediateResults.getTagEntity(tagId);
+			if (tagEntity == null)
+			{
+				throw new MolgenisDataException(
+						"Unknown tag: " + tagId + " for entity [" + entityName + "]). Please specify on the " + EMX_TAGS
+								+ " sheet.");
+			}
+			intermediateResults.addEntityTag(entityName, asTag(md, tagEntity));
+		}
 	}
 
 	/**
@@ -509,7 +506,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private List<Entity> resolvePackages(Repository<Entity> packageRepo)
 	{
 		List<Entity> resolved = new ArrayList<>();
-		if ((packageRepo == null) || isEmpty(packageRepo)) return resolved;
+		if ((packageRepo == null) || Iterables.isEmpty(packageRepo)) return resolved;
 
 		List<Entity> unresolved = new ArrayList<>();
 		Map<String, Entity> resolvedByName = new HashMap<>();
@@ -567,9 +564,9 @@ public class EmxMetaDataParser implements MetaDataParser
 	{
 		for (AttributeMetaData attr : attributesRepo.getEntityMetaData().getAtomicAttributes())
 		{
-			if (!SUPPORTED_ATTRIBUTE_ATTRIBUTES.contains(attr.getName().toLowerCase()) && !((
-					I18nUtils.isI18n(attr.getName()) && (attr.getName().toLowerCase().startsWith(LABEL) || attr
-							.getName().toLowerCase().startsWith(DESCRIPTION)))))
+			if (!SUPPORTED_ATTRIBUTE_ATTRIBUTES.contains(attr.getName().toLowerCase()) && !((isI18n(attr.getName()) && (
+					attr.getName().toLowerCase().startsWith(LABEL) || attr.getName().toLowerCase()
+							.startsWith(DESCRIPTION)))))
 			{
 				throw new IllegalArgumentException("Unsupported attribute metadata: attributes. " + attr.getName());
 			}
