@@ -100,8 +100,7 @@ public class IndexedRepositoryDecoratorTest
 			entities.add(mock(Entity.class));
 		}
 		indexedRepositoryDecorator.add(entities.stream());
-		verify(decoratedRepo, times(2)).add(Matchers.<Stream<Entity>>any());
-
+		verify(decoratedRepo, times(1)).add(Matchers.<Stream<Entity>>any());
 		verifyZeroInteractions(elasticSearchService);
 	}
 
