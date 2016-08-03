@@ -65,7 +65,7 @@ public class GavinJobFactory
 	@RunAsSystem
 	public GavinJob createJob(GavinJobExecution gavinJobExecution)
 	{
-		dataService.add(GAVIN_JOB_EXECUTION, gavinJobExecution);
+		dataService.add(gavinJobExecution.getEntityMetaData().getName(), gavinJobExecution);
 		String username = gavinJobExecution.getUser();
 
 		// create an authentication to run as the user that is listed as the owner of the job
