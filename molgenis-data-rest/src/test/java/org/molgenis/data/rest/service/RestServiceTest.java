@@ -1,24 +1,19 @@
 package org.molgenis.data.rest.service;
 
-import org.mockito.ArgumentMatcher;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.file.FileStore;
+import org.molgenis.file.model.FileMetaFactory;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
-import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
-import static org.mockito.Matchers.argThat;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
@@ -27,15 +22,17 @@ import static org.testng.Assert.assertEquals;
 public class RestServiceTest
 {
 	private RestService restService;
-	private DataService dataService;
+	private EntityManager entityManager;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		dataService = mock(DataService.class);
+		DataService dataService = mock(DataService.class);
 		IdGenerator idGenerator = mock(IdGenerator.class);
 		FileStore fileStore = mock(FileStore.class);
-		this.restService = new RestService(dataService, idGenerator, fileStore, null, null); // FIXME
+		FileMetaFactory fileMetaFactory = mock(FileMetaFactory.class);
+		entityManager = mock(EntityManager.class);
+		this.restService = new RestService(dataService, idGenerator, fileStore, fileMetaFactory, entityManager);
 	}
 
 	@Test
@@ -61,22 +58,8 @@ public class RestServiceTest
 		AttributeMetaData attr = mock(AttributeMetaData.class);
 		when(attr.getDataType()).thenReturn(MREF);
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
-		when(dataService.findAll(eq(refEntityName), argThat(new ArgumentMatcher<Stream<Object>>()
-		{
-			@SuppressWarnings("unchecked")
-			@Override
-			public boolean matches(Object argument)
-			{
-				return ((Stream<Object>) argument).collect(toList()).equals(Arrays.asList(0, 1)); // integers
-			}
-		}))).thenAnswer(new Answer<Stream<Entity>>()
-		{
-			@Override
-			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(entity0, entity1);
-			}
-		});
+		when(entityManager.getReference(refEntityMeta, 0)).thenReturn(entity0);
+		when(entityManager.getReference(refEntityMeta, 1)).thenReturn(entity1);
 		Object entityValue = restService.toEntityValue(attr, "0,1"); // string
 		assertEquals(entityValue, Arrays.asList(entity0, entity1));
 	}
@@ -95,22 +78,8 @@ public class RestServiceTest
 		AttributeMetaData attr = mock(AttributeMetaData.class);
 		when(attr.getDataType()).thenReturn(MREF);
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
-		when(dataService.findAll(eq(refEntityName), argThat(new ArgumentMatcher<Stream<Object>>()
-		{
-			@SuppressWarnings("unchecked")
-			@Override
-			public boolean matches(Object argument)
-			{
-				return ((Stream<Object>) argument).collect(toList()).equals(Arrays.asList("0", "1")); // strings
-			}
-		}))).thenAnswer(new Answer<Stream<Entity>>()
-		{
-			@Override
-			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
-			{
-				return Stream.of(entity0, entity1);
-			}
-		});
+		when(entityManager.getReference(refEntityMeta, "0")).thenReturn(entity0);
+		when(entityManager.getReference(refEntityMeta, "1")).thenReturn(entity1);
 		Object entityValue = restService.toEntityValue(attr, "0,1"); // string
 		assertEquals(entityValue, Arrays.asList(entity0, entity1));
 	}

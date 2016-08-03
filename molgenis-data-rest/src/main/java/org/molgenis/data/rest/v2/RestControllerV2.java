@@ -15,6 +15,7 @@ import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.permission.PermissionSystemService;
+import org.molgenis.util.EntityUtils;
 import org.molgenis.util.ErrorMessageResponse;
 import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
 import org.slf4j.Logger;
@@ -143,24 +144,26 @@ class RestControllerV2
 	 * Retrieve an entity instance by id, optionally specify which attributes to include in the response.
 	 * 
 	 * @param entityName
-	 * @param id
+	 * @param untypedId
 	 * @param attributeFilter
 	 * @return
 	 */
 	@RequestMapping(value = "/{entityName}/{id:.+}", method = GET)
 	@ResponseBody
 	public Map<String, Object> retrieveEntity(@PathVariable("entityName") String entityName,
-			@PathVariable("id") Object id,
+			@PathVariable("id") String untypedId,
 			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
 	{
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
+		Object id = EntityUtils.getTypedValue(untypedId, entityMeta.getIdAttribute());
+
 		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityMeta,
 				languageService.getCurrentUserLanguageCode());
 
 		Entity entity = dataService.findOneById(entityName, id, fetch);
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityName + " [" + id + "] not found");
+			throw new UnknownEntityException(entityName + " [" + untypedId + "] not found");
 		}
 
 		return createEntityResponse(entity, fetch, true);
@@ -169,17 +172,19 @@ class RestControllerV2
 	@RequestMapping(value = "/{entityName}/{id:.+}", method = POST, params = "_method=GET")
 	@ResponseBody
 	public Map<String, Object> retrieveEntityPost(@PathVariable("entityName") String entityName,
-			@PathVariable("id") Object id,
+			@PathVariable("id") String untypedId,
 			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
 	{
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
+		Object id = EntityUtils.getTypedValue(untypedId, entityMeta.getIdAttribute());
+
 		Fetch fetch = AttributeFilterToFetchConverter.convert(attributeFilter, entityMeta,
 				languageService.getCurrentUserLanguageCode());
 
 		Entity entity = dataService.findOneById(entityName, id, fetch);
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityName + " [" + id + "] not found");
+			throw new UnknownEntityException(entityName + " [" + untypedId + "] not found");
 		}
 
 		return createEntityResponse(entity, fetch, true);
@@ -187,8 +192,11 @@ class RestControllerV2
 
 	@RequestMapping(value = "/{entityName}/{id:.+}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
-	public void deleteEntity(@PathVariable("entityName") String entityName, @PathVariable("id") Object id)
+	public void deleteEntity(@PathVariable("entityName") String entityName, @PathVariable("id") String untypedId)
 	{
+		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
+		Object id = EntityUtils.getTypedValue(untypedId, entityMeta.getIdAttribute());
+
 		dataService.deleteById(entityName, id);
 	}
 
