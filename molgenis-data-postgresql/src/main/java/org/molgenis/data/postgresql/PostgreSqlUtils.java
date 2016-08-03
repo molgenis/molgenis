@@ -7,7 +7,6 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.file.model.FileMeta;
 
 import java.util.Date;
-import java.util.stream.Stream;
 
 import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
@@ -80,7 +79,8 @@ class PostgreSqlUtils
 	}
 
 	/**
-	 * Returns the PostgreSQL value for the given entity attribute
+	 * Returns the PostgreSQL query value for the given entity attribute. For query operators requiring a list of
+	 * values (e.g. IN or RANGE) this method must be called for each individual query value.
 	 *
 	 * @param queryValue value of the type that matches the attribute type
 	 * @param attr       attribute
@@ -88,133 +88,124 @@ class PostgreSqlUtils
 	 */
 	static Object getPostgreSqlQueryValue(Object queryValue, AttributeMetaData attr)
 	{
-		String attrName = attr.getName();
-		MolgenisFieldTypes.AttributeType attrType = attr.getDataType();
-
-		switch (attrType)
+		while (true)
 		{
-			case BOOL:
-				if (queryValue != null && !(queryValue instanceof Boolean))
-				{
-					throw new MolgenisDataException(
-							format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
-									queryValue.getClass().getSimpleName(), Boolean.class.getSimpleName()));
-				}
-				return queryValue;
-			case CATEGORICAL:
-			case FILE:
-			case XREF:
-				// queries values referencing an entity can either be the entity itself or the entity id
-				if (queryValue != null)
-				{
-					if (queryValue instanceof Entity)
+			String attrName = attr.getName();
+			MolgenisFieldTypes.AttributeType attrType = attr.getDataType();
+
+			switch (attrType)
+			{
+				case BOOL:
+					if (queryValue != null && !(queryValue instanceof Boolean))
 					{
-						queryValue = ((Entity) queryValue).getIdValue();
+						throw new MolgenisDataException(
+								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
+										queryValue.getClass().getSimpleName(), Boolean.class.getSimpleName()));
 					}
-					return getPostgreSqlQueryValue(queryValue, attr.getRefEntity().getIdAttribute());
-				}
-				else
-				{
-					return null;
-				}
-			case CATEGORICAL_MREF:
-			case MREF:
-				// queries values referencing entities can either be an entity iterable or entity id iterable
-				if (!(queryValue instanceof Iterable<?>))
-				{
-					throw new MolgenisDataException(
-							format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
-									queryValue.getClass().getSimpleName(), Iterable.class.getSimpleName()));
-				}
-				Stream<Object> queryIdValues = stream(((Iterable<?>) queryValue).spliterator(), false)
-						.map(queryMrefValue -> queryMrefValue instanceof Entity ? ((Entity) queryMrefValue)
-								.getIdValue() : queryMrefValue);
-				return queryIdValues.map(queryIdValue -> getPostgreSqlQueryValue(queryIdValue,
-						attr.getRefEntity().getIdAttribute()))
-						.collect(toList());
-			case DATE:
-				if (queryValue != null && !(queryValue instanceof Date))
-				{
-					throw new MolgenisDataException(
-							format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
-									queryValue.getClass().getSimpleName(), Date.class.getSimpleName()));
-				}
-				Date date = (Date) queryValue;
-				return date != null ? new java.sql.Date(date.getTime()) : null;
-			case DATE_TIME:
-				if (queryValue != null && !(queryValue instanceof Date))
-				{
-					throw new MolgenisDataException(
-							format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
-									queryValue.getClass().getSimpleName(), Date.class.getSimpleName()));
-				}
-				Date dateTime = (java.util.Date) queryValue;
-				return dateTime != null ? new java.sql.Timestamp(dateTime.getTime()) : null;
-			case DECIMAL:
-				if (queryValue != null && !(queryValue instanceof Double))
-				{
-					throw new MolgenisDataException(
-							format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
-									queryValue.getClass().getSimpleName(), Double.class.getSimpleName()));
-				}
-				return queryValue;
-			case ENUM:
-				// enum query values can be an enum or enum string
-				if (queryValue != null)
-				{
-					if (queryValue instanceof String)
+					return queryValue;
+				case CATEGORICAL:
+				case CATEGORICAL_MREF: // one query value
+				case FILE:
+				case MREF: // one query value
+				case XREF:
+					// queries values referencing an entity can either be the entity itself or the entity id
+					if (queryValue != null)
 					{
-						return queryValue;
-					}
-					else if (queryValue instanceof Enum<?>)
-					{
-						return queryValue.toString();
+						if (queryValue instanceof Entity)
+						{
+							queryValue = ((Entity) queryValue).getIdValue();
+						}
+						attr = attr.getRefEntity().getIdAttribute();
+						continue;
 					}
 					else
 					{
-						throw new MolgenisDataException(
-								format("Attribute [%s] query value is of type [%s] instead of [%s] or [%s]", attrName,
-										queryValue.getClass().getSimpleName(), String.class.getSimpleName(),
-										Enum.class.getSimpleName()));
+						return null;
 					}
-				}
-				else
-				{
-					return null;
-				}
-			case EMAIL:
-			case HTML:
-			case HYPERLINK:
-			case SCRIPT:
-			case STRING:
-			case TEXT:
-				if (queryValue != null && !(queryValue instanceof String))
-				{
-					throw new MolgenisDataException(
-							format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
-									queryValue.getClass().getSimpleName(), String.class.getSimpleName()));
-				}
-				return queryValue;
-			case INT:
-				if (queryValue != null && !(queryValue instanceof Integer))
-				{
-					throw new MolgenisDataException(
-							format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
-									queryValue.getClass().getSimpleName(), Integer.class.getSimpleName()));
-				}
-				return queryValue;
-			case LONG:
-				if (queryValue != null && !(queryValue instanceof Long))
-				{
-					throw new MolgenisDataException(
-							format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
-									queryValue.getClass().getSimpleName(), Long.class.getSimpleName()));
-				}
-				return queryValue;
-			case COMPOUND:
-				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
-			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+				case DATE:
+					if (queryValue != null && !(queryValue instanceof Date))
+					{
+						throw new MolgenisDataException(
+								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
+										queryValue.getClass().getSimpleName(), Date.class.getSimpleName()));
+					}
+					Date date = (Date) queryValue;
+					return date != null ? new java.sql.Date(date.getTime()) : null;
+				case DATE_TIME:
+					if (queryValue != null && !(queryValue instanceof Date))
+					{
+						throw new MolgenisDataException(
+								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
+										queryValue.getClass().getSimpleName(), Date.class.getSimpleName()));
+					}
+					Date dateTime = (Date) queryValue;
+					return dateTime != null ? new java.sql.Timestamp(dateTime.getTime()) : null;
+				case DECIMAL:
+					if (queryValue != null && !(queryValue instanceof Double))
+					{
+						throw new MolgenisDataException(
+								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
+										queryValue.getClass().getSimpleName(), Double.class.getSimpleName()));
+					}
+					return queryValue;
+				case ENUM:
+					// enum query values can be an enum or enum string
+					if (queryValue != null)
+					{
+						if (queryValue instanceof String)
+						{
+							return queryValue;
+						}
+						else if (queryValue instanceof Enum<?>)
+						{
+							return queryValue.toString();
+						}
+						else
+						{
+							throw new MolgenisDataException(
+									format("Attribute [%s] query value is of type [%s] instead of [%s] or [%s]",
+											attrName, queryValue.getClass().getSimpleName(),
+											String.class.getSimpleName(), Enum.class.getSimpleName()));
+						}
+					}
+					else
+					{
+						return null;
+					}
+				case EMAIL:
+				case HTML:
+				case HYPERLINK:
+				case SCRIPT:
+				case STRING:
+				case TEXT:
+					if (queryValue != null && !(queryValue instanceof String))
+					{
+						throw new MolgenisDataException(
+								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
+										queryValue.getClass().getSimpleName(), String.class.getSimpleName()));
+					}
+					return queryValue;
+				case INT:
+					if (queryValue != null && !(queryValue instanceof Integer))
+					{
+						throw new MolgenisDataException(
+								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
+										queryValue.getClass().getSimpleName(), Integer.class.getSimpleName()));
+					}
+					return queryValue;
+				case LONG:
+					if (queryValue != null && !(queryValue instanceof Long))
+					{
+						throw new MolgenisDataException(
+								format("Attribute [%s] query value is of type [%s] instead of [%s]", attrName,
+										queryValue.getClass().getSimpleName(), Long.class.getSimpleName()));
+					}
+					return queryValue;
+				case COMPOUND:
+					throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+				default:
+					throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+			}
 		}
 	}
 }

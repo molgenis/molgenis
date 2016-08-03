@@ -68,7 +68,7 @@ public class PostgreSqlUtilsTest
 	private static boolean boolValue;
 	private static Entity categoricalValue;
 	private static String categoricalValueId;
-	private static Entity categoricalMrefValue0, categoricalMrefValue1;
+	private static Entity categoricalMrefValue0;
 	private static String categoricalMrefValueId0, categoricalMrefValueId1;
 	private static Date dateValue;
 	private static Date dateTimeValue;
@@ -81,7 +81,7 @@ public class PostgreSqlUtilsTest
 	private static String hyperlinkValue;
 	private static Integer intValue;
 	private static Long longValue;
-	private static Entity mrefValue0, mrefValue1;
+	private static Entity mrefValue0;
 	private static int mrefValueId0, mrefValueId1;
 	private static String scriptValue;
 	private static String stringValue;
@@ -216,7 +216,7 @@ public class PostgreSqlUtilsTest
 				.getMock();
 		when(categoricalMrefValue0.toString()).thenReturn("categoricalMrefValue0");
 		when(categoricalMrefValue0.getIdValue()).thenReturn(categoricalMrefValueId0);
-		categoricalMrefValue1 = when(mock(Entity.class).getEntityMetaData()).thenReturn(refStringIdEntityMeta)
+		Entity categoricalMrefValue1 = when(mock(Entity.class).getEntityMetaData()).thenReturn(refStringIdEntityMeta)
 				.getMock();
 		when(categoricalMrefValue1.toString()).thenReturn("categoricalMrefValue1");
 		when(categoricalMrefValue1.getIdValue()).thenReturn(categoricalMrefValueId1);
@@ -275,7 +275,7 @@ public class PostgreSqlUtilsTest
 		mrefValue0 = when(mock(Entity.class).getEntityMetaData()).thenReturn(refIntIdEntityMeta).getMock();
 		when(mrefValue0.toString()).thenReturn("mrefValue0");
 		when(mrefValue0.getIdValue()).thenReturn(mrefValueId0);
-		mrefValue1 = when(mock(Entity.class).getEntityMetaData()).thenReturn(refIntIdEntityMeta).getMock();
+		Entity mrefValue1 = when(mock(Entity.class).getEntityMetaData()).thenReturn(refIntIdEntityMeta).getMock();
 		when(mrefValue1.toString()).thenReturn("mrefValue1");
 		when(mrefValue1.getIdValue()).thenReturn(mrefValueId1);
 		when(mrefValue0.getInt(attrRefIntIdName)).thenReturn(mrefValueId0);
@@ -352,11 +352,9 @@ public class PostgreSqlUtilsTest
 				new Object[] { categoricalValue, attrCategorical, categoricalValueId },
 				new Object[] { categoricalValueId, attrCategorical, categoricalValueId },
 				new Object[] { null, attrCategoricalNillable, null },
-				new Object[] { asList(categoricalMrefValue0, categoricalMrefValue1), attrCategoricalMref,
-						asList(categoricalMrefValueId0, categoricalMrefValueId1) },
-				new Object[] { asList(categoricalMrefValueId0, categoricalMrefValueId1), attrCategoricalMref,
-						asList(categoricalMrefValueId0, categoricalMrefValueId1) },
-				new Object[] { emptyList(), attrCategoricalMrefNillable, emptyList() },
+				new Object[] { categoricalMrefValue0, attrCategoricalMref, categoricalMrefValueId0 },
+				new Object[] { categoricalMrefValueId0, attrCategoricalMref, categoricalMrefValueId0 },
+				new Object[] { null, attrCategoricalMrefNillable, null },
 				new Object[] { dateValue, attrDate, new java.sql.Date(dateValue.getTime()) },
 				new Object[] { null, attrDateNillable, null },
 				new Object[] { dateTimeValue, attrDateTime, new java.sql.Timestamp(dateTimeValue.getTime()) },
@@ -373,9 +371,8 @@ public class PostgreSqlUtilsTest
 				new Object[] { null, attrHyperlinkNillable, null }, new Object[] { intValue, attrInt, intValue },
 				new Object[] { null, attrIntNillable, null }, new Object[] { longValue, attrLong, longValue },
 				new Object[] { null, attrLongNillable, null }, new Object[] { scriptValue, attrScript, scriptValue },
-				new Object[] { asList(mrefValue0, mrefValue1), attrMref, asList(mrefValueId0, mrefValueId1) },
-				new Object[] { asList(mrefValueId0, mrefValueId1), attrMref, asList(mrefValueId0, mrefValueId1) },
-				new Object[] { emptyList(), attrMrefNillable, emptyList() },
+				new Object[] { mrefValue0, attrMref, mrefValueId0 },
+				new Object[] { mrefValueId0, attrMref, mrefValueId0 }, new Object[] { null, attrMrefNillable, null },
 				new Object[] { scriptValue, attrScriptNillable, scriptValue },
 				new Object[] { null, attrScriptNillable, null }, new Object[] { stringValue, attrString, stringValue },
 				new Object[] { null, attrStringNillable, null }, new Object[] { textValue, attrText, textValue },
