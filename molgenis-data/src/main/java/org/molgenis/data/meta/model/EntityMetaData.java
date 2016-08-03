@@ -158,6 +158,12 @@ public class EntityMetaData extends StaticEntity
 		return entityMetaCopy;
 	}
 
+	@Override
+	public Iterable<String> getAttributeNames()
+	{
+		return stream(getEntities(ATTRIBUTES, AttributeMetaData.class).spliterator(), false).map(AttributeMetaData::getName)::iterator;
+	}
+
 	/**
 	 * Gets the fully qualified entity name.
 	 *
