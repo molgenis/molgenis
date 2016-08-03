@@ -217,6 +217,7 @@ public class MetaDataServiceImpl implements MetaDataService
 				|| getEntityRepository().findOneById(entityName) != null;
 	}
 
+	@Transactional
 	@Override
 	public void addPackage(Package package_)
 	{
