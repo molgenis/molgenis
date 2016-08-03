@@ -253,6 +253,7 @@ public class DataServiceImpl implements DataService
 		return getRepository(entityName, clazz).findAll(ids, fetch);
 	}
 
+	@Transactional
 	@Override
 	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId,
 			String newRepositoryLabel)
@@ -260,6 +261,7 @@ public class DataServiceImpl implements DataService
 		return copyRepository(repository, newRepositoryId, newRepositoryLabel, new QueryImpl<>());
 	}
 
+	@Transactional
 	@Override
 	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId,
 			String newRepositoryLabel, Query<Entity> query)

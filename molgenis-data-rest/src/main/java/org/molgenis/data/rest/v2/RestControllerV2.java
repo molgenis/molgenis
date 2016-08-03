@@ -323,13 +323,13 @@ class RestControllerV2
 
 		Repository<Entity> repositoryToCopyFrom = dataService.getRepository(entityName);
 
+		// Validate the new name
+		MetaValidationUtils.validateName(request.getNewEntityName());
+
 		// Check if the entity already exists
 		String newFullName = EntityMetaDataUtils.buildFullName(repositoryToCopyFrom.getEntityMetaData().getPackage(),
 				request.getNewEntityName());
 		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
-
-		// Validate the new name
-		MetaValidationUtils.validateName(request.getNewEntityName());
 
 		// Permission
 		boolean readPermission = permissionService.hasPermissionOnEntity(repositoryToCopyFrom.getName(),
@@ -342,7 +342,7 @@ class RestControllerV2
 		if (!writableCapabilities) throw createNoWriteCapabilitiesOnEntityException(entityName);
 
 		// Copy
-		this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(), request.getNewEntityName());
+		this.copyRepositoryRunAsSystem(repositoryToCopyFrom, newFullName, request.getNewEntityName());
 
 		// Retrieve new repo
 		Repository<Entity> repository = dataService.getRepository(newFullName);
