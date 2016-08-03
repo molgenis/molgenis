@@ -5,6 +5,7 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageMetaData;
+import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -174,7 +175,8 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 		// remove i18n attributes from i18n string meta data
 		AttributeMetaData attrLanguageCode = i18nStringMeta.getAttribute(languageCode);
 
-		EntityMetaData i18nMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(I18nStringMetaData.I18N_STRING));
+		EntityMetaData i18nMeta = EntityMetaData
+				.newInstance(dataService.getEntityMetaData(I18nStringMetaData.I18N_STRING));
 		i18nMeta.removeAttribute(attrLanguageCode);
 
 		runAsSystem(() -> dataService.update(ENTITY_META_DATA, i18nMeta));
@@ -248,61 +250,86 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 
 		if (!language.getCode().equals(DEFAULT_LANGUAGE_CODE))
 		{
-			// Create new label and description attributes for the added language
 			String languageCode = language.getCode();
-
-			// Add language attributes for attribute meta data
-			AttributeMetaData attrLabel = attrMetaFactory.create().setName(LABEL + '-' + languageCode).setNillable(true)
-					.setLabel("Label (" + languageCode + ')');
-			AttributeMetaData attrDescription = attrMetaFactory.create().setName(DESCRIPTION + '-' + languageCode)
-					.setNillable(true).setLabel("Description (" + languageCode + ')');
-			dataService.add(ATTRIBUTE_META_DATA, Stream.of(attrLabel, attrDescription));
-
-			EntityMetaData attrMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(ATTRIBUTE_META_DATA));
-			attrMeta.addAttribute(attrLabel);
-			attrMeta.addAttribute(attrDescription);
-
-			runAsSystem(() -> dataService.update(ENTITY_META_DATA, attrMeta));
-
-			// hack: update in memory representation
-			EntityMetaData attrMetaUpdated = dataService.getEntityMetaData(ATTRIBUTE_META_DATA);
-			attrMetaUpdated.addAttribute(attrLabel);
-			attrMetaUpdated.addAttribute(attrDescription);
-
-			// Add language attributes for entity meta data
-			AttributeMetaData entityLabel = attrMetaFactory.create()
-					.setName(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true)
-					.setLabel("Label (" + languageCode + ')');
-			AttributeMetaData entityDescription = attrMetaFactory.create()
-					.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true)
-					.setLabel("Description (" + languageCode + ')');
-			dataService.add(ATTRIBUTE_META_DATA, Stream.of(entityLabel, entityDescription));
-
-			EntityMetaData entityMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(ENTITY_META_DATA));
-			entityMeta.addAttribute(entityLabel);
-			entityMeta.addAttribute(entityDescription);
-
-			runAsSystem(() -> dataService.update(ENTITY_META_DATA, entityMeta));
-
-			// hack: update in memory representation
-			EntityMetaData entityMetaUpdated = dataService.getEntityMetaData(ENTITY_META_DATA);
-			entityMetaUpdated.addAttribute(entityLabel);
-			entityMetaUpdated.addAttribute(entityDescription);
-
-			// Add language attributes for i18n string
-			AttributeMetaData languageCodeAttr = attrMetaFactory.create().setName(languageCode).setNillable(true)
-					.setDataType(TEXT);
-			dataService.add(ATTRIBUTE_META_DATA, languageCodeAttr);
-
-			EntityMetaData i18nMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(I18N_STRING));
-			i18nMeta.addAttribute(languageCodeAttr);
-
-			runAsSystem(() -> dataService.update(ENTITY_META_DATA, i18nMeta));
-
-			// hack: update in memory representation
-			EntityMetaData i18nMetaUpdated = dataService.getEntityMetaData(I18N_STRING);
-			i18nMetaUpdated.addAttribute(languageCodeAttr);
+			this.addLanguageToAttributes(languageCode);
+			this.addLanguageToEntities(languageCode);
+			this.addLanguageToI18N(languageCode);
 		}
+	}
+
+	/**
+	 * Add language to attributes
+	 * Create new label and description attributes for the added language
+	 *
+	 * @param languageCode
+	 */
+	private void addLanguageToAttributes(String languageCode)
+	{
+		// Add language attributes for attribute meta data
+		AttributeMetaData attrLabel = attrMetaFactory.create()
+				.setName(LABEL + '-' + languageCode)
+				.setNillable(true)
+				.setLabel("Label (" + languageCode + ')');
+		AttributeMetaData attrDescription = attrMetaFactory.create()
+				.setName(DESCRIPTION + '-' + languageCode)
+				.setNillable(true)
+				.setLabel("Description (" + languageCode + ')');
+		dataService.add(ATTRIBUTE_META_DATA, Stream.of(attrLabel, attrDescription));
+
+		EntityMetaData attrMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(ATTRIBUTE_META_DATA));
+		attrMeta.addAttribute(attrLabel);
+		attrMeta.addAttribute(attrDescription);
+		runAsSystem(() -> dataService.update(ENTITY_META_DATA, attrMeta));
+
+		//FIXME Hack: metaData of system entities is not updated after update
+		EntityMetaData attrMetaUpdated = dataService.getEntityMetaData(ATTRIBUTE_META_DATA);
+		attrMetaUpdated.addAttribute(attrLabel);
+		attrMetaUpdated.addAttribute(attrDescription);
+	}
+
+	/**
+	 * Add language to attributes
+	 * Create new label and description attributes for the added language
+	 *
+	 * @param languageCode
+	 */
+	private void addLanguageToEntities(String languageCode)
+	{
+		// Add language attributes for entity meta data
+		AttributeMetaData entityLabel = attrMetaFactory.create()
+				.setName(EntityMetaDataMetaData.LABEL + '-' + languageCode)
+				.setNillable(true)
+				.setLabel("Label (" + languageCode + ')');
+		AttributeMetaData entityDescription = attrMetaFactory.create()
+				.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode)
+				.setNillable(true)
+				.setLabel("Description (" + languageCode + ')');
+		dataService.add(ATTRIBUTE_META_DATA, Stream.of(entityLabel, entityDescription));
+
+		EntityMetaData entityMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(ENTITY_META_DATA));
+		entityMeta.addAttribute(entityLabel);
+		entityMeta.addAttribute(entityDescription);
+		runAsSystem(() -> dataService.update(ENTITY_META_DATA, entityMeta));
+	}
+
+	/**
+	 * Add language I18N for attribute meta data
+	 *
+	 * @param languageCode
+	 */
+	private void addLanguageToI18N(String languageCode)
+	{
+		AttributeMetaData languageCodeAttr = attrMetaFactory.create().setName(languageCode).setNillable(true)
+				.setDataType(TEXT);
+		dataService.add(ATTRIBUTE_META_DATA, Stream.of(languageCodeAttr));
+
+		EntityMetaData i18nMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(I18N_STRING));
+		i18nMeta.addAttribute(languageCodeAttr);
+		runAsSystem(() -> dataService.update(ENTITY_META_DATA, i18nMeta));
+
+		//FIXME Hack: metaData of system entities is not updated after update
+		EntityMetaData i18nMetaUpdated = dataService.getEntityMetaData(I18N_STRING);
+		i18nMetaUpdated.addAttribute(languageCodeAttr);
 	}
 
 	@Override
