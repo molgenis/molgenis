@@ -39,8 +39,8 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.transform;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
+import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.springframework.http.HttpStatus.*;
@@ -145,46 +145,48 @@ class RestControllerV2
 	 * Retrieve an entity instance by id, optionally specify which attributes to include in the response.
 	 *
 	 * @param entityName
-	 * @param id
+	 * @param untypedId
 	 * @param attributeFilter
 	 * @return
 	 */
 	@RequestMapping(value = "/{entityName}/{id:.+}", method = GET)
 	@ResponseBody
 	public Map<String, Object> retrieveEntity(@PathVariable("entityName") String entityName,
-			@PathVariable("id") Object id,
+			@PathVariable("id") String untypedId,
 			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
 	{
-		return getEntityResponse(entityName, id, attributeFilter);
+		return getEntityResponse(entityName, untypedId, attributeFilter);
 	}
 
 	/**
 	 * Tunnel retrieveEntity through a POST request
 	 *
 	 * @param entityName
-	 * @param id
+	 * @param untypedId
 	 * @param attributeFilter
 	 * @return
 	 */
 	@RequestMapping(value = "/{entityName}/{id:.+}", method = POST, params = "_method=GET")
 	@ResponseBody
 	public Map<String, Object> retrieveEntityPost(@PathVariable("entityName") String entityName,
-			@PathVariable("id") Object id,
+			@PathVariable("id") String untypedId,
 			@RequestParam(value = "attrs", required = false) AttributeFilter attributeFilter)
 	{
-		return getEntityResponse(entityName, id, attributeFilter);
+		return getEntityResponse(entityName, untypedId, attributeFilter);
 	}
 
-	private Map<String, Object> getEntityResponse(String entityName, Object id, AttributeFilter attributeFilter)
+	private Map<String, Object> getEntityResponse(String entityName, String untypedId, AttributeFilter attributeFilter)
 	{
 		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
+		Object id = getTypedValue(untypedId, entityMeta.getIdAttribute());
+
 		Fetch fetch = AttributeFilterToFetchConverter
 				.convert(attributeFilter, entityMeta, languageService.getCurrentUserLanguageCode());
 
 		Entity entity = dataService.findOneById(entityName, id, fetch);
 		if (entity == null)
 		{
-			throw new UnknownEntityException(entityName + " [" + id + "] not found");
+			throw new UnknownEntityException(entityName + " [" + untypedId + "] not found");
 		}
 
 		return createEntityResponse(entity, fetch, true);
@@ -192,13 +194,10 @@ class RestControllerV2
 
 	@RequestMapping(value = "/{entityName}/{id:.+}", method = DELETE)
 	@ResponseStatus(NO_CONTENT)
-	public void deleteEntity(@PathVariable("entityName") String entityName, @PathVariable("id") Object id)
+	public void deleteEntity(@PathVariable("entityName") String entityName, @PathVariable("id") String untypedId)
 	{
-		AttributeType type = getIdAttributeAttributeType(entityName);
-
-		if (type == INT) id = Integer.valueOf(id.toString());
-		else if (type == STRING) id = id.toString();
-		else if (type == LONG) id = Long.valueOf(id.toString());
+		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
+		Object id = getTypedValue(untypedId, entityMeta.getIdAttribute());
 
 		dataService.deleteById(entityName, id);
 	}
@@ -599,7 +598,7 @@ class RestControllerV2
 		}
 		else
 		{
-			Long count = dataService.count(entityName, new QueryImpl<>(q).setOffset(0).setPageSize(Integer.MAX_VALUE));
+			Long count = dataService.count(entityName, q);
 			Iterable<Entity> it;
 			if (count > 0)
 			{
