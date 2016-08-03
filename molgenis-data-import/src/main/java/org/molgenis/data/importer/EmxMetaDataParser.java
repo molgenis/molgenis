@@ -64,6 +64,21 @@ public class EmxMetaDataParser implements MetaDataParser
 	public static final String EMX_LANGUAGES = "languages";
 	public static final String EMX_I18NSTRINGS = "i18nstrings";
 
+	// Column names in the tag sheet
+	public static final String EMX_TAG_IDENTIFIER = "identifier";
+	public static final String EMX_TAG_OBJECT_IRI = "objectIRI";
+	public static final String EMX_TAG_LABEL = "label";
+	public static final String EMX_TAG_RELATION_LABEL = "relationLabel";
+	public static final String EMX_TAG_CODE_SYSTEM = "codeSystem";
+	public static final String EMX_TAG_RELATION_IRI = "relationIRI";
+
+	// Column names in the package sheet
+	public static final String EMX_PACKAGE_NAME = "name";
+	public static final String EMX_PACKAGE_DESCRIPTION = "description";
+	public static final String EMX_PACKAGE_PARENT = "parent";
+	public static final String EMX_PACKAGE_TAGS = "tags";
+	public static final String EMX_PACKAGE_LABEL = "label";
+
 	public static Map<String, String> EMX_NAME_TO_REPO_NAME_MAP = newHashMap();
 
 	static
