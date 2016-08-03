@@ -185,7 +185,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 		if (null != entityMetaData.getAttribute(requireNonNull(attribute).getName()))
 		{
-			throw new UnknownEntityException(format("Adding attribute operation failed. Attribute already exists [%s]", attribute.getName()));
+			throw new MolgenisDataException(format("Adding attribute operation failed. Attribute already exists [%s]", attribute.getName()));
 		}
 		if (entityMetaData == null)
 		{
