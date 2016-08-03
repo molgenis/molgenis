@@ -451,13 +451,18 @@ public class EntityAttributesValidator
 			case CATEGORICAL:
 			case XREF:
 			case FILE:
-				return entity.getEntity(attributeName).getLabelValue();
+				Entity refEntity = entity.getEntity(attributeName);
+				if (refEntity != null) return refEntity.getIdValue();
+				else return "";
 			case CATEGORICAL_MREF:
 			case MREF:
 				List<String> mrefValues = newArrayList();
 				for (Entity mrefEntity : entity.getEntities(attributeName))
 				{
-					mrefValues.add(mrefEntity.getLabelValue().toString());
+					if (mrefEntity != null)
+					{
+						mrefValues.add(mrefEntity.getIdValue().toString());
+					}
 				}
 				return mrefValues;
 			case COMPOUND:
