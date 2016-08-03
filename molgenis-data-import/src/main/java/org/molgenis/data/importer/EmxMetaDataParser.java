@@ -312,25 +312,41 @@ public class EmxMetaDataParser implements MetaDataParser
 			}
 
 			// Set package tags
-			List<Tag> tags = newArrayList();
-			for (String tagIdentifier : toList(packageEntity.getString(EMX_PACKAGE_TAGS)))
+			List<String> tagIdentifiers = toList(packageEntity.getString(EMX_PACKAGE_TAGS));
+			if (tagIdentifiers != null && !tagIdentifiers.isEmpty())
 			{
-				if (intermediateResults.hasTag(tagIdentifier))
-				{
-					Entity tagEntity = intermediateResults.getTagEntity(tagIdentifier);
-					tags.add(entityToTag(tagIdentifier, tagEntity));
-				}
-				else
-				{
-					throw new IllegalArgumentException("Unknown tag '" + tagIdentifier + "'");
-				}
-
+				package_.setTags(parsePackageTags(intermediateResults, tagIdentifiers));
 			}
-			package_.setTags(tags);
 
 			// Add the complete package to the parse results
 			intermediateResults.addPackage(name, package_);
 		}
+	}
+
+	/**
+	 * Parses the tags column in the package sheet
+	 *
+	 * @param intermediateResults
+	 * @param tagIdentifiers
+	 * @return
+	 */
+	private List<Tag> parsePackageTags(IntermediateParseResults intermediateResults, List<String> tagIdentifiers)
+	{
+		List<Tag> tags = newArrayList();
+		for (String tagIdentifier : tagIdentifiers)
+		{
+			if (intermediateResults.hasTag(tagIdentifier))
+			{
+				Entity tagEntity = intermediateResults.getTagEntity(tagIdentifier);
+				tags.add(entityToTag(tagIdentifier, tagEntity));
+			}
+			else
+			{
+				throw new IllegalArgumentException("Unknown tag '" + tagIdentifier + "'");
+			}
+
+		}
+		return tags;
 	}
 
 	/**
