@@ -72,6 +72,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.Sort.Direction.DESC;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.ontology.controller.SortaServiceController.URI;
 import static org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData.*;
 import static org.molgenis.ontology.sorta.meta.SortaJobExecutionMetaData.SORTA_JOB_EXECUTION;
@@ -548,7 +549,8 @@ public class SortaServiceController extends MolgenisPluginController
 
 	private void createEmptyResultRepository(String jobName, String resultEntityName, EntityMetaData sourceMetaData)
 	{
-		EntityMetaData resultEntityMetaData = EntityMetaData.newInstance(matchingTaskContentEntityMetaData);
+		EntityMetaData resultEntityMetaData = EntityMetaData
+				.newInstance(matchingTaskContentEntityMetaData, DEEP_COPY_ATTRS);
 		resultEntityMetaData.setName(resultEntityName);
 		resultEntityMetaData.setAbstract(false);
 		resultEntityMetaData.addAttribute(attrMetaFactory.create().setName(INPUT_TERM).setDataType(XREF)
