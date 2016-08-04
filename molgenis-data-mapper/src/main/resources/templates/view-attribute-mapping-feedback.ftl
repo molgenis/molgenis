@@ -25,11 +25,22 @@
 											<#list refEntityMetaData.attributes as refAttribute>
 												<#assign refAttributeName = refAttribute.name>
 												<#if (refEntity[refAttributeName])??>
-													${refEntity[refAttributeName]} <#if refAttribute?has_next>=</#if>
+													<#assign value = refEntity[refAttributeName]>
+													<#if value?is_boolean>${value?c}<#else>${value}</#if><#if refAttribute?has_next>=</#if>
 												</#if>
-											</#list> 
+											</#list>
 	    								</td>
 	    							</#if>
+								<#elseif sourceAttribute.dataType == "mref">
+									<#if feedbackRow.sourceEntity.get(sourceAttribute.name)??>
+                                    	<td>
+											<#assign refEntity = feedbackRow.sourceEntity.get(sourceAttribute.name)>
+											<#assign refEntityMetaData = sourceAttribute.refEntity>
+                                            <#list refEntity as entity>
+                                                ${entity.getIdValue()}
+                                            </#list>
+										</td>
+									</#if>
 								<#else>
 									<#if feedbackRow.sourceEntity.getString(sourceAttribute.name)??>
 	    								<td>${feedbackRow.sourceEntity.getString(sourceAttribute.name)?html}</td>
@@ -41,7 +52,12 @@
     						<#if feedbackRow.value??>
     							<#if feedbackRow.value?is_date_like>
     								<td>${feedbackRow.value?datetime}</td>
-    							<#else>
+    							<#elseif feedbackRow.value?is_sequence>
+									<td><#list feedbackRow.value as value>
+									    ${value}
+									</#list>
+								</td>
+								<#else>
     								<td>${feedbackRow.value?html}</td>
     							</#if>
     						<#else>	
