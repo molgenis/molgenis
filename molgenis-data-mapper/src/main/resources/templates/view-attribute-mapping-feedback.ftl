@@ -24,7 +24,9 @@
 	    									<#assign refEntityMetaData = sourceAttribute.refEntity>
 											<#list refEntityMetaData.attributes as refAttribute>
 												<#assign refAttributeName = refAttribute.name>
-												${refEntity[refAttributeName]} <#if refEntityMetaData.attributes?seq_index_of(refAttribute) != refEntityMetaData.attributes?size - 1>=</#if>
+												<#if (refEntity[refAttributeName])??>
+													${refEntity[refAttributeName]} <#if refAttribute?has_next>=</#if>
+												</#if>
 											</#list> 
 	    								</td>
 	    							</#if>
