@@ -1,6 +1,6 @@
 package org.molgenis.data.meta.model;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
+import com.google.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
