@@ -9,7 +9,9 @@ import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.reindex.meta.IndexPackage.PACKAGE_INDEX;
+import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
 public class GavinJobExecutionMetaData extends SystemEntityMetaData
@@ -17,7 +19,8 @@ public class GavinJobExecutionMetaData extends SystemEntityMetaData
 	private final JobExecutionMetaData jobExecutionMetaData;
 	AttributeMetaDataFactory attributeMetaDataFactory;
 
-	public static final String GAVIN_JOB_EXECUTION = "GavinJobExecution";
+	private static final String SIMPLE_NAME = "GavinJobExecution";
+	public static final String GAVIN_JOB_EXECUTION = PACKAGE_INDEX + PACKAGE_SEPARATOR + SIMPLE_NAME;
 	public static final String FILENAME = "filename";
 
 	private final IndexPackage indexPackage;
@@ -26,7 +29,7 @@ public class GavinJobExecutionMetaData extends SystemEntityMetaData
 	public GavinJobExecutionMetaData(IndexPackage indexPackage, JobExecutionMetaData jobExecutionMetaData,
 			AttributeMetaDataFactory attributeMetaDataFactory)
 	{
-		super(GAVIN_JOB_EXECUTION, PACKAGE_INDEX);
+		super(SIMPLE_NAME, PACKAGE_INDEX);
 		this.indexPackage = requireNonNull(indexPackage);
 		this.jobExecutionMetaData = requireNonNull(jobExecutionMetaData);
 		this.attributeMetaDataFactory = requireNonNull(attributeMetaDataFactory);

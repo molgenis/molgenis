@@ -23,7 +23,6 @@ import java.util.List;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.of;
-import static org.molgenis.gavin.job.meta.GavinJobExecutionMetaData.GAVIN_JOB_EXECUTION;
 
 @Component
 public class GavinJobFactory
@@ -65,7 +64,7 @@ public class GavinJobFactory
 	@RunAsSystem
 	public GavinJob createJob(GavinJobExecution gavinJobExecution)
 	{
-		dataService.add(GAVIN_JOB_EXECUTION, gavinJobExecution);
+		dataService.add(gavinJobExecution.getEntityMetaData().getName(), gavinJobExecution);
 		String username = gavinJobExecution.getUser();
 
 		// create an authentication to run as the user that is listed as the owner of the job
