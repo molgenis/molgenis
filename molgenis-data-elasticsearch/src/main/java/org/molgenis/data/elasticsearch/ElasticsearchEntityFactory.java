@@ -64,6 +64,7 @@ public class ElasticsearchEntityFactory
 	{
 		for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
 		{
+			generator.writeFieldName(attr.getName());
 			createRec(entity, attr, generator, depth, maxDepth);
 		}
 	}
@@ -73,8 +74,6 @@ public class ElasticsearchEntityFactory
 	{
 		String attrName = attr.getName();
 		AttributeType attrType = attr.getDataType();
-
-		generator.writeFieldName(attrName);
 
 		switch (attrType)
 		{
@@ -170,17 +169,17 @@ public class ElasticsearchEntityFactory
 				Entity xrefEntity = entity.getEntity(attrName);
 				if (xrefEntity != null)
 				{
-					generator.writeStartObject();
 					if (depth < maxDepth)
 					{
+						generator.writeStartObject();
 						createRec(xrefEntity, generator, depth + 1, maxDepth);
+						generator.writeEndObject();
 					}
 					else
 					{
 						AttributeMetaData xrefIdAttr = xrefEntity.getEntityMetaData().getIdAttribute();
 						createRec(xrefEntity, xrefIdAttr, generator, depth + 1, maxDepth);
 					}
-					generator.writeEndObject();
 				}
 				else
 				{
@@ -197,17 +196,17 @@ public class ElasticsearchEntityFactory
 					generator.writeStartArray();
 					for (Entity mrefEntity : mrefEntities)
 					{
-						generator.writeStartObject();
 						if (depth < maxDepth)
 						{
+							generator.writeStartObject();
 							createRec(mrefEntity, generator, depth + 1, maxDepth);
+							generator.writeEndObject();
 						}
 						else
 						{
 							AttributeMetaData mrefIdAttr = mrefEntity.getEntityMetaData().getIdAttribute();
 							createRec(mrefEntity, mrefIdAttr, generator, depth + 1, maxDepth);
 						}
-						generator.writeEndObject();
 					}
 					generator.writeEndArray();
 				}
