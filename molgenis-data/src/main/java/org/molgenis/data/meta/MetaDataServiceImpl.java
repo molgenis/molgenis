@@ -277,10 +277,8 @@ public class MetaDataServiceImpl implements MetaDataService
 		{
 			throw new UnknownEntityException(format("Unknown entity [%s]", entityMeta.getName()));
 		}
-
-		// FIXME please check if true: add/update attributes, attributes are deleted when deleting entity meta data if no more references exist
+		
 		Iterable<AttributeMetaData> compoundOrderedAttributes = entityMeta.getCompoundOrderedAttributes();
-
 		compoundOrderedAttributes.forEach(attr -> {
 			if (attr.getIdentifier() == null)
 			{
