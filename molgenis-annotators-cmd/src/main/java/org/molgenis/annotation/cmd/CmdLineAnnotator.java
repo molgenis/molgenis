@@ -330,12 +330,11 @@ public class CmdLineAnnotator
 			if (annotator instanceof EffectsAnnotator)
 			{
 
-				entitiesToAnnotate = vcfUtils
-						.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT,
+				entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT,
 						StreamSupport.stream(vcfRepo.spliterator(), false));
 
 				// Add metadata to repository that will be annotated, instead of repository with variants
-				for(Entity entity : entitiesToAnnotate)
+				for (Entity entity : entitiesToAnnotate)
 				{
 					entity.getEntityMetaData().addAttributes(annotator.getOutputAttributes());
 				}
@@ -367,7 +366,6 @@ public class CmdLineAnnotator
 			{
 				throw new CmdLineAnnotationException(ae);
 			}
-
 
 		}
 		if (validate)

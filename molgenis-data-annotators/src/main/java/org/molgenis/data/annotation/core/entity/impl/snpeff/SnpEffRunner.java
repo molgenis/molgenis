@@ -7,7 +7,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
-import org.molgenis.data.annotation.core.exception.AnnotationException;
 import org.molgenis.data.annotation.core.utils.JarRunner;
 import org.molgenis.data.annotation.web.settings.SnpEffAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -267,7 +266,6 @@ public class SnpEffRunner
 			bw.write(VcfAttributes.CHROM + "\t" + VcfAttributes.POS + "\t" + VcfAttributes.ID + "\t" + VcfAttributes.REF
 					+ "\t" + VcfAttributes.ALT + "\t" + VcfAttributes.QUAL + "\t" + VcfAttributes.FILTER + "\t"
 					+ VcfAttributes.INFO + "\n");
-
 			while (source.hasNext())
 			{
 				Entity entity = source.next();
