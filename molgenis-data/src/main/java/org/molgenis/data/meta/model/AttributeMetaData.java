@@ -1,13 +1,12 @@
 package org.molgenis.data.meta.model;
 
-import com.google.common.collect.Maps;
+import autovalue.shaded.com.google.common.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.support.StaticEntity;
 
 import java.util.List;
-import java.util.Map;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
@@ -21,6 +20,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.*;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
 
 /**
@@ -60,46 +60,21 @@ public class AttributeMetaData extends StaticEntity
 	}
 
 	/**
-	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #AttributeMetaData(EntityMetaData)})
+	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to
+	 * {@link #AttributeMetaData(EntityMetaData)}). Creates a copy of attribute with a shallow copy of referenced
+	 * entity and tags.
 	 *
-	 * @param attrMeta attribute
+	 * @param attrMeta     attribute
+	 * @param attrCopyMode attribute copy mode that defines whether to deep-copy or shallow-copy attribute parts
 	 * @return deep copy of attribute
 	 */
-	public static AttributeMetaData newInstance(AttributeMetaData attrMeta)
+	public static AttributeMetaData newInstance(AttributeMetaData attrMeta, AttributeCopyMode attrCopyMode)
 	{
-		return newInstance(attrMeta, Maps.newConcurrentMap());
-	}
-
-	/**
-	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #AttributeMetaData(EntityMetaData)})
-	 *
-	 * @param attrMeta attribute
-	 * @return deep copy of attribute
-	 */
-	static AttributeMetaData newInstance(AttributeMetaData attrMeta, Map<String, StaticEntity> copied)
-	{
-		if(null == attrMeta) {
-			return null;
-		}
-
-		requireNonNull(attrMeta.getName());
-
-		if(copied.containsKey(attrMeta.getName()))
-		{
-			return (AttributeMetaData) copied.get(attrMeta.getName());
-		}
-
-		EntityMetaData entityMeta = attrMeta.getEntityMetaData();
-		AttributeMetaData attrMetaCopy = new AttributeMetaData(entityMeta);
+		AttributeMetaData attrMetaCopy = new AttributeMetaData(attrMeta.getEntityMetaData()); // do not deep-copy
 		attrMetaCopy.setIdentifier(attrMeta.getIdentifier());
 		attrMetaCopy.setName(attrMeta.getName());
-
-		// Put the copy into the copied registry
-		copied.put(attrMetaCopy.getName(), attrMetaCopy);
-
 		attrMetaCopy.setDataType(attrMeta.getDataType());
-		EntityMetaData refEntity = attrMeta.getRefEntity();
-		attrMetaCopy.setRefEntity(EntityMetaData.newInstance(refEntity, copied));
+		attrMetaCopy.setRefEntity(attrMeta.getRefEntity()); // do not deep-copy
 		attrMetaCopy.setExpression(attrMeta.getExpression());
 		attrMetaCopy.setNillable(attrMeta.isNillable());
 		attrMetaCopy.setAuto(attrMeta.isAuto());
@@ -111,12 +86,18 @@ public class AttributeMetaData extends StaticEntity
 		attrMetaCopy.setRangeMax(attrMeta.getRangeMax());
 		attrMetaCopy.setReadOnly(attrMeta.isReadOnly());
 		attrMetaCopy.setUnique(attrMeta.isUnique());
-		Iterable<AttributeMetaData> attrParts = attrMeta.getAttributeParts();
-		attrMetaCopy.setAttributeParts(
-				stream(attrParts.spliterator(), false).map(e -> newInstance(e, copied))
-						.collect(toList()));
-		Iterable<Tag> tags = attrMeta.getTags();
-		attrMetaCopy.setTags(stream(tags.spliterator(), false).map(Tag::newInstance).collect(toList()));
+		if (attrCopyMode == DEEP_COPY_ATTRS)
+		{
+			attrMetaCopy.setAttributeParts(stream(attrMeta.getAttributeParts().spliterator(), false)
+					.map(attr -> AttributeMetaData.newInstance(attr, attrCopyMode))
+					.map(attrCopy -> attrCopy.setIdentifier(null)).collect(toList()));
+		}
+		else
+		{
+			attrMetaCopy.setAttributeParts(Lists.newArrayList(attrMeta.getAttributeParts()));
+		}
+
+		attrMetaCopy.setTags(Lists.newArrayList(attrMeta.getTags())); // do not deep-copy
 		attrMetaCopy.setVisibleExpression(attrMeta.getVisibleExpression());
 		attrMetaCopy.setDefaultValue(attrMeta.getDefaultValue());
 		return attrMetaCopy;

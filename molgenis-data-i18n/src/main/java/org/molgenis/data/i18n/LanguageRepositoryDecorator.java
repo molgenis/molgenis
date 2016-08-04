@@ -5,7 +5,6 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageMetaData;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -24,6 +23,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.*;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.SHALLOW_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
@@ -176,7 +176,7 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 		AttributeMetaData attrLanguageCode = i18nStringMeta.getAttribute(languageCode);
 
 		EntityMetaData i18nMeta = EntityMetaData
-				.newInstance(dataService.getEntityMetaData(I18nStringMetaData.I18N_STRING));
+				.newInstance(dataService.getEntityMetaData(I18nStringMetaData.I18N_STRING), SHALLOW_COPY_ATTRS);
 		i18nMeta.removeAttribute(attrLanguageCode);
 
 		runAsSystem(() -> dataService.update(ENTITY_META_DATA, i18nMeta));
@@ -189,7 +189,8 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 		AttributeMetaData entityLabel = entityMetaMeta.getAttribute(LABEL + '-' + languageCode);
 		AttributeMetaData entityDescription = entityMetaMeta.getAttribute(DESCRIPTION + '-' + languageCode);
 
-		EntityMetaData entityMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(ENTITY_META_DATA));
+		EntityMetaData entityMeta = EntityMetaData
+				.newInstance(dataService.getEntityMetaData(ENTITY_META_DATA), SHALLOW_COPY_ATTRS);
 		entityMeta.removeAttribute(entityLabel);
 		entityMeta.removeAttribute(entityDescription);
 
@@ -205,7 +206,8 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 		AttributeMetaData attrLabel = attrMetaMeta.getAttribute(LABEL + '-' + languageCode);
 		AttributeMetaData attrDescription = attrMetaMeta.getAttribute(DESCRIPTION + '-' + languageCode);
 
-		EntityMetaData attrMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(ATTRIBUTE_META_DATA));
+		EntityMetaData attrMeta = EntityMetaData
+				.newInstance(dataService.getEntityMetaData(ATTRIBUTE_META_DATA), SHALLOW_COPY_ATTRS);
 		attrMeta.removeAttribute(attrLabel);
 		attrMeta.removeAttribute(attrDescription);
 
@@ -266,17 +268,14 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	private void addLanguageToAttributes(String languageCode)
 	{
 		// Add language attributes for attribute meta data
-		AttributeMetaData attrLabel = attrMetaFactory.create()
-				.setName(LABEL + '-' + languageCode)
-				.setNillable(true)
+		AttributeMetaData attrLabel = attrMetaFactory.create().setName(LABEL + '-' + languageCode).setNillable(true)
 				.setLabel("Label (" + languageCode + ')');
-		AttributeMetaData attrDescription = attrMetaFactory.create()
-				.setName(DESCRIPTION + '-' + languageCode)
-				.setNillable(true)
-				.setLabel("Description (" + languageCode + ')');
+		AttributeMetaData attrDescription = attrMetaFactory.create().setName(DESCRIPTION + '-' + languageCode)
+				.setNillable(true).setLabel("Description (" + languageCode + ')');
 		dataService.add(ATTRIBUTE_META_DATA, Stream.of(attrLabel, attrDescription));
 
-		EntityMetaData attrMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(ATTRIBUTE_META_DATA));
+		EntityMetaData attrMeta = EntityMetaData
+				.newInstance(dataService.getEntityMetaData(ATTRIBUTE_META_DATA), SHALLOW_COPY_ATTRS);
 		attrMeta.addAttribute(attrLabel);
 		attrMeta.addAttribute(attrDescription);
 		runAsSystem(() -> dataService.update(ENTITY_META_DATA, attrMeta));
@@ -297,16 +296,15 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	{
 		// Add language attributes for entity meta data
 		AttributeMetaData entityLabel = attrMetaFactory.create()
-				.setName(EntityMetaDataMetaData.LABEL + '-' + languageCode)
-				.setNillable(true)
+				.setName(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true)
 				.setLabel("Label (" + languageCode + ')');
 		AttributeMetaData entityDescription = attrMetaFactory.create()
-				.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode)
-				.setNillable(true)
+				.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true)
 				.setLabel("Description (" + languageCode + ')');
 		dataService.add(ATTRIBUTE_META_DATA, Stream.of(entityLabel, entityDescription));
 
-		EntityMetaData entityMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(ENTITY_META_DATA));
+		EntityMetaData entityMeta = EntityMetaData
+				.newInstance(dataService.getEntityMetaData(ENTITY_META_DATA), SHALLOW_COPY_ATTRS);
 		entityMeta.addAttribute(entityLabel);
 		entityMeta.addAttribute(entityDescription);
 		runAsSystem(() -> dataService.update(ENTITY_META_DATA, entityMeta));
@@ -323,7 +321,8 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 				.setDataType(TEXT);
 		dataService.add(ATTRIBUTE_META_DATA, Stream.of(languageCodeAttr));
 
-		EntityMetaData i18nMeta = EntityMetaData.newInstance(dataService.getEntityMetaData(I18N_STRING));
+		EntityMetaData i18nMeta = EntityMetaData
+				.newInstance(dataService.getEntityMetaData(I18N_STRING), SHALLOW_COPY_ATTRS);
 		i18nMeta.addAttribute(languageCodeAttr);
 		runAsSystem(() -> dataService.update(ENTITY_META_DATA, i18nMeta));
 
@@ -336,7 +335,8 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	public Integer add(Stream<Language> entities)
 	{
 		AtomicInteger count = new AtomicInteger();
-		entities.forEach(entity -> {
+		entities.forEach(entity ->
+		{
 			add(entity); // FIXME inefficient, apply filter to stream
 			count.incrementAndGet();
 		});
