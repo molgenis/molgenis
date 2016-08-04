@@ -33,7 +33,8 @@ public class EntitySelfXrefTestHarness
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
 
-	private Package testPackage;
+	@Autowired
+	private TestPackage testPackage;
 
 	@PostConstruct
 	public void postConstruct()
@@ -44,7 +45,7 @@ public class EntitySelfXrefTestHarness
 	{
 		return entityMetaDataFactory.create().setPackage(testPackage).setSimpleName("SelfRef")
 				.addAttribute(createAttribute(ATTR_ID, STRING), ROLE_ID)
-				.addAttribute(createAttribute(ATTR_XREF, XREF), null)
+				.addAttribute(createAttribute(ATTR_XREF, XREF))
 				.addAttribute(createAttribute(ATTR_STRING, STRING), ROLE_LABEL);
 	}
 

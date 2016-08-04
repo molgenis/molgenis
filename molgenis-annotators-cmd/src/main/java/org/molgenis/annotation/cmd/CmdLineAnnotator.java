@@ -324,11 +324,18 @@ public class CmdLineAnnotator
 				}
 			}
 			Iterable<Entity> entitiesToAnnotate;
+
+			AnnotatorUtils
+					.addAnnotatorMetadataToRepositories(vcfRepo.getEntityMetaData(), annotator.getOutputAttributes());
 			if (annotator instanceof EffectsAnnotator)
 			{
-				entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT,
+
+				entitiesToAnnotate = vcfUtils
+						.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT,
 						StreamSupport.stream(vcfRepo.spliterator(), false));
-				for (Entity entity : entitiesToAnnotate)
+
+				// Add metadata to repository that will be annotated, instead of repository with variants
+				for(Entity entity : entitiesToAnnotate)
 				{
 					entity.getEntityMetaData().addAttributes(annotator.getOutputAttributes());
 				}

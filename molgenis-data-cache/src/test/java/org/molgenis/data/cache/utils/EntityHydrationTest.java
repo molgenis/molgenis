@@ -6,6 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.test.data.EntityTestHarness;
 import org.molgenis.util.EntityUtils;
@@ -86,7 +87,7 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 
 		// mock entity manager
 		EntityManager entityManager = when(mock(EntityManager.class).create(entityMetaData))
-				.thenReturn(new DynamicEntity(entityMetaData)).getMock();
+				.thenReturn(new EntityWithComputedAttributes(new DynamicEntity(entityMetaData))).getMock();
 		when(entityManager.getReference(entityMetaDataArgumentCaptor.capture(), eq("0")))
 				.thenReturn(refEntities.get(0));
 		when(entityManager.getReferences(entityMetaDataArgumentCaptor.capture(), eq(newArrayList("0"))))

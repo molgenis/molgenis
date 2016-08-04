@@ -5,6 +5,8 @@ import com.google.common.collect.TreeTraverser;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +25,7 @@ import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.molgenis.auth.AuthorityMetaData.ROLE;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
@@ -30,21 +33,26 @@ import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.TagMetaData.TAG;
+import static org.molgenis.security.core.Permission.COUNT;
+import static org.molgenis.security.core.Permission.READ;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserisSystem;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
 public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaData>
 {
 	private final Repository<EntityMetaData> decoratedRepo;
-	private final SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
 	private final DataService dataService;
+	private final SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
+	private final MolgenisPermissionService permissionService;
 
 	public EntityMetaDataRepositoryDecorator(Repository<EntityMetaData> decoratedRepo, DataService dataService,
-			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry)
+			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, MolgenisPermissionService permissionService)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.dataService = requireNonNull(dataService);
 		this.systemEntityMetaDataRegistry = requireNonNull(systemEntityMetaDataRegistry);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@Override
@@ -80,7 +88,15 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 	@Override
 	public long count()
 	{
-		return decoratedRepo.count();
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.count();
+		}
+		else
+		{
+			Stream<EntityMetaData> entityMetaDatas = StreamSupport.stream(decoratedRepo.spliterator(), false);
+			return filterCountPermission(entityMetaDatas).count();
+		}
 	}
 
 	@Override
@@ -92,61 +108,148 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 	@Override
 	public long count(Query<EntityMetaData> q)
 	{
-		return decoratedRepo.count(q);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.count(q);
+		}
+		else
+		{
+			// ignore query offset and page size
+			Stream<EntityMetaData> entityMetaDatas = decoratedRepo.findAll(q);
+			return filterCountPermission(entityMetaDatas).count();
+		}
 	}
 
 	@Override
 	public Stream<EntityMetaData> findAll(Query<EntityMetaData> q)
 	{
-		return decoratedRepo.findAll(q);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.findAll(q);
+		}
+		else
+		{
+			Query<EntityMetaData> qWithoutLimitOffset = new QueryImpl<>(q);
+			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
+			Stream<EntityMetaData> entityMetaDatas = decoratedRepo.findAll(qWithoutLimitOffset);
+			Stream<EntityMetaData> filteredEntityMetaDatas = filterReadPermission(entityMetaDatas);
+			if (q.getOffset() > 0)
+			{
+				filteredEntityMetaDatas = filteredEntityMetaDatas.skip(q.getOffset());
+			}
+			if (q.getPageSize() > 0)
+			{
+				filteredEntityMetaDatas = filteredEntityMetaDatas.limit(q.getPageSize());
+			}
+			return filteredEntityMetaDatas;
+		}
 	}
 
 	@Override
 	public Iterator<EntityMetaData> iterator()
 	{
-		return decoratedRepo.iterator();
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.iterator();
+		}
+		else
+		{
+			Stream<EntityMetaData> entityMetaDataStream = StreamSupport.stream(decoratedRepo.spliterator(), false);
+			return filterReadPermission(entityMetaDataStream).iterator();
+		}
 	}
 
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<EntityMetaData>> consumer, int batchSize)
 	{
-		decoratedRepo.forEachBatched(fetch, consumer, batchSize);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			decoratedRepo.forEachBatched(fetch, consumer, batchSize);
+		}
+		else
+		{
+			FilteredConsumer filteredConsumer = new FilteredConsumer(consumer, permissionService);
+			decoratedRepo.forEachBatched(fetch, filteredConsumer::filter, batchSize);
+		}
 	}
 
 	@Override
 	public EntityMetaData findOne(Query<EntityMetaData> q)
 	{
-		return decoratedRepo.findOne(q);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.findOne(q);
+		}
+		else
+		{
+			// ignore query offset and page size
+			return filterReadPermission(decoratedRepo.findOne(q));
+		}
 	}
 
 	@Override
 	public EntityMetaData findOneById(Object id)
 	{
-		return decoratedRepo.findOneById(id);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.findOneById(id);
+		}
+		else
+		{
+			return filterReadPermission(decoratedRepo.findOneById(id));
+		}
 	}
 
 	@Override
 	public EntityMetaData findOneById(Object id, Fetch fetch)
 	{
-		return decoratedRepo.findOneById(id, fetch);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.findOneById(id, fetch);
+		}
+		else
+		{
+			return filterReadPermission(decoratedRepo.findOneById(id, fetch));
+		}
 	}
 
 	@Override
 	public Stream<EntityMetaData> findAll(Stream<Object> ids)
 	{
-		return decoratedRepo.findAll(ids);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.findAll(ids);
+		}
+		else
+		{
+			return filterReadPermission(decoratedRepo.findAll(ids));
+		}
 	}
 
 	@Override
 	public Stream<EntityMetaData> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		return decoratedRepo.findAll(ids, fetch);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.findAll(ids, fetch);
+		}
+		else
+		{
+			return filterReadPermission(decoratedRepo.findAll(ids, fetch));
+		}
 	}
 
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		return decoratedRepo.aggregate(aggregateQuery);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.aggregate(aggregateQuery);
+		}
+		else
+		{
+			throw new MolgenisDataAccessException(format("Aggregation on entity [%s] not allowed", getName()));
+		}
 	}
 
 	@Transactional
@@ -221,24 +324,6 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 			return true;
 		}).forEach(this::addEntityMetaData);
 		return count.get();
-	}
-
-	@Override
-	public void flush()
-	{
-		decoratedRepo.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		decoratedRepo.clearCache();
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		decoratedRepo.rebuildIndex();
 	}
 
 	private void addEntityMetaData(EntityMetaData entityMetaData)
@@ -443,10 +528,54 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 
 	private static class AttributeMetaDataTreeTraverser extends TreeTraverser<AttributeMetaData>
 	{
+
 		@Override
 		public Iterable<AttributeMetaData> children(@Nonnull AttributeMetaData attr)
 		{
 			return attr.getAttributeParts();
 		}
+
+	}
+
+	private EntityMetaData filterReadPermission(EntityMetaData entityMeta)
+	{
+		return entityMeta != null ? filterReadPermission(Stream.of(entityMeta)).findFirst().orElse(null) : null;
+	}
+
+	private Stream<EntityMetaData> filterReadPermission(Stream<EntityMetaData> entityMetaDataStream)
+	{
+		return filterPermission(entityMetaDataStream, READ);
+	}
+
+	private Stream<EntityMetaData> filterCountPermission(Stream<EntityMetaData> entityMetaDataStream)
+	{
+		return filterPermission(entityMetaDataStream, COUNT);
+	}
+
+	private Stream<EntityMetaData> filterPermission(Stream<EntityMetaData> entityMetaDataStream, Permission permission)
+	{
+		return entityMetaDataStream
+				.filter(entityMeta -> permissionService.hasPermissionOnEntity(entityMeta.getName(), permission));
+	}
+
+	private static class FilteredConsumer
+	{
+		private final Consumer<List<EntityMetaData>> consumer;
+		private final MolgenisPermissionService permissionService;
+
+		FilteredConsumer(Consumer<List<EntityMetaData>> consumer, MolgenisPermissionService permissionService)
+		{
+			this.consumer = requireNonNull(consumer);
+			this.permissionService = requireNonNull(permissionService);
+		}
+
+		public void filter(List<EntityMetaData> entityMetas)
+		{
+			List<EntityMetaData> filteredEntityMetas = entityMetas.stream()
+					.filter(entityMeta -> permissionService.hasPermissionOnEntity(entityMeta.getName(), READ))
+					.collect(toList());
+			consumer.accept(filteredEntityMetas);
+		}
+
 	}
 }

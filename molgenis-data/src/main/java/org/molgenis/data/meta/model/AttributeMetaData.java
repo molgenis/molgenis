@@ -1,11 +1,13 @@
 package org.molgenis.data.meta.model;
 
+import com.google.common.collect.Maps;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.support.StaticEntity;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
@@ -26,6 +28,8 @@ import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeN
  */
 public class AttributeMetaData extends StaticEntity
 {
+	private transient AttributeType cachedDataType;
+
 	public AttributeMetaData(Entity entity)
 	{
 		super(entity);
@@ -63,13 +67,39 @@ public class AttributeMetaData extends StaticEntity
 	 */
 	public static AttributeMetaData newInstance(AttributeMetaData attrMeta)
 	{
+		return newInstance(attrMeta, Maps.newConcurrentMap());
+	}
+
+	/**
+	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #AttributeMetaData(EntityMetaData)})
+	 *
+	 * @param attrMeta attribute
+	 * @return deep copy of attribute
+	 */
+	static AttributeMetaData newInstance(AttributeMetaData attrMeta, Map<String, StaticEntity> copied)
+	{
+		if(null == attrMeta) {
+			return null;
+		}
+
+		requireNonNull(attrMeta.getName());
+
+		if(copied.containsKey(attrMeta.getName()))
+		{
+			return (AttributeMetaData) copied.get(attrMeta.getName());
+		}
+
 		EntityMetaData entityMeta = attrMeta.getEntityMetaData();
 		AttributeMetaData attrMetaCopy = new AttributeMetaData(entityMeta);
 		attrMetaCopy.setIdentifier(attrMeta.getIdentifier());
 		attrMetaCopy.setName(attrMeta.getName());
+
+		// Put the copy into the copied registry
+		copied.put(attrMetaCopy.getName(), attrMetaCopy);
+
 		attrMetaCopy.setDataType(attrMeta.getDataType());
 		EntityMetaData refEntity = attrMeta.getRefEntity();
-		attrMetaCopy.setRefEntity(refEntity != null ? EntityMetaData.newInstance(refEntity) : null);
+		attrMetaCopy.setRefEntity(EntityMetaData.newInstance(refEntity, copied));
 		attrMetaCopy.setExpression(attrMeta.getExpression());
 		attrMetaCopy.setNillable(attrMeta.isNillable());
 		attrMetaCopy.setAuto(attrMeta.isAuto());
@@ -83,7 +113,8 @@ public class AttributeMetaData extends StaticEntity
 		attrMetaCopy.setUnique(attrMeta.isUnique());
 		Iterable<AttributeMetaData> attrParts = attrMeta.getAttributeParts();
 		attrMetaCopy.setAttributeParts(
-				stream(attrParts.spliterator(), false).map(AttributeMetaData::newInstance).collect(toList()));
+				stream(attrParts.spliterator(), false).map(e -> newInstance(e, copied))
+						.collect(toList()));
 		Iterable<Tag> tags = attrMeta.getTags();
 		attrMetaCopy.setTags(stream(tags.spliterator(), false).map(Tag::newInstance).collect(toList()));
 		attrMetaCopy.setVisibleExpression(attrMeta.getVisibleExpression());
@@ -192,12 +223,13 @@ public class AttributeMetaData extends StaticEntity
 	 */
 	public AttributeType getDataType()
 	{
-		String dataTypeStr = getString(DATA_TYPE);
-		return dataTypeStr != null ? AttributeType.toEnum(dataTypeStr) : null;
+		return getCachedDataType();
 	}
 
 	public AttributeMetaData setDataType(AttributeType dataType)
 	{
+		invalidateCachedDataType();
+
 		set(DATA_TYPE, AttributeType.getValueString(dataType));
 		return this;
 	}
@@ -533,5 +565,20 @@ public class AttributeMetaData extends StaticEntity
 	private static String toEnumOptionsString(List<String> enumOptions)
 	{
 		return !enumOptions.isEmpty() ? enumOptions.stream().collect(joining(",")) : null;
+	}
+
+	private AttributeType getCachedDataType()
+	{
+		if (cachedDataType == null)
+		{
+			String dataTypeStr = getString(DATA_TYPE);
+			cachedDataType = dataTypeStr != null ? AttributeType.toEnum(dataTypeStr) : null;
+		}
+		return cachedDataType;
+	}
+
+	private void invalidateCachedDataType()
+	{
+		cachedDataType = null;
 	}
 }

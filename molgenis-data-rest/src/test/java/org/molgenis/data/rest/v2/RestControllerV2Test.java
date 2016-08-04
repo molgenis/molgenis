@@ -882,10 +882,9 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	@Test
 	public void testUpdateEntitiesSpecificAttributeExceptions8() throws Exception
 	{
-
 		this.testUpdateEntitiesSpecificAttributeExceptions("entity", "email",
-				"{entities:[{id:4,email:'test@email.com'}]}",
-				RestControllerV2.createUnknownEntityExceptionNotValidId("4.0").getMessage());
+				"{\"entities\":[{\"id\":\"4\",\"email\":\"test@email.com\"}]}",
+				RestControllerV2.createUnknownEntityExceptionNotValidId("4").getMessage());
 	}
 
 	private void testCreateEntitiesExceptions(String entityName, String content, String message) throws Exception

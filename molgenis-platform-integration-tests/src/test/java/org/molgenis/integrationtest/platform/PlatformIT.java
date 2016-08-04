@@ -5,10 +5,20 @@ import org.molgenis.data.*;
 import org.molgenis.data.cache.l2.L2Cache;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
+import org.molgenis.data.i18n.I18nUtils;
+import org.molgenis.data.i18n.LanguageService;
+import org.molgenis.data.i18n.model.I18nStringMetaData;
+import org.molgenis.data.i18n.model.Language;
+import org.molgenis.data.i18n.model.LanguageFactory;
+import org.molgenis.data.i18n.model.LanguageMetaData;
 import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.test.data.EntitySelfXrefTestHarness;
@@ -27,7 +37,11 @@ import org.testng.annotations.*;
 
 import java.io.File;
 import java.io.IOException;
+
+import java.util.ArrayList;
+
 import java.text.ParseException;
+
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -43,11 +57,15 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.molgenis.data.RepositoryCapability.*;
+import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
 public class PlatformIT extends AbstractTestNGSpringContextTests
@@ -78,6 +96,18 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private EntityListenersService entityListenersService;
 	@Autowired
 	private L2Cache l2Cache;
+	@Autowired
+	private LanguageFactory languageFactory;
+	@Autowired
+	private LanguageService languageService;
+	@Autowired
+	private I18nStringMetaData i18nStringMetaData;
+	@Autowired
+	private LanguageMetaData languageMetaData;
+	@Autowired
+	private EntityMetaDataMetaData entityMetaDataMetaData;
+	@Autowired
+	private AttributeMetaDataMetaData attributeMetaDataMetaData;
 
 	/**
 	 * Wait till the whole index is stable. Reindex job is done a-synchronized.
@@ -115,27 +145,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@AfterClass
-	public void cleanUp() throws InterruptedException
-	{
-		// Give asyncTransactionLog time to stop gracefully
-		TimeUnit.SECONDS.sleep(1);
-
-		applicationContext.close();
-		SecurityContextHolder.getContext().setAuthentication(null);
-
-		try
-		{
-			// Delete molgenis home folder
-			FileUtils.deleteDirectory(new File(System.getProperty("molgenis.home")));
-		}
-		catch (IOException e)
-		{
-			LOG.error("Error removing molgenis home directory", e);
-		}
-		l2Cache.logStatistics();
-	}
-
 	@BeforeClass
 	public void setUp()
 	{
@@ -148,14 +157,14 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		selfXrefEntityMetaData = entitySelfXrefTestHarness.createDynamicEntityMetaData();
 		selfXrefEntityMetaData.getAttribute(ATTR_XREF).setRefEntity(selfXrefEntityMetaData);
 
-		RunAsSystemProxy.runAsSystem(() ->
-		{
+		RunAsSystemProxy.runAsSystem(() -> {
 			metaDataService.addEntityMeta(refEntityMetaDataDynamic);
 			metaDataService.addEntityMeta(entityMetaDataDynamic);
 			metaDataService.addEntityMeta(selfXrefEntityMetaData);
 		});
-		waitForWorkToBeFinished(reindexService, LOG);
 		setAuthentication();
+		createLanguages();
+		waitForWorkToBeFinished(reindexService, LOG);
 	}
 
 	private void setAuthentication()
@@ -184,20 +193,93 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		String readSelfXrefEntity = "ROLE_ENTITY_READ_" + selfXrefEntityMetaData.getName().toUpperCase();
 		String countSelfXrefEntity = "ROLE_ENTITY_COUNT_" + selfXrefEntityMetaData.getName().toUpperCase();
 
+		// Permissions languageMetaData
+		String writeLanguageMetaData = "ROLE_ENTITY_WRITE_" + languageMetaData.getName().toUpperCase();
+		String readLanguageMetaData = "ROLE_ENTITY_READ_" + languageMetaData.getName().toUpperCase();
+		String countLanguageMetaData = "ROLE_ENTITY_COUNT_" + languageMetaData.getName().toUpperCase();
+
+		// Permissions attributeMetaDataMetaData
+		String writeAttributeMetaDataMetaData =
+				"ROLE_ENTITY_WRITE_" + attributeMetaDataMetaData.getName().toUpperCase();
+		String readAttributeMetaDataMetaData = "ROLE_ENTITY_READ_" + attributeMetaDataMetaData.getName().toUpperCase();
+		String countAttributeMetaDataMetaData =
+				"ROLE_ENTITY_COUNT_" + attributeMetaDataMetaData.getName().toUpperCase();
+
+		// Permissions i18nStringMetaData
+		String writeI18nStringMetaData = "ROLE_ENTITY_WRITE_" + i18nStringMetaData.getName().toUpperCase();
+
+		// EntityMetaDataMetaData
+		String writeEntityMetaDataMetaData = "ROLE_ENTITY_WRITE_" + entityMetaDataMetaData.getName().toUpperCase();
+		String readEntityMetaDataMetaData = "ROLE_ENTITY_READ_" + entityMetaDataMetaData.getName().toUpperCase();
+		String countEntityMetaDataMetaData = "ROLE_ENTITY_COUNT_" + entityMetaDataMetaData.getName().toUpperCase();
+
 		SecurityContextHolder.getContext().setAuthentication(
 				new TestingAuthenticationToken("user", "user", writeTestEntity, readTestEntity, readTestRefEntity,
 						countTestEntity, countTestRefEntity, writeSelfXrefEntity, readSelfXrefEntity,
 						countSelfXrefEntity, writeTestEntityStatic, readTestEntityStatic, countTestEntityStatic,
 						writeTestRefEntityStatic, readTestRefEntityStatic, countTestRefEntityStatic,
-						"ROLE_ENTITY_READ_SYS_MD_ENTITIES", "ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES",
-						"ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
+						writeLanguageMetaData, readLanguageMetaData, countLanguageMetaData,
+						writeAttributeMetaDataMetaData, readAttributeMetaDataMetaData, countAttributeMetaDataMetaData,
+						writeI18nStringMetaData, writeEntityMetaDataMetaData, readEntityMetaDataMetaData,
+						countEntityMetaDataMetaData, "ROLE_ENTITY_READ_SYS_MD_ENTITIES",
+						"ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES", "ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
+	}
+
+	private void createLanguages()
+	{
+		dataService.add(LanguageMetaData.LANGUAGE, languageFactory.create("en", "English"));
+		dataService.add(LanguageMetaData.LANGUAGE, languageFactory.create("nl", "Nederlands"));
+	}
+
+	@AfterClass
+	public void cleanUp() throws InterruptedException
+	{
+		// Give asyncTransactionLog time to stop gracefully
+		TimeUnit.SECONDS.sleep(1);
+
+		applicationContext.close();
+		SecurityContextHolder.getContext().setAuthentication(null);
+
+		try
+		{
+			// Delete molgenis home folder
+			FileUtils.deleteDirectory(new File(System.getProperty("molgenis.home")));
+		}
+		catch (IOException e)
+		{
+			LOG.error("Error removing molgenis home directory", e);
+		}
+		l2Cache.logStatistics();
+		cleanUpLanguages();
+	}
+
+	private void cleanUpLanguages()
+	{
+		List<AttributeMetaData> languageAttrs = new ArrayList<>();
+		for (AttributeMetaData attr : attributeMetaDataMetaData.getAttributes())
+		{
+			if (I18nUtils.isI18n(attr.getName()))
+			{
+				languageAttrs.add(attr);
+			}
+		}
+		languageAttrs.forEach(attributeMetaDataMetaData::removeAttribute);
+
+		languageAttrs.clear();
+		for (AttributeMetaData attr : entityMetaDataMetaData.getAttributes())
+		{
+			if (I18nUtils.isI18n(attr.getName()))
+			{
+				languageAttrs.add(attr);
+			}
+		}
+		languageAttrs.forEach(entityMetaDataMetaData::removeAttribute);
 	}
 
 	@AfterMethod
 	public void afterMethod()
 	{
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			dataService.deleteAll(entityMetaDataStatic.getName());
 			dataService.deleteAll(refEntityMetaDataStatic.getName());
 			dataService.deleteAll(entityMetaDataDynamic.getName());
@@ -212,12 +294,43 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
+	public void testLanguageService()
+	{
+		assertEquals(languageService.getCurrentUserLanguageCode(), "en");
+		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(), new String[] { "en", "nl" });
+
+		// NL
+		assertNotNull(dataService.getEntityMetaData(I18N_STRING).getAttribute("nl"));
+		assertNotNull(dataService.getEntityMetaData(ENTITY_META_DATA).getAttribute("label-nl"));
+		assertNotNull(dataService.getEntityMetaData(ENTITY_META_DATA).getAttribute("description-nl"));
+		assertNotNull(dataService.getEntityMetaData(ATTRIBUTE_META_DATA).getAttribute("label-nl"));
+		assertNotNull(dataService.getEntityMetaData(ATTRIBUTE_META_DATA).getAttribute("description-nl"));
+
+		// EN
+		assertNotNull(dataService.getEntityMetaData(I18N_STRING).getAttribute("en"));
+		assertNotNull(dataService.getEntityMetaData(ENTITY_META_DATA).getAttribute("label-en"));
+		assertNotNull(dataService.getEntityMetaData(ENTITY_META_DATA).getAttribute("description-en"));
+		assertNotNull(dataService.getEntityMetaData(ATTRIBUTE_META_DATA).getAttribute("label-en"));
+		assertNotNull(dataService.getEntityMetaData(ATTRIBUTE_META_DATA).getAttribute("description-en"));
+
+		Entity car = new DynamicEntity(i18nStringMetaData);
+		car.set(I18nStringMetaData.MSGID, "car");
+		car.set("en", "car");
+		car.set("nl", "auto");
+		dataService.add(I18nStringMetaData.I18N_STRING, car);
+		assertEquals(languageService.getBundle("en").getString("car"), "car");
+		assertEquals(languageService.getBundle("nl").getString("car"), "auto");
+
+		// Test default value
+		assertEquals(languageService.getBundle().getString("car"), "car");
+	}
+
+	@Test
 	public void testEntityListener()
 	{
 		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityMetaDataDynamic, 6);
 		List<Entity> entities = testHarness.createTestEntities(entityMetaDataDynamic, 2, refEntities).collect(toList());
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			dataService.add(refEntityMetaDataDynamic.getName(), refEntities.stream());
 			dataService.add(entityMetaDataDynamic.getName(), entities.stream());
 			waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
@@ -723,8 +836,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> testRefEntities = testHarness.createTestRefEntities(refEntityMetaDataDynamic, 6);
 		List<Entity> testEntities = testHarness.createTestEntities(entityMetaDataDynamic, 10, testRefEntities)
 				.collect(toList());
-		runAsSystem(() ->
-		{
+		runAsSystem(() -> {
 			dataService.add(refEntityMetaDataDynamic.getName(), testRefEntities.stream());
 			dataService.add(entityMetaDataDynamic.getName(), testEntities.stream());
 		});

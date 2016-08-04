@@ -4,15 +4,15 @@ import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.security.account.AccountService;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
@@ -23,6 +23,7 @@ import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
+import static org.molgenis.data.meta.model.TagMetaData.TAG;
 import static org.molgenis.security.core.utils.SecurityUtils.*;
 
 @Service
@@ -42,16 +43,13 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 	@Value("${anonymous.email:molgenis+anonymous@gmail.com}")
 	private String anonymousEmail;
 
-	private MolgenisUser anonymousUser;
-
 	@Autowired
 	MolgenisSecurityWebAppDatabasePopulatorServiceImpl(MolgenisUserFactory molgenisUserFactory,
 			MolgenisGroupFactory molgenisGroupFactory, UserAuthorityFactory userAuthorityFactory,
 			GroupAuthorityFactory groupAuthorityFactory)
 	{
-
 		this.molgenisUserFactory = requireNonNull(molgenisUserFactory);
-		this.molgenisGroupFactory = molgenisGroupFactory;
+		this.molgenisGroupFactory = requireNonNull(molgenisGroupFactory);
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
 		this.groupAuthorityFactory = requireNonNull(groupAuthorityFactory);
 	}
@@ -59,10 +57,13 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 	@Override
 	@Transactional
 	@RunAsSystem
-	public void populateDatabase(DataService dataService, String homeControllerId)
+	public void populateDatabase(DataService dataService, String homeControllerId, String userAccountControllerId)
 	{
-		if (adminPassword == null) throw new RuntimeException(
-				"please configure the admin.password property in your molgenis-server.properties");
+		if (adminPassword == null)
+		{
+			throw new RuntimeException(
+					"please configure the admin.password property in your molgenis-server.properties");
+		}
 
 		// create admin user
 		MolgenisUser userAdmin = molgenisUserFactory.create();
@@ -72,57 +73,56 @@ public class MolgenisSecurityWebAppDatabasePopulatorServiceImpl
 		userAdmin.setActive(true);
 		userAdmin.setSuperuser(true);
 		userAdmin.setChangePassword(false);
-		dataService.add(MOLGENIS_USER, userAdmin);
 
 		// create anonymous user
-		anonymousUser = molgenisUserFactory.create();
-		anonymousUser.setUsername(SecurityUtils.ANONYMOUS_USERNAME);
-		anonymousUser.setPassword(SecurityUtils.ANONYMOUS_USERNAME);
+		MolgenisUser anonymousUser = molgenisUserFactory.create();
+		anonymousUser.setUsername(ANONYMOUS_USERNAME);
+		anonymousUser.setPassword(ANONYMOUS_USERNAME);
 		anonymousUser.setEmail(anonymousEmail);
 		anonymousUser.setActive(true);
 		anonymousUser.setSuperuser(false);
 		anonymousUser.setChangePassword(false);
-		dataService.add(MOLGENIS_USER, anonymousUser);
 
 		// set anonymous role for anonymous user
 		UserAuthority anonymousAuthority = userAuthorityFactory.create();
 		anonymousAuthority.setMolgenisUser(anonymousUser);
-		anonymousAuthority.setRole(SecurityUtils.AUTHORITY_ANONYMOUS);
-		dataService.add(USER_AUTHORITY, anonymousAuthority);
+		anonymousAuthority.setRole(AUTHORITY_ANONYMOUS);
+
+		UserAuthority anonymousHomeAuthority = userAuthorityFactory.create();
+		anonymousHomeAuthority.setMolgenisUser(anonymousUser);
+		anonymousHomeAuthority.setRole(AUTHORITY_PLUGIN_READ_PREFIX + homeControllerId.toUpperCase());
 
 		// create all users group
 		MolgenisGroup allUsersGroup = molgenisGroupFactory.create();
 		allUsersGroup.setName(AccountService.ALL_USER_GROUP);
-		dataService.add(MOLGENIS_GROUP, allUsersGroup);
-		dataService.getRepository(MOLGENIS_GROUP).flush();
 
 		// allow all users to see the home plugin
 		GroupAuthority usersGroupHomeAuthority = groupAuthorityFactory.create();
 		usersGroupHomeAuthority.setMolgenisGroup(allUsersGroup);
 		usersGroupHomeAuthority.setRole(AUTHORITY_PLUGIN_READ_PREFIX + homeControllerId.toUpperCase());
-		dataService.add(GROUP_AUTHORITY, usersGroupHomeAuthority);
 
 		// allow all users to update their profile
 		GroupAuthority usersGroupUserAccountAuthority = groupAuthorityFactory.create();
 		usersGroupUserAccountAuthority.setMolgenisGroup(allUsersGroup);
-		// FIXME do not hardcode useraccount plugin name
-		usersGroupUserAccountAuthority.setRole(AUTHORITY_PLUGIN_WRITE_PREFIX + "useraccount".toUpperCase());
-		dataService.add(GROUP_AUTHORITY, usersGroupUserAccountAuthority);
+		usersGroupUserAccountAuthority.setRole(AUTHORITY_PLUGIN_WRITE_PREFIX + userAccountControllerId.toUpperCase());
 
 		// allow all users to read meta data entities
-		List<String> entityNames = Arrays.asList(ENTITY_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, LANGUAGE, I18N_STRING);
-		entityNames.forEach(entityName ->
+		List<String> entityNames = asList(ENTITY_META_DATA, ATTRIBUTE_META_DATA, PACKAGE, TAG, LANGUAGE, I18N_STRING);
+		Stream<GroupAuthority> entityGroupAuthorities = entityNames.stream().map(entityName ->
 		{
 			GroupAuthority usersGroupAuthority = groupAuthorityFactory.create();
 			usersGroupAuthority.setMolgenisGroup(allUsersGroup);
 			usersGroupAuthority.setRole(AUTHORITY_ENTITY_READ_PREFIX + entityName);
-			dataService.add(GROUP_AUTHORITY, usersGroupAuthority);
+			return usersGroupAuthority;
 		});
+
+		// persist entities
+		dataService.add(MOLGENIS_USER, Stream.of(userAdmin, anonymousUser));
+		dataService.add(USER_AUTHORITY, Stream.of(anonymousAuthority, anonymousHomeAuthority));
+		dataService.add(MOLGENIS_GROUP, allUsersGroup);
+		dataService.add(GROUP_AUTHORITY,
+				Stream.concat(Stream.of(usersGroupHomeAuthority, usersGroupUserAccountAuthority),
+						entityGroupAuthorities));
 	}
 
-	@Override
-	public MolgenisUser getAnonymousUser()
-	{
-		return anonymousUser;
-	}
 }

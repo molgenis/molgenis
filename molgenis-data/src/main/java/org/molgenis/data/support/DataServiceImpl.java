@@ -253,6 +253,7 @@ public class DataServiceImpl implements DataService
 		return getRepository(entityName, clazz).findAll(ids, fetch);
 	}
 
+	@Transactional
 	@Override
 	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId,
 			String newRepositoryLabel)
@@ -260,6 +261,7 @@ public class DataServiceImpl implements DataService
 		return copyRepository(repository, newRepositoryId, newRepositoryLabel, new QueryImpl<>());
 	}
 
+	@Transactional
 	@Override
 	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId,
 			String newRepositoryLabel, Query<Entity> query)
@@ -267,8 +269,11 @@ public class DataServiceImpl implements DataService
 		LOG.info("Creating a copy of " + repository.getName() + " repository, with ID: " + newRepositoryId
 				+ ", and label: " + newRepositoryLabel);
 		EntityMetaData emd = EntityMetaData.newInstance(repository.getEntityMetaData());
+		emd.setIdValue(null);
 		emd.setName(newRepositoryId);
 		emd.setLabel(newRepositoryLabel);
+		emd.getOwnAllAttributes().forEach(e -> e.setIdValue(null));
+
 		Repository<Entity> repositoryCopy = metaDataService.addEntityMeta(emd);
 		try
 		{

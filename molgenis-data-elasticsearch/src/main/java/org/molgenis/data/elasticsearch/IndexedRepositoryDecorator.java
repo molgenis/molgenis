@@ -3,15 +3,12 @@ package org.molgenis.data.elasticsearch;
 import org.elasticsearch.common.collect.Iterators;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -58,46 +55,24 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	@Transactional
 	public void add(Entity entity)
 	{
 		decoratedRepository.add(entity);
 	}
 
 	@Override
-	@Transactional
 	public Integer add(Stream<Entity> entities)
 	{
-		// TODO look into performance improvements
-		AtomicInteger count = new AtomicInteger();
-		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
-			Integer batchCount = decoratedRepository.add(batch.stream());
-			count.addAndGet(batchCount);
-		});
-		return count.get();
+		return decoratedRepository.add(entities);
 	}
 
 	@Override
-	public void flush()
-	{
-		decoratedRepository.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		decoratedRepository.clearCache();
-	}
-
-	@Override
-	@Transactional
 	public void update(Entity entity)
 	{
 		decoratedRepository.update(entity);
 	}
 
 	@Override
-	@Transactional
 	public void update(Stream<Entity> entities)
 	{
 		// TODO look into performance improvements
@@ -106,14 +81,12 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	@Transactional
 	public void delete(Entity entity)
 	{
 		decoratedRepository.delete(entity);
 	}
 
 	@Override
-	@Transactional
 	public void delete(Stream<Entity> entities)
 	{
 		// TODO look into performance improvements
@@ -122,14 +95,12 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	@Transactional
 	public void deleteById(Object id)
 	{
 		decoratedRepository.deleteById(id);
 	}
 
 	@Override
-	@Transactional
 	public void deleteAll(Stream<Object> ids)
 	{
 		// TODO look into performance improvements
@@ -137,7 +108,6 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	}
 
 	@Override
-	@Transactional
 	public void deleteAll()
 	{
 		decoratedRepository.deleteAll();
@@ -212,12 +182,6 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
 		decoratedRepository.forEachBatched(fetch, consumer, batchSize);
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		elasticSearchService.rebuildIndex(decoratedRepository);
 	}
 
 	/**

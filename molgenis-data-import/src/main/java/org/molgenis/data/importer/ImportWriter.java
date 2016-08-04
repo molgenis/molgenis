@@ -1,20 +1,14 @@
 package org.molgenis.data.importer;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.Tag;
-import org.molgenis.data.meta.model.TagMetaData;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
@@ -42,6 +36,7 @@ import java.util.*;
 
 import static com.google.common.base.Predicates.notNull;
 import static com.google.common.collect.FluentIterable.from;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -69,6 +64,7 @@ public class ImportWriter
 	private final MolgenisPermissionService molgenisPermissionService;
 	private final TagMetaData tagMetaData;
 	private final I18nStringMetaData i18nStringMetaData;
+	private final TagFactory tagFactory;
 
 	/**
 	 * Creates the ImportWriter
@@ -77,11 +73,12 @@ public class ImportWriter
 	 * @param permissionSystemService {@link PermissionSystemService} to give permissions on uploaded entities
 	 * @param tagMetaData
 	 * @param i18nStringMetaData
+	 * @param tagFactory              {@link TagFactory} to create new tags
 	 */
 	public ImportWriter(DataService dataService, PermissionSystemService permissionSystemService,
 			TagService<LabeledResource, LabeledResource> tagService,
 			MolgenisPermissionService molgenisPermissionService, TagMetaData tagMetaData,
-			I18nStringMetaData i18nStringMetaData)
+			I18nStringMetaData i18nStringMetaData, TagFactory tagFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
@@ -89,6 +86,7 @@ public class ImportWriter
 		this.molgenisPermissionService = requireNonNull(molgenisPermissionService);
 		this.tagMetaData = requireNonNull(tagMetaData);
 		this.i18nStringMetaData = requireNonNull(i18nStringMetaData);
+		this.tagFactory = requireNonNull(tagFactory);
 	}
 
 	@Transactional
@@ -97,8 +95,8 @@ public class ImportWriter
 		// languages first
 		importLanguages(job.report, job.parsedMetaData.getLanguages(), job.dbAction, job.metaDataChanges);
 		runAsSystem(() -> importTags(job.source));
-		importPackages(job.parsedMetaData);
-		addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges);
+		runAsSystem(() -> importPackages(job.parsedMetaData));
+		runAsSystem(() -> addEntityMetaData(job.parsedMetaData, job.report, job.metaDataChanges));
 		addEntityPermissions(job.metaDataChanges);
 		runAsSystem(() -> importEntityAndAttributeTags(job.parsedMetaData));
 		Iterable<EntityMetaData> existingMetaData = dataService.getMeta().getEntityMetaDatas()::iterator;
@@ -201,14 +199,8 @@ public class ImportWriter
 					boolean selfReferencing = DependencyResolver.hasSelfReferences(entityMetaData);
 
 					// transforms entities so that they match the entity meta data of the output repository
-					Iterable<Entity> entities = Iterables.transform(fileEntityRepository, new Function<Entity, Entity>()
-					{
-						@Override
-						public Entity apply(Entity entity)
-						{
-							return new DefaultEntityImporter(entityMetaData, dataService, entity, selfReferencing);
-						}
-					});
+					Iterable<Entity> entities = Iterables.transform(fileEntityRepository,
+							entity -> new DefaultEntityImporter(entityMetaData, dataService, entity, selfReferencing));
 
 					if (selfReferencing)
 					{
@@ -234,32 +226,27 @@ public class ImportWriter
 	 */
 	private Iterable<Entity> keepSelfReferencedEntities(Iterable<Entity> entities)
 	{
-		return Iterables.filter(entities, new Predicate<Entity>()
-		{
-			@Override
-			public boolean apply(Entity entity)
+		return Iterables.filter(entities, entity -> {
+			Iterator<AttributeMetaData> attributes = entity.getEntityMetaData().getAttributes().iterator();
+			while (attributes.hasNext())
 			{
-				Iterator<AttributeMetaData> attributes = entity.getEntityMetaData().getAttributes().iterator();
-				while (attributes.hasNext())
+				AttributeMetaData attribute = attributes.next();
+				if (attribute.getRefEntity() != null && attribute.getRefEntity().getName()
+						.equals(entity.getEntityMetaData().getName()))
 				{
-					AttributeMetaData attribute = attributes.next();
-					if (attribute.getRefEntity() != null && attribute.getRefEntity().getName()
-							.equals(entity.getEntityMetaData().getName()))
+					List<String> ids = DataConverter.toList(entity.get(attribute.getName()));
+					Iterable<Entity> refEntities = entity.getEntities(attribute.getName());
+					if (ids != null && ids.size() != Iterators.size(refEntities.iterator()))
 					{
-						List<String> ids = DataConverter.toList(entity.get(attribute.getName()));
-						Iterable<Entity> refEntities = entity.getEntities(attribute.getName());
-						if (ids != null && ids.size() != Iterators.size(refEntities.iterator()))
-						{
-							throw new UnknownEntityException(
-									"One or more values [" + ids + "] from " + attribute.getDataType().toString()
-											+ " field " + attribute.getName() + " could not be resolved");
-						}
-						return true;
+						throw new UnknownEntityException(
+								"One or more values [" + ids + "] from " + attribute.getDataType().toString()
+										+ " field " + attribute.getName() + " could not be resolved");
 					}
+					return true;
 				}
-
-				return false;
 			}
+
+			return false;
 		});
 	}
 
@@ -332,25 +319,43 @@ public class ImportWriter
 	// FIXME: can everybody always update a tag?
 	private void importTags(RepositoryCollection source)
 	{
-		Repository<Entity> tagRepo = source.getRepository(TAG);
-		if (tagRepo != null)
+		Repository<Entity> tagRepository = source.getRepository(EMX_TAGS);
+		if (tagRepository != null)
 		{
-			for (Entity tag : tagRepo)
+			for (Entity tagEntity : tagRepository)
 			{
-				Tag transformed = new Tag(tagMetaData);
-				transformed.set(tag);
-				Entity existingTag = dataService.findOneById(TAG, tag.getString(TagMetaData.IDENTIFIER));
-
+				Entity existingTag = dataService.findOneById(TAG, tagEntity.getString(EMX_TAG_IDENTIFIER));
 				if (existingTag == null)
 				{
-					dataService.add(TAG, transformed);
+					Tag tag = entityToTag(tagEntity.getString(EMX_TAG_IDENTIFIER), tagEntity);
+					dataService.add(TAG, tag);
 				}
 				else
 				{
-					dataService.update(TAG, transformed);
+					dataService.update(TAG, existingTag);
 				}
 			}
 		}
+	}
+
+	/**
+	 * Transforms an {@link Entity} to a {@link Tag}
+	 *
+	 * @param id
+	 * @param tagEntity
+	 * @return
+	 */
+	// FIXME: Duplicated with EmxMetaDataParser
+	public Tag entityToTag(String id, Entity tagEntity)
+	{
+		Tag tag = tagFactory.create(id);
+		tag.setObjectIri(tagEntity.getString(EMX_TAG_OBJECT_IRI));
+		tag.setLabel(tagEntity.getString(EMX_TAG_LABEL));
+		tag.setRelationLabel(tagEntity.getString(EMX_TAG_RELATION_LABEL));
+		tag.setCodeSystem(tagEntity.getString(EMX_TAG_CODE_SYSTEM));
+		tag.setRelationIri(tagEntity.getString(EMX_TAG_RELATION_IRI));
+
+		return tag;
 	}
 
 	/**
@@ -370,12 +375,11 @@ public class ImportWriter
 			throw new MolgenisDataAccessException("No WRITE permission on entity '" + repo.getName()
 					+ "'. Is this entity already imported by another user who did not grant you WRITE permission?");
 		}
-
 		String idAttributeName = repo.getEntityMetaData().getIdAttribute().getName();
 		AttributeType dataType = repo.getEntityMetaData().getIdAttribute().getDataType();
 		FieldType idFieldType = MolgenisFieldTypes.getType(AttributeType.getValueString(dataType));
-		HugeSet<Object> existingIds = new HugeSet<Object>();
-		HugeSet<Object> ids = new HugeSet<Object>();
+		HugeSet<Object> existingIds = new HugeSet<>();
+		HugeSet<Object> ids = new HugeSet<>();
 		try
 		{
 			for (Entity entity : entities)
@@ -393,7 +397,7 @@ public class ImportWriter
 				if (repo.count() > 0)
 				{
 					int batchSize = 100;
-					Query<Entity> q = new QueryImpl<Entity>();
+					Query<Entity> q = new QueryImpl<>();
 					Iterator<Object> it = ids.iterator();
 					int batchCount = 0;
 					while (it.hasNext())
@@ -403,10 +407,8 @@ public class ImportWriter
 						batchCount++;
 						if (batchCount == batchSize || !it.hasNext())
 						{
-							repo.findAll(q).forEach(existing -> {
-								existingIds.add(existing.getIdValue());
-							});
-							q = new QueryImpl<Entity>();
+							repo.findAll(q).forEach(existing -> existingIds.add(existing.getIdValue()));
+							q = new QueryImpl<>();
 							batchCount = 0;
 						}
 						else
@@ -450,8 +452,8 @@ public class ImportWriter
 					break;
 				case ADD_IGNORE_EXISTING:
 					int batchSize = 1000;
-					List<Entity> existingEntities = Lists.newArrayList();
-					List<Entity> newEntities = Lists.newArrayList();
+					List<Entity> existingEntities;
+					List<Entity> newEntities = newArrayList();
 
 					Iterator<? extends Entity> it = entities.iterator();
 					while (it.hasNext())
@@ -478,10 +480,10 @@ public class ImportWriter
 					break;
 				case ADD_UPDATE_EXISTING:
 					batchSize = 1000;
-					existingEntities = new ArrayList<Entity>(batchSize);
-					List<Integer> existingEntitiesRowIndex = new ArrayList<Integer>(batchSize);
-					newEntities = new ArrayList<Entity>(batchSize);
-					List<Integer> newEntitiesRowIndex = new ArrayList<Integer>(batchSize);
+					existingEntities = new ArrayList<>(batchSize);
+					List<Integer> existingEntitiesRowIndex = new ArrayList<>(batchSize);
+					newEntities = new ArrayList<>(batchSize);
+					List<Integer> newEntitiesRowIndex = new ArrayList<>(batchSize);
 
 					it = entities.iterator();
 					while (it.hasNext())
@@ -932,29 +934,21 @@ public class ImportWriter
 			else
 			{
 				EntityMetaData refEntityMeta = attribute.getRefEntity();
-				return new Iterable<Entity>()
-				{
-					@Override
-					public Iterator<Entity> iterator()
+				return () -> stream(ids.spliterator(), false).map(id -> {
+					// referenced entity id value must match referenced entity id attribute data type
+					if (EntityMetaDataUtils.isStringType(refEntityMeta.getIdAttribute()) && !(id instanceof String))
 					{
-						return stream(ids.spliterator(), false).map(id -> {
-							// referenced entity id value must match referenced entity id attribute data type
-							if (EntityMetaDataUtils.isStringType(refEntityMeta.getIdAttribute())
-									&& !(id instanceof String))
-							{
-								return String.valueOf(id);
-							}
-							else if (refEntityMeta.getIdAttribute().getDataType() == INT && !(id instanceof Integer))
-							{
-								return Integer.valueOf(id.toString());
-							}
-							else
-							{
-								return id;
-							}
-						}).<Entity>map(id -> new LazyEntity(refEntityMeta, dataService, id)).iterator();
+						return String.valueOf(id);
 					}
-				};
+					else if (refEntityMeta.getIdAttribute().getDataType() == INT && !(id instanceof Integer))
+					{
+						return Integer.valueOf(id.toString());
+					}
+					else
+					{
+						return id;
+					}
+				}).<Entity>map(id -> new LazyEntity(refEntityMeta, dataService, id)).iterator();
 			}
 		}
 

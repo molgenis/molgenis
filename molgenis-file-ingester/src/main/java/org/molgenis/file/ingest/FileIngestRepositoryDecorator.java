@@ -1,6 +1,10 @@
 package org.molgenis.file.ingest;
 
-import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_EXECUTION;
+import org.molgenis.data.*;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
+import org.molgenis.file.ingest.meta.FileIngestMetaData;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -9,19 +13,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.listeners.EntityListener;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
-import org.molgenis.file.ingest.meta.FileIngestMetaData;
+import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_EXECUTION;
 
 public class FileIngestRepositoryDecorator implements Repository<Entity>
 {
@@ -228,24 +220,6 @@ public class FileIngestRepositoryDecorator implements Repository<Entity>
 			scheduler.schedule(e);
 			return true;
 		}));
-	}
-
-	@Override
-	public void flush()
-	{
-		decorated.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		decorated.clearCache();
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		decorated.rebuildIndex();
 	}
 
 	@Override

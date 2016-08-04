@@ -17,6 +17,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.api.client.util.Lists.newArrayList;
 import static java.lang.String.format;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.getValueString;
 import static org.molgenis.MolgenisFieldTypes.getType;
@@ -396,8 +397,8 @@ public class EntityAttributesValidator
 			EntityMetaData meta)
 	{
 		String message = format("Invalid %s value '%s' for attribute '%s' of entity '%s'.",
-				attribute.getDataType().toString().toLowerCase(), entity.get(attribute.getName()),
-				attribute.getLabel(), meta.getName());
+				attribute.getDataType().toString().toLowerCase(), entity.get(attribute.getName()), attribute.getLabel(),
+				meta.getName());
 
 		Range range = attribute.getRange();
 		if (range != null)
@@ -417,12 +418,57 @@ public class EntityAttributesValidator
 	private ConstraintViolation createConstraintViolation(Entity entity, AttributeMetaData attribute,
 			EntityMetaData meta, String message)
 	{
+		String dataValue = getDataValuesForType(entity, attribute).toString();
 		String fullMessage = format("Invalid %s value '%s' for attribute '%s' of entity '%s'.",
-				attribute.getDataType().toString().toLowerCase(), entity.getString(attribute.getName()),
-				attribute.getLabel(), meta.getName());
+				attribute.getDataType().toString().toLowerCase(), dataValue, attribute.getLabel(), meta.getName());
 		fullMessage += " " + message;
 
-		return new ConstraintViolation(fullMessage, entity.getString(attribute.getName()), entity, attribute, meta,
-				null);
+		return new ConstraintViolation(fullMessage, dataValue, entity, attribute, meta, null);
+	}
+
+	private Object getDataValuesForType(Entity entity, AttributeMetaData attribute)
+	{
+		String attributeName = attribute.getName();
+		switch (attribute.getDataType())
+		{
+			case DATE:
+			case DATE_TIME:
+				return entity.getUtilDate(attributeName);
+			case BOOL:
+				return entity.getBoolean(attributeName);
+			case DECIMAL:
+			case LONG:
+			case INT:
+				return entity.getInt(attributeName);
+			case HYPERLINK:
+			case ENUM:
+			case HTML:
+			case TEXT:
+			case SCRIPT:
+			case EMAIL:
+			case STRING:
+				return entity.getString(attributeName);
+			case CATEGORICAL:
+			case XREF:
+			case FILE:
+				Entity refEntity = entity.getEntity(attributeName);
+				if (refEntity != null) return refEntity.getIdValue();
+				else return "";
+			case CATEGORICAL_MREF:
+			case MREF:
+				List<String> mrefValues = newArrayList();
+				for (Entity mrefEntity : entity.getEntities(attributeName))
+				{
+					if (mrefEntity != null)
+					{
+						mrefValues.add(mrefEntity.getIdValue().toString());
+					}
+				}
+				return mrefValues;
+			case COMPOUND:
+				return "";
+			default:
+				return "";
+		}
 	}
 }

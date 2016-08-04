@@ -40,7 +40,7 @@ public final class IntermediateParseResults
 	 */
 	private final SetMultimap<String, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
 	/**
-	 * Contains all Entity tags
+	 * Contains all {@link Entity} tags
 	 */
 	private final List<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> entityTags;
 	/**
@@ -69,9 +69,40 @@ public final class IntermediateParseResults
 		this.entityMetaDataFactory = entityMetaDataFactory;
 	}
 
-	public void addTagEntity(String identifier, Entity tagEntity)
+	public void addTag(String identifier, Entity tag)
 	{
-		tags.put(identifier, tagEntity);
+		tags.put(identifier, tag);
+	}
+
+	public boolean hasTag(String identifier)
+	{
+		return tags.containsKey(identifier);
+	}
+
+	public Entity getTagEntity(String tagIdentifier)
+	{
+		return tags.get(tagIdentifier);
+	}
+
+	public void addEntityTag(String entityName, SemanticTag tag)
+	{
+		entityTags.add(tag);
+	}
+
+	public void addAttributeTag(String entityName, SemanticTag tag)
+	{
+		attributeTags.put(entityName, tag);
+	}
+
+	/**
+	 * Gets a specific package
+	 *
+	 * @param name the name of the package
+	 * @return
+	 */
+	public Package getPackage(String name)
+	{
+		return getPackages().get(name);
 	}
 
 	public void addAttributes(String entityName, List<EmxAttribute> emxAttrs)
@@ -239,31 +270,5 @@ public final class IntermediateParseResults
 		}
 		else if (!tags.equals(other.tags)) return false;
 		return true;
-	}
-
-	/**
-	 * Gets a specific package
-	 *
-	 * @param name the name of the package
-	 * @return
-	 */
-	public Package getPackage(String name)
-	{
-		return getPackages().get(name);
-	}
-
-	public Entity getTagEntity(String tagIdentifier)
-	{
-		return tags.get(tagIdentifier);
-	}
-
-	public void addEntityTag(String entityName, SemanticTag tag)
-	{
-		entityTags.add(tag);
-	}
-
-	public void addAttributeTag(String entityName, SemanticTag tag)
-	{
-		attributeTags.put(entityName, tag);
 	}
 }

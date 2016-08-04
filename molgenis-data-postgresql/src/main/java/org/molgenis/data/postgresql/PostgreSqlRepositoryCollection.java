@@ -7,6 +7,7 @@ import org.molgenis.data.support.AbstractRepositoryCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -31,21 +32,26 @@ import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
 import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
 import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
 
-public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
+public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 {
 	private static final Logger LOG = LoggerFactory.getLogger(PostgreSqlRepositoryCollection.class);
 
 	public static final String POSTGRESQL = "PostgreSQL";
 
+	private final PostgreSqlEntityFactory postgreSqlEntityFactory;
 	private final DataSource dataSource;
 	private final JdbcTemplate jdbcTemplate;
 	private final DataService dataService;
+	private final PlatformTransactionManager transactionManager;
 
-	public PostgreSqlRepositoryCollection(DataSource dataSource, JdbcTemplate jdbcTemplate, DataService dataService)
+	public PostgreSqlRepositoryCollection(PostgreSqlEntityFactory postgreSqlEntityFactory, DataSource dataSource,
+			JdbcTemplate jdbcTemplate, DataService dataService, PlatformTransactionManager transactionManager)
 	{
+		this.postgreSqlEntityFactory = requireNonNull(postgreSqlEntityFactory);
 		this.dataSource = requireNonNull(dataSource);
 		this.jdbcTemplate = requireNonNull(jdbcTemplate);
 		this.dataService = requireNonNull(dataService);
+		this.transactionManager = requireNonNull(transactionManager);
 	}
 
 	@Override
@@ -58,6 +64,12 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 	public Set<RepositoryCollectionCapability> getCapabilities()
 	{
 		return immutableEnumSet(of(WRITABLE, UPDATABLE, META_DATA_PERSISTABLE));
+	}
+
+	@Override
+	public boolean hasRepository(String name)
+	{
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -171,9 +183,13 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 	public void addAttribute(String entityName, AttributeMetaData attribute)
 	{
 		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
+		if (null != entityMetaData.getAttribute(requireNonNull(attribute).getName()))
+		{
+			throw new MolgenisDataException(format("Adding attribute operation failed. Attribute already exists [%s]", attribute.getName()));
+		}
 		if (entityMetaData == null)
 		{
-			throw new UnknownEntityException(format("Unknown entity [%s]", entityName));
+			throw new UnknownEntityException(format("Adding attribute operation failed. Unknown entity [%s]", entityName));
 		}
 		addAttributeRec(entityMetaData, attribute);
 	}
@@ -370,7 +386,10 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 	/**
 	 * Return a spring managed prototype bean
 	 */
-	protected abstract PostgreSqlRepository createPostgreSqlRepository();
+	protected PostgreSqlRepository createPostgreSqlRepository()
+	{
+		return new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate, dataSource, transactionManager);
+	}
 
 	private boolean isTableExists(EntityMetaData entityMeta)
 	{
@@ -470,7 +489,8 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 				String createJunctionTableSql = getSqlCreateJunctionTable(entityMeta, attr);
 				if (LOG.isDebugEnabled())
 				{
-					LOG.debug("Creating junction table for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
+					LOG.debug("Creating junction table for entity [{}] attribute [{}]", entityMeta.getName(),
+							attr.getName());
 					if (LOG.isTraceEnabled())
 					{
 						LOG.trace("SQL: {}", createJunctionTableSql);
@@ -484,7 +504,8 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 				String createForeignKeySql = getSqlCreateForeignKey(entityMeta, attr);
 				if (LOG.isDebugEnabled())
 				{
-					LOG.debug("Creating foreign key for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
+					LOG.debug("Creating foreign key for entity [{}] attribute [{}]", entityMeta.getName(),
+							attr.getName());
 					if (LOG.isTraceEnabled())
 					{
 						LOG.trace("SQL: {}", createForeignKeySql);
@@ -498,7 +519,8 @@ public abstract class PostgreSqlRepositoryCollection extends AbstractRepositoryC
 				String createUniqueSql = getSqlCreateUniqueKey(entityMeta, attr);
 				if (LOG.isDebugEnabled())
 				{
-					LOG.debug("Creating unique key for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
+					LOG.debug("Creating unique key for entity [{}] attribute [{}]", entityMeta.getName(),
+							attr.getName());
 					if (LOG.isTraceEnabled())
 					{
 						LOG.trace("SQL: {}", createUniqueSql);

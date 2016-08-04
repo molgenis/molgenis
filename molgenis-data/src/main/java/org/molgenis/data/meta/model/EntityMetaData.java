@@ -1,7 +1,11 @@
 package org.molgenis.data.meta.model;
 
 import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+
+import static java.util.Objects.requireNonNull;
+
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.StaticEntity;
 
@@ -31,6 +35,8 @@ import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeN
 public class EntityMetaData extends StaticEntity
 {
 	private transient Map<String, AttributeMetaData> cachedAttrs;
+	private transient List<AttributeMetaData> cachedOwnAtomicAttrs;
+	private transient Boolean cachedHasAttrWithExpession;
 
 	public EntityMetaData(Entity entity)
 	{
@@ -76,27 +82,86 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public static EntityMetaData newInstance(EntityMetaData entityMeta)
 	{
+		return newInstance(entityMeta, Maps.newConcurrentMap());
+	}
+
+	/**
+	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #EntityMetaData(EntityMetaData)})
+	 *
+	 * @param entityMeta entity meta data
+	 * @param copied     Map<entity full name, entity meta data>
+	 * @return deep copy of entity meta data
+	 */
+	static EntityMetaData newInstance(EntityMetaData entityMeta, Map<String, StaticEntity> copied)
+	{
+		if (null == entityMeta)
+		{
+			return null;
+		}
+
+		requireNonNull(entityMeta.getName());
+
+		if (copied.containsKey(entityMeta.getName()))
+		{
+			return (EntityMetaData) copied.get(entityMeta.getName());
+		}
+
 		EntityMetaData entityMetaCopy = new EntityMetaData(entityMeta.getEntityMetaData());
+
+		// name
 		entityMetaCopy.setName(entityMeta.getName());
+
+		// Put the copy into the copied registry
+		copied.put(entityMetaCopy.getName(), entityMetaCopy);
+
+		// Simple name
 		entityMetaCopy.setSimpleName(entityMeta.getSimpleName());
+
+		// Package
 		Package package_ = entityMeta.getPackage();
 		entityMetaCopy.setPackage(package_ != null ? Package.newInstance(package_) : null);
+
+		// Label
 		entityMetaCopy.setLabel(entityMeta.getLabel());
 		entityMetaCopy.setDescription(entityMeta.getDescription());
-		AttributeMetaData idAttr = entityMeta.getIdAttribute();
-		entityMetaCopy.setIdAttribute(idAttr != null ? AttributeMetaData.newInstance(idAttr) : null);
-		AttributeMetaData labelAttr = entityMeta.getLabelAttribute();
-		entityMetaCopy.setLabelAttribute(idAttr != null ? AttributeMetaData.newInstance(labelAttr) : null);
-		Iterable<AttributeMetaData> lookupAttrs = entityMeta.getLookupAttributes();
+
+		// Own id attribute
+		AttributeMetaData ownIdAttribute = entityMeta.getOwnIdAttribute();
+		entityMetaCopy
+				.setIdAttribute(ownIdAttribute != null ? AttributeMetaData.newInstance(ownIdAttribute, copied) : null);
+
+		// Own label attribute
+		AttributeMetaData labelAttr = entityMeta.getOwnLabelAttribute();
+		entityMetaCopy.setLabelAttribute(labelAttr != null ? AttributeMetaData.newInstance(labelAttr) : null);
+
+		// Own lookup attrs
+		Iterable<AttributeMetaData> ownLookupAttrs = entityMeta.getOwnLookupAttributes();
 		entityMetaCopy.setLookupAttributes(
-				stream(lookupAttrs.spliterator(), false).map(AttributeMetaData::newInstance).collect(toList()));
+				stream(ownLookupAttrs.spliterator(), false).map(AttributeMetaData::newInstance).collect(toList()));
 		entityMetaCopy.setAbstract(entityMeta.isAbstract());
+
+		// Extends
 		EntityMetaData extends_ = entityMeta.getExtends();
-		entityMetaCopy.setExtends(extends_ != null ? EntityMetaData.newInstance(extends_) : null);
+		entityMetaCopy.setExtends(extends_ != null ? EntityMetaData.newInstance(extends_, copied) : null);
+
+		// Tags
 		Iterable<Tag> tags = entityMeta.getTags();
 		entityMeta.setTags(stream(tags.spliterator(), false).map(Tag::newInstance).collect(toList()));
 		entityMetaCopy.setBackend(entityMeta.getBackend());
+
+		// Own attributes
+		Iterable<AttributeMetaData> ownAttributes = entityMeta.getOwnAttributes();
+		entityMetaCopy.setOwnAttributes(
+				stream(ownAttributes.spliterator(), false).map(e -> AttributeMetaData.newInstance(e, copied))
+						.collect(toList()));
+
 		return entityMetaCopy;
+	}
+
+	@Override
+	public Iterable<String> getAttributeNames()
+	{
+		return stream(getEntities(ATTRIBUTES, AttributeMetaData.class).spliterator(), false).map(AttributeMetaData::getName)::iterator;
 	}
 
 	/**
@@ -446,7 +511,8 @@ public class EntityMetaData extends StaticEntity
 	public LinkedHashSet<AttributeMetaData> getCompoundOrderedAttributes()
 	{
 		LinkedHashSet<AttributeMetaData> attributes = newLinkedHashSet();
-		getEntities(ATTRIBUTES, AttributeMetaData.class).forEach(attribute -> {
+		getEntities(ATTRIBUTES, AttributeMetaData.class).forEach(attribute ->
+		{
 			if (attribute.getDataType() == COMPOUND)
 			{
 				attribute.getAttributeParts()
@@ -508,11 +574,11 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public Iterable<AttributeMetaData> getAtomicAttributes()
 	{
-		Iterable<AttributeMetaData> atomicAttrs = getOwnAtomicAttributes();
+		Iterable<AttributeMetaData> atomicAttrs = getCachedOwnAtomicAttrs();
 		EntityMetaData extends_ = getExtends();
 		if (extends_ != null)
 		{
-			atomicAttrs = concat(atomicAttrs, extends_.getAtomicAttributes());
+			atomicAttrs = Iterables.concat(extends_.getAtomicAttributes(), atomicAttrs);
 		}
 		return atomicAttrs;
 	}
@@ -557,6 +623,8 @@ public class EntityMetaData extends StaticEntity
 
 	public EntityMetaData addAttribute(AttributeMetaData attr, AttributeRole... attrTypes)
 	{
+		invalidateCachedAttrs();
+
 		Iterable<AttributeMetaData> attrs = getEntities(ATTRIBUTES, AttributeMetaData.class);
 		set(ATTRIBUTES, concat(attrs, singletonList(attr)));
 		if (attrTypes != null)
@@ -594,11 +662,22 @@ public class EntityMetaData extends StaticEntity
 	 */
 	public boolean hasAttributeWithExpression()
 	{
-		return stream(getAtomicAttributes().spliterator(), false).anyMatch(attr -> attr.getExpression() != null);
+		return getCachedHasAttrWithExpession();
+	}
+
+	private boolean getCachedHasAttrWithExpession()
+	{
+		if (cachedHasAttrWithExpession == null)
+		{
+			cachedHasAttrWithExpession = stream(getAtomicAttributes().spliterator(), false)
+					.anyMatch(attr -> attr.getExpression() != null);
+		}
+		return cachedHasAttrWithExpession;
 	}
 
 	public void removeAttribute(AttributeMetaData attr)
 	{
+		requireNonNull(attr);
 		// FIXME does not remove attr if attr is located in a compound attr
 		Iterable<AttributeMetaData> existingAttrs = getEntities(ATTRIBUTES, AttributeMetaData.class);
 		List<AttributeMetaData> filteredAttrs = stream(existingAttrs.spliterator(), false)
@@ -679,16 +758,20 @@ public class EntityMetaData extends StaticEntity
 	public void set(String attributeName, Object value)
 	{
 		super.set(attributeName, value);
-		if (attributeName.equals(ATTRIBUTES))
+		switch (attributeName)
 		{
-			// clear cache
-			cachedAttrs = null;
+			case ATTRIBUTES:
+				invalidateCachedAttrs();
+				break;
+			default:
+				break;
 		}
 	}
 
 	private void getOwnAtomicAttributesRec(Iterable<AttributeMetaData> attrs, List<AttributeMetaData> atomicAttrs)
 	{
-		attrs.forEach(attr -> {
+		for (AttributeMetaData attr : attrs)
+		{
 			if (attr.getDataType() == COMPOUND)
 			{
 				getOwnAtomicAttributesRec(attr.getAttributeParts(), atomicAttrs);
@@ -697,18 +780,19 @@ public class EntityMetaData extends StaticEntity
 			{
 				atomicAttrs.add(attr);
 			}
-		});
+		}
 	}
 
 	private void getOwnAllAttributesRec(Iterable<AttributeMetaData> attrs, List<AttributeMetaData> allAttrs)
 	{
-		attrs.forEach(attr -> {
+		for (AttributeMetaData attr : attrs)
+		{
 			if (attr.getDataType() == COMPOUND)
 			{
 				getOwnAllAttributesRec(attr.getAttributeParts(), allAttrs);
 			}
 			allAttrs.add(attr);
-		});
+		}
 	}
 
 	private void updateFullName()
@@ -748,13 +832,46 @@ public class EntityMetaData extends StaticEntity
 
 	private void fillCachedAttrsRec(Iterable<AttributeMetaData> attrs)
 	{
-		attrs.forEach(attr -> {
+		for (AttributeMetaData attr : attrs)
+		{
 			cachedAttrs.put(attr.getName(), attr);
 			if (attr.getDataType() == COMPOUND)
 			{
 				fillCachedAttrsRec(attr.getAttributeParts());
 			}
-		});
+		}
+	}
+
+	private List<AttributeMetaData> getCachedOwnAtomicAttrs()
+	{
+		if (cachedOwnAtomicAttrs == null)
+		{
+			cachedOwnAtomicAttrs = new ArrayList<>();
+			fillCachedAtomicAttrsRec(getOwnAttributes());
+		}
+		return cachedOwnAtomicAttrs;
+	}
+
+	private void fillCachedAtomicAttrsRec(Iterable<AttributeMetaData> attrs)
+	{
+		for (AttributeMetaData attr : attrs)
+		{
+			if (attr.getDataType() == COMPOUND)
+			{
+				fillCachedAtomicAttrsRec(attr.getAttributeParts());
+			}
+			else
+			{
+				cachedOwnAtomicAttrs.add(attr);
+			}
+		}
+	}
+
+	private void invalidateCachedAttrs()
+	{
+		cachedAttrs = null;
+		cachedOwnAtomicAttrs = null;
+		cachedHasAttrWithExpession = null;
 	}
 
 	public enum AttributeRole

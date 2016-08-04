@@ -27,6 +27,8 @@ public class LanguageMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Language");
+		setDescription("Web application languages");
 		// 2 or 3 characters, alphanumeric, lowercase
 		addAttribute(CODE, ROLE_ID).setDescription("Lowercase ISO 639 alpha-2 or alpha-3 code")
 				.setValidationExpression("/^[a-z]{2,3}$/.test($('code').value())");
