@@ -1,17 +1,8 @@
 package org.molgenis.data.mapper.repository.impl;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.mapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
-
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
+import org.molgenis.data.*;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.MappingProjectMetaData;
@@ -21,7 +12,11 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.security.user.MolgenisUserService;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.mapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
 
 public class MappingProjectRepositoryImpl implements MappingProjectRepository
 {
@@ -80,9 +75,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	public List<MappingProject> getAllMappingProjects()
 	{
 		List<MappingProject> results = new ArrayList<>();
-		dataService.findAll(MAPPING_PROJECT).forEach(entity -> {
-			results.add(toMappingProject(entity));
-		});
+		dataService.findAll(MAPPING_PROJECT).forEach(entity -> results.add(toMappingProject(entity)));
 		return results;
 	}
 
@@ -90,9 +83,7 @@ public class MappingProjectRepositoryImpl implements MappingProjectRepository
 	public List<MappingProject> getMappingProjects(Query<Entity> q)
 	{
 		List<MappingProject> results = new ArrayList<>();
-		dataService.findAll(MAPPING_PROJECT, q).forEach(entity -> {
-			results.add(toMappingProject(entity));
-		});
+		dataService.findAll(MAPPING_PROJECT, q).forEach(entity -> results.add(toMappingProject(entity)));
 		return results;
 	}
 
