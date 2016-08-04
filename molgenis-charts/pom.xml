@@ -3,7 +3,7 @@
 	<parent>
 	  <groupId>org.molgenis</groupId>
 	  <artifactId>molgenis</artifactId>
-	  <version>1.22.0-ROW-LEVEL-SECURITY</version>
+	  <version>1.22.1-ROW-LEVEL-SECURITY-SNAPSHOT</version>
 	</parent>
 	<artifactId>molgenis-charts</artifactId>
 	<packaging>jar</packaging>
