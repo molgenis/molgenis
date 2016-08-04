@@ -1,5 +1,33 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.IdGenerator;
+import org.molgenis.data.UnknownEntityException;
+import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.semantic.LabeledResource;
+import org.molgenis.data.semantic.Relation;
+import org.molgenis.data.semantic.SemanticTag;
+import org.molgenis.data.semanticsearch.repository.TagRepository;
+import org.molgenis.data.semanticsearch.semantic.OntologyTag;
+import org.molgenis.data.semanticsearch.service.OntologyTagService;
+import org.molgenis.ontology.core.model.Ontology;
+import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.service.OntologyService;
+import org.molgenis.security.core.runas.RunAsSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
+
+import static com.google.common.collect.LinkedHashMultimap.create;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
@@ -8,47 +36,6 @@ import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.data.meta.model.TagMetaData.TAG;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.stream.Stream;
-
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
-import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.meta.model.PackageMetaData;
-import org.molgenis.data.meta.model.Tag;
-import org.molgenis.data.meta.model.TagMetaData;
-import org.molgenis.data.semantic.LabeledResource;
-import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semantic.SemanticTag;
-import org.molgenis.data.semanticsearch.repository.TagRepository;
-import org.molgenis.data.semanticsearch.semantic.OntologyTag;
-import org.molgenis.data.semanticsearch.service.OntologyTagService;
-import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.core.model.Ontology;
-import org.molgenis.ontology.core.model.OntologyTerm;
-import org.molgenis.ontology.core.service.OntologyService;
-import org.molgenis.security.core.runas.RunAsSystem;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.collect.Iterables;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 
 /**
  * Service to tag metadata with ontology terms.
@@ -108,7 +95,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	public Multimap<Relation, OntologyTerm> getTagsForAttribute(EntityMetaData entityMetaData,
 			AttributeMetaData attributeMetaData)
 	{
-		Multimap<Relation, OntologyTerm> tags = LinkedHashMultimap.<Relation, OntologyTerm>create();
+		Multimap<Relation, OntologyTerm> tags = create();
 		Entity entity = findAttributeEntity(entityMetaData.getName(), attributeMetaData.getName());
 		if (entity == null)
 		{
@@ -124,20 +111,19 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	}
 
 	@Override
-	public Iterable<SemanticTag<Package, OntologyTerm, Ontology>> getTagsForPackage(Package p)
+	public Iterable<SemanticTag<Package, OntologyTerm, Ontology>> getTagsForPackage(Package package_)
 	{
-		Entity packageEntity = dataService
-				.findOne(PACKAGE, new QueryImpl<Entity>().eq(PackageMetaData.FULL_NAME, p.getName()));
+		Entity packageEntity = dataService.findOneById(PACKAGE, package_.getIdValue());
 
 		if (packageEntity == null)
 		{
-			throw new UnknownEntityException("Unknown package [" + p.getName() + "]");
+			throw new UnknownEntityException("Unknown package [" + package_.getName() + "]");
 		}
 
 		List<SemanticTag<Package, OntologyTerm, Ontology>> tags = Lists.newArrayList();
 		for (Entity tagEntity : packageEntity.getEntities(PackageMetaData.TAGS))
 		{
-			tags.add(asTag(p, tagEntity));
+			tags.add(asTag(package_, tagEntity));
 		}
 
 		return tags;
@@ -176,7 +162,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		tag.setObjectIri(combinedOntologyTerm.getIRI());
 		dataService.add(TAG, tag);
 
-		Map<String, Entity> tags = Maps.<String, Entity>newHashMap();
+		Map<String, Entity> tags = Maps.newHashMap();
 		for (Entity attrTag : attributeEntity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
 			tags.put(attrTag.get(TagMetaData.OBJECT_IRI).toString(), attrTag);
