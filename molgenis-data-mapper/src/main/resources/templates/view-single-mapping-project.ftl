@@ -211,7 +211,6 @@
                     <div>
                         <label>Add source attribute</label>
                         <input name="addSourceAttribute" type="checkbox"/>
-                        <input type="hidden" name="_addSourceAttribute"/>
                     </div>
 
                     <input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
