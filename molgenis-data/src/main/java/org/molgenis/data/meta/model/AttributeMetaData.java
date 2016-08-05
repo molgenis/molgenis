@@ -562,4 +562,10 @@ public class AttributeMetaData extends StaticEntity
 	{
 		cachedDataType = null;
 	}
+
+	@Override
+	public String toString()
+	{
+		return "AttributeMetaData{" + "name=" + getName() + '}';
+	}
 }
