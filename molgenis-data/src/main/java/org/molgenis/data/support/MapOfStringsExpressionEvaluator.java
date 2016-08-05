@@ -1,14 +1,15 @@
 package org.molgenis.data.support;
 
-import java.util.Map;
-import java.util.Map.Entry;
-
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.SHALLOW_COPY_ATTRS;
 
 public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 {
@@ -47,7 +48,7 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 				{
 					throw new IllegalArgumentException("Unknown target attribute: " + entry.getKey() + '.');
 				}
-				AttributeMetaData amd = AttributeMetaData.newInstance(targetAttributeMetaData)
+				AttributeMetaData amd = AttributeMetaData.newInstance(targetAttributeMetaData, SHALLOW_COPY_ATTRS)
 						.setExpression(entry.getValue());
 				StringExpressionEvaluator evaluator = new StringExpressionEvaluator(amd, entityMeta);
 				builder.put(entry.getKey(), evaluator);

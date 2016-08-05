@@ -1,7 +1,6 @@
 package org.molgenis.data.support;
 
 import org.molgenis.data.*;
-import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
@@ -14,6 +13,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 /**
@@ -268,16 +268,13 @@ public class DataServiceImpl implements DataService
 	{
 		LOG.info("Creating a copy of " + repository.getName() + " repository, with ID: " + newRepositoryId
 				+ ", and label: " + newRepositoryLabel);
-		EntityMetaData emd = EntityMetaData.newInstance(repository.getEntityMetaData());
-		emd.setIdValue(null);
+		EntityMetaData emd = EntityMetaData.newInstance(repository.getEntityMetaData(), DEEP_COPY_ATTRS);
 		emd.setName(newRepositoryId);
 		emd.setLabel(newRepositoryLabel);
-		emd.getOwnAllAttributes().forEach(e -> e.setIdValue(null));
 
 		Repository<Entity> repositoryCopy = metaDataService.addEntityMeta(emd);
 		try
 		{
-
 			repositoryCopy.add(repository.findAll(query));
 			return repositoryCopy;
 		}

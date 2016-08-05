@@ -468,19 +468,6 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		}
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testTargetMetaNotCompatible()
-	{
-
-		MappingProject project = createMappingProjectWithMappings();
-		MappingTarget target = project.getMappingTarget(TARGET_HOP_ENTITY);
-
-		// apply mapping to the wrong target
-		when(dataService.getRepository(SOURCE_GENE_ENTITY)).thenReturn(geneRepo);
-		when(dataService.hasRepository(SOURCE_GENE_ENTITY)).thenReturn(true);
-		mappingService.applyMappings(target, geneMetaData.getName());
-	}
-
 	private MappingProject createMappingProjectWithMappings()
 	{
 		MappingProject mappingProject = mappingService.addMappingProject("TestRun", user, TARGET_HOP_ENTITY);

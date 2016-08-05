@@ -9,6 +9,7 @@ import ch.qos.logback.core.ConsoleAppender;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
+import org.molgenis.annotation.cmd.exception.CmdLineAnnotationException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.annotation.core.EffectsAnnotator;
@@ -16,6 +17,7 @@ import org.molgenis.data.annotation.core.RefEntityAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.core.exception.AnnotationException;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
@@ -327,11 +329,12 @@ public class CmdLineAnnotator
 					.addAnnotatorMetadataToRepositories(vcfRepo.getEntityMetaData(), annotator.getOutputAttributes());
 			if (annotator instanceof EffectsAnnotator)
 			{
-				entitiesToAnnotate = vcfUtils
-						.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT, StreamSupport.stream(vcfRepo.spliterator(), false));
+
+				entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT,
+						StreamSupport.stream(vcfRepo.spliterator(), false));
 
 				// Add metadata to repository that will be annotated, instead of repository with variants
-				for(Entity entity : entitiesToAnnotate)
+				for (Entity entity : entitiesToAnnotate)
 				{
 					entity.getEntityMetaData().addAttributes(annotator.getOutputAttributes());
 				}
@@ -340,19 +343,28 @@ public class CmdLineAnnotator
 			{
 				entitiesToAnnotate = vcfRepo;
 			}
-			Iterator<Entity> annotatedRecords = annotator.annotate(entitiesToAnnotate, update);
 
-			if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
+			try
 			{
-				annotatedRecords = vcfUtils.reverseXrefMrefRelation(annotatedRecords);
+				// these methods wrap iterators around the entities to make it streaming, actual annotation starts later
+				Iterator<Entity> annotatedRecords = annotator.annotate(entitiesToAnnotate, update);
+				if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
+				{
+					annotatedRecords = vcfUtils.reverseXrefMrefRelation(annotatedRecords);
+				}
+
+				while (annotatedRecords.hasNext())
+				{
+					// annotation starts here
+					Entity annotatedRecord = annotatedRecords.next();
+					VcfWriterUtils.writeToVcf(annotatedRecord, VcfUtils.getAtomicAttributesFromList(outputMetaData),
+							attributesToInclude, outputVCFWriter);
+					outputVCFWriter.newLine();
+				}
 			}
-
-			while (annotatedRecords.hasNext())
+			catch (AnnotationException ae)
 			{
-				Entity annotatedRecord = annotatedRecords.next();
-				VcfWriterUtils.writeToVcf(annotatedRecord, VcfUtils.getAtomicAttributesFromList(outputMetaData),
-						attributesToInclude, outputVCFWriter);
-				outputVCFWriter.newLine();
+				throw new CmdLineAnnotationException(ae);
 			}
 
 		}

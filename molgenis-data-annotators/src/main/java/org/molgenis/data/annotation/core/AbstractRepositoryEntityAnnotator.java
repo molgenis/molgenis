@@ -1,6 +1,7 @@
 package org.molgenis.data.annotation.core;
 
 import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.core.exception.AnnotationException;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,13 +50,9 @@ public abstract class AbstractRepositoryEntityAnnotator extends AbstractReposito
 							sourceEntity = source.next();
 							results = annotateEntity(sourceEntity, updateMode);
 						}
-						catch (IOException e)
+						catch (Exception e)
 						{
-							throw new RuntimeException(e);
-						}
-						catch (InterruptedException e)
-						{
-							throw new RuntimeException(e);
+							throw new AnnotationException(sourceEntity, current + 1, getRequiredAttributes(), getSimpleName(), e);
 						}
 
 						size = results.size();

@@ -48,12 +48,6 @@ public class MetaDataServiceImpl implements MetaDataService
 	private final RepositoryCollectionRegistry repoCollectionRegistry;
 	private final SystemEntityMetaDataRegistry systemEntityMetaRegistry;
 
-	// Table names in the source
-	public static final String EMX_ENTITIES = "entities";
-	public static final String EMX_PACKAGES = "packages";
-	public static final String EMX_TAGS = "tags";
-	public static final String EMX_ATTRIBUTES = "attributes";
-
 	@Autowired
 	public MetaDataServiceImpl(DataService dataService, RepositoryCollectionRegistry repoCollectionRegistry,
 			SystemEntityMetaDataRegistry systemEntityMetaRegistry)

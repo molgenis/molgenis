@@ -1,17 +1,5 @@
 package org.molgenis.ontology.sorta.repo;
 
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
-
-import java.io.File;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.csv.CsvRepository;
@@ -25,6 +13,15 @@ import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
+
+import java.io.File;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 public class SortaCsvRepository extends AbstractRepository
 {
@@ -61,7 +58,7 @@ public class SortaCsvRepository extends AbstractRepository
 		{
 			AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
 
-			entityMetaData = EntityMetaData.newInstance(csvRepository.getEntityMetaData());
+			entityMetaData = EntityMetaData.newInstance(csvRepository.getEntityMetaData(), DEEP_COPY_ATTRS);
 			entityMetaData.setName(entityName);
 			entityMetaData.setLabel(entityLabel);
 			entityMetaData
