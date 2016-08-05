@@ -23,7 +23,7 @@ import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DE
  */
 public class QueryGenerator implements QueryPartGenerator
 {
-	private static final String ATTRIBUTE_SEPARATOR = ".";
+	static final String ATTRIBUTE_SEPARATOR = ".";
 
 	@Override
 	public void generate(SearchRequestBuilder searchRequestBuilder, Query<Entity> query, EntityMetaData entityMetaData)
