@@ -39,6 +39,13 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserisSystem;
 import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
 
+/**
+ * Decorator for the entity meta data repository:
+ * - filters requested entities based on the permissions of the current user.
+ * - applies updates to the repository collection for entity meta data adds/updates/deletes
+ * <p>
+ * TODO replace permission based entity filtering with generic row-level security once available
+ */
 public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaData>
 {
 	private final Repository<EntityMetaData> decoratedRepo;
@@ -115,7 +122,9 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		else
 		{
 			// ignore query offset and page size
-			Stream<EntityMetaData> entityMetaDatas = decoratedRepo.findAll(q);
+			Query<EntityMetaData> qWithoutLimitOffset = new QueryImpl<>(q);
+			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
+			Stream<EntityMetaData> entityMetaDatas = decoratedRepo.findAll(qWithoutLimitOffset);
 			return filterCountPermission(entityMetaDatas).count();
 		}
 	}
@@ -576,6 +585,5 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 					.collect(toList());
 			consumer.accept(filteredEntityMetas);
 		}
-
 	}
 }

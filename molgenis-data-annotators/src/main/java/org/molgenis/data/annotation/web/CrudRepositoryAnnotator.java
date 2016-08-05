@@ -3,6 +3,8 @@ package org.molgenis.data.annotation.web;
 import org.molgenis.data.*;
 import org.molgenis.data.annotation.core.RefEntityAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
+import org.molgenis.data.annotation.core.exception.AnnotationException;
+import org.molgenis.data.annotation.core.exception.UiAnnotationException;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -86,6 +88,11 @@ public class CrudRepositoryAnnotator
 
 				iterateOverEntitiesAndAnnotate(dataService.getRepository(repository.getName()), annotator, action);
 			}
+		}
+		catch (AnnotationException ae)
+		{
+			deleteResultEntity(annotator, targetMetaData);
+			throw new UiAnnotationException(ae);
 		}
 		catch (Exception e)
 		{

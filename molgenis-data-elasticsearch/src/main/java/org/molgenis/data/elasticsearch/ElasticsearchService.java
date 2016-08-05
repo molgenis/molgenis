@@ -53,8 +53,6 @@ public class ElasticsearchService implements SearchService
 
 	private static final int BATCH_SIZE = 1000;
 
-	public static final String CRUD_TYPE_FIELD_NAME = "MolgenisCrudType";
-
 	public enum IndexingMode
 	{
 		ADD, UPDATE

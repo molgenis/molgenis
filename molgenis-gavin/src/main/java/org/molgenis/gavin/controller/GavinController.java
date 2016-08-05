@@ -7,6 +7,7 @@ import org.molgenis.gavin.job.GavinJob;
 import org.molgenis.gavin.job.GavinJobExecution;
 import org.molgenis.gavin.job.GavinJobFactory;
 import org.molgenis.gavin.job.meta.GavinJobExecutionFactory;
+import org.molgenis.gavin.job.meta.GavinJobExecutionMetaData;
 import org.molgenis.security.user.UserAccountService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
@@ -112,7 +113,7 @@ public class GavinController extends MolgenisPluginController
 
 		executorService.submit(gavinJob);
 
-		return "/api/v2/GavinJobExecution/" + gavinJobIdentifier;
+		return "/api/v2/" + gavinJobExecution.getEntityMetaData().getName() + "/" + gavinJobIdentifier;
 	}
 
 	/**

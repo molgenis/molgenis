@@ -255,4 +255,10 @@ public class Package extends StaticEntity
 			set(PackageMetaData.FULL_NAME, fullName);
 		}
 	}
+
+	@Override
+	public String toString()
+	{
+		return "Package{" + "name=" + getName() + '}';
+	}
 }
