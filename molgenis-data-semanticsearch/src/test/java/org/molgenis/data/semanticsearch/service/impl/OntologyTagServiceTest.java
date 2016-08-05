@@ -219,9 +219,9 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 
 		ontologyTagService.removeAttributeTag(emd, geneAnnotationTag);
 
-		AttributeMetaData updatedEntity = attrFactory.create();
-		updatedEntity.setTags(asList(chromosomeNameTagEntity, geneAnnotationTagEntity));
-		verify(dataService).update(ATTRIBUTE_META_DATA, updatedEntity);
+		ArgumentCaptor<AttributeMetaData> captor = forClass(AttributeMetaData.class);
+		verify(dataService, times(1)).update(eq(ATTRIBUTE_META_DATA), captor.capture());
+		assertEquals(captor.getValue().getTags(), asList(chromosomeNameTagEntity, geneAnnotationTagEntity));
 	}
 
 	@Test
