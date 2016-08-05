@@ -176,8 +176,7 @@ public class MappingServiceImpl implements MappingService
 		targetMetaData.setLabel(entityName);
 		targetMetaData.addAttribute("source");
 
-		// add a new repository if the target repo doesn't exist, or check if the target repository is compatible with
-		// the result of the mappings
+		// add a new repository if the target repo doesn't exist
 		Repository targetRepo;
 		if (!dataService.hasRepository(entityName))
 		{
@@ -196,12 +195,6 @@ public class MappingServiceImpl implements MappingService
 		else
 		{
 			targetRepo = dataService.getRepository(entityName);
-
-			if (!isTargetMetaCompatible(targetRepo, targetMetaData))
-			{
-				throw new MolgenisDataException(
-						"Target entity " + entityName + " exists but is not compatible with the target mappings.");
-			}
 		}
 
 		try
@@ -219,39 +212,6 @@ public class MappingServiceImpl implements MappingService
 		}
 	}
 
-	/**
-	 * Compares the attributes of the target repository with the results of the mapping and sees if they're compatible.
-	 * The repository is compatible when all attributes resulting from the mapping can be written to it.
-	 *
-	 * @param targetRepository      the target repository
-	 * @param mappingTargetMetaData the metadata of the mapping result entity
-	 * @return true if the mapping can be written to the target repository
-	 */
-	private boolean isTargetMetaCompatible(Repository targetRepository, EntityMetaData mappingTargetMetaData)
-	{
-		Map<String, AttributeMetaData> targetRepoAttributeMap = Maps.newHashMap();
-
-		EntityMetaData targetRepoMetaData = targetRepository.getEntityMetaData();
-		targetRepoMetaData = removeUpdateAttributeIfRowLevelSecured(targetRepoMetaData);
-
-		targetRepoMetaData.getAtomicAttributes().forEach(attr -> targetRepoAttributeMap.put(attr.getName(), attr));
-
-		for (AttributeMetaData mappingTargetAttr : mappingTargetMetaData.getAtomicAttributes())
-		{
-			String mappingTargetAttrName = mappingTargetAttr.getName();
-			if (targetRepoAttributeMap.containsKey(mappingTargetAttrName) && targetRepoAttributeMap
-					.get(mappingTargetAttrName).isSameAs(mappingTargetAttr))
-			{
-				continue;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-
 	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository targetRepo)
 	{
 		for (EntityMapping sourceMapping : mappingTarget.getEntityMappings())
@@ -265,43 +225,19 @@ public class MappingServiceImpl implements MappingService
 		EntityMetaData targetMetaData = targetRepo.getEntityMetaData();
 		Repository sourceRepo = dataService.getRepository(sourceMapping.getName());
 
-		// collect the entities to delete
-		List<Entity> deleteEntities = targetRepo.findAll(new QueryImpl().eq("source", sourceRepo.getName()))
-				.filter(Objects::nonNull).collect(Collectors.toList());
-
-		HugeMap<Object, Iterable<Entity>> updatePermissions = new HugeMap<>();
-		if (targetMetaData.isRowLevelSecured())
-		{
-			// collect all the row level security permissions so we can apply them later
-			RunAsSystemProxy.runAsSystem(() -> deleteEntities.forEach(
-					entity -> updatePermissions.put(entity.getIdValue(), entity.getEntities(UPDATE_ATTRIBUTE))));
-		}
-
-		// remove all target entities from this source so we 'keep track of' deletes, inserts and updates
-		targetRepo.delete(deleteEntities.stream());
-
-		Iterator<Entity> sourceEntities = sourceRepo.iterator();
-		List<MapEntity> mappedEntities = Lists.newArrayList();
-		while (sourceEntities.hasNext())
-		{
-			Entity sourceEntity = sourceEntities.next();
+		sourceRepo.iterator().forEachRemaining(sourceEntity -> {
 			MapEntity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
 					sourceMapping.getSourceEntityMetaData(), targetRepo);
 
-			if (targetMetaData.isRowLevelSecured())
+			if (targetRepo.findOne(mappedEntity.getIdValue()) == null)
 			{
-				// re-apply the permissions to each entity
-				mappedEntity.set(UPDATE_ATTRIBUTE, updatePermissions.get(mappedEntity.getIdValue()));
+				targetRepo.add(mappedEntity);
 			}
-
-			mappedEntities.add(mappedEntity);
-
-			if (mappedEntities.size() == BATCH_SIZE || !sourceEntities.hasNext())
+			else
 			{
-				targetRepo.add(mappedEntities.stream());
-				mappedEntities = Lists.newArrayList();
+				targetRepo.update(mappedEntity);
 			}
-		}
+		});
 	}
 
 	private MapEntity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity,

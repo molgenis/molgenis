@@ -54,7 +54,7 @@
     								<td>${feedbackRow.value?datetime}</td>
     							<#elseif feedbackRow.value?is_sequence>
 									<td><#list feedbackRow.value as value>
-									    ${value}
+									    <#if value?has_content>${value?html}</#if>
 									</#list>
 								</td>
 								<#else>
