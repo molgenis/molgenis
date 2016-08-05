@@ -856,4 +856,10 @@ public class EntityMetaData extends StaticEntity
 	{
 		ROLE_ID, ROLE_LABEL, ROLE_LOOKUP
 	}
+
+	@Override
+	public String toString()
+	{
+		return "EntityMetaData{" + "name=" + getName() + '}';
+	}
 }

@@ -166,10 +166,13 @@ public class EntityMetaDataRepositoryDecoratorTest
 		String entityMeta1Name = "entity1";
 		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta1Name).getMock();
 		Query<EntityMetaData> q = new QueryImpl<>();
-		when(decoratedRepo.findAll(q)).thenReturn(Stream.of(entityMeta0, entityMeta1));
+		ArgumentCaptor<Query<EntityMetaData>> queryCaptor = forClass((Class) Query.class);
+		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityMeta0, entityMeta1));
 		when(permissionService.hasPermissionOnEntity(entityMeta0Name, COUNT)).thenReturn(false);
 		when(permissionService.hasPermissionOnEntity(entityMeta1Name, COUNT)).thenReturn(true);
 		assertEquals(repo.count(q), 1L);
+		assertEquals(queryCaptor.getValue().getOffset(), 0);
+		assertEquals(queryCaptor.getValue().getPageSize(), Integer.MAX_VALUE);
 	}
 
 	@Test
