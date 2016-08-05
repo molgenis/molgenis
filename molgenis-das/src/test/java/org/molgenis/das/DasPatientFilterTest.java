@@ -1,30 +1,23 @@
 package org.molgenis.das;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.AssertJUnit.assertEquals;
-
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import org.mockito.ArgumentCaptor;
+import org.molgenis.das.impl.DasURLFilter;
+import org.testng.annotations.BeforeTest;
+import org.testng.annotations.Test;
+import uk.ac.ebi.mydas.exceptions.DataSourceException;
+import uk.ac.ebi.mydas.exceptions.UnimplementedFeatureException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.MalformedURLException;
 
-import org.mockito.ArgumentCaptor;
-import org.molgenis.das.impl.DasURLFilter;
-import org.testng.annotations.BeforeTest;
-import org.testng.annotations.Test;
-
-import uk.ac.ebi.mydas.exceptions.DataSourceException;
-import uk.ac.ebi.mydas.exceptions.UnimplementedFeatureException;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
+import static org.testng.AssertJUnit.assertEquals;
 
 public class DasPatientFilterTest
 {
@@ -39,9 +32,6 @@ public class DasPatientFilterTest
 	@BeforeTest
 	public void setUp() throws MalformedURLException
 	{
-		Map<URL, String> linkout = new HashMap<URL, String>();
-		linkout.put(new URL("http://www.molgenis.org/"), "Link");
-
 		request = mock(HttpServletRequest.class);
 		response = mock(HttpServletResponse.class);
 		chain = mock(FilterChain.class);
@@ -57,7 +47,7 @@ public class DasPatientFilterTest
 		when(requestNoPatient.getRequestDispatcher("/das/col7a1/features")).thenReturn(requestDispatcher);
 	}
 
-	@Test()
+	@Test
 	public void doFilterPatientTest()
 			throws UnimplementedFeatureException, DataSourceException, IOException, ServletException
 	{
@@ -68,7 +58,7 @@ public class DasPatientFilterTest
 		assertEquals("3,dasdataset_502:48618447,48640609;maxbins=636", argumentRequest.getValue().getQueryString());
 	}
 
-	// @Test()
+	@Test
 	public void doFilterNoPatientTest()
 			throws UnimplementedFeatureException, DataSourceException, IOException, ServletException
 	{

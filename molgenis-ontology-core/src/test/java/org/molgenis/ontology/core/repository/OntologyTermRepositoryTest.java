@@ -1,46 +1,57 @@
 package org.molgenis.ontology.core.repository;
 
-import static com.google.common.collect.ImmutableSet.of;
-import static java.util.Arrays.asList;
-import static org.mockito.ArgumentCaptor.forClass;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ID;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_IRI;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_NAME;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM;
-import static org.testng.Assert.assertEquals;
-
-import java.util.List;
-import java.util.stream.Stream;
-
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
+import org.molgenis.data.QueryRule;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData;
 import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
+import java.util.List;
+import java.util.stream.Stream;
+
+import static com.google.common.collect.ImmutableSet.of;
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.*;
+import static org.testng.Assert.assertEquals;
+
 @ContextConfiguration(classes = OntologyTermRepositoryTest.Config.class)
-public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
+public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
 	DataService dataService;
 
 	@Autowired
 	OntologyTermRepository ontologyTermRepository;
+
+	@Autowired
+	private OntologyMetaData ontologyMetaData;
+
+	@Autowired
+	private OntologyTermMetaData ontologyTermMetaData;
+
+	@Autowired
+	private OntologyTermNodePathMetaData ontologyTermNodePathMetaData;
 
 	private Entity ontologyTermEntity;
 
@@ -90,7 +101,7 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		when(ontologyTermEntity2.get(ONTOLOGY)).thenReturn("34");
 		when(ontologyTermEntity2.getString(ONTOLOGY_TERM_IRI)).thenReturn("http://www.test.nl/iri/2");
 		when(ontologyTermEntity2.getString(ONTOLOGY_TERM_NAME)).thenReturn("Weight");
-		when(ontologyTermEntity2.get(ONTOLOGY_TERM_SYNONYM)).thenReturn(asList(synonymEntity4));
+		when(ontologyTermEntity2.get(ONTOLOGY_TERM_SYNONYM)).thenReturn(singletonList(synonymEntity4));
 
 		ArgumentCaptor<Query<Entity>> queryCaptor = forClass((Class) Query.class);
 		when(dataService.findAll(eq(ONTOLOGY_TERM), queryCaptor.capture()))
@@ -99,8 +110,8 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		List<OntologyTerm> exactOntologyTerms = ontologyTermRepository
 				.findExcatOntologyTerms(asList("1", "2"), of("weight"), 100);
 
-		assertEquals(exactOntologyTerms,
-				asList(OntologyTerm.create("http://www.test.nl/iri/2", "Weight", null, asList("Weight"))));
+		assertEquals(exactOntologyTerms, singletonList(
+				OntologyTerm.create("http://www.test.nl/iri/2", "Weight", null, singletonList("Weight"))));
 	}
 
 	@Test
@@ -112,55 +123,54 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 		List<OntologyTerm> terms = ontologyTermRepository
 				.findOntologyTerms(asList("1", "2"), of("term1", "term2", "term3"), 100);
 
-		assertEquals(terms,
-				asList(OntologyTerm.create("http://www.test.nl/iri", "Ontology term", null, asList("Ontology term"))));
+		assertEquals(terms, singletonList(
+				OntologyTerm.create("http://www.test.nl/iri", "Ontology term", null, singletonList("Ontology term"))));
 		assertEquals(queryCaptor.getValue().toString(),
 				"rules=['ontology' IN [1, 2], AND, ('ontologyTermSynonym' FUZZY_MATCH 'term1', OR, 'ontologyTermSynonym' FUZZY_MATCH 'term2', OR, 'ontologyTermSynonym' FUZZY_MATCH 'term3')], pageSize=100");
 	}
 
-	//		@Test
-	//		public void testGetChildOntologyTermsByNodePath()
-	//		{
-	//			Entity ontologyEntity = new MapEntity(ImmutableMap
-	//					.of(OntologyMetaData.ONTOLOGY_IRI, "http://www.molgenis.org", OntologyMetaData.ONTOLOGY_NAME,
-	//							"molgenis"));
-	//
-	//			Entity nodePathEntity_1 = new MapEntity(
-	//					ImmutableMap.of(OntologyTermNodePathMetaData.NODE_PATH, "0[0].1[1]"));
-	//			Entity nodePathEntity_2 = new MapEntity(
-	//					ImmutableMap.of(OntologyTermNodePathMetaData.NODE_PATH, "0[0].1[1].0[2]"));
-	//			Entity nodePathEntity_3 = new MapEntity(
-	//					ImmutableMap.of(OntologyTermNodePathMetaData.NODE_PATH, "0[0].1[1].1[2]"));
-	//
-	//			MapEntity ontologyTerm_2 = new MapEntity();
-	//			ontologyTerm_2.set(ONTOLOGY, ontologyEntity);
-	//			ontologyTerm_2.set(ONTOLOGY_TERM_IRI, "iri 2");
-	//			ontologyTerm_2.set(ONTOLOGY_TERM_NAME, "name 2");
-	//			ontologyTerm_2
-	//					.set(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, asList(nodePathEntity_1, nodePathEntity_2));
-	//			ontologyTerm_2.set(ONTOLOGY_TERM_SYNONYM, Collections.emptyList());
-	//
-	//			MapEntity ontologyTerm_3 = new MapEntity();
-	//			ontologyTerm_3.set(ONTOLOGY, ontologyEntity);
-	//			ontologyTerm_3.set(ONTOLOGY_TERM_IRI, "iri 3");
-	//			ontologyTerm_3.set(ONTOLOGY_TERM_NAME, "name 3");
-	//			ontologyTerm_3.set(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, asList(nodePathEntity_3));
-	//			ontologyTerm_3.set(ONTOLOGY_TERM_SYNONYM, Collections.emptyList());
-	//
-	//			when(dataService.findAll(ONTOLOGY_TERM, new QueryImpl<Entity>(
-	//					new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, QueryRule.Operator.FUZZY_MATCH, "\"0[0].1[1]\""))
-	//					.and().eq(ONTOLOGY, ontologyEntity)))
-	//					.thenReturn(Stream.of(ontologyTerm_2, ontologyTerm_3));
-	//
-	//			List<OntologyTerm> childOntologyTermsByNodePath = ontologyTermRepository
-	//					.getChildOntologyTermsByNodePath(ontologyEntity, nodePathEntity_1);
-	//
-	//			assertEquals(childOntologyTermsByNodePath.size(), 2);
-	//			assertEquals(childOntologyTermsByNodePath.get(0),
-	//					OntologyTerm.create("iri 2", "name 2", null, asList("name 2")));
-	//			assertEquals(childOntologyTermsByNodePath.get(1),
-	//					OntologyTerm.create("iri 3", "name 3", null, asList("name 3")));
-	//		}
+	@Test
+	public void testGetChildOntologyTermsByNodePath()
+	{
+		Entity ontologyEntity = new DynamicEntity(ontologyMetaData);
+		ontologyEntity.set(OntologyMetaData.ONTOLOGY_IRI, "http://www.molgenis.org");
+		ontologyEntity.set(OntologyMetaData.ONTOLOGY_NAME, "molgenis");
+
+		Entity nodePathEntity_1 = new DynamicEntity(ontologyTermNodePathMetaData);
+		nodePathEntity_1.set(OntologyTermNodePathMetaData.NODE_PATH, "0[0].1[1]");
+		Entity nodePathEntity_2 = new DynamicEntity(ontologyTermNodePathMetaData);
+		nodePathEntity_2.set(OntologyTermNodePathMetaData.NODE_PATH, "0[0].1[1].0[2]");
+		Entity nodePathEntity_3 = new DynamicEntity(ontologyTermNodePathMetaData);
+		nodePathEntity_3.set(OntologyTermNodePathMetaData.NODE_PATH, "0[0].1[1].1[2]");
+
+		Entity ontologyTerm_2 = new DynamicEntity(ontologyTermMetaData);
+		ontologyTerm_2.set(ONTOLOGY, ontologyEntity);
+		ontologyTerm_2.set(ONTOLOGY_TERM_IRI, "iri 2");
+		ontologyTerm_2.set(ONTOLOGY_TERM_NAME, "name 2");
+		ontologyTerm_2.set(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, asList(nodePathEntity_1, nodePathEntity_2));
+		ontologyTerm_2.set(ONTOLOGY_TERM_SYNONYM, emptyList());
+
+		Entity ontologyTerm_3 = new DynamicEntity(ontologyTermMetaData);
+		ontologyTerm_3.set(ONTOLOGY, ontologyEntity);
+		ontologyTerm_3.set(ONTOLOGY_TERM_IRI, "iri 3");
+		ontologyTerm_3.set(ONTOLOGY_TERM_NAME, "name 3");
+		ontologyTerm_3.set(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, singletonList(nodePathEntity_3));
+		ontologyTerm_3.set(ONTOLOGY_TERM_SYNONYM, emptyList());
+
+		when(dataService.findAll(ONTOLOGY_TERM, new QueryImpl<>(
+				new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH, QueryRule.Operator.FUZZY_MATCH,
+						"\"0[0].1[1]\"")).and().eq(ONTOLOGY, ontologyEntity)))
+				.thenReturn(Stream.of(ontologyTerm_2, ontologyTerm_3));
+
+		List<OntologyTerm> childOntologyTermsByNodePath = ontologyTermRepository
+				.getChildOntologyTermsByNodePath(ontologyEntity, nodePathEntity_1);
+
+		assertEquals(childOntologyTermsByNodePath.size(), 2);
+		assertEquals(childOntologyTermsByNodePath.get(0),
+				OntologyTerm.create("iri 2", "name 2", null, singletonList("name 2")));
+		assertEquals(childOntologyTermsByNodePath.get(1),
+				OntologyTerm.create("iri 3", "name 3", null, singletonList("name 3")));
+	}
 
 	@Test
 	public void testCalculateNodePathDistance()
@@ -191,10 +201,11 @@ public class OntologyTermRepositoryTest extends AbstractTestNGSpringContextTests
 
 		OntologyTerm ontologyTerm = ontologyTermRepository.getOntologyTerm(iris);
 		assertEquals(ontologyTerm,
-				OntologyTerm.create("http://www.test.nl/iri", "Ontology term", asList("Ontology term")));
+				OntologyTerm.create("http://www.test.nl/iri", "Ontology term", singletonList("Ontology term")));
 	}
 
 	@Configuration
+	@ComponentScan({ "org.molgenis.ontology.core.meta", "org.molgenis.ontology.core.model" })
 	public static class Config
 	{
 		@Bean
