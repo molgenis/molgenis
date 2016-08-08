@@ -1,38 +1,18 @@
 package org.molgenis.data.mapper.service.impl;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.DECIMAL;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.PostConstruct;
-
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.ManageableRepositoryCollection;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.mapper.config.MappingConfig;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
-import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.repository.impl.AttributeMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.EntityMappingRepositoryImpl;
 import org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl;
@@ -55,7 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.TestingAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -63,16 +42,20 @@ import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import javax.annotation.PostConstruct;
+import java.util.List;
+import java.util.Set;
 
-@ContextConfiguration(classes =
-{ MappingServiceImplTest.Config.class, MappingConfig.class })
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.*;
+import static org.molgenis.MolgenisFieldTypes.DECIMAL;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.springframework.security.core.context.SecurityContextHolder.getContext;
+import static org.testng.Assert.*;
+
+@ContextConfiguration(classes = { MappingServiceImplTest.Config.class, MappingConfig.class })
 public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 {
-	@Autowired
-	private ManageableRepositoryCollection repoCollection;
-
 	@Autowired
 	private DataServiceImpl dataService;
 
@@ -88,15 +71,9 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 	@Autowired
 	private IdGenerator idGenerator;
 
-	@Autowired
-	private MappingProjectRepository mappingProjectRepository;
-
 	private MolgenisUser user;
-
 	private DefaultEntityMetaData hopMetaData;
-
 	private DefaultEntityMetaData geneMetaData;
-
 	private DefaultEntityMetaData exonMetaData;
 
 	private final UuidGenerator uuidGenerator = new UuidGenerator();
@@ -141,14 +118,14 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		exon.deleteAll(); // refresh
 		MapEntity geneEntity = new MapEntity(exonMetaData);
 		geneEntity.set("id", "A");
-		geneEntity.set("basepairs", new Double(12345));
+		geneEntity.set("basepairs", 12345d);
 		exon.add(geneEntity);
 
 		dataService.getEntityNames().forEach(dataService::removeRepository);
 
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("userName", null);
 		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
+		getContext().setAuthentication(authentication);
 
 	}
 
@@ -185,8 +162,8 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		MappingProject mappingProject = createMappingProjectWithMappings("testCloneMappingProject");
 		mappingService.updateMappingProject(mappingProject);
 
-		MappingProject clonedMappingProject = mappingService.cloneMappingProject(mappingProject.getIdentifier(),
-				"Clone of TestRun");
+		MappingProject clonedMappingProject = mappingService
+				.cloneMappingProject(mappingProject.getIdentifier(), "Clone of TestRun");
 
 		List<MappingTarget> mappingTargets = mappingProject.getMappingTargets();
 		List<MappingTarget> clonedMappingTargets = clonedMappingProject.getMappingTargets();
@@ -276,7 +253,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		assertEquals(retrieved.getMappingTarget("HopEntity").getMappingForSource("Gene"), mapping);
 	}
 
-	@Test
+	@Test(expectedExceptions = IllegalStateException.class)
 	public void testAddExistingSource()
 	{
 		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
@@ -286,14 +263,8 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 
 		mappingService.updateMappingProject(mappingProject);
 		MappingProject retrieved = mappingService.getMappingProject(mappingProject.getIdentifier());
-		try
-		{
-			retrieved.getMappingTarget("HopEntity").addSource(geneMetaData);
-			fail("Expected exception");
-		}
-		catch (IllegalStateException expected)
-		{
-		}
+
+		retrieved.getMappingTarget("HopEntity").addSource(geneMetaData);
 	}
 
 	@Test
@@ -311,20 +282,19 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 
 		MapEntity koetje1 = new MapEntity(expectedMetadata);
 		koetje1.set("identifier", "1");
-		koetje1.set("height", new Double(2));
+		koetje1.set("height", 2d);
 		koetje1.set("source", "Gene");
 		MapEntity koetje2 = new MapEntity(expectedMetadata);
 		koetje2.set("identifier", "2");
-		koetje2.set("height", new Double(4));
+		koetje2.set("height", 4d);
 		koetje2.set("source", "Gene");
 		MapEntity koetje3 = new MapEntity(expectedMetadata);
 		koetje3.set("identifier", "3");
-		koetje3.set("height", new Double(6));
+		koetje3.set("height", 6d);
 		koetje3.set("source", "Gene");
 
-		assertEquals(created, ImmutableSet.<Entity> of(koetje1, koetje2, koetje3));
-		verify(permissionSystemService).giveUserEntityPermissions(SecurityContextHolder.getContext(),
-				Arrays.asList(entityName));
+		assertEquals(created, ImmutableSet.<Entity>of(koetje1, koetje2, koetje3));
+		verify(permissionSystemService).giveUserEntityPermissions(getContext(), singletonList(entityName));
 	}
 
 	/**
@@ -342,7 +312,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		// add an entity to the source
 		MapEntity geneEntity = new MapEntity(geneMetaData);
 		geneEntity.set("id", "4");
-		geneEntity.set("length", new Double(8));
+		geneEntity.set("length", 8d);
 		dataService.add(geneMetaData.getName(), geneEntity);
 
 		// apply mapping again
@@ -356,22 +326,22 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 
 		MapEntity expected1 = new MapEntity(expectedMetadata);
 		expected1.set("identifier", "1");
-		expected1.set("height", new Double(2));
+		expected1.set("height", 2d);
 		expected1.set("source", "Gene");
 		MapEntity expected2 = new MapEntity(expectedMetadata);
 		expected2.set("identifier", "2");
-		expected2.set("height", new Double(4));
+		expected2.set("height", 4d);
 		expected2.set("source", "Gene");
 		MapEntity expected3 = new MapEntity(expectedMetadata);
 		expected3.set("identifier", "3");
-		expected3.set("height", new Double(6));
+		expected3.set("height", 6d);
 		expected3.set("source", "Gene");
 		MapEntity expected4 = new MapEntity(expectedMetadata);
 		expected4.set("identifier", "4");
-		expected4.set("height", new Double(8));
+		expected4.set("height", 8d);
 		expected4.set("source", "Gene");
 
-		assertEquals(created, ImmutableSet.<Entity> of(expected1, expected2, expected3, expected4));
+		assertEquals(created, ImmutableSet.<Entity>of(expected1, expected2, expected3, expected4));
 	}
 
 	/**
@@ -402,7 +372,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 
 		MapEntity expected1 = new MapEntity(expectedMetadata);
 		expected1.set("identifier", "1");
-		expected1.set("height", new Double(2));
+		expected1.set("height", 2d);
 		expected1.set("source", "Gene");
 		MapEntity expected2 = new MapEntity(expectedMetadata);
 		expected2.set("identifier", "2");
@@ -410,14 +380,14 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		expected2.set("source", "Gene");
 		MapEntity expected3 = new MapEntity(expectedMetadata);
 		expected3.set("identifier", "3");
-		expected3.set("height", new Double(6));
+		expected3.set("height", 6d);
 		expected3.set("source", "Gene");
 
-		assertEquals(created, ImmutableSet.<Entity> of(expected1, expected2, expected3));
+		assertEquals(created, ImmutableSet.<Entity>of(expected1, expected2, expected3));
 	}
 
 	/**
-	 * Removing an entity in the source and applying the mapping again should also delete this entity in the target.
+	 * Deleting entities from a source should not affect a created mapping
 	 */
 	@Test
 	public void testDelete()
@@ -442,23 +412,28 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 
 		MapEntity expected1 = new MapEntity(expectedMetadata);
 		expected1.set("identifier", "1");
-		expected1.set("height", new Double(2));
+		expected1.set("height", 2d);
 		expected1.set("source", "Gene");
+		MapEntity expected2 = new MapEntity(expectedMetadata);
+		expected2.set("identifier", "2");
+		expected2.set("height", 4d);
+		expected2.set("source", "Gene");
 		MapEntity expected3 = new MapEntity(expectedMetadata);
 		expected3.set("identifier", "3");
-		expected3.set("height", new Double(6));
+		expected3.set("height", 6d);
 		expected3.set("source", "Gene");
 		MapEntity expected4 = new MapEntity(expectedMetadata);
 		expected4.set("identifier", "A");
-		expected4.set("height", new Double(12345));
+		expected4.set("height", 12345d);
 		expected4.set("source", "Exon");
 
-		assertEquals(created, ImmutableSet.<Entity> of(expected1, expected3, expected4));
+		assertEquals(created, ImmutableSet.<Entity>of(expected1, expected2, expected3, expected4));
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
+	@Test(expectedExceptions = MolgenisDataAccessException.class)
 	public void testTargetMetaNotCompatible()
 	{
+		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
 		MappingProject project = createMappingProjectWithMappings("compatibleEntity");
 		MappingTarget target = project.getMappingTarget("HopEntity");
 
@@ -505,9 +480,9 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void testNumericId()
 	{
-		assertEquals(mappingService.generateId(MolgenisFieldTypes.INT, 1l), "2");
-		assertEquals(mappingService.generateId(MolgenisFieldTypes.DECIMAL, 2l), "3");
-		assertEquals(mappingService.generateId(MolgenisFieldTypes.LONG, 3l), "4");
+		assertEquals(mappingService.generateId(MolgenisFieldTypes.INT, 1L), "2");
+		assertEquals(mappingService.generateId(MolgenisFieldTypes.DECIMAL, 2L), "3");
+		assertEquals(mappingService.generateId(MolgenisFieldTypes.LONG, 3L), "4");
 	}
 
 	@Test
@@ -516,7 +491,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		reset(idGenerator);
 		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
 
-		mappingService.generateId(MolgenisFieldTypes.STRING, 1l);
+		mappingService.generateId(MolgenisFieldTypes.STRING, 1L);
 		verify(idGenerator).generateId();
 	}
 
@@ -568,8 +543,7 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		@Bean
 		IdGenerator idGenerator()
 		{
-			IdGenerator idGenerator = mock(IdGenerator.class);
-			return idGenerator;
+			return mock(IdGenerator.class);
 		}
 
 		@Bean

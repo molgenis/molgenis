@@ -12,7 +12,10 @@ import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.PackageImpl;
-import org.molgenis.data.support.*;
+import org.molgenis.data.support.DefaultAttributeMetaData;
+import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.permission.PermissionSystemService;
@@ -24,9 +27,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
 import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RowLevelSecurityRepositoryDecorator.UPDATE_ATTRIBUTE;
 import static org.molgenis.data.RowLevelSecurityUtils.removeUpdateAttributeIfRowLevelSecured;
@@ -158,6 +161,12 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	@Override
+	public String applyMappings(MappingTarget mappingTarget, String entityName)
+	{
+		return applyMappings(mappingTarget, entityName, true);
+	}
+
+	@Override
 	public String applyMappings(MappingTarget mappingTarget, String entityName, boolean addSourceAttribute)
 	{
 		Repository targetRepo;
@@ -177,8 +186,8 @@ public class MappingServiceImpl implements MappingService
 				targetMetaData = defaultEntityMetaData;
 			}
 			targetRepo = dataService.getMeta().addEntityMeta(targetMetaData);
-			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-					Collections.singletonList(targetRepo.getName()));
+			permissionSystemService
+					.giveUserEntityPermissions(SecurityContextHolder.getContext(), singletonList(targetRepo.getName()));
 		}
 		else
 		{
