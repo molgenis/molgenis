@@ -18,11 +18,15 @@
 
 	var restApi = new molgenis.RestClient();
 
-	function createQuery(lookupAttributeNames, terms, operator, search) {
+	function supportsLikeQuery(attr) {
+		return $.inArray(attr.fieldType, ['EMAIL', 'ENUM', 'HYPERLINK', 'STRING']) >= 0;
+	}
+
+	function createQuery(lookupAttributes, terms, exactMatch, search) {
 		var q = [];
 
-		if(lookupAttributeNames.length) {
-			$.each(lookupAttributeNames, function(index, attrName) {
+		if(lookupAttributes.length) {
+			$.each(lookupAttributes, function(index, attribute) {
 				if (q.length > 0) {
 					q.push({operator: 'OR'});
 				}
@@ -32,7 +36,12 @@
     					operator: 'NESTED',
     					nestedRules:[]
     				};
-	            	
+
+    				var operator = 'LIKE';
+					if( exactMatch || !supportsLikeQuery(attribute)) {
+						operator = 'EQUALS'
+					}
+
 	                $.each(terms, function(index) {
 	                    if(index > 0){
                             if(search){
@@ -43,7 +52,7 @@
 	                    }
 	                    
 	                    rule.nestedRules.push({
-	                    	field: attrName,
+	                    	field: attribute.name,
 	                        operator: operator,
 	                        value: terms[index]
 	                    })
@@ -58,14 +67,24 @@
 		}
 	}
 
-	function getUniqueAttributeNames(entityMetaData) {
-		var attributeNames = [];
+	function getUniqueAttributes(entityMetaData) {
+		var attributes = [];
 		$.each(entityMetaData.attributes, function(attrName, attr) {
 			if (attr.unique === true) {
-				attributeNames.push(attr.name);
+				attributes.push(attr);
 			}
 		});
-		return attributeNames;
+		return attributes;
+	}
+
+	function getLookupAttributes(entityMetaData) {
+		var attributes = [];
+		$.each(entityMetaData.attributes, function(attrName, attr) {
+			if (attr.lookupAttribute === true) {
+				attributes.push(attr);
+			}
+		});
+		return attributes;
 	}
 
 	function formatResult(entity, entityMetaData, lookupAttributeNames) {
@@ -108,7 +127,8 @@
 	function createSelect2($container, attributeMetaData, options) {
 		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
 		var lookupAttrNames = refEntityMetaData.lookupAttributes;
-		var uniqueAttrNames = getUniqueAttributeNames(refEntityMetaData);
+		var lookupAttributes = getLookupAttributes(refEntityMetaData);
+		var uniqueAttributes = getUniqueAttributes(refEntityMetaData);
 		var width = options.width ? options.width : 'resolve';
 		var $hiddenInput = $(':input[type=hidden]',$container)
 				.not('[data-filter=xrefmref-operator]')
@@ -122,7 +142,7 @@
 			multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'CATEGORICAL_MREF' || attributeMetaData.fieldType === 'XREF'),
 			closeOnSelect: false,
 			query: function (options){
-				var query = createQuery(lookupAttrNames, options.term.match(/[^ ]+/g),'LIKE', true);
+				var query = createQuery(lookupAttributes, options.term.match(/[^ ]+/g), false, true);
 				if(query)
 				{
 					restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {num: 1000, q: query}, sort : {
@@ -137,8 +157,7 @@
 			},
 			initSelection: function(element, callback) {
 				//Only called when the input has a value
-				var attrNames = uniqueAttrNames;
-				var query = createQuery(attrNames, element.val().split(','), 'EQUALS', false);
+				var query = createQuery(uniqueAttributes, element.val().split(','), true, false);
 				if(query)
 				{
 					restApi.getAsync('/api/v1/' + refEntityMetaData.name, {q: {q: query}}, function(data) {
