@@ -1,9 +1,8 @@
 package org.molgenis.data.support;
 
-import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 
@@ -199,25 +198,24 @@ public class DynamicEntity implements Entity
 	}
 
 	/**
-	 * Validate is value is of the type defined by the attribute data type.
+	 * Validate if value is of the type defined by the attribute data type.
 	 *
 	 * @param attrName attribute name
 	 * @param value    value (must be of the type defined by the attribute data type.)
 	 */
 	protected void validateValueType(String attrName, Object value)
 	{
-		if (value == null)
-		{
-			return;
-		}
+		if (value == null) return;
 
 		AttributeMetaData attr = entityMeta.getAttribute(attrName);
 		if (attr == null)
 		{
-			throw new UnknownAttributeException(format("Unknown attribute [%s]", attrName));
+			// This attribute does not exist yet, this can be because of a i18n situation
+			// e.g. when during importing you specified 'description-nl' in your entities sheet	
+			return;
 		}
 
-		MolgenisFieldTypes.AttributeType dataType = attr.getDataType();
+		AttributeType dataType = attr.getDataType();
 		switch (dataType)
 		{
 
