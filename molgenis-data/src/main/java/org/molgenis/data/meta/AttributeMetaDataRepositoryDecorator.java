@@ -5,31 +5,53 @@ import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
 import org.molgenis.util.EntityUtils;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.PARTS;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.security.core.Permission.COUNT;
+import static org.molgenis.security.core.Permission.READ;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
+import static org.molgenis.security.core.utils.SecurityUtils.currentUserisSystem;
 
+/**
+ * Decorator for the attribute meta data repository:
+ * - filters requested entities based on the entity permissions of the current user.
+ * - applies updates to the repository collection for attribute meta data adds/updates/deletes
+ * <p>
+ * TODO replace permission based entity filtering with generic row-level security once available
+ */
 public class AttributeMetaDataRepositoryDecorator implements Repository<AttributeMetaData>
 {
 	private final Repository<AttributeMetaData> decoratedRepo;
 	private final SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
 	private final DataService dataService;
+	private final MolgenisPermissionService permissionService;
 
 	public AttributeMetaDataRepositoryDecorator(Repository<AttributeMetaData> decoratedRepo,
-			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, DataService dataService)
+			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, DataService dataService,
+			MolgenisPermissionService permissionService)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.systemEntityMetaDataRegistry = requireNonNull(systemEntityMetaDataRegistry);
 		this.dataService = requireNonNull(dataService);
+		this.permissionService = requireNonNull(permissionService);
 	}
 
 	@Override
@@ -65,7 +87,15 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	@Override
 	public long count()
 	{
-		return decoratedRepo.count();
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.count();
+		}
+		else
+		{
+			Stream<AttributeMetaData> attrs = StreamSupport.stream(decoratedRepo.spliterator(), false);
+			return filterCountPermission(attrs).count();
+		}
 	}
 
 	@Override
@@ -77,61 +107,151 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	@Override
 	public long count(Query<AttributeMetaData> q)
 	{
-		return decoratedRepo.count(q);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.count(q);
+		}
+		else
+		{
+			// ignore query offset and page size
+			Query<AttributeMetaData> qWithoutLimitOffset = new QueryImpl<>(q);
+			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
+			Stream<AttributeMetaData> attrs = decoratedRepo.findAll(qWithoutLimitOffset);
+			return filterCountPermission(attrs).count();
+		}
 	}
 
 	@Override
 	public Stream<AttributeMetaData> findAll(Query<AttributeMetaData> q)
 	{
-		return decoratedRepo.findAll(q);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.findAll(q);
+		}
+		else
+		{
+			Query<AttributeMetaData> qWithoutLimitOffset = new QueryImpl<>(q);
+			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
+			Stream<AttributeMetaData> attrs = decoratedRepo.findAll(qWithoutLimitOffset);
+			Stream<AttributeMetaData> filteredAttrs = filterReadPermission(attrs);
+			if (q.getOffset() > 0)
+			{
+				filteredAttrs = filteredAttrs.skip(q.getOffset());
+			}
+			if (q.getPageSize() > 0)
+			{
+				filteredAttrs = filteredAttrs.limit(q.getPageSize());
+			}
+			return filteredAttrs;
+		}
+
 	}
 
 	@Override
 	public Iterator<AttributeMetaData> iterator()
 	{
-		return decoratedRepo.iterator();
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.iterator();
+		}
+		else
+		{
+			Stream<AttributeMetaData> attrs = StreamSupport.stream(decoratedRepo.spliterator(), false);
+			return filterReadPermission(attrs).iterator();
+		}
 	}
 
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<AttributeMetaData>> consumer, int batchSize)
 	{
-		decoratedRepo.forEachBatched(fetch, consumer, batchSize);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			decoratedRepo.forEachBatched(fetch, consumer, batchSize);
+		}
+		else
+		{
+			FilteredConsumer filteredConsumer = new FilteredConsumer(consumer);
+			decoratedRepo.forEachBatched(fetch, filteredConsumer::filter, batchSize);
+		}
 	}
 
 	@Override
 	public AttributeMetaData findOne(Query<AttributeMetaData> q)
 	{
-		return decoratedRepo.findOne(q);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.findOne(q);
+		}
+		else
+		{
+			// ignore query offset and page size
+			return filterReadPermission(decoratedRepo.findOne(q));
+		}
 	}
 
 	@Override
 	public AttributeMetaData findOneById(Object id)
 	{
-		return decoratedRepo.findOneById(id);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.findOneById(id);
+		}
+		else
+		{
+			return filterReadPermission(decoratedRepo.findOneById(id));
+		}
 	}
 
 	@Override
 	public AttributeMetaData findOneById(Object id, Fetch fetch)
 	{
-		return decoratedRepo.findOneById(id, fetch);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.findOneById(id, fetch);
+		}
+		else
+		{
+			return filterReadPermission(decoratedRepo.findOneById(id, fetch));
+		}
 	}
 
 	@Override
 	public Stream<AttributeMetaData> findAll(Stream<Object> ids)
 	{
-		return decoratedRepo.findAll(ids);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.findAll(ids);
+		}
+		else
+		{
+			return filterReadPermission(decoratedRepo.findAll(ids));
+		}
 	}
 
 	@Override
 	public Stream<AttributeMetaData> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		return decoratedRepo.findAll(ids, fetch);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.findAll(ids, fetch);
+		}
+		else
+		{
+			return filterReadPermission(decoratedRepo.findAll(ids, fetch));
+		}
 	}
 
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		return decoratedRepo.aggregate(aggregateQuery);
+		if (currentUserIsSu() || currentUserisSystem())
+		{
+			return decoratedRepo.aggregate(aggregateQuery);
+		}
+		else
+		{
+			throw new MolgenisDataAccessException(format("Aggregation on entity [%s] not allowed", getName()));
+		}
 	}
 
 	@Override
@@ -144,7 +264,8 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	@Override
 	public void update(Stream<AttributeMetaData> attrs)
 	{
-		decoratedRepo.update(attrs.filter(attr -> {
+		decoratedRepo.update(attrs.filter(attr ->
+		{
 			validateAndUpdate(attr);
 			return true;
 		}));
@@ -160,7 +281,8 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	@Override
 	public void delete(Stream<AttributeMetaData> attrs)
 	{
-		decoratedRepo.delete(attrs.filter(attr -> {
+		decoratedRepo.delete(attrs.filter(attr ->
+		{
 			validateAndDelete(attr);
 			return true;
 		}));
@@ -176,7 +298,8 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		decoratedRepo.deleteById(ids.filter(id -> {
+		decoratedRepo.deleteById(ids.filter(id ->
+		{
 			validateAndDelete(findOneById(id));
 			return true;
 		}));
@@ -316,10 +439,50 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 				.updateAttribute(entityMetaData, attr, updatedAttr);
 	}
 
+	/**
+	 * Returns all entities that reference this attribute directly or via a compound attribute
+	 *
+	 * @param attr attribute
+	 * @return entities referencing this attribute
+	 */
 	private Stream<EntityMetaData> getEntities(AttributeMetaData attr)
 	{
-		// FIXME fails for compound attributes
-		return dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(ATTRIBUTES, attr).findAll();
+		return getEntitiesRec(Collections.singletonList(attr));
+	}
+
+	private Stream<EntityMetaData> getEntitiesRec(List<AttributeMetaData> attrs)
+	{
+		// find entities referencing attributes
+		Query<EntityMetaData> entityQ = dataService.query(ENTITY_META_DATA, EntityMetaData.class);
+		Stream<EntityMetaData> entities;
+		if (attrs.size() == 1)
+		{
+			entities = entityQ.eq(ATTRIBUTES, attrs.iterator().next()).findAll();
+		}
+		else
+		{
+			entities = entityQ.in(ATTRIBUTES, attrs).findAll();
+		}
+
+		// find attributes referencing attributes
+		Query<AttributeMetaData> attrQ = dataService.query(ATTRIBUTE_META_DATA, AttributeMetaData.class);
+		List<AttributeMetaData> parentAttrs;
+		if (attrs.size() == 1)
+		{
+			parentAttrs = attrQ.eq(PARTS, attrs.iterator().next()).findAll().collect(toList());
+		}
+		else
+		{
+			parentAttrs = attrQ.in(PARTS, attrs).findAll().collect(toList());
+		}
+
+		// recurse for parent attributes
+		if (!parentAttrs.isEmpty())
+		{
+			entities = Stream.concat(entities, getEntitiesRec(parentAttrs));
+		}
+
+		return entities;
 	}
 
 	private void validateAndUpdate(AttributeMetaData attr)
@@ -338,9 +501,57 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	private void validateAndDelete(AttributeMetaData attr)
 	{
 		validateDeleteAllowed(attr);
-		getEntities(attr).forEach(entityMetaData -> {
+		getEntities(attr).forEach(entityMetaData ->
+		{
 			entityMetaData.removeAttribute(attr);
 			dataService.update(ENTITY_META_DATA, entityMetaData);
 		});
+	}
+
+	private Stream<AttributeMetaData> filterCountPermission(Stream<AttributeMetaData> attrs)
+	{
+		return filterPermission(attrs, COUNT);
+	}
+
+	private AttributeMetaData filterReadPermission(AttributeMetaData attr)
+	{
+		return attr != null ? filterReadPermission(Stream.of(attr)).findFirst().orElse(null) : null;
+	}
+
+	private Stream<AttributeMetaData> filterReadPermission(Stream<AttributeMetaData> attrs)
+	{
+		return filterPermission(attrs, READ);
+	}
+
+	private Stream<AttributeMetaData> filterPermission(Stream<AttributeMetaData> attrs, Permission permission)
+	{
+		return attrs.filter(attr ->
+		{
+			Stream<EntityMetaData> entities = runAsSystem(() -> getEntities(attr));
+			for (Iterator<EntityMetaData> it = entities.iterator(); it.hasNext(); )
+			{
+				if (permissionService.hasPermissionOnEntity(it.next().getName(), permission))
+				{
+					return true;
+				}
+			}
+			return false;
+		});
+	}
+
+	private class FilteredConsumer
+	{
+		private final Consumer<List<AttributeMetaData>> consumer;
+
+		FilteredConsumer(Consumer<List<AttributeMetaData>> consumer)
+		{
+			this.consumer = requireNonNull(consumer);
+		}
+
+		public void filter(List<AttributeMetaData> attrs)
+		{
+			Stream<AttributeMetaData> filteredAttrs = filterPermission(attrs.stream(), READ);
+			consumer.accept(filteredAttrs.collect(toList()));
+		}
 	}
 }

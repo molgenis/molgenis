@@ -1,384 +1,423 @@
 package org.molgenis.data.elasticsearch.request;
 
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.index.query.*;
+import org.mockito.ArgumentCaptor;
+import org.molgenis.data.DataConverter;
+import org.molgenis.data.Entity;
+import org.molgenis.data.MolgenisQueryException;
+import org.molgenis.data.Query;
+import org.molgenis.data.elasticsearch.index.MappingsBuilder;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.molgenis.util.MolgenisDateFormat;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.text.ParseException;
+import java.util.Arrays;
+import java.util.Date;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DEFAULT_ANALYZER;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.testng.Assert.assertEquals;
+
 /**
  * Copy of standard QueryGeneratorTest but now with queries done on the referenced entity
  */
 // FIXME add nillable tests
-public class QueryGeneratorReferencesTest
+public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 {
-	//	private SearchRequestBuilder searchRequestBuilder;
-	//	private EntityMetaData entityMetaData;
-	//
-	//	private final String refIdAttributeName = "xid";
-	//	private final String refBoolAttributeName = "xbool";
-	//	private final String refCategoricalAttributeName = "xcategorical";
-	//	private final String refCompoundAttributeName = "xcompound";
-	//	private final String refCompoundPart0AttributeName = "xcompoundpart0";
-	//	private final String refCompoundPart1AttributeName = "xcompoundpart1";
-	//	private final String refDateAttributeName = "xdate";
-	//	private final String refDateTimeAttributeName = "xdatetime";
-	//	private final String refDecimalAttributeName = "xdecimal";
-	//	private final String refEmailAttributeName = "xemail";
-	//	private final String refEnumAttributeName = "xenum";
-	//	private final String refHtmlAttributeName = "xhtml";
-	//	private final String refHyperlinkAttributeName = "xhyperlink";
-	//	private final String refIntAttributeName = "xint";
-	//	private final String refLongAttributeName = "xlong";
-	//	private final String refMrefAttributeName = "xmref";
-	//	private final String refScriptAttributeName = "xscript";
-	//	private final String refStringAttributeName = "xstring";
-	//	private final String refTextAttributeName = "xtext";
-	//	private final String refXrefAttributeName = "xxref";
-	//
-	//	private final String idAttributeName = "id";
-	//	private final String stringAttributeName = "string";
-	//	private final String mrefAttributeName = "mref";
-	//
-	//	private final String REF_ENTITY_ATT = "mref";
-	//	private final String PREFIX = REF_ENTITY_ATT + QueryGenerator.ATTRIBUTE_SEPARATOR;
-	//
-	//	@BeforeMethod
-	//	public void setUp()
-	//	{
-	//		searchRequestBuilder = mock(SearchRequestBuilder.class);
-	//
-	//		EntityMetaData refEntityMetaData = new EntityMetaData("ref_entity");
-	//		refEntityMetaData.addAttribute(refIdAttributeName, ROLE_ID);
-	//		refEntityMetaData.addAttribute(refBoolAttributeName).setDataType(MolgenisFieldTypes.BOOL);
-	//		refEntityMetaData.addAttribute(refCategoricalAttributeName).setDataType(MolgenisFieldTypes.CATEGORICAL)
-	//				.setRefEntity(refEntityMetaData).setNillable(true);
-	//		AttributeMetaData compoundPart0Attribute = new AttributeMetaData(refCompoundPart0AttributeName)
-	//				.setDataType(MolgenisFieldTypes.STRING);
-	//		AttributeMetaData compoundPart1Attribute = new AttributeMetaData(refCompoundPart1AttributeName)
-	//				.setDataType(MolgenisFieldTypes.STRING);
-	//		refEntityMetaData.addAttribute(refCompoundAttributeName).setDataType(MolgenisFieldTypes.COMPOUND)
-	//				.setAttributeParts(
-	//						Arrays.<AttributeMetaData> asList(compoundPart0Attribute, compoundPart1Attribute));
-	//		refEntityMetaData.addAttribute(refDateAttributeName).setDataType(MolgenisFieldTypes.DATE);
-	//		refEntityMetaData.addAttribute(refDateTimeAttributeName).setDataType(MolgenisFieldTypes.DATETIME);
-	//		refEntityMetaData.addAttribute(refDecimalAttributeName).setDataType(MolgenisFieldTypes.DECIMAL);
-	//		refEntityMetaData.addAttribute(refEmailAttributeName).setDataType(MolgenisFieldTypes.EMAIL);
-	//		refEntityMetaData.addAttribute(refEnumAttributeName).setDataType(new EnumField())
-	//				.setEnumOptions(Arrays.asList("enum0", "enum1", "enum2"));
-	//		refEntityMetaData.addAttribute(refHtmlAttributeName).setDataType(MolgenisFieldTypes.HTML);
-	//		refEntityMetaData.addAttribute(refHyperlinkAttributeName).setDataType(MolgenisFieldTypes.HYPERLINK);
-	//		refEntityMetaData.addAttribute(refIntAttributeName).setDataType(MolgenisFieldTypes.INT);
-	//		refEntityMetaData.addAttribute(refLongAttributeName).setDataType(MolgenisFieldTypes.LONG);
-	//		refEntityMetaData.addAttribute(refMrefAttributeName).setDataType(MolgenisFieldTypes.MREF)
-	//				.setRefEntity(refEntityMetaData).setNillable(true);
-	//		refEntityMetaData.addAttribute(refScriptAttributeName).setDataType(MolgenisFieldTypes.SCRIPT);
-	//		refEntityMetaData.addAttribute(refStringAttributeName).setDataType(MolgenisFieldTypes.STRING);
-	//		refEntityMetaData.addAttribute(refTextAttributeName).setDataType(MolgenisFieldTypes.TEXT);
-	//		refEntityMetaData.addAttribute(refXrefAttributeName).setDataType(MolgenisFieldTypes.XREF)
-	//				.setRefEntity(refEntityMetaData).setNillable(true);
-	//
-	//		EntityMetaData emd = new EntityMetaData("entity");
-	//		emd.addAttribute(idAttributeName, ROLE_ID);
-	//		emd.addAttribute(stringAttributeName, ROLE_LABEL).setUnique(true);
-	//		emd.addAttribute(mrefAttributeName).setDataType(MolgenisFieldTypes.MREF).setNillable(true)
-	//				.setRefEntity(refEntityMetaData);
-	//
-	//		this.entityMetaData = emd;
-	//	}
-	//
-	//	@Test
-	//	public void generateOneQueryRuleGreaterDate() throws ParseException
-	//	{
-	//		String date = "2015-05-22";
-	//		Date value = MolgenisDateFormat.getDateFormat().parse(date);
-	//		Query<Entity> q = new QueryImpl<Entity>().gt(PREFIX + refDateAttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-	//				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refDateAttributeName).gt(date)));
-	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
-	//	}
-	//
-	//	@Test
-	//	public void generateOneQueryRuleGreaterDateTime() throws ParseException
-	//	{
-	//		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22T11:12:13+0500");
-	//		Query<Entity> q = new QueryImpl<Entity>().gt(PREFIX + refDateTimeAttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
-	//				FilterBuilders.nestedFilter(REF_ENTITY_ATT, FilterBuilders
-	//						.rangeFilter(PREFIX + refDateTimeAttributeName).gt(DataConverter.toString(value))));
-	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
-	//	}
-	//
-	//	@Test
-	//	public void generateOneQueryRuleGreaterDecimal()
-	//	{
-	//		Double value = Double.valueOf(1.23);
-	//		Query<Entity> q = new QueryImpl<Entity>().gt(PREFIX + refDecimalAttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-	//				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refDecimalAttributeName).gt(value)));
-	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
-	//	}
-	//
-	//	@Test
-	//	public void generateOneQueryRuleGreaterInt()
-	//	{
-	//		Integer value = Integer.valueOf(1);
-	//		Query<Entity> q = new QueryImpl<Entity>().gt(PREFIX + refIntAttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-	//				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refIntAttributeName).gt(value)));
-	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
-	//	}
-	//
-	//	@Test
-	//	public void generateOneQueryRuleGreaterLong()
-	//	{
-	//		Long value = Long.valueOf(1l);
-	//		Query<Entity> q = new QueryImpl<Entity>().gt(PREFIX + refLongAttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-	//				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refLongAttributeName).gt(value)));
-	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
-	//	}
-	//
-	//	@Test
-	//	public void generateOneQueryRuleGreaterEqualDate() throws ParseException
-	//	{
-	//		String date = "2015-05-22";
-	//		Date value = MolgenisDateFormat.getDateFormat().parse(date);
-	//		Query<Entity> q = new QueryImpl<Entity>().ge(PREFIX + refDateAttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-	//				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refDateAttributeName).gte(date)));
-	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
-	//	}
-	//
-	//	@Test
-	//	public void generateOneQueryRuleLesserEqualDecimal()
-	//	{
-	//		Double value = Double.valueOf(1.23);
-	//		Query<Entity> q = new QueryImpl<>().le(PREFIX + refDecimalAttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-	//				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refDecimalAttributeName).lte(value)));
-	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
-	//	}
-	//
-	//	@Test
-	//	public void generateOneQueryRuleLesserInt()
-	//	{
-	//		Integer value = Integer.valueOf(1);
-	//		Query<Entity> q = new QueryImpl<>().lt(PREFIX + refIntAttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-	//				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refIntAttributeName).lt(value)));
-	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
-	//	}
-	//
-	//	@Test(expectedExceptions = UnsupportedOperationException.class)
-	//	public void generateOneQueryRuleInCategorical_Ids()
-	//	{
-	//		Iterable<String> values = Arrays.asList("id0", "id1", "id2");
-	//		Query<Entity> q = new QueryImpl<>().in(PREFIX + refCategoricalAttributeName, values);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//	}
-	//
-	//	@Test
-	//	public void generateOneQueryRuleLikeCompoundPartString()
-	//	{
-	//		String value = "value";
-	//		Query<Entity> q = new QueryImpl<Entity>().like(PREFIX + refCompoundPart0AttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//		QueryBuilder expectedQuery = QueryBuilders.nestedQuery(REF_ENTITY_ATT, QueryBuilders
-	//				.matchQuery(PREFIX + refCompoundPart0AttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value)
-	//				.analyzer(DEFAULT_ANALYZER));
-	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
-	//	}
-	//
-	//	@Test
-	//	public void generateOneQueryRuleEqualsBool()
-	//	{
-	//		Boolean value = Boolean.TRUE;
-	//		Query<Entity> q = new QueryImpl<Entity>().eq(PREFIX + refBoolAttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-	//				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.termFilter(PREFIX + refBoolAttributeName, value)));
-	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
-	//	}
-	//
-	//	@Test
-	//	public void generateOneQueryRuleEqualsString()
-	//	{
-	//		String value = "value";
-	//		Query<Entity> q = new QueryImpl<Entity>().eq(PREFIX + refStringAttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
-	//				FilterBuilders.nestedFilter(REF_ENTITY_ATT, FilterBuilders.termFilter(
-	//						PREFIX + refStringAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, value)));
-	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
-	//	}
-	//
-	//	@Test(expectedExceptions = UnsupportedOperationException.class)
-	//	public void generateOneQueryRuleEqualsCategorical()
-	//	{
-	//		String value = "id";
-	//		Query<Entity> q = new QueryImpl<Entity>().eq(PREFIX + refCategoricalAttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//	}
-	//
-	//	@Test
-	//	public void generateOneQueryRuleNotEqualsEqualsBool()
-	//	{
-	//		Boolean value = Boolean.TRUE;
-	//		Query<Entity> q = new QueryImpl<Entity>().not().eq(PREFIX + refBoolAttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(
-	//				QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.nestedFilter(REF_ENTITY_ATT,
-	//						FilterBuilders.termFilter(PREFIX + refBoolAttributeName, value))));
-	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
-	//	}
-	//
-	//	@Test(expectedExceptions = UnsupportedOperationException.class)
-	//	public void generateOneQueryRuleNotEqualsCategorical()
-	//	{
-	//		String value = "id";
-	//		Query<Entity> q = new QueryImpl<Entity>().not().eq(PREFIX + refCategoricalAttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//	}
-	//
-	//	@Test(expectedExceptions = MolgenisQueryException.class)
-	//	public void generateOneQueryRuleNotEqualsCompound()
-	//	{
-	//		Object value = "value";
-	//		Query<Entity> q = new QueryImpl<Entity>().not().eq(PREFIX + refCompoundAttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//	}
-	//
-	//	@Test
-	//	public void generateOneQueryRuleNotEqualsCompoundPartString()
-	//	{
-	//		String value = "value";
-	//		Query<Entity> q = new QueryImpl<Entity>().not().eq(PREFIX + refCompoundPart0AttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//		QueryBuilder expectedQuery = QueryBuilders.boolQuery()
-	//				.mustNot(QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
-	//						FilterBuilders.nestedFilter(REF_ENTITY_ATT, FilterBuilders.termFilter(
-	//								PREFIX + refCompoundPart0AttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED,
-	//								value))));
-	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
-	//	}
-	//
-	//	@Test
-	//	public void generateOneQueryRuleRangeInt()
-	//	{
-	//		Integer low = Integer.valueOf(3);
-	//		Integer high = Integer.valueOf(9);
-	//		Query<Entity> q = new QueryImpl<Entity>().rng(PREFIX + refIntAttributeName, low, high);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//
-	//		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-	//				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refIntAttributeName).gte(3).lte(9)));
-	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
-	//	}
-	//
-	//	@Test(expectedExceptions = UnsupportedOperationException.class)
-	//	public void generateOneQueryRuleSearchOneFieldCategorical()
-	//	{
-	//		String value = "text";
-	//		Query<Entity> q = new QueryImpl<Entity>().search(PREFIX + refCategoricalAttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//	}
-	//
-	//	@Test
-	//	public void generateOneQueryRuleSearchOneFieldCompoundPartString()
-	//	{
-	//		String value = "value";
-	//		Query<Entity> q = new QueryImpl<Entity>().search(PREFIX + refCompoundPart0AttributeName, value);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//		QueryBuilder expectedQuery = QueryBuilders.nestedQuery(REF_ENTITY_ATT,
-	//				QueryBuilders.matchQuery(PREFIX + refCompoundPart0AttributeName, value));
-	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
-	//	}
-	//
-	//	@Test
-	//	public void generateMultipleQueryRule()
-	//	{
-	//		// query: ref.a or (b and ref.c)
-	//		Boolean booleanValue = Boolean.TRUE;
-	//		String stringValue = "str";
-	//		Integer intValue = 1;
-	//		Query<Entity> q = new QueryImpl<Entity>().eq(PREFIX + refBoolAttributeName, booleanValue).or().nest()
-	//				.eq(stringAttributeName, stringValue).and().eq(PREFIX + refIntAttributeName, intValue).unnest();
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//
-	//		FilteredQueryBuilder booleanQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-	//				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.termFilter(PREFIX + refBoolAttributeName, booleanValue)));
-	//		QueryBuilder stringQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
-	//				FilterBuilders.termFilter(stringAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, stringValue));
-	//		QueryBuilder intQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-	//				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.termFilter(PREFIX + refIntAttributeName, intValue)));
-	//		BoolQueryBuilder stringIntQuery = QueryBuilders.boolQuery().must(stringQuery).must(intQuery);
-	//		QueryBuilder expectedQuery = QueryBuilders.boolQuery().should(booleanQuery).should(stringIntQuery)
-	//				.minimumNumberShouldMatch(1);
-	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
-	//	}
-	//
-	//	@Test
-	//	public void generateMultipleQueryRuleMultipleNotClauses()
-	//	{
-	//		// query: ref.a and not b and not ref.c
-	//		Boolean booleanValue = Boolean.TRUE;
-	//		String stringValue = "str";
-	//		Integer intValue = 1;
-	//		Query<Entity> q = new QueryImpl<Entity>().eq(PREFIX + refBoolAttributeName, booleanValue).and().not()
-	//				.eq(stringAttributeName, stringValue).and().not().eq(PREFIX + refIntAttributeName, intValue);
-	//		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
-	//		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
-	//		verify(searchRequestBuilder).setQuery(captor.capture());
-	//
-	//		FilteredQueryBuilder booleanQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-	//				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.termFilter(PREFIX + refBoolAttributeName, booleanValue)));
-	//		QueryBuilder stringQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
-	//				FilterBuilders.termFilter(stringAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, stringValue));
-	//		QueryBuilder intQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
-	//				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.termFilter(PREFIX + refIntAttributeName, intValue)));
-	//		QueryBuilder expectedQuery = QueryBuilders.boolQuery().must(booleanQuery).mustNot(stringQuery)
-	//				.mustNot(intQuery);
-	//		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
-	//	}
-	//
-	//	private void assertQueryBuilderEquals(QueryBuilder actual, QueryBuilder expected)
-	//	{
-	//		// QueryBuilder classes do not implement equals
-	//		assertEquals(actual.toString().replaceAll("\\s", ""), expected.toString().replaceAll("\\s", ""));
-	//	}
+	private SearchRequestBuilder searchRequestBuilder;
+	private EntityMetaData entityMetaData;
+
+	private final String refIdAttributeName = "xid";
+	private final String refBoolAttributeName = "xbool";
+	private final String refCategoricalAttributeName = "xcategorical";
+	private final String refCompoundAttributeName = "xcompound";
+	private final String refCompoundPart0AttributeName = "xcompoundpart0";
+	private final String refCompoundPart1AttributeName = "xcompoundpart1";
+	private final String refDateAttributeName = "xdate";
+	private final String refDateTimeAttributeName = "xdatetime";
+	private final String refDecimalAttributeName = "xdecimal";
+	private final String refEmailAttributeName = "xemail";
+	private final String refEnumAttributeName = "xenum";
+	private final String refHtmlAttributeName = "xhtml";
+	private final String refHyperlinkAttributeName = "xhyperlink";
+	private final String refIntAttributeName = "xint";
+	private final String refLongAttributeName = "xlong";
+	private final String refMrefAttributeName = "xmref";
+	private final String refScriptAttributeName = "xscript";
+	private final String refStringAttributeName = "xstring";
+	private final String refTextAttributeName = "xtext";
+	private final String refXrefAttributeName = "xxref";
+
+	private final String idAttributeName = "id";
+	private final String stringAttributeName = "string";
+	private final String mrefAttributeName = "mref";
+
+	private final String REF_ENTITY_ATT = "mref";
+	private final String PREFIX = REF_ENTITY_ATT + QueryGenerator.ATTRIBUTE_SEPARATOR;
+
+	@Autowired
+	EntityMetaDataFactory entityMetaFactory;
+
+	@Autowired
+	AttributeMetaDataFactory attrFactory;
+
+	@BeforeMethod
+	public void setUp()
+	{
+		searchRequestBuilder = mock(SearchRequestBuilder.class);
+
+		EntityMetaData refEntityMetaData = entityMetaFactory.create().setName("ref_entity");
+		refEntityMetaData.addAttribute(attrFactory.create().setName(refIdAttributeName), ROLE_ID);
+		refEntityMetaData.addAttribute(attrFactory.create().setName(refBoolAttributeName).setDataType(BOOL));
+		refEntityMetaData.addAttribute(
+				attrFactory.create().setName(refCategoricalAttributeName).setDataType(CATEGORICAL)
+						.setRefEntity(refEntityMetaData).setNillable(true));
+		AttributeMetaData compoundPart0Attribute = attrFactory.create().setName(refCompoundPart0AttributeName)
+				.setDataType(STRING);
+		AttributeMetaData compoundPart1Attribute = attrFactory.create().setName(refCompoundPart1AttributeName)
+				.setDataType(STRING);
+		refEntityMetaData.addAttribute(attrFactory.create().setName(refCompoundAttributeName).setDataType(COMPOUND)
+				.setAttributeParts(Arrays.asList(compoundPart0Attribute, compoundPart1Attribute)));
+		refEntityMetaData.addAttribute(attrFactory.create().setName(refDateAttributeName).setDataType(DATE));
+		refEntityMetaData.addAttribute(attrFactory.create().setName(refDateTimeAttributeName).setDataType(DATE_TIME));
+		refEntityMetaData.addAttribute(attrFactory.create().setName(refDecimalAttributeName).setDataType(DECIMAL));
+		refEntityMetaData.addAttribute(attrFactory.create().setName(refEmailAttributeName).setDataType(EMAIL));
+		refEntityMetaData.addAttribute(attrFactory.create().setName(refEnumAttributeName).setDataType(ENUM)
+				.setEnumOptions(Arrays.asList("enum0", "enum1", "enum2")));
+		refEntityMetaData.addAttribute(attrFactory.create().setName(refHtmlAttributeName).setDataType(HTML));
+		refEntityMetaData.addAttribute(attrFactory.create().setName(refHyperlinkAttributeName).setDataType(HYPERLINK));
+		refEntityMetaData.addAttribute(attrFactory.create().setName(refIntAttributeName).setDataType(INT));
+		refEntityMetaData.addAttribute(attrFactory.create().setName(refLongAttributeName).setDataType(LONG));
+		refEntityMetaData.addAttribute(
+				attrFactory.create().setName(refMrefAttributeName).setDataType(MREF).setRefEntity(refEntityMetaData)
+						.setNillable(true));
+		refEntityMetaData.addAttribute(attrFactory.create().setName(refScriptAttributeName).setDataType(SCRIPT));
+		refEntityMetaData.addAttribute(attrFactory.create().setName(refStringAttributeName).setDataType(STRING));
+		refEntityMetaData.addAttribute(attrFactory.create().setName(refTextAttributeName).setDataType(TEXT));
+		refEntityMetaData.addAttribute(
+				attrFactory.create().setName(refXrefAttributeName).setDataType(XREF).setRefEntity(refEntityMetaData)
+						.setNillable(true));
+
+		EntityMetaData emd = entityMetaFactory.create().setName("entity");
+		emd.addAttribute(attrFactory.create().setName(idAttributeName), ROLE_ID);
+		emd.addAttribute(attrFactory.create().setName(stringAttributeName).setUnique(true), ROLE_LABEL);
+		emd.addAttribute(attrFactory.create().setName(mrefAttributeName).setDataType(MREF).setNillable(true)
+				.setRefEntity(refEntityMetaData));
+
+		this.entityMetaData = emd;
+	}
+
+	@Test
+	public void generateOneQueryRuleGreaterDate() throws ParseException
+	{
+		String date = "2015-05-22";
+		Date value = MolgenisDateFormat.getDateFormat().parse(date);
+		Query<Entity> q = new QueryImpl<Entity>().gt(PREFIX + refDateAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refDateAttributeName).gt(date)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleGreaterDateTime() throws ParseException
+	{
+		Date value = MolgenisDateFormat.getDateFormat().parse("2015-05-22T11:12:13+0500");
+		Query<Entity> q = new QueryImpl<Entity>().gt(PREFIX + refDateTimeAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refDateTimeAttributeName)
+						.gt(DataConverter.toString(value))));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleGreaterDecimal()
+	{
+		Double value = Double.valueOf(1.23);
+		Query<Entity> q = new QueryImpl<Entity>().gt(PREFIX + refDecimalAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refDecimalAttributeName).gt(value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleGreaterInt()
+	{
+		Integer value = Integer.valueOf(1);
+		Query<Entity> q = new QueryImpl<Entity>().gt(PREFIX + refIntAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refIntAttributeName).gt(value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleGreaterLong()
+	{
+		Long value = Long.valueOf(1l);
+		Query<Entity> q = new QueryImpl<Entity>().gt(PREFIX + refLongAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refLongAttributeName).gt(value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleGreaterEqualDate() throws ParseException
+	{
+		String date = "2015-05-22";
+		Date value = MolgenisDateFormat.getDateFormat().parse(date);
+		Query<Entity> q = new QueryImpl<Entity>().ge(PREFIX + refDateAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refDateAttributeName).gte(date)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleLesserEqualDecimal()
+	{
+		Double value = Double.valueOf(1.23);
+		Query<Entity> q = new QueryImpl<>().le(PREFIX + refDecimalAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refDecimalAttributeName).lte(value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleLesserInt()
+	{
+		Integer value = Integer.valueOf(1);
+		Query<Entity> q = new QueryImpl<>().lt(PREFIX + refIntAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refIntAttributeName).lt(value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test(expectedExceptions = UnsupportedOperationException.class)
+	public void generateOneQueryRuleInCategorical_Ids()
+	{
+		Iterable<String> values = Arrays.asList("id0", "id1", "id2");
+		Query<Entity> q = new QueryImpl<>().in(PREFIX + refCategoricalAttributeName, values);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+	}
+
+	@Test
+	public void generateOneQueryRuleLikeCompoundPartString()
+	{
+		String value = "value";
+		Query<Entity> q = new QueryImpl<Entity>().like(PREFIX + refCompoundPart0AttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.nestedQuery(REF_ENTITY_ATT, QueryBuilders
+				.matchQuery(PREFIX + refCompoundPart0AttributeName + '.' + MappingsBuilder.FIELD_NGRAM_ANALYZED, value)
+				.analyzer(DEFAULT_ANALYZER));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleEqualsBool()
+	{
+		Boolean value = Boolean.TRUE;
+		Query<Entity> q = new QueryImpl<Entity>().eq(PREFIX + refBoolAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.termFilter(PREFIX + refBoolAttributeName, value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleEqualsString()
+	{
+		String value = "value";
+		Query<Entity> q = new QueryImpl<Entity>().eq(PREFIX + refStringAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+				.nestedFilter(REF_ENTITY_ATT, FilterBuilders
+						.termFilter(PREFIX + refStringAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED,
+								value)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test(expectedExceptions = UnsupportedOperationException.class)
+	public void generateOneQueryRuleEqualsCategorical()
+	{
+		String value = "id";
+		Query<Entity> q = new QueryImpl<Entity>().eq(PREFIX + refCategoricalAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+	}
+
+	@Test
+	public void generateOneQueryRuleNotEqualsEqualsBool()
+	{
+		Boolean value = Boolean.TRUE;
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(PREFIX + refBoolAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders
+				.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.nestedFilter(REF_ENTITY_ATT,
+						FilterBuilders.termFilter(PREFIX + refBoolAttributeName, value))));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test(expectedExceptions = UnsupportedOperationException.class)
+	public void generateOneQueryRuleNotEqualsCategorical()
+	{
+		String value = "id";
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(PREFIX + refCategoricalAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+	}
+
+	@Test(expectedExceptions = MolgenisQueryException.class)
+	public void generateOneQueryRuleNotEqualsCompound()
+	{
+		Object value = "value";
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(PREFIX + refCompoundAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+	}
+
+	@Test
+	public void generateOneQueryRuleNotEqualsCompoundPartString()
+	{
+		String value = "value";
+		Query<Entity> q = new QueryImpl<Entity>().not().eq(PREFIX + refCompoundPart0AttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().mustNot(QueryBuilders
+				.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders.nestedFilter(REF_ENTITY_ATT, FilterBuilders
+						.termFilter(PREFIX + refCompoundPart0AttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED,
+								value))));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateOneQueryRuleRangeInt()
+	{
+		Integer low = Integer.valueOf(3);
+		Integer high = Integer.valueOf(9);
+		Query<Entity> q = new QueryImpl<Entity>().rng(PREFIX + refIntAttributeName, low, high);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+
+		QueryBuilder expectedQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.rangeFilter(PREFIX + refIntAttributeName).gte(3).lte(9)));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test(expectedExceptions = UnsupportedOperationException.class)
+	public void generateOneQueryRuleSearchOneFieldCategorical()
+	{
+		String value = "text";
+		Query<Entity> q = new QueryImpl<Entity>().search(PREFIX + refCategoricalAttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+	}
+
+	@Test
+	public void generateOneQueryRuleSearchOneFieldCompoundPartString()
+	{
+		String value = "value";
+		Query<Entity> q = new QueryImpl<Entity>().search(PREFIX + refCompoundPart0AttributeName, value);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+		QueryBuilder expectedQuery = QueryBuilders
+				.nestedQuery(REF_ENTITY_ATT, QueryBuilders.matchQuery(PREFIX + refCompoundPart0AttributeName, value));
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateMultipleQueryRule()
+	{
+		// query: ref.a or (b and ref.c)
+		Boolean booleanValue = Boolean.TRUE;
+		String stringValue = "str";
+		Integer intValue = 1;
+		Query<Entity> q = new QueryImpl<Entity>().eq(PREFIX + refBoolAttributeName, booleanValue).or().nest()
+				.eq(stringAttributeName, stringValue).and().eq(PREFIX + refIntAttributeName, intValue).unnest();
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+
+		FilteredQueryBuilder booleanQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.termFilter(PREFIX + refBoolAttributeName, booleanValue)));
+		QueryBuilder stringQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(stringAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, stringValue));
+		QueryBuilder intQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.termFilter(PREFIX + refIntAttributeName, intValue)));
+		BoolQueryBuilder stringIntQuery = QueryBuilders.boolQuery().must(stringQuery).must(intQuery);
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().should(booleanQuery).should(stringIntQuery)
+				.minimumNumberShouldMatch(1);
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	@Test
+	public void generateMultipleQueryRuleMultipleNotClauses()
+	{
+		// query: ref.a and not b and not ref.c
+		Boolean booleanValue = Boolean.TRUE;
+		String stringValue = "str";
+		Integer intValue = 1;
+		Query<Entity> q = new QueryImpl<Entity>().eq(PREFIX + refBoolAttributeName, booleanValue).and().not()
+				.eq(stringAttributeName, stringValue).and().not().eq(PREFIX + refIntAttributeName, intValue);
+		new QueryGenerator().generate(searchRequestBuilder, q, entityMetaData);
+		ArgumentCaptor<QueryBuilder> captor = ArgumentCaptor.forClass(QueryBuilder.class);
+		verify(searchRequestBuilder).setQuery(captor.capture());
+
+		FilteredQueryBuilder booleanQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.termFilter(PREFIX + refBoolAttributeName, booleanValue)));
+		QueryBuilder stringQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(),
+				FilterBuilders.termFilter(stringAttributeName + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, stringValue));
+		QueryBuilder intQuery = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), FilterBuilders
+				.nestedFilter(REF_ENTITY_ATT, FilterBuilders.termFilter(PREFIX + refIntAttributeName, intValue)));
+		QueryBuilder expectedQuery = QueryBuilders.boolQuery().must(booleanQuery).mustNot(stringQuery)
+				.mustNot(intQuery);
+		assertQueryBuilderEquals(captor.getValue(), expectedQuery);
+	}
+
+	private void assertQueryBuilderEquals(QueryBuilder actual, QueryBuilder expected)
+	{
+		// QueryBuilder classes do not implement equals
+		assertEquals(actual.toString().replaceAll("\\s", ""), expected.toString().replaceAll("\\s", ""));
+	}
 }
