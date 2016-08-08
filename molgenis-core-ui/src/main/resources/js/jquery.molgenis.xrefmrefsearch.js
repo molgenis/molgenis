@@ -18,8 +18,22 @@
 
 	var restApi = new molgenis.RestClient();
 
-	function supportsLikeQuery(attr) {
-		return $.inArray(attr.fieldType, ['EMAIL', 'ENUM', 'HYPERLINK', 'STRING']) >= 0;
+	function getInexactQueryOperator(fieldType) {
+		var operator = 'LIKE';
+		switch(fieldType) {
+			case 'INT':
+			case 'LONG':
+			case 'BOOL':
+			case 'DATE':
+			case 'DATE_TIME':
+			case 'DECIMAL':
+				operator = 'EQUALS';
+				break;
+			case 'TEXT':
+				operator = 'SEARCH';
+				break;
+		}
+		return operator;
 	}
 
 	function createQuery(lookupAttributes, terms, exactMatch, search) {
@@ -37,10 +51,7 @@
     					nestedRules:[]
     				};
 
-    				var operator = 'LIKE';
-					if( exactMatch || !supportsLikeQuery(attribute)) {
-						operator = 'EQUALS'
-					}
+    				var operator = exactMatch ? 'EQUALS' : getInexactQueryOperator(attribute.fieldType);
 
 	                $.each(terms, function(index) {
 	                    if(index > 0){
