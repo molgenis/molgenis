@@ -36,6 +36,28 @@
 		return operator;
 	}
 
+	function isCompatibleWith(fieldType, term) {
+		var result = true
+		switch(fieldType) {
+			case 'INT':
+			case 'LONG':
+			case 'DECIMAL':
+				return !isNaN(term);
+			case 'BOOL':
+				switch(term.toLowerCase()) {
+					case 'true':
+					case 'false':
+						return true;
+					default:
+						return false;
+				}
+			case 'DATE':
+			case 'DATE_TIME':
+				return false;
+		}
+		return result
+	}
+
 	function createQuery(lookupAttributes, terms, exactMatch, search) {
 		var q = [];
 
@@ -54,22 +76,26 @@
     				var operator = exactMatch ? 'EQUALS' : getInexactQueryOperator(attribute.fieldType);
 
 	                $.each(terms, function(index) {
-	                    if(index > 0){
-                            if(search){
-                                rule.nestedRules.push({operator: 'AND'});
-                            }else {
-                                rule.nestedRules.push({operator: 'OR'});
-                            }
-	                    }
-	                    
-	                    rule.nestedRules.push({
-	                    	field: attribute.name,
-	                        operator: operator,
-	                        value: terms[index]
-	                    })
+	                	if(isCompatibleWith(attribute.fieldType, terms[index])){
+							if(rule.nestedRules.length > 0){
+								if(search){
+									rule.nestedRules.push({operator: 'AND'});
+								}else {
+									rule.nestedRules.push({operator: 'OR'});
+								}
+							}
+
+							rule.nestedRules.push({
+								field: attribute.name,
+								operator: operator,
+								value: terms[index]
+							})
+						}
 	                });
-	                
-	                q.push(rule);
+
+					if(rule.nestedRules.length > 0){
+						q.push(rule);
+					}
 	            }
 			});
 			return q;
