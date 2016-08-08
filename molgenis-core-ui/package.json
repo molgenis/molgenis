@@ -1,6 +1,6 @@
 {
   "name": "MOLGENIS",
-  "version": "1.22.1-ROW-LEVEL-SECURITY-SNAPSHOT",
+  "version": "1.22.1-ROW-LEVEL-SECURITY",
   "description": "Dependencies for the MOLGENIS UI",
   "scripts": {
     "watch": "webpack -d --watch",
