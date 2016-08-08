@@ -19,7 +19,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.util.DependencyResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +33,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RowLevelSecurityRepositoryDecorator.UPDATE_ATTRIBUTE;
 import static org.molgenis.data.RowLevelSecurityUtils.removeUpdateAttributeIfRowLevelSecured;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
+import static org.molgenis.util.DependencyResolver.hasSelfReferences;
 
 public class MappingServiceImpl implements MappingService
 {
@@ -202,9 +202,9 @@ public class MappingServiceImpl implements MappingService
 		{
 			LOG.info("Applying mappings to repository [" + targetRepo.getName() + "]");
 			applyMappingsToRepositories(mappingTarget, targetRepo);
-			if (DependencyResolver.hasSelfReferences(targetRepo.getEntityMetaData()))
+			if (hasSelfReferences(targetRepo.getEntityMetaData()))
 			{
-				// execute mapping a second time to set self references
+				LOG.info("Self reference found, applying the mapping for a second time to set references");
 				applyMappingsToRepositories(mappingTarget, targetRepo);
 			}
 			LOG.info("Done applying mappings to repository [" + targetRepo.getName() + "]");
