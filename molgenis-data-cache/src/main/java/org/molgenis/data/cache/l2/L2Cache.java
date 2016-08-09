@@ -4,14 +4,14 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
+import org.molgenis.data.EntityKey;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
-import org.molgenis.data.transaction.MolgenisTransactionManager;
-import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.cache.utils.EntityHydration;
-import org.molgenis.data.EntityKey;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
+import org.molgenis.data.transaction.MolgenisTransactionManager;
+import org.molgenis.data.transaction.TransactionInformation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,7 +88,7 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	{
 		LoadingCache<Object, Optional<Map<String, Object>>> cache = getEntityCache(repository);
 		EntityMetaData entityMetaData = repository.getEntityMetaData();
-		return cache.getUnchecked(id.toString()).map(e -> entityHydration.hydrate(e, entityMetaData)).orElse(null);
+		return cache.getUnchecked(id).map(e -> entityHydration.hydrate(e, entityMetaData)).orElse(null);
 	}
 
 	/**
