@@ -119,7 +119,8 @@
 		$hiddenInput.select2({
 			width: width,
 			minimumInputLength: 1,
-			multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'CATEGORICAL_MREF' || attributeMetaData.fieldType === 'XREF'),
+			multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'CATEGORICAL_MREF'
+				|| attributeMetaData.fieldType === 'XREF' || attributeMetaData.fieldType === 'FILE'),
 			closeOnSelect: false,
 			query: function (options){
 				var query = createQuery(lookupAttrNames, options.term.match(/[^ ]+/g),'LIKE', true);
