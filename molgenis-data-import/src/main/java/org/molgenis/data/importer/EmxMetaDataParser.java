@@ -5,6 +5,8 @@ import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
+import org.molgenis.data.i18n.model.I18nString;
+import org.molgenis.data.i18n.model.I18nStringFactory;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.meta.MetaValidationUtils;
@@ -80,6 +82,10 @@ public class EmxMetaDataParser implements MetaDataParser
 	public static final String EMX_LANGUAGE_CODE = "code";
 	public static final String EMX_LANGUAGE_NAME = "name";
 
+	// Column names in the i18nstring sheet
+	public static final String EMX_I18N_STRING_MSGID = "msgid";
+	public static final String EMX_I18N_STRING_DESCRIPTION = "description";
+
 	// Column names in the package sheet
 	public static final String EMX_PACKAGE_NAME = "name";
 	public static final String EMX_PACKAGE_DESCRIPTION = "description";
@@ -121,6 +127,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private final EntityMetaDataFactory entityMetaDataFactory;
 	private final TagFactory tagFactory;
 	private final LanguageFactory languageFactory;
+	private final I18nStringFactory i18nStringFactory;
 
 	public EmxMetaDataParser(PackageFactory packageFactory, AttributeMetaDataFactory attrMetaFactory,
 			EntityMetaDataFactory entityMetaDataFactory)
@@ -131,18 +138,20 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.entityMetaDataFactory = requireNonNull(entityMetaDataFactory);
 		this.tagFactory = null;
 		this.languageFactory = null;
+		this.i18nStringFactory = null;
 	}
 
 	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory,
 			AttributeMetaDataFactory attrMetaFactory, EntityMetaDataFactory entityMetaDataFactory,
-			TagFactory tagFactory, LanguageFactory languageFactory)
+			TagFactory tagFactory, LanguageFactory languageFactory, I18nStringFactory i18nStringFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.packageFactory = requireNonNull(packageFactory);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 		this.entityMetaDataFactory = requireNonNull(entityMetaDataFactory);
 		this.tagFactory = requireNonNull(tagFactory);
-		this.languageFactory = languageFactory;
+		this.languageFactory = requireNonNull(languageFactory);
+		this.i18nStringFactory = requireNonNull(i18nStringFactory);
 	}
 
 	@Override
@@ -1127,10 +1136,23 @@ public class EmxMetaDataParser implements MetaDataParser
 		return language;
 	}
 
-	private void parseI18nStrings(Repository<Entity> repository, IntermediateParseResults intermediateParseResults)
+	private void parseI18nStrings(Repository<Entity> emxI18nStringRepo,
+			IntermediateParseResults intermediateParseResults)
 	{
-		repository.forEach(intermediateParseResults::addI18nString);
+		emxI18nStringRepo.forEach(emxI18nStringEntity ->
+		{
+			I18nString i18nString = toI18nString(emxI18nStringEntity);
+			intermediateParseResults.addI18nString(i18nString);
+		});
 
+	}
+
+	private I18nString toI18nString(Entity emxI18nStringEntity)
+	{
+		I18nString i18nString = i18nStringFactory.create();
+		i18nString.setMessageId(emxI18nStringEntity.getString(EMX_I18N_STRING_MSGID));
+		i18nString.setDescription(emxI18nStringEntity.getString(EMX_I18N_STRING_DESCRIPTION));
+		return i18nString;
 	}
 
 	/**

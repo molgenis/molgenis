@@ -1,20 +1,16 @@
 package org.molgenis.data.importer;
 
-import java.util.List;
-import java.util.Map;
-
-import org.molgenis.data.Entity;
+import com.google.common.collect.*;
+import org.molgenis.data.i18n.model.I18nString;
+import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
 
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSetMultimap;
-import com.google.common.collect.SetMultimap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Value object to store the result of parsing a source.
@@ -25,14 +21,13 @@ public final class ParsedMetaData
 	private final ImmutableMap<String, Package> packages;
 	private final ImmutableSetMultimap<EntityMetaData, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
 	private final ImmutableList<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> entityTags;
-	private final ImmutableMap<String, Entity> languages;
-	private final ImmutableMap<String, Entity> i18nStrings;
+	private final ImmutableMap<String, Language> languages;
+	private final ImmutableMap<String, I18nString> i18nStrings;
 
 	public ParsedMetaData(List<? extends EntityMetaData> entities, Map<String, ? extends Package> packages,
 			SetMultimap<String, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags,
 			List<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> entityTags,
-			Map<String, Entity> languages,
-			ImmutableMap<String, Entity> i18nStrings)
+			Map<String, Language> languages, ImmutableMap<String, I18nString> i18nStrings)
 	{
 		if (entities == null)
 		{
@@ -95,12 +90,12 @@ public final class ParsedMetaData
 		return entityTags;
 	}
 
-	public ImmutableMap<String, Entity> getLanguages()
+	public ImmutableMap<String, Language> getLanguages()
 	{
 		return languages;
 	}
 
-	public ImmutableMap<String, Entity> getI18nStrings()
+	public ImmutableMap<String, I18nString> getI18nStrings()
 	{
 		return i18nStrings;
 	}
