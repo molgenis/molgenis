@@ -529,7 +529,26 @@ import "./css/Table.css";
 			this._createColsRec(item, entity, entity.attributes, this.props.attrs, Cols, [], false, undefined);
 			return Cols;
 		},
-		_createColsRec: function(item, entity, attrs, selectedAttrs, Cols, path, expanded, parentAttr) {
+		_getAttributeValues: function(item, attrName) {
+			var result = null;
+			if(item !== undefined && item !== null) {
+				if(_.isArray(item)) {
+					// We have passed an mref, the array contains one item for each value of the mref,
+					// this item can be undefined or null
+					result = _.map(item, function(row) {
+						if(row === undefined || row === null) {
+							return undefined;
+						} else {
+							return row[attrName];
+						}
+					});
+				} else {
+					result = item[attrName];
+				}
+			}
+			return result;
+		},
+		_createColsRec: function(item, entity, attrs, selectedAttrs, Cols, path, expanded, behindMref) {
 			if(_.size(selectedAttrs) > 0) {
 				for(var j = 0; j < attrs.length; ++j) {
 					var attr = attrs[j];
@@ -537,27 +556,25 @@ import "./css/Table.css";
 						if(attr.visible === true) {
 							var attrPath = path.concat(attr.name);
 							if(isCompoundAttr(attr)) {
-								this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, path, expanded, parentAttr);
+								this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, path, expanded, behindMref);
 							} else {
-
+								behindMref |= attr.fieldType === 'MREF' || attr.fieldType === 'CATEGORICAL_MREF';
 								if(this._isExpandedAttr(attr, selectedAttrs)) {
 									Cols.push(td({className: 'expanded-left', key : attrPath.join()}));
-									var value = (item !== undefined && item !== null) ? (_.isArray(item) ? _.map(item, function(value) { return value[attr.name];}) : item[attr.name]) : null;
-									this._createColsRec(value, attr.refEntity, attr.refEntity.attributes, selectedAttrs[attr.name], Cols, attrPath, true, attr);
+									this._createColsRec(this._getAttributeValues(item, attr.name), attr.refEntity, attr.refEntity.attributes, selectedAttrs[attr.name], Cols, attrPath, true, behindMref);
 								} else {
 									if(this._canExpandAttr(attr, path)) {
 										Cols.push(td({key: 'e' + attrPath.join()}));
 									}
-									var value = (item !== undefined && item !== null) ? (_.isArray(item) ? _.map(item, function(value) { return value[attr.name];}) : item[attr.name]) : null;
 									var TableCell = TableCellFactory({
 										className: j === attrs.length - 1 && expanded ? 'expanded-right' : undefined,
 										entity: entity,
 										attr : attr,
-										value: value,
+										value: this._getAttributeValues(item, attr.name),
 										expanded: expanded,
 										onEdit: this.props.onEdit,
 										key : attrPath.join(),
-										parentAttr : parentAttr
+										behindMref : behindMref
 									});
 									Cols.push(TableCell);
 								}
@@ -586,7 +603,7 @@ import "./css/Table.css";
 			expanded: React.PropTypes.bool,
 			className: React.PropTypes.string,
 			onEdit: React.PropTypes.func,
-			parentAttr: React.PropTypes.object
+			behindMref: React.PropTypes.bool
 		},
 		shouldComponentUpdate: function(nextProps, nextState) {
 			return !_.isEqual(this.state, nextState) || !_.isEqual(this.props.entity.name, nextProps.entity.name)
@@ -594,8 +611,8 @@ import "./css/Table.css";
 		},
 		render: function() {
 			var CellContentBlocks;
-			// treat expanded mref differently
-			if(this.props.expanded && _.isArray(this.props.value) && (this.props.parentAttr.fieldType === 'MREF' || this.props.parentAttr.fieldType === 'CATEGORICAL_MREF')) {
+			// If we are behind an expanded mref, the value is an array
+			if(this.props.expanded && _.isArray(this.props.value) && this.props.behindMref) {
 				CellContentBlocks = _.flatten(_.map(this.props.value, function(value, i) {
 					if(value !== null && value !== undefined) {
 						var CellContentForValue = this._createTableCellContent(value, 'c' + i);
