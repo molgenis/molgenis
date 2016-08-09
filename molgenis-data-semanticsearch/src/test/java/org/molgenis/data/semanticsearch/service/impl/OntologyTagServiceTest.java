@@ -87,6 +87,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void beforeMethod()
 	{
+		reset(dataService);
 		chromosomeNameTagEntity = tagFactory.create();
 		chromosomeNameTagEntity.set(TagMetaData.IDENTIFIER, "1234");
 		chromosomeNameTagEntity.set(TagMetaData.LABEL, "Chromosome name");
