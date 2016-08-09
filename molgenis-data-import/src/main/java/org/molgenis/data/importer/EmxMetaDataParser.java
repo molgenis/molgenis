@@ -5,6 +5,8 @@ import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
+import org.molgenis.data.i18n.model.Language;
+import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.*;
@@ -74,6 +76,10 @@ public class EmxMetaDataParser implements MetaDataParser
 	public static final String EMX_TAG_CODE_SYSTEM = "codeSystem";
 	public static final String EMX_TAG_RELATION_IRI = "relationIRI";
 
+	// Column names in the language sheet
+	public static final String EMX_LANGUAGE_CODE = "code";
+	public static final String EMX_LANGUAGE_NAME = "name";
+
 	// Column names in the package sheet
 	public static final String EMX_PACKAGE_NAME = "name";
 	public static final String EMX_PACKAGE_DESCRIPTION = "description";
@@ -114,6 +120,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private final AttributeMetaDataFactory attrMetaFactory;
 	private final EntityMetaDataFactory entityMetaDataFactory;
 	private final TagFactory tagFactory;
+	private final LanguageFactory languageFactory;
 
 	public EmxMetaDataParser(PackageFactory packageFactory, AttributeMetaDataFactory attrMetaFactory,
 			EntityMetaDataFactory entityMetaDataFactory)
@@ -123,17 +130,19 @@ public class EmxMetaDataParser implements MetaDataParser
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 		this.entityMetaDataFactory = requireNonNull(entityMetaDataFactory);
 		this.tagFactory = null;
+		this.languageFactory = null;
 	}
 
 	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory,
 			AttributeMetaDataFactory attrMetaFactory, EntityMetaDataFactory entityMetaDataFactory,
-			TagFactory tagFactory)
+			TagFactory tagFactory, LanguageFactory languageFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.packageFactory = requireNonNull(packageFactory);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 		this.entityMetaDataFactory = requireNonNull(entityMetaDataFactory);
 		this.tagFactory = requireNonNull(tagFactory);
+		this.languageFactory = languageFactory;
 	}
 
 	@Override
@@ -1020,7 +1029,8 @@ public class EmxMetaDataParser implements MetaDataParser
 			Iterable<String> emxEntityNames)
 	{
 		ImmutableMap.Builder<String, EntityMetaData> builder = builder();
-		emxEntityNames.forEach(emxName -> {
+		emxEntityNames.forEach(emxName ->
+		{
 			String repoName = EMX_NAME_TO_REPO_NAME_MAP.get(emxName);
 			if (repoName == null) repoName = emxName;
 			builder.put(emxName, dataService.getRepository(repoName).getEntityMetaData());
@@ -1064,7 +1074,8 @@ public class EmxMetaDataParser implements MetaDataParser
 	public static void scanMetaDataForSystemEntityMetaData(Map<String, EntityMetaData> allEntityMetaDataMap,
 			Iterable<EntityMetaData> existingMetaData)
 	{
-		existingMetaData.forEach(emd -> {
+		existingMetaData.forEach(emd ->
+		{
 			if (!allEntityMetaDataMap.containsKey(emd.getName())) allEntityMetaDataMap.put(emd.getName(), emd);
 			else if ((!EntityUtils.equals(emd, allEntityMetaDataMap.get(emd.getName())))
 					&& emd instanceof SystemEntityMetaData)
@@ -1093,9 +1104,27 @@ public class EmxMetaDataParser implements MetaDataParser
 							columnName, rowIndex, booleanString));
 	}
 
-	private void parseLanguages(Repository<Entity> repository, IntermediateParseResults intermediateParseResults)
+	private void parseLanguages(Repository<Entity> emxLanguageRepo, IntermediateParseResults intermediateParseResults)
 	{
-		repository.forEach(intermediateParseResults::addLanguage);
+		emxLanguageRepo.forEach(emxLanguageEntity ->
+		{
+			Language language = toLanguage(emxLanguageEntity);
+			intermediateParseResults.addLanguage(language);
+		});
+	}
+
+	/**
+	 * Creates a language entity from a EMX entity describing a language
+	 *
+	 * @param emxLanguageEntity EMX language entity
+	 * @return language entity
+	 */
+	private Language toLanguage(Entity emxLanguageEntity)
+	{
+		Language language = languageFactory.create();
+		language.setCode(emxLanguageEntity.getString(EMX_LANGUAGE_CODE));
+		language.setName(emxLanguageEntity.getString(EMX_LANGUAGE_NAME));
+		return language;
 	}
 
 	private void parseI18nStrings(Repository<Entity> repository, IntermediateParseResults intermediateParseResults)
