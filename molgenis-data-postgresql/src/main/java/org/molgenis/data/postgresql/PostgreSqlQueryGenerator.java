@@ -132,7 +132,7 @@ class PostgreSqlQueryGenerator
 		AttributeMetaData idAttr = entityMeta.getIdAttribute();
 		StringBuilder sql = new StringBuilder();
 
-		sql.append(" CREATE TABLE IF NOT EXISTS ").append(getJunctionTableName(entityMeta, attr)).append(" (")
+		sql.append("CREATE TABLE IF NOT EXISTS ").append(getJunctionTableName(entityMeta, attr)).append(" (")
 				.append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(" INT,").append(getColumnName(idAttr))
 				.append(' ').append(getPostgreSqlType(idAttr)).append(" NOT NULL, ").append(getColumnName(attr))
 				.append(' ').append(getPostgreSqlType(attr.getRefEntity().getIdAttribute()))
