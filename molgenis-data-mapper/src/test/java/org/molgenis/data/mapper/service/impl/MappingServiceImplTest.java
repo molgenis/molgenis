@@ -144,7 +144,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 				.addAttribute(attrMetaFactory.create().setName("basepairs").setDataType(DECIMAL).setNillable(false));
 
 		metaDataService = mock(MetaDataService.class);
-		when(metaDataService.addEntityMeta(argThat(new ArgumentMatcher<EntityMetaData>()
+		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityMetaData>()
 		{
 			@Override
 			public boolean matches(Object obj)
@@ -152,7 +152,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 				return obj instanceof EntityMetaData && ((EntityMetaData) obj).getName().equals(TARGET_HOP_ENTITY);
 			}
 		}))).thenReturn(hopRepo);
-		when(metaDataService.addEntityMeta(argThat(new ArgumentMatcher<EntityMetaData>()
+		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityMetaData>()
 		{
 			@Override
 			public boolean matches(Object obj)
@@ -160,7 +160,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 				return obj instanceof EntityMetaData && ((EntityMetaData) obj).getName().equals(SOURCE_GENE_ENTITY);
 			}
 		}))).thenReturn(geneRepo);
-		when(metaDataService.addEntityMeta(argThat(new ArgumentMatcher<EntityMetaData>()
+		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityMetaData>()
 		{
 			@Override
 			public boolean matches(Object obj)
@@ -305,7 +305,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		targetMeta.addAttribute(attrMetaFactory.create().setName("source"));
 
 		when(addEntityRepo.getEntityMetaData()).thenReturn(targetMeta);
-		when(metaDataService.addEntityMeta(argThat(new ArgumentMatcher<EntityMetaData>()
+		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityMetaData>()
 		{
 			@Override
 			public boolean matches(Object obj)
@@ -376,7 +376,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataService.getRepository(entityName)).thenReturn(updateEntityRepo);
 
 		when(updateEntityRepo.getEntityMetaData()).thenReturn(targetMeta);
-		when(metaDataService.addEntityMeta(argThat(new ArgumentMatcher<EntityMetaData>()
+		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityMetaData>()
 		{
 			@Override
 			public boolean matches(Object obj)

@@ -6,6 +6,7 @@ import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -53,6 +54,90 @@ public class MetaDataServiceImplTest
 		});
 		when(repoCollectionRegistry.getDefaultRepoCollection()).thenReturn(defaultRepoCollection);
 		assertEquals(metaDataServiceImpl.getLanguageCodes().collect(toList()), asList("en", "nl"));
+	}
+
+	@Test
+	public void createRepository()
+	{
+		String backendName = "backend";
+
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		when(entityMeta.getBackend()).thenReturn(backendName);
+		AttributeMetaData attr0 = mock(AttributeMetaData.class);
+		AttributeMetaData attr1 = mock(AttributeMetaData.class);
+		when(entityMeta.getOwnAllAttributes()).thenReturn(newArrayList(attr0, attr1));
+
+		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
+		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
+		Repository<Entity> repo = mock(Repository.class);
+		when(repoCollection.getRepository(entityMeta)).thenReturn(repo);
+		assertEquals(metaDataServiceImpl.createRepository(entityMeta), repo);
+
+		ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
+		assertEquals(attrsCaptor.getValue().collect(toList()), newArrayList(attr0, attr1));
+
+		verify(dataService).add(ENTITY_META_DATA, entityMeta);
+
+		verifyNoMoreInteractions(dataService);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void createRepositoryAbstractEntityMeta()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).isAbstract()).thenReturn(true).getMock();
+		metaDataServiceImpl.createRepository(entityMeta);
+	}
+
+	@Test
+	public void createRepositoryTyped()
+	{
+		String backendName = "backend";
+		Class<Package> entityClass = Package.class;
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		when(entityMeta.getBackend()).thenReturn(backendName);
+		AttributeMetaData attr0 = mock(AttributeMetaData.class);
+		AttributeMetaData attr1 = mock(AttributeMetaData.class);
+		when(entityMeta.getOwnAllAttributes()).thenReturn(newArrayList(attr0, attr1));
+
+		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
+		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
+		Repository<Package> repo = mock(Repository.class);
+		when(repoCollection.getRepository(entityMeta)).thenReturn((Repository<Entity>) (Repository<?>) repo);
+		assertEquals(metaDataServiceImpl.createRepository(entityMeta, entityClass), repo);
+
+		ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
+		assertEquals(attrsCaptor.getValue().collect(toList()), newArrayList(attr0, attr1));
+
+		verify(dataService).add(ENTITY_META_DATA, entityMeta);
+
+		verifyNoMoreInteractions(dataService);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void createRepositoryTypedAbstractEntityMeta()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).isAbstract()).thenReturn(true).getMock();
+		metaDataServiceImpl.createRepository(entityMeta, Package.class);
+	}
+
+	@Test
+	public void addEntityMeta()
+	{
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		AttributeMetaData attr0 = mock(AttributeMetaData.class);
+		AttributeMetaData attr1 = mock(AttributeMetaData.class);
+		when(entityMeta.getOwnAllAttributes()).thenReturn(newArrayList(attr0, attr1));
+		metaDataServiceImpl.addEntityMeta(entityMeta);
+
+		ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
+		assertEquals(attrsCaptor.getValue().collect(toList()), newArrayList(attr0, attr1));
+
+		verify(dataService).add(ENTITY_META_DATA, entityMeta);
+
+		verifyNoMoreInteractions(dataService);
 	}
 
 	@Test

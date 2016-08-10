@@ -1,6 +1,5 @@
 package org.molgenis.data.meta;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.collect.TreeTraverser;
 import org.molgenis.data.*;
@@ -110,6 +109,30 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
+	public Repository<Entity> createRepository(EntityMetaData entityMeta)
+	{
+		if (entityMeta.isAbstract())
+		{
+			throw new MolgenisDataException(
+					format("Can't create repository for abstract entity [%s]", entityMeta.getName()));
+		}
+		addEntityMeta(entityMeta);
+		return getRepository(entityMeta);
+	}
+
+	@Override
+	public <E extends Entity> Repository<E> createRepository(EntityMetaData entityMeta, Class<E> entityClass)
+	{
+		if (entityMeta.isAbstract())
+		{
+			throw new MolgenisDataException(
+					format("Can't create repository for abstract entity [%s]", entityMeta.getName()));
+		}
+		addEntityMeta(entityMeta);
+		return getRepository(entityMeta, entityClass);
+	}
+
+	@Override
 	public RepositoryCollection getDefaultBackend()
 	{
 		return repoCollectionRegistry.getDefaultRepoCollection();
@@ -163,24 +186,14 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public Repository<Entity> addEntityMeta(EntityMetaData entityMeta)
+	public void addEntityMeta(EntityMetaData entityMeta)
 	{
 		// create attributes
-		Stream<AttributeMetaData> attrEntities = stream(entityMeta.getOwnAttributes().spliterator(), false)
-				.flatMap(MetaDataServiceImpl::getAttributesPostOrder);
-		getAttributeRepository().add(attrEntities);
-
-		// create tags
-		Iterable<Tag> tags = entityMeta.getTags();
-		if (!Iterables.isEmpty(tags))
-		{
-			getTagRepository().add(stream(tags.spliterator(), false));
-		}
+		Stream<AttributeMetaData> attrs = stream(entityMeta.getOwnAllAttributes().spliterator(), false);
+		dataService.add(ATTRIBUTE_META_DATA, attrs);
 
 		// create entity
-		getEntityRepository().add(entityMeta);
-
-		return !entityMeta.isAbstract() ? getRepository(entityMeta) : null;
+		dataService.add(ENTITY_META_DATA, entityMeta);
 	}
 
 	@Transactional

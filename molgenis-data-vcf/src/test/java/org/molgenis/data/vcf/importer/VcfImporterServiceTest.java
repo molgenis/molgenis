@@ -114,7 +114,7 @@ public class VcfImporterServiceTest
 		});
 		when(dataService.hasRepository(entityName0)).thenReturn(false);
 		Repository<Entity> outRepo0 = mock(Repository.class);
-		when(metaDataService.addEntityMeta(argThat(eqName(entityMeta0)))).thenReturn(outRepo0);
+		when(metaDataService.createRepository(argThat(eqName(entityMeta0)))).thenReturn(outRepo0);
 		when(outRepo0.add(any(Stream.class))).thenAnswer(new Answer<Integer>()
 		{
 			@Override
@@ -158,7 +158,7 @@ public class VcfImporterServiceTest
 		when(sampleEntityMeta0.getOwnLookupAttributes()).thenReturn(emptyList());
 		Repository<Entity> outSampleRepo0 = mock(Repository.class);
 		when(outSampleRepo0.getName()).thenReturn(sampleEntityName0);
-		when(metaDataService.addEntityMeta(argThat(eqName(sampleEntityMeta0)))).thenReturn(outSampleRepo0);
+		when(metaDataService.createRepository(argThat(eqName(sampleEntityMeta0)))).thenReturn(outSampleRepo0);
 
 		AttributeMetaData sampleAttr = mock(AttributeMetaData.class);
 		when(sampleAttr.getName()).thenReturn(VcfAttributes.SAMPLES);
@@ -219,7 +219,7 @@ public class VcfImporterServiceTest
 		});
 		when(dataService.hasRepository(entityName0)).thenReturn(false);
 		Repository<Entity> outRepo0 = mock(Repository.class);
-		when(metaDataService.addEntityMeta(argThat(eqName(entityMeta0)))).thenReturn(outRepo0);
+		when(metaDataService.createRepository(argThat(eqName(entityMeta0)))).thenReturn(outRepo0);
 		when(outRepo0.add(any(Stream.class))).thenAnswer(new Answer<Integer>()
 		{
 			@Override

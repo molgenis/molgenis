@@ -376,8 +376,8 @@ public class ImportWriter
 				{
 					LOG.debug("trying to create: " + name);
 					metaDataChanges.addEntity(name);
-					Repository<Entity> repo = dataService.getMeta().addEntityMeta(entityMetaData);
-					if (repo != null)
+					dataService.getMeta().addEntityMeta(entityMetaData);
+					if (!entityMetaData.isAbstract())
 					{
 						report.addNewEntity(name);
 					}

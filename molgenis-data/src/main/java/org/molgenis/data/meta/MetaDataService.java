@@ -69,6 +69,26 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	boolean hasRepository(String entityName);
 
 	/**
+	 * Create a repository for the given entity meta data.
+	 *
+	 * @param entityMeta entity meta data
+	 * @return repository
+	 * @throws org.molgenis.data.MolgenisDataException if entity meta data is abstract
+	 */
+	Repository<Entity> createRepository(EntityMetaData entityMeta);
+
+	/**
+	 * Create a typed repository for the given entity meta data.
+	 *
+	 * @param entityMeta  entity meta data
+	 * @param entityClass entity class
+	 * @param <E>         entity type
+	 * @return typed repository
+	 * @throws org.molgenis.data.MolgenisDataException if entity meta data is abstract
+	 */
+	<E extends Entity> Repository<E> createRepository(EntityMetaData entityMeta, Class<E> entityClass);
+
+	/**
 	 * Get a backend by name or null if it does not exists
 	 *
 	 * @param name
@@ -151,12 +171,11 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	Stream<Repository<Entity>> getRepositories();
 
 	/**
-	 * Adds new EntityMeta and creates a new Repository
+	 * Add entity meta data and entity meta data attributes.
 	 *
-	 * @param entityMeta
-	 * @return
+	 * @param entityMeta entity meta data
 	 */
-	Repository<Entity> addEntityMeta(EntityMetaData entityMeta);
+	void addEntityMeta(EntityMetaData entityMeta);
 
 	/**
 	 * Deletes an EntityMeta

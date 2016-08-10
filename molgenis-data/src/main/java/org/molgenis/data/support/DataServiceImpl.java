@@ -279,7 +279,8 @@ public class DataServiceImpl implements DataService
 		emd.setName(newRepositoryId);
 		emd.setLabel(newRepositoryLabel);
 
-		Repository<Entity> repositoryCopy = metaDataService.addEntityMeta(emd);
+		metaDataService.addEntityMeta(emd);
+		Repository<Entity> repositoryCopy = metaDataService.createRepository(emd);
 		try
 		{
 			repositoryCopy.add(repository.findAll(query));
