@@ -162,9 +162,11 @@ public class AlgorithmServiceImpl implements AlgorithmService
 				case DATE_TIME:
 					convertedValue = Context.jsToJava(value, Date.class);
 					break;
+				case BOOL:
+					convertedValue = Boolean.parseBoolean(Context.toString(value));
+					break;
 				case INT:
-					// Round it up or down to the nearest integer value
-					convertedValue = Math.round(Double.parseDouble(Context.toString(value)));
+					convertedValue = Integer.parseInt(Context.toString(value));
 					break;
 				case DECIMAL:
 					convertedValue = Context.toNumber(value);
