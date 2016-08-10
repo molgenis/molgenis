@@ -153,7 +153,7 @@ public class SystemEntityMetaDataPersister
 	{
 		Stream<EntityMetaData> removedEntityMetas = dataService.findAll(ENTITY_META_DATA, EntityMetaData.class)
 				.filter(this::isSystemEntity).filter(this::isNotExists);
-		dataService.delete(ENTITY_META_DATA, removedEntityMetas); // FIXME dependency resolving?
+		dataService.delete(ENTITY_META_DATA, removedEntityMetas);
 	}
 
 	private boolean isSystemEntity(EntityMetaData entityMeta)
