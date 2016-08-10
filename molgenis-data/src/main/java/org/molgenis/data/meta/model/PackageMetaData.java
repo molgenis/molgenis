@@ -37,10 +37,10 @@ public class PackageMetaData extends SystemEntityMetaData
 		setLabel("Package");
 		setDescription("Grouping of related entities");
 		addAttribute(FULL_NAME, ROLE_ID, ROLE_LABEL).setLabel("Qualified name");
-		addAttribute(SIMPLE_NAME).setLabel("Name");
+		addAttribute(SIMPLE_NAME).setNillable(false).setReadOnly(true).setLabel("Name");
 		addAttribute(LABEL).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
-		addAttribute(PARENT).setDataType(XREF).setRefEntity(this).setLabel("Parent");
+		addAttribute(PARENT).setReadOnly(true).setDataType(XREF).setRefEntity(this).setLabel("Parent");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData).setLabel("Tags");
 	}
 

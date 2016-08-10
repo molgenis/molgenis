@@ -1,15 +1,21 @@
 package org.molgenis.data.postgresql;
 
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.QueryImpl;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -132,4 +138,97 @@ public class PostgreSqlQueryGeneratorTest
 				+ "FROM \"org_molgenis_MasterEntity\" AS this");
 	}
 
+	@DataProvider(name = "getSqlAddColumnProvider")
+	public static Iterator<Object[]> getSqlAddColumnProvider()
+	{
+		// ref entity with string id attribute
+		AttributeMetaData refIdAttrStr = mock(AttributeMetaData.class);
+		when(refIdAttrStr.getName()).thenReturn("refIdAttrStr");
+		when(refIdAttrStr.getDataType()).thenReturn(STRING);
+		EntityMetaData refEntityMetaString = mock(EntityMetaData.class);
+		when(refEntityMetaString.toString()).thenReturn("refEntityStr");
+		when(refEntityMetaString.getName()).thenReturn("refEntityStr");
+		when(refEntityMetaString.getIdAttribute()).thenReturn(refIdAttrStr);
+
+		// ref entity with int id attribute
+		AttributeMetaData refIdAttrInt = mock(AttributeMetaData.class);
+		when(refIdAttrInt.getName()).thenReturn("refIdAttrInt");
+		when(refIdAttrInt.getDataType()).thenReturn(INT);
+		EntityMetaData refEntityMetaInt = mock(EntityMetaData.class);
+		when(refEntityMetaInt.toString()).thenReturn("refEntityInt");
+		when(refEntityMetaInt.getName()).thenReturn("refEntityInt");
+		when(refEntityMetaInt.getIdAttribute()).thenReturn(refIdAttrInt);
+
+		return Arrays.asList(new Object[] { BOOL, true, null, "ALTER TABLE \"entity\" ADD \"attr\" boolean" },
+				new Object[] { CATEGORICAL, true, refEntityMetaInt, "ALTER TABLE \"entity\" ADD \"attr\" integer" },
+				new Object[] { DATE, true, null, "ALTER TABLE \"entity\" ADD \"attr\" date" },
+				new Object[] { DATE_TIME, true, null, "ALTER TABLE \"entity\" ADD \"attr\" timestamp" },
+				new Object[] { DECIMAL, true, null, "ALTER TABLE \"entity\" ADD \"attr\" double precision" },
+				new Object[] { EMAIL, true, null, "ALTER TABLE \"entity\" ADD \"attr\" character varying(255)" },
+				new Object[] { ENUM, true, null,
+						"ALTER TABLE \"entity\" ADD \"attr\" character varying(255) CHECK (\"attr\" IN ('enum0, enum1'))" },
+				new Object[] { FILE, true, refEntityMetaString,
+						"ALTER TABLE \"entity\" ADD \"attr\" character varying(255)" },
+				new Object[] { HTML, true, null, "ALTER TABLE \"entity\" ADD \"attr\" text" },
+				new Object[] { HYPERLINK, true, null, "ALTER TABLE \"entity\" ADD \"attr\" character varying(255)" },
+				new Object[] { INT, true, null, "ALTER TABLE \"entity\" ADD \"attr\" integer" },
+				new Object[] { LONG, true, null, "ALTER TABLE \"entity\" ADD \"attr\" bigint" },
+				new Object[] { SCRIPT, true, null, "ALTER TABLE \"entity\" ADD \"attr\" text" },
+				new Object[] { STRING, true, null, "ALTER TABLE \"entity\" ADD \"attr\" character varying(255)" },
+				new Object[] { TEXT, true, null, "ALTER TABLE \"entity\" ADD \"attr\" text" },
+				new Object[] { XREF, true, refEntityMetaString,
+						"ALTER TABLE \"entity\" ADD \"attr\" character varying(255)" },
+				new Object[] { BOOL, false, null, "ALTER TABLE \"entity\" ADD \"attr\" boolean NOT NULL" },
+				new Object[] { CATEGORICAL, false, refEntityMetaInt,
+						"ALTER TABLE \"entity\" ADD \"attr\" integer NOT NULL" },
+				new Object[] { DATE, false, null, "ALTER TABLE \"entity\" ADD \"attr\" date NOT NULL" },
+				new Object[] { DATE_TIME, false, null, "ALTER TABLE \"entity\" ADD \"attr\" timestamp NOT NULL" },
+				new Object[] { DECIMAL, false, null, "ALTER TABLE \"entity\" ADD \"attr\" double precision NOT NULL" },
+				new Object[] { EMAIL, false, null,
+						"ALTER TABLE \"entity\" ADD \"attr\" character varying(255) NOT NULL" },
+				new Object[] { ENUM, false, null,
+						"ALTER TABLE \"entity\" ADD \"attr\" character varying(255) NOT NULL CHECK (\"attr\" IN ('enum0, enum1'))" },
+				new Object[] { FILE, false, refEntityMetaString,
+						"ALTER TABLE \"entity\" ADD \"attr\" character varying(255) NOT NULL" },
+				new Object[] { HTML, false, null, "ALTER TABLE \"entity\" ADD \"attr\" text NOT NULL" },
+				new Object[] { HYPERLINK, false, null,
+						"ALTER TABLE \"entity\" ADD \"attr\" character varying(255) NOT NULL" },
+				new Object[] { INT, false, null, "ALTER TABLE \"entity\" ADD \"attr\" integer NOT NULL" },
+				new Object[] { LONG, false, null, "ALTER TABLE \"entity\" ADD \"attr\" bigint NOT NULL" },
+				new Object[] { SCRIPT, false, null, "ALTER TABLE \"entity\" ADD \"attr\" text NOT NULL" },
+				new Object[] { STRING, false, null,
+						"ALTER TABLE \"entity\" ADD \"attr\" character varying(255) NOT NULL" },
+				new Object[] { TEXT, false, null, "ALTER TABLE \"entity\" ADD \"attr\" text NOT NULL" },
+				new Object[] { XREF, false, refEntityMetaString,
+						"ALTER TABLE \"entity\" ADD \"attr\" character varying(255) NOT NULL" }).iterator();
+	}
+
+	@Test(dataProvider = "getSqlAddColumnProvider")
+	public void getSqlAddColumn(AttributeType attrType, boolean nillable, EntityMetaData refEntityMeta, String sql)
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(attrType);
+		when(attr.isNillable()).thenReturn(nillable);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		when(attr.getEnumOptions())
+				.thenReturn(attrType == ENUM ? newArrayList("enum0, enum1") : Collections.emptyList());
+		assertEquals(PostgreSqlQueryGenerator.getSqlAddColumn(entityMeta, attr), sql);
+	}
+
+	@DataProvider(name = "getSqlAddColumnInvalidType")
+	public static Iterator<Object[]> getSqlAddColumnInvalidTypeProvider()
+	{
+		return Arrays.asList(new Object[] { COMPOUND }, new Object[] { CATEGORICAL_MREF }, new Object[] { MREF })
+				.iterator();
+	}
+
+	@Test(dataProvider = "getSqlAddColumnInvalidType", expectedExceptions = RuntimeException.class)
+	public void getSqlAddColumnInvalidType(AttributeType attrType)
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(attrType);
+		PostgreSqlQueryGenerator.getSqlAddColumn(entityMeta, attr);
+	}
 }
