@@ -31,6 +31,16 @@
 											</#list> 
 	    								</td>
 	    							</#if>
+								<#elseif sourceAttribute.dataType == "mref">
+									<#if feedbackRow.sourceEntity.get(sourceAttribute.name)??>
+                                        <td>
+											<#assign refEntity = feedbackRow.sourceEntity.get(sourceAttribute.name)>
+											<#assign refEntityMetaData = sourceAttribute.refEntity>
+                                            <#list refEntity as entity>
+												${entity.getIdValue()}
+											</#list>
+                                        </td>
+									</#if>
 								<#else>
 									<#if feedbackRow.sourceEntity.get(sourceAttribute.name)??>
 										<#assign value = feedbackRow.sourceEntity.get(sourceAttribute.name)>
