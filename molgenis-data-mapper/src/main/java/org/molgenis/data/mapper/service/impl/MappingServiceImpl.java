@@ -172,14 +172,12 @@ public class MappingServiceImpl implements MappingService
 			targetMetaData.addAttribute(attrMetaFactory.create().setName(SOURCE));
 		}
 
-		// add a new repository if the target repo doesn't exist, or check if the target repository is compatible with
-		// the result of the mappings
 		Repository<Entity> targetRepo;
 		if (!dataService.hasRepository(entityName))
 		{
+			// Create a new repository
 			targetRepo = runAsSystem(() -> dataService.getMeta().addEntityMeta(targetMetaData));
-			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-					Collections.singletonList(targetRepo.getName()));
+			permissionSystemService.giveUserEntityPermissions(getContext(), singletonList(targetRepo.getName()));
 		}
 		else
 		{
@@ -210,9 +208,19 @@ public class MappingServiceImpl implements MappingService
 		}
 		catch (RuntimeException ex)
 		{
-			LOG.error("Error applying mappings, dropping created repository.", ex);
-			dataService.getMeta().deleteEntityMeta(targetMetaData.getName());
-			throw ex;
+			if (targetRepo.getName().equals(mappingTarget.getName()))
+			{
+				// Mapping to the target model, if something goes wrong we do not want to delete it
+				LOG.error("Error applying mappings to the target", ex);
+				throw ex;
+			}
+			else
+			{
+				// A new repository was created for mapping, so we can drop it if something went wrong
+				LOG.error("Error applying mappings, dropping created repository.", ex);
+				dataService.getMeta().deleteEntityMeta(targetMetaData.getName());
+				throw ex;
+			}
 		}
 	}
 
