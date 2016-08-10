@@ -171,14 +171,12 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	void delete(List<EntityMetaData> entities);
 
 	/**
-	 * Updates EntityMeta
+	 * Updates entity meta data and entity meta data attributes.
 	 *
-	 * @param entityMeta
-	 * @return added attributes
-	 * <p>
-	 * FIXME remove return value or change it to ChangeSet with all changes
+	 * @param entityMeta entity meta data
+	 * @throws UnknownEntityException if entity meta data does not exist
 	 */
-	List<AttributeMetaData> updateEntityMeta(EntityMetaData entityMeta);
+	void updateEntityMeta(EntityMetaData entityMeta);
 
 	/**
 	 * Adds an Attribute to an EntityMeta

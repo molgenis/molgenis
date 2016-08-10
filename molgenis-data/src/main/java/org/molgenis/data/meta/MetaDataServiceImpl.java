@@ -4,8 +4,10 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Sets;
 import com.google.common.collect.TreeTraverser;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.security.core.Permission;
 import org.molgenis.util.DependencyResolver;
@@ -15,10 +17,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -28,6 +28,7 @@ import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
@@ -263,43 +264,69 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public List<AttributeMetaData> updateEntityMeta(EntityMetaData entityMeta)
+	public void updateEntityMeta(EntityMetaData entityMeta)
 	{
-		EntityMetaData otherEntityMeta = dataService.query(ENTITY_META_DATA, EntityMetaData.class)
-				.eq(EntityMetaDataMetaData.FULL_NAME, entityMeta.getName()).findOne();
-		if (otherEntityMeta == null)
+		EntityMetaData existingEntityMeta = dataService.query(ENTITY_META_DATA, EntityMetaData.class)
+				.eq(FULL_NAME, entityMeta.getName()).findOne();
+		if (existingEntityMeta == null)
 		{
 			throw new UnknownEntityException(format("Unknown entity [%s]", entityMeta.getName()));
 		}
 
-		// FIXME please check if true: add/update attributes, attributes are deleted when deleting entity meta data if no more references exist
-		Iterable<AttributeMetaData> compoundOrderedAttributes = entityMeta.getCompoundOrderedAttributes();
-
-		compoundOrderedAttributes.forEach(attr -> {
-			if (attr.getIdentifier() == null)
-			{
-				dataService.add(ATTRIBUTE_META_DATA, attr);
-			}
-			else
-			{
-				AttributeMetaData existingAttr = dataService
-						.findOneById(ATTRIBUTE_META_DATA, attr.getIdentifier(), AttributeMetaData.class);
-				if (!EntityUtils.equals(attr, existingAttr))
-				{
-					dataService.update(ATTRIBUTE_META_DATA, attr);
-				}
-			}
-		});
-
-		// package, tag and referenced entity changes are updated separately
+		// add, update attributes and collect attributes to delete
+		List<AttributeMetaData> deletedAttrs = upsertAttributes(entityMeta, existingEntityMeta);
 
 		// update entity
-		if (!EntityUtils.equals(entityMeta, otherEntityMeta))
+		if (!EntityUtils.equals(entityMeta, existingEntityMeta))
 		{
 			dataService.update(ENTITY_META_DATA, entityMeta);
 		}
 
-		return MetaUtils.updateEntityMeta(this, entityMeta);
+		// delete attributes
+		if (!deletedAttrs.isEmpty())
+		{
+			// assumption: the attribute is owned by this entity or a compound attribute owned by this entity
+			dataService.deleteAll(ATTRIBUTE_META_DATA, deletedAttrs.stream().map(AttributeMetaData::getIdentifier));
+		}
+	}
+
+	/**
+	 * Add and update entity attributes
+	 *
+	 * @param entityMeta         entity meta data
+	 * @param existingEntityMeta existing entity meta data
+	 * @return entity attributes deleted from the given entity meta data
+	 */
+	private List<AttributeMetaData> upsertAttributes(EntityMetaData entityMeta, EntityMetaData existingEntityMeta)
+	{
+		// analyze both compound and atomic attributes owned by the entity
+		Map<String, AttributeMetaData> attrsMap = stream(entityMeta.getOwnAllAttributes().spliterator(), false)
+				.collect(toMap(AttributeMetaData::getName, Function.identity()));
+		Map<String, AttributeMetaData> existingAttrsMap = stream(existingEntityMeta.getOwnAllAttributes().spliterator(),
+				false).collect(toMap(AttributeMetaData::getName, Function.identity()));
+
+		// determine attributes to add, update and delete
+		Set<String> addedAttrNames = Sets.difference(attrsMap.keySet(), existingAttrsMap.keySet());
+		Set<String> sharedAttrNames = Sets.intersection(attrsMap.keySet(), existingAttrsMap.keySet());
+		Set<String> deletedAttrNames = Sets.difference(existingAttrsMap.keySet(), attrsMap.keySet());
+
+		// add new attributes
+		if (!addedAttrNames.isEmpty())
+		{
+			dataService.add(ATTRIBUTE_META_DATA, addedAttrNames.stream().map(attrsMap::get));
+		}
+
+		// update changed attributes
+		List<String> updatedAttrNames = sharedAttrNames.stream()
+				.filter(attrName -> !EntityUtils.equals(attrsMap.get(attrName), existingAttrsMap.get(attrName)))
+				.collect(toList());
+		if (!updatedAttrNames.isEmpty())
+		{
+			dataService.update(ATTRIBUTE_META_DATA, updatedAttrNames.stream().map(attrsMap::get));
+		}
+
+		// return attributes to delete so that they can be deleted after the entity was updated
+		return deletedAttrNames.stream().map(existingAttrsMap::get).collect(toList());
 	}
 
 	@Override
