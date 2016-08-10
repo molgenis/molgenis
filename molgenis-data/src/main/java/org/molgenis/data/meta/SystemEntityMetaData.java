@@ -93,7 +93,7 @@ public abstract class SystemEntityMetaData extends EntityMetaData
 		if (parentAttr != null)
 		{
 			parentAttr.addAttributePart(attr);
-			// FIXME assign roles, see super.addAttribute(AttributeMetaData attr, AttributeRole... attrTypes)
+			setAttributeRoles(attr, attrTypes);
 		}
 		else
 		{

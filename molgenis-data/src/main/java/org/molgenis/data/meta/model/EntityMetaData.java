@@ -605,6 +605,17 @@ public class EntityMetaData extends StaticEntity
 
 		Iterable<AttributeMetaData> attrs = getEntities(ATTRIBUTES, AttributeMetaData.class);
 		set(ATTRIBUTES, concat(attrs, singletonList(attr)));
+		setAttributeRoles(attr, attrTypes);
+		return this;
+	}
+
+	public void addAttributes(Iterable<AttributeMetaData> attrs)
+	{
+		attrs.forEach(this::addAttribute);
+	}
+
+	protected void setAttributeRoles(AttributeMetaData attr, AttributeRole... attrTypes)
+	{
 		if (attrTypes != null)
 		{
 			for (AttributeRole attrType : attrTypes)
@@ -625,18 +636,12 @@ public class EntityMetaData extends StaticEntity
 				}
 			}
 		}
-		return this;
-	}
-
-	public void addAttributes(Iterable<AttributeMetaData> attrs)
-	{
-		attrs.forEach(this::addAttribute);
 	}
 
 	/**
-	 * Returns whether this entity has a attribute with expression
+	 * Returns whether this entity has an attribute with expression
 	 *
-	 * @return whether this entity has a attribute with expression
+	 * @return whether this entity has an attribute with expression
 	 */
 	public boolean hasAttributeWithExpression()
 	{
