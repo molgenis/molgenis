@@ -157,14 +157,22 @@ public class MappingServiceImpl implements MappingService
 		return mappingProjectRepository.getMappingProject(identifier);
 	}
 
+	public String applyMappings(MappingTarget mappingTarget, String entityName)
+	{
+		return applyMappings(mappingTarget, entityName, true);
+	}
+
 	// TODO discuss: why isn't this method transactional?
 	@Override
-	public String applyMappings(MappingTarget mappingTarget, String entityName)
+	public String applyMappings(MappingTarget mappingTarget, String entityName, boolean addSourceAttribute)
 	{
 		EntityMetaData targetMetaData = EntityMetaData.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS);
 		targetMetaData.setName(entityName);
 		targetMetaData.setLabel(entityName);
-		targetMetaData.addAttribute(attrMetaFactory.create().setName("source"));
+		if (addSourceAttribute)
+		{
+			targetMetaData.addAttribute(attrMetaFactory.create().setName(SOURCE));
+		}
 
 		// add a new repository if the target repo doesn't exist, or check if the target repository is compatible with
 		// the result of the mappings
@@ -177,7 +185,17 @@ public class MappingServiceImpl implements MappingService
 		}
 		else
 		{
+			// Get an existing repository
 			targetRepo = dataService.getRepository(entityName);
+
+			// If the addSourceAttribute is true, but the existing repository does not have the SOURCE attribute yet
+			// Get the existing metadata and add the SOURCE attribute
+			EntityMetaData existingTargetMetaData = targetRepo.getEntityMetaData();
+			if (existingTargetMetaData.getAttribute(SOURCE) == null && addSourceAttribute)
+			{
+				existingTargetMetaData.addAttribute(attrMetaFactory.create().setName(SOURCE));
+				dataService.getMeta().updateEntityMeta(existingTargetMetaData);
+			}
 		}
 
 		try
