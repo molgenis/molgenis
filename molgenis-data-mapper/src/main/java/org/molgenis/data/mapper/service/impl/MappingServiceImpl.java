@@ -1,6 +1,5 @@
 package org.molgenis.data.mapper.service.impl;
 
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.*;
@@ -21,26 +20,25 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.util.DependencyResolver.hasSelfReferences;
+import static org.springframework.security.core.context.SecurityContextHolder.getContext;
 
 public class MappingServiceImpl implements MappingService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceImpl.class);
 
 	private static final int BATCH_SIZE = 1000;
+	public static final String SOURCE = "source";
 
 	private final DataService dataService;
 	private final AlgorithmService algorithmService;
@@ -202,6 +200,11 @@ public class MappingServiceImpl implements MappingService
 		{
 			LOG.info("Applying mappings to repository [" + targetMetaData.getName() + "]");
 			applyMappingsToRepositories(mappingTarget, targetRepo);
+			if (hasSelfReferences(targetRepo.getEntityMetaData()))
+			{
+				LOG.info("Self reference found, applying the mapping for a second time to set references");
+				applyMappingsToRepositories(mappingTarget, targetRepo);
+			}
 			LOG.info("Done applying mappings to repository [" + targetMetaData.getName() + "]");
 			return targetMetaData.getName();
 		}
