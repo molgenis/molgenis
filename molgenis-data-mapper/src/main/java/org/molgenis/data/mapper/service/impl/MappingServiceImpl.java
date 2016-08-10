@@ -37,7 +37,6 @@ public class MappingServiceImpl implements MappingService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceImpl.class);
 
-	private static final int BATCH_SIZE = 1000;
 	public static final String SOURCE = "source";
 
 	private final DataService dataService;
@@ -197,11 +196,11 @@ public class MappingServiceImpl implements MappingService
 		try
 		{
 			LOG.info("Applying mappings to repository [" + targetMetaData.getName() + "]");
-			applyMappingsToRepositories(mappingTarget, targetRepo);
+			applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute);
 			if (hasSelfReferences(targetRepo.getEntityMetaData()))
 			{
 				LOG.info("Self reference found, applying the mapping for a second time to set references");
-				applyMappingsToRepositories(mappingTarget, targetRepo);
+				applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute);
 			}
 			LOG.info("Done applying mappings to repository [" + targetMetaData.getName() + "]");
 			return targetMetaData.getName();
@@ -224,15 +223,17 @@ public class MappingServiceImpl implements MappingService
 		}
 	}
 
-	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo)
+	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo,
+			boolean addSourceAttribute)
 	{
 		for (EntityMapping sourceMapping : mappingTarget.getEntityMappings())
 		{
-			applyMappingToRepo(sourceMapping, targetRepo);
+			applyMappingToRepo(sourceMapping, targetRepo, addSourceAttribute);
 		}
 	}
 
-	private void applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo)
+	private void applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo,
+			boolean addSourceAttribute)
 	{
 		EntityMetaData targetMetaData = targetRepo.getEntityMetaData();
 		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
@@ -240,7 +241,7 @@ public class MappingServiceImpl implements MappingService
 		sourceRepo.iterator().forEachRemaining(sourceEntity -> {
 			{
 				Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
-						sourceMapping.getSourceEntityMetaData());
+						sourceMapping.getSourceEntityMetaData(), addSourceAttribute);
 				if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
 				{
 					targetRepo.add(mappedEntity);
@@ -254,15 +255,26 @@ public class MappingServiceImpl implements MappingService
 	}
 
 	private Entity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity, EntityMetaData targetMetaData,
-			EntityMetaData sourceEntityMetaData)
+			EntityMetaData sourceEntityMetaData, boolean addSourceAttribute)
 	{
 		Entity target = new DynamicEntity(targetMetaData);
-		target.set(SOURCE, sourceMapping.getName());
+		if (addSourceAttribute)
+		{
+			target.set(SOURCE, sourceMapping.getName());
+		}
 
 		sourceMapping.getAttributeMappings().forEach(
 				attributeMapping -> applyMappingToAttribute(attributeMapping, sourceEntity, target,
 						sourceEntityMetaData));
 		return target;
+	}
+
+	private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity sourceEntity, Entity target,
+			EntityMetaData entityMetaData)
+	{
+		String targetAttributeName = attributeMapping.getTargetAttributeMetaData().getName();
+		Object typedValue = algorithmService.apply(attributeMapping, sourceEntity, entityMetaData);
+		target.set(targetAttributeName, typedValue);
 	}
 
 	@Override
@@ -278,12 +290,5 @@ public class MappingServiceImpl implements MappingService
 			id = idGenerator.generateId();
 		}
 		return id.toString();
-	}
-
-	private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity sourceEntity, Entity target,
-			EntityMetaData entityMetaData)
-	{
-		target.set(attributeMapping.getTargetAttributeMetaData().getName(),
-				algorithmService.apply(attributeMapping, sourceEntity, entityMetaData));
 	}
 }
