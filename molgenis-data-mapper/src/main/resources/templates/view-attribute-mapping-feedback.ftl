@@ -55,7 +55,7 @@
 								<#elseif feedbackRow.value?is_sequence> <!-- its mref values -->
 									<td>
 										<#list feedbackRow.value as row>
-											<#if row?hascontent>${row.labelValue?html}<#if row?has_next>, </#if></#if>
+											<#if row?has_content>${row.labelValue?html}<#if row?has_next>, </#if></#if>
 										</#list>
 									</td>
 								<#else> <!-- its string or int value -->
