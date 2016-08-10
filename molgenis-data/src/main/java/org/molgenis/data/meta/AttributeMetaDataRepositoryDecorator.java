@@ -298,7 +298,7 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		decoratedRepo.deleteById(ids.filter(id ->
+		decoratedRepo.deleteAll(ids.filter(id ->
 		{
 			validateAndDelete(findOneById(id));
 			return true;
