@@ -243,8 +243,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(mappingProjectEntity.get(MAPPING_TARGETS)).thenReturn(singletonList(expectedMappingTarget));
 
 		when(dataService.findOneById(MAPPING_PROJECT, mappingProjectIdentifier)).thenReturn(mappingProjectEntity);
-		when(mappingProjectRepo.getMappingProject(mappingProjectIdentifier))
-				.thenReturn(actualAddedMappingProject);
+		when(mappingProjectRepo.getMappingProject(mappingProjectIdentifier)).thenReturn(actualAddedMappingProject);
 		MappingProject retrievedMappingProject = mappingService.getMappingProject(mappingProjectIdentifier);
 
 		assertEquals(retrievedMappingProject, expectedMappingProject);
