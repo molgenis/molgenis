@@ -24,7 +24,10 @@
 	    									<#assign refEntityMetaData = sourceAttribute.refEntity>
 											<#list refEntityMetaData.attributes as refAttribute>
 												<#assign refAttributeName = refAttribute.name>
-                                                ${refEntity[refAttributeName]} <#if refAttribute?has_next>=</#if>
+												<#if (refEntity[refAttributeName])??>
+													<#assign value = refEntity[refAttributeName]>
+													<#if value?is_boolean>${value?c}<#else>${value}</#if><#if refAttribute?has_next> = </#if>
+												</#if>
 											</#list> 
 	    								</td>
 	    							</#if>
