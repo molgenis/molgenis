@@ -328,6 +328,10 @@ public class EmxMetaDataParser implements MetaDataParser
 				package_.setSimpleName(simpleName);
 				package_.setParent(intermediateResults.getPackage(parentName));
 			}
+			else
+			{
+				package_.setSimpleName(name);
+			}
 
 			// Set package tags
 			List<String> tagIdentifiers = toList(packageEntity.getString(EMX_PACKAGE_TAGS));
