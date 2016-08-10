@@ -475,9 +475,6 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 
 		// delete rows from attributes table
 		deleteEntityAttributes(entityMeta);
-
-		// delete rows from tags table
-		deleteEntityTags(entityMeta);
 	}
 
 	private void validateDeleteAllowed(EntityMetaData entityMetaData)
