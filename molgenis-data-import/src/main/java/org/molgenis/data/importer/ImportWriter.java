@@ -296,8 +296,7 @@ public class ImportWriter
 				}
 				else if (!entityMetaData.isAbstract())
 				{
-					List<AttributeMetaData> addedAttributes = dataService.getMeta().updateEntityMeta(entityMetaData);
-					metaDataChanges.addAttributes(name, addedAttributes);
+					dataService.getMeta().updateEntityMeta(entityMetaData);
 				}
 			}
 		}
