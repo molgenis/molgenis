@@ -229,33 +229,27 @@ public class MappingServiceImpl implements MappingService
 		EntityMetaData targetMetaData = targetRepo.getEntityMetaData();
 		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
 
-		// delete all target entities from this source
-		List<Entity> deleteEntities = targetRepo.query().eq("source", sourceRepo.getName()).findAll()
-				.filter(Objects::nonNull).collect(Collectors.toList());
-		targetRepo.delete(deleteEntities.stream());
-
-		Iterator<Entity> sourceEntities = sourceRepo.iterator();
-		List<Entity> mappedEntities = Lists.newArrayList();
-		while (sourceEntities.hasNext())
-		{
-			Entity sourceEntity = sourceEntities.next();
-			Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
-					sourceMapping.getSourceEntityMetaData(), targetRepo);
-			mappedEntities.add(mappedEntity);
-
-			if (mappedEntities.size() == BATCH_SIZE || !sourceEntities.hasNext())
+		sourceRepo.iterator().forEachRemaining(sourceEntity -> {
 			{
-				targetRepo.add(mappedEntities.stream());
-				mappedEntities = Lists.newArrayList();
+				Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
+						sourceMapping.getSourceEntityMetaData());
+				if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
+				{
+					targetRepo.add(mappedEntity);
+				}
+				else
+				{
+					targetRepo.update(mappedEntity);
+				}
 			}
-		}
+		});
 	}
 
 	private Entity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity, EntityMetaData targetMetaData,
-			EntityMetaData sourceEntityMetaData, Repository<Entity> targetRepository)
+			EntityMetaData sourceEntityMetaData)
 	{
 		Entity target = new DynamicEntity(targetMetaData);
-		target.set("source", sourceMapping.getName());
+		target.set(SOURCE, sourceMapping.getName());
 
 		sourceMapping.getAttributeMappings().forEach(
 				attributeMapping -> applyMappingToAttribute(attributeMapping, sourceEntity, target,
