@@ -1,10 +1,11 @@
 <#macro renderTags tags>
 	<#if tags?has_content>
 		<#list tags as tag>
-			<#if tag.object.iri?has_content>
-				<span class="label label-primary"><a href='${tag.object.iri?html}' target="_blank">${tag.object.label?html}</a></span>
+            <#if tag.objectIri?has_content>
+            <span class="label label-primary"><a href='${tag.objectIri?html}'
+                                                 target="_blank">${tag.label?html}</a></span>
 			<#else>
-				<span class="label label-primary">${tag.object.label?html}</span>
+            <span class="label label-primary">${tag.label?html}</span>
 			</#if>
 		</#list>
 	</#if>

@@ -31,6 +31,12 @@ public class DataConverterTest
 	}
 
 	@Test
+	public void toDate() throws ParseException
+	{
+		assertEquals(DataConverter.toDate("2015-06-04"), MolgenisDateFormat.getDateFormat().parse("2015-06-04"));
+	}
+
+	@Test
 	public void convertDateTime() throws ParseException
 	{
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
