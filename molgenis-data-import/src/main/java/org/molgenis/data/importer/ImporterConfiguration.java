@@ -1,7 +1,10 @@
 package org.molgenis.data.importer;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.EntityManager;
+import org.molgenis.data.i18n.model.I18nStringFactory;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
+import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semanticsearch.service.TagService;
@@ -47,6 +50,15 @@ public class ImporterConfiguration
 	@Autowired
 	private TagFactory tagFactory;
 
+	@Autowired
+	private LanguageFactory languageFactory;
+
+	@Autowired
+	private I18nStringFactory i18nStringFactory;
+
+	@Autowired
+	private EntityManager entityManager;
+
 	@Bean
 	public ImportService emxImportService()
 	{
@@ -56,13 +68,14 @@ public class ImporterConfiguration
 	@Bean
 	public ImportWriter importWriter()
 	{
-		return new ImportWriter(dataService, permissionSystemService, tagService, molgenisPermissionService,
-				tagMetaData, i18nStringMetaData, tagFactory);
+		return new ImportWriter(dataService, permissionSystemService, tagService, molgenisPermissionService, tagFactory,
+				entityManager);
 	}
 
 	@Bean
 	public MetaDataParser emxMetaDataParser()
 	{
-		return new EmxMetaDataParser(dataService, packageFactory, attrMetaFactory, entityMetaDataFactory, tagFactory);
+		return new EmxMetaDataParser(dataService, packageFactory, attrMetaFactory, entityMetaDataFactory, tagFactory,
+				languageFactory, i18nStringFactory);
 	}
 }

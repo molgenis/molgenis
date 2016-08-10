@@ -35,16 +35,24 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlCreateForeignKey(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ADD FOREIGN KEY (")
+		StringBuilder strBuilder = new StringBuilder();
+		strBuilder.append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ADD FOREIGN KEY (")
 				.append(getColumnName(attr)).append(") REFERENCES ").append(getTableName(attr.getRefEntity()))
-				.append('(').append(getColumnName(attr.getRefEntity().getIdAttribute())).append(")").toString();
+				.append('(').append(getColumnName(attr.getRefEntity().getIdAttribute())).append(')');
+
+		// for self-referencing data defer checking constraints until the end of the transaction
+		if (attr.getRefEntity().getName().equals(entityMeta.getName()))
+		{
+			strBuilder.append(" DEFERRABLE INITIALLY DEFERRED");
+		}
+		return strBuilder.toString();
 	}
 
 	static String getSqlCreateUniqueKey(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		// PostgreSQL name convention
 		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ADD CONSTRAINT ")
-				.append(getUniqueKeyName(entityMeta, attr)).append(" UNIQUE (").append(getColumnName(attr)).append(")")
+				.append(getUniqueKeyName(entityMeta, attr)).append(" UNIQUE (").append(getColumnName(attr)).append(')')
 				.toString();
 	}
 
@@ -70,8 +78,8 @@ class PostgreSqlQueryGenerator
 	static String getSqlSetDataType(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ALTER COLUMN ")
-				.append(getColumnName(attr)).append(" SET DATA TYPE ").append(getPostgreSqlType(attr))
-				.append(" USING ").append(getColumnName(attr)).append("::").append(getPostgreSqlType(attr)).toString();
+				.append(getColumnName(attr)).append(" SET DATA TYPE ").append(getPostgreSqlType(attr)).append(" USING ")
+				.append(getColumnName(attr)).append("::").append(getPostgreSqlType(attr)).toString();
 	}
 
 	static String getSqlAddColumn(EntityMetaData entityMeta, AttributeMetaData attr)
@@ -87,7 +95,8 @@ class PostgreSqlQueryGenerator
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE ").append(getTableName(entityMeta)).append('(');
 
-		getPersistedAttributesNonMref(entityMeta).forEach(attr -> {
+		getPersistedAttributesNonMref(entityMeta).forEach(attr ->
+		{
 			getSqlAttribute(entityMeta, sql, attr);
 			sql.append(", ");
 		});
@@ -123,19 +132,31 @@ class PostgreSqlQueryGenerator
 		AttributeMetaData idAttr = entityMeta.getIdAttribute();
 		StringBuilder sql = new StringBuilder();
 
-		sql.append(" CREATE TABLE IF NOT EXISTS ").append(getJunctionTableName(entityMeta, attr)).append(" (")
+		sql.append("CREATE TABLE IF NOT EXISTS ").append(getJunctionTableName(entityMeta, attr)).append(" (")
 				.append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(" INT,").append(getColumnName(idAttr))
-				.append(' ').append(getPostgreSqlType(idAttr)).append(" NOT NULL, ")
-				.append(getColumnName(attr)).append(' ').append(getPostgreSqlType(attr.getRefEntity().getIdAttribute()))
+				.append(' ').append(getPostgreSqlType(idAttr)).append(" NOT NULL, ").append(getColumnName(attr))
+				.append(' ').append(getPostgreSqlType(attr.getRefEntity().getIdAttribute()))
 				.append(" NOT NULL, FOREIGN KEY (").append(getColumnName(idAttr)).append(") REFERENCES ")
 				.append(getTableName(entityMeta)).append('(').append(getColumnName(idAttr))
 				.append(") ON DELETE CASCADE");
+
+		// for self-referencing data defer checking constraints until the end of the transaction
+		if (attr.getRefEntity().getName().equals(entityMeta.getName()))
+		{
+			sql.append(" DEFERRABLE INITIALLY DEFERRED");
+		}
 
 		if (isPersistedInPostgreSql(attr.getRefEntity()))
 		{
 			sql.append(", FOREIGN KEY (").append(getColumnName(attr)).append(") REFERENCES ")
 					.append(getTableName(attr.getRefEntity())).append('(')
 					.append(getColumnName(attr.getRefEntity().getIdAttribute())).append(") ON DELETE CASCADE");
+
+			// for self-referencing data defer checking constraints until the end of the transaction
+			if (attr.getRefEntity().getName().equals(entityMeta.getName()))
+			{
+				sql.append(" DEFERRABLE INITIALLY DEFERRED");
+			}
 		}
 
 		sql.append(", UNIQUE (").append(getColumnName(attr)).append(',').append(getColumnName(idAttr)).append(')');
@@ -176,7 +197,8 @@ class PostgreSqlQueryGenerator
 		StringBuilder sql = new StringBuilder();
 		sql.append("INSERT INTO ").append(getTableName(entityMeta)).append(" (");
 		StringBuilder params = new StringBuilder();
-		getPersistedAttributesNonMref(entityMeta).forEach(attr -> {
+		getPersistedAttributesNonMref(entityMeta).forEach(attr ->
+		{
 			sql.append(getColumnName(attr)).append(", ");
 			params.append("?, ");
 		});
@@ -228,7 +250,8 @@ class PostgreSqlQueryGenerator
 		final StringBuilder group = new StringBuilder();
 		final AtomicInteger count = new AtomicInteger();
 		final AttributeMetaData idAttribute = entityMeta.getIdAttribute();
-		getPersistedAttributes(entityMeta).forEach(attr -> {
+		getPersistedAttributes(entityMeta).forEach(attr ->
+		{
 			if (q.getFetch() == null || q.getFetch().hasField(attr.getName()))
 			{
 				if (count.get() > 0)
@@ -300,7 +323,8 @@ class PostgreSqlQueryGenerator
 
 		// create sql
 		StringBuilder sql = new StringBuilder("UPDATE ").append(getTableName(entityMeta)).append(" SET ");
-		getPersistedAttributesNonMref(entityMeta).forEach(attr -> {
+		getPersistedAttributesNonMref(entityMeta).forEach(attr ->
+		{
 			sql.append(getColumnName(attr)).append(" = ?, ");
 		});
 		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',')

@@ -5,7 +5,6 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.QueryImpl;
-import org.testng.Assert;
 import org.testng.annotations.Test;
 import org.testng.collections.Lists;
 
@@ -14,11 +13,79 @@ import java.util.List;
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.testng.Assert.assertEquals;
 
 public class PostgreSqlQueryGeneratorTest
 {
+	@Test
+	public void getSqlCreateForeignKey()
+	{
+
+		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refIdAttr").getMock();
+		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(refAttr.getDataType()).thenReturn(XREF);
+		when(refAttr.getRefEntity()).thenReturn(refEntityMeta);
+
+		String expectedSql = "ALTER TABLE \"entity\" ADD FOREIGN KEY (\"attr\") REFERENCES \"refEntity\"(\"refIdAttr\")";
+		assertEquals(PostgreSqlQueryGenerator.getSqlCreateForeignKey(entityMeta, refAttr), expectedSql);
+	}
+
+	@Test
+	public void getSqlCreateForeignKeySelfReferencing()
+	{
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
+		when(idAttr.getDataType()).thenReturn(STRING);
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(refAttr.getDataType()).thenReturn(XREF);
+		when(refAttr.getRefEntity()).thenReturn(entityMeta);
+
+		String expectedSql = "ALTER TABLE \"entity\" ADD FOREIGN KEY (\"attr\") REFERENCES \"entity\"(\"idAttr\") DEFERRABLE INITIALLY DEFERRED";
+		assertEquals(PostgreSqlQueryGenerator.getSqlCreateForeignKey(entityMeta, refAttr), expectedSql);
+	}
+
+	@Test
+	public void getSqlCreateJunctionTable()
+	{
+		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refIdAttr").getMock();
+		when(refIdAttr.getDataType()).thenReturn(STRING);
+		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
+		when(idAttr.getDataType()).thenReturn(STRING);
+		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(MREF);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+
+		String expectedSql = "CREATE TABLE IF NOT EXISTS \"entity_attr\" (\"order\" INT,\"idAttr\" character varying(255) NOT NULL, \"attr\" character varying(255) NOT NULL, FOREIGN KEY (\"idAttr\") REFERENCES \"entity\"(\"idAttr\") ON DELETE CASCADE, FOREIGN KEY (\"attr\") REFERENCES \"refEntity\"(\"refIdAttr\") ON DELETE CASCADE, UNIQUE (\"attr\",\"idAttr\"), UNIQUE (\"order\",\"idAttr\"))";
+		assertEquals(PostgreSqlQueryGenerator.getSqlCreateJunctionTable(entityMeta, attr), expectedSql);
+	}
+
+	@Test
+	public void getSqlCreateJunctionTableSelfReferencing()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
+		when(idAttr.getDataType()).thenReturn(STRING);
+		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(MREF);
+		when(attr.getRefEntity()).thenReturn(entityMeta);
+
+		String expectedSql = "CREATE TABLE IF NOT EXISTS \"entity_attr\" (\"order\" INT,\"idAttr\" character varying(255) NOT NULL, \"attr\" character varying(255) NOT NULL, FOREIGN KEY (\"idAttr\") REFERENCES \"entity\"(\"idAttr\") ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED, FOREIGN KEY (\"attr\") REFERENCES \"entity\"(\"idAttr\") ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED, UNIQUE (\"attr\",\"idAttr\"), UNIQUE (\"order\",\"idAttr\"))";
+		assertEquals(PostgreSqlQueryGenerator.getSqlCreateJunctionTable(entityMeta, attr), expectedSql);
+	}
+
 	@Test
 	public void testGetSqlSelectMref() throws Exception
 	{
@@ -55,7 +122,7 @@ public class PostgreSqlQueryGeneratorTest
 		List<Object> parameters = Lists.newArrayList();
 
 		String sqlSelect = PostgreSqlQueryGenerator.getSqlSelect(entityMeta, q, parameters, true);
-		Assert.assertEquals(sqlSelect, "SELECT this.\"masterId\", "
+		assertEquals(sqlSelect, "SELECT this.\"masterId\", "
 				+ "(SELECT array_agg(DISTINCT ARRAY[\"mref1\".\"order\"::TEXT,\"mref1\".\"mref1\"::TEXT]) "
 				+ "FROM \"org_molgenis_MasterEntity_mref1\" AS \"mref1\" "
 				+ "WHERE this.\"masterId\" = \"mref1\".\"masterId\") AS \"mref1\", "
