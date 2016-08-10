@@ -616,7 +616,10 @@ import "./css/Table.css";
 				CellContentBlocks = _.flatten(_.map(this.props.value, function(value, i) {
 					if(value !== null && value !== undefined) {
 						var CellContentForValue = this._createTableCellContent(value, 'c' + i);
-						return i < this.props.value.length - 1 ? [CellContentForValue, br({key: 'b' + i})] : CellContentForValue;
+						if((i < this.props.value.length - 1) && this.props.attr.fieldType !== 'FILE') {
+							return [CellContentForValue, br({key: 'b' + i})];
+						}
+						return CellContentForValue;
 					} else {
 						return br();
 					}
