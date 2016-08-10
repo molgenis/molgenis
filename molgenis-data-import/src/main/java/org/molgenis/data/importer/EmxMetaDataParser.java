@@ -310,6 +310,10 @@ public class EmxMetaDataParser implements MetaDataParser
 				package_.setSimpleName(simpleName);
 				package_.setParent(intermediateResults.getPackage(parentName));
 			}
+			else
+			{
+				package_.setSimpleName(name);
+			}
 
 			// Set package tags
 			List<String> tagIdentifiers = toList(packageEntity.getString(EMX_PACKAGE_TAGS));
@@ -1020,7 +1024,8 @@ public class EmxMetaDataParser implements MetaDataParser
 			Iterable<String> emxEntityNames)
 	{
 		ImmutableMap.Builder<String, EntityMetaData> builder = builder();
-		emxEntityNames.forEach(emxName -> {
+		emxEntityNames.forEach(emxName ->
+		{
 			String repoName = EMX_NAME_TO_REPO_NAME_MAP.get(emxName);
 			if (repoName == null) repoName = emxName;
 			builder.put(emxName, dataService.getRepository(repoName).getEntityMetaData());
@@ -1064,7 +1069,8 @@ public class EmxMetaDataParser implements MetaDataParser
 	public static void scanMetaDataForSystemEntityMetaData(Map<String, EntityMetaData> allEntityMetaDataMap,
 			Iterable<EntityMetaData> existingMetaData)
 	{
-		existingMetaData.forEach(emd -> {
+		existingMetaData.forEach(emd ->
+		{
 			if (!allEntityMetaDataMap.containsKey(emd.getName())) allEntityMetaDataMap.put(emd.getName(), emd);
 			else if ((!EntityUtils.equals(emd, allEntityMetaDataMap.get(emd.getName())))
 					&& emd instanceof SystemEntityMetaData)
