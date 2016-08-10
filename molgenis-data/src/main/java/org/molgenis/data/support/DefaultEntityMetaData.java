@@ -1,6 +1,5 @@
 package org.molgenis.data.support;
 
-import autovalue.shaded.com.google.common.common.collect.Maps;
 import com.google.common.collect.Iterables;
 import org.molgenis.data.*;
 import org.molgenis.data.Package;
@@ -585,19 +584,23 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	{
 		if (cachedLookupAttrs == null)
 		{
+			cachedLookupAttrs = new LinkedCaseInsensitiveMap<>();
 			if (ownLookupAttrs != null)
 			{
-				cachedLookupAttrs = ownLookupAttrs;
+				cachedLookupAttrs.putAll(ownLookupAttrs);
 			}
-			else if (extends_ != null)
+			if (extends_ != null)
 			{
-				cachedLookupAttrs = stream(extends_.getLookupAttributes().spliterator(), false)
-						.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData>identity(), (u, v) -> {
+				Map<String, AttributeMetaData> extendedLookupAttributes = stream(
+						extends_.getLookupAttributes().spliterator(), false)
+						.collect(toMap(AttributeMetaData::getName, Function.<AttributeMetaData>identity(), (u, v) ->
+						{
 							throw new IllegalStateException(String.format("Duplicate key %s", u));
 						}, LinkedCaseInsensitiveMap::new));
+				cachedLookupAttrs.putAll(extendedLookupAttributes);
 			}
 		}
-		return cachedLookupAttrs != null ? cachedLookupAttrs : emptyMap();
+		return cachedLookupAttrs;
 	}
 
 	private boolean getCachedHasAttrWithExpression()
