@@ -255,7 +255,24 @@ public class ImportWriter
 						{
 							if (emxValue instanceof Iterable<?>)
 							{
-								throw new RuntimeException("adasdasdasdasasdsd");
+								List<Entity> mrefEntities = new ArrayList<>();
+								for (Object emxValueItem : (Iterable<?>) emxValue)
+								{
+									Entity entityValue;
+									if (emxValueItem instanceof Entity)
+									{
+										entityValue = toEntity(attr.getRefEntity(), (Entity) emxValueItem);
+									}
+									else
+									{
+										EntityMetaData xrefEntity = attr.getRefEntity();
+										Object entityId = DataConverter
+												.convert(emxValueItem, xrefEntity.getIdAttribute());
+										entityValue = entityManager.getReference(xrefEntity, entityId);
+									}
+									mrefEntities.add(entityValue);
+								}
+								value = mrefEntities;
 							}
 							else
 							{
