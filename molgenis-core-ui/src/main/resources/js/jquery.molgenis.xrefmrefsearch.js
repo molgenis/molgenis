@@ -65,7 +65,14 @@
 				attributeNames.push(attr.name);
 			}
 		});
-		return attributeNames;
+		if (attributes.length === 0) {
+			$.each(entityMetaData.attributes, function (attrName, attr) {
+				if (attr.labelAttribute === true) {
+					attributes.push(attr);
+				}
+			});
+		}
+		return attributes;
 	}
 
 	function formatResult(entity, entityMetaData, lookupAttributeNames) {
@@ -108,7 +115,12 @@
 	function createSelect2($container, attributeMetaData, options) {
 		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
 		var lookupAttrNames = refEntityMetaData.lookupAttributes;
-		var uniqueAttrNames = getUniqueAttributeNames(refEntityMetaData);
+		if(lookupAttrNames.length == 0) {
+			lookupAttrNames = [refEntityMetaData.labelAttribute];
+		}
+		var lookupAttributes = getLookupAttributes(refEntityMetaData);
+		var uniqueAttributes = getUniqueAttributes(refEntityMetaData);
+
 		var width = options.width ? options.width : 'resolve';
 		var $hiddenInput = $(':input[type=hidden]',$container)
 				.not('[data-filter=xrefmref-operator]')
