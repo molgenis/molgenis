@@ -378,7 +378,6 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 			editableAttr.setReadOnly(true);
 			editableAttr.setUnique(true);
 			editableAttr.setNillable(false);
-			addLookupAttribute(idAttr);
 		}
 		this.ownIdAttr = requireNonNull(idAttr);
 		clearCache();
@@ -400,7 +399,6 @@ public class DefaultEntityMetaData implements EditableEntityMetaData
 	public void setLabelAttribute(AttributeMetaData labelAttr)
 	{
 		this.ownLabelAttr = requireNonNull(labelAttr);
-		addLookupAttribute(labelAttr);
 		clearCache();
 	}
 
