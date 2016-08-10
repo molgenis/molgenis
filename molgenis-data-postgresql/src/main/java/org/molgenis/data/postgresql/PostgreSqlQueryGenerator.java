@@ -1,6 +1,7 @@
 package org.molgenis.data.postgresql;
 
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -74,11 +75,16 @@ class PostgreSqlQueryGenerator
 				.append(" USING ").append(getColumnName(attr)).append("::").append(getPostgreSqlType(attr)).toString();
 	}
 
+	/**
+	 * @param entityMeta
+	 * @param attr
+	 * @return
+	 */
 	static String getSqlAddColumn(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		StringBuilder sql = new StringBuilder();
 		sql.append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ADD ");
-		getSqlAttribute(entityMeta, sql, attr);
+		getSqlAttribute(sql, attr);
 		return sql.toString();
 	}
 
@@ -87,8 +93,9 @@ class PostgreSqlQueryGenerator
 		StringBuilder sql = new StringBuilder();
 		sql.append("CREATE TABLE ").append(getTableName(entityMeta)).append('(');
 
-		getPersistedAttributesNonMref(entityMeta).forEach(attr -> {
-			getSqlAttribute(entityMeta, sql, attr);
+		getPersistedAttributesNonMref(entityMeta).forEach(attr ->
+		{
+			getSqlAttribute(sql, attr);
 			sql.append(", ");
 		});
 
@@ -348,10 +355,12 @@ class PostgreSqlQueryGenerator
 		return sqlBuilder.toString();
 	}
 
-	private static void getSqlAttribute(EntityMetaData entityMeta, StringBuilder sql, AttributeMetaData attr)
+	private static void getSqlAttribute(StringBuilder sql, AttributeMetaData attr)
 	{
-		switch (attr.getDataType())
-		{
+		sql.append(getColumnName(attr)).append(' ');
+
+		AttributeType attrType = attr.getDataType();
+		switch (attrType) {
 			case BOOL:
 			case DATE:
 			case DATE_TIME:
@@ -365,50 +374,31 @@ class PostgreSqlQueryGenerator
 			case SCRIPT:
 			case STRING:
 			case TEXT:
-			case COMPOUND:
+				sql.append(getPostgreSqlType(attr));
 				break;
-			case MREF:
 			case CATEGORICAL:
-			case CATEGORICAL_MREF:
-			case XREF:
 			case FILE:
-				if (attr.equals(entityMeta.getLabelAttribute()))
-				{
-					throw new MolgenisDataException(
-							format("Attribute [%s] of entity [%s] is label attribute and of type [%s]. Label attributes cannot be of type xref, mref, categorical or compound.",
-									attr.getName(), entityMeta.getName(), attr.getDataType().toString()));
-				}
-
-				if (entityMeta.getLookupAttribute(attr.getName()) != null)
-				{
-					throw new MolgenisDataException(
-							format("Attribute [%s] of entity [%s] is lookup attribute and of type [%s]. Lookup attributes cannot be of type xref, mref, categorical or compound.",
-									attr.getName(), entityMeta.getName(), attr.getDataType().toString()));
-				}
-
+			case XREF:
+				sql.append(getPostgreSqlType(attr.getRefEntity().getIdAttribute()));
 				break;
+			case COMPOUND:
+			case CATEGORICAL_MREF:
+			case MREF:
+				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 			default:
-				throw new RuntimeException(format("Unknown data type [%s]", attr.getDataType().toString()));
+				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 		}
 
-		if (!(isMultipleReferenceType(attr)))
+		if (!attr.isNillable())
 		{
-			sql.append(getColumnName(attr)).append(' ');
-			// xref adopt type of the identifier of referenced entity
-			if (isSingleReferenceType(attr))
-			{
-				sql.append(getPostgreSqlType(attr.getRefEntity().getIdAttribute()));
-			}
-			else
-			{
-				sql.append(getPostgreSqlType(attr));
-			}
-			if (attr.getDataType() == ENUM)
-			{
-				sql.append(" CHECK (").append(getColumnName(attr)).append(" IN (")
-						.append(attr.getEnumOptions().stream().map(enumOption -> "'" + enumOption + "'")
-								.collect(joining(","))).append("))");
-			}
+			sql.append(" NOT NULL");
+		}
+
+		if (attr.getDataType() == ENUM)
+		{
+			sql.append(" CHECK (").append(getColumnName(attr)).append(" IN (")
+					.append(attr.getEnumOptions().stream().map(enumOption -> '\'' + enumOption + '\'')
+							.collect(joining(","))).append("))");
 		}
 	}
 
