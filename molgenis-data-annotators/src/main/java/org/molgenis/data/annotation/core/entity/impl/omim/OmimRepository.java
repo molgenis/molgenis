@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.stream.Stream;
 
 import static au.com.bytecode.opencsv.CSVParser.DEFAULT_QUOTE_CHARACTER;
-import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.nio.charset.Charset.forName;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;

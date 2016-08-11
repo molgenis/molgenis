@@ -1,6 +1,6 @@
 package org.molgenis.data.annotation.core.entity.impl.gavin;
 
-import autovalue.shaded.com.google.common.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;

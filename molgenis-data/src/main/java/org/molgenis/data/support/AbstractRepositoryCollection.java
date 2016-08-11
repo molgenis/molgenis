@@ -1,6 +1,6 @@
 package org.molgenis.data.support;
 
-import static autovalue.shaded.com.google.common.common.collect.Sets.immutableEnumSet;
+import static com.google.common.collect.Sets.immutableEnumSet;
 
 import java.util.EnumSet;
 import java.util.Set;

@@ -1,6 +1,6 @@
 package org.molgenis.data.rest.client;
 
-import static autovalue.shaded.com.google.common.common.collect.ImmutableList.of;
+import static com.google.common.collect.ImmutableList.of;
 
 import java.util.Map;
 
