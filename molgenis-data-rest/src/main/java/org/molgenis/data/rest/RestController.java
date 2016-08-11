@@ -61,6 +61,7 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
@@ -297,6 +298,7 @@ public class RestController
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
+		validateAndConvertQueryValues(request.getQ(), dataService.getEntityMetaData(entityName));
 		Set<String> attributesSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
@@ -324,6 +326,7 @@ public class RestController
 			@PathVariable("id") String untypedId, @PathVariable("refAttributeName") String refAttributeName,
 			@Valid @RequestBody EntityCollectionRequest request)
 	{
+		validateAndConvertQueryValues(request.getQ(), dataService.getEntityMetaData(entityName));
 		Set<String> attributesSet = toAttributeSet(request != null ? request.getAttributes() : null);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
 
@@ -349,6 +352,7 @@ public class RestController
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
+		validateAndConvertQueryValues(request.getQ(), dataService.getEntityMetaData(entityName));
 		Set<String> attributesSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
@@ -371,6 +375,7 @@ public class RestController
 	public EntityCollectionResponse retrieveEntityCollectionPost(@PathVariable("entityName") String entityName,
 			@Valid @RequestBody EntityCollectionRequest request)
 	{
+		validateAndConvertQueryValues(request.getQ(), dataService.getEntityMetaData(entityName));
 		Set<String> attributesSet = toAttributeSet(request != null ? request.getAttributes() : null);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
 
@@ -1007,6 +1012,25 @@ public class RestController
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
+	private void validateAndConvertQueryValues(List<QueryRule> queryRules, EntityMetaData entityMetaData)
+	{
+		if (queryRules != null)
+		{
+			for (QueryRule queryRule : queryRules)
+			{
+				if (!queryRule.getNestedRules().isEmpty())
+				{
+					validateAndConvertQueryValues(queryRule.getNestedRules(), entityMetaData);
+				}
+				else
+				{
+					AttributeMetaData attribute = entityMetaData.getAttribute(queryRule.getField());
+					queryRule.setValue(restService.toEntityValue(attribute, queryRule.getValue()));
+				}
+			}
+		}
+	}
+
 	private void updateInternal(String entityName, String untypedId, Map<String, Object> entityMap)
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
@@ -1087,8 +1111,8 @@ public class RestController
 			case COMPOUND:
 				Map<String, Object> entityHasAttributeMap = new LinkedHashMap<String, Object>();
 				entityHasAttributeMap.put("href", attrHref);
-				@SuppressWarnings("unchecked") Iterable<AttributeMetaData> attributeParts = (Iterable<AttributeMetaData>) entity
-						.get(refAttributeName);
+				@SuppressWarnings("unchecked")
+				Iterable<AttributeMetaData> attributeParts = (Iterable<AttributeMetaData>) entity.get(refAttributeName);
 				for (AttributeMetaData attributeMetaData : attributeParts)
 				{
 					String attrName = attributeMetaData.getName();
@@ -1156,15 +1180,7 @@ public class RestController
 		List<QueryRule> queryRules = request.getQ() == null ? Collections.<QueryRule>emptyList() : request.getQ();
 		Query<Entity> q = new QueryImpl<>(queryRules).pageSize(request.getNum()).offset(request.getStart()).sort(sort);
 
-		Iterable<Entity> it = new Iterable<Entity>()
-		{
-
-			@Override
-			public Iterator<Entity> iterator()
-			{
-				return dataService.findAll(entityName, q).iterator();
-			}
-		};
+		Iterable<Entity> it = () -> dataService.findAll(entityName, q).iterator();
 		Long count = repository.count(q);
 		EntityPager pager = new EntityPager(request.getStart(), request.getNum(), count, it);
 
