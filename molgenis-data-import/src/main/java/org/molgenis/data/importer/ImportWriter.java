@@ -11,10 +11,8 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.model.I18nString;
 import org.molgenis.data.i18n.model.Language;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.Tag;
-import org.molgenis.data.meta.model.TagFactory;
+import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.service.TagService;
@@ -411,7 +409,7 @@ public class ImportWriter
 	 */
 	private void importPackages(ParsedMetaData parsedMetaData)
 	{
-		ImmutableCollection<org.molgenis.data.meta.model.Package> packages = parsedMetaData.getPackages().values();
+		ImmutableCollection<Package> packages = parsedMetaData.getPackages().values();
 		dataService.getMeta().upsertPackages(packages.stream().filter(package_ -> package_ != null));
 	}
 
