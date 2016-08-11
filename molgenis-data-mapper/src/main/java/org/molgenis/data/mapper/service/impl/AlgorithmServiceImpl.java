@@ -33,7 +33,6 @@ import java.util.regex.Pattern;
 
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.lang.Double.parseDouble;
-import static java.lang.Long.parseLong;
 import static java.lang.Math.round;
 import static java.lang.Math.toIntExact;
 import static java.util.Collections.emptyList;
@@ -172,7 +171,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 					convertedValue = toIntExact(round(parseDouble(Context.toString(value))));
 					break;
 				case LONG:
-					convertedValue = parseLong(Context.toString(value));
+					convertedValue = round(parseDouble(Context.toString(value)));
 					break;
 				case DECIMAL:
 					convertedValue = toNumber(value);
