@@ -349,7 +349,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		ArgumentCaptor<Entity> entityCaptor = forClass((Class) Entity.class);
 		verify(addEntityRepo, times(4)).add(entityCaptor.capture());
 
-		assertTrue(EntityUtils.equals(entityCaptor.getValue(), expectedEntities.get(3)));
+		assertTrue(EntityUtils.entitiesEquals(entityCaptor.getAllValues(), expectedEntities));
 
 		verify(permissionSystemService)
 				.giveUserEntityPermissions(SecurityContextHolder.getContext(), singletonList(entityName));
@@ -420,7 +420,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		ArgumentCaptor<Entity> entityCaptor = forClass((Class) Entity.class);
 		verify(updateEntityRepo, times(4)).add(entityCaptor.capture());
 
-		assertTrue(EntityUtils.equals(entityCaptor.getValue(), expectedEntities.get(3)));
+		assertTrue(EntityUtils.entitiesEquals(entityCaptor.getAllValues(), expectedEntities));
 
 		verifyZeroInteractions(permissionSystemService);
 	}
