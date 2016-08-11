@@ -1,28 +1,21 @@
 package org.molgenis.data.elasticsearch;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.QueryRule.Operator.EQUALS;
-import static org.molgenis.data.RepositoryCapability.MANAGABLE;
-import static org.molgenis.data.RepositoryCapability.WRITABLE;
+import com.google.common.collect.Sets;
+import org.elasticsearch.common.collect.Iterators;
+import org.molgenis.data.*;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import org.elasticsearch.common.collect.Iterators;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.google.common.collect.Sets;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.QueryRule.Operator.EQUALS;
+import static org.molgenis.data.RepositoryCapability.MANAGABLE;
+import static org.molgenis.data.RepositoryCapability.WRITABLE;
 
 /**
  * Repository that wraps an existing repository and retrieves count/aggregate information from a Elasticsearch index
@@ -216,7 +209,12 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 					return decoratedRepo.stream();
 				}
 			}
-			return decoratedRepo.findAll(q);
+			if ((q.getSort() == null) || StreamSupport.stream(q.getSort().spliterator(), false)
+					.noneMatch(order -> getEntityMetaData().getAttribute(order.getAttr()).getExpression() != null))
+			{
+				// No computed attributes so SQL can do the sort
+				return decoratedRepo.findAll(q);
+			}
 		}
 		return super.findAll(q);
 	}
