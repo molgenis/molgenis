@@ -47,6 +47,7 @@ import static org.molgenis.data.semantic.SemanticTag.asTag;
 import static org.molgenis.data.support.AttributeMetaDataUtils.isIdAttributeTypeAllowed;
 import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
 import static org.molgenis.data.support.EntityMetaDataUtils.isStringType;
+import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.util.DependencyResolver.resolve;
 
 /**
@@ -813,10 +814,14 @@ public class EmxMetaDataParser implements MetaDataParser
 				attr.setEnumOptions(enumOptions);
 			}
 
-			if (isReferenceType(attr) && StringUtils.isEmpty(emxRefEntity))
+			if (!emxDataType.equals("file"))
 			{
-				throw new IllegalArgumentException(
-						format("Missing refEntity on line [%d] (%s.%s)", rowIndex, emxEntityName, emxName));
+				// Only if an attribute is not of type file we apply the normal reference rules
+				if (isReferenceType(attr) && StringUtils.isEmpty(emxRefEntity))
+				{
+					throw new IllegalArgumentException(
+							format("Missing refEntity on line [%d] (%s.%s)", rowIndex, emxEntityName, emxName));
+				}
 			}
 
 			if (isReferenceType(attr) && attr.isNillable() && attr.isAggregatable())
@@ -975,15 +980,22 @@ public class EmxMetaDataParser implements MetaDataParser
 		int rowIndex = 1;
 		for (Entity attribute : attributeRepo)
 		{
-			final String refEntityName = (String) attribute.get(REF_ENTITY);
 			final String entityName = attribute.getString(ENTITY);
 			final String attributeName = attribute.getString(NAME);
+			final String refEntityName = (String) attribute.get(REF_ENTITY);
+			EntityMetaData EntityMetaData = intermediateResults.getEntityMetaData(entityName);
+			AttributeMetaData AttributeMetaData = EntityMetaData.getAttribute(attributeName);
+
+			if (AttributeMetaData.getDataType().equals(FILE))
+			{
+				// If attribute is of type file, set refEntity to file meta and continue to the next attribute
+				AttributeMetaData.setRefEntity(dataService.getEntityMetaData(FILE_META));
+				continue;
+			}
+
 			rowIndex++;
 			if (refEntityName != null)
 			{
-				EntityMetaData EntityMetaData = intermediateResults.getEntityMetaData(entityName);
-				AttributeMetaData AttributeMetaData = EntityMetaData.getAttribute(attributeName);
-
 				if (dataService != null)
 				{
 					if (intermediateResults.knowsEntity(refEntityName))
@@ -993,17 +1005,13 @@ public class EmxMetaDataParser implements MetaDataParser
 					else
 					{
 						EntityMetaData refEntityMeta;
-						try
-						{
-							refEntityMeta = dataService.getEntityMetaData(refEntityName);
-						}
-						catch (UnknownEntityException e)
+						refEntityMeta = dataService.getEntityMetaData(refEntityName);
+						if (refEntityMeta == null)
 						{
 							throw new IllegalArgumentException(
 									"attributes.refEntity error on line " + rowIndex + ": " + refEntityName
 											+ " unknown");
 						}
-
 						// allow computed xref attributes to refer to pre-existing entities
 						AttributeMetaData.setRefEntity(refEntityMeta);
 					}
@@ -1042,8 +1050,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			Iterable<String> emxEntityNames)
 	{
 		ImmutableMap.Builder<String, EntityMetaData> builder = builder();
-		emxEntityNames.forEach(emxName ->
-		{
+		emxEntityNames.forEach(emxName -> {
 			String repoName = EMX_NAME_TO_REPO_NAME_MAP.get(emxName);
 			if (repoName == null) repoName = emxName;
 			builder.put(emxName, dataService.getRepository(repoName).getEntityMetaData());
@@ -1087,8 +1094,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	public static void scanMetaDataForSystemEntityMetaData(Map<String, EntityMetaData> allEntityMetaDataMap,
 			Iterable<EntityMetaData> existingMetaData)
 	{
-		existingMetaData.forEach(emd ->
-		{
+		existingMetaData.forEach(emd -> {
 			if (!allEntityMetaDataMap.containsKey(emd.getName())) allEntityMetaDataMap.put(emd.getName(), emd);
 			else if ((!EntityUtils.equals(emd, allEntityMetaDataMap.get(emd.getName())))
 					&& emd instanceof SystemEntityMetaData)
@@ -1119,8 +1125,7 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	private void parseLanguages(Repository<Entity> emxLanguageRepo, IntermediateParseResults intermediateParseResults)
 	{
-		emxLanguageRepo.forEach(emxLanguageEntity ->
-		{
+		emxLanguageRepo.forEach(emxLanguageEntity -> {
 			Language language = toLanguage(emxLanguageEntity);
 			intermediateParseResults.addLanguage(language);
 		});
@@ -1143,8 +1148,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private void parseI18nStrings(Repository<Entity> emxI18nStringRepo,
 			IntermediateParseResults intermediateParseResults)
 	{
-		emxI18nStringRepo.forEach(emxI18nStringEntity ->
-		{
+		emxI18nStringRepo.forEach(emxI18nStringEntity -> {
 			I18nString i18nString = toI18nString(emxI18nStringEntity);
 			intermediateParseResults.addI18nString(i18nString);
 		});
