@@ -2,8 +2,8 @@ package org.molgenis.data.importer;
 
 import com.google.common.collect.*;
 import org.molgenis.data.Entity;
-import org.molgenis.data.i18n.model.I18nStringMetaData;
-import org.molgenis.data.i18n.model.LanguageMetaData;
+import org.molgenis.data.i18n.model.I18nString;
+import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.importer.EmxMetaDataParser.EmxAttribute;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -50,11 +50,11 @@ public final class IntermediateParseResults
 	/**
 	 * Contains all language enities from the languages sheet
 	 */
-	private final Map<String, Entity> languages;
+	private final Map<String, Language> languages;
 	/**
 	 * Contains all i18nString entities from the i18nstrings sheet
 	 */
-	private final Map<String, Entity> i18nStrings;
+	private final Map<String, I18nString> i18nStrings;
 	private final EntityMetaDataFactory entityMetaDataFactory;
 
 	public IntermediateParseResults(EntityMetaDataFactory entityMetaDataFactory)
@@ -143,14 +143,14 @@ public final class IntermediateParseResults
 		return entities.get(name);
 	}
 
-	public void addLanguage(Entity language)
+	public void addLanguage(Language language)
 	{
-		languages.put(language.getString(LanguageMetaData.CODE), language);
+		languages.put(language.getCode(), language);
 	}
 
-	public void addI18nString(Entity i18nString)
+	public void addI18nString(I18nString i18nString)
 	{
-		i18nStrings.put(i18nString.getString(I18nStringMetaData.MSGID), i18nString);
+		i18nStrings.put(i18nString.getMessageId(), i18nString);
 	}
 
 	/**
@@ -194,12 +194,12 @@ public final class IntermediateParseResults
 		return copyOf(entityTags);
 	}
 
-	public ImmutableMap<String, Entity> getLanguages()
+	public ImmutableMap<String, Language> getLanguages()
 	{
 		return copyOf(languages);
 	}
 
-	public ImmutableMap<String, Entity> getI18nStrings()
+	public ImmutableMap<String, I18nString> getI18nStrings()
 	{
 		return copyOf(i18nStrings);
 	}

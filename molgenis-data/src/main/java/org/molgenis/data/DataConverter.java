@@ -55,6 +55,13 @@ public class DataConverter
 		return getConversionService().convert(source, targetType);
 	}
 
+	/**
+	 * Convert value to the type based on the given attribute.
+	 *
+	 * @param source value to convert
+	 * @param attr   attribute that defines the type of the converted value
+	 * @return converted value or the input value if the attribute type is a reference type
+	 */
 	public static Object convert(Object source, AttributeMetaData attr)
 	{
 		switch (attr.getDataType())
@@ -152,7 +159,7 @@ public class DataConverter
 		if (source == null) return null;
 		if (source instanceof java.sql.Date) return (java.sql.Date) source;
 		if (source instanceof java.util.Date) return new java.sql.Date(((java.util.Date) source).getTime());
-		return convert(source, java.sql.Date.class);
+		return new java.sql.Date(convert(source, java.util.Date.class).getTime());
 	}
 
 	public static java.util.Date toUtilDate(Object source)
@@ -191,7 +198,8 @@ public class DataConverter
 		if (source == null) return null;
 		else if (source instanceof Iterable<?>)
 		{
-			return stream(((Iterable<?>) source).spliterator(), false).map(obj -> {
+			return stream(((Iterable<?>) source).spliterator(), false).map(obj ->
+			{
 				Object objValue;
 				if (obj instanceof Entity)
 				{
@@ -221,8 +229,7 @@ public class DataConverter
 				result.add(str);
 			return result;
 		}
-		else return Arrays.asList(new Object[]
-		{ source });
+		else return Arrays.asList(new Object[] { source });
 	}
 
 	public static List<Integer> toIntList(Object source)

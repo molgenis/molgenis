@@ -59,6 +59,7 @@ public abstract class SystemEntityMetaData extends EntityMetaData
 		super.init(new BootstrapEntity(entityMetaDataMetaData));
 		setName(systemPackageName + PACKAGE_SEPARATOR + entityName);
 		setSimpleName(entityName);
+		setDefaultValues();
 		init();
 	}
 

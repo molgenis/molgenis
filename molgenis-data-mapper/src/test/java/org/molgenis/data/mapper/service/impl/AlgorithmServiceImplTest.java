@@ -107,6 +107,78 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
+	public void testInt() throws ParseException
+	{
+		String identifier = "id";
+		String sourceIntAttribute = "age";
+
+		EntityMetaData entityMetaData = entityMetaFactory.create("testInt");
+		entityMetaData.addAttribute(attrMetaFactory.create().setName(identifier).setDataType(INT), ROLE_ID);
+		entityMetaData.addAttribute(attrMetaFactory.create().setName(sourceIntAttribute).setDataType(INT));
+
+		Entity source = new DynamicEntity(entityMetaData);
+		source.set(identifier, 1);
+		source.set(sourceIntAttribute, 25);
+
+		String targetIntAttribute = "years_lived";
+
+		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName(targetIntAttribute).setDataType(INT);
+		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
+		attributeMapping.setAlgorithm("$('age').value()");
+
+		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
+		assertEquals(result, 25);
+	}
+
+	@Test
+	public void testBool() throws ParseException
+	{
+		String identifier = "id";
+		String sourceBoolAttribute = "has_had_coffee";
+
+		EntityMetaData entityMetaData = entityMetaFactory.create("testInt");
+		entityMetaData.addAttribute(attrMetaFactory.create().setName(identifier).setDataType(INT), ROLE_ID);
+		entityMetaData.addAttribute(attrMetaFactory.create().setName(sourceBoolAttribute).setDataType(BOOL));
+
+		Entity source = new DynamicEntity(entityMetaData);
+		source.set(identifier, 1);
+		source.set(sourceBoolAttribute, false);
+
+		String targetBoolAttribute = "awake";
+
+		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName(targetBoolAttribute).setDataType(BOOL);
+		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
+		attributeMapping.setAlgorithm("$('has_had_coffee').value()");
+
+		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
+		assertEquals(result, false);
+	}
+
+	@Test
+	public void testLong() throws ParseException
+	{
+		String identifier = "id";
+		String sourceLongAttribute = "serial_number";
+
+		EntityMetaData entityMetaData = entityMetaFactory.create("testInt");
+		entityMetaData.addAttribute(attrMetaFactory.create().setName(identifier).setDataType(INT), ROLE_ID);
+		entityMetaData.addAttribute(attrMetaFactory.create().setName(sourceLongAttribute).setDataType(LONG));
+
+		Entity source = new DynamicEntity(entityMetaData);
+		source.set(identifier, 1);
+		source.set(sourceLongAttribute, 529387981723498l);
+
+		String targetLongAttribute = "super_id_code";
+
+		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName(targetLongAttribute).setDataType(LONG);
+		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
+		attributeMapping.setAlgorithm("$('serial_number').value()");
+
+		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
+		assertEquals(result, 529387981723498l);
+	}
+
+	@Test
 	public void testDate() throws ParseException
 	{
 		String idAttrName = "id";
@@ -142,7 +214,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		attributeMapping.setAlgorithm(
 				"Math.floor((new Date('02/12/2015') - $('dob').value())/(365.2425 * 24 * 60 * 60 * 1000))");
 		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
-		assertEquals(result, (long) 41);
+		assertEquals(result, 41);
 	}
 
 	@Test

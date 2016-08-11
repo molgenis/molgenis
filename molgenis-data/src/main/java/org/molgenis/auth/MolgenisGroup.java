@@ -1,29 +1,30 @@
 package org.molgenis.auth;
 
-import static org.molgenis.auth.MolgenisGroupMetaData.ACTIVE;
-import static org.molgenis.auth.MolgenisGroupMetaData.ID;
-import static org.molgenis.auth.MolgenisGroupMetaData.NAME;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
+
+import static org.molgenis.auth.MolgenisGroupMetaData.*;
 
 public class MolgenisGroup extends StaticEntity
 {
 	public MolgenisGroup(Entity entity)
 	{
 		super(entity);
+		setDefaultValues();
 	}
 
 	public MolgenisGroup(EntityMetaData entityMeta)
 	{
 		super(entityMeta);
+		setDefaultValues();
 	}
 
 	public MolgenisGroup(String id, EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 		setId(id);
+		setDefaultValues();
 	}
 
 	public boolean isActive()
@@ -55,5 +56,10 @@ public class MolgenisGroup extends StaticEntity
 	public void setName(String name)
 	{
 		set(NAME, name);
+	}
+
+	private void setDefaultValues()
+	{
+		setActive(true);
 	}
 }

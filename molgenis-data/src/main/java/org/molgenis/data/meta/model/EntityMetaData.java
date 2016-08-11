@@ -797,7 +797,7 @@ public class EntityMetaData extends StaticEntity
 		}
 	}
 
-	private void setDefaultValues()
+	protected void setDefaultValues()
 	{
 		setAbstract(false);
 	}
