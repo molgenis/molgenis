@@ -32,8 +32,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Sets.newLinkedHashSet;
-import static java.lang.Integer.parseInt;
+import static java.lang.Double.parseDouble;
 import static java.lang.Long.parseLong;
+import static java.lang.Math.round;
+import static java.lang.Math.toIntExact;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
@@ -166,7 +168,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 					convertedValue = toBoolean(value);
 					break;
 				case INT:
-					convertedValue = parseInt(Context.toString(value));
+					// Round it up or down to the nearest integer value
+					convertedValue = toIntExact(round(parseDouble(Context.toString(value))));
 					break;
 				case LONG:
 					convertedValue = parseLong(Context.toString(value));
