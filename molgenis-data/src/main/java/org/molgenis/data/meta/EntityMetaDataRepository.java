@@ -204,6 +204,7 @@ class EntityMetaDataRepository
 		emd.setAbstract(entityMetaData.isAbstract());
 		emd.setDescription(entityMetaData.getDescription());
 		emd.setBackend(entityMetaData.getBackend() == null ? collection.getName() : entityMetaData.getBackend());
+		emd.setLookupAttributes(stream(entityMetaData.getOwnLookupAttributes().spliterator(), false));
 
 		// Language attributes
 		for (String languageCode : entityMetaData.getDescriptionLanguageCodes())
