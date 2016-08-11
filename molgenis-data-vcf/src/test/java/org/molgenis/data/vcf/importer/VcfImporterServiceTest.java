@@ -114,7 +114,7 @@ public class VcfImporterServiceTest
 		});
 		when(dataService.hasRepository(entityName0)).thenReturn(false);
 		Repository<Entity> outRepo0 = mock(Repository.class);
-		when(metaDataService.addEntityMeta(argThat(eqName(entityMeta0)))).thenReturn(outRepo0);
+		when(metaDataService.createRepository(argThat(eqName(entityMeta0)))).thenReturn(outRepo0);
 		when(outRepo0.add(any(Stream.class))).thenAnswer(new Answer<Integer>()
 		{
 			@Override
@@ -135,7 +135,7 @@ public class VcfImporterServiceTest
 		expectedEntityImportReport.addNewEntity(entityName0);
 		assertEquals(entityImportReport, expectedEntityImportReport);
 
-		verify(metaDataService, times(1)).addEntityMeta(argThat(eqName(entityMeta0)));
+		verify(metaDataService, times(1)).createRepository(argThat(eqName(entityMeta0)));
 		verify(permissionSystemService, times(1)).giveUserEntityPermissions(securityContext,
 				singletonList(entityName0));
 	}
@@ -158,7 +158,7 @@ public class VcfImporterServiceTest
 		when(sampleEntityMeta0.getOwnLookupAttributes()).thenReturn(emptyList());
 		Repository<Entity> outSampleRepo0 = mock(Repository.class);
 		when(outSampleRepo0.getName()).thenReturn(sampleEntityName0);
-		when(metaDataService.addEntityMeta(argThat(eqName(sampleEntityMeta0)))).thenReturn(outSampleRepo0);
+		when(metaDataService.createRepository(argThat(eqName(sampleEntityMeta0)))).thenReturn(outSampleRepo0);
 
 		AttributeMetaData sampleAttr = mock(AttributeMetaData.class);
 		when(sampleAttr.getName()).thenReturn(VcfAttributes.SAMPLES);
@@ -219,7 +219,7 @@ public class VcfImporterServiceTest
 		});
 		when(dataService.hasRepository(entityName0)).thenReturn(false);
 		Repository<Entity> outRepo0 = mock(Repository.class);
-		when(metaDataService.addEntityMeta(argThat(eqName(entityMeta0)))).thenReturn(outRepo0);
+		when(metaDataService.createRepository(argThat(eqName(entityMeta0)))).thenReturn(outRepo0);
 		when(outRepo0.add(any(Stream.class))).thenAnswer(new Answer<Integer>()
 		{
 			@Override
@@ -242,8 +242,8 @@ public class VcfImporterServiceTest
 		expectedEntityImportReport.addEntityCount(entityName0, entities.size());
 		assertEquals(entityImportReport, expectedEntityImportReport);
 
-		verify(metaDataService, times(1)).addEntityMeta(argThat(eqName(sampleEntityMeta0)));
-		verify(metaDataService, times(1)).addEntityMeta(argThat(eqName(entityMeta0)));
+		verify(metaDataService, times(1)).createRepository(argThat(eqName(sampleEntityMeta0)));
+		verify(metaDataService, times(1)).createRepository(argThat(eqName(entityMeta0)));
 		verify(permissionSystemService, times(1)).giveUserEntityPermissions(securityContext,
 				singletonList(entityName0));
 		verify(permissionSystemService, times(1)).giveUserEntityPermissions(securityContext,

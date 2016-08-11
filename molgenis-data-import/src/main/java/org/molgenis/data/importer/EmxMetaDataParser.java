@@ -1160,6 +1160,9 @@ public class EmxMetaDataParser implements MetaDataParser
 		I18nString i18nString = i18nStringFactory.create();
 		i18nString.setMessageId(emxI18nStringEntity.getString(EMX_I18N_STRING_MSGID));
 		i18nString.setDescription(emxI18nStringEntity.getString(EMX_I18N_STRING_DESCRIPTION));
+
+		dataService.getMeta().getLanguageCodes()
+				.forEach(lang -> i18nString.set(lang, emxI18nStringEntity.getString(lang)));
 		return i18nString;
 	}
 

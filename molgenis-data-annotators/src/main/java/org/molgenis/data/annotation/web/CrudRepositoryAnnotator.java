@@ -70,7 +70,7 @@ public class CrudRepositoryAnnotator
 				if (!dataService.hasRepository(targetMetaData.getName()))
 				{
 					// add new entities to new repo
-					Repository externalRepository = dataService.getMeta().addEntityMeta(targetMetaData);
+					Repository externalRepository = dataService.getMeta().createRepository(targetMetaData);
 					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 							Collections.singletonList(externalRepository.getName()));
 					iterateOverEntitiesAndAnnotate(repository, annotator, DatabaseAction.ADD);

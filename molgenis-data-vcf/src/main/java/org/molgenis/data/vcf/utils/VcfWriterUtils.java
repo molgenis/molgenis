@@ -1,6 +1,6 @@
 package org.molgenis.data.vcf.utils;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;

@@ -1,6 +1,6 @@
 package org.molgenis.data.annotation.core.entity.impl.gavin;
 
-import autovalue.shaded.com.google.common.common.collect.Iterables;
+import com.google.common.collect.Iterables;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -25,7 +25,6 @@ import org.molgenis.data.annotation.web.settings.GavinAnnotatorSettings;
 import org.molgenis.data.importer.EmxMetaDataParser;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.vcf.model.VcfAttributes;
-import org.molgenis.data.vcf.utils.VcfWriterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

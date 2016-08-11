@@ -1,15 +1,5 @@
 package org.molgenis.data.postgresql;
 
-import static java.lang.String.format;
-import static java.util.Collections.singleton;
-import static java.util.Objects.requireNonNull;
-
-import java.sql.SQLException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.sql.DataSource;
-
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.validation.ConstraintViolation;
 import org.molgenis.data.validation.MolgenisValidationException;
@@ -17,6 +7,16 @@ import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
+
+import javax.sql.DataSource;
+import java.sql.SQLException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static java.lang.String.format;
+import static java.util.Collections.singleton;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 
 /**
  * Translates PostgreSQL exceptions to MOLGENIS data exceptions
@@ -84,6 +84,7 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 		PSQLException pSqlException = sqlException;
 		switch (pSqlException.getSQLState())
 		{
+			case "22007": // invalid_datetime_format
 			case "22P02": // not an integer exception
 				return translateInvalidIntegerException(pSqlException);
 			case "23502": // not_null_violation
@@ -97,20 +98,51 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 		}
 	}
 
+	/**
+	 * Package private for testability
+	 *
+	 * @param pSqlException
+	 * @return
+	 */
 	MolgenisValidationException translateInvalidIntegerException(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String message = serverErrorMessage.getMessage();
-		Matcher matcher = Pattern.compile("invalid input syntax for integer: \"(.*?)\"").matcher(message);
+		Matcher matcher = Pattern.compile("invalid input syntax for \\b(?:type )?\\b(.+?): \"(.*?)\"").matcher(message);
 		boolean matches = matcher.matches();
 		if (!matches)
 		{
 			throw new RuntimeException("Error translating exception", pSqlException);
 		}
-		String value = matcher.group(1);
+		String postgreSqlType = matcher.group(1);
+
+		// convert PostgreSQL data type to attribute type:
+		String type;
+		switch (postgreSqlType)
+		{
+			case "boolean":
+				type = BOOL.toString();
+				break;
+			case "date":
+				type = DATE.toString();
+				break;
+			case "timestamp":
+				type = DATE_TIME.toString();
+				break;
+			case "double precision":
+				type = DECIMAL.toString();
+				break;
+			case "integer":
+				type = INT.toString() + " or " + LONG.toString();
+				break;
+			default:
+				type = postgreSqlType;
+				break;
+		}
+		String value = matcher.group(2);
 
 		ConstraintViolation constraintViolation = new ConstraintViolation(
-				format("Value [%s] of this entity attribute is not an integer.", value), null);
+				format("Value [%s] of this entity attribute is not of type [%s].", value, type), null);
 		return new MolgenisValidationException(singleton(constraintViolation));
 	}
 

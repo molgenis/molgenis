@@ -103,7 +103,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	{
 		final Collection<String> attributeNames = getSourceAttributeNames(algorithm);
 
-		return Iterables.transform(sourceEntities, entity -> {
+		return Iterables.transform(sourceEntities, entity ->
+		{
 			AlgorithmEvaluation algorithmResult = new AlgorithmEvaluation(entity);
 
 			Object derivedValue;
