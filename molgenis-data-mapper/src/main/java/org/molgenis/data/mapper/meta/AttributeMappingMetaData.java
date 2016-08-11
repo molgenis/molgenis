@@ -44,7 +44,7 @@ public class AttributeMappingMetaData extends SystemEntityMetaData
 
 		addAttribute(IDENTIFIER, ROLE_ID);
 		addAttribute(TARGETATTRIBUTEMETADATA).setNillable(false);
-		addAttribute(SOURCEATTRIBUTEMETADATAS);
+		addAttribute(SOURCEATTRIBUTEMETADATAS).setDataType(TEXT);
 		addAttribute(ALGORITHM).setDataType(TEXT);
 		List<String> options = asList(AlgorithmState.values()).stream().map(AlgorithmState::toString).collect(toList());
 		addAttribute(ALGORITHMSTATE).setDataType(ENUM).setEnumOptions(options);

@@ -43,12 +43,23 @@ public interface MappingService
 
 	/**
 	 * Applies all mappings in a {@link MappingTarget}
+	 * Adds the source attribute by default
 	 *
 	 * @param mappingTarget the MappingTarget whose mappings are applied
 	 * @param entityName    the name of the entity to map to
 	 * @return fully qualified name of the generated entity
 	 */
 	String applyMappings(MappingTarget mappingTarget, String entityName);
+
+	/**
+	 * Applies all mappings in a {@link MappingTarget}
+	 *
+	 * @param mappingTarget      the MappingTarget whose mappings are applied
+	 * @param entityName         the name of the entity to map to
+	 * @param addSourceAttribute boolean indicating if the 'source' attribute should be added to the target repository
+	 * @return fully qualified name of the generated entity
+	 */
+	String applyMappings(MappingTarget mappingTarget, String entityName, boolean addSourceAttribute);
 
 	/**
 	 * Deletes a {@link MappingProject}

@@ -1,6 +1,5 @@
 package org.molgenis.data.mapper.service.impl;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
@@ -20,7 +19,6 @@ import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.RhinoConfig;
-import org.molgenis.js.ScriptEvaluator;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.mozilla.javascript.Context;
@@ -33,8 +31,16 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.google.common.collect.Sets.newLinkedHashSet;
+import static java.lang.Double.parseDouble;
+import static java.lang.Math.round;
+import static java.lang.Math.toIntExact;
+import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.molgenis.js.ScriptEvaluator.eval;
+import static org.mozilla.javascript.Context.*;
 
 public class AlgorithmServiceImpl implements AlgorithmService
 {
@@ -61,8 +67,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	public String generateAlgorithm(AttributeMetaData targetAttribute, EntityMetaData targetEntityMetaData,
 			List<AttributeMetaData> sourceAttributes, EntityMetaData sourceEntityMetaData)
 	{
-		return algorithmGeneratorService.generate(targetAttribute, sourceAttributes, targetEntityMetaData,
-				sourceEntityMetaData);
+		return algorithmGeneratorService
+				.generate(targetAttribute, sourceAttributes, targetEntityMetaData, sourceEntityMetaData);
 	}
 
 	@Override
@@ -71,14 +77,14 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			EntityMapping mapping, AttributeMetaData targetAttribute)
 	{
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(targetEntityMetaData,
-				targetAttribute);
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService
+				.getTagsForAttribute(targetEntityMetaData, targetAttribute);
 
 		Map<AttributeMetaData, ExplainedAttributeMetaData> relevantAttributes = semanticSearchService
 				.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute, tagsForAttribute.values(),
 						null);
-		GeneratedAlgorithm generatedAlgorithm = algorithmGeneratorService.generate(targetAttribute, relevantAttributes,
-				targetEntityMetaData, sourceEntityMetaData);
+		GeneratedAlgorithm generatedAlgorithm = algorithmGeneratorService
+				.generate(targetAttribute, relevantAttributes, targetEntityMetaData, sourceEntityMetaData);
 
 		if (StringUtils.isNotBlank(generatedAlgorithm.getAlgorithm()))
 		{
@@ -86,8 +92,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			attributeMapping.setAlgorithm(generatedAlgorithm.getAlgorithm());
 			attributeMapping.getSourceAttributeMetaDatas().addAll(generatedAlgorithm.getSourceAttributes());
 			attributeMapping.setAlgorithmState(generatedAlgorithm.getAlgorithmState());
-			LOG.debug("Creating attribute mapping: " + targetAttribute.getName() + " = "
-					+ generatedAlgorithm.getAlgorithm());
+			LOG.debug("Creating attribute mapping: " + targetAttribute.getName() + " = " + generatedAlgorithm
+					.getAlgorithm());
 		}
 	}
 
@@ -97,27 +103,22 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	{
 		final Collection<String> attributeNames = getSourceAttributeNames(algorithm);
 
-		return Iterables.transform(sourceEntities, new Function<Entity, AlgorithmEvaluation>()
-		{
-			@Override
-			public AlgorithmEvaluation apply(Entity entity)
+		return Iterables.transform(sourceEntities, entity -> {
+			AlgorithmEvaluation algorithmResult = new AlgorithmEvaluation(entity);
+
+			Object derivedValue;
+			Entity mapEntity = createEntity(attributeNames, entity); // why is this necessary?
+			try
 			{
-				AlgorithmEvaluation algorithmResult = new AlgorithmEvaluation(entity);
-
-				Object derivedValue;
-				Entity mapEntity = createEntity(attributeNames, entity); // why is this necessary?
-				try
-				{
-					Object result = ScriptEvaluator.eval(algorithm, mapEntity, entity.getEntityMetaData());
-					derivedValue = convert(result, targetAttribute);
-				}
-				catch (RuntimeException e)
-				{
-					return algorithmResult.errorMessage(e.getMessage());
-				}
-
-				return algorithmResult.value(derivedValue);
+				Object result = eval(algorithm, mapEntity, entity.getEntityMetaData());
+				derivedValue = convert(result, targetAttribute);
 			}
+			catch (RuntimeException e)
+			{
+				return algorithmResult.errorMessage(e.getMessage());
+			}
+
+			return algorithmResult.value(derivedValue);
 		});
 	}
 
@@ -135,13 +136,13 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	public Object apply(AttributeMapping attributeMapping, Entity sourceEntity, EntityMetaData sourceEntityMetaData)
 	{
 		String algorithm = attributeMapping.getAlgorithm();
-		if (StringUtils.isEmpty(algorithm))
+		if (isEmpty(algorithm))
 		{
 			return null;
 		}
 
 		Entity entity = createEntity(getSourceAttributeNames(attributeMapping.getAlgorithm()), sourceEntity);
-		Object value = ScriptEvaluator.eval(algorithm, entity, sourceEntityMetaData);
+		Object value = eval(algorithm, entity, sourceEntityMetaData);
 		return convert(value, attributeMapping.getTargetAttributeMetaData());
 	}
 
@@ -160,19 +161,25 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			{
 				case DATE:
 				case DATE_TIME:
-					convertedValue = Context.jsToJava(value, Date.class);
+					convertedValue = jsToJava(value, Date.class);
+					break;
+				case BOOL:
+					convertedValue = toBoolean(value);
 					break;
 				case INT:
 					// Round it up or down to the nearest integer value
-					convertedValue = Math.round(Double.parseDouble(Context.toString(value)));
+					convertedValue = toIntExact(round(parseDouble(Context.toString(value))));
+					break;
+				case LONG:
+					convertedValue = round(parseDouble(Context.toString(value)));
 					break;
 				case DECIMAL:
-					convertedValue = Context.toNumber(value);
+					convertedValue = toNumber(value);
 					break;
 				case XREF:
 				case CATEGORICAL:
-					convertedValue = dataService.findOneById(attributeMetaData.getRefEntity().getName(),
-							Context.toString(value));
+					convertedValue = dataService
+							.findOneById(attributeMetaData.getRefEntity().getName(), Context.toString(value));
 					break;
 				case MREF:
 				case CATEGORICAL_MREF:
@@ -206,8 +213,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	@Override
 	public Collection<String> getSourceAttributeNames(String algorithmScript)
 	{
-		Collection<String> result = Collections.emptyList();
-		if (!StringUtils.isEmpty(algorithmScript))
+		Collection<String> result = emptyList();
+		if (!isEmpty(algorithmScript))
 		{
 			result = findMatchesForPattern(algorithmScript, "\\$\\('([^\\$\\(\\)]+)'\\)");
 			if (result.isEmpty())
@@ -220,7 +227,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 
 	private static Collection<String> findMatchesForPattern(String algorithmScript, String patternString)
 	{
-		LinkedHashSet<String> result = new LinkedHashSet<String>();
+		LinkedHashSet<String> result = newLinkedHashSet();
 		Matcher matcher = Pattern.compile(patternString).matcher(algorithmScript);
 		while (matcher.find())
 		{
