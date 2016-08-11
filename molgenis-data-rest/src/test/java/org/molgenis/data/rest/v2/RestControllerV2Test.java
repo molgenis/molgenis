@@ -1,62 +1,11 @@
 package org.molgenis.data.rest.v2;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.BOOL;
-import static org.molgenis.MolgenisFieldTypes.CATEGORICAL;
-import static org.molgenis.MolgenisFieldTypes.CATEGORICAL_MREF;
-import static org.molgenis.MolgenisFieldTypes.COMPOUND;
-import static org.molgenis.MolgenisFieldTypes.DATE;
-import static org.molgenis.MolgenisFieldTypes.DATETIME;
-import static org.molgenis.MolgenisFieldTypes.DECIMAL;
-import static org.molgenis.MolgenisFieldTypes.EMAIL;
-import static org.molgenis.MolgenisFieldTypes.HTML;
-import static org.molgenis.MolgenisFieldTypes.HYPERLINK;
-import static org.molgenis.MolgenisFieldTypes.INT;
-import static org.molgenis.MolgenisFieldTypes.LONG;
-import static org.molgenis.MolgenisFieldTypes.MREF;
-import static org.molgenis.MolgenisFieldTypes.SCRIPT;
-import static org.molgenis.MolgenisFieldTypes.STRING;
-import static org.molgenis.MolgenisFieldTypes.TEXT;
-import static org.molgenis.MolgenisFieldTypes.XREF;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.testng.Assert.assertEquals;
-
-import java.io.UnsupportedEncodingException;
-import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
+import com.google.common.collect.Sets;
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
+import com.google.gson.reflect.TypeToken;
 import org.mockito.Matchers;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.v2.RestControllerV2Test.RestControllerV2Config;
@@ -95,10 +44,23 @@ import org.testng.Assert;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Sets;
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import java.io.UnsupportedEncodingException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
+import static org.molgenis.MolgenisFieldTypes.*;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.testng.Assert.assertEquals;
 
 @WebAppConfiguration
 @ContextConfiguration(classes =
@@ -158,11 +120,11 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		String refRefAttrId = "id";
 		refRefAttrValue = "value";
 		DefaultEntityMetaData refRefEntityMetaData = new DefaultEntityMetaData(REF_REF_ENTITY_NAME);
-		refRefEntityMetaData.addAttribute(refRefAttrId, ROLE_ID).setDataType(STRING);
+		refRefEntityMetaData.addAttribute(refRefAttrId, ROLE_ID, ROLE_LOOKUP).setDataType(STRING);
 		refRefEntityMetaData.addAttribute(refRefAttrValue).setDataType(STRING);
 
 		DefaultEntityMetaData selfRefEntityMetaData = new DefaultEntityMetaData(SELF_REF_ENTITY_NAME);
-		selfRefEntityMetaData.addAttribute("id", ROLE_ID).setDataType(STRING);
+		selfRefEntityMetaData.addAttribute("id", ROLE_ID, ROLE_LOOKUP).setDataType(STRING);
 		selfRefEntityMetaData.addAttribute("selfRef").setDataType(XREF).setRefEntity(selfRefEntityMetaData);
 
 		Entity selfRefEntity = new DefaultEntity(selfRefEntityMetaData, dataService);
@@ -173,7 +135,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 		refAttrValue = "value";
 		refAttrRef = "ref";
 		DefaultEntityMetaData refEntityMetaData = new DefaultEntityMetaData(REF_ENTITY_NAME);
-		refEntityMetaData.addAttribute(refAttrId, ROLE_ID).setDataType(STRING);
+		refEntityMetaData.addAttribute(refAttrId, ROLE_ID, ROLE_LOOKUP).setDataType(STRING);
 		refEntityMetaData.addAttribute(refAttrValue).setDataType(STRING);
 		refEntityMetaData.addAttribute(refAttrRef).setDataType(XREF).setRefEntity(refRefEntityMetaData);
 
@@ -227,7 +189,7 @@ public class RestControllerV2Test extends AbstractTestNGSpringContextTests
 
 		DefaultEntityMetaData entityMetaData = new DefaultEntityMetaData(ENTITY_NAME);
 		// required
-		entityMetaData.addAttribute(attrId, ROLE_ID).setDataType(STRING);
+		entityMetaData.addAttribute(attrId, ROLE_ID, ROLE_LOOKUP).setDataType(STRING);
 		entityMetaData.addAttribute(attrBool).setDataType(BOOL);
 		entityMetaData.addAttribute(attrCategorical).setDataType(CATEGORICAL).setRefEntity(refEntityMetaData);
 		entityMetaData.addAttribute(attrCategoricalMref).setDataType(CATEGORICAL_MREF).setRefEntity(refEntityMetaData);

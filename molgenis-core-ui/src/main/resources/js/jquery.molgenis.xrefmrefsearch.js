@@ -121,6 +121,13 @@
 				attributes.push(attr);
 			}
 		});
+		if (attributes.length === 0) {
+			$.each(entityMetaData.attributes, function (attrName, attr) {
+				if (attr.labelAttribute === true) {
+					attributes.push(attr);
+				}
+			});
+		}
 		return attributes;
 	}
 
@@ -164,6 +171,9 @@
 	function createSelect2($container, attributeMetaData, options) {
 		var refEntityMetaData = restApi.get(attributeMetaData.refEntity.href, {expand: ['attributes']});
 		var lookupAttrNames = refEntityMetaData.lookupAttributes;
+		if(lookupAttrNames.length == 0) {
+			lookupAttrNames = [refEntityMetaData.labelAttribute];
+		}
 		var lookupAttributes = getLookupAttributes(refEntityMetaData);
 		var uniqueAttributes = getUniqueAttributes(refEntityMetaData);
 		var width = options.width ? options.width : 'resolve';
