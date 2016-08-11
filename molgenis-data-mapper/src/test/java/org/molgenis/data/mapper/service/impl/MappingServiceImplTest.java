@@ -43,7 +43,6 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -243,8 +242,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		when(mappingProjectEntity.get(MAPPING_TARGETS)).thenReturn(singletonList(expectedMappingTarget));
 
 		when(dataService.findOneById(MAPPING_PROJECT, mappingProjectIdentifier)).thenReturn(mappingProjectEntity);
-		when(mappingProjectRepo.getMappingProject(mappingProjectIdentifier))
-				.thenReturn(actualAddedMappingProject);
+		when(mappingProjectRepo.getMappingProject(mappingProjectIdentifier)).thenReturn(actualAddedMappingProject);
 		MappingProject retrievedMappingProject = mappingService.getMappingProject(mappingProjectIdentifier);
 
 		assertEquals(retrievedMappingProject, expectedMappingProject);
@@ -345,13 +343,13 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 
 		// apply mapping again
 		String generatedEntityName = mappingService
-				.applyMappings(project.getMappingTarget(TARGET_HOP_ENTITY), entityName);
+				.applyMappings(project.getMappingTarget(TARGET_HOP_ENTITY), entityName, true);
 		assertEquals(generatedEntityName, entityName);
 
-		ArgumentCaptor<Stream<Entity>> streamCaptor = forClass((Class) Stream.class);
-		verify(addEntityRepo).add(streamCaptor.capture());
+		ArgumentCaptor<Entity> entityCaptor = forClass((Class) Entity.class);
+		verify(addEntityRepo, times(4)).add(entityCaptor.capture());
 
-		assertTrue(EntityUtils.entitiesEquals(streamCaptor.getValue().collect(toList()), expectedEntities));
+		assertTrue(EntityUtils.equals(entityCaptor.getValue(), expectedEntities.get(3)));
 
 		verify(permissionSystemService)
 				.giveUserEntityPermissions(SecurityContextHolder.getContext(), singletonList(entityName));
@@ -419,13 +417,10 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 				.applyMappings(project.getMappingTarget(TARGET_HOP_ENTITY), entityName);
 		assertEquals(generatedEntityName, entityName);
 
-		ArgumentCaptor<Stream<Entity>> deleteStreamCaptor = forClass((Class) Stream.class);
-		verify(updateEntityRepo).delete(deleteStreamCaptor.capture());
-		assertTrue(EntityUtils.entitiesEquals(deleteStreamCaptor.getValue().collect(toList()), expectedEntities));
+		ArgumentCaptor<Entity> entityCaptor = forClass((Class) Entity.class);
+		verify(updateEntityRepo, times(4)).add(entityCaptor.capture());
 
-		ArgumentCaptor<Stream<Entity>> addStreamCaptor = forClass((Class) Stream.class);
-		verify(updateEntityRepo).add(addStreamCaptor.capture());
-		assertTrue(EntityUtils.entitiesEquals(addStreamCaptor.getValue().collect(toList()), expectedEntities));
+		assertTrue(EntityUtils.equals(entityCaptor.getValue(), expectedEntities.get(3)));
 
 		verifyZeroInteractions(permissionSystemService);
 	}

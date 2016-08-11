@@ -24,7 +24,8 @@ import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceTyp
 
 public class DependencyResolver
 {
-	@Autowired private DataService dataService;
+	@Autowired
+	private DataService dataService;
 
 	/**
 	 * Determine the entity import order
@@ -140,12 +141,14 @@ public class DependencyResolver
 	{
 		for (AttributeMetaData attr : emd.getAtomicAttributes())
 		{
-			if ((attr.getRefEntity() != null) && attr.getRefEntity().equals(emd))
+			if (attr.getRefEntity() != null)
 			{
-				return true;
+				if (EntityUtils.equals(attr.getRefEntity(), emd))
+				{
+					return true;
+				}
 			}
 		}
-
 		return false;
 	}
 
