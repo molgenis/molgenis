@@ -55,12 +55,13 @@ public class EntityMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(ID_ATTRIBUTE).setDataType(XREF).setRefEntity(attrMetaMeta).setLabel("ID attribute");
 		addAttribute(LABEL_ATTRIBUTE).setDataType(XREF).setRefEntity(attrMetaMeta).setLabel("Label attribute");
 		addAttribute(LOOKUP_ATTRIBUTES).setDataType(MREF).setRefEntity(attrMetaMeta).setLabel("Lookup attributes");
-		addAttribute(ABSTRACT).setDataType(BOOL).setNillable(false).setLabel("Abstract")
+		addAttribute(ABSTRACT).setDataType(BOOL).setNillable(false).setReadOnly(true).setLabel("Abstract")
 				.setDefaultValue(FALSE.toString());
 		// TODO replace with autowired self-reference after update to Spring 4.3
-		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this).setLabel("Extends");
+		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this).setReadOnly(true).setLabel("Extends");
 		addAttribute(TAGS).setDataType(MREF).setRefEntity(tagMetaData).setLabel("Tags");
-		addAttribute(BACKEND).setNillable(false).setLabel("Backend").setDescription("Backend data store");
+		addAttribute(BACKEND).setNillable(false).setReadOnly(true).setLabel("Backend")
+				.setDescription("Backend data store");
 	}
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies

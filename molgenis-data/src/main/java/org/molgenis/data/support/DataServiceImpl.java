@@ -139,6 +139,13 @@ public class DataServiceImpl implements DataService
 
 	@Override
 	@Transactional
+	public void deleteAll(String entityName, Stream<Object> ids)
+	{
+		getRepository(entityName).deleteAll(ids);
+	}
+
+	@Override
+	@Transactional
 	public void deleteAll(String entityName)
 	{
 		getRepository(entityName).deleteAll();
@@ -272,7 +279,8 @@ public class DataServiceImpl implements DataService
 		emd.setName(newRepositoryId);
 		emd.setLabel(newRepositoryLabel);
 
-		Repository<Entity> repositoryCopy = metaDataService.addEntityMeta(emd);
+		metaDataService.addEntityMeta(emd);
+		Repository<Entity> repositoryCopy = metaDataService.createRepository(emd);
 		try
 		{
 			repositoryCopy.add(repository.findAll(query));

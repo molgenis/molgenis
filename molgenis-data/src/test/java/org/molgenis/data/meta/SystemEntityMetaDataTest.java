@@ -12,9 +12,7 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LOOKUP;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
 import static org.testng.Assert.assertEquals;
 
 public class SystemEntityMetaDataTest

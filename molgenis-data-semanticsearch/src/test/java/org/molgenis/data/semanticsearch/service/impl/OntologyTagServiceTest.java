@@ -1,7 +1,7 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
-import com.google.common.collect.Maps;
 import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;

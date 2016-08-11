@@ -1,15 +1,15 @@
 package org.molgenis.data.postgresql;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
-import javax.sql.DataSource;
-
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
 import org.testng.annotations.Test;
+
+import javax.sql.DataSource;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 public class PostgreSqlExceptionTranslatorTest
 {
@@ -97,5 +97,65 @@ public class PostgreSqlExceptionTranslatorTest
 		when(serverErrorMessage.getTable()).thenReturn("mytable");
 		when(serverErrorMessage.getDetail()).thenReturn("xxxyyyyzzz");
 		postgreSqlExceptionTranslator.translateUniqueKeyViolation(new PSQLException(serverErrorMessage));
+	}
+
+	@Test
+	public void translateInvalidIntegerExceptionInteger()
+	{
+		DataSource dataSource = mock(DataSource.class);
+		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
+		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+		when(serverErrorMessage.getMessage()).thenReturn("invalid input syntax for integer: \"str1\"");
+		MolgenisValidationException e = postgreSqlExceptionTranslator
+				.translateInvalidIntegerException(new PSQLException(serverErrorMessage));
+		assertEquals(e.getMessage(), "Value [str1] of this entity attribute is not of type [INT or LONG].");
+	}
+
+	@Test
+	public void translateInvalidIntegerExceptionBoolean()
+	{
+		DataSource dataSource = mock(DataSource.class);
+		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
+		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+		when(serverErrorMessage.getMessage()).thenReturn("invalid input syntax for type boolean: \"str1\"");
+		MolgenisValidationException e = postgreSqlExceptionTranslator
+				.translateInvalidIntegerException(new PSQLException(serverErrorMessage));
+		assertEquals(e.getMessage(), "Value [str1] of this entity attribute is not of type [BOOL].");
+	}
+
+	@Test
+	public void translateInvalidIntegerExceptionDouble()
+	{
+		DataSource dataSource = mock(DataSource.class);
+		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
+		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+		when(serverErrorMessage.getMessage()).thenReturn("invalid input syntax for type double precision: \"str1\"");
+		MolgenisValidationException e = postgreSqlExceptionTranslator
+				.translateInvalidIntegerException(new PSQLException(serverErrorMessage));
+		assertEquals(e.getMessage(), "Value [str1] of this entity attribute is not of type [DECIMAL].");
+	}
+
+	@Test
+	public void translateInvalidIntegerExceptionDate()
+	{
+		DataSource dataSource = mock(DataSource.class);
+		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
+		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+		when(serverErrorMessage.getMessage()).thenReturn("invalid input syntax for type date: \"str1\"");
+		MolgenisValidationException e = postgreSqlExceptionTranslator
+				.translateInvalidIntegerException(new PSQLException(serverErrorMessage));
+		assertEquals(e.getMessage(), "Value [str1] of this entity attribute is not of type [DATE].");
+	}
+
+	@Test
+	public void translateInvalidIntegerExceptionDateTime()
+	{
+		DataSource dataSource = mock(DataSource.class);
+		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
+		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+		when(serverErrorMessage.getMessage()).thenReturn("invalid input syntax for type timestamp: \"str1\"");
+		MolgenisValidationException e = postgreSqlExceptionTranslator
+				.translateInvalidIntegerException(new PSQLException(serverErrorMessage));
+		assertEquals(e.getMessage(), "Value [str1] of this entity attribute is not of type [DATE_TIME].");
 	}
 }

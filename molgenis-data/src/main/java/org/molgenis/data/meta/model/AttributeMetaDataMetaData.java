@@ -53,11 +53,12 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 		setDescription("Meta data for attributes");
 
 		addAttribute(IDENTIFIER, ROLE_ID).setVisible(false).setAuto(true).setLabel("Identifier");
-		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Name");
+		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setNillable(false).setReadOnly(true).setLabel("Name");
 		addAttribute(DATA_TYPE).setDataType(ENUM).setEnumOptions(AttributeType.getOptionsLowercase()).setNillable(false)
 				.setLabel("Data type");
 		addAttribute(PARTS).setDataType(MREF).setRefEntity(this).setLabel("Attribute parts");
-		addAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityMetaMeta).setLabel("Referenced entity");
+		addAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityMetaMeta).setReadOnly(true)
+				.setLabel("Referenced entity");
 		addAttribute(EXPRESSION).setNillable(true).setLabel("Expression")
 				.setDescription("Computed value expression in Magma JavaScript");
 		addAttribute(NILLABLE).setDataType(BOOL).setNillable(false).setLabel("Nillable");

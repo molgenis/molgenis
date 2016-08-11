@@ -179,7 +179,7 @@ public interface Repository<E extends Entity> extends Iterable<E>, Closeable
 	void deleteById(Object id);
 
 	/**
-	 * Delete one entities by id
+	 * Delete entities by id
 	 *
 	 * @param ids entity ids
 	 */
