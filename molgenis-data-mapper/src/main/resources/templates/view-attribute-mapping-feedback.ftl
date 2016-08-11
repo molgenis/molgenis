@@ -24,10 +24,24 @@
 	    									<#assign refEntityMetaData = sourceAttribute.refEntity>
 											<#list refEntityMetaData.attributes as refAttribute>
 												<#assign refAttributeName = refAttribute.name>
-                                                ${refEntity[refAttributeName]} <#if refAttribute?has_next>=</#if>
+                                                <#if (refEntity[refAttributeName])??>
+                                                    <#assign value = refEntity[refAttributeName]>
+                                                    <#if value?is_boolean>${value?c}<#else>${value}</#if><#if refAttribute?has_next>
+                                                    = </#if>
+                                                </#if>
 											</#list> 
 	    								</td>
 	    							</#if>
+                                <#elseif sourceAttribute.dataType == "mref">
+                                    <#if feedbackRow.sourceEntity.get(sourceAttribute.name)??>
+                                        <td>
+                                            <#assign refEntity = feedbackRow.sourceEntity.get(sourceAttribute.name)>
+											<#assign refEntityMetaData = sourceAttribute.refEntity>
+                                            <#list refEntity as entity>
+                                        ${entity.getIdValue()}
+                                        </#list>
+                                        </td>
+                                    </#if>
 								<#else>
 									<#if feedbackRow.sourceEntity.get(sourceAttribute.name)??>
 										<#assign value = feedbackRow.sourceEntity.get(sourceAttribute.name)>
@@ -55,7 +69,7 @@
 								<#elseif feedbackRow.value?is_sequence> <!-- its mref values -->
 									<td>
 										<#list feedbackRow.value as row>
-											${row.labelValue?html}<#if row?has_next>, </#if>
+                                            <#if row?has_content>${row.labelValue?html}<#if row?has_next>, </#if></#if>
 										</#list>
 									</td>
 								<#else> <!-- its string or int value -->

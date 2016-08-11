@@ -4,6 +4,7 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -274,7 +275,7 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	@Override
 	public void delete(AttributeMetaData attr)
 	{
-		validateAndDelete(attr);
+		validateDeleteAllowed(attr);
 		decoratedRepo.delete(attr);
 	}
 
@@ -283,7 +284,7 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	{
 		decoratedRepo.delete(attrs.filter(attr ->
 		{
-			validateAndDelete(attr);
+			validateDeleteAllowed(attr);
 			return true;
 		}));
 	}
@@ -291,16 +292,16 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	@Override
 	public void deleteById(Object id)
 	{
-		validateAndDelete(findOneById(id));
+		validateDeleteAllowed(findOneById(id));
 		decoratedRepo.deleteById(id);
 	}
 
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		decoratedRepo.deleteById(ids.filter(id ->
+		decoratedRepo.deleteAll(ids.filter(id ->
 		{
-			validateAndDelete(findOneById(id));
+			validateDeleteAllowed(findOneById(id));
 			return true;
 		}));
 	}
@@ -308,7 +309,7 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	@Override
 	public void deleteAll()
 	{
-		iterator().forEachRemaining(this::validateAndDelete);
+		iterator().forEachRemaining(this::validateDeleteAllowed);
 		decoratedRepo.deleteAll();
 	}
 
@@ -363,19 +364,37 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	static
 	{
 		DATA_TYPE_ALLOWED_TRANSITIONS = new EnumMap<>(AttributeType.class);
+		DATA_TYPE_ALLOWED_TRANSITIONS.put(BOOL, EnumSet.of(DECIMAL, INT, LONG, SCRIPT, STRING, TEXT));
 		DATA_TYPE_ALLOWED_TRANSITIONS.put(CATEGORICAL, EnumSet.of(XREF));
 		DATA_TYPE_ALLOWED_TRANSITIONS.put(CATEGORICAL_MREF, EnumSet.of(MREF));
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(EMAIL, EnumSet.of(STRING));
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(HTML, EnumSet.of(TEXT));
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(HYPERLINK, EnumSet.of(STRING));
+		DATA_TYPE_ALLOWED_TRANSITIONS.put(COMPOUND, EnumSet.noneOf(AttributeType.class));
+		DATA_TYPE_ALLOWED_TRANSITIONS.put(DATE, EnumSet.of(DATE_TIME, HTML, SCRIPT, STRING, TEXT));
+		DATA_TYPE_ALLOWED_TRANSITIONS.put(DATE_TIME, EnumSet.of(DATE, HTML, SCRIPT, STRING, TEXT));
+		DATA_TYPE_ALLOWED_TRANSITIONS.put(DECIMAL, EnumSet.of(HTML, INT, LONG, SCRIPT, TEXT));
+		DATA_TYPE_ALLOWED_TRANSITIONS.put(EMAIL, EnumSet.of(SCRIPT, HTML, STRING, TEXT));
+		DATA_TYPE_ALLOWED_TRANSITIONS.put(ENUM, EnumSet.noneOf(AttributeType.class));
+		DATA_TYPE_ALLOWED_TRANSITIONS.put(FILE, EnumSet.noneOf(AttributeType.class));
+		// not implemented: HTML -> CATEGORICAL, CATEGORICAL_MREF, EMAIL, ENUM, HYPERLINK, MREF, XREF
+		// not allowed    : HTML -> COMPOUND, FILE, HTML
+		DATA_TYPE_ALLOWED_TRANSITIONS
+				.put(HTML, EnumSet.of(BOOL, DATE, DATE_TIME, DECIMAL, INT, LONG, SCRIPT, STRING, TEXT));
+		DATA_TYPE_ALLOWED_TRANSITIONS.put(HYPERLINK, EnumSet.of(SCRIPT, HTML, STRING, TEXT));
+		DATA_TYPE_ALLOWED_TRANSITIONS.put(INT, EnumSet.of(DECIMAL, HTML, LONG, SCRIPT, TEXT));
+		DATA_TYPE_ALLOWED_TRANSITIONS.put(LONG, EnumSet.of(DECIMAL, HTML, INT, SCRIPT, TEXT));
 		DATA_TYPE_ALLOWED_TRANSITIONS.put(MREF, EnumSet.of(CATEGORICAL_MREF));
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(SCRIPT, EnumSet.of(TEXT));
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(TEXT, EnumSet.of(SCRIPT));
+		// not implemented: SCRIPT -> CATEGORICAL, CATEGORICAL_MREF, EMAIL, ENUM, HYPERLINK, MREF, XREF
+		// not allowed    : SCRIPT -> COMPOUND, FILE, SCRIPT
+		DATA_TYPE_ALLOWED_TRANSITIONS
+				.put(SCRIPT, EnumSet.of(BOOL, DATE, DATE_TIME, DECIMAL, HTML, INT, LONG, STRING, TEXT));
+		// not implemented: TEXT -> CATEGORICAL, CATEGORICAL_MREF, EMAIL, ENUM, HYPERLINK, MREF, XREF
+		// not allowed    : TEXT -> COMPOUND, FILE, TEXT
+		// not implemented: STRING -> CATEGORICAL, CATEGORICAL_MREF, EMAIL, ENUM, HYPERLINK, MREF, XREF
+		// not allowed    : STRING -> COMPOUND, FILE, STRING
+		DATA_TYPE_ALLOWED_TRANSITIONS
+				.put(STRING, EnumSet.of(BOOL, DATE, DATE_TIME, DECIMAL, HTML, INT, LONG, SCRIPT, TEXT));
+		DATA_TYPE_ALLOWED_TRANSITIONS
+				.put(TEXT, EnumSet.of(BOOL, DATE, DATE_TIME, DECIMAL, HTML, INT, LONG, SCRIPT, STRING));
 		DATA_TYPE_ALLOWED_TRANSITIONS.put(XREF, EnumSet.of(CATEGORICAL));
-		// FIXME extend map
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(STRING, EnumSet.of(INT, DECIMAL));
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(INT, EnumSet.of(STRING));
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(DECIMAL, EnumSet.of(STRING));
 	}
 
 	private static void validateUpdateDataType(AttributeType currentDataType, AttributeType newDataType)
@@ -384,8 +403,8 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 		if (allowedDataTypes == null || !allowedDataTypes.contains(newDataType))
 		{
 			throw new MolgenisDataException(
-					format("Attribute data type update from [%s] to [%s] not allowed", currentDataType.toString(),
-							newDataType.toString()));
+					format("Attribute data type update from [%s] to [%s] not allowed, allowed types are %s",
+							currentDataType.toString(), newDataType.toString(), allowedDataTypes.toString()));
 		}
 	}
 
@@ -425,6 +444,22 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 		{
 			throw new MolgenisDataException(
 					format("Deleting system entity attribute [%s] is not allowed", attr.getName()));
+		}
+		EntityMetaData entityMeta = dataService.query(ENTITY_META_DATA, EntityMetaData.class)
+				.eq(EntityMetaDataMetaData.ATTRIBUTES, attr).findOne();
+		if (entityMeta != null)
+		{
+			throw new MolgenisDataException(
+					format("Deleting attribute [%s] is not allowed, since it is referenced by entity [%s]",
+							attr.getName(), entityMeta.getName()));
+		}
+		AttributeMetaData attrMeta = dataService.query(ATTRIBUTE_META_DATA, AttributeMetaData.class).eq(PARTS, attr)
+				.findOne();
+		if (attrMeta != null)
+		{
+			throw new MolgenisDataException(
+					format("Deleting attribute [%s] is not allowed, since it is referenced by attribute [%s]",
+							attr.getName(), attrMeta.getName()));
 		}
 	}
 
@@ -491,21 +526,6 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 		AttributeMetaData currentAttr = findOneById(attr.getIdentifier());
 		validateUpdate(currentAttr, attr);
 		updateEntities(currentAttr, attr);
-	}
-
-	/**
-	 * Deleting an attribute remove the attribute from entities with this attribute
-	 *
-	 * @param attr attribute to remove
-	 */
-	private void validateAndDelete(AttributeMetaData attr)
-	{
-		validateDeleteAllowed(attr);
-		getEntities(attr).forEach(entityMetaData ->
-		{
-			entityMetaData.removeAttribute(attr);
-			dataService.update(ENTITY_META_DATA, entityMetaData);
-		});
 	}
 
 	private Stream<AttributeMetaData> filterCountPermission(Stream<AttributeMetaData> attrs)

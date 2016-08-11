@@ -1,6 +1,5 @@
 package org.molgenis.data.mapper.service.impl;
 
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.*;
@@ -21,26 +20,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.util.DependencyResolver.hasSelfReferences;
+import static org.springframework.security.core.context.SecurityContextHolder.getContext;
 
 public class MappingServiceImpl implements MappingService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceImpl.class);
 
-	private static final int BATCH_SIZE = 1000;
+	public static final String SOURCE = "source";
 
 	private final DataService dataService;
 	private final AlgorithmService algorithmService;
@@ -157,89 +154,128 @@ public class MappingServiceImpl implements MappingService
 		return mappingProjectRepository.getMappingProject(identifier);
 	}
 
+	public String applyMappings(MappingTarget mappingTarget, String entityName)
+	{
+		return applyMappings(mappingTarget, entityName, true);
+	}
+
 	// TODO discuss: why isn't this method transactional?
 	@Override
-	public String applyMappings(MappingTarget mappingTarget, String entityName)
+	public String applyMappings(MappingTarget mappingTarget, String entityName, boolean addSourceAttribute)
 	{
 		EntityMetaData targetMetaData = EntityMetaData.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS);
 		targetMetaData.setName(entityName);
 		targetMetaData.setLabel(entityName);
-		targetMetaData.addAttribute(attrMetaFactory.create().setName("source"));
+		if (addSourceAttribute)
+		{
+			targetMetaData.addAttribute(attrMetaFactory.create().setName(SOURCE));
+		}
 
-		// add a new repository if the target repo doesn't exist, or check if the target repository is compatible with
-		// the result of the mappings
 		Repository<Entity> targetRepo;
 		if (!dataService.hasRepository(entityName))
 		{
-			targetRepo = runAsSystem(() -> dataService.getMeta().addEntityMeta(targetMetaData));
-			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-					Collections.singletonList(targetRepo.getName()));
+			// Create a new repository
+			targetRepo = runAsSystem(() -> dataService.getMeta().createRepository(targetMetaData));
+			permissionSystemService.giveUserEntityPermissions(getContext(), singletonList(targetRepo.getName()));
 		}
 		else
 		{
+			// Get an existing repository
 			targetRepo = dataService.getRepository(entityName);
+
+			// If the addSourceAttribute is true, but the existing repository does not have the SOURCE attribute yet
+			// Get the existing metadata and add the SOURCE attribute
+			EntityMetaData existingTargetMetaData = targetRepo.getEntityMetaData();
+			if (existingTargetMetaData.getAttribute(SOURCE) == null && addSourceAttribute)
+			{
+				existingTargetMetaData.addAttribute(attrMetaFactory.create().setName(SOURCE));
+				dataService.getMeta().updateEntityMeta(existingTargetMetaData);
+			}
 		}
 
 		try
 		{
 			LOG.info("Applying mappings to repository [" + targetMetaData.getName() + "]");
-			applyMappingsToRepositories(mappingTarget, targetRepo);
+			applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute);
+			if (hasSelfReferences(targetRepo.getEntityMetaData()))
+			{
+				LOG.info("Self reference found, applying the mapping for a second time to set references");
+				applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute);
+			}
 			LOG.info("Done applying mappings to repository [" + targetMetaData.getName() + "]");
 			return targetMetaData.getName();
 		}
 		catch (RuntimeException ex)
 		{
-			LOG.error("Error applying mappings, dropping created repository.", ex);
-			dataService.getMeta().deleteEntityMeta(targetMetaData.getName());
-			throw ex;
-		}
-	}
-
-	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo)
-	{
-		for (EntityMapping sourceMapping : mappingTarget.getEntityMappings())
-		{
-			applyMappingToRepo(sourceMapping, targetRepo);
-		}
-	}
-
-	private void applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo)
-	{
-		EntityMetaData targetMetaData = targetRepo.getEntityMetaData();
-		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
-
-		// delete all target entities from this source
-		List<Entity> deleteEntities = targetRepo.query().eq("source", sourceRepo.getName()).findAll()
-				.filter(Objects::nonNull).collect(Collectors.toList());
-		targetRepo.delete(deleteEntities.stream());
-
-		Iterator<Entity> sourceEntities = sourceRepo.iterator();
-		List<Entity> mappedEntities = Lists.newArrayList();
-		while (sourceEntities.hasNext())
-		{
-			Entity sourceEntity = sourceEntities.next();
-			Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
-					sourceMapping.getSourceEntityMetaData(), targetRepo);
-			mappedEntities.add(mappedEntity);
-
-			if (mappedEntities.size() == BATCH_SIZE || !sourceEntities.hasNext())
+			if (targetRepo.getName().equals(mappingTarget.getName()))
 			{
-				targetRepo.add(mappedEntities.stream());
-				mappedEntities = Lists.newArrayList();
+				// Mapping to the target model, if something goes wrong we do not want to delete it
+				LOG.error("Error applying mappings to the target", ex);
+				throw ex;
+			}
+			else
+			{
+				// A new repository was created for mapping, so we can drop it if something went wrong
+				LOG.error("Error applying mappings, dropping created repository.", ex);
+				dataService.getMeta().deleteEntityMeta(targetMetaData.getName());
+				throw ex;
 			}
 		}
 	}
 
+	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo,
+			boolean addSourceAttribute)
+	{
+		for (EntityMapping sourceMapping : mappingTarget.getEntityMappings())
+		{
+			applyMappingToRepo(sourceMapping, targetRepo, addSourceAttribute);
+		}
+	}
+
+	private void applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo,
+			boolean addSourceAttribute)
+	{
+		EntityMetaData targetMetaData = targetRepo.getEntityMetaData();
+		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
+
+		sourceRepo.iterator().forEachRemaining(sourceEntity ->
+		{
+			{
+				Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
+						sourceMapping.getSourceEntityMetaData(), addSourceAttribute);
+				if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
+				{
+					targetRepo.add(mappedEntity);
+				}
+				else
+				{
+					targetRepo.update(mappedEntity);
+				}
+			}
+		});
+	}
+
 	private Entity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity, EntityMetaData targetMetaData,
-			EntityMetaData sourceEntityMetaData, Repository<Entity> targetRepository)
+			EntityMetaData sourceEntityMetaData, boolean addSourceAttribute)
 	{
 		Entity target = new DynamicEntity(targetMetaData);
-		target.set("source", sourceMapping.getName());
+		if (addSourceAttribute)
+		{
+			target.set(SOURCE, sourceMapping.getName());
+		}
 
 		sourceMapping.getAttributeMappings().forEach(
 				attributeMapping -> applyMappingToAttribute(attributeMapping, sourceEntity, target,
 						sourceEntityMetaData));
 		return target;
+	}
+
+	private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity sourceEntity, Entity target,
+			EntityMetaData entityMetaData)
+	{
+		String targetAttributeName = attributeMapping.getTargetAttributeMetaData().getName();
+		Object typedValue = algorithmService.apply(attributeMapping, sourceEntity, entityMetaData);
+		target.set(targetAttributeName, typedValue);
 	}
 
 	@Override
@@ -255,12 +291,5 @@ public class MappingServiceImpl implements MappingService
 			id = idGenerator.generateId();
 		}
 		return id.toString();
-	}
-
-	private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity sourceEntity, Entity target,
-			EntityMetaData entityMetaData)
-	{
-		target.set(attributeMapping.getTargetAttributeMetaData().getName(),
-				algorithmService.apply(attributeMapping, sourceEntity, entityMetaData));
 	}
 }

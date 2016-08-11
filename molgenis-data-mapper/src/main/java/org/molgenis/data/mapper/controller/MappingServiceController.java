@@ -511,12 +511,13 @@ public class MappingServiceController extends MolgenisPluginController
 	 */
 	@RequestMapping("/createIntegratedEntity")
 	public String createIntegratedEntity(@RequestParam String mappingProjectId, @RequestParam String target,
-			@RequestParam() String newEntityName, Model model)
+			@RequestParam() String newEntityName, @RequestParam(required = false) boolean addSourceAttribute,
+			Model model)
 	{
 		try
 		{
 			MappingTarget mappingTarget = mappingService.getMappingProject(mappingProjectId).getMappingTarget(target);
-			String name = mappingService.applyMappings(mappingTarget, newEntityName);
+			String name = mappingService.applyMappings(mappingTarget, newEntityName, addSourceAttribute);
 			return "redirect:" + menuReaderService.getMenu().findMenuItemPath(DataExplorerController.ID) + "?entity="
 					+ name;
 		}

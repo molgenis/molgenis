@@ -1,7 +1,7 @@
 package org.molgenis.util;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
-import autovalue.shaded.com.google.common.common.collect.Sets;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.molgenis.data.MolgenisDataException;
 import org.testng.annotations.Test;
 

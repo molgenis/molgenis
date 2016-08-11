@@ -197,11 +197,17 @@
         	</div>
         	<div class="modal-body">
         		<form id="create-integrated-entity-form" method="post" action="${context_url}/createIntegratedEntity">
-        			
-        			<label>Enter a name for the integrated dataset</label>
-        			<input name="newEntityName" type="text" value="" required></input>
-        		
-        			<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
+
+                    <div>
+                        <label>Enter a name for the integrated dataset</label>
+                        <input name="newEntityName" type="text" value="" required/>
+                    </div>
+                    <div>
+                        <label>Add source attribute</label>
+                        <input name="addSourceAttribute" type="checkbox"/>
+                    </div>
+
+                    <input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
         			<input type="hidden" name="target" value="${selectedTarget}">
 				</form>
     		</div>

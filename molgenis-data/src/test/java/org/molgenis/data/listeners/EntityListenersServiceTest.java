@@ -1,12 +1,9 @@
 package org.molgenis.data.listeners;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
-import com.google.common.collect.SetMultimap;
 import junit.framework.Assert;
 import org.mockito.Mockito;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
-import org.testng.TestException;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;

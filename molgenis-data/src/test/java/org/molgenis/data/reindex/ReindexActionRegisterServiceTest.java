@@ -1,6 +1,6 @@
 package org.molgenis.data.reindex;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
+import com.google.common.collect.Lists;
 import org.mockito.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.EntityMetaData;
