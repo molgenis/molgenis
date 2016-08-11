@@ -4,6 +4,7 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -274,7 +275,7 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	@Override
 	public void delete(AttributeMetaData attr)
 	{
-		validateAndDelete(attr);
+		validateDeleteAllowed(attr);
 		decoratedRepo.delete(attr);
 	}
 
@@ -283,7 +284,7 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	{
 		decoratedRepo.delete(attrs.filter(attr ->
 		{
-			validateAndDelete(attr);
+			validateDeleteAllowed(attr);
 			return true;
 		}));
 	}
@@ -291,7 +292,7 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	@Override
 	public void deleteById(Object id)
 	{
-		validateAndDelete(findOneById(id));
+		validateDeleteAllowed(findOneById(id));
 		decoratedRepo.deleteById(id);
 	}
 
@@ -300,7 +301,7 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	{
 		decoratedRepo.deleteAll(ids.filter(id ->
 		{
-			validateAndDelete(findOneById(id));
+			validateDeleteAllowed(findOneById(id));
 			return true;
 		}));
 	}
@@ -308,7 +309,7 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	@Override
 	public void deleteAll()
 	{
-		iterator().forEachRemaining(this::validateAndDelete);
+		iterator().forEachRemaining(this::validateDeleteAllowed);
 		decoratedRepo.deleteAll();
 	}
 
@@ -373,7 +374,7 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 		DATA_TYPE_ALLOWED_TRANSITIONS.put(TEXT, EnumSet.of(SCRIPT));
 		DATA_TYPE_ALLOWED_TRANSITIONS.put(XREF, EnumSet.of(CATEGORICAL));
 		// FIXME extend map
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(STRING, EnumSet.of(INT, DECIMAL));
+		DATA_TYPE_ALLOWED_TRANSITIONS.put(STRING, EnumSet.of(INT, DECIMAL, TEXT));
 		DATA_TYPE_ALLOWED_TRANSITIONS.put(INT, EnumSet.of(STRING));
 		DATA_TYPE_ALLOWED_TRANSITIONS.put(DECIMAL, EnumSet.of(STRING));
 	}
@@ -425,6 +426,22 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 		{
 			throw new MolgenisDataException(
 					format("Deleting system entity attribute [%s] is not allowed", attr.getName()));
+		}
+		EntityMetaData entityMeta = dataService.query(ENTITY_META_DATA, EntityMetaData.class)
+				.eq(EntityMetaDataMetaData.ATTRIBUTES, attr).findOne();
+		if (entityMeta != null)
+		{
+			throw new MolgenisDataException(
+					format("Deleting attribute [%s] is not allowed, since it is referenced by entity [%s]",
+							attr.getName(), entityMeta.getName()));
+		}
+		AttributeMetaData attrMeta = dataService.query(ATTRIBUTE_META_DATA, AttributeMetaData.class).eq(PARTS, attr)
+				.findOne();
+		if (attrMeta != null)
+		{
+			throw new MolgenisDataException(
+					format("Deleting attribute [%s] is not allowed, since it is referenced by attribute [%s]",
+							attr.getName(), attrMeta.getName()));
 		}
 	}
 
@@ -491,21 +508,6 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 		AttributeMetaData currentAttr = findOneById(attr.getIdentifier());
 		validateUpdate(currentAttr, attr);
 		updateEntities(currentAttr, attr);
-	}
-
-	/**
-	 * Deleting an attribute remove the attribute from entities with this attribute
-	 *
-	 * @param attr attribute to remove
-	 */
-	private void validateAndDelete(AttributeMetaData attr)
-	{
-		validateDeleteAllowed(attr);
-		getEntities(attr).forEach(entityMetaData ->
-		{
-			entityMetaData.removeAttribute(attr);
-			dataService.update(ENTITY_META_DATA, entityMetaData);
-		});
 	}
 
 	private Stream<AttributeMetaData> filterCountPermission(Stream<AttributeMetaData> attrs)

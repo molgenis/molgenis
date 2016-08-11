@@ -135,7 +135,7 @@ public class VcfImporterServiceTest
 		expectedEntityImportReport.addNewEntity(entityName0);
 		assertEquals(entityImportReport, expectedEntityImportReport);
 
-		verify(metaDataService, times(1)).addEntityMeta(argThat(eqName(entityMeta0)));
+		verify(metaDataService, times(1)).createRepository(argThat(eqName(entityMeta0)));
 		verify(permissionSystemService, times(1)).giveUserEntityPermissions(securityContext,
 				singletonList(entityName0));
 	}
@@ -242,8 +242,8 @@ public class VcfImporterServiceTest
 		expectedEntityImportReport.addEntityCount(entityName0, entities.size());
 		assertEquals(entityImportReport, expectedEntityImportReport);
 
-		verify(metaDataService, times(1)).addEntityMeta(argThat(eqName(sampleEntityMeta0)));
-		verify(metaDataService, times(1)).addEntityMeta(argThat(eqName(entityMeta0)));
+		verify(metaDataService, times(1)).createRepository(argThat(eqName(sampleEntityMeta0)));
+		verify(metaDataService, times(1)).createRepository(argThat(eqName(entityMeta0)));
 		verify(permissionSystemService, times(1)).giveUserEntityPermissions(securityContext,
 				singletonList(entityName0));
 		verify(permissionSystemService, times(1)).giveUserEntityPermissions(securityContext,

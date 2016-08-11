@@ -175,7 +175,7 @@ public class MappingServiceImpl implements MappingService
 		if (!dataService.hasRepository(entityName))
 		{
 			// Create a new repository
-			targetRepo = runAsSystem(() -> dataService.getMeta().addEntityMeta(targetMetaData));
+			targetRepo = runAsSystem(() -> dataService.getMeta().createRepository(targetMetaData));
 			permissionSystemService.giveUserEntityPermissions(getContext(), singletonList(targetRepo.getName()));
 		}
 		else
@@ -238,7 +238,8 @@ public class MappingServiceImpl implements MappingService
 		EntityMetaData targetMetaData = targetRepo.getEntityMetaData();
 		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
 
-		sourceRepo.iterator().forEachRemaining(sourceEntity -> {
+		sourceRepo.iterator().forEachRemaining(sourceEntity ->
+		{
 			{
 				Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
 						sourceMapping.getSourceEntityMetaData(), addSourceAttribute);

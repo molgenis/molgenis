@@ -3,7 +3,9 @@ package org.molgenis.data.meta;
 import com.google.common.collect.Sets;
 import com.google.common.collect.TreeTraverser;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -31,7 +33,8 @@ import static org.molgenis.auth.AuthorityMetaData.ROLE;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.NAME;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
 import static org.molgenis.data.meta.model.TagMetaData.TAG;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
@@ -328,7 +331,8 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 	public Integer add(Stream<EntityMetaData> entities)
 	{
 		AtomicInteger count = new AtomicInteger();
-		entities.filter(entity -> {
+		entities.filter(entity ->
+		{
 			count.incrementAndGet();
 			return true;
 		}).forEach(this::addEntityMetaData);
@@ -358,8 +362,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		validatePermission(entityName, Permission.WRITEMETA);
 
 		// TODO replace with exists() once Repository.exists has been implemented
-		EntityMetaData existingEntityMetaData = findOneById(entityName,
-				new Fetch().field(EntityMetaDataMetaData.FULL_NAME));
+		EntityMetaData existingEntityMetaData = findOneById(entityName, new Fetch().field(FULL_NAME));
 		if (existingEntityMetaData != null)
 		{
 			throw new MolgenisDataException(format("Adding existing entity meta data [%s] is not allowed", entityName));
@@ -373,16 +376,16 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 	{
 		validateUpdateAllowed(entityMetaData);
 
-		// TODO replace with exists() once Repository.exists has been implemented
-		EntityMetaData existingEntityMetaData = findOneById(entityMetaData.getIdValue());
+		EntityMetaData existingEntityMetaData = findOneById(entityMetaData.getIdValue(),
+				new Fetch().field(FULL_NAME).field(ATTRIBUTES, new Fetch().field(NAME)));
 		if (existingEntityMetaData == null)
 		{
 			throw new UnknownEntityException(format("Unknown entity meta data [%s] with id [%s]", getName(),
 					entityMetaData.getIdValue().toString()));
 		}
-		updateEntityAttributes(entityMetaData);
-
 		decoratedRepo.update(entityMetaData);
+
+		updateEntityAttributes(entityMetaData, existingEntityMetaData);
 	}
 
 	/**
@@ -406,16 +409,13 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		MetaValidationUtils.validateEntityMetaData(entityMetaData);
 	}
 
-	private void updateEntityAttributes(EntityMetaData entityMetaData)
+	private void updateEntityAttributes(EntityMetaData entityMeta, EntityMetaData existingEntityMeta)
 	{
-		EntityMetaData currentEntityMetaData = findOneById(entityMetaData.getIdValue(),
-				new Fetch().field(EntityMetaDataMetaData.FULL_NAME)
-						.field(EntityMetaDataMetaData.ATTRIBUTES, new Fetch().field(AttributeMetaDataMetaData.NAME)));
 		Map<String, AttributeMetaData> currentAttrMap = StreamSupport
-				.stream(currentEntityMetaData.getOwnAttributes().spliterator(), false)
+				.stream(existingEntityMeta.getOwnAttributes().spliterator(), false)
 				.collect(toMap(AttributeMetaData::getName, Function.identity()));
 		Map<String, AttributeMetaData> updateAttrMap = StreamSupport
-				.stream(entityMetaData.getOwnAttributes().spliterator(), false)
+				.stream(entityMeta.getOwnAttributes().spliterator(), false)
 				.collect(toMap(AttributeMetaData::getName, Function.identity()));
 
 		Set<String> deletedAttrNames = Sets.difference(currentAttrMap.keySet(), updateAttrMap.keySet());
@@ -423,30 +423,37 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 
 		if (!deletedAttrNames.isEmpty() || !addedAttrNames.isEmpty())
 		{
-			String entityName = entityMetaData.getName();
-			String backend = entityMetaData.getBackend();
+			String entityName = entityMeta.getName();
+			String backend = entityMeta.getBackend();
 			RepositoryCollection repoCollection = dataService.getMeta().getBackend(backend);
 
 			if (!deletedAttrNames.isEmpty())
 			{
-				deletedAttrNames.forEach(deletedAttrName -> {
+				deletedAttrNames.forEach(deletedAttrName ->
+				{
 					repoCollection.deleteAttribute(entityName, deletedAttrName);
 
-					if (entityMetaData.getName().equals(ENTITY_META_DATA))
+					if (entityMeta.getName().equals(ENTITY_META_DATA))
 					{
 						// update system entity meta data
 						systemEntityMetaDataRegistry.getSystemEntityMetaData(ENTITY_META_DATA)
 								.removeAttribute(currentAttrMap.get(deletedAttrName));
 					}
 				});
+
+				// delete attributes removed from entity meta data
+				// assumption: the attribute is owned by this entity or a compound attribute owned by this entity
+				dataService.deleteAll(ATTRIBUTE_META_DATA,
+						deletedAttrNames.stream().map(currentAttrMap::get).map(AttributeMetaData::getIdentifier));
 			}
 
 			if (!addedAttrNames.isEmpty())
 			{
-				addedAttrNames.stream().map(updateAttrMap::get).forEach(addedAttrEntity -> {
+				addedAttrNames.stream().map(updateAttrMap::get).forEach(addedAttrEntity ->
+				{
 					repoCollection.addAttribute(entityName, addedAttrEntity);
 
-					if (entityMetaData.getName().equals(ENTITY_META_DATA))
+					if (entityMeta.getName().equals(ENTITY_META_DATA))
 					{
 						// update system entity meta data
 						systemEntityMetaDataRegistry.getSystemEntityMetaData(ENTITY_META_DATA)

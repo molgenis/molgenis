@@ -1,19 +1,15 @@
 package org.molgenis.data.mem;
 
-import static com.google.common.collect.Sets.immutableEnumSet;
-import static org.molgenis.data.RepositoryCollectionCapability.WRITABLE;
-
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollectionCapability;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AbstractRepositoryCollection;
+
+import java.util.*;
+
+import static com.google.common.collect.Sets.immutableEnumSet;
+import static org.molgenis.data.RepositoryCollectionCapability.WRITABLE;
 
 /**
  * For testing purposis

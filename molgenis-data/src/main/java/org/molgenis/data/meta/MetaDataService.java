@@ -91,23 +91,31 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	/**
 	 * Get a backend by name or null if it does not exists
 	 *
-	 * @param name
-	 * @return
+	 * @param backendName repository collection name
+	 * @return repository collection, null if entity meta data is abstract
 	 */
-	RepositoryCollection getBackend(String name);
+	RepositoryCollection getBackend(String backendName);
 
 	/**
 	 * Get the backend the EntityMetaData belongs to
 	 *
-	 * @param emd
-	 * @return
+	 * @param entityMeta entity meta data
+	 * @return repository collection, null if entity meta data is abstract
 	 */
-	RepositoryCollection getBackend(EntityMetaData emd);
+	RepositoryCollection getBackend(EntityMetaData entityMeta);
+
+	/**
+	 * Has backend will check if the requested backend already exists and is registered.
+	 *
+	 * @param backendName backend name
+	 * @return true if a repository collection with the given name exists
+	 */
+	boolean hasBackend(String backendName);
 
 	/**
 	 * Get the default backend
 	 *
-	 * @return
+	 * @return the default repository collection
 	 */
 	RepositoryCollection getDefaultBackend();
 
@@ -136,9 +144,16 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	/**
 	 * Adds a new Package
 	 *
-	 * @param pack
+	 * @param pack package
 	 */
 	void addPackage(Package pack);
+
+	/**
+	 * Add or update packages
+	 *
+	 * @param packages packages
+	 */
+	void upsertPackages(Stream<Package> packages);
 
 	/**
 	 * Gets the entity meta data for a given entity.
@@ -147,14 +162,6 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @return EntityMetaData of the entity, or null if the entity does not exist
 	 */
 	EntityMetaData getEntityMetaData(String name);
-
-	/**
-	 * Returns whether {@link EntityMetaData entity meta data} exists for the given entity name.
-	 *
-	 * @param entityName entity name
-	 * @return true if entity meta data exists for the given entity name
-	 */
-	boolean hasEntityMetaData(String entityName);
 
 	/**
 	 * Returns a stream of all {@link EntityMetaData entity meta data}.
@@ -179,6 +186,8 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 
 	/**
 	 * Deletes an EntityMeta
+	 *
+	 * @param entityName entity name
 	 */
 	void deleteEntityMeta(String entityName);
 
@@ -219,14 +228,6 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @return
 	 */
 	LinkedHashMap<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection);
-
-	/**
-	 * Has backend will check if the requested backend already exists and is registered.
-	 *
-	 * @param backendName
-	 * @return
-	 */
-	boolean hasBackend(String backendName);
 
 	/**
 	 * Returns whether the given {@link EntityMetaData} defines a meta entity such as {@link EntityMetaDataMetaData} or

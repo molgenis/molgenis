@@ -122,7 +122,8 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		String targetIntAttribute = "years_lived";
 
-		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName(targetIntAttribute).setDataType(INT);
+		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName(targetIntAttribute)
+				.setDataType(INT);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('age').value()");
 
@@ -146,7 +147,8 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		String targetBoolAttribute = "awake";
 
-		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName(targetBoolAttribute).setDataType(BOOL);
+		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName(targetBoolAttribute)
+				.setDataType(BOOL);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('has_had_coffee').value()");
 
@@ -170,7 +172,8 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		String targetLongAttribute = "super_id_code";
 
-		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName(targetLongAttribute).setDataType(LONG);
+		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName(targetLongAttribute)
+				.setDataType(LONG);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('serial_number').value()");
 

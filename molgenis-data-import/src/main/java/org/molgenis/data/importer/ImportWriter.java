@@ -1,5 +1,6 @@
 package org.molgenis.data.importer;
 
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
@@ -38,6 +39,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
@@ -372,7 +374,8 @@ public class ImportWriter
 			if (!EMX_ENTITIES.equals(name) && !EMX_ATTRIBUTES.equals(name) && !EMX_PACKAGES.equals(name) && !EMX_TAGS
 					.equals(name) && !EMX_LANGUAGES.equals(name) && !EMX_I18NSTRINGS.equals(name))
 			{
-				if (dataService.getMeta().getEntityMetaData(entityMetaData.getName()) == null)
+				EntityMetaData existingEntityMeta = dataService.getMeta().getEntityMetaData(entityMetaData.getName());
+				if (existingEntityMeta == null)
 				{
 					LOG.debug("trying to create: " + name);
 					metaDataChanges.addEntity(name);
@@ -384,6 +387,19 @@ public class ImportWriter
 				}
 				else if (!entityMetaData.isAbstract())
 				{
+					// inject identifiers
+					Map<String, String> attrNameIdentifierMap = stream(
+							existingEntityMeta.getOwnAllAttributes().spliterator(), false)
+							.collect(toMap(AttributeMetaData::getName, AttributeMetaData::getIdentifier));
+					entityMetaData.getOwnAllAttributes().forEach(attr ->
+					{
+						String identifier = attrNameIdentifierMap.get(attr.getName());
+						if (identifier != null)
+						{
+							attr.setIdentifier(identifier);
+						}
+					});
+
 					dataService.getMeta().updateEntityMeta(entityMetaData);
 				}
 			}
@@ -395,10 +411,8 @@ public class ImportWriter
 	 */
 	private void importPackages(ParsedMetaData parsedMetaData)
 	{
-		parsedMetaData.getPackages().values().forEach(package_ ->
-		{
-			if (package_ != null) dataService.getMeta().addPackage(package_);
-		});
+		ImmutableCollection<org.molgenis.data.meta.model.Package> packages = parsedMetaData.getPackages().values();
+		dataService.getMeta().upsertPackages(packages.stream().filter(package_ -> package_ != null));
 	}
 
 	/**
