@@ -1,6 +1,6 @@
 package org.molgenis.data.vcf.utils;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.PeekingIterator;
 import com.google.common.io.BaseEncoding;

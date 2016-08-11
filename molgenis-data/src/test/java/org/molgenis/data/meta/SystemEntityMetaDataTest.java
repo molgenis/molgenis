@@ -9,7 +9,7 @@ import org.testng.annotations.Test;
 
 import java.util.Set;
 
-import static autovalue.shaded.com.google.common.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newHashSet;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;

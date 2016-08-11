@@ -1,6 +1,6 @@
 package org.molgenis.data.listeners;
 
-import autovalue.shaded.com.google.common.common.collect.Lists;
+import com.google.common.collect.Lists;
 import com.google.common.collect.SetMultimap;
 import junit.framework.Assert;
 import org.mockito.Mockito;

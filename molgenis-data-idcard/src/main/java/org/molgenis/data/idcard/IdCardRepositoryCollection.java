@@ -1,6 +1,6 @@
 package org.molgenis.data.idcard;
 
-import static autovalue.shaded.com.google.common.common.collect.Sets.immutableEnumSet;
+import static com.google.common.collect.Sets.immutableEnumSet;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RepositoryCollectionCapability.WRITABLE;
 import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.ID_CARD_BIOBANK;
