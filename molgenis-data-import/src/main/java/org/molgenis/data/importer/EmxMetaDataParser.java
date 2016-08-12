@@ -1108,13 +1108,13 @@ public class EmxMetaDataParser implements MetaDataParser
 	}
 
 	/**
-	 * Validates whether a EMX value for a boolean attribute is valid and returns the parsed boolean value.
+	 * Validates whether an EMX value for a boolean attribute is valid and returns the parsed boolean value.
 	 *
 	 * @param booleanString boolean string
 	 * @param rowIndex      row index
 	 * @param columnName    column name
 	 * @return true or false
-	 * @throws IllegalArgumentException if the given boolean string value if not one of [true, false] (case insensitive)
+	 * @throws IllegalArgumentException if the given boolean string value is not one of [true, false] (case insensitive)
 	 */
 	private boolean parseBoolean(String booleanString, int rowIndex, String columnName)
 	{

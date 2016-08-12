@@ -264,6 +264,17 @@ public class AttributeMetaData extends StaticEntity
 	}
 
 	/**
+	 * Wheter attribute has an expression or not
+	 *
+	 * @return true if attribute has expression
+	 */
+	public boolean hasExpression()
+	{
+		return getExpression() != null;
+	}
+
+
+	/**
 	 * Whether attribute has not null constraint
 	 *
 	 * @return <tt>true</tt> if this attribute is nillable
