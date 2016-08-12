@@ -36,17 +36,17 @@ class PostgreSqlQueryUtils
 	/**
 	 * Returns the table name based on entity name
 	 *
-	 * @param emd
-	 * @return
+	 * @param entityMeta entity meta data
+	 * @return PostgreSQL table name
 	 */
-	public static String getTableName(EntityMetaData emd, boolean quoteSystemIdentifiers)
+	public static String getTableName(EntityMetaData entityMeta, boolean quoteSystemIdentifiers)
 	{
 		StringBuilder strBuilder = new StringBuilder();
 		if (quoteSystemIdentifiers)
 		{
 			strBuilder.append("\"");
 		}
-		strBuilder.append(emd.getName());
+		strBuilder.append(entityMeta.getName());
 		if (quoteSystemIdentifiers)
 		{
 			strBuilder.append("\"");
@@ -57,9 +57,9 @@ class PostgreSqlQueryUtils
 	/**
 	 * Returns the function table name for the given attribute of the given entity
 	 *
-	 * @param emd
-	 * @param attr
-	 * @return
+	 * @param emd entity meta data that owns the attribute
+	 * @param attr attribute
+	 * @return PostgreSQL junction table name
 	 */
 	public static String getJunctionTableName(EntityMetaData emd, AttributeMetaData attr)
 	{
@@ -70,7 +70,7 @@ class PostgreSqlQueryUtils
 	/**
 	 * Returns attributes persisted by PostgreSQL (e.g. no compound attributes and attributes with an expression)
 	 *
-	 * @return
+	 * @return stream of persisted attributes
 	 */
 	public static Stream<AttributeMetaData> getPersistedAttributes(EntityMetaData entityMeta)
 	{
@@ -82,7 +82,7 @@ class PostgreSqlQueryUtils
 	 * Returns all MREF attributes persisted by PostgreSQL (e.g. no compound attributes and attributes with an
 	 * expression)
 	 *
-	 * @return
+	 * @return stream of persisted MREF attributes
 	 */
 	public static Stream<AttributeMetaData> getPersistedAttributesMref(EntityMetaData entityMeta)
 	{
@@ -93,7 +93,7 @@ class PostgreSqlQueryUtils
 	 * Returns all non-MREF attributes persisted by PostgreSQL (e.g. no compound attributes and attributes with an
 	 * expression)
 	 *
-	 * @return
+	 * @return stream of persisted non-MREF attributes
 	 */
 	public static Stream<AttributeMetaData> getPersistedAttributesNonMref(EntityMetaData entityMeta)
 	{

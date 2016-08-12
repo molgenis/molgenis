@@ -87,10 +87,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 					LOG.trace("SQL: {}", sql);
 				}
 			}
-			return jdbcTemplate.query(sql, (rs, rowNum) ->
-			{
-				return rs.getString(CODE);
-			}).stream();
+			return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getString(CODE)).stream();
 		}
 		else
 		{
@@ -160,7 +157,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			String sqlDropJunctionTable = getSqlDropJunctionTable(entityMeta, mrefAttr);
 			if (LOG.isDebugEnabled())
 			{
-				LOG.debug("Dropping junction table for entity [{}] attribute [{}]", getName(), mrefAttr.getName());
+				LOG.debug("Dropping junction table for entity [{}] attribute [{}]", POSTGRESQL, mrefAttr.getName());
 				if (LOG.isTraceEnabled())
 				{
 					LOG.trace("SQL: {}", sqlDropJunctionTable);
@@ -172,7 +169,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String sqlDropTable = getSqlDropTable(entityMeta);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Dropping table for entity [{}]", getName());
+			LOG.debug("Dropping table for entity [{}]", POSTGRESQL);
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", sqlDropTable);
@@ -185,15 +182,15 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	public void addAttribute(String entityName, AttributeMetaData attribute)
 	{
 		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
-		if (null != entityMetaData.getAttribute(requireNonNull(attribute).getName()))
-		{
-			throw new MolgenisDataException(
-					format("Adding attribute operation failed. Attribute already exists [%s]", attribute.getName()));
-		}
 		if (entityMetaData == null)
 		{
 			throw new UnknownEntityException(
 					format("Adding attribute operation failed. Unknown entity [%s]", entityName));
+		}
+		if (null != entityMetaData.getAttribute(requireNonNull(attribute).getName()))
+		{
+			throw new MolgenisDataException(
+					format("Adding attribute operation failed. Attribute already exists [%s]", attribute.getName()));
 		}
 		addAttributeRec(entityMetaData, attribute);
 	}
@@ -201,7 +198,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	/**
 	 * Adds an attribute to the repository.
 	 *
-	 * @param entityMetaData
+	 * @param entityMetaData entity meta data that owns the attribute
 	 * @param attr           the {@link AttributeMetaData} to add
 	 */
 	private void addAttributeRec(EntityMetaData entityMetaData, AttributeMetaData attr)
@@ -217,7 +214,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			String createJunctionTableSql = getSqlCreateJunctionTable(entityMetaData, attr);
 			if (LOG.isDebugEnabled())
 			{
-				LOG.debug("Creating junction table for entity [{}] attribute [{}]", getName(), attr.getName());
+				LOG.debug("Creating junction table for entity [{}] attribute [{}]", POSTGRESQL, attr.getName());
 				if (LOG.isTraceEnabled())
 				{
 					LOG.trace("SQL: {}", createJunctionTableSql);
@@ -230,7 +227,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			String addColumnSql = getSqlAddColumn(entityMetaData, attr);
 			if (LOG.isDebugEnabled())
 			{
-				LOG.debug("Creating column for entity [{}] attribute [{}]", getName(), attr.getName());
+				LOG.debug("Creating column for entity [{}] attribute [{}]", POSTGRESQL, attr.getName());
 				if (LOG.isTraceEnabled())
 				{
 					LOG.trace("SQL: {}", addColumnSql);
@@ -245,7 +242,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			String createForeignKeySql = getSqlCreateForeignKey(entityMetaData, attr);
 			if (LOG.isDebugEnabled())
 			{
-				LOG.debug("Creating foreign key for entity [{}] attribute [{}]", getName(), attr.getName());
+				LOG.debug("Creating foreign key for entity [{}] attribute [{}]", POSTGRESQL, attr.getName());
 				if (LOG.isTraceEnabled())
 				{
 					LOG.trace("SQL: {}", createForeignKeySql);
@@ -260,7 +257,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			String createUniqueKeySql = getSqlCreateUniqueKey(entityMetaData, attr);
 			if (LOG.isDebugEnabled())
 			{
-				LOG.debug("Creating unique key for entity [{}] attribute [{}]", getName(), attr.getName());
+				LOG.debug("Creating unique key for entity [{}] attribute [{}]", POSTGRESQL, attr.getName());
 				if (LOG.isTraceEnabled())
 				{
 					LOG.trace("SQL: {}", createUniqueKeySql);
@@ -378,7 +375,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		String dropColumnSql = getSqlDropColumn(entityMetaData, attrName);
 		if (LOG.isDebugEnabled())
 		{
-			LOG.debug("Dropping column for entity [{}] attribute [{}]", getName(), attrName);
+			LOG.debug("Dropping column for entity [{}] attribute [{}]", POSTGRESQL, attrName);
 			if (LOG.isTraceEnabled())
 			{
 				LOG.trace("SQL: {}", dropColumnSql);
@@ -388,9 +385,9 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	}
 
 	/**
-	 * Return a spring managed prototype bean
+	 * Return a new PostgreSQL repository
 	 */
-	protected PostgreSqlRepository createPostgreSqlRepository()
+	private PostgreSqlRepository createPostgreSqlRepository()
 	{
 		return new PostgreSqlRepository(postgreSqlEntityFactory, jdbcTemplate, dataSource, transactionManager);
 	}

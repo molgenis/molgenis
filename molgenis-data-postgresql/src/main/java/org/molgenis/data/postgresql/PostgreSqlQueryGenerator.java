@@ -1,13 +1,11 @@
 package org.molgenis.data.postgresql;
 
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.fieldtypes.FieldType;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -20,7 +18,8 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.IntStream.range;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.BOOL;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.ENUM;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
 import static org.molgenis.data.support.EntityMetaDataUtils.*;
 
@@ -116,7 +115,7 @@ class PostgreSqlQueryGenerator
 					getColumnName(idAttribute)));
 		}
 
-		if (idAttribute.isNillable() == true)
+		if (idAttribute.isNillable())
 		{
 			throw new RuntimeException(format("idAttribute (%s.%s) should not be nillable", getTableName(entityMeta),
 					getColumnName(idAttribute)));
@@ -172,9 +171,9 @@ class PostgreSqlQueryGenerator
 	static String getSqlCreateJunctionTableIndex(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		String junctionTableName = getJunctionTableName(entityMeta, attr);
-		return "CREATE INDEX " + junctionTableName.substring(0, junctionTableName.length() - 1) + "_" + entityMeta
+		return "CREATE INDEX " + junctionTableName.substring(0, junctionTableName.length() - 1) + '_' + entityMeta
 				.getIdAttribute().getName() + "_index\" ON " + junctionTableName + " (" + getColumnName(
-				entityMeta.getIdAttribute()) + ")";
+				entityMeta.getIdAttribute()) + ')';
 	}
 
 	static String getSqlDropJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
@@ -208,7 +207,7 @@ class PostgreSqlQueryGenerator
 			sql.setLength(sql.length() - 2);
 			params.setLength(params.length() - 2);
 		}
-		sql.append(") VALUES (").append(params).append(")");
+		sql.append(") VALUES (").append(params).append(')');
 		return sql.toString();
 	}
 
@@ -241,7 +240,7 @@ class PostgreSqlQueryGenerator
 				+ getColumnName(attr) + " FROM " + getJunctionTableName(entityMeta, attr) + " WHERE " + getColumnName(
 				entityMeta.getIdAttribute()) + " in (" + range(0, numOfIds).mapToObj((x) -> "?").collect(joining(", "))
 				+ ") ORDER BY " + getColumnName(entityMeta.getIdAttribute()) + ", \"" + JUNCTION_TABLE_ORDER_ATTR_NAME
-				+ "\"";
+				+ '"';
 	}
 
 	static <E extends Entity> String getSqlSelect(EntityMetaData entityMeta, Query<E> q, List<Object> parameters,
@@ -324,10 +323,7 @@ class PostgreSqlQueryGenerator
 
 		// create sql
 		StringBuilder sql = new StringBuilder("UPDATE ").append(getTableName(entityMeta)).append(" SET ");
-		getPersistedAttributesNonMref(entityMeta).forEach(attr ->
-		{
-			sql.append(getColumnName(attr)).append(" = ?, ");
-		});
+		getPersistedAttributesNonMref(entityMeta).forEach(attr -> sql.append(getColumnName(attr)).append(" = ?, "));
 		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',')
 		{
 			sql.setLength(sql.length() - 2);
@@ -339,9 +335,9 @@ class PostgreSqlQueryGenerator
 	/**
 	 * Produces SQL to count the number of entities that match the given query. Ignores query offset and pagesize.
 	 *
-	 * @param q
-	 * @param parameters
-	 * @return
+	 * @param q          query
+	 * @param parameters prepared statement parameters
+	 * @return SQL string
 	 */
 	static <E extends Entity> String getSqlCount(EntityMetaData entityMeta, Query<E> q, List<Object> parameters)
 	{
@@ -475,7 +471,7 @@ class PostgreSqlQueryGenerator
 
 					if (isStringType(attr) || isTextType(attr))
 					{
-						result.append(" ").append(columnName);
+						result.append(' ').append(columnName);
 					}
 					else
 					{
@@ -483,7 +479,7 @@ class PostgreSqlQueryGenerator
 					}
 
 					result.append(" LIKE ?");
-					parameters.add("%" + PostgreSqlUtils.getPostgreSqlQueryValue(r.getValue(), attr) + "%");
+					parameters.add("%" + PostgreSqlUtils.getPostgreSqlQueryValue(r.getValue(), attr) + '%');
 					break;
 				case IN:
 					Object inValue = r.getValue();
@@ -537,7 +533,7 @@ class PostgreSqlQueryGenerator
 						throw new MolgenisDataException(format("RANGE value is of type [%s] instead of [Iterable]",
 								range.getClass().getSimpleName()));
 					}
-					Iterator<Object> rangeValues = ((Iterable) range).iterator();
+					Iterator<?> rangeValues = ((Iterable<?>) range).iterator();
 					parameters.add(rangeValues.next()); // from
 					parameters.add(rangeValues.next()); // to
 
@@ -612,9 +608,6 @@ class PostgreSqlQueryGenerator
 					predicate.append('.').append(getColumnName(r.getField()));
 					switch (operator)
 					{
-						case EQUALS:
-							predicate.append(" =");
-							break;
 						case GREATER:
 							predicate.append(" >");
 							break;
@@ -734,26 +727,26 @@ class PostgreSqlQueryGenerator
 		return from.toString();
 	}
 
-	static String getColumnName(AttributeMetaData attr)
+	private static String getColumnName(AttributeMetaData attr)
 	{
 		return getColumnName(attr.getName());
 	}
 
-	static String getColumnName(String attrName)
+	private static String getColumnName(String attrName)
 	{
-		return new StringBuilder().append("\"").append(attrName).append("\"").toString();
+		return new StringBuilder().append('"').append(attrName).append('"').toString();
 	}
 
 	private static String getFilterColumnName(AttributeMetaData attr, int filterIndex)
 	{
-		return new StringBuilder().append("\"").append(attr.getName()).append("_filter").append(filterIndex)
-				.append("\"").toString();
+		return new StringBuilder().append('"').append(attr.getName()).append("_filter").append(filterIndex).append('"')
+				.toString();
 	}
 
 	private static String getUniqueKeyName(EntityMetaData emd, AttributeMetaData attr)
 	{
-		return new StringBuilder().append("\"").append(emd.getName()).append('_').append(attr.getName()).append("_key")
-				.append("\"").toString();
+		return new StringBuilder().append('"').append(emd.getName()).append('_').append(attr.getName()).append("_key")
+				.append('"').toString();
 	}
 
 	private static <E extends Entity> List<AttributeMetaData> getMrefQueryAttrs(EntityMetaData entityMeta, Query<E> q)
@@ -786,8 +779,45 @@ class PostgreSqlQueryGenerator
 
 	private static String getPostgreSqlType(AttributeMetaData attr)
 	{
-		FieldType fieldType = MolgenisFieldTypes.getType(getValueString(attr.getDataType()));
-		return fieldType.getPostgreSqlType();
+		while (true)
+		{
+			AttributeType attrType = attr.getDataType();
+			switch (attrType)
+			{
+				case BOOL:
+					return "boolean";
+				case CATEGORICAL:
+				case XREF:
+				case FILE:
+					attr = attr.getRefEntity().getIdAttribute();
+					continue;
+				case DATE:
+					return "date";
+				case DATE_TIME:
+					return "timestamp";
+				case DECIMAL:
+					return "double precision"; // alias: float8
+				case EMAIL:
+				case ENUM:
+				case HYPERLINK:
+				case STRING:
+					return "character varying(255)"; // alias: varchar(255)
+				case HTML:
+				case SCRIPT:
+				case TEXT:
+					return "text";
+				case INT:
+					return "integer"; // alias: int, int4
+				case LONG:
+					return "bigint"; // alias: int8
+				case CATEGORICAL_MREF:
+				case MREF:
+				case COMPOUND:
+					throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+				default:
+					throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
+			}
+		}
 	}
 }
 
