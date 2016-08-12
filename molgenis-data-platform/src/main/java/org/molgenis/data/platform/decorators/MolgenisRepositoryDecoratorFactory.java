@@ -82,7 +82,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder,
 			EntityMetaDataMetaData entityMetaMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
-			MolgenisPermissionService permissionService, L3Cache l3Cache))
+			MolgenisPermissionService permissionService, L3Cache l3Cache)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
