@@ -1,9 +1,9 @@
 package org.molgenis.ui.menu;
 
-import static org.testng.Assert.assertEquals;
-
 import org.molgenis.ui.MolgenisUiMenuItemType;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
 
 public class MenuItemToMolgenisUiMenuItemAdapterTest
 {

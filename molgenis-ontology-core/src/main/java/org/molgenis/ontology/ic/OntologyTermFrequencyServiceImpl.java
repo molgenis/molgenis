@@ -80,7 +80,8 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 
 		List<Entity> entitiesToAdd = new ArrayList<Entity>();
 		// Create new term frequency records
-		dataService.findAll(ONTOLOGY_TERM_SYNONYM).forEach(entity -> {
+		dataService.findAll(ONTOLOGY_TERM_SYNONYM).forEach(entity ->
+		{
 			String ontologyTermSynonym = entity.getString(OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR);
 			PubMedTFEntity pubMedTFEntity = pubMedTermFrequencyService.getTermFrequency(ontologyTermSynonym);
 

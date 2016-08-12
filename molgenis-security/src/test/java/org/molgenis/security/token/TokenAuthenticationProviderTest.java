@@ -1,14 +1,5 @@
 package org.molgenis.security.token;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Arrays;
-
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.security.core.token.UnknownTokenException;
 import org.springframework.security.core.Authentication;
@@ -17,6 +8,12 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.*;
 
 public class TokenAuthenticationProviderTest
 {
@@ -36,8 +33,8 @@ public class TokenAuthenticationProviderTest
 		RestAuthenticationToken authToken = new RestAuthenticationToken("token");
 		assertFalse(authToken.isAuthenticated());
 
-		when(tokenService.findUserByToken("token")).thenReturn(
-				new User("username", "password", Arrays.asList(new SimpleGrantedAuthority("admin"))));
+		when(tokenService.findUserByToken("token"))
+				.thenReturn(new User("username", "password", Arrays.asList(new SimpleGrantedAuthority("admin"))));
 
 		Authentication auth = tokenAuthenticationProvider.authenticate(authToken);
 		assertNotNull(auth);

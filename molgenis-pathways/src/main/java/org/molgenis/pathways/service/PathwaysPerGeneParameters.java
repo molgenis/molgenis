@@ -15,8 +15,7 @@ abstract class PathwaysPerGeneParameters
 
 	public String[] getGeneArray()
 	{
-		return new String[]
-		{ getGene() };
+		return new String[] { getGene() };
 	}
 
 	public static PathwaysPerGeneParameters create(String species, String gene)

@@ -1,9 +1,9 @@
 package org.molgenis.ui.menu;
 
+import org.elasticsearch.common.collect.Lists;
+
 import java.util.List;
 import java.util.Stack;
-
-import org.elasticsearch.common.collect.Lists;
 
 public class MenuUtils
 {
@@ -32,7 +32,7 @@ public class MenuUtils
 
 	/**
 	 * Return URI path to menu item of the given id or null if item does not exist.
-	 * 
+	 *
 	 * @param id
 	 * @param menu
 	 * @return

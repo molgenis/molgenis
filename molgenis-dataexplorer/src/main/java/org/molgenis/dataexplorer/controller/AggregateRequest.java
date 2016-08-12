@@ -1,10 +1,9 @@
 package org.molgenis.dataexplorer.controller;
 
-import java.util.List;
+import org.molgenis.data.QueryRule;
 
 import javax.validation.constraints.NotNull;
-
-import org.molgenis.data.QueryRule;
+import java.util.List;
 
 public class AggregateRequest
 {

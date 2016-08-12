@@ -1,10 +1,8 @@
 package org.molgenis.script;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import org.molgenis.file.FileStore;
+import org.springframework.util.FileCopyUtils;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,9 +11,9 @@ import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.Map;
 
-import org.molgenis.file.FileStore;
-import org.springframework.util.FileCopyUtils;
-import org.testng.annotations.Test;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.*;
 
 public class ScriptTest
 {

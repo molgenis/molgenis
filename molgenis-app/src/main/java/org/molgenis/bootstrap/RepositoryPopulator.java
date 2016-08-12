@@ -1,7 +1,5 @@
 package org.molgenis.bootstrap;
 
-import static java.util.Objects.requireNonNull;
-
 import org.molgenis.data.settings.SettingsPopulator;
 import org.molgenis.framework.db.WebAppDatabasePopulator;
 import org.molgenis.script.ScriptTypePopulator;
@@ -11,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Populates {@link org.molgenis.data.Repository repositories} with data during bootstrapping.

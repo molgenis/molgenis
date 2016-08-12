@@ -1,10 +1,5 @@
 package org.molgenis.data.elasticsearch.admin;
 
-import static org.molgenis.data.elasticsearch.admin.ElasticsearchIndexManagerController.URI;
-
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,6 +9,11 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseStatus;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+
+import static org.molgenis.data.elasticsearch.admin.ElasticsearchIndexManagerController.URI;
 
 /**
  * Index manager plugin

@@ -1,17 +1,18 @@
 package org.molgenis.data.support;
 
+import com.google.common.collect.Lists;
+import org.molgenis.data.processor.CellProcessor;
+
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
-import org.molgenis.data.processor.CellProcessor;
-
-import com.google.common.collect.Lists;
-
 public abstract class FileRepositoryCollection extends AbstractRepositoryCollection
 {
-	/** process cells after reading */
+	/**
+	 * process cells after reading
+	 */
 	protected List<CellProcessor> cellProcessors;
 	private final Set<String> fileNameExtensions;
 

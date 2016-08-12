@@ -1,14 +1,10 @@
 package org.molgenis.js;
 
+import org.mozilla.javascript.*;
+import org.springframework.stereotype.Service;
+
 import java.io.IOException;
 import java.io.StringReader;
-
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextAction;
-import org.mozilla.javascript.ContextFactory;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.ScriptableObject;
-import org.springframework.stereotype.Service;
 
 /**
  * Executes a JavaScript
@@ -38,8 +34,7 @@ public class JsScriptExecutor
 					throw new RuntimeException(e);
 				}
 				Function evalScript = (Function) scriptableObject.get("executeScript", scriptableObject);
-				return evalScript.call(cx, scriptableObject, scriptableObject, new Object[]
-				{});
+				return evalScript.call(cx, scriptableObject, scriptableObject, new Object[] {});
 			}
 
 		});

@@ -1,12 +1,11 @@
 package org.molgenis.ui;
 
+import com.google.common.collect.Lists;
+import org.molgenis.security.core.MolgenisPermissionService;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-
-import org.molgenis.security.core.MolgenisPermissionService;
-
-import com.google.common.collect.Lists;
 
 /**
  * @deprecated use {@link org.molgenis.ui.menu.MenuItemToMolgenisUiMenuAdapter} instead
@@ -117,7 +116,7 @@ public class XmlMolgenisUiMenu implements MolgenisUiMenu
 	@Override
 	public List<MolgenisUiMenu> getBreadcrumb()
 	{
-		if (parentMenu == null) return Collections.<MolgenisUiMenu> singletonList(this);
+		if (parentMenu == null) return Collections.<MolgenisUiMenu>singletonList(this);
 		List<MolgenisUiMenu> breadcrumb = new ArrayList<MolgenisUiMenu>();
 		for (MolgenisUiMenu menu = this; menu != null; menu = menu.getParentMenu())
 			breadcrumb.add(menu);

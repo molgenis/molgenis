@@ -1,14 +1,7 @@
 package org.molgenis.data.semanticsearch.explain.service;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import org.apache.lucene.search.Explanation;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
@@ -16,8 +9,14 @@ import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.util.ResourceUtils;
 import org.testng.annotations.Test;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 public class ExplainServiceHelperTest
 {
@@ -27,8 +26,8 @@ public class ExplainServiceHelperTest
 	@Test
 	public void discoverMatchedQueries() throws JsonSyntaxException, IOException
 	{
-		Explanation explanation = new Gson().fromJson(ResourceUtils.getString("explain_api_example.json"),
-				Explanation.class);
+		Explanation explanation = new Gson()
+				.fromJson(ResourceUtils.getString("explain_api_example.json"), Explanation.class);
 		Set<String> discoverMatchedQueries = explainServiceHelper.findMatchedWords(explanation);
 		assertEquals(discoverMatchedQueries.size(), 2);
 		assertTrue(discoverMatchedQueries.contains("high blood"));

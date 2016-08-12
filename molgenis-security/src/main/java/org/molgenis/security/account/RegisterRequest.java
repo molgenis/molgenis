@@ -1,11 +1,11 @@
 package org.molgenis.security.account;
 
-import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
+import org.hibernate.validator.constraints.Email;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.hibernate.validator.constraints.Email;
+import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
 
 class RegisterRequest
 {

@@ -5,9 +5,8 @@ import org.mozilla.javascript.ContextFactory;
 
 /**
  * {@link ContextFactory} for Molgenis js.
- * 
+ * <p>
  * Creates Contexts that are sandboxed.
- * 
  */
 public class SandboxedContextFactory extends ContextFactory
 {

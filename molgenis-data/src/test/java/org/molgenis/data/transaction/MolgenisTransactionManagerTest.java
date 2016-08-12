@@ -1,13 +1,13 @@
 package org.molgenis.data.transaction;
 
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import org.molgenis.data.support.UuidGenerator;
+import org.testng.annotations.Test;
 
 import javax.sql.DataSource;
 
-import org.molgenis.data.support.UuidGenerator;
-import org.testng.annotations.Test;
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 
 public class MolgenisTransactionManagerTest
 {

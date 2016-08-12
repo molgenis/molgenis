@@ -1,14 +1,5 @@
 package org.molgenis.ui.controller;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-import javax.validation.Valid;
-
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
 import org.molgenis.auth.MolgenisUser;
@@ -32,6 +23,14 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Controller that handles feedback page requests. The user can fill in this feedback form to send a mail to the app's
@@ -85,9 +84,8 @@ public class FeedbackController extends AbstractStaticContentController
 
 	/**
 	 * Handles feedback form submission.
-	 * 
-	 * @throws CaptchaException
-	 *             if no valid captcha is supplied
+	 *
+	 * @throws CaptchaException if no valid captcha is supplied
 	 */
 	@RequestMapping(method = RequestMethod.POST)
 	public String submitFeedback(@Valid FeedbackForm form, @Valid @ModelAttribute CaptchaRequest captchaRequest)
@@ -126,7 +124,6 @@ public class FeedbackController extends AbstractStaticContentController
 
 	/**
 	 * Creates a MimeMessage based on a FeedbackForm.
-	 * 
 	 */
 	private MimeMessage createFeedbackMessage(FeedbackForm form) throws MessagingException
 	{
@@ -150,7 +147,7 @@ public class FeedbackController extends AbstractStaticContentController
 
 	/**
 	 * Formats a MolgenisUser's name.
-	 * 
+	 *
 	 * @return String containing the user's first name, middle names and last name.
 	 */
 	private static String getFormattedName(MolgenisUser user)

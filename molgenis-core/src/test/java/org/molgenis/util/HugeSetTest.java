@@ -1,22 +1,15 @@
 package org.molgenis.util;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.IntStream;
-
+import com.google.common.collect.Iterators;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Iterators;
+import java.io.IOException;
+import java.util.*;
+import java.util.stream.IntStream;
+
+import static org.testng.Assert.*;
 
 public class HugeSetTest
 {

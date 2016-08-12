@@ -1,10 +1,5 @@
 package org.molgenis.data.elasticsearch.request;
 
-import static org.molgenis.data.QueryRule.Operator.DIS_MAX;
-import static org.molgenis.data.QueryRule.Operator.SHOULD;
-
-import java.util.regex.Pattern;
-
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.index.query.BaseQueryBuilder;
@@ -15,6 +10,11 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.meta.model.EntityMetaData;
+
+import java.util.regex.Pattern;
+
+import static org.molgenis.data.QueryRule.Operator.DIS_MAX;
+import static org.molgenis.data.QueryRule.Operator.SHOULD;
 
 public class DisMaxQueryGenerator implements QueryPartGenerator
 {
@@ -62,7 +62,8 @@ public class DisMaxQueryGenerator implements QueryPartGenerator
 		}
 		else
 		{
-			String value = escapeValue(queryRule.getValue() != null ? queryRule.getValue().toString() : StringUtils.EMPTY);
+			String value = escapeValue(
+					queryRule.getValue() != null ? queryRule.getValue().toString() : StringUtils.EMPTY);
 			StringBuilder queryStringBuilder = new StringBuilder();
 			queryStringBuilder.append(queryRule.getField()).append(":(").append(value).append(')');
 			return QueryBuilders.queryString(queryStringBuilder.toString());

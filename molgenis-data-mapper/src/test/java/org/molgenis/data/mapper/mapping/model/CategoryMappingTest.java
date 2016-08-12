@@ -1,30 +1,29 @@
 package org.molgenis.data.mapper.mapping.model;
 
-import static org.testng.Assert.assertEquals;
-
+import com.google.common.collect.ImmutableMap;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ImmutableMap;
+import static org.testng.Assert.assertEquals;
 
 public class CategoryMappingTest
 {
-	private CategoryMapping<String, String> mapping = CategoryMapping.<String, String> create("blah",
-			ImmutableMap.<String, String> of("Human", "1", "Orc", "2"));
+	private CategoryMapping<String, String> mapping = CategoryMapping.<String, String>create("blah",
+			ImmutableMap.<String, String>of("Human", "1", "Orc", "2"));
 
 	private CategoryMapping<String, String> mappingWithNullValueInMap = CategoryMapping
 			.create("$('LifeLines_GENDER').map({\"0\":null,\"1\":\"0\"}).value();");
 
-	private CategoryMapping<String, String> mappingWithDefault = CategoryMapping.<String, String> create("blah",
-			ImmutableMap.<String, String> of("Human", "1", "Orc", "2"), "3");
+	private CategoryMapping<String, String> mappingWithDefault = CategoryMapping.<String, String>create("blah",
+			ImmutableMap.<String, String>of("Human", "1", "Orc", "2"), "3");
 
-	private CategoryMapping<String, String> mappingWithDefaultNull = CategoryMapping.<String, String> create("blah",
-			ImmutableMap.<String, String> of("Human", "1", "Orc", "2"), null);
+	private CategoryMapping<String, String> mappingWithDefaultNull = CategoryMapping.<String, String>create("blah",
+			ImmutableMap.<String, String>of("Human", "1", "Orc", "2"), null);
 
-	private CategoryMapping<String, String> mappingWithNullValue = CategoryMapping.<String, String> create("blah",
-			ImmutableMap.<String, String> of("Human", "1", "Orc", "2"), "3", "5");
+	private CategoryMapping<String, String> mappingWithNullValue = CategoryMapping.<String, String>create("blah",
+			ImmutableMap.<String, String>of("Human", "1", "Orc", "2"), "3", "5");
 
-	private CategoryMapping<String, String> mappingWithNullValueEqualsNull = CategoryMapping.<String, String> create(
-			"blah", ImmutableMap.<String, String> of("Human", "1", "Orc", "2"), "3", null);
+	private CategoryMapping<String, String> mappingWithNullValueEqualsNull = CategoryMapping.<String, String>create(
+			"blah", ImmutableMap.<String, String>of("Human", "1", "Orc", "2"), "3", null);
 
 	@Test
 	public void testCreateFromAlgorithm()

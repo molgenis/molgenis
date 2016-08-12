@@ -1,11 +1,11 @@
 package org.molgenis.util;
 
-import static org.testng.Assert.assertEquals;
+import org.molgenis.data.support.GenericImporterExtensions;
+import org.testng.annotations.Test;
 
 import java.util.Set;
 
-import org.molgenis.data.support.GenericImporterExtensions;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 public class FileExtensionUtilsTest
 {
@@ -14,11 +14,11 @@ public class FileExtensionUtilsTest
 	public void findExtensionFromSetForGenericImporter()
 	{
 		Set<String> extensions = GenericImporterExtensions.getAll();
-		for(String extention :extensions){
-			assertEquals(FileExtensionUtils.findExtensionFromPossibilities("molgenis.test." + extention,
-					GenericImporterExtensions.getAll()),
-					GenericImporterExtensions.valueOf(extention.toUpperCase().replace('.', '_'))
-					.toString());
+		for (String extention : extensions)
+		{
+			assertEquals(FileExtensionUtils
+							.findExtensionFromPossibilities("molgenis.test." + extention, GenericImporterExtensions.getAll()),
+					GenericImporterExtensions.valueOf(extention.toUpperCase().replace('.', '_')).toString());
 		}
 	}
 }

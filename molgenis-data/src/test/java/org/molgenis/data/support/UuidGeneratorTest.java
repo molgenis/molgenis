@@ -1,11 +1,11 @@
 package org.molgenis.data.support;
 
-import static org.testng.Assert.assertEquals;
+import org.testng.annotations.Test;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 public class UuidGeneratorTest
 {

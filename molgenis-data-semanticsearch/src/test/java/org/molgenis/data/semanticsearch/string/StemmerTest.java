@@ -1,9 +1,9 @@
 package org.molgenis.data.semanticsearch.string;
 
-import static org.testng.Assert.assertEquals;
-
 import org.tartarus.snowball.ext.PorterStemmer;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
 
 public class StemmerTest
 {

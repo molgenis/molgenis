@@ -1,20 +1,14 @@
 package org.molgenis.ontology.utils;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ZipFileUtil
 {
@@ -26,8 +20,7 @@ public class ZipFileUtil
 		int len;
 		try
 		{
-			while ((len = in.read(buffer)) >= 0)
-				out.write(buffer, 0, len);
+			while ((len = in.read(buffer)) >= 0) out.write(buffer, 0, len);
 		}
 		finally
 		{

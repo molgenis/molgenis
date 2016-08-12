@@ -1,10 +1,9 @@
 package org.molgenis.data.mapper.mapping.model;
 
-import javax.annotation.Nullable;
-
+import com.google.auto.value.AutoValue;
 import org.molgenis.data.Entity;
 
-import com.google.auto.value.AutoValue;
+import javax.annotation.Nullable;
 
 /**
  * Result of applying algorithm to one source entity row

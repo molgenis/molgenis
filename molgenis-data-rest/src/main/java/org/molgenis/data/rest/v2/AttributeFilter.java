@@ -1,24 +1,24 @@
 package org.molgenis.data.rest.v2;
 
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-
 /**
  * An AttributeFilter represents the value of the attrs parameter in a REST query.
- * 
+ * <p>
  * The AttributeFilter allows you to specify which attributes should be fetched for each {@link Entity} that is
  * retrieved.
- * 
+ * <p>
  * By default, the top level entity will always be fetched with all attributes, but you can also specify a list of
  * attribute names. Those will be added to the ID and label attributes, which will always be fetched.
- * 
+ * <p>
  * Referenced entities will always be fetched using ID and label, but you can also specify a list of attribute names.
  * Those will be added to the ID and label attributes, which will always be fetched. You can also specify the special
  * selector `*` which will fetch all attributes for a referenced entity.

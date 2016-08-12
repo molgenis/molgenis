@@ -45,8 +45,8 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 		if (!baseName.equals(I18N_STRING)) return null;
 
 		// Only handle languages that are present in the languages repository
-		if (runAsSystem(() -> dataService.query(LANGUAGE).eq(LanguageMetaData.CODE, languageCode)
-				.count()) == 0) return null;
+		if (runAsSystem(() -> dataService.query(LANGUAGE).eq(LanguageMetaData.CODE, languageCode).count()) == 0)
+			return null;
 
 		return new MolgenisResourceBundle(dataService, languageCode, appSettings);
 	}
@@ -68,12 +68,12 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 		@Override
 		protected Object[][] getContents()
 		{
-			List<Entity> entities = runAsSystem(() -> dataService.findAll(I18N_STRING).collect(
-					Collectors.toList()));
+			List<Entity> entities = runAsSystem(() -> dataService.findAll(I18N_STRING).collect(Collectors.toList()));
 
 			appLanguageCode = appSettings.getLanguageCode();
 
-			boolean exists = (appLanguageCode != null) && runAsSystem(() -> {
+			boolean exists = (appLanguageCode != null) && runAsSystem(() ->
+			{
 				return (dataService.findOneById(LANGUAGE, appLanguageCode) != null);
 			});
 
@@ -107,8 +107,7 @@ public class MolgenisResourceBundleControl extends ResourceBundle.Control
 					}
 				}
 
-				contents[i++] = new Object[]
-				{ msgid, msg };
+				contents[i++] = new Object[] { msgid, msg };
 			}
 
 			return contents;

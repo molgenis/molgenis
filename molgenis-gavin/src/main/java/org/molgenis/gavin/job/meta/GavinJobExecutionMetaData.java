@@ -11,7 +11,6 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.reindex.meta.IndexPackage.PACKAGE_INDEX;
-import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
 public class GavinJobExecutionMetaData extends SystemEntityMetaData

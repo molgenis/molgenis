@@ -1,9 +1,9 @@
 package org.molgenis.charts;
 
-import java.util.List;
-
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
 import org.springframework.ui.Model;
+
+import java.util.List;
 
 public abstract class AbstractChartVisualizationService implements ChartVisualizationService
 {

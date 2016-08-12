@@ -99,8 +99,8 @@ public class OmimAnnotator implements AnnotatorConfig
 
 	public AttributeMetaData getOmimLocationAttr()
 	{
-		return attributeMetaDataFactory.create().setName(OMIM_TYPE).setDataType(TEXT)
-				.setDescription("Phenotype Mapping key: 1 - the disorder is placed on the map based on its "
+		return attributeMetaDataFactory.create().setName(OMIM_TYPE).setDataType(TEXT).setDescription(
+				"Phenotype Mapping key: 1 - the disorder is placed on the map based on its "
 						+ "association witha gene, but the underlying defect is not known. 2 - the disorder "
 						+ "has been placed on the map by linkage or other statistical method; no mutation has "
 						+ "been found. 3 - the molecular basis for the disorder is known; a mutation has been "

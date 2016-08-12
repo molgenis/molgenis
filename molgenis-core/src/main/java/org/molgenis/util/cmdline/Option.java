@@ -1,16 +1,16 @@
 package org.molgenis.util.cmdline;
 
-import java.lang.annotation.Target;
-import java.lang.annotation.Retention;
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * This annotation type helps to describe a single commandline option. With it
  * information about the paramater name, usage, etc is stored. Based on this the
  * CmdLineParser class knows which choices to make when parsing the commandline
  * parameters.
- * 
+ *
  * @author RA Scheltema
  * @version 1.0.0
  */
@@ -25,18 +25,26 @@ public @interface Option
 	 */
 	public enum Type
 	{
-		/** The option never has an argument (e.g. -o) */
-		NO_ARGUMENT,
-		/** The option always has an argument (-o argument) */
-		REQUIRED_ARGUMENT,
-		/** The option could have an argument (-o -p _or_ -o argument -p) */
-		OPTIONAL_ARGUMENT
-	};
+		/**
+		 * The option never has an argument (e.g. -o)
+		 */
+		NO_ARGUMENT, /**
+	 * The option always has an argument (-o argument)
+	 */
+	REQUIRED_ARGUMENT, /**
+	 * The option could have an argument (-o -p _or_ -o argument -p)
+	 */
+	OPTIONAL_ARGUMENT
+	}
+
+	;
 
 	public enum Param
 	{
 		BOOLEAN, INTEGER, DOUBLE, STRING, COLLECTION, FILEPATH, DIRPATH, PASSWORD, CLASS, ENUM, LOG4JLEVEL
-	};
+	}
+
+	;
 
 	/**
 	 * Defines the name of the option. This can be a single character, but als a
@@ -56,6 +64,8 @@ public @interface Option
 	 */
 	String usage() default "";
 
-	/** The type of this option. */
+	/**
+	 * The type of this option.
+	 */
 	Option.Type type();// default Option.Type.REQUIRED_ARGUMENT;
 };

@@ -1,43 +1,33 @@
 package org.molgenis.ui.menumanager;
 
-import static org.molgenis.ui.menumanager.MenuManagerController.URI;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import javax.servlet.http.Part;
-import javax.validation.Valid;
-
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.TreeTraverser;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.ui.MolgenisPlugin;
-import org.molgenis.ui.MolgenisPluginController;
-import org.molgenis.ui.MolgenisUi;
-import org.molgenis.ui.MolgenisUiMenu;
-import org.molgenis.ui.MolgenisUiMenuItem;
-import org.molgenis.ui.MolgenisUiMenuItemType;
+import org.molgenis.ui.*;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.util.FileUploadUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.TreeTraverser;
+import javax.servlet.http.Part;
+import javax.validation.Valid;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+
+import static org.molgenis.ui.menumanager.MenuManagerController.URI;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
  * Plugin to view and modify the app UI menu
@@ -126,7 +116,7 @@ public class MenuManagerController extends MolgenisPluginController
 
 	/**
 	 * Upload a new molgenis logo
-	 * 
+	 *
 	 * @param part
 	 * @param model
 	 * @return model

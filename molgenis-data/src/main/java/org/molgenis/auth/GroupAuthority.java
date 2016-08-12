@@ -1,10 +1,10 @@
 package org.molgenis.auth;
 
-import static org.molgenis.auth.GroupAuthorityMetaData.ID;
-import static org.molgenis.auth.GroupAuthorityMetaData.MOLGENIS_GROUP;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
+
+import static org.molgenis.auth.GroupAuthorityMetaData.ID;
+import static org.molgenis.auth.GroupAuthorityMetaData.MOLGENIS_GROUP;
 
 public class GroupAuthority extends Authority
 {

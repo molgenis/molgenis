@@ -32,29 +32,16 @@ package org.molgenis.util;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.net.ssl.*;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.security.KeyStore;
 import java.security.MessageDigest;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.SSLSocketFactory;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class InstallCert
 {
@@ -101,8 +88,7 @@ public class InstallCert
 		tmf.init(ks);
 		X509TrustManager defaultTrustManager = (X509TrustManager) tmf.getTrustManagers()[0];
 		SavingTrustManager tm = new SavingTrustManager(defaultTrustManager);
-		context.init(null, new TrustManager[]
-		{ tm }, null);
+		context.init(null, new TrustManager[] { tm }, null);
 		SSLSocketFactory factory = context.getSocketFactory();
 
 		LOG.info("Opening connection to " + host + ":" + port + "...");

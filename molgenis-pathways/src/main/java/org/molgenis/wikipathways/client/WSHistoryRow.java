@@ -17,52 +17,62 @@ package org.molgenis.wikipathways.client;
 
 /**
  * contains one point in the history of a pathway
- * @author msk
  *
+ * @author msk
  */
-public class WSHistoryRow {
-   
+public class WSHistoryRow
+{
+
 	private String revision;
-    private String comment;
-    private String user;
-    private String timestamp;
+	private String comment;
+	private String user;
+	private String timestamp;
 
-    public WSHistoryRow(String revision,  String comment,  String user, String timestamp) {
-    	this.revision = revision;
-    	this.comment = comment;
-    	this.user = user;
-    	this.timestamp = timestamp;
-    }
+	public WSHistoryRow(String revision, String comment, String user, String timestamp)
+	{
+		this.revision = revision;
+		this.comment = comment;
+		this.user = user;
+		this.timestamp = timestamp;
+	}
 
-    public String getRevision() {
-        return revision;
-    }
+	public String getRevision()
+	{
+		return revision;
+	}
 
-    public void setRevision(String revision) {
-        this.revision = revision;
-    }
+	public void setRevision(String revision)
+	{
+		this.revision = revision;
+	}
 
-    public String getComment() {
-        return comment;
-    }
+	public String getComment()
+	{
+		return comment;
+	}
 
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
+	public void setComment(String comment)
+	{
+		this.comment = comment;
+	}
 
-    public String getUser() {
-        return user;
-    }
+	public String getUser()
+	{
+		return user;
+	}
 
-    public void setUser(String user) {
-        this.user = user;
-    }
+	public void setUser(String user)
+	{
+		this.user = user;
+	}
 
-    public String getTimestamp() {
-        return timestamp;
-    }
+	public String getTimestamp()
+	{
+		return timestamp;
+	}
 
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
+	public void setTimestamp(String timestamp)
+	{
+		this.timestamp = timestamp;
+	}
 }

@@ -1,15 +1,7 @@
 package org.molgenis.python;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.UUID;
-
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.molgenis.file.FileStore;
@@ -21,8 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class PythonScriptRunner implements ScriptRunner
@@ -45,7 +39,7 @@ public class PythonScriptRunner implements ScriptRunner
 
 	/**
 	 * Run a Python script as freemarker template
-	 * 
+	 *
 	 * @param templateName
 	 * @param parameters
 	 * @throws IOException
@@ -60,7 +54,7 @@ public class PythonScriptRunner implements ScriptRunner
 
 	/**
 	 * Run an Python script as freemarker template
-	 * 
+	 *
 	 * @param scriptName
 	 * @param templateName
 	 * @param parameters
@@ -89,14 +83,14 @@ public class PythonScriptRunner implements ScriptRunner
 
 	/**
 	 * Run an Python script as string
-	 * 
+	 *
 	 * @param script
 	 * @param outputHandler
 	 * @throws IOException
 	 * @throws FileNotFoundException
 	 */
-	public void runPythonScript(String script, PythonOutputHandler outputHandler) throws FileNotFoundException,
-			IOException
+	public void runPythonScript(String script, PythonOutputHandler outputHandler)
+			throws FileNotFoundException, IOException
 	{
 		String scriptName = generateRandomPythonScriptName();
 		File file = fileStore.getFile(scriptName);
@@ -124,7 +118,7 @@ public class PythonScriptRunner implements ScriptRunner
 
 	/**
 	 * Run an Python script
-	 * 
+	 *
 	 * @param script
 	 * @param outputHandler
 	 */

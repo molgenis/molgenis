@@ -1,16 +1,15 @@
 package org.molgenis.ui;
 
-import java.io.IOException;
-import java.io.InputStream;
+import org.apache.commons.io.IOUtils;
+import org.molgenis.util.SchemaLoader;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
-
-import org.apache.commons.io.IOUtils;
-import org.molgenis.util.SchemaLoader;
+import java.io.IOException;
+import java.io.InputStream;
 
 public class XmlMolgenisUiLoader
 {

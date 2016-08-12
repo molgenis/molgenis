@@ -6,15 +6,8 @@
 package org.molgenis.model.elements;
 
 // jdk
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Vector;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.fieldtypes.FieldType;
@@ -25,11 +18,12 @@ import org.molgenis.model.MolgenisModelException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Lists;
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Describes a database-entity (or table).
- * 
+ *
  * @author RA Scheltema
  * @author MA Swertz
  */
@@ -37,61 +31,88 @@ public class Entity extends DBSchema implements Record
 {
 	private static final Logger LOG = LoggerFactory.getLogger(Entity.class);
 
-	/** Convenience variable for retrieving the primary key from the keys */
+	/**
+	 * Convenience variable for retrieving the primary key from the keys
+	 */
 	public static final int PRIMARY_KEY = 0;
 
 	// member variables
-	/** namespace, e.g. used for package name */
+	/**
+	 * namespace, e.g. used for package name
+	 */
 	private String namespace;
-	/** The description of this entity as entered in the meta-file */
+	/**
+	 * The description of this entity as entered in the meta-file
+	 */
 	private String description;
-	/** The label which users will see in the user-interface */
+	/**
+	 * The label which users will see in the user-interface
+	 */
 	private String label;
-	/** Indicates whether this entity is system-specific */
+	/**
+	 * Indicates whether this entity is system-specific
+	 */
 	private boolean system;
-	/** List containing all the fields of this entity */
+	/**
+	 * List containing all the fields of this entity
+	 */
 	private final Vector<Field> fields;
 	/** */
 	private Vector<String> parents;
-	/** The name of the entity this entity is implementing */
+	/**
+	 * The name of the entity this entity is implementing
+	 */
 	private Vector<String> implements_parents = new Vector<String>();
-	/** List containing all the indices of this entity */
+	/**
+	 * List containing all the indices of this entity
+	 */
 	private final Vector<Index> indices;
 	/**
 	 * List containing all the unique fields of this entity (index 0 is the primary key)
 	 */
 	private Vector<Unique> unique_fields = new Vector<Unique>();
-	/** higly experimental: allows to add lazy load navigation to objects */
+	/**
+	 * higly experimental: allows to add lazy load navigation to objects
+	 */
 	private final Vector<Field> references = new Vector<Field>();
 	/**
 	 * Boolean that indicates whether this entity is to be instantiated (abstract, interface).
 	 */
 	private boolean abstract_type;
-	/** Boolean indicate whether this is an association table */
+	/**
+	 * Boolean indicate whether this is an association table
+	 */
 	private boolean association_type;
-	/** Used for serialization purposes */
+	/**
+	 * Used for serialization purposes
+	 */
 	private static final long serialVersionUID = 3863969722351309896L;
 
-	/** Trigger type */
+	/**
+	 * Trigger type
+	 */
 	private String decorator;
 
-	/** Default label(s) to be used for Xrefs */
+	/**
+	 * Default label(s) to be used for Xrefs
+	 */
 	private List<String> xrefLabels;
 
-	/** Attributes to be used in xref/mref lookup */
+	/**
+	 * Attributes to be used in xref/mref lookup
+	 */
 	private List<String> xrefLookupFields = new ArrayList<String>();
 
 	private boolean imported;
 
 	// constructor(s)
+
 	/**
 	 * Default constructor. With this constructor all the needed information of an entity is set. Please note that the
 	 * name needs to be unique in the tree.
-	 * 
-	 * @param name
-	 *            The name of the entity.
-	 * @param parent
-	 *            Pointer to the DBSchema this entity belongs to.
+	 *
+	 * @param name   The name of the entity.
+	 * @param parent Pointer to the DBSchema this entity belongs to.
 	 */
 	public Entity(String name, DBSchema parent)
 	{
@@ -101,13 +122,10 @@ public class Entity extends DBSchema implements Record
 	/**
 	 * Default constructor. With this constructor all the needed information of an entity is set. Please note that the
 	 * name needs to be unique in the tree.
-	 * 
-	 * @param name
-	 *            The name of the entity.
-	 * @param label
-	 *            The label of the entity.
-	 * @param parent
-	 *            Pointer to the DBSchema this entity belongs to.
+	 *
+	 * @param name   The name of the entity.
+	 * @param label  The label of the entity.
+	 * @param parent Pointer to the DBSchema this entity belongs to.
 	 */
 	public Entity(String name, String label, DBSchema parent)
 	{
@@ -128,15 +146,11 @@ public class Entity extends DBSchema implements Record
 	/**
 	 * Default constructor. With this constructor all the needed information of an entity is set. Please note that the
 	 * name needs to be unique in the tree.
-	 * 
-	 * @param name
-	 *            The name of the entity.
-	 * @param label
-	 *            The label of the entity.
-	 * @param parent
-	 *            Pointer to the DBSchema this entity belongs to.
-	 * @param system
-	 *            Indicates whether this entity is system-specific
+	 *
+	 * @param name   The name of the entity.
+	 * @param label  The label of the entity.
+	 * @param parent Pointer to the DBSchema this entity belongs to.
+	 * @param system Indicates whether this entity is system-specific
 	 */
 	public Entity(String name, String label, DBSchema parent, boolean system)
 	{
@@ -166,7 +180,7 @@ public class Entity extends DBSchema implements Record
 
 	/**
 	 * Returns the label of this entity.
-	 * 
+	 *
 	 * @return The label of the entity.
 	 */
 	@Override
@@ -186,7 +200,7 @@ public class Entity extends DBSchema implements Record
 
 	/**
 	 * Returns whether this entity is system-specific.
-	 * 
+	 *
 	 * @return True when the entity is system-specific, false otherwise.
 	 */
 	public boolean isSystem()
@@ -227,7 +241,7 @@ public class Entity extends DBSchema implements Record
 
 	/**
 	 * Returns the description of the entity.
-	 * 
+	 *
 	 * @return The description.
 	 */
 	public String getDescription()
@@ -244,7 +258,7 @@ public class Entity extends DBSchema implements Record
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	@Override
 	public boolean hasXRefs()
@@ -260,9 +274,8 @@ public class Entity extends DBSchema implements Record
 	/**
 	 * With this method all the parents of this entity can be set in one call. The parents are the base-entities, this
 	 * entity inherits from.
-	 * 
-	 * @param parents
-	 *            List containing the parents of this entity.
+	 *
+	 * @param parents List containing the parents of this entity.
 	 */
 	public void setParents(Vector<String> parents)
 	{
@@ -285,7 +298,7 @@ public class Entity extends DBSchema implements Record
 
 	/**
 	 * Returns all the parents of this entity.
-	 * 
+	 *
 	 * @return List with the parents
 	 */
 	@Override
@@ -296,7 +309,7 @@ public class Entity extends DBSchema implements Record
 
 	/**
 	 * Returns the root of the entity hierarchy this entity belongs to.
-	 * 
+	 *
 	 * @return Entity
 	 */
 	public Entity getRootAncestor()
@@ -362,8 +375,8 @@ public class Entity extends DBSchema implements Record
 		{
 			if (element.getClass().equals(Entity.class))
 			{
-				if (((Entity) element).hasAncestor()
-						&& ((Entity) element).getAncestor().getName().equals(this.getName()))
+				if (((Entity) element).hasAncestor() && ((Entity) element).getAncestor().getName()
+						.equals(this.getName()))
 				{
 					descendants.add((Entity) element);
 				}
@@ -407,8 +420,8 @@ public class Entity extends DBSchema implements Record
 		for (String iface : this.implements_parents)
 		{
 			Entity iface_entity = (Entity) getParent().get(iface);
-			if (iface_entity == null) throw new MolgenisModelException("interface '" + iface
-					+ "' is undefined for entity " + this.getName());
+			if (iface_entity == null)
+				throw new MolgenisModelException("interface '" + iface + "' is undefined for entity " + this.getName());
 			implements_entities.add(iface_entity);
 		}
 		return implements_entities;
@@ -421,8 +434,8 @@ public class Entity extends DBSchema implements Record
 		for (String iface : this.implements_parents)
 		{
 			Entity iface_entity = (Entity) getParent().get(iface);
-			if (iface_entity == null) throw new MolgenisModelException("interface " + iface
-					+ " is undefined in entity " + this.getName());
+			if (iface_entity == null)
+				throw new MolgenisModelException("interface " + iface + " is undefined in entity " + this.getName());
 
 			implements_entities.addAll(iface_entity.getAllImplements());
 			implements_entities.add(iface_entity);
@@ -454,14 +467,13 @@ public class Entity extends DBSchema implements Record
 	}
 
 	// field access methods
+
 	/**
 	 * Adds the given field to the list of fields associated with this entity. When a field with the same name is
 	 * already present in this entity an exception is thrown (field-names need to be unique).
-	 * 
-	 * @param field
-	 *            Pointer to the field that needs to be added.
-	 * @throws Exception
-	 *             When a field with the same name is already present.
+	 *
+	 * @param field Pointer to the field that needs to be added.
+	 * @throws Exception When a field with the same name is already present.
 	 */
 	public void addField(Field field) throws MolgenisModelException
 	{
@@ -471,18 +483,16 @@ public class Entity extends DBSchema implements Record
 	/**
 	 * Adds the given field to the list of fields associated with this entity. When a field with the same name is
 	 * already present in this entity an exception is thrown (field-names need to be unique).
-	 * 
-	 * @param field
-	 *            Pointer to the field that needs to be added.
-	 * @throws Exception
-	 *             When a field with the same name is already present.
+	 *
+	 * @param field Pointer to the field that needs to be added.
+	 * @throws Exception When a field with the same name is already present.
 	 */
 	public void addField(Integer pos, Field field) throws MolgenisModelException
 	{
 		if (fields.contains(field))
 		{
-			throw new MolgenisModelException("Duplicate Field with name " + field.getName() + "  in entity "
-					+ this.getName());
+			throw new MolgenisModelException(
+					"Duplicate Field with name " + field.getName() + "  in entity " + this.getName());
 		}
 		if (pos != null) fields.add(pos, field);
 		else fields.add(field);
@@ -495,7 +505,7 @@ public class Entity extends DBSchema implements Record
 
 	/**
 	 * Returns a vector with all the fields associated with this entity.
-	 * 
+	 *
 	 * @return All the fields associated with this entity.
 	 * @throws MolgenisModelException
 	 */
@@ -507,16 +517,12 @@ public class Entity extends DBSchema implements Record
 
 	/**
 	 * Returns a vector with all the fields associated with this entity.
-	 * 
-	 * @param required
-	 *            if required == true than returns only fields that are required (not nillable/null) else returns all
-	 *            fields
-	 * @param recursive
-	 *            get also field from super classes
-	 * @param systemField
-	 *            system field, like __type and id
-	 * @param implementing
-	 *            field that this object implements (also done recusively if recusive = true)
+	 *
+	 * @param required     if required == true than returns only fields that are required (not nillable/null) else returns all
+	 *                     fields
+	 * @param recursive    get also field from super classes
+	 * @param systemField  system field, like __type and id
+	 * @param implementing field that this object implements (also done recusively if recusive = true)
 	 * @return All the fields associated with this entity.
 	 * @throws MolgenisModelException
 	 */
@@ -578,15 +584,14 @@ public class Entity extends DBSchema implements Record
 		return new ArrayList<Field>(result.values());
 	}
 
-	public List<Field> getFields(boolean required, boolean recursive, boolean systemField)
-			throws MolgenisModelException
+	public List<Field> getFields(boolean required, boolean recursive, boolean systemField) throws MolgenisModelException
 	{
 		return getFields(required, recursive, systemField, true);
 	}
 
 	/**
 	 * Get fields for this entity as well as from the interfaces it implements.
-	 * 
+	 *
 	 * @return vector of fields implemented by this entity or its interfaces
 	 * @throws MolgenisModelException
 	 */
@@ -754,7 +759,7 @@ public class Entity extends DBSchema implements Record
 	/**
 	 * Returns a vector with all the fields that are actualy located in this entity. For an xref_multiple the entries
 	 * are located in a couple-table.
-	 * 
+	 *
 	 * @return All the fields local for the entity.
 	 * @throws MolgenisModelException
 	 */
@@ -776,7 +781,7 @@ public class Entity extends DBSchema implements Record
 	/**
 	 * Returns a vector with all the fields that are actualy located in this entity. For an xref_multiple the entries
 	 * are located in a couple-table.
-	 * 
+	 *
 	 * @return All the fields local for the entity.
 	 * @throws MolgenisModelException
 	 */
@@ -797,7 +802,7 @@ public class Entity extends DBSchema implements Record
 
 	/**
 	 * Returns a vector with all the fields that are located in other tables, but belong to this entity (xref_multiple).
-	 * 
+	 *
 	 * @return All the fields external for the entity.
 	 * @throws MolgenisModelException
 	 */
@@ -840,7 +845,7 @@ public class Entity extends DBSchema implements Record
 
 	/**
 	 * Returns all the fields belonging to this entity, which have not set the system-property.
-	 * 
+	 *
 	 * @return All the non-system fields for the entity.
 	 * @throws MolgenisModelException
 	 */
@@ -869,8 +874,8 @@ public class Entity extends DBSchema implements Record
 
 		for (Field f : getAllFields())
 		{
-			if (!(f.getType() instanceof XrefField)
-					&& !(f.getType() instanceof IntField && f.isAuto() && f.getEntity() == this))
+			if (!(f.getType() instanceof XrefField) && !(f.getType() instanceof IntField && f.isAuto()
+					&& f.getEntity() == this))
 			// TODO: fix automatic fields
 			// MAJOR error, arghhhh!!! &&
 			// !getKeyFields(PRIMARY_KEY).contains(f))
@@ -904,7 +909,7 @@ public class Entity extends DBSchema implements Record
 
 	/**
 	 * Returns a vector with all the fields associated with this entity and are of the given type.
-	 * 
+	 *
 	 * @return All the fields associated with this entity with the given type.
 	 * @throws MolgenisModelException
 	 */
@@ -998,9 +1003,8 @@ public class Entity extends DBSchema implements Record
 
 	/**
 	 * Returns the field with the given name. When no field with the given name is found null is returned.
-	 * 
-	 * @param name
-	 *            The name of the field to look for.
+	 *
+	 * @param name The name of the field to look for.
 	 * @return The field with the given name.
 	 * @throws MolgenisModelException
 	 */
@@ -1032,9 +1036,8 @@ public class Entity extends DBSchema implements Record
 	/**
 	 * Returns the field with the given name from entity or any of its parents. When no field with the given name is
 	 * found null is returned.
-	 * 
-	 * @param name
-	 *            The name of the field to look for.
+	 *
+	 * @param name The name of the field to look for.
 	 * @return The field with the given name.
 	 * @throws MolgenisModelException
 	 */
@@ -1048,14 +1051,13 @@ public class Entity extends DBSchema implements Record
 	}
 
 	// index access methods
+
 	/**
 	 * Adds the given index to the list of indices associated with this entity. When a Index with the same name is
 	 * already present in this entity an exception is thrown (index-names need to be unique).
-	 * 
-	 * @param index
-	 *            Pointer to the index that needs to be added.
-	 * @throws Exception
-	 *             When a index with the same name is already present.
+	 *
+	 * @param index Pointer to the index that needs to be added.
+	 * @throws Exception When a index with the same name is already present.
 	 */
 	public void addIndex(Index index)// throws Exception
 	{
@@ -1070,7 +1072,7 @@ public class Entity extends DBSchema implements Record
 
 	/**
 	 * Returns a vector with all the indices associated with this entity.
-	 * 
+	 *
 	 * @return All the indices associated with this entity.
 	 * @throws MolgenisModelException
 	 */
@@ -1108,9 +1110,8 @@ public class Entity extends DBSchema implements Record
 
 	/**
 	 * Returns the index with the given name. When no index with the given name is found null is returned.
-	 * 
-	 * @param name
-	 *            The name of the index to look for.
+	 *
+	 * @param name The name of the index to look for.
 	 * @return The index with the given name.
 	 * @throws MolgenisModelException
 	 */
@@ -1128,13 +1129,13 @@ public class Entity extends DBSchema implements Record
 	}
 
 	// key access methods
+
 	/**
 	 * Adds the given field to the key-list. The given field should be present in the field-list of this entity. The
 	 * field is regarded as a key, meaning it does not need to be combined with other keys. When there no keys for this
 	 * entity, the given key is regarded as the primary key, otherwise the key is a secondary key.
-	 * 
-	 * @param key
-	 *            The field that is a key.
+	 *
+	 * @param key The field that is a key.
 	 */
 	public void addKey(String key, String description) // throws Exception
 	{
@@ -1151,9 +1152,8 @@ public class Entity extends DBSchema implements Record
 	 * Adds the given list of fields to the key-list. The given fields should be present in the field-list of the
 	 * entity. The fields are regarded together as the key. When there no keys for this entity, the given key is
 	 * regarded as the primary key, otherwise the key is a secondary key.
-	 * 
-	 * @param keys
-	 *            The fields that combined form the key.
+	 *
+	 * @param keys The fields that combined form the key.
 	 * @throws MolgenisModelException
 	 */
 	public void addKey(List<String> keys, boolean subclass, String description) throws MolgenisModelException
@@ -1193,7 +1193,7 @@ public class Entity extends DBSchema implements Record
 
 	/**
 	 * Returns a list with all the keys.
-	 * 
+	 *
 	 * @return All the keys of this entity.
 	 * @throws MolgenisModelException
 	 */
@@ -1205,8 +1205,8 @@ public class Entity extends DBSchema implements Record
 		if (hasAncestor())
 		{
 			Entity parent_entity = (Entity) getParent().get(this.parents.lastElement());
-			if (parent_entity == null) throw new MolgenisModelException("Superclass " + this.parents.lastElement()
-					+ " unknown for entity " + this.getName());
+			if (parent_entity == null) throw new MolgenisModelException(
+					"Superclass " + this.parents.lastElement() + " unknown for entity " + this.getName());
 			if (parent_entity.getKeys().size() == 0) throw new MolgenisModelException(this.parents.lastElement()
 					+ " or the interface it implements doesn't define primary key (unique,int,not null)");
 			result.add(parent_entity.getKeys().firstElement());
@@ -1244,7 +1244,7 @@ public class Entity extends DBSchema implements Record
 
 	/**
 	 * Returns the key at the given index. The first key in the list (index 0) is regarded as the primary key.
-	 * 
+	 *
 	 * @return The key at the given index.
 	 * @throws MolgenisModelException
 	 */
@@ -1252,8 +1252,8 @@ public class Entity extends DBSchema implements Record
 	{
 		if (index < 0 || index >= unique_fields.size())
 		{
-			throw new IndexOutOfBoundsException("No key was found for entity " + this.getName()
-					+ " at the given index " + index + ".");
+			throw new IndexOutOfBoundsException(
+					"No key was found for entity " + this.getName() + " at the given index " + index + ".");
 		}
 
 		return getKeys().get(index);
@@ -1262,7 +1262,7 @@ public class Entity extends DBSchema implements Record
 	/**
 	 * Returns a list of the fields that make up the key at the given index. The first key in the list (index 0) is
 	 * regarded as the primary key.
-	 * 
+	 *
 	 * @return Vector with fields making up the key at the given index.
 	 */
 	public Vector<Field> getKeyFields(int index) throws MolgenisModelException
@@ -1317,9 +1317,10 @@ public class Entity extends DBSchema implements Record
 	}
 
 	// Object overloads
+
 	/**
 	 * Returns a string representation of the Entity.
-	 * 
+	 *
 	 * @return The string-representation.
 	 */
 	@Override
@@ -1340,9 +1341,8 @@ public class Entity extends DBSchema implements Record
 
 	/**
 	 * Indicates whether some other object is "equal to" this one.
-	 * 
-	 * @param obj
-	 *            The reference object with which to compare.
+	 *
+	 * @param obj The reference object with which to compare.
 	 * @return True if this object is the same as the obj argument, false otherwise.
 	 */
 	@Override
@@ -1358,7 +1358,7 @@ public class Entity extends DBSchema implements Record
 
 	/**
 	 * Returns a hash code value for the Entity. This hash-code is used for quick searching in a vector of entities.
-	 * 
+	 *
 	 * @return The hash-value for this field.
 	 */
 	@Override
@@ -1465,7 +1465,8 @@ public class Entity extends DBSchema implements Record
 			if (field.isMRef())
 			{
 				String xrefEntity = field.getXrefEntityName();
-				if (xrefEntity != null && xrefEntity.equals(e.getName()) && field.getName().equals(f.getName())) count++;
+				if (xrefEntity != null && xrefEntity.equals(e.getName()) && field.getName().equals(f.getName()))
+					count++;
 			}
 		}
 		return count;
@@ -1509,8 +1510,8 @@ public class Entity extends DBSchema implements Record
 		// get from super class or interfaces
 		if (xrefLabels == null)
 		{
-			if (this.hasAncestor() && this.getAncestor().getXrefLabels() != null) return this.getAncestor()
-					.getXrefLabels();
+			if (this.hasAncestor() && this.getAncestor().getXrefLabels() != null)
+				return this.getAncestor().getXrefLabels();
 
 			List<Entity> ifaces = new ArrayList<Entity>(this.getImplements());
 			Collections.reverse(ifaces);

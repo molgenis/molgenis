@@ -1,24 +1,17 @@
 package org.molgenis.data.mapper.algorithmgenerator.generator;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
 
 public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorithmGenerator
 {
@@ -36,8 +29,8 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 	@Override
 	public boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
 	{
-		return isXrefOrCategorialDataType(targetAttribute) && (sourceAttributes.stream().allMatch(this::isXrefOrCategorialDataType))
-				&& sourceAttributes.size() > 1;
+		return isXrefOrCategorialDataType(targetAttribute) && (sourceAttributes.stream()
+				.allMatch(this::isXrefOrCategorialDataType)) && sourceAttributes.size() > 1;
 	}
 
 	@Override
@@ -56,8 +49,9 @@ public class OneToManyCategoryAlgorithmGenerator extends AbstractCategoryAlgorit
 		{
 			for (AttributeMetaData sourceAttribute : sourceAttributes)
 			{
-				stringBuilder.append(oneToOneCategoryAlgorithmGenerator.generate(targetAttribute,
-						Arrays.asList(sourceAttribute), targetEntityMetaData, sourceEntityMetaData));
+				stringBuilder.append(oneToOneCategoryAlgorithmGenerator
+						.generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityMetaData,
+								sourceEntityMetaData));
 			}
 		}
 

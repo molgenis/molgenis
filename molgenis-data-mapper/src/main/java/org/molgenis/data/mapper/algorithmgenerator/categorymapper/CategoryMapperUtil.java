@@ -1,22 +1,7 @@
 package org.molgenis.data.mapper.algorithmgenerator.categorymapper;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.measure.converter.UnitConverter;
-import javax.measure.unit.NonSI;
-import javax.measure.unit.SI;
-import javax.measure.unit.Unit;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.jscience.physics.amount.Amount;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
 import org.molgenis.data.mapper.algorithmgenerator.categorymapper.convertor.AmountConvertor;
@@ -24,13 +9,18 @@ import org.molgenis.data.mapper.algorithmgenerator.categorymapper.convertor.Dail
 import org.molgenis.data.mapper.algorithmgenerator.categorymapper.convertor.NumberAmountConvertor;
 import org.molgenis.data.mapper.algorithmgenerator.categorymapper.convertor.SeveralTimesConvertor;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import javax.measure.converter.UnitConverter;
+import javax.measure.unit.NonSI;
+import javax.measure.unit.SI;
+import javax.measure.unit.Unit;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CategoryMapperUtil
 {
-	private static final List<AmountConvertor> CONVERTORS = Lists.newArrayList(new DailyAmountConvertor(),
-			new SeveralTimesConvertor(), new NumberAmountConvertor());
+	private static final List<AmountConvertor> CONVERTORS = Lists
+			.newArrayList(new DailyAmountConvertor(), new SeveralTimesConvertor(), new NumberAmountConvertor());
 
 	private static final Pattern NUMBER_PATTERN = Pattern.compile("\\d+\\.?\\d*");
 	private static final String NON_LETTER_REGEX = "[^a-zA-Z0-9]";
@@ -38,8 +28,9 @@ public class CategoryMapperUtil
 
 	static
 	{
-		DURATION_UNITS = Arrays.asList(SI.SECOND.inverse(), NonSI.MINUTE.inverse(), NonSI.HOUR.inverse(),
-				NonSI.DAY.inverse(), NonSI.WEEK.inverse(), NonSI.MONTH.inverse(), NonSI.YEAR.inverse());
+		DURATION_UNITS = Arrays
+				.asList(SI.SECOND.inverse(), NonSI.MINUTE.inverse(), NonSI.HOUR.inverse(), NonSI.DAY.inverse(),
+						NonSI.WEEK.inverse(), NonSI.MONTH.inverse(), NonSI.YEAR.inverse());
 	}
 
 	private static final Set<String> POSITIVE_ADJECTIVES;

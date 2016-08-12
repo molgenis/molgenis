@@ -5,7 +5,7 @@ import javax.annotation.Nullable;
 /**
  * Data for charts that use xy point data like a linechart.
  */
-public class XYData 
+public class XYData
 {
 	private final Object xvalue;
 	private final Object yvalue;

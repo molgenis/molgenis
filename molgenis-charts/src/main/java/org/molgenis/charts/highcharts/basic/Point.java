@@ -7,7 +7,7 @@ public class Point
 	private String category;
 	private Number x;
 	private Number y;
-	
+
 	/**
 	 * @return the id
 	 */
@@ -15,6 +15,7 @@ public class Point
 	{
 		return id;
 	}
+
 	/**
 	 * @param id the id to set
 	 */
@@ -22,6 +23,7 @@ public class Point
 	{
 		this.id = id;
 	}
+
 	/**
 	 * @return the name
 	 */
@@ -29,6 +31,7 @@ public class Point
 	{
 		return name;
 	}
+
 	/**
 	 * @param name the name to set
 	 */
@@ -36,6 +39,7 @@ public class Point
 	{
 		this.name = name;
 	}
+
 	/**
 	 * @return the category
 	 */
@@ -43,6 +47,7 @@ public class Point
 	{
 		return category;
 	}
+
 	/**
 	 * @param category the category to set
 	 */
@@ -50,6 +55,7 @@ public class Point
 	{
 		this.category = category;
 	}
+
 	/**
 	 * @return the x
 	 */
@@ -57,6 +63,7 @@ public class Point
 	{
 		return x;
 	}
+
 	/**
 	 * @param x the x to set
 	 */
@@ -64,6 +71,7 @@ public class Point
 	{
 		this.x = x;
 	}
+
 	/**
 	 * @return the y
 	 */
@@ -71,6 +79,7 @@ public class Point
 	{
 		return y;
 	}
+
 	/**
 	 * @param y the y to set
 	 */

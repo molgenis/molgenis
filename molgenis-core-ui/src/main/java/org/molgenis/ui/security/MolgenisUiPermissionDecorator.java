@@ -1,10 +1,10 @@
 package org.molgenis.ui.security;
 
-import static java.util.Objects.requireNonNull;
-
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.ui.MolgenisUi;
 import org.molgenis.ui.MolgenisUiMenu;
+
+import static java.util.Objects.requireNonNull;
 
 public class MolgenisUiPermissionDecorator implements MolgenisUi
 {

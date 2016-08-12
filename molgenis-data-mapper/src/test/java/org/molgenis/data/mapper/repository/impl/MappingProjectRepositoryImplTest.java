@@ -1,33 +1,9 @@
 package org.molgenis.data.mapper.repository.impl;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.mapper.meta.MappingProjectMetaData.IDENTIFIER;
-import static org.molgenis.data.mapper.meta.MappingProjectMetaData.MAPPING_PROJECT;
-import static org.molgenis.data.mapper.meta.MappingProjectMetaData.MAPPING_TARGETS;
-import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
-import static org.molgenis.data.mapper.meta.MappingProjectMetaData.OWNER;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.TagMetaData.TAG;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.fail;
-
-import java.util.List;
-import java.util.stream.Stream;
-
 import org.mockito.ArgumentCaptor;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserFactory;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
+import org.molgenis.data.*;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.MappingProjectMetaData;
@@ -47,6 +23,18 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.List;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
+import static org.molgenis.data.mapper.meta.MappingProjectMetaData.*;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.TagMetaData.TAG;
+import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = MappingProjectRepositoryImplTest.Config.class)
 public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest

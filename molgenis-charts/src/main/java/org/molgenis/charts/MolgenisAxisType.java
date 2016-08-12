@@ -12,9 +12,8 @@ public enum MolgenisAxisType
 
 	/**
 	 * Get a Molgenis axis type based on an attributeJavaType
-	 * 
-	 * @param attributeJavaType
-	 *            Class<?>
+	 *
+	 * @param attributeJavaType Class<?>
 	 * @return MolgenisAxisType
 	 */
 	public static MolgenisAxisType getType(AttributeType attributeFieldTypeEnum)

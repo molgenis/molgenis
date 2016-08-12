@@ -54,10 +54,11 @@ public class InMemoryRepositoryFactory implements RepositoryFactory
 					"Unable to create ExcelRepositoryCollection for file:" + file.getName() + " exception: " + e);
 		}
 
-		ImmutableMap<String, EntityMetaData> entityMap = parser.parse(repositoryCollection, DefaultPackage.PACKAGE_DEFAULT).getEntityMap();
-		if(!entityMap.containsKey(name)) {
-			throw new RuntimeException(
-					"Entity [" + name + "] is not found. Entities found: " + entityMap.keySet());
+		ImmutableMap<String, EntityMetaData> entityMap = parser
+				.parse(repositoryCollection, DefaultPackage.PACKAGE_DEFAULT).getEntityMap();
+		if (!entityMap.containsKey(name))
+		{
+			throw new RuntimeException("Entity [" + name + "] is not found. Entities found: " + entityMap.keySet());
 		}
 
 		EntityMetaData metaData = entityMap.get(name);

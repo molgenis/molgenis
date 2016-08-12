@@ -1,14 +1,13 @@
 package org.molgenis.util;
 
-import static org.testng.Assert.assertEquals;
+import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import org.molgenis.util.ErrorMessageResponse;
-import org.molgenis.util.ErrorMessageResponse.ErrorMessage;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 public class ErrorMessageResponseTest
 {

@@ -1,10 +1,9 @@
 package org.molgenis.data.rest.v2;
 
-import javax.validation.constraints.NotNull;
-
+import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
 
-import com.google.auto.value.AutoValue;
+import javax.validation.constraints.NotNull;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_CopyEntityRequestV2.class)

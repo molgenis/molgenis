@@ -16,8 +16,7 @@ public class Legend
 	}
 
 	/**
-	 * @param enabled
-	 *            the enabled to set
+	 * @param enabled the enabled to set
 	 */
 	public Legend setEnabled(Boolean enabled)
 	{
@@ -35,9 +34,8 @@ public class Legend
 
 	/**
 	 * "left", "center" and "right". Defaults to "center"
-	 * 
-	 * @param align
-	 *            the align to set
+	 *
+	 * @param align the align to set
 	 */
 	public Legend setAlign(String align)
 	{
@@ -55,9 +53,8 @@ public class Legend
 
 	/**
 	 * "top", "middle" or "bottom".
-	 * 
-	 * @param verticalAlign
-	 *            the verticalAlign to set
+	 *
+	 * @param verticalAlign the verticalAlign to set
 	 */
 	public Legend setVerticalAlign(String verticalAlign)
 	{
@@ -67,7 +64,7 @@ public class Legend
 
 	/**
 	 * "horizontal" or "vertical"
-	 * 
+	 *
 	 * @return the layout
 	 */
 	public String getLayout()
@@ -76,8 +73,7 @@ public class Legend
 	}
 
 	/**
-	 * @param layout
-	 *            the layout to set
+	 * @param layout the layout to set
 	 */
 	public Legend setLayout(String layout)
 	{

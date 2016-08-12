@@ -1,17 +1,6 @@
 package org.molgenis.data.elasticsearch.response;
 
-import static org.molgenis.data.elasticsearch.request.AggregateQueryGenerator.AGGREGATION_DISTINCT_POSTFIX;
-import static org.molgenis.data.elasticsearch.request.AggregateQueryGenerator.AGGREGATION_MISSING_POSTFIX;
-import static org.molgenis.data.elasticsearch.request.AggregateQueryGenerator.AGGREGATION_TERMS_POSTFIX;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
-
+import com.google.common.collect.Iterables;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.bucket.missing.Missing;
@@ -27,7 +16,10 @@ import org.molgenis.data.elasticsearch.request.AggregateQueryGenerator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 
-import com.google.common.collect.Iterables;
+import java.util.*;
+import java.util.stream.Stream;
+
+import static org.molgenis.data.elasticsearch.request.AggregateQueryGenerator.*;
 
 public class AggregateResponseParser
 {
@@ -368,7 +360,7 @@ public class AggregateResponseParser
 	/**
 	 * Convert matrix labels that contain ids to label attribute values. Keeps in mind that the last label on a axis is
 	 * "Total".
-	 * 
+	 *
 	 * @param idLabels
 	 * @param entityMetaData
 	 * @param dataService
@@ -384,7 +376,8 @@ public class AggregateResponseParser
 
 			// Map entity ids to labels
 			Map<String, Entity> idToLabelMap = new HashMap<>();
-			dataService.findAll(entityMetaData.getName(), idLabelsWithoutNull).forEach(entity -> {
+			dataService.findAll(entityMetaData.getName(), idLabelsWithoutNull).forEach(entity ->
+			{
 				idToLabelMap.put(entity.getIdValue().toString(), entity);
 			});
 
@@ -405,7 +398,7 @@ public class AggregateResponseParser
 		public int compare(Object o1, Object o2)
 		{
 			return o1 == null ? 1 : (o2 == null ? -1 : o1.toString().compareTo(o2.toString())); // FIXME check if this
-																								// is allowed?
+			// is allowed?
 		}
 	}
 }

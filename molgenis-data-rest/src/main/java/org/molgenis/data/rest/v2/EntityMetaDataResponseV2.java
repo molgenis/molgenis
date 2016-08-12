@@ -48,10 +48,8 @@ class EntityMetaDataResponseV2
 	}
 
 	/**
-	 * 
 	 * @param meta
-	 * @param fetch
-	 *            set of lowercase attribute names to include in response
+	 * @param fetch set of lowercase attribute names to include in response
 	 */
 	public EntityMetaDataResponseV2(EntityMetaData meta, Fetch fetch, MolgenisPermissionService permissionService,
 			DataService dataService, LanguageService languageService)
@@ -87,8 +85,8 @@ class EntityMetaDataResponseV2
 						}
 						else if (EntityMetaDataUtils.isReferenceType(attr))
 						{
-							subAttrFetch = AttributeFilterToFetchConverter.createDefaultAttributeFetch(attr,
-									languageCode);
+							subAttrFetch = AttributeFilterToFetchConverter
+									.createDefaultAttributeFetch(attr, languageCode);
 						}
 						else
 						{
@@ -108,8 +106,8 @@ class EntityMetaDataResponseV2
 		this.idAttribute = idAttribute != null ? idAttribute.getName() : null;
 
 		Iterable<AttributeMetaData> lookupAttributes = meta.getLookupAttributes();
-		this.lookupAttributes = lookupAttributes != null
-				? Lists.newArrayList(Iterables.transform(lookupAttributes, new Function<AttributeMetaData, String>()
+		this.lookupAttributes = lookupAttributes != null ? Lists
+				.newArrayList(Iterables.transform(lookupAttributes, new Function<AttributeMetaData, String>()
 				{
 					@Override
 					public String apply(AttributeMetaData attribute)
@@ -120,8 +118,9 @@ class EntityMetaDataResponseV2
 
 		this.isAbstract = meta.isAbstract();
 
-		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE)
-				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
+		this.writable =
+				permissionService.hasPermissionOnEntity(name, Permission.WRITE) && dataService.getCapabilities(name)
+						.contains(RepositoryCapability.WRITABLE);
 	}
 
 	public String getHref()

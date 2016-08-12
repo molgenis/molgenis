@@ -1,8 +1,8 @@
 package org.molgenis.security.token;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Get a molgenis authentication token from a HttpServletRequest

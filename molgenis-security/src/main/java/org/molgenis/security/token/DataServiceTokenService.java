@@ -1,14 +1,5 @@
 package org.molgenis.security.token;
 
-import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.MolgenisTokenMetaData.MOLGENIS_TOKEN;
-import static org.molgenis.auth.MolgenisTokenMetaData.TOKEN;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.auth.MolgenisUserMetaData.USERNAME;
-
-import java.util.Date;
-
 import org.apache.commons.lang3.time.DateUtils;
 import org.molgenis.auth.MolgenisToken;
 import org.molgenis.auth.MolgenisTokenFactory;
@@ -20,6 +11,15 @@ import org.molgenis.security.core.token.UnknownTokenException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
+
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.MolgenisTokenMetaData.MOLGENIS_TOKEN;
+import static org.molgenis.auth.MolgenisTokenMetaData.TOKEN;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.MolgenisUserMetaData.USERNAME;
 
 /**
  * TokensService implementation that uses the DataService

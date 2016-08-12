@@ -6,9 +6,8 @@ import java.util.List;
 
 /**
  * Annotation classes. Multiple entities can refer to one module.
- * 
+ *
  * @author Morris Swertz
- * 
  */
 public class Module implements Serializable
 {

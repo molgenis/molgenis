@@ -1,12 +1,8 @@
 package org.molgenis.data.importer;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.molgenis.framework.db.EntitiesValidationReport;
+
+import java.util.*;
 
 /**
  * Created by mswertz on 03/05/14.
@@ -17,15 +13,25 @@ public class EntitiesValidationReportImpl implements EntitiesValidationReport
 	 * map of all sheets, and whether they are importable (recognized) or not
 	 */
 	private final Map<String, Boolean> sheetsImportable;
-	/** map of importable sheets and their importable fields */
+	/**
+	 * map of importable sheets and their importable fields
+	 */
 	private final Map<String, Collection<String>> fieldsImportable;
-	/** map of importable sheets and their unknown fields */
+	/**
+	 * map of importable sheets and their unknown fields
+	 */
 	private final Map<String, Collection<String>> fieldsUnknown;
-	/** map of importable sheets and their required/missing fields */
+	/**
+	 * map of importable sheets and their required/missing fields
+	 */
 	private final Map<String, Collection<String>> fieldsRequired;
-	/** map of importable sheets and their available/optional fields */
+	/**
+	 * map of importable sheets and their available/optional fields
+	 */
 	private final Map<String, Collection<String>> fieldsAvailable;
-	/** import order of the sheets */
+	/**
+	 * import order of the sheets
+	 */
 	private final List<String> importOrder;
 	private final List<String> packages;
 

@@ -134,7 +134,8 @@ public class EntityListenersServiceTest
 		{
 			entityListenersService.register(repoFullName);
 			Assert.assertTrue(entityListenersService.isEmpty(repoFullName));
-			Assert.assertEquals(mde.getMessage(), "Repository [EntityRepo] is not registered, please contact your administrator");
+			Assert.assertEquals(mde.getMessage(),
+					"Repository [EntityRepo] is not registered, please contact your administrator");
 			return;
 		}
 		Assert.fail();
@@ -149,7 +150,8 @@ public class EntityListenersServiceTest
 		ts.add(new NewThread("EntityRepo2", 0, 10).getThread());
 		ts.add(new NewThread("EntityRepo2", 0, 10).getThread());
 
-		ts.stream().forEach(t -> {
+		ts.stream().forEach(t ->
+		{
 			try
 			{
 				t.join();

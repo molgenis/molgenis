@@ -1,15 +1,6 @@
 package org.molgenis.data.meta;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.RepositoryCapability.INDEXABLE;
-import static org.molgenis.data.RepositoryCapability.MANAGABLE;
-import static org.molgenis.data.RepositoryCapability.QUERYABLE;
-import static org.molgenis.data.RepositoryCapability.WRITABLE;
-import static org.testng.Assert.assertEquals;
-
+import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
@@ -17,10 +8,12 @@ import org.molgenis.data.Repository;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Sets;
-
 import java.util.List;
 import java.util.function.Consumer;
+
+import static org.mockito.Mockito.*;
+import static org.molgenis.data.RepositoryCapability.*;
+import static org.testng.Assert.assertEquals;
 
 public class MetaDataRepositoryDecoratorTest
 {

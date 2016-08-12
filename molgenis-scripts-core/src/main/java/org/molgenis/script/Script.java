@@ -1,22 +1,9 @@
 package org.molgenis.script;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.molgenis.script.ScriptMetaData.CONTENT;
-import static org.molgenis.script.ScriptMetaData.GENERATE_TOKEN;
-import static org.molgenis.script.ScriptMetaData.NAME;
-import static org.molgenis.script.ScriptMetaData.PARAMETERS;
-import static org.molgenis.script.ScriptMetaData.RESULT_FILE_EXTENSION;
-import static org.molgenis.script.ScriptMetaData.TYPE;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.Lists;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.commons.lang3.RandomStringUtils;
@@ -25,11 +12,13 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 import org.molgenis.file.FileStore;
 
-import com.google.common.collect.Lists;
+import java.io.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.molgenis.script.ScriptMetaData.*;
 
 public class Script extends StaticEntity
 {

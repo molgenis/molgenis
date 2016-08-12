@@ -14,7 +14,7 @@ import java.util.*;
 
 /**
  * This data util is made for converting the Molgenis charts structure to the Highchart structure
- * 
+ *
  * @author jjetten
  */
 @Component
@@ -23,7 +23,7 @@ public class HighchartSeriesUtil
 	/**
 	 * Parse the xyDataSeries objects list to a Series objects list. The new series object can be used for xy data
 	 * charts (like scatter plot)
-	 * 
+	 *
 	 * @param xYDataSeries
 	 * @return Series
 	 */
@@ -40,7 +40,7 @@ public class HighchartSeriesUtil
 	/**
 	 * Parse the boxPlotSeries objects list to a Series objects list. The new series object can be used only for
 	 * BoxPlotSeries
-	 * 
+	 *
 	 * @param boxPlotSeries
 	 * @return series
 	 */
@@ -56,7 +56,7 @@ public class HighchartSeriesUtil
 
 	/**
 	 * Parse the xYDataSerie to a Series object computable with the Highcharts xy series standard.
-	 * 
+	 *
 	 * @param xYDataSerie
 	 * @return Series
 	 */
@@ -81,7 +81,7 @@ public class HighchartSeriesUtil
 
 	/**
 	 * Parse the boxPlotSerie to a Series object computable with the Highcharts box plot series standard
-	 * 
+	 *
 	 * @param boxPlotSerie
 	 * @return series
 	 */
@@ -95,7 +95,7 @@ public class HighchartSeriesUtil
 
 	/**
 	 * Parse the x and y data-objects to object computable with the Highcharts scatter plot standard.
-	 * 
+	 *
 	 * @param xydata
 	 * @param xValueFieldTypeEnum
 	 * @param yValueFieldTypeEnum
@@ -117,7 +117,7 @@ public class HighchartSeriesUtil
 
 	/**
 	 * Convert values to match the Highcharts demand when using json
-	 * 
+	 *
 	 * @param fieldTypeEnum
 	 * @param value
 	 * @return Object
@@ -143,7 +143,7 @@ public class HighchartSeriesUtil
 	 * Convert date to long keeping the timezone valued date. When asking the time of a Date object java return the
 	 * milliseconds from the begin of counting. "Returns the number of milliseconds since January 1, 1970, 00:00:00 GMT
 	 * represented by this Date object."
-	 * 
+	 * <p>
 	 * This can be a problem when accepting JavaSript to create a JavaScript Date object not knowing the time zone and
 	 * ..
 	 */
@@ -162,7 +162,7 @@ public class HighchartSeriesUtil
 	 * Convert date to long keeping the timezone valued date. When asking the time of a Date object java return the
 	 * milliseconds from the begin of counting. "Returns the number of milliseconds since January 1, 1970, 00:00:00 GMT
 	 * represented by this Timestamp object."
-	 * 
+	 * <p>
 	 * This can be a problem when accepting JavaSript to create a JavaScript Date object not knowing the time zone and
 	 * ..
 	 */

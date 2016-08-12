@@ -1,10 +1,10 @@
 package org.molgenis.dataexplorer.galaxy;
 
-import javax.validation.constraints.NotNull;
-
 import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.URL;
 import org.molgenis.dataexplorer.controller.DataRequest;
+
+import javax.validation.constraints.NotNull;
 
 public class GalaxyDataExportRequest
 {

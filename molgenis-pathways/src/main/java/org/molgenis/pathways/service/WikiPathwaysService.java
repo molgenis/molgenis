@@ -1,22 +1,17 @@
 package org.molgenis.pathways.service;
 
-import java.io.ByteArrayInputStream;
-import java.rmi.RemoteException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Scanner;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
-
+import com.google.common.cache.LoadingCache;
 import org.molgenis.pathways.model.Impact;
 import org.molgenis.pathways.model.Pathway;
 import org.molgenis.wikipathways.client.WikiPathwaysPortType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.cache.LoadingCache;
+import java.io.ByteArrayInputStream;
+import java.rmi.RemoteException;
+import java.util.*;
+import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 /**
  * Interacts with WikiPathways. Caches results.
@@ -24,8 +19,7 @@ import com.google.common.cache.LoadingCache;
 @Component
 public class WikiPathwaysService
 {
-	private static final String[] HGNC_CODE = new String[]
-	{ "H" };
+	private static final String[] HGNC_CODE = new String[] { "H" };
 
 	private final WikiPathwaysPortType wikiPathwaysProxy;
 	private final LoadingCache<String, Set<Pathway>> allPathwaysCache;
@@ -35,31 +29,29 @@ public class WikiPathwaysService
 
 	/**
 	 * Creates a new WikiPathwaysService. creates all the caches with their proper loaders.
-	 * 
-	 * @param wikiPathwaysProxy
-	 *            {@link WikiPathwaysPortType} proxy for the REST api that the caches use to load their data from
+	 *
+	 * @param wikiPathwaysProxy {@link WikiPathwaysPortType} proxy for the REST api that the caches use to load their data from
 	 */
 	@Autowired
 	public WikiPathwaysService(WikiPathwaysPortType wikiPathwaysProxy)
 	{
 		this.wikiPathwaysProxy = wikiPathwaysProxy;
-		this.allPathwaysCache = CacheFactory.loadingPathwayCache(wikiPathwaysProxy::listPathways,
-				(organism, pathway) -> true, Pathway::create);
-		this.pathwaysPerGeneCache = CacheFactory.loadingPathwayCache(
-				params -> wikiPathwaysProxy.findPathwaysByXref(params.getGeneArray(), HGNC_CODE),
-				(params, pathway) -> pathway.getSpecies().equals(params.getSpecies()), Pathway::create);
-		this.uncoloredPathwayImageCache = CacheFactory.loadingCache(pathwayId -> toSingleLineString(wikiPathwaysProxy
-				.getPathwayAs("svg", pathwayId, 0)));
-		this.coloredPathwayImageCache = CacheFactory
-				.loadingCache(params -> toSingleLineString(wikiPathwaysProxy.getColoredPathway(params.getPathwayId(),
-						"0", params.getGraphIdArray(), params.getColorArray(), "svg")));
+		this.allPathwaysCache = CacheFactory
+				.loadingPathwayCache(wikiPathwaysProxy::listPathways, (organism, pathway) -> true, Pathway::create);
+		this.pathwaysPerGeneCache = CacheFactory
+				.loadingPathwayCache(params -> wikiPathwaysProxy.findPathwaysByXref(params.getGeneArray(), HGNC_CODE),
+						(params, pathway) -> pathway.getSpecies().equals(params.getSpecies()), Pathway::create);
+		this.uncoloredPathwayImageCache = CacheFactory
+				.loadingCache(pathwayId -> toSingleLineString(wikiPathwaysProxy.getPathwayAs("svg", pathwayId, 0)));
+		this.coloredPathwayImageCache = CacheFactory.loadingCache(params -> toSingleLineString(wikiPathwaysProxy
+				.getColoredPathway(params.getPathwayId(), "0", params.getGraphIdArray(), params.getColorArray(),
+						"svg")));
 	}
 
 	/**
 	 * Turns byte array containing pathway svg into a String. Reads all content into a single line.
-	 * 
-	 * @param source
-	 *            byte array with the svg
+	 *
+	 * @param source byte array with the svg
 	 * @return String containing the svg
 	 */
 	private static String toSingleLineString(byte[] source)
@@ -85,9 +77,8 @@ public class WikiPathwaysService
 
 	/**
 	 * Searches pathways.
-	 * 
-	 * @param searchTerm
-	 *            string to search for
+	 *
+	 * @param searchTerm string to search for
 	 * @return Map with all matching pathway ids mapped to pathway name
 	 * @throws RemoteException
 	 */
@@ -99,9 +90,8 @@ public class WikiPathwaysService
 
 	/**
 	 * Retrieves the GPML of the current version of a pathway
-	 * 
-	 * @param pathwayId
-	 *            ID of the pathway in WikiPathways
+	 *
+	 * @param pathwayId ID of the pathway in WikiPathways
 	 * @return String containing the pathway GPML
 	 * @throws ConverterException
 	 * @throws RemoteException
@@ -113,17 +103,13 @@ public class WikiPathwaysService
 
 	/**
 	 * Retrieves a colored pathway image
-	 * 
-	 * @param pathwayId
-	 *            ID of the pathway from WikiPathways
+	 *
+	 * @param pathwayId               ID of the pathway from WikiPathways
 	 * @param highestImpactPerGraphId
-	 * @param graphIds
-	 *            List containing graphIds to color
-	 * @param colors
-	 *            List of colors in the same order of the graphIds
+	 * @param graphIds                List containing graphIds to color
+	 * @param colors                  List of colors in the same order of the graphIds
 	 * @return String containing the pathway svg
-	 * @throws ExecutionException
-	 *             if loading of the cache fails
+	 * @throws ExecutionException if loading of the cache fails
 	 */
 	public String getColoredPathwayImage(String pathwayId, Map<String, Impact> impactPerGraphId)
 			throws ExecutionException
@@ -133,12 +119,10 @@ public class WikiPathwaysService
 
 	/**
 	 * Retrieves an uncolored pathway image
-	 * 
-	 * @param pathwayId
-	 *            Id of the pathway from WikiPathways
+	 *
+	 * @param pathwayId Id of the pathway from WikiPathways
 	 * @return String containing pathway svg
-	 * @throws ExecutionException
-	 *             if loading of the cache fails
+	 * @throws ExecutionException if loading of the cache fails
 	 */
 	public String getUncoloredPathwayImage(String pathwayId) throws ExecutionException
 	{
@@ -147,14 +131,11 @@ public class WikiPathwaysService
 
 	/**
 	 * Retrieves pathways according to gene, filtered for a certain species.
-	 * 
-	 * @param gene
-	 *            HGNC gene name
-	 * @param species
-	 *            String with species name, e.g. Homo sapiens
+	 *
+	 * @param gene    HGNC gene name
+	 * @param species String with species name, e.g. Homo sapiens
 	 * @return Collection of {@link Pathway}s
-	 * @throws ExecutionException
-	 *             if loading of the cache fails
+	 * @throws ExecutionException if loading of the cache fails
 	 */
 	public Collection<Pathway> getPathwaysForGene(String gene, String species) throws ExecutionException
 	{
@@ -163,12 +144,10 @@ public class WikiPathwaysService
 
 	/**
 	 * Retrieves all pathways for a species.
-	 * 
-	 * @param species
-	 *            String with species name, e.g. Homo sapiens
+	 *
+	 * @param species String with species name, e.g. Homo sapiens
 	 * @return Map mapping id to pathway name
-	 * @throws ExecutionException
-	 *             if loading of the cache fails
+	 * @throws ExecutionException if loading of the cache fails
 	 */
 	public Collection<Pathway> getAllPathways(String species) throws ExecutionException
 	{

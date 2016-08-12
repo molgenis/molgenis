@@ -2,7 +2,7 @@ package org.molgenis.data;
 
 /**
  * Filter counts smaller the a threshold value
- * 
+ *
  * @see also org.molgenis.data.AggregateQuery
  */
 public interface AggregateAnonymizer

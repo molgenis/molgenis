@@ -1,16 +1,15 @@
 package org.molgenis.util;
 
+import com.google.common.io.Resources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.Charset;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import com.google.common.io.Resources;
 
 public class ResourceUtils
 {
@@ -65,10 +64,10 @@ public class ResourceUtils
 
 	/**
 	 * Workaround for http://bugs.java.com/bugdatabase/view_bug.do?bug_id=4466485
-	 * 
+	 * <p>
 	 * This workaround is not working for file resources in jars. You will get a NullPointerException because the URL
 	 * cannot be converted to URI.
-	 * 
+	 *
 	 * @param resourceUrl
 	 * @return
 	 */

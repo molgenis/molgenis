@@ -45,7 +45,8 @@ public class SystemEntityMetaDataI18nInitializer
 		AttributeMetaDataMetaData attrMetaMeta = ctx.getBean(AttributeMetaDataMetaData.class);
 		I18nStringMetaData i18nStringMeta = ctx.getBean(I18nStringMetaData.class);
 
-		languageCodes.forEach(languageCode -> {
+		languageCodes.forEach(languageCode ->
+		{
 			entityMetaMeta.addAttribute(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true)
 					.setLabel("Label (" + languageCode + ')');
 			entityMetaMeta.addAttribute(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true)

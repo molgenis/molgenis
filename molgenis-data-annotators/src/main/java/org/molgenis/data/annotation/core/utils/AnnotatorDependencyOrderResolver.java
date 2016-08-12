@@ -64,12 +64,12 @@ public class AnnotatorDependencyOrderResolver
 			selectedAnnotator.getRequiredAttributes().stream()
 					.filter(requiredInputAttribute -> !areRequiredAttributesAvailable(
 							Lists.newArrayList(entityMetaData.getAtomicAttributes()),
-							Collections.singletonList(requiredInputAttribute)))
-					.forEachOrdered(requiredInputAttribute -> {
-						annotatorList.stream().filter(a -> !a.equals(selectedAnnotator)).collect(Collectors.toList())
-								.forEach(annotator -> resolveAnnotatorDependencies(selectedAnnotator, annotatorList,
-										annotatorQueue, entityMetaData, requiredInputAttribute, annotator));
-					});
+							Collections.singletonList(requiredInputAttribute))).forEachOrdered(requiredInputAttribute ->
+			{
+				annotatorList.stream().filter(a -> !a.equals(selectedAnnotator)).collect(Collectors.toList()).forEach(
+						annotator -> resolveAnnotatorDependencies(selectedAnnotator, annotatorList, annotatorQueue,
+								entityMetaData, requiredInputAttribute, annotator));
+			});
 		}
 		else
 		{

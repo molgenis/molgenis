@@ -6,7 +6,7 @@ import java.util.NoSuchElementException;
 
 /**
  * Iterable that returns an iterator that retrieves a new batch of objects after a given batchSize
- * 
+ *
  * @param <T>
  */
 public abstract class BatchingIterable<T> implements Iterable<T>
@@ -143,9 +143,8 @@ public abstract class BatchingIterable<T> implements Iterable<T>
 
 	/**
 	 * Return new batch, should not return null but empty list if no more elements are available
-	 * 
-	 * @param offset
-	 *            (startIndex)
+	 *
+	 * @param offset    (startIndex)
 	 * @param batchSize
 	 * @return
 	 */

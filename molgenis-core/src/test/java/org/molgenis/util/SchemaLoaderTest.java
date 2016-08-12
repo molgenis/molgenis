@@ -1,12 +1,12 @@
 package org.molgenis.util;
 
-import static org.testng.Assert.assertNotNull;
+import org.testng.annotations.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertNotNull;
 
 public class SchemaLoaderTest
 {

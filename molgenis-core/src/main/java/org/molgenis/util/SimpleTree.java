@@ -11,16 +11,12 @@
 
 package org.molgenis.util;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
-
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * Implementation of a simple tree
@@ -30,24 +26,32 @@ public class SimpleTree<T extends Tree> implements Tree<T>, Serializable
 {
 	private static final Logger LOG = LoggerFactory.getLogger(SimpleTree.class);
 
-	/** Unique name of this element */
+	/**
+	 * Unique name of this element
+	 */
 	protected String name;
-	/** Optional, the value of this element */
+	/**
+	 * Optional, the value of this element
+	 */
 	private Object value;
-	/** parent.name (or null if root element) */
+	/**
+	 * parent.name (or null if root element)
+	 */
 	protected String parentName;
-	/** map of tree elements (ordered) */
+	/**
+	 * map of tree elements (ordered)
+	 */
 	protected Map<String, T> treeElements;
-	/** Serializable id */
+	/**
+	 * Serializable id
+	 */
 	static final long serialVersionUID = 7443849689931440159L;
 
 	/**
 	 * Construct a new Tree
-	 * 
-	 * @param name
-	 *            unique name
-	 * @param parent
-	 *            the parent of this Tree. If null, then this is the root.
+	 *
+	 * @param name   unique name
+	 * @param parent the parent of this Tree. If null, then this is the root.
 	 */
 	public SimpleTree(String name, T parent)
 	{
@@ -60,8 +64,8 @@ public class SimpleTree<T extends Tree> implements Tree<T>, Serializable
 		}
 		if (parent != null) try
 		{
-			if (parent.get(name) != null) throw new IllegalArgumentException("elements already exists with name = '"
-					+ name + "'");
+			if (parent.get(name) != null)
+				throw new IllegalArgumentException("elements already exists with name = '" + name + "'");
 		}
 		catch (NullPointerException e)
 		{
@@ -78,7 +82,7 @@ public class SimpleTree<T extends Tree> implements Tree<T>, Serializable
 		else
 		{
 			treeElements = parent.getTreeElements(); // get a pointer to tree
-														// elements.
+			// elements.
 			parentName = parent.getName();
 		}
 		treeElements.put(name, (T) this);
@@ -140,8 +144,8 @@ public class SimpleTree<T extends Tree> implements Tree<T>, Serializable
 			{
 				if (pkey.equals(ckey) && !parent.getTreeElements().get(pkey).equals(this.treeElements.get(ckey)))
 				{
-					throw new IllegalArgumentException("setParent(" + parent.getName() + "): duplicate child '" + ckey
-							+ "'/'" + pkey + "'");
+					throw new IllegalArgumentException(
+							"setParent(" + parent.getName() + "): duplicate child '" + ckey + "'/'" + pkey + "'");
 				}
 			}
 		}
@@ -177,7 +181,9 @@ public class SimpleTree<T extends Tree> implements Tree<T>, Serializable
 		return this.getAllChildren(false);
 	}
 
-	/** sort in order of dependency */
+	/**
+	 * sort in order of dependency
+	 */
 	@Override
 	public final List<T> getAllChildren(boolean includeSelf)
 	{

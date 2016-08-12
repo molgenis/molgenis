@@ -1,14 +1,5 @@
 package org.molgenis.security.captcha;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.awt.image.BufferedImage;
-
 import org.molgenis.security.captcha.CaptchaControllerTest.Config;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -26,9 +17,17 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.awt.image.BufferedImage;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 @WebAppConfiguration
-@ContextConfiguration(classes =
-{ Config.class, GsonConfig.class })
+@ContextConfiguration(classes = { Config.class, GsonConfig.class })
 public class CaptchaControllerTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired
@@ -44,8 +43,7 @@ public class CaptchaControllerTest extends AbstractTestNGSpringContextTests
 	{
 		mockMvc = MockMvcBuilders.standaloneSetup(captchaController)
 				.setMessageConverters(new BufferedImageHttpMessageConverter(), gsonHttpMessageConverter,
-						new FormHttpMessageConverter())
-				.build();
+						new FormHttpMessageConverter()).build();
 	}
 
 	@Test
@@ -58,36 +56,32 @@ public class CaptchaControllerTest extends AbstractTestNGSpringContextTests
 	@Test
 	public void validateCaptcha_valid() throws Exception
 	{
-		this.mockMvc
-				.perform(post("/captcha").content("{\"captcha\":\"captcha_answer\"}")
-						.contentType(MediaType.APPLICATION_JSON))
+		this.mockMvc.perform(
+				post("/captcha").content("{\"captcha\":\"captcha_answer\"}").contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(content().string("true"));
 	}
 
 	@Test
 	public void validateCaptcha_invalid() throws Exception
 	{
-		this.mockMvc
-				.perform(post("/captcha").content("{\"captcha\":\"invalid_answer\"}")
-						.contentType(MediaType.APPLICATION_JSON))
+		this.mockMvc.perform(
+				post("/captcha").content("{\"captcha\":\"invalid_answer\"}").contentType(MediaType.APPLICATION_JSON))
 				.andExpect(status().isOk()).andExpect(content().string("false"));
 	}
 
 	@Test
 	public void validateCaptchaFromForm_valid() throws Exception
 	{
-		this.mockMvc
-				.perform(post("/captcha").param("captcha", "captcha_answer")
-						.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+		this.mockMvc.perform(
+				post("/captcha").param("captcha", "captcha_answer").contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk()).andExpect(content().string("true"));
 	}
 
 	@Test
 	public void validateCaptchaFromForm_invalid() throws Exception
 	{
-		this.mockMvc
-				.perform(post("/captcha").param("captcha", "invalid_answer")
-						.contentType(MediaType.APPLICATION_FORM_URLENCODED))
+		this.mockMvc.perform(
+				post("/captcha").param("captcha", "invalid_answer").contentType(MediaType.APPLICATION_FORM_URLENCODED))
 				.andExpect(status().isOk()).andExpect(content().string("false"));
 	}
 

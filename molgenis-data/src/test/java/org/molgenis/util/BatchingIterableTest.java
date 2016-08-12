@@ -1,17 +1,13 @@
 package org.molgenis.util;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.*;
+
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 public class BatchingIterableTest
 {
@@ -36,12 +32,10 @@ public class BatchingIterableTest
 				// add limit that is larger than the number of items
 				for (int limit = 1; limit < ITEMS_LIST.size() - offset + 1; ++limit)
 				{
-					paramList.add(new Object[]
-					{ offset, limit, batchSize });
+					paramList.add(new Object[] { offset, limit, batchSize });
 				}
 				// add limit=0 (no limit) add the end to enable friendly printing order
-				paramList.add(new Object[]
-				{ offset, 0, batchSize });
+				paramList.add(new Object[] { offset, 0, batchSize });
 			}
 		}
 
@@ -72,7 +66,7 @@ public class BatchingIterableTest
 
 		int expectedValue = offset + 1;
 		int actualNrItems = 0;
-		for (Iterator<Integer> it = iterable.iterator(); it.hasNext();)
+		for (Iterator<Integer> it = iterable.iterator(); it.hasNext(); )
 		{
 			int intValue = it.next().intValue();
 			assertEquals(intValue, expectedValue++);

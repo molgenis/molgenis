@@ -45,10 +45,9 @@ public class FileIngestMetaData extends SystemEntityMetaData
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setNillable(false);
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description").setNillable(true);
 		addAttribute(URL).setLabel("Url").setDescription("Url of the file to download.").setNillable(false);
-		addAttribute(LOADER).setDataType(ENUM).setEnumOptions(LOADERS).setLabel("Loader type")
-				.setNillable(false);
-		addAttribute(ENTITY_META_DATA).setDataType(XREF)
-				.setRefEntity(entityMetaDataMetaData).setLabel("Target EntityMetaData").setNillable(false);
+		addAttribute(LOADER).setDataType(ENUM).setEnumOptions(LOADERS).setLabel("Loader type").setNillable(false);
+		addAttribute(ENTITY_META_DATA).setDataType(XREF).setRefEntity(entityMetaDataMetaData)
+				.setLabel("Target EntityMetaData").setNillable(false);
 		addAttribute(CRONEXPRESSION).setLabel("Cronexpression").setNillable(false)
 				.setValidationExpression("$('" + CRONEXPRESSION + "').matches(" + StringField.CRON_REGEX + ").value()");
 		addAttribute(ACTIVE).setDataType(BOOL).setLabel("Active").setNillable(false);

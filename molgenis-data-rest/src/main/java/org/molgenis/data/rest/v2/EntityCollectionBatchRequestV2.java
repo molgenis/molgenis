@@ -1,14 +1,12 @@
 package org.molgenis.data.rest.v2;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.validation.constraints.Size;
-
+import com.google.auto.value.AutoValue;
 import org.hibernate.validator.constraints.NotEmpty;
 import org.molgenis.gson.AutoGson;
 
-import com.google.auto.value.AutoValue;
+import javax.validation.constraints.Size;
+import java.util.List;
+import java.util.Map;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_EntityCollectionBatchRequestV2.class)

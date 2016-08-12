@@ -34,6 +34,7 @@ public class CombinedEntityCache
 
 	/**
 	 * Caches the deletion of an entity instance.
+	 *
 	 * @param entityKey the {@link EntityKey} of the deleted entity instance
 	 */
 	public void putDeletion(EntityKey entityKey)

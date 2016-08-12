@@ -1,14 +1,14 @@
 package org.molgenis.file.ingest.execution;
 
+import org.molgenis.file.FileStore;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.net.URL;
-
-import org.molgenis.file.FileStore;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 /**
  * Downloads a file from a URL to the {@link FileStore}

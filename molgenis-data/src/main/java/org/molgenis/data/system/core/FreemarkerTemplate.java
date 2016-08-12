@@ -1,12 +1,10 @@
 package org.molgenis.data.system.core;
 
-import static org.molgenis.data.system.core.FreemarkerTemplateMetaData.ID;
-import static org.molgenis.data.system.core.FreemarkerTemplateMetaData.NAME;
-import static org.molgenis.data.system.core.FreemarkerTemplateMetaData.VALUE;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
+
+import static org.molgenis.data.system.core.FreemarkerTemplateMetaData.*;
 
 public class FreemarkerTemplate extends StaticEntity
 {

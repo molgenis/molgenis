@@ -1,7 +1,6 @@
 package org.molgenis.data.rest;
 
-import java.util.Map;
-
+import cz.jirutka.rsql.parser.RSQLParserException;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -10,22 +9,22 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.QueryImpl;
 
-import cz.jirutka.rsql.parser.RSQLParserException;
+import java.util.Map;
 
 /**
  * Creates a Query object from a http request. Used by the RestController method that returns csv.
- * 
+ * <p>
  * Parameters:
- * 
+ * <p>
  * q: the query
- * 
+ * <p>
  * attributes: the attributes to return, if not specified returns all attributes
- * 
+ * <p>
  * start: the index of the first row, default 0
- * 
+ * <p>
  * num: the number of results to return, default 100, max 100000
- * 
- * 
+ * <p>
+ * <p>
  * Example: /api/v1/csv/person?q=firstName==Piet&attributes=firstName,lastName&start=10&num=100
  */
 public class QueryStringParser

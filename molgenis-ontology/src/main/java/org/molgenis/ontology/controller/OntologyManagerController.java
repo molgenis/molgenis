@@ -1,11 +1,5 @@
 package org.molgenis.ontology.controller;
 
-import static org.molgenis.ontology.controller.OntologyManagerController.URI;
-import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
-
-import java.util.Collections;
-import java.util.Map;
-
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +8,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.Collections;
+import java.util.Map;
+
+import static org.molgenis.ontology.controller.OntologyManagerController.URI;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 @Controller
 @RequestMapping(URI)

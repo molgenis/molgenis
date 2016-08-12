@@ -1,12 +1,5 @@
 package org.molgenis.data.jobs;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.jobs.model.JobExecution.Status.FAILED;
-import static org.molgenis.data.jobs.model.JobExecution.Status.RUNNING;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.JOB_EXECUTION;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.PROGRESS_MESSAGE;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.STATUS;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.SystemEntityMetaData;
@@ -14,6 +7,11 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.jobs.model.JobExecution.Status.FAILED;
+import static org.molgenis.data.jobs.model.JobExecution.Status.RUNNING;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
 
 /**
  * Bootstraps the scheduling framework

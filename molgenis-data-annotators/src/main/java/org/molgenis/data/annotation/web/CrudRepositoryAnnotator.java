@@ -107,7 +107,8 @@ public class CrudRepositoryAnnotator
 		{
 			if (annotator instanceof RefEntityAnnotator && targetMetaData != null)
 			{
-				RunAsSystemProxy.runAsSystem(() -> {
+				RunAsSystemProxy.runAsSystem(() ->
+				{
 					dataService.deleteAll(targetMetaData.getName());
 					dataService.getMeta().deleteEntityMeta(targetMetaData.getName());
 				});

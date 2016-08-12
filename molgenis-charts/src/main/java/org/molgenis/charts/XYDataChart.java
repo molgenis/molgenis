@@ -1,8 +1,8 @@
 package org.molgenis.charts;
 
-import java.util.List;
-
 import org.molgenis.charts.data.XYDataSerie;
+
+import java.util.List;
 
 /**
  * A chart that uses xy data points like a LineChart or BarChart.
@@ -15,10 +15,7 @@ public class XYDataChart extends AbstractChart
 	private MolgenisAxisType yAxisType;
 	private List<XYDataSerie> data;
 
-	public XYDataChart(
-			List<XYDataSerie> data,
-			MolgenisAxisType xAxisType, 
-			MolgenisAxisType yAxisType)
+	public XYDataChart(List<XYDataSerie> data, MolgenisAxisType xAxisType, MolgenisAxisType yAxisType)
 	{
 		if (data == null) throw new IllegalArgumentException("data is null");
 		if (xAxisType == null) throw new IllegalArgumentException("xAxisType is null");
@@ -27,7 +24,7 @@ public class XYDataChart extends AbstractChart
 		this.xAxisType = xAxisType;
 		this.yAxisType = yAxisType;
 	}
-	
+
 	/**
 	 * @return the xAxisLabel
 	 */
@@ -99,7 +96,7 @@ public class XYDataChart extends AbstractChart
 	{
 		return data;
 	}
-	
+
 	/**
 	 * @return the data
 	 */

@@ -1,10 +1,5 @@
 package org.molgenis.app;
 
-import static org.molgenis.security.core.utils.SecurityUtils.getPluginReadAuthority;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.molgenis.security.MolgenisRoleHierarchy;
 import org.molgenis.security.MolgenisWebAppSecurityConfig;
 import org.molgenis.ui.security.MolgenisAccessDecisionVoter;
@@ -22,6 +17,11 @@ import org.springframework.security.config.annotation.web.configurers.Expression
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.web.access.expression.WebExpressionVoter;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.molgenis.security.core.utils.SecurityUtils.getPluginReadAuthority;
 
 @Configuration
 @EnableWebSecurity
@@ -45,8 +45,8 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 		expressionInterceptUrlRegistry.accessDecisionManager(new AffirmativeBased(listOfVoters));
 
 		expressionInterceptUrlRegistry.antMatchers("/").permitAll()
-		// DAS datasource uses the database, unauthenticated users can
-		// not see any data
+				// DAS datasource uses the database, unauthenticated users can
+				// not see any data
 				.antMatchers("/das/**").permitAll()
 
 				.antMatchers("/myDas/**").permitAll()

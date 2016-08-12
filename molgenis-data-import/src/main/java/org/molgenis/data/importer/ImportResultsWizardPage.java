@@ -1,11 +1,11 @@
 package org.molgenis.data.importer;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.molgenis.ui.wizard.AbstractWizardPage;
 import org.molgenis.ui.wizard.Wizard;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Component
 public class ImportResultsWizardPage extends AbstractWizardPage

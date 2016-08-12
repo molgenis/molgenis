@@ -47,12 +47,10 @@ class AttributeMetaDataResponseV2
 	private String validationExpression;
 
 	/**
-	 * 
 	 * @param entityParentName
 	 * @param entityMeta
 	 * @param attr
-	 * @param fetch
-	 *            set of lowercase attribute names to include in response
+	 * @param fetch             set of lowercase attribute names to include in response
 	 * @param permissionService
 	 */
 	public AttributeMetaDataResponseV2(final String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,

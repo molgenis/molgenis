@@ -1,13 +1,10 @@
 package org.molgenis.ontology.core.meta;
 
-import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.ID;
-import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.LABEL;
-import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.NAME;
-import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.VALUE;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
+
+import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.*;
 
 public class OntologyTermDynamicAnnotation extends StaticEntity
 {

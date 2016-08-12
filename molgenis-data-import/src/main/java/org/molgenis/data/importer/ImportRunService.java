@@ -1,10 +1,5 @@
 package org.molgenis.data.importer;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.system.ImportRunMetaData.IMPORT_RUN;
-
-import java.util.Date;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.system.ImportRun;
@@ -18,6 +13,11 @@ import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Component;
+
+import java.util.Date;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.system.ImportRunMetaData.IMPORT_RUN;
 
 @Component
 public class ImportRunService
@@ -94,8 +94,8 @@ public class ImportRunService
 
 	private String createMailText(ImportRun importRun)
 	{
-		return "The import started by you at: " + importRun.getStartDate() + " has finished with status: "
-				+ importRun.getStatus() + "\nMessage:\n" + importRun.getMessage();
+		return "The import started by you at: " + importRun.getStartDate() + " has finished with status: " + importRun
+				.getStatus() + "\nMessage:\n" + importRun.getMessage();
 	}
 
 	private String createMailTitle(ImportRun importRun)

@@ -14,7 +14,7 @@ import org.molgenis.model.MolgenisModelException;
 // jdk
 
 /**
- * 
+ *
  */
 public class Plugin extends UISchema
 {
@@ -43,14 +43,17 @@ public class Plugin extends UISchema
 				if (p.toString().equalsIgnoreCase(method)) return p;
 				optionsBuilder.append(p.toString()).append(", ");
 			}
-			throw new MolgenisModelException("method='" + method + "' is UNKNOWN for plugin. Valid options: "
-					+ optionsBuilder.toString());
+			throw new MolgenisModelException(
+					"method='" + method + "' is UNKNOWN for plugin. Valid options: " + optionsBuilder.toString());
 		}
-	};
+	}
+
+	;
 
 	// constructor(s)
+
 	/**
-	 * 
+	 *
 	 */
 	public Plugin(String name, UISchema parent, String pluginType)
 	{
@@ -60,7 +63,7 @@ public class Plugin extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	@Override
 	public Type getType()
@@ -69,8 +72,9 @@ public class Plugin extends UISchema
 	}
 
 	// access methods
+
 	/**
-	 * 
+	 *
 	 */
 	public void setEntity(Entity entity)
 	{
@@ -78,7 +82,7 @@ public class Plugin extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public Entity getEntity()
 	{
@@ -86,7 +90,7 @@ public class Plugin extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void setRecord(Record record)
 	{
@@ -94,7 +98,7 @@ public class Plugin extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public Record getRecord()
 	{
@@ -102,7 +106,7 @@ public class Plugin extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void setReadOnly(final boolean readonly)
 	{
@@ -123,7 +127,7 @@ public class Plugin extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public boolean getReadOnly()
 	{

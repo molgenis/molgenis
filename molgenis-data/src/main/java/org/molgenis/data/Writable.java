@@ -8,10 +8,14 @@ import java.util.stream.Stream;
  */
 public interface Writable extends Closeable
 {
-	/** Add one entity */
+	/**
+	 * Add one entity
+	 */
 	void add(Entity entity);
 
-	/** Stream add multiple entities */
+	/**
+	 * Stream add multiple entities
+	 */
 	Integer add(Stream<? extends Entity> entities);
 
 	void flush();

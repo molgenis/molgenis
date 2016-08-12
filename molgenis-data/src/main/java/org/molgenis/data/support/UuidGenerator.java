@@ -1,10 +1,9 @@
 package org.molgenis.data.support;
 
+import com.google.common.io.BaseEncoding;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.util.UniqueId;
 import org.springframework.stereotype.Component;
-
-import com.google.common.io.BaseEncoding;
 
 /**
  * Generates a unique id. The generated ids can be used in urls and filenames.

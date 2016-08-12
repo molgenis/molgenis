@@ -1,13 +1,6 @@
 package org.molgenis.data.vcf;
 
-import static java.util.Objects.requireNonNull;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
-
+import com.google.common.collect.ImmutableSet;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
@@ -18,7 +11,13 @@ import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.ImmutableSet;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
+
+import static java.util.Objects.requireNonNull;
 
 public class VcfRepositoryCollection extends FileRepositoryCollection
 {
@@ -54,7 +53,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 		{
 			this.entityName = name.substring(0, name.lastIndexOf('.' + EXTENSION_VCF_GZ));
 		}
-		else if (name.endsWith(EXTENSION_VCF_ZIP)) 
+		else if (name.endsWith(EXTENSION_VCF_ZIP))
 		{
 			this.entityName = name.substring(0, name.lastIndexOf('.' + EXTENSION_VCF_ZIP));
 		}

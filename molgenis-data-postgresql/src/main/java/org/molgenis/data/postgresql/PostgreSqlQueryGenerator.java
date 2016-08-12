@@ -378,7 +378,8 @@ class PostgreSqlQueryGenerator
 		sql.append(getColumnName(attr)).append(' ');
 
 		AttributeType attrType = attr.getDataType();
-		switch (attrType) {
+		switch (attrType)
+		{
 			case BOOL:
 			case DATE:
 			case DATE_TIME:

@@ -138,7 +138,8 @@ public class EntityUtils
 
 		// get entity types that referencing the given entity (including self)
 		String entityName = entityMetaData.getName();
-		dataService.getEntityNames().forEach(otherEntityName -> {
+		dataService.getEntityNames().forEach(otherEntityName ->
+		{
 			EntityMetaData otherEntityMetaData = dataService.getEntityMetaData(otherEntityName);
 
 			// get referencing attributes for other entity

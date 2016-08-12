@@ -1,18 +1,5 @@
 package org.molgenis.data.mapper.repository.impl;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.mapper.meta.MappingTargetMetaData.ENTITY_MAPPINGS;
-import static org.molgenis.data.mapper.meta.MappingTargetMetaData.IDENTIFIER;
-import static org.molgenis.data.mapper.meta.MappingTargetMetaData.TARGET;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Collection;
-import java.util.List;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.MockitoAnnotations;
@@ -41,6 +28,17 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.Collection;
+import java.util.List;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.mapper.meta.MappingTargetMetaData.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 /**
  * Unit test for the MappingTargetRepository. Tests the MappingTargetRepository in isolation.

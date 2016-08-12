@@ -1,14 +1,8 @@
 package org.molgenis.dataexplorer.freemarker;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
-import java.util.Map;
-
+import com.google.common.collect.Maps;
+import freemarker.core.Environment;
+import freemarker.template.*;
 import org.molgenis.data.DataService;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.ui.MolgenisPlugin;
@@ -16,14 +10,14 @@ import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Maps;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.util.Map;
 
-import freemarker.core.Environment;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateDirectiveBody;
-import freemarker.template.TemplateException;
-import freemarker.template.TemplateModel;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 public class DataExplorerHyperlinkDirectiveTest
 {
@@ -36,8 +30,8 @@ public class DataExplorerHyperlinkDirectiveTest
 	public void setUp()
 	{
 		MolgenisPluginRegistry mpr = mock(MolgenisPluginRegistry.class);
-		when(mpr.getPlugin(DataExplorerController.ID)).thenReturn(
-				new MolgenisPlugin("dataex", "dataex", "dataex", "/menu/data/dataex"));
+		when(mpr.getPlugin(DataExplorerController.ID))
+				.thenReturn(new MolgenisPlugin("dataex", "dataex", "dataex", "/menu/data/dataex"));
 
 		dataService = mock(DataService.class);
 		when(dataService.hasRepository("thedataset")).thenReturn(true);

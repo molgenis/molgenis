@@ -11,7 +11,7 @@ public interface SearchService
 
 	/**
 	 * Returns all type names for this index
-	 * 
+	 *
 	 * @return
 	 */
 	Iterable<String> getTypes();
@@ -45,7 +45,7 @@ public interface SearchService
 
 	/**
 	 * Adds or updated the given entities in the index
-	 * 
+	 *
 	 * @param entities
 	 * @param entityMetaData
 	 * @param indexingMode
@@ -63,16 +63,15 @@ public interface SearchService
 
 	/**
 	 * Deletes entities from index
-	 * 
-	 * @param entities
-	 *            entity stream
+	 *
+	 * @param entities       entity stream
 	 * @param entityMetaData
 	 */
 	void delete(Stream<? extends Entity> entities, EntityMetaData entityMetaData);
 
 	/**
 	 * Deletes data and meta data
-	 * 
+	 *
 	 * @param entityName
 	 */
 	void delete(String entityName);
@@ -82,7 +81,7 @@ public interface SearchService
 
 	/**
 	 * TODO replace Stream<Entity> with EntityCollection and add EntityCollection.getTotal()
-	 * 
+	 *
 	 * @param q
 	 * @param entityMetaData
 	 * @return

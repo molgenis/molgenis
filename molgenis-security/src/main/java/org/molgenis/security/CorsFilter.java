@@ -1,14 +1,13 @@
 package org.molgenis.security;
 
-import java.io.IOException;
+import org.molgenis.security.token.TokenExtractor;
+import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.molgenis.security.token.TokenExtractor;
-import org.springframework.web.filter.OncePerRequestFilter;
+import java.io.IOException;
 
 /**
  * Filter to enable Cross-origin resource sharing (CORS)

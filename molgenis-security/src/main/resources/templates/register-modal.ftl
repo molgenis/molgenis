@@ -1,13 +1,15 @@
 <#-- Bootstrap register modal -->
-<div id="register-modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="register-modal-label" aria-hidden="true">
+<div id="register-modal" class="modal" tabindex="-1" role="dialog" aria-labelledby="register-modal-label"
+     aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span
+                        class="sr-only">Close</span></button>
                 <h4 class="modal-title" id="register-modal-label">Sign up</h4>
             </div>
             <div class="modal-body">
-                <#-- register form -->
+            <#-- register form -->
                 <form id="register-form" class="form-horizontal" role="form">
                     <div class="form-group">
                         <label class="col-md-4 control-label" for="reg-username">Username *</label>
@@ -24,7 +26,8 @@
                     <div class="form-group">
                         <label class="col-md-4 control-label" for="reg-password-confirm">Repeat password *</label>
                         <div class="col-md-6">
-                            <input type="password" class="form-control" id="reg-password-confirm" name="confirmPassword" required>
+                            <input type="password" class="form-control" id="reg-password-confirm" name="confirmPassword"
+                                   required>
                         </div>
                     </div>
                     <div class="form-group">
@@ -104,7 +107,7 @@
                     <h4>Code validation</h4>
                     <div class="form-group">
                         <div class="col-md-6 col-md-offset-4">
-                            <a href="#" id="captcha-href"><img id="captcha-img" /></a>
+                            <a href="#" id="captcha-href"><img id="captcha-img"/></a>
                         </div>
                     </div>
                     <div class="form-group">
@@ -112,7 +115,7 @@
                         <div class="col-md-6">
                             <input type="text" class="form-control" id="reg-captcha" name="captcha">
                         </div>
-                    </div>     
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
@@ -123,20 +126,20 @@
     </div>
 </div>
 <script type="text/javascript">
-    $(function() {
+    $(function () {
         var modal = $('#register-modal');
         var submitBtn = $('#register-btn');
         var form = $('#register-form');
         form.validate();
-        
+
         $('#reg-password').rules('add', {
             minlength: ${min_password_length?js_string}
         });
         $('#reg-password-confirm').rules('add', {
             equalTo: '#reg-password'
         });
-        
-        <#-- captcha events -->
+
+    <#-- captcha events -->
         $('#reg-captcha').rules('add', {
             required: true,
             remote: {
@@ -144,38 +147,38 @@
                 type: 'POST'
             }
         });
-        $('#captcha-href').click(function(e){
+        $('#captcha-href').click(function (e) {
             e.preventDefault();
             $('#captcha-img').attr('src', '/captcha?_=' + Date.now());
             $('captcha').val('');
         });
 
-        <#-- modal events -->
-		modal.on('show.bs.modal', function (e) {
-			$('#captcha-img').attr('src', '/captcha?_=' + Date.now());
-		});
+    <#-- modal events -->
+        modal.on('show.bs.modal', function (e) {
+            $('#captcha-img').attr('src', '/captcha?_=' + Date.now());
+        });
 
         modal.on('hide.bs.modal', function (e) {
             e.stopPropagation();
             form[0].reset();
             $('.alert', modal).remove();
         });
-        $('#register-btn-close').click(function() {
+        $('#register-btn-close').click(function () {
             modal.modal('hide');
         });
-    
-        <#-- form events -->
-        form.submit(function(e) {   
-       	    e.preventDefault();
+
+    <#-- form events -->
+        form.submit(function (e) {
+            e.preventDefault();
             e.stopPropagation();
-			$('.alert', modal).remove();
-            
-			if(form.valid() && !submitBtn.attr('disabled')) {
-                submitBtn.attr('disabled','disabled');
-                
+            $('.alert', modal).remove();
+
+            if (form.valid() && !submitBtn.attr('disabled')) {
+                submitBtn.attr('disabled', 'disabled');
+
                 $.ajax({
                     type: 'POST',
-                    url:  '/account/register',
+                    url: '/account/register',
                     data: form.serialize(),
                     global: false, // do not trigger default molgenis error handler
                     success: function (data) {
@@ -183,22 +186,22 @@
                         modal.modal('hide');
                         submitBtn.removeAttr('disabled');
                     },
-                    error: function(xhr) {
-                    	if (xhr.responseText) {
-                        	molgenis.createAlert(JSON.parse(xhr.responseText).errors, 'error', $('.modal-body', modal));
+                    error: function (xhr) {
+                        if (xhr.responseText) {
+                            molgenis.createAlert(JSON.parse(xhr.responseText).errors, 'error', $('.modal-body', modal));
                         }
                         submitBtn.removeAttr('disabled');
                     }
                 });
             }
         });
-        submitBtn.click(function(e) {
+        submitBtn.click(function (e) {
             e.preventDefault();
             e.stopPropagation();
             form.submit();
         });
-        $('input', form).add(submitBtn).keydown(function(e) {
-            if(e.which == 13) {
+        $('input', form).add(submitBtn).keydown(function (e) {
+            if (e.which == 13) {
                 e.preventDefault();
                 e.stopPropagation();
                 form.submit();

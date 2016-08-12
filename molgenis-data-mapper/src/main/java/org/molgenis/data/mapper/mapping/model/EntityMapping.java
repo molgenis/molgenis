@@ -1,12 +1,12 @@
 package org.molgenis.data.mapper.mapping.model;
 
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Created by charbonb on 14/01/15.
@@ -98,7 +98,7 @@ public class EntityMapping
 
 	/**
 	 * Adds a new empty attribute mapping to a target attribute
-	 * 
+	 *
 	 * @param targetAttributeName
 	 * @return the newly created attribute mapping.
 	 */
@@ -106,8 +106,8 @@ public class EntityMapping
 	{
 		if (attributeMappings.containsKey(targetAttributeName))
 		{
-			throw new IllegalStateException("AttributeMapping already exists for target attribute "
-					+ targetAttributeName);
+			throw new IllegalStateException(
+					"AttributeMapping already exists for target attribute " + targetAttributeName);
 		}
 		AttributeMetaData targetAttributeMetaData = targetEntityMetaData.getAttribute(targetAttributeName);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);

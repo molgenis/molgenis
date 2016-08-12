@@ -18,14 +18,11 @@ public class AttributeFilterToFetchConverter
 {
 	/**
 	 * Converts {@link AttributeFilter} to {@link Fetch} based on {@link EntityMetaData}.
-	 * 
-	 * @param attrFilter
-	 *            the {@link AttributeFilter} to convert
-	 * @param entityMeta
-	 *            {@link EntityMetaData} for the entity
+	 *
+	 * @param attrFilter the {@link AttributeFilter} to convert
+	 * @param entityMeta {@link EntityMetaData} for the entity
 	 * @return {@link Fetch}, or null for 'all attributes' {@link AttributeFilter} there are no refEntities
-	 * @throws UnknownAttributeException
-	 *             if the entity does not have one of the attributes mentioned in the filter
+	 * @throws UnknownAttributeException if the entity does not have one of the attributes mentioned in the filter
 	 */
 	public static Fetch convert(AttributeFilter attrFilter, EntityMetaData entityMeta, String languageCode)
 	{
@@ -58,7 +55,8 @@ public class AttributeFilterToFetchConverter
 			fetch.field(entityMeta.getLabelAttribute(languageCode).getName());
 		}
 
-		attrFilter.forEach(entry -> {
+		attrFilter.forEach(entry ->
+		{
 			String attrName = entry.getKey();
 			AttributeMetaData attr = getAttribute(entityMeta, attrName);
 			createFetchContentRec(attrFilter, entityMeta, attr, fetch, languageCode);
@@ -73,8 +71,8 @@ public class AttributeFilterToFetchConverter
 		{
 			case COMPOUND:
 			{
-				AttributeFilter subAttrFilter = attrFilter != null ? attrFilter.getAttributeFilter(entityMeta, attr)
-						: null;
+				AttributeFilter subAttrFilter =
+						attrFilter != null ? attrFilter.getAttributeFilter(entityMeta, attr) : null;
 				if (subAttrFilter != null && !subAttrFilter.isIncludeAllAttrs())
 				{
 					// include compound attribute parts defined by filter
@@ -88,7 +86,8 @@ public class AttributeFilterToFetchConverter
 						createFetchContentRec(subAttrFilter, entityMeta, entityMeta.getLabelAttribute(languageCode),
 								fetch, languageCode);
 					}
-					subAttrFilter.forEach(entry -> {
+					subAttrFilter.forEach(entry ->
+					{
 						String attrPartName = entry.getKey();
 						AttributeMetaData attrPart = attr.getAttributePart(attrPartName);
 						createFetchContentRec(subAttrFilter, entityMeta, attrPart, fetch, languageCode);
@@ -97,7 +96,8 @@ public class AttributeFilterToFetchConverter
 				else
 				{
 					// include all compound attribute parts
-					attr.getAttributeParts().forEach(attrPart -> {
+					attr.getAttributeParts().forEach(attrPart ->
+					{
 						createFetchContentRec(subAttrFilter, entityMeta, attrPart, fetch, languageCode);
 					});
 				}
@@ -109,8 +109,8 @@ public class AttributeFilterToFetchConverter
 			case MREF:
 			case XREF:
 			{
-				AttributeFilter subAttrFilter = attrFilter != null ? attrFilter.getAttributeFilter(entityMeta, attr)
-						: null;
+				AttributeFilter subAttrFilter =
+						attrFilter != null ? attrFilter.getAttributeFilter(entityMeta, attr) : null;
 				Fetch subFetch;
 				if (subAttrFilter != null)
 				{
@@ -124,7 +124,7 @@ public class AttributeFilterToFetchConverter
 				fetch.field(attr.getName(), subFetch);
 				break;
 			}
-				// $CASES-OMITTED$
+			// $CASES-OMITTED$
 			default:
 				fetch.field(attr.getName());
 				break;
@@ -144,7 +144,7 @@ public class AttributeFilterToFetchConverter
 
 	/**
 	 * Create default entity fetch that fetches all attributes.
-	 * 
+	 *
 	 * @param entityMeta
 	 * @return default entity fetch or null
 	 */
@@ -167,7 +167,7 @@ public class AttributeFilterToFetchConverter
 	/**
 	 * Create default fetch for the given attribute. For attributes referencing entities the id and label value are
 	 * fetched. Additionally for file entities the URL is fetched. For other attributes the default fetch is null;
-	 * 
+	 *
 	 * @param attr
 	 * @return default attribute fetch or null
 	 */

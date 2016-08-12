@@ -3,7 +3,6 @@ package org.molgenis.data.annotation.core.effects;
 import org.molgenis.data.annotation.web.meta.AnnotatorEntityMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.data.vcf.utils.VcfWriterUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;

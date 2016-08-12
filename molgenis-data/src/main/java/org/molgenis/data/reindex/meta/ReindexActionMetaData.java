@@ -111,15 +111,13 @@ public class ReindexActionMetaData extends SystemEntityMetaData
 		/**
 		 * Entity data or metadata got added.
 		 */
-		CREATE,
-		/**
-		 * Entity data or metadata got updated.
-		 */
-		UPDATE,
-		/**
-		 * Entity data or metadata got deleted.
-		 */
-		DELETE
+		CREATE, /**
+	 * Entity data or metadata got updated.
+	 */
+	UPDATE, /**
+	 * Entity data or metadata got deleted.
+	 */
+	DELETE
 	}
 
 	/**
@@ -130,11 +128,10 @@ public class ReindexActionMetaData extends SystemEntityMetaData
 		/**
 		 * The data has changed.
 		 */
-		DATA,
-		/**
-		 * The entity's metadata has changed.
-		 */
-		METADATA
+		DATA, /**
+	 * The entity's metadata has changed.
+	 */
+	METADATA
 	}
 
 	/**
@@ -145,22 +142,18 @@ public class ReindexActionMetaData extends SystemEntityMetaData
 		/**
 		 * reindex action is finished
 		 */
-		FINISHED,
-		/**
-		 * reindex action is canceled
-		 */
-		CANCELED,
-		/**
-		 * reindex action failed
-		 */
-		FAILED,
-		/**
-		 * reindex action is started
-		 */
-		STARTED,
-		/**
-		 * reindex action is just created and is not yet processed
-		 */
-		PENDING
+		FINISHED, /**
+	 * reindex action is canceled
+	 */
+	CANCELED, /**
+	 * reindex action failed
+	 */
+	FAILED, /**
+	 * reindex action is started
+	 */
+	STARTED, /**
+	 * reindex action is just created and is not yet processed
+	 */
+	PENDING
 	}
 }

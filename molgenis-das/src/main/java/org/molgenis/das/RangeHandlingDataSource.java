@@ -66,8 +66,8 @@ public abstract class RangeHandlingDataSource implements RangeHandlingAnnotation
 	}
 
 	@Override
-	public DasAnnotatedSegment getFeatures(String arg0, Integer arg1) throws BadReferenceObjectException,
-			DataSourceException
+	public DasAnnotatedSegment getFeatures(String arg0, Integer arg1)
+			throws BadReferenceObjectException, DataSourceException
 	{
 		throw new BadReferenceObjectException(arg0, "The handling of this request is not supported");
 	}
@@ -100,8 +100,8 @@ public abstract class RangeHandlingDataSource implements RangeHandlingAnnotation
 	}
 
 	@Override
-	public DasAnnotatedSegment getFeatures(String arg0, Integer arg1, Range arg2) throws BadReferenceObjectException,
-			DataSourceException, UnimplementedFeatureException
+	public DasAnnotatedSegment getFeatures(String arg0, Integer arg1, Range arg2)
+			throws BadReferenceObjectException, DataSourceException, UnimplementedFeatureException
 	{
 		throw new UnimplementedFeatureException("Not implemented");
 	}

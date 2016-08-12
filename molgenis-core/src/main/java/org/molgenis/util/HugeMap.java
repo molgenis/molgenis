@@ -1,5 +1,8 @@
 package org.molgenis.util;
 
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -8,9 +11,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
 
 public class HugeMap<K, V> implements Map<K, V>, Closeable
 {

@@ -1,9 +1,5 @@
 package org.molgenis.ui.security;
 
-import java.util.Collection;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.ui.MolgenisUi;
@@ -13,6 +9,10 @@ import org.springframework.security.access.AccessDecisionVoter;
 import org.springframework.security.access.ConfigAttribute;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.FilterInvocation;
+
+import java.util.Collection;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterInvocation>
 {
@@ -41,7 +41,8 @@ public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterIn
 		if (pluginMatcher.matches())
 		{
 			String pluginId = pluginMatcher.group(1);
-			return getMolgenisPermissionService().hasPermissionOnPlugin(pluginId, Permission.READ) ? ACCESS_GRANTED : ACCESS_DENIED;
+			return getMolgenisPermissionService()
+					.hasPermissionOnPlugin(pluginId, Permission.READ) ? ACCESS_GRANTED : ACCESS_DENIED;
 		}
 
 		Matcher menuMatcher = PATTERN_MENUID.matcher(requestUrl);
@@ -57,7 +58,7 @@ public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterIn
 
 	/**
 	 * Can't be autowired due to circular dependency resolving
-	 * 
+	 *
 	 * @return
 	 */
 	private MolgenisPermissionService getMolgenisPermissionService()
@@ -67,7 +68,7 @@ public class MolgenisAccessDecisionVoter implements AccessDecisionVoter<FilterIn
 
 	/**
 	 * Can't be autowired due to circular dependency resolving
-	 * 
+	 *
 	 * @return
 	 */
 	private MolgenisUi getMolgenisUi()

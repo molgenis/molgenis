@@ -1,12 +1,11 @@
 package org.molgenis.data.idcard.mapper;
 
-import java.io.IOException;
-
+import com.google.gson.stream.JsonReader;
 import org.molgenis.data.Entity;
 import org.molgenis.data.idcard.model.IdCardBiobank;
 import org.molgenis.data.idcard.model.IdCardOrganization;
 
-import com.google.gson.stream.JsonReader;
+import java.io.IOException;
 
 public interface IdCardBiobankMapper
 {

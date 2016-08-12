@@ -1,11 +1,9 @@
 package org.molgenis.security.core.runas;
 
+import org.testng.annotations.Test;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotEquals;
-
-import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
-import org.testng.annotations.Test;
 
 public class RunAsSystemBeanPostProcessorTest
 {

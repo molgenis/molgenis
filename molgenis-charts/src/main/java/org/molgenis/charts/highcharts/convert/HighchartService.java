@@ -1,31 +1,15 @@
 package org.molgenis.charts.highcharts.convert;
 
-import java.util.Arrays;
-
-import org.molgenis.charts.AbstractChart;
+import org.molgenis.charts.*;
 import org.molgenis.charts.AbstractChart.MolgenisChartType;
-import org.molgenis.charts.AbstractChartVisualizationService;
-import org.molgenis.charts.BoxPlotChart;
-import org.molgenis.charts.MolgenisAxisType;
-import org.molgenis.charts.XYDataChart;
-import org.molgenis.charts.highcharts.basic.AxisAlign;
-import org.molgenis.charts.highcharts.basic.AxisTitle;
-import org.molgenis.charts.highcharts.basic.AxisType;
-import org.molgenis.charts.highcharts.basic.BasicChart;
-import org.molgenis.charts.highcharts.basic.ChartAlign;
-import org.molgenis.charts.highcharts.basic.ChartConstructorType;
-import org.molgenis.charts.highcharts.basic.ChartTitle;
-import org.molgenis.charts.highcharts.basic.ChartType;
-import org.molgenis.charts.highcharts.basic.Credits;
-import org.molgenis.charts.highcharts.basic.Legend;
-import org.molgenis.charts.highcharts.basic.Options;
-import org.molgenis.charts.highcharts.basic.XAxis;
-import org.molgenis.charts.highcharts.basic.YAxis;
+import org.molgenis.charts.highcharts.basic.*;
 import org.molgenis.charts.highcharts.chart.Chart;
 import org.molgenis.charts.highcharts.stockchart.StockChart;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
+
+import java.util.Arrays;
 
 @Component
 public class HighchartService extends AbstractChartVisualizationService
@@ -56,9 +40,9 @@ public class HighchartService extends AbstractChartVisualizationService
 
 	/**
 	 * Create a scatter plot
-	 * 
+	 * <p>
 	 * When the xAxisType equals MolgenisAxisType.DATETIME then the Highcharts Stockchart will be used to create a plot
-	 * 
+	 *
 	 * @param scatterChart
 	 * @return Options
 	 */
@@ -78,7 +62,7 @@ public class HighchartService extends AbstractChartVisualizationService
 
 	/**
 	 * Create the Highcharts options from the given BoxPlotChart
-	 * 
+	 *
 	 * @param boxPlotChart
 	 * @param model
 	 * @return Options
@@ -116,12 +100,10 @@ public class HighchartService extends AbstractChartVisualizationService
 
 	/**
 	 * Create the Highcharts options from the given XYDataChart.
-	 * 
+	 *
 	 * @param xYDataChart
-	 * @param chartConstructorType
-	 *            - When defining the chartConstructorType u can invloed the type of the Highchart constructor types
-	 * @param model
-	 *            - is not used
+	 * @param chartConstructorType - When defining the chartConstructorType u can invloed the type of the Highchart constructor types
+	 * @param model                - is not used
 	 * @return Options
 	 */
 	protected Options createXYDataChart(XYDataChart xYDataChart, ChartConstructorType chartConstructorType)
@@ -146,8 +128,8 @@ public class HighchartService extends AbstractChartVisualizationService
 				.setType(AxisType.valueOf(xYDataChart.getxAxisType().name())).setOrdinal(false);
 
 		YAxis yAxis = new YAxis();
-		yAxis.setTitle(new AxisTitle().setText(xYDataChart.getyAxisLabel()).setAlign(AxisAlign.MIDDLE)).setType(
-				AxisType.valueOf(xYDataChart.getyAxisType().name()));
+		yAxis.setTitle(new AxisTitle().setText(xYDataChart.getyAxisLabel()).setAlign(AxisAlign.MIDDLE))
+				.setType(AxisType.valueOf(xYDataChart.getyAxisType().name()));
 
 		ChartTitle title = new ChartTitle().setText(xYDataChart.getTitle()).setAlign(ChartAlign.CENTER);
 

@@ -13,15 +13,15 @@
 
 package org.molgenis.model.elements;
 
-import java.util.Vector;
-
 import org.molgenis.model.MolgenisModelException;
+
+import java.util.Vector;
 
 // jdk
 
 /**
  * Describes a database-entity (or table).
- * 
+ *
  * @author MA Swertz
  * @version 1.0.0
  */
@@ -29,6 +29,7 @@ import org.molgenis.model.MolgenisModelException;
 public class Processor extends PRSchema
 {
 	// constructor(s)
+
 	/**
 	 */
 	public Processor(String name, PRSchema parent)

@@ -1,16 +1,16 @@
 package org.molgenis.data;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.Spliterator.ORDERED;
-import static java.util.Spliterators.spliteratorUnknownSize;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import static java.util.Objects.requireNonNull;
+import static java.util.Spliterator.ORDERED;
+import static java.util.Spliterators.spliteratorUnknownSize;
 
 /**
  * Applies {@link Repository} decorators to all {@link RepositoryCollection} repositories.

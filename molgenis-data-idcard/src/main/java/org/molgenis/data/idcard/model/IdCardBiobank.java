@@ -1,10 +1,10 @@
 package org.molgenis.data.idcard.model;
 
-import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.ORGANIZATION_ID;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
+
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.ORGANIZATION_ID;
 
 public class IdCardBiobank extends StaticEntity
 {

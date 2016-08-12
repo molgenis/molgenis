@@ -195,7 +195,7 @@ public abstract class AbstractRepository implements Repository<Entity>
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
 		// by default: ignore fetch
-		for(List<Entity> entities: partition(this, batchSize))
+		for (List<Entity> entities : partition(this, batchSize))
 		{
 			consumer.accept(entities);
 		}

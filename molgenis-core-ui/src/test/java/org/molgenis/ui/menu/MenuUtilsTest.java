@@ -1,14 +1,14 @@
 package org.molgenis.ui.menu;
 
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.util.Arrays;
+
 import static org.molgenis.ui.menu.MenuItemType.MENU;
 import static org.molgenis.ui.menu.MenuItemType.PLUGIN;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
-
-import java.util.Arrays;
-
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 public class MenuUtilsTest
 {

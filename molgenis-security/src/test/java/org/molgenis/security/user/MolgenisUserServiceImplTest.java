@@ -1,10 +1,5 @@
 package org.molgenis.security.user;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.testng.Assert.assertEquals;
-
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.DataService;
@@ -22,8 +17,12 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(classes =
-{ Config.class })
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.testng.Assert.assertEquals;
+
+@ContextConfiguration(classes = { Config.class })
 public class MolgenisUserServiceImplTest extends AbstractTestNGSpringContextTests
 {
 	private static Authentication AUTHENTICATION_PREVIOUS;

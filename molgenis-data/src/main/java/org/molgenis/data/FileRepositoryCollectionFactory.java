@@ -1,13 +1,6 @@
 package org.molgenis.data;
 
-import static java.util.Objects.requireNonNull;
-
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.collect.Maps;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.util.FileExtensionUtils;
 import org.springframework.beans.BeanUtils;
@@ -15,14 +8,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.AutowireCapableBeanFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Maps;
+import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.util.Map;
+import java.util.Set;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Factory for creating a RepositoryCollections from a file.
- *
+ * <p>
  * You can bootstrap a new FileRepositoryCollection class for a set of file extension by calling
  * addFileRepositoryCollectionClass
- * 
+ * <p>
  * For example ExcelFileRepositoryCollection class can be registered, then when you call
  * 'createFileRepositoryCollection' for a file with extension 'xls' a new ExcelFileRepositoryCollection is created for
  * you.
@@ -54,19 +53,19 @@ public class FileRepositoryCollectionFactory
 
 	/**
 	 * Factory method for creating a new FileRepositorySource
-	 * 
+	 * <p>
 	 * For example an excel file
-	 * 
+	 *
 	 * @param file
 	 * @return
 	 */
 	public FileRepositoryCollection createFileRepositoryCollection(File file)
 	{
 		Class<? extends FileRepositoryCollection> clazz;
-		
-		String extension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
-				fileRepositoryCollection.keySet());
-		
+
+		String extension = FileExtensionUtils
+				.findExtensionFromPossibilities(file.getName(), fileRepositoryCollection.keySet());
+
 		clazz = fileRepositoryCollection.get(extension);
 
 		if (clazz == null)
@@ -81,8 +80,8 @@ public class FileRepositoryCollectionFactory
 		}
 		catch (Exception e)
 		{
-			throw new MolgenisDataException("Exception creating [" + clazz
-					+ "]  missing constructor FileRepositorySource(File file)");
+			throw new MolgenisDataException(
+					"Exception creating [" + clazz + "]  missing constructor FileRepositorySource(File file)");
 		}
 
 		FileRepositoryCollection fileRepositoryCollection = BeanUtils.instantiateClass(ctor, file);

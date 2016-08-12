@@ -1,13 +1,8 @@
 package org.molgenis.data.mapper.algorithmgenerator.rules.impl;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 import org.molgenis.data.mapper.algorithmgenerator.rules.CategoryMatchQuality;
@@ -15,9 +10,13 @@ import org.molgenis.data.mapper.algorithmgenerator.rules.CategoryRule;
 import org.molgenis.data.mapper.algorithmgenerator.rules.quality.Quality;
 import org.molgenis.data.mapper.algorithmgenerator.rules.quality.impl.NumericQuality;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNull;
 
 public abstract class InternalAbstractCategoryRule implements CategoryRule
 {
@@ -37,8 +36,8 @@ public abstract class InternalAbstractCategoryRule implements CategoryRule
 		String matchedTermForTargetLabel = getMatchedTermFromTheRulelabelContainsWords(targetCategory.getLabel());
 		String matchedTermForSourceLabel = getMatchedTermFromTheRulelabelContainsWords(sourceCategory.getLabel());
 
-		boolean ruleApplied = StringUtils.isNotBlank(matchedTermForTargetLabel)
-				&& StringUtils.isNotBlank(matchedTermForSourceLabel);
+		boolean ruleApplied =
+				StringUtils.isNotBlank(matchedTermForTargetLabel) && StringUtils.isNotBlank(matchedTermForSourceLabel);
 
 		Quality<Double> quality = NumericQuality
 				.create(createNumericQualityIndicator(matchedTermForTargetLabel, matchedTermForSourceLabel));

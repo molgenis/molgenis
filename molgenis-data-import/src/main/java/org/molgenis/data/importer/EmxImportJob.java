@@ -6,7 +6,6 @@ import org.molgenis.framework.db.EntityImportReport;
 
 /**
  * Parameter object for the import job.
- * 
  */
 public class EmxImportJob
 {

@@ -1,18 +1,5 @@
 package org.molgenis.security.token;
 
-import static java.util.Collections.singletonList;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.auth.MolgenisTokenMetaData.MOLGENIS_TOKEN;
-import static org.molgenis.auth.MolgenisTokenMetaData.TOKEN;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.auth.MolgenisUserMetaData.USERNAME;
-import static org.testng.Assert.assertEquals;
-
-import java.util.Date;
-
 import org.apache.commons.lang3.time.DateUtils;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
@@ -29,6 +16,17 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.Date;
+
+import static java.util.Collections.singletonList;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
+import static org.molgenis.auth.MolgenisTokenMetaData.MOLGENIS_TOKEN;
+import static org.molgenis.auth.MolgenisTokenMetaData.TOKEN;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.MolgenisUserMetaData.USERNAME;
+import static org.testng.Assert.assertEquals;
 
 public class DataServiceTokenServiceTest
 {

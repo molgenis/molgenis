@@ -1,7 +1,6 @@
 package org.molgenis.data.mapper.algorithmgenerator.generator;
 
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapper;
@@ -14,7 +13,7 @@ import org.molgenis.data.mapper.algorithmgenerator.rules.impl.PositiveCategoryRu
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 
-import com.google.common.collect.Lists;
+import java.util.List;
 
 public class OneToOneCategoryAlgorithmGenerator extends AbstractCategoryAlgorithmGenerator
 {
@@ -38,8 +37,8 @@ public class OneToOneCategoryAlgorithmGenerator extends AbstractCategoryAlgorith
 	@Override
 	public boolean isSuitable(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes)
 	{
-		return isXrefOrCategorialDataType(targetAttribute) && (sourceAttributes.stream().allMatch(this::isXrefOrCategorialDataType))
-				&& sourceAttributes.size() == 1;
+		return isXrefOrCategorialDataType(targetAttribute) && (sourceAttributes.stream()
+				.allMatch(this::isXrefOrCategorialDataType)) && sourceAttributes.size() == 1;
 	}
 
 	@Override

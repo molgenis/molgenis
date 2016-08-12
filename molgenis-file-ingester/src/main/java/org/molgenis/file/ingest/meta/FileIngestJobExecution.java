@@ -1,13 +1,11 @@
 package org.molgenis.file.ingest.meta;
 
-import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE;
-import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST;
-import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_TYPE;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.file.model.FileMeta;
+
+import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.*;
 
 public class FileIngestJobExecution extends JobExecution
 {

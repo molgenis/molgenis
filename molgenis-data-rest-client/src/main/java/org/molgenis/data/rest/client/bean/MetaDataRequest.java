@@ -1,21 +1,23 @@
 package org.molgenis.data.rest.client.bean;
 
-import java.util.Collection;
-
-import javax.annotation.Nullable;
-
+import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
 
-import com.google.auto.value.AutoValue;
+import javax.annotation.Nullable;
+import java.util.Collection;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_MetaDataRequest.class)
 public abstract class MetaDataRequest
 {
 
-	public abstract @Nullable Collection<String> getAttributes();
+	public abstract
+	@Nullable
+	Collection<String> getAttributes();
 
-	public abstract @Nullable Collection<String> getExpands();
+	public abstract
+	@Nullable
+	Collection<String> getExpands();
 
 	public static MetaDataRequest create()
 	{

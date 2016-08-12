@@ -1,12 +1,12 @@
 package org.molgenis.data.rest;
 
-import java.util.List;
-import java.util.Map;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.security.core.MolgenisPermissionService;
+
+import java.util.List;
+import java.util.Map;
 
 public class EntityCollectionResponse
 {
@@ -24,7 +24,8 @@ public class EntityCollectionResponse
 			LanguageService languageService)
 	{
 		this.href = href;
-		this.meta = meta != null ? new EntityMetaDataResponse(meta, permissionService, dataService, languageService) : null;
+		this.meta =
+				meta != null ? new EntityMetaDataResponse(meta, permissionService, dataService, languageService) : null;
 		this.start = entityPager.getStart();
 		this.num = entityPager.getNum();
 		this.total = entityPager.getTotal();

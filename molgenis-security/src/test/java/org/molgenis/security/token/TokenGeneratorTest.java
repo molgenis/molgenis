@@ -1,9 +1,9 @@
 package org.molgenis.security.token;
 
+import org.testng.annotations.Test;
+
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
-
-import org.testng.annotations.Test;
 
 public class TokenGeneratorTest
 {

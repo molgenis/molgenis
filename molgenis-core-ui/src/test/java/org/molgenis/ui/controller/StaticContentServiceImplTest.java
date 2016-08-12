@@ -1,16 +1,5 @@
 package org.molgenis.ui.controller;
 
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.ui.settings.StaticContentMeta.STATIC_CONTENT;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Arrays;
-import java.util.Collection;
-
 import org.molgenis.data.DataService;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserDetailsService;
@@ -35,6 +24,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.Collection;
+
+import static org.mockito.Mockito.*;
+import static org.molgenis.ui.settings.StaticContentMeta.STATIC_CONTENT;
+import static org.testng.Assert.*;
 
 @WebAppConfiguration
 @ContextConfiguration
@@ -78,8 +74,8 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 
 	private void setSecurityContextSuperUser()
 	{
-		Collection<? extends GrantedAuthority> authorities = Arrays
-				.<SimpleGrantedAuthority> asList(new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
+		Collection<? extends GrantedAuthority> authorities = Arrays.<SimpleGrantedAuthority>asList(
+				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_SU));
 
 		Authentication authentication = mock(Authentication.class);
 
@@ -95,7 +91,7 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 
 	private void setSecurityContextNonSuperUser()
 	{
-		Collection<? extends GrantedAuthority> authorities = Arrays.<SimpleGrantedAuthority> asList(
+		Collection<? extends GrantedAuthority> authorities = Arrays.<SimpleGrantedAuthority>asList(
 				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_PLUGIN_READ_PREFIX + "HOME"),
 				new SimpleGrantedAuthority(SecurityUtils.AUTHORITY_PLUGIN_WRITE_PREFIX + "HOME"));
 

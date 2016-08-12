@@ -9,7 +9,7 @@ public interface IdCardClient
 {
 	/**
 	 * Return all biobanks from ID-Cards as entities
-	 * 
+	 *
 	 * @return
 	 */
 	Iterable<Entity> getIdCardBiobanks();
@@ -18,15 +18,14 @@ public interface IdCardClient
 	 * Return all biobanks from ID-Cards as entities, throws an exception if the request took longer than the given
 	 * timeout.
 	 *
-	 * @param timeout
-	 *            request timeout in ms
+	 * @param timeout request timeout in ms
 	 * @return
 	 */
 	public Iterable<Entity> getIdCardBiobanks(long timeout);
 
 	/**
 	 * Return a biobank by id from ID-Cards as entity
-	 * 
+	 *
 	 * @param id
 	 * @return
 	 */
@@ -37,15 +36,14 @@ public interface IdCardClient
 	 * timeout.
 	 *
 	 * @param id
-	 * @param timeout
-	 *            request timeout in ms
+	 * @param timeout request timeout in ms
 	 * @return
 	 */
 	public Entity getIdCardBiobank(String id, long timeout);
 
 	/**
 	 * Return biobanks by ids from ID-Cards as entities
-	 * 
+	 *
 	 * @param ids
 	 * @return
 	 */

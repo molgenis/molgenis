@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * If a method is annotated with this annotation it is run with role 'ROLE_SYSTEM'
- * 
+ * <p>
  * The current security context will be replaced with one that contains a SystemSecurityToken
  */
 @Target(ElementType.METHOD)

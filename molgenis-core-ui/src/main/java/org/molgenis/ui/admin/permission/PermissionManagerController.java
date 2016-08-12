@@ -1,18 +1,9 @@
 package org.molgenis.ui.admin.permission;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.ui.admin.permission.PermissionManagerController.URI;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
-import org.molgenis.auth.GroupAuthority;
-import org.molgenis.auth.GroupAuthorityFactory;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.UserAuthority;
-import org.molgenis.auth.UserAuthorityFactory;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import org.molgenis.auth.*;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -25,18 +16,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.ui.admin.permission.PermissionManagerController.URI;
 
 @Controller
 @RequestMapping(URI)
@@ -63,8 +52,8 @@ public class PermissionManagerController extends MolgenisPluginController
 	@RequestMapping(method = RequestMethod.GET)
 	public String init(Model model)
 	{
-		model.addAttribute("users", Lists.newArrayList(Iterables.filter(pluginPermissionManagerService.getUsers(),
-				new Predicate<MolgenisUser>()
+		model.addAttribute("users", Lists.newArrayList(
+				Iterables.filter(pluginPermissionManagerService.getUsers(), new Predicate<MolgenisUser>()
 				{
 					@Override
 					public boolean apply(MolgenisUser molgenisUser)
@@ -115,14 +104,14 @@ public class PermissionManagerController extends MolgenisPluginController
 			String param = "radio-" + plugin.getId();
 			String value = webRequest.getParameter(param);
 
-			if (value.equalsIgnoreCase(Permission.READ.toString())
-					|| value.equalsIgnoreCase(Permission.COUNT.toString())
-					|| value.equalsIgnoreCase(Permission.WRITE.toString())
-					|| value.equalsIgnoreCase(Permission.WRITEMETA.toString()))
+			if (value.equalsIgnoreCase(Permission.READ.toString()) || value
+					.equalsIgnoreCase(Permission.COUNT.toString()) || value
+					.equalsIgnoreCase(Permission.WRITE.toString()) || value
+					.equalsIgnoreCase(Permission.WRITEMETA.toString()))
 			{
 				GroupAuthority authority = groupAuthorityFactory.create();
-				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_"
-						+ plugin.getId().toUpperCase());
+				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_" + plugin.getId()
+						.toUpperCase());
 				authorities.add(authority);
 			}
 		}
@@ -138,14 +127,14 @@ public class PermissionManagerController extends MolgenisPluginController
 		{
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
-			if (value.equalsIgnoreCase(Permission.READ.toString())
-					|| value.equalsIgnoreCase(Permission.COUNT.toString())
-					|| value.equalsIgnoreCase(Permission.WRITE.toString())
-					|| value.equalsIgnoreCase(Permission.WRITEMETA.toString()))
+			if (value.equalsIgnoreCase(Permission.READ.toString()) || value
+					.equalsIgnoreCase(Permission.COUNT.toString()) || value
+					.equalsIgnoreCase(Permission.WRITE.toString()) || value
+					.equalsIgnoreCase(Permission.WRITEMETA.toString()))
 			{
 				GroupAuthority authority = groupAuthorityFactory.create();
-				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
-						+ entityClassId.toUpperCase());
+				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId
+						.toUpperCase());
 				authorities.add(authority);
 			}
 		}
@@ -161,14 +150,14 @@ public class PermissionManagerController extends MolgenisPluginController
 		{
 			String param = "radio-" + plugin.getId();
 			String value = webRequest.getParameter(param);
-			if (value.equalsIgnoreCase(Permission.READ.toString())
-					|| value.equalsIgnoreCase(Permission.COUNT.toString())
-					|| value.equalsIgnoreCase(Permission.WRITE.toString())
-					|| value.equalsIgnoreCase(Permission.WRITEMETA.toString()))
+			if (value.equalsIgnoreCase(Permission.READ.toString()) || value
+					.equalsIgnoreCase(Permission.COUNT.toString()) || value
+					.equalsIgnoreCase(Permission.WRITE.toString()) || value
+					.equalsIgnoreCase(Permission.WRITEMETA.toString()))
 			{
 				UserAuthority authority = userAuthorityFactory.create();
-				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_"
-						+ plugin.getId().toUpperCase());
+				authority.setRole(SecurityUtils.AUTHORITY_PLUGIN_PREFIX + value.toUpperCase() + "_" + plugin.getId()
+						.toUpperCase());
 				authorities.add(authority);
 			}
 		}
@@ -184,14 +173,14 @@ public class PermissionManagerController extends MolgenisPluginController
 		{
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
-			if (value.equalsIgnoreCase(Permission.READ.toString())
-					|| value.equalsIgnoreCase(Permission.COUNT.toString())
-					|| value.equalsIgnoreCase(Permission.WRITE.toString())
-					|| value.equalsIgnoreCase(Permission.WRITEMETA.toString()))
+			if (value.equalsIgnoreCase(Permission.READ.toString()) || value
+					.equalsIgnoreCase(Permission.COUNT.toString()) || value
+					.equalsIgnoreCase(Permission.WRITE.toString()) || value
+					.equalsIgnoreCase(Permission.WRITEMETA.toString()))
 			{
 				UserAuthority authority = userAuthorityFactory.create();
-				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
-						+ entityClassId.toUpperCase());
+				authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId
+						.toUpperCase());
 				authorities.add(authority);
 			}
 		}

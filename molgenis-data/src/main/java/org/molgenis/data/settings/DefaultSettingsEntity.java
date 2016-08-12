@@ -40,7 +40,8 @@ public abstract class DefaultSettingsEntity implements Entity
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return RunAsSystemProxy.runAsSystem(() -> {
+		return RunAsSystemProxy.runAsSystem(() ->
+		{
 			return dataService.getEntityMetaData(entityName);
 		});
 	}
@@ -166,12 +167,12 @@ public abstract class DefaultSettingsEntity implements Entity
 	/**
 	 * Adds a listener for this settings entity that fires on entity updates
 	 *
-	 * @param settingsEntityListener
-	 *            listener for this settings entity
+	 * @param settingsEntityListener listener for this settings entity
 	 */
 	public void addListener(SettingsEntityListener settingsEntityListener)
 	{
-		RunAsSystemProxy.runAsSystem(() -> {
+		RunAsSystemProxy.runAsSystem(() ->
+		{
 			entityListenersService.addEntityListener(entityName, new EntityListener()
 			{
 				@Override
@@ -192,12 +193,12 @@ public abstract class DefaultSettingsEntity implements Entity
 	/**
 	 * Removes a listener for this settings entity that fires on entity updates
 	 *
-	 * @param settingsEntityListener
-	 *            listener for this settings entity
+	 * @param settingsEntityListener listener for this settings entity
 	 */
 	public void removeListener(SettingsEntityListener settingsEntityListener)
 	{
-		RunAsSystemProxy.runAsSystem(() -> {
+		RunAsSystemProxy.runAsSystem(() ->
+		{
 			entityListenersService.removeEntityListener(entityName, new EntityListener()
 			{
 
@@ -235,26 +236,27 @@ public abstract class DefaultSettingsEntity implements Entity
 		if (cachedEntity == null)
 		{
 			String id = getEntityMetaData().getSimpleName();
-			cachedEntity = RunAsSystemProxy.runAsSystem(() -> {
+			cachedEntity = RunAsSystemProxy.runAsSystem(() ->
+			{
 				Entity entity = dataService.findOneById(entityName, id);
 
 				// refresh cache on settings update
 				entityListenersService.addEntityListener(entityName, new EntityListener()
+				{
+					@Override
+					public void postUpdate(Entity entity)
 					{
-						@Override
-						public void postUpdate(Entity entity)
-						{
-							cachedEntity = entity;
-						}
+						cachedEntity = entity;
+					}
 
-						@Override
-						public Object getEntityId()
-						{
-							return id;
-						}
-					});
-					return entity;
+					@Override
+					public Object getEntityId()
+					{
+						return id;
+					}
 				});
+				return entity;
+			});
 
 		}
 		return cachedEntity;
@@ -262,12 +264,13 @@ public abstract class DefaultSettingsEntity implements Entity
 
 	private void updateEntity(Entity entity)
 	{
-		RunAsSystemProxy.runAsSystem(() -> {
+		RunAsSystemProxy.runAsSystem(() ->
+		{
 			dataService.update(entityName, entity);
 			ResourceBundle.clearCache();
 
 			// cache refresh is handled via entity listener
-				return null;
-			});
+			return null;
+		});
 	}
 }

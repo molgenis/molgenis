@@ -1,11 +1,11 @@
 package org.molgenis.ui;
 
-import static java.util.Objects.requireNonNull;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 
-import org.molgenis.security.core.MolgenisPermissionService;
-import org.springframework.beans.factory.annotation.Autowired;
+import static java.util.Objects.requireNonNull;
 
 /**
  * @deprecated use {@link org.molgenis.ui.menu.MenuMolgenisUi} instead

@@ -5,7 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class TestRefEntityStaticFactory extends AbstractSystemEntityFactory<TestRefEntityStatic, TestRefEntityStaticMetaData, String>
+public class TestRefEntityStaticFactory
+		extends AbstractSystemEntityFactory<TestRefEntityStatic, TestRefEntityStaticMetaData, String>
 {
 	@Autowired
 	TestRefEntityStaticFactory(TestRefEntityStaticMetaData testRefEntityStaticMetaData)

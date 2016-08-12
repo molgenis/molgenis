@@ -9,17 +9,18 @@
 package org.molgenis.model.elements;
 
 // imports
-import java.util.List;
-import java.util.Vector;
 
 import org.molgenis.fieldtypes.XrefField;
 import org.molgenis.model.MolgenisModelException;
+
+import java.util.List;
+import java.util.Vector;
 
 /**
  * This class describes an updatable view, which shows two or more entities.
  * This can only be a liniair path in the entity graph otherwise updates are
  * undefined.
- * 
+ *
  * @author RA Scheltema
  * @author MA Swertz
  * @version 1.0.0
@@ -28,8 +29,9 @@ import org.molgenis.model.MolgenisModelException;
 public class View extends DBSchema implements Record
 {
 	// constructor(s)
+
 	/**
-	 * 
+	 *
 	 */
 	public View(String name, String label, DBSchema parent)
 	{
@@ -118,8 +120,9 @@ public class View extends DBSchema implements Record
 	}
 
 	// access
+
 	/**
-	 * 
+	 *
 	 */
 	public void addEntity(String entity)
 	{
@@ -127,7 +130,7 @@ public class View extends DBSchema implements Record
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public List<String> getEntities()
 	{
@@ -135,7 +138,7 @@ public class View extends DBSchema implements Record
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public int getNrEntities()
 	{
@@ -144,7 +147,6 @@ public class View extends DBSchema implements Record
 
 	/**
 	 * @throws MolgenisModelException
-	 * 
 	 */
 	public List<Field> getXRefsFor(Entity e, List<Entity> entities) throws MolgenisModelException
 	{

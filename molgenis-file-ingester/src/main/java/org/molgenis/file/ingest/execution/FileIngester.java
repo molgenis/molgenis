@@ -1,11 +1,5 @@
 package org.molgenis.file.ingest.execution;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-
-import java.io.File;
-
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
@@ -19,9 +13,15 @@ import org.molgenis.framework.db.EntityImportReport;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.io.File;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.DatabaseAction.ADD_UPDATE_EXISTING;
+import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
+
 /**
  * Imports a file from a remote url.
- * 
+ * <p>
  * For now only csv files are supported
  */
 @Component
@@ -44,7 +44,7 @@ public class FileIngester
 
 	/**
 	 * Imports a csv file defined in the fileIngest entity
-	 * 
+	 *
 	 * @see FileIngestMetaData
 	 */
 	public FileMeta ingest(String entityName, String url, String loader, String jobExecutionID, Progress progress,

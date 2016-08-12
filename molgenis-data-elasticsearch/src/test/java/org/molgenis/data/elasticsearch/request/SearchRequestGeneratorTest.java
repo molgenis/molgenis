@@ -33,12 +33,12 @@ public class SearchRequestGeneratorTest
 		String entityName = "test";
 		SearchType searchType = SearchType.COUNT;
 		gen.buildSearchRequest(searchRequestBuilderMock, entityName, searchType,
-				new QueryImpl<Entity>().search("test").fetch(new Fetch().field("field1").field("field2")), null, null, null,
-				entityMeta);
+				new QueryImpl<Entity>().search("test").fetch(new Fetch().field("field1").field("field2")), null, null,
+				null, entityMeta);
 		verify(searchRequestBuilderMock).setFrom(0);
 		verify(searchRequestBuilderMock).setSearchType(searchType);
 		verify(searchRequestBuilderMock).setTypes(entityName);
-		verify(searchRequestBuilderMock).setQuery(Matchers.<QueryBuilder> anyObject());
+		verify(searchRequestBuilderMock).setQuery(Matchers.<QueryBuilder>anyObject());
 		verifyNoMoreInteractions(searchRequestBuilderMock);
 	}
 
@@ -55,7 +55,7 @@ public class SearchRequestGeneratorTest
 		verify(searchRequestBuilderMock).setFrom(0);
 		verify(searchRequestBuilderMock).setSearchType(searchType);
 		verify(searchRequestBuilderMock).setTypes(entityName);
-		verify(searchRequestBuilderMock).setQuery(Matchers.<QueryBuilder> anyObject());
+		verify(searchRequestBuilderMock).setQuery(Matchers.<QueryBuilder>anyObject());
 		verifyNoMoreInteractions(searchRequestBuilderMock);
 	}
 }

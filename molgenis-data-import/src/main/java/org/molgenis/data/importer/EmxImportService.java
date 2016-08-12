@@ -130,7 +130,8 @@ public class EmxImportService implements ImportService
 				.getEntityMap();
 
 		LinkedHashMap<String, Boolean> importableEntitiesMap = newLinkedHashMap();
-		stream(entityMetaDataMap.keySet().spliterator(), false).forEach(entityName -> {
+		stream(entityMetaDataMap.keySet().spliterator(), false).forEach(entityName ->
+		{
 			boolean importable = skipEntities.contains(entityName) || metaDataService
 					.isEntityMetaDataCompatible(entityMetaDataMap.get(entityName));
 

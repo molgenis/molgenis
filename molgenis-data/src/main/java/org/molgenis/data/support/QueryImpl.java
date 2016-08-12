@@ -1,20 +1,10 @@
 package org.molgenis.data.support;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.stream.Stream;
-
-import org.molgenis.data.Entity;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
+import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.Repository;
-import org.molgenis.data.Sort;
+
+import java.util.*;
+import java.util.stream.Stream;
 
 public class QueryImpl<E extends Entity> implements Query<E>
 {
@@ -121,8 +111,8 @@ public class QueryImpl<E extends Entity> implements Query<E>
 	@Override
 	public List<QueryRule> getRules()
 	{
-		if (this.rules.size() > 1) throw new MolgenisDataException(
-				"Nested query not closed, use unnest() or unnestAll()");
+		if (this.rules.size() > 1)
+			throw new MolgenisDataException("Nested query not closed, use unnest() or unnestAll()");
 
 		if (this.rules.size() > 0)
 		{
@@ -368,8 +358,7 @@ public class QueryImpl<E extends Entity> implements Query<E>
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		@SuppressWarnings("unchecked")
-		QueryImpl<Entity> other = (QueryImpl<Entity>) obj;
+		@SuppressWarnings("unchecked") QueryImpl<Entity> other = (QueryImpl<Entity>) obj;
 		if (offset != other.offset) return false;
 		if (pageSize != other.pageSize) return false;
 		if (rules == null)

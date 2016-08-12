@@ -3,11 +3,15 @@ package org.molgenis.charts.highcharts.basic;
 import java.util.List;
 
 public class XAxis extends Axis
-{	
+{
 	private List<String> categories;
 
-	public XAxis(){};
-	
+	public XAxis()
+	{
+	}
+
+	;
+
 	public List<String> getCategories()
 	{
 		return categories;

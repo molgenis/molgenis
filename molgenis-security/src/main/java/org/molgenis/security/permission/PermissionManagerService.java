@@ -1,12 +1,12 @@
 package org.molgenis.security.permission;
 
-import java.util.List;
-
 import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.framework.ui.MolgenisPlugin;
+
+import java.util.List;
 
 /**
  * Manage user and group permissions for plugins and entity classes

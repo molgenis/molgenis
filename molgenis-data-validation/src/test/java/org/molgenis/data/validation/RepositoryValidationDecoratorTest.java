@@ -127,8 +127,9 @@ public class RepositoryValidationDecoratorTest
 		when(entityMeta.getAttribute(attrNillableMrefName)).thenReturn(nillableMrefAttr);
 		when(entityMeta.getAttribute(attrUniqueStringName)).thenReturn(uniqueStringAttr);
 		when(entityMeta.getAttribute(attrUniqueXrefName)).thenReturn(uniqueXrefAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
-				nillableMrefAttr, uniqueStringAttr, uniqueXrefAttr));
+		when(entityMeta.getAtomicAttributes()).thenReturn(
+				Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr, nillableMrefAttr, uniqueStringAttr,
+						uniqueXrefAttr));
 
 		// ref entities
 		String refEntity0Id = "idref0";
@@ -161,9 +162,9 @@ public class RepositoryValidationDecoratorTest
 		decoratedRepo = mock(Repository.class);
 		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
 		when(decoratedRepo.getName()).thenReturn(entityName);
-		when(decoratedRepo
-				.findAll(new QueryImpl<Entity>().fetch(new Fetch().field(attrUniqueStringName).field(attrUniqueXrefName))))
-						.thenReturn(Stream.empty());
+		when(decoratedRepo.findAll(
+				new QueryImpl<Entity>().fetch(new Fetch().field(attrUniqueStringName).field(attrUniqueXrefName))))
+				.thenReturn(Stream.empty());
 		refRepo = mock(Repository.class);
 		when(refRepo.getEntityMetaData()).thenReturn(refEntityMeta);
 
@@ -952,8 +953,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStream()
 	{
@@ -989,8 +989,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamEntityAttributesValidationError()
 	{
@@ -1056,8 +1055,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamRequiredValueValidationError()
 	{
@@ -1101,8 +1099,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamRequiredValueWithExpression()
 	{
@@ -1140,8 +1137,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamRequiredValueVisibleExpressionFalse()
 	{
@@ -1182,8 +1178,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamRequiredValueVisibleExpressionTrue()
 	{
@@ -1219,8 +1214,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamRequiredValueVisibleExpressionTrueValidationError()
 	{
@@ -1270,8 +1264,7 @@ public class RepositoryValidationDecoratorTest
 	}
 
 	// Test for hack (see https://github.com/molgenis/molgenis/issues/4308)
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamRequiredQuestionnaireNotSubmitted()
 	{
@@ -1313,8 +1306,7 @@ public class RepositoryValidationDecoratorTest
 	}
 
 	// Test for hack (see https://github.com/molgenis/molgenis/issues/4308)
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamRequiredQuestionnaireSubmittedValidationError()
 	{
@@ -1364,8 +1356,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamRequiredMrefValueValidationError()
 	{
@@ -1409,8 +1400,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamReferenceXrefSelfReferenceToPreviouslyAddedEntity()
 	{
@@ -1450,8 +1440,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamReferenceXrefSelfReferenceToSelf()
 	{
@@ -1511,8 +1500,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(entity1, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamReferenceXrefDoesNotExistsValidationError()
 	{
@@ -1584,8 +1572,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamReferenceAttrWithExpression()
 	{
@@ -1650,8 +1637,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(entity1, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamReferenceMrefDoesNotExistsValidationError()
 	{
@@ -1723,8 +1709,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamUniqueStringValueExistsInBackendValidationError()
 	{
@@ -1791,8 +1776,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamUniqueValueWithExpression()
 	{
@@ -1852,8 +1836,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamUniqueStringValueExistsInSourceValidationError()
 	{
@@ -1918,8 +1901,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void addStreamUniqueXrefValueExistsInBackendValidationError()
 	{
@@ -2687,8 +2669,9 @@ public class RepositoryValidationDecoratorTest
 		when(readonlyStringAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyStringName)).thenReturn(readonlyStringAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
-				nillableMrefAttr, uniqueStringAttr, uniqueXrefAttr, readonlyStringAttr));
+		when(entityMeta.getAtomicAttributes()).thenReturn(
+				Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr, nillableMrefAttr, uniqueStringAttr,
+						uniqueXrefAttr, readonlyStringAttr));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -2759,8 +2742,9 @@ public class RepositoryValidationDecoratorTest
 		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyXrefName)).thenReturn(readonlyXrefAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
-				nillableMrefAttr, uniqueStringAttr, uniqueXrefAttr, readonlyXrefAttr));
+		when(entityMeta.getAtomicAttributes()).thenReturn(
+				Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr, nillableMrefAttr, uniqueStringAttr,
+						uniqueXrefAttr, readonlyXrefAttr));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -2822,8 +2806,9 @@ public class RepositoryValidationDecoratorTest
 		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyXrefName)).thenReturn(readonlyXrefAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
-				nillableMrefAttr, uniqueStringAttr, uniqueXrefAttr, readonlyXrefAttr));
+		when(entityMeta.getAtomicAttributes()).thenReturn(
+				Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr, nillableMrefAttr, uniqueStringAttr,
+						uniqueXrefAttr, readonlyXrefAttr));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -2894,8 +2879,9 @@ public class RepositoryValidationDecoratorTest
 		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyMrefName)).thenReturn(readonlyMrefAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
-				nillableMrefAttr, uniqueStringAttr, uniqueXrefAttr, readonlyMrefAttr));
+		when(entityMeta.getAtomicAttributes()).thenReturn(
+				Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr, nillableMrefAttr, uniqueStringAttr,
+						uniqueXrefAttr, readonlyMrefAttr));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -2931,8 +2917,8 @@ public class RepositoryValidationDecoratorTest
 		when(updatedEntity0.getString(attrUniqueStringName)).thenReturn("unique1");
 		when(updatedEntity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0Clone);
 		when(updatedEntity0.getEntities(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity0Clone)); // read only,
-																											// no
-																											// changes
+		// no
+		// changes
 		when(updatedEntity0.get(attrIdName)).thenReturn("id0");
 		when(updatedEntity0.get(attrXrefName)).thenReturn(refEntity0Clone);
 		when(updatedEntity0.get(attrNillableXrefName)).thenReturn(null);
@@ -2941,7 +2927,7 @@ public class RepositoryValidationDecoratorTest
 		when(updatedEntity0.get(attrUniqueStringName)).thenReturn("unique1");
 		when(updatedEntity0.get(attrUniqueXrefName)).thenReturn(refEntity0Clone);
 		when(updatedEntity0.get(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity0Clone)); // read only, no
-																									// changes
+		// changes
 		// actual tests
 		repositoryValidationDecorator.update(updatedEntity0);
 		verify(decoratedRepo, times(1)).update(updatedEntity0);
@@ -2960,8 +2946,9 @@ public class RepositoryValidationDecoratorTest
 		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyMrefName)).thenReturn(readonlyMrefAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
-				nillableMrefAttr, uniqueStringAttr, uniqueXrefAttr, readonlyMrefAttr));
+		when(entityMeta.getAtomicAttributes()).thenReturn(
+				Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr, nillableMrefAttr, uniqueStringAttr,
+						uniqueXrefAttr, readonlyMrefAttr));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -2997,8 +2984,8 @@ public class RepositoryValidationDecoratorTest
 		when(updatedEntity0.getString(attrUniqueStringName)).thenReturn("unique1");
 		when(updatedEntity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0Clone);
 		when(updatedEntity0.getEntities(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity1)); // read only
-																										// attribute
-																										// update
+		// attribute
+		// update
 		when(updatedEntity0.get(attrIdName)).thenReturn("id0");
 		when(updatedEntity0.get(attrXrefName)).thenReturn(refEntity0Clone);
 		when(updatedEntity0.get(attrNillableXrefName)).thenReturn(null);
@@ -3007,7 +2994,7 @@ public class RepositoryValidationDecoratorTest
 		when(updatedEntity0.get(attrUniqueStringName)).thenReturn("unique1");
 		when(updatedEntity0.get(attrUniqueXrefName)).thenReturn(refEntity0Clone);
 		when(updatedEntity0.get(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity1)); // read only attribute
-																								// update
+		// update
 
 		// actual tests
 		try
@@ -3023,8 +3010,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStream()
 	{
@@ -3060,8 +3046,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamEntityAttributesValidationError()
 	{
@@ -3127,8 +3112,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamRequiredValueValidationError()
 	{
@@ -3172,8 +3156,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamRequiredValueWithExpression()
 	{
@@ -3211,8 +3194,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamRequiredValueVisibleExpressionFalse()
 	{
@@ -3253,8 +3235,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamRequiredValueVisibleExpressionTrue()
 	{
@@ -3290,8 +3271,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamRequiredValueVisibleExpressionTrueValidationError()
 	{
@@ -3341,8 +3321,7 @@ public class RepositoryValidationDecoratorTest
 	}
 
 	// Test for hack (see https://github.com/molgenis/molgenis/issues/4308)
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamRequiredQuestionnaireNotSubmitted()
 	{
@@ -3384,8 +3363,7 @@ public class RepositoryValidationDecoratorTest
 	}
 
 	// Test for hack (see https://github.com/molgenis/molgenis/issues/4308)
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamRequiredQuestionnaireSubmittedValidationError()
 	{
@@ -3435,8 +3413,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamRequiredMrefValueValidationError()
 	{
@@ -3480,8 +3457,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamReferenceXrefSelfReferenceToPreviouslyAddedEntity()
 	{
@@ -3521,8 +3497,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamReferenceXrefSelfReferenceToSelf()
 	{
@@ -3582,8 +3557,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(entity1, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamReferenceXrefDoesNotExistsValidationError()
 	{
@@ -3655,8 +3629,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamReferenceAttrWithExpression()
 	{
@@ -3721,8 +3694,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(entity1, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamReferenceMrefDoesNotExistsValidationError()
 	{
@@ -3794,8 +3766,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamUniqueStringValueExistsInBackendValidationError()
 	{
@@ -3862,8 +3833,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamUniqueValueWithExpression()
 	{
@@ -3923,8 +3893,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(entity0, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamUniqueStringValueExistsInSourceValidationError()
 	{
@@ -3989,8 +3958,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamUniqueXrefValueExistsInBackendValidationError()
 	{
@@ -4057,8 +4025,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamReadOnlyStringAttrValidationError()
 	{
@@ -4070,8 +4037,9 @@ public class RepositoryValidationDecoratorTest
 		when(readonlyStringAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyStringName)).thenReturn(readonlyStringAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
-				nillableMrefAttr, uniqueStringAttr, uniqueXrefAttr, readonlyStringAttr));
+		when(entityMeta.getAtomicAttributes()).thenReturn(
+				Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr, nillableMrefAttr, uniqueStringAttr,
+						uniqueXrefAttr, readonlyStringAttr));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -4137,8 +4105,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamReadOnlyXrefAttr()
 	{
@@ -4151,8 +4118,9 @@ public class RepositoryValidationDecoratorTest
 		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyXrefName)).thenReturn(readonlyXrefAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
-				nillableMrefAttr, uniqueStringAttr, uniqueXrefAttr, readonlyXrefAttr));
+		when(entityMeta.getAtomicAttributes()).thenReturn(
+				Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr, nillableMrefAttr, uniqueStringAttr,
+						uniqueXrefAttr, readonlyXrefAttr));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -4209,8 +4177,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(updatedEntity0, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamReadOnlyXrefAttrValidationError()
 	{
@@ -4223,8 +4190,9 @@ public class RepositoryValidationDecoratorTest
 		when(readonlyXrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyXrefName)).thenReturn(readonlyXrefAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
-				nillableMrefAttr, uniqueStringAttr, uniqueXrefAttr, readonlyXrefAttr));
+		when(entityMeta.getAtomicAttributes()).thenReturn(
+				Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr, nillableMrefAttr, uniqueStringAttr,
+						uniqueXrefAttr, readonlyXrefAttr));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -4290,8 +4258,7 @@ public class RepositoryValidationDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamReadOnlyMrefAttr()
 	{
@@ -4304,8 +4271,9 @@ public class RepositoryValidationDecoratorTest
 		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyMrefName)).thenReturn(readonlyMrefAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
-				nillableMrefAttr, uniqueStringAttr, uniqueXrefAttr, readonlyMrefAttr));
+		when(entityMeta.getAtomicAttributes()).thenReturn(
+				Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr, nillableMrefAttr, uniqueStringAttr,
+						uniqueXrefAttr, readonlyMrefAttr));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -4341,8 +4309,8 @@ public class RepositoryValidationDecoratorTest
 		when(updatedEntity0.getString(attrUniqueStringName)).thenReturn("unique1");
 		when(updatedEntity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0Clone);
 		when(updatedEntity0.getEntities(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity0Clone)); // read only,
-																											// no
-																											// changes
+		// no
+		// changes
 		when(updatedEntity0.get(attrIdName)).thenReturn("id0");
 		when(updatedEntity0.get(attrXrefName)).thenReturn(refEntity0Clone);
 		when(updatedEntity0.get(attrNillableXrefName)).thenReturn(null);
@@ -4351,7 +4319,7 @@ public class RepositoryValidationDecoratorTest
 		when(updatedEntity0.get(attrUniqueStringName)).thenReturn("unique1");
 		when(updatedEntity0.get(attrUniqueXrefName)).thenReturn(refEntity0Clone);
 		when(updatedEntity0.get(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity0Clone)); // read only, no
-																									// changes
+		// changes
 		// actual tests
 		List<Entity> entities = Arrays.asList(updatedEntity0);
 		repositoryValidationDecorator.update(entities.stream());
@@ -4364,8 +4332,7 @@ public class RepositoryValidationDecoratorTest
 		verify(entityAttributesValidator, times(1)).validate(updatedEntity0, entityMeta);
 	}
 
-	@SuppressWarnings(
-	{ "rawtypes", "unchecked" })
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void updateStreamReadOnlyMrefAttrValidationError()
 	{
@@ -4378,8 +4345,9 @@ public class RepositoryValidationDecoratorTest
 		when(readonlyMrefAttr.isReadOnly()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrReadonlyMrefName)).thenReturn(readonlyMrefAttr);
-		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr,
-				nillableMrefAttr, uniqueStringAttr, uniqueXrefAttr, readonlyMrefAttr));
+		when(entityMeta.getAtomicAttributes()).thenReturn(
+				Arrays.asList(idAttr, xrefAttr, nillableXrefAttr, mrefAttr, nillableMrefAttr, uniqueStringAttr,
+						uniqueXrefAttr, readonlyMrefAttr));
 
 		// entities
 		Entity entity0 = mock(Entity.class);
@@ -4415,8 +4383,8 @@ public class RepositoryValidationDecoratorTest
 		when(updatedEntity0.getString(attrUniqueStringName)).thenReturn("unique1");
 		when(updatedEntity0.getEntity(attrUniqueXrefName)).thenReturn(refEntity0Clone);
 		when(updatedEntity0.getEntities(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity1)); // read only
-																										// attribute
-																										// update
+		// attribute
+		// update
 		when(updatedEntity0.get(attrIdName)).thenReturn("id0");
 		when(updatedEntity0.get(attrXrefName)).thenReturn(refEntity0Clone);
 		when(updatedEntity0.get(attrNillableXrefName)).thenReturn(null);
@@ -4425,7 +4393,7 @@ public class RepositoryValidationDecoratorTest
 		when(updatedEntity0.get(attrUniqueStringName)).thenReturn("unique1");
 		when(updatedEntity0.get(attrUniqueXrefName)).thenReturn(refEntity0Clone);
 		when(updatedEntity0.get(attrReadonlyMrefName)).thenReturn(Arrays.asList(refEntity1)); // read only attribute
-																								// update
+		// update
 
 		// actual tests
 		List<Entity> updatedEntities = Arrays.asList(updatedEntity0);
@@ -4484,9 +4452,8 @@ public class RepositoryValidationDecoratorTest
 		when(decoratedRepository.getEntityMetaData()).thenReturn(entityMeta);
 		EntityAttributesValidator entityAttributesValidator = mock(EntityAttributesValidator.class);
 
-		@SuppressWarnings("resource")
-		RepositoryValidationDecorator myRepositoryValidationDecorator = new RepositoryValidationDecorator(dataService,
-				decoratedRepository, entityAttributesValidator, expressionValidator);
+		@SuppressWarnings("resource") RepositoryValidationDecorator myRepositoryValidationDecorator = new RepositoryValidationDecorator(
+				dataService, decoratedRepository, entityAttributesValidator, expressionValidator);
 
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();

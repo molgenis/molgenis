@@ -301,7 +301,8 @@ public class DependencyResolver
 		while (resolvedPackages.size() < packageMap.size())
 		{
 			AtomicInteger nrResolvedPackages = new AtomicInteger(0);
-			packageMap.forEach((name, package_) -> {
+			packageMap.forEach((name, package_) ->
+			{
 				if (package_.getParent() == null || resolvedPackages.containsKey(package_.getParent().getName()))
 				{
 					resolvedPackages.put(name, package_);

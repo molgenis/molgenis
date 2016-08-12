@@ -2,9 +2,8 @@ package org.molgenis.model.elements;
 
 /**
  * Helper class to deal with xref_label fields.
- * 
+ *
  * @author Morris Swertz
- * 
  */
 public class FieldWithXrefLabel extends Field
 {

@@ -1,13 +1,11 @@
 package org.molgenis.security.core;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.testng.annotations.Test;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.*;
 
 public class MolgenisPasswordEncoderTest
 {

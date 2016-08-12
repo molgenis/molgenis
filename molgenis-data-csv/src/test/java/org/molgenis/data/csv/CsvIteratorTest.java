@@ -1,13 +1,7 @@
 package org.molgenis.data.csv;
 
-import static org.testng.Assert.assertEquals;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Arrays;
-
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
@@ -19,8 +13,13 @@ import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Sets;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Arrays;
+
+import static org.testng.Assert.assertEquals;
 
 public class CsvIteratorTest extends AbstractMolgenisSpringTest
 {

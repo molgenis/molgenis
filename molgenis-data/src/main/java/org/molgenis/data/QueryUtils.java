@@ -1,12 +1,12 @@
 package org.molgenis.data;
 
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
-
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Set;
 
 public class QueryUtils
 {

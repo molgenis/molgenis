@@ -52,7 +52,8 @@ public class OmimResultFilter implements ResultFilter
 		AttributeMetaData id = attributeMetaDataFactory.create().setName("ID").setAuto(true);
 		emd.setIdAttribute(id);
 
-		return firstResult.transform(e -> {
+		return firstResult.transform(e ->
+		{
 			Entity result = new DynamicEntity(emd);
 			result.set(OMIM_DISORDER, e.get(OmimRepository.OMIM_PHENOTYPE_COL_NAME));
 			result.set(OMIM_CAUSAL_IDENTIFIER, e.get(OmimRepository.OMIM_MIM_NUMBER_COL_NAME));

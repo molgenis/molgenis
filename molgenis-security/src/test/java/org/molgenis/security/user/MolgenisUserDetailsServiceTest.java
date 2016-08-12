@@ -1,24 +1,10 @@
 package org.molgenis.security.user;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Collection;
-import java.util.Set;
-import java.util.stream.Stream;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Collections2;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.molgenis.auth.MolgenisGroupMember;
-import org.molgenis.auth.MolgenisGroupMemberMetaData;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserMetaData;
-import org.molgenis.auth.UserAuthority;
-import org.molgenis.auth.UserAuthorityMetaData;
+import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
@@ -30,8 +16,16 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import org.testng.collections.Sets;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
+import java.util.Collection;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 public class MolgenisUserDetailsServiceTest
 {
@@ -61,8 +55,8 @@ public class MolgenisUserDetailsServiceTest
 			}
 		};
 		when(dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, userUser),
-				UserAuthority.class)).thenAnswer(new Answer<Stream<UserAuthority>>()
+				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, userUser), UserAuthority.class))
+				.thenAnswer(new Answer<Stream<UserAuthority>>()
 				{
 					@Override
 					public Stream<UserAuthority> answer(InvocationOnMock invocation) throws Throwable
@@ -71,8 +65,8 @@ public class MolgenisUserDetailsServiceTest
 					}
 				});
 		when(dataService.findAll(USER_AUTHORITY,
-				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, adminUser),
-				UserAuthority.class)).thenAnswer(new Answer<Stream<UserAuthority>>()
+				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, adminUser), UserAuthority.class))
+				.thenAnswer(new Answer<Stream<UserAuthority>>()
 				{
 					@Override
 					public Stream<UserAuthority> answer(InvocationOnMock invocation) throws Throwable
@@ -82,26 +76,24 @@ public class MolgenisUserDetailsServiceTest
 				});
 		when(dataService.findAll(MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER,
 				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, userUser),
-				MolgenisGroupMember.class))
-						.thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
-						{
-							@Override
-							public Stream<MolgenisGroupMember> answer(InvocationOnMock invocation) throws Throwable
-							{
-								return Stream.empty();
-							}
-						});
+				MolgenisGroupMember.class)).thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
+		{
+			@Override
+			public Stream<MolgenisGroupMember> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Stream.empty();
+			}
+		});
 		when(dataService.findAll(MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER,
 				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, adminUser),
-				MolgenisGroupMember.class))
-						.thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
-						{
-							@Override
-							public Stream<MolgenisGroupMember> answer(InvocationOnMock invocation) throws Throwable
-							{
-								return Stream.empty();
-							}
-						});
+				MolgenisGroupMember.class)).thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
+		{
+			@Override
+			public Stream<MolgenisGroupMember> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Stream.empty();
+			}
+		});
 		userDetailsService = new MolgenisUserDetailsService(dataService, authoritiesMapper);
 	}
 

@@ -7,9 +7,8 @@ import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Sets the 'from' and 'size' fields of the SearchRequestBuilder object.
- * 
+ *
  * @author erwin
- * 
  */
 public class LimitOffsetGenerator implements QueryPartGenerator
 {

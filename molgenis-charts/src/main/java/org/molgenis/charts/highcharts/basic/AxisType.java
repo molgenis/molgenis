@@ -2,18 +2,17 @@ package org.molgenis.charts.highcharts.basic;
 
 public enum AxisType
 {
-	LINEAR("linear"), 
-	LOGARITHMIC("logarithmic"), 
-	DATETIME("datetime"),
-	CATEGORY("category");
-	
+	LINEAR("linear"), LOGARITHMIC("logarithmic"), DATETIME("datetime"), CATEGORY("category");
+
 	String type;
-	
-	private AxisType(String type) {
-		this.type = type; 
+
+	private AxisType(String type)
+	{
+		this.type = type;
 	}
-	
-	public String toString() {
+
+	public String toString()
+	{
 		return this.type;
 	}
 }

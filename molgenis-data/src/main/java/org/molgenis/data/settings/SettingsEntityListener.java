@@ -9,9 +9,8 @@ public interface SettingsEntityListener
 {
 	/**
 	 * Callback that is fired when the settings entity is updated.
-	 * 
-	 * @param entity
-	 *            settings entity
+	 *
+	 * @param entity settings entity
 	 */
 	public void postUpdate(Entity entity);
 }

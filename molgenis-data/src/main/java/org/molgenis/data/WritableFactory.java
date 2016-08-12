@@ -1,10 +1,10 @@
 package org.molgenis.data;
 
-import java.io.Closeable;
-import java.util.List;
-
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
+
+import java.io.Closeable;
+import java.util.List;
 
 /**
  * Creates a new Entity Writable

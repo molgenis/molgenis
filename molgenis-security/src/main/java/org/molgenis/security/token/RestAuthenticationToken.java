@@ -1,9 +1,9 @@
 package org.molgenis.security.token;
 
-import java.util.Collection;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
+
+import java.util.Collection;
 
 /**
  * Holds the api token, passed by the client via a custom HTTP header

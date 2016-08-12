@@ -1,17 +1,15 @@
 package org.molgenis.security.permission;
 
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_PREFIX;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_PLUGIN_PREFIX;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
-
-import java.util.Collection;
-
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.util.Collection;
+
+import static org.molgenis.security.core.utils.SecurityUtils.*;
 
 public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
 {
@@ -39,8 +37,8 @@ public class MolgenisPermissionServiceImpl implements MolgenisPermissionService
 			for (GrantedAuthority grantedAuthority : grantedAuthorities)
 			{
 				String authority = grantedAuthority.getAuthority();
-				if (authority.equals(AUTHORITY_SU) || authority.equals(SystemSecurityToken.ROLE_SYSTEM)
-						|| authority.equals(pluginAuthority)) return true;
+				if (authority.equals(AUTHORITY_SU) || authority.equals(SystemSecurityToken.ROLE_SYSTEM) || authority
+						.equals(pluginAuthority)) return true;
 			}
 		}
 		return false;

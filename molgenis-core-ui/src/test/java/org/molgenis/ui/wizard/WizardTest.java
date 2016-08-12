@@ -1,14 +1,11 @@
 package org.molgenis.ui.wizard;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
+import org.springframework.validation.BindingResult;
+import org.testng.annotations.Test;
 
 import javax.servlet.http.HttpServletRequest;
 
-import org.springframework.validation.BindingResult;
-import org.testng.annotations.Test;
+import static org.testng.Assert.*;
 
 public class WizardTest
 {

@@ -90,7 +90,5 @@ public class Trio
 		else if (!mother.equals(other.mother)) return false;
 		return true;
 	}
-	
-	
 
 }

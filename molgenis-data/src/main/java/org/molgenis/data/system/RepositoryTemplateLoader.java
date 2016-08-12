@@ -1,18 +1,17 @@
 package org.molgenis.data.system;
 
-import static org.molgenis.data.system.core.FreemarkerTemplateMetaData.FREEMARKER_TEMPLATE;
-
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-
+import freemarker.cache.TemplateLoader;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import freemarker.cache.TemplateLoader;
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+
+import static org.molgenis.data.system.core.FreemarkerTemplateMetaData.FREEMARKER_TEMPLATE;
 
 /**
  * Loads FreemarkerTemplates from a repository.

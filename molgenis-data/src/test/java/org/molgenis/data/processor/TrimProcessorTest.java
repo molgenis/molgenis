@@ -1,6 +1,5 @@
 package org.molgenis.data.processor;
 
-import org.molgenis.data.processor.TrimProcessor;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 

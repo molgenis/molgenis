@@ -1,7 +1,5 @@
 package org.molgenis.data.idcard;
 
-import static java.util.Objects.requireNonNull;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.idcard.indexer.IdCardIndexerService;
 import org.molgenis.data.idcard.settings.IdCardIndexerSettings;
@@ -9,6 +7,8 @@ import org.molgenis.data.settings.SettingsEntityListener;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static java.util.Objects.requireNonNull;
 
 @Component
 public class IdCardBootstrapper

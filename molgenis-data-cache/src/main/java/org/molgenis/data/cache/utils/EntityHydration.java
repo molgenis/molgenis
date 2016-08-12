@@ -100,7 +100,8 @@ public class EntityHydration
 		Map<String, Object> dehydratedEntity = newHashMap();
 		EntityMetaData entityMetaData = entity.getEntityMetaData();
 
-		entityMetaData.getAtomicAttributes().forEach(attribute -> {
+		entityMetaData.getAtomicAttributes().forEach(attribute ->
+		{
 
 			// Only dehydrate if the attribute is NOT computed
 			if (attribute.getExpression() == null)
@@ -129,7 +130,8 @@ public class EntityHydration
 			case CATEGORICAL_MREF:
 			case MREF:
 				List<Object> mrefIdentifiers = newArrayList();
-				entity.getEntities(name).forEach(mrefEntity -> {
+				entity.getEntities(name).forEach(mrefEntity ->
+				{
 					if (mrefEntity != null) mrefIdentifiers.add(mrefEntity.getIdValue());
 				});
 				value = mrefIdentifiers;

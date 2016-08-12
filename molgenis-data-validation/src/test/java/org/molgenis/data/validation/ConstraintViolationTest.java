@@ -1,11 +1,11 @@
 package org.molgenis.data.validation;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 public class ConstraintViolationTest
 {

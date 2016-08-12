@@ -1,32 +1,12 @@
 package org.molgenis.ontology.utils;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.apache.commons.lang3.StringUtils;
 import org.semanticweb.owlapi.apibinding.OWLManager;
-import org.semanticweb.owlapi.model.AddAxiom;
-import org.semanticweb.owlapi.model.IRI;
-import org.semanticweb.owlapi.model.OWLAnnotation;
-import org.semanticweb.owlapi.model.OWLAnnotationAssertionAxiom;
-import org.semanticweb.owlapi.model.OWLAnnotationProperty;
-import org.semanticweb.owlapi.model.OWLClass;
-import org.semanticweb.owlapi.model.OWLClassExpression;
-import org.semanticweb.owlapi.model.OWLDataFactory;
-import org.semanticweb.owlapi.model.OWLEntity;
-import org.semanticweb.owlapi.model.OWLLiteral;
-import org.semanticweb.owlapi.model.OWLObjectProperty;
-import org.semanticweb.owlapi.model.OWLOntology;
-import org.semanticweb.owlapi.model.OWLOntologyCreationException;
-import org.semanticweb.owlapi.model.OWLOntologyManager;
-import org.semanticweb.owlapi.model.OWLSubClassOfAxiom;
+import org.semanticweb.owlapi.model.*;
 import org.semanticweb.owlapi.vocab.OWLRDFVocabulary;
+
+import java.io.File;
+import java.util.*;
 
 public class OntologyLoader
 {
@@ -38,21 +18,24 @@ public class OntologyLoader
 	private OWLOntology ontology = null;
 	private OWLOntologyManager manager = null;
 	private Set<String> synonymsProperties;
+
 	{
-		synonymsProperties = new HashSet<String>(Arrays.asList(
-				"http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#FULL_SYN",
-				"http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P90",
-				"http://www.geneontology.org/formats/oboInOwl#hasExactSynonym",
-				"http://www.ebi.ac.uk/efo/alternative_term"));
+		synonymsProperties = new HashSet<String>(
+				Arrays.asList("http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#FULL_SYN",
+						"http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#P90",
+						"http://www.geneontology.org/formats/oboInOwl#hasExactSynonym",
+						"http://www.ebi.ac.uk/efo/alternative_term"));
 	}
 
 	private Set<String> owlObjectProperties;
+
 	{
 		owlObjectProperties = new HashSet<String>(
 				Arrays.asList("http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#is_associated_with"));
 	}
 
 	private Set<String> ontologyTermDefinitions;
+
 	{
 		ontologyTermDefinitions = new HashSet<String>(Arrays.asList("http://purl.obolibrary.org/obo/",
 				"http://ncicb.nci.nih.gov/xml/owl/EVS/Thesaurus.owl#DEFINITION"));

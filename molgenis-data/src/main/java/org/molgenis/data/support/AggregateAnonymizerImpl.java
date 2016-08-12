@@ -1,13 +1,12 @@
 package org.molgenis.data.support;
 
-import java.util.List;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import org.molgenis.data.AggregateAnonymizer;
 import org.molgenis.data.AggregateResult;
 import org.molgenis.data.AnonymizedAggregateResult;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
+import java.util.List;
 
 public class AggregateAnonymizerImpl implements AggregateAnonymizer
 {

@@ -1,14 +1,12 @@
 package org.molgenis.data.mapper.algorithmgenerator.bean;
 
-import java.util.Set;
-
-import javax.annotation.Nullable;
-
+import com.google.auto.value.AutoValue;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.gson.AutoGson;
 
-import com.google.auto.value.AutoValue;
+import javax.annotation.Nullable;
+import java.util.Set;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_GeneratedAlgorithm.class)

@@ -1,12 +1,11 @@
 package org.molgenis.js.sandbox;
 
-import java.lang.reflect.Method;
-import java.util.Set;
-
+import com.google.common.collect.ImmutableSet;
 import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Scriptable;
 
-import com.google.common.collect.ImmutableSet;
+import java.lang.reflect.Method;
+import java.util.Set;
 
 /**
  * A sandboxed {@link NativeJavaObject} that prevents using reflection to escape a sandbox.
@@ -14,8 +13,8 @@ import com.google.common.collect.ImmutableSet;
 public class SandboxNativeJavaObject extends NativeJavaObject
 {
 	private static final long serialVersionUID = 7690142963749803499L;
-	private static final Set<String> EXCLUDED_METHODS = ImmutableSet.of("wait", "toString", "getClass", "equals",
-			"hashCode", "notify", "notifyAll");
+	private static final Set<String> EXCLUDED_METHODS = ImmutableSet
+			.of("wait", "toString", "getClass", "equals", "hashCode", "notify", "notifyAll");
 
 	public SandboxNativeJavaObject(Scriptable scope, Object javaObject, Class<?> staticType)
 	{

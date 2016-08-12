@@ -4,20 +4,19 @@ import org.molgenis.charts.AbstractChart.MolgenisChartType;
 
 public enum ChartType
 {
-	SCATTER("scatter"),
-	BOXPLOT("boxplot"),
-	LINE("line");
-	
+	SCATTER("scatter"), BOXPLOT("boxplot"), LINE("line");
+
 	private String type;
-	
-	private ChartType(String type){
+
+	private ChartType(String type)
+	{
 		this.type = type;
 	}
-	
-	public String toString(){
+
+	public String toString()
+	{
 		return this.type;
 	}
-	
 
 	public static ChartType getChartType(MolgenisChartType molgenisChartType)
 	{

@@ -1,18 +1,17 @@
 package org.molgenis.security.core.utils;
 
-import static org.molgenis.security.core.runas.SystemSecurityToken.USER_SYSTEM;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.molgenis.security.core.Permission;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import static org.molgenis.security.core.runas.SystemSecurityToken.USER_SYSTEM;
 
 public class SecurityUtils
 {
@@ -56,7 +55,7 @@ public class SecurityUtils
 
 	/**
 	 * Returns whether the current user has at least one of the given roles
-	 * 
+	 *
 	 * @param roles
 	 * @return
 	 */
@@ -82,7 +81,7 @@ public class SecurityUtils
 
 	/**
 	 * Returns whether the current user is a super user
-	 * 
+	 *
 	 * @return
 	 */
 	public static boolean currentUserIsSu()
@@ -113,7 +112,7 @@ public class SecurityUtils
 
 	/**
 	 * Returns whether the current user is authenticated and not the anonymous user
-	 * 
+	 *
 	 * @return
 	 */
 	public static boolean currentUserIsAuthenticated()
@@ -130,7 +129,7 @@ public class SecurityUtils
 
 	/**
 	 * Returns the default (su, read, write) roles related to a plugin
-	 * 
+	 *
 	 * @param pluginId
 	 * @return
 	 */
@@ -146,8 +145,7 @@ public class SecurityUtils
 				pluginAuthorities.add(getPluginWriteAuthority(pluginId));
 			}
 		}
-		return pluginAuthorities.toArray(new String[]
-		{});
+		return pluginAuthorities.toArray(new String[] {});
 	}
 
 	public static String getPluginReadAuthority(String pluginId)
@@ -162,7 +160,7 @@ public class SecurityUtils
 
 	/**
 	 * Get all possible authorities (roles) for an entity
-	 * 
+	 *
 	 * @param entityName
 	 * @return
 	 */
@@ -171,8 +169,8 @@ public class SecurityUtils
 		List<String> authorities = new ArrayList<>();
 		for (Permission permission : Permission.values())
 		{
-			String authority = String.format("%s%s_%s", AUTHORITY_ENTITY_PREFIX, permission.name(),
-					entityName.toUpperCase());
+			String authority = String
+					.format("%s%s_%s", AUTHORITY_ENTITY_PREFIX, permission.name(), entityName.toUpperCase());
 			authorities.add(authority);
 		}
 
@@ -181,8 +179,7 @@ public class SecurityUtils
 
 	/**
 	 * Checks if client session is expired (by checking the requested sessionId).
-	 * 
-	 * 
+	 *
 	 * @param request
 	 * @return true if session is expired
 	 */

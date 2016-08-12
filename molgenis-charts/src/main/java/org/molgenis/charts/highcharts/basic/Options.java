@@ -22,8 +22,7 @@ public class Options
 	}
 
 	/**
-	 * @param chart
-	 *            the chart to set
+	 * @param chart the chart to set
 	 */
 	public void setChart(BasicChart chart)
 	{
@@ -39,8 +38,7 @@ public class Options
 	}
 
 	/**
-	 * @param title
-	 *            the title to set
+	 * @param title the title to set
 	 */
 	public void setTitle(ChartTitle title)
 	{
@@ -56,21 +54,20 @@ public class Options
 	}
 
 	/**
-	 * @param series
-	 *            the series to set
+	 * @param series the series to set
 	 */
 	public void setSeries(List<Series> series)
 	{
 		this.series = series;
 	}
-	
+
 	/**
-	 * @param series
-	 *            the series to add
+	 * @param series the series to add
 	 */
 	public void addSeries(List<Series> series)
 	{
-		for(Series serie: series) {
+		for (Series serie : series)
+		{
 			this.series.add(serie);
 		}
 	}
@@ -84,17 +81,15 @@ public class Options
 	}
 
 	/**
-	 * @param xAxis
-	 *            the xAxis to set
+	 * @param xAxis the xAxis to set
 	 */
 	public void setxAxes(List<XAxis> xAxes)
 	{
 		this.xAxis = xAxes;
 	}
-	
+
 	/**
-	 * @param xAxis
-	 *            the xAxis to add
+	 * @param xAxis the xAxis to add
 	 */
 	public void addxAxis(XAxis xAxis)
 	{
@@ -110,23 +105,20 @@ public class Options
 	}
 
 	/**
-	 * @param yAxis
-	 *            the yAxis to set
+	 * @param yAxis the yAxis to set
 	 */
 	public void setyAxes(List<YAxis> yAxes)
 	{
 		this.yAxis = yAxes;
 	}
-	
+
 	/**
-	 * @param xAxis
-	 *            the xAxis to add
+	 * @param xAxis the xAxis to add
 	 */
 	public void addyAxis(YAxis yAxis)
 	{
 		this.yAxis.add(yAxis);
 	}
-	
 
 	/**
 	 * @return the credits
@@ -143,7 +135,7 @@ public class Options
 	{
 		this.credits = credits;
 	}
-	
+
 	/**
 	 * @return the legend
 	 */

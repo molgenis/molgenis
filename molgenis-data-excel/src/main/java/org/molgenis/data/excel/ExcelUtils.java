@@ -1,7 +1,5 @@
 package org.molgenis.data.excel;
 
-import java.util.List;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellValue;
 import org.apache.poi.ss.usermodel.DateUtil;
@@ -10,6 +8,8 @@ import org.molgenis.data.DataConverter;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
+
+import java.util.List;
 
 public class ExcelUtils
 {
@@ -68,8 +68,8 @@ public class ExcelUtils
 							// read an integer if the double value equals the
 							// integer value
 							double x = cellValue.getNumberValue();
-							if (x == Math.rint(x) && !Double.isNaN(x) && !Double.isInfinite(x)) value = String
-									.valueOf((int) x);
+							if (x == Math.rint(x) && !Double.isNaN(x) && !Double.isInfinite(x))
+								value = String.valueOf((int) x);
 							else value = String.valueOf(x);
 						}
 						break;

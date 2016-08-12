@@ -1,17 +1,16 @@
 package org.molgenis.python;
 
-import java.io.File;
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
+
 /**
  * Executes a Python script with the Python version installed on server executable in a new process.
- * 
  */
 @Service
 public class PythonScriptExecutor
@@ -46,8 +45,8 @@ public class PythonScriptExecutor
 		// Check if Python has execution rights
 		if (!file.canExecute())
 		{
-			throw new MolgenisPythonException("Can not execute [" + pythonScriptExecutable
-					+ "]. Does it have executable permissions?");
+			throw new MolgenisPythonException(
+					"Can not execute [" + pythonScriptExecutable + "]. Does it have executable permissions?");
 		}
 
 		// Check if the Pyhton script exists

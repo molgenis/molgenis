@@ -11,29 +11,36 @@
 package org.molgenis.model.elements;
 
 // imports
+
+import org.molgenis.model.MolgenisModelException;
+
 import java.io.Serializable;
 import java.util.List;
 import java.util.Vector;
 
-import org.molgenis.model.MolgenisModelException;
-
 /**
  * This class describes a unique (combination of) field(s) associated with
  * entity.
- * 
+ *
  * @author RA Scheltema
  * @version 1.0.0
  */
 public class Unique implements Serializable
 {
-	/** Used for serialization purposes */
+	/**
+	 * Used for serialization purposes
+	 */
 	private static final long serialVersionUID = -1201614213585052020L;
 
 	// member variables
-	/** The entity this unique (key) is associated with */
+	/**
+	 * The entity this unique (key) is associated with
+	 */
 	private Entity entity;
 
-	/** The fields of the associated entity that make up this unique. */
+	/**
+	 * The fields of the associated entity that make up this unique.
+	 */
 	private List<String> fields;
 
 	/**
@@ -42,18 +49,19 @@ public class Unique implements Serializable
 	 */
 	private boolean subclass = false;
 
-	/** A description of this constraint */
+	/**
+	 * A description of this constraint
+	 */
 	private String description;
 
 	// constructor(s)
+
 	/**
 	 * Constructor, which sets the associated entity and a single field as the
 	 * unique.
-	 * 
-	 * @param entity
-	 *            The entity this unique is associated with.
-	 * @param field
-	 *            The field that makes up this unique.
+	 *
+	 * @param entity The entity this unique is associated with.
+	 * @param field  The field that makes up this unique.
 	 */
 	public Unique(Entity entity, String fieldName, boolean subclass, String description)
 	{
@@ -65,7 +73,9 @@ public class Unique implements Serializable
 		this.fields.add(fieldName);
 	}
 
-	/** Copy constructor */
+	/**
+	 * Copy constructor
+	 */
 	public Unique(Unique u)
 	{
 		this.description = u.description;
@@ -77,11 +87,9 @@ public class Unique implements Serializable
 	/**
 	 * Constructor, which sets the associated entity and the list of fields as
 	 * the unique.
-	 * 
-	 * @param entity
-	 *            The entity this unique is associated with.
-	 * @param fields
-	 *            The fields that make up this unique.
+	 *
+	 * @param entity The entity this unique is associated with.
+	 * @param fields The fields that make up this unique.
 	 */
 	public Unique(Entity entity, List<String> fieldNames, boolean subclass, String description)
 	{
@@ -92,9 +100,10 @@ public class Unique implements Serializable
 	}
 
 	// access methods
+
 	/**
 	 * Returns a list of all the fields that make up this unique.
-	 * 
+	 *
 	 * @return The fields that make up the unique.
 	 * @throws MolgenisModelException
 	 */
@@ -104,8 +113,8 @@ public class Unique implements Serializable
 		for (String fieldName : fields)
 		{
 			Field f = entity.getAllField(fieldName);
-			if (f == null) throw new MolgenisModelException("Unknown unique field: " + this.getEntity().getName() + "."
-					+ fieldName);
+			if (f == null) throw new MolgenisModelException(
+					"Unknown unique field: " + this.getEntity().getName() + "." + fieldName);
 			result.add(f);
 		}
 		return result;
@@ -113,7 +122,7 @@ public class Unique implements Serializable
 
 	/**
 	 * Returns the associated entity.
-	 * 
+	 *
 	 * @return The entity associated with this unique.
 	 */
 	public Entity getEntity()

@@ -1,42 +1,36 @@
 package org.molgenis.ui.browserdetection;
 
+import eu.bitwalker.useragentutils.Browser;
+import eu.bitwalker.useragentutils.UserAgent;
+
+import javax.servlet.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-
-import eu.bitwalker.useragentutils.Browser;
-import eu.bitwalker.useragentutils.UserAgent;
-
 /**
  * Servlet filter that forwards the request to an browser unsupported message page if the user uses an unsupported
  * browser (< IE9)
- * 
+ * <p>
  * IE compatibility mode is not taken into account (see https://github.com/molgenis/molgenis/issues/3481)
  */
 public class BrowserDetectionFilter implements Filter
 {
 	private static final String USER_AGENT_HEADER_NAME = "User-Agent";
 	private static final String UNSUPPORTED_BROWSER_MESSAGE_PAGE = "/html/unsupported-browser-message.html";
-	private static final List<Browser> UNSUPPORTED_BROWSERS = Arrays.asList(Browser.IE5, Browser.IE5_5, Browser.IE6,
-			Browser.IE7, Browser.IE8);
+	private static final List<Browser> UNSUPPORTED_BROWSERS = Arrays
+			.asList(Browser.IE5, Browser.IE5_5, Browser.IE6, Browser.IE7, Browser.IE8);
 	private static String CONTINUE_WITH_UNSUPPORTED_BROWSER_TOKEN = "continueWithUnsupportedBrowser";
 
 	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException,
-			ServletException
+	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+			throws IOException, ServletException
 	{
 		HttpServletRequest httpRequest = (HttpServletRequest) request;
-		if (!httpRequest.getRequestURI().startsWith("/api/")
-				&& !isSupported(httpRequest.getHeader(USER_AGENT_HEADER_NAME)))
+		if (!httpRequest.getRequestURI().startsWith("/api/") && !isSupported(
+				httpRequest.getHeader(USER_AGENT_HEADER_NAME)))
 		{
 			HttpSession session = httpRequest.getSession();
 			if (session.getAttribute(CONTINUE_WITH_UNSUPPORTED_BROWSER_TOKEN) == null)

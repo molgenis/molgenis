@@ -1,10 +1,10 @@
 package org.molgenis.data.mapper.service.impl;
 
-import static java.util.Objects.requireNonNull;
+import org.molgenis.script.Script;
 
 import java.util.Map;
 
-import org.molgenis.script.Script;
+import static java.util.Objects.requireNonNull;
 
 /**
  * Mapping algorithm template for JavaScript Magma scripts.

@@ -1,14 +1,6 @@
 package org.molgenis.data.idcard.indexer;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.idcard.indexer.IdCardIndexerJob.JOB_USERNAME;
-import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.ID_CARD_INDEXING_EVENT;
-
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.UUID;
-
+import com.google.common.io.BaseEncoding;
 import org.molgenis.data.DataService;
 import org.molgenis.data.idcard.model.IdCardIndexingEvent;
 import org.molgenis.data.idcard.model.IdCardIndexingEventFactory;
@@ -16,16 +8,8 @@ import org.molgenis.data.idcard.model.IdCardIndexingEventStatus;
 import org.molgenis.data.idcard.settings.IdCardIndexerSettings;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.quartz.CronScheduleBuilder;
-import org.quartz.JobBuilder;
-import org.quartz.JobDetail;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
+import org.quartz.*;
 import org.quartz.Trigger.TriggerState;
-import org.quartz.TriggerBuilder;
-import org.quartz.TriggerKey;
 import org.quartz.impl.triggers.CronTriggerImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +17,14 @@ import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.google.common.io.BaseEncoding;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.UUID;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.idcard.indexer.IdCardIndexerJob.JOB_USERNAME;
+import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.ID_CARD_INDEXING_EVENT;
 
 @Service
 public class IdCardIndexerServiceImpl implements IdCardIndexerService, DisposableBean
@@ -222,7 +213,8 @@ public class IdCardIndexerServiceImpl implements IdCardIndexerService, Disposabl
 		IdCardIndexingEvent idCardIndexingEvent = idCardIndexingEventFactory.create();
 		idCardIndexingEvent.setStatus(IdCardIndexingEventStatus.CONFIGURATION_CHANGE);
 		idCardIndexingEvent.setMessage(updateMessage);
-		RunAsSystemProxy.runAsSystem(() -> {
+		RunAsSystemProxy.runAsSystem(() ->
+		{
 			dataService.add(ID_CARD_INDEXING_EVENT, idCardIndexingEvent);
 		});
 	}

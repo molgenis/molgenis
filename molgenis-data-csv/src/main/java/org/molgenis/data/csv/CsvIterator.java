@@ -1,21 +1,6 @@
 package org.molgenis.data.csv;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.Charset;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-
+import au.com.bytecode.opencsv.CSVReader;
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
@@ -28,7 +13,11 @@ import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.util.CloseableIterator;
 import org.springframework.util.StringUtils;
 
-import au.com.bytecode.opencsv.CSVReader;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 
 public class CsvIterator implements CloseableIterator<Entity>
 {
@@ -58,11 +47,11 @@ public class CsvIterator implements CloseableIterator<Entity>
 
 		try
 		{
-			if (StringUtils.getFilenameExtension(file.getName()).equalsIgnoreCase(
-					GenericImporterExtensions.ZIP.toString()))
+			if (StringUtils.getFilenameExtension(file.getName())
+					.equalsIgnoreCase(GenericImporterExtensions.ZIP.toString()))
 			{
 				zipFile = new ZipFile(file.getAbsolutePath());
-				for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements();)
+				for (Enumeration<? extends ZipEntry> e = zipFile.entries(); e.hasMoreElements(); )
 				{
 					ZipEntry entry = e.nextElement();
 					if (StringUtils.stripFilenameExtension(entry.getName()).equalsIgnoreCase(repositoryName))
@@ -90,7 +79,6 @@ public class CsvIterator implements CloseableIterator<Entity>
 			throw new MolgenisDataException("Exception reading [" + file.getAbsolutePath() + "]", e);
 		}
 	}
-
 
 	public Map<String, Integer> getColNamesMap()
 	{

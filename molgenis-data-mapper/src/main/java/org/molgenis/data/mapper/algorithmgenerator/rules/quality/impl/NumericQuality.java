@@ -1,9 +1,8 @@
 package org.molgenis.data.mapper.algorithmgenerator.rules.quality.impl;
 
+import com.google.auto.value.AutoValue;
 import org.molgenis.data.mapper.algorithmgenerator.rules.quality.Quality;
 import org.molgenis.gson.AutoGson;
-
-import com.google.auto.value.AutoValue;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_NumericQuality.class)
