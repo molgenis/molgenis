@@ -18,9 +18,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 public class ReindexMetadataCUDOperationsPlatformIT
 {
@@ -126,11 +124,11 @@ public class ReindexMetadataCUDOperationsPlatformIT
 
 		// 2. remove attribute
 		AttributeMetaData toRemoveAttribute = emd.getAttribute(attributeName);
-		Object toRemoveAttributeId = toRemoveAttribute.getIdValue();
+		emd.removeAttribute(toRemoveAttribute);
 
 		// 3. Preform update
 		runAsSystem(() -> {
-			metaDataService.deleteAttributeById(toRemoveAttribute.getIdValue());
+			metaDataService.updateEntityMeta(emd);
 		});
 		PlatformIT.waitForWorkToBeFinished(reindexService, LOG);
 		assertTrue(searchService.hasMapping(emd));
@@ -138,7 +136,7 @@ public class ReindexMetadataCUDOperationsPlatformIT
 		// 4. Verify metadata changed
 		Query<Entity> q2 = new QueryImpl<>();
 		EntityMetaData emdActual = metaDataService.getEntityMetaData(AttributeMetaDataMetaData.ATTRIBUTE_META_DATA);
-		q2.eq(AttributeMetaDataMetaData.IDENTIFIER, toRemoveAttributeId);
+		q2.eq(AttributeMetaDataMetaData.IDENTIFIER, toRemoveAttribute.getIdValue());
 		assertEquals(searchService.count(q2, emdActual), 0);
 
 		// Reset context
