@@ -273,7 +273,6 @@ public class AttributeMetaData extends StaticEntity
 		return getExpression() != null;
 	}
 
-
 	/**
 	 * Whether attribute has not null constraint
 	 *

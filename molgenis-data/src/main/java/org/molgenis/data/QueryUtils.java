@@ -7,6 +7,7 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+
 import static java.util.stream.StreamSupport.*;
 
 public class QueryUtils
