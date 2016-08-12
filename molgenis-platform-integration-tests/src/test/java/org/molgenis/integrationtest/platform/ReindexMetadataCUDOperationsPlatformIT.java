@@ -140,8 +140,9 @@ public class ReindexMetadataCUDOperationsPlatformIT
 		assertEquals(searchService.count(q2, emdActual), 0);
 
 		// Reset context
+		emd.addAttribute(toRemoveAttribute);
 		runAsSystem(() -> {
-			metaDataService.addAttribute(toRemoveAttribute);
+			metaDataService.updateEntityMeta(emd);
 		});
 		PlatformIT.waitForWorkToBeFinished(reindexService, LOG);
 	}
