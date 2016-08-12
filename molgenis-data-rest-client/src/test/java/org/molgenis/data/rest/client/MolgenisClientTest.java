@@ -1,9 +1,6 @@
 package org.molgenis.data.rest.client;
 
-import static autovalue.shaded.com.google.common.common.collect.ImmutableList.of;
-
-import java.util.Map;
-
+import com.google.gson.GsonBuilder;
 import org.molgenis.data.rest.client.bean.LoginResponse;
 import org.molgenis.data.rest.client.bean.QueryResponse;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -11,7 +8,9 @@ import org.springframework.web.client.RestTemplate;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
-import com.google.gson.GsonBuilder;
+import java.util.Map;
+
+import static com.google.common.collect.ImmutableList.of;
 
 public class MolgenisClientTest
 {

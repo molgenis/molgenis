@@ -1,11 +1,12 @@
 package org.molgenis.data.system;
 
+import static org.molgenis.data.system.core.FreemarkerTemplateMetaData.FREEMARKER_TEMPLATE;
+
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.meta.system.FreemarkerTemplateMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.system.core.FreemarkerTemplate;
 import org.slf4j.Logger;
@@ -36,8 +37,9 @@ public class RepositoryTemplateLoader implements TemplateLoader
 	@Override
 	public Object findTemplateSource(String name) throws IOException
 	{
-		FreemarkerTemplate template = dataService.findOne(FreemarkerTemplateMetaData.ENTITY_NAME,
-				new QueryImpl().eq("Name", name), FreemarkerTemplate.class);
+		FreemarkerTemplate template = dataService
+				.findOne(FREEMARKER_TEMPLATE, new QueryImpl<FreemarkerTemplate>().eq("Name", name),
+						FreemarkerTemplate.class);
 
 		if (template == null)
 		{

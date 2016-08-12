@@ -1,9 +1,10 @@
 package org.molgenis.data.mapper.repository;
 
-import java.util.List;
-
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
+
+import java.util.List;
 
 public interface MappingProjectRepository
 {
@@ -12,14 +13,14 @@ public interface MappingProjectRepository
 	 * 
 	 * @param mappingProject
 	 */
-	public abstract void add(MappingProject mappingProject);
+	void add(MappingProject mappingProject);
 
 	/**
 	 * Update an existing {@link MappingProject}
 	 * 
 	 * @param mappingProject
 	 */
-	public abstract void update(MappingProject mappingProject);
+	void update(MappingProject mappingProject);
 
 	/**
 	 * Get a {@link MappingProject} object based on the project identifier
@@ -27,14 +28,14 @@ public interface MappingProjectRepository
 	 * @param identifier
 	 * @return
 	 */
-	public abstract MappingProject getMappingProject(String identifier);
+	MappingProject getMappingProject(String identifier);
 
 	/**
 	 * Get a list of all {@link MappingProject}
 	 * 
 	 * @return
 	 */
-	public abstract List<MappingProject> getAllMappingProjects();
+	List<MappingProject> getAllMappingProjects();
 
 	/**
 	 * Get a list of {@link MappingProject} based on a query
@@ -42,7 +43,7 @@ public interface MappingProjectRepository
 	 * @param q
 	 * @return
 	 */
-	public abstract List<MappingProject> getMappingProjects(Query q);
+	List<MappingProject> getMappingProjects(Query<Entity> q);
 
 	/**
 	 * Delete a mapping project.
@@ -50,6 +51,6 @@ public interface MappingProjectRepository
 	 * @param mappingProjectId
 	 *            id of the {@link MappingProject} to delete
 	 */
-	public abstract void delete(String mappingProjectId);
+	void delete(String mappingProjectId);
 
 }

@@ -1,8 +1,5 @@
 package org.molgenis.data.transaction;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.logging.LogFactory;
 import org.molgenis.data.IdGenerator;
 import org.slf4j.Logger;
@@ -14,6 +11,8 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * TransactionManager used by Molgenis.
@@ -42,6 +41,7 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 
 	public void addTransactionListener(MolgenisTransactionListener transactionListener)
 	{
+		//FIXME: make concurrent using ReeentrantReadWriteLock.
 		transactionListeners.add(transactionListener);
 	}
 
@@ -100,6 +100,10 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 		}
 
 		super.doCommit(jpaTransactionStatus);
+		if (!status.isReadOnly())
+		{
+			transactionListeners.forEach(j -> j.afterCommitTransaction(transaction.getId()));
+		}
 	}
 
 	@Override
@@ -151,8 +155,11 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 		}
 
 		super.doCleanupAfterCompletion(molgenisTransaction.getDataSourceTransaction());
-
 		TransactionSynchronizationManager.unbindResourceIfPossible(TRANSACTION_ID_RESOURCE_NAME);
+
+		transactionListeners.forEach(j -> {
+			j.doCleanupAfterCompletion(molgenisTransaction.getId());
+		});
 	}
 
 	@Override
@@ -168,5 +175,4 @@ public class MolgenisTransactionManager extends DataSourceTransactionManager
 		MolgenisTransaction molgenisTransaction = (MolgenisTransaction) transaction;
 		super.doResume(molgenisTransaction.getDataSourceTransaction(), suspendedResources);
 	}
-
 }

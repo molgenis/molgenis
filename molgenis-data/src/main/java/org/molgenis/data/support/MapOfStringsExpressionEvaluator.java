@@ -1,14 +1,15 @@
 package org.molgenis.data.support;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.Gson;
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-
-import com.google.common.collect.ImmutableMap;
-import com.google.gson.Gson;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.SHALLOW_COPY_ATTRS;
 
 public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 {
@@ -16,20 +17,20 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 	private Map<String, ExpressionEvaluator> evaluators;
 
 	/**
-	 * Constructs a new EspressionEvaluator for an attribute whose expression is a simple string.
-	 * 
-	 * @param attributeMetaData
-	 * @param entityMetaData
+	 * Constructs a new expression evaluator for an attribute whose expression is a simple string.
+	 *
+	 * @param attrMeta   attribute meta data
+	 * @param entityMeta entity meta data
 	 */
-	public MapOfStringsExpressionEvaluator(AttributeMetaData attributeMetaData, EntityMetaData entityMetaData)
+	public MapOfStringsExpressionEvaluator(AttributeMetaData attrMeta, EntityMetaData entityMeta)
 	{
-		targetAttributeMetaData = new DefaultAttributeMetaData(attributeMetaData);
-		String expression = attributeMetaData.getExpression();
+		targetAttributeMetaData = attrMeta;
+		String expression = attrMeta.getExpression();
 		if (expression == null)
 		{
 			throw new NullPointerException("Attribute has no expression.");
 		}
-		EntityMetaData refEntity = attributeMetaData.getRefEntity();
+		EntityMetaData refEntity = attrMeta.getRefEntity();
 		if (refEntity == null)
 		{
 			throw new NullPointerException("refEntity not specified.");
@@ -37,10 +38,9 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 		Gson gson = new Gson();
 		try
 		{
-			@SuppressWarnings("unchecked")
-			Map<String, String> attributeExpressions = gson.fromJson(expression, Map.class);
-			ImmutableMap.Builder<String, ExpressionEvaluator> builder = ImmutableMap
-					.<String, ExpressionEvaluator> builder();
+			@SuppressWarnings("unchecked") Map<String, String> attributeExpressions = gson
+					.fromJson(expression, Map.class);
+			ImmutableMap.Builder<String, ExpressionEvaluator> builder = ImmutableMap.builder();
 			for (Entry<String, String> entry : attributeExpressions.entrySet())
 			{
 				AttributeMetaData targetAttributeMetaData = refEntity.getAttribute(entry.getKey());
@@ -48,9 +48,9 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 				{
 					throw new IllegalArgumentException("Unknown target attribute: " + entry.getKey() + '.');
 				}
-				DefaultAttributeMetaData amd = new DefaultAttributeMetaData(targetAttributeMetaData)
+				AttributeMetaData amd = AttributeMetaData.newInstance(targetAttributeMetaData, SHALLOW_COPY_ATTRS)
 						.setExpression(entry.getValue());
-				StringExpressionEvaluator evaluator = new StringExpressionEvaluator(amd, entityMetaData);
+				StringExpressionEvaluator evaluator = new StringExpressionEvaluator(amd, entityMeta);
 				builder.put(entry.getKey(), evaluator);
 			}
 			evaluators = builder.build();
@@ -66,7 +66,7 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 	@Override
 	public Object evaluate(Entity entity)
 	{
-		MapEntity result = new MapEntity(targetAttributeMetaData.getRefEntity());
+		Entity result = new DynamicEntity(targetAttributeMetaData.getRefEntity());
 		for (Entry<String, ExpressionEvaluator> entry : evaluators.entrySet())
 		{
 			result.set(entry.getKey(), entry.getValue().evaluate(entity));

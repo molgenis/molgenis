@@ -1,9 +1,9 @@
 package org.molgenis.fieldtypes;
 
-import java.text.ParseException;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.model.MolgenisModelException;
+
+import java.text.ParseException;
 
 public class StringField extends FieldType
 {
@@ -11,6 +11,7 @@ public class StringField extends FieldType
 	private static final long MAX_STRING_LENGTH = 255L;
 	// http://stackoverflow.com/a/21558119
 	public static final String CRON_REGEX = "/^\\s*($|#|\\w+\\s*=|(\\?|\\*|(?:[0-5]?\\d)(?:(?:-|\\/|\\,)(?:[0-5]?\\d))?(?:,(?:[0-5]?\\d)(?:(?:-|\\/|\\,)(?:[0-5]?\\d))?)*)\\s+(\\?|\\*|(?:[0-5]?\\d)(?:(?:-|\\/|\\,)(?:[0-5]?\\d))?(?:,(?:[0-5]?\\d)(?:(?:-|\\/|\\,)(?:[0-5]?\\d))?)*)\\s+(\\?|\\*|(?:[01]?\\d|2[0-3])(?:(?:-|\\/|\\,)(?:[01]?\\d|2[0-3]))?(?:,(?:[01]?\\d|2[0-3])(?:(?:-|\\/|\\,)(?:[01]?\\d|2[0-3]))?)*)\\s+(\\?|\\*|(?:0?[1-9]|[12]\\d|3[01])(?:(?:-|\\/|\\,)(?:0?[1-9]|[12]\\d|3[01]))?(?:,(?:0?[1-9]|[12]\\d|3[01])(?:(?:-|\\/|\\,)(?:0?[1-9]|[12]\\d|3[01]))?)*)\\s+(\\?|\\*|(?:[1-9]|1[012])(?:(?:-|\\/|\\,)(?:[1-9]|1[012]))?(?:L|W)?(?:,(?:[1-9]|1[012])(?:(?:-|\\/|\\,)(?:[1-9]|1[012]))?(?:L|W)?)*|\\?|\\*|(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)(?:(?:-)(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))?(?:,(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)(?:(?:-)(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC))?)*)\\s+(\\?|\\*|(?:[0-6])(?:(?:-|\\/|\\,|#)(?:[0-6]))?(?:L)?(?:,(?:[0-6])(?:(?:-|\\/|\\,|#)(?:[0-6]))?(?:L)?)*|\\?|\\*|(?:MON|TUE|WED|THU|FRI|SAT|SUN)(?:(?:-)(?:MON|TUE|WED|THU|FRI|SAT|SUN))?(?:,(?:MON|TUE|WED|THU|FRI|SAT|SUN)(?:(?:-)(?:MON|TUE|WED|THU|FRI|SAT|SUN))?)*)(|\\s)+(\\?|\\*|(?:|\\d{4})(?:(?:-|\\/|\\,)(?:|\\d{4}))?(?:,(?:|\\d{4})(?:(?:-|\\/|\\,)(?:|\\d{4}))?)*))$/";
+	public static final String DURATION_REGEX = "/^[0-9]+[dhms]$/";
 
 	@Override
 	public String getJavaAssignment(String value) throws MolgenisModelException
@@ -36,6 +37,12 @@ public class StringField extends FieldType
 	{
 		// Changed from varchar to text to allow for more columns
 		return "TEXT";
+	}
+
+	@Override
+	public String getPostgreSqlType()
+	{
+		return "character varying(255)"; // alias: varchar(255)
 	}
 
 	@Override
@@ -87,9 +94,9 @@ public class StringField extends FieldType
 	}
 
 	@Override
-	public FieldTypeEnum getEnumType()
+	public AttributeType getEnumType()
 	{
-		return FieldTypeEnum.STRING;
+		return AttributeType.STRING;
 	}
 
 	@Override

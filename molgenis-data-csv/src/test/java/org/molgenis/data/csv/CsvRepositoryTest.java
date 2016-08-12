@@ -9,7 +9,6 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,15 +16,24 @@ import java.util.Iterator;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-public class CsvRepositoryTest
+public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
 
 	private static File test;
 	private static File testdata;
@@ -36,7 +44,7 @@ public class CsvRepositoryTest
 	private static File emptylinessinglecol;
 
 	@BeforeClass
-	public static void beforeClass() throws FileNotFoundException, IOException
+	public static void beforeClass() throws IOException
 	{
 		InputStream in = CsvRepositoryTest.class.getResourceAsStream("/test.csv");
 		test = new File(FileUtils.getTempDirectory(), "test.csv");
@@ -74,7 +82,7 @@ public class CsvRepositoryTest
 		when(processor.process("col1")).thenReturn("col1");
 		when(processor.process("col2")).thenReturn("col2");
 
-		CsvRepository csvRepository = new CsvRepository(test, null);
+		CsvRepository csvRepository = new CsvRepository(test, entityMetaFactory, attrMetaFactory, null);
 		try
 		{
 			csvRepository.addCellProcessor(processor);
@@ -95,7 +103,7 @@ public class CsvRepositoryTest
 	public void addCellProcessor_data() throws IOException
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
-		CsvRepository csvRepository = new CsvRepository(test, null);
+		CsvRepository csvRepository = new CsvRepository(test, entityMetaFactory, attrMetaFactory, null);
 		try
 		{
 			csvRepository.addCellProcessor(processor);
@@ -118,7 +126,7 @@ public class CsvRepositoryTest
 		CsvRepository csvRepository = null;
 		try
 		{
-			csvRepository = new CsvRepository(testdata, null);
+			csvRepository = new CsvRepository(testdata, entityMetaFactory, attrMetaFactory, null);
 			assertEquals(csvRepository.getName(), "testdata");
 			Iterator<AttributeMetaData> it = csvRepository.getEntityMetaData().getAttributes().iterator();
 			assertTrue(it.hasNext());
@@ -144,7 +152,7 @@ public class CsvRepositoryTest
 		CsvRepository csvRepository = null;
 		try
 		{
-			csvRepository = new CsvRepository(testdata, null);
+			csvRepository = new CsvRepository(testdata, entityMetaFactory, attrMetaFactory, null);
 			Iterator<Entity> it = csvRepository.iterator();
 
 			assertTrue(it.hasNext());
@@ -184,7 +192,7 @@ public class CsvRepositoryTest
 	@Test
 	public void iterator_noValues() throws IOException
 	{
-		CsvRepository csvRepository = new CsvRepository(novalues, null);
+		CsvRepository csvRepository = new CsvRepository(novalues, entityMetaFactory, attrMetaFactory, null);
 		try
 		{
 			Iterator<Entity> it = csvRepository.iterator();
@@ -199,7 +207,7 @@ public class CsvRepositoryTest
 	@Test
 	public void iterator_emptyValues() throws IOException
 	{
-		CsvRepository csvRepository = new CsvRepository(emptyvalues, null);
+		CsvRepository csvRepository = new CsvRepository(emptyvalues, entityMetaFactory, attrMetaFactory, null);
 		try
 		{
 			Iterator<Entity> it = csvRepository.iterator();
@@ -215,7 +223,7 @@ public class CsvRepositoryTest
 	@Test
 	public void iterator_tsv() throws IOException
 	{
-		CsvRepository tsvRepository = new CsvRepository(testtsv, null);
+		CsvRepository tsvRepository = new CsvRepository(testtsv, entityMetaFactory, attrMetaFactory, null);
 		try
 		{
 			Iterator<Entity> it = tsvRepository.iterator();
@@ -233,7 +241,7 @@ public class CsvRepositoryTest
 	@Test
 	public void iterator_emptylines() throws IOException
 	{
-		CsvRepository csvRepository = new CsvRepository(emptylines, null);
+		CsvRepository csvRepository = new CsvRepository(emptylines, entityMetaFactory, attrMetaFactory, null);
 		try
 		{
 			Iterator<Entity> it = csvRepository.iterator();
@@ -251,7 +259,7 @@ public class CsvRepositoryTest
 	@Test
 	public void iterator_emptylines_singlecol() throws IOException
 	{
-		CsvRepository csvRepository = new CsvRepository(emptylinessinglecol, null);
+		CsvRepository csvRepository = new CsvRepository(emptylinessinglecol, entityMetaFactory, attrMetaFactory, null);
 		try
 		{
 			Iterator<Entity> it = csvRepository.iterator();

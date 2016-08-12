@@ -15,12 +15,20 @@ import org.springframework.stereotype.Service;
 @Service
 public class JsMagmaScriptRunner implements ScriptRunner
 {
+	public static final String NAME = "JavaScript (Magma)";
+
 	private final JsMagmaScriptExecutor jsScriptExecutor;
 
 	@Autowired
 	public JsMagmaScriptRunner(JsMagmaScriptExecutor jsMagmaScriptExecutor)
 	{
 		this.jsScriptExecutor = requireNonNull(jsMagmaScriptExecutor);
+	}
+
+	@Override
+	public String getName()
+	{
+		return NAME;
 	}
 
 	@Override

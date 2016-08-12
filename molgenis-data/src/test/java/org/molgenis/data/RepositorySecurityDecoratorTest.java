@@ -1,20 +1,19 @@
 package org.molgenis.data;
 
 import static java.util.stream.Collectors.toList;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.mockito.ArgumentCaptor;
+import org.molgenis.data.listeners.EntityListener;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.settings.AppSettings;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,7 +24,7 @@ public class RepositorySecurityDecoratorTest
 {
 	private String entityName;
 	private EntityMetaData entityMeta;
-	private Repository decoratedRepository;
+	private Repository<Entity> decoratedRepository;
 	private AppSettings appSettings;
 	private RepositorySecurityDecorator repositorySecurityDecorator;
 
@@ -262,9 +261,9 @@ public class RepositorySecurityDecoratorTest
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
-		when(decoratedRepository.findOne(id, fetch)).thenReturn(entity);
-		assertEquals(entity, decoratedRepository.findOne(id, fetch));
-		verify(decoratedRepository, times(1)).findOne(id, fetch);
+		when(decoratedRepository.findOneById(id, fetch)).thenReturn(entity);
+		assertEquals(entity, decoratedRepository.findOneById(id, fetch));
+		verify(decoratedRepository, times(1)).findOneById(id, fetch);
 	}
 
 	@Test(expectedExceptions = MolgenisDataAccessException.class)
@@ -277,72 +276,8 @@ public class RepositorySecurityDecoratorTest
 		Object id = Integer.valueOf(0);
 		Fetch fetch = new Fetch();
 		Entity entity = mock(Entity.class);
-		when(decoratedRepository.findOne(id, fetch)).thenReturn(entity);
-		repositorySecurityDecorator.findOne(id, fetch);
-	}
-
-	@Test
-	public void addEntityListener() throws IOException
-	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_MYENTITY");
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		Repository repo = when(mock(Repository.class).getName()).thenReturn("myentity").getMock();
-
-		@SuppressWarnings("resource")
-		RepositorySecurityDecorator repoSecurityDecorator = new RepositorySecurityDecorator(repo,
-				mock(AppSettings.class));
-		repoSecurityDecorator.addEntityListener(mock(EntityListener.class));
-	}
-
-	@Test
-	public void removeEntityListener()
-	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_MYENTITY");
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		Repository repo = when(mock(Repository.class).getName()).thenReturn("myentity").getMock();
-
-		@SuppressWarnings("resource")
-		RepositorySecurityDecorator repoSecurityDecorator = new RepositorySecurityDecorator(repo,
-				mock(AppSettings.class));
-		repoSecurityDecorator.removeEntityListener(mock(EntityListener.class));
-	}
-
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
-	public void addEntityListenerNotAllowed() throws IOException
-	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_MYENTITY");
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		Repository repo = when(mock(Repository.class).getName()).thenReturn("yourentity").getMock();
-
-		@SuppressWarnings("resource")
-		RepositorySecurityDecorator repoSecurityDecorator = new RepositorySecurityDecorator(repo,
-				mock(AppSettings.class));
-		repoSecurityDecorator.addEntityListener(mock(EntityListener.class));
-	}
-
-	@Test(expectedExceptions = MolgenisDataAccessException.class)
-	public void removeEntityListenerNotAllowed()
-	{
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("username", null,
-				"ROLE_ENTITY_READ_MYENTITY");
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
-		Repository repo = when(mock(Repository.class).getName()).thenReturn("yourentity").getMock();
-
-		@SuppressWarnings("resource")
-		RepositorySecurityDecorator repoSecurityDecorator = new RepositorySecurityDecorator(repo,
-				mock(AppSettings.class));
-		repoSecurityDecorator.removeEntityListener(mock(EntityListener.class));
+		when(decoratedRepository.findOneById(id, fetch)).thenReturn(entity);
+		repositorySecurityDecorator.findOneById(id, fetch);
 	}
 
 	@Test
@@ -354,7 +289,7 @@ public class RepositorySecurityDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		Entity entity0 = mock(Entity.class);
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = repositorySecurityDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
@@ -368,7 +303,7 @@ public class RepositorySecurityDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		Entity entity0 = mock(Entity.class);
-		Query query = mock(Query.class);
+		Query<Entity> query = mock(Query.class);
 		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(entity0));
 		Stream<Entity> entities = repositorySecurityDecorator.findAll(query);
 		assertEquals(entities.collect(Collectors.toList()), Arrays.asList(entity0));
@@ -383,11 +318,10 @@ public class RepositorySecurityDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		Fetch fetch = new Fetch();
-		Entity entity0 = mock(Entity.class);
-		Entity entity1 = mock(Entity.class);
-		when(decoratedRepository.stream(fetch)).thenReturn(Stream.of(entity0, entity1));
-		Stream<Entity> expectedEntities = repositorySecurityDecorator.stream(fetch);
-		assertEquals(expectedEntities.collect(Collectors.toList()), Arrays.asList(entity0, entity1));
+		Consumer<List<Entity>> consumer = mock(Consumer.class);
+		repositorySecurityDecorator.forEachBatched(fetch, consumer, 1000);
+
+		verify(decoratedRepository).forEachBatched(fetch, consumer, 1000);
 	}
 
 	@Test(expectedExceptions = MolgenisDataAccessException.class)
@@ -398,9 +332,9 @@ public class RepositorySecurityDecoratorTest
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
 		Fetch fetch = new Fetch();
-		Entity entity0 = mock(Entity.class);
-		Entity entity1 = mock(Entity.class);
-		when(decoratedRepository.stream(fetch)).thenReturn(Stream.of(entity0, entity1));
-		repositorySecurityDecorator.stream(fetch);
+		Consumer<List<Entity>> consumer = mock(Consumer.class);
+		repositorySecurityDecorator.forEachBatched(fetch, consumer, 1000);
+
+		verifyZeroInteractions(decoratedRepository);
 	}
 }

@@ -1,31 +1,42 @@
 package org.molgenis.ontology.core.meta;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class OntologyMetaData extends DefaultEntityMetaData
+public class OntologyMetaData extends SystemEntityMetaData
 {
+	public static final String SIMPLE_NAME = "Ontology";
+	public final static String ONTOLOGY = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
+
 	public final static String ID = "id";
 	public final static String ONTOLOGY_IRI = "ontologyIRI";
 	public final static String ONTOLOGY_NAME = "ontologyName";
-	public final static String SIMPLE_NAME = "Ontology";
-	public final static String ENTITY_NAME = OntologyPackage.PACKAGE_NAME + "_" + SIMPLE_NAME;
 
-	public final static OntologyMetaData INSTANCE = new OntologyMetaData();
+	private final OntologyPackage ontologyPackage;
 
-	private OntologyMetaData()
+	@Autowired
+	public OntologyMetaData(OntologyPackage ontologyPackage)
 	{
-		super(SIMPLE_NAME, OntologyPackage.getPackageInstance());
-		addAttributeMetaData(new DefaultAttributeMetaData(ID).setVisible(false), ROLE_ID);
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_IRI, FieldTypeEnum.STRING).setNillable(false));
-		addAttributeMetaData(new DefaultAttributeMetaData(ONTOLOGY_NAME, FieldTypeEnum.STRING).setNillable(false),
-				ROLE_LABEL);
+		super(SIMPLE_NAME, PACKAGE_ONTOLOGY);
+		this.ontologyPackage = requireNonNull(ontologyPackage);
+	}
+
+	@Override
+	public void init()
+	{
+		setPackage(ontologyPackage);
+
+		addAttribute(ID, ROLE_ID).setVisible(false);
+		addAttribute(ONTOLOGY_IRI).setNillable(false);
+		addAttribute(ONTOLOGY_NAME, ROLE_LABEL).setNillable(false);
 	}
 }

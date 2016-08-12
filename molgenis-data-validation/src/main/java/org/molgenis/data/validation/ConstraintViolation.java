@@ -4,9 +4,9 @@ import static java.lang.Math.toIntExact;
 
 import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 public class ConstraintViolation
 {
@@ -50,7 +50,7 @@ public class ConstraintViolation
 	 */
 	public void renumberRowIndex(List<Integer> indices)
 	{
-		this.rownr = new Long(indices.get(toIntExact(this.rownr - 1)));
+		this.rownr = this.rownr != null ? new Long(indices.get(toIntExact(this.rownr - 1))) : null;
 	}
 
 	public String getMessage()

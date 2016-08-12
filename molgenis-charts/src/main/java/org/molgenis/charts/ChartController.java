@@ -23,6 +23,7 @@ import org.molgenis.charts.highcharts.basic.Options;
 import org.molgenis.charts.requests.BoxPlotChartRequest;
 import org.molgenis.charts.requests.HeatMapRequest;
 import org.molgenis.charts.requests.XYDataChartRequest;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.file.FileStore;
@@ -80,7 +81,7 @@ public class ChartController
 	@ResponseBody
 	public Options renderXYDataChart(@Valid @RequestBody XYDataChartRequest request, Model model)
 	{
-		Query query = request.getQuery();
+		Query<Entity> query = request.getQuery();
 		XYDataChart xYDataChart = chartDataService.getXYDataChart(request.getEntity(), request.getX(), request.getY(),
 				request.getSplit(), query != null ? query.getRules() : Collections.<QueryRule> emptyList());
 
@@ -101,7 +102,7 @@ public class ChartController
 	@ResponseBody
 	public Options renderPlotBoxChart(@Valid @RequestBody BoxPlotChartRequest request, Model model)
 	{
-		Query query = request.getQuery();
+		Query<Entity> query = request.getQuery();
 		BoxPlotChart chart = chartDataService.getBoxPlotChart(request.getEntity(), request.getObservableFeature(),
 				query != null ? query.getRules() : Collections.<QueryRule> emptyList(), request.getSplit(),
 				request.getScale());

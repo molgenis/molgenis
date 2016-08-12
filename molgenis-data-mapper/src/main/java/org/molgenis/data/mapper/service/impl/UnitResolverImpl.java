@@ -15,9 +15,10 @@ import javax.measure.unit.Unit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.service.UnitResolver;
+import org.molgenis.data.mapper.utils.UnitHelper;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -27,8 +28,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Sets;
-
-import utils.UnitHelper;
 
 public class UnitResolverImpl implements UnitResolver
 {

@@ -4,6 +4,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.ui.settings.StaticContent;
+import org.molgenis.ui.settings.StaticContentFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.ui.settings.StaticContentMeta.STATIC_CONTENT;
 
 /**
  * Controller that handles static content pages requests.
@@ -22,11 +24,13 @@ public class StaticContentServiceImpl implements StaticContentService
 	private static final Logger LOG = LoggerFactory.getLogger(StaticContentServiceImpl.class);
 
 	private final DataService dataService;
+	private final StaticContentFactory staticContentFactory;
 
 	@Autowired
-	public StaticContentServiceImpl(DataService dataService)
+	public StaticContentServiceImpl(DataService dataService, StaticContentFactory staticContentFactory)
 	{
 		this.dataService = requireNonNull(dataService);
+		this.staticContentFactory = staticContentFactory;
 	}
 
 	@Override
@@ -36,17 +40,17 @@ public class StaticContentServiceImpl implements StaticContentService
 	{
 		try
 		{
-			StaticContent staticContent = dataService.findOne(StaticContent.ENTITY_NAME, key, StaticContent.class);
+			StaticContent staticContent = dataService.findOneById(STATIC_CONTENT, key, StaticContent.class);
 			if (staticContent == null)
 			{
-				staticContent = new StaticContent(key, dataService);
+				staticContent = staticContentFactory.create();
 				staticContent.setContent(content);
-				dataService.add(StaticContent.ENTITY_NAME, staticContent);
+				dataService.add(STATIC_CONTENT, staticContent);
 			}
 			else
 			{
 				staticContent.setContent(content);
-				dataService.update(StaticContent.ENTITY_NAME, staticContent);
+				dataService.update(STATIC_CONTENT, staticContent);
 			}
 			return true;
 		}
@@ -66,9 +70,8 @@ public class StaticContentServiceImpl implements StaticContentService
 	@Override
 	public String getContent(String key)
 	{
-		StaticContent staticContent = RunAsSystemProxy.runAsSystem(() -> {
-			return dataService.findOne(StaticContent.ENTITY_NAME, key, StaticContent.class);
-		});
+		StaticContent staticContent = RunAsSystemProxy
+				.runAsSystem(() -> dataService.findOneById(STATIC_CONTENT, key, StaticContent.class));
 		return staticContent != null ? staticContent.getContent() : null;
 	}
 }

@@ -1,48 +1,39 @@
 package org.molgenis.data.elasticsearch.index;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.Iterator;
-import java.util.Map;
-import java.util.stream.StreamSupport;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.elasticsearch.ElasticsearchService;
-import org.molgenis.data.support.DefaultEntity;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+import java.util.stream.StreamSupport;
+
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+
 @Component
 public class SourceToEntityConverter
 {
-	private final DataService dataService;
 	private final EntityManager entityManager;
 
 	@Autowired
-	public SourceToEntityConverter(DataService dataService, EntityManager entityManager)
+	public SourceToEntityConverter(EntityManager entityManager)
 	{
-		this.dataService = requireNonNull(dataService);
 		this.entityManager = requireNonNull(entityManager);
 	}
 
 	public Entity convert(Map<String, Object> source, EntityMetaData entityMeta)
 	{
-		DefaultEntity entity = new DefaultEntity(entityMeta, dataService);
-		source.entrySet().forEach(entry -> {
+		Entity entity = entityManager.create(entityMeta);
+		source.entrySet().forEach(entry ->
+		{
 			String attrName = entry.getKey();
-			if (attrName.equals(ElasticsearchService.CRUD_TYPE_FIELD_NAME))
-			{
-				// this entity was retrieved from a transaction index, ignore 'meta' crud type attribute
-				return;
-			}
 			AttributeMetaData attr = entityMeta.getAttribute(attrName);
 			if (attr == null)
 			{
@@ -54,8 +45,8 @@ public class SourceToEntityConverter
 			Object entityValue;
 			if (sourceValue != null)
 			{
-				FieldTypeEnum attrType = attr.getDataType().getEnumType();
-				switch (attr.getDataType().getEnumType())
+				AttributeType attrType = attr.getDataType();
+				switch (attr.getDataType())
 				{
 					case BOOL:
 					case DECIMAL:
@@ -76,8 +67,7 @@ public class SourceToEntityConverter
 						// TODO store id for xrefs
 						if (sourceValue instanceof Map<?, ?>)
 						{
-							@SuppressWarnings("unchecked")
-							Map<String, Object> sourceRefEntity = (Map<String, Object>) sourceValue;
+							@SuppressWarnings("unchecked") Map<String, Object> sourceRefEntity = (Map<String, Object>) sourceValue;
 							EntityMetaData refEntity = attr.getRefEntity();
 							String refIdAttrName = refEntity.getIdAttribute().getName();
 							Object sourceRefEntityId = sourceRefEntity.get(refIdAttrName);
@@ -94,19 +84,12 @@ public class SourceToEntityConverter
 						if (sourceValue instanceof Iterable<?>)
 						{
 							// TODO store list of ids for mrefs
-							@SuppressWarnings("unchecked")
-							Iterable<Map<String, Object>> sourceRefEntities = (Iterable<Map<String, Object>>) sourceValue;
+							@SuppressWarnings("unchecked") Iterable<Map<String, Object>> sourceRefEntities = (Iterable<Map<String, Object>>) sourceValue;
 							EntityMetaData refEntity = attr.getRefEntity();
 							String refIdAttrName = refEntity.getIdAttribute().getName();
-							Iterable<Object> sourceRefEntityIds = new Iterable<Object>()
-							{
-								@Override
-								public Iterator<Object> iterator()
-								{
-									return StreamSupport.stream(sourceRefEntities.spliterator(), false)
-											.map(sourceRefEntity -> sourceRefEntity.get(refIdAttrName)).iterator();
-								}
-							};
+							Iterable<Object> sourceRefEntityIds = () -> StreamSupport
+									.stream(sourceRefEntities.spliterator(), false)
+									.map(sourceRefEntity -> sourceRefEntity.get(refIdAttrName)).iterator();
 							entityValue = entityManager.getReferences(refEntity, sourceRefEntityIds);
 						}
 						else
@@ -138,7 +121,7 @@ public class SourceToEntityConverter
 						}
 						break;
 					default:
-						throw new RuntimeException("Unknown data type [" + attrType + "]");
+						throw new RuntimeException(format("Unknown data type [%s]", attrType.toString()));
 				}
 			}
 			else

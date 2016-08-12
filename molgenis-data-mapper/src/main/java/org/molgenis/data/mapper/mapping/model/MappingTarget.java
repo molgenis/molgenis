@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.elasticsearch.common.collect.Lists;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 public class MappingTarget
 {

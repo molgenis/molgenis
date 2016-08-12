@@ -3,8 +3,8 @@ package org.molgenis.data.mapper.service;
 import javax.measure.quantity.Quantity;
 import javax.measure.unit.Unit;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 public interface UnitResolver
 {

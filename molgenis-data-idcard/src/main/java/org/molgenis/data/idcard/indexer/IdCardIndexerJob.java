@@ -1,11 +1,9 @@
 package org.molgenis.data.idcard.indexer;
 
-import javax.mail.MessagingException;
-import javax.mail.internet.MimeMessage;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.idcard.IdCardBiobankRepository;
 import org.molgenis.data.idcard.model.IdCardIndexingEvent;
+import org.molgenis.data.idcard.model.IdCardIndexingEventFactory;
 import org.molgenis.data.idcard.model.IdCardIndexingEventStatus;
 import org.molgenis.data.idcard.settings.IdCardIndexerSettings;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
@@ -18,6 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMessage;
+
+import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.ID_CARD_INDEXING_EVENT;
 
 @DisallowConcurrentExecution
 public class IdCardIndexerJob implements Job
@@ -40,6 +43,9 @@ public class IdCardIndexerJob implements Job
 	@Autowired
 	private JavaMailSender mailSender;
 
+	@Autowired
+	private IdCardIndexingEventFactory idCardIndexingEventFactory;
+
 	@Override
 	public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException
 	{
@@ -58,12 +64,11 @@ public class IdCardIndexerJob implements Job
 
 	private void rebuildIndex(String username)
 	{
-		IdCardIndexingEvent idCardIndexingEvent = new IdCardIndexingEvent(dataService);
+		IdCardIndexingEvent idCardIndexingEvent = idCardIndexingEventFactory.create();
 		RuntimeException runtimeException = null;
 		try
 		{
-			idCardBiobankRepository.rebuildIndex();
-
+			RunAsSystemProxy.runAsSystem(() -> idCardBiobankRepository.rebuildIndex());
 			idCardIndexingEvent.setStatus(IdCardIndexingEventStatus.SUCCESS);
 			idCardIndexingEvent
 					.setMessage(String.format("Index rebuild [%s]", username != null ? username : JOB_USERNAME_SYSTEM));
@@ -75,9 +80,7 @@ public class IdCardIndexerJob implements Job
 			runtimeException = e;
 		}
 
-		RunAsSystemProxy.runAsSystem(() -> {
-			dataService.add(IdCardIndexingEvent.ENTITY_NAME, idCardIndexingEvent);
-		});
+		RunAsSystemProxy.runAsSystem(() -> dataService.add(ID_CARD_INDEXING_EVENT, idCardIndexingEvent));
 
 		if (idCardIndexingEvent.getStatus() == IdCardIndexingEventStatus.FAILED)
 		{

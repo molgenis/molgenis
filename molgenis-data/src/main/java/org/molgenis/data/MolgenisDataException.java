@@ -1,11 +1,14 @@
 package org.molgenis.data;
 
-public class MolgenisDataException extends RuntimeException
+import org.springframework.dao.DataAccessException;
+
+public class MolgenisDataException extends DataAccessException
 {
 	private static final long serialVersionUID = 4738825795930038340L;
 
 	public MolgenisDataException()
 	{
+		this("");
 	}
 
 	public MolgenisDataException(String msg)
@@ -15,7 +18,7 @@ public class MolgenisDataException extends RuntimeException
 
 	public MolgenisDataException(Throwable t)
 	{
-		super(t);
+		this("", t);
 	}
 
 	public MolgenisDataException(String msg, Throwable t)

@@ -1,10 +1,11 @@
 <#macro renderTags tags>
 	<#if tags?has_content>
 		<#list tags as tag>
-			<#if tag.object.iri?has_content>
-				<span class="label label-primary"><a href='${tag.object.iri?html}' target="_blank">${tag.object.label?html}</a></span>
+            <#if tag.objectIri?has_content>
+            <span class="label label-primary"><a href='${tag.objectIri?html}'
+                                                 target="_blank">${tag.label?html}</a></span>
 			<#else>
-				<span class="label label-primary">${tag.object.label?html}</span>
+            <span class="label label-primary">${tag.label?html}</span>
 			</#if>
 		</#list>
 	</#if>
@@ -86,7 +87,7 @@
 </#macro>
 <#macro renderAttribute attribute entity depth>
     <#assign nextDepth = depth + ["x"]/>
-    <#assign dataType=attribute.dataType.enumType>
+    <#assign dataType=attribute.dataType>
 	<tr id="attribute-${entity.name?replace(" ", "_")?html}${attribute.name?replace(" ", "_")?html}">
         <td><#list depth as lvl>&nbsp;</#list>${attribute.label?html}<#if entity.idAttribute?? && entity.idAttribute.name == attribute.name> <em>(id attribute)</em></#if><#if entity.labelAttribute?? && entity.labelAttribute.name == attribute.name> <em>(label attribute)</em></#if><#list entity.lookupAttributes as lookupAttribute><#if lookupAttribute.name == attribute.name> <em>(lookup attribute)</em><#break></#if></#list></td>
     	<td><#if attribute.defaultValue?has_content>${attribute.defaultValue?html}</#if></td>
@@ -94,7 +95,7 @@
     	<td>
     	    <#assign constraints = []>
             <#if attribute.nillable><#assign constraints = constraints + [ "nillable" ] /></#if>
-       		<#if attribute.readonly><#assign constraints = constraints + [ "read-only" ] /></#if>
+            <#if attribute.readOnly><#assign constraints = constraints + [ "read-only" ] /></#if>
         	<#if attribute.unique><#assign constraints = constraints + [ "unique" ] /></#if>
         	<#if !attribute.visible><#assign constraints = constraints + [ "hidden" ] /></#if>
         	<#if attribute.auto><#assign constraints = constraints + [ "auto" ] /></#if>
@@ -114,7 +115,7 @@
     	</td>
     	<td class="description-column"><#if attribute.description?has_content>${attribute.description?html}</#if></td>
 	</tr>
-    <#if attribute.dataType.enumType == "COMPOUND">
+    <#if attribute.dataType == "COMPOUND">
         <#list attribute.attributeParts as attributePart>
             <@renderAttribute attributePart entity nextDepth/>
         </#list>

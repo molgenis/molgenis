@@ -1,5 +1,7 @@
 package org.molgenis.data;
 
+import org.molgenis.data.meta.model.Package;
+
 /**
  * Listener that when added to a {@link Package} fires when a package property changes.
  */

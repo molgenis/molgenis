@@ -34,7 +34,7 @@
 	 * Returns the plugin settings entity id
 	 */
 	molgenis.getPluginSettingsId = function() {
-		return 'settings_' +  molgenis.getPluginId();
+		return 'sys_set_' + molgenis.getPluginId();
 	};
 	
 	/**
@@ -326,9 +326,8 @@ function createInput(attr, attrs, val, lbl) {
 	case 'CATEGORICAL_MREF':
 	case 'MREF':
 	case 'XREF':
-		return createBasicInput('hidden', attrs, val).addClass('form-control');
 	case 'FILE':
-		throw 'Unsupported data type: ' + dataType;
+		return createBasicInput('hidden', attrs, val).addClass('form-control');
 	default:
 		throw 'Unknown data type: ' + dataType;
 	}

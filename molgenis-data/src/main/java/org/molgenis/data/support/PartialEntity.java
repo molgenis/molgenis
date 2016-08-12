@@ -4,12 +4,11 @@ import static java.util.Objects.requireNonNull;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.List;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.Fetch;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Entity with partially loaded attributes based on a fetch. Requesting attributes not included in the fetch are
@@ -49,7 +48,13 @@ public class PartialEntity implements Entity
 	}
 
 	@Override
-	public String getLabelValue()
+	public void setIdValue(Object id)
+	{
+		decoratedEntity.setIdValue(id);
+	}
+
+	@Override
+	public Object getLabelValue()
 	{
 		return decoratedEntity.getLabelValue();
 	}
@@ -221,32 +226,6 @@ public class PartialEntity implements Entity
 		else
 		{
 			return entityManager.getReference(getEntityMetaData(), getIdValue()).getEntities(attributeName, clazz);
-		}
-	}
-
-	@Override
-	public List<String> getList(String attributeName)
-	{
-		if (fetch.hasField(attributeName))
-		{
-			return decoratedEntity.getList(attributeName);
-		}
-		else
-		{
-			return entityManager.getReference(getEntityMetaData(), getIdValue()).getList(attributeName);
-		}
-	}
-
-	@Override
-	public List<Integer> getIntList(String attributeName)
-	{
-		if (fetch.hasField(attributeName))
-		{
-			return decoratedEntity.getIntList(attributeName);
-		}
-		else
-		{
-			return entityManager.getReference(getEntityMetaData(), getIdValue()).getIntList(attributeName);
 		}
 	}
 

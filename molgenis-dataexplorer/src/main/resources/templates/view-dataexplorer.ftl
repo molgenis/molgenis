@@ -32,7 +32,7 @@
                                 <option value=""></option><#-- Required for placeholder to work with select2 -->
                         <#if entitiesMeta?has_content>
                             <#list entitiesMeta as entityMeta>
-                                <option value="${entityMeta.name?html}"<#if selectedEntityName?? && (entityMeta.name == selectedEntityName)> selected</#if>><#if entityMeta.label?has_content>${entityMeta.label?html}<#else>${entityMeta.name?html}</#if></option>
+                                <option value="${entityMeta.name?html}"<#if selectedEntityName?? && (entityMeta.name == selectedEntityName)> selected</#if>>${entityMeta.simpleName?html}</option>
                             </#list>
                         </#if>
                         </select>
@@ -66,7 +66,8 @@
                 	<div class="form-horizontal">
                     	<div class="form-group">
                         	<div class="col-md-12">
-                            	<div class="input-group" <#if plugin_settings.searchbox == false> style="display:none"</#if>>
+                                <div class="input-group" <#if plugin_settings.get("searchbox") == false>
+                                     style="display:none"</#if>>
                                 	<input type="text" class="form-control" id="observationset-search" placeholder="Search data values" autofocus="autofocus"/>
                                 	<span class="input-group-btn">
                                     	<button id="search-clear-button" class="btn btn-default" type="button"><span class="glyphicon glyphicon-remove"></span></button>

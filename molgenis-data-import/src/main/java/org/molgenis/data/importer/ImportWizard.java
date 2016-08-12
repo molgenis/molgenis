@@ -1,11 +1,13 @@
 package org.molgenis.data.importer;
 
+import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
+
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.framework.db.EntityImportReport;
@@ -206,10 +208,10 @@ public class ImportWizard extends Wizard
 
 	public boolean getAllowPermissions()
 	{
-		allowPermissions = SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX
-				+ MolgenisGroup.ENTITY_NAME.toUpperCase())
-				&& SecurityUtils.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX
-						+ GroupAuthority.ENTITY_NAME.toUpperCase());
+		allowPermissions = SecurityUtils
+				.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + MOLGENIS_GROUP.toUpperCase())
+				&& SecurityUtils
+				.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX + GROUP_AUTHORITY.toUpperCase());
 		return allowPermissions || SecurityUtils.currentUserIsSu();
 	}
 }

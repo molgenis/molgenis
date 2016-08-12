@@ -22,7 +22,7 @@ import com.mchange.v2.c3p0.ComboPooledDataSource;
 @EnableTransactionManagement(proxyTargetClass = true)
 public class DatabaseConfig implements TransactionManagementConfigurer
 {
-	@Value("${db_driver:com.mysql.jdbc.Driver}")
+	@Value("${db_driver:org.postgresql.Driver}")
 	private String dbDriverClass;
 	@Value("${db_uri:@null}")
 	private String dbJdbcUri;
@@ -63,7 +63,7 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 	}
 
 	@Bean
-	public PlatformTransactionManager transactionManager()
+	public MolgenisTransactionManager transactionManager()
 	{
 		return new MolgenisTransactionManager(idGenerator, dataSource());
 	}

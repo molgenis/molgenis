@@ -74,7 +74,8 @@
 							<#if !attribute.nillable> <span class="label label-default">required</span></#if>
 							<#if attribute.unique> <span class="label label-default">unique</span></#if>
 							<#if attribute.description??><br />${attribute.description?html}</#if>
-							<#if attribute.tags??><br />${attribute.tags?html}</#if>
+							<#if attribute.tags??><br/><#list attribute.tags as tag>${tag.label?html}<#sep>
+                                , </#list></#if>
 							<#if attributeTagMap[attribute.name]??>
 								<br />
 								<#list attributeTagMap[attribute.name] as tag>
@@ -196,11 +197,17 @@
         	</div>
         	<div class="modal-body">
         		<form id="create-integrated-entity-form" method="post" action="${context_url}/createIntegratedEntity">
-        			
-        			<label>Enter a name for the integrated dataset</label>
-        			<input name="newEntityName" type="text" value="" required></input>
-        		
-        			<input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
+
+                    <div>
+                        <label>Enter a name for the integrated dataset</label>
+                        <input name="newEntityName" type="text" value="" required/>
+                    </div>
+                    <div>
+                        <label>Add source attribute</label>
+                        <input name="addSourceAttribute" type="checkbox"/>
+                    </div>
+
+                    <input type="hidden" name="mappingProjectId" value="${mappingProject.identifier}">
         			<input type="hidden" name="target" value="${selectedTarget}">
 				</form>
     		</div>

@@ -1,46 +1,26 @@
 package org.molgenis.data.idcard.mapper;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.idcard.model.IdCardBiobank.ALSO_LISTED_IN;
-import static org.molgenis.data.idcard.model.IdCardBiobank.CITY;
-import static org.molgenis.data.idcard.model.IdCardBiobank.COUNTRY;
-import static org.molgenis.data.idcard.model.IdCardBiobank.DATE_OF_INCLUSION;
-import static org.molgenis.data.idcard.model.IdCardBiobank.EMAIL;
-import static org.molgenis.data.idcard.model.IdCardBiobank.FIRST_NAME;
-import static org.molgenis.data.idcard.model.IdCardBiobank.ID;
-import static org.molgenis.data.idcard.model.IdCardBiobank.LAST_ACTIVITIES;
-import static org.molgenis.data.idcard.model.IdCardBiobank.LAST_NAME;
-import static org.molgenis.data.idcard.model.IdCardBiobank.NAME;
-import static org.molgenis.data.idcard.model.IdCardBiobank.NAME_OF_HOST_INSTITUTION;
-import static org.molgenis.data.idcard.model.IdCardBiobank.ORGANIZATION_ID;
-import static org.molgenis.data.idcard.model.IdCardBiobank.PHONE;
-import static org.molgenis.data.idcard.model.IdCardBiobank.STREET1;
-import static org.molgenis.data.idcard.model.IdCardBiobank.STREET2;
-import static org.molgenis.data.idcard.model.IdCardBiobank.TARGET_POPULATION;
-import static org.molgenis.data.idcard.model.IdCardBiobank.SALUTATION;
-import static org.molgenis.data.idcard.model.IdCardBiobank.TYPE;
-import static org.molgenis.data.idcard.model.IdCardBiobank.TYPE_OF_HOST_INSTITUTION;
-import static org.molgenis.data.idcard.model.IdCardBiobank.URL;
-import static org.molgenis.data.idcard.model.IdCardBiobank.ZIP;
-
-import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.google.gson.stream.JsonReader;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.idcard.model.IdCardBiobank;
+import org.molgenis.data.idcard.model.IdCardBiobankFactory;
 import org.molgenis.data.idcard.model.IdCardOrganization;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.stream.JsonReader;
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.*;
 
 @Component
 public class IdCardBiobankMapperImpl implements IdCardBiobankMapper
@@ -48,17 +28,19 @@ public class IdCardBiobankMapperImpl implements IdCardBiobankMapper
 	private static final Logger LOG = LoggerFactory.getLogger(IdCardBiobankMapperImpl.class);
 
 	private final DataService dataService;
+	private final IdCardBiobankFactory idCardBiobankFactory;
 
 	@Autowired
-	public IdCardBiobankMapperImpl(DataService dataService)
+	public IdCardBiobankMapperImpl(DataService dataService, IdCardBiobankFactory idCardBiobankFactory)
 	{
 		this.dataService = requireNonNull(dataService);
+		this.idCardBiobankFactory = requireNonNull(idCardBiobankFactory);
 	}
 
 	@Override
 	public IdCardBiobank toIdCardBiobank(JsonReader jsonReader) throws IOException
 	{
-		IdCardBiobank idCardBiobank = new IdCardBiobank(dataService);
+		IdCardBiobank idCardBiobank = idCardBiobankFactory.create();
 
 		// e.g. "Mon Jan 05 18:02:13 GMT 2015"
 		SimpleDateFormat dateTimeFormat = new SimpleDateFormat("EEE MMM dd HH:mm:ss z yyyy", Locale.ENGLISH);

@@ -1,16 +1,15 @@
 package org.molgenis.data.rest.v2;
 
-import static java.lang.String.format;
-import static org.molgenis.MolgenisFieldTypes.FieldTypeEnum.FILE;
-
-import org.molgenis.MolgenisFieldTypes.FieldTypeEnum;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.fieldtypes.MrefField;
-import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.file.FileMeta;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.file.model.FileMetaMetaData;
+
+import static java.lang.String.format;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.FILE;
+import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
 
 /**
  * Converts {@link AttributeFilter} to {@link Fetch}.
@@ -69,7 +68,7 @@ public class AttributeFilterToFetchConverter
 	private static void createFetchContentRec(AttributeFilter attrFilter, EntityMetaData entityMeta,
 			AttributeMetaData attr, Fetch fetch, String languageCode)
 	{
-		FieldTypeEnum attrType = attr.getDataType().getEnumType();
+		AttributeType attrType = attr.getDataType();
 		switch (attrType)
 		{
 			case COMPOUND:
@@ -175,7 +174,7 @@ public class AttributeFilterToFetchConverter
 	public static Fetch createDefaultAttributeFetch(AttributeMetaData attr, String languageCode)
 	{
 		Fetch fetch;
-		if (attr.getDataType() instanceof XrefField || attr.getDataType() instanceof MrefField)
+		if (isReferenceType(attr))
 		{
 			fetch = new Fetch();
 			EntityMetaData refEntityMeta = attr.getRefEntity();
@@ -188,9 +187,9 @@ public class AttributeFilterToFetchConverter
 				fetch.field(labelAttrName);
 			}
 
-			if (attr.getDataType().getEnumType() == FILE)
+			if (attr.getDataType() == FILE)
 			{
-				fetch.field(FileMeta.URL);
+				fetch.field(FileMetaMetaData.URL);
 			}
 		}
 		else

@@ -1,253 +1,281 @@
 package org.molgenis.data.mapper.service.impl;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.DECIMAL;
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.fail;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
-
-import javax.annotation.PostConstruct;
-
-import org.elasticsearch.common.collect.Lists;
-import org.molgenis.MolgenisFieldTypes;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
+import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.IdGenerator;
-import org.molgenis.data.ManageableRepositoryCollection;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
-import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.mapper.config.MappingConfig;
+import org.molgenis.auth.MolgenisUserFactory;
+import org.molgenis.data.*;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
+import org.molgenis.data.mapper.meta.MappingTargetMetaData;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
-import org.molgenis.data.mapper.repository.impl.AttributeMappingRepositoryImpl;
-import org.molgenis.data.mapper.repository.impl.EntityMappingRepositoryImpl;
-import org.molgenis.data.mapper.repository.impl.MappingProjectRepositoryImpl;
-import org.molgenis.data.mapper.repository.impl.MappingTargetRepositoryImpl;
+import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
-import org.molgenis.data.mem.InMemoryRepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.data.meta.PackageImpl;
-import org.molgenis.data.semanticsearch.service.OntologyTagService;
-import org.molgenis.data.semanticsearch.service.SemanticSearchService;
-import org.molgenis.data.support.DataServiceImpl;
-import org.molgenis.data.support.DefaultEntityMetaData;
-import org.molgenis.data.support.MapEntity;
+import org.molgenis.data.meta.model.*;
+import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.UuidGenerator;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.security.user.MolgenisUserService;
-import org.molgenis.ui.settings.AppDbSettings;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
+import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.Stream;
 
-@ContextConfiguration(classes =
-{ MappingServiceImplTest.Config.class, MappingConfig.class })
-public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.Mockito.*;
+import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.mapper.meta.MappingProjectMetaData.*;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+
+@ContextConfiguration(classes = { MappingServiceImplTest.Config.class })
+public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 {
-	@Autowired
-	private ManageableRepositoryCollection repoCollection;
+	private static final String TARGET_HOP_ENTITY = "HopEntity";
+	private static final String USERNAME = "admin";
+	private static final String SOURCE_GENE_ENTITY = "Gene";
+	private static final String SOURCE_EXON_ENTITY = "Exon";
 
 	@Autowired
-	private DataServiceImpl dataService;
+	private DataService dataService;
 
 	@Autowired
-	private MappingService mappingService;
-
-	@Autowired
-	private MolgenisUserService userService;
-
-	@Autowired
-	private PermissionSystemService permissionSystemService;
+	private AlgorithmService algorithmService;
 
 	@Autowired
 	private IdGenerator idGenerator;
 
 	@Autowired
-	private MappingProjectRepository mappingProjectRepository;
+	private MappingProjectRepository mappingProjectRepo;
+
+	@Autowired
+	private PermissionSystemService permissionSystemService;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
+	@Autowired
+	private MappingService mappingService;
+
+	@Autowired
+	private MolgenisUserFactory molgenisUserFactory;
+
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+
+	@Autowired
+	private PackageFactory packageFactory;
+
+	@Mock
+	private Repository<Entity> hopRepo;
+
+	@Mock
+	private Repository<Entity> geneRepo;
+
+	@Mock
+	private Repository<Entity> exonRepo;
+
+	private MetaDataService metaDataService;
 
 	private MolgenisUser user;
-
-	private DefaultEntityMetaData hopMetaData;
-
-	private DefaultEntityMetaData geneMetaData;
-
-	private DefaultEntityMetaData exonMetaData;
-
+	private EntityMetaData hopMetaData;
+	private EntityMetaData geneMetaData;
+	private Package package_;
 	private final UuidGenerator uuidGenerator = new UuidGenerator();
+
+	@BeforeClass
+	public void beforeClass()
+	{
+		initMocks(this);
+	}
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
-		user = new MolgenisUser();
-		user.setUsername("Piet");
-		when(userService.getUser("Piet")).thenReturn(user);
+		reset(dataService);
+		reset(idGenerator);
+		reset(mappingProjectRepo);
+		reset(permissionSystemService);
+		reset(hopRepo);
+		reset(geneRepo);
+		reset(exonRepo);
 
-		hopMetaData = new DefaultEntityMetaData("HopEntity", PackageImpl.defaultPackage);
-		hopMetaData.addAttribute("identifier", ROLE_ID);
-		hopMetaData.addAttribute("height").setDataType(DECIMAL).setNillable(false);
+		user = molgenisUserFactory.create();
+		user.setUsername(USERNAME);
 
-		geneMetaData = new DefaultEntityMetaData("Gene", PackageImpl.defaultPackage);
-		geneMetaData.addAttribute("id", ROLE_ID);
-		geneMetaData.addAttribute("length").setDataType(DECIMAL).setNillable(false);
+		package_ = packageFactory.create("package");
 
-		exonMetaData = new DefaultEntityMetaData("Exon", PackageImpl.defaultPackage);
-		exonMetaData.addAttribute("id", ROLE_ID);
-		exonMetaData.addAttribute("basepairs").setDataType(DECIMAL).setNillable(false);
+		hopMetaData = entityMetaFactory.create(TARGET_HOP_ENTITY).setPackage(package_);
+		hopMetaData.addAttribute(attrMetaFactory.create().setName("identifier"), ROLE_ID);
+		hopMetaData.addAttribute(attrMetaFactory.create().setName("height").setDataType(DECIMAL).setNillable(false));
 
-		if (!dataService.hasRepository("HopEntity"))
+		geneMetaData = entityMetaFactory.create(SOURCE_GENE_ENTITY).setPackage(package_);
+		geneMetaData.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
+		geneMetaData.addAttribute(attrMetaFactory.create().setName("length").setDataType(DECIMAL).setNillable(false));
+
+		EntityMetaData exonMetaData = entityMetaFactory.create(SOURCE_EXON_ENTITY).setPackage(package_);
+		exonMetaData.addAttribute(attrMetaFactory.create().setName("id"), ROLE_ID);
+		exonMetaData
+				.addAttribute(attrMetaFactory.create().setName("basepairs").setDataType(DECIMAL).setNillable(false));
+
+		metaDataService = mock(MetaDataService.class);
+		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityMetaData>()
 		{
-			dataService.getMeta().addEntityMeta(hopMetaData);
-		}
-
-		// add 3 Gene entities
-		Repository gene = dataService.getMeta().addEntityMeta(geneMetaData);
-		gene.deleteAll(); // refresh
-		for (int i = 1; i < 4; i++)
+			@Override
+			public boolean matches(Object obj)
+			{
+				return obj instanceof EntityMetaData && ((EntityMetaData) obj).getName().equals(TARGET_HOP_ENTITY);
+			}
+		}))).thenReturn(hopRepo);
+		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityMetaData>()
 		{
-			MapEntity geneEntity = new MapEntity(geneMetaData);
-			geneEntity.set("id", Integer.valueOf(i).toString());
-			geneEntity.set("length", i * 2);
-			gene.add(geneEntity);
-		}
+			@Override
+			public boolean matches(Object obj)
+			{
+				return obj instanceof EntityMetaData && ((EntityMetaData) obj).getName().equals(SOURCE_GENE_ENTITY);
+			}
+		}))).thenReturn(geneRepo);
+		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityMetaData>()
+		{
+			@Override
+			public boolean matches(Object obj)
+			{
+				return obj instanceof EntityMetaData && ((EntityMetaData) obj).getName().equals(SOURCE_EXON_ENTITY);
+			}
+		}))).thenReturn(exonRepo);
 
-		// add 1 Exon entity
-		Repository exon = dataService.getMeta().addEntityMeta(exonMetaData);
-		exon.deleteAll(); // refresh
-		MapEntity geneEntity = new MapEntity(exonMetaData);
-		geneEntity.set("id", "A");
-		geneEntity.set("basepairs", new Double(12345));
-		exon.add(geneEntity);
+		when(hopRepo.getName()).thenReturn(TARGET_HOP_ENTITY);
+		when(hopRepo.getEntityMetaData()).thenReturn(hopMetaData);
+		when(geneRepo.getName()).thenReturn(SOURCE_GENE_ENTITY);
+		when(geneRepo.iterator()).thenReturn(Collections.<Entity>emptyList().iterator());
+		when(geneRepo.getEntityMetaData()).thenReturn(geneMetaData);
+		when(exonRepo.getName()).thenReturn(SOURCE_EXON_ENTITY);
+		when(exonRepo.iterator()).thenReturn(Collections.<Entity>emptyList().iterator());
+		when(exonRepo.getEntityMetaData()).thenReturn(exonMetaData);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		when(dataService.getEntityMetaData(TARGET_HOP_ENTITY)).thenReturn(hopMetaData);
+		when(dataService.getRepository(TARGET_HOP_ENTITY)).thenReturn(hopRepo);
+		Query<Entity> hopQ = mock(Query.class);
+		when(hopRepo.query()).thenReturn(hopQ);
+		when(hopQ.eq("source", SOURCE_GENE_ENTITY)).thenReturn(hopQ);
+		when(hopQ.eq("source", SOURCE_EXON_ENTITY)).thenReturn(hopQ);
+		when(hopQ.findAll()).thenAnswer(new Answer<Stream>()
+		{
+			@Override
+			public Stream answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Stream.empty();
+			}
+		});
 
-		dataService.getEntityNames().forEach(dataService::removeRepository);
-
-		TestingAuthenticationToken authentication = new TestingAuthenticationToken("userName", null);
-		authentication.setAuthenticated(false);
-		SecurityContextHolder.getContext().setAuthentication(authentication);
-
+		when(dataService.getEntityMetaData(SOURCE_GENE_ENTITY)).thenReturn(geneMetaData);
+		when(dataService.getRepository(SOURCE_GENE_ENTITY)).thenReturn(geneRepo);
+		when(dataService.getEntityMetaData(SOURCE_EXON_ENTITY)).thenReturn(exonMetaData);
+		when(dataService.getRepository(SOURCE_EXON_ENTITY)).thenReturn(exonRepo);
+		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
 	}
 
 	@Test
 	public void testAddMappingProject()
 	{
-		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
-
-		MappingProject added = mappingService.addMappingProject("Test123", user, "HopEntity");
-		assertEquals(added.getName(), "Test123");
-
-		MappingProject expected = new MappingProject("Test123", user);
-		expected.addTarget(hopMetaData);
-
-		final String mappingProjectId = added.getIdentifier();
-		assertNotNull(mappingProjectId);
-		expected.setIdentifier(mappingProjectId);
-
-		final String mappingTargetId = added.getMappingTarget("HopEntity").getIdentifier();
-		assertNotNull(mappingTargetId);
-		expected.getMappingTarget("HopEntity").setIdentifier(mappingTargetId);
-		assertEquals(added, expected);
-
-		MappingProject retrieved = mappingService.getMappingProject(mappingProjectId);
-		assertEquals(retrieved, expected);
+		String projectName = "test_project";
+		MappingProject mappingProject = mappingService.addMappingProject(projectName, user, TARGET_HOP_ENTITY);
+		verify(mappingProjectRepo, times(1)).add(mappingProject);
+		assertEquals(mappingProject.getName(), projectName);
+		assertEquals(mappingProject.getOwner(), user);
+		List<MappingTarget> mappingTargets = mappingProject.getMappingTargets();
+		assertEquals(mappingTargets.size(), 1);
+		assertEquals(mappingTargets.get(0).getTarget(), hopMetaData);
 	}
 
-	// TODO add unit test for testCloneMappingProject when InMemoryRepositoryCollection supports Query.
+	@Test
+	public void testGetMappingProject()
+	{
+		String projectName = "test_project";
+
+		MappingProject actualAddedMappingProject = mappingService
+				.addMappingProject(projectName, user, TARGET_HOP_ENTITY);
+
+		String mappingTargetIdentifier = actualAddedMappingProject.getMappingTarget(TARGET_HOP_ENTITY).getIdentifier();
+		MappingTarget expectedMappingTarget = getManualMappingTarget(mappingTargetIdentifier, emptyList());
+
+		String mappingProjectIdentifier = actualAddedMappingProject.getIdentifier();
+		MappingProject expectedMappingProject = getManualMappingProject(mappingProjectIdentifier, projectName,
+				expectedMappingTarget);
+
+		Entity mappingTargetEntity = mock(Entity.class);
+		when(mappingTargetEntity.getString(MappingTargetMetaData.IDENTIFIER)).thenReturn(mappingTargetIdentifier);
+		when(mappingTargetEntity.getString(MappingTargetMetaData.TARGET)).thenReturn(TARGET_HOP_ENTITY);
+		when(mappingTargetEntity.getEntities(MappingTargetMetaData.ENTITY_MAPPINGS)).thenReturn(null);
+		when(dataService.getEntityMetaData(mappingTargetEntity.getString(MappingTargetMetaData.TARGET)))
+				.thenReturn(hopMetaData);
+
+		Entity mappingProjectEntity = mock(Entity.class);
+		when(mappingProjectEntity.get(IDENTIFIER)).thenReturn(mappingProjectIdentifier);
+		when(mappingProjectEntity.get(NAME)).thenReturn(projectName);
+		when(mappingProjectEntity.get(OWNER)).thenReturn(user);
+		when(mappingProjectEntity.getEntities(MAPPING_TARGETS)).thenReturn(singletonList(mappingTargetEntity));
+		when(mappingProjectEntity.get(MAPPING_TARGETS)).thenReturn(singletonList(expectedMappingTarget));
+
+		when(dataService.findOneById(MAPPING_PROJECT, mappingProjectIdentifier)).thenReturn(mappingProjectEntity);
+		when(mappingProjectRepo.getMappingProject(mappingProjectIdentifier)).thenReturn(actualAddedMappingProject);
+		MappingProject retrievedMappingProject = mappingService.getMappingProject(mappingProjectIdentifier);
+
+		assertEquals(retrievedMappingProject, expectedMappingProject);
+	}
+
 	@Test
 	public void testCloneMappingProjectString()
 	{
-		when(idGenerator.generateId()).thenReturn("0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
-
-		MappingProject mappingProject = createMappingProjectWithMappings("testCloneMappingProject");
-		mappingService.updateMappingProject(mappingProject);
-
-		MappingProject clonedMappingProject = mappingService.cloneMappingProject(mappingProject.getIdentifier(),
-				"Clone of TestRun");
-
-		List<MappingTarget> mappingTargets = mappingProject.getMappingTargets();
-		List<MappingTarget> clonedMappingTargets = clonedMappingProject.getMappingTargets();
-		assertEquals(mappingTargets.size(), clonedMappingTargets.size());
-		for (int i = 0; i < mappingTargets.size(); ++i)
-		{
-			MappingTarget mappingTarget = mappingTargets.get(i);
-			MappingTarget clonedMappingTarget = clonedMappingTargets.get(i);
-
-			assertNotEquals(mappingTarget.getIdentifier(), clonedMappingTarget.getIdentifier());
-			assertEquals(mappingTarget.getTarget().getName(), clonedMappingTarget.getTarget().getName());
-
-			List<EntityMapping> entityMappings = Lists.newArrayList(mappingTarget.getEntityMappings());
-			List<EntityMapping> clonedEntityMappings = Lists.newArrayList(clonedMappingTarget.getEntityMappings());
-			assertEquals(entityMappings.size(), clonedEntityMappings.size());
-
-			for (int j = 0; j < entityMappings.size(); ++j)
-			{
-				EntityMapping entityMapping = entityMappings.get(j);
-				EntityMapping clonedEntityMapping = clonedEntityMappings.get(j);
-
-				assertNotEquals(entityMapping.getIdentifier(), clonedEntityMapping.getIdentifier());
-				assertEquals(entityMapping.getLabel(), clonedEntityMapping.getLabel());
-				assertEquals(entityMapping.getName(), clonedEntityMapping.getName());
-				assertEquals(entityMapping.getSourceEntityMetaData().getName(),
-						clonedEntityMapping.getSourceEntityMetaData().getName());
-				assertEquals(entityMapping.getTargetEntityMetaData().getName(),
-						clonedEntityMapping.getTargetEntityMetaData().getName());
-
-				List<AttributeMapping> attributeMappings = Lists.newArrayList(entityMapping.getAttributeMappings());
-				List<AttributeMapping> clonedAttributeMappings = Lists
-						.newArrayList(clonedEntityMapping.getAttributeMappings());
-				assertEquals(attributeMappings.size(), clonedAttributeMappings.size());
-
-				for (int k = 0; k < attributeMappings.size(); ++k)
-				{
-					AttributeMapping attributeMapping = attributeMappings.get(k);
-					AttributeMapping clonedAttributeMapping = clonedAttributeMappings.get(k);
-					assertNotEquals(attributeMapping.getIdentifier(), clonedAttributeMapping.getIdentifier());
-
-					assertEquals(attributeMapping.getAlgorithm(), clonedAttributeMapping.getAlgorithm());
-					assertEquals(attributeMapping.getTargetAttributeMetaData().getName(),
-							clonedAttributeMapping.getTargetAttributeMetaData().getName());
-				}
-			}
-		}
+		MappingProject mappingProject = mock(MappingProject.class);
+		when(mappingProjectRepo.getMappingProject("0")).thenReturn(mappingProject);
+		mappingService.cloneMappingProject("0");
+		verify(mappingProject).removeIdentifiers();
+		verify(mappingProjectRepo).add(mappingProject);
 	}
 
 	@Test
-	public void testAddTarget()
+	public void testCloneMappingProjectStringString()
 	{
-		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
+		MappingProject mappingProject = mock(MappingProject.class);
+		when(mappingProjectRepo.getMappingProject("0")).thenReturn(mappingProject);
+		mappingService.cloneMappingProject("0", "newName");
+		verify(mappingProject).removeIdentifiers();
+		verify(mappingProject).setName("newName");
+		verify(mappingProjectRepo).add(mappingProject);
+	}
 
-		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
-		mappingProject.addTarget(geneMetaData);
-
-		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
+	@Test
+	public void testUpdateMappingProject()
+	{
+		MappingProject mappingProject = mock(MappingProject.class);
 		mappingService.updateMappingProject(mappingProject);
-
-		MappingProject retrieved = mappingService.getMappingProject(mappingProject.getIdentifier());
-		assertEquals(mappingProject, retrieved);
+		verifyZeroInteractions(mappingProject);
+		verify(mappingProjectRepo).update(mappingProject);
 	}
 
 	@Test(expectedExceptions = IllegalStateException.class)
@@ -255,221 +283,191 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
 
-		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
+		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, TARGET_HOP_ENTITY);
 		mappingProject.addTarget(hopMetaData);
-	}
-
-	@Test
-	public void testAddNewSource()
-	{
-		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
-
-		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
-
-		// now add new source
-		EntityMapping mapping = mappingProject.getMappingTarget("HopEntity").addSource(geneMetaData);
-		mappingService.updateMappingProject(mappingProject);
-
-		MappingProject retrieved = mappingService.getMappingProject(mappingProject.getIdentifier());
-		assertEquals(retrieved, mappingProject);
-
-		assertEquals(retrieved.getMappingTarget("HopEntity").getMappingForSource("Gene"), mapping);
-	}
-
-	@Test
-	public void testAddExistingSource()
-	{
-		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
-
-		MappingProject mappingProject = mappingService.addMappingProject("Test123", user, "HopEntity");
-		mappingProject.getMappingTarget("HopEntity").addSource(geneMetaData);
-
-		mappingService.updateMappingProject(mappingProject);
-		MappingProject retrieved = mappingService.getMappingProject(mappingProject.getIdentifier());
-		try
-		{
-			retrieved.getMappingTarget("HopEntity").addSource(geneMetaData);
-			fail("Expected exception");
-		}
-		catch (IllegalStateException expected)
-		{
-		}
-	}
-
-	@Test
-	public void testApplyMappings()
-	{
-		String entityName = "Koetjeboe";
-		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
-		createMappingProjectWithMappings(entityName);
-
-		Repository actual = dataService.getRepository(entityName);
-		DefaultEntityMetaData expectedMetadata = new DefaultEntityMetaData(entityName, hopMetaData);
-		expectedMetadata.addAttribute("source");
-		assertEquals(actual.getEntityMetaData(), expectedMetadata);
-		Set<Entity> created = Sets.newHashSet(actual.iterator());
-
-		MapEntity koetje1 = new MapEntity(expectedMetadata);
-		koetje1.set("identifier", "1");
-		koetje1.set("height", new Double(2));
-		koetje1.set("source", "Gene");
-		MapEntity koetje2 = new MapEntity(expectedMetadata);
-		koetje2.set("identifier", "2");
-		koetje2.set("height", new Double(4));
-		koetje2.set("source", "Gene");
-		MapEntity koetje3 = new MapEntity(expectedMetadata);
-		koetje3.set("identifier", "3");
-		koetje3.set("height", new Double(6));
-		koetje3.set("source", "Gene");
-
-		assertEquals(created, ImmutableSet.<Entity> of(koetje1, koetje2, koetje3));
-		verify(permissionSystemService).giveUserEntityPermissions(SecurityContextHolder.getContext(),
-				Arrays.asList(entityName));
 	}
 
 	/**
 	 * New entities in the source should be added to the target when a new mapping to the same target is performed.
 	 */
 	@Test
-	public void testAdd()
+	public void testApplyMappingsAdd()
 	{
 		String entityName = "addEntity";
 		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
+		Repository<Entity> addEntityRepo = mock(Repository.class);
+		when(addEntityRepo.getName()).thenReturn(entityName);
+		EntityMetaData targetMeta = entityMetaFactory.create(TARGET_HOP_ENTITY).setPackage(package_);
+		targetMeta.addAttribute(attrMetaFactory.create().setName("identifier"), ROLE_ID);
+		targetMeta.addAttribute(attrMetaFactory.create().setName("height").setDataType(DECIMAL).setNillable(false));
+		targetMeta.addAttribute(attrMetaFactory.create().setName("source"));
 
-		// make project and apply mappings once
-		MappingProject project = createMappingProjectWithMappings(entityName);
+		when(addEntityRepo.getEntityMetaData()).thenReturn(targetMeta);
+		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityMetaData>()
+		{
+			@Override
+			public boolean matches(Object obj)
+			{
+				return obj instanceof EntityMetaData && ((EntityMetaData) obj).getName().equals(entityName);
+			}
+		}))).thenReturn(addEntityRepo);
 
 		// add an entity to the source
-		MapEntity geneEntity = new MapEntity(geneMetaData);
-		geneEntity.set("id", "4");
-		geneEntity.set("length", new Double(8));
-		dataService.add(geneMetaData.getName(), geneEntity);
+		List<Entity> sourceGeneEntities = newArrayList();
+		List<Entity> expectedEntities = newArrayList();
+		createEntities(targetMeta, sourceGeneEntities, expectedEntities);
+
+		Query<Entity> addEntityQ = mock(Query.class);
+		when(addEntityRepo.query()).thenReturn(addEntityQ);
+		when(addEntityQ.eq("source", SOURCE_GENE_ENTITY)).thenReturn(addEntityQ);
+		when(addEntityQ.findAll()).thenAnswer(new Answer<Stream<Entity>>()
+		{
+			@Override
+			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return Stream.empty();
+			}
+		});
+
+		when(geneRepo.iterator()).thenAnswer(new Answer<Iterator<Entity>>()
+		{
+			@Override
+			public Iterator<Entity> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return sourceGeneEntities.iterator();
+			}
+		});
+
+		// make project and apply mappings once
+		MappingProject project = createMappingProjectWithMappings();
 
 		// apply mapping again
-		mappingService.applyMappings(project.getMappingTarget("HopEntity"), entityName);
+		String generatedEntityName = mappingService
+				.applyMappings(project.getMappingTarget(TARGET_HOP_ENTITY), entityName, true);
+		assertEquals(generatedEntityName, entityName);
 
-		Repository actual = dataService.getRepository(entityName);
-		DefaultEntityMetaData expectedMetadata = new DefaultEntityMetaData(entityName, hopMetaData);
-		expectedMetadata.addAttribute("source");
-		assertEquals(actual.getEntityMetaData(), expectedMetadata);
-		Set<Entity> created = Sets.newHashSet(actual.iterator());
+		ArgumentCaptor<Entity> entityCaptor = forClass((Class) Entity.class);
+		verify(addEntityRepo, times(4)).add(entityCaptor.capture());
 
-		MapEntity expected1 = new MapEntity(expectedMetadata);
-		expected1.set("identifier", "1");
-		expected1.set("height", new Double(2));
-		expected1.set("source", "Gene");
-		MapEntity expected2 = new MapEntity(expectedMetadata);
-		expected2.set("identifier", "2");
-		expected2.set("height", new Double(4));
-		expected2.set("source", "Gene");
-		MapEntity expected3 = new MapEntity(expectedMetadata);
-		expected3.set("identifier", "3");
-		expected3.set("height", new Double(6));
-		expected3.set("source", "Gene");
-		MapEntity expected4 = new MapEntity(expectedMetadata);
-		expected4.set("identifier", "4");
-		expected4.set("height", new Double(8));
-		expected4.set("source", "Gene");
+		assertTrue(EntityUtils.entitiesEquals(entityCaptor.getAllValues(), expectedEntities));
 
-		assertEquals(created, ImmutableSet.<Entity> of(expected1, expected2, expected3, expected4));
+		verify(permissionSystemService)
+				.giveUserEntityPermissions(SecurityContextHolder.getContext(), singletonList(entityName));
 	}
 
 	/**
 	 * Applying a mapping multiple times to the same target should update the existing entities.
 	 */
 	@Test
-	public void testUpdate()
+	public void testApplyMappingsUpdate()
 	{
 		String entityName = "updateEntity";
+
 		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
+		Repository<Entity> updateEntityRepo = mock(Repository.class);
+		when(updateEntityRepo.getName()).thenReturn(entityName);
+		EntityMetaData targetMeta = entityMetaFactory.create(TARGET_HOP_ENTITY).setPackage(package_);
+		targetMeta.addAttribute(attrMetaFactory.create().setName("identifier"), ROLE_ID);
+		targetMeta.addAttribute(attrMetaFactory.create().setName("height").setDataType(DECIMAL).setNillable(false));
+		targetMeta.addAttribute(attrMetaFactory.create().setName("source"));
+		when(dataService.hasRepository(entityName)).thenReturn(true);
+		when(dataService.getRepository(entityName)).thenReturn(updateEntityRepo);
+
+		when(updateEntityRepo.getEntityMetaData()).thenReturn(targetMeta);
+		when(metaDataService.createRepository(argThat(new ArgumentMatcher<EntityMetaData>()
+		{
+			@Override
+			public boolean matches(Object obj)
+			{
+				return obj instanceof EntityMetaData && ((EntityMetaData) obj).getName().equals(entityName);
+			}
+		}))).thenReturn(updateEntityRepo);
+
+		// add an entity to the source
+		List<Entity> sourceGeneEntities = newArrayList();
+		List<Entity> expectedEntities = newArrayList();
+		createEntities(targetMeta, sourceGeneEntities, expectedEntities);
+
+		Query<Entity> addEntityQ = mock(Query.class);
+		when(updateEntityRepo.query()).thenReturn(addEntityQ);
+		when(addEntityQ.eq("source", SOURCE_GENE_ENTITY)).thenReturn(addEntityQ);
+		when(addEntityQ.findAll()).thenAnswer(new Answer<Stream<Entity>>()
+		{
+			@Override
+			public Stream<Entity> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return expectedEntities.stream();
+			}
+		});
+
+		when(geneRepo.iterator()).thenAnswer(new Answer<Iterator<Entity>>()
+		{
+			@Override
+			public Iterator<Entity> answer(InvocationOnMock invocation) throws Throwable
+			{
+				return sourceGeneEntities.iterator();
+			}
+		});
 
 		// make project and apply mappings once
-		MappingProject project = createMappingProjectWithMappings(entityName);
-
-		// update an entity in the source
-		Entity geneEntity = dataService.findOne(geneMetaData.getName(), "2");
-		geneEntity.set("length", 5.678);
-		dataService.update(geneMetaData.getName(), geneEntity);
+		MappingProject project = createMappingProjectWithMappings();
 
 		// apply mapping again
-		mappingService.applyMappings(project.getMappingTarget("HopEntity"), entityName);
+		String generatedEntityName = mappingService
+				.applyMappings(project.getMappingTarget(TARGET_HOP_ENTITY), entityName);
+		assertEquals(generatedEntityName, entityName);
 
-		Repository actual = dataService.getRepository(entityName);
-		DefaultEntityMetaData expectedMetadata = new DefaultEntityMetaData(entityName, hopMetaData);
-		expectedMetadata.addAttribute("source");
-		assertEquals(actual.getEntityMetaData(), expectedMetadata);
-		Set<Entity> created = Sets.newHashSet(actual.iterator());
+		ArgumentCaptor<Entity> entityCaptor = forClass((Class) Entity.class);
+		verify(updateEntityRepo, times(4)).add(entityCaptor.capture());
 
-		MapEntity expected1 = new MapEntity(expectedMetadata);
-		expected1.set("identifier", "1");
-		expected1.set("height", new Double(2));
-		expected1.set("source", "Gene");
-		MapEntity expected2 = new MapEntity(expectedMetadata);
-		expected2.set("identifier", "2");
-		expected2.set("height", 5.678);
-		expected2.set("source", "Gene");
-		MapEntity expected3 = new MapEntity(expectedMetadata);
-		expected3.set("identifier", "3");
-		expected3.set("height", new Double(6));
-		expected3.set("source", "Gene");
+		assertTrue(EntityUtils.entitiesEquals(entityCaptor.getAllValues(), expectedEntities));
 
-		assertEquals(created, ImmutableSet.<Entity> of(expected1, expected2, expected3));
+		verifyZeroInteractions(permissionSystemService);
 	}
 
-	/**
-	 * Removing an entity in the source and applying the mapping again should also delete this entity in the target.
-	 */
-	@Test
-	public void testDelete()
+	private void createEntities(EntityMetaData targetMeta, List<Entity> sourceGeneEntities,
+			List<Entity> expectedEntities)
 	{
-		String entityName = "deleteEntity";
-		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
+		for (int i = 0; i < 4; ++i)
+		{
+			Entity geneEntity = new DynamicEntity(geneMetaData);
+			geneEntity.set("id", String.valueOf(i));
+			geneEntity.set("length", i * 2d);
+			sourceGeneEntities.add(geneEntity);
 
-		// make project and apply mappings once
-		MappingProject project = createMappingProjectWithTwoSourcesWithMappings(entityName);
+			when(algorithmService.apply(argThat(new ArgumentMatcher<AttributeMapping>()
+			{
+				@Override
+				public boolean matches(Object obj)
+				{
+					return obj instanceof AttributeMapping && ((AttributeMapping) obj).getAlgorithm()
+							.equals("$('id').value()");
+				}
+			}), eq(geneEntity), eq(geneMetaData))).thenReturn(geneEntity.getString("id"));
 
-		// delete an entity from the source
-		dataService.delete(geneMetaData.getName(), "2");
+			when(algorithmService.apply(argThat(new ArgumentMatcher<AttributeMapping>()
+			{
+				@Override
+				public boolean matches(Object obj)
+				{
+					return obj instanceof AttributeMapping && ((AttributeMapping) obj).getAlgorithm()
+							.equals("$('length').value()");
+				}
+			}), eq(geneEntity), eq(geneMetaData))).thenReturn(geneEntity.getDouble("length"));
 
-		// apply mapping again, this should not delete entities mapped from source 2
-		mappingService.applyMappings(project.getMappingTarget("HopEntity"), entityName);
-
-		Repository actual = dataService.getRepository(entityName);
-		DefaultEntityMetaData expectedMetadata = new DefaultEntityMetaData(entityName, hopMetaData);
-		expectedMetadata.addAttribute("source");
-		assertEquals(actual.getEntityMetaData(), expectedMetadata);
-		Set<Entity> created = Sets.newHashSet(actual.iterator());
-
-		MapEntity expected1 = new MapEntity(expectedMetadata);
-		expected1.set("identifier", "1");
-		expected1.set("height", new Double(2));
-		expected1.set("source", "Gene");
-		MapEntity expected3 = new MapEntity(expectedMetadata);
-		expected3.set("identifier", "3");
-		expected3.set("height", new Double(6));
-		expected3.set("source", "Gene");
-		MapEntity expected4 = new MapEntity(expectedMetadata);
-		expected4.set("identifier", "A");
-		expected4.set("height", new Double(12345));
-		expected4.set("source", "Exon");
-
-		assertEquals(created, ImmutableSet.<Entity> of(expected1, expected3, expected4));
+			Entity expectedEntity = new DynamicEntity(targetMeta);
+			expectedEntity.set("identifier", String.valueOf(i));
+			expectedEntity.set("height", i * 2d);
+			expectedEntity.set("source", SOURCE_GENE_ENTITY);
+			expectedEntities.add(expectedEntity);
+		}
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testTargetMetaNotCompatible()
+	private MappingProject createMappingProjectWithMappings()
 	{
-		MappingProject project = createMappingProjectWithMappings("compatibleEntity");
-		MappingTarget target = project.getMappingTarget("HopEntity");
+		MappingProject mappingProject = mappingService.addMappingProject("TestRun", user, TARGET_HOP_ENTITY);
+		MappingTarget target = mappingProject.getMappingTarget(TARGET_HOP_ENTITY);
 
-		// apply mapping to the wrong target
-		mappingService.applyMappings(target, geneMetaData.getName());
-	}
-
-	private MappingProject createMappingProjectWithMappings(String newEntityName)
-	{
-		MappingProject mappingProject = mappingService.addMappingProject("TestRun", user, "HopEntity");
-		MappingTarget target = mappingProject.getMappingTarget("HopEntity");
 		EntityMapping mapping = target.addSource(geneMetaData);
 
 		AttributeMapping idMapping = mapping.addAttributeMapping("identifier");
@@ -477,37 +475,15 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		AttributeMapping attrMapping = mapping.addAttributeMapping("height");
 		attrMapping.setAlgorithm("$('length').value()");
 
-		mappingService.applyMappings(target, newEntityName);
-		return mappingProject;
-	}
-
-	private MappingProject createMappingProjectWithTwoSourcesWithMappings(String newEntityName)
-	{
-		MappingProject mappingProject = mappingService.addMappingProject("TestRun", user, "HopEntity");
-		MappingTarget target = mappingProject.getMappingTarget("HopEntity");
-		EntityMapping mapping = target.addSource(geneMetaData);
-
-		AttributeMapping idMapping = mapping.addAttributeMapping("identifier");
-		idMapping.setAlgorithm("$('id').value()");
-		AttributeMapping attrMapping = mapping.addAttributeMapping("height");
-		attrMapping.setAlgorithm("$('length').value()");
-
-		EntityMapping mapping2 = target.addSource(exonMetaData);
-		AttributeMapping idMapping2 = mapping2.addAttributeMapping("identifier");
-		idMapping2.setAlgorithm("$('id').value()");
-		AttributeMapping attrMapping2 = mapping2.addAttributeMapping("height");
-		attrMapping2.setAlgorithm("$('basepairs').value()");
-
-		mappingService.applyMappings(target, newEntityName);
 		return mappingProject;
 	}
 
 	@Test
 	public void testNumericId()
 	{
-		assertEquals(mappingService.generateId(MolgenisFieldTypes.INT, 1l), "2");
-		assertEquals(mappingService.generateId(MolgenisFieldTypes.DECIMAL, 2l), "3");
-		assertEquals(mappingService.generateId(MolgenisFieldTypes.LONG, 3l), "4");
+		assertEquals(mappingService.generateId(INT, 1L), "2");
+		assertEquals(mappingService.generateId(DECIMAL, 2L), "3");
+		assertEquals(mappingService.generateId(LONG, 3L), "4");
 	}
 
 	@Test
@@ -516,93 +492,65 @@ public class MappingServiceImplTest extends AbstractTestNGSpringContextTests
 		reset(idGenerator);
 		when(idGenerator.generateId()).thenReturn(uuidGenerator.generateId());
 
-		mappingService.generateId(MolgenisFieldTypes.STRING, 1l);
+		mappingService.generateId(STRING, 1L);
 		verify(idGenerator).generateId();
 	}
 
+	private MappingTarget getManualMappingTarget(String identifier, Collection<EntityMapping> entityMappings)
+	{
+		return new MappingTarget(identifier, hopMetaData, entityMappings);
+	}
+
+	private MappingProject getManualMappingProject(String identifier, String projectName, MappingTarget mappingTarget)
+	{
+		return new MappingProject(identifier, projectName, user, newArrayList(mappingTarget));
+	}
+
 	@Configuration
+	@ComponentScan({ "org.molgenis.data.mapper.meta", "org.molgenis.auth", "org.molgenis.data.reindex.meta" })
 	static class Config
 	{
 		@Bean
-		DataServiceImpl dataService()
+		public DataService dataService()
 		{
-			return new DataServiceImpl();
+			return mock(DataService.class);
 		}
 
 		@Bean
-		PlatformTransactionManager platformTransactionManager()
+		public AlgorithmService algorithmService()
 		{
-			return mock(PlatformTransactionManager.class);
+			return mock(AlgorithmService.class);
 		}
 
 		@Bean
-		MetaDataService metaDataService()
+		public IdGenerator idGenerator()
 		{
-			return new MetaDataServiceImpl(dataService());
+			return mock(IdGenerator.class);
 		}
 
 		@Bean
-		MolgenisUserService userService()
+		public MappingProjectRepository mappingProjectRepository()
 		{
-			return mock(MolgenisUserService.class);
+			return mock(MappingProjectRepository.class);
 		}
 
 		@Bean
-		ManageableRepositoryCollection manageableRepositoryCollection()
-		{
-			return new InMemoryRepositoryCollection("mem");
-		}
-
-		@Bean
-		PermissionSystemService permissionSystemService()
+		public PermissionSystemService permissionSystemService()
 		{
 			return mock(PermissionSystemService.class);
 		}
 
 		@Bean
-		SemanticSearchService semanticSearchService()
+		public AttributeMetaDataFactory attributeMetaDataFactory()
 		{
-			return mock(SemanticSearchService.class);
+			return new AttributeMetaDataFactory();
 		}
 
 		@Bean
-		IdGenerator idGenerator()
+		public MappingService mappingService()
 		{
-			IdGenerator idGenerator = mock(IdGenerator.class);
-			return idGenerator;
-		}
-
-		@Bean
-		public OntologyTagService ontologyTagService()
-		{
-			return mock(OntologyTagService.class);
-		}
-
-		@Bean
-		public LanguageService languageService()
-		{
-			return new LanguageService(dataService(), new AppDbSettings());
-		}
-
-		@Bean
-		public FreeMarkerConfigurer freeMarkerConfigurer()
-		{
-			return new FreeMarkerConfigurer();
-		}
-
-		@PostConstruct
-		public void initRepositories()
-		{
-			MetaDataService metaDataService = metaDataService();
-			dataService().setMeta(metaDataService);
-
-			ManageableRepositoryCollection manageableRepositoryCollection = manageableRepositoryCollection();
-			metaDataService.setDefaultBackend(manageableRepositoryCollection);
-			metaDataService.addEntityMeta(new MolgenisUserMetaData());
-			metaDataService.addEntityMeta(AttributeMappingRepositoryImpl.META_DATA);
-			metaDataService.addEntityMeta(EntityMappingRepositoryImpl.META_DATA);
-			metaDataService.addEntityMeta(MappingTargetRepositoryImpl.META_DATA);
-			metaDataService.addEntityMeta(MappingProjectRepositoryImpl.META_DATA);
+			return new MappingServiceImpl(dataService(), algorithmService(), idGenerator(), mappingProjectRepository(),
+					permissionSystemService(), attributeMetaDataFactory());
 		}
 	}
 }

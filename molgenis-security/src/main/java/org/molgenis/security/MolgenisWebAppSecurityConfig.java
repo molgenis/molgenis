@@ -10,6 +10,9 @@ import java.util.List;
 
 import javax.servlet.Filter;
 
+import org.molgenis.auth.MolgenisGroupMemberFactory;
+import org.molgenis.auth.MolgenisTokenFactory;
+import org.molgenis.auth.MolgenisUserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.account.AccountController;
@@ -80,6 +83,15 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Autowired
 	private AppSettings appSettings;
 
+	@Autowired
+	private MolgenisTokenFactory molgenisTokenFactory;
+
+	@Autowired
+	private MolgenisUserFactory molgenisUserFactory;
+
+	@Autowired
+	private MolgenisGroupMemberFactory molgenisGroupMemberFactory;
+
 	@Override
 	protected void configure(HttpSecurity http) throws Exception
 	{
@@ -120,6 +132,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 				.antMatchers(GOOGLE_AUTHENTICATION_URL).permitAll()
 
 				.antMatchers("/logo/**").permitAll()
+
+				.antMatchers("/molgenis.py").permitAll()
 
 				.antMatchers("/molgenis.R").permitAll()
 
@@ -214,7 +228,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	@Bean
 	public TokenService tokenService()
 	{
-		return new DataServiceTokenService(new TokenGenerator(), dataService, userDetailsService());
+		return new DataServiceTokenService(new TokenGenerator(), dataService, userDetailsService(),
+				molgenisTokenFactory);
 	}
 
 	@Bean
@@ -241,7 +256,8 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 	public Filter googleAuthenticationProcessingFilter() throws Exception
 	{
 		GoogleAuthenticationProcessingFilter googleAuthenticationProcessingFilter = new GoogleAuthenticationProcessingFilter(
-				googlePublicKeysManager(), dataService, (MolgenisUserDetailsService) userDetailsService(), appSettings);
+				googlePublicKeysManager(), dataService, (MolgenisUserDetailsService) userDetailsService(), appSettings,
+				molgenisUserFactory, molgenisGroupMemberFactory);
 		googleAuthenticationProcessingFilter.setAuthenticationManager(authenticationManagerBean());
 		return googleAuthenticationProcessingFilter;
 	}

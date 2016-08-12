@@ -1,47 +1,7 @@
 package org.molgenis.data.importer;
 
-import static org.apache.commons.io.FilenameUtils.getBaseName;
-import static org.apache.commons.io.FilenameUtils.getExtension;
-import static org.molgenis.data.importer.ImportWizardController.URI;
-import static org.molgenis.security.core.Permission.COUNT;
-import static org.molgenis.security.core.Permission.NONE;
-import static org.molgenis.security.core.Permission.READ;
-import static org.molgenis.security.core.Permission.WRITE;
-import static org.molgenis.security.core.Permission.WRITEMETA;
-import static org.springframework.http.MediaType.TEXT_PLAIN;
-
-import java.io.File;
-import java.io.IOException;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.servlet.http.HttpServletRequest;
-
-
-import org.molgenis.auth.Authority;
-import org.molgenis.auth.GroupAuthority;
-import org.molgenis.auth.MolgenisGroup;
-import org.molgenis.data.DataService;
-import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Package;
-import org.molgenis.data.RepositoryCollection;
+import org.molgenis.auth.*;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.GenericImporterExtensions;
@@ -66,14 +26,32 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMapper;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.Objects.requireNonNull;
+import static org.apache.commons.io.FilenameUtils.getBaseName;
+import static org.apache.commons.io.FilenameUtils.getExtension;
+import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
+import static org.molgenis.data.importer.ImportWizardController.URI;
+import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
+import static org.molgenis.security.core.Permission.*;
+import static org.springframework.http.MediaType.TEXT_PLAIN;
 
 @Controller
 @RequestMapping(URI)
@@ -89,6 +67,7 @@ public class ImportWizardController extends AbstractWizardController
 	private final PackageWizardPage packageWizardPage;
 	private final GrantedAuthoritiesMapper grantedAuthoritiesMapper;
 	private final UserAccountService userAccountService;
+	private final GroupAuthorityFactory groupAuthorityFactory;
 
 	private ImportServiceFactory importServiceFactory;
 	private FileStore fileStore;
@@ -104,13 +83,16 @@ public class ImportWizardController extends AbstractWizardController
 			ImportResultsWizardPage importResultsWizardPage, DataService dataService,
 			GrantedAuthoritiesMapper grantedAuthoritiesMapper, UserAccountService userAccountService,
 			ImportServiceFactory importServiceFactory, FileStore fileStore,
-			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, ImportRunService importRunService)
+			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, ImportRunService importRunService,
+			GroupAuthorityFactory groupAuthorityFactory)
 	{
 		super(URI, "importWizard");
 		if (uploadWizardPage == null) throw new IllegalArgumentException("UploadWizardPage is null");
 		if (optionsWizardPage == null) throw new IllegalArgumentException("OptionsWizardPage is null");
 		if (validationResultWizardPage == null)
+		{
 			throw new IllegalArgumentException("ValidationResultWizardPage is null");
+		}
 		if (importResultsWizardPage == null) throw new IllegalArgumentException("ImportResultsWizardPage is null");
 		this.uploadWizardPage = uploadWizardPage;
 		this.optionsWizardPage = optionsWizardPage;
@@ -124,6 +106,7 @@ public class ImportWizardController extends AbstractWizardController
 		this.fileStore = fileStore;
 		this.fileRepositoryCollectionFactory = fileRepositoryCollectionFactory;
 		this.importRunService = importRunService;
+		this.groupAuthorityFactory = requireNonNull(groupAuthorityFactory);
 		this.dataService = dataService;
 		this.asyncImportJobs = Executors.newSingleThreadExecutor();
 	}
@@ -134,7 +117,7 @@ public class ImportWizardController extends AbstractWizardController
 			GrantedAuthoritiesMapper grantedAuthoritiesMapper, UserAccountService userAccountService,
 			ImportServiceFactory importServiceFactory, FileStore fileStore,
 			FileRepositoryCollectionFactory fileRepositoryCollectionFactory, ImportRunService importRunService,
-			ExecutorService executorService)
+			ExecutorService executorService, GroupAuthorityFactory groupAuthorityFactory)
 	{
 		super(URI, "importWizard");
 		if (uploadWizardPage == null) throw new IllegalArgumentException("UploadWizardPage is null");
@@ -156,6 +139,7 @@ public class ImportWizardController extends AbstractWizardController
 		this.importRunService = importRunService;
 		this.dataService = dataService;
 		this.asyncImportJobs = executorService;
+		this.groupAuthorityFactory = groupAuthorityFactory;
 	}
 
 	@Override
@@ -190,7 +174,7 @@ public class ImportWizardController extends AbstractWizardController
 		String entitiesString = webRequest.getParameter("entityIds");
 		List<String> entities = Arrays.asList(entitiesString.split(","));
 
-		MolgenisGroup molgenisGroup = dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class);
+		MolgenisGroup molgenisGroup = dataService.findOneById(MOLGENIS_GROUP, groupId, MolgenisGroup.class);
 		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
 		List<Authority> groupPermissions = getGroupPermissions(molgenisGroup);
 		Permissions permissions = createPermissions(groupPermissions, entities);
@@ -211,23 +195,28 @@ public class ImportWizardController extends AbstractWizardController
 					.currentUserHasRole(SecurityUtils.AUTHORITY_ENTITY_WRITEMETA_PREFIX + entityClassId.toUpperCase())
 					|| userAccountService.getCurrentUser().isSuperuser()))
 			{
-				if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString())
-						|| value.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
+				if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString()) || value
+						.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
 				{
-					authority.setMolgenisGroup(
-							dataService.findOne(MolgenisGroup.ENTITY_NAME, groupId, MolgenisGroup.class));
-					authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_"
-							+ entityClassId.toUpperCase());
+					authority.setMolgenisGroup(dataService.findOneById(MOLGENIS_GROUP, groupId, MolgenisGroup.class));
+					authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId
+							.toUpperCase());
 					if (authority.getId() == null)
 					{
 						authority.setId(UUID.randomUUID().toString());
-						dataService.add(GroupAuthority.ENTITY_NAME, authority);
+						dataService.add(GROUP_AUTHORITY, authority);
 					}
-					else dataService.update(GroupAuthority.ENTITY_NAME, authority);
+					else
+					{
+						dataService.update(GROUP_AUTHORITY, authority);
+					}
 				}
 				else if (value.equalsIgnoreCase(NONE.toString()))
 				{
-					if (authority.getId() != null) dataService.delete(GroupAuthority.ENTITY_NAME, authority.getId());
+					if (authority.getId() != null)
+					{
+						dataService.deleteById(GROUP_AUTHORITY, authority.getId());
+					}
 				}
 				else
 				{
@@ -245,9 +234,9 @@ public class ImportWizardController extends AbstractWizardController
 
 	private List<Authority> getGroupPermissions(MolgenisGroup molgenisGroup)
 	{
-		return dataService.findAll(GroupAuthority.ENTITY_NAME,
-				new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, molgenisGroup), GroupAuthority.class)
-				.collect(Collectors.toList());
+		return dataService.findAll(GROUP_AUTHORITY,
+				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.MOLGENIS_GROUP, molgenisGroup),
+				GroupAuthority.class).collect(Collectors.toList());
 	}
 
 	private Permissions createPermissions(List<? extends Authority> entityAuthorities, List<String> entityIds)
@@ -308,15 +297,16 @@ public class ImportWizardController extends AbstractWizardController
 
 	private GroupAuthority getGroupAuthority(String groupId, String entityClassId)
 	{
-		GroupAuthority authority = new GroupAuthority();
-		Stream<GroupAuthority> stream = dataService.findAll(GroupAuthority.ENTITY_NAME,
-				new QueryImpl().eq(GroupAuthority.MOLGENISGROUP, groupId), GroupAuthority.class);
-		for (Iterator<GroupAuthority> it = stream.iterator(); it.hasNext();)
+		GroupAuthority authority = groupAuthorityFactory.create();
+		Stream<GroupAuthority> stream = dataService.findAll(GROUP_AUTHORITY,
+				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.MOLGENIS_GROUP, groupId),
+				GroupAuthority.class);
+		for (Iterator<GroupAuthority> it = stream.iterator(); it.hasNext(); )
 		{
 			GroupAuthority groupAuthority = it.next();
 			String entity = "";
-			if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX)
-					|| groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX))
+			if (groupAuthority.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX) || groupAuthority
+					.getRole().startsWith(SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX))
 			{
 				entity = groupAuthority.getRole().substring(SecurityUtils.AUTHORITY_ENTITY_COUNT_PREFIX.length());
 			}
@@ -411,8 +401,8 @@ public class ImportWizardController extends AbstractWizardController
 	private String getFilename(String originalFileName, String entityName)
 	{
 		String filename;
-		String extension = FileExtensionUtils.findExtensionFromPossibilities(originalFileName,
-				GenericImporterExtensions.getAll());
+		String extension = FileExtensionUtils
+				.findExtensionFromPossibilities(originalFileName, GenericImporterExtensions.getAll());
 		if (entityName == null)
 		{
 			filename = originalFileName;
@@ -420,7 +410,7 @@ public class ImportWizardController extends AbstractWizardController
 		else
 		{
 			filename = entityName + "." + extension;
-			if (!extension.equals("vcf") && (!extension.equals("vcf.gz")&&(!extension.equals("vcf.zip"))))
+			if (!extension.equals("vcf") && (!extension.equals("vcf.gz") && (!extension.equals("vcf.zip"))))
 				LOG.warn("Specifing a filename for a non-VCF file has no effect on entity names.");
 		}
 		return filename;
@@ -445,7 +435,7 @@ public class ImportWizardController extends AbstractWizardController
 		importRun = importRunService.addImportRun(SecurityUtils.getCurrentUsername(), Boolean.TRUE.equals(notify));
 		asyncImportJobs.execute(
 				new ImportJob(importService, SecurityContextHolder.getContext(), repositoryCollection, databaseAction,
-						importRun.getId(), importRunService, request.getSession(), Package.DEFAULT_PACKAGE_NAME));
+						importRun.getId(), importRunService, request.getSession(), PACKAGE_DEFAULT));
 
 		return importRun;
 	}
@@ -461,13 +451,14 @@ public class ImportWizardController extends AbstractWizardController
 			}
 			catch (IllegalArgumentException e)
 			{
-				throw new IllegalArgumentException("Invalid action:[" + action.toUpperCase() + "] valid values: "
-						+ (Arrays.toString(DatabaseAction.values())));
+				throw new IllegalArgumentException(
+						"Invalid action:[" + action.toUpperCase() + "] valid values: " + (Arrays
+								.toString(DatabaseAction.values())));
 			}
 		}
 
-		String extension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
-				GenericImporterExtensions.getAll());
+		String extension = FileExtensionUtils
+				.findExtensionFromPossibilities(file.getName(), GenericImporterExtensions.getAll());
 
 		if (extension.equals("vcf") || extension.equals("vcf.gz") || extension.equals("vcf.zip"))
 		{

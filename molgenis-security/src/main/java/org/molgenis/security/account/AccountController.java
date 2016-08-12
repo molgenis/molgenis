@@ -15,6 +15,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.MolgenisUserFactory;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.settings.AppSettings;
@@ -63,15 +64,17 @@ public class AccountController
 	private final CaptchaService captchaService;
 	private final RedirectStrategy redirectStrategy;
 	private final AppSettings appSettings;
+	private final MolgenisUserFactory molgenisUserFactory;
 
 	@Autowired
 	public AccountController(AccountService accountService, CaptchaService captchaService,
-			RedirectStrategy redirectStrategy, AppSettings appSettings)
+			RedirectStrategy redirectStrategy, AppSettings appSettings, MolgenisUserFactory molgenisUserFactory)
 	{
 		this.accountService = requireNonNull(accountService);
 		this.captchaService = requireNonNull(captchaService);
 		this.redirectStrategy = requireNonNull(redirectStrategy);
 		this.appSettings = requireNonNull(appSettings);
+		this.molgenisUserFactory = requireNonNull(molgenisUserFactory);
 	}
 
 	@RequestMapping(value = "/login", method = RequestMethod.GET)
@@ -248,7 +251,7 @@ public class AccountController
 
 	private MolgenisUser toMolgenisUser(RegisterRequest request)
 	{
-		MolgenisUser user = new MolgenisUser();
+		MolgenisUser user = molgenisUserFactory.create();
 		user.setUsername(request.getUsername());
 		user.setPassword(request.getPassword());
 		user.setEmail(request.getEmail());

@@ -1,30 +1,27 @@
 package org.molgenis.file.ingest;
 
-import java.io.IOException;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.stream.Stream;
-
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityListener;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.*;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 
-public class FileIngestRepositoryDecorator implements Repository
+import java.io.IOException;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+
+import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_EXECUTION;
+
+public class FileIngestRepositoryDecorator implements Repository<Entity>
 {
-	private final Repository decorated;
+	private final Repository<Entity> decorated;
 	private final FileIngesterJobScheduler scheduler;
 	private final DataService dataService;
 
-	public FileIngestRepositoryDecorator(Repository decorated, FileIngesterJobScheduler scheduler,
+	public FileIngestRepositoryDecorator(Repository<Entity> decorated, FileIngesterJobScheduler scheduler,
 			DataService dataService)
 	{
 		this.decorated = decorated;
@@ -51,6 +48,12 @@ public class FileIngestRepositoryDecorator implements Repository
 	}
 
 	@Override
+	public Set<Operator> getQueryOperators()
+	{
+		return decorated.getQueryOperators();
+	}
+
+	@Override
 	public String getName()
 	{
 		return decorated.getName();
@@ -69,39 +72,39 @@ public class FileIngestRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Query query()
+	public Query<Entity> query()
 	{
 		return decorated.query();
 	}
 
 	@Override
-	public long count(Query q)
+	public long count(Query<Entity> q)
 	{
 		return decorated.count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query q)
+	public Stream<Entity> findAll(Query<Entity> q)
 	{
 		return decorated.findAll(q);
 	}
 
 	@Override
-	public Entity findOne(Query q)
+	public Entity findOne(Query<Entity> q)
 	{
 		return decorated.findOne(q);
 	}
 
 	@Override
-	public Entity findOne(Object id)
+	public Entity findOneById(Object id)
 	{
-		return decorated.findOne(id);
+		return decorated.findOneById(id);
 	}
 
 	@Override
-	public Entity findOne(Object id, Fetch fetch)
+	public Entity findOneById(Object id, Fetch fetch)
 	{
-		return decorated.findOne(id, fetch);
+		return decorated.findOneById(id, fetch);
 	}
 
 	@Override
@@ -130,7 +133,7 @@ public class FileIngestRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void update(Stream<? extends Entity> entities)
+	public void update(Stream<Entity> entities)
 	{
 		decorated.update(entities.filter(e -> {
 			scheduler.schedule(e);
@@ -140,8 +143,9 @@ public class FileIngestRepositoryDecorator implements Repository
 
 	private void removeJobExecutions(String entityId)
 	{
-		Query query = dataService.query(FileIngestJobExecutionMetaData.ENTITY_NAME).eq(FileIngestJobExecutionMetaData.FILE_INGEST, entityId);
-		dataService.delete(FileIngestJobExecutionMetaData.ENTITY_NAME, dataService.findAll(FileIngestJobExecutionMetaData.ENTITY_NAME, query));
+		Query<Entity> query = dataService.query(FILE_INGEST_JOB_EXECUTION)
+				.eq(FileIngestJobExecutionMetaData.FILE_INGEST, entityId);
+		dataService.delete(FILE_INGEST_JOB_EXECUTION, dataService.findAll(FILE_INGEST_JOB_EXECUTION, query));
 	}
 
 	@Override
@@ -154,7 +158,7 @@ public class FileIngestRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void delete(Stream<? extends Entity> entities)
+	public void delete(Stream<Entity> entities)
 	{
 		decorated.delete(entities.filter(e -> {
 			String entityId = e.getString(FileIngestMetaData.ID);
@@ -177,9 +181,9 @@ public class FileIngestRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void deleteById(Stream<Object> ids)
+	public void deleteAll(Stream<Object> ids)
 	{
-		decorated.deleteById(ids.filter(id -> {
+		decorated.deleteAll(ids.filter(id -> {
 			if (id instanceof String)
 			{
 				String entityId = (String) id;
@@ -210,7 +214,7 @@ public class FileIngestRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public Integer add(Stream<? extends Entity> entities)
+	public Integer add(Stream<Entity> entities)
 	{
 		return decorated.add(entities.filter(e -> {
 			scheduler.schedule(e);
@@ -219,51 +223,9 @@ public class FileIngestRepositoryDecorator implements Repository
 	}
 
 	@Override
-	public void flush()
+	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		decorated.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		decorated.clearCache();
-	}
-
-	@Override
-	public void create()
-	{
-		decorated.create();
-	}
-
-	@Override
-	public void drop()
-	{
-		decorated.drop();
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		decorated.rebuildIndex();
-	}
-
-	@Override
-	public void addEntityListener(EntityListener entityListener)
-	{
-		decorated.addEntityListener(entityListener);
-	}
-
-	@Override
-	public void removeEntityListener(EntityListener entityListener)
-	{
-		decorated.removeEntityListener(entityListener);
-	}
-
-	@Override
-	public Stream<Entity> stream(Fetch fetch)
-	{
-		return decorated.stream(fetch);
+		decorated.forEachBatched(fetch, consumer, 1000);
 	}
 
 }

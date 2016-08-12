@@ -14,7 +14,12 @@ public interface MetaDataParser
 	 *            , the package where the entities without a package should go
 	 * @return {@link ParsedMetaData}
 	 */
-	public abstract ParsedMetaData parse(RepositoryCollection source, String defaultPackage);
+	ParsedMetaData parse(RepositoryCollection source, String defaultPackage);
 
-	public abstract EntitiesValidationReport validate(RepositoryCollection source);
+	/**
+	 * Generates a {@link EntitiesValidationReport} by parsing all data from a supplied source
+	 * @param source
+	 * @return
+	 */
+	EntitiesValidationReport validate(RepositoryCollection source);
 }

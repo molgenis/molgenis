@@ -1,33 +1,30 @@
 package org.molgenis.data.idcard;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.Iterator;
-import java.util.Map;
-
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.ManageableRepositoryCollection;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
-import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.idcard.model.IdCardBiobank;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import com.google.common.collect.Maps;
+import org.molgenis.data.*;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.AbstractRepositoryCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Maps;
+import java.util.EnumSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+
+import static com.google.common.collect.Sets.immutableEnumSet;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.RepositoryCollectionCapability.WRITABLE;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.ID_CARD_BIOBANK;
 
 @Component
-public class IdCardRepositoryCollection implements ManageableRepositoryCollection
+public class IdCardRepositoryCollection extends AbstractRepositoryCollection
 {
 	public static final String NAME = "ID-Card";
 
 	private final DataService dataService;
 	private final IdCardBiobankRepository idCardBiobankRepository;
-	private final Map<String, Repository> repositories;
+	private final Map<String, Repository<Entity>> repositories;
 
 	@Autowired
 	public IdCardRepositoryCollection(DataService dataService, IdCardBiobankRepository idCardBiobankRepository)
@@ -44,21 +41,27 @@ public class IdCardRepositoryCollection implements ManageableRepositoryCollectio
 	}
 
 	@Override
-	public Repository addEntityMeta(EntityMetaData entityMeta)
+	public Set<RepositoryCollectionCapability> getCapabilities()
+	{
+		return immutableEnumSet(EnumSet.of(WRITABLE));
+	}
+
+	@Override
+	public Repository<Entity> createRepository(EntityMetaData entityMeta)
 	{
 		String entityName = entityMeta.getName();
-		if (!entityName.equals(IdCardBiobank.ENTITY_NAME))
+		if (!entityName.equals(ID_CARD_BIOBANK))
 		{
 			throw new MolgenisDataException("Not a valid backend for entity [" + entityName + "]");
 		}
-		else if (repositories.containsKey(IdCardBiobank.ENTITY_NAME))
+		else if (repositories.containsKey(ID_CARD_BIOBANK))
 		{
 			throw new MolgenisDataException(
 					"ID-Card repository collection already contains repository [" + entityName + "]");
 		}
 		else
 		{
-			repositories.put(IdCardBiobank.ENTITY_NAME, idCardBiobankRepository);
+			repositories.put(ID_CARD_BIOBANK, idCardBiobankRepository);
 		}
 		return idCardBiobankRepository;
 	}
@@ -70,9 +73,16 @@ public class IdCardRepositoryCollection implements ManageableRepositoryCollectio
 	}
 
 	@Override
-	public Repository getRepository(String name)
+	public Repository<Entity> getRepository(String name)
 	{
-		return repositories.get(name);
+		//return repositories.get(name);
+		return idCardBiobankRepository; // FIXME
+	}
+
+	@Override
+	public Repository<Entity> getRepository(EntityMetaData entityMetaData)
+	{
+		return getRepository(entityMetaData.getName());
 	}
 
 	@Override
@@ -82,52 +92,20 @@ public class IdCardRepositoryCollection implements ManageableRepositoryCollectio
 	}
 
 	@Override
-	public Iterator<Repository> iterator()
+	public Iterator<Repository<Entity>> iterator()
 	{
 		return repositories.values().iterator();
 	}
 
 	@Override
-	public void deleteEntityMeta(String entityName)
+	public void deleteRepository(EntityMetaData entityMeta)
 	{
-		repositories.remove(entityName);
+		repositories.remove(entityMeta.getName());
 	}
 
 	@Override
-	public void addAttribute(String entityName, AttributeMetaData attribute)
+	public boolean hasRepository(EntityMetaData entityMeta)
 	{
-		DefaultEntityMetaData entityMetaData;
-		try
-		{
-			entityMetaData = (DefaultEntityMetaData) dataService.getEntityMetaData(entityName);
-		}
-		catch (ClassCastException ex)
-		{
-			throw new RuntimeException("Cannot cast EntityMetaData to DefaultEntityMetadata " + ex);
-		}
-		if (entityMetaData == null) throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
-
-		entityMetaData.addAttributeMetaData(attribute);
-	}
-
-	@Override
-	public void deleteAttribute(String entityName, String attributeName)
-	{
-		EntityMetaData entityMetaData = dataService.getMeta().getEntityMetaData(entityName);
-		if (entityMetaData == null) throw new UnknownEntityException(String.format("Unknown entity '%s'", entityName));
-
-		DefaultEntityMetaData defaultEntityMetaData = new DefaultEntityMetaData(
-				dataService.getMeta().getEntityMetaData(entityName));
-		AttributeMetaData attr = entityMetaData.getAttribute(attributeName);
-		if (attr == null) throw new UnknownAttributeException(
-				String.format("Unknown attribute '%s' of entity '%s'", attributeName, entityName));
-
-		defaultEntityMetaData.removeAttributeMetaData(attr);
-	}
-
-	@Override
-	public void addAttributeSync(String entityName, AttributeMetaData attribute)
-	{
-		addAttribute(entityName, attribute);
+		return hasRepository(entityMeta.getName());
 	}
 }

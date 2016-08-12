@@ -5,8 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.meta.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.gson.AutoGson;
 
 import com.google.auto.value.AutoValue;

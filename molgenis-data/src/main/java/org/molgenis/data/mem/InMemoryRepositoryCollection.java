@@ -1,20 +1,22 @@
 package org.molgenis.data.mem;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.ManageableRepositoryCollection;
+import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
+import org.molgenis.data.RepositoryCollectionCapability;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.AbstractRepositoryCollection;
+
+import java.util.*;
+
+import static com.google.common.collect.Sets.immutableEnumSet;
+import static org.molgenis.data.RepositoryCollectionCapability.WRITABLE;
 
 /**
  * For testing purposis
  */
-public class InMemoryRepositoryCollection implements ManageableRepositoryCollection
+public class InMemoryRepositoryCollection extends AbstractRepositoryCollection
 {
-	private final Map<String, Repository> repos = new HashMap<>();
+	private final Map<String, Repository<Entity>> repos = new HashMap<>();
 	private String name = "Memory";
 
 	public InMemoryRepositoryCollection()
@@ -33,39 +35,39 @@ public class InMemoryRepositoryCollection implements ManageableRepositoryCollect
 	}
 
 	@Override
-	public Repository getRepository(String name)
+	public Repository<Entity> getRepository(String name)
 	{
 		return repos.get(name);
 	}
 
 	@Override
-	public Iterator<Repository> iterator()
+	public Repository<Entity> getRepository(EntityMetaData entityMetaData)
+	{
+		return getRepository(entityMetaData.getName());
+	}
+
+	@Override
+	public Iterator<Repository<Entity>> iterator()
 	{
 		return repos.values().iterator();
 	}
 
 	@Override
-	public Repository addEntityMeta(EntityMetaData entityMetaData)
+	public Repository<Entity> createRepository(EntityMetaData entityMetaData)
 	{
 		String name = entityMetaData.getName();
 		if (!repos.containsKey(name))
 		{
-			Repository repo = new InMemoryRepository(entityMetaData);
+			Repository<Entity> repo = new InMemoryRepository(entityMetaData);
 			repos.put(name, repo);
 		}
 		return repos.get(name);
 	}
 
 	@Override
-	public void deleteAttribute(String entityName, String attributeName)
+	public void deleteRepository(EntityMetaData entityMeta)
 	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void deleteEntityMeta(String entityName)
-	{
-		repos.remove(entityName);
+		repos.remove(entityMeta.getName());
 	}
 
 	@Override
@@ -75,15 +77,9 @@ public class InMemoryRepositoryCollection implements ManageableRepositoryCollect
 	}
 
 	@Override
-	public void addAttribute(String entityName, AttributeMetaData attribute)
+	public Set<RepositoryCollectionCapability> getCapabilities()
 	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void addAttributeSync(String entityName, AttributeMetaData attribute)
-	{
-		throw new UnsupportedOperationException();
+		return immutableEnumSet(EnumSet.of(WRITABLE));
 	}
 
 	@Override
@@ -96,5 +92,11 @@ public class InMemoryRepositoryCollection implements ManageableRepositoryCollect
 			if (entityNames.next().equals(name)) return true;
 		}
 		return false;
+	}
+
+	@Override
+	public boolean hasRepository(EntityMetaData entityMeta)
+	{
+		return hasRepository(entityMeta.getName());
 	}
 }

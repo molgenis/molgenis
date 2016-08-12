@@ -1,38 +1,61 @@
 package org.molgenis.data.mapper.service.impl;
 
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.js.magma.JsMagmaScriptRegistrator.SCRIPT_TYPE_JAVASCRIPT_MAGMA;
-import static org.molgenis.script.Script.TYPE;
+import static org.molgenis.script.ScriptMetaData.SCRIPT;
+import static org.molgenis.script.ScriptMetaData.TYPE;
+import static org.molgenis.script.ScriptParameterMetaData.SCRIPT_PARAMETER;
 import static org.testng.Assert.assertEquals;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.file.FileStore;
+import org.molgenis.js.magma.JsMagmaScriptRunner;
 import org.molgenis.script.Script;
+import org.molgenis.script.ScriptFactory;
+import org.molgenis.script.ScriptMetaData;
 import org.molgenis.script.ScriptParameter;
+import org.molgenis.script.ScriptParameterFactory;
+import org.molgenis.security.core.token.TokenService;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.collect.Maps;
+
 @ContextConfiguration(classes = AlgorithmTemplateServiceImplTest.Config.class)
-public class AlgorithmTemplateServiceImplTest extends AbstractTestNGSpringContextTests
+public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 {
+	@Autowired
+	private ScriptFactory scriptFactory;
+
+	@Autowired
+	private ScriptParameterFactory scriptParameterFactory;
+
+	@Autowired
+	private EntityMetaDataFactory entityMetaFactory;
+
+	@Autowired
+	private AttributeMetaDataFactory attrMetaFactory;
+
 	@Autowired
 	private AlgorithmTemplateServiceImpl algorithmTemplateServiceImpl;
 
@@ -45,21 +68,21 @@ public class AlgorithmTemplateServiceImplTest extends AbstractTestNGSpringContex
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		ScriptParameter param0 = new ScriptParameter(dataService);
+		ScriptParameter param0 = scriptParameterFactory.create();
 		param0.setName(param0Name);
 
-		ScriptParameter param1 = new ScriptParameter(dataService);
+		ScriptParameter param1 = scriptParameterFactory.create();
 		param1.setName(param1Name);
 
-		script0 = new Script(dataService);
+		script0 = scriptFactory.create();
 		script0.setName("name");
 		script0.setContent(String.format("$('%s'),$('%s')", param0, param1));
-		script0.set(Script.PARAMETERS, Arrays.asList(param0, param1));
+		script0.set(ScriptMetaData.PARAMETERS, Arrays.asList(param0, param1));
 
-		Query q = new QueryImpl().eq(TYPE, SCRIPT_TYPE_JAVASCRIPT_MAGMA);
-		when(dataService.findAll(Script.ENTITY_NAME, q, Script.class)).thenReturn(Stream.of(script0));
-		when(dataService.findOne(ScriptParameter.ENTITY_NAME, param0Name)).thenReturn(param0);
-		when(dataService.findOne(ScriptParameter.ENTITY_NAME, param1Name)).thenReturn(param1);
+		Query<Script> q = new QueryImpl<Script>().eq(TYPE, JsMagmaScriptRunner.NAME);
+		when(dataService.findAll(SCRIPT, q, Script.class)).thenReturn(Stream.of(script0));
+		when(dataService.findOneById(SCRIPT_PARAMETER, param0Name)).thenReturn(param0);
+		when(dataService.findOneById(SCRIPT_PARAMETER, param1Name)).thenReturn(param1);
 	}
 
 	@Test
@@ -67,21 +90,22 @@ public class AlgorithmTemplateServiceImplTest extends AbstractTestNGSpringContex
 	{
 		String sourceAttr0Name = "sourceAttr0";
 		String sourceAttr1Name = "sourceAttr1";
-		DefaultEntityMetaData sourceEntityMeta = new DefaultEntityMetaData("source");
-		DefaultAttributeMetaData sourceAttr0 = sourceEntityMeta.addAttribute(sourceAttr0Name);
-		DefaultAttributeMetaData sourceAttr1 = sourceEntityMeta.addAttribute(sourceAttr1Name);
-
+		EntityMetaData sourceEntityMeta = entityMetaFactory.create("source");
+		AttributeMetaData sourceAttr0 = attrMetaFactory.create().setName(sourceAttr0Name);
+		AttributeMetaData sourceAttr1 = attrMetaFactory.create().setName(sourceAttr1Name);
+		sourceEntityMeta.addAttribute(sourceAttr0);
+		sourceEntityMeta.addAttribute(sourceAttr1);
 		ExplainedQueryString sourceAttr0Explain = ExplainedQueryString.create("a", "b", param0Name, 1.0);
 		ExplainedQueryString sourceAttr1Explain = ExplainedQueryString.create("a", "b", param1Name, 0.5);
-		Map<AttributeMetaData, ExplainedAttributeMetaData> attrResults = new HashMap<>();
+		Map<AttributeMetaData, ExplainedAttributeMetaData> attrResults = Maps.newHashMap();
 		attrResults.put(sourceAttr0,
-				ExplainedAttributeMetaData.create(sourceAttr0, Arrays.asList(sourceAttr0Explain), false));
+				ExplainedAttributeMetaData.create(sourceAttr0, singletonList(sourceAttr0Explain), false));
 		attrResults.put(sourceAttr1,
-				ExplainedAttributeMetaData.create(sourceAttr1, Arrays.asList(sourceAttr1Explain), false));
+				ExplainedAttributeMetaData.create(sourceAttr1, singletonList(sourceAttr1Explain), false));
 
 		Stream<AlgorithmTemplate> templateStream = algorithmTemplateServiceImpl.find(attrResults);
 
-		Map<String, String> model = new HashMap<>();
+		Map<String, String> model = Maps.newHashMap();
 		model.put(param0Name, sourceAttr0Name);
 		model.put(param1Name, sourceAttr1Name);
 		AlgorithmTemplate expectedAlgorithmTemplate = new AlgorithmTemplate(script0, model);
@@ -90,8 +114,21 @@ public class AlgorithmTemplateServiceImplTest extends AbstractTestNGSpringContex
 	}
 
 	@Configuration
+	@ComponentScan({ "org.molgenis.script" })
 	public static class Config
 	{
+		@Bean
+		public FileStore fileStore()
+		{
+			return mock(FileStore.class);
+		}
+
+		@Bean
+		public TokenService tokenService()
+		{
+			return mock(TokenService.class);
+		}
+
 		@Bean
 		public AlgorithmTemplateServiceImpl algorithmTemplateServiceImpl()
 		{

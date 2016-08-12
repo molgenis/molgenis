@@ -1,25 +1,13 @@
 package org.molgenis.ontology.importer;
 
-import java.io.File;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.google.common.collect.Lists;
 import org.apache.commons.io.IOUtils;
-import org.molgenis.data.DataService;
-import org.molgenis.data.DatabaseAction;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.FileRepositoryCollectionFactory;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.importer.EntitiesValidationReportImpl;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.meta.MetaDataService;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.GenericImporterExtensions;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.db.EntitiesValidationReport;
@@ -31,9 +19,16 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Lists;
+import java.io.File;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
 
 @Service
 public class OntologyImportService implements ImportService
@@ -66,14 +61,14 @@ public class OntologyImportService implements ImportService
 			while (it.hasNext())
 			{
 				String entityNameToImport = it.next();
-				Repository repo = source.getRepository(entityNameToImport);
+				Repository<Entity> repo = source.getRepository(entityNameToImport);
 				try
 				{
 					report = new EntityImportReport();
 
-					Repository crudRepository = dataService.getRepository(entityNameToImport);
+					Repository<Entity> crudRepository = dataService.getRepository(entityNameToImport);
 
-					crudRepository.add(repo.stream());
+					crudRepository.add(stream(repo.spliterator(), false));
 
 					List<String> entityNames = addedEntities.stream().map(emd -> emd.getName())
 							.collect(Collectors.toList());
@@ -120,17 +115,17 @@ public class OntologyImportService implements ImportService
 	{
 		EntitiesValidationReport report = new EntitiesValidationReportImpl();
 
-		if (source.getRepository(OntologyMetaData.ENTITY_NAME) == null)
-			throw new MolgenisDataException("Exception Repository [" + OntologyMetaData.ENTITY_NAME + "] is missing");
+		if (source.getRepository(ONTOLOGY) == null)
+			throw new MolgenisDataException("Exception Repository [" + ONTOLOGY + "] is missing");
 
 		boolean ontologyExists = false;
-		for (Entity ontologyEntity : source.getRepository(OntologyMetaData.ENTITY_NAME))
+		for (Entity ontologyEntity : source.getRepository(ONTOLOGY))
 		{
 			String ontologyIRI = ontologyEntity.getString(OntologyMetaData.ONTOLOGY_IRI);
 			String ontologyName = ontologyEntity.getString(OntologyMetaData.ONTOLOGY_NAME);
 
-			Entity ontologyQueryEntity = dataService.findOne(OntologyMetaData.ENTITY_NAME,
-					new QueryImpl().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIRI).or()
+			Entity ontologyQueryEntity = dataService.findOne(ONTOLOGY,
+					new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIRI).or()
 							.eq(OntologyMetaData.ONTOLOGY_NAME, ontologyName));
 			ontologyExists = ontologyQueryEntity != null;
 		}
@@ -185,9 +180,9 @@ public class OntologyImportService implements ImportService
 	}
 
 	@Override
-	public LinkedHashMap<String, Boolean> integrationTestMetaData(MetaDataService metaDataService,
+	public LinkedHashMap<String, Boolean> determineImportableEntities(MetaDataService metaDataService,
 			RepositoryCollection repositoryCollection, String defaultPackage)
 	{
-		return metaDataService.integrationTestMetaData(repositoryCollection);
+		return metaDataService.determineImportableEntities(repositoryCollection);
 	}
 }

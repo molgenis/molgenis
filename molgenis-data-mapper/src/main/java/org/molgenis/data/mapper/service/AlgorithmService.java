@@ -3,12 +3,12 @@ package org.molgenis.data.mapper.service;
 import java.util.Collection;
 import java.util.List;
 
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.service.impl.AlgorithmEvaluation;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 
 public interface AlgorithmService
 {

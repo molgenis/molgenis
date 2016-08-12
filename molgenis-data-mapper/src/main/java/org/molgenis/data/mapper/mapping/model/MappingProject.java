@@ -1,16 +1,17 @@
 package org.molgenis.data.mapper.mapping.model;
 
+import com.google.common.collect.Lists;
+import org.elasticsearch.repositories.Repository;
+import org.molgenis.auth.MolgenisUser;
+import org.molgenis.data.mapper.repository.MappingProjectRepository;
+import org.molgenis.data.mapper.service.MappingService;
+import org.molgenis.data.meta.model.EntityMetaData;
+
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.elasticsearch.repositories.Repository;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.mapper.repository.MappingProjectRepository;
-import org.molgenis.data.mapper.service.MappingService;
-
-import com.google.common.collect.Lists;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 public class MappingProject
 {
@@ -77,6 +78,8 @@ public class MappingProject
 
 	public MolgenisUser getOwner()
 	{
+		// For owner lazy load the molgenis username as system so that Freemarker is able to access it
+		runAsSystem(() -> owner.getUsername());
 		return owner;
 	}
 

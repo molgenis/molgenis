@@ -1,26 +1,26 @@
 package org.molgenis.util;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
-import org.molgenis.data.UnknownEntityException;
-import org.molgenis.fieldtypes.XrefField;
-
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
+import org.molgenis.data.*;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Package;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.google.common.collect.Maps.newHashMap;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
 
 public class DependencyResolver
 {
@@ -29,14 +29,14 @@ public class DependencyResolver
 
 	/**
 	 * Determine the entity import order
-	 * 
+	 *
 	 * @param repos
 	 * @return
 	 */
-	public static List<Repository> resolve(Iterable<Repository> repos)
+	public static List<Repository<Entity>> resolve(Iterable<Repository<Entity>> repos)
 	{
-		Map<String, Repository> repoByName = new HashMap<>();
-		for (Repository repo : repos)
+		Map<String, Repository<Entity>> repoByName = new HashMap<>();
+		for (Repository<Entity> repo : repos)
 		{
 			repoByName.put(repo.getEntityMetaData().getName(), repo);
 		}
@@ -47,35 +47,36 @@ public class DependencyResolver
 
 	/**
 	 * Determine the entity import order
-	 * 
+	 *
 	 * @param coll
 	 * @return
 	 */
 	public static List<EntityMetaData> resolve(Set<EntityMetaData> coll)
 	{
 		// EntityMetaData by entityname
-		Map<String, EntityMetaData> metaDataByName = Maps.newHashMap();
+		Map<String, EntityMetaData> metaDataByName = newHashMap();
 
 		// All dependencies of EntityMetaData
-		Map<String, Set<EntityMetaData>> dependenciesByName = Maps.newHashMap();
+		Map<String, Set<String>> dependenciesByName = newHashMap();
 
 		for (EntityMetaData meta : coll)
 		{
 			metaDataByName.put(meta.getName(), meta);
 
-			Set<EntityMetaData> dependencies = Sets.newHashSet();
+			Set<String> dependencies = Sets.newHashSet();
 			dependenciesByName.put(meta.getName(), dependencies);
 
 			if (meta.getExtends() != null)
 			{
-				dependencies.add(meta.getExtends());
+				dependencies.add(meta.getExtends().getName());
 			}
 
 			for (AttributeMetaData attr : meta.getAtomicAttributes())
 			{
-				if ((attr.getRefEntity() != null) && !attr.getRefEntity().equals(meta))// self reference
+				if ((attr.getRefEntity() != null) && !attr.getRefEntity().getName()
+						.equals(meta.getName()))// self reference
 				{
-					dependencies.add(attr.getRefEntity());
+					dependencies.add(attr.getRefEntity().getName());
 				}
 			}
 		}
@@ -87,7 +88,7 @@ public class DependencyResolver
 			final List<String> ready = Lists.newArrayList();
 
 			// Get all metadata without dependencies
-			for (Entry<String, Set<EntityMetaData>> entry : dependenciesByName.entrySet())
+			for (Entry<String, Set<String>> entry : dependenciesByName.entrySet())
 			{
 				if (entry.getValue().isEmpty())
 				{
@@ -100,19 +101,33 @@ public class DependencyResolver
 			// When there aren't any we got a non resolvable
 			if (ready.isEmpty())
 			{
-				throw new MolgenisDataException("Could not resolve dependencies of entities "
-						+ dependenciesByName.keySet() + " are there circular dependencies?");
+				// accept the cyclic dependency between entity meta <--> attribute meta which is dealt with during
+				// bootstrapping, see SystemEntityMetaDataPersister.
+				if (dependenciesByName.containsKey(ENTITY_META_DATA) && dependenciesByName
+						.containsKey(ATTRIBUTE_META_DATA))
+				{
+					ready.add(ENTITY_META_DATA);
+					ready.add(ATTRIBUTE_META_DATA);
+					resolved.add(metaDataByName.get(ENTITY_META_DATA));
+					resolved.add(metaDataByName.get(ATTRIBUTE_META_DATA));
+				}
+				else
+				{
+					throw new MolgenisDataException(
+							"Could not resolve dependencies of entities " + dependenciesByName.keySet()
+									+ " are there circular dependencies?");
+				}
 			}
 
 			// Remove found metadata from dependency graph
-			Set<EntityMetaData> remove = Sets.newHashSet();
+			Set<String> remove = Sets.newHashSet();
 			for (String name : ready)
 			{
 				dependenciesByName.remove(name);
-				remove.add(metaDataByName.get(name));
+				remove.add(name);
 			}
 
-			for (Set<EntityMetaData> dependencies : dependenciesByName.values())
+			for (Set<String> dependencies : dependenciesByName.values())
 			{
 				dependencies.removeAll(remove);
 			}
@@ -126,18 +141,20 @@ public class DependencyResolver
 	{
 		for (AttributeMetaData attr : emd.getAtomicAttributes())
 		{
-			if ((attr.getRefEntity() != null) && attr.getRefEntity().equals(emd))
+			if (attr.getRefEntity() != null)
 			{
-				return true;
+				if (EntityUtils.equals(attr.getRefEntity(), emd))
+				{
+					return true;
+				}
 			}
 		}
-
 		return false;
 	}
 
 	/**
 	 * Determine the import order of entities that have a self reference
-	 * 
+	 *
 	 * @param entities
 	 * @param emd
 	 * @return
@@ -160,10 +177,10 @@ public class DependencyResolver
 		}
 
 		// You can't have a self reference if you provide id'ds. So we have id's
-		Map<Object, Entity> entitiesById = Maps.newHashMap();
+		Map<Object, Entity> entitiesById = newHashMap();
 
 		// All self-references of an entity
-		Map<Object, Set<Object>> dependenciesById = Maps.newHashMap();
+		Map<Object, Set<Object>> dependenciesById = newHashMap();
 
 		// Fill maps
 		for (Entity entity : entities)
@@ -184,7 +201,7 @@ public class DependencyResolver
 			{
 				List<Entity> refs = Lists.newArrayList();
 
-				if (attr.getDataType() instanceof XrefField)
+				if (isSingleReferenceType(attr))
 				{
 					Entity ref = entity.getEntity(attr.getName());
 					if (ref != null) refs.add(ref);
@@ -211,13 +228,14 @@ public class DependencyResolver
 						}
 						else
 						{
-							Entity refEntity = dataService.getRepository(
-									emd.getAttribute(attr.getName()).getRefEntity().getName()).findOne(refId);
+							Entity refEntity = dataService
+									.getRepository(emd.getAttribute(attr.getName()).getRefEntity().getName())
+									.findOneById(refId);
 							if (refEntity == null)
 							{
-								throw new UnknownEntityException(attr.getRefEntity().getName() + " with "
-										+ attr.getRefEntity().getIdAttribute().getName() + " [" + refId
-										+ "] does not exist");
+								throw new UnknownEntityException(
+										attr.getRefEntity().getName() + " with " + attr.getRefEntity().getIdAttribute()
+												.getName() + " [" + refId + "] does not exist");
 							}
 						}
 					}
@@ -265,4 +283,36 @@ public class DependencyResolver
 		return resolved;
 	}
 
+	/**
+	 * Resolved package dependencies in database insertion order
+	 *
+	 * @param packageStream
+	 * @return package dependencies in database insertion order
+	 */
+	public static Stream<Package> resolve(Stream<Package> packageStream)
+	{
+		Map<String, Package> packageMap = packageStream.collect(toMap(Package::getName, identity()));
+		if (packageMap.isEmpty())
+		{
+			return Stream.empty();
+		}
+
+		Map<String, Package> resolvedPackages = new LinkedHashMap<>();
+		while (resolvedPackages.size() < packageMap.size())
+		{
+			AtomicInteger nrResolvedPackages = new AtomicInteger(0);
+			packageMap.forEach((name, package_) -> {
+				if (package_.getParent() == null || resolvedPackages.containsKey(package_.getParent().getName()))
+				{
+					resolvedPackages.put(name, package_);
+					nrResolvedPackages.incrementAndGet();
+				}
+			});
+			if (nrResolvedPackages.get() == 0)
+			{
+				throw new RuntimeException("Unable to resolve packages, circular dependency?");
+			}
+		}
+		return resolvedPackages.values().stream();
+	}
 }

@@ -1,16 +1,16 @@
 package org.molgenis.data.meta;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import org.molgenis.MolgenisFieldTypes;
-import org.molgenis.data.AttributeMetaData;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.support.DefaultAttributeMetaData;
-import org.molgenis.data.support.DefaultEntityMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.testng.annotations.Test;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 
 public class MetaValidationUtilsTest
 {
@@ -36,18 +36,6 @@ public class MetaValidationUtilsTest
 	public void testReservedKeyword()
 	{
 		MetaValidationUtils.validateName("implements");
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testReservedKeywordMysqlLowerCase()
-	{
-		MetaValidationUtils.validateName("select");
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void testReservedKeywordMysqlUpperCase()
-	{
-		MetaValidationUtils.validateName("SELECT");
 	}
 
 	@Test
@@ -90,82 +78,114 @@ public class MetaValidationUtilsTest
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityMetaDataTooLong()
 	{
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
-
-		List<AttributeMetaData> compAttrs = new ArrayList<>();
-		compAttrs.add(new DefaultAttributeMetaData("aCompStringWayTooLongToUseAsAnAttributeName1")
-				.setDataType(MolgenisFieldTypes.STRING));
-		compAttrs.add(new DefaultAttributeMetaData("aCompString2").setDataType(MolgenisFieldTypes.STRING));
-		emd.addAttribute("aComp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributesMetaData(compAttrs);
-		emd.addAttribute("aString", ROLE_ID);
-
-		MetaValidationUtils.validateEntityMetaData(emd);
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		when(entityMeta.getSimpleName()).thenReturn("entity");
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("aString").getMock();
+		when(idAttr.getDataType()).thenReturn(STRING);
+		AttributeMetaData compoundAttrPart0 = when(mock(AttributeMetaData.class).getName())
+				.thenReturn("aCompStringWayTooLongToUseAsAnAttributeName1").getMock();
+		when(compoundAttrPart0.getDataType()).thenReturn(STRING);
+		AttributeMetaData compoundAttrPart1 = when(mock(AttributeMetaData.class).getName()).thenReturn("aCompString2")
+				.getMock();
+		when(compoundAttrPart1.getDataType()).thenReturn(STRING);
+		AttributeMetaData compoundAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("aComp").getMock();
+		when(compoundAttr.getDataType()).thenReturn(COMPOUND);
+		when(compoundAttr.getAttributeParts()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
+		when(entityMeta.getAttributes()).thenReturn(asList(idAttr, compoundAttr));
+		MetaValidationUtils.validateEntityMetaData(entityMeta);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityMetaDataStartsWithDigit()
 	{
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		when(entityMeta.getSimpleName()).thenReturn("entity");
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("aString").getMock();
+		when(idAttr.getDataType()).thenReturn(STRING);
+		AttributeMetaData compoundAttrPart0 = when(mock(AttributeMetaData.class).getName()).thenReturn("aCompString1")
+				.getMock();
+		when(compoundAttrPart0.getDataType()).thenReturn(STRING);
+		AttributeMetaData compoundAttrPart1 = when(mock(AttributeMetaData.class).getName()).thenReturn("2aCompString")
+				.getMock();
+		when(compoundAttrPart1.getDataType()).thenReturn(STRING);
+		AttributeMetaData compoundAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("aComp").getMock();
+		when(compoundAttr.getDataType()).thenReturn(COMPOUND);
+		when(compoundAttr.getAttributeParts()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
+		when(entityMeta.getAttributes()).thenReturn(asList(idAttr, compoundAttr));
 
-		List<AttributeMetaData> compAttrs = new ArrayList<>();
-		compAttrs.add(new DefaultAttributeMetaData("aCompString1").setDataType(MolgenisFieldTypes.STRING));
-		compAttrs.add(new DefaultAttributeMetaData("2aCompString").setDataType(MolgenisFieldTypes.STRING));
-		emd.addAttribute("aComp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributesMetaData(compAttrs);
-		emd.addAttribute("aString", ROLE_ID);
-
-		MetaValidationUtils.validateEntityMetaData(emd);
+		MetaValidationUtils.validateEntityMetaData(entityMeta);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityMetaDataInvalidChar()
 	{
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		when(entityMeta.getSimpleName()).thenReturn("entity");
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("aString").getMock();
+		when(idAttr.getDataType()).thenReturn(STRING);
+		AttributeMetaData compoundAttrPart0 = when(mock(AttributeMetaData.class).getName()).thenReturn("aCompString1")
+				.getMock();
+		when(compoundAttrPart0.getDataType()).thenReturn(STRING);
+		AttributeMetaData compoundAttrPart1 = when(mock(AttributeMetaData.class).getName()).thenReturn("aCompString2")
+				.getMock();
+		when(compoundAttrPart1.getDataType()).thenReturn(STRING);
+		AttributeMetaData compoundAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("a.Comp").getMock();
+		when(compoundAttr.getDataType()).thenReturn(COMPOUND);
+		when(compoundAttr.getAttributeParts()).thenReturn(asList(compoundAttrPart0, compoundAttrPart1));
+		when(entityMeta.getAttributes()).thenReturn(asList(idAttr, compoundAttr));
 
-		List<AttributeMetaData> compAttrs = new ArrayList<>();
-		compAttrs.add(new DefaultAttributeMetaData("aCompString1").setDataType(MolgenisFieldTypes.STRING));
-		compAttrs.add(new DefaultAttributeMetaData("aCompString2").setDataType(MolgenisFieldTypes.STRING));
-		emd.addAttribute("a.Comp").setDataType(MolgenisFieldTypes.COMPOUND).setAttributesMetaData(compAttrs);
-		emd.addAttribute("aString", ROLE_ID);
-
-		MetaValidationUtils.validateEntityMetaData(emd);
+		MetaValidationUtils.validateEntityMetaData(entityMeta);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityMetaDataIdAttributeWithDefaultValue()
 	{
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
-		emd.addAttribute("id", ROLE_ID).setDefaultValue("5");
-
-		MetaValidationUtils.validateEntityMetaData(emd);
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		when(entityMeta.getSimpleName()).thenReturn("entity");
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		when(idAttr.getDataType()).thenReturn(STRING);
+		when(idAttr.getDefaultValue()).thenReturn("5");
+		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		when(entityMeta.getAttributes()).thenReturn(singletonList(idAttr));
+		MetaValidationUtils.validateEntityMetaData(entityMeta);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityMetaDataUniqueAttributeWithDefaultValue()
 	{
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
-		emd.addAttribute("id", ROLE_ID);
-		emd.addAttribute("uniqueAttribute").setUnique(true).setDefaultValue("5");
-
-		MetaValidationUtils.validateEntityMetaData(emd);
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		when(entityMeta.getSimpleName()).thenReturn("entity");
+		AttributeMetaData uniqueAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("uniqueAttr").getMock();
+		when(uniqueAttr.isUnique()).thenReturn(true);
+		when(uniqueAttr.getDefaultValue()).thenReturn("5");
+		when(entityMeta.getAttributes()).thenReturn(singletonList(uniqueAttr));
+		MetaValidationUtils.validateEntityMetaData(entityMeta);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testValidateEntityComputedAttributeWithDefaultValue()
 	{
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
-		emd.addAttribute("id", ROLE_ID);
-		emd.addAttribute("expressionAttribute").setExpression("$('id').value()").setDefaultValue("5");
-
-		MetaValidationUtils.validateEntityMetaData(emd);
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		when(entityMeta.getSimpleName()).thenReturn("entity");
+		AttributeMetaData expressionAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("expressionAttr")
+				.getMock();
+		when(expressionAttr.getExpression()).thenReturn("$('id').value()");
+		when(expressionAttr.getDefaultValue()).thenReturn("5");
+		when(entityMeta.getAttributes()).thenReturn(singletonList(expressionAttr));
+		MetaValidationUtils.validateEntityMetaData(entityMeta);
 	}
 
 	@Test
 	public void testValidateEntityMetaDataOkayAttributeWithDefaultValue()
 	{
-		DefaultEntityMetaData emd = new DefaultEntityMetaData("entity");
-		emd.addAttribute("id", ROLE_ID);
-		emd.addAttribute("blah").setDefaultValue("5");
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		when(entityMeta.getSimpleName()).thenReturn("entity");
+		AttributeMetaData attrWithDefaultValue = when(mock(AttributeMetaData.class).getName())
+				.thenReturn("attrWithDefaultValue").getMock();
+		when(attrWithDefaultValue.getDataType()).thenReturn(STRING);
+		when(attrWithDefaultValue.getDefaultValue()).thenReturn("5");
+		when(entityMeta.getAttributes()).thenReturn(singletonList(attrWithDefaultValue));
 
-		MetaValidationUtils.validateEntityMetaData(emd);
+		MetaValidationUtils.validateEntityMetaData(entityMeta);
 	}
 }

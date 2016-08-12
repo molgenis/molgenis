@@ -4,7 +4,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.collect.Lists;
-import org.molgenis.data.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 
 /**
  * Created by charbonb on 14/01/15.
