@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.*;
@@ -26,6 +25,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.REF_ENTITY;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 /**
@@ -36,17 +36,9 @@ public class SystemEntityMetaDataPersister
 {
 	private final DataService dataService;
 	private final SystemEntityMetaDataRegistry systemEntityMetaRegistry;
-
-	@Autowired
 	private TagMetaData tagMeta;
-
-	@Autowired
-	private AttributeMetaDataMetaData attributeMetaMeta;
-
-	@Autowired
+	private AttributeMetaDataMetaData attrMetaMeta;
 	private PackageMetaData packageMeta;
-
-	@Autowired
 	private EntityMetaDataMetaData entityMetaMeta;
 
 	@Autowired
@@ -63,7 +55,7 @@ public class SystemEntityMetaDataPersister
 		// workaround for a cyclic dependency entity meta <--> attribute meta:
 		// first create attribute meta and entity meta table, then change data type.
 		// see the note in AttributeMetaDataMetaData and the exception in DependencyResolver
-		attributeMetaMeta.getAttribute(REF_ENTITY).setDataType(STRING).setRefEntity(null);
+		attrMetaMeta.getAttribute(REF_ENTITY).setDataType(STRING).setRefEntity(null);
 
 		// create meta entity tables
 		// TODO make generic with dependency resolving, use MetaDataService.isMetaEntityMetaData
@@ -71,9 +63,9 @@ public class SystemEntityMetaDataPersister
 		{
 			repositoryCollection.createRepository(tagMeta);
 		}
-		if (!repositoryCollection.hasRepository(attributeMetaMeta))
+		if (!repositoryCollection.hasRepository(attrMetaMeta))
 		{
-			repositoryCollection.createRepository(attributeMetaMeta);
+			repositoryCollection.createRepository(attrMetaMeta);
 		}
 		if (!repositoryCollection.hasRepository(packageMeta))
 		{
@@ -87,21 +79,48 @@ public class SystemEntityMetaDataPersister
 		// workaround for a cyclic dependency entity meta <--> attribute meta:
 		// first create attribute meta and entity meta table, then change data type.
 		// see the note in AttributeMetaDataMetaData and the exception in DependencyResolver
-		attributeMetaMeta.getAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityMetaMeta);
+		attrMetaMeta.getAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityMetaMeta);
 
 		// add default meta entities
 		ApplicationContext ctx = event.getApplicationContext();
 		Map<String, Package> packageMap = ctx.getBeansOfType(Package.class);
-		Stream<Package> packagesToAdd = DependencyResolver.resolve(packageMap.values().stream())
-				.filter(this::isNotPersisted);
-		persist(packagesToAdd);
+		List<Package> packagesToAdd = packageMap.values().stream().filter(this::isNotPersisted).collect(toList());
+		if (!packagesToAdd.isEmpty())
+		{
+			persist(packagesToAdd);
+		}
 
 		// persist entity meta data
 		Set<EntityMetaData> metaEntityMetaSet = systemEntityMetaRegistry.getSystemEntityMetaDatas().collect(toSet());
-		DependencyResolver.resolve(metaEntityMetaSet).stream().forEach(this::persist);
+		DependencyResolver.resolve(metaEntityMetaSet).forEach(this::persist);
 
 		// remove entity meta data
 		removeNonExistingSystemEntities();
+	}
+
+	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
+	@Autowired
+	public void TagMetaData(TagMetaData tagMeta)
+	{
+		this.tagMeta = requireNonNull(tagMeta);
+	}
+
+	@Autowired
+	public void setAttributeMetaDataMetaData(AttributeMetaDataMetaData attrMetaMeta)
+	{
+		this.attrMetaMeta = requireNonNull(attrMetaMeta);
+	}
+
+	@Autowired
+	public void PackageMetaData(PackageMetaData packageMeta)
+	{
+		this.packageMeta = requireNonNull(packageMeta);
+	}
+
+	@Autowired
+	public void setEntityMetaDataMetaData(EntityMetaDataMetaData entityMetaMeta)
+	{
+		this.entityMetaMeta = requireNonNull(entityMetaMeta);
 	}
 
 	private static void populateAutoAttributeValues(EntityMetaData existingEntityMeta, EntityMetaData entityMeta)
@@ -115,10 +134,6 @@ public class SystemEntityMetaDataPersister
 			if (attrIdentifier != null)
 			{
 				attr.setIdentifier(attrIdentifier);
-			}
-			else
-			{
-				// new attribute in java class
 			}
 		});
 	}
@@ -144,12 +159,12 @@ public class SystemEntityMetaDataPersister
 
 	private boolean isNotPersisted(Package package_)
 	{
-		return dataService.findOneById(packageMeta.getName(), package_.getIdValue()) == null;
+		return dataService.findOneById(PACKAGE, package_.getIdValue(), Package.class) == null;
 	}
 
-	private void persist(Stream<Package> packages)
+	private void persist(List<Package> packages)
 	{
-		dataService.add(packageMeta.getName(), packages);
+		dataService.add(PACKAGE, packages.stream());
 	}
 
 	/**
@@ -159,7 +174,7 @@ public class SystemEntityMetaDataPersister
 	{
 		// get all system entities
 		Set<EntityMetaData> systemEntityMetaSet = dataService.findAll(ENTITY_META_DATA, EntityMetaData.class)
-				.filter(this::isSystemEntity).collect(toSet());
+				.filter(SystemEntityMetaDataPersister::isSystemEntity).collect(toSet());
 
 		// determine removed system entities
 		Map<String, EntityMetaData> removedSystemEntityMetaMap = systemEntityMetaSet.stream().filter(this::isNotExists)
@@ -178,7 +193,7 @@ public class SystemEntityMetaDataPersister
 		}
 	}
 
-	private boolean isSystemEntity(EntityMetaData entityMeta)
+	private static boolean isSystemEntity(EntityMetaData entityMeta)
 	{
 		Package package_ = entityMeta.getPackage();
 		if (package_ == null)
@@ -190,11 +205,7 @@ public class SystemEntityMetaDataPersister
 			return true;
 		}
 		Package rootPackage = package_.getRootPackage();
-		if (rootPackage != null && rootPackage.getName().equals(PACKAGE_SYSTEM))
-		{
-			return true;
-		}
-		return false;
+		return rootPackage != null && rootPackage.getName().equals(PACKAGE_SYSTEM);
 	}
 
 	private boolean isNotExists(EntityMetaData entityMeta)
