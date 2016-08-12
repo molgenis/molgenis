@@ -1,9 +1,8 @@
 package org.molgenis.data.cache.l3;
 
-import org.molgenis.data.AbstractRepositoryDecorator;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
-import org.molgenis.data.Repository;
+import org.molgenis.data.*;
+import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.transaction.TransactionInformation;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -12,17 +11,29 @@ import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 
+/**
+ * Retrieves identifiers from the {@link L3Cache} based on a {@link Query}
+ * if {@link RepositoryCapability#CACHEABLE}.
+ * <p>
+ * Delegates to the underlying {@link Repository}
+ */
 public class L3CacheRepositoryDecorator extends AbstractRepositoryDecorator
 {
 	private final L3Cache l3Cache;
 	private final boolean cacheable;
 	private final Repository<Entity> decoratedRepository;
 
-	public L3CacheRepositoryDecorator(Repository<Entity> decoratedRepository, L3Cache l3Cache)
+	private final TransactionInformation transactionInformation;
+
+	private static final int MAX_PAGE_SIZE = 1200;
+
+	public L3CacheRepositoryDecorator(Repository<Entity> decoratedRepository, L3Cache l3Cache,
+			TransactionInformation transactionInformation)
 	{
 		this.decoratedRepository = requireNonNull(decoratedRepository);
 		this.l3Cache = requireNonNull(l3Cache);
 		this.cacheable = decoratedRepository.getCapabilities().containsAll(newArrayList(CACHEABLE));
+		this.transactionInformation = transactionInformation;
 	}
 
 	@Override
@@ -32,81 +43,53 @@ public class L3CacheRepositoryDecorator extends AbstractRepositoryDecorator
 	}
 
 	/**
-	 * Retrieves multiple entities
+	 * Retrieves a {@link List} of identifiers from the {@link L3Cache} if the
+	 * {@link Repository} is cacheable and the {@link Query} is
+	 * limited (i.e. contains a pageSize) between 0 and MAX_PAGE_SIZE
 	 *
-	 * @param q
-	 * @return
+	 * @param q The {@link Query}
+	 * @return A stream of {@link Entity}
 	 */
 	@Override
 	public Stream<Entity> findAll(Query<Entity> q)
 	{
-		if (cacheable)
+		if (transactionInformation.isRepositoryCompletelyClean(getName()) && cacheable && q.getPageSize() > 0
+				&& q.getPageSize() < MAX_PAGE_SIZE)
 		{
 			List<Object> ids = l3Cache.get(delegate(), q);
-			if (!ids.isEmpty()) return delegate().findAll(ids.stream());
+			return delegate().findAll(ids.stream(), q.getFetch());
 		}
 		return delegate().findAll(q);
 	}
 
+	/**
+	 * Retrieves a single identifier from the {@link L3Cache} if the
+	 * {@link Repository} is cacheable and the {@link Query} is
+	 * limited (i.e. contains a pageSize) between 0 and MAX_PAGE_SIZE
+	 *
+	 * @param q The {@link Query}
+	 * @return A single {@link Entity} or null if not found
+	 */
 	@Override
 	public Entity findOne(Query<Entity> q)
 	{
-		if (cacheable)
+		if (transactionInformation.isRepositoryCompletelyClean(getName()) && cacheable)
 		{
-			List<Object> ids = l3Cache.get(delegate(), q);
-			if (!ids.isEmpty()) return delegate().findOneById(ids.get(0));
+			// Some query parameters are irrelevant for findOne
+			QueryImpl<Entity> newQuery = new QueryImpl<>(q);
+			newQuery.setPageSize(1);
+			newQuery.setSort(new Sort());
+
+			List<Object> ids = l3Cache.get(delegate(), newQuery);
+			if (!ids.isEmpty())
+			{
+				return delegate().findOneById(ids.get(0), q.getFetch());
+			}
+			else
+			{
+				return null;
+			}
 		}
 		return delegate().findOne(q);
 	}
-
-	// TODO check which ones are needed
-
-	@Override
-	public void delete(Entity entity)
-	{
-		delegate().delete(entity);
-	}
-
-	@Override
-	public void deleteById(Object id)
-	{
-		delegate().deleteById(id);
-	}
-
-	@Override
-	public void deleteAll()
-	{
-		delegate().deleteAll();
-	}
-
-	@Override
-	public void add(Entity entity)
-	{
-		delegate().add(entity);
-	}
-
-	@Override
-	public Integer add(Stream<Entity> entities)
-	{
-		return delegate().add(entities);
-	}
-
-	@Override
-	public void update(Stream<Entity> entities)
-	{
-		delegate().update(entities);
-	}
-
-	@Override
-	public void delete(Stream<Entity> entities)
-	{
-		delegate().delete(entities);
-	}
-
-	@Override
-	public void deleteAll(Stream<Object> ids)
-	{
-		delegate().deleteAll(ids);
-	}
-
 }

@@ -150,11 +150,18 @@ public class ReindexActionRegisterServiceImpl implements TransactionInformation,
 	}
 
 	@Override
-	public boolean isRepositoryDirty(String entityName)
+	public boolean isEntireRepositoryDirty(String entityName)
 	{
 		return getReindexActionsForCurrentTransaction().stream().anyMatch(
 				reindexAction -> reindexAction.getEntityId() == null && reindexAction.getEntityFullName()
 						.equals(entityName));
+	}
+
+	@Override
+	public boolean isRepositoryCompletelyClean(String entityName)
+	{
+		return getReindexActionsForCurrentTransaction().stream()
+				.noneMatch(reindexAction -> reindexAction.getEntityFullName().equals(entityName));
 	}
 
 	@Override
@@ -167,10 +174,17 @@ public class ReindexActionRegisterServiceImpl implements TransactionInformation,
 	}
 
 	@Override
-	public Set<String> getDirtyRepositories()
+	public Set<String> getEntirelyDirtyRepositories()
 	{
 		return getReindexActionsForCurrentTransaction().stream()
 				.filter(reindexAction -> reindexAction.getEntityId() == null).map(ReindexAction::getEntityFullName)
 				.collect(toSet());
 	}
+
+	@Override
+	public Set<String> getDirtyRepositories()
+	{
+		return getReindexActionsForCurrentTransaction().stream().map(ReindexAction::getEntityFullName).collect(toSet());
+	}
+
 }

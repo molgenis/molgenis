@@ -116,14 +116,14 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		// 12. Query the L2 cache before querying the database
 		decoratedRepository = new L2CacheRepositoryDecorator(decoratedRepository, l2Cache, transactionInformation);
 
-		// 11. Query the L3 cache before querying the database
-		decoratedRepository = new L3CacheRepositoryDecorator(decoratedRepository, l3Cache);
-
-		// 10. Query the L1 cache before querying the database
+		// 11. Query the L1 cache before querying the database
 		decoratedRepository = new L1CacheRepositoryDecorator(decoratedRepository, l1Cache);
 
-		// 9. Route specific queries to the index
+		// 10. Route specific queries to the index
 		decoratedRepository = new IndexedRepositoryDecorator(decoratedRepository, searchService);
+
+		// 9. Query the L3 cache before querying the index
+		decoratedRepository = new L3CacheRepositoryDecorator(decoratedRepository, l3Cache, transactionInformation);
 
 		// 8. Register the cud action needed to reindex indexed repositories
 		decoratedRepository = new ReindexActionRepositoryDecorator(decoratedRepository, reindexActionRegisterService);

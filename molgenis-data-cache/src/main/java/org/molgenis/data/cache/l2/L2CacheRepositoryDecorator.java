@@ -68,7 +68,7 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator
 	@Override
 	public Entity findOneById(Object id)
 	{
-		if (cacheable && !transactionInformation.isRepositoryDirty(getName()) && !transactionInformation
+		if (cacheable && !transactionInformation.isEntireRepositoryDirty(getName()) && !transactionInformation
 				.isEntityDirty(EntityKey.create(getEntityMetaData(), id)))
 		{
 			return l2Cache.get(delegate(), id);
@@ -90,13 +90,13 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
-		if (cacheable && !transactionInformation.isRepositoryDirty(getName()))
+		if (cacheable && !transactionInformation.isEntireRepositoryDirty(getName()))
 		{
+			@SuppressWarnings(true);
 			Iterator<List<Object>> idBatches = partition(ids.iterator(), ID_BATCH_SIZE);
 			Iterator<List<Entity>> entityBatches = Iterators.transform(idBatches, this::findAllBatch);
 			return stream(spliteratorUnknownSize(entityBatches, SORTED | ORDERED), false).flatMap(List::stream);
-		}
-		return delegate().findAll(ids);
+		} return delegate().findAll(ids);
 	}
 
 	@Override
@@ -129,7 +129,8 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator
 		Collection<Object> cleanIds = partitionedIds.get(false);
 		Collection<Object> dirtyIds = partitionedIds.get(true);
 
-		Map<Object, Entity> result = newHashMap(uniqueIndex(l2Cache.getBatch(delegate(), cleanIds), Entity::getIdValue));
+		Map<Object, Entity> result = newHashMap(
+				uniqueIndex(l2Cache.getBatch(delegate(), cleanIds), Entity::getIdValue));
 		result.putAll(delegate().findAll(dirtyIds.stream()).collect(toMap(Entity::getIdValue, e -> e)));
 
 		return ids.stream().filter(result::containsKey).map(result::get).collect(toList());

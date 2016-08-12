@@ -62,7 +62,7 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	public void afterCommitTransaction(String transactionId)
 	{
 		//TODO: trace logging
-		transactionInformation.getDirtyRepositories().forEach(caches::remove);
+		transactionInformation.getEntirelyDirtyRepositories().forEach(caches::remove);
 		transactionInformation.getDirtyEntities().forEach(this::evict);
 	}
 
