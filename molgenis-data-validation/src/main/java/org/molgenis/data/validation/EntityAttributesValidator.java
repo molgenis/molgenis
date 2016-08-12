@@ -90,11 +90,11 @@ public class EntityAttributesValidator
 					violation = checkText(entity, attr, meta, MolgenisFieldTypes.STRING);
 					break;
 				case CATEGORICAL:
+				case FILE:
 				case XREF:
 					violation = checkXref(entity, attr, meta);
 					break;
 				case CATEGORICAL_MREF:
-				case FILE:
 				case MREF:
 					violation = checkMref(entity, attr, meta);
 					break;
