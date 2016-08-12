@@ -814,7 +814,7 @@ public class EmxMetaDataParser implements MetaDataParser
 				attr.setEnumOptions(enumOptions);
 			}
 
-			if (!emxDataType.equalsIgnoreCase("file"))
+			if (attr.getDataType() != FILE)
 			{
 				// Only if an attribute is not of type file we apply the normal reference rules
 				if (isReferenceType(attr) && StringUtils.isEmpty(emxRefEntity))
