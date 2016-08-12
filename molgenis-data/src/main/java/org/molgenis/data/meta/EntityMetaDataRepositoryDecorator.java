@@ -372,20 +372,73 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		MetaValidationUtils.validateEntityMetaData(entityMetaData);
 	}
 
-	private void updateEntity(EntityMetaData entityMetaData)
+	private void updateEntity(EntityMetaData entityMeta)
 	{
-		validateUpdateAllowed(entityMetaData);
+		validateUpdateAllowed(entityMeta);
 
-		EntityMetaData existingEntityMetaData = findOneById(entityMetaData.getIdValue(),
+		EntityMetaData existingEntityMeta = findOneById(entityMeta.getIdValue(),
 				new Fetch().field(FULL_NAME).field(ATTRIBUTES, new Fetch().field(NAME)));
-		if (existingEntityMetaData == null)
+		if (existingEntityMeta == null)
 		{
 			throw new UnknownEntityException(format("Unknown entity meta data [%s] with id [%s]", getName(),
-					entityMetaData.getIdValue().toString()));
+					entityMeta.getIdValue().toString()));
 		}
-		decoratedRepo.update(entityMetaData);
 
-		updateEntityAttributes(entityMetaData, existingEntityMetaData);
+		Map<String, AttributeMetaData> currentAttrMap = StreamSupport
+				.stream(existingEntityMeta.getOwnAttributes().spliterator(), false)
+				.collect(toMap(AttributeMetaData::getName, Function.identity()));
+		Map<String, AttributeMetaData> updateAttrMap = StreamSupport
+				.stream(entityMeta.getOwnAttributes().spliterator(), false)
+				.collect(toMap(AttributeMetaData::getName, Function.identity()));
+
+		// add attributes
+		Set<String> addedAttrNames = Sets.difference(updateAttrMap.keySet(), currentAttrMap.keySet());
+		if (!addedAttrNames.isEmpty())
+		{
+			String entityName = entityMeta.getName();
+			String backend = entityMeta.getBackend();
+			RepositoryCollection repoCollection = dataService.getMeta().getBackend(backend);
+			addedAttrNames.stream().map(updateAttrMap::get).forEach(addedAttrEntity ->
+			{
+				repoCollection.addAttribute(entityName, addedAttrEntity);
+
+				if (entityMeta.getName().equals(ENTITY_META_DATA))
+				{
+					// update system entity meta data
+					systemEntityMetaDataRegistry.getSystemEntityMetaData(ENTITY_META_DATA)
+							.addAttribute(addedAttrEntity);
+				}
+			});
+		}
+
+		// update entity
+		decoratedRepo.update(entityMeta);
+
+		// remove attributes
+		Set<String> deletedAttrNames = Sets.difference(currentAttrMap.keySet(), updateAttrMap.keySet());
+
+		if (!deletedAttrNames.isEmpty())
+		{
+			String entityName = entityMeta.getName();
+			String backend = entityMeta.getBackend();
+			RepositoryCollection repoCollection = dataService.getMeta().getBackend(backend);
+			deletedAttrNames.forEach(deletedAttrName ->
+			{
+				repoCollection.deleteAttribute(entityName, deletedAttrName);
+
+				if (entityMeta.getName().equals(ENTITY_META_DATA))
+				{
+					// update system entity meta data
+					systemEntityMetaDataRegistry.getSystemEntityMetaData(ENTITY_META_DATA)
+							.removeAttribute(currentAttrMap.get(deletedAttrName));
+				}
+			});
+
+			// delete attributes removed from entity meta data
+			// assumption: the attribute is owned by this entity or a compound attribute owned by this entity
+			dataService.deleteAll(ATTRIBUTE_META_DATA,
+					deletedAttrNames.stream().map(currentAttrMap::get).map(AttributeMetaData::getIdentifier));
+		}
 	}
 
 	/**
@@ -407,61 +460,6 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		}
 
 		MetaValidationUtils.validateEntityMetaData(entityMetaData);
-	}
-
-	private void updateEntityAttributes(EntityMetaData entityMeta, EntityMetaData existingEntityMeta)
-	{
-		Map<String, AttributeMetaData> currentAttrMap = StreamSupport
-				.stream(existingEntityMeta.getOwnAttributes().spliterator(), false)
-				.collect(toMap(AttributeMetaData::getName, Function.identity()));
-		Map<String, AttributeMetaData> updateAttrMap = StreamSupport
-				.stream(entityMeta.getOwnAttributes().spliterator(), false)
-				.collect(toMap(AttributeMetaData::getName, Function.identity()));
-
-		Set<String> deletedAttrNames = Sets.difference(currentAttrMap.keySet(), updateAttrMap.keySet());
-		Set<String> addedAttrNames = Sets.difference(updateAttrMap.keySet(), currentAttrMap.keySet());
-
-		if (!deletedAttrNames.isEmpty() || !addedAttrNames.isEmpty())
-		{
-			String entityName = entityMeta.getName();
-			String backend = entityMeta.getBackend();
-			RepositoryCollection repoCollection = dataService.getMeta().getBackend(backend);
-
-			if (!deletedAttrNames.isEmpty())
-			{
-				deletedAttrNames.forEach(deletedAttrName ->
-				{
-					repoCollection.deleteAttribute(entityName, deletedAttrName);
-
-					if (entityMeta.getName().equals(ENTITY_META_DATA))
-					{
-						// update system entity meta data
-						systemEntityMetaDataRegistry.getSystemEntityMetaData(ENTITY_META_DATA)
-								.removeAttribute(currentAttrMap.get(deletedAttrName));
-					}
-				});
-
-				// delete attributes removed from entity meta data
-				// assumption: the attribute is owned by this entity or a compound attribute owned by this entity
-				dataService.deleteAll(ATTRIBUTE_META_DATA,
-						deletedAttrNames.stream().map(currentAttrMap::get).map(AttributeMetaData::getIdentifier));
-			}
-
-			if (!addedAttrNames.isEmpty())
-			{
-				addedAttrNames.stream().map(updateAttrMap::get).forEach(addedAttrEntity ->
-				{
-					repoCollection.addAttribute(entityName, addedAttrEntity);
-
-					if (entityMeta.getName().equals(ENTITY_META_DATA))
-					{
-						// update system entity meta data
-						systemEntityMetaDataRegistry.getSystemEntityMetaData(ENTITY_META_DATA)
-								.addAttribute(addedAttrEntity);
-					}
-				});
-			}
-		}
 	}
 
 	private void deleteEntityMetaData(EntityMetaData entityMeta)
