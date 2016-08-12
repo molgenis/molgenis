@@ -41,7 +41,7 @@ public class SystemEntityMetaDataTest
 
 		Set<String> lookupAttributes = newHashSet();
 		testEMD.getLookupAttributes().forEach(e -> lookupAttributes.add(e.getName()));
-		assertEquals(lookupAttributes, newHashSet("idAttr", "lookupAttr1", "lookupAttr2"));
+		assertEquals(lookupAttributes, newHashSet("lookupAttr1", "lookupAttr2"));
 	}
 
 	@Test
@@ -56,7 +56,7 @@ public class SystemEntityMetaDataTest
 
 		Set<String> lookupAttributes = newHashSet();
 		testEMD.getLookupAttributes().forEach(e -> lookupAttributes.add(e.getName()));
-		assertEquals(lookupAttributes, newHashSet("idAttr", "lookupAttr1", "lookupAttr2"));
+		assertEquals(lookupAttributes, newHashSet("lookupAttr1", "lookupAttr2"));
 	}
 
 	private class TestNestedCompoundEMD extends SystemEntityMetaData

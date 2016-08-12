@@ -317,10 +317,6 @@ public class EntityMetaData extends StaticEntity
 		{
 			setLabelAttribute(idAttr);
 		}
-		if (!getLookupAttributes().iterator().hasNext())
-		{
-			addLookupAttribute(idAttr);
-		}
 		return this;
 	}
 
@@ -375,13 +371,6 @@ public class EntityMetaData extends StaticEntity
 	public EntityMetaData setLabelAttribute(AttributeMetaData labelAttr)
 	{
 		set(LABEL_ATTRIBUTE, labelAttr);
-		if (labelAttr != null)
-		{
-			if (!getLookupAttributes().iterator().hasNext())
-			{
-				addLookupAttribute(labelAttr);
-			}
-		}
 		return this;
 	}
 

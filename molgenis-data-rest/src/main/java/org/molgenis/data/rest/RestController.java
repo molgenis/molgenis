@@ -61,7 +61,6 @@ import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
@@ -1024,8 +1023,11 @@ public class RestController
 				}
 				else
 				{
-					AttributeMetaData attribute = entityMetaData.getAttribute(queryRule.getField());
-					queryRule.setValue(restService.toEntityValue(attribute, queryRule.getValue()));
+					if (queryRule.getValue() != null)
+					{
+						AttributeMetaData attribute = entityMetaData.getAttribute(queryRule.getField());
+						queryRule.setValue(restService.toEntityValue(attribute, queryRule.getValue()));
+					}
 				}
 			}
 		}
@@ -1111,8 +1113,8 @@ public class RestController
 			case COMPOUND:
 				Map<String, Object> entityHasAttributeMap = new LinkedHashMap<String, Object>();
 				entityHasAttributeMap.put("href", attrHref);
-				@SuppressWarnings("unchecked")
-				Iterable<AttributeMetaData> attributeParts = (Iterable<AttributeMetaData>) entity.get(refAttributeName);
+				@SuppressWarnings("unchecked") Iterable<AttributeMetaData> attributeParts = (Iterable<AttributeMetaData>) entity
+						.get(refAttributeName);
 				for (AttributeMetaData attributeMetaData : attributeParts)
 				{
 					String attrName = attributeMetaData.getName();
