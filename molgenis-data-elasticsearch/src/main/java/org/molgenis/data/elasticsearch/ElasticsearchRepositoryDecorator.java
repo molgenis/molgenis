@@ -210,7 +210,7 @@ public class ElasticsearchRepositoryDecorator extends AbstractElasticsearchRepos
 				}
 			}
 			if ((q.getSort() == null) || StreamSupport.stream(q.getSort().spliterator(), false)
-					.noneMatch(order -> getEntityMetaData().getAttribute(order.getAttr()).getExpression() != null))
+					.allMatch(order -> getEntityMetaData().getAttribute(order.getAttr()).getExpression() == null))
 			{
 				// No computed attributes so SQL can do the sort
 				return decoratedRepo.findAll(q);
