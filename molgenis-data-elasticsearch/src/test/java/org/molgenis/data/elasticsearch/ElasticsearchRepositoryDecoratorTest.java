@@ -1,14 +1,14 @@
 package org.molgenis.data.elasticsearch;
 
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Matchers;
+import org.molgenis.data.*;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
+import org.molgenis.data.support.AggregateQueryImpl;
+import org.molgenis.data.support.QueryImpl;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,23 +18,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.mockito.ArgumentCaptor;
-import org.mockito.Matchers;
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AttributeMetaData;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityMetaData;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
-import org.molgenis.data.QueryRule;
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.Repository;
-import org.molgenis.data.Sort;
-import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
-import org.molgenis.data.support.AggregateQueryImpl;
-import org.molgenis.data.support.QueryImpl;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
+import static org.molgenis.data.Sort.Direction.ASC;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 public class ElasticsearchRepositoryDecoratorTest
 {
@@ -88,9 +76,9 @@ public class ElasticsearchRepositoryDecoratorTest
 			entities.add(mock(Entity.class));
 		}
 		elasticsearchRepositoryDecorator.add(entities.stream());
-		verify(decoratedRepo, times(2)).add(Matchers.<Stream<Entity>> any());
-		verify(elasticSearchService, times(2)).index(Matchers.<Stream<Entity>> any(), eq(repositoryEntityMetaData),
-				eq(IndexingMode.ADD));
+		verify(decoratedRepo, times(2)).add(Matchers.<Stream<Entity>>any());
+		verify(elasticSearchService, times(2))
+				.index(Matchers.<Stream<Entity>>any(), eq(repositoryEntityMetaData), eq(IndexingMode.ADD));
 	}
 
 	@Test
@@ -159,8 +147,8 @@ public class ElasticsearchRepositoryDecoratorTest
 			entities.add(mock(Entity.class));
 		}
 		elasticsearchRepositoryDecorator.delete(entities.stream());
-		verify(decoratedRepo, times(2)).delete(Matchers.<Stream<Entity>> any());
-		verify(elasticSearchService, times(2)).delete(Matchers.<Stream<Entity>> any(), eq(repositoryEntityMetaData));
+		verify(decoratedRepo, times(2)).delete(Matchers.<Stream<Entity>>any());
+		verify(elasticSearchService, times(2)).delete(Matchers.<Stream<Entity>>any(), eq(repositoryEntityMetaData));
 	}
 
 	@Test
@@ -189,7 +177,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		when(elasticSearchService.search(q, repositoryEntityMetaData))
-				.thenReturn(Arrays.<Entity> asList(entity0, entity1));
+				.thenReturn(Arrays.<Entity>asList(entity0, entity1));
 		elasticsearchRepositoryDecorator.findOne(q);
 		verify(elasticSearchService).search(q, repositoryEntityMetaData);
 	}
@@ -273,8 +261,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		assertEquals(argument.getValue().get(idAttrName), entityName + id);
 	}
 
-	@SuppressWarnings(
-	{ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void updateStream()
 	{
@@ -293,8 +280,8 @@ public class ElasticsearchRepositoryDecoratorTest
 		assertEquals(decoratedRepoValues.get(1).collect(Collectors.toList()), entities.subList(1000, 1100));
 
 		ArgumentCaptor<Stream<Entity>> elasticSearchServiceCaptor = ArgumentCaptor.forClass((Class) Stream.class);
-		verify(elasticSearchService, times(2)).index(elasticSearchServiceCaptor.capture(), eq(repositoryEntityMetaData),
-				eq(IndexingMode.UPDATE));
+		verify(elasticSearchService, times(2))
+				.index(elasticSearchServiceCaptor.capture(), eq(repositoryEntityMetaData), eq(IndexingMode.UPDATE));
 		List<Stream<Entity>> elasticSearchServiceValues = elasticSearchServiceCaptor.getAllValues();
 		assertEquals(elasticSearchServiceValues.size(), 2);
 		assertEquals(elasticSearchServiceValues.get(0).collect(Collectors.toList()), entities.subList(0, 1000));
@@ -368,7 +355,7 @@ public class ElasticsearchRepositoryDecoratorTest
 		QueryImpl q = new QueryImpl();
 		Fetch fetch = mock(Fetch.class);
 		q.setFetch(fetch);
-		q.setSort(mock(Sort.class));
+		q.setSort(new Sort());
 		elasticsearchRepositoryDecorator.findAll(q);
 		verify(decoratedRepo).findAll(q);
 	}
@@ -383,6 +370,26 @@ public class ElasticsearchRepositoryDecoratorTest
 		q.setPageSize(20);
 		q.setSort(mock(Sort.class));
 		q.not();
+		elasticsearchRepositoryDecorator.findAll(q);
+		verify(decoratedRepo, never()).stream();
+		verify(decoratedRepo, never()).stream(fetch);
+		verify(decoratedRepo, never()).findAll(q);
+	}
+
+	@Test
+	public void findAllWithComputedAttribute()
+	{
+		QueryImpl q = new QueryImpl();
+		Fetch fetch = mock(Fetch.class);
+		q.setFetch(fetch);
+		q.setOffset(1);
+		q.setPageSize(20);
+		String computedAttribute = "computedAttribute";
+		q.setSort(new Sort(computedAttribute, ASC));
+		AttributeMetaData computedAttrMeta = mock(AttributeMetaData.class);
+		when(repositoryEntityMetaData.getAttribute(computedAttribute)).thenReturn(computedAttrMeta);
+		when(computedAttrMeta.getExpression()).thenReturn("expression");
+
 		elasticsearchRepositoryDecorator.findAll(q);
 		verify(decoratedRepo, never()).stream();
 		verify(decoratedRepo, never()).stream(fetch);
