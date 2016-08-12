@@ -5,9 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
-import java.util.stream.Stream;
+import java.util.List;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 import static org.molgenis.script.ScriptTypeMetaData.SCRIPT_TYPE;
 
 /**
@@ -33,7 +34,12 @@ public class ScriptTypePopulator
 	{
 		Collection<ScriptRunner> scriptRunners = scriptRunnerFactory.getScriptRunners();
 
-		persist(scriptRunners.stream().filter(this::notExists).map(this::createScriptType));
+		List<ScriptType> newScriptTypes = scriptRunners.stream().filter(this::notExists).map(this::createScriptType)
+				.collect(toList());
+		if (!newScriptTypes.isEmpty())
+		{
+			persist(newScriptTypes);
+		}
 	}
 
 	private boolean notExists(ScriptRunner scriptRunner)
@@ -46,9 +52,9 @@ public class ScriptTypePopulator
 		return scriptTypeFactory.create(scriptRunner.getName());
 	}
 
-	private void persist(Stream<ScriptType> scriptTypes)
+	private void persist(List<ScriptType> scriptTypes)
 	{
-		dataService.add(SCRIPT_TYPE, scriptTypes);
+		dataService.add(SCRIPT_TYPE, scriptTypes.stream());
 	}
 }
 
