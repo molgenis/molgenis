@@ -1,29 +1,20 @@
 package org.molgenis.data.rsql;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import java.util.Iterator;
-import java.util.List;
-
+import cz.jirutka.rsql.parser.ast.*;
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisQueryException;
-import org.molgenis.data.Query;
-import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AggregateQueryImpl;
 
-import cz.jirutka.rsql.parser.ast.AndNode;
-import cz.jirutka.rsql.parser.ast.ComparisonNode;
-import cz.jirutka.rsql.parser.ast.NoArgRSQLVisitorAdapter;
-import cz.jirutka.rsql.parser.ast.Node;
-import cz.jirutka.rsql.parser.ast.OrNode;
+import java.util.Iterator;
+import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * RSQLVisitor implementation for molgenis Query.
- * 
+ *
  * @see https://github.com/jirutka/rsql-parser
  */
 public class AggregateQueryRsqlVisitor extends NoArgRSQLVisitorAdapter<AggregateQuery>
@@ -40,7 +31,7 @@ public class AggregateQueryRsqlVisitor extends NoArgRSQLVisitorAdapter<Aggregate
 	@Override
 	public AggregateQuery visit(AndNode node)
 	{
-		for (Iterator<Node> it = node.iterator(); it.hasNext();)
+		for (Iterator<Node> it = node.iterator(); it.hasNext(); )
 		{
 			Node child = it.next();
 			child.accept(this);
@@ -90,8 +81,9 @@ public class AggregateQueryRsqlVisitor extends NoArgRSQLVisitorAdapter<Aggregate
 		List<String> args = node.getArguments();
 		if (args.size() != 1)
 		{
-			throw new MolgenisQueryException(String.format(
-					"RSQL query value must have exactly one value instead of [%s]", StringUtils.join(args, ',')));
+			throw new MolgenisQueryException(
+					String.format("RSQL query value must have exactly one value instead of [%s]",
+							StringUtils.join(args, ',')));
 		}
 		String attrName = args.iterator().next();
 

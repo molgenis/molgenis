@@ -1,25 +1,5 @@
 package org.molgenis.security.account;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
-import static org.molgenis.auth.MolgenisGroupMetaData.NAME;
-import static org.molgenis.auth.MolgenisUserMetaData.ACTIVATIONCODE;
-import static org.molgenis.auth.MolgenisUserMetaData.ACTIVE;
-import static org.molgenis.auth.MolgenisUserMetaData.EMAIL;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.auth.MolgenisUserMetaData.USERNAME;
-import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
-import static org.testng.Assert.assertNotNull;
-
-import java.net.URISyntaxException;
-
-import javax.mail.internet.MimeMessage;
-
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -41,6 +21,18 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import javax.mail.internet.MimeMessage;
+import java.net.URISyntaxException;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
+import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
+import static org.molgenis.auth.MolgenisGroupMetaData.NAME;
+import static org.molgenis.auth.MolgenisUserMetaData.*;
+import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
+import static org.testng.Assert.assertNotNull;
 
 @ContextConfiguration
 public class AccountServiceImplTest extends AbstractTestNGSpringContextTests

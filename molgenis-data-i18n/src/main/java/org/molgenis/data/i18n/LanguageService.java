@@ -40,8 +40,7 @@ public class LanguageService
 	@RunAsSystem
 	public List<String> getLanguageCodes()
 	{
-		return dataService.findAll(LANGUAGE).map(e -> e.getString(LanguageMetaData.CODE))
-				.collect(toList());
+		return dataService.findAll(LANGUAGE).map(e -> e.getString(LanguageMetaData.CODE)).collect(toList());
 	}
 
 	/**
@@ -68,7 +67,8 @@ public class LanguageService
 	{
 		String currentUserName = SecurityUtils.getCurrentUsername();
 
-		return runAsSystem(() -> {
+		return runAsSystem(() ->
+		{
 			String languageCode = null;
 
 			if (currentUserName != null)

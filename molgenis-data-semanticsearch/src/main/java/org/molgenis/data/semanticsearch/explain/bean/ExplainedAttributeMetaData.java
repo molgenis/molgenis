@@ -1,16 +1,15 @@
 package org.molgenis.data.semanticsearch.explain.bean;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.auto.value.AutoValue;
+import com.google.common.collect.Sets;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.gson.AutoGson;
 
-import com.google.auto.value.AutoValue;
-import com.google.common.collect.Sets;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_ExplainedAttributeMetaData.class)

@@ -244,8 +244,8 @@ public class InMemoryRepositoryTest
 
 			System.out.println(entity0.get(idAttrName));
 
-			List<Entity> entities = inMemoryRepository.findAll(new QueryImpl<Entity>().eq("attr", "a")).filter(Objects::nonNull)
-					.collect(Collectors.toList());
+			List<Entity> entities = inMemoryRepository.findAll(new QueryImpl<Entity>().eq("attr", "a"))
+					.filter(Objects::nonNull).collect(Collectors.toList());
 			assertEquals(Lists.newArrayList(entities), Arrays.asList(entity0, entity1));
 		}
 		finally

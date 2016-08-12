@@ -1,21 +1,19 @@
 package org.molgenis.data.reindex;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.CREATE;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.DELETE;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.UPDATE;
-import static org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType.METADATA;
-
-import java.util.Iterator;
-import java.util.Set;
-import java.util.stream.Stream;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.RepositoryCollectionCapability;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+
+import java.util.Iterator;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.CudType.*;
+import static org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType.METADATA;
 
 /**
  * Decorator around a {@link Repository} that registers changes made to its data with the

@@ -4,8 +4,10 @@ public class Marker
 {
 	private Boolean enabled;
 	private Integer radius;
-	
-	Marker(){}
+
+	Marker()
+	{
+	}
 
 	public Marker(Boolean enabled, Integer radius)
 	{
@@ -22,8 +24,7 @@ public class Marker
 	}
 
 	/**
-	 * @param enabled
-	 *            the enabled to set
+	 * @param enabled the enabled to set
 	 */
 	public void setEnabled(Boolean enabled)
 	{
@@ -39,8 +40,7 @@ public class Marker
 	}
 
 	/**
-	 * @param radius
-	 *            the radius to set
+	 * @param radius the radius to set
 	 */
 	public void setRadius(Integer radius)
 	{

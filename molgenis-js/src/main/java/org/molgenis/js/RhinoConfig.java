@@ -1,14 +1,14 @@
 package org.molgenis.js;
 
-import javax.annotation.PostConstruct;
-
 import org.molgenis.js.sandbox.SandboxedContextFactory;
 import org.mozilla.javascript.ContextFactory;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
+
 /**
  * Molgenis js {@link Configuration} class.
- * 
+ * <p>
  * Initializes the Global {@link ContextFactory}
  */
 @Configuration

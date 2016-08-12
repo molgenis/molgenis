@@ -1,29 +1,18 @@
 package org.molgenis.js;
 
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.List;
-
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.ContextAction;
-import org.mozilla.javascript.ContextFactory;
-import org.mozilla.javascript.EcmaError;
-import org.mozilla.javascript.Function;
-import org.mozilla.javascript.Scriptable;
-import org.mozilla.javascript.ScriptableObject;
+import org.mozilla.javascript.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.FileCopyUtils;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.util.*;
 
 /**
  * Evaluate a script with molgenis-script-evaluator.js
@@ -36,21 +25,17 @@ public class ScriptEvaluator
 
 	/**
 	 * Evaluates a script for a single entity.
-	 * 
-	 * @param source
-	 *            {@link String} containing the script to evaluate
-	 * @param entity
-	 *            the {@link Entity} to evaluate the script on
-	 * @param entityMetaData
-	 *            {@link EntityMetaData} for the entity
+	 *
+	 * @param source         {@link String} containing the script to evaluate
+	 * @param entity         the {@link Entity} to evaluate the script on
+	 * @param entityMetaData {@link EntityMetaData} for the entity
 	 * @return result of the evaluation, or a {@link RuntimeException} if one was thrown
-	 * @throws EcmaError
-	 *             if there's a syntax error in the script
+	 * @throws EcmaError if there's a syntax error in the script
 	 */
 	public static Object eval(final String source, final Entity entity, final EntityMetaData entityMetaData)
 	{
-		Object result = Iterables.get(
-				eval(Collections.singletonList(source), Collections.singleton(entity), entityMetaData), 0);
+		Object result = Iterables
+				.get(eval(Collections.singletonList(source), Collections.singleton(entity), entityMetaData), 0);
 		if (result instanceof RuntimeException)
 		{
 			throw (RuntimeException) result;
@@ -70,7 +55,8 @@ public class ScriptEvaluator
 		return results;
 	}
 
-	public static List<Object> eval(final List<String> sources, final Entity entity, final EntityMetaData entityMetaData)
+	public static List<Object> eval(final List<String> sources, final Entity entity,
+			final EntityMetaData entityMetaData)
 	{
 		List<Object> results = eval(sources, Collections.singleton(entity), entityMetaData);
 
@@ -84,15 +70,12 @@ public class ScriptEvaluator
 	/**
 	 * Evaluates a script on a batch of entities
 	 *
-	 * @param sources
-	 *            the source of the script to run
-	 * @param entities
-	 *            {@link Iterable} of {@link Entity}s to evaluate it for
+	 * @param sources        the source of the script to run
+	 * @param entities       {@link Iterable} of {@link Entity}s to evaluate it for
 	 * @param entityMetaData
 	 * @return {@link List} of {@link Object} that contain the results of the evaluation, or the
-	 *         {@link RuntimeException} if one was thrown
-	 * @throws EcmaError
-	 *             if there's a syntax error in the script
+	 * {@link RuntimeException} if one was thrown
+	 * @throws EcmaError if there's a syntax error in the script
 	 */
 	@SuppressWarnings("unchecked")
 	protected static List<Object> eval(final List<String> sources, final Iterable<Entity> entities,
@@ -102,8 +85,8 @@ public class ScriptEvaluator
 		{
 			try
 			{
-				JS_SCRIPT = FileCopyUtils.copyToString(new InputStreamReader(ScriptEvaluator.class
-						.getResourceAsStream("/js/molgenis-script-evaluator.js"), "UTF-8"));
+				JS_SCRIPT = FileCopyUtils.copyToString(new InputStreamReader(
+						ScriptEvaluator.class.getResourceAsStream("/js/molgenis-script-evaluator.js"), "UTF-8"));
 			}
 			catch (IOException e)
 			{
@@ -130,8 +113,8 @@ public class ScriptEvaluator
 
 						for (String source : sources)
 						{
-							result.add(evalScript.call(cx, scriptableObject, scriptableObject, new Object[]
-							{ source, scriptableEntity }));
+							result.add(evalScript.call(cx, scriptableObject, scriptableObject,
+									new Object[] { source, scriptableEntity }));
 						}
 					}
 					catch (EcmaError error)
@@ -162,11 +145,11 @@ public class ScriptEvaluator
 			{
 				Scriptable scriptableEntity = cx.newObject(scriptableObject);
 				scriptableEntity.setPrototype(scriptableObject);
-				entityMetaData.getAtomicAttributes().forEach(
-						attr -> {
-							scriptableEntity.put(attr.getName(), scriptableEntity,
-									javaToJS(entity.get(attr.getName()), cx, scriptableObject));
-						});
+				entityMetaData.getAtomicAttributes().forEach(attr ->
+				{
+					scriptableEntity.put(attr.getName(), scriptableEntity,
+							javaToJS(entity.get(attr.getName()), cx, scriptableObject));
+				});
 				return scriptableEntity;
 			}
 		});
@@ -178,8 +161,7 @@ public class ScriptEvaluator
 		if (value != null && value instanceof Date)
 		{
 			long dateLong = ((Date) value).getTime();
-			Scriptable convertedValue = cx.newObject(scope, "Date", new Object[]
-			{ dateLong });
+			Scriptable convertedValue = cx.newObject(scope, "Date", new Object[] { dateLong });
 			return convertedValue;
 		}
 

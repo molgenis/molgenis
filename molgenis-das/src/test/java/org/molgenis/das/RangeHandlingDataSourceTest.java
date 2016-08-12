@@ -1,7 +1,16 @@
 package org.molgenis.das;
 
-import static org.mockito.Mockito.mock;
-import static org.testng.AssertJUnit.assertEquals;
+import org.mockito.Mockito;
+import org.molgenis.das.impl.MolgenisDasTarget;
+import org.molgenis.data.DataService;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+import uk.ac.ebi.mydas.exceptions.BadReferenceObjectException;
+import uk.ac.ebi.mydas.exceptions.CoordinateErrorException;
+import uk.ac.ebi.mydas.exceptions.DataSourceException;
+import uk.ac.ebi.mydas.exceptions.UnimplementedFeatureException;
+import uk.ac.ebi.mydas.model.*;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -9,23 +18,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.mockito.Mockito;
-import org.molgenis.das.impl.MolgenisDasTarget;
-import org.molgenis.data.DataService;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import uk.ac.ebi.mydas.exceptions.BadReferenceObjectException;
-import uk.ac.ebi.mydas.exceptions.CoordinateErrorException;
-import uk.ac.ebi.mydas.exceptions.DataSourceException;
-import uk.ac.ebi.mydas.exceptions.UnimplementedFeatureException;
-import uk.ac.ebi.mydas.model.DasFeature;
-import uk.ac.ebi.mydas.model.DasFeatureOrientation;
-import uk.ac.ebi.mydas.model.DasMethod;
-import uk.ac.ebi.mydas.model.DasPhase;
-import uk.ac.ebi.mydas.model.DasTarget;
-import uk.ac.ebi.mydas.model.DasType;
+import static org.mockito.Mockito.mock;
+import static org.testng.AssertJUnit.assertEquals;
 
 public class RangeHandlingDataSourceTest
 {
@@ -62,9 +56,10 @@ public class RangeHandlingDataSourceTest
 	@Test()
 	public void createDasFeature() throws UnimplementedFeatureException, DataSourceException, MalformedURLException
 	{
-		DasFeature dasFeatureUnderTest = source.createDasFeature(0, 1000, "vatiant_identifier", "name",
-				"variant_description", "http://www.molgenis.org/", new DasType("0", "", "", "type"),
-				new DasMethod("not_recorded", "not_recorded", "ECO:0000037"), "", "", new ArrayList<String>());
+		DasFeature dasFeatureUnderTest = source
+				.createDasFeature(0, 1000, "vatiant_identifier", "name", "variant_description",
+						"http://www.molgenis.org/", new DasType("0", "", "", "type"),
+						new DasMethod("not_recorded", "not_recorded", "ECO:0000037"), "", "", new ArrayList<String>());
 		assertEquals(dasFeature, dasFeatureUnderTest);
 	}
 

@@ -3,7 +3,6 @@ package org.molgenis.test.data;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.*;
-import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -44,8 +43,7 @@ public class EntitySelfXrefTestHarness
 	public EntityMetaData createDynamicEntityMetaData()
 	{
 		return entityMetaDataFactory.create().setPackage(testPackage).setSimpleName("SelfRef")
-				.addAttribute(createAttribute(ATTR_ID, STRING), ROLE_ID)
-				.addAttribute(createAttribute(ATTR_XREF, XREF))
+				.addAttribute(createAttribute(ATTR_ID, STRING), ROLE_ID).addAttribute(createAttribute(ATTR_XREF, XREF))
 				.addAttribute(createAttribute(ATTR_STRING, STRING), ROLE_LABEL);
 	}
 

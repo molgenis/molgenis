@@ -1,16 +1,7 @@
 package org.molgenis.data.csv;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.convert.DateToStringConverter;
@@ -19,8 +10,10 @@ import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 public class CsvWriter extends AbstractWritable
 {
@@ -29,7 +22,9 @@ public class CsvWriter extends AbstractWritable
 	public static final char DEFAULT_SEPARATOR = ',';
 
 	private final au.com.bytecode.opencsv.CSVWriter csvWriter;
-	/** process cells before writing */
+	/**
+	 * process cells before writing
+	 */
 	private List<CellProcessor> cellProcessors;
 
 	private List<String> cachedAttributeNames;
@@ -98,8 +93,8 @@ public class CsvWriter extends AbstractWritable
 	@Override
 	public void add(Entity entity)
 	{
-		if (cachedAttributeNames == null) throw new MolgenisDataException(
-				"No attribute names defined call writeAttributeNames first");
+		if (cachedAttributeNames == null)
+			throw new MolgenisDataException("No attribute names defined call writeAttributeNames first");
 
 		int i = 0;
 		String[] values = new String[cachedAttributeNames.size()];
@@ -119,7 +114,7 @@ public class CsvWriter extends AbstractWritable
 
 	/**
 	 * Use attribute labels as column names
-	 * 
+	 *
 	 * @param attributes
 	 * @throws IOException
 	 */

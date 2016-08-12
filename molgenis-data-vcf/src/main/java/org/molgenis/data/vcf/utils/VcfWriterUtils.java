@@ -550,8 +550,8 @@ public class VcfWriterUtils
 				.collect(Collectors.toList());
 		// always write all fields that were not added by this annotation run.
 		// else write the field if it was specified or if nothing was sepcified at all.
-		return (!annotatorAttributeNames.contains(attribute.getName()) ||
-				attributesToInclude.contains(attribute.getName()) || attributesToInclude.isEmpty()) && attribute
-				.isVisible() && !attribute.getName().equals(VcfAttributes.SAMPLES);
+		return (!annotatorAttributeNames.contains(attribute.getName()) || attributesToInclude
+				.contains(attribute.getName()) || attributesToInclude.isEmpty()) && attribute.isVisible() && !attribute
+				.getName().equals(VcfAttributes.SAMPLES);
 	}
 }

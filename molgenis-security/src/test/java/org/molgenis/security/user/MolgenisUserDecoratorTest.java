@@ -187,12 +187,12 @@ public class MolgenisUserDecoratorTest
 		assertEquals(entities.collect(toList()), singletonList(molgenisUser));
 	}
 
-		@Test
-		public void forEachBatchedFetch()
-		{
-			Fetch fetch = new Fetch();
-			Consumer<List<MolgenisUser>> consumer = mock(Consumer.class);
-			molgenisUserDecorator.forEachBatched(fetch, consumer, 234);
-			verify(decoratedRepository, times(1)).forEachBatched(fetch, consumer, 234);
-		}
+	@Test
+	public void forEachBatchedFetch()
+	{
+		Fetch fetch = new Fetch();
+		Consumer<List<MolgenisUser>> consumer = mock(Consumer.class);
+		molgenisUserDecorator.forEachBatched(fetch, consumer, 234);
+		verify(decoratedRepository, times(1)).forEachBatched(fetch, consumer, 234);
+	}
 }

@@ -1,15 +1,13 @@
 package org.molgenis.data.mapper.algorithmgenerator.categorymapper.convertor;
 
-import java.util.Set;
-
-import javax.measure.unit.NonSI;
-import javax.measure.unit.Unit;
-
+import com.google.common.collect.Sets;
 import org.jscience.physics.amount.Amount;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
 import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapperUtil;
 
-import com.google.common.collect.Sets;
+import javax.measure.unit.NonSI;
+import javax.measure.unit.Unit;
+import java.util.Set;
 
 /**
  * The several times converter is able to convert any frequency related categories, in which 'several times' have
@@ -18,9 +16,8 @@ import com.google.common.collect.Sets;
  * used by HOP project. The upper bound is calculated using the formula (1 time / per day).convertTo(currentUnit) - 1,
  * which is decided upon the unit detected from the description. E.g. several times per week will be converted to 3-6
  * times a week. Several times per month will be converted to 3-30 times per month.
- * 
- * @author chaopang
  *
+ * @author chaopang
  */
 public class SeveralTimesConvertor extends AmountConvertor
 {

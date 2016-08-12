@@ -1,13 +1,13 @@
 package org.molgenis.r;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.molgenis.security.token.TokenExtractor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * Returns the molgenis R api client script

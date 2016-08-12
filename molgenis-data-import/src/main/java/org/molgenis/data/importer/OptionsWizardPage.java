@@ -1,15 +1,5 @@
 package org.molgenis.data.importer;
 
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.FileRepositoryCollectionFactory;
@@ -27,6 +17,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
+
+import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 
 @Component
 public class OptionsWizardPage extends AbstractWizardPage

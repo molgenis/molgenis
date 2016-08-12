@@ -624,7 +624,8 @@ public class MappingServiceController extends MolgenisPluginController
 
 		FluentIterable<Entity> sourceEntities = FluentIterable.from(() -> dataService.findAll(source).iterator())
 				.limit(10);
-		ImmutableList<AlgorithmResult> algorithmResults = sourceEntities.transform(sourceEntity -> {
+		ImmutableList<AlgorithmResult> algorithmResults = sourceEntities.transform(sourceEntity ->
+		{
 			try
 			{
 				return AlgorithmResult.createSuccess(

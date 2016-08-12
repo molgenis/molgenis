@@ -1,16 +1,16 @@
 package org.molgenis.data.rest.v2;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.List;
-import java.util.Map;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.security.core.MolgenisPermissionService;
+
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Objects.requireNonNull;
 
 class EntityCollectionResponseV2
 {

@@ -1,16 +1,15 @@
 package org.molgenis.ontology.sorta.request;
 
-import java.util.List;
-import java.util.Map;
-
 import org.molgenis.data.Entity;
 import org.molgenis.ontology.utils.SortaServiceUtil;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * This function is used to parse the results from OntologyService
- * 
+ *
  * @author chaopang
- * 
  */
 public class SortaServiceResponse
 {

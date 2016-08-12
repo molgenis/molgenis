@@ -1,18 +1,5 @@
 package org.molgenis.ui.jobs;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.SUBMISSION_DATE;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.USER;
-import static org.molgenis.ui.jobs.JobsController.URI;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
-
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -26,6 +13,14 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import java.util.*;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.SUBMISSION_DATE;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.USER;
+import static org.molgenis.ui.jobs.JobsController.URI;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
 @RequestMapping(URI)
@@ -74,7 +69,8 @@ public class JobsController extends MolgenisPluginController
 
 		dataService.getMeta().getEntityMetaDatas()
 				.filter(e -> e.getExtends() != null && e.getExtends().getName().equals(jobMetaDataMetaData.getName()))
-				.forEach(e -> {
+				.forEach(e ->
+				{
 					Query<Entity> q = dataService.query(e.getName()).ge(JobExecutionMetaData.SUBMISSION_DATE, weekAgo);
 					if (!currentUser.isSuperuser())
 					{

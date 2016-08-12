@@ -38,8 +38,8 @@ public abstract class AbstractCellProcessor implements CellProcessor
 		{
 			for (CellProcessor cellProcessor : cellProcessors)
 			{
-				boolean process = (isHeader && cellProcessor.processHeader())
-						|| (!isHeader && cellProcessor.processData());
+				boolean process =
+						(isHeader && cellProcessor.processHeader()) || (!isHeader && cellProcessor.processData());
 				if (process) value = cellProcessor.process(value);
 			}
 		}

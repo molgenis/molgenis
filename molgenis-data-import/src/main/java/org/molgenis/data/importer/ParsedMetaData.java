@@ -45,7 +45,8 @@ public final class ParsedMetaData
 			throw new NullPointerException("Null packages");
 		}
 		this.packages = ImmutableMap.copyOf(packages);
-		ImmutableSetMultimap.Builder<EntityMetaData, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attrTagBuilder = ImmutableSetMultimap.builder();
+		ImmutableSetMultimap.Builder<EntityMetaData, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attrTagBuilder = ImmutableSetMultimap
+				.builder();
 		for (String simpleEntityName : attributeTags.keys())
 		{
 			EntityMetaData emd = this.entities.get(simpleEntityName);
@@ -163,9 +164,8 @@ public final class ParsedMetaData
 
 	/**
 	 * Gets a specific package
-	 * 
-	 * @param name
-	 *            the name of the package
+	 *
+	 * @param name the name of the package
 	 * @return
 	 */
 	public Package getPackage(String name)

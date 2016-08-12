@@ -11,8 +11,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping("/")
 public class MolgenisRootController
 {
-	@RequestMapping(method =
-	{ RequestMethod.GET, RequestMethod.POST })
+	@RequestMapping(method = { RequestMethod.GET, RequestMethod.POST })
 	public String index()
 	{
 		return "forward:" + MolgenisMenuController.URI;

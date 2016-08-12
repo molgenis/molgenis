@@ -87,8 +87,8 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator
 				{
 					unitConverter = null;
 					// algorithm sets source unit and assigns source value to target
-					algorithm = String.format("$('%s').unit('%s').value();", sourceAttribute.getName(),
-							sourceUnit.toString());
+					algorithm = String
+							.format("$('%s').unit('%s').value();", sourceAttribute.getName(), sourceUnit.toString());
 				}
 
 				if (unitConverter != null)
@@ -101,8 +101,8 @@ public class NumericAlgorithmGenerator implements AlgorithmGenerator
 			else
 			{
 				// algorithm sets source unit and assigns source value to target
-				algorithm = String.format("$('%s').unit('%s').value();", sourceAttribute.getName(),
-						sourceUnit.toString());
+				algorithm = String
+						.format("$('%s').unit('%s').value();", sourceAttribute.getName(), sourceUnit.toString());
 			}
 		}
 

@@ -60,8 +60,8 @@ public class MolgenisUserMetaData extends SystemEntityMetaData
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false)
 				.setDescription("automatically generated internal id, only for internal use.");
-		addAttribute(USERNAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Username").setUnique(true)
-				.setDescription("").setNillable(false);
+		addAttribute(USERNAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Username").setUnique(true).setDescription("")
+				.setNillable(false);
 		addAttribute(PASSWORD_).setLabel("Password")
 				.setDescription("This is the hashed password, enter a new plaintext password to update.")
 				.setNillable(false);
@@ -70,41 +70,34 @@ public class MolgenisUserMetaData extends SystemEntityMetaData
 		addAttribute(ACTIVE).setLabel("Active").setDataType(BOOL).setDefaultValue("false")
 				.setDescription("Boolean to indicate if this account can be used to login").setAggregatable(true)
 				.setNillable(false);
-		addAttribute(SUPERUSER).setLabel("Superuser").setDataType(BOOL).setDefaultValue("false")
-				.setAggregatable(true).setDescription("").setNillable(false);
+		addAttribute(SUPERUSER).setLabel("Superuser").setDataType(BOOL).setDefaultValue("false").setAggregatable(true)
+				.setDescription("").setNillable(false);
 		addAttribute(FIRSTNAME).setLabel("First name").setNillable(true).setDescription("");
 		addAttribute(MIDDLENAMES).setLabel("Middle names").setNillable(true).setDescription("");
 		addAttribute(LASTNAME, ROLE_LOOKUP).setLabel("Last name").setNillable(true).setDescription("");
-		addAttribute(TITLE).setLabel("Title").setNillable(true)
-				.setDescription("An academic title, e.g. Prof.dr, PhD");
+		addAttribute(TITLE).setLabel("Title").setNillable(true).setDescription("An academic title, e.g. Prof.dr, PhD");
 		addAttribute(AFFILIATION).setLabel("Affiliation").setNillable(true).setDescription("");
 		addAttribute(DEPARTMENT)
 				.setDescription("Added from the old definition of MolgenisUser. Department of this contact.")
 				.setNillable(true);
-		addAttribute(ROLE).setDescription("Indicate role of the contact, e.g. lab worker or PI.")
-				.setNillable(true);
-		addAttribute(ADDRESS).setDescription("The address of the Contact.").setNillable(true)
-				.setDataType(TEXT);
-		addAttribute(PHONE)
-				.setDescription("The telephone number of the Contact including the suitable area codes.")
+		addAttribute(ROLE).setDescription("Indicate role of the contact, e.g. lab worker or PI.").setNillable(true);
+		addAttribute(ADDRESS).setDescription("The address of the Contact.").setNillable(true).setDataType(TEXT);
+		addAttribute(PHONE).setDescription("The telephone number of the Contact including the suitable area codes.")
 				.setNillable(true);
 		addAttribute(EMAIL, ROLE_LOOKUP).setDescription("The email address of the Contact.").setUnique(true)
 				.setDataType(AttributeType.EMAIL).setNillable(false);
 		addAttribute(FAX).setDescription("The fax number of the Contact.").setNillable(true);
 		addAttribute(TOLLFREEPHONE).setLabel("Toll-free phone").setNillable(true)
 				.setDescription("A toll free phone number for the Contact, including suitable area codes.");
-		addAttribute(CITY)
-				.setDescription("Added from the old definition of MolgenisUser. City of this contact.")
+		addAttribute(CITY).setDescription("Added from the old definition of MolgenisUser. City of this contact.")
 				.setNillable(true);
-		addAttribute(COUNTRY)
-				.setDescription("Added from the old definition of MolgenisUser. Country of this contact.")
+		addAttribute(COUNTRY).setDescription("Added from the old definition of MolgenisUser. Country of this contact.")
 				.setNillable(true);
-		addAttribute(CHANGE_PASSWORD).setLabel("Change password").setDataType(BOOL)
-				.setDefaultValue("false")
+		addAttribute(CHANGE_PASSWORD).setLabel("Change password").setDataType(BOOL).setDefaultValue("false")
 				.setDescription("If true the user must first change his password before he can proceed")
 				.setAggregatable(true).setNillable(false);
-		addAttribute(LANGUAGECODE).setLabel("Language code")
-				.setDescription("Selected language for this site.").setNillable(true);
+		addAttribute(LANGUAGECODE).setLabel("Language code").setDescription("Selected language for this site.")
+				.setNillable(true);
 		addAttribute(GOOGLEACCOUNTID).setLabel("Google account ID")
 				.setDescription("An identifier for the user, unique among all Google accounts and never reused.")
 				.setNillable(true);

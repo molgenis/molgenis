@@ -10,24 +10,20 @@
 package org.molgenis.util.cmdline;
 
 // jdk
+
+import org.molgenis.util.cmdline.Option.Param;
+
 import java.io.PrintStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Properties;
-
-import org.molgenis.util.cmdline.Option.Param;
+import java.util.*;
 
 /**
  * This class defines the commandline options parser. Based on a class filled with members annotated with the Option
  * annotation-type the parser knows for which minus parameters to look and to convert the accompanying string to which
  * type. After the parse-function is finished the annotated object is filled with the data passed with the command-line
  * options.
- * 
+ * <p>
  * <pre>
  *   class Example
  *   {
@@ -36,26 +32,26 @@ import org.molgenis.util.cmdline.Option.Param;
  *         \@Option(name=&quot;t&quot;, param=&quot;integer&quot;, type=Option.OptionType.REQUIRED_ARGUMENT, usage=
  *         	&quot;a long description here ...&quot;)
  *         public int threshold = 500;
- *         
+ *
  *         \@option(name=&quot;f&quot;, param=&quot;filename&quot;, type=Option.OptionType.REQUIRED_ARGUMENT, usage=
  *         	&quot;a long description here ...&quot;)
  *         public String file = &quot;std_file.txt&quot;;
- *         
+ *
  *         \@option(name=&quot;fs&quot;, param=&quot;filename-list comma separated&quot;, type=Option.OptionType.REQUIRED_ARGUMENT, usage=
  *         	&quot;a long description here ...&quot;)
  *         public Vector<String> files = new Vector<String>();
- *         
+ *
  *         \@option(name=&quot;d&quot;, param=&quot;&quot;, type=Option.OptionType.NO_ARGUMENT, usage=
  *         	&quot;a long description here ...&quot;)
- *         public boolean do_something = false; 
+ *         public boolean do_something = false;
  *      }
- *      
+ *
  *      public static void main(String args[])
  *      {
  *         Example m = new Example();
  *         Options options = m.new Options();
  *         CmdLineParser parser = new CmdLineParser(options);
- *         
+ *
  *         try
  *         {
  *            parser.parse(args);
@@ -64,7 +60,7 @@ import org.molgenis.util.cmdline.Option.Param;
  *         {
  *            parser.printUsage(System.err, e.toString());
  *         }
- *         
+ *
  *         if (options.do_something)
  *         {
  *            ...
@@ -72,26 +68,25 @@ import org.molgenis.util.cmdline.Option.Param;
  *      }
  *   }
  * </pre>
- * 
+ * <p>
  * TODO Although some support is in place, methods are still not supported. TODO Help-output should be nicely formatted.
  * TODO Make the program description also an annotated type ?
- * 
+ *
  * @author RA Scheltema
  * @version 1.0.0
  */
 public class CmdLineParser
 {
 	// constructor / destructor
+
 	/**
 	 * Standard constructor where the options-object and the description are set. The options-object is parsed for
 	 * annotated variables and functions, which are saved for the parse-function. After successful completion of this
 	 * constructor, the parse-function has the information it needs to deal with the command-line options.
-	 * 
-	 * @param o
-	 *            The options-object with the annotated variables and functions.
-	 * @param description
-	 *            The program description. throws NullPointerException When either of the parameters has been set to
-	 *            null.
+	 *
+	 * @param o           The options-object with the annotated variables and functions.
+	 * @param description The program description. throws NullPointerException When either of the parameters has been set to
+	 *                    null.
 	 * @throws CmdLineException
 	 */
 	public CmdLineParser(final Object options) throws NullPointerException, CmdLineException
@@ -136,16 +131,15 @@ public class CmdLineParser
 	}
 
 	// public methods
+
 	/**
 	 * With this function the parser is invoked for the command-line options. The parser looks for -option entries in
 	 * the command-line options and tries to translate the information into the annotated object. After successful
 	 * completion of this method, the annotated object set in the constructor will contain all the information found in
 	 * the command-line options.
-	 * 
-	 * @param args
-	 *            The command-line options.
-	 * @throws CmdLineException
-	 *             When the options cannot be parsed due to insufficient number, etc..
+	 *
+	 * @param args The command-line options.
+	 * @throws CmdLineException When the options cannot be parsed due to insufficient number, etc..
 	 */
 	public void parse(String[] args) throws CmdLineException
 	{
@@ -225,7 +219,7 @@ public class CmdLineParser
 
 	/**
 	 * Helper function to assign value to field given an Option. Wraps assignToField() and does error/warning throws.
-	 * 
+	 *
 	 * @param opt
 	 * @param result
 	 * @param field
@@ -256,7 +250,7 @@ public class CmdLineParser
 
 	/**
 	 * Assigns the actual value to the field. Wrapped by assign()
-	 * 
+	 *
 	 * @param opt
 	 * @param result
 	 * @param field
@@ -284,8 +278,8 @@ public class CmdLineParser
 				case COLLECTION:
 					// NOTE: We are aware of the unchecked cast, but that what
 					// you get when you play with runtime objects
-					@SuppressWarnings("unchecked")
-					ArrayList<String> collection = (ArrayList<String>) field.get(options);
+					@SuppressWarnings("unchecked") ArrayList<String> collection = (ArrayList<String>) field
+							.get(options);
 					for (String v : result.toString().split(","))
 					{
 						collection.add(v);
@@ -293,25 +287,25 @@ public class CmdLineParser
 					break;
 				case FILEPATH:
 					field.set(options, result); // TODO: check if valid
-												// filepath? check if file
-												// exists?
+					// filepath? check if file
+					// exists?
 					break;
 				case DIRPATH:
 					field.set(options, result.endsWith("/") ? result : result + "/"); // TODO:
-																						// check
-																						// OK?
-																						// other
-																						// checks
-																						// needed?
+					// check
+					// OK?
+					// other
+					// checks
+					// needed?
 					break;
 				case PASSWORD:
 					field.set(options, result); // special behaviour wanted?
 					break;
 				case CLASS:
 					field.set(options, result); // TODO check if valid class
-												// name (eg. just [a-z] and .)
-												// and/or or check if class
-												// exists?
+					// name (eg. just [a-z] and .)
+					// and/or or check if class
+					// exists?
 					break;
 
 				case ENUM:
@@ -337,11 +331,9 @@ public class CmdLineParser
 	 * With this function the parser is invoked for the properties. The parser looks for entries in the properties list
 	 * and tries to translate the information into the annotated object. After successful completion of this method, the
 	 * annotated object set in the constructor will contain all the information found in the command-line options.
-	 * 
-	 * @param properties
-	 *            the properties set
-	 * @throws CmdLineException
-	 *             When the options cannot be parsed due to insufficient number, etc..
+	 *
+	 * @param properties the properties set
+	 * @throws CmdLineException When the options cannot be parsed due to insufficient number, etc..
 	 */
 	public void parse(Properties properties) throws CmdLineException
 	{
@@ -372,8 +364,8 @@ public class CmdLineParser
 				}
 				else if (opt.type() == Option.Type.REQUIRED_ARGUMENT)
 				{
-					if (property.getValue().toString().length() == 0) throw new CmdLineException(
-							"Insufficient number of options.");
+					if (property.getValue().toString().length() == 0)
+						throw new CmdLineException("Insufficient number of options.");
 
 					result = property.getValue().toString().trim();
 				}
@@ -431,11 +423,9 @@ public class CmdLineParser
 	/**
 	 * With this method the usage description can be printed to a print-stream. The output will be formatted to look
 	 * good on a 80 characters wide display (typical for a command-line prompt).
-	 * 
-	 * @param stream
-	 *            The print-stream to write the information to.
-	 * @param msg
-	 *            The extra message (when needed) that will be displayed above the usage.
+	 *
+	 * @param stream The print-stream to write the information to.
+	 * @param msg    The extra message (when needed) that will be displayed above the usage.
 	 */
 	public void printUsage(PrintStream stream, String msg)
 	{
@@ -544,9 +534,9 @@ public class CmdLineParser
 
 	/**
 	 * Pretty print the options.
-	 * 
+	 * <p>
 	 * Uses reflection to filter out the relevant fields.
-	 * 
+	 *
 	 * @throws CmdLineException
 	 */
 	public String toString(Object options) throws CmdLineException
@@ -600,8 +590,9 @@ public class CmdLineParser
 						v_spacesBuilder.append(' ');
 
 					// print
-					result.append(opt.name() + n_spacesBuilder.toString() + " = " + value + v_spacesBuilder.toString()
-							+ " #" + opt.usage() + "\n");
+					result.append(
+							opt.name() + n_spacesBuilder.toString() + " = " + value + v_spacesBuilder.toString() + " #"
+									+ opt.usage() + "\n");
 				}
 				catch (IllegalAccessException e)
 				{
@@ -618,9 +609,13 @@ public class CmdLineParser
 	 * Provides a place for keeping to the class with the annotated variables describing the options
 	 */
 	private Object options;
-	/** Provides a container for the annotated fields */
+	/**
+	 * Provides a container for the annotated fields
+	 */
 	private HashMap<String, Field> field_map;
-	/** Provides a container for the annotated methods */
+	/**
+	 * Provides a container for the annotated methods
+	 */
 	private HashMap<String, Method> method_map;
 	/** */
 	private String description = null;

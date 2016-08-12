@@ -1,11 +1,6 @@
 package org.molgenis.security.permission;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
-
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.auth.UserAuthority;
@@ -23,7 +18,11 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 
 @Component
 public class PermissionSystemService
@@ -43,8 +42,8 @@ public class PermissionSystemService
 	{
 		Authentication auth = securityContext.getAuthentication();
 
-		if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))
-				&& !auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_SYSTEM")))
+		if (!auth.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN")) && !auth.getAuthorities()
+				.contains(new SimpleGrantedAuthority("ROLE_SYSTEM")))
 		{
 			MolgenisUser user = dataService.findOne(MOLGENIS_USER,
 					new QueryImpl<MolgenisUser>().eq(MolgenisUserMetaData.USERNAME, SecurityUtils.getUsername(auth)),
@@ -60,8 +59,8 @@ public class PermissionSystemService
 					{
 						if (permission != Permission.NONE)
 						{
-							String role = SecurityUtils.AUTHORITY_ENTITY_PREFIX + permission.toString() + "_"
-									+ entity.toUpperCase();
+							String role = SecurityUtils.AUTHORITY_ENTITY_PREFIX + permission.toString() + "_" + entity
+									.toUpperCase();
 							roles.add(new SimpleGrantedAuthority(role));
 							UserAuthority userAuthority = userAuthorityFactory.create();
 							userAuthority.setMolgenisUser(user);

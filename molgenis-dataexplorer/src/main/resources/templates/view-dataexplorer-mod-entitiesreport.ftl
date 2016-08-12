@@ -4,7 +4,7 @@
 <#include "resource-macros.ftl">
     <div class="row">
         <div class="col-md-12">
-            <#include "view-"+viewName+"-entitiesreport.ftl">
+        <#include "view-"+viewName+"-entitiesreport.ftl">
         </div>
     </div>
 </div>

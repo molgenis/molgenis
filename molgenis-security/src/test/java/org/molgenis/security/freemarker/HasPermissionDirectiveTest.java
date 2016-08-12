@@ -1,27 +1,21 @@
 package org.molgenis.security.freemarker;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
+import com.google.common.collect.Maps;
+import freemarker.core.Environment;
+import freemarker.template.*;
+import org.molgenis.security.core.MolgenisPermissionService;
+import org.molgenis.security.core.Permission;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Map;
 
-import org.molgenis.security.core.MolgenisPermissionService;
-import org.molgenis.security.core.Permission;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import com.google.common.collect.Maps;
-
-import freemarker.core.Environment;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateDirectiveBody;
-import freemarker.template.TemplateException;
-import freemarker.template.TemplateModel;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 public class HasPermissionDirectiveTest
 {

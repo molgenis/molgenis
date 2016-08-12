@@ -110,8 +110,7 @@ public class OntologyImportService implements ImportService
 	@Override
 	/**
 	 * Ontology validation
-	 */
-	public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
+	 */ public EntitiesValidationReport validateImport(File file, RepositoryCollection source)
 	{
 		EntitiesValidationReport report = new EntitiesValidationReportImpl();
 

@@ -1,9 +1,7 @@
 package org.molgenis.data.validation;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
@@ -17,8 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Sets;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 @Component
 public class DefaultEntityValidator implements EntityValidator
@@ -75,9 +74,10 @@ public class DefaultEntityValidator implements EntityValidator
 					rownr++;
 					if (mustDoNotNullCheck(meta, attr, entity) && entity.get(attr.getName()) == null)
 					{
-						String message = String.format(
-								"The attribute '%s' of entity '%s' with key '%s' can not be null.", attr.getName(),
-								meta.getName(), entity.getString(meta.getLabelAttribute().getName()));
+						String message = String
+								.format("The attribute '%s' of entity '%s' with key '%s' can not be null.",
+										attr.getName(), meta.getName(),
+										entity.getString(meta.getLabelAttribute().getName()));
 						violations.add(new ConstraintViolation(message, null, entity, attr, meta, rownr));
 					}
 				}
@@ -94,9 +94,8 @@ public class DefaultEntityValidator implements EntityValidator
 			return false;
 
 		// Do not validate is visibleExpression resolves to false
-		if (StringUtils.isNotBlank(attr.getVisibleExpression())
-				&& !ValidationUtils.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityMetaData))
-			return false;
+		if (StringUtils.isNotBlank(attr.getVisibleExpression()) && !ValidationUtils
+				.resolveBooleanExpression(attr.getVisibleExpression(), entity, entityMetaData)) return false;
 
 		return true;
 	}
@@ -108,8 +107,8 @@ public class DefaultEntityValidator implements EntityValidator
 
 		for (AttributeMetaData attr : meta.getAtomicAttributes())
 		{
-			if (attr.isUnique() && !attr.equals(meta.getIdAttribute())
-					&& !(attr.equals(meta.getLabelAttribute()) && (dbAction == DatabaseAction.ADD_UPDATE_EXISTING)))
+			if (attr.isUnique() && !attr.equals(meta.getIdAttribute()) && !(attr.equals(meta.getLabelAttribute()) && (
+					dbAction == DatabaseAction.ADD_UPDATE_EXISTING)))
 			{
 				// Gather all attribute values
 				List<Object> values = Lists.newArrayList();
@@ -124,8 +123,8 @@ public class DefaultEntityValidator implements EntityValidator
 				{
 					// TODO TBD: should an attribute be globally unique or unique per entity?
 					// For now workaround, identifier.
-					String entityName = attr.getName().equalsIgnoreCase("identifier") ? "Characteristic"
-							: meta.getName();
+					String entityName = attr.getName().equalsIgnoreCase("identifier") ? "Characteristic" : meta
+							.getName();
 
 					long count = dataService.count(entityName, new QueryImpl<Entity>().in(attr.getName(), values));
 					if (count > 0)
@@ -139,20 +138,20 @@ public class DefaultEntityValidator implements EntityValidator
 							Entity entity = it.next();
 
 							Object value = entity.get(attr.getName());
-							Entity existing = dataService.findOne(entityName,
-									new QueryImpl<Entity>().eq(attr.getName(), value));
+							Entity existing = dataService
+									.findOne(entityName, new QueryImpl<Entity>().eq(attr.getName(), value));
 
 							if (existing != null)
 							{
 								// If dbAction is null check on id if its an update of itself or a new insert. Violation
 								// if dbAction is ADD
-								if (((dbAction == null) && !idEquals(entity, existing, meta))
-										|| ((dbAction != null) && (dbAction == DatabaseAction.ADD)))
+								if (((dbAction == null) && !idEquals(entity, existing, meta)) || ((dbAction != null)
+										&& (dbAction == DatabaseAction.ADD)))
 								{
-									String message = String.format(
-											"The attribute '%s' of entity '%s' with key '%s' must be unique, but the value '%s' already exists.",
-											attr.getName(), meta.getName(),
-											entity.getString(meta.getLabelAttribute().getName()), value);
+									String message = String
+											.format("The attribute '%s' of entity '%s' with key '%s' must be unique, but the value '%s' already exists.",
+													attr.getName(), meta.getName(),
+													entity.getString(meta.getLabelAttribute().getName()), value);
 									violations.add(new ConstraintViolation(message, value, entity, attr, meta, null));
 								}
 

@@ -1,13 +1,11 @@
 package org.molgenis.data.rest.client.bean;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nullable;
-
+import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
 
-import com.google.auto.value.AutoValue;
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Map;
 
 @AutoGson(autoValueClass = AutoValue_QueryResponse.class)
 @AutoValue

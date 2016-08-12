@@ -10,11 +10,10 @@ import org.springframework.web.servlet.view.RedirectView;
 
 /**
  * Plugin that redirects the user to another url.
- * 
+ * <p>
  * Can be used to create a menu item to show a page outside molgenis
- * 
+ * <p>
  * Usage: /plugin/redirect?url=http://www.mysite.nl
- * 
  */
 @Controller
 @RequestMapping(RedirectController.URI)

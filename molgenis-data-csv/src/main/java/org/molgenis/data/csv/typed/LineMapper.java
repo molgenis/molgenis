@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 
 /**
  * Convert a row in a csv file to an entity
- * 
+ *
  * @param <T>
  */
 public interface LineMapper<T extends Entity>

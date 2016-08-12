@@ -47,8 +47,9 @@ public class ChartDataServiceImpl implements ChartDataService
 		{
 			if (!StringUtils.isNotBlank(split))
 			{
-				xYDataSeries = Arrays.asList(this.getXYDataSerie(repo, entityName, attributeNameXaxis,
-						attributeNameYaxis, attributeXFieldTypeEnum, attributeYFieldTypeEnum, queryRules));
+				xYDataSeries = Arrays.asList(this
+						.getXYDataSerie(repo, entityName, attributeNameXaxis, attributeNameYaxis,
+								attributeXFieldTypeEnum, attributeYFieldTypeEnum, queryRules));
 			}
 			else
 			{
@@ -74,8 +75,8 @@ public class ChartDataServiceImpl implements ChartDataService
 		EntityMetaData entityMetaData = repo.getEntityMetaData();
 
 		XYDataSerie serie = new XYDataSerie();
-		serie.setName(entityMetaData.getAttribute(attributeNameXaxis).getLabel() + " vs "
-				+ entityMetaData.getAttribute(attributeNameYaxis).getLabel());
+		serie.setName(entityMetaData.getAttribute(attributeNameXaxis).getLabel() + " vs " + entityMetaData
+				.getAttribute(attributeNameYaxis).getLabel());
 		serie.setAttributeXFieldTypeEnum(attributeXFieldTypeEnum);
 		serie.setAttributeYFieldTypeEnum(attributeYFieldTypeEnum);
 
@@ -137,8 +138,7 @@ public class ChartDataServiceImpl implements ChartDataService
 		}
 		else if (o instanceof List)
 		{
-			@SuppressWarnings("unchecked")
-			Iterable<Object> refObjects = (Iterable<Object>) o;
+			@SuppressWarnings("unchecked") Iterable<Object> refObjects = (Iterable<Object>) o;
 			StringBuilder strBuilder = new StringBuilder();
 			for (Object ob : refObjects)
 			{
@@ -173,10 +173,10 @@ public class ChartDataServiceImpl implements ChartDataService
 	@Override
 	/**
 	 * init a box plot chart
-	 * 
+	 *
 	 * with: 1. box plot series as the boxes 2. xy data series as the outliers 3. categories names of the different box
 	 * plots
-	 * 
+	 *
 	 * @param boxPlotChart
 	 *            (BoxPlotChart) the chart to be initialized
 	 * @param repo
@@ -192,8 +192,7 @@ public class ChartDataServiceImpl implements ChartDataService
 	 * @param scaleToCalcOutliers
 	 *            (double) the scale that need to be used calculating the outliers. value 1 means that there wil not be
 	 *            any outliers.
-	 */
-	public BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules,
+	 */ public BoxPlotChart getBoxPlotChart(String entityName, String attributeName, List<QueryRule> queryRules,
 			String split, double scaleToCalcOutliers)
 	{
 		Repository<Entity> repo = dataService.getRepository(entityName);
@@ -260,12 +259,11 @@ public class ChartDataServiceImpl implements ChartDataService
 
 	/**
 	 * Get a map containing keys to different data lists
-	 * 
+	 *
 	 * @param entityMeta
 	 * @param iterable
 	 * @param attributeName
-	 * @param split
-	 *            (String) if null or empty String will not split
+	 * @param split         (String) if null or empty String will not split
 	 * @return map (Map<String, List<Double>>)
 	 */
 	private Map<String, List<Double>> getBoxPlotDataListMap(EntityMetaData entityMeta, Iterable<Entity> iterable,
@@ -301,19 +299,16 @@ public class ChartDataServiceImpl implements ChartDataService
 
 	/**
 	 * get a Iterable holding entitys
-	 * 
-	 * @param entityName
-	 *            (String) the name of the entity to be used
-	 * @param repo
-	 *            (Repository<? extends Entity>) the repository where the data exists
-	 * @param queryRules
-	 *            (List<QueryRule>) the query rules to be used getting the data from the repo
-	 * @param sort
-	 *            (Sort)
+	 *
+	 * @param entityName (String) the name of the entity to be used
+	 * @param repo       (Repository<? extends Entity>) the repository where the data exists
+	 * @param queryRules (List<QueryRule>) the query rules to be used getting the data from the repo
+	 * @param sort       (Sort)
 	 * @return
 	 */
 
-	private Iterable<Entity> getIterable(String entityName, Repository<Entity> repo, List<QueryRule> queryRules, Sort sort)
+	private Iterable<Entity> getIterable(String entityName, Repository<Entity> repo, List<QueryRule> queryRules,
+			Sort sort)
 	{
 
 		final Query<Entity> q;
@@ -344,7 +339,7 @@ public class ChartDataServiceImpl implements ChartDataService
 
 	/**
 	 * retrieves the value of the designated column as attributeJavaType
-	 * 
+	 *
 	 * @param entity
 	 * @param attributeName
 	 * @param attributeFieldTypeEnum
@@ -414,8 +409,8 @@ public class ChartDataServiceImpl implements ChartDataService
 
 		for (Entity entity : iterable)
 		{
-			String rowTargetName = entity.getString(attributeNameYaxis) != null ? entity.getString(attributeNameYaxis)
-					: "";
+			String rowTargetName =
+					entity.getString(attributeNameYaxis) != null ? entity.getString(attributeNameYaxis) : "";
 			rowTargets.add(new Target(rowTargetName));
 
 			List<Number> rowValues = new ArrayList<Number>();

@@ -18,36 +18,43 @@ package org.molgenis.wikipathways.client;
 /**
  * authentication object needed for
  * updating and saving data to WP
- * @author msk
  *
+ * @author msk
  */
-public class WSAuth {
-    private String user;
-    private String key;
+public class WSAuth
+{
+	private String user;
+	private String key;
 
-    public WSAuth(String user, String key) {
-           this.user = user;
-           this.key = key;
-    }
+	public WSAuth(String user, String key)
+	{
+		this.user = user;
+		this.key = key;
+	}
 
-    public String getUser() {
-        return user;
-    }
+	public String getUser()
+	{
+		return user;
+	}
 
-    public void setUser(String user) {
-        this.user = user;
-    }
+	public void setUser(String user)
+	{
+		this.user = user;
+	}
 
-    public String getKey() {
-        return key;
-    }
+	public String getKey()
+	{
+		return key;
+	}
 
-    public void setKey(String key) {
-        this.key = key;
-    }
-    
-    @Override
-    public String toString() {
-    	return user + ":" + key;
-    }
+	public void setKey(String key)
+	{
+		this.key = key;
+	}
+
+	@Override
+	public String toString()
+	{
+		return user + ":" + key;
+	}
 }

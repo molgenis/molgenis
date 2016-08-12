@@ -1,8 +1,5 @@
 package org.molgenis.bootstrap;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
-
 import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
 import org.molgenis.data.importer.ImportServiceRegistrar;
@@ -13,6 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
 
 /**
  * Bootstraps registries of {@link org.molgenis.data.RepositoryCollection repository collection},

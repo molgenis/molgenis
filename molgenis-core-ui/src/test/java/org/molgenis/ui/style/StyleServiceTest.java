@@ -1,16 +1,7 @@
 package org.molgenis.ui.style;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Set;
-
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.settings.AppSettings;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +12,12 @@ import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
+import java.util.Set;
+
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 @ContextConfiguration(classes = StyleServiceTest.Config.class)
 public class StyleServiceTest extends AbstractTestNGSpringContextTests

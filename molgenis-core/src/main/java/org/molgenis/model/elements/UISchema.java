@@ -10,26 +10,25 @@
 package org.molgenis.model.elements;
 
 // jdk
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
 
 import org.molgenis.util.SimpleTree;
+
+import java.util.*;
 
 /**
  * Definition of the base-class for objects in the user interface schema. This class inherits from the tree, so it can
  * hold multiple children and have convenient search-methods. Objects that need to be placed in this container need to
  * inherit from it.
- * 
+ *
  * @author RA Scheltema
  * @version 1.0.0
  */
 public class UISchema extends SimpleTree<UISchema>
 {
 	// member variables
-	/** Used for serialization purposes */
+	/**
+	 * Used for serialization purposes
+	 */
 	private static final long serialVersionUID = 1816308705758091632L;
 
 	private String label;
@@ -41,13 +40,12 @@ public class UISchema extends SimpleTree<UISchema>
 	private String groupRead;
 
 	// constructor(s)
+
 	/**
 	 * The standard constructor, which links the object in the tree (with the parent parameter).
-	 * 
-	 * @param name
-	 *            The name of the element.
-	 * @param parent
-	 *            The parent which will be used to link this object in the tree.
+	 *
+	 * @param name   The name of the element.
+	 * @param parent The parent which will be used to link this object in the tree.
 	 */
 	public UISchema(String name, UISchema parent)
 	{
@@ -208,7 +206,9 @@ public class UISchema extends SimpleTree<UISchema>
 	enum Type
 	{
 		UNKNOWN, FORM, TREE, MENU, PLUGIN
-	};
+	}
+
+	;
 
 	public Type getType()
 	{

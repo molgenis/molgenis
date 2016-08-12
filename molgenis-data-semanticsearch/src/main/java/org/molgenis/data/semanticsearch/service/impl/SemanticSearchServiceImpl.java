@@ -1,23 +1,9 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
+import com.google.common.base.Splitter;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.Ordering;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.Explanation;
@@ -48,10 +34,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Ordering;
-import com.google.common.collect.Sets;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 
 public class SemanticSearchServiceImpl implements SemanticSearchService
 {
@@ -91,8 +80,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		Iterable<String> attributeIdentifiers = semanticSearchServiceHelper
 				.getAttributeIdentifiers(sourceEntityMetaData);
 
-		QueryRule disMaxQueryRule = semanticSearchServiceHelper.createDisMaxQueryRuleForAttribute(queryTerms,
-				ontologyTerms);
+		QueryRule disMaxQueryRule = semanticSearchServiceHelper
+				.createDisMaxQueryRuleForAttribute(queryTerms, ontologyTerms);
 
 		List<QueryRule> finalQueryRules = Lists
 				.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER, Operator.IN, attributeIdentifiers));
@@ -102,17 +91,17 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			finalQueryRules.addAll(Arrays.asList(new QueryRule(Operator.AND), disMaxQueryRule));
 		}
 
-		Stream<Entity> attributeMetaDataEntities = dataService.findAll(ATTRIBUTE_META_DATA,
-				new QueryImpl<>(finalQueryRules));
+		Stream<Entity> attributeMetaDataEntities = dataService
+				.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(finalQueryRules));
 
-		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper.collectExpandedQueryMap(queryTerms,
-				ontologyTerms);
+		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper
+				.collectExpandedQueryMap(queryTerms, ontologyTerms);
 
 		// Because the explain-API can be computationally expensive we limit the explanation to the top 10 attributes
 		Map<AttributeMetaData, ExplainedAttributeMetaData> explainedAttributes = new LinkedHashMap<>();
 		AtomicInteger count = new AtomicInteger(0);
 		attributeMetaDataEntities.forEach(attributeEntity ->
-		// for (Entity attributeEntity : attributeMetaDataEntities)
+				// for (Entity attributeEntity : attributeMetaDataEntities)
 		{
 			AttributeMetaData attribute = sourceEntityMetaData
 					.getAttribute(attributeEntity.getString(AttributeMetaDataMetaData.NAME));
@@ -152,9 +141,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		if (queryTerms.size() > 0 && queryTerms.stream().anyMatch(token -> isGoodMatch(matchedTags, token)))
 			return true;
 
-		if (ontologyTermQueries.size() > 0
-				&& ontologyTermQueries.stream().allMatch(token -> isGoodMatch(matchedTags, token)))
-			return true;
+		if (ontologyTermQueries.size() > 0 && ontologyTermQueries.stream()
+				.allMatch(token -> isGoodMatch(matchedTags, token))) return true;
 
 		return false;
 	}
@@ -162,9 +150,9 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	boolean isGoodMatch(Map<String, Double> matchedTags, String label)
 	{
 		label = label.toLowerCase();
-		return matchedTags.containsKey(label) && matchedTags.get(label).intValue() == 100
-				|| Sets.newHashSet(label.split(" ")).stream()
-						.allMatch(word -> matchedTags.containsKey(word) && matchedTags.get(word).intValue() == 100);
+		return matchedTags.containsKey(label) && matchedTags.get(label).intValue() == 100 || Sets
+				.newHashSet(label.split(" ")).stream()
+				.allMatch(word -> matchedTags.containsKey(word) && matchedTags.get(word).intValue() == 100);
 	}
 
 	@Override
@@ -180,8 +168,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		{
 			Set<String> escapedSearchTerms = searchTerms.stream().filter(StringUtils::isNotBlank)
 					.map(QueryParser::escape).collect(Collectors.toSet());
-			ontologyTerms = ontologyService.findExcatOntologyTerms(ontologyService.getAllOntologiesIds(),
-					escapedSearchTerms, MAX_NUM_TAGS);
+			ontologyTerms = ontologyService
+					.findExcatOntologyTerms(ontologyService.getAllOntologiesIds(), escapedSearchTerms, MAX_NUM_TAGS);
 		}
 		else if (null == ontologyTerms || ontologyTerms.size() == 0)
 		{
@@ -192,8 +180,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 				allOntologiesIds.remove(unitOntology.getId());
 			}
 			Hit<OntologyTerm> ontologyTermHit = findTags(targetAttribute, allOntologiesIds);
-			ontologyTerms = ontologyTermHit != null ? Arrays.asList(ontologyTermHit.getResult())
-					: Collections.emptyList();
+			ontologyTerms =
+					ontologyTermHit != null ? Arrays.asList(ontologyTermHit.getResult()) : Collections.emptyList();
 		}
 
 		return findAttributes(sourceEntityMetaData, queryTerms, ontologyTerms);
@@ -203,7 +191,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	 * A helper function to create a list of queryTerms based on the information from the targetAttribute as well as
 	 * user defined searchTerms. If the user defined searchTerms exist, the targetAttribute information will not be
 	 * used.
-	 * 
+	 *
 	 * @param targetAttribute
 	 * @param searchTerms
 	 * @return list of queryTerms
@@ -235,7 +223,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 	/**
 	 * A helper function to explain each of the matched attributes returned by the explain-API
-	 * 
+	 *
 	 * @param attributeEntity
 	 * @param sourceEntityMetaData
 	 * @param collectExpanedQueryMap
@@ -251,11 +239,13 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		AttributeMetaData attribute = sourceEntityMetaData.getAttribute(attributeName);
 		if (attribute == null)
 		{
-			throw new MolgenisDataAccessException("The attributeMetaData : " + attributeName
-					+ " does not exsit in EntityMetaData : " + sourceEntityMetaData.getName());
+			throw new MolgenisDataAccessException(
+					"The attributeMetaData : " + attributeName + " does not exsit in EntityMetaData : "
+							+ sourceEntityMetaData.getName());
 		}
-		Explanation explanation = elasticSearchExplainService.explain(new QueryImpl<Entity>(finalQueryRules),
-				dataService.getEntityMetaData(ATTRIBUTE_META_DATA), attributeId);
+		Explanation explanation = elasticSearchExplainService
+				.explain(new QueryImpl<Entity>(finalQueryRules), dataService.getEntityMetaData(ATTRIBUTE_META_DATA),
+						attributeId);
 
 		Set<ExplainedQueryString> detectedQueryStrings = elasticSearchExplainService
 				.findQueriesFromExplanation(collectExpanedQueryMap, explanation);
@@ -300,10 +290,9 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 		List<Hit<OntologyTerm>> hits = candidates.stream()
 				.filter(ontologyTerm -> filterOntologyTerm(splitIntoTerms(stemmer.stemAndJoin(searchTerms)),
-						ontologyTerm, stemmer))
-				.map(ontolgoyTerm -> Hit.<OntologyTerm> create(ontolgoyTerm,
-						bestMatchingSynonym(ontolgoyTerm, searchTerms).getScore()))
-				.sorted(Ordering.natural().reverse()).collect(Collectors.toList());
+						ontologyTerm, stemmer)).map(ontolgoyTerm -> Hit.<OntologyTerm>create(ontolgoyTerm,
+						bestMatchingSynonym(ontolgoyTerm, searchTerms).getScore())).sorted(Ordering.natural().reverse())
+				.collect(Collectors.toList());
 
 		if (LOG.isDebugEnabled())
 		{
@@ -322,8 +311,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			}
 			else
 			{
-				Set<String> jointTerms = Sets.union(splitIntoTerms(bestMatchingSynonym),
-						splitIntoTerms(bestMatchingSynonymForHit));
+				Set<String> jointTerms = Sets
+						.union(splitIntoTerms(bestMatchingSynonym), splitIntoTerms(bestMatchingSynonymForHit));
 				String joinedSynonyms = termJoiner.join(jointTerms);
 				Hit<OntologyTerm> joinedHit = Hit.create(OntologyTerm.and(result.getResult(), hit.getResult()),
 						distanceFrom(joinedSynonyms, searchTerms, stemmer));
@@ -367,18 +356,16 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	 * Computes the best matching synonym which is closest to a set of search terms.<br/>
 	 * Will stem the {@link OntologyTerm} 's synonyms and the search terms, and then compute the maximum
 	 * {@link StringDistance} between them. 0 means disjunct, 1 means identical
-	 * 
-	 * @param ontologyTerm
-	 *            the {@link OntologyTerm}
-	 * @param searchTerms
-	 *            the search terms
+	 *
+	 * @param ontologyTerm the {@link OntologyTerm}
+	 * @param searchTerms  the search terms
 	 * @return the maximum {@link StringDistance} between the ontologyterm and the search terms
 	 */
 	public Hit<String> bestMatchingSynonym(OntologyTerm ontologyTerm, Set<String> searchTerms)
 	{
 		Stemmer stemmer = new Stemmer();
 		Optional<Hit<String>> bestSynonym = ontologyTerm.getSynonyms().stream()
-				.map(synonym -> Hit.<String> create(synonym, distanceFrom(synonym, searchTerms, stemmer)))
+				.map(synonym -> Hit.<String>create(synonym, distanceFrom(synonym, searchTerms, stemmer)))
 				.max(Comparator.naturalOrder());
 		return bestSynonym.get();
 	}

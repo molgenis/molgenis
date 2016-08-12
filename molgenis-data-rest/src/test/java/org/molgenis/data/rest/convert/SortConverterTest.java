@@ -1,10 +1,9 @@
 package org.molgenis.data.rest.convert;
 
-import static org.testng.Assert.assertEquals;
-
 import org.molgenis.data.Sort;
-import org.molgenis.data.rest.convert.SortConverter;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
 
 public class SortConverterTest
 {
@@ -42,14 +41,14 @@ public class SortConverterTest
 	@Test
 	public void convertMultiAttrDesc()
 	{
-		assertEquals(new SortConverter().convert("attr0:desc,attr1:desc"), new Sort().on("attr0", Sort.Direction.DESC)
-				.on("attr1", Sort.Direction.DESC));
+		assertEquals(new SortConverter().convert("attr0:desc,attr1:desc"),
+				new Sort().on("attr0", Sort.Direction.DESC).on("attr1", Sort.Direction.DESC));
 	}
 
 	@Test
 	public void convertMultiAttrAscAndDesc()
 	{
-		assertEquals(new SortConverter().convert("attr0:asc,attr1:desc"), new Sort().on("attr0", Sort.Direction.ASC)
-				.on("attr1", Sort.Direction.DESC));
+		assertEquals(new SortConverter().convert("attr0:asc,attr1:desc"),
+				new Sort().on("attr0", Sort.Direction.ASC).on("attr1", Sort.Direction.DESC));
 	}
 }

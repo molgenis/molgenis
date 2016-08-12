@@ -31,8 +31,7 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.testng.Assert.assertEquals;
 
 @WebAppConfiguration
-@ContextConfiguration(classes =
-{ GsonConfig.class })
+@ContextConfiguration(classes = { GsonConfig.class })
 public class DataExplorerControllerTest extends AbstractTestNGSpringContextTests
 {
 	@InjectMocks

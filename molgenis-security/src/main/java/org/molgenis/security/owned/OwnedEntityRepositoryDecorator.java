@@ -21,10 +21,10 @@ import static org.molgenis.security.owned.OwnedEntityMetaData.OWNED;
 
 /**
  * RepositoryDecorator that works on EntityMetaData that extends OwnedEntityMetaData.
- * 
+ * <p>
  * Ensures that when an Entity is created the owner is set to the current user, users can only view, update, delete
  * their own entities.
- * 
+ * <p>
  * Admins are not effected.
  */
 public class OwnedEntityRepositoryDecorator implements Repository<Entity>
@@ -50,7 +50,8 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 		{
 			fetch.field(OwnedEntityMetaData.OWNER_USERNAME);
 		}
-		decoratedRepo.forEachBatched(fetch, entities -> {
+		decoratedRepo.forEachBatched(fetch, entities ->
+		{
 			if (mustAddRowLevelSecurity())
 			{
 				//TODO: This results in smaller batches! Should do a findAll instead!
@@ -209,7 +210,8 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 		{
 			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
 			String currentUsername = SecurityUtils.getCurrentUsername();
-			entities = entities.map(entity -> {
+			entities = entities.map(entity ->
+			{
 				if (mustAddRowLevelSecurity || entity.get(OwnedEntityMetaData.OWNER_USERNAME) == null)
 				{
 					entity.set(OwnedEntityMetaData.OWNER_USERNAME, currentUsername);
@@ -296,7 +298,8 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 		{
 			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
 			String currentUsername = SecurityUtils.getCurrentUsername();
-			entities = entities.map(entity -> {
+			entities = entities.map(entity ->
+			{
 				if (mustAddRowLevelSecurity || entity.get(OwnedEntityMetaData.OWNER_USERNAME) == null)
 				{
 					entity.set(OwnedEntityMetaData.OWNER_USERNAME, currentUsername);

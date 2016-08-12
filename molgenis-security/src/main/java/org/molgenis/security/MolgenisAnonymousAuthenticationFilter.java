@@ -1,14 +1,5 @@
 package org.molgenis.security;
 
-import java.io.IOException;
-import java.util.Collection;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.slf4j.Logger;
@@ -26,9 +17,17 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.util.Assert;
 import org.springframework.web.filter.GenericFilterBean;
 
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.Collection;
+
 /**
  * Based on org.springframework.security.web.authentication.AnonymousAuthenticationFilter:
- * 
+ * <p>
  * Detects if there is no {@code Authentication} object in the {@code SecurityContextHolder}, and populates it with one
  * if needed.
  */
@@ -46,9 +45,8 @@ public class MolgenisAnonymousAuthenticationFilter extends GenericFilterBean imp
 
 	/**
 	 * Creates a filter with a principal named "anonymousUser" and the single authority "ROLE_ANONYMOUS".
-	 * 
-	 * @param key
-	 *            the key to identify tokens created by this filter
+	 *
+	 * @param key the key to identify tokens created by this filter
 	 */
 	public MolgenisAnonymousAuthenticationFilter(String key, Object principal, UserDetailsService userDetailsService)
 	{
@@ -78,8 +76,8 @@ public class MolgenisAnonymousAuthenticationFilter extends GenericFilterBean imp
 
 			if (LOG.isDebugEnabled())
 			{
-				LOG.debug("Populated SecurityContextHolder with anonymous token: '"
-						+ SecurityContextHolder.getContext().getAuthentication() + "'");
+				LOG.debug("Populated SecurityContextHolder with anonymous token: '" + SecurityContextHolder.getContext()
+						.getAuthentication() + "'");
 			}
 		}
 		else

@@ -1,11 +1,6 @@
 package org.molgenis.security.permission;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Permissions
 {
@@ -48,7 +43,7 @@ public class Permissions
 
 	public Map<String, List<Permission>> getUserPermissions()
 	{
-		return userPermissionMap != null ? userPermissionMap : Collections.<String, List<Permission>> emptyMap();
+		return userPermissionMap != null ? userPermissionMap : Collections.<String, List<Permission>>emptyMap();
 	}
 
 	public void addUserPermission(String pluginId, Permission pluginPermission)
@@ -65,7 +60,7 @@ public class Permissions
 
 	public Map<String, List<Permission>> getGroupPermissions()
 	{
-		return groupPermissionMap != null ? groupPermissionMap : Collections.<String, List<Permission>> emptyMap();
+		return groupPermissionMap != null ? groupPermissionMap : Collections.<String, List<Permission>>emptyMap();
 	}
 
 	public void addGroupPermission(String pluginId, Permission pluginPermission)

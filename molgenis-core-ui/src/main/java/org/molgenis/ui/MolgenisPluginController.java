@@ -1,7 +1,5 @@
 package org.molgenis.ui;
 
-import javax.annotation.PostConstruct;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
@@ -10,6 +8,8 @@ import org.molgenis.framework.ui.MolgenisPluginFactory;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.annotation.PostConstruct;
 
 /**
  * Abstract base class for all MOLGENIS plugin controllers
@@ -24,7 +24,9 @@ public abstract class MolgenisPluginController
 	@Autowired
 	private MolgenisPluginRegistry molgenisPluginRegistry;
 
-	/** Base URI for a plugin */
+	/**
+	 * Base URI for a plugin
+	 */
 	private final String uri;
 
 	private final MolgenisPluginFactory molgenisPluginFactory;
@@ -47,7 +49,7 @@ public abstract class MolgenisPluginController
 
 	/**
 	 * Returns the base URI of the plugin
-	 * 
+	 *
 	 * @return
 	 */
 	public String getUri()
@@ -55,7 +57,9 @@ public abstract class MolgenisPluginController
 		return uri;
 	}
 
-	/** Returns the unique id of the plugin */
+	/**
+	 * Returns the unique id of the plugin
+	 */
 	public String getId()
 	{
 		return uri.substring(PLUGIN_URI_PREFIX.length());
@@ -63,7 +67,7 @@ public abstract class MolgenisPluginController
 
 	/**
 	 * Returns an entity containing settings for a plugin or null if no settings exist.
-	 * 
+	 *
 	 * @return entity or null
 	 */
 	public Entity getPluginSettings()
@@ -89,7 +93,7 @@ public abstract class MolgenisPluginController
 
 	/**
 	 * Testability
-	 * 
+	 *
 	 * @param dataService
 	 */
 	void setDataService(DataService dataService)

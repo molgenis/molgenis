@@ -1,8 +1,8 @@
 package org.molgenis.data.support;
 
-import java.util.Set;
-
 import com.google.common.collect.ImmutableSet;
+
+import java.util.Set;
 
 public enum GenericImporterExtensions
 {
@@ -63,7 +63,8 @@ public enum GenericImporterExtensions
 
 	public static Set<String> getAll()
 	{
-		return ImmutableSet.of(CSV.toString(), TXT.toString(), TSV.toString(), ZIP.toString(), XLS.toString(),
-				XLSX.toString(), OBO_ZIP.toString(), OWL_ZIP.toString(), VCF.toString(), VCF_GZ.toString(), VCF_ZIP.toString());
+		return ImmutableSet
+				.of(CSV.toString(), TXT.toString(), TSV.toString(), ZIP.toString(), XLS.toString(), XLSX.toString(),
+						OBO_ZIP.toString(), OWL_ZIP.toString(), VCF.toString(), VCF_GZ.toString(), VCF_ZIP.toString());
 	}
 }

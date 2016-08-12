@@ -1,10 +1,10 @@
 package org.molgenis.data.semanticsearch.string;
 
-import java.util.Set;
-import java.util.stream.Collectors;
-
 import org.apache.commons.lang3.StringUtils;
 import org.tartarus.snowball.ext.PorterStemmer;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Stemmer
 {
@@ -12,7 +12,7 @@ public class Stemmer
 
 	/**
 	 * Remove illegal characters from the string and stem each single word
-	 * 
+	 *
 	 * @param phrase
 	 * @return a string that consists of stemmed words
 	 */

@@ -1,9 +1,8 @@
 package org.molgenis.data.support;
 
+import com.google.gson.Gson;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-
-import com.google.gson.Gson;
 
 public class ExpressionEvaluatorFactory
 {

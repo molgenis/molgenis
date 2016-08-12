@@ -1,15 +1,14 @@
 package org.molgenis.data.mapper.algorithmgenerator.categorymapper;
 
-import java.util.Arrays;
-import java.util.List;
-
+import com.google.common.collect.Lists;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 import org.molgenis.data.mapper.algorithmgenerator.rules.impl.NegativeCategoryRule;
 import org.molgenis.data.mapper.algorithmgenerator.rules.impl.PositiveCategoryRule;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Lists;
+import java.util.Arrays;
+import java.util.List;
 
 public class LexicalCategoryMapperTest
 {

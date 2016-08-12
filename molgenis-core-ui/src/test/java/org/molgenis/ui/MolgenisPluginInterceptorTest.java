@@ -1,13 +1,5 @@
 package org.molgenis.ui;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import javax.servlet.http.HttpServletRequest;
-
 import org.molgenis.data.DataService;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -17,6 +9,12 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import javax.servlet.http.HttpServletRequest;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.*;
 
 public class MolgenisPluginInterceptorTest
 {

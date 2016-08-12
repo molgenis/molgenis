@@ -5,17 +5,19 @@ import org.molgenis.charts.data.DataMatrix;
 public class HeatMapChart extends DataMatrixChart
 {
 	private HeatMapScale scale;
-	
+
 	public HeatMapChart(DataMatrix data)
 	{
 		super(MolgenisChartType.HEAT_MAP, data);
 	}
 
-	public HeatMapScale getScale() {
+	public HeatMapScale getScale()
+	{
 		return scale;
 	}
 
-	public void setScale(HeatMapScale scale) {
+	public void setScale(HeatMapScale scale)
+	{
 		this.scale = scale;
 	}
 
@@ -24,7 +26,5 @@ public class HeatMapChart extends DataMatrixChart
 	{
 		return "HeatMapChart [data=" + getData() + ", width=" + getWidth() + ", height=" + getHeight() + "]";
 	}
-	
-	
 
 }

@@ -17,67 +17,80 @@ package org.molgenis.wikipathways.client;
 
 /**
  * contains basic information about a pathway
- * @author msk
  *
+ * @author msk
  */
-public class WSPathwayInfo {
-   
+public class WSPathwayInfo
+{
+
 	private String id;
-    private String url;
-    private String name;
-    private String species;
-    private String revision;
+	private String url;
+	private String name;
+	private String species;
+	private String revision;
 
-    public WSPathwayInfo(String id, String url, String name, String species, String revision) {
-           this.id = id;
-           this.url = url;
-           this.name = name;
-           this.species = species;
-           this.revision = revision;
-    }
+	public WSPathwayInfo(String id, String url, String name, String species, String revision)
+	{
+		this.id = id;
+		this.url = url;
+		this.name = name;
+		this.species = species;
+		this.revision = revision;
+	}
 
-    public String getId() {
-        return id;
-    }
+	public String getId()
+	{
+		return id;
+	}
 
-    public void setId(String id) {
-        this.id = id;
-    }
+	public void setId(String id)
+	{
+		this.id = id;
+	}
 
-    public String getUrl() {
-        return url;
-    }
+	public String getUrl()
+	{
+		return url;
+	}
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+	public void setUrl(String url)
+	{
+		this.url = url;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getName()
+	{
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setName(String name)
+	{
+		this.name = name;
+	}
 
-    public String getSpecies() {
-        return species;
-    }
+	public String getSpecies()
+	{
+		return species;
+	}
 
-    public void setSpecies(String species) {
-        this.species = species;
-    }
+	public void setSpecies(String species)
+	{
+		this.species = species;
+	}
 
-    public String getRevision() {
-        return revision;
-    }
+	public String getRevision()
+	{
+		return revision;
+	}
 
-    public void setRevision(String revision) {
-        this.revision = revision;
-    }
-    
-    @Override
-    public String toString() {
-		return id + ":" + revision + "\t" + name +"\t" + species + "\t" + url;
-    }
+	public void setRevision(String revision)
+	{
+		this.revision = revision;
+	}
+
+	@Override
+	public String toString()
+	{
+		return id + ":" + revision + "\t" + name + "\t" + species + "\t" + url;
+	}
 }

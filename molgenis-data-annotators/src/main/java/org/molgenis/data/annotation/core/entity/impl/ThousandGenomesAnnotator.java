@@ -96,7 +96,8 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 						.setDataType(DECIMAL)), vcfAttributes);
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(THOUSAND_GENOME_MULTI_FILE_RESOURCE, thousandGenomeInfo,
-				locusQueryCreator, multiAllelicResultFilter, dataService, resources, (annotationSourceFileName) -> {
+				locusQueryCreator, multiAllelicResultFilter, dataService, resources, (annotationSourceFileName) ->
+		{
 			thousendGenomesAnnotatorSettings.set(ROOT_DIRECTORY, annotationSourceFileName);
 			thousendGenomesAnnotatorSettings
 					.set(FILEPATTERN, "ALL.chr%s.phase3_shapeit2_mvncall_integrated_v5.20130502.genotypes.vcf.gz");

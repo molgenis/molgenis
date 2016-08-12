@@ -129,7 +129,8 @@ public class GavinAnnotator implements AnnotatorConfig
 				.create(AnnotatorInfo.Status.READY, AnnotatorInfo.Type.PATHOGENICITY_ESTIMATE, NAME, description,
 						attributes);
 		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(RESOURCE, gavinInfo, geneNameQueryCreator, dataService,
-				resources, (annotationSourceFileName) -> {
+				resources, (annotationSourceFileName) ->
+		{
 			gavinAnnotatorSettings.set(GavinAnnotatorSettings.Meta.VARIANT_FILE_LOCATION, annotationSourceFileName);
 		})
 		{

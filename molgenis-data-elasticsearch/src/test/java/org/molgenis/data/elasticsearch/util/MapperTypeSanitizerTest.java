@@ -1,10 +1,9 @@
 package org.molgenis.data.elasticsearch.util;
 
+import org.testng.annotations.Test;
+
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
-
-import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
-import org.testng.annotations.Test;
 
 public class MapperTypeSanitizerTest
 {

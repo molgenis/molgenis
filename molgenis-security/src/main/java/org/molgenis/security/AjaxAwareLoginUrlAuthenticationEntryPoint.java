@@ -1,11 +1,5 @@
 package org.molgenis.security;
 
-import java.io.IOException;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.login.MolgenisLoginController;
 import org.springframework.security.core.AuthenticationException;
@@ -13,9 +7,13 @@ import org.springframework.security.web.authentication.LoginUrlAuthenticationEnt
 import org.springframework.security.web.util.matcher.ELRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
 /**
  * @author bchild
- * 
  */
 public class AjaxAwareLoginUrlAuthenticationEntryPoint extends LoginUrlAuthenticationEntryPoint
 {
@@ -60,7 +58,7 @@ public class AjaxAwareLoginUrlAuthenticationEntryPoint extends LoginUrlAuthentic
 
 	/**
 	 * Checks if this is a X-domain pre-flight request.
-	 * 
+	 *
 	 * @param request
 	 * @return
 	 */
@@ -71,7 +69,7 @@ public class AjaxAwareLoginUrlAuthenticationEntryPoint extends LoginUrlAuthentic
 
 	/**
 	 * Checks if it is a rest request
-	 * 
+	 *
 	 * @param request
 	 * @return
 	 */

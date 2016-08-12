@@ -10,24 +10,26 @@
 package org.molgenis.model.elements;
 
 // jdk
+
+import org.molgenis.model.MolgenisModelException;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import org.molgenis.model.MolgenisModelException;
-
 /**
- * 
+ *
  */
 public class Model implements Serializable
 {
 	private static final long serialVersionUID = 1L;
 
 	// constructor
+
 	/**
-	 * 
+	 *
 	 */
 	public Model(String name)
 	{
@@ -43,8 +45,9 @@ public class Model implements Serializable
 	}
 
 	// general access methods
+
 	/**
-	 * 
+	 *
 	 */
 	public String getName()
 	{
@@ -68,7 +71,7 @@ public class Model implements Serializable
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public DBSchema getDatabase()
 	{
@@ -76,7 +79,7 @@ public class Model implements Serializable
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public UISchema getUserinterface()
 	{
@@ -84,7 +87,7 @@ public class Model implements Serializable
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public MethodSchema getMethodSchema()
 	{
@@ -92,7 +95,7 @@ public class Model implements Serializable
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public String getDBDescription()
 	{
@@ -100,7 +103,7 @@ public class Model implements Serializable
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void setDBDescription(String description)
 	{
@@ -108,7 +111,7 @@ public class Model implements Serializable
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public String getUIDescription()
 	{
@@ -116,7 +119,7 @@ public class Model implements Serializable
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void setUIDescription(String description)
 	{
@@ -124,7 +127,7 @@ public class Model implements Serializable
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public String getPRDescription()
 	{
@@ -132,7 +135,7 @@ public class Model implements Serializable
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void setPRDescription(String description)
 	{
@@ -140,8 +143,9 @@ public class Model implements Serializable
 	}
 
 	//
+
 	/**
-	 * 
+	 *
 	 */
 	public Vector<View> getViews()
 	{
@@ -192,7 +196,7 @@ public class Model implements Serializable
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public Vector<Entity> getEntities(boolean includeSystemTable, boolean includeNonConcretes)
 	{
@@ -215,7 +219,7 @@ public class Model implements Serializable
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public Vector<Entity> getEntities(boolean includeSystemTable)
 	{
@@ -255,7 +259,7 @@ public class Model implements Serializable
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public Vector<Method> getMethods()
 	{
@@ -271,7 +275,6 @@ public class Model implements Serializable
 
 	/**
 	 * @throws MolgenisModelException
-	 * 
 	 */
 	public Entity getEntity(String name)
 	{
@@ -291,7 +294,7 @@ public class Model implements Serializable
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public Record getRecord(String name)
 	{
@@ -311,7 +314,7 @@ public class Model implements Serializable
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	// public static void createSystemTables(Model model)
 	// {
@@ -491,19 +494,29 @@ public class Model implements Serializable
 	}
 
 	// member variables
-	/** The name of the model */
+	/**
+	 * The name of the model
+	 */
 	private String name;
 
-	/** The pretty label of the model */
+	/**
+	 * The pretty label of the model
+	 */
 	private String label;
 
-	/** The meta model for the database */
+	/**
+	 * The meta model for the database
+	 */
 	private DBSchema database;
 
-	/** The meta model for the userinterface */
+	/**
+	 * The meta model for the userinterface
+	 */
 	private UISchema userinterface;
 
-	/** The meta model for methods */
+	/**
+	 * The meta model for methods
+	 */
 	private MethodSchema methods;
 
 	/** */

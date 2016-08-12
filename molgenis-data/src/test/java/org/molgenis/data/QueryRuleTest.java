@@ -1,12 +1,9 @@
 package org.molgenis.data;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
 import org.molgenis.data.QueryRule.Operator;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.*;
 
 public class QueryRuleTest
 {

@@ -4,12 +4,12 @@ public class EntityMetaRequest
 {
 	private String[] attributes;
 	private String[] expand;
-	
+
 	public String[] getAttributes()
 	{
 		return attributes;
 	}
-	
+
 	public void setAttributes(String[] attributes)
 	{
 		this.attributes = attributes;

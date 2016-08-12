@@ -1,10 +1,10 @@
 package org.molgenis.script;
 
-import static org.molgenis.script.ScriptTypeMetaData.NAME;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
+
+import static org.molgenis.script.ScriptTypeMetaData.NAME;
 
 /**
  * Script type entity
@@ -29,7 +29,7 @@ public class ScriptType extends StaticEntity
 	/**
 	 * Constructs a script type with the given type name and meta data
 	 *
-	 * @param name               script type name
+	 * @param name       script type name
 	 * @param entityMeta script type meta data
 	 */
 	public ScriptType(String name, EntityMetaData entityMeta)

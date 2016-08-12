@@ -1,15 +1,14 @@
 package org.molgenis.data.mapper.utils;
 
+import org.apache.commons.lang3.StringUtils;
+import org.jscience.physics.amount.Amount;
+
+import javax.measure.quantity.Quantity;
+import javax.measure.unit.Unit;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.Unit;
-
-import org.apache.commons.lang3.StringUtils;
-import org.jscience.physics.amount.Amount;
 
 public class MagmaUnitConverter
 {

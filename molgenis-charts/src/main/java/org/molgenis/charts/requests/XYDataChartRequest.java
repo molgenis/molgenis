@@ -15,7 +15,7 @@ public class XYDataChartRequest extends ChartRequest
 
 	@NotNull
 	private String yAxisLabel;
-	
+
 	private String split;
 
 	/**
@@ -27,8 +27,7 @@ public class XYDataChartRequest extends ChartRequest
 	}
 
 	/**
-	 * @param x
-	 *            the x to set
+	 * @param x the x to set
 	 */
 	public void setX(String x)
 	{
@@ -44,8 +43,7 @@ public class XYDataChartRequest extends ChartRequest
 	}
 
 	/**
-	 * @param xAxisLabel
-	 *            the xAxisLabel to set
+	 * @param xAxisLabel the xAxisLabel to set
 	 */
 	public void setxAxisLabel(String xAxisLabel)
 	{
@@ -61,8 +59,7 @@ public class XYDataChartRequest extends ChartRequest
 	}
 
 	/**
-	 * @param y
-	 *            the y to set
+	 * @param y the y to set
 	 */
 	public void setY(String y)
 	{
@@ -78,8 +75,7 @@ public class XYDataChartRequest extends ChartRequest
 	}
 
 	/**
-	 * @param yAxisLabel
-	 *            the yAxisLabel to set
+	 * @param yAxisLabel the yAxisLabel to set
 	 */
 	public void setyAxisLabel(String yAxisLabel)
 	{
@@ -93,10 +89,9 @@ public class XYDataChartRequest extends ChartRequest
 	{
 		return this.split;
 	}
-	
+
 	/**
-	 * @param split
-	 *            the split to set
+	 * @param split the split to set
 	 */
 	public void setSplit(String split)
 	{

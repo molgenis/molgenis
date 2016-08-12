@@ -4,17 +4,17 @@ import org.molgenis.charts.MolgenisSerieType;
 
 public enum SeriesType
 {
-	SCATTER("scatter"),
-	LINE("line"),
-	BOXPLOT("boxplot");
-	
+	SCATTER("scatter"), LINE("line"), BOXPLOT("boxplot");
+
 	private String type;
-	
-	private SeriesType(String type){
+
+	private SeriesType(String type)
+	{
 		this.type = type;
 	}
-	
-	public String toString(){
+
+	public String toString()
+	{
 		return this.type;
 	}
 

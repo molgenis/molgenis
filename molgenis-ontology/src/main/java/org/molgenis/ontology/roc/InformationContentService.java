@@ -1,19 +1,10 @@
 package org.molgenis.ontology.roc;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
-
-import java.math.BigDecimal;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
-
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Sets;
+import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -26,11 +17,19 @@ import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Sets;
-import com.google.common.util.concurrent.UncheckedExecutionException;
+import java.math.BigDecimal;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
 
 public class InformationContentService
 {
@@ -43,8 +42,8 @@ public class InformationContentService
 				@Override
 				public Long load(String ontologyIri)
 				{
-					Entity ontologyEntity = dataService.findOne(ONTOLOGY,
-							new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
+					Entity ontologyEntity = dataService
+							.findOne(ONTOLOGY, new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
 					if (ontologyEntity != null)
 					{
 						return dataService.count(ONTOLOGY_TERM,
@@ -60,12 +59,13 @@ public class InformationContentService
 				public Double load(OntologyWord key) throws ExecutionException
 				{
 					String ontologyIri = key.getOntologyIri();
-					Entity ontologyEntity = dataService.findOne(ONTOLOGY,
-							new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
+					Entity ontologyEntity = dataService
+							.findOne(ONTOLOGY, new QueryImpl<Entity>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri));
 					if (ontologyEntity != null)
 					{
-						QueryRule queryRule = new QueryRule(Arrays.asList(new QueryRule(
-								OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH, key.getWord())));
+						QueryRule queryRule = new QueryRule(Arrays.asList(
+								new QueryRule(OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM, Operator.FUZZY_MATCH,
+										key.getWord())));
 						queryRule.setOperator(Operator.DIS_MAX);
 						QueryRule finalQuery = new QueryRule(Arrays.asList(
 								new QueryRule(OntologyTermMetaData.ONTOLOGY, Operator.EQUALS, ontologyEntity),
@@ -107,8 +107,8 @@ public class InformationContentService
 				double diff = entry.getValue() - averageIDFValue;
 				if (diff < 0)
 				{
-					Double contributedSimilarity = (entry.getKey().length() / queryStringLength * 100)
-							* (diff / averageIDFValue);
+					Double contributedSimilarity =
+							(entry.getKey().length() / queryStringLength * 100) * (diff / averageIDFValue);
 					totalContribution += Math.abs(contributedSimilarity);
 					wordWeightedSimilarity.put(entry.getKey(), contributedSimilarity);
 				}
@@ -134,7 +134,8 @@ public class InformationContentService
 	{
 		Map<String, Double> wordFreqMap = new HashMap<>();
 		Set<String> wordsInQueryString = createStemmedWordSet(queryString);
-		wordsInQueryString.stream().forEach(word -> {
+		wordsInQueryString.stream().forEach(word ->
+		{
 			Double wordIDF = null;
 			try
 			{

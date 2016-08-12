@@ -35,8 +35,7 @@ public class Series
 	}
 
 	/**
-	 * @param lineWidth
-	 *            the lineWidth to set
+	 * @param lineWidth the lineWidth to set
 	 */
 	public void setLineWidth(Integer lineWidth)
 	{
@@ -52,8 +51,7 @@ public class Series
 	}
 
 	/**
-	 * @param name
-	 *            the name to set
+	 * @param name the name to set
 	 */
 	public void setName(String name)
 	{
@@ -69,8 +67,7 @@ public class Series
 	}
 
 	/**
-	 * @param data
-	 *            the data to set
+	 * @param data the data to set
 	 */
 	public void setData(List<Object> data)
 	{
@@ -86,8 +83,7 @@ public class Series
 	}
 
 	/**
-	 * @param type
-	 *            the type to set
+	 * @param type the type to set
 	 */
 	public void setType(SeriesType type)
 	{

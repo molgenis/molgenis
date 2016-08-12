@@ -1,8 +1,5 @@
 package org.molgenis.messageconverter;
 
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.EntityCollection;
 import org.molgenis.data.csv.CsvWriter;
@@ -12,6 +9,9 @@ import org.springframework.http.HttpOutputMessage;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.HttpMessageNotWritableException;
+
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 /**
  * Converts an EntityCollection to comma separated values

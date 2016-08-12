@@ -18,17 +18,15 @@ public class LinkableTree<T extends Tree<T>> extends SimpleTree<T>
 {
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -351346449721432255L;
 
 	/**
 	 * Construct a new Tree
-	 * 
-	 * @param name
-	 *            unique name
-	 * @param parent
-	 *            the parent of this Tree. If null, then this is the root.
+	 *
+	 * @param name   unique name
+	 * @param parent the parent of this Tree. If null, then this is the root.
 	 */
 	public LinkableTree(String name, T parent, String url)
 	{

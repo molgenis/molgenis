@@ -1,24 +1,22 @@
 package org.molgenis.data;
 
-import static java.util.stream.Collectors.toList;
-import static org.mockito.Mockito.*;
-import static org.testng.Assert.assertEquals;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
-import java.util.function.Consumer;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import org.mockito.ArgumentCaptor;
-import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.settings.AppSettings;
 import org.springframework.security.authentication.TestingAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertEquals;
 
 public class RepositorySecurityDecoratorTest
 {
@@ -127,8 +125,7 @@ public class RepositorySecurityDecoratorTest
 		}
 	}
 
-	@SuppressWarnings(
-	{ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void updateStream()
 	{

@@ -1,22 +1,15 @@
 package org.molgenis.model.elements;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
+import org.molgenis.fieldtypes.*;
+import org.molgenis.model.MolgenisModelException;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Vector;
 
-import org.molgenis.fieldtypes.EnumField;
-import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.fieldtypes.MrefField;
-import org.molgenis.fieldtypes.StringField;
-import org.molgenis.fieldtypes.XrefField;
-import org.molgenis.model.MolgenisModelException;
-import org.testng.annotations.Test;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.*;
 
 public class FieldTest
 {

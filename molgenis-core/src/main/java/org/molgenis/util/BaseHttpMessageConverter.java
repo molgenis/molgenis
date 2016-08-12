@@ -1,10 +1,10 @@
 package org.molgenis.util;
 
-import java.nio.charset.Charset;
-
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.AbstractHttpMessageConverter;
+
+import java.nio.charset.Charset;
 
 public abstract class BaseHttpMessageConverter<T> extends AbstractHttpMessageConverter<T>
 {

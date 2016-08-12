@@ -1,14 +1,14 @@
 package org.molgenis.ui.menu;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
+import org.molgenis.data.settings.AppSettings;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.molgenis.data.settings.AppSettings;
-import org.testng.annotations.Test;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 public class MenuReaderServiceImplTest
 {
@@ -21,13 +21,14 @@ public class MenuReaderServiceImplTest
 	@Test
 	public void getMenu()
 	{
-		AppSettings appSettings = when(mock(AppSettings.class).getMenu()).thenReturn("{\n" + "	\"type\": \"menu\",\n"
-				+ "	\"id\": \"menu\",\n" + "	\"label\": \"Menu\",\n" + "	\"items\": [{\n"
-				+ "		\"type\": \"plugin\",\n" + "		\"id\": \"plugin0\",\n" + "		\"label\": \"Plugin #0\",\n"
-				+ "		\"params\": \"a=0&b=1\"\n" + "	},\n" + "	{\n" + "		\"type\": \"menu\",\n"
-				+ "		\"id\": \"submenu\",\n" + "		\"label\": \"Submenu\",\n" + "		\"items\": [{\n"
-				+ "			\"type\": \"plugin\",\n" + "			\"id\": \"plugin1\",\n"
-				+ "			\"label\": \"Plugin #1\"\n" + "		}]\n" + "	}]\n" + "}").getMock();
+		AppSettings appSettings = when(mock(AppSettings.class).getMenu()).thenReturn(
+				"{\n" + "	\"type\": \"menu\",\n" + "	\"id\": \"menu\",\n" + "	\"label\": \"Menu\",\n"
+						+ "	\"items\": [{\n" + "		\"type\": \"plugin\",\n" + "		\"id\": \"plugin0\",\n"
+						+ "		\"label\": \"Plugin #0\",\n" + "		\"params\": \"a=0&b=1\"\n" + "	},\n"
+						+ "	{\n" + "		\"type\": \"menu\",\n" + "		\"id\": \"submenu\",\n"
+						+ "		\"label\": \"Submenu\",\n" + "		\"items\": [{\n" + "			\"type\": \"plugin\",\n"
+						+ "			\"id\": \"plugin1\",\n" + "			\"label\": \"Plugin #1\"\n" + "		}]\n"
+						+ "	}]\n" + "}").getMock();
 
 		MenuItem item0 = new MenuItem();
 		item0.setType(MenuItemType.PLUGIN);

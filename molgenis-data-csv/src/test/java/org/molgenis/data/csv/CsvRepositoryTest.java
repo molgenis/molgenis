@@ -1,19 +1,5 @@
 package org.molgenis.data.csv;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Iterator;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.molgenis.data.Entity;
@@ -26,6 +12,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.FileCopyUtils;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Iterator;
+
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 {
@@ -86,8 +81,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 		try
 		{
 			csvRepository.addCellProcessor(processor);
-			for (@SuppressWarnings("unused")
-			Entity entity : csvRepository)
+			for (@SuppressWarnings("unused") Entity entity : csvRepository)
 			{
 			}
 			verify(processor).process("col1");
@@ -107,8 +101,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 		try
 		{
 			csvRepository.addCellProcessor(processor);
-			for (@SuppressWarnings("unused")
-			Entity entity : csvRepository)
+			for (@SuppressWarnings("unused") Entity entity : csvRepository)
 			{
 			}
 			verify(processor).process("val1");
@@ -143,7 +136,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 
 	/**
 	 * Test based on au.com.bytecode.opencsv.CSVReaderTest
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	@Test

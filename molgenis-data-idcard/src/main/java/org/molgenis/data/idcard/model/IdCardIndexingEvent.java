@@ -1,12 +1,10 @@
 package org.molgenis.data.idcard.model;
 
-import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.ID;
-import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.MESSAGE;
-import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.STATUS;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
+
+import static org.molgenis.data.idcard.model.IdCardIndexingEventMetaData.*;
 
 public class IdCardIndexingEvent extends StaticEntity
 {

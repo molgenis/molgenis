@@ -1,11 +1,11 @@
 package org.molgenis.ontology.core.meta;
 
-import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ID;
-import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
+
+import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ID;
+import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM_ATTR;
 
 public class OntologyTermSynonym extends StaticEntity
 {

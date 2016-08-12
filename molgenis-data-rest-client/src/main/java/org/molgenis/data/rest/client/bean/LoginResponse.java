@@ -1,10 +1,9 @@
 package org.molgenis.data.rest.client.bean;
 
-import javax.annotation.Nullable;
-
+import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
 
-import com.google.auto.value.AutoValue;
+import javax.annotation.Nullable;
 
 @AutoGson(autoValueClass = AutoValue_LoginResponse.class)
 @AutoValue

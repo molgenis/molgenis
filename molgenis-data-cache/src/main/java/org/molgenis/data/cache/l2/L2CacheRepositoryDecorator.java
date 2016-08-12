@@ -129,7 +129,8 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator
 		Collection<Object> cleanIds = partitionedIds.get(false);
 		Collection<Object> dirtyIds = partitionedIds.get(true);
 
-		Map<Object, Entity> result = newHashMap(uniqueIndex(l2Cache.getBatch(delegate(), cleanIds), Entity::getIdValue));
+		Map<Object, Entity> result = newHashMap(
+				uniqueIndex(l2Cache.getBatch(delegate(), cleanIds), Entity::getIdValue));
 		result.putAll(delegate().findAll(dirtyIds.stream()).collect(toMap(Entity::getIdValue, e -> e)));
 
 		return ids.stream().filter(result::containsKey).map(result::get).collect(toList());

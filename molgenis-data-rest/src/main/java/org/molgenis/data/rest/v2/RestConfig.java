@@ -1,7 +1,8 @@
 package org.molgenis.data.rest.v2;
 
-import java.util.Set;
-
+import cz.jirutka.rsql.parser.RSQLParser;
+import cz.jirutka.rsql.parser.ast.ComparisonOperator;
+import cz.jirutka.rsql.parser.ast.RSQLOperators;
 import org.molgenis.data.rest.convert.AggregateQueryRsqlConverter;
 import org.molgenis.data.rest.convert.QueryRsqlConverter;
 import org.molgenis.data.rest.convert.SortConverter;
@@ -10,9 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 
-import cz.jirutka.rsql.parser.RSQLParser;
-import cz.jirutka.rsql.parser.ast.ComparisonOperator;
-import cz.jirutka.rsql.parser.ast.RSQLOperators;
+import java.util.Set;
 
 @Configuration
 public class RestConfig extends WebMvcConfigurerAdapter

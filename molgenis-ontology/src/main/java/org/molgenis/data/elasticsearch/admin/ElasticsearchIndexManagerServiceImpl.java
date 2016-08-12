@@ -35,7 +35,8 @@ public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexM
 	{
 		// collect indexed repos
 		List<EntityMetaData> indexedEntityMetaDataList = new ArrayList<>();
-		dataService.getEntityNames().forEach(entityName -> {
+		dataService.getEntityNames().forEach(entityName ->
+		{
 			Repository<Entity> repository = dataService.getRepository(entityName);
 			if (repository != null && repository.getCapabilities().contains(RepositoryCapability.INDEXABLE))
 			{

@@ -33,7 +33,8 @@ public abstract class AbstractCategoryAlgorithmGenerator implements AlgorithmGen
 		EntityMetaData refEntity = attributeMetaData.getRefEntity();
 		if (refEntity != null)
 		{
-			dataService.findAll(refEntity.getName()).forEach(entity -> {
+			dataService.findAll(refEntity.getName()).forEach(entity ->
+			{
 				String code = DataConverter.toString(entity.get(refEntity.getIdAttribute().getName()));
 				String label = DataConverter.toString(entity.get(refEntity.getLabelAttribute().getName()));
 				Category category = Category.create(code, label, CategoryMapperUtil.convertDescriptionToAmount(label));

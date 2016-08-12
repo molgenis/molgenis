@@ -27,7 +27,7 @@ public class Language extends StaticEntity
 	/**
 	 * Constructs a language with the given type code and meta data
 	 *
-	 * @param code             language code
+	 * @param code       language code
 	 * @param entityMeta language meta data
 	 */
 	public Language(String code, EntityMetaData entityMeta)

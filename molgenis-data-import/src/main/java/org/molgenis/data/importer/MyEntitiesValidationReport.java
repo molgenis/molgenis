@@ -1,17 +1,12 @@
 package org.molgenis.data.importer;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.molgenis.framework.db.EntitiesValidationReport;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMap.Builder;
+import org.molgenis.framework.db.EntitiesValidationReport;
+
+import java.util.*;
+import java.util.Map.Entry;
 
 /**
  * Value object to store the {@link EntitiesValidationReport}.
@@ -23,19 +18,16 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 		/**
 		 * Present in the source, known in the target.
 		 */
-		IMPORTABLE(true),
-		/**
-		 * Present in the source, unknown in the target
-		 */
-		UNKNOWN(false),
-		/**
-		 * Required in the target, missing in the source
-		 */
-		REQUIRED(false),
-		/**
-		 * Available in the target, missing in the source
-		 */
-		AVAILABLE(true);
+		IMPORTABLE(true), /**
+	 * Present in the source, unknown in the target
+	 */
+	UNKNOWN(false), /**
+	 * Required in the target, missing in the source
+	 */
+	REQUIRED(false), /**
+	 * Available in the target, missing in the source
+	 */
+	AVAILABLE(true);
 
 		private final boolean valid;
 
@@ -61,11 +53,9 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 
 	/**
 	 * Creates a new report, with an entity added to it.
-	 * 
-	 * @param entityName
-	 *            name of the entity
-	 * @param importable
-	 *            true if the entity is importable
+	 *
+	 * @param entityName name of the entity
+	 * @param importable true if the entity is importable
 	 * @return this report
 	 */
 	public MyEntitiesValidationReport addEntity(String entityName, boolean importable)
@@ -86,7 +76,7 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 	/**
 	 * Creates a new report, with an attribute with state {@value AttributeState#IMPORTABLE} added to the last added
 	 * entity;
-	 * 
+	 *
 	 * @param attributeName
 	 * @return new {@link MyEntitiesValidationReport} with attribute added.
 	 */
@@ -97,7 +87,7 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 
 	/**
 	 * Add a package to the report
-	 * 
+	 *
 	 * @param pack
 	 * @return
 	 */
@@ -109,11 +99,9 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 
 	/**
 	 * Creates a new report, with an attribute added to the last added entity;
-	 * 
-	 * @param attributeName
-	 *            name of the attribute to add
-	 * @param state
-	 *            state of the attribute to add
+	 *
+	 * @param attributeName name of the attribute to add
+	 * @param state         state of the attribute to add
 	 * @return this report
 	 */
 	public MyEntitiesValidationReport addAttribute(String attributeName, AttributeState state)
@@ -153,62 +141,74 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 		sheets.get(entityName).add(attributeName);
 	}
 
-	/** Returns true for importable sheets and false for unimportable sheets */
+	/**
+	 * Returns true for importable sheets and false for unimportable sheets
+	 */
 	@Override
 	public ImmutableMap<String, Boolean> getSheetsImportable()
 	{
-		return ImmutableMap.<String, Boolean> copyOf(sheetsImportable);
+		return ImmutableMap.<String, Boolean>copyOf(sheetsImportable);
 	}
 
 	private static ImmutableMap<String, Collection<String>> getImmutableCopy(Map<String, Collection<String>> map)
 	{
-		Builder<String, Collection<String>> builder = ImmutableMap.<String, Collection<String>> builder();
+		Builder<String, Collection<String>> builder = ImmutableMap.<String, Collection<String>>builder();
 		for (Entry<String, Collection<String>> entry : map.entrySet())
 		{
-			builder.put(entry.getKey(), ImmutableList.<String> copyOf(entry.getValue()));
+			builder.put(entry.getKey(), ImmutableList.<String>copyOf(entry.getValue()));
 		}
 		return builder.build();
 	}
 
-	/** lists per entity what fields can be imported */
+	/**
+	 * lists per entity what fields can be imported
+	 */
 	@Override
 	public ImmutableMap<String, Collection<String>> getFieldsImportable()
 	{
 		return getImmutableCopy(fieldsImportable);
 	}
 
-	/** lists per entity what fields cannot be imported */
+	/**
+	 * lists per entity what fields cannot be imported
+	 */
 	@Override
 	public ImmutableMap<String, Collection<String>> getFieldsUnknown()
 	{
 		return getImmutableCopy(fieldsUnknown);
 	}
 
-	/** lists per entity what fields should have been filled in */
+	/**
+	 * lists per entity what fields should have been filled in
+	 */
 	@Override
 	public ImmutableMap<String, Collection<String>> getFieldsRequired()
 	{
 		return getImmutableCopy(fieldsRequired);
 	}
 
-	/** lists per entity what fields could have been filled in but were not provided */
+	/**
+	 * lists per entity what fields could have been filled in but were not provided
+	 */
 	@Override
 	public ImmutableMap<String, Collection<String>> getFieldsAvailable()
 	{
 		return getImmutableCopy(fieldsAvailable);
 	}
 
-	/** provides import order based on dependency */
+	/**
+	 * provides import order based on dependency
+	 */
 	@Override
 	public ImmutableList<String> getImportOrder()
 	{
-		return ImmutableList.<String> copyOf(importOrder);
+		return ImmutableList.<String>copyOf(importOrder);
 	}
 
 	@Override
 	public List<String> getPackages()
 	{
-		return ImmutableList.<String> copyOf(packages);
+		return ImmutableList.<String>copyOf(packages);
 	}
 
 	@Override

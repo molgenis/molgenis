@@ -24,7 +24,7 @@ import java.util.Collections;
  */
 @Configuration
 @EnableScheduling
-@Import({ReindexConfig.class})
+@Import({ ReindexConfig.class })
 public class EmbeddedElasticSearchConfig
 {
 	static
@@ -39,14 +39,14 @@ public class EmbeddedElasticSearchConfig
 	@Autowired
 	private ElasticsearchEntityFactory elasticsearchEntityFactory;
 
-//	@Autowired
-//	private MolgenisTransactionManager molgenisTransactionManager;
-//
-//	@Autowired
-//	private ReindexJobExecutionFactory reindexJobExecutionFactory;
+	//	@Autowired
+	//	private MolgenisTransactionManager molgenisTransactionManager;
+	//
+	//	@Autowired
+	//	private ReindexJobExecutionFactory reindexJobExecutionFactory;
 
-//	@Autowired
-//	private ReindexActionRegisterService reindexActionRegisterService;
+	//	@Autowired
+	//	private ReindexActionRegisterService reindexActionRegisterService;
 
 	@Bean(destroyMethod = "close")
 	public EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory()

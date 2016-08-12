@@ -1,9 +1,8 @@
 package org.molgenis.pathways.model;
 
+import com.google.auto.value.AutoValue;
 import org.molgenis.wikipathways.client.WSPathwayInfo;
 import org.molgenis.wikipathways.client.WSSearchResult;
-
-import com.google.auto.value.AutoValue;
 
 /**
  * Name and ID of a Pathway

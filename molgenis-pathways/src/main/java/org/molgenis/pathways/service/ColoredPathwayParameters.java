@@ -1,11 +1,10 @@
 package org.molgenis.pathways.service;
 
-import java.util.Map;
-
-import org.molgenis.pathways.model.Impact;
-
 import com.google.auto.value.AutoValue;
 import com.google.common.cache.LoadingCache;
+import org.molgenis.pathways.model.Impact;
+
+import java.util.Map;
 
 /**
  * Parameter object used as key for the {@link LoadingCache} with the colored pathways.

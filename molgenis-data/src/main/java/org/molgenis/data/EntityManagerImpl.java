@@ -91,7 +91,8 @@ public class EntityManagerImpl implements EntityManager
 	public Iterable<Entity> getReferences(EntityMetaData entityMeta, Iterable<?> ids)
 	{
 		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityMeta);
-		return () -> stream(ids.spliterator(), false).map(id -> {
+		return () -> stream(ids.spliterator(), false).map(id ->
+		{
 			Entity lazyEntity = getReference(entityMeta, id);
 			if (entityFactory != null)
 			{
@@ -187,7 +188,8 @@ public class EntityManagerImpl implements EntityManager
 		}
 
 		Iterable<List<Entity>> iterable = () -> Iterators.partition(entities.iterator(), BATCH_SIZE);
-		return stream(iterable.spliterator(), false).flatMap(batch -> {
+		return stream(iterable.spliterator(), false).flatMap(batch ->
+		{
 			List<Entity> batchWithReferences = resolveReferences(resolvableAttrs, batch, fetch);
 			return batchWithReferences.stream();
 		});
@@ -272,7 +274,8 @@ public class EntityManagerImpl implements EntityManager
 					{
 						// replace lazy entities with real entities
 						Iterable<Entity> lazyRefEntities = entity.getEntities(attrName);
-						List<Entity> mrefEntities = stream(lazyRefEntities.spliterator(), true).map(lazyRefEntity -> {
+						List<Entity> mrefEntities = stream(lazyRefEntities.spliterator(), true).map(lazyRefEntity ->
+						{
 							// replace lazy entity with real entity
 							Object refEntityId = lazyRefEntity.getIdValue();
 							return refEntitiesIdMap.get(refEntityId);
@@ -349,9 +352,8 @@ public class EntityManagerImpl implements EntityManager
 	private static List<AttributeMetaData> getResolvableAttrs(EntityMetaData entityMeta, Fetch fetch)
 	{
 		return stream(entityMeta.getAtomicAttributes().spliterator(), false)
-				.filter(EntityMetaDataUtils::isReferenceType)
-				.filter(attr -> attr.getExpression() == null).filter(attr -> fetch.hasField(attr.getName()))
-				.collect(Collectors.toList());
+				.filter(EntityMetaDataUtils::isReferenceType).filter(attr -> attr.getExpression() == null)
+				.filter(attr -> fetch.hasField(attr.getName())).collect(Collectors.toList());
 	}
 
 	private static class EntityIdIterable implements Iterable<Object>

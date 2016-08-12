@@ -1,15 +1,15 @@
 package org.molgenis.data.jobs;
 
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 public class JobExecutionUpdaterImpl implements JobExecutionUpdater
 {

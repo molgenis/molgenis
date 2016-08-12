@@ -1,11 +1,11 @@
 package org.molgenis.bootstrap;
 
-import static java.util.Objects.requireNonNull;
-
 import org.molgenis.framework.MolgenisUpgrade;
 import org.molgenis.framework.MolgenisUpgradeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Registers and executes {@link MolgenisUpgrade upgrades} during application bootstrapping.

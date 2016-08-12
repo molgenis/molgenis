@@ -1,9 +1,5 @@
 package org.molgenis.data.excel;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -15,6 +11,10 @@ import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractWritable;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Writable implementation for an excel sheet
  */
@@ -23,7 +23,9 @@ public class ExcelSheetWriter extends AbstractWritable
 	private final Sheet sheet;
 	private int row;
 
-	/** process cells before writing */
+	/**
+	 * process cells before writing
+	 */
 	private List<CellProcessor> cellProcessors;
 	private Iterable<AttributeMetaData> cachedAttributes;
 
@@ -48,8 +50,8 @@ public class ExcelSheetWriter extends AbstractWritable
 	public void add(Entity entity)
 	{
 		if (entity == null) throw new IllegalArgumentException("Entity cannot be null");
-		if (cachedAttributes == null) throw new MolgenisDataException(
-				"The attribute names are not defined, call writeAttributeNames first");
+		if (cachedAttributes == null)
+			throw new MolgenisDataException("The attribute names are not defined, call writeAttributeNames first");
 
 		int i = 0;
 		Row poiRow = sheet.createRow(row++);
@@ -83,7 +85,8 @@ public class ExcelSheetWriter extends AbstractWritable
 				switch (attributeWriteMode)
 				{
 					case ATTRIBUTE_LABELS:
-						cell.setCellValue(AbstractCellProcessor.processCell(attribute.getLabel(), true, cellProcessors));
+						cell.setCellValue(
+								AbstractCellProcessor.processCell(attribute.getLabel(), true, cellProcessors));
 						break;
 					case ATTRIBUTE_NAMES:
 						cell.setCellValue(AbstractCellProcessor.processCell(attribute.getName(), true, cellProcessors));

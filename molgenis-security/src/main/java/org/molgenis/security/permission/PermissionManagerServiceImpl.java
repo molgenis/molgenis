@@ -1,31 +1,8 @@
 package org.molgenis.security.permission;
 
-import static java.util.stream.Collectors.toList;
-import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.stream.Stream;
-
-import org.molgenis.auth.Authority;
-import org.molgenis.auth.GroupAuthority;
-import org.molgenis.auth.GroupAuthorityMetaData;
-import org.molgenis.auth.MolgenisGroup;
-import org.molgenis.auth.MolgenisGroupMember;
-import org.molgenis.auth.MolgenisGroupMemberMetaData;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.UserAuthority;
-import org.molgenis.auth.UserAuthorityMetaData;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.framework.ui.MolgenisPlugin;
@@ -39,8 +16,15 @@ import org.springframework.security.core.authority.mapping.GrantedAuthoritiesMap
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
+import java.util.*;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
+import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 
 @Service
 public class PermissionManagerServiceImpl implements PermissionManagerService
@@ -154,13 +138,12 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 
 		List<MolgenisGroupMember> groupMembers = dataService.findAll(MOLGENIS_GROUP_MEMBER,
 				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser),
-				MolgenisGroupMember.class).collect(
-				toList());
+				MolgenisGroupMember.class).collect(toList());
 
 		if (!groupMembers.isEmpty())
 		{
-			List<MolgenisGroup> molgenisGroups = Lists.transform(groupMembers,
-					new Function<MolgenisGroupMember, MolgenisGroup>()
+			List<MolgenisGroup> molgenisGroups = Lists
+					.transform(groupMembers, new Function<MolgenisGroupMember, MolgenisGroup>()
 					{
 						@Override
 						public MolgenisGroup apply(MolgenisGroupMember molgenisGroupMember)
@@ -248,7 +231,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 				new QueryImpl<UserAuthority>().eq(UserAuthorityMetaData.MOLGENIS_USER, molgenisUser),
 				UserAuthority.class);
 
-		return authorities.filter(authority -> {
+		return authorities.filter(authority ->
+		{
 			return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;
 		}).collect(toList());
 	}
@@ -274,7 +258,8 @@ public class PermissionManagerServiceImpl implements PermissionManagerService
 				new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.MOLGENIS_GROUP, molgenisGroups),
 				GroupAuthority.class);
 
-		return authorities.filter(authority -> {
+		return authorities.filter(authority ->
+		{
 			return authorityPrefix != null ? authority.getRole().startsWith(authorityPrefix) : true;
 		}).collect(toList());
 	}

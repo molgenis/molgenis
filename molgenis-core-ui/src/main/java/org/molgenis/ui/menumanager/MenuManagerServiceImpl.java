@@ -1,15 +1,9 @@
 package org.molgenis.ui.menumanager;
 
-import static java.util.Objects.requireNonNull;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-
+import com.google.gson.GsonBuilder;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
-import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.MenuType;
 import org.molgenis.ui.Molgenis;
 import org.molgenis.ui.PluginType;
@@ -21,12 +15,14 @@ import org.molgenis.ui.menu.MenuReaderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationListener;
-import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.gson.GsonBuilder;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
 
 public class MenuManagerServiceImpl implements MenuManagerService
 {
@@ -70,7 +66,8 @@ public class MenuManagerServiceImpl implements MenuManagerService
 		appSettings.setMenu(menuJson);
 	}
 
-	public String getDefaultMenuValue() {
+	public String getDefaultMenuValue()
+	{
 		Molgenis molgenis;
 		try
 		{

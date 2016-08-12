@@ -30,8 +30,8 @@ public class SortaCsvRepository extends AbstractRepository
 	private final String entityName;
 	private final String entityLabel;
 	public final static String ALLOWED_IDENTIFIER = "Identifier";
-	private final static List<CellProcessor> LOWERCASE_AND_TRIM = Arrays.asList(new LowerCaseProcessor(),
-			new TrimProcessor());
+	private final static List<CellProcessor> LOWERCASE_AND_TRIM = Arrays
+			.asList(new LowerCaseProcessor(), new TrimProcessor());
 
 	public SortaCsvRepository(File file, EntityMetaDataFactory entityMetaFactory,
 			AttributeMetaDataFactory attrMetaFactory)

@@ -1,13 +1,13 @@
 package org.molgenis.util;
 
+import com.eaio.uuid.UUIDGen;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import com.eaio.uuid.UUIDGen;
-
 /**
  * Copied from https://github.com/mumrah/flake-java/blob/master/src/uniq/UniqueId.java
- * 
+ * <p>
  * See also http://boundary.com/blog/2012/01/12/flake-a-decentralized-k-ordered-unique-id-generator-in-erlang/
  */
 public class UniqueId
@@ -15,10 +15,10 @@ public class UniqueId
 
 	// Get the MAC address (i.e., the "node" from a UUID1)
 	private final long clockSeqAndNode = UUIDGen.getClockSeqAndNode();
-	private final byte[] node = new byte[]
-	{ (byte) ((clockSeqAndNode >> 40) & 0xff), (byte) ((clockSeqAndNode >> 32) & 0xff),
-			(byte) ((clockSeqAndNode >> 24) & 0xff), (byte) ((clockSeqAndNode >> 16) & 0xff),
-			(byte) ((clockSeqAndNode >> 8) & 0xff), (byte) ((clockSeqAndNode >> 0) & 0xff), };
+	private final byte[] node = new byte[] { (byte) ((clockSeqAndNode >> 40) & 0xff),
+			(byte) ((clockSeqAndNode >> 32) & 0xff), (byte) ((clockSeqAndNode >> 24) & 0xff),
+			(byte) ((clockSeqAndNode >> 16) & 0xff), (byte) ((clockSeqAndNode >> 8) & 0xff),
+			(byte) ((clockSeqAndNode >> 0) & 0xff), };
 	private final ThreadLocal<ByteBuffer> tlbb = new ThreadLocal<ByteBuffer>()
 	{
 		@Override

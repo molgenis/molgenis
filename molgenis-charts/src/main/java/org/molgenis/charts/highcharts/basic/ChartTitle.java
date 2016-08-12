@@ -1,7 +1,7 @@
 package org.molgenis.charts.highcharts.basic;
 
 public class ChartTitle
-{	
+{
 	ChartAlign align;
 	Integer margin;
 	String text;
@@ -15,10 +15,7 @@ public class ChartTitle
 
 	public static ChartTitle getDefault()
 	{
-		return new ChartTitle()
-			.setAlign(ChartAlign.CENTER)
-			.setMargin(15)
-			.setText("Chart title");
+		return new ChartTitle().setAlign(ChartAlign.CENTER).setMargin(15).setText("Chart title");
 	}
 
 	public ChartAlign getAlign()

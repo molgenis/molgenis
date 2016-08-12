@@ -1,12 +1,12 @@
 package org.molgenis.data.elasticsearch.util;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MultiSearchRequest
 {

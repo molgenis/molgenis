@@ -1,14 +1,14 @@
 package org.molgenis.data.meta.system;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.Map;
-
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Discovers and registers system entity meta data with the system entity meta data registry.

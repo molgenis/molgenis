@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.sonatype.oss</groupId>
@@ -27,13 +28,13 @@
         <connection>scm:git:git://github.com/molgenis/molgenis.git</connection>
         <url>https://github.com/molgenis/molgenis</url>
     </scm>
-    <developers />
-    
+    <developers/>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <slf4j.version>1.7.12</slf4j.version>
         <logback.version>1.1.3</logback.version>
-        
+
         <spring.version>4.1.8.RELEASE</spring.version>
         <spring.security.version>4.0.3.RELEASE</spring.security.version>
         <hibernate.validator.version>4.2.0.Final</hibernate.validator.version>
@@ -73,7 +74,7 @@
                         <!--useIncrementalCompilation a workaround for "endPosTable already set"-->
                         <useIncrementalCompilation>false</useIncrementalCompilation>
                         <compilerArguments>
-                            <Xlint />
+                            <Xlint/>
                         </compilerArguments>
                     </configuration>
                 </plugin>
@@ -104,7 +105,9 @@
                             Exclude JCL and LOG4J since all logging should go through SLF4J.
                             Note that we're excluding log4j-<version>.jar but keeping log4j-over-slf4j-<version>.jar
                         -->
-                        <packagingExcludes>WEB-INF/lib/commons-logging-*.jar,%regex[WEB-INF/lib/log4j-(?!over-slf4j).*.jar]</packagingExcludes>
+                        <packagingExcludes>
+                            WEB-INF/lib/commons-logging-*.jar,%regex[WEB-INF/lib/log4j-(?!over-slf4j).*.jar]
+                        </packagingExcludes>
                     </configuration>
                 </plugin>
                 <!-- specify plugin version -->
@@ -153,26 +156,26 @@
                             the uk.ac.ebi.mydas.controller.MydasServlet cannot find the file if
                             its placed in the normal WEB-INF/classes folder
                         -->
-						<execution>
-							<id>copy-resources</id>
-							<phase>validate</phase>
-							<goals>
-								<goal>copy-resources</goal>
-							</goals>
-							<configuration>
-								<outputDirectory>target/${project.name}-${project.version}</outputDirectory>
-								<resources>
-									<resource>
-										<directory>src/main/resources/</directory>
-										<includes>
-											<include>MydasServerConfig.xml</include>
-										</includes>
-										<filtering>true</filtering>
-									</resource>
-								</resources>
-							</configuration>
-						</execution>
-					</executions>
+                        <execution>
+                            <id>copy-resources</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>copy-resources</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>target/${project.name}-${project.version}</outputDirectory>
+                                <resources>
+                                    <resource>
+                                        <directory>src/main/resources/</directory>
+                                        <includes>
+                                            <include>MydasServerConfig.xml</include>
+                                        </includes>
+                                        <filtering>true</filtering>
+                                    </resource>
+                                </resources>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
                 <!-- specify java 8 compatible plugin version -->
                 <plugin>
@@ -207,12 +210,13 @@
                             <configuration>
                                 <tasks>
                                     <path id="generate-classpath">
-                                        <path refid="maven.compile.classpath" />
-                                        <pathelement path="${project.basedir}/src/main/resources" />
+                                        <path refid="maven.compile.classpath"/>
+                                        <pathelement path="${project.basedir}/src/main/resources"/>
                                     </path>
-                                    <java classname="org.molgenis.Molgenis" classpathref="generate-classpath" failonerror="true">
-                                        <arg value="molgenis.properties" />
-                                        <arg value="${project.build.directory}/generated-sources/molgenis" />
+                                    <java classname="org.molgenis.Molgenis" classpathref="generate-classpath"
+                                          failonerror="true">
+                                        <arg value="molgenis.properties"/>
+                                        <arg value="${project.build.directory}/generated-sources/molgenis"/>
                                     </java>
                                 </tasks>
                             </configuration>
@@ -226,13 +230,14 @@
                             <configuration>
                                 <tasks>
                                     <path id="generate-classpath">
-                                        <path refid="maven.compile.classpath" />
-                                        <pathelement path="${project.basedir}/src/main/resources" />
+                                        <path refid="maven.compile.classpath"/>
+                                        <pathelement path="${project.basedir}/src/main/resources"/>
                                     </path>
-                                    <java classname="org.molgenis.Molgenis" classpathref="generate-classpath" failonerror="true">
-                                        <arg value="molgenis.properties" />
-                                        <arg value="${project.build.directory}/generated-test-sources/molgenis" />
-                                        <arg value="--generatetests" />
+                                    <java classname="org.molgenis.Molgenis" classpathref="generate-classpath"
+                                          failonerror="true">
+                                        <arg value="molgenis.properties"/>
+                                        <arg value="${project.build.directory}/generated-test-sources/molgenis"/>
+                                        <arg value="--generatetests"/>
                                     </java>
                                 </tasks>
                             </configuration>
@@ -362,7 +367,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -375,7 +380,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -388,7 +393,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -401,7 +406,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -414,7 +419,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                                 <pluginExecution>
@@ -427,7 +432,7 @@
                                         </goals>
                                     </pluginExecutionFilter>
                                     <action>
-                                        <ignore />
+                                        <ignore/>
                                     </action>
                                 </pluginExecution>
                             </pluginExecutions>
@@ -436,24 +441,24 @@
                 </plugin>
                 <!--  integration test plugin -->
                 <plugin>
-                	<groupId>org.apache.maven.plugins</groupId>
+                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>2.8.1</version>
                     <executions>
-                    	<execution>
-        					<id>integration-test</id>
-        					<phase>integration-test</phase>
-        					<goals>
-            					<goal>integration-test</goal>
-        					</goals>
-    					</execution>
-                    	<execution>
-        					<id>verify</id>
-        					<phase>verify</phase>
-        					<goals>
-            					<goal>verify</goal>
-        					</goals>
-    					</execution>
+                        <execution>
+                            <id>integration-test</id>
+                            <phase>integration-test</phase>
+                            <goals>
+                                <goal>integration-test</goal>
+                            </goals>
+                        </execution>
+                        <execution>
+                            <id>verify</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>verify</goal>
+                            </goals>
+                        </execution>
                     </executions>
                 </plugin>
                 <!-- minify css/js -->
@@ -509,7 +514,7 @@
                 <artifactId>maven-resources-plugin</artifactId>
             </plugin>
             <plugin>
-            <!-- add minified resources to build path -->
+                <!-- add minified resources to build path -->
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>build-helper-maven-plugin</artifactId>
                 <executions>
@@ -532,20 +537,20 @@
                 </executions>
             </plugin>
             <plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.7.6.201602180812</version>
-				<executions>
-					<execution>
-						<id>amend-unit-test-java-agent-option</id>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
+                <executions>
+                    <execution>
+                        <id>amend-unit-test-java-agent-option</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
             <plugin>
-            	<groupId>org.apache.maven.plugins</groupId>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.18.1</version>
                 <configuration>
@@ -559,10 +564,10 @@
         <plugins>
             <!-- code coverage -->
             <plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.7.6.201602180812</version>
-			</plugin>
+            </plugin>
             <!-- code analysis -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
@@ -596,32 +601,32 @@
                 <type>pom</type>
                 <scope>import</scope>
                 <exclusions>
-         			<exclusion>
-           				<groupId>commons-logging</groupId>
-           				<artifactId>commons-logging</artifactId>
-       				</exclusion>
-      			</exclusions>
+                    <exclusion>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
         </dependencies>
     </dependencyManagement>
 
     <dependencies>
         <!-- logging -->
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>${slf4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-classic</artifactId>
-			<version>${logback.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>ch.qos.logback</groupId>
-			<artifactId>logback-core</artifactId>
-			<version>${logback.version}</version>
-		</dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-core</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
         <!-- for third party dependencies that use log4j -->
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -629,10 +634,10 @@
             <version>${slf4j.version}</version>
         </dependency>
         <dependency>
-      		<groupId>org.slf4j</groupId>
-      		<artifactId>jcl-over-slf4j</artifactId>
-      		<version>${slf4j.version}</version>
-   		</dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
         <!-- scope: test -->
         <dependency>
             <groupId>org.testng</groupId>
@@ -676,7 +681,7 @@
         <module>molgenis-data-googlespreadsheet</module>
         <module>molgenis-data</module>
         <module>molgenis-data-system</module>
-		<module>molgenis-data-postgresql</module>
+        <module>molgenis-data-postgresql</module>
         <module>molgenis-data-vcf</module>
         <module>molgenis-data-rest</module>
         <module>molgenis-data-elasticsearch</module>
@@ -697,9 +702,9 @@
         <module>molgenis-data-rest-client</module>
         <module>molgenis-data-migrate</module>
         <module>molgenis-questionnaires</module>
-		<module>molgenis-file</module>
-		<module>molgenis-catalogue</module>
-		<module>molgenis-file-ingester</module>
+        <module>molgenis-file</module>
+        <module>molgenis-catalogue</module>
+        <module>molgenis-file-ingester</module>
         <module>molgenis-gavin</module>
         <module>molgenis-jobs</module>
         <module>molgenis-platform-integration-tests</module>

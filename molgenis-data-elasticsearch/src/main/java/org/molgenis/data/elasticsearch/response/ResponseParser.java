@@ -24,9 +24,8 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
 
 /**
  * Generates a SearchResult from the ElasticSearch SearchResponse object
- * 
+ *
  * @author erwin
- * 
  */
 public class ResponseParser
 {
@@ -77,8 +76,7 @@ public class ResponseParser
 					// information for labelAttribute from refeEntity and put it
 					// in the Hit result map
 					String fieldName = entry.getKey();
-					if (entityMetaData == null
-							|| entityMetaData.getAttribute(fieldName) == null
+					if (entityMetaData == null || entityMetaData.getAttribute(fieldName) == null
 							|| entityMetaData.getAttribute(fieldName).getDataType() != MREF)
 
 					{
@@ -131,8 +129,9 @@ public class ResponseParser
 		Aggregations aggregations = response.getAggregations();
 		if (aggregations != null)
 		{
-			aggregate = aggregateResponseParser.parseAggregateResponse(request.getAggregateField1(),
-					request.getAggregateField2(), request.getAggregateFieldDistinct(), aggregations, dataService);
+			aggregate = aggregateResponseParser
+					.parseAggregateResponse(request.getAggregateField1(), request.getAggregateField2(),
+							request.getAggregateFieldDistinct(), aggregations, dataService);
 		}
 
 		return new SearchResult(totalCount, searchHits, aggregate);

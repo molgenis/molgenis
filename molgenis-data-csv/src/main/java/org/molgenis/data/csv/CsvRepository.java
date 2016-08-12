@@ -20,7 +20,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 
 /**
  * Repository implementation for csv files.
- * 
+ * <p>
  * The filename without the extension is considered to be the entityname
  */
 public class CsvRepository extends AbstractRepository

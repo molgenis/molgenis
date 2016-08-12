@@ -1,7 +1,5 @@
 package org.molgenis.data.importer;
 
-import javax.servlet.http.HttpSession;
-
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.data.RepositoryCollection;
@@ -10,6 +8,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import javax.servlet.http.HttpSession;
 
 public class ImportJob implements Runnable
 {
@@ -60,7 +60,7 @@ public class ImportJob implements Runnable
 			{
 				// session invalidated
 			}
-			
+
 			importRunService.finishImportRun(importRunId, importReport.toString(),
 					StringUtils.join(importReport.getNewEntities(), ','));
 

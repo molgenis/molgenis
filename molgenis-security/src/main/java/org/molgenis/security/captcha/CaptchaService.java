@@ -1,17 +1,15 @@
 package org.molgenis.security.captcha;
 
-import java.awt.image.BufferedImage;
-
-import javax.servlet.http.HttpSession;
-
 import nl.captcha.Captcha;
 import nl.captcha.backgrounds.GradiatedBackgroundProducer;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.WebApplicationContext;
+
+import javax.servlet.http.HttpSession;
+import java.awt.image.BufferedImage;
 
 @Scope(proxyMode = ScopedProxyMode.TARGET_CLASS, value = WebApplicationContext.SCOPE_SESSION)
 @Service
@@ -22,11 +20,9 @@ public class CaptchaService
 
 	/**
 	 * Creates a {@link Captcha} and stores it in the session.
-	 * 
-	 * @param width
-	 *            the width of the image
-	 * @param height
-	 *            the height of the image
+	 *
+	 * @param width  the width of the image
+	 * @param height the height of the image
 	 * @return {@link BufferedImage} containing the captcha image
 	 */
 	public BufferedImage createCaptcha(int width, int height)
@@ -39,12 +35,10 @@ public class CaptchaService
 
 	/**
 	 * Validates a captcha answer. The same captcha can be validated multiple times.
-	 * 
-	 * @param captchaAnswer
-	 *            the String to validate
+	 *
+	 * @param captchaAnswer the String to validate
 	 * @return boolean indicating if the answer is correct
-	 * @throws CaptchaException
-	 *             if no captcha found to validate
+	 * @throws CaptchaException if no captcha found to validate
 	 */
 	public boolean validateCaptcha(String captchaAnswer) throws CaptchaException
 	{

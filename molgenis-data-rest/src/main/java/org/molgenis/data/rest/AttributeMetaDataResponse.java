@@ -50,14 +50,11 @@ public class AttributeMetaDataResponse
 	}
 
 	/**
-	 * 
 	 * @param entityParentName
 	 * @param entityMeta
 	 * @param attr
-	 * @param attributesSet
-	 *            set of lowercase attribute names to include in response
-	 * @param attributeExpandsSet
-	 *            set of lowercase attribute names to expand in response
+	 * @param attributesSet       set of lowercase attribute names to include in response
+	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */
 	public AttributeMetaDataResponse(final String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,
 			Set<String> attributesSet, final Map<String, Set<String>> attributeExpandsSet,
@@ -120,14 +117,13 @@ public class AttributeMetaDataResponse
 			}
 			else
 			{
-				this.refEntity = refEntity != null
-						? new Href(Href.concatMetaEntityHref(RestController.BASE_URI, refEntity.getName()),
-								String.format("%s/%s", RestController.BASE_URI, refEntity.getName()))
-						: null; // FIXME
-								// apply
-								// Href
-								// escaping
-								// fix
+				this.refEntity = refEntity != null ? new Href(
+						Href.concatMetaEntityHref(RestController.BASE_URI, refEntity.getName()),
+						String.format("%s/%s", RestController.BASE_URI, refEntity.getName())) : null; // FIXME
+				// apply
+				// Href
+				// escaping
+				// fix
 			}
 		}
 		else this.refEntity = null;
@@ -135,15 +131,15 @@ public class AttributeMetaDataResponse
 		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
 		{
 			Iterable<AttributeMetaData> attributeParts = attr.getAttributeParts();
-			this.attributes = attributeParts != null
-					? Lists.newArrayList(Iterables.transform(attributeParts, new Function<AttributeMetaData, Object>()
+			this.attributes = attributeParts != null ? Lists
+					.newArrayList(Iterables.transform(attributeParts, new Function<AttributeMetaData, Object>()
 					{
 
 						@Override
 						public Object apply(AttributeMetaData attributeMetaData)
 						{
-							if (attributeExpandsSet != null
-									&& attributeExpandsSet.containsKey("attributes".toLowerCase()))
+							if (attributeExpandsSet != null && attributeExpandsSet
+									.containsKey("attributes".toLowerCase()))
 							{
 								Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 								return new AttributeMetaDataResponse(entityParentName, entityMeta, attributeMetaData,
@@ -152,8 +148,9 @@ public class AttributeMetaDataResponse
 							}
 							else
 							{
-								return Collections.<String, Object> singletonMap("href", Href.concatMetaAttributeHref(
-										RestController.BASE_URI, entityParentName, attributeMetaData.getName()));
+								return Collections.<String, Object>singletonMap("href",
+										Href.concatMetaAttributeHref(RestController.BASE_URI, entityParentName,
+												attributeMetaData.getName()));
 							}
 						}
 					})) : null;

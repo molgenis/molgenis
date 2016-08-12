@@ -1,29 +1,10 @@
 package org.molgenis.ontology.controller;
 
-import static org.molgenis.ontology.controller.SortaServiceAnonymousController.URI;
-import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.COMBINED_SCORE;
-import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.SCORE;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.Part;
-
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.Entity;
@@ -48,11 +29,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+import static org.molgenis.ontology.controller.SortaServiceAnonymousController.URI;
+import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.COMBINED_SCORE;
+import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.SCORE;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 @Controller
 @RequestMapping(URI)
@@ -218,8 +211,9 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 				.toList();
 
 		List<String> columnHeaders = new ArrayList<String>(inputAttributeNames);
-		columnHeaders.addAll(Arrays.asList(OntologyTermMetaData.ONTOLOGY_TERM_NAME,
-				OntologyTermMetaData.ONTOLOGY_TERM_IRI, SCORE, COMBINED_SCORE));
+		columnHeaders.addAll(Arrays
+				.asList(OntologyTermMetaData.ONTOLOGY_TERM_NAME, OntologyTermMetaData.ONTOLOGY_TERM_IRI, SCORE,
+						COMBINED_SCORE));
 		return columnHeaders;
 	}
 
@@ -229,8 +223,8 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		{
 			public Map<String, Object> apply(Entity inputEntity)
 			{
-				Iterable<Entity> findOntologyTermEntities = sortaService.findOntologyTermEntities(ontologyIri,
-						inputEntity);
+				Iterable<Entity> findOntologyTermEntities = sortaService
+						.findOntologyTermEntities(ontologyIri, inputEntity);
 
 				return ImmutableMap.of("inputTerm", SortaServiceUtil.getEntityAsMap(inputEntity), "ontologyTerm",
 						SortaServiceUtil.getEntityAsMap(findOntologyTermEntities));
@@ -270,8 +264,8 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		{
 			public boolean apply(AttributeMetaData attr)
 			{
-				return StringUtils.isNotEmpty(attr.getName())
-						&& StringUtils.equalsIgnoreCase(attr.getName(), SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
+				return StringUtils.isNotEmpty(attr.getName()) && StringUtils
+						.equalsIgnoreCase(attr.getName(), SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
 			}
 		});
 	}

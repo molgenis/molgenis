@@ -16,15 +16,6 @@
 
 package org.molgenis.wikipathways.client;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URLEncoder;
-import java.rmi.RemoteException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.Consts;
@@ -41,11 +32,19 @@ import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 import org.molgenis.wikipathways.utils.Utils;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URLEncoder;
+import java.rmi.RemoteException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * connects to the new WikiPathways REST webservice
- * 
- * @author msk
  *
+ * @author msk
  */
 public class WikiPathwaysRESTBindingStub implements WikiPathwaysPortType
 {
@@ -603,9 +602,9 @@ public class WikiPathwaysRESTBindingStub implements WikiPathwaysPortType
 	{
 		try
 		{
-			String url = baseUrl + "/saveCurationTag?pwId=" + pwId + "&tagName=" + tagName + "&text="
-					+ URLEncoder.encode(tagText, "UTF-8") + "&revision=" + revision + "&auth=" + auth.getKey()
-					+ "&username=" + auth.getUser();
+			String url = baseUrl + "/saveCurationTag?pwId=" + pwId + "&tagName=" + tagName + "&text=" + URLEncoder
+					.encode(tagText, "UTF-8") + "&revision=" + revision + "&auth=" + auth.getKey() + "&username=" + auth
+					.getUser();
 			Document jdomDocument = Utils.connect(url, client);
 			String success = jdomDocument.getRootElement().getChild("success", WSNamespaces.NS1).getValue();
 			if (success.equals("1"))
@@ -625,8 +624,9 @@ public class WikiPathwaysRESTBindingStub implements WikiPathwaysPortType
 	{
 		try
 		{
-			String url = baseUrl + "/saveOntologyTag?pwId=" + pwId + "&term=" + URLEncoder.encode(term, "UTF-8")
-					+ "&termId=" + termId + "&auth=" + auth.getKey() + "&user=" + auth.getUser();
+			String url =
+					baseUrl + "/saveOntologyTag?pwId=" + pwId + "&term=" + URLEncoder.encode(term, "UTF-8") + "&termId="
+							+ termId + "&auth=" + auth.getKey() + "&user=" + auth.getUser();
 			Document jdomDocument = Utils.connect(url, client);
 			String success = jdomDocument.getRootElement().getChild("success", WSNamespaces.NS1).getValue();
 			if (success.equals("1"))

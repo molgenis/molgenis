@@ -1,14 +1,6 @@
 package org.molgenis.das.impl;
 
-import static com.google.common.collect.Iterables.toArray;
-import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
-
-import java.util.*;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import javax.servlet.ServletContext;
-
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.das.RangeHandlingDataSource;
@@ -17,9 +9,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
-
-import com.google.common.collect.Iterables;
-
 import uk.ac.ebi.mydas.configuration.DataSourceConfiguration;
 import uk.ac.ebi.mydas.configuration.PropertyType;
 import uk.ac.ebi.mydas.datasource.RangeHandlingAnnotationDataSource;
@@ -29,6 +18,12 @@ import uk.ac.ebi.mydas.model.DasAnnotatedSegment;
 import uk.ac.ebi.mydas.model.DasFeature;
 import uk.ac.ebi.mydas.model.DasMethod;
 import uk.ac.ebi.mydas.model.DasType;
+
+import javax.servlet.ServletContext;
+import java.util.*;
+import java.util.stream.Stream;
+
+import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 		implements RangeHandlingAnnotationDataSource
@@ -90,7 +85,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 
 		Integer score = 0;
 		Map<String, DasType> patients = new HashMap<String, DasType>();
-		for (Iterator<Entity> it = entityIterable.iterator(); it.hasNext();)
+		for (Iterator<Entity> it = entityIterable.iterator(); it.hasNext(); )
 		{
 			Entity entity = it.next();
 
@@ -126,22 +121,22 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 			// no end position? assume mutation of 1 position, so stop == start
 			List<String> attributes = Lists.newArrayList(entity.getAttributeNames().iterator());
 			valueStop = Iterables.contains(attributes, stopAttribute) ? entity.getInt(stopAttribute) : valueStart;
-			valueDescription = Iterables.contains(attributes, descriptionAttribute)
-					? entity.getString(descriptionAttribute) : "";
+			valueDescription = Iterables.contains(attributes, descriptionAttribute) ? entity
+					.getString(descriptionAttribute) : "";
 			valueLink = Iterables.contains(attributes, linkAttribute) ? entity.getString(linkAttribute) : "";
 			valuePatient = Iterables.contains(attributes, patientAttribute) ? entity.getString(patientAttribute) : "";
 
-			valueRef = StringUtils.isNotEmpty(refAttribute) && StringUtils.isNotEmpty(entity.getString(refAttribute))
-					? entity.getString(refAttribute) : "";
-			valueAlt = StringUtils.isNotEmpty(altAttribute) && StringUtils.isNotEmpty(entity.getString(altAttribute))
-					? entity.getString(altAttribute) : "";
+			valueRef = StringUtils.isNotEmpty(refAttribute) && StringUtils
+					.isNotEmpty(entity.getString(refAttribute)) ? entity.getString(refAttribute) : "";
+			valueAlt = StringUtils.isNotEmpty(altAttribute) && StringUtils
+					.isNotEmpty(entity.getString(altAttribute)) ? entity.getString(altAttribute) : "";
 
 			List<String> notes = new ArrayList<String>();
 			if (StringUtils.isNotEmpty(valueRef)) notes.add(refAttribute + "~" + valueRef);
 			if (StringUtils.isNotEmpty(valueAlt)) notes.add(altAttribute + "~" + valueAlt);
 
-			if (valueStart != null
-					&& ((valueStart >= start && valueStart <= stop) || (valueStop >= start && valueStop <= stop)))
+			if (valueStart != null && ((valueStart >= start && valueStart <= stop) || (valueStop >= start
+					&& valueStop <= stop)))
 			{
 				DasType type;// used for label colours in Dalliance
 				if (!StringUtils.isEmpty(valueRef) && !StringUtils.isEmpty(valueAlt))
@@ -175,8 +170,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 				Object labelValue = entity.getLabelValue();
 				feature = createDasFeature(valueStart, valueStop, entity.getIdValue().toString(),
 						labelValue != null ? labelValue.toString() : null, valueDescription, valueLink, type, method,
-						dataSet, valuePatient,
-						notes);
+						dataSet, valuePatient, notes);
 				features.add(feature);
 			}
 		}

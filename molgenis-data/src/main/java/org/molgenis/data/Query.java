@@ -67,7 +67,6 @@ public interface Query<E extends Entity> extends Iterable<E>
 	Query<E> not();
 
 	/**
-	 * 
 	 * @param field
 	 * @param value
 	 * @return
@@ -75,19 +74,15 @@ public interface Query<E extends Entity> extends Iterable<E>
 	Query<E> like(String field, String value);
 
 	/**
-	 * 
 	 * @param field
-	 * @param value
-	 *            categorical/xref: entity or entity id; mref: entity iterable or id iterable; else: value
+	 * @param value categorical/xref: entity or entity id; mref: entity iterable or id iterable; else: value
 	 * @return
 	 */
 	Query<E> eq(String field, Object value);
 
 	/**
-	 * 
 	 * @param field
-	 * @param values
-	 *            ids
+	 * @param values ids
 	 * @return
 	 */
 	Query<E> in(String field, Iterable<?> values);
@@ -139,29 +134,28 @@ public interface Query<E extends Entity> extends Iterable<E>
 
 	/**
 	 * Return the query {@link Fetch} that defines which entity attributes to retrieve.
-	 * 
+	 *
 	 * @return the query {@link Fetch} or null
 	 */
 	Fetch getFetch();
 
 	/**
 	 * Sets the query {@link Fetch} that defines which entity attributes to retrieve.
-	 * 
-	 * @param fetch
-	 *            the query {@link Fetch}
+	 *
+	 * @param fetch the query {@link Fetch}
 	 */
 	void setFetch(Fetch fetch);
 
 	/**
 	 * Create a new empty {@link Fetch} that defines which entity attributes to retrieve.
-	 * 
+	 *
 	 * @return new empty {@link Fetch}
 	 */
 	Fetch fetch();
 
 	/**
 	 * Sets the query {@link Fetch} that defines which entity attributes to retrieve.
-	 * 
+	 *
 	 * @return this query
 	 */
 	Query<E> fetch(Fetch fetch);

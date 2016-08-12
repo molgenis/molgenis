@@ -187,7 +187,8 @@ public class ImportWizardController extends AbstractWizardController
 	@ResponseStatus(HttpStatus.OK)
 	public void addGroupEntityClassPermissions(@RequestParam String groupId, WebRequest webRequest)
 	{
-		dataService.getEntityNames().forEach(entityClassId -> {
+		dataService.getEntityNames().forEach(entityClassId ->
+		{
 			GroupAuthority authority = getGroupAuthority(groupId, entityClassId);
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
@@ -422,8 +423,7 @@ public class ImportWizardController extends AbstractWizardController
 		ImportRun importRun;
 		String fileExtension = getExtension(file.getName());
 		DatabaseAction databaseAction = getDatabaseAction(file, action);
-		if (fileExtension.contains("vcf") &&
-				dataService.hasRepository(getBaseName(file.getName())))
+		if (fileExtension.contains("vcf") && dataService.hasRepository(getBaseName(file.getName())))
 		{
 			throw new MolgenisDataException(
 					"A repository with name " + getBaseName(file.getName()) + " already exists");

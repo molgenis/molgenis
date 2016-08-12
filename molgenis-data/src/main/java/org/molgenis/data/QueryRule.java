@@ -1,20 +1,19 @@
 package org.molgenis.data;
 
+import org.apache.commons.lang3.StringUtils;
+
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.xml.bind.annotation.XmlElement;
-import javax.xml.bind.annotation.XmlRootElement;
-
-import org.apache.commons.lang3.StringUtils;
-
 /**
  * With this class an equation model can be described for a database-field (eg a column). By combining this description
  * into a single class a convenient way for passing rules to the
  * {@link org.molgenis.Database.db.Database#find(Class, QueryRule[]) Database#find(Class, QueryRule[])}.
- * 
+ * <p>
  * <pre>
  * QueryRule rule = new QueryRule(&quot;Name&quot;, QueryRule.Operator.EQUALS, &quot;richard&quot;);
  * database.find(Person.class, rule);
@@ -76,7 +75,7 @@ public class QueryRule
 
 		/**
 		 * 'field' equal to 'value'
-		 * 
+		 * <p>
 		 * When 'field type' is 'Mref' its results are derived from the 'Contains' behavior. <br>
 		 * Examples: <br>
 		 * 1. ref1 OR ref2 can result in:
@@ -175,9 +174,8 @@ public class QueryRule
 
 		/**
 		 * Translate String label of the operator to Operator.
-		 * 
-		 * @param name
-		 *            of the operator
+		 *
+		 * @param name of the operator
 		 */
 		Operator(String label)
 		{
@@ -195,18 +193,16 @@ public class QueryRule
 	}
 
 	// constructor
+
 	/**
 	 * Standard constructor.
 	 * <p>
 	 * With this constructor the field, operator and value are set in one go, so there is no need for additional
 	 * statements.
-	 * 
-	 * @param field
-	 *            The field-name.
-	 * @param operator
-	 *            The operator to use for comparing entries in the field with the value.
-	 * @param value
-	 *            The value.
+	 *
+	 * @param field    The field-name.
+	 * @param operator The operator to use for comparing entries in the field with the value.
+	 * @param value    The value.
 	 */
 	public QueryRule(String field, Operator operator, Object value)
 	{
@@ -222,7 +218,7 @@ public class QueryRule
 
 	/**
 	 * Specific constructor for rules that do not apply to a field such as LIMIT and OFFSET.
-	 * 
+	 *
 	 * @param operator
 	 * @param value
 	 */
@@ -296,7 +292,7 @@ public class QueryRule
 
 	/**
 	 * Returns the field-name set for this rule.
-	 * 
+	 *
 	 * @return The field-name.
 	 */
 	public String getField()
@@ -318,9 +314,8 @@ public class QueryRule
 
 	/**
 	 * Sets a new field-name for this rule.
-	 * 
-	 * @param field
-	 *            The new field-name.
+	 *
+	 * @param field The new field-name.
 	 */
 	public void setField(String field)
 	{
@@ -329,7 +324,7 @@ public class QueryRule
 
 	/**
 	 * Returns the operator set for this rule.
-	 * 
+	 *
 	 * @return The operator.
 	 */
 	public Operator getOperator()
@@ -339,9 +334,8 @@ public class QueryRule
 
 	/**
 	 * Sets a new operator for this rule.
-	 * 
-	 * @param operator
-	 *            The new operator.
+	 *
+	 * @param operator The new operator.
 	 */
 	public void setOperator(Operator operator)
 	{
@@ -350,7 +344,7 @@ public class QueryRule
 
 	/**
 	 * Returns the value set for this rule.
-	 * 
+	 *
 	 * @return The value.
 	 */
 	public Object getValue()
@@ -360,9 +354,8 @@ public class QueryRule
 
 	/**
 	 * Sets a new value for this rule.
-	 * 
-	 * @param value
-	 *            The new value.
+	 *
+	 * @param value The new value.
 	 */
 	public void setValue(Object value)
 	{
@@ -371,7 +364,7 @@ public class QueryRule
 
 	/**
 	 * Convenience function to return value as nested rule array.
-	 * 
+	 *
 	 * @return Nested rule set
 	 */
 	public List<QueryRule> getNestedRules()
@@ -424,7 +417,7 @@ public class QueryRule
 			}
 			strBuilder.append('(');
 
-			for (Iterator<QueryRule> it = nestedRules.iterator(); it.hasNext();)
+			for (Iterator<QueryRule> it = nestedRules.iterator(); it.hasNext(); )
 			{
 				strBuilder.append(it.next());
 				if (it.hasNext())

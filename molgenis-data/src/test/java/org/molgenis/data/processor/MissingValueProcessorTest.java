@@ -1,9 +1,8 @@
 package org.molgenis.data.processor;
 
-import static org.testng.Assert.assertEquals;
-
-import org.molgenis.data.processor.MissingValueProcessor;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
 
 public class MissingValueProcessorTest
 {

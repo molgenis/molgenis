@@ -1,26 +1,15 @@
 package org.molgenis.util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
-
+import ch.ethz.ssh2.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.ethz.ssh2.ChannelCondition;
-import ch.ethz.ssh2.Connection;
-import ch.ethz.ssh2.InteractiveCallback;
-import ch.ethz.ssh2.LocalPortForwarder;
-import ch.ethz.ssh2.SCPClient;
-import ch.ethz.ssh2.Session;
+import java.io.*;
+import java.nio.charset.Charset;
 
 /**
  * Wrapper arround ssh. Build on top of
- * 
+ * <p>
  * http://www.cleondris.ch/opensource/ssh2/javadoc/ (BSD type license) http://www.ganymed.ethz.ch/ssh2/FAQ.html
  */
 public class Ssh
@@ -84,7 +73,7 @@ public class Ssh
 
 	/**
 	 * Connect to server as a session
-	 * 
+	 *
 	 * @throws IOException
 	 */
 	private void connect() throws IOException
@@ -134,7 +123,9 @@ public class Ssh
 		return this.executeCommand(command, timeout);
 	}
 
-	/** Execute one command and wait for the result to return */
+	/**
+	 * Execute one command and wait for the result to return
+	 */
 	public SshResult executeCommand(String command, int timeout) throws IOException
 	{
 		LOG.debug("executing command: " + command);
@@ -166,8 +157,9 @@ public class Ssh
 					 * STDOUT_DATA (or STDERR_DATA, or both) may be set together.
 					 */
 
-					int conditions = sess.waitForCondition(ChannelCondition.STDOUT_DATA | ChannelCondition.STDERR_DATA
-							| ChannelCondition.EOF, timeout);
+					int conditions = sess.waitForCondition(
+							ChannelCondition.STDOUT_DATA | ChannelCondition.STDERR_DATA | ChannelCondition.EOF,
+							timeout);
 
 					/* Wait no longer than 2 seconds (= 2000 milliseconds) */
 
@@ -199,8 +191,8 @@ public class Ssh
 					// You can be paranoid and check that the library is not
 					// going
 					// nuts:
-					if ((conditions & (ChannelCondition.STDOUT_DATA | ChannelCondition.STDERR_DATA)) == 0) throw new IOException(
-							"Unexpected condition result (" + conditions + ")");
+					if ((conditions & (ChannelCondition.STDOUT_DATA | ChannelCondition.STDERR_DATA)) == 0)
+						throw new IOException("Unexpected condition result (" + conditions + ")");
 				}
 
 				/*
@@ -223,7 +215,7 @@ public class Ssh
 				{
 					int len = stderr.read(buffer);
 					if (len > 0) // this check is somewhat paranoid
-					stdErrBuffer.append(new String(buffer, 0, len, Charset.forName("UTF-8")));
+						stdErrBuffer.append(new String(buffer, 0, len, Charset.forName("UTF-8")));
 				}
 			}
 
@@ -290,11 +282,9 @@ public class Ssh
 
 	/**
 	 * Upload string to remote file.
-	 * 
-	 * @param string
-	 *            to upload
-	 * @param remoteFile
-	 *            full path including directories
+	 *
+	 * @param string     to upload
+	 * @param remoteFile full path including directories
 	 * @throws IOException
 	 */
 	public void uploadStringToFile(String string, String remoteFile) throws IOException
@@ -319,13 +309,10 @@ public class Ssh
 
 	/**
 	 * Upload a string using scp, with seperate directory and file parameters.
-	 * 
-	 * @param string
-	 *            to upload
-	 * @param remoteFile
-	 *            only the file name
-	 * @param remoteDir
-	 *            path to the directory
+	 *
+	 * @param string     to upload
+	 * @param remoteFile only the file name
+	 * @param remoteDir  path to the directory
 	 * @throws IOException
 	 */
 	public void uploadStringToFile(String string, String remoteFile, String remoteDir) throws IOException
@@ -343,7 +330,7 @@ public class Ssh
 
 	/**
 	 * Download remote file to local file via scp
-	 * 
+	 *
 	 * @param remoteFile
 	 * @param localFile
 	 * @throws IOException

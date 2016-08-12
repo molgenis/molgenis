@@ -1,12 +1,11 @@
 package org.molgenis.data.mapper.algorithmgenerator.rules;
 
-import javax.annotation.Nullable;
-
+import com.google.auto.value.AutoValue;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 import org.molgenis.data.mapper.algorithmgenerator.rules.quality.Quality;
 import org.molgenis.gson.AutoGson;
 
-import com.google.auto.value.AutoValue;
+import javax.annotation.Nullable;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_CategoryMatchQuality.class)

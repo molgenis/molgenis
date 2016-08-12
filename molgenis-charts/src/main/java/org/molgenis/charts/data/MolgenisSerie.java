@@ -19,8 +19,7 @@ public class MolgenisSerie
 	}
 
 	/**
-	 * @param name
-	 *            the name to set
+	 * @param name the name to set
 	 */
 	public void setName(String name)
 	{
@@ -36,8 +35,7 @@ public class MolgenisSerie
 	}
 
 	/**
-	 * @param type
-	 *            the type to set
+	 * @param type the type to set
 	 */
 	public void setType(MolgenisSerieType type)
 	{

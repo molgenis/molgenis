@@ -1,19 +1,18 @@
 package org.molgenis.r;
 
-import static java.util.Objects.requireNonNull;
-
-import java.io.File;
-import java.io.IOException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * Executes a r script with the RScript executable in a new process.
- * 
  */
 @Service
 public class RScriptExecutor

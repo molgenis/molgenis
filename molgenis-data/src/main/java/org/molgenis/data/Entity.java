@@ -21,14 +21,14 @@ public interface Entity extends Serializable
 
 	/**
 	 * Get all attribute names
-	 *
+	 * <p>
 	 * TODO remove, use getEntityMetaData to retrieve entity meta data
 	 */
 	Iterable<String> getAttributeNames();
 
 	/**
 	 * Optional unique id to identify this Entity. Otherwise return null
-	 *
+	 * <p>
 	 * // TODO getIdValue should return id of type of entity (requires generic on Entity)
 	 */
 	Object getIdValue();
@@ -117,7 +117,7 @@ public interface Entity extends Serializable
 
 	/**
 	 * Copy attribute values from another entity
-	 *
+	 * <p>
 	 * TODO remove method, move to utility class
 	 */
 	void set(Entity values);

@@ -284,7 +284,8 @@ class RestControllerV2
 			// Add all entities
 			this.dataService.add(entityName, entities.stream());
 
-			entities.forEach(entity -> {
+			entities.forEach(entity ->
+			{
 				String id = entity.getIdValue().toString();
 				ids.add(id.toString());
 				responseBody.getResources().add(new AutoValue_ResourcesResponseV2(

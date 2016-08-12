@@ -1,14 +1,5 @@
 package org.molgenis.script;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.URLConnection;
-import java.util.Map;
-
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -18,11 +9,19 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.URLConnection;
+import java.util.Map;
+
 /**
  * Controller for running a script
- * 
+ * <p>
  * Url: /scripts/${scriptname}/run
- * 
+ * <p>
  * If the script generates an outputfile that file is streamed to the outputstream else the script output
  */
 @Controller

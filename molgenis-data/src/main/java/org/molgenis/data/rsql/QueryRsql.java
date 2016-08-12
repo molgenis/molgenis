@@ -1,14 +1,13 @@
 package org.molgenis.data.rsql;
 
+import cz.jirutka.rsql.parser.ast.Node;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.EntityMetaData;
 
-import cz.jirutka.rsql.parser.ast.Node;
-
 /**
  * Create MOLGENIS Query from RSQL node based on entity meta data.
- * 
+ *
  * @see https://github.com/jirutka/rsql-parser
  */
 public class QueryRsql

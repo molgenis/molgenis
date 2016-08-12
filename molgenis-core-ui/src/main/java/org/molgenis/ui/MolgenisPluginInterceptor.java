@@ -1,16 +1,5 @@
 package org.molgenis.ui;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.ui.MolgenisPluginAttributes.KEY_AUTHENTICATED;
-import static org.molgenis.ui.MolgenisPluginAttributes.KEY_MOLGENIS_UI;
-import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_ID;
-import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_ID_WITH_QUERY_STRING;
-import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_SETTINGS;
-import static org.molgenis.ui.MolgenisPluginAttributes.KEY_PLUGIN_SETTINGS_CAN_WRITE;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.molgenis.data.Entity;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -19,6 +8,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.ui.MolgenisPluginAttributes.*;
 
 /**
  * Interceptor that adds default model objects to all plugin requests that return a view.
@@ -70,8 +65,8 @@ public class MolgenisPluginInterceptor extends HandlerInterceptorAdapter
 			if (pluginSettings != null)
 			{
 				String pluginSettingsEntityName = pluginSettings.getEntityMetaData().getName();
-				pluginSettingsCanWrite = permissionService.hasPermissionOnEntity(pluginSettingsEntityName,
-						Permission.WRITE);
+				pluginSettingsCanWrite = permissionService
+						.hasPermissionOnEntity(pluginSettingsEntityName, Permission.WRITE);
 			}
 			else
 			{

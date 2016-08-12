@@ -1,15 +1,13 @@
 package org.molgenis.data.elasticsearch.request;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 public class LimitOffsetGeneratorTest
 {

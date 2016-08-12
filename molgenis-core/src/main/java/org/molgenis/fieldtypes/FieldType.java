@@ -24,7 +24,7 @@ public abstract class FieldType implements Serializable
 
 	/**
 	 * Get the field type from a field. Equal to field.getType();
-	 * 
+	 *
 	 * @param f
 	 * @return
 	 * @throws MolgenisModelException
@@ -36,7 +36,7 @@ public abstract class FieldType implements Serializable
 
 	/**
 	 * Get an entity from the field type (only works if the field type is linked to a Field instance).
-	 * 
+	 *
 	 * @param name
 	 * @return
 	 */
@@ -46,7 +46,6 @@ public abstract class FieldType implements Serializable
 	}
 
 	/**
-	 * 
 	 * @return
 	 * @throws MolgenisModelException
 	 */
@@ -57,14 +56,14 @@ public abstract class FieldType implements Serializable
 
 	/**
 	 * Returns the maximum number of characters for this field type or null if not applicable
-	 * 
+	 *
 	 * @return
 	 */
 	public abstract Long getMaxLength();
 
 	/**
 	 * Product the Java type of this field type. Default: "String".
-	 * 
+	 *
 	 * @return type in java code
 	 * @throws MolgenisModelException
 	 */
@@ -72,7 +71,7 @@ public abstract class FieldType implements Serializable
 
 	/**
 	 * Product the Java type of this field type. Default: "String".
-	 * 
+	 *
 	 * @return type in java code
 	 * @throws MolgenisModelException
 	 */
@@ -81,7 +80,7 @@ public abstract class FieldType implements Serializable
 	/**
 	 * Produce a valid Java snippet to set the default of a field, using the 'getDefault' function of that field.
 	 * Default: "\""+f.getDefault()+"\"".
-	 * 
+	 *
 	 * @return default in java code
 	 * @throws MolgenisModelException
 	 */
@@ -89,7 +88,7 @@ public abstract class FieldType implements Serializable
 
 	/**
 	 * Produce a valid Java snippet to set a value for field.
-	 * 
+	 *
 	 * @return default in java code
 	 * @throws MolgenisModelException
 	 */
@@ -97,7 +96,7 @@ public abstract class FieldType implements Serializable
 
 	/**
 	 * Produce the Java class corresponding to the value
-	 * 
+	 *
 	 * @return Java class
 	 * @throws MolgenisModelException
 	 */
@@ -105,7 +104,7 @@ public abstract class FieldType implements Serializable
 
 	/**
 	 * Produce a valid mysql snippet indicating the mysql type. E.g. "BOOL".
-	 * 
+	 *
 	 * @return mysql type string
 	 * @throws MolgenisModelException
 	 */
@@ -113,7 +112,7 @@ public abstract class FieldType implements Serializable
 
 	/**
 	 * Returns the PostgreSQL data type name for this field type
-	 * 
+	 *
 	 * @return PostgreSQL data type name
 	 */
 	public abstract String getPostgreSqlType();
@@ -125,7 +124,7 @@ public abstract class FieldType implements Serializable
 
 	/**
 	 * Convert a list of string to comma separated values.
-	 * 
+	 *
 	 * @param elements
 	 * @return csv
 	 */
@@ -143,7 +142,7 @@ public abstract class FieldType implements Serializable
 
 	/**
 	 * Produce a valid hsql snippet indicating the mysql type. E.g. "BOOL".
-	 * 
+	 *
 	 * @return hsql type string
 	 * @throws MolgenisModelException
 	 */
@@ -156,7 +155,7 @@ public abstract class FieldType implements Serializable
 
 	/**
 	 * Get the format string, e.g. '%s'
-	 * 
+	 *
 	 * @return
 	 */
 	public abstract String getFormatString();

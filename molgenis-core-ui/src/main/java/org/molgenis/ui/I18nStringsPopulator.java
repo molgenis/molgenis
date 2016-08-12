@@ -1,13 +1,5 @@
 package org.molgenis.ui;
 
-import static org.molgenis.data.DatabaseAction.ADD_IGNORE_EXISTING;
-import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-
 import org.molgenis.data.FileRepositoryCollectionFactory;
 import org.molgenis.data.importer.ImportService;
 import org.molgenis.data.importer.ImportServiceFactory;
@@ -17,6 +9,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static org.molgenis.data.DatabaseAction.ADD_IGNORE_EXISTING;
+import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 /**
  * Imports i18n static strings from molgenis-core-ui/src/main/resources/i18n.xlsx at startup.

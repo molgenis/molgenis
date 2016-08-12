@@ -579,8 +579,7 @@ public class PostgreSqlRepository extends AbstractRepository
 				}
 				// update mrefs
 				List<Object> ids = entitiesBatch.stream()
-						.map(entity -> PostgreSqlUtils.getPostgreSqlValue(entity, idAttr))
-						.collect(toList());
+						.map(entity -> PostgreSqlUtils.getPostgreSqlValue(entity, idAttr)).collect(toList());
 				for (AttributeMetaData attr : persistedMrefAttrs)
 				{
 					if (isMultipleReferenceType(attr))

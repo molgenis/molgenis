@@ -1,10 +1,10 @@
 package org.molgenis.auth;
 
-import static org.molgenis.auth.UserAuthorityMetaData.ID;
-import static org.molgenis.auth.UserAuthorityMetaData.MOLGENIS_USER;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
+
+import static org.molgenis.auth.UserAuthorityMetaData.ID;
+import static org.molgenis.auth.UserAuthorityMetaData.MOLGENIS_USER;
 
 public class UserAuthority extends Authority
 {

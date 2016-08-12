@@ -73,10 +73,10 @@ public class Step30MigrateJobExecutionUser extends MolgenisUpgrade
 		LOG.info("Update data type of {}.{} to {}...", entityFullName, attributeName, newDataType);
 		String attributeId = jdbcTemplate.queryForObject(
 				"SELECT a.identifier FROM entities_attributes ea JOIN attributes a ON ea.attributes = a.identifier WHERE ea.fullName = '"
-						+ entityFullName + "' AND a.name='" + attributeName + "'",
-				String.class);
-		jdbcTemplate.update("UPDATE attributes SET dataType = '" + newDataType
-				+ "', refEntity = NULL WHERE identifier = '" + attributeId + "'");
+						+ entityFullName + "' AND a.name='" + attributeName + "'", String.class);
+		jdbcTemplate
+				.update("UPDATE attributes SET dataType = '" + newDataType + "', refEntity = NULL WHERE identifier = '"
+						+ attributeId + "'");
 	}
 
 	private void dropForeignKey(String entityFullName)

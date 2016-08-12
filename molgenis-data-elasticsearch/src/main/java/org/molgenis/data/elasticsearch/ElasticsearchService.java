@@ -381,8 +381,7 @@ public class ElasticsearchService implements SearchService
 		AttributeMetaData xAttr = aggregateQuery.getAttributeX();
 		AttributeMetaData yAttr = aggregateQuery.getAttributeY();
 		AttributeMetaData distinctAttr = aggregateQuery.getAttributeDistinct();
-		SearchRequest searchRequest = new SearchRequest(entityMetaData.getName(), q, xAttr, yAttr,
-				distinctAttr);
+		SearchRequest searchRequest = new SearchRequest(entityMetaData.getName(), q, xAttr, yAttr, distinctAttr);
 		SearchResult searchResults = search(searchRequest);
 		return searchResults.getAggregate();
 	}

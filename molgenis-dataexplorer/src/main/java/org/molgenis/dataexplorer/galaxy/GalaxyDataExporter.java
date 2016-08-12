@@ -1,8 +1,5 @@
 package org.molgenis.dataexplorer.galaxy;
 
-import java.io.File;
-import java.util.List;
-
 import com.github.jmchilton.blend4j.galaxy.GalaxyInstance;
 import com.github.jmchilton.blend4j.galaxy.GalaxyInstanceFactory;
 import com.github.jmchilton.blend4j.galaxy.HistoriesClient;
@@ -12,6 +9,9 @@ import com.github.jmchilton.blend4j.galaxy.ToolsClient.UploadFile;
 import com.github.jmchilton.blend4j.galaxy.beans.History;
 import com.github.jmchilton.blend4j.galaxy.beans.OutputDataset;
 import com.github.jmchilton.blend4j.galaxy.beans.ToolExecution;
+
+import java.io.File;
+import java.util.List;
 
 public class GalaxyDataExporter
 {

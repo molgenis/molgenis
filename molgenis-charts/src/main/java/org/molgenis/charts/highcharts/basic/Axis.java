@@ -16,7 +16,7 @@ public class Axis
 
 	/**
 	 * Works only on Highstock charts
-	 * 
+	 *
 	 * @param ordinal the ordinal to set
 	 */
 	public Axis setOrdinal(Boolean ordinal)
@@ -35,13 +35,13 @@ public class Axis
 		this.type = type;
 		return this;
 	}
-	
+
 	public Axis setType(AxisType type)
 	{
 		this.type = type.toString();
 		return this;
 	}
-	
+
 	public AxisTitle getTitle()
 	{
 		return title;

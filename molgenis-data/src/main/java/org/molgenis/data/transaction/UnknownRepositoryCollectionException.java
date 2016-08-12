@@ -1,8 +1,8 @@
 package org.molgenis.data.transaction;
 
-import static java.lang.String.format;
-
 import org.molgenis.data.MolgenisDataException;
+
+import static java.lang.String.format;
 
 public class UnknownRepositoryCollectionException extends MolgenisDataException
 {

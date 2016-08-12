@@ -1,14 +1,14 @@
 package org.molgenis.data.support;
 
-import static java.util.Objects.requireNonNull;
-
-import java.sql.Date;
-import java.sql.Timestamp;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.EntityMetaData;
+
+import java.sql.Date;
+import java.sql.Timestamp;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Entity with partially loaded attributes based on a fetch. Requesting attributes not included in the fetch are

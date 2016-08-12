@@ -24,9 +24,8 @@ public class SearchRequest
 		this.query = new QueryImpl<>(query);
 	}
 
-	public SearchRequest(String documentType, Query<Entity> query,
-			AttributeMetaData aggregateField1, AttributeMetaData aggregateField2,
-			AttributeMetaData aggregateFieldDistinct)
+	public SearchRequest(String documentType, Query<Entity> query, AttributeMetaData aggregateField1,
+			AttributeMetaData aggregateField2, AttributeMetaData aggregateFieldDistinct)
 	{
 		this(documentType, query);
 		this.aggregateField1 = aggregateField1;

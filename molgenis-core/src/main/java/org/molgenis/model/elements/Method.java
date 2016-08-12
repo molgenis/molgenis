@@ -14,9 +14,10 @@
 package org.molgenis.model.elements;
 
 // imports
-import java.util.Vector;
 
 import org.molgenis.model.MolgenisModelException;
+
+import java.util.Vector;
 
 /**
  * Describes an exposable method in the molgenis framework. A method can for
@@ -91,7 +92,8 @@ public class Method extends MethodSchema
 		{
 			strBuilder.append("\n-> ").append(query.getEntity()).append(":\n");
 			for (MethodQuery.Rule rule : query.getRules())
-				strBuilder.append("   ").append(rule.getField()).append(' ').append(rule.getOperator()).append(' ').append(rule.getParameter()).append('\n');
+				strBuilder.append("   ").append(rule.getField()).append(' ').append(rule.getOperator()).append(' ')
+						.append(rule.getParameter()).append('\n');
 		}
 		return strBuilder.toString();
 	}

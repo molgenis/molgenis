@@ -1,11 +1,11 @@
 package org.molgenis.data.convert;
 
-import static org.testng.Assert.assertEquals;
+import org.molgenis.util.MolgenisDateFormat;
+import org.testng.annotations.Test;
 
 import java.util.Date;
 
-import org.molgenis.util.MolgenisDateFormat;
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 public class StringToDateConverterTest
 {

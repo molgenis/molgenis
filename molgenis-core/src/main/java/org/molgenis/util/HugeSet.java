@@ -1,5 +1,8 @@
 package org.molgenis.util;
 
+import org.mapdb.DB;
+import org.mapdb.DBMaker;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -9,12 +12,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
-import org.mapdb.DB;
-import org.mapdb.DBMaker;
-
 /**
  * Set that can contain a huge amount of data by storing it on disk.
- * 
+ *
  * @param <E>
  */
 public class HugeSet<E> implements Set<E>, Closeable

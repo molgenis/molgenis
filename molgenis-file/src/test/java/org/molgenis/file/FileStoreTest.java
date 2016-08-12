@@ -25,15 +25,13 @@ public class FileStoreTest
 		Assert.assertTrue(fileStore.getFile("testDir").isDirectory());
 		fileStore.delete("testDir");
 	}
-	
+
 	@Test
 	public void store() throws IOException
 	{
 		FileStore fileStore = new FileStore(System.getProperty("java.io.tmpdir"));
-		File file = fileStore.store(new ByteArrayInputStream(new byte[]
-		{ 1, 2, 3 }), "bytes.bin");
-		Assert.assertEquals(FileUtils.readFileToByteArray(file), new byte[]
-		{ 1, 2, 3 });
+		File file = fileStore.store(new ByteArrayInputStream(new byte[] { 1, 2, 3 }), "bytes.bin");
+		Assert.assertEquals(FileUtils.readFileToByteArray(file), new byte[] { 1, 2, 3 });
 	}
 
 	@Test
@@ -41,8 +39,7 @@ public class FileStoreTest
 	{
 		String fileName = "bytes.bin";
 		FileStore fileStore = new FileStore(System.getProperty("java.io.tmpdir"));
-		File file = fileStore.store(new ByteArrayInputStream(new byte[]
-		{ 1, 2, 3 }), fileName);
+		File file = fileStore.store(new ByteArrayInputStream(new byte[] { 1, 2, 3 }), fileName);
 
 		Assert.assertEquals(fileStore.getFile(fileName).getAbsolutePath(), file.getAbsolutePath());
 	}

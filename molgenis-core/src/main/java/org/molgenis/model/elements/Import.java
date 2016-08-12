@@ -2,9 +2,8 @@ package org.molgenis.model.elements;
 
 /**
  * Import model
- * 
+ *
  * @author Morris Swertz
- * 
  */
 public class Import
 {

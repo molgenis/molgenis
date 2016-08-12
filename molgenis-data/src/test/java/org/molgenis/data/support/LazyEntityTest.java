@@ -1,16 +1,6 @@
 package org.molgenis.data.support;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.util.Arrays;
-
+import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -18,7 +8,12 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Lists;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.util.Arrays;
+
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertEquals;
 
 public class LazyEntityTest
 {
@@ -117,8 +112,7 @@ public class LazyEntityTest
 	public void getEntitiesString()
 	{
 		String attrName = "attr";
-		@SuppressWarnings("unchecked")
-		Iterable<Entity> entities = mock(Iterable.class);
+		@SuppressWarnings("unchecked") Iterable<Entity> entities = mock(Iterable.class);
 		when(entity.getEntities(attrName)).thenReturn(entities);
 		assertEquals(entities, lazyEntity.getEntities(attrName));
 		assertEquals(entities, lazyEntity.getEntities(attrName));
@@ -129,8 +123,7 @@ public class LazyEntityTest
 	public void getEntitiesStringClassE()
 	{
 		String attrName = "attr";
-		@SuppressWarnings("unchecked")
-		Iterable<Entity> entities = mock(Iterable.class);
+		@SuppressWarnings("unchecked") Iterable<Entity> entities = mock(Iterable.class);
 		when(entity.getEntities(attrName, Entity.class)).thenReturn(entities);
 		assertEquals(entities, lazyEntity.getEntities(attrName, Entity.class));
 		assertEquals(entities, lazyEntity.getEntities(attrName, Entity.class));

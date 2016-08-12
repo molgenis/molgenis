@@ -45,8 +45,7 @@ public class I18nStringDecoratorTest
 		verify(decoratedRepo, times(1)).delete(entities);
 	}
 
-	@SuppressWarnings(
-	{ "unchecked", "rawtypes" })
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void updateStream()
 	{

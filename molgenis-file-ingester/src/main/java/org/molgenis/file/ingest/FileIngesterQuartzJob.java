@@ -1,13 +1,5 @@
 package org.molgenis.file.ingest;
 
-import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_EXECUTION;
-import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
-import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-
 import org.molgenis.data.DataService;
 import org.molgenis.file.ingest.execution.FileIngestJob;
 import org.molgenis.file.ingest.execution.FileIngestJobFactory;
@@ -23,9 +15,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+
+import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_EXECUTION;
+import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
+import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+
 /**
  * FileIngester quartz job
- * 
+ * <p>
  * It prevents concurrent execution of jobs with the same JobKey
  */
 @DisallowConcurrentExecution

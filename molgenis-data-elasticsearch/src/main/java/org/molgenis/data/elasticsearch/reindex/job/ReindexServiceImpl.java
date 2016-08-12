@@ -100,7 +100,8 @@ public class ReindexServiceImpl implements ReindexService
 	@Scheduled(fixedRate = 5 * 60 * 1000)
 	public void cleanupJobExecutions()
 	{
-		runAsSystem(() -> {
+		runAsSystem(() ->
+		{
 			LOG.trace("Clean up Reindex job executions...");
 			Date fiveMinutesAgo = from(now().minusMinutes(5).toInstant());
 			boolean reindexJobExecutionExists = dataService.hasRepository(REINDEX_JOB_EXECUTION);

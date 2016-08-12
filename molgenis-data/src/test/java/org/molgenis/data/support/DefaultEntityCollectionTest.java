@@ -1,10 +1,10 @@
 package org.molgenis.data.support;
 
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertFalse;
-
 import org.molgenis.data.Entity;
 import org.testng.annotations.Test;
+
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertFalse;
 
 public class DefaultEntityCollectionTest
 {

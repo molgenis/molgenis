@@ -1,15 +1,14 @@
 package org.molgenis.data.mapper.algorithmgenerator.categorymapper;
 
-import java.util.List;
-
-import javax.measure.unit.NonSI;
-import javax.measure.unit.Unit;
-
 import org.jscience.physics.amount.Amount;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 import org.molgenis.data.mapper.algorithmgenerator.rules.CategoryMatchQuality;
 import org.molgenis.data.mapper.algorithmgenerator.rules.CategoryRule;
+
+import javax.measure.unit.NonSI;
+import javax.measure.unit.Unit;
+import java.util.List;
 
 public class FrequencyCategoryMapper extends CategoryMapper
 {

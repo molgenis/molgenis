@@ -1,15 +1,10 @@
 package org.molgenis.security;
 
-import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_CSS;
-import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_FONTS;
-import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_IMG;
-import static org.molgenis.framework.ui.ResourcePathPatterns.PATTERN_JS;
-import static org.molgenis.security.google.GoogleAuthenticationProcessingFilter.GOOGLE_AUTHENTICATION_URL;
-
-import java.util.List;
-
-import javax.servlet.Filter;
-
+import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import org.molgenis.auth.MolgenisGroupMemberFactory;
 import org.molgenis.auth.MolgenisTokenFactory;
 import org.molgenis.auth.MolgenisUserFactory;
@@ -64,11 +59,11 @@ import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
 import org.springframework.security.web.util.matcher.OrRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 
-import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
-import com.google.api.client.http.HttpTransport;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.jackson2.JacksonFactory;
+import javax.servlet.Filter;
+import java.util.List;
+
+import static org.molgenis.framework.ui.ResourcePathPatterns.*;
+import static org.molgenis.security.google.GoogleAuthenticationProcessingFilter.GOOGLE_AUTHENTICATION_URL;
 
 public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurerAdapter
 {
@@ -112,7 +107,7 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 		http.addFilterBefore(apiSessionExpirationFilter(), MolgenisAnonymousAuthenticationFilter.class);
 		http.authenticationProvider(tokenAuthenticationProvider());
-		
+
 		http.authenticationProvider(runAsAuthenticationProvider());
 
 		http.addFilterBefore(tokenAuthenticationFilter(), ApiSessionExpirationFilter.class);
@@ -175,22 +170,24 @@ public abstract class MolgenisWebAppSecurityConfig extends WebSecurityConfigurer
 
 				.formLogin().loginPage("/login").failureUrl("/login?error").and()
 
-				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) -> {
-					if (req.getSession(false) != null
-							&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
-					{
-						req.setAttribute("continueWithUnsupportedBrowser", true);
-					}
-				}).logoutSuccessHandler((req, res, auth) -> {
-					StringBuilder logoutSuccessUrl = new StringBuilder("/");
-					if (req.getAttribute("continueWithUnsupportedBrowser") != null)
-					{
-						logoutSuccessUrl.append("?continueWithUnsupportedBrowser=true");
-					}
-					SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
-					logoutSuccessHandler.setDefaultTargetUrl(logoutSuccessUrl.toString());
-					logoutSuccessHandler.onLogoutSuccess(req, res, auth);
-				})
+				.logout().deleteCookies("JSESSIONID").addLogoutHandler((req, res, auth) ->
+		{
+			if (req.getSession(false) != null
+					&& req.getSession().getAttribute("continueWithUnsupportedBrowser") != null)
+			{
+				req.setAttribute("continueWithUnsupportedBrowser", true);
+			}
+		}).logoutSuccessHandler((req, res, auth) ->
+		{
+			StringBuilder logoutSuccessUrl = new StringBuilder("/");
+			if (req.getAttribute("continueWithUnsupportedBrowser") != null)
+			{
+				logoutSuccessUrl.append("?continueWithUnsupportedBrowser=true");
+			}
+			SimpleUrlLogoutSuccessHandler logoutSuccessHandler = new SimpleUrlLogoutSuccessHandler();
+			logoutSuccessHandler.setDefaultTargetUrl(logoutSuccessUrl.toString());
+			logoutSuccessHandler.onLogoutSuccess(req, res, auth);
+		})
 
 				.and()
 

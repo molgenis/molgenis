@@ -1,10 +1,10 @@
 package org.molgenis.ui.admin.usermanager;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.auth.MolgenisUser;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class MolgenisUserViewData
 {

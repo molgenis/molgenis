@@ -1,6 +1,5 @@
 package org.molgenis.data;
 
-
 public class UnknownAttributeException extends MolgenisDataException
 {
 	private static final long serialVersionUID = 1L;

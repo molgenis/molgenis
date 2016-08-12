@@ -2,16 +2,15 @@ package org.molgenis.util;
 
 /**
  * Helper functions for HTML interaction
- * 
+ *
  * @author joerivandervelde
- * 
  */
 public class HtmlTools
 {
 
 	/**
 	 * Helper function to convert any string into URL-safe encoding.
-	 * 
+	 *
 	 * @param input
 	 * @return
 	 */
@@ -32,7 +31,7 @@ public class HtmlTools
 	/**
 	 * Helper function to convert any string into URL-safe encoding. Output
 	 * string is less easy to translate back to the original.
-	 * 
+	 *
 	 * @param input
 	 * @return
 	 */
@@ -54,7 +53,7 @@ public class HtmlTools
 	 * Helper function to convert an URL-safe string (passed from eg. a REST
 	 * interface) back to the original string. Input string passes an extra
 	 * translation step.
-	 * 
+	 *
 	 * @param input
 	 * @return
 	 */
@@ -72,7 +71,7 @@ public class HtmlTools
 
 	/**
 	 * Helper function to convert any string into URL-safe encoding.
-	 * 
+	 *
 	 * @param input
 	 * @return
 	 */
@@ -93,7 +92,7 @@ public class HtmlTools
 	/**
 	 * Helper function to convert an URL-safe string (passed from eg. a REST
 	 * interface) back to the original string.
-	 * 
+	 *
 	 * @param input
 	 * @return
 	 */
@@ -111,7 +110,7 @@ public class HtmlTools
 
 	/**
 	 * Example for toSafeUrlString() and fromSafeUrlString():
-	 * 
+	 *
 	 * String example = "abcabc!@#$%^&*(){}:,./;|'\"<>"; String enc =
 	 * HtmlTools.toSafeUrlString(example); System.out.println(enc); if
 	 * (example.equals(HtmlTools.fromSafeUrlString(enc))) {

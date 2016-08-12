@@ -1,21 +1,5 @@
 package org.molgenis.security.account;
 
-import static java.lang.String.format;
-import static java.util.Arrays.asList;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
-import static org.molgenis.auth.MolgenisGroupMetaData.NAME;
-import static org.molgenis.auth.MolgenisUserMetaData.ACTIVATIONCODE;
-import static org.molgenis.auth.MolgenisUserMetaData.ACTIVE;
-import static org.molgenis.auth.MolgenisUserMetaData.EMAIL;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.auth.MolgenisUserMetaData.USERNAME;
-
-import java.net.URI;
-import java.util.List;
-import java.util.UUID;
-
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.auth.MolgenisGroupMember;
@@ -35,6 +19,18 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.net.URI;
+import java.util.List;
+import java.util.UUID;
+
+import static java.lang.String.format;
+import static java.util.Arrays.asList;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
+import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
+import static org.molgenis.auth.MolgenisGroupMetaData.NAME;
+import static org.molgenis.auth.MolgenisUserMetaData.*;
 
 @Service
 public class AccountServiceImpl implements AccountService

@@ -1,9 +1,9 @@
 package org.molgenis.data.rest;
 
-import java.util.Arrays;
-
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
 
 public class HrefTest
 {

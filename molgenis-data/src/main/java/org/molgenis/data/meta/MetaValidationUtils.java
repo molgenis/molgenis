@@ -46,7 +46,7 @@ public class MetaValidationUtils
 	/**
 	 * Validates names of entities, packages and attributes. Rules: only [a-zA-Z0-9_#] are allowed, name must start with
 	 * a letter
-	 * 
+	 *
 	 * @throws MolgenisDataException
 	 */
 	public static void validateName(String name)
@@ -55,8 +55,9 @@ public class MetaValidationUtils
 
 		if (name.length() > MAX_ATTRIBUTE_LENGTH)
 		{
-			throw new MolgenisDataException("Attribute name [" + name + "] is too long: maximum length is "
-					+ MAX_ATTRIBUTE_LENGTH + " characters.");
+			throw new MolgenisDataException(
+					"Attribute name [" + name + "] is too long: maximum length is " + MAX_ATTRIBUTE_LENGTH
+							+ " characters.");
 		}
 
 		if (!name.matches("[a-zA-Z0-9_#]+(-[a-z]{2,3})??$"))

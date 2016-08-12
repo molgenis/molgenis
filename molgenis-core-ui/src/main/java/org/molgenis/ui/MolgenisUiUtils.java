@@ -1,18 +1,17 @@
 package org.molgenis.ui;
 
-import javax.servlet.http.HttpServletRequest;
-
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+
+import javax.servlet.http.HttpServletRequest;
 
 public class MolgenisUiUtils
 {
 	/**
 	 * Gets the uri which is currently visible in the browser.
-	 * 
+	 * <p>
 	 * Must be used in a Spring environment
-	 * 
 	 */
 	public static String getCurrentUri()
 	{

@@ -58,8 +58,8 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 			{
 				if (generator.isSuitable(targetAttribute, sourceAttributes))
 				{
-					return generator.generate(targetAttribute, sourceAttributes, targetEntityMetaData,
-							sourceEntityMetaData);
+					return generator
+							.generate(targetAttribute, sourceAttributes, targetEntityMetaData, sourceEntityMetaData);
 				}
 			}
 			return generateMixedTypes(targetAttribute, sourceAttributes, targetEntityMetaData, sourceEntityMetaData);
@@ -105,8 +105,8 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 			if (algorithmTemplate != null)
 			{
 				algorithm = algorithmTemplate.render();
-				mappedSourceAttributes = AlgorithmGeneratorHelper.extractSourceAttributesFromAlgorithm(algorithm,
-						sourceEntityMetaData);
+				mappedSourceAttributes = AlgorithmGeneratorHelper
+						.extractSourceAttributesFromAlgorithm(algorithm, sourceEntityMetaData);
 				algorithm = convertUnitForTemplateAlgorithm(algorithm, targetAttribute, targetEntityMetaData,
 						mappedSourceAttributes, sourceEntityMetaData);
 				algorithmState = GENERATED_HIGH;
@@ -118,8 +118,8 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 				AttributeMetaData sourceAttribute = firstEntry.getKey();
 				algorithm = generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityMetaData,
 						sourceEntityMetaData);
-				mappedSourceAttributes = AlgorithmGeneratorHelper.extractSourceAttributesFromAlgorithm(algorithm,
-						sourceEntityMetaData);
+				mappedSourceAttributes = AlgorithmGeneratorHelper
+						.extractSourceAttributesFromAlgorithm(algorithm, sourceEntityMetaData);
 				algorithmState = firstEntry.getValue().isHighQuality() ? GENERATED_HIGH : GENERATED_LOW;
 			}
 		}
@@ -142,8 +142,8 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 			if (StringUtils.isNotBlank(convertUnit))
 			{
 				String attrMagamSyntax = String.format("$('%s')", sourceAttribute.getName());
-				String unitConvertedMagamSyntax = convertUnit.startsWith(".") ? attrMagamSyntax + convertUnit
-						: attrMagamSyntax + "." + convertUnit;
+				String unitConvertedMagamSyntax = convertUnit.startsWith(".") ?
+						attrMagamSyntax + convertUnit : attrMagamSyntax + "." + convertUnit;
 				algorithm = StringUtils.replace(algorithm, attrMagamSyntax, unitConvertedMagamSyntax);
 			}
 		}

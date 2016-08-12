@@ -1,18 +1,17 @@
 package org.molgenis.util;
 
-import static com.google.common.collect.Maps.newHashMap;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.TypeAdapterFactory;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.springframework.beans.factory.FactoryBean;
-import org.springframework.beans.factory.InitializingBean;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.TypeAdapterFactory;
+import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * A {@link FactoryBean} for creating a Google Gson 2.x {@link Gson} instance.
@@ -36,7 +35,7 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 	/**
 	 * Whether to use the {@link GsonBuilder#serializeNulls()} option when writing JSON. This is a shortcut for setting
 	 * up a {@code Gson} as follows:
-	 * 
+	 * <p>
 	 * <pre class="code">
 	 * new GsonBuilder().serializeNulls().create();
 	 * </pre>
@@ -49,7 +48,7 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 	/**
 	 * Whether to use the {@link GsonBuilder#setPrettyPrinting()} when writing JSON. This is a shortcut for setting up a
 	 * {@code Gson} as follows:
-	 * 
+	 * <p>
 	 * <pre class="code">
 	 * new GsonBuilder().setPrettyPrinting().create();
 	 * </pre>
@@ -62,7 +61,7 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 	/**
 	 * Whether to use the {@link GsonBuilder#disableHtmlEscaping()} when writing JSON. Set to {@code true} to disable
 	 * HTML escaping in JSON. This is a shortcut for setting up a {@code Gson} as follows:
-	 * 
+	 * <p>
 	 * <pre class="code">
 	 * new GsonBuilder().disableHtmlEscaping().create();
 	 * </pre>
@@ -75,7 +74,7 @@ public class GsonFactoryBean implements FactoryBean<Gson>, InitializingBean
 	/**
 	 * Define the date/time format with a {@link SimpleDateFormat}-style pattern. This is a shortcut for setting up a
 	 * {@code Gson} as follows:
-	 * 
+	 * <p>
 	 * <pre class="code">
 	 * new GsonBuilder().setDateFormat(dateFormatPattern).create();
 	 * </pre>

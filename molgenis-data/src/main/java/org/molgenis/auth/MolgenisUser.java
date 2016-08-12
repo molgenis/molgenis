@@ -1,32 +1,10 @@
 package org.molgenis.auth;
 
-import static org.molgenis.auth.MolgenisUserMetaData.ACTIVATIONCODE;
-import static org.molgenis.auth.MolgenisUserMetaData.ACTIVE;
-import static org.molgenis.auth.MolgenisUserMetaData.ADDRESS;
-import static org.molgenis.auth.MolgenisUserMetaData.AFFILIATION;
-import static org.molgenis.auth.MolgenisUserMetaData.CHANGE_PASSWORD;
-import static org.molgenis.auth.MolgenisUserMetaData.CITY;
-import static org.molgenis.auth.MolgenisUserMetaData.COUNTRY;
-import static org.molgenis.auth.MolgenisUserMetaData.DEPARTMENT;
-import static org.molgenis.auth.MolgenisUserMetaData.EMAIL;
-import static org.molgenis.auth.MolgenisUserMetaData.FAX;
-import static org.molgenis.auth.MolgenisUserMetaData.FIRSTNAME;
-import static org.molgenis.auth.MolgenisUserMetaData.GOOGLEACCOUNTID;
-import static org.molgenis.auth.MolgenisUserMetaData.ID;
-import static org.molgenis.auth.MolgenisUserMetaData.LANGUAGECODE;
-import static org.molgenis.auth.MolgenisUserMetaData.LASTNAME;
-import static org.molgenis.auth.MolgenisUserMetaData.MIDDLENAMES;
-import static org.molgenis.auth.MolgenisUserMetaData.PASSWORD_;
-import static org.molgenis.auth.MolgenisUserMetaData.PHONE;
-import static org.molgenis.auth.MolgenisUserMetaData.ROLE;
-import static org.molgenis.auth.MolgenisUserMetaData.SUPERUSER;
-import static org.molgenis.auth.MolgenisUserMetaData.TITLE;
-import static org.molgenis.auth.MolgenisUserMetaData.TOLLFREEPHONE;
-import static org.molgenis.auth.MolgenisUserMetaData.USERNAME;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
+
+import static org.molgenis.auth.MolgenisUserMetaData.*;
 
 public class MolgenisUser extends StaticEntity
 {

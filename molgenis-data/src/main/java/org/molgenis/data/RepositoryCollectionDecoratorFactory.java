@@ -1,11 +1,11 @@
 package org.molgenis.data;
 
-import static java.util.Objects.requireNonNull;
-
 import org.molgenis.data.reindex.ReindexActionRegisterService;
 import org.molgenis.data.reindex.ReindexActionRepositoryCollectionDecorator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Applies decorators to all {@link RepositoryCollection RepositoryCollections}.

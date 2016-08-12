@@ -19,8 +19,7 @@ public class BasicChart
 	}
 
 	/**
-	 * @param height
-	 *            the height to set
+	 * @param height the height to set
 	 */
 	public BasicChart setHeight(Integer height)
 	{
@@ -37,8 +36,7 @@ public class BasicChart
 	}
 
 	/**
-	 * @param width
-	 *            the width to set
+	 * @param width the width to set
 	 */
 	public BasicChart setWidth(Integer width)
 	{
@@ -55,8 +53,7 @@ public class BasicChart
 	}
 
 	/**
-	 * @param marginBottom
-	 *            the marginBottom to set
+	 * @param marginBottom the marginBottom to set
 	 */
 	public BasicChart setMarginBottom(Integer marginBottom)
 	{
@@ -73,8 +70,7 @@ public class BasicChart
 	}
 
 	/**
-	 * @param marginLeft
-	 *            the marginLeft to set
+	 * @param marginLeft the marginLeft to set
 	 */
 	public BasicChart setMarginLeft(Integer marginLeft)
 	{
@@ -91,8 +87,7 @@ public class BasicChart
 	}
 
 	/**
-	 * @param marginRight
-	 *            the marginRight to set
+	 * @param marginRight the marginRight to set
 	 */
 	public BasicChart setMarginRight(Integer marginRight)
 	{
@@ -109,8 +104,7 @@ public class BasicChart
 	}
 
 	/**
-	 * @param marginTop
-	 *            the marginTop to set
+	 * @param marginTop the marginTop to set
 	 */
 	public BasicChart setMarginTop(Integer marginTop)
 	{
@@ -127,8 +121,7 @@ public class BasicChart
 	}
 
 	/**
-	 * @param type
-	 *            the type to set
+	 * @param type the type to set
 	 */
 	public BasicChart setType(ChartType type)
 	{

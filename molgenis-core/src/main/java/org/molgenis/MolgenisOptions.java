@@ -1,10 +1,13 @@
 package org.molgenis;
 
-import java.io.File;
-import java.io.FileInputStream;
+import org.molgenis.util.cmdline.CmdLineException;
+import org.molgenis.util.cmdline.CmdLineParser;
+import org.molgenis.util.cmdline.Option;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -12,16 +15,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import org.apache.commons.io.IOUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.molgenis.util.cmdline.CmdLineException;
-import org.molgenis.util.cmdline.CmdLineParser;
-import org.molgenis.util.cmdline.Option;
-
 /**
  * Option to parameterize the {@link Molgenis} and the {@link org.molgenis.framework.server.MolgenisServer}
- * 
+ *
  * @author Morris Swertz
  */
 public class MolgenisOptions implements Serializable
@@ -34,7 +30,9 @@ public class MolgenisOptions implements Serializable
 	final public static String SUBCLASS_PER_TABLE = "subclass_per_table";
 	final public static String HIERARCHY_PER_TABLE = "hierarchy_per_table";
 
-	/** Properties file where this data came from */
+	/**
+	 * Properties file where this data came from
+	 */
 	private String molgenis_properties = "";
 
 	/**
@@ -52,27 +50,39 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "output_dir", param = Option.Param.DIRPATH, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Directory where all generated code is stored")
 	public String output_dir = "generated";
 
-	/** Source directory for generated java */
+	/**
+	 * Source directory for generated java
+	 */
 	@Option(name = "output_src", param = Option.Param.DIRPATH, type = Option.Type.REQUIRED_ARGUMENT, usage = "Output-directory for the generated Java classes. Default: 'generated/java'")
 	public String output_src = output_dir + "/java";
 
-	/** Source directory for handwritten java */
+	/**
+	 * Source directory for handwritten java
+	 */
 	@Option(name = "output_hand", param = Option.Param.DIRPATH, type = Option.Type.REQUIRED_ARGUMENT, usage = "Source directory for handwritten java. Default: 'handwritten/java'")
 	public String output_hand = "handwritten/java";
 
-	/** Source directory for generated sql */
+	/**
+	 * Source directory for generated sql
+	 */
 	@Option(name = "output_sql", param = Option.Param.DIRPATH, type = Option.Type.REQUIRED_ARGUMENT, usage = "Output-directory for the generated sql files. Default: 'generated/sql'")
 	public String output_sql = output_dir + "/sql";
 
-	/** Source directory for generated doc */
+	/**
+	 * Source directory for generated doc
+	 */
 	@Option(name = "output_doc", param = Option.Param.DIRPATH, type = Option.Type.REQUIRED_ARGUMENT, usage = "Output-directory for the generated documentation. Default: 'WebContent/generated-doc'")
 	public String output_doc = "WebContent/generated-doc";
 
-	/** Source directory for web content */
+	/**
+	 * Source directory for web content
+	 */
 	@Option(name = "output_web", param = Option.Param.DIRPATH, type = Option.Type.REQUIRED_ARGUMENT, usage = "Output-directory for any generated web resources. Default: 'WebContent'")
 	public String output_web = "WebContent";
 
-	/** Class folder with overrides for decorators */
+	/**
+	 * Class folder with overrides for decorators
+	 */
 	@Option(name = "decorator_overriders", param = Option.Param.CLASS, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Points to an application package with overriding classes for entity decorators, mapped by name. Default: ''")
 	public String decorator_overriders = "";
 
@@ -82,7 +92,9 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "db_filepath", param = Option.Param.DIRPATH, type = Option.Type.REQUIRED_ARGUMENT, usage = "Path where the database should store file attachements. Default: 'data'")
 	public String db_filepath = "data";
 
-	/** Advanced option: Type of object relational mapping. */
+	/**
+	 * Advanced option: Type of object relational mapping.
+	 */
 	@Option(name = "object_relational_mapping", param = Option.Param.STRING, type = Option.Type.OPTIONAL_ARGUMENT, usage = "Expert option: Choosing OR strategy. Either 'class_per_table', 'subclass_per_table', 'hierarchy_per_table'. Default: SUBCLASS_PER_TABLE")
 	public String object_relational_mapping = SUBCLASS_PER_TABLE;
 
@@ -98,7 +110,9 @@ public class MolgenisOptions implements Serializable
 	@Option(name = "generate_db", param = Option.Param.BOOLEAN, type = Option.Type.OPTIONAL_ARGUMENT, usage = "generate database. Default: true")
 	public boolean generate_db = true;
 
-	/** Advanced option: skip entities marked as 'system="true"' */
+	/**
+	 * Advanced option: skip entities marked as 'system="true"'
+	 */
 	@Option(name = "exclude_system", param = Option.Param.BOOLEAN, type = Option.Type.REQUIRED_ARGUMENT, usage = "Expert option: Whether system tables should be excluded from generation. Default: true")
 	public boolean exclude_system = true;
 
@@ -138,7 +152,7 @@ public class MolgenisOptions implements Serializable
 
 	/**
 	 * Get the options as a map, used in the UsedMolgenisOptionsGen.ftl template
-	 * 
+	 *
 	 * @return
 	 * @throws Exception
 	 */
@@ -169,7 +183,7 @@ public class MolgenisOptions implements Serializable
 
 	/**
 	 * Initialize options from properties object
-	 * 
+	 *
 	 * @param properties
 	 * @throws IOException
 	 * @throws FileNotFoundException

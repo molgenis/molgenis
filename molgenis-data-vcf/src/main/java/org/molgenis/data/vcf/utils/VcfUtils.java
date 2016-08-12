@@ -42,6 +42,7 @@ public class VcfUtils
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
+
 	/**
 	 * Creates a internal molgenis id from a vcf entity
 	 *
@@ -50,19 +51,12 @@ public class VcfUtils
 	 */
 	public static String createId(Entity vcfEntity)
 	{
-		String idStr = StringUtils.strip(vcfEntity.get(CHROM).toString()) +
-				"_" +
-				StringUtils.strip(vcfEntity.get(POS).toString()) +
-				"_" +
-				StringUtils.strip(vcfEntity.get(REF).toString()) +
-				"_" +
-				StringUtils.strip(vcfEntity.get(ALT).toString()) +
-				"_" +
-				StringUtils.strip(vcfEntity.get(ID).toString()) +
-				"_" +
-				StringUtils.strip(vcfEntity.get(QUAL) != null ? vcfEntity.get(QUAL).toString() : "") +
-				"_" +
-				StringUtils.strip(vcfEntity.get(FILTER) != null ? vcfEntity.get(FILTER).toString() : "");
+		String idStr = StringUtils.strip(vcfEntity.get(CHROM).toString()) + "_" + StringUtils
+				.strip(vcfEntity.get(POS).toString()) + "_" + StringUtils.strip(vcfEntity.get(REF).toString()) + "_"
+				+ StringUtils.strip(vcfEntity.get(ALT).toString()) + "_" + StringUtils
+				.strip(vcfEntity.get(ID).toString()) + "_" + StringUtils
+				.strip(vcfEntity.get(QUAL) != null ? vcfEntity.get(QUAL).toString() : "") + "_" + StringUtils
+				.strip(vcfEntity.get(FILTER) != null ? vcfEntity.get(FILTER).toString() : "");
 
 		// use MD5 hash to prevent ids that are too long
 		MessageDigest messageDigest;
@@ -163,8 +157,8 @@ public class VcfUtils
 				{
 					effectsEMD = effect.getEntityMetaData();
 					resultEMD = entityMetaDataFactory.create(variantEMD);
-					resultEMD.addAttribute(attributeMetaDataFactory.create().setName(VcfWriterUtils.EFFECT).setDataType(
-							MolgenisFieldTypes.AttributeType.MREF).setRefEntity(effectsEMD));
+					resultEMD.addAttribute(attributeMetaDataFactory.create().setName(VcfWriterUtils.EFFECT)
+							.setDataType(MolgenisFieldTypes.AttributeType.MREF).setRefEntity(effectsEMD));
 				}
 			}
 
@@ -191,8 +185,8 @@ public class VcfUtils
 					boolean isEmpty = true;
 					for (AttributeMetaData attr : effectsEMD.getAtomicAttributes())
 					{
-						if (attr.getName().equals(effectsEMD.getIdAttribute().getName())
-								|| attr.getName().equals(VARIANT))
+						if (attr.getName().equals(effectsEMD.getIdAttribute().getName()) || attr.getName()
+								.equals(VARIANT))
 						{
 						}
 						else if (entity.get(attr.getName()) != null)
@@ -269,26 +263,26 @@ public class VcfUtils
 		return results;
 	}
 
-	private EntityMetaData getXrefEntityMetaData(Map<Integer, AttributeMetaData> metadataMap,
-			String entityName)
+	private EntityMetaData getXrefEntityMetaData(Map<Integer, AttributeMetaData> metadataMap, String entityName)
 	{
 		EntityMetaData xrefMetaData = entityMetaDataFactory.create().setName(entityName);
-		xrefMetaData.addAttribute(attributeMetaDataFactory.create().setName("identifier").setAuto(true).setVisible(false),
-				EntityMetaData.AttributeRole.ROLE_ID);
-		xrefMetaData.addAttributes(com.google.common.collect.Lists.newArrayList(metadataMap.values()));
 		xrefMetaData
-				.addAttribute(attributeMetaDataFactory.create().setName(VARIANT).setDataType(MolgenisFieldTypes.AttributeType.XREF));
+				.addAttribute(attributeMetaDataFactory.create().setName("identifier").setAuto(true).setVisible(false),
+						EntityMetaData.AttributeRole.ROLE_ID);
+		xrefMetaData.addAttributes(com.google.common.collect.Lists.newArrayList(metadataMap.values()));
+		xrefMetaData.addAttribute(
+				attributeMetaDataFactory.create().setName(VARIANT).setDataType(MolgenisFieldTypes.AttributeType.XREF));
 		return xrefMetaData;
 	}
 
-	private static EntityMetaData removeRefFieldFromInfoMetadata(AttributeMetaData attributeToParse,
-			Entity inputEntity)
+	private static EntityMetaData removeRefFieldFromInfoMetadata(AttributeMetaData attributeToParse, Entity inputEntity)
 	{
 		EntityMetaData newMeta = inputEntity.getEntityMetaData();
 		AttributeMetaData newInfoMetadata = newMeta.getAttribute(VcfAttributes.INFO);
-		newInfoMetadata.setAttributeParts(StreamSupport
-				.stream(newMeta.getAttribute(VcfAttributes.INFO).getAttributeParts().spliterator(), false)
-				.filter(attr -> !attr.getName().equals(attributeToParse.getName())).collect(Collectors.toList()));
+		newInfoMetadata.setAttributeParts(
+				StreamSupport.stream(newMeta.getAttribute(VcfAttributes.INFO).getAttributeParts().spliterator(), false)
+						.filter(attr -> !attr.getName().equals(attributeToParse.getName()))
+						.collect(Collectors.toList()));
 		newMeta.removeAttribute(newMeta.getAttribute(VcfAttributes.INFO));
 		newMeta.addAttribute(newInfoMetadata);
 		return newMeta;
@@ -305,11 +299,11 @@ public class VcfUtils
 		for (int i = 0; i < attributeStrings.length; i++)
 		{
 			String attribute = attributeStrings[i];
-			MolgenisFieldTypes.AttributeType type = annotatorAttributeMap.containsKey(attribute)
-					? annotatorAttributeMap.get(attribute).getDataType()
-					: MolgenisFieldTypes.AttributeType.STRING;
-			AttributeMetaData attr = attributeMetaDataFactory.create().setName(
-					org.apache.commons.lang.StringUtils.deleteWhitespace(attribute)).setDataType(type).setLabel(attribute);
+			MolgenisFieldTypes.AttributeType type = annotatorAttributeMap.containsKey(attribute) ? annotatorAttributeMap
+					.get(attribute).getDataType() : MolgenisFieldTypes.AttributeType.STRING;
+			AttributeMetaData attr = attributeMetaDataFactory.create()
+					.setName(org.apache.commons.lang.StringUtils.deleteWhitespace(attribute)).setDataType(type)
+					.setLabel(attribute);
 			attributeMap.put(i, attr);
 		}
 		return attributeMap;
@@ -339,7 +333,6 @@ public class VcfUtils
 	}
 
 	/**
-	 *
 	 * Get pedigree data from VCF Now only support child, father, mother No fancy data structure either Output:
 	 * result.put(childID, Arrays.asList(new String[]{motherID, fatherID}));
 	 *

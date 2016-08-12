@@ -1050,7 +1050,8 @@ public class EmxMetaDataParser implements MetaDataParser
 			Iterable<String> emxEntityNames)
 	{
 		ImmutableMap.Builder<String, EntityMetaData> builder = builder();
-		emxEntityNames.forEach(emxName -> {
+		emxEntityNames.forEach(emxName ->
+		{
 			String repoName = EMX_NAME_TO_REPO_NAME_MAP.get(emxName);
 			if (repoName == null) repoName = emxName;
 			builder.put(emxName, dataService.getRepository(repoName).getEntityMetaData());
@@ -1094,7 +1095,8 @@ public class EmxMetaDataParser implements MetaDataParser
 	public static void scanMetaDataForSystemEntityMetaData(Map<String, EntityMetaData> allEntityMetaDataMap,
 			Iterable<EntityMetaData> existingMetaData)
 	{
-		existingMetaData.forEach(emd -> {
+		existingMetaData.forEach(emd ->
+		{
 			if (!allEntityMetaDataMap.containsKey(emd.getName())) allEntityMetaDataMap.put(emd.getName(), emd);
 			else if ((!EntityUtils.equals(emd, allEntityMetaDataMap.get(emd.getName())))
 					&& emd instanceof SystemEntityMetaData)
@@ -1125,7 +1127,8 @@ public class EmxMetaDataParser implements MetaDataParser
 
 	private void parseLanguages(Repository<Entity> emxLanguageRepo, IntermediateParseResults intermediateParseResults)
 	{
-		emxLanguageRepo.forEach(emxLanguageEntity -> {
+		emxLanguageRepo.forEach(emxLanguageEntity ->
+		{
 			Language language = toLanguage(emxLanguageEntity);
 			intermediateParseResults.addLanguage(language);
 		});
@@ -1148,7 +1151,8 @@ public class EmxMetaDataParser implements MetaDataParser
 	private void parseI18nStrings(Repository<Entity> emxI18nStringRepo,
 			IntermediateParseResults intermediateParseResults)
 	{
-		emxI18nStringRepo.forEach(emxI18nStringEntity -> {
+		emxI18nStringRepo.forEach(emxI18nStringEntity ->
+		{
 			I18nString i18nString = toI18nString(emxI18nStringEntity);
 			intermediateParseResults.addI18nString(i18nString);
 		});

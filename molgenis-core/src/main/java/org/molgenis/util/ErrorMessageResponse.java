@@ -26,7 +26,7 @@ public class ErrorMessageResponse
 
 	public List<ErrorMessage> getErrors()
 	{
-		return errors != null ? errors : Collections.<ErrorMessage> emptyList();
+		return errors != null ? errors : Collections.<ErrorMessage>emptyList();
 	}
 
 	public void addErrorMessage(ErrorMessage errorMessage)
@@ -43,7 +43,7 @@ public class ErrorMessageResponse
 
 	public static class ErrorMessage
 	{
-        private static final String DEFAULT_ERROR_MESSAGE = "Unknown error";
+		private static final String DEFAULT_ERROR_MESSAGE = "Unknown error";
 
 		private final String message;
 		private final Integer code;

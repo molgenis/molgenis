@@ -1,13 +1,13 @@
 package org.molgenis.data;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Discovers and registers entity factories with the entity factory registry.

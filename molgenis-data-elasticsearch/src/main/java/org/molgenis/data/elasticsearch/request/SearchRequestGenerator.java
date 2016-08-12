@@ -12,9 +12,8 @@ import java.util.List;
 
 /**
  * Builds a ElasticSearch search request
- * 
+ *
  * @author erwin
- * 
  */
 public class SearchRequestGenerator
 {
@@ -29,19 +28,17 @@ public class SearchRequestGenerator
 
 	/**
 	 * Writes a query to a {@link SearchRequestBuilder}.
-	 * 
+	 *
 	 * @param searchRequestBuilder
 	 * @param entityName
 	 * @param searchType
 	 * @param query
-	 * @param aggAttr1
-	 *            First Field to aggregate on
-	 * @param aggAttr2
-	 *            Second Field to aggregate on
+	 * @param aggAttr1             First Field to aggregate on
+	 * @param aggAttr2             Second Field to aggregate on
 	 * @param entityMetaData
 	 */
-	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, String entityName,
-			SearchType searchType, Query<Entity> query, AttributeMetaData aggAttr1, AttributeMetaData aggAttr2,
+	public void buildSearchRequest(SearchRequestBuilder searchRequestBuilder, String entityName, SearchType searchType,
+			Query<Entity> query, AttributeMetaData aggAttr1, AttributeMetaData aggAttr2,
 			AttributeMetaData aggAttrDistinct, EntityMetaData entityMetaData)
 	{
 		searchRequestBuilder.setSearchType(searchType);

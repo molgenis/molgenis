@@ -40,10 +40,11 @@ public class Step29MigrateJobExecutionProgressMessage extends MolgenisUpgrade
 	private void updateDataType(String entityFullName, String attributeName, String newDataType)
 	{
 		LOG.info("Update data type of {}.{} to {}...", entityFullName, attributeName, newDataType);
-		String attributeId = jdbcTemplate.queryForObject("SELECT a.identifier " + "FROM entities_attributes ea "
-				+ "JOIN attributes a " + "ON ea.attributes = a.identifier " + "WHERE ea.fullName = '" + entityFullName
-				+ "' " + "AND a.name='" + attributeName + "'", String.class);
-		jdbcTemplate.update(
-				"UPDATE attributes SET dataType = '" + newDataType + "' WHERE identifier = '" + attributeId + "'");
+		String attributeId = jdbcTemplate.queryForObject(
+				"SELECT a.identifier " + "FROM entities_attributes ea " + "JOIN attributes a "
+						+ "ON ea.attributes = a.identifier " + "WHERE ea.fullName = '" + entityFullName + "' "
+						+ "AND a.name='" + attributeName + "'", String.class);
+		jdbcTemplate.update("UPDATE attributes SET dataType = '" + newDataType + "' WHERE identifier = '" + attributeId
+				+ "'");
 	}
 }

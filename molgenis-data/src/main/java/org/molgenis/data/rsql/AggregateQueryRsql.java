@@ -1,17 +1,16 @@
 package org.molgenis.data.rsql;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
+import cz.jirutka.rsql.parser.ast.Node;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.EntityMetaData;
 
-import cz.jirutka.rsql.parser.ast.Node;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Create MOLGENIS aggregation query from RSQL node.
- * 
+ *
  * @see https://github.com/jirutka/rsql-parser
  */
 public class AggregateQueryRsql

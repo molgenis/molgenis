@@ -53,7 +53,8 @@ public class ReindexMetadataCUDOperationsPlatformIT
 				1);
 
 		// 2. delete sys_test_TypeTestDynamic metadata and wait on reindex
-		runAsSystem(() -> {
+		runAsSystem(() ->
+		{
 			metaDataService.deleteEntityMeta(entityMetaDataDynamic.getName());
 		});
 		PlatformIT.waitForIndexToBeStable(EntityMetaDataMetaData.ENTITY_META_DATA, reindexService, LOG);
@@ -63,7 +64,8 @@ public class ReindexMetadataCUDOperationsPlatformIT
 		assertFalse(searchService.hasMapping(entityMetaDataDynamic));
 
 		// Reset context
-		RunAsSystemProxy.runAsSystem(() -> {
+		RunAsSystemProxy.runAsSystem(() ->
+		{
 			metaDataService.addEntityMeta(entityMetaDataDynamic);
 		});
 		PlatformIT.waitForWorkToBeFinished(reindexService, LOG);
@@ -87,7 +89,8 @@ public class ReindexMetadataCUDOperationsPlatformIT
 		Object toUpdateAttributeId = toUpdateAttribute.getIdValue();
 
 		// 3. Preform update
-		runAsSystem(() -> {
+		runAsSystem(() ->
+		{
 			metaDataService.updateEntityMeta(entityMetaDataDynamic);
 		});
 		PlatformIT.waitForWorkToBeFinished(reindexService, LOG);
@@ -103,7 +106,8 @@ public class ReindexMetadataCUDOperationsPlatformIT
 
 		// Reset context
 		toUpdateAttribute.setDataType(MolgenisFieldTypes.AttributeType.EMAIL);
-		runAsSystem(() -> {
+		runAsSystem(() ->
+		{
 			metaDataService.deleteEntityMeta(entityMetaDataDynamic.getName());
 			metaDataService.addEntityMeta(entityMetaDataDynamic);
 		});
@@ -113,8 +117,8 @@ public class ReindexMetadataCUDOperationsPlatformIT
 	/**
 	 * Test metadata removing an attribute
 	 */
-	public static void testReindexUpdateMetaDataRemoveAttribute(EntityMetaData emd, String attributeName, SearchService searchService,
-			MetaDataService metaDataService, ReindexService reindexService)
+	public static void testReindexUpdateMetaDataRemoveAttribute(EntityMetaData emd, String attributeName,
+			SearchService searchService, MetaDataService metaDataService, ReindexService reindexService)
 	{
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
 		Query<Entity> q = new QueryImpl<>();
@@ -127,7 +131,8 @@ public class ReindexMetadataCUDOperationsPlatformIT
 		emd.removeAttribute(toRemoveAttribute);
 
 		// 3. Preform update
-		runAsSystem(() -> {
+		runAsSystem(() ->
+		{
 			metaDataService.updateEntityMeta(emd);
 		});
 		PlatformIT.waitForWorkToBeFinished(reindexService, LOG);
@@ -141,7 +146,8 @@ public class ReindexMetadataCUDOperationsPlatformIT
 
 		// Reset context
 		emd.addAttribute(toRemoveAttribute);
-		runAsSystem(() -> {
+		runAsSystem(() ->
+		{
 			metaDataService.updateEntityMeta(emd);
 		});
 		PlatformIT.waitForWorkToBeFinished(reindexService, LOG);

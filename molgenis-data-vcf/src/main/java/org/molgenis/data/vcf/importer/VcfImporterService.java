@@ -204,7 +204,8 @@ public class VcfImporterService implements ImportService
 			}
 
 			AtomicInteger vcfEntityCount = new AtomicInteger();
-			outRepository.add(StreamSupport.stream(inRepository.spliterator(), false).filter(entity -> {
+			outRepository.add(StreamSupport.stream(inRepository.spliterator(), false).filter(entity ->
+			{
 				vcfEntityCount.incrementAndGet();
 				return true;
 			}));

@@ -1,11 +1,5 @@
 package org.molgenis.data.elasticsearch.factory;
 
-import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
-
-import java.io.Closeable;
-import java.io.IOException;
-import java.util.Map;
-
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.ImmutableSettings.Builder;
@@ -17,12 +11,17 @@ import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.util.Map;
+
+import static org.elasticsearch.node.NodeBuilder.nodeBuilder;
+
 /**
  * Factory for creating an embedded ElasticSearch server service. An elastic search config file named
  * 'elasticsearch.yml' must be on the classpath
- * 
+ *
  * @author erwin
- * 
  */
 public class EmbeddedElasticSearchServiceFactory implements Closeable
 {
@@ -42,7 +41,7 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 	/**
 	 * Create an embedded ElasticSearch server service using 'elasticsearch.yml' and provided settings. The provided
 	 * settings override settings specified in 'elasticsearch.yml'
-	 * 
+	 *
 	 * @param providedSettings
 	 */
 	public EmbeddedElasticSearchServiceFactory(Map<String, String> providedSettings)
@@ -58,7 +57,7 @@ public class EmbeddedElasticSearchServiceFactory implements Closeable
 	/**
 	 * Create an embedded ElasticSearch server service with the given index name using 'elasticsearch.yml' and provided
 	 * settings. The provided settings override settings specified in 'elasticsearch.yml'
-	 * 
+	 *
 	 * @param indexName
 	 * @param providedSettings
 	 */

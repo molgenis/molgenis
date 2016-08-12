@@ -1,27 +1,18 @@
 package org.molgenis.model.elements;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Vector;
-
 import org.apache.commons.lang3.StringUtils;
-import org.molgenis.fieldtypes.EnumField;
-import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.fieldtypes.MrefField;
-import org.molgenis.fieldtypes.StringField;
-import org.molgenis.fieldtypes.XrefField;
+import org.molgenis.fieldtypes.*;
 import org.molgenis.model.MolgenisModelException;
 import org.molgenis.util.SimpleTree;
 import org.molgenis.util.Tree;
 
+import java.io.Serializable;
+import java.util.*;
+import java.util.Map.Entry;
+
 /**
  * Describes a field in an entity.
- * 
+ *
  * @author RA Scheltema
  * @author MA Swertz
  * @version 1.0.0
@@ -29,7 +20,9 @@ import org.molgenis.util.Tree;
 public class Field implements Serializable
 {
 	public static final String TYPE_FIELD = "__Type";
-	/** Fixed value used for determining the not-set value for the varchar. */
+	/**
+	 * Fixed value used for determining the not-set value for the varchar.
+	 */
 	private static final int LENGTH_NOT_SET = 0;
 
 	public Field(Entity parent, String name, FieldType type)
@@ -38,25 +31,19 @@ public class Field implements Serializable
 	}
 
 	// constructor(s)
+
 	/**
 	 * Standard constructor, which sets all the common variables for a field. Extra fields can be set with the
 	 * appropriate access methods.
-	 * 
-	 * @param type
-	 *            The type of the field.
-	 * @param name
-	 *            The name of the field, which needs to be unique for the entity.
-	 * @param label
-	 *            The label of the field, which is used for the user interface.
-	 * @param auto
-	 *            Indicates whether this field needs to assigned a value by the database.
-	 * @param nillable
-	 *            Indicates whether this field can have the value NULL in the database.
-	 * @param readonly
-	 *            Indicates whether this field is readonly.
-	 * @param jpaCascade
-	 *            Makes it possible to use JPA Cascade options to streamline object datbase interaction, see JPA
-	 *            documentation for details
+	 *
+	 * @param type       The type of the field.
+	 * @param name       The name of the field, which needs to be unique for the entity.
+	 * @param label      The label of the field, which is used for the user interface.
+	 * @param auto       Indicates whether this field needs to assigned a value by the database.
+	 * @param nillable   Indicates whether this field can have the value NULL in the database.
+	 * @param readonly   Indicates whether this field is readonly.
+	 * @param jpaCascade Makes it possible to use JPA Cascade options to streamline object datbase interaction, see JPA
+	 *                   documentation for details
 	 */
 	public Field(Entity parent, FieldType type, String name, String label, boolean auto, boolean nillable,
 			boolean readonly, String default_value, String jpaCascade)
@@ -97,22 +84,17 @@ public class Field implements Serializable
 	}
 
 	// constructor(s)
+
 	/**
 	 * Standard constructor, which sets all the common variables for a field. Extra fields can be set with the
 	 * appropriate access methods.
-	 * 
-	 * @param type
-	 *            The type of the field.
-	 * @param name
-	 *            The name of the field, which needs to be unique for the entity.
-	 * @param label
-	 *            The label of the field, which is used for the user interface.
-	 * @param auto
-	 *            Indicates whether this field needs to assigned a value by the database.
-	 * @param nillable
-	 *            Indicates whether this field can have the value NULL in the database.
-	 * @param readonly
-	 *            Indicates whether this field is readonly.
+	 *
+	 * @param type     The type of the field.
+	 * @param name     The name of the field, which needs to be unique for the entity.
+	 * @param label    The label of the field, which is used for the user interface.
+	 * @param auto     Indicates whether this field needs to assigned a value by the database.
+	 * @param nillable Indicates whether this field can have the value NULL in the database.
+	 * @param readonly Indicates whether this field is readonly.
 	 */
 	public Field(Entity parent, FieldType type, String name, String label, boolean auto, boolean nillable,
 			boolean readonly, String default_value)
@@ -153,9 +135,10 @@ public class Field implements Serializable
 	}
 
 	// global access methods
+
 	/**
-     * 
-     */
+	 *
+	 */
 	@Deprecated
 	public Entity getParent()
 	{
@@ -169,7 +152,7 @@ public class Field implements Serializable
 
 	/**
 	 * This method returns the type of this field.
-	 * 
+	 *
 	 * @return The type of this field.
 	 */
 	public FieldType getType()
@@ -204,7 +187,7 @@ public class Field implements Serializable
 
 	/**
 	 * This method returns the name of this field.
-	 * 
+	 *
 	 * @return The name of this field.
 	 */
 	public String getName()
@@ -213,8 +196,8 @@ public class Field implements Serializable
 	}
 
 	/**
-     * 
-     */
+	 *
+	 */
 	public void setName(String name)
 	{
 		this.name = name;
@@ -222,7 +205,7 @@ public class Field implements Serializable
 
 	/**
 	 * This method returns the label of this field.
-	 * 
+	 *
 	 * @return The label of this field.
 	 */
 	public String getLabel()
@@ -235,8 +218,8 @@ public class Field implements Serializable
 	}
 
 	/**
-     * 
-     */
+	 *
+	 */
 	public void setLabel(String label)
 	{
 		this.label = label;
@@ -249,7 +232,7 @@ public class Field implements Serializable
 
 	/**
 	 * Returns whether this field is auto-assigned by the database.
-	 * 
+	 *
 	 * @return True when this field is auto-assigned, false otherwise.
 	 */
 	public boolean isAuto()
@@ -259,7 +242,7 @@ public class Field implements Serializable
 
 	/**
 	 * Returns whether this field can be NULL in the database.
-	 * 
+	 *
 	 * @return True when this field can be NULL, false otherwise.
 	 */
 	public boolean isNillable()
@@ -294,7 +277,7 @@ public class Field implements Serializable
 
 	/**
 	 * Returns whether this field is read-only in the database.
-	 * 
+	 *
 	 * @return True when this field is read-only, false otherwise.
 	 */
 	public boolean isReadOnly()
@@ -305,7 +288,7 @@ public class Field implements Serializable
 	/**
 	 * Returns whether this field is a system-field. When it is a system-field, it will not be displayed in the
 	 * user-interface.
-	 * 
+	 *
 	 * @return True when this field is a system-field, false otherwise.
 	 */
 	public boolean isSystem()
@@ -315,9 +298,8 @@ public class Field implements Serializable
 
 	/**
 	 * With this set-function the system-property can be set.
-	 * 
-	 * @param s
-	 *            The system boolean.
+	 *
+	 * @param s The system boolean.
 	 */
 	public void setSystem(boolean s)
 	{
@@ -327,7 +309,7 @@ public class Field implements Serializable
 	/**
 	 * Returns whether this field is locally available in the table, or whether it is located in another table (for
 	 * example link-table).
-	 * 
+	 *
 	 * @return Whether this field is located in the table
 	 */
 	public boolean isLocal()
@@ -337,7 +319,6 @@ public class Field implements Serializable
 
 	/**
 	 * @throws MolgenisModelException
-	 * 
 	 */
 	public boolean isCyclic() throws MolgenisModelException
 	{
@@ -371,7 +352,7 @@ public class Field implements Serializable
 
 	/**
 	 * Returns whether this field has enum options.
-	 * 
+	 *
 	 * @return Whether this field has enum options.
 	 */
 	public boolean isEnum()
@@ -381,7 +362,7 @@ public class Field implements Serializable
 
 	/**
 	 * Returns whether this field is a xref.
-	 * 
+	 *
 	 * @return Whether this field is a xref.
 	 */
 	// FIXME rename to isXref
@@ -392,7 +373,7 @@ public class Field implements Serializable
 
 	/**
 	 * Returns whether this field is a mref.
-	 * 
+	 *
 	 * @return Whether this field is a mref.
 	 */
 	// FIXME rename to isMref
@@ -403,7 +384,7 @@ public class Field implements Serializable
 
 	/**
 	 * Returns the value the database should set for the field when there is no value set.
-	 * 
+	 *
 	 * @return The default-value.
 	 */
 	public String getDefaultValue()
@@ -418,7 +399,7 @@ public class Field implements Serializable
 
 	/**
 	 * Returns the description of the entity.
-	 * 
+	 *
 	 * @return The description.
 	 */
 	public String getDescription()
@@ -451,14 +432,13 @@ public class Field implements Serializable
 	}
 
 	// varchar access methods
+
 	/**
 	 * When this field is of type Type.VARCHAR, this method sets the maximum length the varchar can be. When this field
 	 * is not of type Type.VARCHAR, this method raises an exception.
-	 * 
-	 * @param length
-	 *            The maximum length the varchar field can be.
-	 * @throws Exception
-	 *             When the field is not of type Type.VARCHAR.
+	 *
+	 * @param length The maximum length the varchar field can be.
+	 * @throws Exception When the field is not of type Type.VARCHAR.
 	 */
 	public void setVarCharLength(int length) // throws Exception
 	{
@@ -468,10 +448,9 @@ public class Field implements Serializable
 	/**
 	 * When this field is of type Type.VARCHAR, this method returns the maximum length the varchar can be. When this
 	 * field is not of type Type.VARCHAR, this method raises an exception.
-	 * 
+	 *
 	 * @return The maximum length the varchar field can be.
-	 * @throws Exception
-	 *             When the field is not of type Type.VARCHAR.
+	 * @throws Exception When the field is not of type Type.VARCHAR.
 	 */
 	public int getVarCharLength() throws MolgenisModelException
 	{
@@ -493,15 +472,11 @@ public class Field implements Serializable
 	/**
 	 * With this method all the additional information for this xref-field can be set. When this field is not of type
 	 * Type.XREF_SINGLE or Type.XREF_MULTIPLE an exception is raised.
-	 * 
-	 * @param entity
-	 *            The entity this field references.
-	 * @param field
-	 *            The field of the entity this field references.
-	 * @param labels
-	 *            The label of this xref.
-	 * @throws Exception
-	 *             When this field is not of type Type.XREF_SINGLE or Type.XREF_MULTIPLE
+	 *
+	 * @param entity The entity this field references.
+	 * @param field  The field of the entity this field references.
+	 * @param labels The label of this xref.
+	 * @throws Exception When this field is not of type Type.XREF_SINGLE or Type.XREF_MULTIPLE
 	 */
 	// FIXME rename setXRefVariables to setXrefVariables
 	public void setXRefVariables(String entity, String field, List<String> labels)
@@ -514,18 +489,18 @@ public class Field implements Serializable
 	/**
 	 * Returns the name of the entity this field is referencing to. When this field is not of type Type.XREF_SINGLE or
 	 * Type.XREF_MULTIPLE an exception is raised.
-	 * 
+	 *
 	 * @return The name of the entity this field is referencing.
-	 * @throws Exception
-	 *             When this field is not of type Type.XREF_SINGLE or Type.XREF_MULTIPLE
+	 * @throws Exception When this field is not of type Type.XREF_SINGLE or Type.XREF_MULTIPLE
 	 */
 	public Entity getXrefEntity() throws MolgenisModelException
 	{
 		Entity e = this.getEntity().getModel().getEntity(this.getXrefEntityName());
 		if (e == null)
 		{
-			throw new MolgenisModelException("Xref entity '" + this.getXrefEntityName() + "' for attribute '"
-					+ this.getName() + "' of entity '" + this.getEntity().getName() + "' not part of model.");
+			throw new MolgenisModelException(
+					"Xref entity '" + this.getXrefEntityName() + "' for attribute '" + this.getName() + "' of entity '"
+							+ this.getEntity().getName() + "' not part of model.");
 		}
 		return e;
 	}
@@ -545,11 +520,10 @@ public class Field implements Serializable
 	/**
 	 * Returns the name of the field of the entity this field is referencing to. When this field is not of type
 	 * Type.XREF_SINGLE or Type.XREF_MULTIPLE an exception is raised.
-	 * 
+	 *
 	 * @return The name of the field of the entity this field is referencing.
 	 * @throws Exception
-	 * @throws Exception
-	 *             When this field is not of type Type.XREF_SINGLE or Type.XREF_MULTIPLE
+	 * @throws Exception When this field is not of type Type.XREF_SINGLE or Type.XREF_MULTIPLE
 	 */
 	public Field getXrefField() throws MolgenisModelException
 	{
@@ -561,8 +535,8 @@ public class Field implements Serializable
 		Field result = this.getXrefEntity().getAllField(this.getXrefFieldName());
 		if (result == null)
 		{
-			throw new MolgenisModelException("xref_field is not known for field " + getEntity().getName() + "."
-					+ getName());
+			throw new MolgenisModelException(
+					"xref_field is not known for field " + getEntity().getName() + "." + getName());
 		}
 		return result;
 	}
@@ -576,11 +550,10 @@ public class Field implements Serializable
 	/**
 	 * Returns the label of this reference. When this field is not of type Type.XREF_SINGLE or Type.XREF_MULTIPLE an
 	 * exception is raised.
-	 * 
+	 *
 	 * @return The label of this reference.
 	 * @throws MolgenisModelException
-	 * @throws Exception
-	 *             When this field is not of type Type.XREF_SINGLE or Type.XREF_MULTIPLE
+	 * @throws Exception              When this field is not of type Type.XREF_SINGLE or Type.XREF_MULTIPLE
 	 */
 	public List<String> getXrefLabelNames() throws MolgenisModelException
 	{
@@ -598,7 +571,7 @@ public class Field implements Serializable
 	 * Return a tree wich describes the path to xref labels. This allows also to use indirect secondary keys as labels.
 	 * For example: Sample is identified by {name,Investigation.name}. Investigation.name has a path via
 	 * sample.investigation.
-	 * 
+	 *
 	 * @return
 	 * @throws MolgenisModelException
 	 */
@@ -623,11 +596,9 @@ public class Field implements Serializable
 
 	/**
 	 * Creates a tree with leafs that match labels and nodes that match entities. xref fields will result in sub trees.
-	 * 
-	 * @param labels
-	 *            to be matched
-	 * @param parent
-	 *            so far in the tree to allow for recursion
+	 *
+	 * @param labels to be matched
+	 * @param parent so far in the tree to allow for recursion
 	 * @return tree of paths matching labels.
 	 * @throws MolgenisModelException
 	 */
@@ -638,11 +609,9 @@ public class Field implements Serializable
 
 	/**
 	 * Creates a tree with leafs that match labels and nodes that match entities. xref fields will result in sub trees.
-	 * 
-	 * @param labels
-	 *            to be matched
-	 * @param parent
-	 *            so far in the tree to allow for recursion
+	 *
+	 * @param labels to be matched
+	 * @param parent so far in the tree to allow for recursion
 	 * @return tree of paths matching labels.
 	 * @throws MolgenisModelException
 	 */
@@ -709,9 +678,9 @@ public class Field implements Serializable
 			{
 				result.add(this.getEntity().getModel().findField(label));
 			} // path through xref to another field, path separated by _
-				// caveat is fieldnames with '_' in the name
-				// solution is to match against all possible xref_label
-				// candidates
+			// caveat is fieldnames with '_' in the name
+			// solution is to match against all possible xref_label
+			// candidates
 			else if (label.contains("_"))
 			{
 				// match agains all known labels
@@ -742,8 +711,9 @@ public class Field implements Serializable
 		{
 			if (this.getXrefEntity() == null)
 			{
-				throw new MolgenisModelException("Cannot find xref_entity='" + getXrefEntityName() + "' for "
-						+ getEntity().getName() + "." + getName());
+				throw new MolgenisModelException(
+						"Cannot find xref_entity='" + getXrefEntityName() + "' for " + getEntity().getName() + "."
+								+ getName());
 			}
 			if (this.getXrefEntity().getXrefLabels() != null)
 			{
@@ -751,8 +721,7 @@ public class Field implements Serializable
 			}
 			else
 			{
-				return Arrays.asList(new String[]
-				{ this.xref_field });
+				return Arrays.asList(new String[] { this.xref_field });
 			}
 		}
 		return xref_labels;
@@ -761,10 +730,9 @@ public class Field implements Serializable
 	/**
 	 * Gets the name of the link-table when this field is a XREF_MULTIPLE. When this field is not of type
 	 * Type.XREF_MULTIPLE an exception is raised.
-	 * 
+	 *
 	 * @return The name of the linktable.
-	 * @throws Exception
-	 *             When this field is not of type Type.XREF_MULTIPLE
+	 * @throws Exception When this field is not of type Type.XREF_MULTIPLE
 	 */
 	public String getMrefName()
 	{
@@ -774,11 +742,9 @@ public class Field implements Serializable
 	/**
 	 * Sets the name of the link-table when this field is a XREF_MULTIPLE. When this field is not of type
 	 * Type.XREF_MULTIPLE an exception is raised.
-	 * 
-	 * @param linktable
-	 *            The name of the linktable.
-	 * @throws Exception
-	 *             When this field is not of type Type.XREF_MULTIPLE
+	 *
+	 * @param linktable The name of the linktable.
+	 * @throws Exception When this field is not of type Type.XREF_MULTIPLE
 	 */
 	public void setMrefName(String linktable)
 	{
@@ -826,9 +792,10 @@ public class Field implements Serializable
 	}
 
 	// Object overloads
+
 	/**
 	 * Returns a string representation of the Field.
-	 * 
+	 *
 	 * @return The string-representation.
 	 */
 	@Override
@@ -890,9 +857,8 @@ public class Field implements Serializable
 
 	/**
 	 * Indicates whether some other object is "equal to" this one.
-	 * 
-	 * @param obj
-	 *            The reference object with which to compare.
+	 *
+	 * @param obj The reference object with which to compare.
 	 * @return True if this object is the same as the obj argument, false otherwise.
 	 */
 	@Override
@@ -908,7 +874,7 @@ public class Field implements Serializable
 
 	/**
 	 * Returns a hash code value for the Field. This hash-code is used for quick searching in a vector of fields.
-	 * 
+	 *
 	 * @return The hash-value for this field.
 	 */
 	@Override
@@ -920,31 +886,47 @@ public class Field implements Serializable
 	// member variables
 	/** */
 	private Entity entity;
-	/** The type of this field. */
+	/**
+	 * The type of this field.
+	 */
 	private FieldType type;
 	/**
 	 * The name of this field, which needs to be unique for the associated entity.
 	 */
 	private String name;
-	/** The label of this field, which is used for the user interface. */
+	/**
+	 * The label of this field, which is used for the user interface.
+	 */
 	private String label;
-	/** Whether this field is auto-assigned by the database. */
+	/**
+	 * Whether this field is auto-assigned by the database.
+	 */
 	private boolean auto;
-	/** Whether this field can be NULL in the database. */
+	/**
+	 * Whether this field can be NULL in the database.
+	 */
 	private boolean nillable;
-	/** Whether this field is read-only. */
+	/**
+	 * Whether this field is read-only.
+	 */
 	private boolean hidden;
-	/** Whether this field is hidden. */
+	/**
+	 * Whether this field is hidden.
+	 */
 	private boolean readonly;
 	private boolean aggregateable;
 	/**
 	 * The string that should be set as the default value (is passed to the database ...)
 	 */
 	private String default_value = null;
-	/** A short description of this field. */
+	/**
+	 * A short description of this field.
+	 */
 	private String description;
 	private String default_code;
-	/** When this field a of type Type.ENUM, this vector contains the options */
+	/**
+	 * When this field a of type Type.ENUM, this vector contains the options
+	 */
 	private Vector<String> enum_options;
 	/**
 	 * When this field is of type Type.VARCHAR, this indicates the maximum length of the string.
@@ -984,11 +966,17 @@ public class Field implements Serializable
 	private String filtervalue;
 	/** */
 	private boolean system;
-	/** Contains a pointer to some user-data. */
+	/**
+	 * Contains a pointer to some user-data.
+	 */
 	private Object user_data;
-	/** Used to <annotation> */
+	/**
+	 * Used to <annotation>
+	 */
 	private String annotations;
-	/** Used for serialization purposes. */
+	/**
+	 * Used for serialization purposes.
+	 */
 	private static final long serialVersionUID = -1879739243713730190L;
 	private String tableName;
 	private Long minRange;
@@ -1179,7 +1167,7 @@ public class Field implements Serializable
 
 	/**
 	 * If this a unique field? If this field is part of a compound key it will return false
-	 * 
+	 *
 	 * @return
 	 * @throws MolgenisModelException
 	 */
@@ -1196,25 +1184,25 @@ public class Field implements Serializable
 		return false;
 	}
 
-		/**
-		 * Convert a list of string to comma separated values.
-		 *
-		 * @param elements
-		 * @return csv
-		 */
-		public String toCsv(List<String> elements)
+	/**
+	 * Convert a list of string to comma separated values.
+	 *
+	 * @param elements
+	 * @return csv
+	 */
+	public String toCsv(List<String> elements)
+	{
+		StringBuilder strBuilder = new StringBuilder();
+
+		if (elements != null)
 		{
-			StringBuilder strBuilder = new StringBuilder();
-
-			if (elements != null)
-			{
-				for (String str : elements)
-					strBuilder.append('\'').append(str).append('\'').append(',');
-				if (!elements.isEmpty()) strBuilder.deleteCharAt(strBuilder.length() - 1);
-			}
-
-			return strBuilder.toString();
+			for (String str : elements)
+				strBuilder.append('\'').append(str).append('\'').append(',');
+			if (!elements.isEmpty()) strBuilder.deleteCharAt(strBuilder.length() - 1);
 		}
+
+		return strBuilder.toString();
+	}
 
 	/**
 	 * Convert string with first character to uppercase.
@@ -1229,18 +1217,18 @@ public class Field implements Serializable
 		else return " ERROR[STRING EMPTY] ";
 	}
 
-		private  String getJavaName(String name, boolean doFirstToUpper)
+	private String getJavaName(String name, boolean doFirstToUpper)
+	{
+		if (name == null) return " NULL ";
+
+		String[] split = name.split("_");
+		StringBuilder strBuilder = new StringBuilder();
+		for (int i = 0; i < split.length; i++)
 		{
-			if (name == null) return " NULL ";
-
-			String[] split = name.split("_");
-			StringBuilder strBuilder = new StringBuilder();
-			for (int i = 0; i < split.length; i++)
-			{
-				if (i > 0) strBuilder.append('_');
-				if (!split[i].isEmpty()) strBuilder.append(doFirstToUpper ? firstToUpper(split[i]) : split[i]);
-			}
-
-			return strBuilder.toString();
+			if (i > 0) strBuilder.append('_');
+			if (!split[i].isEmpty()) strBuilder.append(doFirstToUpper ? firstToUpper(split[i]) : split[i]);
 		}
+
+		return strBuilder.toString();
+	}
 }

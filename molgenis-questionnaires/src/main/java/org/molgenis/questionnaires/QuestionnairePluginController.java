@@ -1,16 +1,5 @@
 package org.molgenis.questionnaires;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.support.QueryImpl.EQ;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletResponse;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
@@ -26,6 +15,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.support.QueryImpl.EQ;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX;
 
 @Controller
 @RequestMapping(QuestionnairePluginController.URI)
@@ -59,7 +58,8 @@ public class QuestionnairePluginController extends MolgenisPluginController
 		List<Questionnaire> questionnaires = questionnaireMeta.stream()
 				.map(e -> e.getString(EntityMetaDataMetaData.FULL_NAME))
 				.filter(name -> SecurityUtils.currentUserIsSu() || SecurityUtils
-						.currentUserHasRole(AUTHORITY_ENTITY_WRITE_PREFIX + name.toUpperCase())).map(name -> {
+						.currentUserHasRole(AUTHORITY_ENTITY_WRITE_PREFIX + name.toUpperCase())).map(name ->
+				{
 					// Create entity if not yet exists for current user
 					EntityMetaData emd = dataService.getMeta().getEntityMetaData(name);
 					Entity entity = findQuestionnaireEntity(name);

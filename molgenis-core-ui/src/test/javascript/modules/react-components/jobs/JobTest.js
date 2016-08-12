@@ -1,10 +1,8 @@
-import test from 'tape';
-import React from 'react';
-import sd from 'skin-deep';
-
-import {job_success, job_failed, job_running} from './jobs'
-
-import Job from 'react-components/jobs/Job';
+import test from "tape";
+import React from "react";
+import sd from "skin-deep";
+import {job_success, job_failed, job_running} from "./jobs";
+import Job from "react-components/jobs/Job";
 
 test('Test if the Job component renders a succeeded job correctly', assert => {
     const tree = sd.shallowRender(Job({

@@ -1,12 +1,12 @@
 package org.molgenis.data;
 
-import java.util.Map;
-
 import org.molgenis.data.transaction.UnknownRepositoryCollectionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 /**
  * Discovers and registers {@link RepositoryCollection} beans with the {@link RepositoryCollectionRegistry}

@@ -1,12 +1,12 @@
 package org.molgenis.data.importer;
 
-import java.io.File;
-
 import org.molgenis.data.DatabaseAction;
 import org.molgenis.ui.wizard.Wizard;
 import org.slf4j.Logger;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
+
+import java.io.File;
 
 public class ImportWizardUtil
 {
@@ -38,8 +38,9 @@ public class ImportWizardUtil
 	{
 		if (!(wizard instanceof ImportWizard))
 		{
-			throw new RuntimeException("Wizard must be of type '" + ImportWizard.class.getSimpleName()
-					+ "' instead of '" + wizard.getClass().getSimpleName() + "'");
+			throw new RuntimeException(
+					"Wizard must be of type '" + ImportWizard.class.getSimpleName() + "' instead of '" + wizard
+							.getClass().getSimpleName() + "'");
 		}
 	}
 }

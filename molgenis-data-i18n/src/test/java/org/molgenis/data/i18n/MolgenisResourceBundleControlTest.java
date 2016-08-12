@@ -48,16 +48,16 @@ public class MolgenisResourceBundleControlTest
 	@Test
 	public void newBundleWithUnknownBundleName() throws IllegalAccessException, InstantiationException, IOException
 	{
-		assertNull(molgenisResourceBundleControl.newBundle("bogus", new Locale("en"), "java.class", getClass()
-				.getClassLoader(), true));
+		assertNull(molgenisResourceBundleControl
+				.newBundle("bogus", new Locale("en"), "java.class", getClass().getClassLoader(), true));
 	}
 
 	@Test
 	public void newBundleWithUnknownLanguage() throws IllegalAccessException, InstantiationException, IOException
 	{
 		when(queryMock.count()).thenReturn(0L);
-		assertNull(molgenisResourceBundleControl.newBundle(I18N_STRING, new Locale("nl"),
-				"java.class", getClass().getClassLoader(), true));
+		assertNull(molgenisResourceBundleControl
+				.newBundle(I18N_STRING, new Locale("nl"), "java.class", getClass().getClassLoader(), true));
 	}
 
 	@Test
@@ -83,8 +83,8 @@ public class MolgenisResourceBundleControlTest
 		when(queryMock.count()).thenReturn(1L);
 		when(dataServiceMock.findAll(I18N_STRING)).thenReturn(Stream.of(entity, entity1));
 
-		ResourceBundle bundle = molgenisResourceBundleControl.newBundle(I18N_STRING,
-				new Locale("nl"), "java.class", getClass().getClassLoader(), true);
+		ResourceBundle bundle = molgenisResourceBundleControl
+				.newBundle(I18N_STRING, new Locale("nl"), "java.class", getClass().getClassLoader(), true);
 		assertNotNull(bundle);
 
 		Set<String> keys = bundle.keySet();

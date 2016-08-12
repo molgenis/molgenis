@@ -148,7 +148,8 @@ public class AnnotatorController
 
 	private List<Map<String, Object>> createAttrsResponse(List<AttributeMetaData> inputMetaData)
 	{
-		return inputMetaData.stream().map(attr -> {
+		return inputMetaData.stream().map(attr ->
+		{
 			Map<String, Object> attrMap = new HashMap<String, Object>();
 			attrMap.put("name", attr.getName());
 			attrMap.put("description", attr.getDescription());

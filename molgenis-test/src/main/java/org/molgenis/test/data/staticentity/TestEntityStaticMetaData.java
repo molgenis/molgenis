@@ -37,8 +37,8 @@ public class TestEntityStaticMetaData extends SystemEntityMetaData
 		addAttribute(EntityTestHarness.ATTR_ID, ROLE_ID).setAuto(true);
 		addAttribute(EntityTestHarness.ATTR_STRING, ROLE_LABEL);
 		addAttribute(EntityTestHarness.ATTR_BOOL).setDataType(BOOL);
-		addAttribute(EntityTestHarness.ATTR_CATEGORICAL).setDataType(CATEGORICAL).setRefEntity(
-				testRefEntityStaticMetaData);
+		addAttribute(EntityTestHarness.ATTR_CATEGORICAL).setDataType(CATEGORICAL)
+				.setRefEntity(testRefEntityStaticMetaData);
 		addAttribute(EntityTestHarness.ATTR_CATEGORICAL_MREF).setDataType(CATEGORICAL_MREF)
 				.setRefEntity(testRefEntityStaticMetaData);
 		addAttribute(EntityTestHarness.ATTR_DATE).setDataType(DATE);

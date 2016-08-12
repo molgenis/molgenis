@@ -1,20 +1,10 @@
 package org.molgenis.googlespreadsheet;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-
+import com.google.gdata.client.spreadsheet.SpreadsheetService;
+import com.google.gdata.data.IFeed;
+import com.google.gdata.data.TextConstruct;
+import com.google.gdata.data.spreadsheet.*;
+import com.google.gdata.util.ServiceException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
@@ -25,16 +15,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.gdata.client.spreadsheet.SpreadsheetService;
-import com.google.gdata.data.IFeed;
-import com.google.gdata.data.TextConstruct;
-import com.google.gdata.data.spreadsheet.Cell;
-import com.google.gdata.data.spreadsheet.CellEntry;
-import com.google.gdata.data.spreadsheet.CellFeed;
-import com.google.gdata.data.spreadsheet.CustomElementCollection;
-import com.google.gdata.data.spreadsheet.ListEntry;
-import com.google.gdata.data.spreadsheet.ListFeed;
-import com.google.gdata.util.ServiceException;
+import java.io.IOException;
+import java.net.URL;
+import java.util.*;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.*;
 
 public class GoogleSpreadsheetRepositoryTest extends AbstractMolgenisSpringTest
 {

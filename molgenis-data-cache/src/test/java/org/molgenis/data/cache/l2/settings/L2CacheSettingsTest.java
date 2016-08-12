@@ -68,8 +68,7 @@ public class L2CacheSettingsTest extends AbstractMolgenisSpringTest
 		l2CacheSettings.setValueReferenceType(Strong);
 		l2CacheSettings.setRecordStats(true);
 
-		assertEquals(l2CacheSettings.getCacheBuilderSpecString(),
-				"concurrencyLevel=4,initialCapacity=16,recordStats");
+		assertEquals(l2CacheSettings.getCacheBuilderSpecString(), "concurrencyLevel=4,initialCapacity=16,recordStats");
 	}
 
 	@Import({ L2CacheSettingsFactory.class, L2CacheSettingsMetaData.class })

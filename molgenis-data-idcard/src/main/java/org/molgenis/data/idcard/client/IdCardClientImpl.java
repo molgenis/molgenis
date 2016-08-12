@@ -1,16 +1,7 @@
 package org.molgenis.data.idcard.client;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-import static java.util.Objects.requireNonNull;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Iterator;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
-
+import com.google.common.primitives.Ints;
+import com.google.gson.stream.JsonReader;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
@@ -32,8 +23,16 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.google.common.primitives.Ints;
-import com.google.gson.stream.JsonReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.Iterator;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.Objects.requireNonNull;
 
 @Service
 public class IdCardClientImpl implements IdCardClient

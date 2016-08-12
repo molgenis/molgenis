@@ -1,11 +1,5 @@
 package org.molgenis.questionnaires;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletResponse;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
@@ -16,6 +10,11 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Static content editor for the questionnaires thank you page
@@ -50,8 +49,8 @@ public class ThankYouPageEditorController extends MolgenisPluginController
 		}
 		if (edit.equalsIgnoreCase("true") && (questionnaireName != null)) model.addAttribute("edit", true);
 
-		List<Entity> questionnaires = QuestionnaireUtils.findQuestionnairesMetaData(dataService).collect(
-				Collectors.toList());
+		List<Entity> questionnaires = QuestionnaireUtils.findQuestionnairesMetaData(dataService)
+				.collect(Collectors.toList());
 		model.addAttribute("questionnaires", questionnaires);
 
 		if ((questionnaireName == null) && !questionnaires.isEmpty())
@@ -74,8 +73,8 @@ public class ThankYouPageEditorController extends MolgenisPluginController
 			thankYouTextService.saveThankYouText(questionnaireName, content);
 		}
 
-		List<Entity> questionnaires = QuestionnaireUtils.findQuestionnairesMetaData(dataService).collect(
-				Collectors.toList());
+		List<Entity> questionnaires = QuestionnaireUtils.findQuestionnairesMetaData(dataService)
+				.collect(Collectors.toList());
 		model.addAttribute("questionnaires", questionnaires);
 		model.addAttribute("content", content);
 		model.addAttribute("selectedQuestionnaire", questionnaireName);

@@ -15,16 +15,10 @@
  */
 package org.molgenis.util;
 
-import static java.util.Objects.requireNonNull;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.lang.reflect.Type;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,15 +30,19 @@ import org.springframework.http.converter.HttpMessageNotWritableException;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonIOException;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Reader;
+import java.lang.reflect.Type;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Converts objects to json string and vica versa If logging is set to debug it will print the incoming and outgoing
  * json strings
- * 
+ *
  * @author Roy Clarkson
  * @since 1.0
  */
@@ -60,9 +58,8 @@ public class GsonHttpMessageConverter extends BaseHttpMessageConverter<Object>
 
 	/**
 	 * Construct a new {@code GsonHttpMessageConverter}.
-	 * 
-	 * @param gson
-	 *            a customized {@link Gson#Gson() Gson}
+	 *
+	 * @param gson a customized {@link Gson#Gson() Gson}
 	 */
 	public GsonHttpMessageConverter(Gson gson)
 	{

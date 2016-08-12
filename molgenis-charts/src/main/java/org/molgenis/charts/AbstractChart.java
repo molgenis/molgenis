@@ -20,9 +20,11 @@ public abstract class AbstractChart
 	private String title = "";
 	private String xLabel = "";
 	private String yLabel = "";
-	
-	protected AbstractChart(){}
-	
+
+	protected AbstractChart()
+	{
+	}
+
 	public String getTitle()
 	{
 		return title;
@@ -33,19 +35,23 @@ public abstract class AbstractChart
 		this.title = (title == null) ? "" : title;
 	}
 
-	public String getxLabel() {
+	public String getxLabel()
+	{
 		return xLabel;
 	}
-	
-	public void setxLabel(String xLabel) {
+
+	public void setxLabel(String xLabel)
+	{
 		this.xLabel = xLabel;
 	}
 
-	public String getyLabel() {
+	public String getyLabel()
+	{
 		return yLabel;
 	}
 
-	public void setyLabel(String yLabel) {
+	public void setyLabel(String yLabel)
+	{
 		this.yLabel = yLabel;
 	}
 
@@ -53,12 +59,11 @@ public abstract class AbstractChart
 	{
 		return type;
 	}
-	
+
 	public void setType(MolgenisChartType type)
 	{
 		this.type = type;
 	}
-
 
 	public int getWidth()
 	{

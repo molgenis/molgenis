@@ -1,18 +1,17 @@
 package org.molgenis.data.support;
 
-import static org.mockito.Mockito.mock;
-import static org.testng.Assert.assertEquals;
-
-import java.util.Arrays;
-import java.util.List;
-
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.testng.annotations.Test;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import java.util.Arrays;
+import java.util.List;
+
+import static org.mockito.Mockito.mock;
+import static org.testng.Assert.assertEquals;
 
 public class BatchingQueryResultTest
 {
