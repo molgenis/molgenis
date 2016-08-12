@@ -1,18 +1,5 @@
 package org.molgenis.data.mapper.algorithmgenerator.service.impl;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_HIGH;
-import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_LOW;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.Unit;
-
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.algorithmgenerator.bean.GeneratedAlgorithm;
@@ -31,6 +18,18 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import javax.measure.quantity.Quantity;
+import javax.measure.unit.Unit;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_HIGH;
+import static org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState.GENERATED_LOW;
 
 public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 {

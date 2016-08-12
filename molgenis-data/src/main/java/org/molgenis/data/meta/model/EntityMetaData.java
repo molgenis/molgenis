@@ -1,29 +1,27 @@
 package org.molgenis.data.meta.model;
 
 import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-
-import static java.util.Objects.requireNonNull;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.StaticEntity;
 
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.lang.String.format;
 import static java.util.Collections.singletonList;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.LABEL;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
@@ -74,88 +72,74 @@ public class EntityMetaData extends StaticEntity
 		setSimpleName(entityId);
 	}
 
-	/**
-	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #EntityMetaData(EntityMetaData)})
-	 *
-	 * @param entityMeta entity meta data
-	 * @return deep copy of entity meta data
-	 */
-	public static EntityMetaData newInstance(EntityMetaData entityMeta)
+	public enum AttributeCopyMode
 	{
-		return newInstance(entityMeta, Maps.newConcurrentMap());
+		SHALLOW_COPY_ATTRS, DEEP_COPY_ATTRS
 	}
 
 	/**
-	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #EntityMetaData(EntityMetaData)})
+	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to
+	 * {@link #EntityMetaData(EntityMetaData)}). Creates shallow-copy of package, tags and extended entity.
 	 *
-	 * @param entityMeta entity meta data
-	 * @param copied     Map<entity full name, entity meta data>
-	 * @return deep copy of entity meta data
+	 * @param entityMeta   entity meta data
+	 * @param attrCopyMode attribute copy mode that defines whether to deep-copy or shallow-copy attributes
+	 * @return copy of entity meta data
 	 */
-	static EntityMetaData newInstance(EntityMetaData entityMeta, Map<String, StaticEntity> copied)
+	public static EntityMetaData newInstance(EntityMetaData entityMeta, AttributeCopyMode attrCopyMode)
 	{
-		if (null == entityMeta)
-		{
-			return null;
-		}
-
-		requireNonNull(entityMeta.getName());
-
-		if (copied.containsKey(entityMeta.getName()))
-		{
-			return (EntityMetaData) copied.get(entityMeta.getName());
-		}
-
-		EntityMetaData entityMetaCopy = new EntityMetaData(entityMeta.getEntityMetaData());
-
-		// name
+		EntityMetaData entityMetaCopy = new EntityMetaData(entityMeta.getEntityMetaData()); // do not deep-copy
 		entityMetaCopy.setName(entityMeta.getName());
-
-		// Put the copy into the copied registry
-		copied.put(entityMetaCopy.getName(), entityMetaCopy);
-
-		// Simple name
 		entityMetaCopy.setSimpleName(entityMeta.getSimpleName());
-
-		// Package
-		Package package_ = entityMeta.getPackage();
-		entityMetaCopy.setPackage(package_ != null ? Package.newInstance(package_) : null);
-
-		// Label
+		entityMetaCopy.setPackage(entityMeta.getPackage()); // do not deep-copy
 		entityMetaCopy.setLabel(entityMeta.getLabel());
 		entityMetaCopy.setDescription(entityMeta.getDescription());
 
-		// Own id attribute
-		AttributeMetaData ownIdAttribute = entityMeta.getOwnIdAttribute();
-		entityMetaCopy
-				.setIdAttribute(ownIdAttribute != null ? AttributeMetaData.newInstance(ownIdAttribute, copied) : null);
+		// Own attributes (deep copy or shallow copy)
+		if (attrCopyMode == DEEP_COPY_ATTRS)
+		{
+			LinkedHashMap<String, AttributeMetaData> ownAttrMap = stream(entityMeta.getOwnAttributes().spliterator(),
+					false).map(attr -> AttributeMetaData.newInstance(attr, attrCopyMode))
+					.map(attrCopy -> attrCopy.setIdentifier(null))
+					.collect(toMap(AttributeMetaData::getName, Function.identity(), (u, v) ->
+					{
+						throw new IllegalStateException(String.format("Duplicate key %s", u));
+					}, LinkedHashMap::new));
+			entityMetaCopy.setOwnAttributes(ownAttrMap.values());
 
-		// Own label attribute
-		AttributeMetaData labelAttr = entityMeta.getOwnLabelAttribute();
-		entityMetaCopy.setLabelAttribute(labelAttr != null ? AttributeMetaData.newInstance(labelAttr) : null);
+			// Own id attribute (use attribute reference from attributes map)
+			AttributeMetaData ownIdAttribute = entityMeta.getOwnIdAttribute();
+			entityMetaCopy.setIdAttribute(ownIdAttribute != null ? ownAttrMap.get(ownIdAttribute.getName()) : null);
 
-		// Own lookup attrs
-		Iterable<AttributeMetaData> ownLookupAttrs = entityMeta.getOwnLookupAttributes();
-		entityMetaCopy.setLookupAttributes(
-				stream(ownLookupAttrs.spliterator(), false).map(AttributeMetaData::newInstance).collect(toList()));
+			// Own label attribute (use attribute reference from attributes map)
+			AttributeMetaData ownLabelAttr = entityMeta.getOwnLabelAttribute();
+			entityMetaCopy.setLabelAttribute(ownLabelAttr != null ? ownAttrMap.get(ownLabelAttr.getName()) : null);
+
+			// Own lookup attrs (use attribute reference from attributes map)
+			Iterable<AttributeMetaData> ownLookupAttrs = entityMeta.getOwnLookupAttributes();
+			entityMetaCopy.setLookupAttributes(stream(ownLookupAttrs.spliterator(), false)
+					.map(ownLookupAttr -> ownAttrMap.get(ownLookupAttr.getName())).collect(toList()));
+		}
+		else
+		{
+			entityMetaCopy.setOwnAttributes(newArrayList(entityMeta.getOwnAttributes()));
+			entityMetaCopy.setIdAttribute(entityMeta.getOwnIdAttribute());
+			entityMetaCopy.setLabelAttribute(entityMeta.getOwnLabelAttribute());
+			entityMetaCopy.setLookupAttributes(newArrayList(entityMeta.getOwnLookupAttributes()));
+		}
+
 		entityMetaCopy.setAbstract(entityMeta.isAbstract());
-
-		// Extends
-		EntityMetaData extends_ = entityMeta.getExtends();
-		entityMetaCopy.setExtends(extends_ != null ? EntityMetaData.newInstance(extends_, copied) : null);
-
-		// Tags
-		Iterable<Tag> tags = entityMeta.getTags();
-		entityMeta.setTags(stream(tags.spliterator(), false).map(Tag::newInstance).collect(toList()));
+		entityMetaCopy.setExtends(entityMeta.getExtends()); // do not deep-copy
+		entityMetaCopy.setTags(newArrayList(entityMeta.getTags())); // do not deep-copy
 		entityMetaCopy.setBackend(entityMeta.getBackend());
 
-		// Own attributes
-		Iterable<AttributeMetaData> ownAttributes = entityMeta.getOwnAttributes();
-		entityMetaCopy.setOwnAttributes(
-				stream(ownAttributes.spliterator(), false).map(e -> AttributeMetaData.newInstance(e, copied))
-						.collect(toList()));
-
 		return entityMetaCopy;
+	}
+
+	@Override
+	public Iterable<String> getAttributeNames()
+	{
+		return stream(getEntities(ATTRIBUTES, AttributeMetaData.class).spliterator(), false)
+				.map(AttributeMetaData::getName)::iterator;
 	}
 
 	/**
@@ -333,10 +317,6 @@ public class EntityMetaData extends StaticEntity
 		{
 			setLabelAttribute(idAttr);
 		}
-		if (!getLookupAttributes().iterator().hasNext())
-		{
-			addLookupAttribute(idAttr);
-		}
 		return this;
 	}
 
@@ -391,13 +371,6 @@ public class EntityMetaData extends StaticEntity
 	public EntityMetaData setLabelAttribute(AttributeMetaData labelAttr)
 	{
 		set(LABEL_ATTRIBUTE, labelAttr);
-		if (labelAttr != null)
-		{
-			if (!getLookupAttributes().iterator().hasNext())
-			{
-				addLookupAttribute(labelAttr);
-			}
-		}
 		return this;
 	}
 
@@ -621,6 +594,17 @@ public class EntityMetaData extends StaticEntity
 
 		Iterable<AttributeMetaData> attrs = getEntities(ATTRIBUTES, AttributeMetaData.class);
 		set(ATTRIBUTES, concat(attrs, singletonList(attr)));
+		setAttributeRoles(attr, attrTypes);
+		return this;
+	}
+
+	public void addAttributes(Iterable<AttributeMetaData> attrs)
+	{
+		attrs.forEach(this::addAttribute);
+	}
+
+	protected void setAttributeRoles(AttributeMetaData attr, AttributeRole... attrTypes)
+	{
 		if (attrTypes != null)
 		{
 			for (AttributeRole attrType : attrTypes)
@@ -641,18 +625,12 @@ public class EntityMetaData extends StaticEntity
 				}
 			}
 		}
-		return this;
-	}
-
-	public void addAttributes(Iterable<AttributeMetaData> attrs)
-	{
-		attrs.forEach(this::addAttribute);
 	}
 
 	/**
-	 * Returns whether this entity has a attribute with expression
+	 * Returns whether this entity has an attribute with expression
 	 *
-	 * @return whether this entity has a attribute with expression
+	 * @return whether this entity has an attribute with expression
 	 */
 	public boolean hasAttributeWithExpression()
 	{
@@ -808,7 +786,7 @@ public class EntityMetaData extends StaticEntity
 		}
 	}
 
-	private void setDefaultValues()
+	protected void setDefaultValues()
 	{
 		setAbstract(false);
 	}
@@ -871,5 +849,11 @@ public class EntityMetaData extends StaticEntity
 	public enum AttributeRole
 	{
 		ROLE_ID, ROLE_LABEL, ROLE_LOOKUP
+	}
+
+	@Override
+	public String toString()
+	{
+		return "EntityMetaData{" + "name=" + getName() + '}';
 	}
 }

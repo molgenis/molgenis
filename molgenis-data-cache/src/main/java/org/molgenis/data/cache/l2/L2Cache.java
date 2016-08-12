@@ -88,7 +88,7 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	{
 		LoadingCache<Object, Optional<Map<String, Object>>> cache = getEntityCache(repository);
 		EntityMetaData entityMetaData = repository.getEntityMetaData();
-		return cache.getUnchecked(id.toString()).map(e -> entityHydration.hydrate(e, entityMetaData)).orElse(null);
+		return cache.getUnchecked(id).map(e -> entityHydration.hydrate(e, entityMetaData)).orElse(null);
 	}
 
 	/**

@@ -648,7 +648,8 @@
 				
 				if(value) {
 					// Add values
-					if(attribute.fieldType === 'MREF' || attribute.fieldType == 'CATEGORICAL_MREF' || attribute.fieldType === 'XREF'){
+					if(attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL_MREF' ||
+						attribute.fieldType === 'XREF' || attribute.fieldType === 'FILE'){
 						var mrefValues = value.split(',');
 						$(mrefValues).each(function(i){
 							values.push(mrefValues[i]);

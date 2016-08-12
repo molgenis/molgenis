@@ -2,8 +2,8 @@ package org.molgenis.data.importer;
 
 import com.google.common.collect.*;
 import org.molgenis.data.Entity;
-import org.molgenis.data.i18n.model.I18nStringMetaData;
-import org.molgenis.data.i18n.model.LanguageMetaData;
+import org.molgenis.data.i18n.model.I18nString;
+import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.importer.EmxMetaDataParser.EmxAttribute;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -40,7 +40,7 @@ public final class IntermediateParseResults
 	 */
 	private final SetMultimap<String, SemanticTag<AttributeMetaData, LabeledResource, LabeledResource>> attributeTags;
 	/**
-	 * Contains all Entity tags
+	 * Contains all {@link Entity} tags
 	 */
 	private final List<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> entityTags;
 	/**
@@ -50,11 +50,11 @@ public final class IntermediateParseResults
 	/**
 	 * Contains all language enities from the languages sheet
 	 */
-	private final Map<String, Entity> languages;
+	private final Map<String, Language> languages;
 	/**
 	 * Contains all i18nString entities from the i18nstrings sheet
 	 */
-	private final Map<String, Entity> i18nStrings;
+	private final Map<String, I18nString> i18nStrings;
 	private final EntityMetaDataFactory entityMetaDataFactory;
 
 	public IntermediateParseResults(EntityMetaDataFactory entityMetaDataFactory)
@@ -69,9 +69,40 @@ public final class IntermediateParseResults
 		this.entityMetaDataFactory = entityMetaDataFactory;
 	}
 
-	public void addTagEntity(String identifier, Entity tagEntity)
+	public void addTag(String identifier, Entity tag)
 	{
-		tags.put(identifier, tagEntity);
+		tags.put(identifier, tag);
+	}
+
+	public boolean hasTag(String identifier)
+	{
+		return tags.containsKey(identifier);
+	}
+
+	public Entity getTagEntity(String tagIdentifier)
+	{
+		return tags.get(tagIdentifier);
+	}
+
+	public void addEntityTag(String entityName, SemanticTag tag)
+	{
+		entityTags.add(tag);
+	}
+
+	public void addAttributeTag(String entityName, SemanticTag tag)
+	{
+		attributeTags.put(entityName, tag);
+	}
+
+	/**
+	 * Gets a specific package
+	 *
+	 * @param name the name of the package
+	 * @return
+	 */
+	public Package getPackage(String name)
+	{
+		return getPackages().get(name);
 	}
 
 	public void addAttributes(String entityName, List<EmxAttribute> emxAttrs)
@@ -112,14 +143,14 @@ public final class IntermediateParseResults
 		return entities.get(name);
 	}
 
-	public void addLanguage(Entity language)
+	public void addLanguage(Language language)
 	{
-		languages.put(language.getString(LanguageMetaData.CODE), language);
+		languages.put(language.getCode(), language);
 	}
 
-	public void addI18nString(Entity i18nString)
+	public void addI18nString(I18nString i18nString)
 	{
-		i18nStrings.put(i18nString.getString(I18nStringMetaData.MSGID), i18nString);
+		i18nStrings.put(i18nString.getMessageId(), i18nString);
 	}
 
 	/**
@@ -163,12 +194,12 @@ public final class IntermediateParseResults
 		return copyOf(entityTags);
 	}
 
-	public ImmutableMap<String, Entity> getLanguages()
+	public ImmutableMap<String, Language> getLanguages()
 	{
 		return copyOf(languages);
 	}
 
-	public ImmutableMap<String, Entity> getI18nStrings()
+	public ImmutableMap<String, I18nString> getI18nStrings()
 	{
 		return copyOf(i18nStrings);
 	}
@@ -239,31 +270,5 @@ public final class IntermediateParseResults
 		}
 		else if (!tags.equals(other.tags)) return false;
 		return true;
-	}
-
-	/**
-	 * Gets a specific package
-	 *
-	 * @param name the name of the package
-	 * @return
-	 */
-	public Package getPackage(String name)
-	{
-		return getPackages().get(name);
-	}
-
-	public Entity getTagEntity(String tagIdentifier)
-	{
-		return tags.get(tagIdentifier);
-	}
-
-	public void addEntityTag(String entityName, SemanticTag tag)
-	{
-		entityTags.add(tag);
-	}
-
-	public void addAttributeTag(String entityName, SemanticTag tag)
-	{
-		attributeTags.put(entityName, tag);
 	}
 }

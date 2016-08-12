@@ -7,7 +7,6 @@ import org.elasticsearch.index.query.*;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -24,7 +23,7 @@ import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DE
  */
 public class QueryGenerator implements QueryPartGenerator
 {
-	public static final String ATTRIBUTE_SEPARATOR = ".";
+	static final String ATTRIBUTE_SEPARATOR = ".";
 
 	@Override
 	public void generate(SearchRequestBuilder searchRequestBuilder, Query<Entity> query, EntityMetaData entityMetaData)
@@ -114,7 +113,7 @@ public class QueryGenerator implements QueryPartGenerator
 
 	/**
 	 * Create query clause for query rule
-	 * 
+	 *
 	 * @param queryRule
 	 * @param entityMetaData
 	 * @return query class or null for SHOULD and DIS_MAX query rules
@@ -172,112 +171,104 @@ public class QueryGenerator implements QueryPartGenerator
 				}
 
 				FilterBuilder filterBuilder;
-				if (queryField.equals(ElasticsearchService.CRUD_TYPE_FIELD_NAME))
+				String[] attributePath = parseAttributePath(queryField);
+				AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+
+				// construct query part
+				if (queryValue != null)
 				{
-					filterBuilder = FilterBuilders.termFilter(queryField, queryValue);
+					AttributeType dataType = attr.getDataType();
+					switch (dataType)
+					{
+						case BOOL:
+						case DATE:
+						case DATE_TIME:
+						case DECIMAL:
+						case INT:
+						case LONG:
+						{
+							filterBuilder = FilterBuilders.termFilter(queryField, queryValue);
+							filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
+							break;
+						}
+						case EMAIL:
+						case ENUM:
+						case HTML:
+						case HYPERLINK:
+						case SCRIPT:
+						case STRING:
+						case TEXT:
+						{
+							filterBuilder = FilterBuilders
+									.termFilter(queryField + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, queryValue);
+							filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
+							break;
+						}
+						case CATEGORICAL:
+						case CATEGORICAL_MREF:
+						case XREF:
+						case MREF:
+						case FILE:
+						{
+							if (attributePath.length > 1)
+								throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
+
+							// support both entity as entity id as value
+							Object queryIdValue = queryValue instanceof Entity ? ((Entity) queryValue)
+									.getIdValue() : queryValue;
+
+							AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
+							String indexFieldName = getXRefEqualsInSearchFieldName(refIdAttr, queryField);
+
+							filterBuilder = FilterBuilders
+									.nestedFilter(queryField, FilterBuilders.termFilter(indexFieldName, queryIdValue));
+							break;
+						}
+						case COMPOUND:
+							throw new MolgenisQueryException(
+									"Illegal data type [" + dataType + "] for operator [" + queryOperator + "]");
+						default:
+							throw new RuntimeException("Unknown data type [" + dataType + "]");
+					}
 				}
 				else
 				{
-					String[] attributePath = parseAttributePath(queryField);
-					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
-
-					// construct query part
-					if (queryValue != null)
+					AttributeType dataType = attr.getDataType();
+					switch (dataType)
 					{
-						AttributeType dataType = attr.getDataType();
-						switch (dataType)
-						{
-							case BOOL:
-							case DATE:
-							case DATE_TIME:
-							case DECIMAL:
-							case INT:
-							case LONG:
-							{
-								filterBuilder = FilterBuilders.termFilter(queryField, queryValue);
-								filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
-								break;
-							}
-							case EMAIL:
-							case ENUM:
-							case HTML:
-							case HYPERLINK:
-							case SCRIPT:
-							case STRING:
-							case TEXT:
-							{
-								filterBuilder = FilterBuilders
-										.termFilter(queryField + '.' + MappingsBuilder.FIELD_NOT_ANALYZED, queryValue);
-								filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
-								break;
-							}
-							case CATEGORICAL:
-							case CATEGORICAL_MREF:
-							case XREF:
-							case MREF:
-							case FILE:
-							{
-								if (attributePath.length > 1) throw new UnsupportedOperationException(
-										"Can not filter on references deeper than 1.");
+						case BOOL:
+						case DATE:
+						case DATE_TIME:
+						case DECIMAL:
+						case EMAIL:
+						case ENUM:
+						case HTML:
+						case HYPERLINK:
+						case INT:
+						case LONG:
+						case SCRIPT:
+						case STRING:
+						case TEXT:
+							filterBuilder = FilterBuilders.missingFilter(queryField).existence(true).nullValue(true);
+							break;
+						case CATEGORICAL:
+						case CATEGORICAL_MREF:
+						case FILE:
+						case MREF:
+						case XREF:
+							AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
+							String indexFieldName = getXRefEqualsInSearchFieldName(refIdAttr, queryField);
 
-								// support both entity as entity id as value
-								Object queryIdValue = queryValue instanceof Entity ? ((Entity) queryValue).getIdValue()
-										: queryValue;
+							// see https://github.com/elastic/elasticsearch/issues/3495
+							filterBuilder = FilterBuilders.notFilter(FilterBuilders
+									.nestedFilter(queryField, FilterBuilders.existsFilter(indexFieldName)));
+							break;
+						case COMPOUND:
+							throw new MolgenisQueryException(
+									"Illegal data type [" + dataType + "] for operator [" + queryOperator + "]");
+						default:
+							throw new RuntimeException("Unknown data type [" + dataType + "]");
 
-								AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
-								String indexFieldName = getXRefEqualsInSearchFieldName(refIdAttr, queryField);
-
-								filterBuilder = FilterBuilders.nestedFilter(queryField,
-										FilterBuilders.termFilter(indexFieldName, queryIdValue));
-								break;
-							}
-							case COMPOUND:
-								throw new MolgenisQueryException(
-										"Illegal data type [" + dataType + "] for operator [" + queryOperator + "]");
-							default:
-								throw new RuntimeException("Unknown data type [" + dataType + "]");
-						}
-					}
-					else
-					{
-						AttributeType dataType = attr.getDataType();
-						switch (dataType)
-						{
-							case BOOL:
-							case DATE:
-							case DATE_TIME:
-							case DECIMAL:
-							case EMAIL:
-							case ENUM:
-							case HTML:
-							case HYPERLINK:
-							case INT:
-							case LONG:
-							case SCRIPT:
-							case STRING:
-							case TEXT:
-								filterBuilder = FilterBuilders.missingFilter(queryField).existence(true)
-										.nullValue(true);
-								break;
-							case CATEGORICAL:
-							case CATEGORICAL_MREF:
-							case FILE:
-							case MREF:
-							case XREF:
-								AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
-								String indexFieldName = getXRefEqualsInSearchFieldName(refIdAttr, queryField);
-
-								// see https://github.com/elastic/elasticsearch/issues/3495
-								filterBuilder = FilterBuilders.notFilter(FilterBuilders.nestedFilter(queryField,
-										FilterBuilders.existsFilter(indexFieldName)));
-								break;
-							case COMPOUND:
-								throw new MolgenisQueryException(
-										"Illegal data type [" + dataType + "] for operator [" + queryOperator + "]");
-							default:
-								throw new RuntimeException("Unknown data type [" + dataType + "]");
-
-						}
 					}
 				}
 				queryBuilder = QueryBuilders.filteredQuery(QueryBuilders.matchAllQuery(), filterBuilder);
@@ -327,8 +318,9 @@ public class QueryGenerator implements QueryPartGenerator
 				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
 				if (!(queryValue instanceof Iterable<?>))
 				{
-					throw new MolgenisQueryException("Query value must be a Iterable instead of ["
-							+ queryValue.getClass().getSimpleName() + "]");
+					throw new MolgenisQueryException(
+							"Query value must be a Iterable instead of [" + queryValue.getClass().getSimpleName()
+									+ "]");
 				}
 				Iterable<?> iterable = (Iterable<?>) queryValue;
 
@@ -353,8 +345,8 @@ public class QueryGenerator implements QueryPartGenerator
 					case STRING:
 					case TEXT:
 						// note: inFilter expects array, not iterable
-						filterBuilder = FilterBuilders.inFilter(getFieldName(attr, queryField),
-								Iterables.toArray(iterable, Object.class));
+						filterBuilder = FilterBuilders
+								.inFilter(getFieldName(attr, queryField), Iterables.toArray(iterable, Object.class));
 						filterBuilder = nestedFilterBuilder(attributePath, filterBuilder);
 						break;
 					case CATEGORICAL:
@@ -438,8 +430,9 @@ public class QueryGenerator implements QueryPartGenerator
 				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
 				if (!(queryValue instanceof Iterable<?>))
 				{
-					throw new MolgenisQueryException("Query value must be a Iterable instead of ["
-							+ queryValue.getClass().getSimpleName() + "]");
+					throw new MolgenisQueryException(
+							"Query value must be a Iterable instead of [" + queryValue.getClass().getSimpleName()
+									+ "]");
 				}
 				Iterable<?> iterable = (Iterable<?>) queryValue;
 
@@ -506,8 +499,9 @@ public class QueryGenerator implements QueryPartGenerator
 					case SCRIPT: // due to size would result in large amount of ngrams
 					case TEXT: // due to size would result in large amount of ngrams
 					case HTML: // due to size would result in large amount of ngrams
-						throw new UnsupportedOperationException("Query with operator [" + queryOperator
-								+ "] and data type [" + dataType + "] not supported");
+						throw new UnsupportedOperationException(
+								"Query with operator [" + queryOperator + "] and data type [" + dataType
+										+ "] not supported");
 					case EMAIL:
 					case ENUM:
 					case HYPERLINK:
@@ -618,9 +612,8 @@ public class QueryGenerator implements QueryPartGenerator
 						case CATEGORICAL_MREF:
 						case FILE:
 							queryField = attr.getName() + "." + attr.getRefEntity().getLabelAttribute().getName();
-							queryBuilder = QueryBuilders
-									.nestedQuery(attr.getName(),
-											QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")"))
+							queryBuilder = QueryBuilders.nestedQuery(attr.getName(),
+									QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")"))
 									.scoreMode("max");
 							break;
 						case BOOL:
@@ -666,11 +659,10 @@ public class QueryGenerator implements QueryPartGenerator
 							break;
 						case MREF:
 						case XREF:
-							queryField = attr.getName() + "." + attr.getRefEntity().getLabelAttribute().getName()
-									+ ".ngram";
-							queryBuilder = QueryBuilders
-									.nestedQuery(attr.getName(),
-											QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")"))
+							queryField =
+									attr.getName() + "." + attr.getRefEntity().getLabelAttribute().getName() + ".ngram";
+							queryBuilder = QueryBuilders.nestedQuery(attr.getName(),
+									QueryBuilders.queryStringQuery(queryField + ":(" + queryValue + ")"))
 									.scoreMode("max");
 							break;
 						default:
@@ -811,7 +803,9 @@ public class QueryGenerator implements QueryPartGenerator
 		}
 	}
 
-	/** Returns the target attribute. Looks in the reference entity when it is a nested query. */
+	/**
+	 * Returns the target attribute. Looks in the reference entity when it is a nested query.
+	 */
 	private AttributeMetaData getAttribute(EntityMetaData entityMetaData, String[] attributePath)
 	{
 		if (attributePath.length > 2)

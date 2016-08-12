@@ -1,6 +1,8 @@
 package org.molgenis.data;
 
-import static java.util.Objects.requireNonNull;
+import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.QueryImpl;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -10,10 +12,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.listeners.EntityListener;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.support.QueryImpl;
+import static java.util.Objects.requireNonNull;
 
 public class EntityReferenceResolverDecorator implements Repository<Entity>
 {
@@ -198,24 +197,6 @@ public class EntityReferenceResolverDecorator implements Repository<Entity>
 	public Integer add(Stream<Entity> entities)
 	{
 		return decoratedRepo.add(entities);
-	}
-
-	@Override
-	public void flush()
-	{
-		decoratedRepo.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		decoratedRepo.clearCache();
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		decoratedRepo.rebuildIndex();
 	}
 
 	private Entity resolveEntityReferences(Entity entity)

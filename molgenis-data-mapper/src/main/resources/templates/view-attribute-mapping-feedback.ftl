@@ -24,35 +24,60 @@
 	    									<#assign refEntityMetaData = sourceAttribute.refEntity>
 											<#list refEntityMetaData.attributes as refAttribute>
 												<#assign refAttributeName = refAttribute.name>
-                                                ${refEntity[refAttributeName]} <#if refAttribute?has_next>=</#if>
+                                                <#if (refEntity[refAttributeName])??>
+                                                    <#assign value = refEntity[refAttributeName]>
+                                                    <#if value?is_boolean>${value?c}<#else>${value}</#if><#if refAttribute?has_next>
+                                                    = </#if>
+                                                </#if>
 											</#list> 
 	    								</td>
 	    							</#if>
+                                <#elseif sourceAttribute.dataType == "mref">
+                                    <#if feedbackRow.sourceEntity.get(sourceAttribute.name)??>
+                                        <td>
+                                            <#assign refEntity = feedbackRow.sourceEntity.get(sourceAttribute.name)>
+											<#assign refEntityMetaData = sourceAttribute.refEntity>
+                                            <#list refEntity as entity>
+                                        ${entity.getIdValue()}
+                                        </#list>
+                                        </td>
+                                    </#if>
 								<#else>
 									<#if feedbackRow.sourceEntity.get(sourceAttribute.name)??>
-	    								<td>${feedbackRow.sourceEntity.get(sourceAttribute.name)?html}</td>
+										<#assign value = feedbackRow.sourceEntity.get(sourceAttribute.name)>
+                                       	<#if value?is_sequence> <!-- its mref values -->
+                                        	<td>
+												<#list value as row>
+													${row.labelValue?html}<#if row?has_next>, </#if>
+												</#list>
+                                        	</td>
+										<#elseif value?is_boolean>
+											<td>${value?c}</td>
+										<#else>
+											<td>${value?html}</td>
+										</#if>
 	    							</#if>
 								</#if>
     						</#list>
     					</#if>
     					<#if feedbackRow.success>
     						<#if feedbackRow.value??>
-    							<#if feedbackRow.value?is_date_like>
-    								<td>${feedbackRow.value?datetime}</td>
-    							<#else>
-									<#if feedbackRow.value?is_sequence>
-										<td>
-											<#list feedbackRow.value as row>
-												${row?html}<#if row?has_next>, </#if>
-											</#list>
-										</td>
-    								<#else>
-										<td>${feedbackRow.value?html}</td>
-									</#if>
-    							</#if>
-    						<#else>	
-    							<td><i>null</i></td>
-    						</#if>
+								<#if feedbackRow.value?is_date_like> <!-- its a date or datetime -->
+									<td>${feedbackRow.value?datetime}</td>
+								<#elseif feedbackRow.value?is_hash> <!-- its an entity -->
+                                    <td>${feedbackRow.value.getLabelValue()?html}</td>
+								<#elseif feedbackRow.value?is_sequence> <!-- its mref values -->
+									<td>
+										<#list feedbackRow.value as row>
+                                            <#if row?has_content>${row.labelValue?html}<#if row?has_next>, </#if></#if>
+										</#list>
+									</td>
+								<#else> <!-- its string or int value -->
+									<td>${feedbackRow.value?html}</td>
+								</#if>
+							<#else>
+								<td><i>null</i></td>
+							</#if>
     					<#else>
     						<td>
     							<span class="label label-danger">

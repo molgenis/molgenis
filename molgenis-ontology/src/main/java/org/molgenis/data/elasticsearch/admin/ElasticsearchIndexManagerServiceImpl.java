@@ -1,21 +1,17 @@
 package org.molgenis.data.elasticsearch.admin;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataAccessException;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
+import org.molgenis.data.*;
+import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Elasticsearch index manager service that handles authorization
@@ -24,11 +20,13 @@ import org.springframework.stereotype.Service;
 public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexManagerService
 {
 	private final DataService dataService;
+	private final ElasticsearchService elasticsearchService;
 
 	@Autowired
-	public ElasticsearchIndexManagerServiceImpl(DataService dataService)
+	public ElasticsearchIndexManagerServiceImpl(DataService dataService, ElasticsearchService elasticsearchService)
 	{
 		this.dataService = requireNonNull(dataService);
+		this.elasticsearchService = requireNonNull(elasticsearchService);
 	}
 
 	@Override
@@ -36,24 +34,17 @@ public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexM
 	public List<EntityMetaData> getIndexedEntities()
 	{
 		// collect indexed repos
-		List<EntityMetaData> indexedEntityMetaDataList = new ArrayList<EntityMetaData>();
+		List<EntityMetaData> indexedEntityMetaDataList = new ArrayList<>();
 		dataService.getEntityNames().forEach(entityName -> {
 			Repository<Entity> repository = dataService.getRepository(entityName);
-			if (repository.getCapabilities().contains(RepositoryCapability.INDEXABLE))
+			if (repository != null && repository.getCapabilities().contains(RepositoryCapability.INDEXABLE))
 			{
 				indexedEntityMetaDataList.add(repository.getEntityMetaData());
 			}
 		});
 
 		// sort indexed repos by entity label
-		Collections.sort(indexedEntityMetaDataList, new Comparator<EntityMetaData>()
-		{
-			@Override
-			public int compare(EntityMetaData e1, EntityMetaData e2)
-			{
-				return e1.getLabel().compareTo(e2.getLabel());
-			}
-		});
+		Collections.sort(indexedEntityMetaDataList, (e1, e2) -> e1.getLabel().compareTo(e2.getLabel()));
 		return indexedEntityMetaDataList;
 	}
 
@@ -66,6 +57,6 @@ public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexM
 		{
 			throw new MolgenisDataAccessException("Repository [" + entityName + "] is not an indexed repository");
 		}
-		repository.rebuildIndex();
+		elasticsearchService.rebuildIndex(repository);
 	}
 }

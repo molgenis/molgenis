@@ -1,26 +1,21 @@
 package org.molgenis.data.idcard;
 
-import static autovalue.shaded.com.google.common.common.collect.Sets.immutableEnumSet;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.RepositoryCollectionCapability.WRITABLE;
-import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.ID_CARD_BIOBANK;
+import com.google.common.collect.Maps;
+import org.molgenis.data.*;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.AbstractRepositoryCollection;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCollectionCapability;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.support.AbstractRepositoryCollection;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.google.common.collect.Maps;
+import static com.google.common.collect.Sets.immutableEnumSet;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.RepositoryCollectionCapability.WRITABLE;
+import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.ID_CARD_BIOBANK;
 
 @Component
 public class IdCardRepositoryCollection extends AbstractRepositoryCollection

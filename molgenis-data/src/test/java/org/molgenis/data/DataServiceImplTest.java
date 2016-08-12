@@ -1,20 +1,5 @@
 package org.molgenis.data;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static java.util.stream.Collectors.toList;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.stream.Stream;
-
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.meta.MetaDataService;
@@ -29,6 +14,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Stream;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static java.util.stream.Collectors.toList;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 public class DataServiceImplTest
 {
@@ -106,6 +102,14 @@ public class DataServiceImplTest
 		Stream<Entity> entities = Stream.empty();
 		dataService.delete("Entity1", entities);
 		verify(repo1, times(1)).delete(entities);
+	}
+
+	@Test
+	public void deleteAllStream()
+	{
+		Stream<Object> entityIds = Stream.empty();
+		dataService.deleteAll("Entity1", entityIds);
+		verify(repo1, times(1)).deleteAll(entityIds);
 	}
 
 	@Test

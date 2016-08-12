@@ -31,6 +31,7 @@ import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -68,6 +69,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final EntityListenersService entityListenersService;
 	private final L2Cache l2Cache;
 	private final TransactionInformation transactionInformation;
+	private final MolgenisPermissionService permissionService;
 	private final L3Cache l3Cache;
 
 	@Autowired
@@ -80,7 +82,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder,
 			EntityMetaDataMetaData entityMetaMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
-			L3Cache l3Cache)
+			MolgenisPermissionService permissionService, L3Cache l3Cache))
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -102,6 +104,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.entityListenersService = requireNonNull(entityListenersService);
 		this.l2Cache = requireNonNull(l2Cache);
 		this.transactionInformation = requireNonNull(transactionInformation);
+		this.permissionService = requireNonNull(permissionService);
 		this.l3Cache = requireNonNull(l3Cache);
 	}
 
@@ -113,6 +116,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		// 12. Query the L2 cache before querying the database
 		decoratedRepository = new L2CacheRepositoryDecorator(decoratedRepository, l2Cache, transactionInformation);
 
+		// 11. Query the L3 cache before querying the database
 		decoratedRepository = new L3CacheRepositoryDecorator(decoratedRepository, l3Cache);
 
 		// 10. Query the L1 cache before querying the database
@@ -170,13 +174,13 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		{
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new AttributeMetaDataRepositoryDecorator(
 					(Repository<AttributeMetaData>) (Repository<? extends Entity>) repo, systemEntityMetaDataRegistry,
-					dataService);
+					dataService, permissionService);
 		}
 		else if (repo.getName().equals(ENTITY_META_DATA))
 		{
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityMetaDataRepositoryDecorator(
 					(Repository<EntityMetaData>) (Repository<? extends Entity>) repo, dataService,
-					systemEntityMetaDataRegistry);
+					systemEntityMetaDataRegistry, permissionService);
 		}
 		else if (repo.getName().equals(PACKAGE))
 		{

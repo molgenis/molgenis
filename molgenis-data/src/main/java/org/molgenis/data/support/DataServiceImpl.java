@@ -1,7 +1,6 @@
 package org.molgenis.data.support;
 
 import org.molgenis.data.*;
-import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
@@ -14,6 +13,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 /**
@@ -139,6 +139,13 @@ public class DataServiceImpl implements DataService
 
 	@Override
 	@Transactional
+	public void deleteAll(String entityName, Stream<Object> ids)
+	{
+		getRepository(entityName).deleteAll(ids);
+	}
+
+	@Override
+	@Transactional
 	public void deleteAll(String entityName)
 	{
 		getRepository(entityName).deleteAll();
@@ -253,6 +260,7 @@ public class DataServiceImpl implements DataService
 		return getRepository(entityName, clazz).findAll(ids, fetch);
 	}
 
+	@Transactional
 	@Override
 	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId,
 			String newRepositoryLabel)
@@ -260,19 +268,21 @@ public class DataServiceImpl implements DataService
 		return copyRepository(repository, newRepositoryId, newRepositoryLabel, new QueryImpl<>());
 	}
 
+	@Transactional
 	@Override
 	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId,
 			String newRepositoryLabel, Query<Entity> query)
 	{
 		LOG.info("Creating a copy of " + repository.getName() + " repository, with ID: " + newRepositoryId
 				+ ", and label: " + newRepositoryLabel);
-		EntityMetaData emd = EntityMetaData.newInstance(repository.getEntityMetaData());
+		EntityMetaData emd = EntityMetaData.newInstance(repository.getEntityMetaData(), DEEP_COPY_ATTRS);
 		emd.setName(newRepositoryId);
 		emd.setLabel(newRepositoryLabel);
-		Repository<Entity> repositoryCopy = metaDataService.addEntityMeta(emd);
+
+		metaDataService.addEntityMeta(emd);
+		Repository<Entity> repositoryCopy = metaDataService.createRepository(emd);
 		try
 		{
-
 			repositoryCopy.add(repository.findAll(query));
 			return repositoryCopy;
 		}

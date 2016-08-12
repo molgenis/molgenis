@@ -1,7 +1,5 @@
 package org.molgenis.data.mapper.service.impl;
 
-import com.google.common.collect.Maps;
-import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.*;
@@ -12,33 +10,34 @@ import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
-import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.security.permission.PermissionSystemService;
-import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
 
+import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.molgenis.util.DependencyResolver.hasSelfReferences;
+import static org.springframework.security.core.context.SecurityContextHolder.getContext;
 
 public class MappingServiceImpl implements MappingService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(MappingServiceImpl.class);
 
-	private static final int BATCH_SIZE = 1000;
+	public static final String SOURCE = "source";
 
 	private final DataService dataService;
 	private final AlgorithmService algorithmService;
@@ -155,126 +154,128 @@ public class MappingServiceImpl implements MappingService
 		return mappingProjectRepository.getMappingProject(identifier);
 	}
 
-	// TODO discuss: why isn't this method transactional?
-	@Override
 	public String applyMappings(MappingTarget mappingTarget, String entityName)
 	{
-		EntityMetaData targetMetaData = EntityMetaData.newInstance(mappingTarget.getTarget());
-		targetMetaData.setName(entityName);
-		//		targetMetaData.setPackage(Package.defaultPackage);
-		targetMetaData.setLabel(entityName);
-		targetMetaData.addAttribute(attrMetaFactory.create().setName("source"));
+		return applyMappings(mappingTarget, entityName, true);
+	}
 
-		// add a new repository if the target repo doesn't exist, or check if the target repository is compatible with
-		// the result of the mappings
+	// TODO discuss: why isn't this method transactional?
+	@Override
+	public String applyMappings(MappingTarget mappingTarget, String entityName, boolean addSourceAttribute)
+	{
+		EntityMetaData targetMetaData = EntityMetaData.newInstance(mappingTarget.getTarget(), DEEP_COPY_ATTRS);
+		targetMetaData.setName(entityName);
+		targetMetaData.setLabel(entityName);
+		if (addSourceAttribute)
+		{
+			targetMetaData.addAttribute(attrMetaFactory.create().setName(SOURCE));
+		}
+
 		Repository<Entity> targetRepo;
 		if (!dataService.hasRepository(entityName))
 		{
-			targetRepo = dataService.getMeta().addEntityMeta(targetMetaData);
-			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
-					Collections.singletonList(targetRepo.getName()));
+			// Create a new repository
+			targetRepo = runAsSystem(() -> dataService.getMeta().createRepository(targetMetaData));
+			permissionSystemService.giveUserEntityPermissions(getContext(), singletonList(targetRepo.getName()));
 		}
 		else
 		{
+			// Get an existing repository
 			targetRepo = dataService.getRepository(entityName);
 
-			if (!isTargetMetaCompatible(targetRepo, targetMetaData))
+			// If the addSourceAttribute is true, but the existing repository does not have the SOURCE attribute yet
+			// Get the existing metadata and add the SOURCE attribute
+			EntityMetaData existingTargetMetaData = targetRepo.getEntityMetaData();
+			if (existingTargetMetaData.getAttribute(SOURCE) == null && addSourceAttribute)
 			{
-				throw new MolgenisDataException(
-						"Target entity " + entityName + " exists but is not compatible with the target mappings.");
+				existingTargetMetaData.addAttribute(attrMetaFactory.create().setName(SOURCE));
+				dataService.getMeta().updateEntityMeta(existingTargetMetaData);
 			}
 		}
 
 		try
 		{
 			LOG.info("Applying mappings to repository [" + targetMetaData.getName() + "]");
-			applyMappingsToRepositories(mappingTarget, targetRepo);
+			applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute);
+			if (hasSelfReferences(targetRepo.getEntityMetaData()))
+			{
+				LOG.info("Self reference found, applying the mapping for a second time to set references");
+				applyMappingsToRepositories(mappingTarget, targetRepo, addSourceAttribute);
+			}
 			LOG.info("Done applying mappings to repository [" + targetMetaData.getName() + "]");
 			return targetMetaData.getName();
 		}
 		catch (RuntimeException ex)
 		{
-			LOG.error("Error applying mappings, dropping created repository.", ex);
-			dataService.getMeta().deleteEntityMeta(targetMetaData.getName());
-			throw ex;
-		}
-	}
-
-	/**
-	 * Compares the attributes of the target repository with the results of the mapping and sees if they're compatible.
-	 * The repository is compatible when all attributes resulting from the mapping can be written to it.
-	 *
-	 * @param targetRepository      the target repository
-	 * @param mappingTargetMetaData the metadata of the mapping result entity
-	 * @return true if the mapping can be written to the target repository
-	 */
-	private boolean isTargetMetaCompatible(Repository<Entity> targetRepository, EntityMetaData mappingTargetMetaData)
-	{
-		Map<String, AttributeMetaData> targetRepoAttributeMap = Maps.newHashMap();
-		targetRepository.getEntityMetaData().getAtomicAttributes()
-				.forEach(attr -> targetRepoAttributeMap.put(attr.getName(), attr));
-
-		for (AttributeMetaData mappingTargetAttr : mappingTargetMetaData.getAtomicAttributes())
-		{
-			String mappingTargetAttrName = mappingTargetAttr.getName();
-			if (targetRepoAttributeMap.containsKey(mappingTargetAttrName) && EntityUtils
-					.equals(targetRepoAttributeMap.get(mappingTargetAttrName), mappingTargetAttr))
+			if (targetRepo.getName().equals(mappingTarget.getName()))
 			{
-				continue;
+				// Mapping to the target model, if something goes wrong we do not want to delete it
+				LOG.error("Error applying mappings to the target", ex);
+				throw ex;
 			}
 			else
 			{
-				return false;
+				// A new repository was created for mapping, so we can drop it if something went wrong
+				LOG.error("Error applying mappings, dropping created repository.", ex);
+				dataService.getMeta().deleteEntityMeta(targetMetaData.getName());
+				throw ex;
 			}
 		}
-		return true;
 	}
 
-	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo)
+	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo,
+			boolean addSourceAttribute)
 	{
 		for (EntityMapping sourceMapping : mappingTarget.getEntityMappings())
 		{
-			applyMappingToRepo(sourceMapping, targetRepo);
+			applyMappingToRepo(sourceMapping, targetRepo, addSourceAttribute);
 		}
 	}
 
-	private void applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo)
+	private void applyMappingToRepo(EntityMapping sourceMapping, Repository<Entity> targetRepo,
+			boolean addSourceAttribute)
 	{
 		EntityMetaData targetMetaData = targetRepo.getEntityMetaData();
 		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
 
-		// delete all target entities from this source
-		List<Entity> deleteEntities = targetRepo.query().eq("source", sourceRepo.getName()).findAll()
-				.filter(Objects::nonNull).collect(Collectors.toList());
-		targetRepo.delete(deleteEntities.stream());
-
-		Iterator<Entity> sourceEntities = sourceRepo.iterator();
-		List<Entity> mappedEntities = Lists.newArrayList();
-		while (sourceEntities.hasNext())
+		sourceRepo.iterator().forEachRemaining(sourceEntity ->
 		{
-			Entity sourceEntity = sourceEntities.next();
- 			Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
-					sourceMapping.getSourceEntityMetaData(), targetRepo);
-			mappedEntities.add(mappedEntity);
-
-			if (mappedEntities.size() == BATCH_SIZE || !sourceEntities.hasNext())
 			{
-				targetRepo.add(mappedEntities.stream());
-				mappedEntities = Lists.newArrayList();
+				Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
+						sourceMapping.getSourceEntityMetaData(), addSourceAttribute);
+				if (targetRepo.findOneById(mappedEntity.getIdValue()) == null)
+				{
+					targetRepo.add(mappedEntity);
+				}
+				else
+				{
+					targetRepo.update(mappedEntity);
+				}
 			}
-		}
+		});
 	}
 
 	private Entity applyMappingToEntity(EntityMapping sourceMapping, Entity sourceEntity, EntityMetaData targetMetaData,
-			EntityMetaData sourceEntityMetaData, Repository<Entity> targetRepository)
+			EntityMetaData sourceEntityMetaData, boolean addSourceAttribute)
 	{
 		Entity target = new DynamicEntity(targetMetaData);
-		target.set("source", sourceMapping.getName());
+		if (addSourceAttribute)
+		{
+			target.set(SOURCE, sourceMapping.getName());
+		}
 
 		sourceMapping.getAttributeMappings().forEach(
 				attributeMapping -> applyMappingToAttribute(attributeMapping, sourceEntity, target,
 						sourceEntityMetaData));
 		return target;
+	}
+
+	private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity sourceEntity, Entity target,
+			EntityMetaData entityMetaData)
+	{
+		String targetAttributeName = attributeMapping.getTargetAttributeMetaData().getName();
+		Object typedValue = algorithmService.apply(attributeMapping, sourceEntity, entityMetaData);
+		target.set(targetAttributeName, typedValue);
 	}
 
 	@Override
@@ -290,12 +291,5 @@ public class MappingServiceImpl implements MappingService
 			id = idGenerator.generateId();
 		}
 		return id.toString();
-	}
-
-	private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity sourceEntity, Entity target,
-			EntityMetaData entityMetaData)
-	{
-		target.set(attributeMapping.getTargetAttributeMetaData().getName(),
-				algorithmService.apply(attributeMapping, sourceEntity, entityMetaData));
 	}
 }

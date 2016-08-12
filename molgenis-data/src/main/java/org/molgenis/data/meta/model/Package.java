@@ -1,17 +1,17 @@
 package org.molgenis.data.meta.model;
 
+import org.molgenis.data.DataService;
+import org.molgenis.data.Entity;
+import org.molgenis.data.Query;
+import org.molgenis.data.support.StaticEntity;
+import org.molgenis.util.ApplicationContextProvider;
+
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
-
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Query;
-import org.molgenis.data.support.StaticEntity;
-import org.molgenis.util.ApplicationContextProvider;
 
 /**
  * Package defines the structure and attributes of a Package. Attributes are unique. Other software components can use
@@ -173,9 +173,9 @@ public class Package extends StaticEntity
 	}
 
 	/**
-	 * Add a tag for this package
+	 * Add a {@link Tag} to this {@link Package}
 	 *
-	 * @param tag package tag
+	 * @param tag
 	 */
 	public void addTag(Tag tag)
 	{
@@ -183,9 +183,9 @@ public class Package extends StaticEntity
 	}
 
 	/**
-	 * Add a tag for this package
+	 * Remove a {@link Tag} from this {@link Package}
 	 *
-	 * @param tag package tag
+	 * @param tag
 	 */
 	public void removeTag(Tag tag)
 	{
@@ -254,5 +254,11 @@ public class Package extends StaticEntity
 			}
 			set(PackageMetaData.FULL_NAME, fullName);
 		}
+	}
+
+	@Override
+	public String toString()
+	{
+		return "Package{" + "name=" + getName() + '}';
 	}
 }

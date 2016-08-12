@@ -17,8 +17,10 @@ import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.integrationtest.data.TestAppSettings;
 import org.molgenis.js.RhinoConfig;
 import org.molgenis.security.core.MolgenisPasswordEncoder;
+import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.runas.RunAsSystemBeanPostProcessor;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
+import org.molgenis.security.permission.MolgenisPermissionServiceImpl;
 import org.molgenis.util.ApplicationContextProvider;
 import org.molgenis.util.GsonConfig;
 import org.slf4j.Logger;
@@ -62,10 +64,11 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 		"org.molgenis.data.i18n", "org.molgenis.data.postgresql", "org.molgenis.file.model",
 		"org.molgenis.security.owned", "org.molgenis.security.user" })
 @Import({ DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class, PostgreSqlConfiguration.class,
-		RunAsSystemBeanPostProcessor.class, RhinoConfig.class, UuidGenerator.class,
-		ExpressionValidator.class, PlatformConfig.class, org.molgenis.data.RepositoryCollectionRegistry.class,
-		org.molgenis.data.RepositoryCollectionDecoratorFactory.class, org.molgenis.data.validation.EntityAttributesValidator.class,
-		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class, })
+		RunAsSystemBeanPostProcessor.class, RhinoConfig.class, UuidGenerator.class, ExpressionValidator.class,
+		PlatformConfig.class, org.molgenis.data.RepositoryCollectionRegistry.class,
+		org.molgenis.data.RepositoryCollectionDecoratorFactory.class,
+		org.molgenis.data.validation.EntityAttributesValidator.class,
+		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
 	static
@@ -141,6 +144,11 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 		return new MolgenisPasswordEncoder(new BCryptPasswordEncoder());
 	}
 
+	@Bean
+	public MolgenisPermissionService molgenisPermissionService()
+	{
+		return new MolgenisPermissionServiceImpl();
+	}
 
 	// FIXME The bootstrapping of the data platform should be delegated to a specific bootstrapper so that updates
 	// are reflected in the test
@@ -152,10 +160,12 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	{
 		TransactionTemplate transactionTemplate = new TransactionTemplate();
 		transactionTemplate.setTransactionManager(molgenisTransactionManager);
-		transactionTemplate.execute((action) -> {
+		transactionTemplate.execute((action) ->
+		{
 			try
 			{
-				RunAsSystemProxy.runAsSystem(() -> {
+				RunAsSystemProxy.runAsSystem(() ->
+				{
 					LOG.info("Bootstrapping registries ...");
 					LOG.trace("Registering repository collections ...");
 					repoCollectionBootstrapper.bootstrap(event, POSTGRESQL);

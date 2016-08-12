@@ -3,7 +3,9 @@ package org.molgenis.data.cache.utils;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +37,8 @@ public class EntityHydration
 	}
 
 	/**
-	 * Rehydrate an entity.
+	 * Rehydrate an entity. Entity can be an {@link EntityWithComputedAttributes}
+	 * if there are attributes present with an expression
 	 *
 	 * @param entityMetaData   metadata of the entity to rehydrate
 	 * @param dehydratedEntity map with key value pairs representing this entity
@@ -46,31 +49,40 @@ public class EntityHydration
 		LOG.trace("Hydrating entity: {} for entity {}", dehydratedEntity, entityMetaData.getName());
 
 		Entity hydratedEntity = entityManager.create(entityMetaData);
-		entityMetaData.getAtomicAttributes().forEach(attr -> {
 
-			String name = attr.getName();
-			Object value = dehydratedEntity.get(name);
-			if (value != null)
+		for (AttributeMetaData attribute : entityMetaData.getAtomicAttributes())
+		{
+			// Only hydrate the attribute if it is NOT computed.
+			// Computed attributes will be calculated based on the metadata
+			if (attribute.getExpression() == null)
 			{
-				if (isMultipleReferenceType(attr))
+				String name = attribute.getName();
+				Object value = dehydratedEntity.get(name);
+				if (value != null)
 				{
-					// We can do this cast because during dehydration, mrefs and categorical mrefs are stored as a List of Object
-					Iterable<Entity> referenceEntities = entityManager
-							.getReferences(attr.getRefEntity(), (List<Object>) value);
-					hydratedEntity.set(name, referenceEntities);
-				}
-				else if (isSingleReferenceType(attr))
-				{
-					Entity referenceEntity = entityManager.getReference(attr.getRefEntity(), value);
-					hydratedEntity.set(name, referenceEntity);
+					if (isMultipleReferenceType(attribute))
+					{
+						// We can do this cast because during dehydration, mrefs and categorical mrefs are stored as a List of Object
+						Iterable<Entity> referenceEntities = entityManager
+								.getReferences(attribute.getRefEntity(), (List<Object>) value);
+						hydratedEntity.set(name, referenceEntities);
+					}
+					else if (isSingleReferenceType(attribute))
+					{
+						Entity referenceEntity = entityManager.getReference(attribute.getRefEntity(), value);
+						hydratedEntity.set(name, referenceEntity);
+					}
+					else
+					{
+						hydratedEntity.set(name, value);
+					}
 				}
 				else
 				{
 					hydratedEntity.set(name, value);
 				}
 			}
-
-		});
+		}
 
 		return hydratedEntity;
 	}
@@ -89,10 +101,15 @@ public class EntityHydration
 		EntityMetaData entityMetaData = entity.getEntityMetaData();
 
 		entityMetaData.getAtomicAttributes().forEach(attribute -> {
-			String name = attribute.getName();
-			AttributeType type = attribute.getDataType();
 
-			dehydratedEntity.put(name, getValueBasedOnType(entity, name, type));
+			// Only dehydrate if the attribute is NOT computed
+			if (attribute.getExpression() == null)
+			{
+				String name = attribute.getName();
+				AttributeType type = attribute.getDataType();
+
+				dehydratedEntity.put(name, getValueBasedOnType(entity, name, type));
+			}
 		});
 
 		return dehydratedEntity;

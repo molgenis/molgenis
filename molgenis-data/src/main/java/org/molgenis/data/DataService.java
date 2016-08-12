@@ -1,11 +1,10 @@
 package org.molgenis.data;
 
-import java.util.Set;
-import java.util.stream.Stream;
-
-import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityMetaData;
+
+import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * DataService is a facade that manages data sources Entity names should be unique over all data sources.
@@ -293,6 +292,13 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * @throws MolgenisDataAccessException
 	 */
 	void deleteById(String entityName, Object id);
+
+	/**
+	 * Deletes entities by id
+	 *
+	 * @param ids entity ids
+	 */
+	void deleteAll(String entityName, Stream<Object> ids);
 
 	/**
 	 * Deletes all entities

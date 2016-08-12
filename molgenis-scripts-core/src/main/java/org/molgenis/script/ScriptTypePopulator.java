@@ -1,11 +1,15 @@
 package org.molgenis.script;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.script.ScriptTypeMetaData.SCRIPT_TYPE;
-
 import org.molgenis.data.DataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Collection;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.script.ScriptTypeMetaData.SCRIPT_TYPE;
 
 /**
  * Populates {@link ScriptType} repository with script type entities based on existing {@link ScriptRunner script runners.}
@@ -28,16 +32,29 @@ public class ScriptTypePopulator
 
 	public void populate()
 	{
-		scriptRunnerFactory.getScriptRunners().map(ScriptRunner::getName).forEach(this::persist);
+		Collection<ScriptRunner> scriptRunners = scriptRunnerFactory.getScriptRunners();
+
+		List<ScriptType> newScriptTypes = scriptRunners.stream().filter(this::notExists).map(this::createScriptType)
+				.collect(toList());
+		if (!newScriptTypes.isEmpty())
+		{
+			persist(newScriptTypes);
+		}
 	}
 
-	private void persist(String scriptTypeName)
+	private boolean notExists(ScriptRunner scriptRunner)
 	{
-		ScriptType scriptType = dataService.findOneById(SCRIPT_TYPE, scriptTypeName, ScriptType.class);
-		if (scriptType == null)
-		{
-			dataService.add(SCRIPT_TYPE, scriptTypeFactory.create(scriptTypeName));
-		}
+		return dataService.findOneById(SCRIPT_TYPE, scriptRunner.getName(), ScriptType.class) == null;
+	}
+
+	private ScriptType createScriptType(ScriptRunner scriptRunner)
+	{
+		return scriptTypeFactory.create(scriptRunner.getName());
+	}
+
+	private void persist(List<ScriptType> scriptTypes)
+	{
+		dataService.add(SCRIPT_TYPE, scriptTypes.stream());
 	}
 }
 

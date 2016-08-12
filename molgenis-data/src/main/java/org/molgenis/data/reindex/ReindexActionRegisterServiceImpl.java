@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Collection;
@@ -68,6 +69,7 @@ public class ReindexActionRegisterServiceImpl implements TransactionInformation,
 		excludedEntities.add(entityFullName);
 	}
 
+	@Transactional
 	@Override
 	public synchronized void register(String entityFullName, CudType cudType, DataType dataType, String entityId)
 	{

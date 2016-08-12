@@ -2,19 +2,19 @@ package org.molgenis.data.elasticsearch.index;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
-import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.io.IOException;
 
+import static java.lang.String.format;
+
 /**
  * Builds mappings for a documentType. For each column a multi_field is created, one analyzed for searching and one
  * not_analyzed for sorting
- * 
+ *
  * @author erwin
- * 
  */
 public class MappingsBuilder
 {
@@ -28,10 +28,9 @@ public class MappingsBuilder
 	/**
 	 * Creates a Elasticsearch mapping for the given entity meta data
 	 *
-	 * @param jsonBuilder {@link XContentBuilder} to write the mapping to
+	 * @param jsonBuilder    {@link XContentBuilder} to write the mapping to
 	 * @param entityMetaData {@link EntityMetaData} for the entity to map
-	 * @return
-	 * @throws IOException
+	 * @throws IOException writing to JSON builder
 	 */
 	public static void buildMapping(XContentBuilder jsonBuilder, EntityMetaData entityMetaData, boolean enableNorms,
 			boolean createAllIndex) throws IOException
@@ -42,10 +41,6 @@ public class MappingsBuilder
 		jsonBuilder.startObject("_source").field("enabled", false).endObject();
 
 		jsonBuilder.startObject("properties");
-
-		jsonBuilder.startObject(ElasticsearchService.CRUD_TYPE_FIELD_NAME);
-		jsonBuilder.field("type", "string").field("index", "not_analyzed");
-		jsonBuilder.endObject();
 
 		for (AttributeMetaData attr : entityMetaData.getAtomicAttributes())
 		{
@@ -68,7 +63,7 @@ public class MappingsBuilder
 
 	private static void createAttributeMappingContents(AttributeMetaData attr, boolean enableNorms,
 			boolean createAllIndex, boolean nestRefs, boolean enableNgramAnalyzer, XContentBuilder jsonBuilder)
-					throws IOException
+			throws IOException
 	{
 		AttributeType dataType = attr.getDataType();
 		switch (dataType)
@@ -174,7 +169,7 @@ public class MappingsBuilder
 						.field("index", "not_analyzed").endObject().endObject();
 				break;
 			default:
-				throw new RuntimeException("Unknown data type [" + dataType + "]");
+				throw new RuntimeException(format("Unknown data type [%s]", dataType.toString()));
 		}
 
 		jsonBuilder.field("include_in_all", createAllIndex && attr.isVisible());

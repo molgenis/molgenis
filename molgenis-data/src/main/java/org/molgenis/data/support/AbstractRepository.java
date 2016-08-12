@@ -1,37 +1,22 @@
 package org.molgenis.data.support;
 
-import static com.google.common.base.Predicates.notNull;
-import static com.google.common.collect.Iterables.filter;
-import static com.google.common.collect.Iterables.partition;
-import static com.google.common.collect.Iterables.transform;
-import static com.google.common.collect.Maps.uniqueIndex;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.EnumSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Consumer;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
-import org.molgenis.data.AggregateQuery;
-import org.molgenis.data.AggregateResult;
-import org.molgenis.data.Entity;
-import org.molgenis.data.listeners.EntityListener;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.Query;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Sets;
+import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.Repository;
-import org.molgenis.data.RepositoryCapability;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Sets;
+import java.io.IOException;
+import java.util.*;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import static com.google.common.base.Predicates.notNull;
+import static com.google.common.collect.Iterables.*;
+import static com.google.common.collect.Maps.uniqueIndex;
 
 /**
  * Base class for repositories. Subclasses can override supported methods
@@ -202,23 +187,6 @@ public abstract class AbstractRepository implements Repository<Entity>
 
 	@Override
 	public Integer add(Stream<Entity> entities)
-	{
-		throw new UnsupportedOperationException();
-	}
-
-	@Override
-	public void flush()
-	{
-	}
-
-	@Override
-	public void clearCache()
-	{
-	}
-
-	// Implement in child class if repository has capability INDEXABLE
-	@Override
-	public void rebuildIndex()
 	{
 		throw new UnsupportedOperationException();
 	}

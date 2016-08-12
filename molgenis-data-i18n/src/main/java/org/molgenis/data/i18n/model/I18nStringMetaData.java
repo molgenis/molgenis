@@ -25,6 +25,8 @@ public class I18nStringMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Internationalization");
+		setDescription("Translated language strings");
 		addAttribute(MSGID, ROLE_ID);
 		addAttribute(DESCRIPTION).setNillable(true).setDataType(TEXT);
 	}

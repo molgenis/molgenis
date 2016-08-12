@@ -194,6 +194,12 @@ public class CmdLineDataService implements DataService
 	}
 
 	@Override
+	public void deleteAll(String entityName, Stream<Object> ids)
+	{
+		throw new UnsupportedOperationException();
+	}
+
+	@Override
 	public void deleteAll(String entityName)
 	{
 		throw new UnsupportedOperationException();

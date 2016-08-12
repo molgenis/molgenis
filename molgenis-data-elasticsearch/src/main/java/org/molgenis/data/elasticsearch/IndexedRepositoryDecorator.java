@@ -1,17 +1,13 @@
 package org.molgenis.data.elasticsearch;
 
-import org.elasticsearch.common.collect.Iterators;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -32,127 +28,93 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	private static final String INDEX_REPOSITORY = "Index Repository";
 	private static final String DECORATED_REPOSITORY = "Decorated Repository";
 
-	private static final int BATCH_SIZE = 1000;
-
-	private final Repository<Entity> decoratedRepository;
-	private SearchService elasticSearchService;
+	private final Repository<Entity> decoratedRepo;
+	private SearchService searchService;
 
 	/**
 	 * Operators NOT supported by the decorated repository.
 	 */
 	private Set<Operator> unsupportedOperators;
 
-	public IndexedRepositoryDecorator(Repository<Entity> decoratedRepo, SearchService elasticSearchService)
+	public IndexedRepositoryDecorator(Repository<Entity> decoratedRepo, SearchService searchService)
 	{
-		this.elasticSearchService = requireNonNull(elasticSearchService);
-		this.decoratedRepository = requireNonNull(decoratedRepo);
+		this.searchService = requireNonNull(searchService);
+		this.decoratedRepo = requireNonNull(decoratedRepo);
 		Set<Operator> operators = getQueryOperators();
-		operators.removeAll(decoratedRepository.getQueryOperators());
+		operators.removeAll(this.decoratedRepo.getQueryOperators());
 		unsupportedOperators = Collections.unmodifiableSet(operators);
 	}
 
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		return decoratedRepository.getEntityMetaData();
+		return decoratedRepo.getEntityMetaData();
 	}
 
 	@Override
-	@Transactional
 	public void add(Entity entity)
 	{
-		decoratedRepository.add(entity);
+		decoratedRepo.add(entity);
 	}
 
 	@Override
-	@Transactional
 	public Integer add(Stream<Entity> entities)
 	{
-		// TODO look into performance improvements
-		AtomicInteger count = new AtomicInteger();
-		Iterators.partition(entities.iterator(), BATCH_SIZE).forEachRemaining(batch -> {
-			Integer batchCount = decoratedRepository.add(batch.stream());
-			count.addAndGet(batchCount);
-		});
-		return count.get();
+		return decoratedRepo.add(entities);
 	}
 
 	@Override
-	public void flush()
-	{
-		decoratedRepository.flush();
-	}
-
-	@Override
-	public void clearCache()
-	{
-		decoratedRepository.clearCache();
-	}
-
-	@Override
-	@Transactional
 	public void update(Entity entity)
 	{
-		decoratedRepository.update(entity);
+		decoratedRepo.update(entity);
 	}
 
 	@Override
-	@Transactional
 	public void update(Stream<Entity> entities)
 	{
-		// TODO look into performance improvements
-		Iterators.partition(entities.iterator(), BATCH_SIZE)
-				.forEachRemaining(batch -> decoratedRepository.update(batch.stream()));
+		decoratedRepo.update(entities);
 	}
 
 	@Override
-	@Transactional
 	public void delete(Entity entity)
 	{
-		decoratedRepository.delete(entity);
+		decoratedRepo.delete(entity);
 	}
 
 	@Override
-	@Transactional
 	public void delete(Stream<Entity> entities)
 	{
-		// TODO look into performance improvements
-		Iterators.partition(entities.iterator(), BATCH_SIZE)
-				.forEachRemaining(batch -> decoratedRepository.delete(batch.stream()));
+		decoratedRepo.delete(entities);
 	}
 
 	@Override
-	@Transactional
 	public void deleteById(Object id)
 	{
-		decoratedRepository.deleteById(id);
+		decoratedRepo.deleteById(id);
 	}
 
 	@Override
-	@Transactional
 	public void deleteAll(Stream<Object> ids)
 	{
-		// TODO look into performance improvements
-		Iterators.partition(ids.iterator(), BATCH_SIZE).forEachRemaining(decoratedRepository::deleteById);
+		decoratedRepo.deleteAll(ids);
 	}
 
 	@Override
-	@Transactional
 	public void deleteAll()
 	{
-		decoratedRepository.deleteAll();
+		decoratedRepo.deleteAll();
 	}
 
 	@Override
 	public Entity findOneById(Object id)
 	{
-		return decoratedRepository.findOneById(id);
+		return decoratedRepo.findOneById(id);
 	}
 
 	@Override
 	public Entity findOneById(Object id, Fetch fetch)
 	{
-		return decoratedRepository.findOneById(id, fetch);
+		return decoratedRepo.findOneById(id, fetch);
 	}
 
 	@Override
@@ -162,13 +124,13 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		{
 			LOG.debug("public Entity findOne({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
 					DECORATED_REPOSITORY);
-			return decoratedRepository.findOne(q);
+			return decoratedRepo.findOne(q);
 		}
 		else
 		{
 			LOG.debug("public Entity findOne({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
 					INDEX_REPOSITORY);
-			return elasticSearchService.findOne(q, getEntityMetaData());
+			return searchService.findOne(q, getEntityMetaData());
 		}
 
 	}
@@ -176,13 +138,13 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
-		return decoratedRepository.findAll(ids);
+		return decoratedRepo.findAll(ids);
 	}
 
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
 	{
-		return decoratedRepository.findAll(ids, fetch);
+		return decoratedRepo.findAll(ids, fetch);
 	}
 
 	@Override
@@ -192,32 +154,26 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		{
 			LOG.debug("public Entity findAll({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
 					DECORATED_REPOSITORY);
-			return decoratedRepository.findAll(q);
+			return decoratedRepo.findAll(q);
 		}
 		else
 		{
 			LOG.debug("public Entity findAll({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
 					INDEX_REPOSITORY);
-			return elasticSearchService.searchAsStream(q, getEntityMetaData());
+			return searchService.searchAsStream(q, getEntityMetaData());
 		}
 	}
 
 	@Override
 	public Iterator<Entity> iterator()
 	{
-		return decoratedRepository.iterator();
+		return decoratedRepo.iterator();
 	}
 
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		decoratedRepository.forEachBatched(fetch, consumer, batchSize);
-	}
-
-	@Override
-	public void rebuildIndex()
-	{
-		elasticSearchService.rebuildIndex(decoratedRepository);
+		decoratedRepo.forEachBatched(fetch, consumer, batchSize);
 	}
 
 	/**
@@ -229,7 +185,7 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	public Set<RepositoryCapability> getCapabilities()
 	{
 		Set<RepositoryCapability> capabilities = new HashSet<>();
-		capabilities.addAll(decoratedRepository.getCapabilities());
+		capabilities.addAll(decoratedRepo.getCapabilities());
 		capabilities.addAll(EnumSet.of(QUERYABLE, AGGREGATEABLE));
 		return unmodifiableSet(capabilities);
 	}
@@ -243,25 +199,25 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	@Override
 	public void close() throws IOException
 	{
-		decoratedRepository.close();
+		decoratedRepo.close();
 	}
 
 	@Override
 	public String getName()
 	{
-		return decoratedRepository.getName();
+		return decoratedRepo.getName();
 	}
 
 	@Override
 	public long count()
 	{
-		return decoratedRepository.count();
+		return decoratedRepo.count();
 	}
 
 	@Override
 	public Query<Entity> query()
 	{
-		return decoratedRepository.query();
+		return decoratedRepo.query();
 	}
 
 	@Override
@@ -272,20 +228,20 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 		{
 			LOG.debug("public long count({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
 					DECORATED_REPOSITORY);
-			return decoratedRepository.count(q);
+			return decoratedRepo.count(q);
 		}
 		else
 		{
 			LOG.debug("public long count({}) entityName: [{}] repository: [{}]", q, getEntityMetaData().getName(),
 					INDEX_REPOSITORY);
-			return elasticSearchService.count(q, getEntityMetaData());
+			return searchService.count(q, getEntityMetaData());
 		}
 	}
 
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		return elasticSearchService.aggregate(aggregateQuery, getEntityMetaData());
+		return searchService.aggregate(aggregateQuery, getEntityMetaData());
 	}
 
 	/**

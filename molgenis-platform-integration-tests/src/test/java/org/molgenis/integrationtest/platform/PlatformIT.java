@@ -57,11 +57,15 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.molgenis.data.RepositoryCapability.*;
+import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
 public class PlatformIT extends AbstractTestNGSpringContextTests
@@ -158,9 +162,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			metaDataService.addEntityMeta(entityMetaDataDynamic);
 			metaDataService.addEntityMeta(selfXrefEntityMetaData);
 		});
-		waitForWorkToBeFinished(reindexService, LOG);
 		setAuthentication();
 		createLanguages();
+		waitForWorkToBeFinished(reindexService, LOG);
 	}
 
 	private void setAuthentication()
@@ -197,9 +201,17 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		// Permissions attributeMetaDataMetaData
 		String writeAttributeMetaDataMetaData =
 				"ROLE_ENTITY_WRITE_" + attributeMetaDataMetaData.getName().toUpperCase();
+		String readAttributeMetaDataMetaData = "ROLE_ENTITY_READ_" + attributeMetaDataMetaData.getName().toUpperCase();
+		String countAttributeMetaDataMetaData =
+				"ROLE_ENTITY_COUNT_" + attributeMetaDataMetaData.getName().toUpperCase();
 
 		// Permissions i18nStringMetaData
 		String writeI18nStringMetaData = "ROLE_ENTITY_WRITE_" + i18nStringMetaData.getName().toUpperCase();
+
+		// EntityMetaDataMetaData
+		String writeEntityMetaDataMetaData = "ROLE_ENTITY_WRITE_" + entityMetaDataMetaData.getName().toUpperCase();
+		String readEntityMetaDataMetaData = "ROLE_ENTITY_READ_" + entityMetaDataMetaData.getName().toUpperCase();
+		String countEntityMetaDataMetaData = "ROLE_ENTITY_COUNT_" + entityMetaDataMetaData.getName().toUpperCase();
 
 		SecurityContextHolder.getContext().setAuthentication(
 				new TestingAuthenticationToken("user", "user", writeTestEntity, readTestEntity, readTestRefEntity,
@@ -207,7 +219,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 						countSelfXrefEntity, writeTestEntityStatic, readTestEntityStatic, countTestEntityStatic,
 						writeTestRefEntityStatic, readTestRefEntityStatic, countTestRefEntityStatic,
 						writeLanguageMetaData, readLanguageMetaData, countLanguageMetaData,
-						writeAttributeMetaDataMetaData, writeI18nStringMetaData, "ROLE_ENTITY_READ_SYS_MD_ENTITIES",
+						writeAttributeMetaDataMetaData, readAttributeMetaDataMetaData, countAttributeMetaDataMetaData,
+						writeI18nStringMetaData, writeEntityMetaDataMetaData, readEntityMetaDataMetaData,
+						countEntityMetaDataMetaData, "ROLE_ENTITY_READ_SYS_MD_ENTITIES",
 						"ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES", "ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
 	}
 
@@ -285,12 +299,25 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(languageService.getCurrentUserLanguageCode(), "en");
 		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(), new String[] { "en", "nl" });
 
+		// NL
+		assertNotNull(dataService.getEntityMetaData(I18N_STRING).getAttribute("nl"));
+		assertNotNull(dataService.getEntityMetaData(ENTITY_META_DATA).getAttribute("label-nl"));
+		assertNotNull(dataService.getEntityMetaData(ENTITY_META_DATA).getAttribute("description-nl"));
+		assertNotNull(dataService.getEntityMetaData(ATTRIBUTE_META_DATA).getAttribute("label-nl"));
+		assertNotNull(dataService.getEntityMetaData(ATTRIBUTE_META_DATA).getAttribute("description-nl"));
+
+		// EN
+		assertNotNull(dataService.getEntityMetaData(I18N_STRING).getAttribute("en"));
+		assertNotNull(dataService.getEntityMetaData(ENTITY_META_DATA).getAttribute("label-en"));
+		assertNotNull(dataService.getEntityMetaData(ENTITY_META_DATA).getAttribute("description-en"));
+		assertNotNull(dataService.getEntityMetaData(ATTRIBUTE_META_DATA).getAttribute("label-en"));
+		assertNotNull(dataService.getEntityMetaData(ATTRIBUTE_META_DATA).getAttribute("description-en"));
+
 		Entity car = new DynamicEntity(i18nStringMetaData);
 		car.set(I18nStringMetaData.MSGID, "car");
 		car.set("en", "car");
 		car.set("nl", "auto");
 		dataService.add(I18nStringMetaData.I18N_STRING, car);
-
 		assertEquals(languageService.getBundle("en").getString("car"), "car");
 		assertEquals(languageService.getBundle("nl").getString("car"), "auto");
 

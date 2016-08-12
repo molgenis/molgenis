@@ -37,7 +37,6 @@ import java.util.stream.Stream;
 import static com.google.common.base.Stopwatch.createStarted;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static java.lang.String.format;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableSet;
@@ -418,60 +417,6 @@ public class PostgreSqlRepository extends AbstractRepository
 		};
 	}
 
-	/**
-	 * Returns the PostgreSQL value for the given entity attribute
-	 *
-	 * @param entity entity
-	 * @param attr   attribute
-	 * @return PostgreSQL value
-	 */
-	private static Object getPostgreSqlValue(Entity entity, AttributeMetaData attr)
-	{
-		String attrName = attr.getName();
-		AttributeType attrType = attr.getDataType();
-
-		switch (attrType)
-		{
-			case BOOL:
-				return entity.getBoolean(attrName);
-			case CATEGORICAL:
-			case FILE:
-			case XREF:
-				Entity xrefEntity = entity.getEntity(attrName);
-				return xrefEntity != null ? getPostgreSqlValue(xrefEntity,
-						xrefEntity.getEntityMetaData().getIdAttribute()) : null;
-			case CATEGORICAL_MREF:
-			case MREF:
-				Iterable<Entity> entities = entity.getEntities(attrName);
-				return stream(entities.spliterator(), false).map(mrefEntity -> getPostgreSqlValue(mrefEntity,
-						mrefEntity.getEntityMetaData().getIdAttribute())).collect(toList());
-			case DATE:
-				Date date = entity.getDate(attrName);
-				return date != null ? new java.sql.Date(date.getTime()) : null;
-			case DATE_TIME:
-				Date dateTime = entity.getDate(attrName);
-				return dateTime != null ? new java.sql.Timestamp(dateTime.getTime()) : null;
-			case DECIMAL:
-				return entity.getDouble(attrName);
-			case EMAIL:
-			case ENUM:
-			case HTML:
-			case HYPERLINK:
-			case SCRIPT:
-			case STRING:
-			case TEXT:
-				return entity.getString(attrName);
-			case INT:
-				return entity.getInt(attrName);
-			case LONG:
-				return entity.getLong(attrName);
-			case COMPOUND:
-				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
-			default:
-				throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
-		}
-	}
-
 	private Integer addBatching(Iterator<? extends Entity> entities)
 	{
 		AtomicInteger count = new AtomicInteger();
@@ -506,7 +451,7 @@ public class PostgreSqlRepository extends AbstractRepository
 					int fieldIndex = 1;
 					for (AttributeMetaData attr : persistedNonMrefAttrs)
 					{
-						Object postgreSqlValue = getPostgreSqlValue(entity, attr);
+						Object postgreSqlValue = PostgreSqlUtils.getPostgreSqlValue(entity, attr);
 						preparedStatement.setObject(fieldIndex++, postgreSqlValue);
 					}
 				}
@@ -593,11 +538,11 @@ public class PostgreSqlRepository extends AbstractRepository
 					int fieldIndex = 1;
 					for (AttributeMetaData attr : persistedNonMrefAttrs)
 					{
-						Object postgreSqlValue = getPostgreSqlValue(entity, attr);
+						Object postgreSqlValue = PostgreSqlUtils.getPostgreSqlValue(entity, attr);
 						preparedStatement.setObject(fieldIndex++, postgreSqlValue);
 					}
 
-					preparedStatement.setObject(fieldIndex++, getPostgreSqlValue(entity, idAttr));
+					preparedStatement.setObject(fieldIndex++, PostgreSqlUtils.getPostgreSqlValue(entity, idAttr));
 				}
 
 				@Override
@@ -633,7 +578,8 @@ public class PostgreSqlRepository extends AbstractRepository
 					}
 				}
 				// update mrefs
-				List<Object> ids = entitiesBatch.stream().map(entity -> getPostgreSqlValue(entity, idAttr))
+				List<Object> ids = entitiesBatch.stream()
+						.map(entity -> PostgreSqlUtils.getPostgreSqlValue(entity, idAttr))
 						.collect(toList());
 				for (AttributeMetaData attr : persistedMrefAttrs)
 				{
@@ -670,8 +616,8 @@ public class PostgreSqlRepository extends AbstractRepository
 				preparedStatement.setInt(1, (int) mref.get(JUNCTION_TABLE_ORDER_ATTR_NAME));
 				preparedStatement.setObject(2, mref.get(idAttribute.getName()));
 				Entity mrefEntity = (Entity) mref.get(attr.getName());
-				preparedStatement
-						.setObject(3, getPostgreSqlValue(mrefEntity, mrefEntity.getEntityMetaData().getIdAttribute()));
+				preparedStatement.setObject(3, PostgreSqlUtils
+						.getPostgreSqlValue(mrefEntity, mrefEntity.getEntityMetaData().getIdAttribute()));
 			}
 
 			@Override
