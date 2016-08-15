@@ -92,11 +92,11 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator
 	{
 		if (cacheable && !transactionInformation.isEntireRepositoryDirty(getName()))
 		{
-			@SuppressWarnings(true);
 			Iterator<List<Object>> idBatches = partition(ids.iterator(), ID_BATCH_SIZE);
 			Iterator<List<Entity>> entityBatches = Iterators.transform(idBatches, this::findAllBatch);
 			return stream(spliteratorUnknownSize(entityBatches, SORTED | ORDERED), false).flatMap(List::stream);
-		} return delegate().findAll(ids);
+		}
+		return delegate().findAll(ids);
 	}
 
 	@Override
