@@ -25,7 +25,7 @@ public class L3CacheRepositoryDecorator extends AbstractRepositoryDecorator
 
 	private final TransactionInformation transactionInformation;
 
-	private static final int MAX_PAGE_SIZE = 1200;
+	private static final int MAX_PAGE_SIZE = 1000;
 
 	public L3CacheRepositoryDecorator(Repository<Entity> decoratedRepository, L3Cache l3Cache,
 			TransactionInformation transactionInformation)
@@ -47,49 +47,48 @@ public class L3CacheRepositoryDecorator extends AbstractRepositoryDecorator
 	 * {@link Repository} is cacheable and the {@link Query} is
 	 * limited (i.e. contains a pageSize) between 0 and MAX_PAGE_SIZE
 	 *
-	 * @param q The {@link Query}
+	 * @param query The {@link Query}
 	 * @return A stream of {@link Entity}
 	 */
 	@Override
-	public Stream<Entity> findAll(Query<Entity> q)
+	public Stream<Entity> findAll(Query<Entity> query)
 	{
-		if (transactionInformation.isRepositoryCompletelyClean(getName()) && cacheable && q.getPageSize() > 0
-				&& q.getPageSize() < MAX_PAGE_SIZE)
+		if (transactionInformation.isRepositoryCompletelyClean(getName()) && cacheable && query.getPageSize() > 0
+				&& query.getPageSize() <= MAX_PAGE_SIZE)
 		{
-			List<Object> ids = l3Cache.get(delegate(), q);
-			return delegate().findAll(ids.stream(), q.getFetch());
+			List<Object> ids = l3Cache.get(delegate(), query);
+			return delegate().findAll(ids.stream(), query.getFetch());
 		}
-		return delegate().findAll(q);
+		return delegate().findAll(query);
 	}
 
 	/**
 	 * Retrieves a single identifier from the {@link L3Cache} if the
-	 * {@link Repository} is cacheable and the {@link Query} is
-	 * limited (i.e. contains a pageSize) between 0 and MAX_PAGE_SIZE
+	 * {@link Repository} is cacheable
 	 *
-	 * @param q The {@link Query}
+	 * @param query The {@link Query}
 	 * @return A single {@link Entity} or null if not found
 	 */
 	@Override
-	public Entity findOne(Query<Entity> q)
+	public Entity findOne(Query<Entity> query)
 	{
 		if (transactionInformation.isRepositoryCompletelyClean(getName()) && cacheable)
 		{
 			// Some query parameters are irrelevant for findOne
-			QueryImpl<Entity> newQuery = new QueryImpl<>(q);
+			QueryImpl<Entity> newQuery = new QueryImpl<>(query);
 			newQuery.setPageSize(1);
 			newQuery.setSort(new Sort());
 
 			List<Object> ids = l3Cache.get(delegate(), newQuery);
 			if (!ids.isEmpty())
 			{
-				return delegate().findOneById(ids.get(0), q.getFetch());
+				return delegate().findOneById(ids.get(0), query.getFetch());
 			}
 			else
 			{
 				return null;
 			}
 		}
-		return delegate().findOne(q);
+		return delegate().findOne(query);
 	}
 }
