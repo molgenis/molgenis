@@ -55,6 +55,7 @@ public class DatabaseConfig implements TransactionManagementConfigurer
 		dataSource.setJdbcUrl(dbJdbcUri);
 		dataSource.setUser(dbUser);
 		dataSource.setPassword(dbPassword);
+		dataSource.setInitialPoolSize(5);
 		dataSource.setMinPoolSize(5);
 		dataSource.setMaxPoolSize(150);
 		dataSource.setTestConnectionOnCheckin(true);
