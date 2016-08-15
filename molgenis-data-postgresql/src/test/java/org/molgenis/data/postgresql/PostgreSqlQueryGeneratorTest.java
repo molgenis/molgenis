@@ -268,4 +268,13 @@ public class PostgreSqlQueryGeneratorTest
 		when(attr.getDataType()).thenReturn(attrType);
 		PostgreSqlQueryGenerator.getSqlAddColumn(entityMeta, attr);
 	}
+
+	@Test
+	public void getSqlDropColumn()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		assertEquals(PostgreSqlQueryGenerator.getSqlDropColumn(entityMeta, attr),
+				"ALTER TABLE \"entity\" DROP COLUMN \"attr\"");
+	}
 }

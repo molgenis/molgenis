@@ -385,22 +385,21 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		}
 
 		Map<String, AttributeMetaData> currentAttrMap = StreamSupport
-				.stream(existingEntityMeta.getOwnAttributes().spliterator(), false)
+				.stream(existingEntityMeta.getOwnAllAttributes().spliterator(), false)
 				.collect(toMap(AttributeMetaData::getName, Function.identity()));
 		Map<String, AttributeMetaData> updateAttrMap = StreamSupport
-				.stream(entityMeta.getOwnAttributes().spliterator(), false)
+				.stream(entityMeta.getOwnAllAttributes().spliterator(), false)
 				.collect(toMap(AttributeMetaData::getName, Function.identity()));
 
 		// add attributes
 		Set<String> addedAttrNames = Sets.difference(updateAttrMap.keySet(), currentAttrMap.keySet());
 		if (!addedAttrNames.isEmpty())
 		{
-			String entityName = entityMeta.getName();
 			String backend = entityMeta.getBackend();
 			RepositoryCollection repoCollection = dataService.getMeta().getBackend(backend);
 			addedAttrNames.stream().map(updateAttrMap::get).forEach(addedAttrEntity ->
 			{
-				repoCollection.addAttribute(entityName, addedAttrEntity);
+				repoCollection.addAttribute(existingEntityMeta, addedAttrEntity);
 
 				if (entityMeta.getName().equals(ENTITY_META_DATA))
 				{
@@ -419,12 +418,11 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 
 		if (!deletedAttrNames.isEmpty())
 		{
-			String entityName = entityMeta.getName();
 			String backend = entityMeta.getBackend();
 			RepositoryCollection repoCollection = dataService.getMeta().getBackend(backend);
 			deletedAttrNames.forEach(deletedAttrName ->
 			{
-				repoCollection.deleteAttribute(entityName, deletedAttrName);
+				repoCollection.deleteAttribute(existingEntityMeta, currentAttrMap.get(deletedAttrName));
 
 				if (entityMeta.getName().equals(ENTITY_META_DATA))
 				{

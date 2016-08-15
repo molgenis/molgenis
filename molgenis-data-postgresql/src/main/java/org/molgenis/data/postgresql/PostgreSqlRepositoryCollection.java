@@ -43,7 +43,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	private final DataService dataService;
 	private final PlatformTransactionManager transactionManager;
 
-	public PostgreSqlRepositoryCollection(PostgreSqlEntityFactory postgreSqlEntityFactory, DataSource dataSource,
+	PostgreSqlRepositoryCollection(PostgreSqlEntityFactory postgreSqlEntityFactory, DataSource dataSource,
 			JdbcTemplate jdbcTemplate, DataService dataService, PlatformTransactionManager transactionManager)
 	{
 		this.postgreSqlEntityFactory = requireNonNull(postgreSqlEntityFactory);
@@ -76,8 +76,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	{
 		if (isTableExists(LANGUAGE))
 		{
-			String sql = new StringBuilder("SELECT \"").append(CODE).append("\" FROM \"").append(LANGUAGE).append('"')
-					.toString();
+			String sql = "SELECT \"" + CODE + "\" FROM \"" + LANGUAGE + '"';
 			if (LOG.isDebugEnabled())
 			{
 				LOG.debug("Fetching languages");
@@ -179,130 +178,126 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	}
 
 	@Override
-	public void addAttribute(String entityName, AttributeMetaData attribute)
+	public void addAttribute(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
-		if (entityMetaData == null)
-		{
-			throw new UnknownEntityException(
-					format("Adding attribute operation failed. Unknown entity [%s]", entityName));
-		}
-		if (null != entityMetaData.getAttribute(requireNonNull(attribute).getName()))
-		{
-			throw new MolgenisDataException(
-					format("Adding attribute operation failed. Attribute already exists [%s]", attribute.getName()));
-		}
-		addAttributeRec(entityMetaData, attribute);
+		addAttributeRec(entityMeta, attr, true);
 	}
 
 	/**
-	 * Adds an attribute to the repository.
+	 * Recursively add attribute to entity and entities extending from this entity.
 	 *
-	 * @param entityMeta entity meta data that owns the attribute
-	 * @param attr       the {@link AttributeMetaData} to add
+	 * @param entityMeta      entity meta data
+	 * @param attr            attribute to add
+	 * @param checkAttrExists whether or not to perform a check if the attribute exists for the given entity
 	 */
-	private void addAttributeRec(EntityMetaData entityMeta, AttributeMetaData attr)
+	private void addAttributeRec(EntityMetaData entityMeta, AttributeMetaData attr, boolean checkAttrExists)
 	{
-		// FIXME code duplication with create table
-		if (attr.getExpression() != null)
+		if (attr.getExpression() != null || attr.getDataType() == COMPOUND)
 		{
-			// computed attributes are not persisted
+			// computed attributes and compound attributes are not persisted
 			return;
 		}
-		if (isMultipleReferenceType(attr))
+
+		if (checkAttrExists && entityMeta.getAttribute(attr.getName()) != null)
 		{
-			String createJunctionTableSql = getSqlCreateJunctionTable(entityMeta, attr);
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("Creating junction table for entity [{}] attribute [{}]", entityMeta.getName(),
-						attr.getName());
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("SQL: {}", createJunctionTableSql);
-				}
-			}
-			jdbcTemplate.execute(createJunctionTableSql);
-		}
-		else if (attr.getDataType() != COMPOUND)
-		{
-			String addColumnSql = getSqlAddColumn(entityMeta, attr);
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("Creating column for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("SQL: {}", addColumnSql);
-				}
-			}
-			jdbcTemplate.execute(addColumnSql);
+			throw new MolgenisDataException(
+					format("Adding attribute operation failed. Attribute already exists [%s]", attr.getName()));
 		}
 
-		// FIXME Code duplication
-		if (isSingleReferenceType(attr) && isPersistedInPostgreSql(attr.getRefEntity()))
+		if (entityMeta.isAbstract())
 		{
-			String createForeignKeySql = getSqlCreateForeignKey(entityMeta, attr);
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("Creating foreign key for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("SQL: {}", createForeignKeySql);
-				}
-			}
-			jdbcTemplate.execute(createForeignKeySql);
+			// for abstract entities recursively update entities extending the abstract entity
+			dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(EXTENDS, entityMeta).findAll()
+					.forEach(childEntityMeta -> addAttributeRec(childEntityMeta, attr, checkAttrExists));
 		}
-
-		String idAttrName = entityMeta.getIdAttribute().getName();
-		if (attr.isUnique() && !attr.getName().equals(idAttrName))
+		else
 		{
-			String createUniqueKeySql = getSqlCreateUniqueKey(entityMeta, attr);
-			if (LOG.isDebugEnabled())
+			if (isMultipleReferenceType(attr))
 			{
-				LOG.debug("Creating unique key for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("SQL: {}", createUniqueKeySql);
-				}
+				createJunctionTable(entityMeta, attr);
 			}
-			jdbcTemplate.execute(createUniqueKeySql);
-		}
-
-		if (attr.getDataType() == COMPOUND)
-		{
-			for (AttributeMetaData attrPart : attr.getAttributeParts())
+			else if (attr.getDataType() != COMPOUND)
 			{
-				addAttributeRec(entityMeta, attrPart);
+				createColumn(entityMeta, attr);
+			}
+
+			if (isSingleReferenceType(attr) && isPersistedInPostgreSql(attr.getRefEntity()))
+			{
+				createForeignKey(entityMeta, attr);
+			}
+
+			String idAttrName = entityMeta.getIdAttribute().getName();
+			if (attr.isUnique() && !attr.getName().equals(idAttrName))
+			{
+				createUniqueKey(entityMeta, attr);
 			}
 		}
 	}
 
 	@Override
-	public void updateAttribute(EntityMetaData entityMetaData, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	public void updateAttribute(EntityMetaData entityMeta, AttributeMetaData attr, AttributeMetaData updatedAttr)
 	{
-		if (entityMetaData.isAbstract())
+		if (entityMeta.getAttribute(attr.getName()) == null)
+		{
+			throw new UnknownAttributeException(format("Unknown attribute [%s]", attr.getName()));
+		}
+		updateAttributeRec(entityMeta, attr, updatedAttr);
+	}
+
+	/**
+	 * Recursively update attribute of entity and entities extending from this entity.
+	 *
+	 * @param entityMeta  entity meta data
+	 * @param attr        existing attribute
+	 * @param updatedAttr updated attribute
+	 */
+	private void updateAttributeRec(EntityMetaData entityMeta, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	{
+		if ((attr.getExpression() != null && updatedAttr.getExpression() != null) || (attr.getDataType() == COMPOUND
+				&& updatedAttr.getDataType() == COMPOUND))
+		{
+			return;
+		}
+
+		if (entityMeta.isAbstract())
 		{
 			// for abstract entities recursively update entities extending the abstract entity
-			dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(EXTENDS, entityMetaData).findAll()
-					.forEach(childEntityMeta -> updateAttribute(childEntityMeta, attr, updatedAttr));
+			dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(EXTENDS, entityMeta).findAll()
+					.forEach(childEntityMeta -> updateAttributeRec(childEntityMeta, attr, updatedAttr));
 		}
 		else
 		{
-			// nullable changes
-			if (!Objects.equals(attr.isNillable(), updatedAttr.isNillable()))
+			if ((attr.getExpression() == null && updatedAttr.getExpression() != null) || (attr.getDataType() != COMPOUND
+					&& updatedAttr.getDataType() == COMPOUND))
 			{
-				updateNillable(entityMetaData, attr, updatedAttr);
+				// computed attributes and compound attributes are not persisted
+				deleteAttribute(entityMeta, attr);
 			}
-
-			// unique changes
-			if (!Objects.equals(attr.isUnique(), updatedAttr.isUnique()))
+			else if ((attr.getExpression() != null && updatedAttr.getExpression() == null) || (
+					attr.getDataType() == COMPOUND && updatedAttr.getDataType() != COMPOUND))
 			{
-				updateUnique(entityMetaData, attr, updatedAttr);
+				// computed attributes and compound attributes are not persisted
+				addAttributeRec(entityMeta, updatedAttr, false);
 			}
-
-			// data type changes
-			if (!Objects.equals(attr.getDataType(), updatedAttr.getDataType()))
+			else
 			{
-				updateDataType(entityMetaData, attr, updatedAttr);
+				// nullable changes
+				if (!Objects.equals(attr.isNillable(), updatedAttr.isNillable()))
+				{
+					updateNillable(entityMeta, attr, updatedAttr);
+				}
+
+				// unique changes
+				if (!Objects.equals(attr.isUnique(), updatedAttr.isUnique()))
+				{
+					updateUnique(entityMeta, attr, updatedAttr);
+				}
+
+				// data type changes
+				if (!Objects.equals(attr.getDataType(), updatedAttr.getDataType()))
+				{
+					updateDataType(entityMeta, attr, updatedAttr);
+				}
 			}
 		}
 	}
@@ -347,17 +342,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		// add foreign key on data type updates such as STRING --> XREF
 		if (!isReferenceType(attr) && isSingleReferenceType(updatedAttr))
 		{
-			String sqlCreateForeignKey = getSqlCreateForeignKey(entityMeta, updatedAttr);
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("Creating foreign key for entity [{}] attribute [{}]", entityMeta.getName(),
-						updatedAttr.getName());
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("SQL: {}", sqlCreateForeignKey);
-				}
-			}
-			jdbcTemplate.execute(sqlCreateForeignKey);
+			createForeignKey(entityMeta, updatedAttr);
 		}
 	}
 
@@ -402,28 +387,48 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	}
 
 	@Override
-	public void deleteAttribute(String entityName, String attributeName)
+	public void deleteAttribute(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
-		if (entityMetaData == null)
+		if (entityMeta.getAttribute(attr.getName()) == null)
 		{
-			throw new UnknownEntityException(format("Unknown entity [%s]", entityName));
+			throw new UnknownAttributeException(format("Unknown attribute [%s]", attr.getName()));
 		}
-		deleteAttribute(entityMetaData, attributeName);
+		deleteAttributeRec(entityMeta, attr);
 	}
 
-	private void deleteAttribute(EntityMetaData entityMeta, String attrName)
+	/**
+	 * Recursively delete attribute in entity and entities extending from this entity.
+	 *
+	 * @param entityMeta entity meta data
+	 * @param attr       attribute to delete
+	 */
+	private void deleteAttributeRec(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		String dropColumnSql = getSqlDropColumn(entityMeta, attrName);
-		if (LOG.isDebugEnabled())
+		if (attr.getExpression() != null || attr.getDataType() == COMPOUND)
 		{
-			LOG.debug("Dropping column for entity [{}] attribute [{}]", entityMeta.getName(), attrName);
-			if (LOG.isTraceEnabled())
-			{
-				LOG.trace("SQL: {}", dropColumnSql);
-			}
+			// computed attributes and compound attributes are not persisted
+			return;
 		}
-		jdbcTemplate.execute(dropColumnSql);
+
+		if (entityMeta.isAbstract())
+		{
+			// for abstract entities recursively update entities extending the abstract entity
+			dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(EXTENDS, entityMeta).findAll()
+					.forEach(childEntityMeta -> deleteAttributeRec(childEntityMeta, attr));
+		}
+		else
+		{
+			String dropColumnSql = getSqlDropColumn(entityMeta, attr);
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Dropping column for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
+				if (LOG.isTraceEnabled())
+				{
+					LOG.trace("SQL: {}", dropColumnSql);
+				}
+			}
+			jdbcTemplate.execute(dropColumnSql);
+		}
 	}
 
 	/**
@@ -466,6 +471,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			}
 			catch (Exception e)
 			{
+				//noinspection ThrowFromFinallyBlock
 				throw new RuntimeException(e);
 			}
 		}
@@ -531,48 +537,73 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			// add mref tables
 			if (isMultipleReferenceType(attr))
 			{
-				String createJunctionTableSql = getSqlCreateJunctionTable(entityMeta, attr);
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("Creating junction table for entity [{}] attribute [{}]", entityMeta.getName(),
-							attr.getName());
-					if (LOG.isTraceEnabled())
-					{
-						LOG.trace("SQL: {}", createJunctionTableSql);
-					}
-				}
-				jdbcTemplate.execute(createJunctionTableSql);
+				createJunctionTable(entityMeta, attr);
 			}
-			// FIXME Code duplication
 			else if (isSingleReferenceType(attr) && isPersistedInPostgreSql(attr.getRefEntity()))
 			{
-				String createForeignKeySql = getSqlCreateForeignKey(entityMeta, attr);
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("Creating foreign key for entity [{}] attribute [{}]", entityMeta.getName(),
-							attr.getName());
-					if (LOG.isTraceEnabled())
-					{
-						LOG.trace("SQL: {}", createForeignKeySql);
-					}
-				}
-				jdbcTemplate.execute(createForeignKeySql);
+				createForeignKey(entityMeta, attr);
 			}
 
 			if (attr.isUnique() && !attr.getName().equals(idAttrName))
 			{
-				String createUniqueSql = getSqlCreateUniqueKey(entityMeta, attr);
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("Creating unique key for entity [{}] attribute [{}]", entityMeta.getName(),
-							attr.getName());
-					if (LOG.isTraceEnabled())
-					{
-						LOG.trace("SQL: {}", createUniqueSql);
-					}
-				}
-				jdbcTemplate.execute(createUniqueSql);
+				createUniqueKey(entityMeta, attr);
 			}
 		});
+	}
+
+	private void createForeignKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	{
+		String createForeignKeySql = getSqlCreateForeignKey(entityMeta, attr);
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Creating foreign key for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
+			if (LOG.isTraceEnabled())
+			{
+				LOG.trace("SQL: {}", createForeignKeySql);
+			}
+		}
+		jdbcTemplate.execute(createForeignKeySql);
+	}
+
+	private void createUniqueKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	{
+		String createUniqueKeySql = getSqlCreateUniqueKey(entityMeta, attr);
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Creating unique key for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
+			if (LOG.isTraceEnabled())
+			{
+				LOG.trace("SQL: {}", createUniqueKeySql);
+			}
+		}
+		jdbcTemplate.execute(createUniqueKeySql);
+	}
+
+	private void createColumn(EntityMetaData entityMeta, AttributeMetaData attr)
+	{
+		String addColumnSql = getSqlAddColumn(entityMeta, attr);
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Creating column for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
+			if (LOG.isTraceEnabled())
+			{
+				LOG.trace("SQL: {}", addColumnSql);
+			}
+		}
+		jdbcTemplate.execute(addColumnSql);
+	}
+
+	private void createJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
+	{
+		String createJunctionTableSql = getSqlCreateJunctionTable(entityMeta, attr);
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Creating junction table for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
+			if (LOG.isTraceEnabled())
+			{
+				LOG.trace("SQL: {}", createJunctionTableSql);
+			}
+		}
+		jdbcTemplate.execute(createJunctionTableSql);
 	}
 }

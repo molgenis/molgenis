@@ -195,10 +195,10 @@ class PostgreSqlQueryGenerator
 		return getSqlDropTable(getTableName(entityMeta));
 	}
 
-	static String getSqlDropColumn(EntityMetaData entityMeta, String attrName)
+	static String getSqlDropColumn(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		return new StringBuilder().append("ALTER TABLE ").append(getTableName(entityMeta)).append(" DROP COLUMN ")
-				.append(getColumnName(attrName)).toString();
+				.append(getColumnName(attr)).toString();
 	}
 
 	static String getSqlInsert(EntityMetaData entityMeta)
