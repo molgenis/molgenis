@@ -1,12 +1,10 @@
 package org.molgenis.ui.menu;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
+import com.google.gson.annotations.SerializedName;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import com.google.gson.annotations.SerializedName;
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 public class MenuItem
 {

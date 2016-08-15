@@ -1,12 +1,12 @@
 package org.molgenis.data.meta.model;
 
-import static java.util.Objects.requireNonNull;
-
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * {@link AttributeMetaData Attribute meta data} factory. This factory does not extend from

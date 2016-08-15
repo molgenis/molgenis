@@ -101,8 +101,10 @@ public class EntityReferenceResolverDecorator implements Repository<Entity>
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		decoratedRepo.forEachBatched(fetch, entities -> {
-			List<Entity> resolvedEntities = resolveEntityReferences(entities.stream(), fetch).collect(Collectors.toList());
+		decoratedRepo.forEachBatched(fetch, entities ->
+		{
+			List<Entity> resolvedEntities = resolveEntityReferences(entities.stream(), fetch)
+					.collect(Collectors.toList());
 			consumer.accept(resolvedEntities);
 		}, batchSize);
 	}

@@ -1,8 +1,7 @@
 package org.molgenis.data.mapper.controller;
 
-import org.molgenis.gson.AutoGson;
-
 import com.google.auto.value.AutoValue;
+import org.molgenis.gson.AutoGson;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_FirstAttributeMappingInfo.class)
@@ -16,7 +15,9 @@ public abstract class FirstAttributeMappingInfo
 
 	public abstract String getTargetAttribute();
 
-	public static FirstAttributeMappingInfo create(String mappingProjectId, String target, String source, String targetAttribute){
+	public static FirstAttributeMappingInfo create(String mappingProjectId, String target, String source,
+			String targetAttribute)
+	{
 		return new AutoValue_FirstAttributeMappingInfo(mappingProjectId, target, source, targetAttribute);
 	}
 }

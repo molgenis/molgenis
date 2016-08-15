@@ -9,21 +9,22 @@
 
 package org.molgenis.model.elements;
 
+import org.molgenis.model.MolgenisModelException;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.molgenis.model.MolgenisModelException;
 
 // jdk
 
 /**
- * 
+ *
  */
 public class Form extends UISchema
 {
 	// constructor(s)
+
 	/**
-	 * 
+	 *
 	 */
 	public Form(String name, UISchema parent)
 	{
@@ -34,7 +35,7 @@ public class Form extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	@Override
 	public Type getType()
@@ -43,8 +44,9 @@ public class Form extends UISchema
 	}
 
 	// access methods
+
 	/**
-	 * 
+	 *
 	 */
 	public void setEntity(Entity entity)
 	{
@@ -52,7 +54,7 @@ public class Form extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public Entity getEntity()
 	{
@@ -64,14 +66,16 @@ public class Form extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void setRecord(Record record)
 	{
 		this.record = record;
 	}
 
-	/** Getter/setter for optional custom header for the selected form screen */
+	/**
+	 * Getter/setter for optional custom header for the selected form screen
+	 */
 	public String getHeader()
 	{
 		return this.header;
@@ -82,7 +86,9 @@ public class Form extends UISchema
 		this.header = header;
 	}
 
-	/** Getter/setter for optional description for the selected form screen */
+	/**
+	 * Getter/setter for optional description for the selected form screen
+	 */
 	public String getDescription()
 	{
 		return this.description;
@@ -94,7 +100,7 @@ public class Form extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public Record getRecord()
 	{
@@ -102,7 +108,7 @@ public class Form extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void setReadOnly(final boolean readonly)
 	{
@@ -110,7 +116,7 @@ public class Form extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public boolean getReadOnly()
 	{
@@ -118,7 +124,7 @@ public class Form extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void setLimit(final int limit)
 	{
@@ -126,7 +132,7 @@ public class Form extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public int getLimit()
 	{
@@ -134,7 +140,7 @@ public class Form extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void setViewType(final ViewType viewtype)
 	{
@@ -142,7 +148,7 @@ public class Form extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public ViewType getViewType()
 	{
@@ -150,15 +156,16 @@ public class Form extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public enum ViewType
 	{
 		LIST_VIEW("list"), EDIT_VIEW("edit"), VIEWTYPE_UNKNOWN("unknown");
 
 		//
+
 		/**
-		 * 
+		 *
 		 */
 		public String getValue()
 		{
@@ -166,7 +173,7 @@ public class Form extends UISchema
 		}
 
 		/**
-		 * 
+		 *
 		 */
 		public static ViewType parseViewType(String str) throws MolgenisModelException
 		{
@@ -174,8 +181,7 @@ public class Form extends UISchema
 
 			if (str.equals(ViewType.LIST_VIEW.val)) return ViewType.LIST_VIEW;
 			else if (str.equals(ViewType.EDIT_VIEW.val)) return ViewType.EDIT_VIEW;
-			else
-				return ViewType.VIEWTYPE_UNKNOWN;
+			else return ViewType.VIEWTYPE_UNKNOWN;
 		}
 
 		/** */
@@ -206,7 +212,9 @@ public class Form extends UISchema
 	/** */
 	private boolean readonly;
 
-	/** Optional custom header for the selected form screen */
+	/**
+	 * Optional custom header for the selected form screen
+	 */
 	private String header;
 
 	/**
@@ -236,6 +244,7 @@ public class Form extends UISchema
 	public enum SortOrder
 	{
 		ASC, DESC;
+
 		public static SortOrder parse(String str) throws MolgenisModelException
 		{
 			if (str == null) throw new MolgenisModelException("SortOrder cannot be null");
@@ -243,7 +252,9 @@ public class Form extends UISchema
 			if (str.equalsIgnoreCase(SortOrder.DESC.toString())) return SortOrder.DESC;
 			throw new MolgenisModelException("SortOrder can only be 'asc' or 'desc'");
 		}
-	};
+	}
+
+	;
 
 	/**
 	 * Option to have a compact view only showing the assigned fields.. The
@@ -402,8 +413,8 @@ public class Form extends UISchema
 			commandsBuilder.append(command).append(',');
 		String sortby = "";
 		if (this.sortby != null) sortby = "sortby=" + this.sortby;
-		return String.format("Form(name=%s, entity=%s, group=%s, groupRead=%s, commands=%s,%s)", getName(), getRecord()
-				.getName(), getGroup(), getGroupRead(), commandsBuilder.toString(), sortby);
+		return String.format("Form(name=%s, entity=%s, group=%s, groupRead=%s, commands=%s,%s)", getName(),
+				getRecord().getName(), getGroup(), getGroupRead(), commandsBuilder.toString(), sortby);
 	}
 
 	public String getSortby()

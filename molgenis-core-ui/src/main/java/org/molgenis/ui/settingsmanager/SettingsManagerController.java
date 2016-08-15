@@ -1,11 +1,11 @@
 package org.molgenis.ui.settingsmanager;
 
-import static org.molgenis.ui.settingsmanager.SettingsManagerController.URI;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import static org.molgenis.ui.settingsmanager.SettingsManagerController.URI;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
 @RequestMapping(URI)

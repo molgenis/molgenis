@@ -1,15 +1,5 @@
 package org.molgenis.dataexplorer.download;
 
-import static com.google.common.collect.Iterables.filter;
-import static com.google.common.collect.Iterables.transform;
-import static java.util.Objects.requireNonNull;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.Set;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.csv.CsvWriter;
@@ -24,6 +14,16 @@ import org.molgenis.data.support.AbstractWritable.EntityWriteMode;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import static com.google.common.collect.Iterables.filter;
+import static com.google.common.collect.Iterables.transform;
+import static java.util.Objects.requireNonNull;
 
 public class DataExplorerDownloadHandler
 {
@@ -54,12 +54,12 @@ public class DataExplorerDownloadHandler
 			switch (dataRequest.getColNames())
 			{
 				case ATTRIBUTE_LABELS:
-					excelSheetWriter = excelWriter.createWritable(entityName, attributes,
-							AttributeWriteMode.ATTRIBUTE_LABELS);
+					excelSheetWriter = excelWriter
+							.createWritable(entityName, attributes, AttributeWriteMode.ATTRIBUTE_LABELS);
 					break;
 				case ATTRIBUTE_NAMES:
-					excelSheetWriter = excelWriter.createWritable(entityName, attributes,
-							AttributeWriteMode.ATTRIBUTE_NAMES);
+					excelSheetWriter = excelWriter
+							.createWritable(entityName, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);
 					break;
 			}
 			switch (dataRequest.getEntityValues())

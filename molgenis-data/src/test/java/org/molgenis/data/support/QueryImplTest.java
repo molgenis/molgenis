@@ -1,18 +1,16 @@
 package org.molgenis.data.support;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertNotEquals;
-
-import java.util.Arrays;
-import java.util.List;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.List;
+
+import static org.testng.Assert.*;
 
 public class QueryImplTest
 {
@@ -36,8 +34,9 @@ public class QueryImplTest
 	public void nestOr()
 	{
 		Query<Entity> q = new QueryImpl<>().nest().eq("field", "value1").or().eq("field", "value2").unnest();
-		QueryRule expectedRule = new QueryRule(Arrays.asList(new QueryRule("field", Operator.EQUALS, "value1"),
-				new QueryRule(Operator.OR), new QueryRule("field", Operator.EQUALS, "value2")));
+		QueryRule expectedRule = new QueryRule(
+				Arrays.asList(new QueryRule("field", Operator.EQUALS, "value1"), new QueryRule(Operator.OR),
+						new QueryRule("field", Operator.EQUALS, "value2")));
 		assertEquals(q.getRules(), Arrays.asList(expectedRule));
 	}
 
@@ -45,8 +44,9 @@ public class QueryImplTest
 	public void nestAnd()
 	{
 		Query<Entity> q = new QueryImpl<>().nest().eq("field", "value1").and().eq("field", "value2").unnest();
-		QueryRule expectedRule = new QueryRule(Arrays.asList(new QueryRule("field", Operator.EQUALS, "value1"),
-				new QueryRule(Operator.AND), new QueryRule("field", Operator.EQUALS, "value2")));
+		QueryRule expectedRule = new QueryRule(
+				Arrays.asList(new QueryRule("field", Operator.EQUALS, "value1"), new QueryRule(Operator.AND),
+						new QueryRule("field", Operator.EQUALS, "value2")));
 		assertEquals(q.getRules(), Arrays.asList(expectedRule));
 	}
 

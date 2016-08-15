@@ -1,15 +1,7 @@
 package org.molgenis.r;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.util.Map;
-import java.util.UUID;
-
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.molgenis.file.FileStore;
@@ -20,8 +12,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class RScriptRunner implements ScriptRunner
@@ -43,7 +37,7 @@ public class RScriptRunner implements ScriptRunner
 
 	/**
 	 * Run an R script as freemarker template
-	 * 
+	 *
 	 * @param templateName
 	 * @param parameters
 	 * @throws IOException
@@ -58,7 +52,7 @@ public class RScriptRunner implements ScriptRunner
 
 	/**
 	 * Run an R script as freemarker template
-	 * 
+	 *
 	 * @param scriptName
 	 * @param templateName
 	 * @param parameters
@@ -87,7 +81,7 @@ public class RScriptRunner implements ScriptRunner
 
 	/**
 	 * Run an R script as string
-	 * 
+	 *
 	 * @param script
 	 * @param outputHandler
 	 * @throws IOException
@@ -121,7 +115,7 @@ public class RScriptRunner implements ScriptRunner
 
 	/**
 	 * Run an R script
-	 * 
+	 *
 	 * @param script
 	 * @param outputHandler
 	 */

@@ -5,7 +5,7 @@ public class Credits
 	boolean enabled = true;
 	String href = "http://www.molgenis.org";
 	String text = "Molgenis";
-	
+
 	/**
 	 * @return the enabled
 	 */
@@ -13,6 +13,7 @@ public class Credits
 	{
 		return enabled;
 	}
+
 	/**
 	 * @param enabled the enabled to set
 	 */
@@ -20,6 +21,7 @@ public class Credits
 	{
 		this.enabled = enabled;
 	}
+
 	/**
 	 * @return the href
 	 */
@@ -27,6 +29,7 @@ public class Credits
 	{
 		return href;
 	}
+
 	/**
 	 * @param href the href to set
 	 */
@@ -34,6 +37,7 @@ public class Credits
 	{
 		this.href = href;
 	}
+
 	/**
 	 * @return the text
 	 */
@@ -41,6 +45,7 @@ public class Credits
 	{
 		return text;
 	}
+
 	/**
 	 * @param text the text to set
 	 */
@@ -48,6 +53,5 @@ public class Credits
 	{
 		this.text = text;
 	}
-	
-	
+
 }

@@ -1,10 +1,10 @@
 package org.molgenis.script;
 
-import static org.molgenis.script.ScriptParameterMetaData.NAME;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
+
+import static org.molgenis.script.ScriptParameterMetaData.NAME;
 
 public class ScriptParameter extends StaticEntity
 {

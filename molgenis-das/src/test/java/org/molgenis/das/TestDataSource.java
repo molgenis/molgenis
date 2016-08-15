@@ -9,9 +9,6 @@ import uk.ac.ebi.mydas.model.DasAnnotatedSegment;
 import uk.ac.ebi.mydas.model.DasType;
 
 import javax.servlet.ServletContext;
-
-import org.molgenis.das.RangeHandlingDataSource;
-
 import java.util.Collection;
 import java.util.Map;
 
@@ -22,24 +19,31 @@ import java.util.Map;
  * Time: 09:29
  * To change this template use File | Settings | File Templates.
  */
-public class TestDataSource extends RangeHandlingDataSource{
-    @Override
-    public DasAnnotatedSegment getFeatures(String segmentId, int start, int stop, Integer maxbins) throws BadReferenceObjectException, CoordinateErrorException, DataSourceException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
+public class TestDataSource extends RangeHandlingDataSource
+{
+	@Override
+	public DasAnnotatedSegment getFeatures(String segmentId, int start, int stop, Integer maxbins)
+			throws BadReferenceObjectException, CoordinateErrorException, DataSourceException
+	{
+		return null;  //To change body of implemented methods use File | Settings | File Templates.
+	}
 
-    @Override
-    public void init(ServletContext servletContext, Map<String, PropertyType> globalParameters, DataSourceConfiguration dataSourceConfig) throws DataSourceException {
-        //To change body of implemented methods use File | Settings | File Templates.
-    }
+	@Override
+	public void init(ServletContext servletContext, Map<String, PropertyType> globalParameters,
+			DataSourceConfiguration dataSourceConfig) throws DataSourceException
+	{
+		//To change body of implemented methods use File | Settings | File Templates.
+	}
 
-    @Override
-    public Collection<DasType> getTypes() throws DataSourceException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
+	@Override
+	public Collection<DasType> getTypes() throws DataSourceException
+	{
+		return null;  //To change body of implemented methods use File | Settings | File Templates.
+	}
 
-    @Override
-    public Integer getTotalCountForType(DasType type) throws DataSourceException {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
-    }
+	@Override
+	public Integer getTotalCountForType(DasType type) throws DataSourceException
+	{
+		return null;  //To change body of implemented methods use File | Settings | File Templates.
+	}
 }

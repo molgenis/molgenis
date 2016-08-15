@@ -1,11 +1,6 @@
 package org.molgenis.file.ingest;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
-import static org.quartz.CronScheduleBuilder.cronSchedule;
-import static org.quartz.JobBuilder.newJob;
-import static org.quartz.TriggerBuilder.newTrigger;
-
+import com.google.common.collect.Sets;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
@@ -14,19 +9,17 @@ import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.file.ingest.execution.FileIngestException;
 import org.molgenis.file.ingest.meta.FileIngest;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
-import org.quartz.CronExpression;
-import org.quartz.JobDataMap;
-import org.quartz.JobDetail;
-import org.quartz.JobKey;
-import org.quartz.Scheduler;
-import org.quartz.SchedulerException;
-import org.quartz.Trigger;
+import org.quartz.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Sets;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.file.ingest.meta.FileIngestMetaData.FILE_INGEST;
+import static org.quartz.CronScheduleBuilder.cronSchedule;
+import static org.quartz.JobBuilder.newJob;
+import static org.quartz.TriggerBuilder.newTrigger;
 
 /**
  * Schedule and unschedule FileIngestJobs
@@ -49,7 +42,7 @@ public class FileIngesterJobScheduler
 
 	/**
 	 * Execute FileIngest job immediately
-	 * 
+	 *
 	 * @param fileIngestId
 	 */
 	public synchronized void runNow(String fileIngestId)
@@ -84,11 +77,11 @@ public class FileIngesterJobScheduler
 
 	/**
 	 * Schedule a FileIngest job with a cron expression defined in the entity.
-	 * 
+	 * <p>
 	 * Reschedules job if the job already exists.
-	 * 
+	 * <p>
 	 * If active is false, it unschedules the job
-	 * 
+	 *
 	 * @param fileIngest
 	 */
 	public synchronized void schedule(Entity fileIngest)
@@ -134,7 +127,7 @@ public class FileIngesterJobScheduler
 
 	/**
 	 * Remove a job from the scheduler
-	 * 
+	 *
 	 * @param fileIngestId
 	 */
 	public synchronized void unschedule(String fileIngestId)

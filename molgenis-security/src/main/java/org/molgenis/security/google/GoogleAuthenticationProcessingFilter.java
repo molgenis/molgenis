@@ -1,33 +1,10 @@
 package org.molgenis.security.google;
 
-import static java.lang.String.format;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
-import static org.molgenis.auth.MolgenisGroupMetaData.NAME;
-import static org.molgenis.auth.MolgenisUserMetaData.EMAIL;
-import static org.molgenis.auth.MolgenisUserMetaData.GOOGLEACCOUNTID;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
-import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-import static org.springframework.http.HttpMethod.POST;
-
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.molgenis.auth.MolgenisGroup;
-import org.molgenis.auth.MolgenisGroupMember;
-import org.molgenis.auth.MolgenisGroupMemberFactory;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserFactory;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
+import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.token.UnknownTokenException;
@@ -47,10 +24,25 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken.Payload;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import static java.lang.String.format;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
+import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
+import static org.molgenis.auth.MolgenisGroupMetaData.NAME;
+import static org.molgenis.auth.MolgenisUserMetaData.*;
+import static org.molgenis.security.account.AccountService.ALL_USER_GROUP;
+import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
+import static org.springframework.http.HttpMethod.POST;
 
 public class GoogleAuthenticationProcessingFilter extends AbstractAuthenticationProcessingFilter
 {
@@ -146,7 +138,8 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 		String principal = payload.getSubject();
 		String credentials = payload.getAccessTokenHash();
 
-		return runAsSystem(() -> {
+		return runAsSystem(() ->
+		{
 			MolgenisUser user;
 
 			user = dataService.query(MOLGENIS_USER, MolgenisUser.class).eq(GOOGLEACCOUNTID, principal).findOne();
@@ -164,14 +157,15 @@ public class GoogleAuthenticationProcessingFilter extends AbstractAuthentication
 				{
 					// create new user
 					String username = email;
-					String givenName = payload.containsKey(PROFILE_KEY_GIVEN_NAME)
-							? payload.get(PROFILE_KEY_GIVEN_NAME).toString() : null;
-					String familyName = payload.containsKey(PROFILE_KEY_FAMILY_NAME)
-							? payload.get(PROFILE_KEY_FAMILY_NAME).toString() : null;
+					String givenName = payload.containsKey(PROFILE_KEY_GIVEN_NAME) ? payload.get(PROFILE_KEY_GIVEN_NAME)
+							.toString() : null;
+					String familyName = payload.containsKey(PROFILE_KEY_FAMILY_NAME) ? payload
+							.get(PROFILE_KEY_FAMILY_NAME).toString() : null;
 					user = createMolgenisUser(username, email, givenName, familyName, principal);
 				}
 			}
-			if(!user.isActive()){
+			if (!user.isActive())
+			{
 				throw new DisabledException(MolgenisLoginController.ERROR_MESSAGE_DISABLED);
 			}
 			// create authentication

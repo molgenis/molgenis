@@ -1,8 +1,7 @@
 package org.molgenis.model.elements;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.molgenis.model.MolgenisModelException;
+import org.slf4j.LoggerFactory;
 
 /*
  * <entity name="TextData"> <field name="assay" type="xref"
@@ -19,19 +18,33 @@ import org.molgenis.model.MolgenisModelException;
 public class Matrix extends DBSchema
 {
 	private static final long serialVersionUID = 1L;
-	/** the entity that is wrapped by this matrix */
+	/**
+	 * the entity that is wrapped by this matrix
+	 */
 	String content_entity;
-	/** field of the entity that points to the container */
+	/**
+	 * field of the entity that points to the container
+	 */
 	String container;
-	/** field of the entity that contains the matrix cell values */
+	/**
+	 * field of the entity that contains the matrix cell values
+	 */
 	String content;
-	/** field that points to the labels of the row */
+	/**
+	 * field that points to the labels of the row
+	 */
 	String row;
-	/** field that points to the labels of the column */
+	/**
+	 * field that points to the labels of the column
+	 */
 	String col;
-	/** override the default xref type of row to use a subclass */
+	/**
+	 * override the default xref type of row to use a subclass
+	 */
 	String row_entity;
-	/** override the default xref type of col to use a subclass */
+	/**
+	 * override the default xref type of col to use a subclass
+	 */
 	String col_entity;
 
 	public Matrix(String name, DBSchema parent)
@@ -84,7 +97,7 @@ public class Matrix extends DBSchema
 
 	/**
 	 * Return the Entity that contains the labels for the rows.
-	 * 
+	 *
 	 * @return entity that is refered to from the rows
 	 * @throws MolgenisModelException
 	 */
@@ -105,7 +118,7 @@ public class Matrix extends DBSchema
 
 	/**
 	 * Return the Entity that contains the labels for the columns.
-	 * 
+	 *
 	 * @return entity that is referred to by the columns
 	 * @throws MolgenisModelException
 	 */
@@ -127,7 +140,7 @@ public class Matrix extends DBSchema
 
 	/**
 	 * Return the Entity that contains the container
-	 * 
+	 *
 	 * @return entity that provides the name of this matrix
 	 * @throws MolgenisModelException
 	 */

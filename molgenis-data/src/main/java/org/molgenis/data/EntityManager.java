@@ -1,8 +1,8 @@
 package org.molgenis.data;
 
-import java.util.stream.Stream;
-
 import org.molgenis.data.meta.model.EntityMetaData;
+
+import java.util.stream.Stream;
 
 /**
  * Entity manager responsible for creating entity references and resolving references of reference attributes.

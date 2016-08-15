@@ -1,14 +1,13 @@
 package org.molgenis.data.support;
 
-import java.util.Set;
-
+import com.google.common.collect.Sets;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Sets;
+import java.util.Set;
 
 @Component
 public class GenomicDataSettings extends DefaultSettingsEntity

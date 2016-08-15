@@ -1,21 +1,20 @@
 package org.molgenis.ui;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
-
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.util.ResourceFingerprintRegistry;
 import org.springframework.web.servlet.ModelAndView;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
 
 public class MolgenisInterceptorTest
 {
@@ -50,7 +49,8 @@ public class MolgenisInterceptorTest
 		molgenisInterceptor.postHandle(request, response, handler, modelAndView);
 
 		Map<String, Object> model = modelAndView.getModel();
-		assertEquals(model.get(MolgenisPluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY), resourceFingerprintRegistry);
+		assertEquals(model.get(MolgenisPluginAttributes.KEY_RESOURCE_FINGERPRINT_REGISTRY),
+				resourceFingerprintRegistry);
 		assertEquals(model.get(MolgenisPluginAttributes.KEY_APP_SETTINGS), appSettings);
 		assertEquals(model.get(MolgenisPluginAttributes.KEY_ENVIRONMENT), environment);
 		assertTrue(model.containsKey(MolgenisPluginAttributes.KEY_I18N));

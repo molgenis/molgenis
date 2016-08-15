@@ -13,7 +13,7 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 public class TestPackage extends SystemPackage
 {
 	public static final String SIMPLE_NAME = "test";
-	public static final String PACKAGE_TEST_ENTITY= PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String PACKAGE_TEST_ENTITY = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	private final RootSystemPackage rootSystemPackage;
 

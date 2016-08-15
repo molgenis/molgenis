@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 /**
  * Decorator for the I18nString respository.
- * 
+ * <p>
  * Clears the ResourceBundle cache after an update
  */
 public class I18nStringDecorator implements Repository<Entity>

@@ -108,7 +108,8 @@ public class GoNLAnnotator implements AnnotatorConfig
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator(vcfAttributes);
 
 		EntityAnnotator entityAnnotator = new QueryAnnotatorImpl(GONL_MULTI_FILE_RESOURCE, thousandGenomeInfo,
-				locusQueryCreator, dataService, resources, (annotationSourceFileName) -> {
+				locusQueryCreator, dataService, resources, (annotationSourceFileName) ->
+		{
 			goNLAnnotatorSettings.set(ROOT_DIRECTORY, annotationSourceFileName);
 			goNLAnnotatorSettings.set(FILEPATTERN, "gonl.chr%s.snps_indels.r5.vcf.gz");
 			goNLAnnotatorSettings.set(OVERRIDE_CHROMOSOME_FILES, "X:gonl.chrX.release4.gtc.vcf.gz");

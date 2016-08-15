@@ -1,11 +1,11 @@
 package org.molgenis.data;
 
-import static org.testng.Assert.assertEquals;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Iterator;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 public class SortTest
 {
@@ -60,7 +60,7 @@ public class SortTest
 	@Test
 	public void sortMultipleAttrDefault()
 	{
-		Sort sort = new Sort(Arrays.<Sort.Order> asList(new Sort.Order("attr0"), new Sort.Order("attr1")));
+		Sort sort = new Sort(Arrays.<Sort.Order>asList(new Sort.Order("attr0"), new Sort.Order("attr1")));
 		Iterator<Sort.Order> it = sort.iterator();
 		assertEquals(it.next(), new Sort.Order("attr0"));
 		assertEquals(it.next(), new Sort.Order("attr1"));
@@ -69,8 +69,8 @@ public class SortTest
 	@Test
 	public void sortMultipleAttrAsc()
 	{
-		Sort sort = new Sort(Arrays.<Sort.Order> asList(new Sort.Order("attr0", Sort.Direction.ASC), new Sort.Order(
-				"attr1", Sort.Direction.ASC)));
+		Sort sort = new Sort(Arrays.<Sort.Order>asList(new Sort.Order("attr0", Sort.Direction.ASC),
+				new Sort.Order("attr1", Sort.Direction.ASC)));
 		Iterator<Sort.Order> it = sort.iterator();
 		assertEquals(it.next(), new Sort.Order("attr0", Sort.Direction.ASC));
 		assertEquals(it.next(), new Sort.Order("attr1", Sort.Direction.ASC));
@@ -79,8 +79,8 @@ public class SortTest
 	@Test
 	public void sortMultipleAttrDesc()
 	{
-		Sort sort = new Sort(Arrays.<Sort.Order> asList(new Sort.Order("attr0", Sort.Direction.DESC), new Sort.Order(
-				"attr1", Sort.Direction.DESC)));
+		Sort sort = new Sort(Arrays.<Sort.Order>asList(new Sort.Order("attr0", Sort.Direction.DESC),
+				new Sort.Order("attr1", Sort.Direction.DESC)));
 		Iterator<Sort.Order> it = sort.iterator();
 		assertEquals(it.next(), new Sort.Order("attr0", Sort.Direction.DESC));
 		assertEquals(it.next(), new Sort.Order("attr1", Sort.Direction.DESC));
@@ -89,8 +89,8 @@ public class SortTest
 	@Test
 	public void sortMultipleAttrAscAndDesc()
 	{
-		Sort sort = new Sort(Arrays.<Sort.Order> asList(new Sort.Order("attr0", Sort.Direction.ASC), new Sort.Order(
-				"attr1", Sort.Direction.DESC)));
+		Sort sort = new Sort(Arrays.<Sort.Order>asList(new Sort.Order("attr0", Sort.Direction.ASC),
+				new Sort.Order("attr1", Sort.Direction.DESC)));
 		Iterator<Sort.Order> it = sort.iterator();
 		assertEquals(it.next(), new Sort.Order("attr0", Sort.Direction.ASC));
 		assertEquals(it.next(), new Sort.Order("attr1", Sort.Direction.DESC));

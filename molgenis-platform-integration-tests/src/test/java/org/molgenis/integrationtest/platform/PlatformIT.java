@@ -8,7 +8,6 @@ import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
 import org.molgenis.data.i18n.I18nUtils;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
-import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.i18n.model.LanguageMetaData;
 import org.molgenis.data.listeners.EntityListener;
@@ -37,11 +36,8 @@ import org.testng.annotations.*;
 
 import java.io.File;
 import java.io.IOException;
-
-import java.util.ArrayList;
-
 import java.text.ParseException;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -65,7 +61,6 @@ import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.testng.Assert.*;
-import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { PlatformITConfig.class })
 public class PlatformIT extends AbstractTestNGSpringContextTests
@@ -157,7 +152,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		selfXrefEntityMetaData = entitySelfXrefTestHarness.createDynamicEntityMetaData();
 		selfXrefEntityMetaData.getAttribute(ATTR_XREF).setRefEntity(selfXrefEntityMetaData);
 
-		RunAsSystemProxy.runAsSystem(() -> {
+		RunAsSystemProxy.runAsSystem(() ->
+		{
 			metaDataService.addEntityMeta(refEntityMetaDataDynamic);
 			metaDataService.addEntityMeta(entityMetaDataDynamic);
 			metaDataService.addEntityMeta(selfXrefEntityMetaData);
@@ -279,7 +275,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@AfterMethod
 	public void afterMethod()
 	{
-		runAsSystem(() -> {
+		runAsSystem(() ->
+		{
 			dataService.deleteAll(entityMetaDataStatic.getName());
 			dataService.deleteAll(refEntityMetaDataStatic.getName());
 			dataService.deleteAll(entityMetaDataDynamic.getName());
@@ -330,7 +327,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityMetaDataDynamic, 6);
 		List<Entity> entities = testHarness.createTestEntities(entityMetaDataDynamic, 2, refEntities).collect(toList());
-		runAsSystem(() -> {
+		runAsSystem(() ->
+		{
 			dataService.add(refEntityMetaDataDynamic.getName(), refEntities.stream());
 			dataService.add(entityMetaDataDynamic.getName(), entities.stream());
 			waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
@@ -836,7 +834,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		List<Entity> testRefEntities = testHarness.createTestRefEntities(refEntityMetaDataDynamic, 6);
 		List<Entity> testEntities = testHarness.createTestEntities(entityMetaDataDynamic, 10, testRefEntities)
 				.collect(toList());
-		runAsSystem(() -> {
+		runAsSystem(() ->
+		{
 			dataService.add(refEntityMetaDataDynamic.getName(), testRefEntities.stream());
 			dataService.add(entityMetaDataDynamic.getName(), testEntities.stream());
 		});

@@ -16,7 +16,7 @@ import org.molgenis.model.MolgenisModelException;
 
 /**
  * Describes a menu-element in the user-interface.
- * 
+ *
  * @author RA Scheltema
  * @version 1.0.0
  */
@@ -47,14 +47,17 @@ public class Menu extends UISchema
 				if (p.toString().equalsIgnoreCase(position)) return p;
 				optionsBuilder.append(p.toString()).append(", ");
 			}
-			throw new MolgenisModelException("position='" + position + "' is UNKNOWN for menu. Valid options: "
-					+ optionsBuilder.toString());
+			throw new MolgenisModelException(
+					"position='" + position + "' is UNKNOWN for menu. Valid options: " + optionsBuilder.toString());
 		}
-	};
+	}
+
+	;
 
 	// constructor(s)
+
 	/**
-	 * 
+	 *
 	 */
 	public Menu(String name, UISchema parent)
 	{
@@ -90,8 +93,9 @@ public class Menu extends UISchema
 	}
 
 	//
+
 	/**
-	 * 
+	 *
 	 */
 	@Override
 	public Type getType()
@@ -100,7 +104,9 @@ public class Menu extends UISchema
 	}
 
 	// local variables
-	/** Used for serialization purposes. */
+	/**
+	 * Used for serialization purposes.
+	 */
 	static final long serialVersionUID = -1842653490799425686L;
 
 	private Position position = null;

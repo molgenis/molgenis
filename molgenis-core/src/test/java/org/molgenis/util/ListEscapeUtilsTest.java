@@ -1,11 +1,11 @@
 package org.molgenis.util;
 
-import static org.testng.Assert.assertEquals;
+import org.testng.annotations.Test;
 
 import java.util.Arrays;
 import java.util.Collections;
 
-import org.testng.annotations.Test;
+import static org.testng.Assert.assertEquals;
 
 public class ListEscapeUtilsTest
 {

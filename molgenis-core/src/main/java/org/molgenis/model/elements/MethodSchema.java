@@ -3,6 +3,7 @@
 package org.molgenis.model.elements;
 
 // imports
+
 import org.molgenis.util.SimpleTree;
 
 /**

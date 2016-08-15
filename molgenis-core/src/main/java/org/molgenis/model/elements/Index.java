@@ -10,10 +10,11 @@
 package org.molgenis.model.elements;
 
 // jdk
-import java.io.Serializable;
-import java.util.Vector;
 
 import org.molgenis.model.MolgenisModelException;
+
+import java.io.Serializable;
+import java.util.Vector;
 
 // invengine
 
@@ -21,7 +22,7 @@ import org.molgenis.model.MolgenisModelException;
  * This class describes a single index-field. An index makes a column (or
  * multiple columns) faster to search (binary tree idea). It can index multiple
  * columns at the same time.
- * 
+ *
  * @author RA Scheltema
  * @version 1.0.0
  */
@@ -30,12 +31,12 @@ public class Index implements Serializable
 	private static final long serialVersionUID = 8774987474903369117L;
 
 	// constructor(s)
+
 	/**
 	 * Default constructor, which sets the name of the index. The fields vector
 	 * remains empty.
-	 * 
-	 * @param name
-	 *            The name of the index.
+	 *
+	 * @param name The name of the index.
 	 */
 	public Index(String name)
 	{
@@ -44,9 +45,10 @@ public class Index implements Serializable
 	}
 
 	// access methods
+
 	/**
 	 * Returns the name of the index.
-	 * 
+	 *
 	 * @return The name of the index.
 	 */
 	public String getName()
@@ -57,11 +59,9 @@ public class Index implements Serializable
 	/**
 	 * Adds the field-name to the list of fields. The field-name needs to be
 	 * unique in the list of fields, otherwise an exception is generated.
-	 * 
-	 * @param field
-	 *            The name of the field this index indexes.
-	 * @throws Exception
-	 *             When the name is already present.
+	 *
+	 * @param field The name of the field this index indexes.
+	 * @throws Exception When the name is already present.
 	 */
 	public void addField(String field) throws MolgenisModelException
 	{
@@ -75,7 +75,7 @@ public class Index implements Serializable
 
 	/**
 	 * Returns a vector with all the field-names this index indexes.
-	 * 
+	 *
 	 * @return Vector with all the field-names.
 	 */
 	public Vector<String> getFields()
@@ -84,9 +84,10 @@ public class Index implements Serializable
 	}
 
 	// Object overloads
+
 	/**
 	 * Returns a string representation of the Index.
-	 * 
+	 *
 	 * @return The string-representation.
 	 */
 	@Override
@@ -104,11 +105,10 @@ public class Index implements Serializable
 
 	/**
 	 * Indicates whether some other object is "equal to" this one.
-	 * 
-	 * @param obj
-	 *            The reference object with which to compare.
+	 *
+	 * @param obj The reference object with which to compare.
 	 * @return True if this object is the same as the obj argument, false
-	 *         otherwise.
+	 * otherwise.
 	 */
 	@Override
 	public boolean equals(Object obj)
@@ -124,7 +124,7 @@ public class Index implements Serializable
 	/**
 	 * Returns a hash code value for the Field. This hash-code is used for quick
 	 * searching in a vector of fields.
-	 * 
+	 *
 	 * @return The hash-value for this field.
 	 */
 	@Override
@@ -134,9 +134,13 @@ public class Index implements Serializable
 	}
 
 	// member variables
-	/** The name of the index */
+	/**
+	 * The name of the index
+	 */
 	String name;
 
-	/** The field within the associated entity the index points to */
+	/**
+	 * The field within the associated entity the index points to
+	 */
 	Vector<String> fields;
 }

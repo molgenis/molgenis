@@ -4,13 +4,10 @@ import java.util.regex.Pattern;
 
 /**
  * Removes invalid characters from a mapper type.
- * 
+ * <p>
  * Mapper type cannot start with '_' and cannot contain '#', ',' and '.'
- * 
- * 
- * 
+ *
  * @author erwin
- * 
  */
 public class MapperTypeSanitizer
 {

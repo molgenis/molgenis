@@ -1,9 +1,9 @@
 package org.molgenis.data.support;
 
-import java.util.Iterator;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityCollection;
+
+import java.util.Iterator;
 
 public class DefaultEntityCollection implements EntityCollection
 {

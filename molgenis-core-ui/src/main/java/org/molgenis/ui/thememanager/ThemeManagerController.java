@@ -1,10 +1,5 @@
 package org.molgenis.ui.thememanager;
 
-import static org.molgenis.ui.thememanager.ThemeManagerController.URI;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-
-import javax.validation.Valid;
-
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.ui.style.StyleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +10,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.validation.Valid;
+
+import static org.molgenis.ui.thememanager.ThemeManagerController.URI;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
 
 @Controller
 @RequestMapping(URI)
@@ -36,8 +36,8 @@ public class ThemeManagerController extends MolgenisPluginController
 	@RequestMapping(method = GET)
 	public String init(Model model)
 	{
-		if (styleService.getSelectedStyle() != null) model.addAttribute("selectedStyle", styleService
-				.getSelectedStyle().getName());
+		if (styleService.getSelectedStyle() != null)
+			model.addAttribute("selectedStyle", styleService.getSelectedStyle().getName());
 		model.addAttribute("availableStyles", styleService.getAvailableStyles());
 
 		return "view-thememanager";
@@ -45,12 +45,14 @@ public class ThemeManagerController extends MolgenisPluginController
 
 	/**
 	 * Set a new bootstrap theme
-	 * 
+	 *
 	 * @param selectedBootstrapTheme
 	 */
 	@PreAuthorize("hasAnyRole('ROLE_SU')")
 	@RequestMapping(value = "/set-bootstrap-theme", method = RequestMethod.POST, produces = "application/json", consumes = "application/json")
-	public @ResponseBody void setBootstrapTheme(@Valid @RequestBody String styleName)
+	public
+	@ResponseBody
+	void setBootstrapTheme(@Valid @RequestBody String styleName)
 	{
 		styleService.setSelectedStyle(styleName);
 	}

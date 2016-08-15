@@ -37,8 +37,8 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 		private static final long DEFAULT_API_TIMEOUT = 5000l;
 		private static final String DEFAULT_BIOBANK_RESOURCE = "regbb/organization-id";
 		private static final String DEFAULT_BIOBANK_COLLECTIONS_RESOURCE = "regbbs";
-		private static final String DEFAULT_BIOBANK_COLLECTIONS_SELECTION_RESOURCE = DEFAULT_BIOBANK_COLLECTIONS_RESOURCE
-				+ "/data";
+		private static final String DEFAULT_BIOBANK_COLLECTIONS_SELECTION_RESOURCE =
+				DEFAULT_BIOBANK_COLLECTIONS_RESOURCE + "/data";
 		private static final boolean DEFAULT_BIOBANK_INDEXING_ENABLED = false;
 		private static final long DEFAULT_BIOBANK_INDEXING_TIMEOUT = 60000l;
 		private static final String DEFAULT_BIOBANK_INDEXING_FREQUENCY = "0 4 * * * ?";

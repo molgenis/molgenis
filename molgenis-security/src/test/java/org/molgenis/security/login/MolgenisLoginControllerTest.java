@@ -1,10 +1,5 @@
 package org.molgenis.security.login;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.model;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.view;
-
 import org.molgenis.security.login.MolgenisLoginControllerTest.Config;
 import org.molgenis.util.GsonConfig;
 import org.molgenis.util.GsonHttpMessageConverter;
@@ -20,9 +15,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 @WebAppConfiguration
-@ContextConfiguration(classes =
-{ Config.class, GsonConfig.class })
+@ContextConfiguration(classes = { Config.class, GsonConfig.class })
 public class MolgenisLoginControllerTest extends AbstractTestNGSpringContextTests
 {
 	@Autowired

@@ -1,14 +1,14 @@
 package org.molgenis.ui.menu;
 
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
+
+import java.util.Collections;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-
-import java.util.Collections;
-
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
 
 public class MenuMolgenisUiTest
 {
@@ -57,7 +57,7 @@ public class MenuMolgenisUiTest
 		String id = "id1";
 		subMenu.setId(id);
 		subMenu.setType(MenuItemType.MENU);
-		menu.setItems(Collections.<MenuItem> singletonList(subMenu));
+		menu.setItems(Collections.<MenuItem>singletonList(subMenu));
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		assertNotNull(menuMolgenisUi.getMenu(id));
 	}

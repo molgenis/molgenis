@@ -52,7 +52,8 @@ public abstract class AbstractRepositoryEntityAnnotator extends AbstractReposito
 						}
 						catch (Exception e)
 						{
-							throw new AnnotationException(sourceEntity, current + 1, getRequiredAttributes(), getSimpleName(), e);
+							throw new AnnotationException(sourceEntity, current + 1, getRequiredAttributes(),
+									getSimpleName(), e);
 						}
 
 						size = results.size();

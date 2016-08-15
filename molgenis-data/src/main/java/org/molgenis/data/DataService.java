@@ -228,7 +228,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * type-save find an entity by it's id
 	 *
 	 * @param entityName entity name
-	 * @param q query
+	 * @param q          query
 	 * @throws MolgenisDataAccessException
 	 */
 	<E extends Entity> E findOne(String entityName, Query<E> q, Class<E> clazz);
@@ -246,7 +246,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * Adds entities to it's repository
 	 *
 	 * @param entityName entity name (case insensitive)
-	 * @param entities entities
+	 * @param entities   entities
 	 */
 	<E extends Entity> void add(String entityName, Stream<E> entities);
 
@@ -263,7 +263,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * Updates entities
 	 *
 	 * @param entityName entity name (case insensitive)
-	 * @param entities entities
+	 * @param entities   entities
 	 */
 	<E extends Entity> void update(String entityName, Stream<E> entities);
 
@@ -280,7 +280,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * Delete entities from it's repository
 	 *
 	 * @param entityName entity name (case insensitive)
-	 * @param entities entities
+	 * @param entities   entities
 	 */
 	<E extends Entity> void delete(String entityName, Stream<E> entities);
 
@@ -288,7 +288,7 @@ public interface DataService extends Iterable<Repository<Entity>>
 	 * Deletes an entity by it's id
 	 *
 	 * @param entityName entity name (case insensitive)
-	 * @param id entity id
+	 * @param id         entity id
 	 * @throws MolgenisDataAccessException
 	 */
 	void deleteById(String entityName, Object id);

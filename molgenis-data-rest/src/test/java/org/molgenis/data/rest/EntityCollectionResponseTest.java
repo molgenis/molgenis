@@ -1,12 +1,5 @@
 package org.molgenis.data.rest;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-
-import java.util.Collections;
-
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.i18n.LanguageService;
@@ -14,6 +7,13 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.Collections;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 public class EntityCollectionResponseTest
 {

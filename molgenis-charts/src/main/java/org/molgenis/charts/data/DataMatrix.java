@@ -11,11 +11,11 @@ public class DataMatrix
 
 	public DataMatrix(List<Target> columnTargets, List<Target> rowTargets, List<List<Number>> values)
 	{
-		if (columnTargets.size() != values.get(0).size()) throw new IllegalArgumentException(
-				"Nr columnTargets not the same as the nr of columns of the values");
+		if (columnTargets.size() != values.get(0).size())
+			throw new IllegalArgumentException("Nr columnTargets not the same as the nr of columns of the values");
 
-		if (rowTargets.size() != values.size()) throw new IllegalArgumentException(
-				"Nr rowTargets not the same as the nr of rows of the values");
+		if (rowTargets.size() != values.size())
+			throw new IllegalArgumentException("Nr rowTargets not the same as the nr of rows of the values");
 
 		for (int i = 0; i < columnTargets.size(); i++)
 		{

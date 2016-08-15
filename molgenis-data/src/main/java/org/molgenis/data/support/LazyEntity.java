@@ -1,15 +1,15 @@
 package org.molgenis.data.support;
 
-import static java.util.Objects.requireNonNull;
-
-import java.sql.Date;
-import java.sql.Timestamp;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+
+import java.sql.Date;
+import java.sql.Timestamp;
+
+import static java.util.Objects.requireNonNull;
 
 public class LazyEntity implements Entity
 {

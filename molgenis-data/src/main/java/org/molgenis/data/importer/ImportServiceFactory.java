@@ -1,18 +1,17 @@
 package org.molgenis.data.importer;
 
-import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.util.FileExtensionUtils;
 import org.springframework.core.OrderComparator;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
+import java.io.File;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class ImportServiceFactory
@@ -27,13 +26,12 @@ public class ImportServiceFactory
 
 	/**
 	 * Finds a suitable ImportService for a FileRepositoryCollection.
-	 * 
+	 * <p>
 	 * Import of mixed backend types in one FileRepositoryCollection isn't supported.
-	 * 
-	 * @throws MolgenisDataException
-	 *             if no suitable ImportService is found for the FileRepositoryCollection
+	 *
 	 * @param source
 	 * @return
+	 * @throws MolgenisDataException if no suitable ImportService is found for the FileRepositoryCollection
 	 */
 	public ImportService getImportService(File file, RepositoryCollection source)
 	{
@@ -49,8 +47,8 @@ public class ImportServiceFactory
 			}
 		}
 
-		String extension = FileExtensionUtils.findExtensionFromPossibilities(file.getName(),
-				importServicesMappedToExtensions.keySet());
+		String extension = FileExtensionUtils
+				.findExtensionFromPossibilities(file.getName(), importServicesMappedToExtensions.keySet());
 
 		final ImportService importService = importServicesMappedToExtensions.get(extension);
 
@@ -64,14 +62,14 @@ public class ImportServiceFactory
 		final Map<String, ImportService> importServicesMappedToExtensions = Maps.newHashMap();
 		for (ImportService importService : importServices)
 		{
-				for (String extension : importService.getSupportedFileExtensions())
-				{
-					importServicesMappedToExtensions.put(extension.toLowerCase(), importService);
-				}
+			for (String extension : importService.getSupportedFileExtensions())
+			{
+				importServicesMappedToExtensions.put(extension.toLowerCase(), importService);
+			}
 		}
 
-		String extension = FileExtensionUtils.findExtensionFromPossibilities(fileName,
-				importServicesMappedToExtensions.keySet());
+		String extension = FileExtensionUtils
+				.findExtensionFromPossibilities(fileName, importServicesMappedToExtensions.keySet());
 
 		final ImportService importService = importServicesMappedToExtensions.get(extension);
 

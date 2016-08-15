@@ -1,21 +1,17 @@
 package org.molgenis.ontology.core.repository;
 
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ID;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_IRI;
-import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY_NAME;
-
-import java.util.stream.Stream;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.model.Ontology;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.stream.Stream;
+
+import static org.molgenis.ontology.core.meta.OntologyMetaData.*;
+
 /**
  * Maps OntologyMetaData {@link Entity} <-> {@link Ontology}
- * 
  */
 public class OntologyRepository
 {
@@ -32,9 +28,8 @@ public class OntologyRepository
 
 	/**
 	 * Retrieves an ontology with a specific IRI.
-	 * 
-	 * @param IRI
-	 *            the IRI of the ontology
+	 *
+	 * @param IRI the IRI of the ontology
 	 * @return
 	 */
 	public Ontology getOntology(String IRI)

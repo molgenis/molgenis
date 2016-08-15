@@ -1,11 +1,6 @@
 package org.molgenis.util;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -15,24 +10,28 @@ public class ZipUtils
 
 	public enum DirectoryStructure
 	{
-		/** includes path of files in zip */
+		/**
+		 * includes path of files in zip
+		 */
 		INCLUDE_DIR
-		{
-			@Override
-			String getPath(File f)
+				{
+					@Override
+					String getPath(File f)
+					{
+						return f.getAbsolutePath();
+					}
+				}, /**
+	 * exclude path of files in zip
+	 */
+	EXCLUDE_DIR
 			{
-				return f.getAbsolutePath();
-			}
-		},
-		/** exclude path of files in zip */
-		EXCLUDE_DIR
-		{
-			@Override
-			String getPath(File f)
-			{
-				return f.getName();
-			}
-		};
+				@Override
+				String getPath(File f)
+				{
+					return f.getName();
+				}
+			};
+
 		abstract String getPath(File f);
 	}
 

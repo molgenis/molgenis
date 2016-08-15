@@ -1,9 +1,9 @@
 package org.molgenis.data.mapper.algorithmgenerator.categorymapper.convertor;
 
-import javax.measure.unit.NonSI;
-
 import org.jscience.physics.amount.Amount;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
+
+import javax.measure.unit.NonSI;
 
 public class DailyAmountConvertor extends AmountConvertor
 {

@@ -1,9 +1,9 @@
 package org.molgenis.fieldtypes;
 
-import static org.molgenis.MolgenisFieldTypes.*;
-
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import static org.molgenis.MolgenisFieldTypes.*;
 
 /**
  * Created by mswertz on 06/04/14.

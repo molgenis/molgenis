@@ -1,28 +1,23 @@
 package org.molgenis.dataexplorer.freemarker;
 
-import java.io.IOException;
-import java.io.Writer;
-import java.net.URLEncoder;
-import java.util.Map;
-
+import freemarker.core.Environment;
+import freemarker.template.*;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.DataService;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.framework.ui.MolgenisPlugin;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 
-import freemarker.core.Environment;
-import freemarker.template.TemplateDirectiveBody;
-import freemarker.template.TemplateDirectiveModel;
-import freemarker.template.TemplateException;
-import freemarker.template.TemplateModel;
-import freemarker.template.TemplateModelException;
+import java.io.IOException;
+import java.io.Writer;
+import java.net.URLEncoder;
+import java.util.Map;
 
 /**
  * Creates a link to the dataexplorer for a dataset
- * 
+ * <p>
  * usage: <@dataExplorerLink dataset='celiacsprue' class='btn'>Explore data</@dataExplorerLink>
- * 
+ * <p>
  * created html: <a href='/menu/main/dataexplorer' class='btn'>Explore data</a>
  */
 public class DataExplorerHyperlinkDirective implements TemplateDirectiveModel
@@ -48,8 +43,8 @@ public class DataExplorerHyperlinkDirective implements TemplateDirectiveModel
 		if (dataService.hasRepository(dataset) && (dataexplorer != null))
 		{
 			String cssClass = DataConverter.toString(params.get("class"));
-			String dataexplorerPageUri = String.format("%s?entity=%s", dataexplorer.getFullUri(),
-					URLEncoder.encode(dataset, "UTF-8"));
+			String dataexplorerPageUri = String
+					.format("%s?entity=%s", dataexplorer.getFullUri(), URLEncoder.encode(dataset, "UTF-8"));
 
 			w.write("<a href='");
 			w.write(dataexplorerPageUri);

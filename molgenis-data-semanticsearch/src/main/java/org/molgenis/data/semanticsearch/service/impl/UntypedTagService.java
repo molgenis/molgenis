@@ -1,24 +1,14 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
-import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.meta.model.PackageMetaData;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semantic.SemanticTag;
@@ -29,10 +19,15 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.ArrayListMultimap;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 
 /**
  * Service to tag metadata with simple String terms.
@@ -53,8 +48,8 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	private Entity findAttributeEntity(EntityMetaData entityMetaData, String attributeName)
 	{
 		Entity entityMetaDataEntity = dataService.findOneById(ENTITY_META_DATA, entityMetaData.getName());
-		Optional<Entity> result = stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false).filter(
-				att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst();
+		Optional<Entity> result = stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false)
+				.filter(att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst();
 		return result.isPresent() ? result.get() : null;
 	}
 
@@ -89,13 +84,13 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 			AttributeMetaData attributeMetaData)
 	{
 		Entity entity = findAttributeEntity(entityMetaData, attributeMetaData.getName());
-		if (entity == null) return ArrayListMultimap.<Relation, LabeledResource> create();
+		if (entity == null) return ArrayListMultimap.<Relation, LabeledResource>create();
 
-		Multimap<Relation, LabeledResource> tags = ArrayListMultimap.<Relation, LabeledResource> create();
+		Multimap<Relation, LabeledResource> tags = ArrayListMultimap.<Relation, LabeledResource>create();
 		for (Entity tagEntity : entity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
-			SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> tag = SemanticTag.asTag(attributeMetaData,
-					tagEntity);
+			SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> tag = SemanticTag
+					.asTag(attributeMetaData, tagEntity);
 			tags.put(tag.getRelation(), tag.getObject());
 		}
 		return tags;
@@ -153,7 +148,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 			return;
 		}
 
-		ImmutableList.Builder<Entity> builder = ImmutableList.<Entity> builder();
+		ImmutableList.Builder<Entity> builder = ImmutableList.<Entity>builder();
 		builder.addAll(entity.getEntities(EntityMetaDataMetaData.TAGS));
 		builder.add(getTagEntity(tag));
 		entity.set(EntityMetaDataMetaData.TAGS, builder.build());
@@ -162,16 +157,16 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	public Entity getTagEntity(SemanticTag<?, LabeledResource, LabeledResource> tag)
 	{
-		return tagRepository.getTagEntity(tag.getObject().getIri(), tag.getObject().getLabel(), tag.getRelation(), tag
-				.getCodeSystem().getIri());
+		return tagRepository.getTagEntity(tag.getObject().getIri(), tag.getObject().getLabel(), tag.getRelation(),
+				tag.getCodeSystem().getIri());
 	}
 
 	@Override
 	@RunAsSystem
 	public Iterable<SemanticTag<Package, LabeledResource, LabeledResource>> getTagsForPackage(Package p)
 	{
-		Entity packageEntity = dataService.findOne(PACKAGE,
-				new QueryImpl<Entity>().eq(PackageMetaData.FULL_NAME, p.getName()));
+		Entity packageEntity = dataService
+				.findOne(PACKAGE, new QueryImpl<Entity>().eq(PackageMetaData.FULL_NAME, p.getName()));
 
 		if (packageEntity == null)
 		{

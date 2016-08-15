@@ -90,8 +90,8 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 		notes.add("source:MOLGENIS");
 
 		dasFeature = new DasFeature("mutation id", "mutation name,description", type, method, 10, 1000, new Double(0),
-				ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout, dasTarget,
-				new ArrayList<>(), null);
+				ORIENTATION_NOT_APPLICABLE, DasPhase.PHASE_NOT_APPLICABLE, notes, linkout, dasTarget, new ArrayList<>(),
+				null);
 
 		Query<Entity> q = new QueryImpl<>().eq("CHROM", "1");
 		q.pageSize(100);
@@ -170,23 +170,28 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 			throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
 			CoordinateErrorException
 	{
-			assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getFeatures().iterator().next().getFeatureLabel(),
-				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures().iterator().next().getFeatureLabel());
+		assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getFeatures().iterator().next()
+						.getFeatureLabel(),
+				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures().iterator().next()
+						.getFeatureLabel());
 	}
 
 	@Test
-	public void getFeaturesId()
-			throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
+	public void getFeaturesId() throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
 			CoordinateErrorException
-	{	assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getFeatures().iterator().next().getFeatureId(),
-				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures().iterator().next().getFeatureId());
+	{
+		assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getFeatures().iterator().next()
+						.getFeatureId(),
+				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getFeatures().iterator().next()
+						.getFeatureId());
 	}
 
 	@Test
 	public void getFeaturesSegment()
 			throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
 			CoordinateErrorException
-	{	assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getSegmentId(),
+	{
+		assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getSegmentId(),
 				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getSegmentId());
 	}
 
@@ -194,7 +199,8 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 	public void getFeaturesStart()
 			throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
 			CoordinateErrorException
-	{	assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getStartCoordinate(),
+	{
+		assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getStartCoordinate(),
 				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getStartCoordinate());
 	}
 
@@ -202,7 +208,8 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 	public void getFeaturesStop()
 			throws UnimplementedFeatureException, DataSourceException, BadReferenceObjectException,
 			CoordinateErrorException
-	{	assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getStopCoordinate(),
+	{
+		assertEquals(source.getFeatures("1,dasdataset_dataset", 1, 100000, 100).getStopCoordinate(),
 				new DasAnnotatedSegment("1", 1, 100000, "1.00", "1", featureList).getStopCoordinate());
 	}
 

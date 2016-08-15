@@ -17,47 +17,56 @@ package org.molgenis.wikipathways.client;
 
 /**
  * ontology term object
- * @author msk
  *
+ * @author msk
  */
-public class WSOntologyTerm {
-    
+public class WSOntologyTerm
+{
+
 	private String ontology;
-    private String id;
-    private String name;
+	private String id;
+	private String name;
 
-    public WSOntologyTerm(String ontology, String id, String name) {
-    	this.ontology = ontology;
-    	this.id = id;
-    	this.name = name;
-    }
+	public WSOntologyTerm(String ontology, String id, String name)
+	{
+		this.ontology = ontology;
+		this.id = id;
+		this.name = name;
+	}
 
-    public String getOntology() {
-        return ontology;
-    }
+	public String getOntology()
+	{
+		return ontology;
+	}
 
-    public void setOntology(String ontology) {
-        this.ontology = ontology;
-    }
+	public void setOntology(String ontology)
+	{
+		this.ontology = ontology;
+	}
 
-    public String getId() {
-        return id;
-    }
+	public String getId()
+	{
+		return id;
+	}
 
-    public void setId(String id) {
-        this.id = id;
-    }
+	public void setId(String id)
+	{
+		this.id = id;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getName()
+	{
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
-    
-    @Override
-    public String toString() {
-    	return name + "\t" + id + "\t" + ontology;
-    }
+	public void setName(String name)
+	{
+		this.name = name;
+	}
+
+	@Override
+	public String toString()
+	{
+		return name + "\t" + id + "\t" + ontology;
+	}
 }

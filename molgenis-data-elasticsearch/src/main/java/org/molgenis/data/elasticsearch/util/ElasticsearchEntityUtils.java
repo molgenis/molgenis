@@ -1,12 +1,11 @@
 package org.molgenis.data.elasticsearch.util;
 
-import java.util.stream.Stream;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
+import java.util.stream.Stream;
 
 public class ElasticsearchEntityUtils
 {

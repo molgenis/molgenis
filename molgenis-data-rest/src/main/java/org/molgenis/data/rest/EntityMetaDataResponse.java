@@ -1,11 +1,9 @@
 package org.molgenis.data.rest;
 
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Sets;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCapability;
@@ -15,10 +13,7 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Sets;
+import java.util.*;
 
 public class EntityMetaDataResponse
 {
@@ -49,12 +44,9 @@ public class EntityMetaDataResponse
 	}
 
 	/**
-	 * 
 	 * @param meta
-	 * @param attributesSet
-	 *            set of lowercase attribute names to include in response
-	 * @param attributeExpandsSet
-	 *            set of lowercase attribute names to expand in response
+	 * @param attributesSet       set of lowercase attribute names to include in response
+	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */
 	public EntityMetaDataResponse(EntityMetaData meta, Set<String> attributesSet,
 			Map<String, Set<String>> attributeExpandsSet, MolgenisPermissionService permissionService,
@@ -96,9 +88,8 @@ public class EntityMetaDataResponse
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 						this.attributes.put(attr.getName(),
-								new AttributeMetaDataResponse(name, meta, attr, subAttributesSet,
-										Collections.singletonMap("refEntity".toLowerCase(),
-												Sets.newHashSet("idattribute")),
+								new AttributeMetaDataResponse(name, meta, attr, subAttributesSet, Collections
+										.singletonMap("refEntity".toLowerCase(), Sets.newHashSet("idattribute")),
 										permissionService, dataService, languageService));
 					}
 					else
@@ -128,8 +119,8 @@ public class EntityMetaDataResponse
 		if (attributesSet == null || attributesSet.contains("lookupAttributes".toLowerCase()))
 		{
 			Iterable<AttributeMetaData> lookupAttributes = meta.getLookupAttributes();
-			this.lookupAttributes = lookupAttributes != null
-					? Lists.newArrayList(Iterables.transform(lookupAttributes, new Function<AttributeMetaData, String>()
+			this.lookupAttributes = lookupAttributes != null ? Lists
+					.newArrayList(Iterables.transform(lookupAttributes, new Function<AttributeMetaData, String>()
 					{
 						@Override
 						public String apply(AttributeMetaData attribute)
@@ -146,8 +137,9 @@ public class EntityMetaDataResponse
 		}
 		else this.isAbstract = null;
 
-		this.writable = permissionService.hasPermissionOnEntity(name, Permission.WRITE)
-				&& dataService.getCapabilities(name).contains(RepositoryCapability.WRITABLE);
+		this.writable =
+				permissionService.hasPermissionOnEntity(name, Permission.WRITE) && dataService.getCapabilities(name)
+						.contains(RepositoryCapability.WRITABLE);
 	}
 
 	public String getHref()

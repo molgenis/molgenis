@@ -1,16 +1,16 @@
 package org.molgenis.ui.style;
 
-import static java.util.Objects.requireNonNull;
-
-import java.io.IOException;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.molgenis.data.settings.AppSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
+
+import static java.util.Objects.requireNonNull;
 
 @Component
 public class StyleServiceImpl implements StyleService

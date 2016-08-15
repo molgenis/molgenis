@@ -1,13 +1,9 @@
 package org.molgenis.data.vcf;
 
-import static java.util.Objects.requireNonNull;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Set;
-
+import com.google.common.base.Supplier;
+import com.google.common.base.Suppliers;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Iterators;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
@@ -22,14 +18,17 @@ import org.molgenis.vcf.meta.VcfMeta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Supplier;
-import com.google.common.base.Suppliers;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
+import java.io.File;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Repository implementation for vcf files.
- * 
+ * <p>
  * The filename without the extension is considered to be the entityname
  */
 public class VcfRepository extends AbstractRepository
@@ -93,7 +92,7 @@ public class VcfRepository extends AbstractRepository
 
 	/**
 	 * Returns an iterator for this repository.
-	 *
+	 * <p>
 	 * Use with caution! Multiple iterators will all point to the same line in the VCF file, leading to unpredictable
 	 * behaviour. If you want to get the EntityMetaData of this repository and you can't access getEntityMetaData(),
 	 * convert the iterator to a PeekingIterator and peek the first Entity.

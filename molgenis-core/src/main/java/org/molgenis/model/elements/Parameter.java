@@ -11,16 +11,17 @@
 package org.molgenis.model.elements;
 
 // jdk
-import java.io.Serializable;
-import java.util.List;
 
 import org.molgenis.model.MolgenisModelException;
+
+import java.io.Serializable;
+import java.util.List;
 
 // invengine
 
 /**
  * Describes a field in an entity.
- * 
+ *
  * @author RA Scheltema
  * @version 1.0.0
  */
@@ -31,36 +32,41 @@ public class Parameter implements Serializable
 	 */
 	public static enum Type
 	{
-		/** The type is unknown, this case should raise an exception. */
-		UNKNOWN("unknown"),
-		/** The type is a simple boolean. */
-		BOOL("bool"),
-		/** The type is a simple integer. */
-		INT("int"),
-		/** The type is a decimal value. */
-		DECIMAL("decimal"),
 		/**
-		 * The type is a variable character string. More information can be
-		 * found with the appropriate functions.
+		 * The type is unknown, this case should raise an exception.
 		 */
-		VARCHAR("varchar"),
-		/** The type is free-text. The length of the string is not defined. */
-		TEXT("text"),
-		/** The type is a date-field. */
-		DATE("date"),
-		/** */
-		DATETIME("datetime"),
-		/**
-		 * The type of the field is user, which basically references a hidden
-		 * table.
-		 */
-		USER("user"),
-		/** The type of the field is file. */
-		FILE("file"),
-		/** */
-		ENUM("enum"), ;
+		UNKNOWN("unknown"), /**
+	 * The type is a simple boolean.
+	 */
+	BOOL("bool"), /**
+	 * The type is a simple integer.
+	 */
+	INT("int"), /**
+	 * The type is a decimal value.
+	 */
+	DECIMAL("decimal"), /**
+	 * The type is a variable character string. More information can be
+	 * found with the appropriate functions.
+	 */
+	VARCHAR("varchar"), /**
+	 * The type is free-text. The length of the string is not defined.
+	 */
+	TEXT("text"), /**
+	 * The type is a date-field.
+	 */
+	DATE("date"), /** */
+	DATETIME("datetime"), /**
+	 * The type of the field is user, which basically references a hidden
+	 * table.
+	 */
+	USER("user"), /**
+	 * The type of the field is file.
+	 */
+	FILE("file"), /** */
+	ENUM("enum"),;
 
 		// access
+
 		/**
 		 * The standard constructor, which binds a string to the
 		 * enumeration-type.
@@ -73,9 +79,8 @@ public class Parameter implements Serializable
 		/**
 		 * With this method the enumeration-type can be found based on the given
 		 * string.
-		 * 
-		 * @param tag
-		 *            The string-representation of the tag.
+		 *
+		 * @param tag The string-representation of the tag.
 		 * @return The enumeration-type.
 		 */
 		public static Type getType(String tag)
@@ -126,20 +131,27 @@ public class Parameter implements Serializable
 			}
 		}
 
-		/** The string-representation of the enumeration-type. */
+		/**
+		 * The string-representation of the enumeration-type.
+		 */
 		public final String tag;
-	};
+	}
 
-	/** Fixed value used for determining the not-set value for the varchar. */
+	;
+
+	/**
+	 * Fixed value used for determining the not-set value for the varchar.
+	 */
 	public static final int LENGTH_NOT_SET = 0;
 
 	// constructor(s)
+
 	/**
 	 * Constructor specifically meant for constructing a return-type. This
 	 * avoids the need for an additional class describing basically the same
 	 * thing. The properties: name, label and default_value are set to null and
 	 * nillable to false.
-	 * 
+	 *
 	 * @see #Parameter(Method, Type, String, String, boolean, String)
 	 */
 	public Parameter(Method parent, Type type)
@@ -150,17 +162,13 @@ public class Parameter implements Serializable
 	/**
 	 * Standard constructor, which sets all the common variables for a field.
 	 * Extra fields can be set with the appropriate access methods.
-	 * 
-	 * @param type
-	 *            The type of the field.
-	 * @param name
-	 *            The name of the field, which needs to be unique for the
-	 *            entity.
-	 * @param label
-	 *            The label of the field, which is used for the user interface.
-	 * @param nillable
-	 *            Indicates whether this field can have the value NULL in the
-	 *            database.
+	 *
+	 * @param type     The type of the field.
+	 * @param name     The name of the field, which needs to be unique for the
+	 *                 entity.
+	 * @param label    The label of the field, which is used for the user interface.
+	 * @param nillable Indicates whether this field can have the value NULL in the
+	 *                 database.
 	 */
 	public Parameter(Method parent, Type type, String name, String label, boolean nillable, String default_value)
 	{
@@ -186,8 +194,9 @@ public class Parameter implements Serializable
 	}
 
 	// global access methods
+
 	/**
-	 * 
+	 *
 	 */
 	@Deprecated
 	public Method getParent()
@@ -202,7 +211,7 @@ public class Parameter implements Serializable
 
 	/**
 	 * This method returns the type of this field.
-	 * 
+	 *
 	 * @return The type of this field.
 	 */
 	public Type getType()
@@ -220,7 +229,7 @@ public class Parameter implements Serializable
 
 	/**
 	 * This method returns the name of this field.
-	 * 
+	 *
 	 * @return The name of this field.
 	 */
 	public String getName()
@@ -230,7 +239,7 @@ public class Parameter implements Serializable
 
 	/**
 	 * This method returns the label of this field.
-	 * 
+	 *
 	 * @return The label of this field.
 	 */
 	public String getLabel()
@@ -240,7 +249,7 @@ public class Parameter implements Serializable
 
 	/**
 	 * Returns whether this field can be NULL in the database.
-	 * 
+	 *
 	 * @return True when this field can be NULL, false otherwise.
 	 */
 	public boolean isNillable()
@@ -251,7 +260,7 @@ public class Parameter implements Serializable
 	/**
 	 * Returns the value the database should set for the field when there is no
 	 * value set.
-	 * 
+	 *
 	 * @return The default-value.
 	 */
 	public String getDefaultValue()
@@ -261,7 +270,7 @@ public class Parameter implements Serializable
 
 	/**
 	 * Returns the description of the entity.
-	 * 
+	 *
 	 * @return The description.
 	 */
 	public String getDescription()
@@ -278,8 +287,9 @@ public class Parameter implements Serializable
 	}
 
 	// enum access methods
+
 	/**
-	 * 
+	 *
 	 */
 	public void setEnumOptions(List<String> options) throws MolgenisModelException
 	{
@@ -296,7 +306,7 @@ public class Parameter implements Serializable
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public List<String> getEnumOptions() throws MolgenisModelException
 	{
@@ -309,15 +319,14 @@ public class Parameter implements Serializable
 	}
 
 	// varchar access methods
+
 	/**
 	 * When this field is of type Type.VARCHAR, this method sets the maximum
 	 * length the varchar can be. When this field is not of type Type.VARCHAR,
 	 * this method raises an exception.
-	 * 
-	 * @param length
-	 *            The maximum length the varchar field can be.
-	 * @throws Exception
-	 *             When the field is not of type Type.VARCHAR.
+	 *
+	 * @param length The maximum length the varchar field can be.
+	 * @throws Exception When the field is not of type Type.VARCHAR.
 	 */
 	public void setVarCharLength(int length) throws Exception
 	{
@@ -333,10 +342,9 @@ public class Parameter implements Serializable
 	 * When this field is of type Type.VARCHAR, this method returns the maximum
 	 * length the varchar can be. When this field is not of type Type.VARCHAR,
 	 * this method raises an exception.
-	 * 
+	 *
 	 * @return The maximum length the varchar field can be.
-	 * @throws Exception
-	 *             When the field is not of type Type.VARCHAR.
+	 * @throws Exception When the field is not of type Type.VARCHAR.
 	 */
 	public int getVarCharLength() throws Exception
 	{
@@ -349,8 +357,9 @@ public class Parameter implements Serializable
 	}
 
 	//
+
 	/**
-	 * 
+	 *
 	 */
 	public void setUserData(Object obj)
 	{
@@ -358,7 +367,7 @@ public class Parameter implements Serializable
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public Object getUserData()
 	{
@@ -366,9 +375,10 @@ public class Parameter implements Serializable
 	}
 
 	// Object overloads
+
 	/**
 	 * Returns a string representation of the Field.
-	 * 
+	 *
 	 * @return The string-representation.
 	 */
 	@Override
@@ -397,11 +407,10 @@ public class Parameter implements Serializable
 
 	/**
 	 * Indicates whether some other object is "equal to" this one.
-	 * 
-	 * @param obj
-	 *            The reference object with which to compare.
+	 *
+	 * @param obj The reference object with which to compare.
 	 * @return True if this object is the same as the obj argument, false
-	 *         otherwise.
+	 * otherwise.
 	 */
 	@Override
 	public boolean equals(Object obj)
@@ -417,7 +426,7 @@ public class Parameter implements Serializable
 	/**
 	 * Returns a hash code value for the Field. This hash-code is used for quick
 	 * searching in a vector of fields.
-	 * 
+	 *
 	 * @return The hash-value for this field.
 	 */
 	@Override
@@ -430,7 +439,9 @@ public class Parameter implements Serializable
 	/** */
 	private Method parent;
 
-	/** The type of this field. */
+	/**
+	 * The type of this field.
+	 */
 	private Type type;
 
 	/**
@@ -439,10 +450,14 @@ public class Parameter implements Serializable
 	 */
 	private String name;
 
-	/** The label of this field, which is used for the user interface. */
+	/**
+	 * The label of this field, which is used for the user interface.
+	 */
 	private String label;
 
-	/** Whether this field can be NULL in the database. */
+	/**
+	 * Whether this field can be NULL in the database.
+	 */
 	private boolean nillable;
 
 	/**
@@ -451,10 +466,14 @@ public class Parameter implements Serializable
 	 */
 	private String default_value;
 
-	/** A short description of this field. */
+	/**
+	 * A short description of this field.
+	 */
 	private String description;
 
-	/** When this field a of type Type.ENUM, this vector contains the options */
+	/**
+	 * When this field a of type Type.ENUM, this vector contains the options
+	 */
 	private List<String> enum_options;
 
 	/**
@@ -463,9 +482,13 @@ public class Parameter implements Serializable
 	 */
 	private int varchar_length;
 
-	/** Contains a pointer to some user-data. */
+	/**
+	 * Contains a pointer to some user-data.
+	 */
 	private Object user_data;
 
-	/** Used for serialization purposes. */
+	/**
+	 * Used for serialization purposes.
+	 */
 	private static final long serialVersionUID = -1879739243713730190L;
 }

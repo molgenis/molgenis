@@ -1,10 +1,9 @@
 package org.molgenis.data.semanticsearch.semantic;
 
+import com.google.auto.value.AutoValue;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.gson.AutoGson;
 import org.molgenis.ontology.core.model.OntologyTerm;
-
-import com.google.auto.value.AutoValue;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_OntologyTag.class)

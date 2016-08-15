@@ -1,23 +1,15 @@
 package org.molgenis.data.system;
 
-import static org.molgenis.data.meta.system.ImportRunMetaData.ENDDATE;
-import static org.molgenis.data.meta.system.ImportRunMetaData.ID;
-import static org.molgenis.data.meta.system.ImportRunMetaData.IMPORTEDENTITIES;
-import static org.molgenis.data.meta.system.ImportRunMetaData.MESSAGE;
-import static org.molgenis.data.meta.system.ImportRunMetaData.NOTIFY;
-import static org.molgenis.data.meta.system.ImportRunMetaData.PROGRESS;
-import static org.molgenis.data.meta.system.ImportRunMetaData.STARTDATE;
-import static org.molgenis.data.meta.system.ImportRunMetaData.STATUS;
-import static org.molgenis.data.meta.system.ImportRunMetaData.USERNAME;
+import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.StaticEntity;
+import org.molgenis.util.ValueLabel;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.support.StaticEntity;
-import org.molgenis.util.ValueLabel;
+import static org.molgenis.data.meta.system.ImportRunMetaData.*;
 
 public class ImportRun extends StaticEntity
 {

@@ -1,10 +1,10 @@
 package org.molgenis.security.owned;
 
-import static org.molgenis.security.owned.OwnedEntityMetaData.OWNER_USERNAME;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
+
+import static org.molgenis.security.owned.OwnedEntityMetaData.OWNER_USERNAME;
 
 /**
  * Base class for owned entities.

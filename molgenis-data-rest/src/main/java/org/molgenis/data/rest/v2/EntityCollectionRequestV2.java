@@ -1,11 +1,11 @@
 package org.molgenis.data.rest.v2;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-
 import org.molgenis.data.Sort;
 import org.molgenis.data.rsql.AggregateQueryRsql;
 import org.molgenis.data.rsql.QueryRsql;
+
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 
 class EntityCollectionRequestV2
 {

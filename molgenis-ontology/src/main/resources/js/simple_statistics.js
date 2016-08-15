@@ -4,7 +4,7 @@
 // [Javascript module pattern](http://www.adequatelygood.com/2010/3/JavaScript-Module-Pattern-In-Depth),
 // eventually assigning `simple-statistics` to `ss` in browsers or the
 // `exports object for node.js
-(function() {
+(function () {
     var ss = {};
 
     if (typeof module !== 'undefined') {
@@ -27,7 +27,7 @@
             data = [];
 
         // Assign data to the model. Data is assumed to be an array.
-        linreg.data = function(x) {
+        linreg.data = function (x) {
             if (!arguments.length) return data;
             data = x.slice();
             return linreg;
@@ -35,7 +35,7 @@
 
         // Calculate the slope and y-intercept of the regression line
         // by calculating the least sum of squares
-        linreg.mb = function() {
+        linreg.mb = function () {
             var m, b;
 
             //if there's only one point, arbitrarily choose a slope of 0
@@ -71,17 +71,17 @@
             }
 
             // Return both values as an object.
-            return { m: m, b: b };
+            return {m: m, b: b};
         };
 
         // a shortcut for simply getting the slope of the regression line
-        linreg.m = function() {
+        linreg.m = function () {
             return linreg.mb().m;
         };
 
         // a shortcut for simply getting the y-intercept of the regression
         // line.
-        linreg.b = function() {
+        linreg.b = function () {
             return linreg.mb().b;
         };
 
@@ -90,7 +90,7 @@
         // This is called after `.data()` and returns the
         // equation `y = f(x)` which gives the position
         // of the regression line at each point in `x`.
-        linreg.line = function() {
+        linreg.line = function () {
 
             // Get the slope, `m`, and y-intercept, `b`, of the line.
             var mb = linreg.mb(),
@@ -100,7 +100,7 @@
             // Return a function that computes a `y` value for each
             // x value it is given, based on the values of `b` and `a`
             // that we just computed.
-            return function(x) {
+            return function (x) {
                 return b + (m * x);
             };
         };
@@ -166,7 +166,7 @@
         // ## Train
         // Train the classifier with a new item, which has a single
         // dimension of Javascript literal keys and values.
-        bayes_model.train = function(item, category) {
+        bayes_model.train = function (item, category) {
             // If the data object doesn't have any values
             // for this category, create a new object for it.
             if (!data[category]) data[category] = {};
@@ -189,7 +189,7 @@
         // ## Score
         // Generate a score of how well this item matches all
         // possible categories based on its attributes
-        bayes_model.score = function(item) {
+        bayes_model.score = function (item) {
             // Initialize an empty array of odds per category.
             var odds = {}, category;
             // Iterate through each key in the item,
@@ -403,8 +403,8 @@
     function sample_covariance(x, y) {
 
         // The two datasets must have the same length which must be more than 1
-        if (x.length <= 1 || x.length != y.length){
-          return null;
+        if (x.length <= 1 || x.length != y.length) {
+            return null;
         }
 
         // determine the mean of each dataset so that we can judge each
@@ -419,7 +419,7 @@
         // difference from the mean is associated - if both are well above
         // or if both are well below
         // the mean, the covariance increases significantly.
-        for (var i = 0; i < x.length; i++){
+        for (var i = 0; i < x.length; i++) {
             sum += (x[i] - xmean) * (y[i] - ymean);
         }
 
@@ -454,13 +454,15 @@
 
         // Sorting the array makes it easy to find the center, but
         // use `.slice()` to ensure the original array `x` is not modified
-        var sorted = x.slice().sort(function (a, b) { return a - b; });
+        var sorted = x.slice().sort(function (a, b) {
+            return a - b;
+        });
 
         // If the length of the list is odd, it's the central number
         if (sorted.length % 2 === 1) {
             return sorted[(sorted.length - 1) / 2];
-        // Otherwise, the median is the average of the two numbers
-        // at the center of the list
+            // Otherwise, the median is the average of the two numbers
+            // at the center of the list
         } else {
             var a = sorted[(sorted.length / 2) - 1];
             var b = sorted[(sorted.length / 2)];
@@ -480,7 +482,9 @@
         // Sorting the array lets us iterate through it below and be sure
         // that every time we see a new number it's new and we'll never
         // see the same number twice
-        var sorted = x.slice().sort(function (a, b) { return a - b; });
+        var sorted = x.slice().sort(function (a, b) {
+            return a - b;
+        });
 
         // This assumes it is dealing with an array of size > 1, since size
         // 0 and 1 are handled immediately. Hence it starts at index 1 in the
@@ -509,9 +513,11 @@
                     value = last;
                 }
                 last = sorted[i];
-            // if this isn't a new number, it's one more occurrence of
-            // the potential mode
-            } else { seen_this++; }
+                // if this isn't a new number, it's one more occurrence of
+                // the potential mode
+            } else {
+                seen_this++;
+            }
         }
         return value;
     }
@@ -530,18 +536,18 @@
     //
     // Depends on `standard_deviation()` and `mean()`
     function t_test(sample, x) {
-      // The mean of the sample
-      var sample_mean = mean(sample);
+        // The mean of the sample
+        var sample_mean = mean(sample);
 
-      // The standard deviation of the sample
-      var sd = standard_deviation(sample);
+        // The standard deviation of the sample
+        var sd = standard_deviation(sample);
 
-      // Square root the length of the sample
-      var rootN = Math.sqrt(sample.length);
+        // Square root the length of the sample
+        var rootN = Math.sqrt(sample.length);
 
-      // Compute the known value against the sample,
-      // returning the t value
-      return (sample_mean - x) / (sd / rootN);
+        // Compute the known value against the sample,
+        // returning the t value
+        return (sample_mean - x) / (sd / rootN);
     }
 
     // # [2-sample t-test](http://en.wikipedia.org/wiki/Student's_t-test)
@@ -565,7 +571,7 @@
         var n = sample_x.length,
             m = sample_y.length;
 
-        if (!n || !m) return null ;
+        if (!n || !m) return null;
 
         // default difference (mu) is zero
         if (!diff) diff = 0;
@@ -600,7 +606,9 @@
 
         // Sort a copy of the array. We'll need a sorted array to index
         // the values in sorted order.
-        var sorted = sample.slice().sort(function (a, b) { return a - b; });
+        var sorted = sample.slice().sort(function (a, b) {
+            return a - b;
+        });
 
         // Find a potential index in the list. In Wikipedia's terms, this
         // is I<sub>p</sub>.
@@ -627,8 +635,8 @@
     // A measure of statistical dispersion, or how scattered, spread, or
     // concentrated a distribution is. It's computed as the difference betwen
     // the third quartile and first quartile.
-    function iqr(sample){
-	    // We can't derive quantiles from an empty list
+    function iqr(sample) {
+        // We can't derive quantiles from an empty list
         if (sample.length === 0) return null;
 
         // Interquartile range is the span between the upper quartile,
@@ -804,7 +812,9 @@
 
         // sort data in numerical order, since this is expected
         // by the matrices function
-        data = data.slice().sort(function (a, b) { return a - b; });
+        data = data.slice().sort(function (a, b) {
+            return a - b;
+        });
 
         // get our basic matrices
         var matrices = jenksMatrices(data, n_classes),
@@ -950,7 +960,7 @@
         // create a closure with a method name so that a reference
         // like `arrayMethods[i]` doesn't follow the loop increment
         function wrap(method) {
-            return function() {
+            return function () {
                 // cast any arguments into an array, since they're
                 // natively objects
                 var args = Array.prototype.slice.apply(arguments);

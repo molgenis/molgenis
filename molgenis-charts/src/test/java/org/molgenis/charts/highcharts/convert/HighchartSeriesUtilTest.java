@@ -107,8 +107,7 @@ public class HighchartSeriesUtilTest
 	public void parseBoxPlotSerieToSeries()
 	{
 		final String name = "test";
-		final List<Double[]> listOfDoubleArrays = Arrays.<Double[]> asList(new Double[]
-		{ 0d, 0d, 0d, 0d, 0d });
+		final List<Double[]> listOfDoubleArrays = Arrays.<Double[]>asList(new Double[] { 0d, 0d, 0d, 0d, 0d });
 		BoxPlotSerie boxPlotSerie = mock(BoxPlotSerie.class);
 		when(boxPlotSerie.getName()).thenReturn(name);
 		when(boxPlotSerie.getData()).thenReturn(listOfDoubleArrays);

@@ -9,10 +9,10 @@
 
 package org.molgenis.model.elements;
 
+import org.molgenis.util.SimpleTree;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import org.molgenis.util.SimpleTree;
 
 // jdk
 
@@ -23,14 +23,16 @@ import org.molgenis.util.SimpleTree;
  * inherits from the tree, so it can hold multiple children and have convenient
  * search-methods. Objects that need to be placed in this container need to
  * inherit from it.
- * 
+ *
  * @author RA Scheltema
  * @version 1.0.0
  */
 public class DBSchema extends SimpleTree<DBSchema>
 {
 	// variables
-	/** Used for serialization purposes */
+	/**
+	 * Used for serialization purposes
+	 */
 	private static final long serialVersionUID = -6239251669294203517L;
 
 	private List<Module> modules = new ArrayList<Module>();
@@ -48,14 +50,13 @@ public class DBSchema extends SimpleTree<DBSchema>
 	}
 
 	// constructor(s)
+
 	/**
 	 * The standard constructor, which links the object in the tree (with the
 	 * parent parameter).
-	 * 
-	 * @param name
-	 *            The name of the element.
-	 * @param parent
-	 *            The parent which will be used to link this object in the tree.
+	 *
+	 * @param name   The name of the element.
+	 * @param parent The parent which will be used to link this object in the tree.
 	 */
 	public DBSchema(String name, DBSchema parent, Model model)
 	{

@@ -1,19 +1,5 @@
 package org.molgenis.security.account;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.security.account.AccountController.URI;
-import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
-
-import javax.naming.NoPermissionException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserFactory;
 import org.molgenis.data.MolgenisDataAccessException;
@@ -37,15 +23,22 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
-import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+
+import javax.naming.NoPermissionException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.security.account.AccountController.URI;
+import static org.molgenis.security.user.UserAccountService.MIN_PASSWORD_LENGTH;
 
 @Controller
 @RequestMapping(URI)
@@ -102,7 +95,7 @@ public class AccountController
 	public ModelAndView getChangePasswordForm()
 	{
 		ModelAndView model = new ModelAndView("view-change-password");
-				model.addObject("min_password_length", MIN_PASSWORD_LENGTH);
+		model.addObject("min_password_length", MIN_PASSWORD_LENGTH);
 		return model;
 	}
 
@@ -159,7 +152,8 @@ public class AccountController
 			}
 			accountService.createUser(molgenisUser, activationUri);
 
-			String successMessage = appSettings.getSignUpModeration() ? REGISTRATION_SUCCESS_MESSAGE_ADMIN : REGISTRATION_SUCCESS_MESSAGE_USER;
+			String successMessage = appSettings
+					.getSignUpModeration() ? REGISTRATION_SUCCESS_MESSAGE_ADMIN : REGISTRATION_SUCCESS_MESSAGE_USER;
 			captchaService.removeCaptcha();
 			return Collections.singletonMap("message", successMessage);
 		}

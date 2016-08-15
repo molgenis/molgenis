@@ -39,7 +39,7 @@ public class HighchartServiceTest extends AbstractTestNGSpringContextTests
 		{
 			return new HighchartService();
 		}
-		
+
 		@Bean
 		public HighchartSeriesUtil highchartSeriesUtil()
 		{
@@ -49,33 +49,36 @@ public class HighchartServiceTest extends AbstractTestNGSpringContextTests
 
 	@Autowired
 	private HighchartService highchartService;
-	
+
 	@Autowired
 	private HighchartService highchartSeriesUtil;
-	
+
 	@Test
-	public void renderChartInternalScatterPlot() {
+	public void renderChartInternalScatterPlot()
+	{
 		XYDataChart xYDataChart = mock(XYDataChart.class);
 		doReturn(MolgenisChartType.SCATTER_CHART).when(xYDataChart).getType();
 		doReturn(MolgenisAxisType.LINEAR).when(xYDataChart).getxAxisType();
 		doReturn(MolgenisAxisType.LINEAR).when(xYDataChart).getyAxisType();
 		assertNotNull(highchartService.renderChartInternal(xYDataChart, null));
 	}
-	
+
 	@Test
-	public void renderChartInternalBoxplot() {
+	public void renderChartInternalBoxplot()
+	{
 		BoxPlotChart boxPlotChart = mock(BoxPlotChart.class);
 		doReturn(MolgenisChartType.BOXPLOT_CHART).when(boxPlotChart).getType();
 		assertNotNull(highchartService.renderChartInternal(boxPlotChart, null));
 	}
-	
+
 	@Test
-	public void renderChartInternalNull() {
+	public void renderChartInternalNull()
+	{
 		XYDataChart xYDataChart = mock(XYDataChart.class);
 		doReturn(MolgenisChartType.HEAT_MAP).when(xYDataChart).getType();
 		assertNull(highchartService.renderChartInternal(xYDataChart, null));
 	}
-	
+
 	@Test
 	public void createScatterPlotChart()
 	{
@@ -112,7 +115,7 @@ public class HighchartServiceTest extends AbstractTestNGSpringContextTests
 		assertEquals(options.getxAxis().get(0).getOrdinal(), Boolean.valueOf(false));
 		assertEquals(options.getxAxis().get(0).getTitle().getText(), "xlabel");
 		assertEquals(options.getxAxis().get(0).getTitle().getAlign(), AxisAlign.MIDDLE.toString());
-		
+
 		// yAxis
 		assertNotNull(options.getyAxis());
 		assertFalse(options.getyAxis().isEmpty());
@@ -139,9 +142,12 @@ public class HighchartServiceTest extends AbstractTestNGSpringContextTests
 		assertNotNull(options.getSeries());
 		assertFalse(options.getSeries().isEmpty());
 		assertEquals(options.getSeries().get(0).getType(), SeriesType.SCATTER.toString());
-		assertEquals(options.getSeries().get(0).getData().get(0), Arrays.<Object> asList(Integer.valueOf("1"), Double.valueOf("1.1")));
-		assertEquals(options.getSeries().get(0).getData().get(1), Arrays.<Object> asList(Integer.valueOf("2"), Double.valueOf("2.2")));
-		assertEquals(options.getSeries().get(0).getData().get(2), Arrays.<Object> asList(Integer.valueOf("3"), Double.valueOf("3.3")));
+		assertEquals(options.getSeries().get(0).getData().get(0),
+				Arrays.<Object>asList(Integer.valueOf("1"), Double.valueOf("1.1")));
+		assertEquals(options.getSeries().get(0).getData().get(1),
+				Arrays.<Object>asList(Integer.valueOf("2"), Double.valueOf("2.2")));
+		assertEquals(options.getSeries().get(0).getData().get(2),
+				Arrays.<Object>asList(Integer.valueOf("3"), Double.valueOf("3.3")));
 	}
 
 	@Test
@@ -214,8 +220,10 @@ public class HighchartServiceTest extends AbstractTestNGSpringContextTests
 		assertNotNull(options.getSeries());
 		assertFalse(options.getSeries().isEmpty());
 		assertEquals(options.getSeries().get(0).getType(), SeriesType.LINE.toString());
-		assertEquals(options.getSeries().get(0).getData().get(0), Arrays.<Object> asList(1392940800000l, Double.valueOf("1.1")));
-		assertEquals(options.getSeries().get(0).getData().get(1), Arrays.<Object> asList(1393027200000l, Double.valueOf("2.2")));
+		assertEquals(options.getSeries().get(0).getData().get(0),
+				Arrays.<Object>asList(1392940800000l, Double.valueOf("1.1")));
+		assertEquals(options.getSeries().get(0).getData().get(1),
+				Arrays.<Object>asList(1393027200000l, Double.valueOf("2.2")));
 	}
 
 	@Test
@@ -225,7 +233,7 @@ public class HighchartServiceTest extends AbstractTestNGSpringContextTests
 
 		List<BoxPlotSerie> boxPlotSeries = new ArrayList<BoxPlotSerie>();
 		BoxPlotSerie boxPlotSerie = new BoxPlotSerie();
-		boxPlotSerie.addData(new Double[]{ 20.5, 50.5, 100.5, 200.5, 400.5 });
+		boxPlotSerie.addData(new Double[] { 20.5, 50.5, 100.5, 200.5, 400.5 });
 		boxPlotSeries.add(boxPlotSerie);
 		boxPlotChart.setBoxPlotSeries(boxPlotSeries);
 
@@ -292,7 +300,9 @@ public class HighchartServiceTest extends AbstractTestNGSpringContextTests
 		assertEquals(options.getSeries().get(0).getData().get(0), new Double[] { 20.5, 50.5, 100.5, 200.5, 400.5 });
 
 		assertEquals(options.getSeries().get(1).getType(), SeriesType.SCATTER.toString());
-		assertEquals(options.getSeries().get(1).getData().get(0), Arrays.<Object> asList(Double.valueOf("0"), Double.valueOf("10")));
-		assertEquals(options.getSeries().get(1).getData().get(1), Arrays.<Object> asList(Double.valueOf("0"), Double.valueOf("500")));
+		assertEquals(options.getSeries().get(1).getData().get(0),
+				Arrays.<Object>asList(Double.valueOf("0"), Double.valueOf("10")));
+		assertEquals(options.getSeries().get(1).getData().get(1),
+				Arrays.<Object>asList(Double.valueOf("0"), Double.valueOf("500")));
 	}
 }

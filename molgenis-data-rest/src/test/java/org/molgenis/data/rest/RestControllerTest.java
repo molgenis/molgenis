@@ -66,9 +66,10 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 			+ "\",\"meta\":{\"href\":\"/api/v1/Person/meta\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"Person\",\"attributes\":{\"name\":{\"href\":\"/api/v1/Person/meta/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"},\"int\":{\"href\":\"/api/v1/Person/meta/int\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false},\"start\":5,\"num\":10,\"total\":0,\"prevHref\":\""
 			+ HREF_ENTITY + "?start=0&num=10\",\"items\":[{\"href\":\"" + HREF_ENTITY_ID
 			+ "\",\"name\":\"Piet\",\"id\":\"p1\",\"enum\":\"enum1\",\"int\":1}]}";
-	private static final String ENTITY_META_RESPONSE_STRING = "{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\""
-			+ ENTITY_NAME + "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
-			+ "/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"},\"int\":{\"href\":\"/api/v1/Person/meta/int\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false}";
+	private static final String ENTITY_META_RESPONSE_STRING =
+			"{\"href\":\"" + HREF_ENTITY_META + "\",\"hrefCollection\":\"/api/v1/Person\",\"name\":\"" + ENTITY_NAME
+					+ "\",\"attributes\":{\"name\":{\"href\":\"" + HREF_ENTITY_META
+					+ "/name\"},\"id\":{\"href\":\"/api/v1/Person/meta/id\"},\"enum\":{\"href\":\"/api/v1/Person/meta/enum\"},\"int\":{\"href\":\"/api/v1/Person/meta/int\"}},\"idAttribute\":\"id\",\"isAbstract\":false,\"writable\":false}";
 
 	@Autowired
 	private RestController restController;
@@ -250,8 +251,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveEntityMeta() throws Exception
 	{
 		mockMvc.perform(get(HREF_ENTITY_META)).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
-				.string(ENTITY_META_RESPONSE_STRING));
+				.andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(content().string(ENTITY_META_RESPONSE_STRING));
 	}
 
 	@Test
@@ -274,8 +275,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(dataService.getCapabilities(ENTITY_NAME))
 				.thenReturn(new HashSet<>(singletonList(RepositoryCapability.QUERYABLE)));
 		mockMvc.perform(get(HREF_ENTITY_META)).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
-				.string(ENTITY_META_RESPONSE_STRING));
+				.andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(content().string(ENTITY_META_RESPONSE_STRING));
 	}
 
 	@Test
@@ -312,7 +313,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		mockMvc.perform(get(HREF_ENTITY_ID)).andExpect(status().isOk())
 				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
-				.string("{\"href\":\"" + HREF_ENTITY_ID + "\",\"name\":\"Piet\",\"id\":\"p1\",\"enum\":\"enum1\",\"int\":1}"));
+				.string("{\"href\":\"" + HREF_ENTITY_ID
+						+ "\",\"name\":\"Piet\",\"id\":\"p1\",\"enum\":\"enum1\",\"int\":1}"));
 
 	}
 
@@ -330,8 +332,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	{
 		mockMvc.perform(get(HREF_ENTITY).param("start", "5").param("num", "10").param("q[0].operator", "EQUALS")
 				.param("q[0].field", "name").param("q[0].value", "Piet")).andExpect(status().isOk())
-				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
-				.string(ENTITY_COLLECTION_RESPONSE_STRING));
+				.andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(content().string(ENTITY_COLLECTION_RESPONSE_STRING));
 
 	}
 
@@ -358,8 +360,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		String json = "{start:5, num:10, q:[{operator:EQUALS,field:name,value:Piet}]}";
 
 		mockMvc.perform(post(HREF_ENTITY).param("_method", "GET").content(json).contentType(APPLICATION_JSON))
-				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON)).andExpect(content()
-				.string(ENTITY_COLLECTION_RESPONSE_STRING));
+				.andExpect(status().isOk()).andExpect(content().contentType(APPLICATION_JSON))
+				.andExpect(content().string(ENTITY_COLLECTION_RESPONSE_STRING));
 	}
 
 	@Test
@@ -613,8 +615,8 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 	public void retrieveSortedEntityCollectionCsv() throws Exception
 	{
 		mockMvc.perform(get(BASE_URI + "/csv/Person").param("sortColumn", "name").param("sortOrder", "DESC"))
-				.andExpect(status().isOk()).andExpect(content().contentType("text/csv")).andExpect(
-				content().string(CSV_HEADER + "\"Klaas\",\"p2\",,\"2\"\n\"Piet\",\"p1\",\"enum1\",\"1\"\n"));
+				.andExpect(status().isOk()).andExpect(content().contentType("text/csv"))
+				.andExpect(content().string(CSV_HEADER + "\"Klaas\",\"p2\",,\"2\"\n\"Piet\",\"p1\",\"enum1\",\"1\"\n"));
 	}
 
 	@Configuration

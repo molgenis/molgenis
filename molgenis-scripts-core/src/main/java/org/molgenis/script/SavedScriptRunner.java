@@ -1,10 +1,5 @@
 package org.molgenis.script;
 
-import static org.molgenis.script.ScriptMetaData.SCRIPT;
-
-import java.util.Map;
-import java.util.UUID;
-
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
@@ -14,15 +9,20 @@ import org.molgenis.security.core.utils.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Map;
+import java.util.UUID;
+
+import static org.molgenis.script.ScriptMetaData.SCRIPT;
+
 /**
  * Runs a script.
- * 
+ * <p>
  * Retrieve script from the database as freemarker template, render the script and return the result, script output
  * and/or the name of a generated outputfile
- * 
+ * <p>
  * If the script requires a security token, a token is generated that is available to the script as a parameter named
  * 'molgenisToken'
- * 
+ * <p>
  * If the script results in an outputfile (if script.resultFileExtension is not null) a ramdom name is generated with
  * the correct extension, this is available to the script as a parameter named 'outputFile'
  */
@@ -46,19 +46,17 @@ public class SavedScriptRunner
 
 	/**
 	 * Run a script with parameters
-	 * 
+	 *
 	 * @param scriptName
 	 * @param parameters
 	 * @return ScripResult
-	 * @throws UnknownScriptException
-	 *             if scriptName is unknown
-	 * @throws GenerateScriptException
-	 *             , if parameter is missing
+	 * @throws UnknownScriptException  if scriptName is unknown
+	 * @throws GenerateScriptException , if parameter is missing
 	 */
 	public ScriptResult runScript(String scriptName, Map<String, Object> parameters)
 	{
-		Script script = dataService.findOne(SCRIPT, new QueryImpl<Script>().eq(ScriptMetaData.NAME, scriptName),
-				Script.class);
+		Script script = dataService
+				.findOne(SCRIPT, new QueryImpl<Script>().eq(ScriptMetaData.NAME, scriptName), Script.class);
 
 		if (script == null)
 		{
@@ -78,8 +76,8 @@ public class SavedScriptRunner
 
 		if (script.isGenerateToken())
 		{
-			String token = tokenService.generateAndStoreToken(SecurityUtils.getCurrentUsername(), "For script "
-					+ script.getName());
+			String token = tokenService
+					.generateAndStoreToken(SecurityUtils.getCurrentUsername(), "For script " + script.getName());
 			parameters.put("molgenisToken", token);
 		}
 

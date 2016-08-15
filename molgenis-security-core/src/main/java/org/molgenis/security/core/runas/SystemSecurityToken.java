@@ -1,10 +1,10 @@
 package org.molgenis.security.core.runas;
 
-import java.util.Arrays;
-
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+
+import java.util.Arrays;
 
 /**
  * Authentication token for the SYSTEM user
@@ -18,7 +18,7 @@ public class SystemSecurityToken extends UsernamePasswordAuthenticationToken
 
 	public SystemSecurityToken()
 	{
-		super(new User(USER_SYSTEM, "", Arrays.asList(new SimpleGrantedAuthority(ROLE_SYSTEM))), "", Arrays
-				.asList(new SimpleGrantedAuthority(ROLE_SYSTEM)));
+		super(new User(USER_SYSTEM, "", Arrays.asList(new SimpleGrantedAuthority(ROLE_SYSTEM))), "",
+				Arrays.asList(new SimpleGrantedAuthority(ROLE_SYSTEM)));
 	}
 }

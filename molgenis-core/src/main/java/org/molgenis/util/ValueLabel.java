@@ -9,9 +9,13 @@ public class ValueLabel implements Serializable
 {
 	/* The serial version UID of this class. Needed for serialization. */
 	private static final long serialVersionUID = -6539081630192819896L;
-	/** The label */
+	/**
+	 * The label
+	 */
 	private String label;
-	/** The value */
+	/**
+	 * The value
+	 */
 	private Object value;
 
 	/**
@@ -24,11 +28,9 @@ public class ValueLabel implements Serializable
 
 	/**
 	 * Construct a new ValueLabel
-	 * 
-	 * @param value
-	 *            the value
-	 * @param label
-	 *            the label
+	 *
+	 * @param value the value
+	 * @param label the label
 	 */
 	public ValueLabel(Object value, String label)
 	{
@@ -38,7 +40,7 @@ public class ValueLabel implements Serializable
 
 	/**
 	 * Retrieve the label
-	 * 
+	 *
 	 * @return label
 	 */
 	public String getLabel()
@@ -48,9 +50,8 @@ public class ValueLabel implements Serializable
 
 	/**
 	 * Set the label
-	 * 
-	 * @param label
-	 *            new label
+	 *
+	 * @param label new label
 	 */
 	public void setLabel(String label)
 	{
@@ -59,7 +60,7 @@ public class ValueLabel implements Serializable
 
 	/**
 	 * Retrieve the value
-	 * 
+	 *
 	 * @return value
 	 */
 	public Object getValue()
@@ -69,7 +70,7 @@ public class ValueLabel implements Serializable
 
 	/**
 	 * Set the value
-	 * 
+	 *
 	 * @param value
 	 */
 	public void setValue(Object value)

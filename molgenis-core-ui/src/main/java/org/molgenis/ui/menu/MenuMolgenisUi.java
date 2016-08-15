@@ -1,10 +1,10 @@
 package org.molgenis.ui.menu;
 
-import static java.util.Objects.requireNonNull;
-
 import org.molgenis.ui.MolgenisUi;
 import org.molgenis.ui.MolgenisUiMenu;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import static java.util.Objects.requireNonNull;
 
 public class MenuMolgenisUi implements MolgenisUi
 {

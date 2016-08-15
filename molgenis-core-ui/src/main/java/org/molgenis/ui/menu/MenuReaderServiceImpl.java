@@ -1,12 +1,11 @@
 package org.molgenis.ui.menu;
 
-import static java.util.Objects.requireNonNull;
-
+import com.google.gson.GsonBuilder;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.gson.GsonBuilder;
+import static java.util.Objects.requireNonNull;
 
 public class MenuReaderServiceImpl implements MenuReaderService
 {

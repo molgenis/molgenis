@@ -14,20 +14,21 @@ import org.molgenis.model.MolgenisModelException;
 // jdk
 
 /**
- * 
+ *
  */
 public class Tree extends UISchema
 {
 	/**
-	 * 
+	 *
 	 */
 	public enum ViewType
 	{
 		VIEWTYPE_LIST("list"), VIEWTYPE_RECORD("record"), VIEWTYPE_UNKNOWN("unknown");
 
 		//
+
 		/**
-		 * 
+		 *
 		 */
 		public String getValue()
 		{
@@ -35,7 +36,7 @@ public class Tree extends UISchema
 		}
 
 		/**
-		 * 
+		 *
 		 */
 		public static ViewType parseViewType(String str) throws MolgenisModelException
 		{
@@ -43,8 +44,7 @@ public class Tree extends UISchema
 
 			if (str.equals(ViewType.VIEWTYPE_LIST.val)) return ViewType.VIEWTYPE_LIST;
 			else if (str.equals(ViewType.VIEWTYPE_RECORD.val)) return ViewType.VIEWTYPE_RECORD;
-			else
-				return ViewType.VIEWTYPE_UNKNOWN;
+			else return ViewType.VIEWTYPE_UNKNOWN;
 		}
 
 		/** */
@@ -58,8 +58,9 @@ public class Tree extends UISchema
 	}
 
 	// constructor(s)
+
 	/**
-	 * 
+	 *
 	 */
 	public Tree(String name, UISchema parent, String parentField, String idField, String labelField)
 	{
@@ -72,8 +73,9 @@ public class Tree extends UISchema
 	}
 
 	// access methods
+
 	/**
-	 * 
+	 *
 	 */
 	public void setEntity(Entity entity)
 	{
@@ -81,7 +83,7 @@ public class Tree extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public Entity getEntity()
 	{
@@ -89,7 +91,7 @@ public class Tree extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void setRecord(Record record)
 	{
@@ -97,7 +99,7 @@ public class Tree extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public Record getRecord()
 	{
@@ -105,7 +107,7 @@ public class Tree extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public void setReadOnly(final boolean readonly)
 	{
@@ -113,7 +115,7 @@ public class Tree extends UISchema
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	public boolean getReadOnly()
 	{
@@ -151,8 +153,9 @@ public class Tree extends UISchema
 	}
 
 	//
+
 	/**
-	 * 
+	 *
 	 */
 	@Override
 	public Type getType()

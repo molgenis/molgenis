@@ -14,7 +14,7 @@ public class XYDataSerie extends MolgenisSerie
 	private AttributeType attributeXFieldTypeEnum;
 	private AttributeType attributeYFieldTypeEnum;
 	private List<XYData> data = new ArrayList<XYData>();
-	
+
 	public XYDataSerie()
 	{
 		this.setType(MolgenisSerieType.SCATTER);
@@ -35,7 +35,7 @@ public class XYDataSerie extends MolgenisSerie
 	{
 		this.data = data;
 	}
-	
+
 	/**
 	 * @param xYData the xYData point to add
 	 */
@@ -43,7 +43,7 @@ public class XYDataSerie extends MolgenisSerie
 	{
 		this.data.add(xYData);
 	}
-	
+
 	/**
 	 * @param xYData the xYData point to add
 	 */

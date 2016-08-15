@@ -1,13 +1,5 @@
 package org.molgenis.security.user;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
-
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.security.user.UserAccountServiceImplTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +14,10 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-@ContextConfiguration(classes =
-{ Config.class })
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
+
+@ContextConfiguration(classes = { Config.class })
 public class UserAccountServiceImplTest extends AbstractTestNGSpringContextTests
 {
 	@Configuration

@@ -11,7 +11,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRegistration.Dynamic;
 import java.util.EnumSet;
 
-
 public class WebAppInitializer implements WebApplicationInitializer
 {
 	private static final Logger LOG = LoggerFactory.getLogger(WebAppInitializer.class);
@@ -27,9 +26,9 @@ public class WebAppInitializer implements WebApplicationInitializer
 		}
 		else
 		{
-			filter.addMappingForUrlPatterns(EnumSet.of (DispatcherType.REQUEST), true, "/das/*");
+			filter.addMappingForUrlPatterns(EnumSet.of(DispatcherType.REQUEST), true, "/das/*");
 		}
-		
+
 		Dynamic dasServlet = servletContext.addServlet("dasServlet", new MydasServlet());
 		if (dasServlet == null)
 		{

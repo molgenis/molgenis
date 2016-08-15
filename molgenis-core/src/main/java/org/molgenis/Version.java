@@ -28,18 +28,24 @@ public class Version
 	 */
 	public static final int MINOR = 0;
 
-	/** The maintenance part of the version, which is changed for bug-fixes */
+	/**
+	 * The maintenance part of the version, which is changed for bug-fixes
+	 */
 	public static final int MAINTENANCE = 0;
 
-	/** Flag to indicate that this is a testing release */
+	/**
+	 * Flag to indicate that this is a testing release
+	 */
 	public static final boolean TESTING = true;
 
 	// static access methods
-	/** string representation of the version */
+
+	/**
+	 * string representation of the version
+	 */
 	public static String convertToString()
 	{
 		if (!TESTING) return "" + MAJOR + "." + MINOR + "." + MAINTENANCE;
-		else
-			return "" + MAJOR + "." + MINOR + "." + MAINTENANCE + "-testing";
+		else return "" + MAJOR + "." + MINOR + "." + MAINTENANCE + "-testing";
 	}
 }

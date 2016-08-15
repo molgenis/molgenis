@@ -1,15 +1,14 @@
 package org.molgenis.data.mapper.algorithmgenerator.categorymapper.convertor;
 
+import org.jscience.physics.amount.Amount;
+import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
+import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapperUtil;
+
+import javax.measure.unit.Unit;
 import java.util.Collections;
 import java.util.List;
 import java.util.OptionalDouble;
 import java.util.Set;
-
-import javax.measure.unit.Unit;
-
-import org.jscience.physics.amount.Amount;
-import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
-import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapperUtil;
 
 public class NumberAmountConvertor extends AmountConvertor
 {
@@ -34,9 +33,9 @@ public class NumberAmountConvertor extends AmountConvertor
 			}
 			else if (extractNumbers.size() > 1)
 			{
-				return AmountWrapper.create(
-						Amount.rangeOf(extractNumbers.get(0), extractNumbers.get(extractNumbers.size() - 1), unit)
-								.to(STANDARD_PER_WEEK_UNIT));
+				return AmountWrapper.create(Amount
+						.rangeOf(extractNumbers.get(0), extractNumbers.get(extractNumbers.size() - 1), unit)
+						.to(STANDARD_PER_WEEK_UNIT));
 			}
 			else
 			{

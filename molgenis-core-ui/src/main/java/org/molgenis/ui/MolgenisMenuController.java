@@ -1,15 +1,5 @@
 package org.molgenis.ui;
 
-import static org.molgenis.ui.MolgenisMenuController.URI;
-import static org.molgenis.ui.MolgenisPluginAttributes.KEY_CONTEXT_URL;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +9,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.HandlerMapping;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+import static org.molgenis.ui.MolgenisMenuController.URI;
+import static org.molgenis.ui.MolgenisPluginAttributes.KEY_CONTEXT_URL;
 
 @Controller
 @RequestMapping(URI)
@@ -46,8 +45,8 @@ public class MolgenisMenuController
 		this.molgenisUi = molgenisUi;
 		this.molgenisVersion = molgenisVersion;
 		// workaround for Eclipse bug: https://github.com/molgenis/molgenis/issues/2667
-		this.molgenisBuildData = molgenisBuildData.equals("${maven.build.timestamp}") ? new SimpleDateFormat(
-				"yyyy-MM-dd HH:mm").format(new Date()) + " by Eclipse" : molgenisBuildData;
+		this.molgenisBuildData = molgenisBuildData.equals("${maven.build.timestamp}") ?
+				new SimpleDateFormat("yyyy-MM-dd HH:mm").format(new Date()) + " by Eclipse" : molgenisBuildData;
 	}
 
 	@RequestMapping

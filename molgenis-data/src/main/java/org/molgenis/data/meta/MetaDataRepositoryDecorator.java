@@ -14,7 +14,7 @@ import java.util.stream.Stream;
 
 /**
  * Repository decorator for entities, attributes and packages repositories.
- * 
+ * <p>
  * Removes the WRITABLE and MANAGEABLE capabilities, because the user must not directly edit these repos but use the
  * MetaDataServices
  */

@@ -1,7 +1,7 @@
 package org.molgenis.charts.highcharts.basic;
 
 public class AxisTitle
-{	
+{
 	String align;
 	Integer margin;
 	String text;
@@ -23,7 +23,7 @@ public class AxisTitle
 		this.align = align;
 		return this;
 	}
-	
+
 	public AxisTitle setAlign(AxisAlign align)
 	{
 		this.align = align.toString();

@@ -40,9 +40,9 @@ public class MolgenisGroupMemberMetaData extends SystemEntityMetaData
 		setPackage(securityPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
-		addAttribute(MOLGENIS_USER).setDataType(XREF).setRefEntity(molgenisUserMetaData)
-				.setAggregatable(true).setDescription("").setNillable(false);
-		addAttribute(MOLGENIS_GROUP).setDataType(XREF).setRefEntity(molgenisGroupMetaData)
-				.setAggregatable(true).setDescription("").setNillable(false);
+		addAttribute(MOLGENIS_USER).setDataType(XREF).setRefEntity(molgenisUserMetaData).setAggregatable(true)
+				.setDescription("").setNillable(false);
+		addAttribute(MOLGENIS_GROUP).setDataType(XREF).setRefEntity(molgenisGroupMetaData).setAggregatable(true)
+				.setDescription("").setNillable(false);
 	}
 }

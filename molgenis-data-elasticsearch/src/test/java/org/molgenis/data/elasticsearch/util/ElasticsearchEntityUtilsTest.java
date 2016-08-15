@@ -1,18 +1,18 @@
 package org.molgenis.data.elasticsearch.util;
 
-import static java.util.stream.Collectors.toList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-
-import java.util.Arrays;
-import java.util.stream.Stream;
-
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.testng.annotations.Test;
+
+import java.util.Arrays;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 
 public class ElasticsearchEntityUtilsTest
 {
@@ -30,7 +30,7 @@ public class ElasticsearchEntityUtilsTest
 		String id0 = "id0";
 		String id1 = "id1";
 		assertEquals(ElasticsearchEntityUtils.toElasticsearchIds(Stream.of(id0, id1)).collect(toList()),
-				Arrays.<String> asList(id0, id1));
+				Arrays.<String>asList(id0, id1));
 	}
 
 	@Test
@@ -45,8 +45,8 @@ public class ElasticsearchEntityUtilsTest
 	{
 		String id0 = "id0";
 		String id1 = "id1";
-		assertEquals(Arrays.<Object> asList(id0, id1),
-				Lists.newArrayList(ElasticsearchEntityUtils.toEntityIds(Arrays.<String> asList(id0, id1))));
+		assertEquals(Arrays.<Object>asList(id0, id1),
+				Lists.newArrayList(ElasticsearchEntityUtils.toEntityIds(Arrays.<String>asList(id0, id1))));
 	}
 
 	@Test

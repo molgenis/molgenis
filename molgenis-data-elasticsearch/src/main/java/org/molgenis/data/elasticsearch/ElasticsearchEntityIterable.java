@@ -57,8 +57,8 @@ class ElasticsearchEntityIterable extends BatchingQueryResult<Entity> implements
 				.buildSearchRequest(searchRequestBuilder, type, SearchType.QUERY_AND_FETCH, q, null, null, null,
 						entityMeta);
 		return elasticsearchFacade.searchForIds(searchRequestBuilderConsumer, q.toString(), type, indexName)
-					.map(idString -> convert(idString, entityMeta.getIdAttribute()))
-					.map(idObject -> elasticsearchEntityFactory.getReference(entityMeta, idObject)).collect(toList());
+				.map(idString -> convert(idString, entityMeta.getIdAttribute()))
+				.map(idObject -> elasticsearchEntityFactory.getReference(entityMeta, idObject)).collect(toList());
 	}
 
 	@Override

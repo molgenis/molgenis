@@ -1,22 +1,21 @@
 package org.molgenis.ui.wizard;
 
-import static org.molgenis.ui.MolgenisPluginAttributes.KEY_CONTEXT_URL;
-import static org.springframework.web.bind.annotation.RequestMethod.GET;
-import static org.springframework.web.bind.annotation.RequestMethod.POST;
-
-import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
+
+import static org.molgenis.ui.MolgenisPluginAttributes.KEY_CONTEXT_URL;
+import static org.springframework.web.bind.annotation.RequestMethod.GET;
+import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 public abstract class AbstractWizardController extends MolgenisPluginController
 {
@@ -69,8 +68,8 @@ public abstract class AbstractWizardController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/next", method = POST)
-	public String next(HttpServletRequest request, HttpServletResponse response, @ModelAttribute("wizard")
-	Wizard wizard, BindingResult result, Model model) throws IOException
+	public String next(HttpServletRequest request, HttpServletResponse response,
+			@ModelAttribute("wizard") Wizard wizard, BindingResult result, Model model) throws IOException
 	{
 		if (wizard.isLastPage())
 		{
@@ -90,8 +89,7 @@ public abstract class AbstractWizardController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/previous", method = POST)
-	public String previous(HttpServletResponse response, @ModelAttribute("wizard")
-	Wizard wizard) throws IOException
+	public String previous(HttpServletResponse response, @ModelAttribute("wizard") Wizard wizard) throws IOException
 	{
 		if (wizard.isFirstPage())
 		{

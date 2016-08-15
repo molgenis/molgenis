@@ -1,10 +1,10 @@
 package org.molgenis.charts;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.molgenis.charts.data.BoxPlotSerie;
 import org.molgenis.charts.data.XYDataSerie;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A Molgenis Box Plot Chart
@@ -19,7 +19,7 @@ public class BoxPlotChart extends AbstractChart
 	{
 		this.setType(MolgenisChartType.BOXPLOT_CHART);
 	}
-	
+
 	/**
 	 * @return the categories
 	 */
@@ -35,8 +35,6 @@ public class BoxPlotChart extends AbstractChart
 	{
 		this.categories = categories;
 	}
-
-
 
 	/**
 	 * @return the xYDataSeries
@@ -69,18 +67,20 @@ public class BoxPlotChart extends AbstractChart
 	{
 		this.boxPlotSeries = boxPlotSeries;
 	}
-	
+
 	/**
 	 * @param boxPlotSerie the boxPlotSerie to add
 	 */
-	public void addBoxPlotSerie(BoxPlotSerie boxPlotSerie){
+	public void addBoxPlotSerie(BoxPlotSerie boxPlotSerie)
+	{
 		this.boxPlotSeries.add(boxPlotSerie);
 	}
-	
+
 	/**
 	 * @param xYDataSerie the xYDataSerie to add
 	 */
-	public void addXYDataSerie(XYDataSerie xYDataSerie){
+	public void addXYDataSerie(XYDataSerie xYDataSerie)
+	{
 		this.xYDataSeries.add(xYDataSerie);
 	}
 }

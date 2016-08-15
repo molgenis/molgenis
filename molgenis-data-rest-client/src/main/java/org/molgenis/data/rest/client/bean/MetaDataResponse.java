@@ -1,10 +1,9 @@
 package org.molgenis.data.rest.client.bean;
 
-import java.util.Map;
-
+import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
 
-import com.google.auto.value.AutoValue;
+import java.util.Map;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_MetaDataResponse.class)

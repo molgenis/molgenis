@@ -4,7 +4,7 @@ import org.springframework.context.ApplicationEvent;
 
 /**
  * Spring application event that is published when a entity was imported
- * 
+ *
  * @author erwin
  */
 public class EntityImportedEvent extends ApplicationEvent

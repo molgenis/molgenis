@@ -26,11 +26,9 @@ public class CmdLineAnnotationException extends AnnotationException
 				variantEntity = variantEntity.getEntity(VARIANT);
 			}
 
-			message += " with [" +
-					"CHROM=" + variantEntity.get(VcfAttributes.CHROM) + ", " +
-					"POS=" + variantEntity.get(VcfAttributes.POS) + ", " +
-					"REF=" + variantEntity.get(VcfAttributes.REF) + ", " +
-					"ALT=" + variantEntity.get(VcfAttributes.ALT) +	"]";
+			message += " with [" + "CHROM=" + variantEntity.get(VcfAttributes.CHROM) + ", " + "POS=" + variantEntity
+					.get(VcfAttributes.POS) + ", " + "REF=" + variantEntity.get(VcfAttributes.REF) + ", " + "ALT="
+					+ variantEntity.get(VcfAttributes.ALT) + "]";
 		}
 
 		message += " Cause: " + super.getCause();

@@ -1,19 +1,6 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
-import static java.util.Arrays.stream;
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.molgenis.MolgenisFieldTypes;
@@ -33,7 +20,12 @@ import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ontology.ic.TermFrequencyService;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.Sets;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static java.util.Arrays.stream;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 
 public class SemanticSearchServiceHelper
 {
@@ -65,10 +57,9 @@ public class SemanticSearchServiceHelper
 	/**
 	 * Create a disMaxJunc query rule based on the given search terms as well as the information from given ontology
 	 * terms
-	 * 
+	 *
 	 * @param ontologyTerms
 	 * @param searchTerms
-	 * 
 	 * @return disMaxJunc queryRule
 	 */
 	public QueryRule createDisMaxQueryRuleForAttribute(Set<String> searchTerms, Collection<OntologyTerm> ontologyTerms)
@@ -82,14 +73,16 @@ public class SemanticSearchServiceHelper
 		}
 
 		// Handle tags with only one ontologyterm
-		ontologyTerms.stream().filter(ontologyTerm -> !ontologyTerm.getIRI().contains(COMMA_CHAR)).forEach(ot -> {
+		ontologyTerms.stream().filter(ontologyTerm -> !ontologyTerm.getIRI().contains(COMMA_CHAR)).forEach(ot ->
+		{
 			queryTerms.addAll(parseOntologyTermQueries(ot));
 		});
 
 		QueryRule disMaxQueryRule = createDisMaxQueryRuleForTerms(queryTerms);
 
 		// Handle tags with multiple ontologyterms
-		ontologyTerms.stream().filter(ontologyTerm -> ontologyTerm.getIRI().contains(COMMA_CHAR)).forEach(ot -> {
+		ontologyTerms.stream().filter(ontologyTerm -> ontologyTerm.getIRI().contains(COMMA_CHAR)).forEach(ot ->
+		{
 			disMaxQueryRule.getNestedRules().add(createShouldQueryRule(ot.getIRI()));
 		});
 
@@ -98,14 +91,15 @@ public class SemanticSearchServiceHelper
 
 	/**
 	 * Create disMaxJunc query rule based a list of queryTerm. All queryTerms are lower cased and stop words are removed
-	 * 
+	 *
 	 * @param queryTerms
 	 * @return disMaxJunc queryRule
 	 */
 	public QueryRule createDisMaxQueryRuleForTerms(List<String> queryTerms)
 	{
 		List<QueryRule> rules = new ArrayList<QueryRule>();
-		queryTerms.stream().filter(StringUtils::isNotEmpty).map(this::escapeCharsExcludingCaretChar).forEach(query -> {
+		queryTerms.stream().filter(StringUtils::isNotEmpty).map(this::escapeCharsExcludingCaretChar).forEach(query ->
+		{
 			rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, query));
 			rules.add(new QueryRule(AttributeMetaDataMetaData.DESCRIPTION, Operator.FUZZY_MATCH, query));
 		});
@@ -116,7 +110,7 @@ public class SemanticSearchServiceHelper
 
 	/**
 	 * Create a disMaxQueryRule with corresponding boosted value
-	 * 
+	 *
 	 * @param queryTerms
 	 * @param boostValue
 	 * @return a disMaxQueryRule with boosted value
@@ -133,7 +127,7 @@ public class SemanticSearchServiceHelper
 
 	/**
 	 * Create a boolean should query for composite tags containing multiple ontology terms
-	 * 
+	 *
 	 * @param multiOntologyTermIri
 	 * @return return a boolean should queryRule
 	 */
@@ -154,14 +148,14 @@ public class SemanticSearchServiceHelper
 	/**
 	 * Create a list of string queries based on the information collected from current ontologyterm including label,
 	 * synonyms and child ontologyterms
-	 * 
+	 *
 	 * @param ontologyTerm
 	 * @return
 	 */
 	public List<String> parseOntologyTermQueries(OntologyTerm ontologyTerm)
 	{
 		List<String> queryTerms = getOtLabelAndSynonyms(ontologyTerm).stream().map(this::processQueryString)
-				.collect(Collectors.<String> toList());
+				.collect(Collectors.<String>toList());
 
 		for (OntologyTerm childOt : ontologyService.getChildren(ontologyTerm))
 		{
@@ -174,7 +168,7 @@ public class SemanticSearchServiceHelper
 
 	/**
 	 * A helper function to collect synonyms as well as label of ontologyterm
-	 * 
+	 *
 	 * @param ontologyTerm
 	 * @return a list of synonyms plus label
 	 */
@@ -226,7 +220,7 @@ public class SemanticSearchServiceHelper
 
 	/**
 	 * A helper function that gets identifiers of all the attributes from one entityMetaData
-	 * 
+	 *
 	 * @param sourceEntityMetaData
 	 * @return
 	 */
@@ -269,8 +263,8 @@ public class SemanticSearchServiceHelper
 	{
 		Set<String> searchTerms = removeStopWords(description);
 
-		List<OntologyTerm> matchingOntologyTerms = ontologyService.findOntologyTerms(ontologyIds, searchTerms,
-				MAX_NUM_TAGS);
+		List<OntologyTerm> matchingOntologyTerms = ontologyService
+				.findOntologyTerms(ontologyIds, searchTerms, MAX_NUM_TAGS);
 
 		return matchingOntologyTerms;
 	}

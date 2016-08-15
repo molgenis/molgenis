@@ -1,8 +1,5 @@
 package org.molgenis.data.validation;
 
-import java.util.Collections;
-import java.util.List;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -11,20 +8,22 @@ import org.mozilla.javascript.EcmaError;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
+import java.util.List;
+
 public class ValidationUtils
 {
 	private static final Logger LOG = LoggerFactory.getLogger(ValidationUtils.class);
 
 	/**
 	 * Resolves a boolean expression (validation or visible expression)
-	 * 
-	 * @throws MolgenisDataException
-	 *             if the script resolves to null or to a non boolean
+	 *
 	 * @param expression
 	 * @param entity
 	 * @param meta
 	 * @param attribute
 	 * @return true or false
+	 * @throws MolgenisDataException if the script resolves to null or to a non boolean
 	 */
 	public static boolean resolveBooleanExpression(String expression, Entity entity, EntityMetaData meta)
 	{

@@ -112,7 +112,8 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator
 		Map<Object, Entity> missingEntities = delegate().findAll(missingIds.stream())
 				.collect(toMap(Entity::getIdValue, e -> e));
 
-		return Lists.transform(batch, id -> {
+		return Lists.transform(batch, id ->
+		{
 			Optional<Entity> result = l1Cache.get(entityName, id, getEntityMetaData());
 			if (result == null)
 			{
@@ -134,7 +135,8 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator
 	{
 		if (cacheable)
 		{
-			entities = entities.filter(entity -> {
+			entities = entities.filter(entity ->
+			{
 				l1Cache.put(getName(), entity);
 				return true;
 			});

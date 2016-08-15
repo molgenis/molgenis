@@ -115,7 +115,8 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		// Job Factory sets the Identifier in the JobExecution object.
 		ArgumentCaptor<GavinJobExecution> captor = ArgumentCaptor.forClass(GavinJobExecution.class);
 		when(userAccountService.getCurrentUser()).thenReturn(user);
-		doAnswer(invocation -> {
+		doAnswer(invocation ->
+		{
 			Object[] args = invocation.getArguments();
 			((GavinJobExecution) args[0]).setIdentifier("ABCDE");
 			return job;

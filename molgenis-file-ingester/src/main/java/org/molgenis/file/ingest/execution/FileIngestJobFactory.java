@@ -1,8 +1,5 @@
 package org.molgenis.file.ingest.execution;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_EXECUTION;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.JobExecutionUpdater;
@@ -19,6 +16,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.FILE_INGEST_JOB_EXECUTION;
 
 @Component
 public class FileIngestJobFactory

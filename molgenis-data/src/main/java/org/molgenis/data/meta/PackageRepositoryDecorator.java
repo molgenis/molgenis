@@ -147,7 +147,8 @@ public class PackageRepositoryDecorator implements Repository<Package>
 	@Override
 	public void update(Stream<Package> entities)
 	{
-		decoratedRepo.update(entities.filter(entity -> {
+		decoratedRepo.update(entities.filter(entity ->
+		{
 			validateUpdateAllowed(entity);
 			return true;
 		}));
@@ -195,7 +196,8 @@ public class PackageRepositoryDecorator implements Repository<Package>
 	@Override
 	public Integer add(Stream<Package> entities)
 	{
-		return decoratedRepo.add(entities.filter(entity -> {
+		return decoratedRepo.add(entities.filter(entity ->
+		{
 			validateAddAllowed(entity);
 			return true;
 		}));

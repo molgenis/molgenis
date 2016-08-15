@@ -10,21 +10,21 @@ public interface MappingProjectRepository
 {
 	/**
 	 * Adds a {@link MappingProject} to the {@link MappingProjectRepository}
-	 * 
+	 *
 	 * @param mappingProject
 	 */
 	void add(MappingProject mappingProject);
 
 	/**
 	 * Update an existing {@link MappingProject}
-	 * 
+	 *
 	 * @param mappingProject
 	 */
 	void update(MappingProject mappingProject);
 
 	/**
 	 * Get a {@link MappingProject} object based on the project identifier
-	 * 
+	 *
 	 * @param identifier
 	 * @return
 	 */
@@ -32,14 +32,14 @@ public interface MappingProjectRepository
 
 	/**
 	 * Get a list of all {@link MappingProject}
-	 * 
+	 *
 	 * @return
 	 */
 	List<MappingProject> getAllMappingProjects();
 
 	/**
 	 * Get a list of {@link MappingProject} based on a query
-	 * 
+	 *
 	 * @param q
 	 * @return
 	 */
@@ -47,9 +47,8 @@ public interface MappingProjectRepository
 
 	/**
 	 * Delete a mapping project.
-	 * 
-	 * @param mappingProjectId
-	 *            id of the {@link MappingProject} to delete
+	 *
+	 * @param mappingProjectId id of the {@link MappingProject} to delete
 	 */
 	void delete(String mappingProjectId);
 

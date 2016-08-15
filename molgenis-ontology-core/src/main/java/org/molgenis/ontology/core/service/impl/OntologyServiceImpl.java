@@ -1,12 +1,5 @@
 package org.molgenis.ontology.core.service.impl;
 
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -14,6 +7,13 @@ import org.molgenis.ontology.core.repository.OntologyRepository;
 import org.molgenis.ontology.core.repository.OntologyTermRepository;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
 
 public class OntologyServiceImpl implements OntologyService
 {
@@ -65,7 +65,7 @@ public class OntologyServiceImpl implements OntologyService
 	{
 		if (null == terms || terms.size() == 0)
 		{
-			return Lists.<OntologyTerm> newArrayList();
+			return Lists.<OntologyTerm>newArrayList();
 		}
 		return ontologyTermRepository.findExcatOntologyTerms(ontologyIds, terms, pageSize);
 	}
@@ -75,7 +75,7 @@ public class OntologyServiceImpl implements OntologyService
 	{
 		if (null == terms || terms.size() == 0)
 		{
-			return Lists.<OntologyTerm> newArrayList();
+			return Lists.<OntologyTerm>newArrayList();
 		}
 		return ontologyTermRepository.findOntologyTerms(ontologyIds, terms, pageSize);
 	}

@@ -1,15 +1,6 @@
 package org.molgenis.data.importer;
 
-import static java.util.stream.Collectors.toList;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
-import javax.servlet.http.HttpServletRequest;
-
+import com.google.common.collect.Lists;
 import org.molgenis.auth.MolgenisGroup;
 import org.molgenis.data.DataService;
 import org.molgenis.data.DatabaseAction;
@@ -30,7 +21,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
-import com.google.common.collect.Lists;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
 
 @Component
 public class ValidationResultWizardPage extends AbstractWizardPage
@@ -84,17 +82,18 @@ public class ValidationResultWizardPage extends AbstractWizardPage
 
 				RepositoryCollection repositoryCollection = fileRepositoryCollectionFactory
 						.createFileRepositoryCollection(importWizard.getFile());
-				ImportService importService = importServiceFactory.getImportService(importWizard.getFile(),
-						repositoryCollection);
+				ImportService importService = importServiceFactory
+						.getImportService(importWizard.getFile(), repositoryCollection);
 
 				synchronized (this)
 				{
 					ImportRun importRun = importRunService.addImportRun(SecurityUtils.getCurrentUsername(), false);
 					((ImportWizard) wizard).setImportRunId(importRun.getId());
 
-					asyncImportJobs.execute(new ImportJob(importService, SecurityContextHolder.getContext(),
-							repositoryCollection, entityDbAction, importRun.getId(), importRunService,
-							request.getSession(), importWizard.getDefaultEntity()));
+					asyncImportJobs.execute(
+							new ImportJob(importService, SecurityContextHolder.getContext(), repositoryCollection,
+									entityDbAction, importRun.getId(), importRunService, request.getSession(),
+									importWizard.getDefaultEntity()));
 				}
 
 			}

@@ -1,17 +1,12 @@
 package org.molgenis.ui.menu;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.molgenis.ui.MolgenisUiMenu;
-import org.molgenis.ui.MolgenisUiMenuItem;
-
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
+import org.molgenis.ui.MolgenisUiMenu;
+import org.molgenis.ui.MolgenisUiMenuItem;
+
+import java.util.*;
 
 public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuItemAdapter implements MolgenisUiMenu
 {
@@ -31,17 +26,17 @@ public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuIte
 	public List<MolgenisUiMenuItem> getItems()
 	{
 		List<MenuItem> items = menu.getItems();
-		return items != null ? Lists.newArrayList(Iterables.transform(items,
-				new Function<MenuItem, MolgenisUiMenuItem>()
+		return items != null ? Lists
+				.newArrayList(Iterables.transform(items, new Function<MenuItem, MolgenisUiMenuItem>()
 				{
 					@Override
 					public MolgenisUiMenuItem apply(MenuItem menuItem)
 					{
-						if (menuItem.getType() == MenuItemType.PLUGIN) return new MenuItemToMolgenisUiMenuItemAdapter(
-								menuItem);
+						if (menuItem.getType() == MenuItemType.PLUGIN)
+							return new MenuItemToMolgenisUiMenuItemAdapter(menuItem);
 						else return new MenuItemToMolgenisUiMenuAdapter(menuItem, rootMenu);
 					}
-				})) : Collections.<MolgenisUiMenuItem> emptyList();
+				})) : Collections.<MolgenisUiMenuItem>emptyList();
 	}
 
 	@Override
@@ -75,7 +70,7 @@ public class MenuItemToMolgenisUiMenuAdapter extends MenuItemToMolgenisUiMenuIte
 	@Override
 	public List<MolgenisUiMenu> getBreadcrumb()
 	{
-		if (menu.equals(rootMenu)) return Collections.<MolgenisUiMenu> singletonList(this);
+		if (menu.equals(rootMenu)) return Collections.<MolgenisUiMenu>singletonList(this);
 
 		Map<String, MenuItem> menuParentMap = new HashMap<String, MenuItem>();
 		createMenuParentMapRec(rootMenu, null, menu, menuParentMap);

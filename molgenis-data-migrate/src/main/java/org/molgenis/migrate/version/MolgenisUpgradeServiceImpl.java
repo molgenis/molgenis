@@ -1,10 +1,5 @@
 package org.molgenis.migrate.version;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.ArrayList;
-import java.util.List;
-
 import org.molgenis.framework.MolgenisUpgrade;
 import org.molgenis.framework.MolgenisUpgradeService;
 import org.slf4j.Logger;
@@ -12,9 +7,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static java.util.Objects.requireNonNull;
+
 /**
  * Upgrades the data backends to the current version.
- * 
+ * <p>
  * Gets the current version from the {@link MolgenisVersionService}.
  */
 @Service
@@ -38,7 +38,7 @@ public class MolgenisUpgradeServiceImpl implements MolgenisUpgradeService
 
 	/**
 	 * Executes MOLGENIS MetaData version upgrades.
-	 * 
+	 *
 	 * @return true if an upgrade was necessary, false if not
 	 */
 	@Override
@@ -46,16 +46,16 @@ public class MolgenisUpgradeServiceImpl implements MolgenisUpgradeService
 	{
 		if (versionService.getMolgenisVersionFromServerProperties() < 19)
 		{
-			throw new UnsupportedOperationException("Upgrading from versions below 1.10 (metadataversion 19) is not supported, please update to 1.10 first.");
+			throw new UnsupportedOperationException(
+					"Upgrading from versions below 1.10 (metadataversion 19) is not supported, please update to 1.10 first.");
 		}
 		if (versionService.getMolgenisVersionFromServerProperties() < MolgenisVersionService.CURRENT_VERSION)
 		{
 			LOG.info("MetaData version:{}, current version:{} upgrade needed",
 					versionService.getMolgenisVersionFromServerProperties(), MolgenisVersionService.CURRENT_VERSION);
 
-			upgrades.stream().filter(
-					upgrade -> upgrade.getFromVersion() >= versionService.getMolgenisVersionFromServerProperties())
-					.forEach(this::runUpgrade);
+			upgrades.stream().filter(upgrade -> upgrade.getFromVersion() >= versionService
+					.getMolgenisVersionFromServerProperties()).forEach(this::runUpgrade);
 
 			versionService.updateToCurrentVersion();
 

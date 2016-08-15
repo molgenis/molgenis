@@ -1,26 +1,8 @@
 package org.molgenis.security.user;
 
-import static java.util.stream.Collectors.toList;
-import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
-import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
-
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.molgenis.auth.Authority;
-import org.molgenis.auth.GroupAuthority;
-import org.molgenis.auth.GroupAuthorityMetaData;
-import org.molgenis.auth.MolgenisGroup;
-import org.molgenis.auth.MolgenisGroupMember;
-import org.molgenis.auth.MolgenisGroupMemberMetaData;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserMetaData;
-import org.molgenis.auth.UserAuthority;
-import org.molgenis.auth.UserAuthorityMetaData;
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import org.molgenis.auth.*;
 import org.molgenis.data.DataService;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -34,8 +16,16 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
+import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 
 public class MolgenisUserDetailsService implements UserDetailsService
 {
@@ -76,8 +66,8 @@ public class MolgenisUserDetailsService implements UserDetailsService
 	{
 		// user authorities
 		List<? extends Authority> authorities = getUserAuthorities(user);
-		List<GrantedAuthority> grantedAuthorities = authorities != null
-				? Lists.transform(authorities, new Function<Authority, GrantedAuthority>()
+		List<GrantedAuthority> grantedAuthorities =
+				authorities != null ? Lists.transform(authorities, new Function<Authority, GrantedAuthority>()
 				{
 					@Override
 					public GrantedAuthority apply(Authority authority)
@@ -88,8 +78,8 @@ public class MolgenisUserDetailsService implements UserDetailsService
 
 		// // user group authorities
 		List<GroupAuthority> groupAuthorities = getGroupAuthorities(user);
-		List<GrantedAuthority> grantedGroupAuthorities = groupAuthorities != null
-				? Lists.transform(groupAuthorities, new Function<GroupAuthority, GrantedAuthority>()
+		List<GrantedAuthority> grantedGroupAuthorities = groupAuthorities != null ? Lists
+				.transform(groupAuthorities, new Function<GroupAuthority, GrantedAuthority>()
 				{
 					@Override
 					public GrantedAuthority apply(GroupAuthority groupAuthority)
@@ -120,13 +110,12 @@ public class MolgenisUserDetailsService implements UserDetailsService
 	{
 		List<MolgenisGroupMember> groupMembers = dataService.findAll(MOLGENIS_GROUP_MEMBER,
 				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser),
-				MolgenisGroupMember.class)
-				.collect(toList());
+				MolgenisGroupMember.class).collect(toList());
 
 		if (!groupMembers.isEmpty())
 		{
-			List<MolgenisGroup> molgenisGroups = Lists.transform(groupMembers,
-					new Function<MolgenisGroupMember, MolgenisGroup>()
+			List<MolgenisGroup> molgenisGroups = Lists
+					.transform(groupMembers, new Function<MolgenisGroupMember, MolgenisGroup>()
 					{
 						@Override
 						public MolgenisGroup apply(MolgenisGroupMember molgenisGroupMember)
@@ -137,8 +126,7 @@ public class MolgenisUserDetailsService implements UserDetailsService
 
 			return dataService.findAll(GROUP_AUTHORITY,
 					new QueryImpl<GroupAuthority>().in(GroupAuthorityMetaData.MOLGENIS_GROUP, molgenisGroups),
-					GroupAuthority.class)
-					.collect(toList());
+					GroupAuthority.class).collect(toList());
 		}
 		return null;
 	}

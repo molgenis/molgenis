@@ -17,73 +17,86 @@ package org.molgenis.wikipathways.client;
 
 /**
  * contains all information about a pathway
- * @author msk
  *
+ * @author msk
  */
-public class WSPathway {
-	
-    private String gpml;
-    private String id;
-    private String url;
-    private String name;
-    private String species;
-    private String revision;
+public class WSPathway
+{
 
-    public WSPathway( String gpml, String id, String url, String name,
-           String species, String revision) {
-    	this.gpml = gpml;
-    	this.id = id;
-    	this.url = url;
-    	this.name = name;
-    	this.species = species;
-    	this.revision = revision;
-    }
+	private String gpml;
+	private String id;
+	private String url;
+	private String name;
+	private String species;
+	private String revision;
 
-    public String getGpml() {
-        return gpml;
-    }
+	public WSPathway(String gpml, String id, String url, String name, String species, String revision)
+	{
+		this.gpml = gpml;
+		this.id = id;
+		this.url = url;
+		this.name = name;
+		this.species = species;
+		this.revision = revision;
+	}
 
-    public void setGpml(String gpml) {
-        this.gpml = gpml;
-    }
+	public String getGpml()
+	{
+		return gpml;
+	}
 
-    public String getId() {
-        return id;
-    }
+	public void setGpml(String gpml)
+	{
+		this.gpml = gpml;
+	}
 
-    public void setId(String id) {
-        this.id = id;
-    }
+	public String getId()
+	{
+		return id;
+	}
 
-    public String getUrl() {
-        return url;
-    }
+	public void setId(String id)
+	{
+		this.id = id;
+	}
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+	public String getUrl()
+	{
+		return url;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public void setUrl(String url)
+	{
+		this.url = url;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public String getName()
+	{
+		return name;
+	}
 
-    public String getSpecies() {
-        return species;
-    }
+	public void setName(String name)
+	{
+		this.name = name;
+	}
 
-    public void setSpecies(String species) {
-        this.species = species;
-    }
+	public String getSpecies()
+	{
+		return species;
+	}
 
-    public String getRevision() {
-        return revision;
-    }
+	public void setSpecies(String species)
+	{
+		this.species = species;
+	}
 
-    public void setRevision(String revision) {
-        this.revision = revision;
-    }
+	public String getRevision()
+	{
+		return revision;
+	}
+
+	public void setRevision(String revision)
+	{
+		this.revision = revision;
+	}
 }

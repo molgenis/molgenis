@@ -1,10 +1,10 @@
 package org.molgenis.data.convert;
 
-import java.text.ParseException;
-import java.util.Date;
-
 import org.molgenis.util.MolgenisDateFormat;
 import org.springframework.core.convert.converter.Converter;
+
+import java.text.ParseException;
+import java.util.Date;
 
 public class StringToDateConverter implements Converter<String, Date>
 {

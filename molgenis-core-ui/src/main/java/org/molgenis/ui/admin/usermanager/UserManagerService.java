@@ -1,8 +1,8 @@
 package org.molgenis.ui.admin.usermanager;
 
-import java.util.List;
-
 import org.molgenis.auth.MolgenisGroup;
+
+import java.util.List;
 
 public interface UserManagerService
 {

@@ -1,22 +1,21 @@
 package org.molgenis.data.elasticsearch.util;
 
+import org.apache.commons.lang3.builder.ToStringBuilder;
+
 import java.util.Collections;
 import java.util.Map;
 
-import org.apache.commons.lang3.builder.ToStringBuilder;
-
 /**
  * Represents a search hit found by the SearchService
- * 
+ *
  * @author erwin
- * 
  */
 public class Hit
 {
 	private final String id;// document id
 	private final String documentType;// Document type (collection type)
 	private final Map<String, Object> columnValueMap;// key: fieldname,
-														// value:fieldvalue
+	// value:fieldvalue
 
 	public Hit(String id, String documentType, Map<String, Object> columnValueMap)
 	{

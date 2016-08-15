@@ -17,81 +17,96 @@ package org.molgenis.wikipathways.client;
 
 /**
  * contains the history of a pathway
- * @author msk
  *
+ * @author msk
  */
-public class WSPathwayHistory {
-   
+public class WSPathwayHistory
+{
+
 	private WSHistoryRow[] history;
-    private String id;
-    private String url;
-    private String name;
-    private String species;
-    private String revision;
+	private String id;
+	private String url;
+	private String name;
+	private String species;
+	private String revision;
 
-    public WSPathwayHistory(WSHistoryRow[] history, String id, String url,
-           String name, String species, String revision) {
-           this.history = history;
-           this.id = id;
-           this.url = url;
-           this.name = name;
-           this.species = species;
-           this.revision = revision;
-    }
+	public WSPathwayHistory(WSHistoryRow[] history, String id, String url, String name, String species, String revision)
+	{
+		this.history = history;
+		this.id = id;
+		this.url = url;
+		this.name = name;
+		this.species = species;
+		this.revision = revision;
+	}
 
-    public WSHistoryRow[] getHistory() {
-        return history;
-    }
+	public WSHistoryRow[] getHistory()
+	{
+		return history;
+	}
 
-    public void setHistory(WSHistoryRow[] history) {
-        this.history = history;
-    }
+	public void setHistory(WSHistoryRow[] history)
+	{
+		this.history = history;
+	}
 
-    public WSHistoryRow getHistory(int i) {
-        return this.history[i];
-    }
+	public WSHistoryRow getHistory(int i)
+	{
+		return this.history[i];
+	}
 
-    public void setHistory(int i, WSHistoryRow _value) {
-        this.history[i] = _value;
-    }
+	public void setHistory(int i, WSHistoryRow _value)
+	{
+		this.history[i] = _value;
+	}
 
-    public String getId() {
-        return id;
-    }
+	public String getId()
+	{
+		return id;
+	}
 
-    public void setId(String id) {
-        this.id = id;
-    }
+	public void setId(String id)
+	{
+		this.id = id;
+	}
 
-    public String getUrl() {
-        return url;
-    }
+	public String getUrl()
+	{
+		return url;
+	}
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
+	public void setUrl(String url)
+	{
+		this.url = url;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getName()
+	{
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setName(String name)
+	{
+		this.name = name;
+	}
 
-    public String getSpecies() {
-        return species;
-    }
+	public String getSpecies()
+	{
+		return species;
+	}
 
-    public void setSpecies(String species) {
-        this.species = species;
-    }
+	public void setSpecies(String species)
+	{
+		this.species = species;
+	}
 
-    public String getRevision() {
-        return revision;
-    }
+	public String getRevision()
+	{
+		return revision;
+	}
 
-    public void setRevision(String revision) {
-        this.revision = revision;
-    }
+	public void setRevision(String revision)
+	{
+		this.revision = revision;
+	}
 }

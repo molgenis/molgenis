@@ -1,9 +1,9 @@
 package org.molgenis.security.token;
 
-import static org.testng.Assert.assertEquals;
-
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertEquals;
 
 public class TokenExtractorTest
 {

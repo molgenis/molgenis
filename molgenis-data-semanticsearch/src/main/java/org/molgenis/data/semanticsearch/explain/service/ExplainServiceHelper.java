@@ -1,24 +1,18 @@
 package org.molgenis.data.semanticsearch.explain.service;
 
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
+import com.google.common.base.Splitter;
+import com.google.common.collect.FluentIterable;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.Explanation;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 
-import com.google.common.base.Splitter;
-import com.google.common.collect.FluentIterable;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class ExplainServiceHelper
 {
@@ -30,11 +24,10 @@ public class ExplainServiceHelper
 		/**
 		 * elasticsearch description that is product of:
 		 */
-		PRODUCT_OF("product of:"),
-		/**
-		 * elasticsearch description that is max of:
-		 */
-		MAX_OF("max of:"),
+		PRODUCT_OF("product of:"), /**
+	 * elasticsearch description that is max of:
+	 */
+	MAX_OF("max of:"),
 
 		/**
 		 * elasticsearch description that is sum of:
@@ -61,7 +54,7 @@ public class ExplainServiceHelper
 
 	/**
 	 * This method is able to recursively collect all the matched words from ElastisSearch Explanation document
-	 * 
+	 *
 	 * @param explanation
 	 * @return a set of matched words that are matched to different ontology terms
 	 */
@@ -118,7 +111,7 @@ public class ExplainServiceHelper
 	/**
 	 * This method is able to find the queries that are used in the matching. Only queries that contain all matched
 	 * words are potential queries.
-	 * 
+	 *
 	 * @param matchedWordsString
 	 * @param collectExpandedQueryMap
 	 * @return a map of potentail queries and their matching scores
@@ -132,8 +125,8 @@ public class ExplainServiceHelper
 			Set<String> wordsInQuery = splitIntoTerms(entry.getKey());
 			if (wordsInQuery.containsAll(matchedWords))
 			{
-				qualifiedQueries.put(entry.getKey(),
-						NGramDistanceAlgorithm.stringMatching(matchedWordsString, entry.getKey()));
+				qualifiedQueries
+						.put(entry.getKey(), NGramDistanceAlgorithm.stringMatching(matchedWordsString, entry.getKey()));
 			}
 		}
 		return qualifiedQueries;

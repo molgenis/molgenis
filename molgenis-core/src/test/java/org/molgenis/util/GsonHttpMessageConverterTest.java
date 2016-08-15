@@ -1,12 +1,11 @@
 package org.molgenis.util;
 
-import static org.testng.Assert.assertTrue;
-
+import com.google.gson.Gson;
 import org.springframework.http.MediaType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.gson.Gson;
+import static org.testng.Assert.assertTrue;
 
 public class GsonHttpMessageConverterTest
 {

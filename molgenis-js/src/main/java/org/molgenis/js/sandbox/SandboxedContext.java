@@ -5,7 +5,6 @@ import org.mozilla.javascript.ContextFactory;
 
 /**
  * A sandboxed {@link Context} that prevents access to native java classes
- * 
  */
 public class SandboxedContext extends Context
 {

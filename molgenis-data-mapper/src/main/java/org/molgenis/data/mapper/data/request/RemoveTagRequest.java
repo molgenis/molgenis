@@ -1,12 +1,10 @@
 package org.molgenis.data.mapper.data.request;
 
-import javax.validation.constraints.NotNull;
-
+import com.google.auto.value.AutoValue;
 import org.hibernate.validator.constraints.NotEmpty;
-import org.molgenis.data.mapper.data.request.AutoValue_RemoveTagRequest;
 import org.molgenis.gson.AutoGson;
 
-import com.google.auto.value.AutoValue;
+import javax.validation.constraints.NotNull;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_RemoveTagRequest.class)

@@ -1,12 +1,12 @@
 package org.molgenis.security.core.runas;
 
-import java.lang.reflect.Method;
-
 import org.springframework.aop.framework.Advised;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.config.BeanPostProcessor;
 import org.springframework.stereotype.Component;
+
+import java.lang.reflect.Method;
 
 /**
  * Proxies class that have the RunAsSystem annotation on one of its methods

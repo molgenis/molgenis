@@ -1,19 +1,18 @@
 package org.molgenis.ui.freemarker;
 
-import static freemarker.template.utility.DeepUnwrap.unwrap;
-
-import java.util.List;
-
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.molgenis.data.DataConverter;
-
 import freemarker.template.TemplateMethodModelEx;
 import freemarker.template.TemplateModel;
 import freemarker.template.TemplateModelException;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.molgenis.data.DataConverter;
+
+import java.util.List;
+
+import static freemarker.template.utility.DeepUnwrap.unwrap;
 
 /**
  * FreeMarker limit method. For limiting text size, adds '...' if to long
- * 
+ * <p>
  * usage: ${limit('text', 5)}
  */
 public class LimitMethod implements TemplateMethodModelEx

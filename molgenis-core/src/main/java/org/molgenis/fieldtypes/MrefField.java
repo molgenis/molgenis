@@ -12,13 +12,13 @@ import static java.util.stream.Collectors.toList;
 
 /**
  * Many to many reference.
- * 
+ * <p>
  * Example MOLGENIS DSL,
- * 
+ * <p>
  * <pre>
  * <field name="myfield" type="mref" xref_entity="OtherEntity" xref_field="id" xref_label="name"/>
  * </pre>
- * 
+ * <p>
  * This example would in the UI show a seletion box with 'name' elements.
  */
 public class MrefField extends FieldType

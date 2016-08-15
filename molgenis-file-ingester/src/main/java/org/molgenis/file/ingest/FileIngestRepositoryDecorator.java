@@ -135,7 +135,8 @@ public class FileIngestRepositoryDecorator implements Repository<Entity>
 	@Override
 	public void update(Stream<Entity> entities)
 	{
-		decorated.update(entities.filter(e -> {
+		decorated.update(entities.filter(e ->
+		{
 			scheduler.schedule(e);
 			return true;
 		}));
@@ -160,7 +161,8 @@ public class FileIngestRepositoryDecorator implements Repository<Entity>
 	@Override
 	public void delete(Stream<Entity> entities)
 	{
-		decorated.delete(entities.filter(e -> {
+		decorated.delete(entities.filter(e ->
+		{
 			String entityId = e.getString(FileIngestMetaData.ID);
 			scheduler.unschedule(entityId);
 			removeJobExecutions(entityId);
@@ -183,7 +185,8 @@ public class FileIngestRepositoryDecorator implements Repository<Entity>
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		decorated.deleteAll(ids.filter(id -> {
+		decorated.deleteAll(ids.filter(id ->
+		{
 			if (id instanceof String)
 			{
 				String entityId = (String) id;
@@ -216,7 +219,8 @@ public class FileIngestRepositoryDecorator implements Repository<Entity>
 	@Override
 	public Integer add(Stream<Entity> entities)
 	{
-		return decorated.add(entities.filter(e -> {
+		return decorated.add(entities.filter(e ->
+		{
 			scheduler.schedule(e);
 			return true;
 		}));

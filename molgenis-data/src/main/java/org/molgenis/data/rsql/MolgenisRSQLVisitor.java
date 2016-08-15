@@ -13,7 +13,7 @@ import java.util.List;
 
 /**
  * RSQLVisitor implementation for molgenis Query.
- * 
+ *
  * @see https://github.com/jirutka/rsql-parser
  */
 public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
@@ -31,7 +31,7 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
 	{
 		q.nest(); // TODO only nest if more than one child
 
-		for (Iterator<Node> it = node.iterator(); it.hasNext();)
+		for (Iterator<Node> it = node.iterator(); it.hasNext(); )
 		{
 			Node child = it.next();
 			child.accept(this);
@@ -52,7 +52,7 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
 	{
 		q.nest(); // TODO only nest if more than one child
 
-		for (Iterator<Node> it = node.iterator(); it.hasNext();)
+		for (Iterator<Node> it = node.iterator(); it.hasNext(); )
 		{
 			Node child = it.next();
 			child.accept(this);
@@ -75,7 +75,8 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
 		String symbol = node.getOperator().getSymbol();
 		List<String> values = node.getArguments();
 		switch (symbol)
-		{	case "=notlike=":
+		{
+			case "=notlike=":
 				String notLikeValue = values.get(0);
 				q.not().like(attrName, notLikeValue);
 				break;
@@ -172,8 +173,8 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
 				break;
 			// $CASES-OMITTED$
 			default:
-				throw new IllegalArgumentException("Can't perform operator '\" + symbol + \"' on attribute '\""
-						+ attr.getName() + "\"");
+				throw new IllegalArgumentException(
+						"Can't perform operator '\" + symbol + \"' on attribute '\"" + attr.getName() + "\"");
 		}
 	}
 

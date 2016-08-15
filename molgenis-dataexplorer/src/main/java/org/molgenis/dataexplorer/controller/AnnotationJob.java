@@ -72,8 +72,9 @@ public class AnnotationJob extends Job<Void>
 		}
 		if (firstException != null)
 		{
-			progress.status("Failed annotators: " + StringUtils.join(failedAnnotators, ",") + ". Successful annotators: "
-					+ StringUtils.join(successfulAnnotators, ","));
+			progress.status(
+					"Failed annotators: " + StringUtils.join(failedAnnotators, ",") + ". Successful annotators: "
+							+ StringUtils.join(successfulAnnotators, ","));
 			throw firstException;
 		}
 		return null;

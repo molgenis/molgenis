@@ -1,11 +1,6 @@
 package org.molgenis.data.meta;
 
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
-
-import java.util.List;
-import java.util.ListIterator;
-
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -18,7 +13,11 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Lists;
+import java.util.List;
+import java.util.ListIterator;
+
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 
 @Component
 public class MetaDataSearchServiceImpl implements MetaDataSearchService
@@ -51,7 +50,8 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 			// Search in packages
 			Query<Entity> q = new QueryImpl<>().search(searchTerm);
 			// for (Entity packageEntity : dataService.findAllAsIterable(PackageMetaData.MOLGENIS_GROUP_MEMBER, q))
-			dataService.findAll(PACKAGE, q).forEach(packageEntity -> {
+			dataService.findAll(PACKAGE, q).forEach(packageEntity ->
+			{
 				Package p = metaDataService.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));
 				if ((p != null) && (p.getParent() == null))
 				{
@@ -61,12 +61,13 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 			});
 
 			// Search in entities
-			dataService.findAll(ENTITY_META_DATA, q).forEach(entityMetaData -> {
+			dataService.findAll(ENTITY_META_DATA, q).forEach(entityMetaData ->
+			{
 				Package p = getRootPackage(entityMetaData);
 				if (p != null)
 				{
-					String matchDesc = "Matched: entity '"
-							+ entityMetaData.getString(EntityMetaDataMetaData.SIMPLE_NAME) + "'";
+					String matchDesc =
+							"Matched: entity '" + entityMetaData.getString(EntityMetaDataMetaData.SIMPLE_NAME) + "'";
 					PackageSearchResultItem item = new PackageSearchResultItem(p.getRootPackage(), matchDesc);
 					if ((p != null) && !results.contains(item)) results.add(item);
 				}

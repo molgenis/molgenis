@@ -1,12 +1,12 @@
 package org.molgenis.framework.ui;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 
 public class MolgenisPluginRegistryImpl implements MolgenisPluginRegistry
 {

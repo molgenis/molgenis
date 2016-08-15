@@ -1,17 +1,16 @@
 package org.molgenis.ui.security;
 
-import java.util.List;
-
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.ui.MolgenisUiMenu;
 import org.molgenis.ui.MolgenisUiMenuItem;
 import org.molgenis.ui.MolgenisUiMenuItemType;
 
-import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
+import java.util.List;
 
 public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 {
@@ -66,8 +65,8 @@ public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 	@Override
 	public List<MolgenisUiMenuItem> getItems()
 	{
-		return Lists.newArrayList(Iterables.filter(
-				Iterables.transform(molgenisUiMenu.getItems(), new Function<MolgenisUiMenuItem, MolgenisUiMenuItem>()
+		return Lists.newArrayList(Iterables.filter(Iterables
+				.transform(molgenisUiMenu.getItems(), new Function<MolgenisUiMenuItem, MolgenisUiMenuItem>()
 				{
 					@Override
 					public MolgenisUiMenuItem apply(MolgenisUiMenuItem molgenisUiMenuItem)
@@ -80,18 +79,18 @@ public class MolgenisUiMenuPermissionDecorator implements MolgenisUiMenu
 							case PLUGIN:
 								return molgenisUiMenuItem;
 							default:
-								throw new RuntimeException("Unknown MolgenisUiMenuItem ["
-										+ molgenisUiMenuItem.getType() + "]");
+								throw new RuntimeException(
+										"Unknown MolgenisUiMenuItem [" + molgenisUiMenuItem.getType() + "]");
 						}
 					}
 				}), new Predicate<MolgenisUiMenuItem>()
-				{
-					@Override
-					public boolean apply(MolgenisUiMenuItem molgenisUiMenuItem)
-					{
-						return hasPermission(molgenisUiMenuItem);
-					}
-				}));
+		{
+			@Override
+			public boolean apply(MolgenisUiMenuItem molgenisUiMenuItem)
+			{
+				return hasPermission(molgenisUiMenuItem);
+			}
+		}));
 	}
 
 	@Override

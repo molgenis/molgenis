@@ -4,6 +4,7 @@
 package org.molgenis.model.elements;
 
 // jdk
+
 import java.util.Vector;
 
 // invengine
@@ -11,7 +12,7 @@ import java.util.Vector;
 /**
  * <report name="week"> <entity name="project" fields="[name]" /> <entity
  * name="task" fields="[name, user, start, project]" />
- * 
+ * <p>
  * <constraint type="hidden" entity="task" field="type" value="qtl" />
  * <constraint type="equals" entity="task" field="user" /> <constraint
  * type="range" entity="task" field="start" /> </report>
@@ -29,8 +30,9 @@ public class Report
 	}
 
 	// constructor(s)
+
 	/**
-	 * 
+	 *
 	 */
 	public Report(String name)
 	{

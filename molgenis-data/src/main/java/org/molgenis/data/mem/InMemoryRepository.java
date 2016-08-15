@@ -16,7 +16,7 @@ import static com.google.common.collect.Iterables.partition;
 
 /**
  * Repository that uses a hashmap as store.
- * 
+ * <p>
  * For testing purposes
  */
 public class InMemoryRepository implements Repository<Entity>
@@ -50,7 +50,7 @@ public class InMemoryRepository implements Repository<Entity>
 	@Override
 	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
 	{
-		for(List<Entity> batch: partition(entities.values(), batchSize))
+		for (List<Entity> batch : partition(entities.values(), batchSize))
 		{
 			consumer.accept(batch);
 		}
@@ -89,7 +89,8 @@ public class InMemoryRepository implements Repository<Entity>
 				QueryRule r = q.getRules().iterator().next();
 				if (r.getOperator() == Operator.EQUALS)
 				{
-					return entities.entrySet().stream().map((e) -> {
+					return entities.entrySet().stream().map((e) ->
+					{
 						if (e.getValue().get(r.getField()).equals(r.getValue()))
 						{
 							return e.getValue();
@@ -212,7 +213,8 @@ public class InMemoryRepository implements Repository<Entity>
 	public Integer add(Stream<Entity> entities)
 	{
 		AtomicInteger count = new AtomicInteger();
-		entities.forEach(entity -> {
+		entities.forEach(entity ->
+		{
 			add(entity);
 			count.incrementAndGet();
 		});

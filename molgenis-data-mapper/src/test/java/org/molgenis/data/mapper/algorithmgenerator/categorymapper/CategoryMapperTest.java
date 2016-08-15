@@ -1,17 +1,16 @@
 package org.molgenis.data.mapper.algorithmgenerator.categorymapper;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.NonSI;
-import javax.measure.unit.Unit;
-
 import org.jscience.physics.amount.Amount;
 import org.molgenis.data.mapper.algorithmgenerator.bean.AmountWrapper;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import javax.measure.quantity.Quantity;
+import javax.measure.unit.NonSI;
+import javax.measure.unit.Unit;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class CategoryMapperTest
 {
@@ -89,10 +88,8 @@ public class CategoryMapperTest
 		Assert.assertEquals(CategoryMapperUtil.convertDescriptionToAmount("About once a week"),
 				AmountWrapper.create(Amount.valueOf((double) 1, NonSI.WEEK.inverse())));
 
-		Assert.assertEquals(
-				CategoryMapperUtil
-						.convertDescriptionToAmount("several times a month"),
-				AmountWrapper.create(Amount.rangeOf((double) 3,
+		Assert.assertEquals(CategoryMapperUtil.convertDescriptionToAmount("several times a month"), AmountWrapper
+				.create(Amount.rangeOf((double) 3,
 						NonSI.DAY.inverse().getConverterTo(NonSI.MONTH.inverse()).convert((double) 1) - 1,
 						NonSI.MONTH.inverse()).to(NonSI.WEEK.inverse()), false));
 	}
@@ -116,10 +113,9 @@ public class CategoryMapperTest
 		String sourceCategory1 = "never/less than 1 per month";
 		AmountWrapper amountSourceCategory1 = CategoryMapperUtil.convertDescriptionToAmount(sourceCategory1);
 		Assert.assertTrue(CategoryMapperUtil.isAmountRanged(amountSourceCategory1.getAmount()));
-		Assert.assertEquals(amountSourceCategory1.toString(),
-				AmountWrapper
-						.create(Amount.rangeOf((double) 0, (double) 1, NonSI.MONTH.inverse()).to(NonSI.WEEK.inverse()))
-						.toString());
+		Assert.assertEquals(amountSourceCategory1.toString(), AmountWrapper
+				.create(Amount.rangeOf((double) 0, (double) 1, NonSI.MONTH.inverse()).to(NonSI.WEEK.inverse()))
+				.toString());
 
 		String sourceCategory2 = "1-3 per month";
 		AmountWrapper amountSourceCategory2 = CategoryMapperUtil.convertDescriptionToAmount(sourceCategory2);

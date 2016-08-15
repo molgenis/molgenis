@@ -20,9 +20,8 @@ import org.jdom.Namespace;
 
 /**
  * WP namespaces
- * 
- * @author msk
  *
+ * @author msk
  */
 public class WSNamespaces
 {

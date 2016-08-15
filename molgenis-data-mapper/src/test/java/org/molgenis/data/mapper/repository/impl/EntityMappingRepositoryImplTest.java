@@ -115,8 +115,8 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 		targetEntityMetaData.addAttribute(targetAttributeMetaData);
 
 		List<AttributeMapping> attributeMappings = Lists.newArrayList();
-		attributeMappings
-				.add(new AttributeMapping("1", targetAttributeMetaData, "algorithm", sourceAttributeMetaDatas, CURATED.toString()));
+		attributeMappings.add(new AttributeMapping("1", targetAttributeMetaData, "algorithm", sourceAttributeMetaDatas,
+				CURATED.toString()));
 
 		Collection<EntityMapping> entityMappings = singletonList(
 				new EntityMapping(AUTO_ID, sourceEntityMetaData, targetEntityMetaData, attributeMappings));

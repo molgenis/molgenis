@@ -52,8 +52,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 	@Autowired
 	public StandardsRegistryController(DataService dataService, MetaDataService metaDataService,
-			MolgenisPermissionService molgenisPermissionService, TagService<LabeledResource, LabeledResource> tagService,
-			MetaDataSearchService metaDataSearchService)
+			MolgenisPermissionService molgenisPermissionService,
+			TagService<LabeledResource, LabeledResource> tagService, MetaDataSearchService metaDataSearchService)
 	{
 		super(URI);
 		if (dataService == null) throw new IllegalArgumentException("dataService is null");
@@ -128,8 +128,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 		{
 			Package p = searchResult.getPackageFound();
 			List<PackageResponse.Entity> entitiesInPackageUnfiltered = getEntitiesInPackage(p.getName());
-			List<PackageResponse.Entity> entitiesInPackageFiltered = Lists.newArrayList(Iterables.filter(
-					entitiesInPackageUnfiltered, new Predicate<PackageResponse.Entity>()
+			List<PackageResponse.Entity> entitiesInPackageFiltered = Lists
+					.newArrayList(Iterables.filter(entitiesInPackageUnfiltered, new Predicate<PackageResponse.Entity>()
 					{
 						@Override
 						public boolean apply(PackageResponse.Entity entity)
@@ -139,7 +139,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 							String entityName = entity.getName();
 
 							// Check read permission
-							if (!molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ)) return false;
+							if (!molgenisPermissionService.hasPermissionOnEntity(entityName, Permission.READ))
+								return false;
 
 							// Check has data
 							if (!dataService.hasRepository(entityName)
@@ -213,8 +214,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 		if (molgenisPackage == null) return null;
 
 		return new PackageResponse(molgenisPackage.getName(), molgenisPackage.getLabel(),
-				molgenisPackage.getDescription(), null,
-				getEntitiesInPackage(molgenisPackage.getName()), getTagsForPackage(molgenisPackage));
+				molgenisPackage.getDescription(), null, getEntitiesInPackage(molgenisPackage.getName()),
+				getTagsForPackage(molgenisPackage));
 	}
 
 	/* PACKAGE TREE */
@@ -310,8 +311,8 @@ public class StandardsRegistryController extends MolgenisPluginController
 
 		for (SemanticTag<Package, LabeledResource, LabeledResource> tag : tagService.getTagsForPackage(p))
 		{
-			tags.add(new PackageResponse.Tag(tag.getObject().getLabel(), tag.getObject().getIri(), tag.getRelation()
-					.toString()));
+			tags.add(new PackageResponse.Tag(tag.getObject().getLabel(), tag.getObject().getIri(),
+					tag.getRelation().toString()));
 		}
 
 		return tags;

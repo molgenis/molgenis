@@ -70,7 +70,8 @@ public class GeneCsvRepository extends AbstractRepository
 	{
 		if (index.isEmpty())
 		{
-			forEach(e -> {
+			forEach(e ->
+			{
 				Object key = e.get(sourceAttributeName);
 				if (key == null) throw new MolgenisDataException(
 						"Missing value for attribute [" + sourceAttributeName + "] in entity [" + e + "]");

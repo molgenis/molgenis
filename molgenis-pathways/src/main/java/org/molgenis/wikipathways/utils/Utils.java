@@ -16,16 +16,6 @@
 
 package org.molgenis.wikipathways.utils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringReader;
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Consts;
 import org.apache.http.HttpEntity;
@@ -40,16 +30,12 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.JDOMException;
 import org.jdom.input.SAXBuilder;
-import org.molgenis.wikipathways.client.WSCurationTag;
-import org.molgenis.wikipathways.client.WSCurationTagHistory;
-import org.molgenis.wikipathways.client.WSHistoryRow;
-import org.molgenis.wikipathways.client.WSIndexField;
-import org.molgenis.wikipathways.client.WSNamespaces;
-import org.molgenis.wikipathways.client.WSOntologyTerm;
-import org.molgenis.wikipathways.client.WSPathway;
-import org.molgenis.wikipathways.client.WSPathwayHistory;
-import org.molgenis.wikipathways.client.WSPathwayInfo;
-import org.molgenis.wikipathways.client.WSSearchResult;
+import org.molgenis.wikipathways.client.*;
+
+import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class Utils
 {

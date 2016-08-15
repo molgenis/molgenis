@@ -1,9 +1,8 @@
-import test from 'tape';
-import React from 'react';
-import sd from 'skin-deep';
-
-import {jobs} from './jobs'
-import RunningJobs from 'react-components/jobs/RunningJobs'
+import test from "tape";
+import React from "react";
+import sd from "skin-deep";
+import {jobs} from "./jobs";
+import RunningJobs from "react-components/jobs/RunningJobs";
 
 test('Test if the RunningJobs component renders job progressbars correctly', assert => {
     const tree = sd.shallowRender(RunningJobs({

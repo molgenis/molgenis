@@ -17,72 +17,85 @@ package org.molgenis.wikipathways.client;
 
 /**
  * curation tag history object
- * @author msk
  *
+ * @author msk
  */
-public class WSCurationTagHistory {
-    private String tagName;
-    private String text;
-    private String pathwayId;
-    private String action;
-    private String user;
-    private String time;
+public class WSCurationTagHistory
+{
+	private String tagName;
+	private String text;
+	private String pathwayId;
+	private String action;
+	private String user;
+	private String time;
 
-    public WSCurationTagHistory(String tagName, String text, String pathwayId,
-           String action, String user, String time) {
-    	this.tagName = tagName;
+	public WSCurationTagHistory(String tagName, String text, String pathwayId, String action, String user, String time)
+	{
+		this.tagName = tagName;
 		this.text = text;
 		this.pathwayId = pathwayId;
 		this.action = action;
 		this.user = user;
 		this.time = time;
-    }
+	}
 
-    public String getTagName() {
-        return tagName;
-    }
+	public String getTagName()
+	{
+		return tagName;
+	}
 
-    public void setTagName(String tagName) {
-        this.tagName = tagName;
-    }
+	public void setTagName(String tagName)
+	{
+		this.tagName = tagName;
+	}
 
-    public String getText() {
-        return text;
-    }
+	public String getText()
+	{
+		return text;
+	}
 
-    public void setText(String text) {
-        this.text = text;
-    }
+	public void setText(String text)
+	{
+		this.text = text;
+	}
 
-    public String getPathwayId() {
-        return pathwayId;
-    }
+	public String getPathwayId()
+	{
+		return pathwayId;
+	}
 
-    public void setPathwayId(String pathwayId) {
-        this.pathwayId = pathwayId;
-    }
+	public void setPathwayId(String pathwayId)
+	{
+		this.pathwayId = pathwayId;
+	}
 
-    public String getAction() {
-        return action;
-    }
+	public String getAction()
+	{
+		return action;
+	}
 
-    public void setAction(String action) {
-        this.action = action;
-    }
+	public void setAction(String action)
+	{
+		this.action = action;
+	}
 
-    public String getUser() {
-        return user;
-    }
+	public String getUser()
+	{
+		return user;
+	}
 
-    public void setUser(String user) {
-        this.user = user;
-    }
+	public void setUser(String user)
+	{
+		this.user = user;
+	}
 
-    public String getTime() {
-        return time;
-    }
+	public String getTime()
+	{
+		return time;
+	}
 
-    public void setTime(String time) {
-        this.time = time;
-    }
+	public void setTime(String time)
+	{
+		this.time = time;
+	}
 }

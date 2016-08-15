@@ -1,13 +1,13 @@
 package org.molgenis.js.magma;
 
-import static java.util.Objects.requireNonNull;
-
-import java.util.Map;
-
 import org.molgenis.script.Script;
 import org.molgenis.script.ScriptRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
+
+import static java.util.Objects.requireNonNull;
 
 /**
  * Runs a JavaScript using the Magma API with the given inputs and returns one output

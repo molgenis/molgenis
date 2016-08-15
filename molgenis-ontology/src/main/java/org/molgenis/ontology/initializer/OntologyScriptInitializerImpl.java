@@ -1,24 +1,10 @@
 package org.molgenis.ontology.initializer;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.script.ScriptMetaData.SCRIPT;
-import static org.molgenis.script.ScriptParameterMetaData.SCRIPT_PARAMETER;
-
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
-import java.util.Arrays;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.script.Script;
-import org.molgenis.script.ScriptFactory;
-import org.molgenis.script.ScriptMetaData;
-import org.molgenis.script.ScriptParameterFactory;
-import org.molgenis.script.ScriptParameterMetaData;
-import org.molgenis.script.ScriptTypeMetaData;
+import org.molgenis.script.*;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,6 +13,15 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.UncheckedIOException;
+import java.util.Arrays;
+
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.script.ScriptMetaData.SCRIPT;
+import static org.molgenis.script.ScriptParameterMetaData.SCRIPT_PARAMETER;
 
 @Service
 public class OntologyScriptInitializerImpl implements OntologyScriptInitializer

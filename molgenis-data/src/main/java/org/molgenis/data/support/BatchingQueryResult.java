@@ -1,14 +1,14 @@
 package org.molgenis.data.support;
 
-import java.util.List;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.util.BatchingIterable;
 
+import java.util.List;
+
 /**
  * BatchingIterable that batches a Query.
- * 
+ * <p>
  * It changes the query's offset and pageSize of each batch.
  */
 public abstract class BatchingQueryResult<E extends Entity> extends BatchingIterable<E>

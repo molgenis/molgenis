@@ -1,11 +1,10 @@
 package org.molgenis.data.rest;
 
-import java.util.List;
+import org.molgenis.data.QueryRule;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-
-import org.molgenis.data.QueryRule;
+import java.util.List;
 
 public class EntityCollectionRequest
 {

@@ -1,31 +1,18 @@
 package org.molgenis.data.jobs.model;
 
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.END_DATE;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.FAILURE_EMAIL;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.IDENTIFIER;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.LOG;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.PROGRESS_INT;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.PROGRESS_MAX;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.PROGRESS_MESSAGE;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.RESULT_URL;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.START_DATE;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.STATUS;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.SUBMISSION_DATE;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.SUCCESS_EMAIL;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.TYPE;
-import static org.molgenis.data.jobs.model.JobExecutionMetaData.USER;
-
-import java.util.Date;
-
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 import org.springframework.util.StringUtils;
 
+import java.util.Date;
+
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
+
 /**
  * Superclass that represents a job execution.
- *
+ * <p>
  * Do not add abstract identifier to this class, see EntitySerializerTest
  */
 public class JobExecution extends StaticEntity

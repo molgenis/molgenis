@@ -9,15 +9,16 @@
 package org.molgenis.util.cmdline;
 
 // jdk
+
 import java.lang.reflect.Field;
 import java.util.Collection;
 
 /**
  * ...
- * 
+ *
  * @author RA Scheltema
  * @version 1.0.0
- * 
+ *          <p>
  *          DEPRECATED AS OF April 15th 2011. Not longer needed due to assign() in
  *          org.molgenis.util.cmdline.CmdLineParser.
  */
@@ -25,13 +26,12 @@ import java.util.Collection;
 public class FieldAssign
 {
 	// constructor / destructor
+
 	/**
 	 * ...
-	 * 
-	 * @param field
-	 *            ...
-	 * @throws NullPointerException
-	 *             When the field f is null.
+	 *
+	 * @param field ...
+	 * @throws NullPointerException When the field f is null.
 	 * @throws CmdLineException
 	 */
 	public FieldAssign(final Field field) throws CmdLineException
@@ -45,26 +45,22 @@ public class FieldAssign
 	}
 
 	// public methods
+
 	/**
 	 * This method applies the given value to the field in the given object. It checks whether the field is a primitive
 	 * and converts the value accordingly.
-	 * 
-	 * @param obj
-	 *            The object to set.
-	 * @param value
-	 *            The value to set the obj to.
-	 * @throws NullPointerException
-	 *             When obj or value are null.
-	 * @throws IllegalAccessException
-	 *             When the obj cannot be set to the given value.
+	 *
+	 * @param obj   The object to set.
+	 * @param value The value to set the obj to.
+	 * @throws NullPointerException     When obj or value are null.
+	 * @throws IllegalAccessException   When the obj cannot be set to the given value.
 	 * @throws CmdLineException
 	 * @throws InstantiationException
 	 * @throws IllegalArgumentException
 	 */
-	@SuppressWarnings(
-	{ "unchecked" })
-	public void assign(final Object obj, final Object value) throws IllegalAccessException, CmdLineException,
-			IllegalArgumentException, InstantiationException
+	@SuppressWarnings({ "unchecked" })
+	public void assign(final Object obj, final Object value)
+			throws IllegalAccessException, CmdLineException, IllegalArgumentException, InstantiationException
 	{
 		if (obj == null || value == null)
 		{
@@ -136,6 +132,8 @@ public class FieldAssign
 	}
 
 	// private members
-	/** Reference to the field. */
+	/**
+	 * Reference to the field.
+	 */
 	private Field field;
 }

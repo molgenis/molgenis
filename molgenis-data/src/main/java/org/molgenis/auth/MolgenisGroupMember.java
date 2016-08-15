@@ -1,12 +1,10 @@
 package org.molgenis.auth;
 
-import static org.molgenis.auth.MolgenisGroupMemberMetaData.ID;
-import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP;
-import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_USER;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
+
+import static org.molgenis.auth.MolgenisGroupMemberMetaData.*;
 
 public class MolgenisGroupMember extends StaticEntity
 {

@@ -1,7 +1,5 @@
 package org.molgenis.data.jobs;
 
-import static org.testng.Assert.assertTrue;
-
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
@@ -17,6 +15,8 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import static org.testng.Assert.assertTrue;
 
 @ContextConfiguration(classes = { ProgressImplTest.Config.class })
 public class ProgressImplTest extends AbstractMolgenisSpringTest

@@ -6,7 +6,7 @@ import org.mozilla.javascript.Undefined;
 
 /**
  * {@link ScriptableObject} that holds the value of an interpreted js function.
- * 
+ * <p>
  * TODO Null values
  */
 public class ScriptableValue extends ScriptableObject

@@ -1,13 +1,5 @@
 package org.molgenis.data.semanticsearch.explain.service;
 
-import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
-
-import java.util.Comparator;
-import java.util.LinkedHashSet;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
 import org.apache.lucene.search.Explanation;
 import org.elasticsearch.action.explain.ExplainRequestBuilder;
 import org.elasticsearch.action.explain.ExplainResponse;
@@ -21,6 +13,14 @@ import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Comparator;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+
+import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
 
 public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainService
 {
@@ -65,8 +65,8 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 		Set<String> matchedQueryTerms = explainServiceHelper.findMatchedWords(explanation);
 		for (String matchedQueryTerm : matchedQueryTerms)
 		{
-			Map<String, Double> matchedQueryRule = explainServiceHelper.findMatchQueries(matchedQueryTerm,
-					originalQueryInMap);
+			Map<String, Double> matchedQueryRule = explainServiceHelper
+					.findMatchQueries(matchedQueryTerm, originalQueryInMap);
 
 			if (matchedQueryRule.size() > 0)
 			{
@@ -79,8 +79,9 @@ public class ElasticSearchExplainServiceImpl implements ElasticSearchExplainServ
 							}
 						}).get();
 
-				matchedQueryStrings.add(ExplainedQueryString.create(matchedQueryTerm, entry.getKey(),
-						originalQueryInMap.get(entry.getKey()), entry.getValue()));
+				matchedQueryStrings.add(ExplainedQueryString
+						.create(matchedQueryTerm, entry.getKey(), originalQueryInMap.get(entry.getKey()),
+								entry.getValue()));
 			}
 		}
 		return matchedQueryStrings;

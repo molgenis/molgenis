@@ -23,15 +23,15 @@ public class TokenAuthenticationProvider implements AuthenticationProvider
 	@RunAsSystem
 	public Authentication authenticate(Authentication authentication) throws AuthenticationException
 	{
-		if (!supports(authentication.getClass())) throw new IllegalArgumentException(
-				"Only RestAuthenticationToken is supported");
+		if (!supports(authentication.getClass()))
+			throw new IllegalArgumentException("Only RestAuthenticationToken is supported");
 
 		RestAuthenticationToken authToken = (RestAuthenticationToken) authentication;
 
 		if (authToken.getToken() != null)
 		{
 			UserDetails userDetails = tokenService.findUserByToken(authToken.getToken());// Throws UnknownTokenException
-																							// if token is invalid
+			// if token is invalid
 			authToken = new RestAuthenticationToken(userDetails, userDetails.getPassword(),
 					userDetails.getAuthorities(), authToken.getToken());
 		}

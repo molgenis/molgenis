@@ -16,9 +16,8 @@ import org.molgenis.data.meta.model.EntityMetaData;
 
 /**
  * Adds Sort to the SearchRequestBuilder object.
- * 
+ *
  * @author erwin
- * 
  */
 public class SortGenerator implements QueryPartGenerator
 {

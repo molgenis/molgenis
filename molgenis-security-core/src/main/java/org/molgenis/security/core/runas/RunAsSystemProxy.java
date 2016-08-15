@@ -1,13 +1,13 @@
 package org.molgenis.security.core.runas;
 
-import java.lang.reflect.Method;
-
 import org.aopalliance.aop.Advice;
 import org.aopalliance.intercept.MethodInterceptor;
 import org.aopalliance.intercept.MethodInvocation;
 import org.springframework.aop.framework.Advised;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+
+import java.lang.reflect.Method;
 
 /**
  * Proxy that set a SystemSecurityToken in the security context for the duration of a method
@@ -42,7 +42,8 @@ public class RunAsSystemProxy implements Advice, MethodInterceptor
 
 	public static void runAsSystem(Runnable runnable)
 	{
-		runAsSystem(() -> {
+		runAsSystem(() ->
+		{
 			runnable.run();
 			return null;
 		});

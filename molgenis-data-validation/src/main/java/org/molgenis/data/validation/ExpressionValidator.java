@@ -1,10 +1,10 @@
 package org.molgenis.data.validation;
 
-import java.util.List;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.springframework.stereotype.Component;
+
+import java.util.List;
 
 /**
  * Spring bean for {@link ValidationUtils}
@@ -14,7 +14,7 @@ public class ExpressionValidator
 {
 	/**
 	 * see {@link ValidationUtils#resolveBooleanExpression}
-	 * 
+	 *
 	 * @param expression
 	 * @param entity
 	 * @param meta
@@ -27,7 +27,7 @@ public class ExpressionValidator
 
 	/**
 	 * see {@link ValidationUtils#resolveBooleanExpressions}
-	 * 
+	 *
 	 * @param expressions
 	 * @param entity
 	 * @param meta

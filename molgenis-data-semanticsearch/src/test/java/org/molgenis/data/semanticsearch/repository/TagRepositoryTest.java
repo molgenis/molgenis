@@ -1,20 +1,5 @@
 package org.molgenis.data.semanticsearch.repository;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.model.TagMetaData.CODE_SYSTEM;
-import static org.molgenis.data.meta.model.TagMetaData.OBJECT_IRI;
-import static org.molgenis.data.meta.model.TagMetaData.RELATION_IRI;
-import static org.molgenis.data.meta.model.TagMetaData.TAG;
-import static org.testng.Assert.assertTrue;
-
-import java.util.UUID;
-
 import org.molgenis.data.DataService;
 import org.molgenis.data.IdGenerator;
 import org.molgenis.data.Query;
@@ -31,6 +16,15 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.UUID;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
+import static org.molgenis.data.meta.model.TagMetaData.*;
+import static org.testng.Assert.assertTrue;
 
 @WebAppConfiguration
 @ContextConfiguration(classes = TagRepositoryTest.Config.class)

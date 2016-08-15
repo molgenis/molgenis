@@ -1,16 +1,5 @@
 package org.molgenis.data.system;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.system.core.FreemarkerTemplateMetaData.FREEMARKER_TEMPLATE;
-import static org.testng.Assert.assertNotEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertTrue;
-
-import java.io.IOException;
-import java.io.Reader;
-import java.io.StringReader;
-
 import org.apache.commons.io.IOUtils;
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
@@ -25,6 +14,15 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.io.StringReader;
+
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.system.core.FreemarkerTemplateMetaData.FREEMARKER_TEMPLATE;
+import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = RepositoryTemplateLoaderTest.Config.class)
 public class RepositoryTemplateLoaderTest extends AbstractMolgenisSpringTest

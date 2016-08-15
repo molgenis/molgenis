@@ -1,14 +1,10 @@
 package org.molgenis.file.model;
 
-import static org.molgenis.file.model.FileMetaMetaData.CONTENT_TYPE;
-import static org.molgenis.file.model.FileMetaMetaData.FILENAME;
-import static org.molgenis.file.model.FileMetaMetaData.ID;
-import static org.molgenis.file.model.FileMetaMetaData.SIZE;
-import static org.molgenis.file.model.FileMetaMetaData.URL;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.security.owned.OwnedEntity;
+
+import static org.molgenis.file.model.FileMetaMetaData.*;
 
 public class FileMeta extends OwnedEntity
 {

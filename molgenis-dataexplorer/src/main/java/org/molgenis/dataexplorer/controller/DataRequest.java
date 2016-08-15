@@ -1,11 +1,10 @@
 package org.molgenis.dataexplorer.controller;
 
-import java.util.List;
-
-import javax.validation.constraints.NotNull;
-
 import org.molgenis.data.Entity;
 import org.molgenis.data.support.QueryImpl;
+
+import javax.validation.constraints.NotNull;
+import java.util.List;
 
 public class DataRequest
 {
