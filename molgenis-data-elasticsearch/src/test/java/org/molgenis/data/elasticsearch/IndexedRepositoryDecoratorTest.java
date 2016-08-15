@@ -1,6 +1,5 @@
 package org.molgenis.data.elasticsearch;
 
-import com.google.common.collect.Lists;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -18,6 +17,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.RepositoryCapability.*;
@@ -53,20 +53,20 @@ public class IndexedRepositoryDecoratorTest
 		when(decoratedRepo.getQueryOperators()).thenReturn(EnumSet.of(IN, LESS, EQUALS, AND, OR));
 		indexedRepositoryDecorator = new IndexedRepositoryDecorator(decoratedRepo, searchService);
 
-		when(repositoryEntityMetaData.getAtomicAttributes()).thenReturn(Lists.newArrayList(idAttr));
+		when(repositoryEntityMetaData.getAtomicAttributes()).thenReturn(newArrayList(idAttr));
 
 		query = mock(Query.class);
 		QueryRule rule1 = mock(QueryRule.class);
 		QueryRule rule2 = mock(QueryRule.class);
 		when(rule1.getOperator()).thenReturn(IN);
 		when(rule2.getOperator()).thenReturn(EQUALS);
-		List<QueryRule> queryRules = Lists.newArrayList(rule1, rule2);
+		List<QueryRule> queryRules = newArrayList(rule1, rule2);
 		when(query.getRules()).thenReturn(queryRules);
 
 		unsupportedQuery = mock(Query.class);
 		QueryRule unsupportedRule = mock(QueryRule.class);
 		when(unsupportedRule.getOperator()).thenReturn(FUZZY_MATCH);
-		List<QueryRule> unsupportedQueryRules = Lists.newArrayList(rule1, rule2, unsupportedRule);
+		List<QueryRule> unsupportedQueryRules = newArrayList(rule1, rule2, unsupportedRule);
 		when(unsupportedQuery.getRules()).thenReturn(unsupportedQueryRules);
 
 	}
@@ -107,7 +107,8 @@ public class IndexedRepositoryDecoratorTest
 		AttributeMetaData distinctAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("distinctAttr")
 				.getMock();
 
-		@SuppressWarnings("unchecked") Query<Entity> q = mock(Query.class);
+		@SuppressWarnings("unchecked")
+		Query<Entity> q = mock(Query.class);
 		AggregateQuery aggregateQuery = new AggregateQueryImpl().attrX(xAttr).attrY(yAttr).attrDistinct(distinctAttr)
 				.query(q);
 
@@ -341,7 +342,8 @@ public class IndexedRepositoryDecoratorTest
 	@Test
 	public void unsupportedQueryWithComputedAttributes()
 	{
-		@SuppressWarnings("unchecked") Query<Entity> q = mock(Query.class);
+		@SuppressWarnings("unchecked")
+		Query<Entity> q = mock(Query.class);
 		QueryRule qRule1 = mock(QueryRule.class);
 		QueryRule qRule2 = mock(QueryRule.class);
 
@@ -351,15 +353,44 @@ public class IndexedRepositoryDecoratorTest
 		when(qRule2.getOperator()).thenReturn(OR);
 		when(qRule1.getNestedRules()).thenReturn(Collections.emptyList());
 		when(qRule2.getNestedRules()).thenReturn(Collections.emptyList());
-		when(q.getRules()).thenReturn(Lists.newArrayList(qRule1, qRule2));
+		when(q.getRules()).thenReturn(newArrayList(qRule1, qRule2));
 
 		AttributeMetaData attr1 = mock(AttributeMetaData.class);
 		when(repositoryEntityMetaData.getAttribute("attr1")).thenReturn(attr1);
-		when(attr1.getExpression()).thenReturn(null);
+		when(attr1.hasExpression()).thenReturn(true);
 
 		AttributeMetaData attr2 = mock(AttributeMetaData.class);
 		when(repositoryEntityMetaData.getAttribute("attr2")).thenReturn(attr2);
-		when(attr2.getExpression()).thenReturn("${value}");
+		when(attr2.hasExpression()).thenReturn(true);
+
+		indexedRepositoryDecorator.count(q);
+		verify(searchService).count(q, repositoryEntityMetaData);
+		verify(decoratedRepo, never()).count(q);
+	}
+
+	@Test
+	public void unsupportedQueryWithSortOnComputedAttributes()
+	{
+		@SuppressWarnings("unchecked")
+		Query<Entity> q = mock(Query.class);
+		Sort sort = mock(Sort.class);
+		when(q.getSort()).thenReturn(sort);
+
+		AttributeMetaData attr1 = mock(AttributeMetaData.class);
+		when(repositoryEntityMetaData.getAttribute("attr1")).thenReturn(attr1);
+		when(attr1.hasExpression()).thenReturn(true);
+
+		AttributeMetaData attr2 = mock(AttributeMetaData.class);
+		when(repositoryEntityMetaData.getAttribute("attr2")).thenReturn(attr2);
+		when(attr2.hasExpression()).thenReturn(true);
+
+		Sort.Order o1 = mock(Sort.Order.class);
+		Sort.Order o2 = mock(Sort.Order.class);
+
+		when(o1.getAttr()).thenReturn("attr1");
+		when(o2.getAttr()).thenReturn("attr2");
+
+		when(sort.spliterator()).thenReturn(newArrayList(o1, o2).spliterator());
 
 		indexedRepositoryDecorator.count(q);
 		verify(searchService).count(q, repositoryEntityMetaData);
