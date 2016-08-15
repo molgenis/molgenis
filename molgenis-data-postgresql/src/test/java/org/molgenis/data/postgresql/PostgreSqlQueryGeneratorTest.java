@@ -27,7 +27,6 @@ public class PostgreSqlQueryGeneratorTest
 	@Test
 	public void getSqlCreateForeignKey()
 	{
-
 		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refIdAttr").getMock();
 		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
@@ -37,7 +36,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(refAttr.getDataType()).thenReturn(XREF);
 		when(refAttr.getRefEntity()).thenReturn(refEntityMeta);
 
-		String expectedSql = "ALTER TABLE \"entity\" ADD FOREIGN KEY (\"attr\") REFERENCES \"refEntity\"(\"refIdAttr\")";
+		String expectedSql = "ALTER TABLE \"entity\" ADD CONSTRAINT \"entity_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity\"(\"refIdAttr\")";
 		assertEquals(PostgreSqlQueryGenerator.getSqlCreateForeignKey(entityMeta, refAttr), expectedSql);
 	}
 
@@ -53,8 +52,46 @@ public class PostgreSqlQueryGeneratorTest
 		when(refAttr.getDataType()).thenReturn(XREF);
 		when(refAttr.getRefEntity()).thenReturn(entityMeta);
 
-		String expectedSql = "ALTER TABLE \"entity\" ADD FOREIGN KEY (\"attr\") REFERENCES \"entity\"(\"idAttr\") DEFERRABLE INITIALLY DEFERRED";
+		String expectedSql = "ALTER TABLE \"entity\" ADD CONSTRAINT \"entity_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"entity\"(\"idAttr\") DEFERRABLE INITIALLY DEFERRED";
 		assertEquals(PostgreSqlQueryGenerator.getSqlCreateForeignKey(entityMeta, refAttr), expectedSql);
+	}
+
+	@Test
+	public void getSqlDropForeignKey()
+	{
+		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refIdAttr").getMock();
+		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(refAttr.getDataType()).thenReturn(XREF);
+		when(refAttr.getRefEntity()).thenReturn(refEntityMeta);
+
+		String expectedSql = "ALTER TABLE \"entity\" DROP CONSTRAINT \"entity_attr_fkey\"";
+		assertEquals(PostgreSqlQueryGenerator.getSqlDropForeignKey(entityMeta, refAttr), expectedSql);
+	}
+
+	@Test
+	public void getSqlCreateUniqueKey()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(STRING);
+
+		String expectedSql = "ALTER TABLE \"entity\" ADD CONSTRAINT \"entity_attr_key\" UNIQUE (\"attr\")";
+		assertEquals(PostgreSqlQueryGenerator.getSqlCreateUniqueKey(entityMeta, attr), expectedSql);
+	}
+
+	@Test
+	public void getSqlDropUniqueKey()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(STRING);
+
+		String expectedSql = "ALTER TABLE \"entity\" DROP CONSTRAINT \"entity_attr_key\"";
+		assertEquals(PostgreSqlQueryGenerator.getSqlDropUniqueKey(entityMeta, attr), expectedSql);
 	}
 
 	@Test

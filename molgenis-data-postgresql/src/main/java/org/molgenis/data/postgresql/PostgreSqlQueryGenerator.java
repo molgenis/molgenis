@@ -36,15 +36,24 @@ class PostgreSqlQueryGenerator
 	static String getSqlCreateForeignKey(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		StringBuilder strBuilder = new StringBuilder();
-		strBuilder.append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ADD FOREIGN KEY (")
-				.append(getColumnName(attr)).append(") REFERENCES ").append(getTableName(attr.getRefEntity()))
-				.append('(').append(getColumnName(attr.getRefEntity().getIdAttribute())).append(')');
+		strBuilder.append("ALTER TABLE ").append(getTableName(entityMeta)).append(" ADD CONSTRAINT ")
+				.append(getForeignKeyName(entityMeta, attr)).append(" FOREIGN KEY (").append(getColumnName(attr))
+				.append(") REFERENCES ").append(getTableName(attr.getRefEntity())).append('(')
+				.append(getColumnName(attr.getRefEntity().getIdAttribute())).append(')');
 
 		// for self-referencing data defer checking constraints until the end of the transaction
 		if (attr.getRefEntity().getName().equals(entityMeta.getName()))
 		{
 			strBuilder.append(" DEFERRABLE INITIALLY DEFERRED");
 		}
+		return strBuilder.toString();
+	}
+
+	static String getSqlDropForeignKey(EntityMetaData entityMeta, AttributeMetaData attr)
+	{
+		StringBuilder strBuilder = new StringBuilder();
+		strBuilder.append("ALTER TABLE ").append(getTableName(entityMeta)).append(" DROP CONSTRAINT ")
+				.append(getForeignKeyName(entityMeta, attr));
 		return strBuilder.toString();
 	}
 
@@ -743,10 +752,20 @@ class PostgreSqlQueryGenerator
 				.toString();
 	}
 
-	private static String getUniqueKeyName(EntityMetaData emd, AttributeMetaData attr)
+	private static String getForeignKeyName(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		return new StringBuilder().append('"').append(emd.getName()).append('_').append(attr.getName()).append("_key")
-				.append('"').toString();
+		return getKeyName(entityMeta, attr, "fkey");
+	}
+
+	private static String getUniqueKeyName(EntityMetaData entityMeta, AttributeMetaData attr)
+	{
+		return getKeyName(entityMeta, attr, "key");
+	}
+
+	private static String getKeyName(EntityMetaData entityMeta, AttributeMetaData attr, String keyPostfix)
+	{
+		return new StringBuilder().append('"').append(entityMeta.getName()).append('_').append(attr.getName())
+				.append('_').append(keyPostfix).append('"').toString();
 	}
 
 	private static <E extends Entity> List<AttributeMetaData> getMrefQueryAttrs(EntityMetaData entityMeta, Query<E> q)
