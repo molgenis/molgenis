@@ -199,7 +199,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	 * Adds an attribute to the repository.
 	 *
 	 * @param entityMeta entity meta data that owns the attribute
-	 * @param attr           the {@link AttributeMetaData} to add
+	 * @param attr       the {@link AttributeMetaData} to add
 	 */
 	private void addAttributeRec(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
@@ -279,23 +279,31 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	@Override
 	public void updateAttribute(EntityMetaData entityMetaData, AttributeMetaData attr, AttributeMetaData updatedAttr)
 	{
-		// FIXME updating attributes in abstract entities
-		// nullable changes
-		if (!Objects.equals(attr.isNillable(), updatedAttr.isNillable()))
+		if (entityMetaData.isAbstract())
 		{
-			updateNillable(entityMetaData, attr, updatedAttr);
+			// for abstract entities recursively update entities extending the abstract entity
+			dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(EXTENDS, entityMetaData).findAll()
+					.forEach(childEntityMeta -> updateAttribute(childEntityMeta, attr, updatedAttr));
 		}
-
-		// unique changes
-		if (!Objects.equals(attr.isUnique(), updatedAttr.isUnique()))
+		else
 		{
-			updateUnique(entityMetaData, attr, updatedAttr);
-		}
+			// nullable changes
+			if (!Objects.equals(attr.isNillable(), updatedAttr.isNillable()))
+			{
+				updateNillable(entityMetaData, attr, updatedAttr);
+			}
 
-		// data type changes
-		if (!Objects.equals(attr.getDataType(), updatedAttr.getDataType()))
-		{
-			updateDataType(entityMetaData, attr, updatedAttr);
+			// unique changes
+			if (!Objects.equals(attr.isUnique(), updatedAttr.isUnique()))
+			{
+				updateUnique(entityMetaData, attr, updatedAttr);
+			}
+
+			// data type changes
+			if (!Objects.equals(attr.getDataType(), updatedAttr.getDataType()))
+			{
+				updateDataType(entityMetaData, attr, updatedAttr);
+			}
 		}
 	}
 
