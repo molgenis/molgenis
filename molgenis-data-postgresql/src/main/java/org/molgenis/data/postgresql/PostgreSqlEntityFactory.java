@@ -86,7 +86,7 @@ public class PostgreSqlEntityFactory
 		 * @param resultSet result set
 		 * @param attr      attribute
 		 * @return value for the given attribute in the type defined by the attribute type
-		 * @throws SQLException
+		 * @throws SQLException if an error occurs reading from the result set
 		 */
 		private Object mapValue(ResultSet resultSet, AttributeMetaData attr) throws SQLException
 		{
@@ -101,7 +101,7 @@ public class PostgreSqlEntityFactory
 		 * @param attr      attribute
 		 * @param colName   column name in the result set
 		 * @return value for the given attribute in the type defined by the attribute type
-		 * @throws SQLException
+		 * @throws SQLException if an error occurs reading from the result set
 		 */
 		private Object mapValue(ResultSet resultSet, AttributeMetaData attr, String colName) throws SQLException
 		{
@@ -169,7 +169,7 @@ public class PostgreSqlEntityFactory
 		 * @param arrayValue result set array value
 		 * @param entityMeta entity meta data
 		 * @return mapped value
-		 * @throws SQLException
+		 * @throws SQLException if an error occurs while attempting to access the array
 		 */
 		private Object mapValueMref(Array arrayValue, EntityMetaData entityMeta) throws SQLException
 		{

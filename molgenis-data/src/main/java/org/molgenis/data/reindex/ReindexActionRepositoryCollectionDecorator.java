@@ -50,10 +50,10 @@ public class ReindexActionRepositoryCollectionDecorator implements RepositoryCol
 	}
 
 	@Override
-	public void addAttribute(String entityFullName, AttributeMetaData attribute)
+	public void addAttribute(EntityMetaData entityMeta, AttributeMetaData attribute)
 	{
-		this.reindexActionRegisterService.register(entityFullName, UPDATE, METADATA, null);
-		this.decorated.addAttribute(entityFullName, attribute);
+		this.reindexActionRegisterService.register(entityMeta.getName(), UPDATE, METADATA, null);
+		this.decorated.addAttribute(entityMeta, attribute);
 	}
 
 	@Override
@@ -64,10 +64,10 @@ public class ReindexActionRepositoryCollectionDecorator implements RepositoryCol
 	}
 
 	@Override
-	public void deleteAttribute(String entityFullName, String attributeName)
+	public void deleteAttribute(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		this.reindexActionRegisterService.register(entityFullName, UPDATE, METADATA, null);
-		this.decorated.deleteAttribute(entityFullName, attributeName);
+		this.reindexActionRegisterService.register(entityMeta.getName(), UPDATE, METADATA, null);
+		this.decorated.deleteAttribute(entityMeta, attr);
 	}
 
 	@Override

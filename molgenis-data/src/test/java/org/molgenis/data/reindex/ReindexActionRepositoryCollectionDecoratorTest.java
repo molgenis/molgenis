@@ -48,17 +48,20 @@ public class ReindexActionRepositoryCollectionDecoratorTest
 	@Test
 	public void addAttribute()
 	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(REPOSITORY_NAME).getMock();
 		AttributeMetaData attribute = when(mock(AttributeMetaData.class).getName()).thenReturn("attribute").getMock();
-		reindexActionRepositoryCollectionDecorator.addAttribute(REPOSITORY_NAME, attribute);
-		verify(decoratedRepositoryCollection, times(1)).addAttribute(REPOSITORY_NAME, attribute);
+		reindexActionRepositoryCollectionDecorator.addAttribute(entityMeta, attribute);
+		verify(decoratedRepositoryCollection, times(1)).addAttribute(entityMeta, attribute);
 		verify(reindexActionRegisterService).register("repo", UPDATE, METADATA, null);
 	}
 
 	@Test
 	public void deleteAttribute()
 	{
-		reindexActionRepositoryCollectionDecorator.deleteAttribute(REPOSITORY_NAME, "attribute");
-		verify(decoratedRepositoryCollection, times(1)).deleteAttribute(REPOSITORY_NAME, "attribute");
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(REPOSITORY_NAME).getMock();
+		AttributeMetaData attribute = when(mock(AttributeMetaData.class).getName()).thenReturn("attribute").getMock();
+		reindexActionRepositoryCollectionDecorator.deleteAttribute(entityMeta, attribute);
+		verify(decoratedRepositoryCollection, times(1)).deleteAttribute(entityMeta, attribute);
 		verify(reindexActionRegisterService).register("repo", UPDATE, METADATA, null);
 	}
 

@@ -38,7 +38,7 @@ public abstract class AbstractRepositoryCollection implements RepositoryCollecti
 	}
 
 	@Override
-	public void addAttribute(String entityName, AttributeMetaData attribute)
+	public void addAttribute(EntityMetaData entityMeta, AttributeMetaData attribute)
 	{
 		throw new UnsupportedOperationException();
 	}
@@ -50,7 +50,7 @@ public abstract class AbstractRepositoryCollection implements RepositoryCollecti
 	}
 
 	@Override
-	public void deleteAttribute(String entityName, String attributeName)
+	public void deleteAttribute(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		throw new UnsupportedOperationException();
 	}

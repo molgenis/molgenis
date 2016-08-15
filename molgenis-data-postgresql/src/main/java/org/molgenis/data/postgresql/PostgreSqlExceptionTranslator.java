@@ -73,15 +73,8 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 		return molgenisDataException;
 	}
 
-	private MolgenisDataException doTranslate(PSQLException sqlException)
+	private MolgenisDataException doTranslate(PSQLException pSqlException)
 	{
-		if (!(sqlException instanceof PSQLException))
-		{
-			throw new RuntimeException(
-					format("Unexpected exception class [%s]", sqlException.getClass().getSimpleName()));
-		}
-
-		PSQLException pSqlException = sqlException;
 		switch (pSqlException.getSQLState())
 		{
 			case "22007": // invalid_datetime_format
@@ -101,8 +94,8 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 	/**
 	 * Package private for testability
 	 *
-	 * @param pSqlException
-	 * @return
+	 * @param pSqlException PostgreSQL exception
+	 * @return translated validation exception
 	 */
 	MolgenisValidationException translateInvalidIntegerException(PSQLException pSqlException)
 	{
@@ -149,8 +142,8 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 	/**
 	 * Package private for testability
 	 *
-	 * @param pSqlException
-	 * @return
+	 * @param pSqlException PostgreSQL exception
+	 * @return translated validation exception
 	 */
 	MolgenisValidationException translateNotNullViolation(PSQLException pSqlException)
 	{
@@ -189,8 +182,8 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 	/**
 	 * Package private for testability
 	 *
-	 * @param pSqlException
-	 * @return
+	 * @param pSqlException PostgreSQL exception
+	 * @return translated validation exception
 	 */
 	MolgenisValidationException translateForeignKeyViolation(PSQLException pSqlException)
 	{
@@ -216,8 +209,8 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 	/**
 	 * Package private for testability
 	 *
-	 * @param pSqlException
-	 * @return
+	 * @param pSqlException PostgreSQL exception
+	 * @return translated validation exception
 	 */
 	MolgenisValidationException translateUniqueKeyViolation(PSQLException pSqlException)
 	{
