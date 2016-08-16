@@ -887,7 +887,7 @@ public class MappingServiceController extends MolgenisPluginController
 
 	private List<EntityMetaData> getWritableEntityMetaDatas()
 	{
-		return getEntityMetaDatas().stream()
+		return getEntityMetaDatas().stream().filter(emd -> !emd.isAbstract())
 				.filter(emd -> dataService.getCapabilities(emd.getName()).contains(RepositoryCapability.WRITABLE))
 				.collect(Collectors.toList());
 	}
