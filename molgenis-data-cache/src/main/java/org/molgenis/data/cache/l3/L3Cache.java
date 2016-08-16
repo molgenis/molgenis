@@ -38,14 +38,13 @@ public class L3Cache extends DefaultMolgenisTransactionListener
 	/**
 	 * maps entity name to the loading cache with Query key and List of Identifiers
 	 */
-	private final ConcurrentMap<String, LoadingCache<Query<Entity>, List<Object>>> caches;
+	private final ConcurrentMap<String, LoadingCache<Query<Entity>, List<Object>>> caches = newConcurrentMap();
 	private final TransactionInformation transactionInformation;
 
 	@Autowired
 	public L3Cache(MolgenisTransactionManager molgenisTransactionManager, TransactionInformation transactionInformation)
 	{
-		this.transactionInformation = transactionInformation;
-		caches = newConcurrentMap();
+		this.transactionInformation = requireNonNull(transactionInformation);
 		requireNonNull(molgenisTransactionManager).addTransactionListener(this);
 	}
 

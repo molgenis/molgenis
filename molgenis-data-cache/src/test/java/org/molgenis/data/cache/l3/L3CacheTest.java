@@ -19,15 +19,15 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.stream.Stream;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = L3CacheTest.Config.class)
 public class L3CacheTest extends AbstractMolgenisSpringTest
@@ -36,11 +36,11 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 
 	private EntityMetaData entityMetaData;
 
-	private Entity mockEntity1;
-	private Entity mockEntity2;
-	private Entity mockEntity3;
+	private Entity entity1;
+	private Entity entity2;
+	private Entity entity3;
 
-	private final String repository = "TestRepository";
+	private final String repositoryName = "TestRepository";
 	private static final String COUNTRY = "Country";
 	private static final String ID = "ID";
 
@@ -67,25 +67,27 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 	{
 		initMocks(this);
 
-		entityMetaData = entityMetaDataFactory.create(repository);
+		entityMetaData = entityMetaDataFactory.create(repositoryName);
 		entityMetaData.addAttribute(attributeMetaDataFactory.create().setDataType(INT).setName(ID), ROLE_ID);
 		entityMetaData.addAttribute(attributeMetaDataFactory.create().setName(COUNTRY));
 
-		when(entityManager.create(entityMetaData)).thenReturn(new DynamicEntity(entityMetaData));
+		//		when(entityManager.create(entityMetaData)).thenReturn(new DynamicEntity(entityMetaData));
 
-		mockEntity1 = entityManager.create(entityMetaData);
-		mockEntity1.set(ID, 1);
-		mockEntity1.set(COUNTRY, "NL");
+		entity1 = new DynamicEntity(entityMetaData);
+		entity1.set(ID, 1);
+		entity1.set(COUNTRY, "NL");
 
-		mockEntity2 = entityManager.create(entityMetaData);
-		mockEntity2.set(ID, 2);
-		mockEntity2.set(COUNTRY, "NL");
+		entity2 = new DynamicEntity(entityMetaData);
+		entity2.set(ID, 2);
+		entity2.set(COUNTRY, "NL");
 
-		mockEntity3 = entityManager.create(entityMetaData);
-		mockEntity3.set(ID, 3);
-		mockEntity3.set(COUNTRY, "GB");
+		entity3 = new DynamicEntity(entityMetaData);
+		entity3.set(ID, 3);
+		entity3.set(COUNTRY, "GB");
 
 		when(decoratedRepository.getCapabilities()).thenReturn(Sets.newHashSet(CACHEABLE));
+		when(decoratedRepository.getName()).thenReturn(repositoryName);
+		when(decoratedRepository.getEntityMetaData()).thenReturn(entityMetaData);
 		l3Cache = new L3Cache(molgenisTransactionManager, transactionInformation);
 	}
 
@@ -96,17 +98,23 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void getTest()
+	public void testGetIgnoresFetch()
 	{
-		// repository.findAll(new QueryImpl<>(query).fetch(idAttributeFetch)).map(Entity::getIdValue)
-
 		Fetch idAttributeFetch = new Fetch().field(entityMetaData.getIdAttribute().getName());
-		Query<Entity> query = new QueryImpl<>().eq(COUNTRY, "NL");
-		query.fetch(idAttributeFetch);
+		Query<Entity> fetchLessQuery = new QueryImpl<>().eq(COUNTRY, "NL").fetch(idAttributeFetch);
 
-		when(decoratedRepository.findAll(query)).thenReturn(Stream.of(mockEntity1, mockEntity2));
+		when(decoratedRepository.findAll(fetchLessQuery)).thenReturn(Stream.of(entity1, entity2));
 
-		List<Object> actualIdentifiers = l3Cache.get(decoratedRepository, query);
+		Fetch fetch = mock(Fetch.class);
+		Query<Entity> query = new QueryImpl<>().eq(COUNTRY, "NL").fetch(fetch);
+
+		assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
+		assertEquals(l3Cache.get(decoratedRepository, query), Arrays.asList(1, 2));
+
+		verify(decoratedRepository, atMost(1)).findAll(fetchLessQuery);
+		verify(decoratedRepository, atLeast(0)).getName();
+		verify(decoratedRepository, atLeast(0)).getEntityMetaData();
+		verifyNoMoreInteractions(decoratedRepository);
 	}
 
 	@Configuration
