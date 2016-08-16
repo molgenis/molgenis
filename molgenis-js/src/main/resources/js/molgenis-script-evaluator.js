@@ -279,6 +279,21 @@ function evalScript(script, entity) {
                 return this;
             },
             /**
+             * Checks if something is one value and the other
+             *
+             * Example: $('female').and($('pregnant')).value()
+             *
+             * @param other :
+                *            Another value
+             *
+             * @memberof $
+             * @method and
+             */
+            and: function (other) {
+                this.val = (this.val && other.value());
+                return this;
+            },
+            /**
              * Returns true or false if Greater then the submitted value
              *
              * Example: $('Height').gt(100).value()

@@ -182,6 +182,34 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
+	public void updateAttributeSingleRefDataTypeToSingleRefDataType() throws Exception
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		String attrName = "attr";
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(attr.getDataType()).thenReturn(XREF);
+		AttributeMetaData updatedAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		when(updatedAttr.getDataType()).thenReturn(CATEGORICAL);
+		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		verifyZeroInteractions(jdbcTemplate);
+	}
+
+	@Test
+	public void updateAttributeMultiRefDataTypeToMultiRefDataType() throws Exception
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		String attrName = "attr";
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(attr.getDataType()).thenReturn(MREF);
+		AttributeMetaData updatedAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		when(updatedAttr.getDataType()).thenReturn(CATEGORICAL_MREF);
+		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		verifyZeroInteractions(jdbcTemplate);
+	}
+
+	@Test
 	public void updateAttributeDataTypeToSingleRefDataType() throws Exception
 	{
 		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refIdAttr").getMock();
