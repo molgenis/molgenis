@@ -411,6 +411,20 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
+	public void addAttributeUnique()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(STRING);
+		when(attr.isUnique()).thenReturn(true);
+		postgreSqlRepoCollection.addAttribute(entityMeta, attr);
+		verify(jdbcTemplate).execute(
+				"ALTER TABLE \"entity\" ADD \"attr\" character varying(255) NOT NULL,ADD CONSTRAINT \"entity_attr_key\" UNIQUE (\"attr\")");
+	}
+
+	@Test
 	public void addAttributeAbstractEntity()
 	{
 		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
