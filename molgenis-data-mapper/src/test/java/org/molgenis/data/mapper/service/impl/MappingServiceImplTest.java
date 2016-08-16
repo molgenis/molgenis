@@ -425,6 +425,88 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		verifyZeroInteractions(permissionSystemService);
 	}
 
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Target repository does not contain the following attribute: COUNTRY_1")
+	public void testIncompatibleMetaDataUnknownAttribute()
+	{
+		String targetRepositoryName = "target_repository";
+
+		Repository<Entity> targetRepository = mock(Repository.class);
+		EntityMetaData targetRepositoryMetaData = entityMetaFactory.create(targetRepositoryName);
+		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
+		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("COUNTRY").setDataType(STRING));
+
+		when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
+		when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
+		when(targetRepository.getEntityMetaData()).thenReturn(targetRepositoryMetaData);
+
+		EntityMetaData mappingTargetMetaData = entityMetaFactory.create("mapping_target");
+		mappingTargetMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
+		mappingTargetMetaData.addAttribute(attrMetaFactory.create().setName("COUNTRY_1").setDataType(STRING));
+
+		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
+
+		mappingService.applyMappings(mappingTarget, targetRepositoryName, false);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp =
+			"attribute COUNTRY in the mapping target is type INT while attribute "
+					+ "COUNTRY in the target repository is type STRING. Please make sure the types are the same")
+	public void testIncompatibleMetaDataDifferentType()
+	{
+		String targetRepositoryName = "target_repository";
+
+		Repository<Entity> targetRepository = mock(Repository.class);
+		EntityMetaData targetRepositoryMetaData = entityMetaFactory.create(targetRepositoryName);
+		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
+		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("COUNTRY").setDataType(STRING));
+
+		when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
+		when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
+		when(targetRepository.getEntityMetaData()).thenReturn(targetRepositoryMetaData);
+
+		EntityMetaData mappingTargetMetaData = entityMetaFactory.create("mapping_target");
+		mappingTargetMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
+		mappingTargetMetaData.addAttribute(attrMetaFactory.create().setName("COUNTRY").setDataType(INT));
+
+		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
+
+		mappingService.applyMappings(mappingTarget, targetRepositoryName, false);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp =
+			"In the mapping target, attribute COUNTRY of type XREF has "
+					+ "reference entity mapping_target_ref while in the target repository attribute COUNTRY of type XREF has reference entity target_repository_ref. "
+					+ "Please make sure the reference entities of your mapping target are pointing towards the same reference entities as your target repository")
+	public void testIncompatibleMetaDataDifferentRefEntity()
+	{
+		String targetRepositoryName = "target_repository";
+		String targetRepositoryRefEntityName = "target_repository_ref";
+		String mappingTargetRefEntityName = "mapping_target_ref";
+
+		EntityMetaData targetRefEntity = entityMetaFactory.create(targetRepositoryRefEntityName);
+
+		Repository<Entity> targetRepository = mock(Repository.class);
+		EntityMetaData targetRepositoryMetaData = entityMetaFactory.create(targetRepositoryName);
+		targetRepositoryMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
+		targetRepositoryMetaData.addAttribute(
+				attrMetaFactory.create().setName("COUNTRY").setDataType(XREF).setRefEntity(targetRefEntity));
+
+		when(dataService.hasRepository(targetRepositoryName)).thenReturn(true);
+		when(dataService.getRepository(targetRepositoryName)).thenReturn(targetRepository);
+		when(targetRepository.getEntityMetaData()).thenReturn(targetRepositoryMetaData);
+
+		EntityMetaData mappingTargetRefEntity = entityMetaFactory.create(mappingTargetRefEntityName);
+
+		EntityMetaData mappingTargetMetaData = entityMetaFactory.create("mapping_target");
+		mappingTargetMetaData.addAttribute(attrMetaFactory.create().setName("ID").setDataType(STRING), ROLE_ID);
+		mappingTargetMetaData.addAttribute(
+				attrMetaFactory.create().setName("COUNTRY").setDataType(XREF).setRefEntity(mappingTargetRefEntity));
+
+		MappingTarget mappingTarget = new MappingTarget(mappingTargetMetaData);
+
+		mappingService.applyMappings(mappingTarget, targetRepositoryName, false);
+	}
+
 	private void createEntities(EntityMetaData targetMeta, List<Entity> sourceGeneEntities,
 			List<Entity> expectedEntities)
 	{
