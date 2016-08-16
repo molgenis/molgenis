@@ -309,7 +309,8 @@ public class MappingServiceImpl implements MappingService
 		EntityMetaData targetMetaData = targetRepo.getEntityMetaData();
 		Repository<Entity> sourceRepo = dataService.getRepository(sourceMapping.getName());
 
-		sourceRepo.iterator().forEachRemaining(sourceEntity -> {
+		sourceRepo.iterator().forEachRemaining(sourceEntity ->
+		{
 			{
 				Entity mappedEntity = applyMappingToEntity(sourceMapping, sourceEntity, targetMetaData,
 						sourceMapping.getSourceEntityMetaData(), addSourceAttribute);
