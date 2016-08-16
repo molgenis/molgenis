@@ -21,11 +21,21 @@ public interface TransactionInformation
 
 	/**
 	 * Finds out if an entire repository has been dirtied in the current transaction.
+	 * Even if this method returns false, {@link #isEntityDirty(EntityKey)}
+	 * can still return true for one or more entities
 	 *
 	 * @param entityName fully qualified name of the repository
 	 * @return indication if the entire repository has been dirtied
 	 */
-	boolean isRepositoryDirty(String entityName);
+	boolean isEntireRepositoryDirty(String entityName);
+
+	/**
+	 * Finds out if a repository is completely clean in the current transaction
+	 *
+	 * @param entityName
+	 * @return indication if the entire repository is clean
+	 */
+	boolean isRepositoryCompletelyClean(String entityName);
 
 	/**
 	 * Get all IDs of specific entity instances that have been dirtied by this transaction.
@@ -39,6 +49,14 @@ public interface TransactionInformation
 	 * This happens during a streaming update or insert or delete of data or a metadata change.
 	 * If a single row has been updated or multiple calls to single update methods have been made, the specific rows will
 	 * not be returned here but in {@link #getDirtyEntities()} instead.
+	 *
+	 * @return Set of {@link String}s with fully qualified names of the dirty repositories
+	 */
+	Set<String> getEntirelyDirtyRepositories();
+
+	/**
+	 * Get all repositories that have been dirtied by this transaction,
+	 * whether it is one entity, or a complete repository
 	 *
 	 * @return Set of {@link String}s with fully qualified names of the dirty repositories
 	 */

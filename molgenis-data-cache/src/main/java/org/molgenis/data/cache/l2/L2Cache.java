@@ -2,7 +2,6 @@ package org.molgenis.data.cache.l2;
 
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.MolgenisDataException;
@@ -27,6 +26,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.cache.CacheBuilder.newBuilder;
+import static com.google.common.collect.Maps.newConcurrentMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -54,7 +54,7 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	{
 		this.entityHydration = requireNonNull(entityHydration);
 		this.transactionInformation = requireNonNull(transactionInformation);
-		caches = Maps.newConcurrentMap();
+		caches = newConcurrentMap();
 		requireNonNull(molgenisTransactionManager).addTransactionListener(this);
 	}
 
@@ -62,7 +62,7 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	public void afterCommitTransaction(String transactionId)
 	{
 		//TODO: trace logging
-		transactionInformation.getDirtyRepositories().forEach(caches::remove);
+		transactionInformation.getEntirelyDirtyRepositories().forEach(caches::remove);
 		transactionInformation.getDirtyEntities().forEach(this::evict);
 	}
 
