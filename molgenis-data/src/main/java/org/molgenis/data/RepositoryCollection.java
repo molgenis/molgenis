@@ -49,15 +49,15 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	/**
 	 * Get a repository by entity name
 	 *
-	 * @throws UnknownEntityException
+	 * @throws UnknownEntityException if no repository exists for the given entity name
 	 */
 	Repository<Entity> getRepository(String name);
 
 	/**
 	 * Get a repository for the given entity meta data
 	 *
-	 * @param entityMeta
-	 * @return
+	 * @param entityMeta entity meta data
+	 * @return repository for the given entity meta data
 	 */
 	Repository<Entity> getRepository(EntityMetaData entityMeta);
 
@@ -78,18 +78,18 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	/**
 	 * Adds an Attribute to an EntityMeta
 	 *
-	 * @param entityName
-	 * @param attribute
+	 * @param entityMeta entity meta data
+	 * @param attribute  attribute to add
 	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#UPDATABLE}
 	 */
-	void addAttribute(String entityName, AttributeMetaData attribute);
+	void addAttribute(EntityMetaData entityMeta, AttributeMetaData attribute);
 
 	/**
 	 * Updates {@link Repository repositories} for the given updated attribute.
 	 *
 	 * @param entityMetaData entity meta data
 	 * @param attr           attribute
-	 * @param updatedAttr
+	 * @param updatedAttr    updated attribute
 	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#UPDATABLE}
 	 */
 	void updateAttribute(EntityMetaData entityMetaData, AttributeMetaData attr, AttributeMetaData updatedAttr);
@@ -97,16 +97,16 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	/**
 	 * Removes an attribute from an entity
 	 *
-	 * @param entityName
-	 * @param attributeName
+	 * @param entityMeta entity meta data
+	 * @param attr       attribute to remove
 	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#UPDATABLE}
 	 */
-	void deleteAttribute(String entityName, String attributeName);
+	void deleteAttribute(EntityMetaData entityMeta, AttributeMetaData attr);
 
 	/**
 	 * Returns the language codes defined in the meta data stored in this repository collection.
 	 *
-	 * @return
+	 * @return stream of language codes
 	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#META_DATA_PERSISTABLE}
 	 */
 	Stream<String> getLanguageCodes();

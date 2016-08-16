@@ -57,8 +57,8 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(DATA_TYPE).setDataType(ENUM).setEnumOptions(AttributeType.getOptionsLowercase()).setNillable(false)
 				.setLabel("Data type");
 		addAttribute(PARTS).setDataType(MREF).setRefEntity(this).setLabel("Attribute parts");
-		addAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityMetaMeta).setReadOnly(true)
-				.setLabel("Referenced entity");
+		addAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityMetaMeta).setLabel("Referenced entity")
+				.setValidationExpression(getRefEntityValidationExpression());
 		addAttribute(EXPRESSION).setNillable(true).setLabel("Expression")
 				.setDescription("Computed value expression in Magma JavaScript");
 		addAttribute(NILLABLE).setDataType(BOOL).setNillable(false).setLabel("Nillable");
@@ -68,7 +68,8 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(LABEL, ROLE_LOOKUP).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
 		addAttribute(AGGREGATEABLE).setDataType(BOOL).setNillable(false).setLabel("Aggregatable");
-		addAttribute(ENUM_OPTIONS).setDataType(TEXT).setLabel("Enum values").setDescription("For data type ENUM");
+		addAttribute(ENUM_OPTIONS).setDataType(TEXT).setLabel("Enum values").setDescription("For data type ENUM")
+				.setValidationExpression(getEnumOptionsValidationExpression());
 		addAttribute(RANGE_MIN).setDataType(LONG).setLabel("Range min");
 		addAttribute(RANGE_MAX).setDataType(LONG).setLabel("Range max");
 		addAttribute(READ_ONLY).setDataType(BOOL).setNillable(false).setLabel("Read-only");
@@ -90,5 +91,22 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 	public void setEntityMetaDataMetaData(EntityMetaDataMetaData entityMetaMeta)
 	{
 		this.entityMetaMeta = requireNonNull(entityMetaMeta);
+	}
+
+	private static String getEnumOptionsValidationExpression()
+	{
+		return "$('" + ENUM_OPTIONS + "').isNull().and($('" + DATA_TYPE + "').eq('" + getValueString(ENUM)
+				+ "').not()).or(" + "$('" + ENUM_OPTIONS + "').isNull().not().and($('" + DATA_TYPE + "').eq('"
+				+ getValueString(ENUM) + "'))).value()";
+	}
+
+	private static String getRefEntityValidationExpression()
+	{
+		String regex =
+				"/^(" + getValueString(CATEGORICAL) + '|' + getValueString(CATEGORICAL_MREF) + '|' + getValueString(
+						FILE) + '|' + getValueString(MREF) + '|' + getValueString(XREF) + ")$/";
+
+		return "$('" + REF_ENTITY + "').isNull().and($('" + DATA_TYPE + "').matches(" + regex + ").not()).or(" + "$('"
+				+ REF_ENTITY + "').isNull().not().and($('" + DATA_TYPE + "').matches(" + regex + "))).value()";
 	}
 }

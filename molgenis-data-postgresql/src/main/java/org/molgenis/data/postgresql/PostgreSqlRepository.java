@@ -37,7 +37,6 @@ import java.util.stream.Stream;
 import static com.google.common.base.Stopwatch.createStarted;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.unmodifiableSet;
 import static java.util.Objects.requireNonNull;
@@ -70,9 +69,9 @@ public class PostgreSqlRepository extends AbstractRepository
 	/**
 	 * Repository capabilities
 	 */
-	private static final Set<RepositoryCapability> REPO_CAPABILITIES = unmodifiableSet(new HashSet<>(
-			asList(WRITABLE, MANAGABLE, QUERYABLE, VALIDATE_REFERENCE_CONSTRAINT, VALIDATE_UNIQUE_CONSTRAINT,
-					VALIDATE_NOTNULL_CONSTRAINT, CACHEABLE)));
+	private static final Set<RepositoryCapability> REPO_CAPABILITIES = unmodifiableSet(
+			EnumSet.of(WRITABLE, MANAGABLE, QUERYABLE, VALIDATE_REFERENCE_CONSTRAINT, VALIDATE_UNIQUE_CONSTRAINT,
+					VALIDATE_NOTNULL_CONSTRAINT, CACHEABLE));
 
 	/**
 	 * Supported query operators
@@ -542,7 +541,7 @@ public class PostgreSqlRepository extends AbstractRepository
 						preparedStatement.setObject(fieldIndex++, postgreSqlValue);
 					}
 
-					preparedStatement.setObject(fieldIndex++, PostgreSqlUtils.getPostgreSqlValue(entity, idAttr));
+					preparedStatement.setObject(fieldIndex, PostgreSqlUtils.getPostgreSqlValue(entity, idAttr));
 				}
 
 				@Override
@@ -654,13 +653,6 @@ public class PostgreSqlRepository extends AbstractRepository
 				return ids.size();
 			}
 		});
-	}
-
-	@Deprecated
-	private static Object convert(AttributeMetaData attr, Object value)
-	{
-		FieldType fieldType = MolgenisFieldTypes.getType(getValueString(attr.getDataType()));
-		return fieldType.convert(value);
 	}
 
 	@Deprecated

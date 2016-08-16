@@ -92,9 +92,9 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	}
 
 	@Override
-	public void addAttribute(String entityName, AttributeMetaData attribute)
+	public void addAttribute(EntityMetaData entityMeta, AttributeMetaData attribute)
 	{
-		decoratedRepositoryCollection.addAttribute(entityName, attribute);
+		decoratedRepositoryCollection.addAttribute(entityMeta, attribute);
 	}
 
 	@Override
@@ -104,9 +104,9 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	}
 
 	@Override
-	public void deleteAttribute(String entityName, String attributeName)
+	public void deleteAttribute(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		decoratedRepositoryCollection.deleteAttribute(entityName, attributeName);
+		decoratedRepositoryCollection.deleteAttribute(entityMeta, attr);
 	}
 
 	@Override
