@@ -131,11 +131,11 @@ public class QueryUtilsTest
 
 		AttributeMetaData attr1 = mock(AttributeMetaData.class);
 		when(entityMetaData.getAttribute("attr1")).thenReturn(attr1);
-		when(attr1.getExpression()).thenReturn(null);
+		when(attr1.hasExpression()).thenReturn(false);
 
 		AttributeMetaData attr2 = mock(AttributeMetaData.class);
 		when(entityMetaData.getAttribute("attr2")).thenReturn(attr2);
-		when(attr2.getExpression()).thenReturn("${value}");
+		when(attr2.hasExpression()).thenReturn(true);
 
 		assertTrue(QueryUtils.containsComputedAttribute(q.getRules(), entityMetaData));
 	}
@@ -164,19 +164,19 @@ public class QueryUtilsTest
 
 		AttributeMetaData attr1 = mock(AttributeMetaData.class);
 		when(entityMetaData.getAttribute("attr1")).thenReturn(attr1);
-		when(attr1.getExpression()).thenReturn(null);
+		when(attr1.hasExpression()).thenReturn(false);
 
 		AttributeMetaData attr2 = mock(AttributeMetaData.class);
 		when(entityMetaData.getAttribute("attr2")).thenReturn(attr2);
-		when(attr2.getExpression()).thenReturn(null);
+		when(attr2.hasExpression()).thenReturn(false);
 
 		AttributeMetaData attr3 = mock(AttributeMetaData.class);
 		when(entityMetaData.getAttribute("attr3")).thenReturn(attr3);
-		when(attr1.getExpression()).thenReturn(null);
+		when(attr1.hasExpression()).thenReturn(false);
 
 		AttributeMetaData attr4 = mock(AttributeMetaData.class);
 		when(entityMetaData.getAttribute("attr4")).thenReturn(attr4);
-		when(attr1.getExpression()).thenReturn("${value}");
+		when(attr1.hasExpression()).thenReturn(true);
 
 		assertTrue(QueryUtils.containsComputedAttribute(q.getRules(), entityMetaData));
 	}

@@ -250,8 +250,7 @@ public class IndexedRepositoryDecorator implements Repository<Entity>
 	 */
 	private boolean querySupported(Query<Entity> q)
 	{
-		return !containsAnyOperator(q, unsupportedOperators) && !containsComputedAttribute(q.getRules(),
-				getEntityMetaData());
+		return !containsAnyOperator(q, unsupportedOperators) && !containsComputedAttribute(q, getEntityMetaData());
 
 	}
 }
