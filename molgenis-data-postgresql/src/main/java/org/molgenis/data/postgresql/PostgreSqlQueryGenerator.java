@@ -111,21 +111,11 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlSetNotNull(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		if (!attr.isNillable())
-		{
-			throw new MolgenisDataException(
-					format("Entity [%s] attribute [%s] is not nillable", entityMeta.getName(), attr.getName()));
-		}
 		return "ALTER TABLE " + getTableName(entityMeta) + " ALTER COLUMN " + getColumnName(attr) + " SET NOT NULL";
 	}
 
 	static String getSqlDropNotNull(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		if (attr.isNillable())
-		{
-			throw new MolgenisDataException(
-					format("Entity [%s] attribute [%s] is nillable", entityMeta.getName(), attr.getName()));
-		}
 		return "ALTER TABLE " + getTableName(entityMeta) + " ALTER COLUMN " + getColumnName(attr) + " DROP NOT NULL";
 	}
 

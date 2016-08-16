@@ -35,21 +35,6 @@ public class PostgreSqlQueryGeneratorTest
 				"ALTER TABLE \"entity\" ALTER COLUMN \"attr\" SET NOT NULL");
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void getSqlSetNotNullAttrNotNillable()
-	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
-		when(attr.isNillable()).thenReturn(false);
-		PostgreSqlQueryGenerator.getSqlSetNotNull(entityMeta, attr);
-	}
-
-	@Test
-	public void getSqlSetDataType()
-	{
-
-	}
-
 	@Test
 	public void getSqlDropNotNull()
 	{
@@ -58,15 +43,6 @@ public class PostgreSqlQueryGeneratorTest
 		when(attr.isNillable()).thenReturn(false);
 		assertEquals(PostgreSqlQueryGenerator.getSqlDropNotNull(entityMeta, attr),
 				"ALTER TABLE \"entity\" ALTER COLUMN \"attr\" DROP NOT NULL");
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class)
-	public void getSqlDropNotNullAttrNotNillable()
-	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
-		when(attr.isNillable()).thenReturn(true);
-		PostgreSqlQueryGenerator.getSqlDropNotNull(entityMeta, attr);
 	}
 
 	@Test
