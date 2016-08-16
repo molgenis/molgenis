@@ -304,6 +304,18 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 
 	private void updateDataType(EntityMetaData entityMeta, AttributeMetaData attr, AttributeMetaData updatedAttr)
 	{
+		// do nothing on representation changes XREF --> CATEGORICAL
+		if (isSingleReferenceType(attr) && isSingleReferenceType(updatedAttr))
+		{
+			return;
+		}
+
+		// do nothing on representation changes MREF --> CATEGORICAL_MREF
+		if (isMultipleReferenceType(attr) && isMultipleReferenceType(updatedAttr))
+		{
+			return;
+		}
+
 		AttributeMetaData idAttr = entityMeta.getIdAttribute();
 		if (idAttr != null && idAttr.getName().equals(attr.getName()))
 		{
