@@ -190,11 +190,7 @@ public class MappingServiceImpl implements MappingService
 
 			// Compare the metadata between the target repository and the mapping target
 			// Returns detailed information in case something is not compatible
-			String mappingException = compareTargetMetaDatas(targetRepo.getEntityMetaData(), targetMetaData);
-			if (mappingException != null)
-			{
-				throw new MolgenisDataException(mappingException);
-			}
+			compareTargetMetaDatas(targetRepo.getEntityMetaData(), targetMetaData);
 
 			// If the addSourceAttribute is true, but the existing repository does not have the SOURCE attribute yet
 			// Get the existing metadata and add the SOURCE attribute
@@ -247,7 +243,7 @@ public class MappingServiceImpl implements MappingService
 	 * @param mappingTargetMetaData
 	 * @return A {@link String} containing details on a potential mapping exception, or null if the attributes of both the target repository and mapping target are compatible
 	 */
-	private String compareTargetMetaDatas(EntityMetaData targetRepositoryMetaData, EntityMetaData mappingTargetMetaData)
+	private void compareTargetMetaDatas(EntityMetaData targetRepositoryMetaData, EntityMetaData mappingTargetMetaData)
 	{
 		Map<String, AttributeMetaData> targetRepositoryAttributeMap = newHashMap();
 		targetRepositoryMetaData.getAtomicAttributes()
@@ -259,18 +255,18 @@ public class MappingServiceImpl implements MappingService
 			AttributeMetaData targetRepositoryAttribute = targetRepositoryAttributeMap.get(mappingTargetAttributeName);
 			if (targetRepositoryAttribute == null)
 			{
-				return format("Target repository does not contain the following attribute: %s",
-						mappingTargetAttributeName);
+				throw new MolgenisDataException(format("Target repository does not contain the following attribute: %s",
+						mappingTargetAttributeName));
 			}
 
 			AttributeType targetRepositoryAttributeType = targetRepositoryAttribute.getDataType();
 			AttributeType mappingTargetAttributeType = mappingTargetAttribute.getDataType();
 			if (!mappingTargetAttributeType.equals(targetRepositoryAttributeType))
 			{
-				return format(
-						"attribute %s in the mapping target is type %s while attribute %s in the target repository is type %s. Please make sure the types are the same",
-						mappingTargetAttributeName, mappingTargetAttributeType, targetRepositoryAttribute.getName(),
-						targetRepositoryAttributeType);
+				throw new MolgenisDataException(
+						format("attribute %s in the mapping target is type %s while attribute %s in the target repository is type %s. Please make sure the types are the same",
+								mappingTargetAttributeName, mappingTargetAttributeType,
+								targetRepositoryAttribute.getName(), targetRepositoryAttributeType));
 			}
 
 			if (isReferenceType(mappingTargetAttribute))
@@ -279,19 +275,15 @@ public class MappingServiceImpl implements MappingService
 				String targetRepositoryRefEntityName = targetRepositoryAttribute.getRefEntity().getName();
 				if (!mappingTargetRefEntityName.equals(targetRepositoryRefEntityName))
 				{
-					return format(
-							"In the mapping target, attribute %s of type %s has reference entity %s while in the target repository attribute %s of type %s has reference entity %s. "
-									+ "Please make sure the reference entities of your mapping target are pointing towards the same reference entities as your target repository",
-							mappingTargetAttributeName, mappingTargetAttributeType, mappingTargetRefEntityName,
-							targetRepositoryAttribute.getName(), targetRepositoryAttributeType,
-							targetRepositoryRefEntityName);
+					throw new MolgenisDataException(
+							format("In the mapping target, attribute %s of type %s has reference entity %s while in the target repository attribute %s of type %s has reference entity %s. "
+											+ "Please make sure the reference entities of your mapping target are pointing towards the same reference entities as your target repository",
+									mappingTargetAttributeName, mappingTargetAttributeType, mappingTargetRefEntityName,
+									targetRepositoryAttribute.getName(), targetRepositoryAttributeType,
+									targetRepositoryRefEntityName));
 				}
 			}
-
 		}
-
-		// The target repository and mapping target are compatible, return null
-		return null;
 	}
 
 	private void applyMappingsToRepositories(MappingTarget mappingTarget, Repository<Entity> targetRepo,
