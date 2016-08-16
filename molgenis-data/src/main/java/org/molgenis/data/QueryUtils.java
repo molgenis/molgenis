@@ -8,14 +8,16 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 
+import static java.util.stream.StreamSupport.*;
+
 public class QueryUtils
 {
-	public static boolean containsOperator(Query q, Operator operator)
+	public static boolean containsOperator(Query<Entity> q, Operator operator)
 	{
 		return containsAnyOperator(q, EnumSet.of(operator));
 	}
 
-	public static boolean containsAnyOperator(Query q, Set<Operator> operators)
+	public static boolean containsAnyOperator(Query<Entity> q, Set<Operator> operators)
 	{
 		return containsAnyOperator(q.getRules(), operators);
 	}
@@ -38,7 +40,19 @@ public class QueryUtils
 		return false;
 	}
 
-	public static boolean containsComputedAttribute(List<QueryRule> rules, EntityMetaData entityMetaData)
+	public static boolean containsComputedAttribute(Query<Entity> query, EntityMetaData entityMetaData)
+	{
+		return (containsComputedAttribute(query.getSort(), entityMetaData) || containsComputedAttribute(
+				query.getRules(), entityMetaData));
+	}
+
+	public static boolean containsComputedAttribute(Sort sort, EntityMetaData entityMetaData)
+	{
+		return ((sort != null) && !stream(sort.spliterator(), false)
+				.allMatch(order -> !entityMetaData.getAttribute(order.getAttr()).hasExpression()));
+	}
+
+	public static boolean containsComputedAttribute(Iterable<QueryRule> rules, EntityMetaData entityMetaData)
 	{
 		for (QueryRule rule : rules)
 		{
@@ -49,7 +63,7 @@ public class QueryUtils
 			}
 
 			AttributeMetaData amd = entityMetaData.getAttribute(rule.getField());
-			if (amd != null && amd.getExpression() != null)
+			if (amd != null && amd.hasExpression())
 			{
 				return true;
 			}

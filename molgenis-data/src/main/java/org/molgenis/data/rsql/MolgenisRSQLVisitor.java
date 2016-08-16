@@ -1,7 +1,5 @@
 package org.molgenis.data.rsql;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Iterables;
 import cz.jirutka.rsql.parser.ast.*;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -11,15 +9,18 @@ import org.molgenis.data.support.QueryImpl;
 import java.util.Iterator;
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+
 /**
- * RSQLVisitor implementation for molgenis Query.
+ * RSQLVisitor implementation that creates {@link Query} objects for an RSQL tree.
  *
  * @see https://github.com/jirutka/rsql-parser
  */
 public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
 {
-	private final QueryImpl<Entity> q = new QueryImpl<Entity>();
+	private final QueryImpl<Entity> q = new QueryImpl<>();
 	private final EntityMetaData entityMetaData;
+	private final RSQLValueParser rsqlValueParser = new RSQLValueParser();
 
 	public MolgenisRSQLVisitor(EntityMetaData entityMetaData)
 	{
@@ -92,53 +93,46 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
 				}
 				break;
 			case "==":
-				Object eqValue = DataConverter.convert(values.get(0), getAttribute(node));
+				Object eqValue = rsqlValueParser.parse(values.get(0), getAttribute(node));
 				q.eq(attrName, eqValue);
 				break;
 			case "=in=":
 				AttributeMetaData inAttr = getAttribute(node);
-				q.in(attrName, Iterables.transform(values, new Function<String, Object>()
-				{
-					@Override
-					public Object apply(String value)
-					{
-						return DataConverter.convert(value, inAttr);
-					}
-				}));
+				q.in(attrName, values.stream().map(value -> rsqlValueParser.parse(value, inAttr)).collect(toList()));
 				break;
 			case "=lt=":
 			case "<":
 				AttributeMetaData ltAttr = getAttribute(node);
-				validateNumericOrDate(ltAttr, symbol);
-				Object ltValue = DataConverter.convert(values.get(0), ltAttr);
+				validateNumericOrDate(ltAttr);
+				Object ltValue = rsqlValueParser.parse(values.get(0), ltAttr);
 				q.lt(attrName, ltValue);
 				break;
 			case "=le=":
 			case "<=":
 				AttributeMetaData leAttr = getAttribute(node);
-				validateNumericOrDate(leAttr, symbol);
-				Object leValue = DataConverter.convert(values.get(0), leAttr);
+				validateNumericOrDate(leAttr);
+				Object leValue = rsqlValueParser.parse(values.get(0), leAttr);
 				q.le(attrName, leValue);
 				break;
 			case "=gt=":
 			case ">":
 				AttributeMetaData gtAttr = getAttribute(node);
-				validateNumericOrDate(gtAttr, symbol);
-				Object gtValue = DataConverter.convert(values.get(0), gtAttr);
+				validateNumericOrDate(gtAttr);
+				Object gtValue = rsqlValueParser.parse(values.get(0), gtAttr);
 				q.gt(attrName, gtValue);
 				break;
 			case "=ge=":
 			case ">=":
 				AttributeMetaData geAttr = getAttribute(node);
-				validateNumericOrDate(geAttr, symbol);
-				Object geValue = DataConverter.convert(values.get(0), geAttr);
+				validateNumericOrDate(geAttr);
+				Object geValue = rsqlValueParser.parse(values.get(0), geAttr);
 				q.ge(attrName, geValue);
 				break;
 			case "=rng=":
 				AttributeMetaData rngAttr = getAttribute(node);
-				validateNumericOrDate(rngAttr, symbol);
-				Object fromValue = values.get(0) != null ? DataConverter.convert(values.get(0), rngAttr) : null;
-				Object toValue = values.get(1) != null ? DataConverter.convert(values.get(1), rngAttr) : null;
+				validateNumericOrDate(rngAttr);
+				Object fromValue = values.get(0) != null ? rsqlValueParser.parse(values.get(0), rngAttr) : null;
+				Object toValue = values.get(1) != null ? rsqlValueParser.parse(values.get(1), rngAttr) : null;
 				q.rng(attrName, fromValue, toValue);
 				break;
 			case "=like=":
@@ -146,7 +140,7 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
 				q.like(attrName, likeValue);
 				break;
 			case "!=":
-				Object notEqValue = DataConverter.convert(values.get(0), getAttribute(node));
+				Object notEqValue = rsqlValueParser.parse(values.get(0), getAttribute(node));
 				q.not().eq(attrName, notEqValue);
 				break;
 			case "=should=":
@@ -161,7 +155,7 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
 		return q;
 	}
 
-	private void validateNumericOrDate(AttributeMetaData attr, String symbol)
+	private void validateNumericOrDate(AttributeMetaData attr)
 	{
 		switch (attr.getDataType())
 		{
@@ -188,7 +182,7 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
 		{
 			throw new UnknownAttributeException("Unknown attribute [" + attrName + "]");
 		}
-		EntityMetaData entityMetaDataAtDepth = entityMetaData;
+		EntityMetaData entityMetaDataAtDepth;
 		for (int i = 1; i < attrTokens.length; ++i)
 		{
 			entityMetaDataAtDepth = attr.getRefEntity();
