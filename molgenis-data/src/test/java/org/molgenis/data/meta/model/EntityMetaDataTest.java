@@ -69,6 +69,32 @@ public class EntityMetaDataTest
 	}
 
 	@Test
+	public void setNameNoSimpleNameNoLabel()
+	{
+		EntityMetaData entityMeta = new EntityMetaData(createEntityMetaMeta());
+		String name = "name";
+		entityMeta.setName(name);
+		assertEquals(entityMeta.getName(), name);
+		assertEquals(entityMeta.getSimpleName(), name);
+		assertEquals(entityMeta.getLabel(), name);
+	}
+
+	@Test
+	public void setNameExistingSimpleNameExistingLabel()
+	{
+		EntityMetaData entityMeta = new EntityMetaData(createEntityMetaMeta());
+		String label = "label";
+		String simpleName = "simpleName";
+		String name = "name";
+		entityMeta.setLabel(label);
+		entityMeta.setSimpleName(simpleName);
+		entityMeta.setName(name);
+		assertEquals(entityMeta.getName(), name);
+		assertEquals(entityMeta.getSimpleName(), simpleName);
+		assertEquals(entityMeta.getLabel(), label);
+	}
+
+	@Test
 	public void setSimpleNameNoNameNoLabel()
 	{
 		EntityMetaData entityMeta = new EntityMetaData(createEntityMetaMeta());

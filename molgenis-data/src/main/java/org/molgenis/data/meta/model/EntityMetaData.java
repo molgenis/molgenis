@@ -152,9 +152,20 @@ public class EntityMetaData extends StaticEntity
 		return getString(FULL_NAME);
 	}
 
+	/**
+	 * Sets the fully qualified entity name.
+	 * In case this entity simple name is null, assigns the fully qualified entity name to the simple name.
+	 *
+	 * @param fullName fully qualified entity name.
+	 * @return this entity meta data for chaining
+	 */
 	public EntityMetaData setName(String fullName)
 	{
 		set(FULL_NAME, fullName);
+		if (getSimpleName() == null)
+		{
+			setSimpleName(fullName);
+		}
 		return this;
 	}
 
@@ -168,6 +179,13 @@ public class EntityMetaData extends StaticEntity
 		return getString(SIMPLE_NAME);
 	}
 
+	/**
+	 * Sets the entity name.
+	 * In case this entity label is null, assigns the entity name to the label.
+	 *
+	 * @param simpleName entity name.
+	 * @return this entity meta data for chaining
+	 */
 	public EntityMetaData setSimpleName(String simpleName)
 	{
 		set(SIMPLE_NAME, simpleName);
