@@ -60,6 +60,7 @@ public class CombinedEntityCache
 	 * @return Optional {@link Entity} with the result from the cache,
 	 * or null if no record of the entity is present in the cache
 	 */
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_OPTIONAL_RETURN_NULL", justification = "Intentional behavior")
 	public Optional<Entity> getIfPresent(EntityMetaData entityMetaData, Object id)
 	{
 		Optional<Map<String, Object>> optionalDehydratedEntity = cache
