@@ -164,7 +164,11 @@ public class EntityMetaData extends StaticEntity
 		set(FULL_NAME, fullName);
 		if (getSimpleName() == null)
 		{
-			setSimpleName(fullName);
+			set(SIMPLE_NAME, fullName);
+		}
+		if (getLabel() == null)
+		{
+			set(LABEL, fullName);
 		}
 		return this;
 	}
