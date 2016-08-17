@@ -201,8 +201,22 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 			throw new RuntimeException("Error translating exception", pSqlException);
 		}
 		String value = m.group(1);
+
+		String constraintViolationMessageTemplate;
+		if (detailMessage.contains("still referenced from"))
+		{
+			// ERROR: update or delete on table "x" violates foreign key constraint "y" on table "z"
+			// Detail: Key (k)=(v) is still referenced from table "x".
+			constraintViolationMessageTemplate = "Value '%s' for attribute '%s' is referenced by entity '%s'.";
+		}
+		else
+		{
+			// ERROR: insert or update on table "x" violates foreign key constraint "y"
+			// Detail: Key (k)=(v) is not present in table "z".
+			constraintViolationMessageTemplate = "Unknown xref value '%s' for attribute '%s' of entity '%s'.";
+		}
 		ConstraintViolation constraintViolation = new ConstraintViolation(
-				format("Unknown xref value '%s' for attribute '%s' of entity '%s'.", value, colName, tableName), null);
+				format(constraintViolationMessageTemplate, value, colName, tableName), null);
 		return new MolgenisValidationException(singleton(constraintViolation));
 	}
 

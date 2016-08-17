@@ -29,6 +29,7 @@ public class PostgreSqlExceptionTranslatorTest
 		when(serverErrorMessage.getTable()).thenReturn("mytable");
 		when(serverErrorMessage.getMessage())
 				.thenReturn("null value in column \"mycolumn\" violates not-null constraint");
+		//noinspection ThrowableResultOfMethodCallIgnored
 		MolgenisValidationException e = postgreSqlExceptionTranslator
 				.translateNotNullViolation(new PSQLException(serverErrorMessage));
 		assertEquals(e.getMessage(), "The attribute 'mycolumn' of entity 'mytable' can not be null.");
@@ -43,6 +44,7 @@ public class PostgreSqlExceptionTranslatorTest
 		when(serverErrorMessage.getSQLState()).thenReturn("23502");
 		when(serverErrorMessage.getTable()).thenReturn("mytable");
 		when(serverErrorMessage.getMessage()).thenReturn("xxxyyyzzzz");
+		//noinspection ThrowableResultOfMethodCallIgnored
 		postgreSqlExceptionTranslator.translateNotNullViolation(new PSQLException(serverErrorMessage));
 	}
 
@@ -55,9 +57,41 @@ public class PostgreSqlExceptionTranslatorTest
 		when(serverErrorMessage.getSQLState()).thenReturn("23503");
 		when(serverErrorMessage.getTable()).thenReturn("mytable");
 		when(serverErrorMessage.getDetail()).thenReturn("... (mycolumn) ... (myvalue) ...");
+		//noinspection ThrowableResultOfMethodCallIgnored
 		MolgenisValidationException e = postgreSqlExceptionTranslator
 				.translateForeignKeyViolation(new PSQLException(serverErrorMessage));
 		assertEquals(e.getMessage(), "Unknown xref value 'myvalue' for attribute 'mycolumn' of entity 'mytable'.");
+	}
+
+	@Test
+	public void translateForeignKeyViolationNotPresent()
+	{
+		DataSource dataSource = mock(DataSource.class);
+		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
+		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+		when(serverErrorMessage.getSQLState()).thenReturn("23503");
+		when(serverErrorMessage.getTable()).thenReturn("mytable");
+		when(serverErrorMessage.getDetail()).thenReturn("Key (mycolumn)=(myvalue) is not present in table \"mytable\"");
+		//noinspection ThrowableResultOfMethodCallIgnored
+		MolgenisValidationException e = postgreSqlExceptionTranslator
+				.translateForeignKeyViolation(new PSQLException(serverErrorMessage));
+		assertEquals(e.getMessage(), "Unknown xref value 'myvalue' for attribute 'mycolumn' of entity 'mytable'.");
+	}
+
+	@Test
+	public void translateForeignKeyViolationStillReferenced()
+	{
+		DataSource dataSource = mock(DataSource.class);
+		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
+		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+		when(serverErrorMessage.getSQLState()).thenReturn("23503");
+		when(serverErrorMessage.getTable()).thenReturn("mytable");
+		when(serverErrorMessage.getDetail())
+				.thenReturn("Key (mycolumn)=(myvalue) is still referenced from table \"mytable\"");
+		//noinspection ThrowableResultOfMethodCallIgnored
+		MolgenisValidationException e = postgreSqlExceptionTranslator
+				.translateForeignKeyViolation(new PSQLException(serverErrorMessage));
+		assertEquals(e.getMessage(), "Value 'myvalue' for attribute 'mycolumn' is referenced by entity 'mytable'.");
 	}
 
 	@Test(expectedExceptions = RuntimeException.class)
@@ -69,6 +103,7 @@ public class PostgreSqlExceptionTranslatorTest
 		when(serverErrorMessage.getSQLState()).thenReturn("23503");
 		when(serverErrorMessage.getTable()).thenReturn("mytable");
 		when(serverErrorMessage.getDetail()).thenReturn("xxxyyyyzzzz");
+		//noinspection ThrowableResultOfMethodCallIgnored
 		postgreSqlExceptionTranslator.translateForeignKeyViolation(new PSQLException(serverErrorMessage));
 	}
 
@@ -81,6 +116,7 @@ public class PostgreSqlExceptionTranslatorTest
 		when(serverErrorMessage.getSQLState()).thenReturn("23505");
 		when(serverErrorMessage.getTable()).thenReturn("mytable");
 		when(serverErrorMessage.getDetail()).thenReturn("Key (mycolumn)=(myvalue) already exists.");
+		//noinspection ThrowableResultOfMethodCallIgnored
 		MolgenisValidationException e = postgreSqlExceptionTranslator
 				.translateUniqueKeyViolation(new PSQLException(serverErrorMessage));
 		assertEquals(e.getMessage(),
@@ -96,6 +132,7 @@ public class PostgreSqlExceptionTranslatorTest
 		when(serverErrorMessage.getSQLState()).thenReturn("23505");
 		when(serverErrorMessage.getTable()).thenReturn("mytable");
 		when(serverErrorMessage.getDetail()).thenReturn("xxxyyyyzzz");
+		//noinspection ThrowableResultOfMethodCallIgnored
 		postgreSqlExceptionTranslator.translateUniqueKeyViolation(new PSQLException(serverErrorMessage));
 	}
 
@@ -106,6 +143,7 @@ public class PostgreSqlExceptionTranslatorTest
 		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getMessage()).thenReturn("invalid input syntax for integer: \"str1\"");
+		//noinspection ThrowableResultOfMethodCallIgnored
 		MolgenisValidationException e = postgreSqlExceptionTranslator
 				.translateInvalidIntegerException(new PSQLException(serverErrorMessage));
 		assertEquals(e.getMessage(), "Value [str1] of this entity attribute is not of type [INT or LONG].");
@@ -118,6 +156,7 @@ public class PostgreSqlExceptionTranslatorTest
 		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getMessage()).thenReturn("invalid input syntax for type boolean: \"str1\"");
+		//noinspection ThrowableResultOfMethodCallIgnored
 		MolgenisValidationException e = postgreSqlExceptionTranslator
 				.translateInvalidIntegerException(new PSQLException(serverErrorMessage));
 		assertEquals(e.getMessage(), "Value [str1] of this entity attribute is not of type [BOOL].");
@@ -130,6 +169,7 @@ public class PostgreSqlExceptionTranslatorTest
 		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getMessage()).thenReturn("invalid input syntax for type double precision: \"str1\"");
+		//noinspection ThrowableResultOfMethodCallIgnored
 		MolgenisValidationException e = postgreSqlExceptionTranslator
 				.translateInvalidIntegerException(new PSQLException(serverErrorMessage));
 		assertEquals(e.getMessage(), "Value [str1] of this entity attribute is not of type [DECIMAL].");
@@ -142,6 +182,7 @@ public class PostgreSqlExceptionTranslatorTest
 		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getMessage()).thenReturn("invalid input syntax for type date: \"str1\"");
+		//noinspection ThrowableResultOfMethodCallIgnored
 		MolgenisValidationException e = postgreSqlExceptionTranslator
 				.translateInvalidIntegerException(new PSQLException(serverErrorMessage));
 		assertEquals(e.getMessage(), "Value [str1] of this entity attribute is not of type [DATE].");
@@ -154,6 +195,7 @@ public class PostgreSqlExceptionTranslatorTest
 		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getMessage()).thenReturn("invalid input syntax for type timestamp: \"str1\"");
+		//noinspection ThrowableResultOfMethodCallIgnored
 		MolgenisValidationException e = postgreSqlExceptionTranslator
 				.translateInvalidIntegerException(new PSQLException(serverErrorMessage));
 		assertEquals(e.getMessage(), "Value [str1] of this entity attribute is not of type [DATE_TIME].");
