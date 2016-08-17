@@ -94,7 +94,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	public static final String EMX_PACKAGE_TAGS = "tags";
 	public static final String EMX_PACKAGE_LABEL = "label";
 
-	public static Map<String, String> EMX_NAME_TO_REPO_NAME_MAP = newHashMap();
+	public static final Map<String, String> EMX_NAME_TO_REPO_NAME_MAP = newHashMap();
 
 	static
 	{
