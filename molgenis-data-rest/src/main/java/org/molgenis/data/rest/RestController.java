@@ -326,8 +326,8 @@ public class RestController
 			@Valid @RequestBody EntityCollectionRequest request)
 	{
 		validateAndConvertQueryValues(request.getQ(), dataService.getEntityMetaData(entityName));
-		Set<String> attributesSet = toAttributeSet(request != null ? request.getAttributes() : null);
-		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
+		Set<String> attributesSet = toAttributeSet(request.getAttributes());
+		Map<String, Set<String>> attributeExpandSet = toExpandMap(request.getExpand());
 
 		return retrieveEntityAttributeInternal(entityName, untypedId, refAttributeName, request, attributesSet,
 				attributeExpandSet);
@@ -375,10 +375,8 @@ public class RestController
 			@Valid @RequestBody EntityCollectionRequest request)
 	{
 		validateAndConvertQueryValues(request.getQ(), dataService.getEntityMetaData(entityName));
-		Set<String> attributesSet = toAttributeSet(request != null ? request.getAttributes() : null);
-		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
-
-		request = request != null ? request : new EntityCollectionRequest();
+		Set<String> attributesSet = toAttributeSet(request.getAttributes());
+		Map<String, Set<String>> attributeExpandSet = toExpandMap(request.getExpand());
 
 		return retrieveEntityCollectionInternal(entityName, request, attributesSet, attributeExpandSet);
 	}
