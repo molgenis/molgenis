@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentMap;
@@ -32,7 +33,7 @@ import static org.slf4j.LoggerFactory.getLogger;
 @Service
 public class L3Cache extends DefaultMolgenisTransactionListener
 {
-	public static final Logger LOG = getLogger(L3Cache.class);
+	private static final Logger LOG = getLogger(L3Cache.class);
 	private static final int MAX_CACHE_SIZE_PER_QUERY = 1000;
 
 	/**
@@ -83,7 +84,7 @@ public class L3Cache extends DefaultMolgenisTransactionListener
 	/**
 	 * Create a cacheloader that loads entity ids from the repository and stores them together with their query
 	 *
-	 * @return
+	 * @return the {@link CacheLoader}
 	 */
 	private CacheLoader<Query<Entity>, List<Object>> createCacheLoader(final Repository<Entity> repository)
 	{
@@ -93,12 +94,11 @@ public class L3Cache extends DefaultMolgenisTransactionListener
 		{
 			/**
 			 * Loads {@link Entity} identifiers for a {@link Query}
-			 * @param query
-			 * @return
-			 * @throws Exception
+			 * @param query the cache key to load
+			 * @return {@link List} of identifier {@link Object}s
 			 */
 			@Override
-			public List<Object> load(Query<Entity> query) throws Exception
+			public List<Object> load(@Nonnull Query<Entity> query)
 			{
 				LOG.trace("Loading identifiers from repository {} for query {}", repositoryName, query);
 				return repository.findAll(new QueryImpl<>(query).fetch(idAttributeFetch)).map(Entity::getIdValue)
