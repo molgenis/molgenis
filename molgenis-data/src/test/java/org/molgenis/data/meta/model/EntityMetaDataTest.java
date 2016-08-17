@@ -14,7 +14,7 @@ import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
 import static org.testng.Assert.*;
 
 public class EntityMetaDataTest
@@ -23,13 +23,11 @@ public class EntityMetaDataTest
 	private AttributeMetaData randomAttribute;
 	private AttributeMetaData compoundAttribute;
 	private AttributeMetaData attributePart;
-	private Entity entity;
 
 	private EntityMetaData nestedEntityMetaData;
 	private AttributeMetaData nestedCompoundParent;
 	private AttributeMetaData nestedCompoundPart;
 	private AttributeMetaData nestedAttributePart;
-	private Entity nestedEntity;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -48,8 +46,8 @@ public class EntityMetaDataTest
 
 		Iterable<AttributeMetaData> mockedAttributes = newArrayList(compoundAttribute, randomAttribute);
 
-		entity = when(mock(Entity.class).getEntities(ATTRIBUTES, AttributeMetaData.class)).thenReturn(mockedAttributes)
-				.getMock();
+		Entity entity = when(mock(Entity.class).getEntities(ATTRIBUTES, AttributeMetaData.class))
+				.thenReturn(mockedAttributes).getMock();
 		entityMetaData = new EntityMetaData(entity);
 
 		// Setup for nested compound test
@@ -65,9 +63,61 @@ public class EntityMetaDataTest
 
 		Iterable<AttributeMetaData> mockedNestedAttributes = newArrayList(nestedCompoundParent, randomAttribute);
 
-		nestedEntity = when(mock(Entity.class).getEntities(ATTRIBUTES, AttributeMetaData.class))
+		Entity nestedEntity = when(mock(Entity.class).getEntities(ATTRIBUTES, AttributeMetaData.class))
 				.thenReturn(mockedNestedAttributes).getMock();
 		nestedEntityMetaData = new EntityMetaData(nestedEntity);
+	}
+
+	@Test
+	public void setSimpleNameNoNameNoLabel()
+	{
+		EntityMetaData entityMeta = new EntityMetaData(createEntityMetaMeta());
+		String simpleName = "simpleName";
+		entityMeta.setSimpleName(simpleName);
+		assertEquals(entityMeta.getSimpleName(), simpleName);
+		assertEquals(entityMeta.getString(SIMPLE_NAME), simpleName);
+		assertEquals(entityMeta.getName(), simpleName);
+		assertEquals(entityMeta.getString(FULL_NAME), simpleName);
+		assertEquals(entityMeta.getLabel(), simpleName);
+		assertEquals(entityMeta.getString(LABEL), simpleName);
+	}
+
+	@Test
+	public void setSimpleNameExistingNameExistingLabel()
+	{
+		EntityMetaData entityMeta = new EntityMetaData(createEntityMetaMeta());
+		String label = "label";
+		String simpleName = "simpleName";
+		entityMeta.setName("name");
+		entityMeta.setLabel(label);
+		entityMeta.setSimpleName(simpleName);
+		assertEquals(entityMeta.getSimpleName(), simpleName);
+		assertEquals(entityMeta.getString(SIMPLE_NAME), simpleName);
+		assertEquals(entityMeta.getName(), simpleName);
+		assertEquals(entityMeta.getString(FULL_NAME), simpleName);
+		assertEquals(entityMeta.getLabel(), label);
+		assertEquals(entityMeta.getString(LABEL), label);
+	}
+
+	@Test
+	public void setLabel()
+	{
+		EntityMetaData entityMeta = new EntityMetaData(createEntityMetaMeta());
+		String label = "label";
+		entityMeta.setLabel(label);
+		assertEquals(entityMeta.getLabel(), label);
+		assertEquals(entityMeta.getString(LABEL), label);
+	}
+
+	@Test
+	public void setLabelNull()
+	{
+		EntityMetaData entityMeta = new EntityMetaData(createEntityMetaMeta());
+		String simpleName = "simpleName";
+		entityMeta.setSimpleName(simpleName);
+		entityMeta.setLabel(null);
+		assertEquals(entityMeta.getLabel(), simpleName);
+		assertEquals(entityMeta.getString(LABEL), simpleName);
 	}
 
 	@Test
@@ -180,7 +230,7 @@ public class EntityMetaDataTest
 		assertEquals(entityMetaCopy.getBackend(), "backend");
 	}
 
-	private EntityMetaData createEntityMetaMeta()
+	private static EntityMetaData createEntityMetaMeta()
 	{
 		EntityMetaData entityMetaMeta = mock(EntityMetaData.class);
 		AttributeMetaData strAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
@@ -190,7 +240,7 @@ public class EntityMetaDataTest
 		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.FULL_NAME)).thenReturn(strAttr);
 		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.SIMPLE_NAME)).thenReturn(strAttr);
 		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.PACKAGE)).thenReturn(xrefAttr);
-		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.LABEL)).thenReturn(strAttr);
+		when(entityMetaMeta.getAttribute(LABEL)).thenReturn(strAttr);
 		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.DESCRIPTION)).thenReturn(strAttr);
 		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.ATTRIBUTES)).thenReturn(mrefAttr);
 		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.ID_ATTRIBUTE)).thenReturn(xrefAttr);

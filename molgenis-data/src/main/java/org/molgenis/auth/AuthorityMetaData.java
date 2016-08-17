@@ -28,6 +28,7 @@ public class AuthorityMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Authority");
 		setPackage(securityPackage);
 
 		setAbstract(true);

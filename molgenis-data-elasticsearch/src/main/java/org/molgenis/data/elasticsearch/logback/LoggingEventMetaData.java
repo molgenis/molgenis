@@ -31,6 +31,7 @@ public class LoggingEventMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Logging event");
 		addAttribute(IDENTIFIER, ROLE_ID).setVisible(false);
 		addAttribute(TIMESTAMP).setDataType(DATE_TIME);
 		addAttribute(THREAD);

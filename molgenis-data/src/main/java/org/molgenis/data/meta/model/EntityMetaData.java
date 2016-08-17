@@ -172,18 +172,22 @@ public class EntityMetaData extends StaticEntity
 	{
 		set(SIMPLE_NAME, simpleName);
 		updateFullName();
+
+		if (getLabel() == null)
+		{
+			setLabel(simpleName);
+		}
 		return this;
 	}
 
 	/**
-	 * Optional human readable longer label
+	 * Human readable entity label
 	 *
 	 * @return entity label
 	 */
 	public String getLabel()
 	{
-		String label = getString(LABEL);
-		return label != null ? label : getString(FULL_NAME);
+		return getString(LABEL);
 	}
 
 	/**
@@ -199,6 +203,10 @@ public class EntityMetaData extends StaticEntity
 
 	public EntityMetaData setLabel(String label)
 	{
+		if (label == null)
+		{
+			label = getSimpleName();
+		}
 		set(LABEL, label);
 		return this;
 	}
@@ -848,7 +856,7 @@ public class EntityMetaData extends StaticEntity
 
 	public enum AttributeRole
 	{
-		ROLE_ID, ROLE_LABEL, ROLE_LOOKUP
+		ROLE_ID, ROLE_LABEL, ROLE_LOOKUP;
 	}
 
 	@Override

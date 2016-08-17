@@ -42,6 +42,7 @@ public class JobExecutionMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Job execution");
 		setAbstract(true);
 		addAttribute(IDENTIFIER, ROLE_ID).setLabel("Job ID").setAuto(true).setNillable(false);
 		addAttribute(USER).setDataType(STRING).setLabel("Job owner").setNillable(false);

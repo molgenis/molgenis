@@ -27,6 +27,7 @@ public class FreemarkerTemplateMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Freemarker template");
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false)
 				.setDescription("automatically generated internal id, only for internal use.");
 		addAttribute(NAME, ROLE_LABEL).setDescription("Name of the entity").setNillable(false).setUnique(true);
