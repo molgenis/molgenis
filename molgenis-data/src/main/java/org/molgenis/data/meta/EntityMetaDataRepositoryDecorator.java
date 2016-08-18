@@ -352,7 +352,12 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		decoratedRepo.add(entityMetaData);
 		if (!entityMetaData.isAbstract() && !dataService.getMeta().isMetaEntityMetaData(entityMetaData))
 		{
-			dataService.getMeta().getBackend(entityMetaData.getBackend()).createRepository(entityMetaData);
+			RepositoryCollection repoCollection = dataService.getMeta().getBackend(entityMetaData.getBackend());
+			if (repoCollection == null)
+			{
+				throw new MolgenisDataException(format("Unknown backend [%s]", entityMetaData.getBackend()));
+			}
+			repoCollection.createRepository(entityMetaData);
 		}
 	}
 

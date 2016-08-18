@@ -19,8 +19,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
-import static java.util.Collections.singleton;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
@@ -125,6 +124,41 @@ public class EntityMetaDataRepositoryDecoratorTest
 		when(permissionService.hasPermissionOnEntity(entityMeta0Name, COUNT)).thenReturn(false);
 		when(permissionService.hasPermissionOnEntity(entityMeta1Name, COUNT)).thenReturn(true);
 		assertEquals(repo.count(), 1L);
+	}
+
+	@Test
+	public void addWithKnownBackend()
+	{
+		SecurityContextHolder.getContext()
+				.setAuthentication(new TestingAuthenticationToken("anonymous", null, "ROLE_SU"));
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		when(entityMeta.getSimpleName()).thenReturn("entity");
+		when(entityMeta.getAttributes()).thenReturn(emptyList());
+		String backendName = "knownBackend";
+		when(entityMeta.getBackend()).thenReturn(backendName);
+		MetaDataService metaDataService = mock(MetaDataService.class);
+		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
+		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		repo.add(entityMeta);
+		verify(decoratedRepo).add(entityMeta);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Unknown backend \\[unknownBackend\\]")
+	public void addWithUnknownBackend()
+	{
+		SecurityContextHolder.getContext()
+				.setAuthentication(new TestingAuthenticationToken("anonymous", null, "ROLE_SU"));
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		when(entityMeta.getSimpleName()).thenReturn("entity");
+		when(entityMeta.getAttributes()).thenReturn(emptyList());
+		String backendName = "unknownBackend";
+		when(entityMeta.getBackend()).thenReturn(backendName);
+		MetaDataService metaDataService = mock(MetaDataService.class);
+		when(metaDataService.getBackend(backendName)).thenReturn(null);
+		when(dataService.getMeta()).thenReturn(metaDataService);
+		repo.add(entityMeta);
+		verify(decoratedRepo).add(entityMeta);
 	}
 
 	@Test
