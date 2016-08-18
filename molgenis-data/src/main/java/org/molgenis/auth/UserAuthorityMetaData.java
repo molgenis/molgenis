@@ -39,6 +39,7 @@ public class UserAuthorityMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("User authority");
 		setPackage(securityPackage);
 
 		setExtends(authorityMetaData);

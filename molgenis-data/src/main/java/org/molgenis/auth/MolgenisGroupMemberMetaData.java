@@ -37,6 +37,7 @@ public class MolgenisGroupMemberMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Group member");
 		setPackage(securityPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");
