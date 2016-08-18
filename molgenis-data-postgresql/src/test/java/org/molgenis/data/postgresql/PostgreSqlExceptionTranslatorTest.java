@@ -158,4 +158,17 @@ public class PostgreSqlExceptionTranslatorTest
 				.translateInvalidIntegerException(new PSQLException(serverErrorMessage));
 		assertEquals(e.getMessage(), "Value [str1] of this entity attribute is not of type [DATE_TIME].");
 	}
+
+	@Test
+	public void translateCheckConstraintViolation()
+	{
+		DataSource dataSource = mock(DataSource.class);
+		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
+		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
+		when(serverErrorMessage.getTable()).thenReturn("entity");
+		when(serverErrorMessage.getConstraint()).thenReturn("entity_column_chk");
+		MolgenisValidationException e = postgreSqlExceptionTranslator
+				.translateCheckConstraintViolation(new PSQLException(serverErrorMessage));
+		assertEquals(e.getMessage(), "Unknown enum value for attribute 'column' of entity 'entity'.");
+	}
 }
