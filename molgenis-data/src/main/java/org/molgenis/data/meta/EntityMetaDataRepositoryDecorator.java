@@ -5,7 +5,6 @@ import com.google.common.collect.TreeTraverser;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -35,7 +34,6 @@ import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
-import static org.molgenis.data.meta.model.TagMetaData.TAG;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
@@ -341,12 +339,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 
 	private void addEntityMetaData(EntityMetaData entityMetaData)
 	{
-		validateAddAllowed(entityMetaData);
-
-		if (entityMetaData.getBackend() == null)
-		{
-			entityMetaData.setBackend(dataService.getMeta().getDefaultBackend().getName());
-		}
+		validatePermission(entityMetaData.getName(), Permission.WRITEMETA);
 
 		// add row to entities table
 		decoratedRepo.add(entityMetaData);
@@ -359,22 +352,6 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 			}
 			repoCollection.createRepository(entityMetaData);
 		}
-	}
-
-	private void validateAddAllowed(EntityMetaData entityMetaData)
-	{
-		String entityName = entityMetaData.getName();
-		validatePermission(entityName, Permission.WRITEMETA);
-
-		// TODO replace with exists() once Repository.exists has been implemented
-		EntityMetaData existingEntityMetaData = findOneById(entityName, new Fetch().field(FULL_NAME));
-		if (existingEntityMetaData != null)
-		{
-			throw new MolgenisDataException(format("Adding existing entity meta data [%s] is not allowed", entityName));
-		}
-
-		// FIXME: Importer validates emd twice!!
-		MetaValidationUtils.validateEntityMetaData(entityMetaData);
 	}
 
 	private void updateEntity(EntityMetaData entityMeta)
@@ -461,8 +438,6 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		{
 			throw new MolgenisDataException(format("Updating system entity meta data [%s] is not allowed", entityName));
 		}
-
-		MetaValidationUtils.validateEntityMetaData(entityMetaData);
 	}
 
 	private void deleteEntityMetaData(EntityMetaData entityMeta)
@@ -505,12 +480,6 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 						.stream(new AttributeMetaDataTreeTraverser().postOrderTraversal(attrEntity).spliterator(),
 								false));
 		dataService.delete(ATTRIBUTE_META_DATA, allAttrs);
-	}
-
-	private void deleteEntityTags(EntityMetaData entityMetaData)
-	{
-		Iterable<Tag> tags = entityMetaData.getTags();
-		dataService.delete(TAG, StreamSupport.stream(tags.spliterator(), false));
 	}
 
 	private void deleteEntityRepository(EntityMetaData entityMetaData)
