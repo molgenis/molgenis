@@ -463,7 +463,7 @@ public class PostgreSqlRepositoryCollectionTest
 				"ALTER TABLE \"entity\" ADD CONSTRAINT \"entity_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity1\"(\"refIdAttr1\")"));
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Updating entity [entity] attribute [attr] referenced entity from [refEntity0] to [refEntity1] not allowed for type [MREF]")
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Updating entity \\[entity\\] attribute \\[attr\\] referenced entity from \\[refEntity0\\] to \\[refEntity1\\] not allowed for type \\[MREF\\]")
 	public void updateAttributeRefEntityMref()
 	{
 		AttributeMetaData refIdAttr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("refIdAttr0").getMock();
