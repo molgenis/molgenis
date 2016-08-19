@@ -39,7 +39,7 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 		return doTranslate(dataAccessException);
 	}
 
-	private MolgenisDataException doTranslate(DataAccessException dataAccessException)
+	private static MolgenisDataException doTranslate(DataAccessException dataAccessException)
 	{
 		Throwable cause = dataAccessException.getCause();
 		if (!(cause instanceof PSQLException))
@@ -56,7 +56,7 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 		return molgenisDataException;
 	}
 
-	private MolgenisDataException doTranslate(SQLException sqlException)
+	private static MolgenisDataException doTranslate(SQLException sqlException)
 	{
 		if (!(sqlException instanceof PSQLException))
 		{
@@ -73,7 +73,7 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 		return molgenisDataException;
 	}
 
-	private MolgenisDataException doTranslate(PSQLException pSqlException)
+	private static MolgenisDataException doTranslate(PSQLException pSqlException)
 	{
 		switch (pSqlException.getSQLState())
 		{
@@ -99,7 +99,7 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	MolgenisValidationException translateInvalidIntegerException(PSQLException pSqlException)
+	static MolgenisValidationException translateInvalidIntegerException(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String message = serverErrorMessage.getMessage();
@@ -147,7 +147,7 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	MolgenisValidationException translateNotNullViolation(PSQLException pSqlException)
+	static MolgenisValidationException translateNotNullViolation(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String tableName = serverErrorMessage.getTable();
@@ -187,7 +187,7 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	MolgenisValidationException translateForeignKeyViolation(PSQLException pSqlException)
+	static MolgenisValidationException translateForeignKeyViolation(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String tableName = serverErrorMessage.getTable();
@@ -203,8 +203,22 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 			throw new RuntimeException("Error translating exception", pSqlException);
 		}
 		String value = m.group(1);
+
+		String constraintViolationMessageTemplate;
+		if (detailMessage.contains("still referenced from"))
+		{
+			// ERROR: update or delete on table "x" violates foreign key constraint "y" on table "z"
+			// Detail: Key (k)=(v) is still referenced from table "x".
+			constraintViolationMessageTemplate = "Value '%s' for attribute '%s' is referenced by entity '%s'.";
+		}
+		else
+		{
+			// ERROR: insert or update on table "x" violates foreign key constraint "y"
+			// Detail: Key (k)=(v) is not present in table "z".
+			constraintViolationMessageTemplate = "Unknown xref value '%s' for attribute '%s' of entity '%s'.";
+		}
 		ConstraintViolation constraintViolation = new ConstraintViolation(
-				format("Unknown xref value '%s' for attribute '%s' of entity '%s'.", value, colName, tableName), null);
+				format(constraintViolationMessageTemplate, value, colName, tableName), null);
 		return new MolgenisValidationException(singleton(constraintViolation));
 	}
 
@@ -214,7 +228,7 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	MolgenisValidationException translateUniqueKeyViolation(PSQLException pSqlException)
+	static MolgenisValidationException translateUniqueKeyViolation(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String tableName = serverErrorMessage.getTable();

@@ -29,6 +29,7 @@ public class ScriptParameterMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Script parameter");
 		setPackage(scriptPackage);
 
 		addAttribute(NAME, ROLE_ID).setNillable(false).setLabel("Name label");

@@ -33,6 +33,7 @@ public class OntologyTermNodePathMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Ontology term node path");
 		setPackage(ontologyPackage);
 		addAttribute(ID, ROLE_ID).setVisible(false);
 		addAttribute(NODE_PATH, ROLE_LABEL).setDataType(TEXT).setNillable(false);

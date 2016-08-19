@@ -34,6 +34,7 @@ public class MappingTargetMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Mapping target");
 		setPackage(mapperPackage);
 
 		addAttribute(IDENTIFIER, ROLE_ID);

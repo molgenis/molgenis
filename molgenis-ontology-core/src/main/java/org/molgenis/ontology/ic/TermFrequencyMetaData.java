@@ -12,7 +12,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
 @Component
-public class TermFrequencyEntityMetaData extends SystemEntityMetaData
+public class TermFrequencyMetaData extends SystemEntityMetaData
 {
 	public static final String SIMPLE_NAME = "TermFrequency";
 	public static final String TERM_FREQUENCY = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -25,7 +25,7 @@ public class TermFrequencyEntityMetaData extends SystemEntityMetaData
 	private final OntologyPackage ontologyPackage;
 
 	@Autowired
-	TermFrequencyEntityMetaData(OntologyPackage ontologyPackage)
+	TermFrequencyMetaData(OntologyPackage ontologyPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_ONTOLOGY);
 		this.ontologyPackage = ontologyPackage;
@@ -34,6 +34,7 @@ public class TermFrequencyEntityMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Term frequency");
 		setPackage(ontologyPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true);
