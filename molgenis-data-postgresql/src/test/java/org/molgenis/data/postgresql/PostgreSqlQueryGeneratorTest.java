@@ -255,7 +255,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(attr.getDataType()).thenReturn(MREF);
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
 
-		String expectedSql = "CREATE TABLE IF NOT EXISTS \"entity_attr\" (\"order\" INT,\"idAttr\" character varying(255) NOT NULL, \"attr\" character varying(255) NOT NULL, FOREIGN KEY (\"idAttr\") REFERENCES \"entity\"(\"idAttr\") ON DELETE CASCADE, FOREIGN KEY (\"attr\") REFERENCES \"refEntity\"(\"refIdAttr\") ON DELETE CASCADE, UNIQUE (\"attr\",\"idAttr\"), UNIQUE (\"order\",\"idAttr\"))";
+		String expectedSql = "CREATE TABLE \"entity_attr\" (\"order\" INT,\"idAttr\" character varying(255) NOT NULL, \"attr\" character varying(255) NOT NULL, FOREIGN KEY (\"idAttr\") REFERENCES \"entity\"(\"idAttr\") ON DELETE CASCADE, FOREIGN KEY (\"attr\") REFERENCES \"refEntity\"(\"refIdAttr\") ON DELETE CASCADE, UNIQUE (\"idAttr\",\"attr\"), UNIQUE (\"order\",\"idAttr\"))";
 		assertEquals(PostgreSqlQueryGenerator.getSqlCreateJunctionTable(entityMeta, attr), expectedSql);
 	}
 
@@ -270,7 +270,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(attr.getDataType()).thenReturn(MREF);
 		when(attr.getRefEntity()).thenReturn(entityMeta);
 
-		String expectedSql = "CREATE TABLE IF NOT EXISTS \"entity_attr\" (\"order\" INT,\"idAttr\" character varying(255) NOT NULL, \"attr\" character varying(255) NOT NULL, FOREIGN KEY (\"idAttr\") REFERENCES \"entity\"(\"idAttr\") ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED, FOREIGN KEY (\"attr\") REFERENCES \"entity\"(\"idAttr\") ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED, UNIQUE (\"attr\",\"idAttr\"), UNIQUE (\"order\",\"idAttr\"))";
+		String expectedSql = "CREATE TABLE \"entity_attr\" (\"order\" INT,\"idAttr\" character varying(255) NOT NULL, \"attr\" character varying(255) NOT NULL, FOREIGN KEY (\"idAttr\") REFERENCES \"entity\"(\"idAttr\") ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED, FOREIGN KEY (\"attr\") REFERENCES \"entity\"(\"idAttr\") ON DELETE CASCADE DEFERRABLE INITIALLY DEFERRED, UNIQUE (\"idAttr\",\"attr\"), UNIQUE (\"order\",\"idAttr\"))";
 		assertEquals(PostgreSqlQueryGenerator.getSqlCreateJunctionTable(entityMeta, attr), expectedSql);
 	}
 
@@ -425,5 +425,16 @@ public class PostgreSqlQueryGeneratorTest
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
 		assertEquals(PostgreSqlQueryGenerator.getSqlDropColumn(entityMeta, attr),
 				"ALTER TABLE \"entity\" DROP COLUMN \"attr\"");
+	}
+
+	@Test
+	public void getSqlCreateJunctionTableIndex()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		AttributeMetaData idxAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idxAttr").getMock();
+		when(entityMeta.getIdAttribute()).thenReturn(idxAttr);
+		assertEquals(PostgreSqlQueryGenerator.getSqlCreateJunctionTableIndex(entityMeta, attr),
+				"CREATE INDEX \"entity_attr_idxAttr_idx\" ON \"entity_attr\" (\"idxAttr\")");
 	}
 }
