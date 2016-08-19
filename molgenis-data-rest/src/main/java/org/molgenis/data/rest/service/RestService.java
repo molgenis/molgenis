@@ -326,9 +326,8 @@ public class RestService
 				catch (ParseException e)
 				{
 					throw new MolgenisDataException(
-							format("Attribute [%s] value [%s] does not match date format [%s] or [%s]", attr.getName(),
-									paramStrValue, MolgenisDateFormat.DATEFORMAT_DATE,
-									MolgenisDateFormat.DATEFORMAT_DATETIME));
+							format("Attribute [%s] value [%s] does not match date format [%s]", attr.getName(),
+									paramStrValue, MolgenisDateFormat.DATEFORMAT_DATE));
 				}
 			}
 			else
