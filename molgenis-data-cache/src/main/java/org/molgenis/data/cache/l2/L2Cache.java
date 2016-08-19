@@ -2,7 +2,6 @@ package org.molgenis.data.cache.l2;
 
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Maps;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityKey;
 import org.molgenis.data.MolgenisDataException;
@@ -18,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.google.common.cache.CacheBuilder.newBuilder;
+import static com.google.common.collect.Maps.newConcurrentMap;
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
 import static java.util.concurrent.TimeUnit.MINUTES;
@@ -39,7 +40,7 @@ import static java.util.stream.StreamSupport.stream;
 @Service
 public class L2Cache extends DefaultMolgenisTransactionListener
 {
-	public static final Logger LOG = LoggerFactory.getLogger(L2Cache.class);
+	private static final Logger LOG = LoggerFactory.getLogger(L2Cache.class);
 	private static final int MAX_CACHE_SIZE_PER_ENTITY = 1000;
 	/**
 	 * maps entity name to the loading cache with Object key and Optional dehydrated entity value
@@ -54,7 +55,7 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	{
 		this.entityHydration = requireNonNull(entityHydration);
 		this.transactionInformation = requireNonNull(transactionInformation);
-		caches = Maps.newConcurrentMap();
+		caches = newConcurrentMap();
 		requireNonNull(molgenisTransactionManager).addTransactionListener(this);
 	}
 
@@ -62,7 +63,7 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 	public void afterCommitTransaction(String transactionId)
 	{
 		//TODO: trace logging
-		transactionInformation.getDirtyRepositories().forEach(caches::remove);
+		transactionInformation.getEntirelyDirtyRepositories().forEach(caches::remove);
 		transactionInformation.getDirtyEntities().forEach(this::evict);
 	}
 
@@ -180,7 +181,7 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 			 * @return dehydrated entity or empty if the entity was not present in the repository
 			 */
 			@Override
-			public Optional<Map<String, Object>> load(Object id)
+			public Optional<Map<String, Object>> load(@Nonnull Object id)
 			{
 				return Optional.ofNullable(repository.findOneById(id)).map(entityHydration::dehydrate);
 			}
@@ -191,7 +192,7 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 			 * @return Map mapping id to loaded entity, or to empty optional if the entity was not present in the repository
 			 */
 			@Override
-			public Map<Object, Optional<Map<String, Object>>> loadAll(Iterable<? extends Object> ids)
+			public Map<Object, Optional<Map<String, Object>>> loadAll(Iterable<?> ids)
 			{
 				Stream<Object> typedIds = stream(ids.spliterator(), false).map(id -> id);
 				Map<Object, Optional<Map<String, Object>>> result = repository.findAll(typedIds)
