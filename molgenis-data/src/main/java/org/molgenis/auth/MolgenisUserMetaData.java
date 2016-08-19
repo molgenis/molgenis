@@ -54,6 +54,7 @@ public class MolgenisUserMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("User");
 		setPackage(securityPackage);
 
 		setDescription("Anyone who can login");

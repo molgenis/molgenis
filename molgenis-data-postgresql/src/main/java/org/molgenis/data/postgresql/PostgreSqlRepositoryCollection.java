@@ -715,6 +715,18 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 			}
 		}
 		jdbcTemplate.execute(createJunctionTableSql);
+
+		String createJunctionTableIndexSql = getSqlCreateJunctionTableIndex(entityMeta, attr);
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Creating junction table index for entity [{}] attribute [{}]", entityMeta.getName(),
+					attr.getName());
+			if (LOG.isTraceEnabled())
+			{
+				LOG.trace("SQL: {}", createJunctionTableIndexSql);
+			}
+		}
+		jdbcTemplate.execute(createJunctionTableIndexSql);
 	}
 
 	private void dropJunctionTable(EntityMetaData entityMeta, AttributeMetaData mrefAttr)

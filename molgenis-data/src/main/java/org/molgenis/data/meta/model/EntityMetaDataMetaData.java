@@ -49,10 +49,11 @@ public class EntityMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(SIMPLE_NAME, ROLE_LABEL).setNillable(false).setReadOnly(true).setLabel("Name");
 		// TODO discuss whether package should be nillable
 		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetaData).setLabel("Package").setReadOnly(true);
-		addAttribute(LABEL, ROLE_LOOKUP).setLabel("Label");
+		addAttribute(LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
 		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(attrMetaMeta).setNillable(false).setLabel("Attributes");
-		addAttribute(ID_ATTRIBUTE).setDataType(XREF).setRefEntity(attrMetaMeta).setLabel("ID attribute");
+		addAttribute(ID_ATTRIBUTE).setDataType(XREF).setRefEntity(attrMetaMeta).setReadOnly(true)
+				.setLabel("ID attribute");
 		addAttribute(LABEL_ATTRIBUTE).setDataType(XREF).setRefEntity(attrMetaMeta).setLabel("Label attribute");
 		addAttribute(LOOKUP_ATTRIBUTES).setDataType(MREF).setRefEntity(attrMetaMeta).setLabel("Lookup attributes");
 		addAttribute(ABSTRACT).setDataType(BOOL).setNillable(false).setReadOnly(true).setLabel("Abstract")

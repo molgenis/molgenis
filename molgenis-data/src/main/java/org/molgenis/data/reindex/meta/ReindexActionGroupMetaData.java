@@ -41,6 +41,7 @@ public class ReindexActionGroupMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Index action group");
 		setPackage(indexPackage);
 
 		setDescription("This entity is used to group the reindex actions.");

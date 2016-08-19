@@ -9,7 +9,7 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.*;
 import org.molgenis.ontology.roc.InformationContentService;
-import org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData;
+import org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
 import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
-import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.COMBINED_SCORE;
+import static org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData.COMBINED_SCORE;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { SortaServiceImplTest.Config.class })
@@ -340,7 +340,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 	public static class Config
 	{
 		@Autowired
-		public OntologyTermHitEntityMetaData ontologyTermHitEntityMetaData;
+		public OntologyTermHitMetaData ontologyTermHitMetaData;
 
 		@Autowired
 		private OntologyTermSynonymFactory ontologyTermSynonymFactory;
@@ -360,7 +360,7 @@ public class SortaServiceImplTest extends AbstractMolgenisSpringTest
 		@Bean
 		public SortaServiceImpl sortaServiceImpl()
 		{
-			return new SortaServiceImpl(dataService(), informationContentService(), ontologyTermHitEntityMetaData,
+			return new SortaServiceImpl(dataService(), informationContentService(), ontologyTermHitMetaData,
 					ontologyTermSynonymFactory);
 		}
 	}
