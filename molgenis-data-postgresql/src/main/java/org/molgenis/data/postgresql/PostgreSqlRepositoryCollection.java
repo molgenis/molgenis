@@ -337,8 +337,10 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		}
 		else if (isMultipleReferenceType(attr) && isMultipleReferenceType(updatedAttr))
 		{
-			dropJunctionTable(entityMeta, attr);
-			createJunctionTable(entityMeta, updatedAttr);
+			throw new MolgenisDataException(
+					format("Updating entity [%s] attribute [%s] referenced entity from [%s] to [%s] not allowed for type [%s]",
+							entityMeta.getName(), attr.getName(), attr.getRefEntity().getName(),
+							updatedAttr.getRefEntity().getName(), updatedAttr.getDataType().toString()));
 		}
 	}
 

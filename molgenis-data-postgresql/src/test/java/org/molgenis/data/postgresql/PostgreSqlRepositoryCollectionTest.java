@@ -463,7 +463,7 @@ public class PostgreSqlRepositoryCollectionTest
 				"ALTER TABLE \"entity\" ADD CONSTRAINT \"entity_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity1\"(\"refIdAttr1\")"));
 	}
 
-	@Test
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Updating entity [entity] attribute [attr] referenced entity from [refEntity0] to [refEntity1] not allowed for type [MREF]")
 	public void updateAttributeRefEntityMref()
 	{
 		AttributeMetaData refIdAttr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("refIdAttr0").getMock();
@@ -492,10 +492,6 @@ public class PostgreSqlRepositoryCollectionTest
 		when(updatedAttr.getRefEntity()).thenReturn(refEntityMeta1);
 
 		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
-		ArgumentCaptor<String> captor = forClass(String.class);
-		verify(jdbcTemplate, times(2)).execute(captor.capture());
-		assertEquals(captor.getAllValues(), newArrayList("DROP TABLE \"entity_attr\"",
-				"CREATE TABLE IF NOT EXISTS \"entity_attr\" (\"order\" INT,\"id\" character varying(255) NOT NULL, \"attr\" character varying(255) NOT NULL, FOREIGN KEY (\"id\") REFERENCES \"entity\"(\"id\") ON DELETE CASCADE, FOREIGN KEY (\"attr\") REFERENCES \"refEntity1\"(\"refIdAttr1\") ON DELETE CASCADE, UNIQUE (\"attr\",\"id\"), UNIQUE (\"order\",\"id\"))"));
 	}
 
 	@Test
