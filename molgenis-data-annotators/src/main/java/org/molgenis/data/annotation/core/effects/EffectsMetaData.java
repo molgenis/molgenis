@@ -21,22 +21,22 @@ public class EffectsMetaData implements AnnotatorEntityMetaData
 	public static String ID = "id";
 	public static String VARIANT = VcfWriterUtils.VARIANT;
 
-	public static String ALT = "Alt_Allele";
-	public static String ANNOTATION = "Annotation";
-	public static String PUTATIVE_IMPACT = "Putative_impact";
-	public static String GENE_NAME = "Gene_Name";
-	public static String GENE_ID = "Gene_ID";
-	public static String FEATURE_TYPE = "Feature_type";
-	public static String FEATURE_ID = "Feature_ID";
-	public static String TRANSCRIPT_BIOTYPE = "Transcript_biotype";
-	public static String RANK_TOTAL = "Rank_total";
-	public static String HGVS_C = "HGVS_c";
-	public static String HGVS_P = "HGVS_p";
-	public static String C_DNA_POSITION = "cDNA_position";
-	public static String CDS_POSITION = "CDS_position";
-	public static String PROTEIN_POSITION = "Protein_position";
-	public static String DISTANCE_TO_FEATURE = "Distance_to_feature";
-	public static String ERRORS = "Errors";
+	public static final String ALT = "Alt_Allele";
+	public static final String ANNOTATION = "Annotation";
+	public static final String PUTATIVE_IMPACT = "Putative_impact";
+	public static final String GENE_NAME = "Gene_Name";
+	public static final String GENE_ID = "Gene_ID";
+	public static final String FEATURE_TYPE = "Feature_type";
+	public static final String FEATURE_ID = "Feature_ID";
+	public static final String TRANSCRIPT_BIOTYPE = "Transcript_biotype";
+	public static final String RANK_TOTAL = "Rank_total";
+	public static final String HGVS_C = "HGVS_c";
+	public static final String HGVS_P = "HGVS_p";
+	public static final String C_DNA_POSITION = "cDNA_position";
+	public static final String CDS_POSITION = "CDS_position";
+	public static final String PROTEIN_POSITION = "Protein_position";
+	public static final String DISTANCE_TO_FEATURE = "Distance_to_feature";
+	public static final String ERRORS = "Errors";
 
 	public LinkedList<AttributeMetaData> getOrderedAttributes()
 	{
