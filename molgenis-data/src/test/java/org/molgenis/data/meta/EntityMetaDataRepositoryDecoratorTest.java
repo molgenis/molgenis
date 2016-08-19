@@ -1,8 +1,11 @@
 package org.molgenis.data.meta;
 
 import org.mockito.ArgumentCaptor;
+import org.molgenis.auth.GroupAuthority;
+import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.support.QueryImpl;
@@ -22,9 +25,14 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentCaptor.forClass;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
+import static org.molgenis.auth.AuthorityMetaData.ROLE;
+import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
+import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.runas.SystemSecurityToken.ROLE_SYSTEM;
@@ -38,6 +46,7 @@ public class EntityMetaDataRepositoryDecoratorTest
 	private EntityMetaDataRepositoryDecorator repo;
 	private Repository<EntityMetaData> decoratedRepo;
 	private DataService dataService;
+	private MetaDataService metaDataService;
 	private SystemEntityMetaDataRegistry systemEntityMetaRegistry;
 	private MolgenisPermissionService permissionService;
 
@@ -46,6 +55,8 @@ public class EntityMetaDataRepositoryDecoratorTest
 	{
 		decoratedRepo = mock(Repository.class);
 		dataService = mock(DataService.class);
+		metaDataService = mock(MetaDataService.class);
+		when(dataService.getMeta()).thenReturn(metaDataService);
 		systemEntityMetaRegistry = mock(SystemEntityMetaDataRegistry.class);
 		permissionService = mock(MolgenisPermissionService.class);
 		repo = new EntityMetaDataRepositoryDecorator(decoratedRepo, dataService, systemEntityMetaRegistry,
@@ -584,8 +595,7 @@ public class EntityMetaDataRepositoryDecoratorTest
 		aggregateSuOrSystem();
 	}
 
-	@Test
-	public void aggregateSuOrSystem() throws Exception
+	private void aggregateSuOrSystem() throws Exception
 	{
 		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
 		AggregateResult aggregateResult = mock(AggregateResult.class);
@@ -599,6 +609,192 @@ public class EntityMetaDataRepositoryDecoratorTest
 		setUserAuthentication();
 		AggregateQuery aggregateQuery = mock(AggregateQuery.class);
 		repo.aggregate(aggregateQuery);
+	}
+
+	@Test
+	public void deleteSu()
+	{
+		setSuAuthentication();
+		deleteSuOrSystem();
+	}
+
+	@Test
+	public void deleteSystem()
+	{
+		setSystemAuthentication();
+		deleteSuOrSystem();
+	}
+
+	private void deleteSuOrSystem()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData attr0 = mock(AttributeMetaData.class);
+		when(attr0.getAttributeParts()).thenReturn(emptyList());
+		AttributeMetaData attrCompound = mock(AttributeMetaData.class);
+		AttributeMetaData attr1a = mock(AttributeMetaData.class);
+		when(attr1a.getAttributeParts()).thenReturn(emptyList());
+		AttributeMetaData attr1b = mock(AttributeMetaData.class);
+		when(attr1b.getAttributeParts()).thenReturn(emptyList());
+		when(attrCompound.getAttributeParts()).thenReturn(newArrayList(attr1a, attr1b));
+		when(entityMeta.getOwnAttributes()).thenReturn(newArrayList(attr0, attrCompound));
+
+		String backendName = "backend";
+		when(entityMeta.getBackend()).thenReturn(backendName);
+		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
+		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
+		//noinspection unchecked
+		Query<UserAuthority> userAuthorityQ = mock(Query.class);
+		when(userAuthorityQ.in(ROLE,
+				newArrayList("ROLE_ENTITY_READ_ENTITY", "ROLE_ENTITY_WRITE_ENTITY", "ROLE_ENTITY_COUNT_ENTITY",
+						"ROLE_ENTITY_NONE_ENTITY", "ROLE_ENTITY_WRITEMETA_ENTITY"))).thenReturn(userAuthorityQ);
+		UserAuthority userAuthority = mock(UserAuthority.class);
+		when(userAuthorityQ.findAll()).thenReturn(singletonList(userAuthority).stream());
+		when(dataService.query(USER_AUTHORITY, UserAuthority.class)).thenReturn(userAuthorityQ);
+
+		//noinspection unchecked
+		Query<GroupAuthority> groupAuthorityQ = mock(Query.class);
+		when(groupAuthorityQ.in(ROLE,
+				newArrayList("ROLE_ENTITY_READ_ENTITY", "ROLE_ENTITY_WRITE_ENTITY", "ROLE_ENTITY_COUNT_ENTITY",
+						"ROLE_ENTITY_NONE_ENTITY", "ROLE_ENTITY_WRITEMETA_ENTITY"))).thenReturn(groupAuthorityQ);
+		GroupAuthority groupAuthority = mock(GroupAuthority.class);
+		when(groupAuthorityQ.findAll()).thenReturn(singletonList(groupAuthority).stream());
+		when(dataService.query(GROUP_AUTHORITY, GroupAuthority.class)).thenReturn(groupAuthorityQ);
+
+		repo.delete(entityMeta);
+
+		verify(decoratedRepo).delete(entityMeta);
+		verify(repoCollection).deleteRepository(entityMeta);
+
+		//noinspection unchecked
+		ArgumentCaptor<Stream<UserAuthority>> userAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(dataService).delete(eq(USER_AUTHORITY), userAuthorityCaptor.capture());
+		assertEquals(userAuthorityCaptor.getValue().collect(toList()), singletonList(userAuthority));
+
+		//noinspection unchecked
+		ArgumentCaptor<Stream<GroupAuthority>> groupAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(dataService).delete(eq(GROUP_AUTHORITY), groupAuthorityCaptor.capture());
+		assertEquals(groupAuthorityCaptor.getValue().collect(toList()), singletonList(groupAuthority));
+
+		//noinspection unchecked
+		ArgumentCaptor<Stream<AttributeMetaData>> attrCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrCaptor.capture());
+		assertEquals(attrCaptor.getValue().collect(toList()), newArrayList(attr0, attrCompound, attr1a, attr1b));
+	}
+
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on entity \\[entity\\]")
+	public void deleteUser()
+	{
+		setUserAuthentication();
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		repo.delete(entityMeta);
+	}
+
+	@Test
+	public void deleteAbstract()
+	{
+		setSystemAuthentication();
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		when(entityMeta.isAbstract()).thenReturn(true);
+		AttributeMetaData attr0 = mock(AttributeMetaData.class);
+		when(attr0.getAttributeParts()).thenReturn(emptyList());
+		when(entityMeta.getOwnAttributes()).thenReturn(singletonList(attr0));
+
+		String backendName = "backend";
+		when(entityMeta.getBackend()).thenReturn(backendName);
+		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
+		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
+		//noinspection unchecked
+		Query<UserAuthority> userAuthorityQ = mock(Query.class);
+		when(userAuthorityQ.in(ROLE,
+				newArrayList("ROLE_ENTITY_READ_ENTITY", "ROLE_ENTITY_WRITE_ENTITY", "ROLE_ENTITY_COUNT_ENTITY",
+						"ROLE_ENTITY_NONE_ENTITY", "ROLE_ENTITY_WRITEMETA_ENTITY"))).thenReturn(userAuthorityQ);
+		UserAuthority userAuthority = mock(UserAuthority.class);
+		when(userAuthorityQ.findAll()).thenReturn(singletonList(userAuthority).stream());
+		when(dataService.query(USER_AUTHORITY, UserAuthority.class)).thenReturn(userAuthorityQ);
+
+		//noinspection unchecked
+		Query<GroupAuthority> groupAuthorityQ = mock(Query.class);
+		when(groupAuthorityQ.in(ROLE,
+				newArrayList("ROLE_ENTITY_READ_ENTITY", "ROLE_ENTITY_WRITE_ENTITY", "ROLE_ENTITY_COUNT_ENTITY",
+						"ROLE_ENTITY_NONE_ENTITY", "ROLE_ENTITY_WRITEMETA_ENTITY"))).thenReturn(groupAuthorityQ);
+		GroupAuthority groupAuthority = mock(GroupAuthority.class);
+		when(groupAuthorityQ.findAll()).thenReturn(singletonList(groupAuthority).stream());
+		when(dataService.query(GROUP_AUTHORITY, GroupAuthority.class)).thenReturn(groupAuthorityQ);
+
+		repo.delete(entityMeta);
+
+		verify(decoratedRepo).delete(entityMeta);
+		verify(repoCollection, times(0)).deleteRepository(entityMeta); // entity is abstract
+
+		//noinspection unchecked
+		ArgumentCaptor<Stream<UserAuthority>> userAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(dataService).delete(eq(USER_AUTHORITY), userAuthorityCaptor.capture());
+		assertEquals(userAuthorityCaptor.getValue().collect(toList()), singletonList(userAuthority));
+
+		//noinspection unchecked
+		ArgumentCaptor<Stream<GroupAuthority>> groupAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(dataService).delete(eq(GROUP_AUTHORITY), groupAuthorityCaptor.capture());
+		assertEquals(groupAuthorityCaptor.getValue().collect(toList()), singletonList(groupAuthority));
+
+		//noinspection unchecked
+		ArgumentCaptor<Stream<AttributeMetaData>> attrCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrCaptor.capture());
+		assertEquals(attrCaptor.getValue().collect(toList()), singletonList(attr0));
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Deleting system entity meta data \\[entity\\] is not allowed")
+	public void deleteSystemEntity()
+	{
+		setSystemAuthentication();
+		String entityName = "entity";
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
+		when(entityMeta.isAbstract()).thenReturn(true);
+		AttributeMetaData attr0 = mock(AttributeMetaData.class);
+		when(attr0.getAttributeParts()).thenReturn(emptyList());
+		when(entityMeta.getOwnAttributes()).thenReturn(singletonList(attr0));
+		when(systemEntityMetaRegistry.hasSystemEntityMetaData(entityName)).thenReturn(true);
+
+		String backendName = "backend";
+		when(entityMeta.getBackend()).thenReturn(backendName);
+		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
+		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
+		//noinspection unchecked
+		Query<UserAuthority> userAuthorityQ = mock(Query.class);
+		when(userAuthorityQ.in(ROLE,
+				newArrayList("ROLE_ENTITY_READ_ENTITY", "ROLE_ENTITY_WRITE_ENTITY", "ROLE_ENTITY_COUNT_ENTITY",
+						"ROLE_ENTITY_NONE_ENTITY", "ROLE_ENTITY_WRITEMETA_ENTITY"))).thenReturn(userAuthorityQ);
+		UserAuthority userAuthority = mock(UserAuthority.class);
+		when(userAuthorityQ.findAll()).thenReturn(singletonList(userAuthority).stream());
+		when(dataService.query(USER_AUTHORITY, UserAuthority.class)).thenReturn(userAuthorityQ);
+
+		//noinspection unchecked
+		Query<GroupAuthority> groupAuthorityQ = mock(Query.class);
+		when(groupAuthorityQ.in(ROLE,
+				newArrayList("ROLE_ENTITY_READ_ENTITY", "ROLE_ENTITY_WRITE_ENTITY", "ROLE_ENTITY_COUNT_ENTITY",
+						"ROLE_ENTITY_NONE_ENTITY", "ROLE_ENTITY_WRITEMETA_ENTITY"))).thenReturn(groupAuthorityQ);
+		GroupAuthority groupAuthority = mock(GroupAuthority.class);
+		when(groupAuthorityQ.findAll()).thenReturn(singletonList(groupAuthority).stream());
+		when(dataService.query(GROUP_AUTHORITY, GroupAuthority.class)).thenReturn(groupAuthorityQ);
+
+		repo.delete(entityMeta);
+
+		verify(decoratedRepo).delete(entityMeta);
+		verify(repoCollection, times(0)).deleteRepository(entityMeta); // entity is abstract
+
+		//noinspection unchecked
+		ArgumentCaptor<Stream<UserAuthority>> userAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(dataService).delete(eq(USER_AUTHORITY), userAuthorityCaptor.capture());
+		assertEquals(userAuthorityCaptor.getValue().collect(toList()), singletonList(userAuthority));
+
+		//noinspection unchecked
+		ArgumentCaptor<Stream<GroupAuthority>> groupAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(dataService).delete(eq(GROUP_AUTHORITY), groupAuthorityCaptor.capture());
+		assertEquals(groupAuthorityCaptor.getValue().collect(toList()), singletonList(groupAuthority));
+
+		//noinspection unchecked
+		ArgumentCaptor<Stream<AttributeMetaData>> attrCaptor = ArgumentCaptor.forClass((Class) Stream.class);
+		verify(dataService).delete(eq(ATTRIBUTE_META_DATA), attrCaptor.capture());
+		assertEquals(attrCaptor.getValue().collect(toList()), singletonList(attr0));
 	}
 
 	private static void setSuAuthentication()

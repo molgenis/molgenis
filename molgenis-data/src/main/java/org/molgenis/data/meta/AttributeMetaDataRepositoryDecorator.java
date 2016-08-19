@@ -4,7 +4,6 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -282,11 +281,10 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	@Override
 	public void delete(Stream<AttributeMetaData> attrs)
 	{
-		decoratedRepo.delete(attrs.filter(attr ->
-		{
-			validateDeleteAllowed(attr);
-			return true;
-		}));
+		// The validateDeleteAllowed check if querying the table in which we are deleting. Since the decorated repo only
+		// guarantees that the attributes are deleted after the operation completes we have to delete the attributes one
+		// by one
+		attrs.forEach(this::delete);
 	}
 
 	@Override
@@ -437,8 +435,8 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 			throw new MolgenisDataException(
 					format("Deleting system entity attribute [%s] is not allowed", attr.getName()));
 		}
-		EntityMetaData entityMeta = dataService.query(ENTITY_META_DATA, EntityMetaData.class)
-				.eq(EntityMetaDataMetaData.ATTRIBUTES, attr).findOne();
+		EntityMetaData entityMeta = dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(ATTRIBUTES, attr)
+				.findOne();
 		if (entityMeta != null)
 		{
 			throw new MolgenisDataException(

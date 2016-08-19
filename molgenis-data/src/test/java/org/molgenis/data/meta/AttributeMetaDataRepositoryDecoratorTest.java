@@ -787,6 +787,97 @@ public class AttributeMetaDataRepositoryDecoratorTest
 		repo.aggregate(aggregateQuery);
 	}
 
+	@Test
+	public void delete()
+	{
+		String attrName = "attrName";
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		String attrIdentifier = "id";
+		when(attr.getIdentifier()).thenReturn(attrIdentifier);
+		when(systemEntityMetaRegistry.hasSystemAttributeMetaData(attrIdentifier)).thenReturn(false);
+
+		//noinspection unchecked
+		Query<EntityMetaData> entityQ = mock(Query.class);
+		when(entityQ.eq(ATTRIBUTES, attr)).thenReturn(entityQ);
+		when(entityQ.findOne()).thenReturn(null);
+		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(entityQ);
+
+		//noinspection unchecked
+		Query<AttributeMetaData> attrQ = mock(Query.class);
+		when(dataService.query(ATTRIBUTE_META_DATA, AttributeMetaData.class)).thenReturn(attrQ);
+		when(attrQ.eq(PARTS, attr)).thenReturn(attrQ);
+		when(attrQ.findOne()).thenReturn(null);
+
+		repo.delete(attr);
+
+		verify(decoratedRepo).delete(attr);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Deleting system entity attribute \\[attrName\\] is not allowed")
+	public void deleteSystemAttribute()
+	{
+		String attrName = "attrName";
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		String attrIdentifier = "id";
+		when(attr.getIdentifier()).thenReturn(attrIdentifier);
+		when(systemEntityMetaRegistry.hasSystemAttributeMetaData(attrIdentifier)).thenReturn(true);
+		repo.delete(attr);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Deleting attribute \\[attrName\\] is not allowed, since it is referenced by entity \\[ownerEntity\\]")
+	public void deleteReferencedByEntity()
+	{
+		String attrName = "attrName";
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		String attrIdentifier = "id";
+		when(attr.getIdentifier()).thenReturn(attrIdentifier);
+		when(systemEntityMetaRegistry.hasSystemAttributeMetaData(attrIdentifier)).thenReturn(false);
+		//noinspection unchecked
+		Query<EntityMetaData> entityQ = mock(Query.class);
+		when(entityQ.eq(ATTRIBUTES, attr)).thenReturn(entityQ);
+		EntityMetaData ownerEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("ownerEntity").getMock();
+		when(entityQ.findOne()).thenReturn(ownerEntityMeta);
+		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(entityQ);
+		repo.delete(attr);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Deleting attribute \\[attrName\\] is not allowed, since it is referenced by attribute \\[ownerAttr\\]")
+	public void deleteReferencedByAttribute()
+	{
+		String attrName = "attrName";
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		String attrIdentifier = "id";
+		when(attr.getIdentifier()).thenReturn(attrIdentifier);
+		when(systemEntityMetaRegistry.hasSystemAttributeMetaData(attrIdentifier)).thenReturn(false);
+
+		//noinspection unchecked
+		Query<EntityMetaData> entityQ = mock(Query.class);
+		when(entityQ.eq(ATTRIBUTES, attr)).thenReturn(entityQ);
+		when(entityQ.findOne()).thenReturn(null);
+		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(entityQ);
+
+		AttributeMetaData ownerAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("ownerAttr").getMock();
+		//noinspection unchecked
+		Query<AttributeMetaData> attrQ = mock(Query.class);
+		when(dataService.query(ATTRIBUTE_META_DATA, AttributeMetaData.class)).thenReturn(attrQ);
+		when(attrQ.eq(PARTS, attr)).thenReturn(attrQ);
+		when(attrQ.findOne()).thenReturn(ownerAttr);
+
+		repo.delete(attr);
+	}
+
+	@Test
+	public void deleteStream()
+	{
+		AttributeMetaDataRepositoryDecorator repoSpy = spy(repo);
+		doNothing().when(repoSpy).delete(any(AttributeMetaData.class));
+		AttributeMetaData attr0 = mock(AttributeMetaData.class);
+		AttributeMetaData attr1 = mock(AttributeMetaData.class);
+		repoSpy.delete(Stream.of(attr0, attr1));
+		verify(repoSpy).delete(attr0);
+		verify(repoSpy).delete(attr1);
+	}
+
 	private static void setSuAuthentication()
 	{
 		TestingAuthenticationToken authentication = new TestingAuthenticationToken("su", null, AUTHORITY_SU);
