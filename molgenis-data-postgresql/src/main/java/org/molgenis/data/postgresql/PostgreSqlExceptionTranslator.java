@@ -86,6 +86,8 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 				return translateForeignKeyViolation(pSqlException);
 			case "23505": // unique_violation
 				return translateUniqueKeyViolation(pSqlException);
+			case "23514": // check_violation
+				return translateCheckConstraintViolation(pSqlException);
 			default:
 				return null;
 		}
@@ -264,5 +266,23 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 				throw new RuntimeException("Error translating exception", pSqlException);
 			}
 		}
+	}
+
+	/**
+	 * Package private for testability
+	 *
+	 * @param pSqlException PostgreSQL exception
+	 * @return translated validation exception
+	 */
+	static MolgenisValidationException translateCheckConstraintViolation(PSQLException pSqlException)
+	{
+		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
+		String tableName = serverErrorMessage.getTable();
+		String constraintName = serverErrorMessage.getConstraint();
+		// constraint name: <tableName>_<columnName>_chk
+		String columnName = constraintName.substring(tableName.length() + 1, constraintName.length() - 4);
+		ConstraintViolation constraintViolation = new ConstraintViolation(
+				format("Unknown enum value for attribute '%s' of entity '%s'.", columnName, tableName), null);
+		return new MolgenisValidationException(singleton(constraintViolation));
 	}
 }
