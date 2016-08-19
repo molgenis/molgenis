@@ -274,7 +274,7 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 	 * @param pSqlException PostgreSQL exception
 	 * @return translated validation exception
 	 */
-	MolgenisValidationException translateCheckConstraintViolation(PSQLException pSqlException)
+	static MolgenisValidationException translateCheckConstraintViolation(PSQLException pSqlException)
 	{
 		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
 		String tableName = serverErrorMessage.getTable();
