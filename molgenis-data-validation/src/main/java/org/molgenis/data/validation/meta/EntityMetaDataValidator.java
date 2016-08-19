@@ -27,6 +27,9 @@ import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 
+/**
+ * Entity meta data validator
+ */
 @Component
 public class EntityMetaDataValidator
 {
@@ -38,6 +41,12 @@ public class EntityMetaDataValidator
 		this.dataService = requireNonNull(dataService);
 	}
 
+	/**
+	 * Validates entity meta data
+	 *
+	 * @param entityMeta entity meta data
+	 * @throws MolgenisValidationException if entity meta data is not valid
+	 */
 	public void validate(EntityMetaData entityMeta)
 	{
 		validateEntityName(entityMeta);
