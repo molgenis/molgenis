@@ -113,27 +113,31 @@ public class MetaValidationUtils
 
 	/**
 	 * Validates an entity and all of its attributes.
+	 *
+	 * @param entityMeta entity meta data to validate
+	 * @throw MolgenisDataException if entity meta data is not valid
 	 */
-	public static void validateEntityMetaData(EntityMetaData emd)
+	public static void validateEntityMetaData(EntityMetaData entityMeta)
 	{
 		try
 		{
-			if (!emd.getName().equals(ATTRIBUTE_META_DATA) && !emd.getName().equals(ENTITY_META_DATA) && !emd.getName()
-					.equals(PACKAGE))
+			if (!entityMeta.getName().equals(ATTRIBUTE_META_DATA) && !entityMeta.getName().equals(ENTITY_META_DATA)
+					&& !entityMeta.getName().equals(PACKAGE))
 			{
-				validateName(emd.getSimpleName());
-				validateAttributes(emd.getAttributes());
+				validateName(entityMeta.getSimpleName());
+				validateAttributes(entityMeta.getAttributes());
 			}
 
-			if (emd.getIdAttribute() != null && emd.getIdAttribute().getDefaultValue() != null)
+			if (entityMeta.getIdAttribute() != null && entityMeta.getIdAttribute().getDefaultValue() != null)
 			{
 				throw new MolgenisDataException(
-						"ID attribute " + emd.getIdAttribute().getName() + " cannot have default value");
+						"ID attribute " + entityMeta.getIdAttribute().getName() + " cannot have default value");
 			}
 		}
 		catch (MolgenisDataException e)
 		{
-			throw new MolgenisDataException("Validation error in entity [" + emd.getName() + "]: " + e.getMessage(), e);
+			throw new MolgenisDataException(
+					"Validation error in entity [" + entityMeta.getName() + "]: " + e.getMessage(), e);
 		}
 	}
 

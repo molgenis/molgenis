@@ -18,6 +18,11 @@ public class ConstraintViolation
 	private String importInfo;
 	private Long rownr;
 
+	public ConstraintViolation(String message)
+	{
+		this(message, null);
+	}
+
 	public ConstraintViolation(String message, Long rownr)
 	{
 		this.message = message;

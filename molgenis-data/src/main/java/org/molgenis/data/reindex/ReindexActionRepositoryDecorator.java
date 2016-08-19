@@ -16,7 +16,7 @@ import static org.molgenis.data.reindex.meta.ReindexActionMetaData.DataType.DATA
 /**
  * {@link Repository} decorator that registers changes with a {@link ReindexActionRegisterServiceImpl}.
  */
-public class ReindexActionRepositoryDecorator extends AbstractRepositoryDecorator
+public class ReindexActionRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
 	private final ReindexActionRegisterService reindexActionRegisterService;
 	private final Repository<Entity> decorated;

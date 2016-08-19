@@ -339,12 +339,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 
 	private void addEntityMetaData(EntityMetaData entityMetaData)
 	{
-		validateAddAllowed(entityMetaData);
-
-		if (entityMetaData.getBackend() == null)
-		{
-			entityMetaData.setBackend(dataService.getMeta().getDefaultBackend().getName());
-		}
+		validatePermission(entityMetaData.getName(), Permission.WRITEMETA);
 
 		// add row to entities table
 		decoratedRepo.add(entityMetaData);
@@ -357,22 +352,6 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 			}
 			repoCollection.createRepository(entityMetaData);
 		}
-	}
-
-	private void validateAddAllowed(EntityMetaData entityMetaData)
-	{
-		String entityName = entityMetaData.getName();
-		validatePermission(entityName, Permission.WRITEMETA);
-
-		// TODO replace with exists() once Repository.exists has been implemented
-		EntityMetaData existingEntityMetaData = findOneById(entityName, new Fetch().field(FULL_NAME));
-		if (existingEntityMetaData != null)
-		{
-			throw new MolgenisDataException(format("Adding existing entity meta data [%s] is not allowed", entityName));
-		}
-
-		// FIXME: Importer validates emd twice!!
-		MetaValidationUtils.validateEntityMetaData(entityMetaData);
 	}
 
 	private void updateEntity(EntityMetaData entityMeta)
@@ -459,8 +438,6 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		{
 			throw new MolgenisDataException(format("Updating system entity meta data [%s] is not allowed", entityName));
 		}
-
-		MetaValidationUtils.validateEntityMetaData(entityMetaData);
 	}
 
 	private void deleteEntityMetaData(EntityMetaData entityMeta)

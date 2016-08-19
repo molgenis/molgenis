@@ -29,6 +29,8 @@ import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
+import org.molgenis.data.validation.meta.EntityMetaDataRepositoryValidationDecorator;
+import org.molgenis.data.validation.meta.EntityMetaDataValidator;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
 import org.molgenis.util.EntityUtils;
@@ -68,6 +70,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final L2Cache l2Cache;
 	private final TransactionInformation transactionInformation;
 	private final MolgenisPermissionService permissionService;
+	private final EntityMetaDataValidator entityMetaDataValidator;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -79,7 +82,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder,
 			EntityMetaDataMetaData entityMetaMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
-			MolgenisPermissionService permissionService)
+			MolgenisPermissionService permissionService, EntityMetaDataValidator entityMetaDataValidator)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -102,6 +105,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.l2Cache = requireNonNull(l2Cache);
 		this.transactionInformation = requireNonNull(transactionInformation);
 		this.permissionService = requireNonNull(permissionService);
+		this.entityMetaDataValidator = requireNonNull(entityMetaDataValidator);
 	}
 
 	@Override
@@ -171,6 +175,9 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		}
 		else if (repo.getName().equals(ENTITY_META_DATA))
 		{
+			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityMetaDataRepositoryValidationDecorator(
+					(Repository<EntityMetaData>) (Repository<? extends Entity>) repo, entityMetaDataValidator);
+
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityMetaDataRepositoryDecorator(
 					(Repository<EntityMetaData>) (Repository<? extends Entity>) repo, dataService,
 					systemEntityMetaDataRegistry, permissionService);
