@@ -57,6 +57,7 @@ public class EntityMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(LABEL_ATTRIBUTE).setDataType(XREF).setRefEntity(attrMetaMeta).setLabel("Label attribute");
 		addAttribute(LOOKUP_ATTRIBUTES).setDataType(MREF).setRefEntity(attrMetaMeta).setLabel("Lookup attributes");
 		addAttribute(ABSTRACT).setDataType(BOOL).setNillable(false).setReadOnly(true).setLabel("Abstract")
+				.setReadOnly(true)
 				.setDefaultValue(FALSE.toString());
 		// TODO replace with autowired self-reference after update to Spring 4.3
 		addAttribute(EXTENDS).setDataType(XREF).setRefEntity(this).setReadOnly(true).setLabel("Extends");
