@@ -2,6 +2,8 @@ package org.molgenis.data.meta;
 
 import com.google.common.collect.Sets;
 import com.google.common.collect.TreeTraverser;
+import org.molgenis.auth.GroupAuthority;
+import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -11,7 +13,6 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Nonnull;
 import java.io.IOException;
@@ -264,35 +265,30 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		}
 	}
 
-	@Transactional
 	@Override
 	public void update(EntityMetaData entity)
 	{
 		updateEntity(entity);
 	}
 
-	@Transactional
 	@Override
 	public void update(Stream<EntityMetaData> entities)
 	{
 		entities.forEach(this::updateEntity);
 	}
 
-	@Transactional
 	@Override
 	public void delete(EntityMetaData entity)
 	{
 		deleteEntityMetaData(entity);
 	}
 
-	@Transactional
 	@Override
 	public void delete(Stream<EntityMetaData> entities)
 	{
 		entities.forEach(this::deleteEntityMetaData);
 	}
 
-	@Transactional
 	@Override
 	public void deleteById(Object id)
 	{
@@ -305,28 +301,24 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		deleteEntityMetaData(entityMetaData);
 	}
 
-	@Transactional
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
 		findAll(ids).forEach(this::deleteEntityMetaData);
 	}
 
-	@Transactional
 	@Override
 	public void deleteAll()
 	{
 		iterator().forEachRemaining(this::deleteEntityMetaData);
 	}
 
-	@Transactional
 	@Override
 	public void add(EntityMetaData entity)
 	{
 		addEntityMetaData(entity);
 	}
 
-	@Transactional
 	@Override
 	public Integer add(Stream<EntityMetaData> entities)
 	{
@@ -502,7 +494,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		Iterable<AttributeMetaData> rootAttrs = entityMetaData.getOwnAttributes();
 		Stream<AttributeMetaData> allAttrs = StreamSupport.stream(rootAttrs.spliterator(), false).flatMap(
 				attrEntity -> StreamSupport
-						.stream(new AttributeMetaDataTreeTraverser().postOrderTraversal(attrEntity).spliterator(),
+						.stream(new AttributeMetaDataTreeTraverser().preOrderTraversal(attrEntity).spliterator(),
 								false));
 		dataService.delete(ATTRIBUTE_META_DATA, allAttrs);
 	}
@@ -516,8 +508,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 	private void deleteEntityRepository(EntityMetaData entityMetaData)
 	{
 		String backend = entityMetaData.getBackend();
-		dataService.getMeta().getBackend(backend)
-				.deleteRepository(entityMetaData); // FIXME call deleteRepo directly on metadataservice
+		dataService.getMeta().getBackend(backend).deleteRepository(entityMetaData);
 	}
 
 	private void deleteEntityPermissions(EntityMetaData entityMetaData)
@@ -526,17 +517,18 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		List<String> authorities = SecurityUtils.getEntityAuthorities(entityName);
 
 		// User permissions
-		if (dataService.hasRepository(USER_AUTHORITY))
+		List<UserAuthority> userPermissions = dataService.query(USER_AUTHORITY, UserAuthority.class)
+				.in(ROLE, authorities).findAll().collect(toList());
+		if (!userPermissions.isEmpty())
 		{
-			Stream<Entity> userPermissions = dataService.query(USER_AUTHORITY).in(ROLE, authorities).findAll();
-			dataService.delete(USER_AUTHORITY, userPermissions);
+			dataService.delete(USER_AUTHORITY, userPermissions.stream());
 		}
-
 		// Group permissions
-		if (dataService.hasRepository(GROUP_AUTHORITY))
+		List<GroupAuthority> groupPermissions = dataService.query(GROUP_AUTHORITY, GroupAuthority.class)
+				.in(ROLE, authorities).findAll().collect(toList());
+		if (!groupPermissions.isEmpty())
 		{
-			Stream<Entity> groupPermissions = dataService.query(GROUP_AUTHORITY).in(ROLE, authorities).findAll();
-			dataService.delete(GROUP_AUTHORITY, groupPermissions);
+			dataService.delete(GROUP_AUTHORITY, groupPermissions.stream());
 		}
 	}
 
