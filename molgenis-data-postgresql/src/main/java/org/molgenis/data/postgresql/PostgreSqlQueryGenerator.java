@@ -171,7 +171,7 @@ class PostgreSqlQueryGenerator
 	static String getSqlCreateJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		AttributeMetaData idAttr = entityMeta.getIdAttribute();
-		StringBuilder sql = new StringBuilder("CREATE TABLE IF NOT EXISTS ")
+		StringBuilder sql = new StringBuilder("CREATE TABLE ")
 				.append(getJunctionTableName(entityMeta, attr)).append(" (")
 				.append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(" INT,").append(getColumnName(idAttr))
 				.append(' ').append(getPostgreSqlType(idAttr)).append(" NOT NULL, ").append(getColumnName(attr))
@@ -199,7 +199,7 @@ class PostgreSqlQueryGenerator
 			}
 		}
 
-		sql.append(", UNIQUE (").append(getColumnName(attr)).append(',').append(getColumnName(idAttr)).append(')');
+		sql.append(", UNIQUE (").append(getColumnName(idAttr)).append(',').append(getColumnName(attr)).append(')');
 		sql.append(", UNIQUE (").append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(',')
 				.append(getColumnName(idAttr)).append(')');
 
@@ -210,10 +210,11 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlCreateJunctionTableIndex(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
+		AttributeMetaData idxAttr = entityMeta.getIdAttribute();
 		String junctionTableName = getJunctionTableName(entityMeta, attr);
-		return "CREATE INDEX " + junctionTableName.substring(0, junctionTableName.length() - 1) + '_' + entityMeta
-				.getIdAttribute().getName() + "_index\" ON " + junctionTableName + " (" + getColumnName(
-				entityMeta.getIdAttribute()) + ')';
+		String junctionTableIndexName = getJunctionTableIndexName(entityMeta, attr, idxAttr);
+		String idxColumnName = getColumnName(idxAttr);
+		return "CREATE INDEX " + junctionTableIndexName + " ON " + junctionTableName + " (" + idxColumnName + ')';
 	}
 
 	static String getSqlDropJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
@@ -806,12 +807,12 @@ class PostgreSqlQueryGenerator
 
 	private static String getColumnName(String attrName)
 	{
-		return "\"" + attrName + '"';
+		return '"' + attrName + '"';
 	}
 
 	private static String getFilterColumnName(AttributeMetaData attr, int filterIndex)
 	{
-		return "\"" + attr.getName() + "_filter" + filterIndex + '"';
+		return '"' + attr.getName() + "_filter" + filterIndex + '"';
 	}
 
 	private static String getPrimaryKeyName(EntityMetaData entityMeta, AttributeMetaData attr)
@@ -836,7 +837,7 @@ class PostgreSqlQueryGenerator
 
 	private static String getConstraintName(EntityMetaData entityMeta, AttributeMetaData attr, String constraintPostfix)
 	{
-		return "\"" + entityMeta.getName() + '_' + attr.getName() + '_' + constraintPostfix + '"';
+		return '"' + entityMeta.getName() + '_' + attr.getName() + '_' + constraintPostfix + '"';
 	}
 
 	private static <E extends Entity> List<AttributeMetaData> getMrefQueryAttrs(EntityMetaData entityMeta, Query<E> q)

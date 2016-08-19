@@ -26,6 +26,7 @@ public class SettingsEntityMeta extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Settings");
 		setAbstract(true);
 		setPackage(settingsPackage);
 		addAttribute(ID, ROLE_ID).setLabel("Id").setVisible(false);

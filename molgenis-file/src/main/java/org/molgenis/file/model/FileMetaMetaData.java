@@ -38,6 +38,7 @@ public class FileMetaMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("File metadata");
 		setExtends(ownedEntityMetaData);
 		addAttribute(ID, ROLE_ID).setVisible(false).setLabel("Id");
 		addAttribute(FILENAME, ROLE_LABEL, ROLE_LOOKUP).setDataType(STRING).setNillable(false).setLabel("Filename");

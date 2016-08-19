@@ -49,12 +49,12 @@ public class GavinEntry
 		this.gene = split[0];
 		this.category = Category.valueOf(split[1]);
 		this.chromosome = split[2];
-		this.start = Integer.valueOf(split[3]);
-		this.end = Integer.valueOf(split[4]);
-		this.NrOfPopulationVariants = Integer.valueOf(split[5]);
-		this.NrOfPathogenicVariants = Integer.valueOf(split[6]);
-		this.NrOfOverlappingVariants = Integer.valueOf(split[7]);
-		this.NrOfFilteredPopVariants = Integer.valueOf(split[8]);
+		this.start = Integer.parseInt(split[3]);
+		this.end = Integer.parseInt(split[4]);
+		this.NrOfPopulationVariants = Integer.parseInt(split[5]);
+		this.NrOfPathogenicVariants = Integer.parseInt(split[6]);
+		this.NrOfOverlappingVariants = Integer.parseInt(split[7]);
+		this.NrOfFilteredPopVariants = Integer.parseInt(split[8]);
 		this.PathoMAFThreshold = split[9].isEmpty() ? null : Double.parseDouble(split[9]);
 
 		this.PopImpactHighPerc = split[10].isEmpty() ? null : Double.parseDouble(split[10]);

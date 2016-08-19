@@ -84,7 +84,7 @@ public final class IntermediateParseResults
 		return tags.get(tagIdentifier);
 	}
 
-	public void addEntityTag(String entityName, SemanticTag tag)
+	public void addEntityTag(SemanticTag tag)
 	{
 		entityTags.add(tag);
 	}

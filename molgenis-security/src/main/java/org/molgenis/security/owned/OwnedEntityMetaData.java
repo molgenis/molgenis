@@ -38,6 +38,7 @@ public class OwnedEntityMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Owned");
 		setPackage(securityPackage);
 
 		setAbstract(true);

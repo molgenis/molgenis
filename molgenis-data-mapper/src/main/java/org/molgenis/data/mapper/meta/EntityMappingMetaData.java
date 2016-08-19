@@ -35,6 +35,7 @@ public class EntityMappingMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Entity mapping");
 		setPackage(mapperPackage);
 
 		addAttribute(IDENTIFIER, ROLE_ID);

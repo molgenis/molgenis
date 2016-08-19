@@ -28,7 +28,7 @@ class PostgreSqlQueryUtils
 	 * @param entityMeta entity meta data
 	 * @return table name for this entity
 	 */
-	public static String getTableName(EntityMetaData entityMeta)
+	static String getTableName(EntityMetaData entityMeta)
 	{
 		return getTableName(entityMeta, true);
 	}
@@ -39,32 +39,45 @@ class PostgreSqlQueryUtils
 	 * @param entityMeta entity meta data
 	 * @return PostgreSQL table name
 	 */
-	public static String getTableName(EntityMetaData entityMeta, boolean quoteSystemIdentifiers)
+	static String getTableName(EntityMetaData entityMeta, boolean quoteSystemIdentifiers)
 	{
-		StringBuilder strBuilder = new StringBuilder();
+		StringBuilder strBuilder = new StringBuilder(32);
 		if (quoteSystemIdentifiers)
 		{
-			strBuilder.append("\"");
+			strBuilder.append('"');
 		}
 		strBuilder.append(entityMeta.getName());
 		if (quoteSystemIdentifiers)
 		{
-			strBuilder.append("\"");
+			strBuilder.append('"');
 		}
 		return strBuilder.toString();
 	}
 
 	/**
-	 * Returns the function table name for the given attribute of the given entity
+	 * Returns the junction table name for the given attribute of the given entity
 	 *
-	 * @param emd entity meta data that owns the attribute
-	 * @param attr attribute
+	 * @param entityMeta entity meta data that owns the attribute
+	 * @param attr       attribute
 	 * @return PostgreSQL junction table name
 	 */
-	public static String getJunctionTableName(EntityMetaData emd, AttributeMetaData attr)
+	static String getJunctionTableName(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		return new StringBuilder().append("\"").append(emd.getName()).append('_').append(attr.getName()).append("\"")
-				.toString();
+		return '"' + entityMeta.getName() + '_' + attr.getName() + '"';
+	}
+
+	/**
+	 * Returns the junction table index name for the given indexed attribute in a junction table
+	 *
+	 * @param entityMeta entity meta data
+	 * @param attr       attribute
+	 * @param idxAttr    indexed attribute
+	 * @return PostgreSQL junction table index name
+	 */
+	static String getJunctionTableIndexName(EntityMetaData entityMeta, AttributeMetaData attr,
+			AttributeMetaData idxAttr)
+	{
+		return '"' + entityMeta.getName() + '_' + attr.getName() + '_' + idxAttr.getName() + "_idx\"";
 	}
 
 	/**
@@ -72,7 +85,7 @@ class PostgreSqlQueryUtils
 	 *
 	 * @return stream of persisted attributes
 	 */
-	public static Stream<AttributeMetaData> getPersistedAttributes(EntityMetaData entityMeta)
+	static Stream<AttributeMetaData> getPersistedAttributes(EntityMetaData entityMeta)
 	{
 		return StreamSupport.stream(entityMeta.getAtomicAttributes().spliterator(), false)
 				.filter(atomicAttr -> atomicAttr.getExpression() == null);
@@ -84,7 +97,7 @@ class PostgreSqlQueryUtils
 	 *
 	 * @return stream of persisted MREF attributes
 	 */
-	public static Stream<AttributeMetaData> getPersistedAttributesMref(EntityMetaData entityMeta)
+	static Stream<AttributeMetaData> getPersistedAttributesMref(EntityMetaData entityMeta)
 	{
 		return getPersistedAttributes(entityMeta).filter(EntityMetaDataUtils::isMultipleReferenceType);
 	}
@@ -95,7 +108,7 @@ class PostgreSqlQueryUtils
 	 *
 	 * @return stream of persisted non-MREF attributes
 	 */
-	public static Stream<AttributeMetaData> getPersistedAttributesNonMref(EntityMetaData entityMeta)
+	static Stream<AttributeMetaData> getPersistedAttributesNonMref(EntityMetaData entityMeta)
 	{
 		return getPersistedAttributes(entityMeta).filter(attr -> !isMultipleReferenceType(attr));
 	}
@@ -106,7 +119,7 @@ class PostgreSqlQueryUtils
 	 * @param entityMeta entity meta data
 	 * @return true is the entity is persisted in PostgreSQL
 	 */
-	public static boolean isPersistedInPostgreSql(EntityMetaData entityMeta)
+	static boolean isPersistedInPostgreSql(EntityMetaData entityMeta)
 	{
 		String backend = entityMeta.getBackend();
 		if (backend == null)

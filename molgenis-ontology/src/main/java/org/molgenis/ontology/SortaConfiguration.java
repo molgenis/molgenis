@@ -5,7 +5,7 @@ import org.molgenis.ontology.core.meta.OntologyTermSynonymFactory;
 import org.molgenis.ontology.ic.OntologyTermFrequencyServiceImpl;
 import org.molgenis.ontology.ic.TermFrequencyService;
 import org.molgenis.ontology.roc.InformationContentService;
-import org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData;
+import org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.ontology.sorta.service.impl.SortaServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +19,7 @@ public class SortaConfiguration
 	private DataService dataService;
 
 	@Autowired
-	private OntologyTermHitEntityMetaData ontologyTermHitEntityMetaData;
+	private OntologyTermHitMetaData ontologyTermHitMetaData;
 
 	@Autowired
 	private OntologyTermSynonymFactory ontologyTermSynonymFactory;
@@ -33,7 +33,7 @@ public class SortaConfiguration
 	@Bean
 	public SortaService sortaService()
 	{
-		return new SortaServiceImpl(dataService, informationContentService(), ontologyTermHitEntityMetaData,
+		return new SortaServiceImpl(dataService, informationContentService(), ontologyTermHitMetaData,
 				ontologyTermSynonymFactory);
 	}
 

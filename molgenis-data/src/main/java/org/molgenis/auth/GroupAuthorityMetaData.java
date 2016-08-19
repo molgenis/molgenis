@@ -39,6 +39,7 @@ public class GroupAuthorityMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Group authority");
 		setPackage(securityPackage);
 
 		setExtends(authorityMetaData);

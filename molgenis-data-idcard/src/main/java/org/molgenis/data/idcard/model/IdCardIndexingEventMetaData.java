@@ -36,6 +36,7 @@ public class IdCardIndexingEventMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("ID-Card indexing event");
 		setPackage(idCardPackage);
 
 		addAttribute(ID, ROLE_ID).setVisible(false).setAuto(true).setLabel("Id");

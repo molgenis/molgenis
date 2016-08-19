@@ -92,6 +92,7 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 	 * @return the retrieved {@link Entity} or Optional.empty() if deletion of this entity is stored in the cache or
 	 * null if no information available about this entity in the cache
 	 */
+	@edu.umd.cs.findbugs.annotations.SuppressWarnings(value = "NP_OPTIONAL_RETURN_NULL", justification = "Intentional behavior")
 	public Optional<Entity> get(String entityName, Object id, EntityMetaData entityMetaData)
 	{
 		CombinedEntityCache cache = caches.get();
