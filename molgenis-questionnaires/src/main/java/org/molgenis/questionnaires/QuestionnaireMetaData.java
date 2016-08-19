@@ -36,6 +36,7 @@ public class QuestionnaireMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Questionnaire");
 		setAbstract(true);
 		setExtends(ownedEntityMetaData);
 

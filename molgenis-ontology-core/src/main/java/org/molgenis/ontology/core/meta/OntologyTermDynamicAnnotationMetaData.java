@@ -34,6 +34,7 @@ public class OntologyTermDynamicAnnotationMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Ontology term dynamic annotation");
 		setPackage(ontologyPackage);
 
 		addAttribute(ID, ROLE_ID).setVisible(false);

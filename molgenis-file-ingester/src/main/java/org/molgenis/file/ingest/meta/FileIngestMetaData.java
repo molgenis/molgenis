@@ -41,6 +41,7 @@ public class FileIngestMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("File ingest");
 		addAttribute(ID, ROLE_ID).setAuto(true).setNillable(false);
 		addAttribute(NAME, ROLE_LABEL, ROLE_LOOKUP).setLabel("Name").setNillable(false);
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description").setNillable(true);

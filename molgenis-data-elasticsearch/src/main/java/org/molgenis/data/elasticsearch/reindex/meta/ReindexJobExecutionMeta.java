@@ -42,6 +42,7 @@ public class ReindexJobExecutionMeta extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Index job execution");
 		setPackage(indexPackage);
 
 		setExtends(jobExecutionMetaData);

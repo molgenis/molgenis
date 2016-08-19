@@ -37,6 +37,7 @@ public class GavinJobExecutionMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Gavin job execution");
 		setPackage(indexPackage);
 
 		setExtends(jobExecutionMetaData);

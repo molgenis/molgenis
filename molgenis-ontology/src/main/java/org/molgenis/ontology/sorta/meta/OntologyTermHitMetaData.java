@@ -12,7 +12,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
 @Component
-public class OntologyTermHitEntityMetaData extends SystemEntityMetaData
+public class OntologyTermHitMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "OntologyTermHit";
 	public static final String ONTOLOGY_TERM_HIT = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -24,7 +24,7 @@ public class OntologyTermHitEntityMetaData extends SystemEntityMetaData
 	private final OntologyPackage ontologyPackage;
 
 	@Autowired
-	public OntologyTermHitEntityMetaData(OntologyPackage ontologyPackage)
+	public OntologyTermHitMetaData(OntologyPackage ontologyPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_ONTOLOGY);
 		this.ontologyPackage = requireNonNull(ontologyPackage);
@@ -33,6 +33,7 @@ public class OntologyTermHitEntityMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Ontology term hit");
 		setPackage(ontologyPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true);
