@@ -13,7 +13,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
 @Component
-public class MatchingTaskContentEntityMetaData extends SystemEntityMetaData
+public class MatchingTaskContentMetaData extends SystemEntityMetaData
 {
 	public static final String SIMPLE_NAME = "MatchingTaskContent";
 	public static final String MATCHING_TASK_CONTENT = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -27,7 +27,7 @@ public class MatchingTaskContentEntityMetaData extends SystemEntityMetaData
 	private final OntologyPackage ontologyPackage;
 
 	@Autowired
-	MatchingTaskContentEntityMetaData(OntologyPackage ontologyPackage)
+	MatchingTaskContentMetaData(OntologyPackage ontologyPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_ONTOLOGY);
 		this.ontologyPackage = requireNonNull(ontologyPackage);
@@ -36,6 +36,7 @@ public class MatchingTaskContentEntityMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Matching task content");
 		setPackage(ontologyPackage);
 
 		setAbstract(true);

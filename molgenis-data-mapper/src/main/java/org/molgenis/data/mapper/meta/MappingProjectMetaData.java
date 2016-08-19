@@ -40,6 +40,7 @@ public class MappingProjectMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Mapping project");
 		setPackage(mapperPackage);
 
 		addAttribute(IDENTIFIER, ROLE_ID);

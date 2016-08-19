@@ -33,6 +33,7 @@ public class OntologyTermSynonymMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Ontology term synonym");
 		setPackage(ontologyPackage);
 
 		addAttribute(ID, ROLE_ID).setVisible(false);

@@ -40,6 +40,7 @@ public class SortaJobExecutionMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("SORTA job execution");
 		setPackage(ontologyPackage);
 
 		setExtends(jobExecutionMetaData);

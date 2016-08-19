@@ -29,6 +29,7 @@ public class ScriptTypeMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Script type");
 		setPackage(scriptPackage);
 
 		addAttribute(NAME, ROLE_ID).setNillable(false);
