@@ -681,7 +681,7 @@ public class EntityMetaDataRepositoryDecoratorTest
 		assertEquals(attrCaptor.getValue().collect(toList()), newArrayList(attr0, attrCompound, attr1a, attr1b));
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on entity \\[entity\\]")
+	@Test(expectedExceptions = MolgenisDataAccessException.class, expectedExceptionsMessageRegExp = "No \\[WRITEMETA\\] permission on entity \\[entity\\]")
 	public void deleteUser()
 	{
 		setUserAuthentication();
