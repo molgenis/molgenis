@@ -7,7 +7,6 @@ import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -36,7 +35,6 @@ import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.NAME;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
-import static org.molgenis.data.meta.model.TagMetaData.TAG;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
@@ -497,12 +495,6 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 						.stream(new AttributeMetaDataTreeTraverser().preOrderTraversal(attrEntity).spliterator(),
 								false));
 		dataService.delete(ATTRIBUTE_META_DATA, allAttrs);
-	}
-
-	private void deleteEntityTags(EntityMetaData entityMetaData)
-	{
-		Iterable<Tag> tags = entityMetaData.getTags();
-		dataService.delete(TAG, StreamSupport.stream(tags.spliterator(), false));
 	}
 
 	private void deleteEntityRepository(EntityMetaData entityMetaData)
