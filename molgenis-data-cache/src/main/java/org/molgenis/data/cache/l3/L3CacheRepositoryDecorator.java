@@ -17,7 +17,7 @@ import static org.molgenis.data.RepositoryCapability.CACHEABLE;
  * <p>
  * Delegates to the underlying {@link Repository}
  */
-public class L3CacheRepositoryDecorator extends AbstractRepositoryDecorator
+public class L3CacheRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
 	private final L3Cache l3Cache;
 	private final boolean cacheable;
