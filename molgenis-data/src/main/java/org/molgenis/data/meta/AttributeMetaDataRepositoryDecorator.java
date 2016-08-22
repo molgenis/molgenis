@@ -4,7 +4,6 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -282,11 +281,10 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	@Override
 	public void delete(Stream<AttributeMetaData> attrs)
 	{
-		decoratedRepo.delete(attrs.filter(attr ->
-		{
-			validateDeleteAllowed(attr);
-			return true;
-		}));
+		// The validateDeleteAllowed check if querying the table in which we are deleting. Since the decorated repo only
+		// guarantees that the attributes are deleted after the operation completes we have to delete the attributes one
+		// by one
+		attrs.forEach(this::delete);
 	}
 
 	@Override
@@ -359,63 +357,44 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 		}
 	}
 
-	private static EnumMap<AttributeType, EnumSet<AttributeType>> DATA_TYPE_ALLOWED_TRANSITIONS;
+	private static EnumMap<AttributeType, EnumSet<AttributeType>> DATA_TYPE_DISALLOWED_TRANSITIONS;
 
 	static
 	{
-		DATA_TYPE_ALLOWED_TRANSITIONS = new EnumMap<>(AttributeType.class);
-		DATA_TYPE_ALLOWED_TRANSITIONS
-				.put(BOOL, EnumSet.of(CATEGORICAL, DECIMAL, INT, LONG, SCRIPT, STRING, TEXT, XREF));
-		// not implemented: CATEGORICAL_MREF, EMAIL, ENUM, HYPERLINK, MREF
-		// not allowed    : CATEGORICAL, COMPOUND, FILE
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(CATEGORICAL,
-				EnumSet.of(BOOL, DATE, DATE_TIME, DECIMAL, HTML, INT, LONG, SCRIPT, STRING, TEXT, XREF));
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(CATEGORICAL_MREF, EnumSet.of(MREF));
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(COMPOUND, EnumSet.noneOf(AttributeType.class));
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(DATE, EnumSet.of(CATEGORICAL, DATE_TIME, HTML, SCRIPT, STRING, TEXT, XREF));
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(DATE_TIME, EnumSet.of(CATEGORICAL, DATE, HTML, SCRIPT, STRING, TEXT, XREF));
-		DATA_TYPE_ALLOWED_TRANSITIONS
-				.put(DECIMAL, EnumSet.of(CATEGORICAL, HTML, INT, LONG, SCRIPT, STRING, TEXT, XREF));
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(EMAIL, EnumSet.of(SCRIPT, HTML, STRING, TEXT));
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(ENUM, EnumSet.noneOf(AttributeType.class));
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(FILE, EnumSet.noneOf(AttributeType.class));
-		// not implemented: HTML -> CATEGORICAL, CATEGORICAL_MREF, EMAIL, ENUM, HYPERLINK, MREF, XREF
-		// not allowed    : HTML -> COMPOUND, FILE, HTML
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(HTML,
-				EnumSet.of(CATEGORICAL, BOOL, DATE, DATE_TIME, DECIMAL, INT, LONG, SCRIPT, STRING, TEXT, XREF));
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(HYPERLINK, EnumSet.of(SCRIPT, HTML, STRING, TEXT));
-		DATA_TYPE_ALLOWED_TRANSITIONS
-				.put(INT, EnumSet.of(BOOL, CATEGORICAL, DECIMAL, HTML, LONG, SCRIPT, STRING, TEXT, XREF));
-		DATA_TYPE_ALLOWED_TRANSITIONS
-				.put(LONG, EnumSet.of(BOOL, CATEGORICAL, DECIMAL, HTML, INT, SCRIPT, STRING, TEXT, XREF));
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(MREF, EnumSet.of(CATEGORICAL_MREF));
-		// not implemented: SCRIPT -> CATEGORICAL, CATEGORICAL_MREF, EMAIL, ENUM, HYPERLINK, MREF, XREF
-		// not allowed    : SCRIPT -> COMPOUND, FILE, SCRIPT
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(SCRIPT,
-				EnumSet.of(CATEGORICAL, BOOL, DATE, DATE_TIME, DECIMAL, HTML, INT, LONG, STRING, TEXT, XREF));
-		// not implemented: TEXT -> CATEGORICAL, CATEGORICAL_MREF, EMAIL, ENUM, HYPERLINK, MREF, XREF
-		// not allowed    : TEXT -> COMPOUND, FILE, TEXT
-		// not implemented: STRING -> CATEGORICAL, CATEGORICAL_MREF, EMAIL, ENUM, HYPERLINK, MREF, XREF
-		// not allowed    : STRING -> COMPOUND, FILE, STRING
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(STRING,
-				EnumSet.of(BOOL, CATEGORICAL, DATE, DATE_TIME, DECIMAL, HTML, INT, LONG, SCRIPT, TEXT, XREF));
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(TEXT,
-				EnumSet.of(CATEGORICAL, BOOL, DATE, DATE_TIME, DECIMAL, HTML, INT, LONG, SCRIPT, STRING, XREF));
-		// not implemented: CATEGORICAL_MREF, EMAIL, ENUM, HYPERLINK, MREF
-		// not allowed    : COMPOUND, FILE, XREF
-		DATA_TYPE_ALLOWED_TRANSITIONS.put(XREF,
-				EnumSet.of(BOOL, CATEGORICAL, DATE, DATE_TIME, DECIMAL, HTML, INT, LONG, SCRIPT, STRING, TEXT));
+		// transitions to EMAIL and HYPERLINK not allowed because existing values not checked by PostgreSQL
+		// transitions to CATEGORICAL_MREF and MREF not allowed because junction tables updated not implemented
+		// transitions to FILE not allowed because associated file in FileStore not created/removed
+		DATA_TYPE_DISALLOWED_TRANSITIONS = new EnumMap<>(AttributeType.class);
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(BOOL, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(CATEGORICAL, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(CATEGORICAL_MREF, EnumSet.complementOf(EnumSet.of(MREF)));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(COMPOUND, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(DATE, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(DATE_TIME, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(DECIMAL, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(EMAIL, EnumSet.of(CATEGORICAL_MREF, MREF, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(ENUM, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(FILE, EnumSet.allOf(AttributeType.class));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(HTML, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(HYPERLINK, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(INT, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(LONG, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(MREF, EnumSet.complementOf(EnumSet.of(CATEGORICAL_MREF)));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(SCRIPT, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(STRING, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(TEXT, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(XREF, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
 	}
 
 	private static void validateUpdateDataType(AttributeType currentDataType, AttributeType newDataType)
 	{
-		EnumSet<AttributeType> allowedDataTypes = DATA_TYPE_ALLOWED_TRANSITIONS.get(currentDataType);
-		if (allowedDataTypes == null || !allowedDataTypes.contains(newDataType))
+		EnumSet<AttributeType> disallowedDataTypes = DATA_TYPE_DISALLOWED_TRANSITIONS.get(currentDataType);
+		if (disallowedDataTypes.contains(newDataType))
 		{
 			throw new MolgenisDataException(
 					format("Attribute data type update from [%s] to [%s] not allowed, allowed types are %s",
 							currentDataType.toString(), newDataType.toString(),
-							allowedDataTypes != null ? allowedDataTypes.toString() : "[]"));
+							EnumSet.complementOf(disallowedDataTypes).toString()));
 		}
 	}
 
@@ -456,8 +435,8 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 			throw new MolgenisDataException(
 					format("Deleting system entity attribute [%s] is not allowed", attr.getName()));
 		}
-		EntityMetaData entityMeta = dataService.query(ENTITY_META_DATA, EntityMetaData.class)
-				.eq(EntityMetaDataMetaData.ATTRIBUTES, attr).findOne();
+		EntityMetaData entityMeta = dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(ATTRIBUTES, attr)
+				.findOne();
 		if (entityMeta != null)
 		{
 			throw new MolgenisDataException(

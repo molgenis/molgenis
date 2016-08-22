@@ -1,16 +1,15 @@
 package org.molgenis.data.rest.service;
 
-import org.molgenis.data.DataService;
-import org.molgenis.data.Entity;
-import org.molgenis.data.EntityManager;
-import org.molgenis.data.IdGenerator;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMetaFactory;
+import org.molgenis.util.MolgenisDateFormat;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.text.ParseException;
 import java.util.Arrays;
 
 import static java.util.Collections.emptyList;
@@ -82,5 +81,22 @@ public class RestServiceTest
 		when(entityManager.getReference(refEntityMeta, "1")).thenReturn(entity1);
 		Object entityValue = restService.toEntityValue(attr, "0,1"); // string
 		assertEquals(entityValue, Arrays.asList(entity0, entity1));
+	}
+
+	@Test
+	public void toEntityDateStringValueValid() throws ParseException
+	{
+		AttributeMetaData dateAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("dateAttr").getMock();
+		when(dateAttr.getDataType()).thenReturn(DATE);
+		assertEquals(restService.toEntityValue(dateAttr, "2000-12-31"),
+				MolgenisDateFormat.getDateFormat().parse("2000-12-31"));
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Attribute \\[dateAttr\\] value \\[invalidDate\\] does not match date format \\[yyyy-MM-dd\\]")
+	public void toEntityDateStringValueInvalid()
+	{
+		AttributeMetaData dateAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("dateAttr").getMock();
+		when(dateAttr.getDataType()).thenReturn(DATE);
+		restService.toEntityValue(dateAttr, "invalidDate");
 	}
 }

@@ -169,7 +169,7 @@ public class AccountServiceImpl implements AccountService
 		MolgenisUser user = dataService.query(MOLGENIS_USER, MolgenisUser.class).eq(USERNAME, username).findOne();
 		if (user == null)
 		{
-			throw new MolgenisUserException(format("Unknown user [%s]"));
+			throw new MolgenisUserException(format("Unknown user [%s]", username));
 		}
 
 		user.setPassword(newPassword);

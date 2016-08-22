@@ -38,6 +38,7 @@ public class MolgenisTokenMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Token");
 		setPackage(securityPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false).setDescription("");

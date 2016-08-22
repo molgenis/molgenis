@@ -28,4 +28,11 @@ public class OntologyTermHitEntity extends DynamicEntity
 		DynamicEntity other = (DynamicEntity) obj;
 		return getIdValue().equals(other.getIdValue());
 	}
+
+	@Override
+	public int hashCode()
+	{
+		Object idValue = getIdValue();
+		return idValue != null ? getIdValue().hashCode() : 0;
+	}
 }

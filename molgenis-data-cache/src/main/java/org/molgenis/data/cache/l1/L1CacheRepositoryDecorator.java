@@ -28,7 +28,7 @@ import static org.molgenis.data.RepositoryCapability.WRITABLE;
  * Delegates to the underlying repository when an action is not supported by the cache or when the cache doesn't contain
  * the needed entity.
  */
-public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator
+public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
 	private static final int ID_BATCH_SIZE = 1000;
 

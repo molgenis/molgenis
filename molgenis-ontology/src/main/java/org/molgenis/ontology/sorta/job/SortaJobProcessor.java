@@ -9,7 +9,7 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.controller.SortaServiceController;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
-import org.molgenis.ontology.sorta.meta.MatchingTaskContentEntityMetaData;
+import org.molgenis.ontology.sorta.meta.MatchingTaskContentMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.SCORE;
+import static org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData.SCORE;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 public class SortaJobProcessor
@@ -64,31 +64,31 @@ public class SortaJobProcessor
 			progress.setProgressMax((int) maxCount);
 
 			// FIXME get rid of getApplicationContext reference
-			MatchingTaskContentEntityMetaData matchingTaskContentEntityMetaData = getApplicationContext()
-					.getBean(MatchingTaskContentEntityMetaData.class);
+			MatchingTaskContentMetaData matchingTaskContentMetaData = getApplicationContext()
+					.getBean(MatchingTaskContentMetaData.class);
 
 			// Match input terms with code
 			List<Entity> entitiesToAdd = newArrayList();
 			dataService.findAll(inputRepositoryName).forEach(inputRow ->
 			{
-				Entity resultEntity = new DynamicEntity(matchingTaskContentEntityMetaData);
-				resultEntity.set(MatchingTaskContentEntityMetaData.INPUT_TERM, inputRow);
-				resultEntity.set(MatchingTaskContentEntityMetaData.IDENTIFIER, idGenerator.generateId());
-				resultEntity.set(MatchingTaskContentEntityMetaData.VALIDATED, false);
+				Entity resultEntity = new DynamicEntity(matchingTaskContentMetaData);
+				resultEntity.set(MatchingTaskContentMetaData.INPUT_TERM, inputRow);
+				resultEntity.set(MatchingTaskContentMetaData.IDENTIFIER, idGenerator.generateId());
+				resultEntity.set(MatchingTaskContentMetaData.VALIDATED, false);
 				entitiesToAdd.add(resultEntity);
 
 				Iterable<Entity> ontologyTermEntities = sortaService.findOntologyTermEntities(ontologyIri, inputRow);
 				if (Iterables.size(ontologyTermEntities) > 0)
 				{
 					Entity firstMatchedOntologyTerm = Iterables
-							.getFirst(ontologyTermEntities, new DynamicEntity(matchingTaskContentEntityMetaData));
-					resultEntity.set(MatchingTaskContentEntityMetaData.MATCHED_TERM,
+							.getFirst(ontologyTermEntities, new DynamicEntity(matchingTaskContentMetaData));
+					resultEntity.set(MatchingTaskContentMetaData.MATCHED_TERM,
 							firstMatchedOntologyTerm.get(OntologyTermMetaData.ONTOLOGY_TERM_IRI));
-					resultEntity.set(MatchingTaskContentEntityMetaData.SCORE, firstMatchedOntologyTerm.get(SCORE));
+					resultEntity.set(MatchingTaskContentMetaData.SCORE, firstMatchedOntologyTerm.get(SCORE));
 				}
 				else
 				{
-					resultEntity.set(MatchingTaskContentEntityMetaData.SCORE, 0);
+					resultEntity.set(MatchingTaskContentMetaData.SCORE, 0);
 				}
 
 				// Add entity in batch

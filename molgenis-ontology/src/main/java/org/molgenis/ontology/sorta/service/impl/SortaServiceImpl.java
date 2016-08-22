@@ -14,7 +14,7 @@ import org.molgenis.data.support.QueryImpl;
 import org.molgenis.ontology.core.meta.*;
 import org.molgenis.ontology.roc.InformationContentService;
 import org.molgenis.ontology.sorta.bean.OntologyTermHitEntity;
-import org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData;
+import org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData;
 import org.molgenis.ontology.sorta.service.SortaService;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -27,8 +27,8 @@ import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.ontology.core.meta.OntologyMetaData.ONTOLOGY;
 import static org.molgenis.ontology.core.meta.OntologyTermDynamicAnnotationMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
 import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM;
-import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.COMBINED_SCORE;
-import static org.molgenis.ontology.sorta.meta.OntologyTermHitEntityMetaData.SCORE;
+import static org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData.COMBINED_SCORE;
+import static org.molgenis.ontology.sorta.meta.OntologyTermHitMetaData.SCORE;
 
 public class SortaServiceImpl implements SortaService
 {
@@ -49,17 +49,17 @@ public class SortaServiceImpl implements SortaService
 
 	private final DataService dataService;
 	private final InformationContentService informationContentService;
-	private final OntologyTermHitEntityMetaData ontologyTermHitEntityMetaData;
+	private final OntologyTermHitMetaData ontologyTermHitMetaData;
 	private final OntologyTermSynonymFactory ontologyTermSynonymFactory;
 
 	@Autowired
 	public SortaServiceImpl(DataService dataService, InformationContentService informationContentService,
-			OntologyTermHitEntityMetaData ontologyTermHitEntityMetaData,
+			OntologyTermHitMetaData ontologyTermHitMetaData,
 			OntologyTermSynonymFactory ontologyTermSynonymFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.informationContentService = requireNonNull(informationContentService);
-		this.ontologyTermHitEntityMetaData = requireNonNull(ontologyTermHitEntityMetaData);
+		this.ontologyTermHitMetaData = requireNonNull(ontologyTermHitMetaData);
 		this.ontologyTermSynonymFactory = requireNonNull(ontologyTermSynonymFactory);
 	}
 
@@ -239,7 +239,7 @@ public class SortaServiceImpl implements SortaService
 				}
 			}
 		}
-		OntologyTermHitEntity mapEntity = new OntologyTermHitEntity(ontologyTerm, ontologyTermHitEntityMetaData);
+		OntologyTermHitEntity mapEntity = new OntologyTermHitEntity(ontologyTerm, ontologyTermHitMetaData);
 		mapEntity.set(SCORE, maxNgramScore);
 		mapEntity.set(COMBINED_SCORE, maxNgramIDFScore);
 		return mapEntity;
@@ -256,7 +256,7 @@ public class SortaServiceImpl implements SortaService
 	 */
 	private Entity calculateNGromOTAnnotations(Entity inputEntity, Entity ontologyTermEntity)
 	{
-		OntologyTermHitEntity mapEntity = new OntologyTermHitEntity(ontologyTermEntity, ontologyTermHitEntityMetaData);
+		OntologyTermHitEntity mapEntity = new OntologyTermHitEntity(ontologyTermEntity, ontologyTermHitMetaData);
 		for (Entity annotationEntity : ontologyTermEntity
 				.getEntities(OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION))
 		{
