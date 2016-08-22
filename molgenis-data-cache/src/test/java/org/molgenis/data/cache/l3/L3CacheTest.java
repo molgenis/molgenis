@@ -67,8 +67,6 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 		entityMetaData.addAttribute(attributeMetaDataFactory.create().setDataType(INT).setName(ID), ROLE_ID);
 		entityMetaData.addAttribute(attributeMetaDataFactory.create().setName(COUNTRY));
 
-		//		when(entityManager.create(entityMetaData)).thenReturn(new DynamicEntity(entityMetaData));
-
 		entity1 = new DynamicEntity(entityMetaData);
 		entity1.set(ID, 1);
 		entity1.set(COUNTRY, "NL");
