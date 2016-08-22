@@ -80,6 +80,7 @@ public class ReindexActionMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Index action");
 		setPackage(indexPackage);
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false);

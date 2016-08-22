@@ -20,7 +20,6 @@ public class GroupAuthorityMetaData extends SystemEntityMetaData
 	public static final String GROUP_AUTHORITY = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String MOLGENIS_GROUP = "molgenisGroup";
-	public static final String ROLE = "role";
 	public static final String ID = "id";
 
 	private final SecurityPackage securityPackage;
@@ -40,6 +39,7 @@ public class GroupAuthorityMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Group authority");
 		setPackage(securityPackage);
 
 		setExtends(authorityMetaData);

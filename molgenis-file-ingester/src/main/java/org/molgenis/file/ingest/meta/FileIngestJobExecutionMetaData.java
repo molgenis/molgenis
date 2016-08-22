@@ -39,6 +39,7 @@ public class FileIngestJobExecutionMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("File ingest job execution");
 		setExtends(jobExecutionMetaData);
 		addAttribute(FILE).setLabel("File").setDescription("The imported file.").setDataType(XREF)
 				.setRefEntity(fileMetaMetaData).setNillable(true);

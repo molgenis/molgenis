@@ -37,6 +37,7 @@ public class MolgenisGroupMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Group");
 		setPackage(securityPackage);
 
 		setExtends(authorityMetaData);

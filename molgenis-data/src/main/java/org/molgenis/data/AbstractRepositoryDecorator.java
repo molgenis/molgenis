@@ -14,19 +14,19 @@ import java.util.stream.Stream;
  * Abstract superclass for {@link Repository} decorators that delegates everything to the
  * decorated repository.
  */
-public abstract class AbstractRepositoryDecorator extends ForwardingObject implements Repository<Entity>
+public abstract class AbstractRepositoryDecorator<E extends Entity> extends ForwardingObject implements Repository<E>
 {
 	@Override
-	protected abstract Repository<Entity> delegate();
+	protected abstract Repository<E> delegate();
 
 	@Override
-	public Iterator<Entity> iterator()
+	public Iterator<E> iterator()
 	{
 		return delegate().iterator();
 	}
 
 	@Override
-	public void forEachBatched(Fetch fetch, Consumer<List<Entity>> consumer, int batchSize)
+	public void forEachBatched(Fetch fetch, Consumer<List<E>> consumer, int batchSize)
 	{
 		delegate().forEachBatched(fetch, consumer, batchSize);
 	}
@@ -56,25 +56,25 @@ public abstract class AbstractRepositoryDecorator extends ForwardingObject imple
 	}
 
 	@Override
-	public Query<Entity> query()
+	public Query<E> query()
 	{
 		return delegate().query();
 	}
 
 	@Override
-	public long count(Query<Entity> q)
+	public long count(Query<E> q)
 	{
 		return delegate().count(q);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Query<Entity> q)
+	public Stream<E> findAll(Query<E> q)
 	{
 		return delegate().findAll(q);
 	}
 
 	@Override
-	public Entity findOne(Query<Entity> q)
+	public E findOne(Query<E> q)
 	{
 		return delegate().findOne(q);
 	}
@@ -86,25 +86,25 @@ public abstract class AbstractRepositoryDecorator extends ForwardingObject imple
 	}
 
 	@Override
-	public Entity findOneById(Object id)
+	public E findOneById(Object id)
 	{
 		return delegate().findOneById(id);
 	}
 
 	@Override
-	public Entity findOneById(Object id, Fetch fetch)
+	public E findOneById(Object id, Fetch fetch)
 	{
 		return delegate().findOneById(id, fetch);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Stream<Object> ids)
+	public Stream<E> findAll(Stream<Object> ids)
 	{
 		return delegate().findAll(ids);
 	}
 
 	@Override
-	public Stream<Entity> findAll(Stream<Object> ids, Fetch fetch)
+	public Stream<E> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		return delegate().findAll(ids, fetch);
 	}
@@ -122,13 +122,13 @@ public abstract class AbstractRepositoryDecorator extends ForwardingObject imple
 	}
 
 	@Override
-	public void update(Entity entity)
+	public void update(E entity)
 	{
 		delegate().update(entity);
 	}
 
 	@Override
-	public void delete(Entity entity)
+	public void delete(E entity)
 	{
 		delegate().delete(entity);
 	}
@@ -146,25 +146,25 @@ public abstract class AbstractRepositoryDecorator extends ForwardingObject imple
 	}
 
 	@Override
-	public void add(Entity entity)
+	public void add(E entity)
 	{
 		delegate().add(entity);
 	}
 
 	@Override
-	public Integer add(Stream<Entity> entities)
+	public Integer add(Stream<E> entities)
 	{
 		return delegate().add(entities);
 	}
 
 	@Override
-	public void update(Stream<Entity> entities)
+	public void update(Stream<E> entities)
 	{
 		delegate().update(entities);
 	}
 
 	@Override
-	public void delete(Stream<Entity> entities)
+	public void delete(Stream<E> entities)
 	{
 		delegate().delete(entities);
 	}

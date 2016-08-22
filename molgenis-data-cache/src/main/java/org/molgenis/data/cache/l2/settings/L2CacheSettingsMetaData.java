@@ -46,8 +46,8 @@ public class L2CacheSettingsMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("L2 cache settings");
 		setPackage(rootSystemPackage);
-		setDescription("L2 Cache settings");
 		addAttribute(ID, ROLE_ID).setAuto(true).setVisible(false)
 				.setDescription("automatically generated internal id, only for internal use.");
 		addAttribute(CACHED_ENTITY).setDescription("Name of the entity whose L2 Cache settings these are.")

@@ -13,7 +13,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.molgenis.ontology.core.meta.OntologyTermSynonymMetaData.ONTOLOGY_TERM_SYNONYM;
-import static org.molgenis.ontology.ic.TermFrequencyEntityMetaData.*;
+import static org.molgenis.ontology.ic.TermFrequencyMetaData.*;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
@@ -60,8 +60,7 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 		if (pubMedTFEntity == null) return null;
 
 		// FIXME remove reference to getApplicationContext
-		TermFrequencyEntityMetaData termFrequencyEntityMeta = getApplicationContext()
-				.getBean(TermFrequencyEntityMetaData.class);
+		TermFrequencyMetaData termFrequencyEntityMeta = getApplicationContext().getBean(TermFrequencyMetaData.class);
 		Entity entity = new DynamicEntity(termFrequencyEntityMeta);
 		entity.set(TERM, term);
 		entity.set(FREQUENCY, pubMedTFEntity.getFrequency());
@@ -88,8 +87,8 @@ public class OntologyTermFrequencyServiceImpl implements TermFrequencyService
 			if (pubMedTFEntity != null)
 			{
 				// FIXME remove reference to getApplicationContext
-				TermFrequencyEntityMetaData termFrequencyEntityMeta = getApplicationContext()
-						.getBean(TermFrequencyEntityMetaData.class);
+				TermFrequencyMetaData termFrequencyEntityMeta = getApplicationContext()
+						.getBean(TermFrequencyMetaData.class);
 				Entity mapEntity = new DynamicEntity(termFrequencyEntityMeta);
 				mapEntity.set(TERM, ontologyTermSynonym);
 				mapEntity.set(FREQUENCY, pubMedTFEntity.getFrequency());

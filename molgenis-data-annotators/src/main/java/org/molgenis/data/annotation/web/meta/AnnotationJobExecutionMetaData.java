@@ -31,6 +31,7 @@ public class AnnotationJobExecutionMetaData extends SystemEntityMetaData
 	@Override
 	public void init()
 	{
+		setLabel("Annotation job execution");
 		setExtends(jobExecutionMetaData);
 		addAttribute(TARGET_NAME).setDataType(STRING).setLabel("target name")
 				.setDescription("Fully qualified name of the entity that is being annotated.").setNillable(false);
