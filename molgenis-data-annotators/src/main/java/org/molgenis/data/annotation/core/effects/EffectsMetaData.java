@@ -18,9 +18,8 @@ public class EffectsMetaData implements AnnotatorEntityMetaData
 	@Autowired
 	AttributeMetaDataFactory attributeMetaDataFactory;
 
-	public static String ID = "id";
-	public static String VARIANT = VcfWriterUtils.VARIANT;
-
+	public static final String ID = "id";
+	public static final String VARIANT = VcfWriterUtils.VARIANT;
 	public static final String ALT = "Alt_Allele";
 	public static final String ANNOTATION = "Annotation";
 	public static final String PUTATIVE_IMPACT = "Putative_impact";
