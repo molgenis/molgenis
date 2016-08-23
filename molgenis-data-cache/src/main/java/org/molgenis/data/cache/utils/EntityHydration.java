@@ -63,24 +63,14 @@ public class EntityHydration
 					if (isMultipleReferenceType(attribute))
 					{
 						// We can do this cast because during dehydration, mrefs and categorical mrefs are stored as a List of Object
-						Iterable<Entity> referenceEntities = entityManager
-								.getReferences(attribute.getRefEntity(), (List<Object>) value);
-						hydratedEntity.set(name, referenceEntities);
+						value = entityManager.getReferences(attribute.getRefEntity(), (List<Object>) value);
 					}
 					else if (isSingleReferenceType(attribute))
 					{
-						Entity referenceEntity = entityManager.getReference(attribute.getRefEntity(), value);
-						hydratedEntity.set(name, referenceEntity);
-					}
-					else
-					{
-						hydratedEntity.set(name, value);
+						value = entityManager.getReference(attribute.getRefEntity(), value);
 					}
 				}
-				else
-				{
-					hydratedEntity.set(name, value);
-				}
+				hydratedEntity.set(name, value);
 			}
 		}
 
@@ -102,9 +92,8 @@ public class EntityHydration
 
 		entityMetaData.getAtomicAttributes().forEach(attribute ->
 		{
-
 			// Only dehydrate if the attribute is NOT computed
-			if (attribute.getExpression() == null)
+			if (!attribute.hasExpression())
 			{
 				String name = attribute.getName();
 				AttributeType type = attribute.getDataType();
