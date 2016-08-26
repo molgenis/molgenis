@@ -62,12 +62,11 @@ import static org.molgenis.integrationtest.platform.PostgreSqlDatabase.dropAndCr
 		"org.molgenis.data.elasticsearch", "org.molgenis.auth", "org.molgenis.test.data", "org.molgenis.data.platform",
 		"org.molgenis.data.meta.model", "org.molgenis.data.system.model", "org.molgenis.data.cache",
 		"org.molgenis.data.i18n", "org.molgenis.data.postgresql", "org.molgenis.file.model",
-		"org.molgenis.security.owned", "org.molgenis.security.user" })
+		"org.molgenis.security.owned", "org.molgenis.security.user", "org.molgenis.data.validation" })
 @Import({ DatabaseConfig.class, EmbeddedElasticSearchConfig.class, GsonConfig.class, PostgreSqlConfiguration.class,
 		RunAsSystemBeanPostProcessor.class, RhinoConfig.class, UuidGenerator.class, ExpressionValidator.class,
 		PlatformConfig.class, org.molgenis.data.RepositoryCollectionRegistry.class,
 		org.molgenis.data.RepositoryCollectionDecoratorFactory.class,
-		org.molgenis.data.validation.EntityAttributesValidator.class,
 		org.molgenis.data.RepositoryCollectionBootstrapper.class, org.molgenis.data.EntityFactoryRegistrar.class })
 public class PlatformITConfig implements ApplicationListener<ContextRefreshedEvent>
 {
