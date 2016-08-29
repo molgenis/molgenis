@@ -8,6 +8,8 @@ import org.molgenis.data.cache.l1.L1Cache;
 import org.molgenis.data.cache.l1.L1CacheRepositoryDecorator;
 import org.molgenis.data.cache.l2.L2Cache;
 import org.molgenis.data.cache.l2.L2CacheRepositoryDecorator;
+import org.molgenis.data.cache.l3.L3Cache;
+import org.molgenis.data.cache.l3.L3CacheRepositoryDecorator;
 import org.molgenis.data.elasticsearch.IndexedRepositoryDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.i18n.I18nStringDecorator;
@@ -71,6 +73,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final TransactionInformation transactionInformation;
 	private final MolgenisPermissionService permissionService;
 	private final EntityMetaDataValidator entityMetaDataValidator;
+	private final L3Cache l3Cache;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -82,7 +85,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder,
 			EntityMetaDataMetaData entityMetaMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
-			MolgenisPermissionService permissionService, EntityMetaDataValidator entityMetaDataValidator)
+			MolgenisPermissionService permissionService, EntityMetaDataValidator entityMetaDataValidator,
+			L3Cache l3Cache)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -106,6 +110,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.transactionInformation = requireNonNull(transactionInformation);
 		this.permissionService = requireNonNull(permissionService);
 		this.entityMetaDataValidator = requireNonNull(entityMetaDataValidator);
+		this.l3Cache = requireNonNull(l3Cache);
 	}
 
 	@Override
@@ -113,14 +118,17 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	{
 		Repository<Entity> decoratedRepository = repositoryDecoratorRegistry.decorate(repository);
 
-		// 11. Query the L2 cache before querying the database
+		// 12. Query the L2 cache before querying the database
 		decoratedRepository = new L2CacheRepositoryDecorator(decoratedRepository, l2Cache, transactionInformation);
 
-		// 10. Query the L1 cache before querying the database
+		// 11. Query the L1 cache before querying the database
 		decoratedRepository = new L1CacheRepositoryDecorator(decoratedRepository, l1Cache);
 
-		// 9. Route specific queries to the index
+		// 10. Route specific queries to the index
 		decoratedRepository = new IndexedRepositoryDecorator(decoratedRepository, searchService);
+
+		// 9. Query the L3 cache before querying the index
+		decoratedRepository = new L3CacheRepositoryDecorator(decoratedRepository, l3Cache, transactionInformation);
 
 		// 8. Register the cud action needed to reindex indexed repositories
 		decoratedRepository = new ReindexActionRepositoryDecorator(decoratedRepository, reindexActionRegisterService);
