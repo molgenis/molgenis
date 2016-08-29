@@ -11,6 +11,7 @@ import org.molgenis.data.support.QueryImpl;
 import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -18,7 +19,6 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
-import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.BOOL;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.ENUM;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
@@ -560,15 +560,15 @@ class PostgreSqlQueryGenerator
 					{
 						throw new MolgenisDataException("Missing value for IN query");
 					}
-					if (!(inValue instanceof Iterable<?>))
+					if (!(inValue instanceof Set<?>))
 					{
-						throw new MolgenisDataException(format("IN value is of type [%s] instead of [Iterable]",
+						throw new MolgenisDataException(format("IN value is of type [%s] instead of [Set]",
 								inValue.getClass().getSimpleName()));
 					}
 
 					StringBuilder in = new StringBuilder();
 					AttributeMetaData inAttr = attr;
-					Stream<Object> postgreSqlIds = stream(((Iterable<?>) inValue).spliterator(), false)
+					Stream<Object> postgreSqlIds = ((Set<?>) inValue).stream()
 							.map(idValue -> PostgreSqlUtils.getPostgreSqlQueryValue(idValue, inAttr));
 					for (Iterator<Object> it = postgreSqlIds.iterator(); it.hasNext(); )
 					{
