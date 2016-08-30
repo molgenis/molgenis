@@ -1,5 +1,6 @@
 package org.molgenis.data.postgresql;
 
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
@@ -114,6 +115,7 @@ public class PostgreSqlEntityFactory
 					break;
 				case CATEGORICAL:
 				case FILE:
+				case MANY_TO_ONE:
 				case XREF:
 					EntityMetaData xrefEntityMeta = attr.getRefEntity();
 					Object refIdValue = mapValue(resultSet, xrefEntityMeta.getIdAttribute(), colName);
@@ -121,6 +123,7 @@ public class PostgreSqlEntityFactory
 					break;
 				case CATEGORICAL_MREF:
 				case MREF:
+				case ONE_TO_MANY:
 					EntityMetaData mrefEntityMeta = attr.getRefEntity();
 					Array arrayValue = resultSet.getArray(colName);
 					value = resultSet.wasNull() ? null : mapValueMref(arrayValue, mrefEntityMeta);
@@ -213,20 +216,17 @@ public class PostgreSqlEntityFactory
 			// use iteration instead of tail recursion
 			while (true)
 			{
-				switch (idAttr.getDataType())
+				AttributeType attrType = idAttr.getDataType();
+				switch (attrType)
 				{
 					case BOOL:
 						return Boolean.valueOf(idValueStr);
 					case CATEGORICAL:
 					case FILE:
 					case XREF:
+					case MANY_TO_ONE:
 						idAttr = idAttr.getRefEntity().getIdAttribute();
 						continue;
-					case CATEGORICAL_MREF:
-					case COMPOUND:
-					case MREF:
-						throw new RuntimeException(
-								format("Invalid id attribute type [%s]", idAttr.getDataType().toString()));
 					case DATE:
 					case DATE_TIME:
 						return Date.valueOf(idValueStr);
@@ -244,9 +244,13 @@ public class PostgreSqlEntityFactory
 						return Integer.valueOf(idValueStr);
 					case LONG:
 						return Long.valueOf(idValueStr);
+					case CATEGORICAL_MREF:
+					case COMPOUND:
+					case MREF:
+					case ONE_TO_MANY:
+						throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 					default:
-						throw new RuntimeException(
-								format("Unknown attribute type [%s]", idAttr.getDataType().toString()));
+						throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 				}
 			}
 		}
