@@ -1,6 +1,5 @@
 package org.molgenis.util;
 
-import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -9,17 +8,43 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.testng.Assert.assertEquals;
 
 public class DependencyResolverTest
 {
+	@Test
+	public void resolveOneToMany()
+	{
+		EntityMetaData oneToManyEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityMetaData manyToOneEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity")
+				.getMock();
+
+		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
+		when(oneToManyAttr.getName()).thenReturn("oneToManyAttr");
+		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(oneToManyAttr.getRefEntity()).thenReturn(manyToOneEntityMeta);
+
+		AttributeMetaData manyToOneAttr = mock(AttributeMetaData.class);
+		when(manyToOneAttr.getName()).thenReturn("manyToOneAttr");
+		when(manyToOneAttr.getDataType()).thenReturn(MANY_TO_ONE);
+		when(manyToOneAttr.getRefEntity()).thenReturn(oneToManyEntityMeta);
+
+		when(oneToManyEntityMeta.getAtomicAttributes()).thenReturn(singleton(oneToManyAttr));
+		when(manyToOneEntityMeta.getAtomicAttributes()).thenReturn(singleton(manyToOneAttr));
+		assertEquals(
+				DependencyResolver.resolve(newLinkedHashSet(newArrayList(manyToOneEntityMeta, oneToManyEntityMeta))),
+				newArrayList(oneToManyEntityMeta, manyToOneEntityMeta));
+	}
+
 	@Test
 	public void resolve()
 	{
@@ -100,6 +125,6 @@ public class DependencyResolverTest
 		Iterable<Entity> entities = asList(piet, klaas, jan, katrijn, marie);
 
 		Iterable<Entity> sorted = new DependencyResolver().resolveSelfReferences(entities, emd);
-		assertEquals(Lists.newArrayList(sorted), asList(marie, piet, jan, katrijn, klaas));
+		assertEquals(newArrayList(sorted), asList(marie, piet, jan, katrijn, klaas));
 	}
 }

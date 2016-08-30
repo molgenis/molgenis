@@ -18,6 +18,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
@@ -73,8 +74,8 @@ public class DependencyResolver
 
 			for (AttributeMetaData attr : meta.getAtomicAttributes())
 			{
-				if ((attr.getRefEntity() != null) && !attr.getRefEntity().getName()
-						.equals(meta.getName()))// self reference
+				if (attr.getDataType() != ONE_TO_MANY && (attr.getRefEntity() != null) && !attr.getRefEntity().getName()
+						.equals(meta.getName()))
 				{
 					dependencies.add(attr.getRefEntity().getName());
 				}
