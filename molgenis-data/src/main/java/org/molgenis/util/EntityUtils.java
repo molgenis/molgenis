@@ -8,6 +8,7 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
+import org.molgenis.data.support.EntityMetaDataUtils;
 
 import java.text.ParseException;
 import java.util.Iterator;
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Iterables.*;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
@@ -35,17 +37,10 @@ public class EntityUtils
 	 */
 	public static Object getTypedValue(String valueStr, AttributeMetaData attr)
 	{
-		switch (attr.getDataType())
+		if (EntityMetaDataUtils.isReferenceType(attr))
 		{
-			case CATEGORICAL:
-			case FILE:
-			case XREF:
-			case CATEGORICAL_MREF:
-			case MREF:
-				throw new MolgenisDataException(
-						"getTypedValue(String, AttributeMetaData) can't be used for attributes referencing entities");
-			default:
-				break;
+			throw new MolgenisDataException(
+					"getTypedValue(String, AttributeMetaData) can't be used for attributes referencing entities");
 		}
 		return getTypedValue(valueStr, attr, null);
 	}
@@ -68,16 +63,19 @@ public class EntityUtils
 			case CATEGORICAL:
 			case FILE:
 			case XREF:
+			case MANY_TO_ONE:
 				EntityMetaData xrefEntity = attr.getRefEntity();
 				Object xrefIdValue = getTypedValue(valueStr, xrefEntity.getIdAttribute(), entityManager);
 				return entityManager.getReference(xrefEntity, xrefIdValue);
 			case CATEGORICAL_MREF:
 			case MREF:
+			case ONE_TO_MANY:
 				EntityMetaData mrefEntity = attr.getRefEntity();
 				List<String> mrefIdStrValues = ListEscapeUtils.toList(valueStr);
 				return mrefIdStrValues.stream()
 						.map(mrefIdStrValue -> getTypedValue(mrefIdStrValue, mrefEntity.getIdAttribute(),
-								entityManager));
+								entityManager)).map(mrefIdValue -> entityManager.getReference(mrefEntity, mrefIdValue))
+						.collect(toList());
 			case COMPOUND:
 				throw new IllegalArgumentException("Compound attribute has no value");
 			case DATE:
