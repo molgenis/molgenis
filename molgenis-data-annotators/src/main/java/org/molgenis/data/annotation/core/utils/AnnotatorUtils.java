@@ -16,8 +16,6 @@ import java.util.Map;
 
 public class AnnotatorUtils
 {
-	public static final String MOLGENIS_PREFIX = "MOLGENIS_";
-
 	public static String getAnnotatorResourceDir()
 	{
 		// Annotators include files/tools
