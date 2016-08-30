@@ -1,15 +1,15 @@
 package org.molgenis.data.mapper.meta;
 
-import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
-
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping.AlgorithmState;
 import org.molgenis.data.support.DefaultEntityMetaData;
 import org.molgenis.fieldtypes.EnumField;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
+import static org.molgenis.MolgenisFieldTypes.TEXT;
+import static org.molgenis.data.EntityMetaData.AttributeRole.ROLE_ID;
 
 @Component
 public class AttributeMappingMetaData extends DefaultEntityMetaData
@@ -27,8 +27,8 @@ public class AttributeMappingMetaData extends DefaultEntityMetaData
 
 		addAttribute(IDENTIFIER, ROLE_ID);
 		addAttribute(TARGETATTRIBUTEMETADATA).setNillable(false);
-		addAttribute(SOURCEATTRIBUTEMETADATAS);
-		addAttribute(ALGORITHM).setDataType(MolgenisFieldTypes.TEXT);
+		addAttribute(SOURCEATTRIBUTEMETADATAS).setDataType(TEXT);
+		addAttribute(ALGORITHM).setDataType(TEXT);
 		EnumField enumField = new EnumField();
 		enumField.setEnumOptions(Arrays.asList(AlgorithmState.values()).stream().map(STATE -> STATE.toString())
 				.collect(Collectors.toList()));
