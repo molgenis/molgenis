@@ -4,6 +4,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
@@ -25,12 +26,14 @@ import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static java.util.Collections.singletonList;
+import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.MANY_TO_ONE;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.ONE_TO_MANY;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -108,8 +111,48 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 	@Test
 	public void dehydrateTest()
 	{
-		Map<String, Object> actualDehydratedEntity = entityHydration.dehydrate(hydratedEntity);
+		Map<String, Object> actualDehydratedEntity = EntityHydration.dehydrate(hydratedEntity);
 		assertEquals(actualDehydratedEntity, dehydratedEntity);
+	}
+
+	@Test
+	public void dehydrateOnetoMany()
+	{
+		String attrName = "attr";
+		Entity entity = mock(Entity.class);
+		Entity oneToManyEntity0 = mock(Entity.class);
+		String oneToManyEntity0IdValue = "ref0";
+		when(oneToManyEntity0.getIdValue()).thenReturn(oneToManyEntity0IdValue);
+		Entity oneToManyEntity1 = mock(Entity.class);
+		String oneToManyEntity1IdValue = "ref1";
+		when(oneToManyEntity1.getIdValue()).thenReturn(oneToManyEntity1IdValue);
+		when(entity.getEntities(attrName)).thenReturn(newArrayList(oneToManyEntity0, oneToManyEntity1));
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
+		when(oneToManyAttr.getName()).thenReturn(attrName);
+		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(entityMeta.getAtomicAttributes()).thenReturn(singleton(oneToManyAttr));
+		when(entity.getEntityMetaData()).thenReturn(entityMeta);
+		assertEquals(EntityHydration.dehydrate(entity),
+				singletonMap(attrName, newArrayList(oneToManyEntity0IdValue, oneToManyEntity1IdValue)));
+	}
+
+	@Test
+	public void dehydrateManyToOne()
+	{
+		String attrName = "attr";
+		Entity entity = mock(Entity.class);
+		Entity manyToOneEntity = mock(Entity.class);
+		String manyToOneEntityIdValue = "ref0";
+		when(manyToOneEntity.getIdValue()).thenReturn(manyToOneEntityIdValue);
+		when(entity.getEntity(attrName)).thenReturn(manyToOneEntity);
+		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		AttributeMetaData manyToOneAttr = mock(AttributeMetaData.class);
+		when(manyToOneAttr.getName()).thenReturn(attrName);
+		when(manyToOneAttr.getDataType()).thenReturn(MANY_TO_ONE);
+		when(entityMeta.getAtomicAttributes()).thenReturn(singleton(manyToOneAttr));
+		when(entity.getEntityMetaData()).thenReturn(entityMeta);
+		assertEquals(EntityHydration.dehydrate(entity), singletonMap(attrName, manyToOneEntityIdValue));
 	}
 
 	@Configuration
