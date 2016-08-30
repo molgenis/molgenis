@@ -2,8 +2,12 @@ package org.molgenis.data.meta.model;
 
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.support.EntityMetaDataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
@@ -102,9 +106,8 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 
 	private static String getRefEntityValidationExpression()
 	{
-		String regex =
-				"/^(" + getValueString(CATEGORICAL) + '|' + getValueString(CATEGORICAL_MREF) + '|' + getValueString(
-						FILE) + '|' + getValueString(MREF) + '|' + getValueString(XREF) + ")$/";
+		String regex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityMetaDataUtils::isReferenceType)
+				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
 
 		return "$('" + REF_ENTITY + "').isNull().and($('" + DATA_TYPE + "').matches(" + regex + ").not()).or(" + "$('"
 				+ REF_ENTITY + "').isNull().not().and($('" + DATA_TYPE + "').matches(" + regex + "))).value()";
