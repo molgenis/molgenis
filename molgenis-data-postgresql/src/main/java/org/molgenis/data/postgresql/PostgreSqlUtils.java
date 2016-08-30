@@ -39,11 +39,13 @@ class PostgreSqlUtils
 				return entity.getBoolean(attrName);
 			case CATEGORICAL:
 			case XREF:
+			case MANY_TO_ONE:
 				Entity xrefEntity = entity.getEntity(attrName);
 				return xrefEntity != null ? getPostgreSqlValue(xrefEntity,
 						xrefEntity.getEntityMetaData().getIdAttribute()) : null;
 			case CATEGORICAL_MREF:
 			case MREF:
+			case ONE_TO_MANY:
 				Iterable<Entity> entities = entity.getEntities(attrName);
 				return stream(entities.spliterator(), false).map(mrefEntity -> getPostgreSqlValue(mrefEntity,
 						mrefEntity.getEntityMetaData().getIdAttribute())).collect(toList());
@@ -108,6 +110,8 @@ class PostgreSqlUtils
 				case FILE:
 				case MREF: // one query value
 				case XREF:
+				case ONE_TO_MANY:
+				case MANY_TO_ONE:
 					// queries values referencing an entity can either be the entity itself or the entity id
 					if (queryValue != null)
 					{

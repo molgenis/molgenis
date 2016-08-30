@@ -43,6 +43,7 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.ONE_TO_MANY;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.getValueString;
 import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.RepositoryCapability.*;
@@ -513,7 +514,8 @@ public class PostgreSqlRepository extends AbstractRepository
 		final List<AttributeMetaData> persistedNonMrefAttrs = persistedAttrs.stream()
 				.filter(attr -> !isMultipleReferenceType(attr)).collect(toList());
 		final List<AttributeMetaData> persistedMrefAttrs = persistedAttrs.stream()
-				.filter(EntityMetaDataUtils::isMultipleReferenceType).collect(toList());
+				.filter(EntityMetaDataUtils::isMultipleReferenceType).filter(attr -> attr.getDataType() != ONE_TO_MANY)
+				.collect(toList());
 		final String updateSql = getSqlUpdate(metaData);
 
 		// update values in entity table
