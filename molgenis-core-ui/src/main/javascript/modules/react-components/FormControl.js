@@ -6,7 +6,7 @@ import Spinner from "./Spinner";
 import URI from "urijs";
 import _ from "underscore";
 
-    var div = React.DOM.div, span = React.DOM.span, label = React.DOM.label, strong = React.DOM.strong, a = React.DOM.a;
+var div = React.DOM.div, span = React.DOM.span, label = React.DOM.label, strong = React.DOM.strong, a = React.DOM.a;
     
     
     /**
@@ -75,6 +75,7 @@ import _ from "underscore";
             
             var attributeControlProps = _.extend({}, this.props, {
                 attr : attr,
+                entity: this.props.entity,
                 id : id,
                 name : id,
                 disabled: this.props.mode === 'view',

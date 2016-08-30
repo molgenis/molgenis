@@ -10,19 +10,12 @@ import Icon from "./Icon";
 import Popover from "./Popover";
 import ReactLayeredComponentMixin from "./mixin/ReactLayeredComponentMixin";
 import Modal from "./Modal";
-import FormFactory from "./Form";
-import Dialog from "./Dialog";
 import Form from "./Form";
-import {
-	isRefAttr,
-	isXrefAttr,
-	isMrefAttr,
-	isCompoundAttr
-} from "rest-client/AttributeFunctions";
-
+import Dialog from "./Dialog";
+import {isRefAttr, isXrefAttr, isMrefAttr, isCompoundAttr} from "rest-client/AttributeFunctions";
 import "./css/Table.css";
 
-	var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em, br = React.DOM.br, label = React.DOM.label;
+var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody = React.DOM.tbody, tr = React.DOM.tr, th = React.DOM.th, td = React.DOM.td, a = React.DOM.a, span = React.DOM.span, em = React.DOM.em, br = React.DOM.br, label = React.DOM.label;
 
 	var api = new RestClientV2();
 
@@ -558,7 +551,7 @@ import "./css/Table.css";
 							if(isCompoundAttr(attr)) {
 								this._createColsRec(item, entity, attr.attributes, {'*': null}, Cols, path, expanded, behindMref);
 							} else {
-								behindMref |= attr.fieldType === 'MREF' || attr.fieldType === 'CATEGORICAL_MREF';
+                                behindMref |= attr.fieldType === 'MREF' || attr.fieldType === 'CATEGORICAL_MREF' || attr.fieldType === 'ONE_TO_MANY';
 								if(this._isExpandedAttr(attr, selectedAttrs)) {
 									Cols.push(td({className: 'expanded-left', key : attrPath.join()}));
 									this._createColsRec(this._getAttributeValues(item, attr.name), attr.refEntity, attr.refEntity.attributes, selectedAttrs[attr.name], Cols, attrPath, true, behindMref);
@@ -733,6 +726,7 @@ import "./css/Table.css";
 						CellContent = span(null, value.toString());
 						break;
 					case 'CATEGORICAL':
+                    case 'MANY_TO_ONE':
 					case 'XREF':
 						if(attr.expression) {
 							// computed refs refer to entities that only exist within the context of entity that refers to them 
@@ -757,6 +751,7 @@ import "./css/Table.css";
 						break;
 					case 'CATEGORICAL_MREF':
 					case 'MREF':
+                    case 'ONE_TO_MANY':
 						CellContent = (
 							span(null,
 									_.flatten(_.map(value, function(item, i) {
