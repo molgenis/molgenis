@@ -73,6 +73,8 @@ public class DataConverter
 			case CATEGORICAL_MREF:
 			case MREF:
 			case FILE:
+			case ONE_TO_MANY:
+			case MANY_TO_ONE:
 				return source;
 			case COMPOUND:
 				throw new UnsupportedOperationException();
