@@ -324,8 +324,8 @@ public class CmdLineAnnotator
 			}
 			Iterable<Entity> entitiesToAnnotate;
 
-			AnnotatorUtils
-					.addAnnotatorMetadataToRepositories(vcfRepo.getEntityMetaData(), annotator.getOutputAttributes());
+			AnnotatorUtils.addAnnotatorMetadataToRepositories(vcfRepo.getEntityMetaData(), attributeMetaDataFactory,
+					annotator);
 			if (annotator instanceof EffectsAnnotator)
 			{
 
