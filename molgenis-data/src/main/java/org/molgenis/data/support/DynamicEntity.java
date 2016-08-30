@@ -220,7 +220,6 @@ public class DynamicEntity implements Entity
 		MolgenisFieldTypes.AttributeType dataType = attr.getDataType();
 		switch (dataType)
 		{
-
 			case BOOL:
 				if (!(value instanceof Boolean))
 				{
@@ -232,6 +231,7 @@ public class DynamicEntity implements Entity
 			case CATEGORICAL:
 				// expected type is FileMeta. validation is not possible because molgenis-data does not depend on molgenis-file
 			case FILE:
+			case MANY_TO_ONE:
 			case XREF:
 				if (!(value instanceof Entity))
 				{
@@ -242,6 +242,7 @@ public class DynamicEntity implements Entity
 				break;
 			case CATEGORICAL_MREF:
 			case MREF:
+			case ONE_TO_MANY:
 				if (!(value instanceof Iterable))
 				{
 					throw new MolgenisDataException(
