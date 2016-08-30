@@ -30,7 +30,14 @@ public class MolgenisFieldTypes
 
 	public enum AttributeType
 	{
-		BOOL, CATEGORICAL, CATEGORICAL_MREF, COMPOUND, DATE, DATE_TIME, DECIMAL, EMAIL, ENUM, FILE, HTML, HYPERLINK, INT, LONG, MREF, SCRIPT, STRING, TEXT, XREF;
+		BOOL, CATEGORICAL, CATEGORICAL_MREF, COMPOUND, DATE, DATE_TIME, DECIMAL, EMAIL, ENUM, FILE, HTML, HYPERLINK, INT, LONG, /**
+	 * Field type that models the inverse relationship of ONE_TO_MANY
+	 */
+	MANY_TO_ONE, /**
+	 * Field type that models the relationship between two entities A and B in which an element of A may be linked
+	 * to many elements of B, but a member of B is linked to only one element of A.
+	 */
+	ONE_TO_MANY, MREF, SCRIPT, STRING, TEXT, XREF;
 
 		private static final Map<String, AttributeType> strValMap;
 
@@ -95,7 +102,9 @@ public class MolgenisFieldTypes
 	public static final FieldType HYPERLINK = new HyperlinkField();
 	public static final FieldType INT = new IntField();
 	public static final FieldType LONG = new LongField();
+	public static final FieldType MANY_TO_ONE = new ManyToOneField();
 	public static final FieldType MREF = new MrefField();
+	public static final FieldType ONE_TO_MANY = new OneToManyField();
 	public static final FieldType SCRIPT = new ScriptField();
 	public static final FieldType STRING = new StringField();
 	public static final FieldType TEXT = new TextField();
@@ -126,7 +135,9 @@ public class MolgenisFieldTypes
 			addType(HYPERLINK);
 			addType(INT);
 			addType(LONG);
+			addType(MANY_TO_ONE);
 			addType(MREF);
+			addType(ONE_TO_MANY);
 			addType(STRING);
 			addType(SCRIPT);
 			addType(TEXT);
