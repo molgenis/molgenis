@@ -1121,6 +1121,7 @@ public class RestController
 				return entityHasAttributeMap;
 			case CATEGORICAL_MREF:
 			case MREF:
+			case ONE_TO_MANY:
 				List<Entity> mrefEntities = new ArrayList<Entity>();
 				for (Entity e : entity.getEntities((attr.getName())))
 					mrefEntities.add(e);
@@ -1141,6 +1142,7 @@ public class RestController
 						dataService, languageService);
 			case CATEGORICAL:
 			case XREF:
+			case MANY_TO_ONE:
 				Map<String, Object> entityXrefAttributeMap = getEntityAsMap((Entity) entity.get(refAttributeName),
 						attr.getRefEntity(), attributesSet, attributeExpandSet);
 				entityXrefAttributeMap.put("href", attrHref);
@@ -1246,11 +1248,12 @@ public class RestController
 							.format(date) : null);
 				}
 				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF && attrType != CATEGORICAL_MREF
+						&& attrType != ONE_TO_MANY && attrType != MANY_TO_ONE
 						&& attrType != FILE)
 				{
 					entityMap.put(attrName, entity.get(attr.getName()));
 				}
-				else if ((attrType == XREF || attrType == CATEGORICAL || attrType == FILE)
+				else if ((attrType == XREF || attrType == CATEGORICAL || attrType == FILE || attrType == MANY_TO_ONE)
 						&& attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
 					Entity refEntity = entity.getEntity(attr.getName());
@@ -1263,7 +1266,8 @@ public class RestController
 						entityMap.put(attrName, refEntityMap);
 					}
 				}
-				else if ((attrType == MREF || attrType == CATEGORICAL_MREF) && attributeExpandsSet != null
+				else if ((attrType == MREF || attrType == CATEGORICAL_MREF || attrType == ONE_TO_MANY)
+						&& attributeExpandsSet != null
 						&& attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
 					EntityMetaData refEntityMetaData = dataService.getEntityMetaData(attr.getRefEntity().getName());
@@ -1289,7 +1293,8 @@ public class RestController
 				}
 				else if ((attrType == XREF && entity.get(attr.getName()) != null) || (attrType == CATEGORICAL
 						&& entity.get(attr.getName()) != null) || (attrType == FILE
-						&& entity.get(attr.getName()) != null) || attrType == MREF || attrType == CATEGORICAL_MREF)
+						&& entity.get(attr.getName()) != null) || attrType == MREF || attrType == CATEGORICAL_MREF
+						|| attrType == ONE_TO_MANY)
 				{
 					// Add href to ref field
 					Map<String, String> ref = new LinkedHashMap<String, String>();

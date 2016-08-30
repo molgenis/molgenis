@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 
 import static com.google.common.collect.Lists.transform;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.rest.v2.AttributeFilterToFetchConverter.createDefaultAttributeFetch;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
@@ -697,11 +698,15 @@ class RestControllerV2
 					case CATEGORICAL:
 					case XREF:
 					case FILE:
+					case MANY_TO_ONE:
 						Entity refEntity = entity.getEntity(attrName);
 						Map<String, Object> refEntityResponse;
 						if (refEntity != null)
 						{
-							Fetch refAttrFetch = fetch != null ? fetch.getFetch(attr) : null;
+							Fetch refAttrFetch =
+									fetch != null ? fetch.getFetch(attr) : createDefaultAttributeFetch(attr,
+											languageService.getCurrentUserLanguageCode());
+							;
 							refEntityResponse = createEntityResponse(refEntity, refAttrFetch, false);
 						}
 						else
@@ -712,12 +717,16 @@ class RestControllerV2
 						break;
 					case CATEGORICAL_MREF:
 					case MREF:
+					case ONE_TO_MANY:
 						Iterable<Entity> refEntities = entity.getEntities(attrName);
 						List<Map<String, Object>> refEntityResponses;
 						if (refEntities != null)
 						{
 							refEntityResponses = new ArrayList<Map<String, Object>>();
-							Fetch refAttrFetch = fetch != null ? fetch.getFetch(attrName) : null;
+							Fetch refAttrFetch =
+									fetch != null ? fetch.getFetch(attrName) : createDefaultAttributeFetch(attr,
+											languageService.getCurrentUserLanguageCode());
+							;
 							for (Entity refEntitiesEntity : refEntities)
 							{
 								refEntityResponses.add(createEntityResponse(refEntitiesEntity, refAttrFetch, false));
