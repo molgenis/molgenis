@@ -1,8 +1,11 @@
 package org.molgenis.data.annotation.core.utils;
 
 import org.apache.commons.lang.StringUtils;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
@@ -63,14 +66,26 @@ public class AnnotatorUtils
 	/**
 	 * Adds a new compound attribute to an existing CrudRepository
 	 *
-	 * @param entityMetaData     {@link EntityMetaData} for the existing repository
-	 * @param attributeMetaDatas
+	 * @param entityMetaData           {@link EntityMetaData} for the existing repository
+	 * @param attributeMetaDataFactory
+	 * @param annotator
 	 */
 	public static EntityMetaData addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData,
-			List<AttributeMetaData> attributeMetaDatas)
+			AttributeMetaDataFactory attributeMetaDataFactory, RepositoryAnnotator annotator)
 	{
-		attributeMetaDatas.stream().filter(part -> entityMetaData.getAttribute(part.getName()) == null)
-				.forEachOrdered(part -> entityMetaData.addAttribute(part));
+		List<AttributeMetaData> attributeMetaDatas = annotator.getOutputAttributes();
+		AttributeMetaData compound;
+		String compoundName = annotator.getFullName();
+		compound = entityMetaData.getAttribute(compoundName);
+		if (compound == null)
+		{
+			compound = attributeMetaDataFactory.create().setName(compoundName).setLabel(annotator.getFullName())
+					.setDataType(MolgenisFieldTypes.AttributeType.COMPOUND).setLabel(annotator.getSimpleName());
+			AttributeMetaData finalCompound = compound;
+			attributeMetaDatas.stream().filter(part -> entityMetaData.getAttribute(part.getName()) == null)
+					.forEachOrdered(part -> finalCompound.addAttributePart(part));
+			entityMetaData.addAttribute(compound);
+		}
 		return entityMetaData;
 	}
 }

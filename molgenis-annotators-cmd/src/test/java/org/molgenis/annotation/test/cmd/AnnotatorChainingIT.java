@@ -74,15 +74,15 @@ public class AnnotatorChainingIT extends AbstractMolgenisSpringTest
 				tgAnnotator.getCmdLineAnnotatorSettingsConfigurer()
 						.addSettings(ResourceUtils.getFile(getClass(), "/1000g").getPath());
 
-				AnnotatorUtils.addAnnotatorMetadataToRepositories(repo.getEntityMetaData(),
-						gonlAnnotator.getOutputAttributes());
+				AnnotatorUtils.addAnnotatorMetadataToRepositories(repo.getEntityMetaData(), attributeMetaDataFactory,
+						gonlAnnotator);
 
 				Iterator<Entity> it = gonlAnnotator.annotate(repo);
 				assertNotNull(it);
 				assertTrue(it.hasNext());
 
-				AnnotatorUtils.addAnnotatorMetadataToRepositories(repo.getEntityMetaData(),
-						tgAnnotator.getOutputAttributes());
+				AnnotatorUtils.addAnnotatorMetadataToRepositories(repo.getEntityMetaData(), attributeMetaDataFactory,
+						tgAnnotator);
 				it = tgAnnotator.annotate(it);
 				assertNotNull(it);
 				assertTrue(it.hasNext());
