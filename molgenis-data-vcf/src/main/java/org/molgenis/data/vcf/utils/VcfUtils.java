@@ -133,6 +133,8 @@ public class VcfUtils
 			case XREF:
 			case CATEGORICAL_MREF:
 			case MREF:
+			case ONE_TO_MANY:
+			case MANY_TO_ONE:
 				return VcfMetaInfo.Type.STRING.toString();
 			case COMPOUND:
 			case FILE:
