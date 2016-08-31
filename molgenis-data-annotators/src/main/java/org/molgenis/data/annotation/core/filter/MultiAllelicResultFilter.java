@@ -2,12 +2,12 @@ package org.molgenis.data.annotation.core.filter;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.*;
-import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.datastructures.Location;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
 import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.support.EntityMetaDataUtils;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
 import java.util.*;
@@ -138,8 +138,8 @@ public class MultiAllelicResultFilter implements ResultFilter
 			// also compile a list of original source alleles and their values for use in 'update mode'
 			if (updateMode && sourceEntity.get(attributeMetaData.getName()) != null)
 			{
-				if (sourceEntity.getEntityMetaData().getAttribute(attributeMetaData.getName()).getDataType()
-						== MolgenisFieldTypes.AttributeType.STRING)
+				if (EntityMetaDataUtils.isTextType(attributeMetaData) || EntityMetaDataUtils
+						.isStringType(attributeMetaData))
 				{
 					String[] sourceValues = sourceEntity.getString(attributeMetaData.getName()).split(",", -1);
 					for (int i = 0; i < sourceAlts.length; i++)
