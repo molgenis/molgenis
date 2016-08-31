@@ -9,39 +9,26 @@ import ch.qos.logback.core.ConsoleAppender;
 import joptsimple.OptionException;
 import joptsimple.OptionParser;
 import joptsimple.OptionSet;
-import org.molgenis.annotation.cmd.exception.CmdLineAnnotationException;
-import org.molgenis.data.Entity;
-import org.molgenis.data.MolgenisInvalidFormatException;
-import org.molgenis.data.annotation.core.EffectsAnnotator;
-import org.molgenis.data.annotation.core.RefEntityAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
-import org.molgenis.data.annotation.core.exception.AnnotationException;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
-import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
-import org.molgenis.data.vcf.utils.VcfWriterUtils;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.JOptCommandLinePropertySource;
 
-import java.io.*;
+import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
-import static com.google.common.collect.Lists.newArrayList;
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Arrays.asList;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
 
 /**
  * Build JAR file...............: mvn clean install -pl molgenis-annotators-cmd/ -am -DskipTests -P create-delivery
@@ -49,8 +36,6 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.MREF;
  */
 public class CmdLineAnnotator
 {
-	private static final String EFFECT = "EFFECT";
-
 	@Autowired
 	CommandLineAnnotatorConfig commandLineAnnotatorConfig;
 
@@ -171,7 +156,33 @@ public class CmdLineAnnotator
 		}
 
 		annotator.getCmdLineAnnotatorSettingsConfigurer().addSettings(annotationSourceFile.getAbsolutePath());
-		annotate(annotator, inputVcfFile, outputVCFFile, options);
+		annotate(annotator, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory, vcfUtils, inputVcfFile,
+				outputVCFFile, options);
+	}
+
+	/**
+	 * Annotate VCF file
+	 *
+	 * @param annotator
+	 * @param inputVcfFile
+	 * @param outputVCFFile
+	 * @param options       , the attributes of the annotator to include in the output vcf, if empty outputs all
+	 * @throws Exception
+	 */
+	private void annotate(RepositoryAnnotator annotator, VcfAttributes vcfAttributes,
+			EntityMetaDataFactory entityMetaDataFactory, AttributeMetaDataFactory attributeMetaDataFactory,
+			VcfUtils vcfUtils, File inputVcfFile, File outputVCFFile, OptionSet options) throws Exception
+	{
+		List<String> attributesToInclude = options.nonOptionArguments().stream().map(Object::toString)
+				.collect(Collectors.toList());
+		AnnotatorUtils.annotate(annotator, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory, vcfUtils,
+				inputVcfFile, outputVCFFile, attributesToInclude, options.has("u"));
+		if (options.has("validate"))
+		{
+			System.out.println("Validating produced VCF file...");
+			System.out.println(vcfValidator.validateVCF(outputVCFFile));
+		}
+		System.out.println("All done!");
 	}
 
 	public static void main(String[] args) throws Exception
@@ -228,151 +239,6 @@ public class CmdLineAnnotator
 				"Enables add/updating of annotations, i.e. CADD scores from a different source, by reusing existing annotations when no match was found.");
 
 		return parser;
-	}
-
-	/**
-	 * Annotate VCF file
-	 *
-	 * @param annotator
-	 * @param inputVcfFile
-	 * @param outputVCFFile
-	 * @param options       , the attributes of the annotator to include in the output vcf, if empty outputs all
-	 * @throws Exception
-	 */
-	private void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile, OptionSet options)
-			throws Exception
-	{
-		List<String> attributesToInclude = options.nonOptionArguments().stream().map(Object::toString)
-				.collect(Collectors.toList());
-		annotate(annotator, inputVcfFile, outputVCFFile, attributesToInclude, options.has("validate"),
-				options.has("u"));
-	}
-
-	public void annotate(RepositoryAnnotator annotator, File inputVcfFile, File outputVCFFile,
-			List<String> attributesToInclude, boolean validate, boolean update)
-			throws IOException, MolgenisInvalidFormatException
-	{
-
-		try (BufferedWriter outputVCFWriter = new BufferedWriter(
-				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
-				VcfRepository vcfRepo = new VcfRepository(inputVcfFile, inputVcfFile.getName(), vcfAttributes,
-						entityMetaDataFactory, attributeMetaDataFactory))
-		{
-			if (!attributesToInclude.isEmpty())
-			{
-				// Check attribute names
-				List<String> outputAttributeNames = VcfUtils
-						.getAtomicAttributesFromList(annotator.getOutputAttributes()).stream()
-						.map(AttributeMetaData::getName).collect(Collectors.toList());
-
-				List<String> inputAttributeNames = VcfUtils
-						.getAtomicAttributesFromList(vcfRepo.getEntityMetaData().getAtomicAttributes()).stream()
-						.map(AttributeMetaData::getName).collect(Collectors.toList());
-
-				boolean stop = false;
-				for (Object attrName : attributesToInclude)
-				{
-					if (!outputAttributeNames.contains(attrName))
-					{
-						System.out.println("Unknown output attribute '" + attrName + "'");
-						stop = true;
-					}
-					else if (inputAttributeNames.contains(attrName))
-					{
-						System.out.println("The output attribute '" + attrName
-								+ "' is present in the inputfile, but is deselected in the current run, this is not supported");
-						stop = true;
-					}
-				}
-				if (stop) return;
-			}
-
-			// If the annotator e.g. SnpEff creates an external repository, collect the output metadata into an mref
-			// entity
-			// This allows for the header to be written as 'EFFECT annotations: <ouput_attributes> | <ouput_attributes>'
-			List<AttributeMetaData> outputMetaData = newArrayList();
-			if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
-			{
-				EntityMetaData effectRefEntity = entityMetaDataFactory.create()
-						.setName(annotator.getSimpleName() + "_EFFECTS");
-				for (AttributeMetaData outputAttribute : annotator.getOutputAttributes())
-				{
-					effectRefEntity.addAttribute(outputAttribute);
-				}
-				AttributeMetaData effect = attributeMetaDataFactory.create().setName(EFFECT);
-				effect.setDataType(MREF).setRefEntity(effectRefEntity);
-				outputMetaData.add(effect);
-			}
-			else
-			{
-				outputMetaData = annotator.getOutputAttributes();
-			}
-
-			VcfWriterUtils
-					.writeVcfHeader(inputVcfFile, outputVCFWriter, VcfUtils.getAtomicAttributesFromList(outputMetaData),
-							attributesToInclude);
-			System.out.println("Now starting to process the data.");
-
-			EntityMetaData emd = vcfRepo.getEntityMetaData();
-			AttributeMetaData infoAttribute = emd.getAttribute(VcfAttributes.INFO);
-			for (AttributeMetaData attribute : annotator.getOutputAttributes())
-			{
-				for (AttributeMetaData atomicAttribute : attribute.getAttributeParts())
-				{
-					infoAttribute.addAttributePart(atomicAttribute);
-				}
-			}
-			Iterable<Entity> entitiesToAnnotate;
-
-			AnnotatorUtils.addAnnotatorMetadataToRepositories(vcfRepo.getEntityMetaData(), attributeMetaDataFactory,
-					annotator);
-			if (annotator instanceof EffectsAnnotator)
-			{
-
-				entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT,
-						StreamSupport.stream(vcfRepo.spliterator(), false));
-
-				// Add metadata to repository that will be annotated, instead of repository with variants
-				for (Entity entity : entitiesToAnnotate)
-				{
-					entity.getEntityMetaData().addAttributes(annotator.getOutputAttributes());
-				}
-			}
-			else
-			{
-				entitiesToAnnotate = vcfRepo;
-			}
-
-			try
-			{
-				// these methods wrap iterators around the entities to make it streaming, actual annotation starts later
-				Iterator<Entity> annotatedRecords = annotator.annotate(entitiesToAnnotate, update);
-				if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
-				{
-					annotatedRecords = vcfUtils.reverseXrefMrefRelation(annotatedRecords);
-				}
-
-				while (annotatedRecords.hasNext())
-				{
-					// annotation starts here
-					Entity annotatedRecord = annotatedRecords.next();
-					VcfWriterUtils.writeToVcf(annotatedRecord, VcfUtils.getAtomicAttributesFromList(outputMetaData),
-							attributesToInclude, outputVCFWriter);
-					outputVCFWriter.newLine();
-				}
-			}
-			catch (AnnotationException ae)
-			{
-				throw new CmdLineAnnotationException(ae);
-			}
-
-		}
-		if (validate)
-		{
-			System.out.println("Validating produced VCF file...");
-			System.out.println(vcfValidator.validateVCF(outputVCFFile));
-		}
-		System.out.println("All done!");
 	}
 
 	private void printInfo(AnnotatorInfo info)
