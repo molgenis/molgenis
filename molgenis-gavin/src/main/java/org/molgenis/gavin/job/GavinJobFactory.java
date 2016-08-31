@@ -3,7 +3,6 @@ package org.molgenis.gavin.job;
 import org.molgenis.data.DataService;
 import org.molgenis.data.annotation.core.EffectsAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
-import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
@@ -87,7 +86,7 @@ public class GavinJobFactory
 		return new GavinJob(new ProgressImpl(gavinJobExecution, jobExecutionUpdater, mailSender),
 				new TransactionTemplate(transactionManager), runAsAuthentication, gavinJobExecution.getIdentifier(),
 				fileStore, menuReaderService, cadd, exac, snpEff, gavin, vcfAttributes, vcfUtils, entityMetaDataFactory,
-				attributeMetaDataFactory, new AnnotatorUtils());
+				attributeMetaDataFactory);
 	}
 
 	public List<String> getAnnotatorsWithMissingResources()

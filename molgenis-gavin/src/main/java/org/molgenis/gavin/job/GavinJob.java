@@ -1,5 +1,6 @@
 package org.molgenis.gavin.job;
 
+import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.jobs.Job;
@@ -14,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.File;
+import java.io.IOException;
 
 import static java.io.File.separator;
 import static java.text.MessageFormat.format;
@@ -35,18 +37,17 @@ public class GavinJob extends Job<Void>
 	private final File exacOutputFile;
 	private final File snpeffOutputFile;
 	private final File gavinOutputFile;
-	private final AnnotatorUtils annotatorUtils;
 
-	VcfAttributes vcfAttributes;
-	VcfUtils vcfUtils;
-	EntityMetaDataFactory entityMetaDataFactory;
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	private final VcfAttributes vcfAttributes;
+	private final VcfUtils vcfUtils;
+	private final EntityMetaDataFactory entityMetaDataFactory;
+	private final AttributeMetaDataFactory attributeMetaDataFactory;
 
 	public GavinJob(Progress progress, TransactionTemplate transactionTemplate, Authentication authentication,
 			String jobIdentifier, FileStore fileStore, MenuReaderService menuReaderService, RepositoryAnnotator cadd,
 			RepositoryAnnotator exac, RepositoryAnnotator snpeff, RepositoryAnnotator gavin,
 			VcfAttributes vcfAttributes, VcfUtils vcfUtils, EntityMetaDataFactory entityMetaDataFactory,
-			AttributeMetaDataFactory attributeMetaDataFactory, AnnotatorUtils annotatorUtils)
+			AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		super(progress, transactionTemplate, authentication);
 		this.jobIdentifier = jobIdentifier;
@@ -59,7 +60,6 @@ public class GavinJob extends Job<Void>
 		this.vcfUtils = vcfUtils;
 		this.entityMetaDataFactory = entityMetaDataFactory;
 		this.attributeMetaDataFactory = attributeMetaDataFactory;
-		this.annotatorUtils = annotatorUtils;
 
 		this.inputFile = fileStore
 				.getFile(format("{0}{1}{2}{3}input.vcf", GAVIN_APP, separator, jobIdentifier, separator));
@@ -79,26 +79,28 @@ public class GavinJob extends Job<Void>
 		progress.setProgressMax(4);
 
 		progress.progress(0, "Annotating with cadd...");
-		annotatorUtils
-				.annotate(cadd, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory, vcfUtils, inputFile,
-						caddOutputFile, emptyList(), true);
+		runAnnotator(cadd, inputFile, caddOutputFile, true);
 
 		progress.progress(1, "Annotating with exac...");
-		annotatorUtils.annotate(exac, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory, vcfUtils,
-				caddOutputFile, exacOutputFile, emptyList(), true);
+		runAnnotator(exac, caddOutputFile, exacOutputFile, true);
 
 		progress.progress(2, "Annotating with snpEff...");
-		annotatorUtils.annotate(snpeff, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory, vcfUtils,
-				exacOutputFile, snpeffOutputFile, emptyList(), false);
+		runAnnotator(snpeff, exacOutputFile, snpeffOutputFile, false);
 
 		progress.progress(3, "Annotating with gavin...");
-		annotatorUtils.annotate(gavin, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory, vcfUtils,
-				snpeffOutputFile, gavinOutputFile, emptyList(), false);
+		runAnnotator(gavin, snpeffOutputFile, gavinOutputFile, false);
 
 		progress.progress(4, "Result is ready for download.");
 		String path = menuReaderService.getMenu().findMenuItemPath(GAVIN_APP);
 		progress.setResultUrl(format("{0}/result/{1}", path, jobIdentifier));
 
 		return null;
+	}
+
+	public void runAnnotator(RepositoryAnnotator annotator, File inputFile, File outputFile, boolean update)
+			throws IOException, MolgenisInvalidFormatException
+	{
+		AnnotatorUtils.annotate(annotator, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory, vcfUtils,
+				inputFile, outputFile, emptyList(), update);
 	}
 }
