@@ -2,6 +2,7 @@ package org.molgenis.data.annotation.core.filter;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.*;
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.datastructures.Location;
@@ -135,13 +136,21 @@ public class MultiAllelicResultFilter implements ResultFilter
 			}
 
 			// also compile a list of original source alleles and their values for use in 'update mode'
-			if (updateMode && sourceEntity.getString(attributeMetaData.getName()) != null)
+			if (updateMode && sourceEntity.get(attributeMetaData.getName()) != null)
 			{
-				String[] sourceValues = sourceEntity.getString(attributeMetaData.getName()).split(",", -1);
-				for (int i = 0; i < sourceAlts.length; i++)
+				if (sourceEntity.getEntityMetaData().getAttribute(attributeMetaData.getName()).getDataType()
+						== MolgenisFieldTypes.AttributeType.STRING)
 				{
-					sourceAlleleValueMap
-							.put(sourceAlts[i] + resourcePostfix, sourceValues[i].isEmpty() ? "." : sourceValues[i]);
+					String[] sourceValues = sourceEntity.getString(attributeMetaData.getName()).split(",", -1);
+					for (int i = 0; i < sourceAlts.length; i++)
+					{
+						sourceAlleleValueMap.put(sourceAlts[i] + resourcePostfix,
+								sourceValues[i].isEmpty() ? "." : sourceValues[i]);
+					}
+				}
+				else if (sourceAlts.length == 1)
+				{
+					sourceAlleleValueMap.put(sourceAlts[0], sourceEntity.get(attributeMetaData.getName()).toString());
 				}
 			}
 
