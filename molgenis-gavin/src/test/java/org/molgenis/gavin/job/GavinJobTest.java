@@ -1,9 +1,13 @@
 package org.molgenis.gavin.job;
 
 import org.mockito.Mock;
-import org.molgenis.annotation.cmd.CmdLineAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
+import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.jobs.Progress;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.vcf.model.VcfAttributes;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.file.FileStore;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -26,8 +30,6 @@ public class GavinJobTest
 {
 	private GavinJob job;
 
-	@Mock
-	private CmdLineAnnotator cmdLineAnnotator;
 	@Mock
 	private Progress progress;
 	@Mock
@@ -58,6 +60,16 @@ public class GavinJobTest
 	private File snpEffResult;
 	@Mock
 	private File gavinResult;
+	@Mock
+	private VcfAttributes vcfAttributes;
+	@Mock
+	private VcfUtils vcfUtils;
+	@Mock
+	private EntityMetaDataFactory entityMetaDataFactory;
+	@Mock
+	private AttributeMetaDataFactory attributeMetaDataFactory;
+	@Mock
+	private AnnotatorUtils annotatorUtils;
 
 	@BeforeMethod
 	public void beforeMethod()
@@ -74,8 +86,9 @@ public class GavinJobTest
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "gavin-result.vcf"))
 				.thenReturn(gavinResult);
 
-		job = new GavinJob(cmdLineAnnotator, progress, transactionTemplate, authentication, "ABCDE", fileStore,
-				menuReaderService, cadd, exac, snpeff, gavin);
+		job = new GavinJob(progress, transactionTemplate, authentication, "ABCDE", fileStore, menuReaderService, cadd,
+				exac, snpeff, gavin, vcfAttributes, vcfUtils, entityMetaDataFactory, attributeMetaDataFactory,
+				annotatorUtils);
 	}
 
 	@Test
@@ -85,13 +98,21 @@ public class GavinJobTest
 
 		verify(progress).setProgressMax(4);
 		verify(progress).progress(0, "Annotating with cadd...");
-		verify(cmdLineAnnotator).annotate(cadd, inputFile, caddResult, emptyList(), false, true);
+		verify(annotatorUtils)
+				.annotate(cadd, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory, vcfUtils, inputFile,
+						caddResult, emptyList(), true);
 		verify(progress).progress(1, "Annotating with exac...");
-		verify(cmdLineAnnotator).annotate(exac, caddResult, exacResult, emptyList(), false, true);
+		verify(annotatorUtils)
+				.annotate(exac, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory, vcfUtils, caddResult,
+						exacResult, emptyList(), true);
 		verify(progress).progress(2, "Annotating with snpEff...");
-		verify(cmdLineAnnotator).annotate(snpeff, exacResult, snpEffResult, emptyList(), false, false);
+		verify(annotatorUtils)
+				.annotate(snpeff, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory, vcfUtils, exacResult,
+						snpEffResult, emptyList(), false);
 		verify(progress).progress(3, "Annotating with gavin...");
-		verify(cmdLineAnnotator).annotate(gavin, snpEffResult, gavinResult, emptyList(), false, false);
+		verify(annotatorUtils)
+				.annotate(gavin, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory, vcfUtils, snpEffResult,
+						gavinResult, emptyList(), false);
 		verify(progress).progress(4, "Result is ready for download.");
 		verify(progress).setResultUrl("/menu/plugins/gavin-app/result/ABCDE");
 
@@ -101,7 +122,9 @@ public class GavinJobTest
 	public void testRunCaddFails() throws Exception
 	{
 		RuntimeException ex = new RuntimeException();
-		doThrow(ex).when(cmdLineAnnotator).annotate(cadd, inputFile, caddResult, emptyList(), false, true);
+		doThrow(ex).when(annotatorUtils)
+				.annotate(cadd, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory, vcfUtils, inputFile,
+						caddResult, emptyList(), true);
 		try
 		{
 			job.call(progress);
