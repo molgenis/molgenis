@@ -36,6 +36,16 @@ import static java.util.Arrays.asList;
  */
 public class CmdLineAnnotator
 {
+	public static final String VALIDATE = "validate";
+	public static final String OUTPUT = "output";
+	public static final String VCF_VALIDATOR_LOCATION = "vcf-validator-location";
+	public static final String SOURCE = "source";
+	public static final String ANNOTATOR = "annotator";
+	public static final String INPUT = "input";
+	public static final String HELP = "help";
+	public static final String REPLACE = "replace";
+	public static final String UPDATE_ANNOTATIONS = "update-annotations";
+	public static final String USER_HOME = "user.home";
 	@Autowired
 	CommandLineAnnotatorConfig commandLineAnnotatorConfig;
 
@@ -71,7 +81,7 @@ public class CmdLineAnnotator
 
 		Set<String> annotatorNames = configuredFreshAnnotators.keySet();
 
-		if (!options.has("annotator") || options.has("help"))
+		if (!options.has(ANNOTATOR) || options.has(HELP))
 		{
 
 			String implementationVersion = getClass().getPackage().getImplementationVersion();
@@ -114,13 +124,13 @@ public class CmdLineAnnotator
 		RepositoryAnnotator annotator = annotators.get(annotatorName);
 		if (annotator == null) throw new Exception("Annotator unknown: " + annotatorName);
 
-		if (!options.has("input"))
+		if (!options.has(INPUT))
 		{
 			printInfo(annotator.getInfo());
 			return;
 		}
 
-		File annotationSourceFile = (File) options.valueOf("source");
+		File annotationSourceFile = (File) options.valueOf(SOURCE);
 		if (!annotationSourceFile.exists())
 		{
 			System.out.println("Annotation source file or directory not found at " + annotationSourceFile);
@@ -139,10 +149,10 @@ public class CmdLineAnnotator
 			return;
 		}
 
-		File outputVCFFile = (File) options.valueOf("output");
+		File outputVCFFile = (File) options.valueOf(OUTPUT);
 		if (outputVCFFile.exists())
 		{
-			if (options.has("replace"))
+			if (options.has(REPLACE))
 			{
 				System.out.println("Override enabled, replacing existing vcf with specified output: " + outputVCFFile
 						.getAbsolutePath());
@@ -177,7 +187,7 @@ public class CmdLineAnnotator
 				.collect(Collectors.toList());
 		AnnotatorUtils.annotate(annotator, vcfAttributes, entityMetaDataFactory, attributeMetaDataFactory, vcfUtils,
 				inputVcfFile, outputVCFFile, attributesToInclude, options.has("u"));
-		if (options.has("validate"))
+		if (options.has(VALIDATE))
 		{
 			System.out.println("Validating produced VCF file...");
 			System.out.println(vcfValidator.validateVCF(outputVCFFile));
@@ -220,22 +230,22 @@ public class CmdLineAnnotator
 	private static OptionParser createOptionParser()
 	{
 		OptionParser parser = new OptionParser();
-		parser.acceptsAll(asList("i", "input"), "Input VCF file").withRequiredArg().ofType(File.class);
-		parser.acceptsAll(asList("a", "annotator"), "Annotator name").requiredIf("input").withRequiredArg();
-		parser.acceptsAll(asList("s", "source"), "Source file for the annotator").requiredIf("input").withRequiredArg()
+		parser.acceptsAll(asList("i", INPUT), "Input VCF file").withRequiredArg().ofType(File.class);
+		parser.acceptsAll(asList("a", ANNOTATOR), "Annotator name").requiredIf("input").withRequiredArg();
+		parser.acceptsAll(asList("s", SOURCE), "Source file for the annotator").requiredIf("input").withRequiredArg()
 				.ofType(File.class);
-		parser.acceptsAll(asList("o", "output"), "Output VCF file").requiredIf("input").withRequiredArg()
+		parser.acceptsAll(asList("o", OUTPUT), "Output VCF file").requiredIf("input").withRequiredArg()
 				.ofType(File.class);
-		parser.acceptsAll(asList("v", "validate"), "Use VCF validator on the output file");
-		parser.acceptsAll(asList("t", "vcf-validator-location"),
+		parser.acceptsAll(asList("v", VALIDATE), "Use VCF validator on the output file");
+		parser.acceptsAll(asList("t", VCF_VALIDATOR_LOCATION),
 				"Location of the vcf-validator executable from the vcf-tools suite").withRequiredArg()
 				.ofType(String.class).defaultsTo(
-				System.getProperty("user.home") + File.separator + ".molgenis" + File.separator + "vcf-tools"
+				System.getProperty(USER_HOME) + File.separator + ".molgenis" + File.separator + "vcf-tools"
 						+ File.separator + "bin" + File.separator + "vcf-validator");
-		parser.acceptsAll(asList("h", "help"), "Prints this help text");
-		parser.acceptsAll(asList("r", "replace"),
+		parser.acceptsAll(asList("h", HELP), "Prints this help text");
+		parser.acceptsAll(asList("r", REPLACE),
 				"Enables output file override, replacing a file with the same name as the argument for the -o option");
-		parser.acceptsAll(asList("u", "update-annotations"),
+		parser.acceptsAll(asList("u", UPDATE_ANNOTATIONS),
 				"Enables add/updating of annotations, i.e. CADD scores from a different source, by reusing existing annotations when no match was found.");
 
 		return parser;
