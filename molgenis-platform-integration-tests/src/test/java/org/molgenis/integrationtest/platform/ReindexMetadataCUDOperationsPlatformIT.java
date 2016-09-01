@@ -5,7 +5,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.reindex.job.ReindexService;
+import org.molgenis.data.elasticsearch.index.job.IndexService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
@@ -43,7 +43,7 @@ public class ReindexMetadataCUDOperationsPlatformIT
 	 * static entity metadata cannot be deleted
 	 */
 	public static void testReindexDeleteMetaData(SearchService searchService, DataService dataService,
-			EntityMetaData entityMetaDataDynamic, MetaDataService metaDataService, ReindexService reindexService)
+			EntityMetaData entityMetaDataDynamic, MetaDataService metaDataService, IndexService indexService)
 	{
 
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
@@ -57,8 +57,8 @@ public class ReindexMetadataCUDOperationsPlatformIT
 		{
 			metaDataService.deleteEntityMeta(entityMetaDataDynamic.getName());
 		});
-		PlatformIT.waitForIndexToBeStable(EntityMetaDataMetaData.ENTITY_META_DATA, reindexService, LOG);
-		PlatformIT.waitForWorkToBeFinished(reindexService, LOG);
+		PlatformIT.waitForIndexToBeStable(EntityMetaDataMetaData.ENTITY_META_DATA, indexService, LOG);
+		PlatformIT.waitForWorkToBeFinished(indexService, LOG);
 
 		// 3. verify that mapping is removed
 		assertFalse(searchService.hasMapping(entityMetaDataDynamic));
@@ -68,14 +68,14 @@ public class ReindexMetadataCUDOperationsPlatformIT
 		{
 			metaDataService.addEntityMeta(entityMetaDataDynamic);
 		});
-		PlatformIT.waitForWorkToBeFinished(reindexService, LOG);
+		PlatformIT.waitForWorkToBeFinished(indexService, LOG);
 	}
 
 	/**
 	 * Test update metadata
 	 */
 	public static void testReindexUpdateMetaDataUpdateAttribute(SearchService searchService,
-			EntityMetaData entityMetaDataDynamic, MetaDataService metaDataService, ReindexService reindexService)
+			EntityMetaData entityMetaDataDynamic, MetaDataService metaDataService, IndexService indexService)
 	{
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
 		Query<Entity> q = new QueryImpl<>();
@@ -93,7 +93,7 @@ public class ReindexMetadataCUDOperationsPlatformIT
 		{
 			metaDataService.updateEntityMeta(entityMetaDataDynamic);
 		});
-		PlatformIT.waitForWorkToBeFinished(reindexService, LOG);
+		PlatformIT.waitForWorkToBeFinished(indexService, LOG);
 		assertTrue(searchService.hasMapping(entityMetaDataDynamic));
 
 		// Verify metadata changed
@@ -111,14 +111,14 @@ public class ReindexMetadataCUDOperationsPlatformIT
 			metaDataService.deleteEntityMeta(entityMetaDataDynamic.getName());
 			metaDataService.addEntityMeta(entityMetaDataDynamic);
 		});
-		PlatformIT.waitForWorkToBeFinished(reindexService, LOG);
+		PlatformIT.waitForWorkToBeFinished(indexService, LOG);
 	}
 
 	/**
 	 * Test metadata removing an attribute
 	 */
 	public static void testReindexUpdateMetaDataRemoveAttribute(EntityMetaData emd, String attributeName,
-			SearchService searchService, MetaDataService metaDataService, ReindexService reindexService)
+			SearchService searchService, MetaDataService metaDataService, IndexService indexService)
 	{
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
 		Query<Entity> q = new QueryImpl<>();
@@ -135,7 +135,7 @@ public class ReindexMetadataCUDOperationsPlatformIT
 		{
 			metaDataService.updateEntityMeta(emd);
 		});
-		PlatformIT.waitForWorkToBeFinished(reindexService, LOG);
+		PlatformIT.waitForWorkToBeFinished(indexService, LOG);
 		assertTrue(searchService.hasMapping(emd));
 
 		// 4. Verify metadata changed
@@ -150,6 +150,6 @@ public class ReindexMetadataCUDOperationsPlatformIT
 		{
 			metaDataService.updateEntityMeta(emd);
 		});
-		PlatformIT.waitForWorkToBeFinished(reindexService, LOG);
+		PlatformIT.waitForWorkToBeFinished(indexService, LOG);
 	}
 }

@@ -6,7 +6,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
-import org.molgenis.data.elasticsearch.reindex.ReindexConfig;
+import org.molgenis.data.elasticsearch.index.config.IndexConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -24,7 +24,7 @@ import java.util.Collections;
  */
 @Configuration
 @EnableScheduling
-@Import({ ReindexConfig.class })
+@Import({ IndexConfig.class })
 public class EmbeddedElasticSearchConfig
 {
 	static

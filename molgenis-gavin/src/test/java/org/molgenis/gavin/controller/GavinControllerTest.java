@@ -10,7 +10,7 @@ import org.molgenis.data.annotation.core.EffectsAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
-import org.molgenis.data.reindex.meta.IndexPackage;
+import org.molgenis.data.index.meta.IndexPackage;
 import org.molgenis.file.FileStore;
 import org.molgenis.framework.ui.MolgenisPluginRegistry;
 import org.molgenis.gavin.job.GavinJob;

@@ -9,8 +9,8 @@ import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
 import org.molgenis.data.jobs.JobExecutionUpdater;
-import org.molgenis.data.reindex.ReindexActionRegisterService;
-import org.molgenis.data.reindex.ReindexActionRegisterServiceImpl;
+import org.molgenis.data.index.IndexActionRegisterService;
+import org.molgenis.data.index.IndexActionRegisterServiceImpl;
 import org.molgenis.data.support.DataServiceImpl;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.security.user.MolgenisUserService;
@@ -93,9 +93,9 @@ public class EmbeddedElasticSearchConfigTest
 		}
 
 		@Bean
-		public ReindexActionRegisterService reindexActionRegisterService()
+		public IndexActionRegisterService indexActionRegisterService()
 		{
-			return mock(ReindexActionRegisterServiceImpl.class);
+			return mock(IndexActionRegisterServiceImpl.class);
 		}
 	}
 
