@@ -32,7 +32,7 @@ import static org.molgenis.data.RepositoryCapability.CACHEABLE;
  * Delegates to the underlying repository when an action is not supported by the cache or when the cache doesn't contain
  * the needed entity.
  */
-public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator
+public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
 	private static final int ID_BATCH_SIZE = 1000;
 
@@ -68,7 +68,7 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator
 	@Override
 	public Entity findOneById(Object id)
 	{
-		if (cacheable && !transactionInformation.isRepositoryDirty(getName()) && !transactionInformation
+		if (cacheable && !transactionInformation.isEntireRepositoryDirty(getName()) && !transactionInformation
 				.isEntityDirty(EntityKey.create(getEntityMetaData(), id)))
 		{
 			return l2Cache.get(delegate(), id);
@@ -90,7 +90,7 @@ public class L2CacheRepositoryDecorator extends AbstractRepositoryDecorator
 	@Override
 	public Stream<Entity> findAll(Stream<Object> ids)
 	{
-		if (cacheable && !transactionInformation.isRepositoryDirty(getName()))
+		if (cacheable && !transactionInformation.isEntireRepositoryDirty(getName()))
 		{
 			Iterator<List<Object>> idBatches = partition(ids.iterator(), ID_BATCH_SIZE);
 			Iterator<List<Entity>> entityBatches = Iterators.transform(idBatches, this::findAllBatch);

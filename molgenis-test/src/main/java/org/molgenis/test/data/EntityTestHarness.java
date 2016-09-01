@@ -86,7 +86,7 @@ public class EntityTestHarness
 
 	public EntityMetaData createDynamicRefEntityMetaData()
 	{
-		return entityMetaDataFactory.create().setPackage(testPackage).setSimpleName("TypeTestRefDynamic")
+		return entityMetaDataFactory.create().setPackage(testPackage).setSimpleName("TypeTestRefDynamic").setBackend("PostgreSQL")
 				.addAttribute(createAttribute(ATTR_REF_ID, STRING), ROLE_ID)
 				.addAttribute(createAttribute(ATTR_REF_STRING, STRING), ROLE_LABEL);
 	}
@@ -94,7 +94,7 @@ public class EntityTestHarness
 	public EntityMetaData createDynamicTestEntityMetaData()
 	{
 		EntityMetaData refEntityMetaData = createDynamicRefEntityMetaData();
-		return entityMetaDataFactory.create().setPackage(testPackage).setSimpleName("TypeTestDynamic")
+		return entityMetaDataFactory.create().setPackage(testPackage).setSimpleName("TypeTestDynamic").setBackend("PostgreSQL")
 				.addAttribute(createAttribute(ATTR_ID, STRING).setAuto(true), ROLE_ID)
 				.addAttribute(createAttribute(ATTR_STRING, STRING), ROLE_LABEL)
 				.addAttribute(createAttribute(ATTR_BOOL, BOOL))

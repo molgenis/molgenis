@@ -18,7 +18,7 @@ import static org.molgenis.fieldtypes.StringField.DURATION_REGEX;
 public class L2CacheSettingsMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "L2CacheSettings";
-	public static final String L2CACHESETTINGS = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String L2CACHE_SETTINGS = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	static final String ID = "id";
 	static final String CACHED_ENTITY = "entityName";
@@ -32,8 +32,8 @@ public class L2CacheSettingsMetaData extends SystemEntityMetaData
 	static final String VALUE_REFERENCE_TYPE = "valueReferenceType";
 	static final String RECORD_STATS = "recordStats";
 
-	private RootSystemPackage rootSystemPackage;
-	private EntityMetaDataMetaData entityMetaDataMetaData;
+	private final RootSystemPackage rootSystemPackage;
+	private final EntityMetaDataMetaData entityMetaDataMetaData;
 
 	@Autowired
 	public L2CacheSettingsMetaData(RootSystemPackage rootSystemPackage, EntityMetaDataMetaData entityMetaDataMetaData)
