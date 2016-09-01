@@ -65,9 +65,9 @@ public class AnnotatorUtils
 		}
 		else if (StringUtils.isEmpty(annotations))
 		{
-			for (int i = 0; i < altArray.length; i++)
+			for (String anAltArray : altArray)
 			{
-				result.put(altArray[i], null);
+				result.put(anAltArray, null);
 			}
 		}
 		else
@@ -108,7 +108,7 @@ public class AnnotatorUtils
 				.setDataType(MolgenisFieldTypes.AttributeType.COMPOUND).setLabel(annotator.getSimpleName());
 		AttributeMetaData finalCompound = compound;
 		attributeMetaDatas.stream().filter(part -> entityMetaData.getAttribute(part.getName()) == null)
-				.forEachOrdered(part -> finalCompound.addAttributePart(part));
+				.forEachOrdered(finalCompound::addAttributePart);
 		entityMetaData.addAttribute(compound);
 	}
 
@@ -157,7 +157,7 @@ public class AnnotatorUtils
 		return outputVCFFile.getAbsolutePath();
 	}
 
-	public static Iterator<Entity> annotateRepo(RepositoryAnnotator annotator, VcfUtils vcfUtils, boolean update,
+	private static Iterator<Entity> annotateRepo(RepositoryAnnotator annotator, VcfUtils vcfUtils, boolean update,
 			Iterable<Entity> entitiesToAnnotate)
 	{
 		Iterator<Entity> annotatedRecords = annotator.annotate(entitiesToAnnotate, update);
@@ -168,7 +168,7 @@ public class AnnotatorUtils
 		return annotatedRecords;
 	}
 
-	public static Iterable<Entity> addAnnotatorMetaDataToRepository(RepositoryAnnotator annotator,
+	private static Iterable<Entity> addAnnotatorMetaDataToRepository(RepositoryAnnotator annotator,
 			AttributeMetaDataFactory attributeMetaDataFactory, VcfUtils vcfUtils, VcfRepository vcfRepo)
 	{
 		addAnnotatorAttributesToInfoAttribute(annotator, vcfRepo);
@@ -194,7 +194,7 @@ public class AnnotatorUtils
 		return entitiesToAnnotate;
 	}
 
-	public static void writeAnnotationResultToVcfFile(List<String> attributesToInclude, BufferedWriter outputVCFWriter,
+	private static void writeAnnotationResultToVcfFile(List<String> attributesToInclude, BufferedWriter outputVCFWriter,
 			List<AttributeMetaData> outputMetaData, Iterator<Entity> annotatedRecords) throws IOException
 	{
 		while (annotatedRecords.hasNext())
@@ -207,7 +207,7 @@ public class AnnotatorUtils
 		}
 	}
 
-	public static void addAnnotatorAttributesToInfoAttribute(RepositoryAnnotator annotator, VcfRepository vcfRepo)
+	private static void addAnnotatorAttributesToInfoAttribute(RepositoryAnnotator annotator, VcfRepository vcfRepo)
 	{
 		EntityMetaData emd = vcfRepo.getEntityMetaData();
 		AttributeMetaData infoAttribute = emd.getAttribute(VcfAttributes.INFO);
@@ -220,7 +220,7 @@ public class AnnotatorUtils
 		}
 	}
 
-	public static List<AttributeMetaData> getOutputAttributeMetaDatasForAnnotator(RepositoryAnnotator annotator,
+	private static List<AttributeMetaData> getOutputAttributeMetaDatasForAnnotator(RepositoryAnnotator annotator,
 			EntityMetaDataFactory entityMetaDataFactory, AttributeMetaDataFactory attributeMetaDataFactory,
 			List<String> attributesToInclude, VcfRepository vcfRepo)
 	{
@@ -251,7 +251,7 @@ public class AnnotatorUtils
 		return outputMetaData;
 	}
 
-	public static void checkSelectedOutputAttributeNames(RepositoryAnnotator annotator,
+	private static void checkSelectedOutputAttributeNames(RepositoryAnnotator annotator,
 			List<String> attributesToInclude, VcfRepository vcfRepo)
 	{
 		// Check attribute names
