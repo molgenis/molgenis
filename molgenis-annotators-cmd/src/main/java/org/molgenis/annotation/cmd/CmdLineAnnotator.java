@@ -36,16 +36,17 @@ import static java.util.Arrays.asList;
  */
 public class CmdLineAnnotator
 {
-	public static final String VALIDATE = "validate";
-	public static final String OUTPUT = "output";
-	public static final String VCF_VALIDATOR_LOCATION = "vcf-validator-location";
-	public static final String SOURCE = "source";
-	public static final String ANNOTATOR = "annotator";
-	public static final String INPUT = "input";
-	public static final String HELP = "help";
-	public static final String REPLACE = "replace";
-	public static final String UPDATE_ANNOTATIONS = "update-annotations";
-	public static final String USER_HOME = "user.home";
+	private static final String VALIDATE = "validate";
+	private static final String OUTPUT = "output";
+	private static final String VCF_VALIDATOR_LOCATION = "vcf-validator-location";
+	private static final String SOURCE = "source";
+	private static final String ANNOTATOR = "annotator";
+	private static final String INPUT = "input";
+	private static final String HELP = "help";
+	private static final String REPLACE = "replace";
+	private static final String UPDATE_ANNOTATIONS = "update-annotations";
+	private static final String USER_HOME = "user.home";
+
 	@Autowired
 	CommandLineAnnotatorConfig commandLineAnnotatorConfig;
 
@@ -310,7 +311,7 @@ public class CmdLineAnnotator
 	 */
 	static String printAnnotatorsPerType(Map<String, RepositoryAnnotator> annotators)
 	{
-		Map<AnnotatorInfo.Type, List<String>> annotatorsPerType = new HashMap<AnnotatorInfo.Type, List<String>>();
+		Map<AnnotatorInfo.Type, List<String>> annotatorsPerType = new HashMap<>();
 		for (String annotator : annotators.keySet())
 		{
 			AnnotatorInfo.Type type = annotators.get(annotator).getInfo().getType();
@@ -320,17 +321,17 @@ public class CmdLineAnnotator
 			}
 			else
 			{
-				annotatorsPerType.put(type, new ArrayList<String>(Arrays.asList(new String[] { annotator })));
+				annotatorsPerType.put(type, new ArrayList<>(Arrays.asList(new String[] { annotator })));
 			}
 
 		}
 		StringBuilder sb = new StringBuilder();
 		for (AnnotatorInfo.Type type : annotatorsPerType.keySet())
 		{
-			sb.append("### " + type + " ###\n");
+			sb.append("### ").append(type).append(" ###\n");
 			for (String annotatorName : annotatorsPerType.get(type))
 			{
-				sb.append("* " + annotatorName + "\n");
+				sb.append("* ").append(annotatorName).append("\n");
 			}
 
 			sb.append("\n");
@@ -348,15 +349,14 @@ public class CmdLineAnnotator
 	static HashMap<String, RepositoryAnnotator> getFreshAnnotators(
 			Map<String, RepositoryAnnotator> configuredAnnotators)
 	{
-		HashMap<String, RepositoryAnnotator> configuredFreshAnnotators = new HashMap<String, RepositoryAnnotator>();
-		for (String annotator : configuredAnnotators.keySet())
-		{
-			if (configuredAnnotators.get(annotator).getInfo() != null && configuredAnnotators.get(annotator).getInfo()
-					.getStatus().equals(AnnotatorInfo.Status.READY))
-			{
-				configuredFreshAnnotators.put(annotator, configuredAnnotators.get(annotator));
-			}
-		}
+		HashMap<String, RepositoryAnnotator> configuredFreshAnnotators = new HashMap<>();
+		configuredAnnotators.keySet().stream()
+				.filter(annotator -> configuredAnnotators.get(annotator).getInfo() != null && configuredAnnotators
+						.get(annotator).getInfo().getStatus().equals(AnnotatorInfo.Status.READY))
+				.forEachOrdered(annotator ->
+				{
+					configuredFreshAnnotators.put(annotator, configuredAnnotators.get(annotator));
+				});
 		return configuredFreshAnnotators;
 	}
 
