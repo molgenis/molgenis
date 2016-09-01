@@ -331,8 +331,7 @@ public class SnpEffRunner
 	{
 		EntityMetaData emd = entityMetaDataFactory.create()
 				.setSimpleName(sourceEMD.getSimpleName() + ENTITY_NAME_SUFFIX).setPackage(sourceEMD.getPackage());
-		String sourcePackage = emd.getPackage() != null ? emd.getPackage().getName() : "SnpEff";
-		emd.setName(sourcePackage + "_" + emd.getSimpleName());
+		emd.setPackage(sourceEMD.getPackage());
 		emd.setBackend(sourceEMD.getBackend());
 		AttributeMetaData id = attributeMetaDataFactory.create().setName(EffectsMetaData.ID).setAuto(true)
 				.setVisible(false);

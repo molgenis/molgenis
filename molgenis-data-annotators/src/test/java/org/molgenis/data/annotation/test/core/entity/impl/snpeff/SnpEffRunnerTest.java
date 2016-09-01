@@ -107,7 +107,7 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 		metaDataCanAnnotate.addAttribute(attributeMetaDataRef);
 		metaDataCanAnnotate.addAttribute(attributeMetaDataAlt);
 
-		effectsEMD = entityMetaDataFactory.create().setName("SnpEff_test_EFFECTS");
+		effectsEMD = entityMetaDataFactory.create().setSimpleName("test_EFFECTS");
 		effectsEMD.addAttribute(attributeMetaDataFactory.create().setName("ID").setAuto(true).setVisible(false));
 		effectsEMD.addAttribute(effectsMetaData.getAltAttr());
 		effectsEMD.addAttribute(effectsMetaData.getGeneNameAttr());
