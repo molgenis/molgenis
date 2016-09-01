@@ -1,33 +1,54 @@
 package org.molgenis.gavin.job;
 
 import org.mockito.Mock;
-import org.molgenis.annotation.cmd.CmdLineAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.jobs.Progress;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.vcf.model.VcfAttributes;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.file.FileStore;
+import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.ui.menu.Menu;
 import org.molgenis.ui.menu.MenuReaderService;
+import org.molgenis.util.ResourceUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.Authentication;
+import org.springframework.test.context.ContextConfiguration;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.Iterator;
 
 import static java.io.File.separator;
-import static java.util.Collections.emptyList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.anyObject;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.gavin.controller.GavinController.GAVIN_APP;
 import static org.testng.Assert.assertSame;
 import static org.testng.Assert.fail;
 
-public class GavinJobTest
+@ContextConfiguration(classes = { GavinJobTest.Config.class })
+public class GavinJobTest extends AbstractMolgenisSpringTest
 {
 	private GavinJob job;
 
-	@Mock
-	private CmdLineAnnotator cmdLineAnnotator;
+	@Autowired
+	VcfAttributes vcfAttributes;
+
+	@Autowired
+	EntityMetaDataFactory entityMetaDataFactory;
+
+	@Autowired
+	AttributeMetaDataFactory attributeMetaDataFactory;
+
 	@Mock
 	private Progress progress;
 	@Mock
@@ -49,14 +70,12 @@ public class GavinJobTest
 	@Mock
 	private Menu menu;
 	@Mock
+	VcfUtils vcfUtils;
+
 	private File inputFile;
-	@Mock
 	private File caddResult;
-	@Mock
 	private File exacResult;
-	@Mock
 	private File snpEffResult;
-	@Mock
 	private File gavinResult;
 
 	@BeforeMethod
@@ -66,6 +85,16 @@ public class GavinJobTest
 		when(menuReaderService.getMenu()).thenReturn(menu);
 		when(menu.findMenuItemPath(GAVIN_APP)).thenReturn("/menu/plugins/gavin-app");
 
+		inputFile = ResourceUtils.getFile(getClass(), "/input.vcf");
+		caddResult = ResourceUtils.getFile(getClass(), "/cadd.vcf");
+		;
+		exacResult = ResourceUtils.getFile(getClass(), "/exac.vcf");
+		;
+		snpEffResult = ResourceUtils.getFile(getClass(), "/snpeff.vcf");
+		;
+		gavinResult = ResourceUtils.getFile(getClass(), "/gavin.vcf");
+		;
+
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "input.vcf")).thenReturn(inputFile);
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "temp-cadd.vcf")).thenReturn(caddResult);
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "temp-exac.vcf")).thenReturn(exacResult);
@@ -73,9 +102,15 @@ public class GavinJobTest
 				.thenReturn(snpEffResult);
 		when(fileStore.getFile("gavin-app" + separator + "ABCDE" + separator + "gavin-result.vcf"))
 				.thenReturn(gavinResult);
+		Iterator iterator = Collections.emptyList().iterator();
+		when(cadd.annotate(anyObject(), eq(true))).thenReturn(iterator);
+		when(exac.annotate(anyObject(), eq(true))).thenReturn(iterator);
+		when(snpeff.annotate(anyObject(), eq(false))).thenReturn(iterator);
+		when(gavin.annotate(anyObject(), eq(false))).thenReturn(iterator);
+		when(vcfUtils.reverseXrefMrefRelation(anyObject())).thenReturn(iterator);
 
-		job = new GavinJob(cmdLineAnnotator, progress, transactionTemplate, authentication, "ABCDE", fileStore,
-				menuReaderService, cadd, exac, snpeff, gavin);
+		job = new GavinJob(progress, transactionTemplate, authentication, "ABCDE", fileStore, menuReaderService, cadd,
+				exac, snpeff, gavin, vcfAttributes, vcfUtils, entityMetaDataFactory, attributeMetaDataFactory);
 	}
 
 	@Test
@@ -85,36 +120,35 @@ public class GavinJobTest
 
 		verify(progress).setProgressMax(4);
 		verify(progress).progress(0, "Annotating with cadd...");
-		verify(cmdLineAnnotator).annotate(cadd, inputFile, caddResult, emptyList(), false, true);
+		verify(cadd).annotate(anyObject(), eq(true));
 		verify(progress).progress(1, "Annotating with exac...");
-		verify(cmdLineAnnotator).annotate(exac, caddResult, exacResult, emptyList(), false, true);
+		verify(exac).annotate(anyObject(), eq(true));
 		verify(progress).progress(2, "Annotating with snpEff...");
-		verify(cmdLineAnnotator).annotate(snpeff, exacResult, snpEffResult, emptyList(), false, false);
+		verify(snpeff).annotate(anyObject(), eq(false));
 		verify(progress).progress(3, "Annotating with gavin...");
-		verify(cmdLineAnnotator).annotate(gavin, snpEffResult, gavinResult, emptyList(), false, false);
+		verify(gavin).annotate(anyObject(), eq(false));
 		verify(progress).progress(4, "Result is ready for download.");
 		verify(progress).setResultUrl("/menu/plugins/gavin-app/result/ABCDE");
-
 	}
 
 	@Test
 	public void testRunCaddFails() throws Exception
 	{
-		RuntimeException ex = new RuntimeException();
-		doThrow(ex).when(cmdLineAnnotator).annotate(cadd, inputFile, caddResult, emptyList(), false, true);
+		RuntimeException expected = new RuntimeException();
 		try
 		{
-			job.call(progress);
-			fail("Should throw exception if one of the annotators fails");
+			job.runAnnotator(new FailingAnnotator(expected), inputFile, caddResult, true);
+			fail("Should throw exception if the annotator fails");
 		}
-		catch (Exception expected)
+		catch (Exception actual)
 		{
-			assertSame(ex, expected);
+			assertSame(actual, expected);
 		}
+	}
 
-		verify(progress).setProgressMax(4);
-		verify(progress).progress(0, "Annotating with cadd...");
-
-		verify(progress, never()).setResultUrl(any());
+	@Configuration
+	@ComponentScan({ "org.molgenis.data.vcf.model", "org.molgenis.data.vcf.utils" })
+	public static class Config
+	{
 	}
 }

@@ -1,12 +1,15 @@
 package org.molgenis.gavin.job;
 
-import org.molgenis.annotation.cmd.CmdLineAnnotator;
 import org.molgenis.data.DataService;
 import org.molgenis.data.annotation.core.EffectsAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
+import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.vcf.model.VcfAttributes;
+import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.file.FileStore;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.molgenis.ui.menu.MenuReaderService;
@@ -39,13 +42,18 @@ public class GavinJobFactory
 	private RepositoryAnnotator snpEff;
 	private EffectsAnnotator gavin;
 	private MenuReaderService menuReaderService;
+	private VcfAttributes vcfAttributes;
+	private VcfUtils vcfUtils;
+	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
 	public GavinJobFactory(CrudRepositoryAnnotator crudRepositoryAnnotator, DataService dataService,
 			PlatformTransactionManager transactionManager, UserDetailsService userDetailsService,
 			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, FileStore fileStore,
 			RepositoryAnnotator cadd, RepositoryAnnotator exac, RepositoryAnnotator snpEff, EffectsAnnotator gavin,
-			MenuReaderService menuReaderService)
+			MenuReaderService menuReaderService, VcfAttributes vcfAttributes, VcfUtils vcfUtils,
+			AttributeMetaDataFactory attributeMetaDataFactory, EntityMetaDataFactory entityMetaDataFactory)
 	{
 		this.crudRepositoryAnnotator = requireNonNull(crudRepositoryAnnotator);
 		this.dataService = requireNonNull(dataService);
@@ -59,6 +67,10 @@ public class GavinJobFactory
 		this.snpEff = requireNonNull(snpEff);
 		this.gavin = requireNonNull(gavin);
 		this.menuReaderService = requireNonNull(menuReaderService);
+		this.vcfAttributes = requireNonNull(vcfAttributes);
+		this.vcfUtils = requireNonNull(vcfUtils);
+		this.attributeMetaDataFactory = requireNonNull(attributeMetaDataFactory);
+		this.entityMetaDataFactory = requireNonNull(entityMetaDataFactory);
 	}
 
 	@RunAsSystem
@@ -71,10 +83,10 @@ public class GavinJobFactory
 		RunAsUserToken runAsAuthentication = new RunAsUserToken("Job Execution", username, null,
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 
-		return new GavinJob(new CmdLineAnnotator(),
-				new ProgressImpl(gavinJobExecution, jobExecutionUpdater, mailSender),
+		return new GavinJob(new ProgressImpl(gavinJobExecution, jobExecutionUpdater, mailSender),
 				new TransactionTemplate(transactionManager), runAsAuthentication, gavinJobExecution.getIdentifier(),
-				fileStore, menuReaderService, cadd, exac, snpEff, gavin);
+				fileStore, menuReaderService, cadd, exac, snpEff, gavin, vcfAttributes, vcfUtils, entityMetaDataFactory,
+				attributeMetaDataFactory);
 	}
 
 	public List<String> getAnnotatorsWithMissingResources()
