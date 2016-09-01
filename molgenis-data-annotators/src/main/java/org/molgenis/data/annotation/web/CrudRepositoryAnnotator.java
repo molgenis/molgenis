@@ -77,7 +77,7 @@ public class CrudRepositoryAnnotator
 					permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 							Collections.singletonList(externalRepository.getName()));
 					RunAsSystemProxy.runAsSystem(() -> dataService.getMeta().updateEntityMeta(AnnotatorUtils
-							.addAnnotatorMetadataToRepositories(externalRepository.getEntityMetaData(),
+							.addAnnotatorMetaDataToRepositories(externalRepository.getEntityMetaData(),
 									attributeMetaDataFactory, annotator)));
 
 					iterateOverEntitiesAndAnnotate(repository, annotator, DatabaseAction.ADD);
@@ -91,7 +91,7 @@ public class CrudRepositoryAnnotator
 			else
 			{
 				RunAsSystemProxy.runAsSystem(() -> dataService.getMeta().updateEntityMeta(AnnotatorUtils
-						.addAnnotatorMetadataToRepositories(entityMetaData, attributeMetaDataFactory, annotator)));
+						.addAnnotatorMetaDataToRepositories(entityMetaData, attributeMetaDataFactory, annotator)));
 
 				iterateOverEntitiesAndAnnotate(dataService.getRepository(repository.getName()), annotator, action);
 			}
