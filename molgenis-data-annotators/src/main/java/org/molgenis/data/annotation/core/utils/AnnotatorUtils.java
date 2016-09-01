@@ -84,7 +84,7 @@ public class AnnotatorUtils
 	 * @param attributeMetaDataFactory
 	 * @param annotator
 	 */
-	public static EntityMetaData addAnnotatorMetadataToRepositories(EntityMetaData entityMetaData,
+	public static EntityMetaData addAnnotatorMetaDataToRepositories(EntityMetaData entityMetaData,
 			AttributeMetaDataFactory attributeMetaDataFactory, RepositoryAnnotator annotator)
 	{
 		List<AttributeMetaData> attributeMetaDatas = annotator.getOutputAttributes();
@@ -93,16 +93,41 @@ public class AnnotatorUtils
 		compound = entityMetaData.getAttribute(compoundName);
 		if (compound == null)
 		{
-			compound = attributeMetaDataFactory.create().setName(compoundName).setLabel(annotator.getFullName())
-					.setDataType(MolgenisFieldTypes.AttributeType.COMPOUND).setLabel(annotator.getSimpleName());
-			AttributeMetaData finalCompound = compound;
-			attributeMetaDatas.stream().filter(part -> entityMetaData.getAttribute(part.getName()) == null)
-					.forEachOrdered(part -> finalCompound.addAttributePart(part));
-			entityMetaData.addAttribute(compound);
+			createCompoundForAnnotator(entityMetaData, attributeMetaDataFactory, annotator, attributeMetaDatas,
+					compoundName);
 		}
 		return entityMetaData;
 	}
 
+	private static void createCompoundForAnnotator(EntityMetaData entityMetaData,
+			AttributeMetaDataFactory attributeMetaDataFactory, RepositoryAnnotator annotator,
+			List<AttributeMetaData> attributeMetaDatas, String compoundName)
+	{
+		AttributeMetaData compound;
+		compound = attributeMetaDataFactory.create().setName(compoundName).setLabel(annotator.getFullName())
+				.setDataType(MolgenisFieldTypes.AttributeType.COMPOUND).setLabel(annotator.getSimpleName());
+		AttributeMetaData finalCompound = compound;
+		attributeMetaDatas.stream().filter(part -> entityMetaData.getAttribute(part.getName()) == null)
+				.forEachOrdered(part -> finalCompound.addAttributePart(part));
+		entityMetaData.addAttribute(compound);
+	}
+
+	/**
+	 * Adds a new compound attribute to an existing CrudRepository
+	 *
+	 * @param annotator                the annotator to be runned
+	 * @param vcfAttributes            utility class for vcf metadata
+	 * @param entityMetaDataFactory    factory for molgenis entityMetaData
+	 * @param attributeMetaDataFactory factory for molgenis entityMetaData
+	 * @param vcfUtils                 utility class for working with vcf data in molgenis
+	 * @param inputVcfFile             the vcf file to be annotated
+	 * @param outputVCFFile            the resulting, annotated vcf file
+	 * @param attributesToInclude      the attributes of the annotator that should be written to the result
+	 * @param update                   boolean indicating if values already present for the annotator attributes should be updated(true) or overwritten (false)
+	 * @return the path of the result vcf file
+	 * @throws IOException,
+	 * @throws MolgenisInvalidFormatException
+	 */
 	public static String annotate(RepositoryAnnotator annotator, VcfAttributes vcfAttributes,
 			EntityMetaDataFactory entityMetaDataFactory, AttributeMetaDataFactory attributeMetaDataFactory,
 			VcfUtils vcfUtils, File inputVcfFile, File outputVCFFile, List<String> attributesToInclude, boolean update)
@@ -114,104 +139,140 @@ public class AnnotatorUtils
 				VcfRepository vcfRepo = new VcfRepository(inputVcfFile, inputVcfFile.getName(), vcfAttributes,
 						entityMetaDataFactory, attributeMetaDataFactory))
 		{
-			if (!attributesToInclude.isEmpty())
-			{
-				// Check attribute names
-				List<String> outputAttributeNames = VcfUtils
-						.getAtomicAttributesFromList(annotator.getOutputAttributes()).stream()
-						.map(AttributeMetaData::getName).collect(Collectors.toList());
 
-				List<String> inputAttributeNames = VcfUtils
-						.getAtomicAttributesFromList(vcfRepo.getEntityMetaData().getAtomicAttributes()).stream()
-						.map(AttributeMetaData::getName).collect(Collectors.toList());
-
-				for (Object attrName : attributesToInclude)
-				{
-					if (!outputAttributeNames.contains(attrName))
-					{
-						throw new RuntimeException("Unknown output attribute '" + attrName + "'");
-					}
-					else if (inputAttributeNames.contains(attrName))
-					{
-						throw new RuntimeException("The output attribute '" + attrName
-								+ "' is present in the inputfile, but is deselected in the current run, this is not supported");
-					}
-				}
-			}
-
-			// If the annotator e.g. SnpEff creates an external repository, collect the output metadata into an mref
-			// entity
-			// This allows for the header to be written as 'EFFECT annotations: <ouput_attributes> | <ouput_attributes>'
-			List<AttributeMetaData> outputMetaData = newArrayList();
-			if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
-			{
-				EntityMetaData effectRefEntity = entityMetaDataFactory.create()
-						.setName(annotator.getSimpleName() + "_EFFECTS");
-				for (AttributeMetaData outputAttribute : annotator.getOutputAttributes())
-				{
-					effectRefEntity.addAttribute(outputAttribute);
-				}
-				AttributeMetaData effect = attributeMetaDataFactory.create().setName(EFFECT);
-				effect.setDataType(MREF).setRefEntity(effectRefEntity);
-				outputMetaData.add(effect);
-			}
-			else
-			{
-				outputMetaData = annotator.getOutputAttributes();
-			}
+			List<AttributeMetaData> outputMetaData = getOutputAttributeMetaDatasForAnnotator(annotator,
+					entityMetaDataFactory, attributeMetaDataFactory, attributesToInclude, vcfRepo);
 
 			VcfWriterUtils
 					.writeVcfHeader(inputVcfFile, outputVCFWriter, VcfUtils.getAtomicAttributesFromList(outputMetaData),
 							attributesToInclude);
-			System.out.println("Now starting to process the data.");
 
-			EntityMetaData emd = vcfRepo.getEntityMetaData();
-			AttributeMetaData infoAttribute = emd.getAttribute(VcfAttributes.INFO);
-			for (AttributeMetaData attribute : annotator.getOutputAttributes())
-			{
-				for (AttributeMetaData atomicAttribute : attribute.getAttributeParts())
-				{
-					infoAttribute.addAttributePart(atomicAttribute);
-				}
-			}
-			Iterable<Entity> entitiesToAnnotate;
+			Iterable<Entity> entitiesToAnnotate = addAnnotatorMetaDataToRepository(annotator, attributeMetaDataFactory,
+					vcfUtils, vcfRepo);
 
-			AnnotatorUtils.addAnnotatorMetadataToRepositories(vcfRepo.getEntityMetaData(), attributeMetaDataFactory,
-					annotator);
-			if (annotator instanceof EffectsAnnotator)
-			{
+			Iterator<Entity> annotatedRecords = annotateRepo(annotator, vcfUtils, update, entitiesToAnnotate);
 
-				entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT,
-						StreamSupport.stream(vcfRepo.spliterator(), false));
-
-				// Add metadata to repository that will be annotated, instead of repository with variants
-				for (Entity entity : entitiesToAnnotate)
-				{
-					entity.getEntityMetaData().addAttributes(annotator.getOutputAttributes());
-				}
-			}
-			else
-			{
-				entitiesToAnnotate = vcfRepo;
-			}
-
-			// these methods wrap iterators around the entities to make it streaming, actual annotation starts later
-			Iterator<Entity> annotatedRecords = annotator.annotate(entitiesToAnnotate, update);
-			if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
-			{
-				annotatedRecords = vcfUtils.reverseXrefMrefRelation(annotatedRecords);
-			}
-
-			while (annotatedRecords.hasNext())
-			{
-				// annotation starts here
-				Entity annotatedRecord = annotatedRecords.next();
-				VcfWriterUtils.writeToVcf(annotatedRecord, VcfUtils.getAtomicAttributesFromList(outputMetaData),
-						attributesToInclude, outputVCFWriter);
-				outputVCFWriter.newLine();
-			}
-
+			writeAnnotationResultToVcfFile(attributesToInclude, outputVCFWriter, outputMetaData, annotatedRecords);
 		}
 		return outputVCFFile.getAbsolutePath();
+	}
+
+	public static Iterator<Entity> annotateRepo(RepositoryAnnotator annotator, VcfUtils vcfUtils, boolean update,
+			Iterable<Entity> entitiesToAnnotate)
+	{
+		Iterator<Entity> annotatedRecords = annotator.annotate(entitiesToAnnotate, update);
+		if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
+		{
+			annotatedRecords = vcfUtils.reverseXrefMrefRelation(annotatedRecords);
+		}
+		return annotatedRecords;
+	}
+
+	public static Iterable<Entity> addAnnotatorMetaDataToRepository(RepositoryAnnotator annotator,
+			AttributeMetaDataFactory attributeMetaDataFactory, VcfUtils vcfUtils, VcfRepository vcfRepo)
+	{
+		addAnnotatorAttributesToInfoAttribute(annotator, vcfRepo);
+		Iterable<Entity> entitiesToAnnotate;
+
+		if (annotator instanceof EffectsAnnotator)
+		{
+			entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT,
+					StreamSupport.stream(vcfRepo.spliterator(), false));
+
+			// Add metadata to repository that will be annotated, instead of repository with variants
+			for (Entity entity : entitiesToAnnotate)
+			{
+				entity.getEntityMetaData().addAttributes(annotator.getOutputAttributes());
+			}
+		}
+		else
+		{
+			AnnotatorUtils.addAnnotatorMetaDataToRepositories(vcfRepo.getEntityMetaData(), attributeMetaDataFactory,
+					annotator);
+			entitiesToAnnotate = vcfRepo;
+		}
+		return entitiesToAnnotate;
+	}
+
+	public static void writeAnnotationResultToVcfFile(List<String> attributesToInclude, BufferedWriter outputVCFWriter,
+			List<AttributeMetaData> outputMetaData, Iterator<Entity> annotatedRecords) throws IOException
+	{
+		while (annotatedRecords.hasNext())
+		{
+			// annotation starts here
+			Entity annotatedRecord = annotatedRecords.next();
+			VcfWriterUtils.writeToVcf(annotatedRecord, VcfUtils.getAtomicAttributesFromList(outputMetaData),
+					attributesToInclude, outputVCFWriter);
+			outputVCFWriter.newLine();
+		}
+	}
+
+	public static void addAnnotatorAttributesToInfoAttribute(RepositoryAnnotator annotator, VcfRepository vcfRepo)
+	{
+		EntityMetaData emd = vcfRepo.getEntityMetaData();
+		AttributeMetaData infoAttribute = emd.getAttribute(VcfAttributes.INFO);
+		for (AttributeMetaData attribute : annotator.getOutputAttributes())
+		{
+			for (AttributeMetaData atomicAttribute : attribute.getAttributeParts())
+			{
+				infoAttribute.addAttributePart(atomicAttribute);
+			}
+		}
+	}
+
+	public static List<AttributeMetaData> getOutputAttributeMetaDatasForAnnotator(RepositoryAnnotator annotator,
+			EntityMetaDataFactory entityMetaDataFactory, AttributeMetaDataFactory attributeMetaDataFactory,
+			List<String> attributesToInclude, VcfRepository vcfRepo)
+	{
+		if (!attributesToInclude.isEmpty())
+		{
+			checkSelectedOutputAttributeNames(annotator, attributesToInclude, vcfRepo);
+		}
+		// If the annotator e.g. SnpEff creates an external repository, collect the output metadata into an mref
+		// entity
+		// This allows for the header to be written as 'EFFECT annotations: <ouput_attributes> | <ouput_attributes>'
+		List<AttributeMetaData> outputMetaData = newArrayList();
+		if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
+		{
+			EntityMetaData effectRefEntity = entityMetaDataFactory.create()
+					.setName(annotator.getSimpleName() + "_EFFECTS");
+			for (AttributeMetaData outputAttribute : annotator.getOutputAttributes())
+			{
+				effectRefEntity.addAttribute(outputAttribute);
+			}
+			AttributeMetaData effect = attributeMetaDataFactory.create().setName(EFFECT);
+			effect.setDataType(MREF).setRefEntity(effectRefEntity);
+			outputMetaData.add(effect);
+		}
+		else
+		{
+			outputMetaData = annotator.getOutputAttributes();
+		}
+		return outputMetaData;
+	}
+
+	public static void checkSelectedOutputAttributeNames(RepositoryAnnotator annotator,
+			List<String> attributesToInclude, VcfRepository vcfRepo)
+	{
+		// Check attribute names
+		List<String> outputAttributeNames = VcfUtils.getAtomicAttributesFromList(annotator.getOutputAttributes())
+				.stream().map(AttributeMetaData::getName).collect(Collectors.toList());
+
+		List<String> inputAttributeNames = VcfUtils
+				.getAtomicAttributesFromList(vcfRepo.getEntityMetaData().getAtomicAttributes()).stream()
+				.map(AttributeMetaData::getName).collect(Collectors.toList());
+
+		for (Object attrName : attributesToInclude)
+		{
+			if (!outputAttributeNames.contains(attrName))
+			{
+				throw new RuntimeException("Unknown output attribute '" + attrName + "'");
+			}
+			else if (inputAttributeNames.contains(attrName))
+			{
+				throw new RuntimeException("The output attribute '" + attrName
+						+ "' is present in the inputfile, but is deselected in the current run, this is not supported");
+			}
+		}
 	}
 }
