@@ -532,7 +532,14 @@ function($, molgenis, settingsXhr) {
 			searchQuery = $(this).val().trim();
 			$(document).trigger('changeQuery', createEntityQuery());
 		});
-		
+
+		$('#observationset-search').keypress(function (event) {
+			if (event.which == 13) {
+				$(document).trigger('changeQuery', createEntityQuery());
+				$("#observationset-search").change();
+			}
+		});
+
 		$('#search-clear-button').click(function(){
 			$("#observationset-search").val('');
 			$("#observationset-search").change();
