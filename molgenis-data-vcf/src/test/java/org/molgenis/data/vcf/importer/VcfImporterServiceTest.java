@@ -44,6 +44,9 @@ public class VcfImporterServiceTest
 	private MetaDataService metaDataService;
 	@Mock
 	private SecurityContext securityContext;
+	@Mock
+	private RepositoryCollection repositoryCollection;
+
 	@Captor
 	private ArgumentCaptor<Consumer<List<Entity>>> consumerArgumentCaptor;
 
@@ -51,9 +54,12 @@ public class VcfImporterServiceTest
 	public void setUpBeforeMethod()
 	{
 		MockitoAnnotations.initMocks(this);
-		vcfImporterService = new VcfImporterService(dataService, permissionSystemService);
+		vcfImporterService = new VcfImporterService(dataService, permissionSystemService, metaDataService);
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		SecurityContextHolder.setContext(securityContext);
+		when(metaDataService.getDefaultBackend()).thenReturn(repositoryCollection);
+		when(repositoryCollection.getName()).thenReturn("default");
+
 	}
 
 	@SuppressWarnings("unchecked")

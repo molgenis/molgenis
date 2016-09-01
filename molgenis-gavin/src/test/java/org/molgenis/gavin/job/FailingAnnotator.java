@@ -1,0 +1,126 @@
+package org.molgenis.gavin.job;
+
+import org.molgenis.data.Entity;
+import org.molgenis.data.annotation.core.RepositoryAnnotator;
+import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
+import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfigurer;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.EntityMetaData;
+
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+
+public class FailingAnnotator implements RepositoryAnnotator
+{
+	private final RuntimeException ex;
+
+	public FailingAnnotator(RuntimeException ex)
+	{
+		this.ex = ex;
+	}
+
+	@Override
+	public AnnotatorInfo getInfo()
+	{
+		return new AnnotatorInfo()
+		{
+			@Override
+			public Status getStatus()
+			{
+				return Status.BETA;
+			}
+
+			@Override
+			public Type getType()
+			{
+				return Type.UNKNOWN;
+			}
+
+			@Override
+			public String getCode()
+			{
+				return "FAIL";
+			}
+
+			@Override
+			public String getDescription()
+			{
+				return "Failing annotator for unit test purposes";
+			}
+
+			@Override
+			public List<AttributeMetaData> getOutputAttributes()
+			{
+				return Collections.emptyList();
+			}
+		};
+	}
+
+	@Override
+	public Iterator<Entity> annotate(Iterable<Entity> source, boolean updateMode)
+	{
+		return this.annotate(source);
+	}
+
+	@Override
+	public Iterator<Entity> annotate(Iterable<Entity> source)
+	{
+		throw ex;
+	}
+
+	@Override
+	public boolean annotationDataExists()
+	{
+		return true;
+	}
+
+	@Override
+	public Iterator<Entity> annotate(Iterator<Entity> source)
+	{
+		throw ex;
+	}
+
+	@Override
+	public List<AttributeMetaData> getOutputAttributes()
+	{
+		return Collections.emptyList();
+	}
+
+	@Override
+	public List<AttributeMetaData> getRequiredAttributes()
+	{
+		return Collections.emptyList();
+	}
+
+	@Override
+	public String canAnnotate(EntityMetaData inputMetaData)
+	{
+		return null;
+	}
+
+	@Override
+	public String getSimpleName()
+	{
+		return "FAIL";
+	}
+
+	@Override
+	public String getFullName()
+	{
+		return "FAIL";
+	}
+
+	@Override
+	public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer()
+	{
+		return new CmdLineAnnotatorSettingsConfigurer()
+		{
+			@Override
+			public void addSettings(String annotationSourceFileName)
+			{
+
+			}
+		};
+	}
+}

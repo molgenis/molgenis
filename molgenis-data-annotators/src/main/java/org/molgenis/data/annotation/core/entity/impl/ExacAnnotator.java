@@ -30,7 +30,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.data.annotation.web.settings.ExacAnnotatorSettings.Meta.EXAC_LOCATION;
 
 @Configuration
@@ -89,10 +89,11 @@ public class ExacAnnotator implements AnnotatorConfig
 
 		List<AttributeMetaData> resourceMetaData = new ArrayList<AttributeMetaData>(Arrays.asList(
 				new AttributeMetaData[] {
-						attributeMetaDataFactory.create().setName(EXAC_AF_ResourceAttributeName).setDataType(DECIMAL),
-						attributeMetaDataFactory.create().setName(EXAC_AC_HOM_ResourceAttributeName).setDataType(INT),
+						attributeMetaDataFactory.create().setName(EXAC_AF_ResourceAttributeName).setDataType(STRING),
+						attributeMetaDataFactory.create().setName(EXAC_AC_HOM_ResourceAttributeName).setDataType(
+								STRING),
 						attributeMetaDataFactory.create().setName(EXAC_AC_HET_ResourceAttributeName).setDataType(
-								INT) }));
+								STRING) }));
 
 		AnnotatorInfo exacInfo = AnnotatorInfo.create(Status.READY, AnnotatorInfo.Type.POPULATION_REFERENCE, "exac",
 				" The Exome Aggregation Consortium (ExAC) is a coalition of investigators seeking to aggregate"
