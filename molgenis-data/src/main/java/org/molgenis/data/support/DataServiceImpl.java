@@ -278,7 +278,7 @@ public class DataServiceImpl implements DataService
 
 		// create copy of entity meta data
 		EntityMetaData emd = EntityMetaData.newInstance(repository.getEntityMetaData(), DEEP_COPY_ATTRS);
-		emd.setName(newRepositoryId);
+		emd.setSimpleName(newRepositoryId);
 		emd.setLabel(newRepositoryLabel);
 
 		// create repository for copied entity meta data
