@@ -273,26 +273,19 @@ public class DataServiceImpl implements DataService
 	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId,
 			String newRepositoryLabel, Query<Entity> query)
 	{
-		LOG.info("Creating a copy of " + repository.getName() + " repository, with ID: " + newRepositoryId
-				+ ", and label: " + newRepositoryLabel);
+		LOG.info("Creating a copy of {} repository, with ID: {}, and label: {}", repository.getName(), newRepositoryId,
+				newRepositoryLabel);
+
+		// create copy of entity meta data
 		EntityMetaData emd = EntityMetaData.newInstance(repository.getEntityMetaData(), DEEP_COPY_ATTRS);
-		emd.setName(newRepositoryId);
+		emd.setSimpleName(newRepositoryId);
 		emd.setLabel(newRepositoryLabel);
 
-		metaDataService.addEntityMeta(emd);
+		// create repository for copied entity meta data
 		Repository<Entity> repositoryCopy = metaDataService.createRepository(emd);
-		try
-		{
-			repositoryCopy.add(repository.findAll(query));
-			return repositoryCopy;
-		}
-		catch (RuntimeException e)
-		{
-			if (repositoryCopy != null)
-			{
-				metaDataService.deleteEntityMeta(emd.getName());
-			}
-			throw e;
-		}
+
+		// copy data to new repository
+		repositoryCopy.add(repository.findAll(query));
+		return repositoryCopy;
 	}
 }
