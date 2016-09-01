@@ -171,11 +171,10 @@ class PostgreSqlQueryGenerator
 	static String getSqlCreateJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		AttributeMetaData idAttr = entityMeta.getIdAttribute();
-		StringBuilder sql = new StringBuilder("CREATE TABLE ")
-				.append(getJunctionTableName(entityMeta, attr)).append(" (")
-				.append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(" INT,").append(getColumnName(idAttr))
-				.append(' ').append(getPostgreSqlType(idAttr)).append(" NOT NULL, ").append(getColumnName(attr))
-				.append(' ').append(getPostgreSqlType(attr.getRefEntity().getIdAttribute()))
+		StringBuilder sql = new StringBuilder("CREATE TABLE ").append(getJunctionTableName(entityMeta, attr))
+				.append(" (").append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(" INT,")
+				.append(getColumnName(idAttr)).append(' ').append(getPostgreSqlType(idAttr)).append(" NOT NULL, ")
+				.append(getColumnName(attr)).append(' ').append(getPostgreSqlType(attr.getRefEntity().getIdAttribute()))
 				.append(" NOT NULL, FOREIGN KEY (").append(getColumnName(idAttr)).append(") REFERENCES ")
 				.append(getTableName(entityMeta)).append('(').append(getColumnName(idAttr))
 				.append(") ON DELETE CASCADE");
@@ -290,7 +289,8 @@ class PostgreSqlQueryGenerator
 		final AttributeMetaData idAttribute = entityMeta.getIdAttribute();
 		getPersistedAttributes(entityMeta).forEach(attr ->
 		{
-			if (q.getFetch() == null || q.getFetch().hasField(attr.getName()))
+			if (q.getFetch() == null || q.getFetch().hasField(attr.getName()) || (q.getSort() != null && q.getSort()
+					.hasField(attr.getName())))
 			{
 				if (count.get() > 0)
 				{

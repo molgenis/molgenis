@@ -9,8 +9,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.ac.ebi.mydas.configuration.DataSourceConfiguration;
 import uk.ac.ebi.mydas.configuration.PropertyType;
 import uk.ac.ebi.mydas.datasource.RangeHandlingAnnotationDataSource;
@@ -30,8 +28,6 @@ import static org.molgenis.util.ApplicationContextProvider.getApplicationContext
 public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 		implements RangeHandlingAnnotationDataSource
 {
-	private static final Logger LOG = LoggerFactory.getLogger(RepositoryRangeHandlingDataSource.class);
-
 	private final DataService dataService;
 	private final GenomicDataSettings config;
 	private DasType mutationType;
@@ -115,13 +111,11 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 
 			try
 			{
-				Object objectValue = entity.get(posAttribute);
-				if (objectValue == null) break;
-				valueStart = Integer.parseInt(objectValue.toString());
+				valueStart = entity.getInt(posAttribute);
 			}
 			catch (ClassCastException e)
 			{
-				LOG.error("Unsupported type of position attribute for entity: " + entity.getIdValue());
+				// start of identifier not correctly specified? exclude this mutation fore it can not be plotted
 				break;
 			}
 			// no end position? assume mutation of 1 position, so stop == start
