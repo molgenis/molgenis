@@ -19,7 +19,6 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.security.core.runas.RunAsSystemProxy;
 import org.molgenis.test.data.EntitySelfXrefTestHarness;
 import org.molgenis.test.data.EntityTestHarness;
 import org.molgenis.test.data.staticentity.TestEntityStatic;
@@ -152,7 +151,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		selfXrefEntityMetaData = entitySelfXrefTestHarness.createDynamicEntityMetaData();
 		selfXrefEntityMetaData.getAttribute(ATTR_XREF).setRefEntity(selfXrefEntityMetaData);
 
-		RunAsSystemProxy.runAsSystem(() ->
+		runAsSystem(() ->
 		{
 			metaDataService.addEntityMeta(refEntityMetaDataDynamic);
 			metaDataService.addEntityMeta(entityMetaDataDynamic);
@@ -731,6 +730,35 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		{
 			assertTrue(EntityUtils.equals(foundAsList.get(i), entities.get(expectedEntityIndices.get(i))));
 		}
+	}
+
+	/**
+	 * Test used as a caching benchmark
+	 */
+	@Test(enabled = false)
+	public void cachePerformanceTest()
+	{
+		List<Entity> entities = createDynamic(10000).collect(toList());
+		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
+		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
+
+		Query q1 = new QueryImpl<>().eq(EntityTestHarness.ATTR_STRING, "string1");
+		q1.pageSize(1000);
+
+		Query q2 = new QueryImpl<>().eq(EntityTestHarness.ATTR_BOOL, true);
+		q2.pageSize(500);
+
+		Query q3 = new QueryImpl<>().eq(ATTR_DECIMAL, 1.123);
+
+		runAsSystem(() ->
+		{
+			for (int i = 0; i < 100000; i++)
+			{
+				dataService.findAll(entityMetaDataDynamic.getName(), q1);
+				dataService.findAll(entityMetaDataDynamic.getName(), q2);
+				dataService.findOne(entityMetaDataDynamic.getName(), q3);
+			}
+		});
 	}
 
 	@DataProvider(name = "findQueryOperatorAnd")

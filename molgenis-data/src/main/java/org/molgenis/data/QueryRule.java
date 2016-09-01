@@ -1,13 +1,11 @@
 package org.molgenis.data;
 
-import org.apache.commons.lang3.StringUtils;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
+
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.StreamSupport.stream;
 
 /**
  * With this class an equation model can be described for a database-field (eg a column). By combining this description
@@ -175,7 +173,7 @@ public class QueryRule
 		/**
 		 * Translate String label of the operator to Operator.
 		 *
-		 * @param name of the operator
+		 * @param label of the operator
 		 */
 		Operator(String label)
 		{
@@ -213,7 +211,7 @@ public class QueryRule
 		}
 		this.field = field;
 		this.operator = operator;
-		this.value = value;
+		setValue(value);
 	}
 
 	/**
@@ -228,7 +226,7 @@ public class QueryRule
 		if (operator == Operator.SEARCH)
 		{
 			this.operator = operator;
-			this.value = value;
+			setValue(value);
 		}
 		else if (Operator.NESTED.equals(operator))
 		{
@@ -301,18 +299,6 @@ public class QueryRule
 	}
 
 	/**
-	 * Returns the field-name as a JPA Attribute
-	 */
-	public String getJpaAttribute()
-	{
-		if (!StringUtils.isEmpty(field))
-		{
-			return field.substring(0, 1).toLowerCase() + field.substring(1);
-		}
-		return field;
-	}
-
-	/**
 	 * Sets a new field-name for this rule.
 	 *
 	 * @param field The new field-name.
@@ -359,7 +345,24 @@ public class QueryRule
 	 */
 	public void setValue(Object value)
 	{
-		this.value = value;
+		if (value instanceof Iterable<?>)
+		{
+			this.value = stream(((Iterable<?>) value).spliterator(), false).map(this::toValue)
+					.collect(toCollection(LinkedHashSet::new));
+		}
+		else
+		{
+			this.value = toValue(value);
+		}
+	}
+
+	private Object toValue(Object value)
+	{
+		if (value instanceof Entity)
+		{
+			return ((Entity) value).getIdValue();
+		}
+		return value;
 	}
 
 	/**
