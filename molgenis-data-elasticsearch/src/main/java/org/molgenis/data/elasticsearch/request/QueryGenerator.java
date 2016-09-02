@@ -7,7 +7,7 @@ import org.elasticsearch.index.query.*;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.elasticsearch.index.MappingsBuilder;
+import org.molgenis.data.elasticsearch.converter.MappingsBuilder;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.util.MolgenisDateFormat;
@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
-import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DEFAULT_ANALYZER;
+import static org.molgenis.data.elasticsearch.converter.ElasticsearchIndexCreator.DEFAULT_ANALYZER;
 
 /**
  * Creates Elasticsearch query from MOLGENIS query

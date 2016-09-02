@@ -1,14 +1,11 @@
-package org.molgenis.data.elasticsearch.index;
+package org.molgenis.data.elasticsearch.index.job;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.molgenis.data.*;
-import org.molgenis.data.elasticsearch.index.job.IndexJob;
-import org.molgenis.data.elasticsearch.index.job.IndexJobExecution;
-import org.molgenis.data.elasticsearch.index.job.IndexJobFactory;
-import org.molgenis.data.elasticsearch.index.job.IndexService;
+import org.molgenis.data.elasticsearch.index.IndexConfig;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.MolgenisTransactionListener;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
@@ -140,7 +137,7 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@ComponentScan(basePackages = {
-			"org.molgenis.data.elasticsearch.index, org.molgenis.data.elasticsearch.config, org.molgenis.data.jobs.model, org.molgenis.auth" })
+			"org.molgenis.data.elasticsearch.index.job, org.molgenis.data.jobs.model, org.molgenis.auth" })
 	@Configuration
 	@Import({ IndexConfig.class })
 	public static class Config

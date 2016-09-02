@@ -1,7 +1,8 @@
-package org.molgenis.data.elasticsearch.index;
+package org.molgenis.data.elasticsearch.converter;
 
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
+import org.molgenis.data.elasticsearch.converter.ElasticsearchIndexCreator;
 import org.molgenis.data.elasticsearch.util.MapperTypeSanitizer;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;

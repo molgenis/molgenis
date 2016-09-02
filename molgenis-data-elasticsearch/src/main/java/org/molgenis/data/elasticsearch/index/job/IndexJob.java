@@ -32,7 +32,7 @@ import static org.molgenis.data.index.meta.IndexActionMetaData.DataType.METADATA
 /**
  * {@link Job} that executes a bunch of {@link IndexActionMetaData} stored in a {@link IndexActionGroupMetaData}.
  */
-public class IndexJob extends Job
+class IndexJob extends Job
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IndexJob.class);
 	private final String transactionId;
@@ -223,7 +223,7 @@ public class IndexJob extends Job
 	/**
 	 * Retrieves the query to get all index actions sorted
 	 */
-	public static Query<IndexAction> createQueryGetAllIndexActions(String transactionId)
+	static Query<IndexAction> createQueryGetAllIndexActions(String transactionId)
 	{
 		QueryRule rule = new QueryRule(INDEX_ACTION_GROUP_ATTR, EQUALS, transactionId);
 		QueryImpl<IndexAction> q = new QueryImpl<>(rule);

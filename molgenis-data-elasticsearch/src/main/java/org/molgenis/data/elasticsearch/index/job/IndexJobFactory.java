@@ -33,7 +33,7 @@ public class IndexJobFactory
 	/**
 	 * Create a IndexJob for a {@link IndexJobExecution} entity.
 	 */
-	IndexJob createJob(IndexJobExecution indexJobExecution)
+	public IndexJob createJob(IndexJobExecution indexJobExecution)
 	{
 		RunAsSystemProxy
 				.runAsSystem(() -> dataService.add(IndexJobExecutionMeta.INDEX_JOB_EXECUTION, indexJobExecution));

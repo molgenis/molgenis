@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.index;
+package org.molgenis.data.elasticsearch.converter;
 
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.admin.indices.create.CreateIndexResponse;
