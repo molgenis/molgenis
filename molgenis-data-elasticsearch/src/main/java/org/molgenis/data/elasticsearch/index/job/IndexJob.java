@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.index;
+package org.molgenis.data.elasticsearch.index.job;
 
 import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
@@ -32,7 +32,7 @@ import static org.molgenis.data.index.meta.IndexActionMetaData.DataType.METADATA
 /**
  * {@link Job} that executes a bunch of {@link IndexActionMetaData} stored in a {@link IndexActionGroupMetaData}.
  */
-class IndexJob extends Job
+public class IndexJob extends Job
 {
 	private static final Logger LOG = LoggerFactory.getLogger(IndexJob.class);
 	private final String transactionId;
@@ -223,7 +223,7 @@ class IndexJob extends Job
 	/**
 	 * Retrieves the query to get all index actions sorted
 	 */
-	static Query<IndexAction> createQueryGetAllIndexActions(String transactionId)
+	protected static Query<IndexAction> createQueryGetAllIndexActions(String transactionId)
 	{
 		QueryRule rule = new QueryRule(INDEX_ACTION_GROUP_ATTR, EQUALS, transactionId);
 		QueryImpl<IndexAction> q = new QueryImpl<>(rule);

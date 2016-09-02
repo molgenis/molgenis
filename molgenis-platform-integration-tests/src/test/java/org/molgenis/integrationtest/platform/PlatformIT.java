@@ -4,7 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.molgenis.data.*;
 import org.molgenis.data.cache.l2.L2Cache;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.index.IndexService;
+import org.molgenis.data.elasticsearch.index.job.IndexService;
 import org.molgenis.data.i18n.I18nUtils;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.I18nStringMetaData;

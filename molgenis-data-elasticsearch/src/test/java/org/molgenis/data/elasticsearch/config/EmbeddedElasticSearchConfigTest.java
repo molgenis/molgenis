@@ -7,7 +7,7 @@ import org.molgenis.data.elasticsearch.ElasticsearchEntityFactory;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
-import org.molgenis.data.elasticsearch.index.SourceToEntityConverter;
+import org.molgenis.data.elasticsearch.converter.SourceToEntityConverter;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.IndexActionRegisterServiceImpl;

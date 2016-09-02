@@ -2,6 +2,10 @@ package org.molgenis.data.elasticsearch.index;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.elasticsearch.index.job.IndexJobExecutionFactory;
+import org.molgenis.data.elasticsearch.index.job.IndexJobFactory;
+import org.molgenis.data.elasticsearch.index.job.IndexService;
+import org.molgenis.data.elasticsearch.index.job.IndexServiceImpl;
 import org.molgenis.data.elasticsearch.transaction.IndexTransactionListener;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.JobExecutionUpdaterImpl;

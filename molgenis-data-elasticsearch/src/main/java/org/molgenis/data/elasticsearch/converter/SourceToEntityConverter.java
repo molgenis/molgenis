@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.index;
+package org.molgenis.data.elasticsearch.converter;
 
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;

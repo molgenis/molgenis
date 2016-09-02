@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.index;
+package org.molgenis.data.elasticsearch.index.job;
 
 import com.google.common.util.concurrent.AtomicLongMap;
 import org.molgenis.data.meta.model.AttributeMetaData;
