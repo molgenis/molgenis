@@ -35,7 +35,7 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.data.elasticsearch.index.meta.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
+import static org.molgenis.data.elasticsearch.index.job.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;

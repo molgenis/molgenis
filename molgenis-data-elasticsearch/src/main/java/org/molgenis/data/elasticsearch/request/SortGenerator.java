@@ -10,7 +10,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.Sort;
 import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.UnknownAttributeException;
-import org.molgenis.data.elasticsearch.converter.MappingsBuilder;
+import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 

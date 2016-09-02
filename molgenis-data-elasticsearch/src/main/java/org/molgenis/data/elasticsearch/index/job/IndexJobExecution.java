@@ -1,7 +1,6 @@
 package org.molgenis.data.elasticsearch.index.job;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.elasticsearch.index.meta.IndexJobExecutionMeta;
 import org.molgenis.data.jobs.model.JobExecution;
 import org.molgenis.data.meta.model.EntityMetaData;
 

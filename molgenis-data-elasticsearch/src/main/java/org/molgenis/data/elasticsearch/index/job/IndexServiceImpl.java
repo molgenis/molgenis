@@ -20,7 +20,7 @@ import static java.util.Date.from;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
-import static org.molgenis.data.elasticsearch.index.meta.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
+import static org.molgenis.data.elasticsearch.index.job.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
 import static org.molgenis.data.jobs.model.JobExecution.Status.SUCCESS;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.END_DATE;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.STATUS;

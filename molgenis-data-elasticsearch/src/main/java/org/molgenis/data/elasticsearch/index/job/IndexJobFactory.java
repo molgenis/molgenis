@@ -2,9 +2,6 @@ package org.molgenis.data.elasticsearch.index.job;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.index.job.IndexJob;
-import org.molgenis.data.elasticsearch.index.job.IndexJobExecution;
-import org.molgenis.data.elasticsearch.index.meta.IndexJobExecutionMeta;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.security.core.runas.RunAsSystemProxy;

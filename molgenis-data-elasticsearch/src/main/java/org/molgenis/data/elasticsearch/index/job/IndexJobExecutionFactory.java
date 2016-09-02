@@ -1,8 +1,6 @@
 package org.molgenis.data.elasticsearch.index.job;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
-import org.molgenis.data.elasticsearch.index.job.IndexJobExecution;
-import org.molgenis.data.elasticsearch.index.meta.IndexJobExecutionMeta;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
