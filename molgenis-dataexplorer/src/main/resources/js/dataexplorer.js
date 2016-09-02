@@ -543,7 +543,7 @@ $.when($,
 
             // Workaround for IE not submitting on "enter"
             $('#observationset-search').keypress(function (event) {
-                if (getInternetExplorerVersion != -1) {
+                if (getInternetExplorerVersion() != -1) {
 
                     if (event.which == 13) {
                         $(document).trigger('changeQuery', createEntityQuery());
