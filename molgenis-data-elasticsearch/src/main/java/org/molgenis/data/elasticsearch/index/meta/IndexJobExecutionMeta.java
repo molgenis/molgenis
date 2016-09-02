@@ -14,19 +14,19 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.index.meta.IndexPackage.PACKAGE_INDEX;
 
 /**
- * This entity is used to track the progress of the execution of a ReindexActionJob.
+ * This entity is used to track the progress of the execution of a IndexActionJob.
  */
 @Component
 public class IndexJobExecutionMeta extends SystemEntityMetaData
 {
-	private static final String SIMPLE_NAME = "ReindexJobExecution";
+	private static final String SIMPLE_NAME = "IndexJobExecution";
 	public static final String INDEX_JOB_EXECUTION = PACKAGE_INDEX + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	/**
 	 * Example: Transaction id can be used to group all actions into one transaction.
 	 */
 	public static final String ID = "id";
-	public static final String INDEX_ACTION_JOB_ID = "reindexActionJobID";
+	public static final String INDEX_ACTION_JOB_ID = "indexActionJobID";
 
 	private final IndexPackage indexPackage;
 	private final JobExecutionMetaData jobExecutionMetaData;
@@ -47,7 +47,7 @@ public class IndexJobExecutionMeta extends SystemEntityMetaData
 
 		setExtends(jobExecutionMetaData);
 		addAttribute(INDEX_ACTION_JOB_ID).setDescription(
-				"ID of the IndexActionJob that contains the group of ReindexActions that this reindex job execution will reindex.")
+				"ID of the IndexActionJob that contains the group of IndexActions that this index job execution will index.")
 				.setNillable(false);
 	}
 

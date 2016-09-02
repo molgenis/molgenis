@@ -1,6 +1,6 @@
 package org.molgenis.data.elasticsearch.transaction;
 
-import org.molgenis.data.elasticsearch.index.job.IndexService;
+import org.molgenis.data.elasticsearch.index.IndexService;
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.transaction.DefaultMolgenisTransactionListener;
 import org.slf4j.Logger;

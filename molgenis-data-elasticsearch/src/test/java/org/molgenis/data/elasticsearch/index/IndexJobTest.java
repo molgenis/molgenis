@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.index.job;
+package org.molgenis.data.elasticsearch.index;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;

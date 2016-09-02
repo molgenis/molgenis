@@ -5,7 +5,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.index.job.IndexService;
+import org.molgenis.data.elasticsearch.index.IndexService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
@@ -20,11 +20,11 @@ import org.slf4j.LoggerFactory;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.testng.Assert.*;
 
-public class ReindexMetadataCUDOperationsPlatformIT
+public class IndexMetadataCUDOperationsPlatformIT
 {
-	private static final Logger LOG = LoggerFactory.getLogger(ReindexMetadataCUDOperationsPlatformIT.class);
+	private static final Logger LOG = LoggerFactory.getLogger(IndexMetadataCUDOperationsPlatformIT.class);
 
-	public static void testReindexCreateMetaData(SearchService searchService, EntityMetaData entityMetaDataStatic,
+	public static void testIndexCreateMetaData(SearchService searchService, EntityMetaData entityMetaDataStatic,
 			EntityMetaData entityMetaDataDynamic, MetaDataService metaDataService)
 	{
 		Query<Entity> q1 = new QueryImpl<>();
@@ -42,7 +42,7 @@ public class ReindexMetadataCUDOperationsPlatformIT
 	 * Test delete only for dynamic entity metadata
 	 * static entity metadata cannot be deleted
 	 */
-	public static void testReindexDeleteMetaData(SearchService searchService, DataService dataService,
+	public static void testIndexDeleteMetaData(SearchService searchService, DataService dataService,
 			EntityMetaData entityMetaDataDynamic, MetaDataService metaDataService, IndexService indexService)
 	{
 
@@ -52,7 +52,7 @@ public class ReindexMetadataCUDOperationsPlatformIT
 		assertEquals(searchService.count(q, metaDataService.getEntityMetaData(EntityMetaDataMetaData.ENTITY_META_DATA)),
 				1);
 
-		// 2. delete sys_test_TypeTestDynamic metadata and wait on reindex
+		// 2. delete sys_test_TypeTestDynamic metadata and wait on index
 		runAsSystem(() ->
 		{
 			metaDataService.deleteEntityMeta(entityMetaDataDynamic.getName());
@@ -74,7 +74,7 @@ public class ReindexMetadataCUDOperationsPlatformIT
 	/**
 	 * Test update metadata
 	 */
-	public static void testReindexUpdateMetaDataUpdateAttribute(SearchService searchService,
+	public static void testIndexUpdateMetaDataUpdateAttribute(SearchService searchService,
 			EntityMetaData entityMetaDataDynamic, MetaDataService metaDataService, IndexService indexService)
 	{
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping
@@ -117,7 +117,7 @@ public class ReindexMetadataCUDOperationsPlatformIT
 	/**
 	 * Test metadata removing an attribute
 	 */
-	public static void testReindexUpdateMetaDataRemoveAttribute(EntityMetaData emd, String attributeName,
+	public static void testIndexUpdateMetaDataRemoveAttribute(EntityMetaData emd, String attributeName,
 			SearchService searchService, MetaDataService metaDataService, IndexService indexService)
 	{
 		// 1. verify that sys_test_TypeTestDynamic exists in mapping

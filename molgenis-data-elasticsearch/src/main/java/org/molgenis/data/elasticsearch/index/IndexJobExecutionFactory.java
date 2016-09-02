@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.index.job;
+package org.molgenis.data.elasticsearch.index;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.elasticsearch.index.meta.IndexJobExecutionMeta;

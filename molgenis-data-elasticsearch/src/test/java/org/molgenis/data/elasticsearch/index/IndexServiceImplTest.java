@@ -1,20 +1,13 @@
-package org.molgenis.data.elasticsearch.index.job;
+package org.molgenis.data.elasticsearch.index;
 
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.Repository;
-import org.molgenis.data.elasticsearch.index.config.IndexConfig;
-import org.molgenis.data.index.meta.IndexAction;
-import org.molgenis.data.index.meta.IndexActionFactory;
-import org.molgenis.data.index.meta.IndexActionGroup;
-import org.molgenis.data.index.meta.IndexActionGroupFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.MolgenisTransactionListener;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
@@ -53,15 +46,6 @@ import static org.testng.Assert.assertTrue;
 public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private MolgenisUserFactory molgenisUserFactory;
-
-	@Autowired
-	private IndexActionFactory indexActionFactory;
-
-	@Autowired
-	private IndexActionGroupFactory indexActionGroupFactory;
-
-	@Autowired
 	private IndexJobFactory indexJobFactory;
 
 	@Autowired
@@ -91,10 +75,6 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 	@Mock
 	private IndexJob indexJob;
 
-	private MolgenisUser admin;
-	private IndexAction indexAction;
-	private IndexActionGroup indexActionGroup;
-
 	@Captor
 	private ArgumentCaptor<IndexJobExecution> indexJobExecutionCaptor;
 
@@ -110,12 +90,6 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void setUp() throws Exception
 	{
-		indexAction = indexActionFactory.create();
-		indexAction.setEntityFullName("test_TestEntity");
-		indexActionGroup = indexActionGroupFactory.create();
-		admin = molgenisUserFactory.create();
-		admin.setUsername("admin");
-
 		verify(molgenisTransactionManager).addTransactionListener(molgenisTransactionListener);
 	}
 
@@ -165,7 +139,7 @@ public class IndexServiceImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@ComponentScan(basePackages = {
-			"org.molgenis.data.elasticsearch.index, org.molgenis.data.jobs.model, org.molgenis.auth" })
+			"org.molgenis.data.elasticsearch.index, org.molgenis.data.elasticsearch.config, org.molgenis.data.jobs.model, org.molgenis.auth" })
 	@Configuration
 	@Import({ IndexConfig.class })
 	public static class Config

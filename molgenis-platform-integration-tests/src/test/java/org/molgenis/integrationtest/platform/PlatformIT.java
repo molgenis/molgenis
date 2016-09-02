@@ -4,7 +4,7 @@ import org.apache.commons.io.FileUtils;
 import org.molgenis.data.*;
 import org.molgenis.data.cache.l2.L2Cache;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.index.job.IndexService;
+import org.molgenis.data.elasticsearch.index.IndexService;
 import org.molgenis.data.i18n.I18nUtils;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
@@ -122,7 +122,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	}
 
 	/**
-	 * Wait till the index is stable. Index job is executed asynchronously. This method waits for all reindex jobs
+	 * Wait till the index is stable. Index job is executed asynchronously. This method waits for all index jobs
 	 * relevant for this entity to be finished.
 	 *
 	 * @param entityName name of the entitiy whose index needs to be stable
@@ -1041,7 +1041,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testUpdateSingleRefEntityReindexesReferencingEntities()
+	public void testUpdateSingleRefEntityIndexesReferencingEntities()
 	{
 		dataService.add(entityMetaDataDynamic.getName(), createDynamic(30));
 		waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
@@ -1059,7 +1059,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(enabled = false) //FIXME: sys_md_attributes spam
-	public void testUpdateSingleRefEntityReindexesLargeAmountOfReferencingEntities()
+	public void testUpdateSingleRefEntityIndexesLargeAmountOfReferencingEntities()
 	{
 		dataService.add(entityMetaDataDynamic.getName(), createDynamic(10000));
 		waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
@@ -1193,69 +1193,69 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test
-	public void testReindexCreateMetaData()
+	public void testIndexCreateMetaData()
 	{
-		ReindexMetadataCUDOperationsPlatformIT
-				.testReindexCreateMetaData(searchService, entityMetaDataStatic, entityMetaDataDynamic, metaDataService);
+		IndexMetadataCUDOperationsPlatformIT
+				.testIndexCreateMetaData(searchService, entityMetaDataStatic, entityMetaDataDynamic, metaDataService);
 	}
 
 	@Test
-	public void testReindexDeleteMetaData()
+	public void testIndexDeleteMetaData()
 	{
-		ReindexMetadataCUDOperationsPlatformIT
-				.testReindexDeleteMetaData(searchService, dataService, entityMetaDataDynamic, metaDataService,
+		IndexMetadataCUDOperationsPlatformIT
+				.testIndexDeleteMetaData(searchService, dataService, entityMetaDataDynamic, metaDataService,
 						indexService);
 	}
 
 	@Test
-	public void testReindexUpdateMetaDataUpdateAttribute()
+	public void testIndexUpdateMetaDataUpdateAttribute()
 	{
-		ReindexMetadataCUDOperationsPlatformIT
-				.testReindexUpdateMetaDataUpdateAttribute(searchService, entityMetaDataDynamic, metaDataService,
+		IndexMetadataCUDOperationsPlatformIT
+				.testIndexUpdateMetaDataUpdateAttribute(searchService, entityMetaDataDynamic, metaDataService,
 						indexService);
 	}
 
 	@Test
-	public void testReindexUpdateMetaDataRemoveAttribute()
+	public void testIndexUpdateMetaDataRemoveAttribute()
 	{
-		ReindexMetadataCUDOperationsPlatformIT
-				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_CATEGORICAL,
+		IndexMetadataCUDOperationsPlatformIT
+				.testIndexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_CATEGORICAL,
 						searchService, metaDataService, indexService);
 
-		ReindexMetadataCUDOperationsPlatformIT
-				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_BOOL,
+		IndexMetadataCUDOperationsPlatformIT
+				.testIndexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_BOOL,
 						searchService, metaDataService, indexService);
 
-		ReindexMetadataCUDOperationsPlatformIT
-				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_DATE,
+		IndexMetadataCUDOperationsPlatformIT
+				.testIndexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_DATE,
 						searchService, metaDataService, indexService);
 
-		ReindexMetadataCUDOperationsPlatformIT
-				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_XREF,
+		IndexMetadataCUDOperationsPlatformIT
+				.testIndexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_XREF,
 						searchService, metaDataService, indexService);
 
-		ReindexMetadataCUDOperationsPlatformIT
-				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_DATETIME,
+		IndexMetadataCUDOperationsPlatformIT
+				.testIndexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_DATETIME,
 						searchService, metaDataService, indexService);
 
-		ReindexMetadataCUDOperationsPlatformIT
-				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_DECIMAL,
+		IndexMetadataCUDOperationsPlatformIT
+				.testIndexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_DECIMAL,
 						searchService, metaDataService, indexService);
 
-		ReindexMetadataCUDOperationsPlatformIT
-				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_EMAIL,
+		IndexMetadataCUDOperationsPlatformIT
+				.testIndexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_EMAIL,
 						searchService, metaDataService, indexService);
 
-		ReindexMetadataCUDOperationsPlatformIT
-				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_HTML,
+		IndexMetadataCUDOperationsPlatformIT
+				.testIndexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_HTML,
 						searchService, metaDataService, indexService);
 
-		ReindexMetadataCUDOperationsPlatformIT
-				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_INT,
+		IndexMetadataCUDOperationsPlatformIT
+				.testIndexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_INT,
 						searchService, metaDataService, indexService);
 
-		ReindexMetadataCUDOperationsPlatformIT
-				.testReindexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_HYPERLINK,
+		IndexMetadataCUDOperationsPlatformIT
+				.testIndexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_HYPERLINK,
 						searchService, metaDataService, indexService);
 	}
 }

@@ -1,4 +1,4 @@
-package org.molgenis.data.elasticsearch.index.job;
+package org.molgenis.data.elasticsearch.index;
 
 /**
  * Schedules {@link IndexJob}s.

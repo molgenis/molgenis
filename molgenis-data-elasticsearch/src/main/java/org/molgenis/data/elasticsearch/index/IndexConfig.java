@@ -1,11 +1,7 @@
-package org.molgenis.data.elasticsearch.index.config;
+package org.molgenis.data.elasticsearch.index;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.elasticsearch.index.job.IndexJobExecutionFactory;
-import org.molgenis.data.elasticsearch.index.job.IndexJobFactory;
-import org.molgenis.data.elasticsearch.index.job.IndexService;
-import org.molgenis.data.elasticsearch.index.job.IndexServiceImpl;
 import org.molgenis.data.elasticsearch.transaction.IndexTransactionListener;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.JobExecutionUpdaterImpl;
@@ -23,7 +19,7 @@ import java.util.concurrent.Executors;
 import static org.molgenis.data.elasticsearch.index.meta.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
 
 @Configuration
-@ComponentScan(basePackages = { "org.molgenis.data.elasticsearch.reindex, org.molgenis.data.jobs.model" })
+@ComponentScan(basePackages = { "org.molgenis.data.elasticsearch.index, org.molgenis.data.jobs.model" })
 public class IndexConfig
 {
 	@Autowired
