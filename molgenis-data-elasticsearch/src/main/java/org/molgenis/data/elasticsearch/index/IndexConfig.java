@@ -19,7 +19,7 @@ import java.util.concurrent.Executors;
 import static org.molgenis.data.elasticsearch.index.meta.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
 
 @Configuration
-@ComponentScan(basePackages = { "org.molgenis.data.elasticsearch.index, org.molgenis.data.jobs.model" })
+@ComponentScan(basePackages = { "org.molgenis.data.elasticsearch.index, org.molgenis.data.jobs" })
 public class IndexConfig
 {
 	@Autowired
