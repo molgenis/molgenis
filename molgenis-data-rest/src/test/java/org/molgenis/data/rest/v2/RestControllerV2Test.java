@@ -491,17 +491,17 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	public void testCopyEntity() throws Exception
 	{
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
-		mocksForCopyEntitySucces(repositoryToCopy);
+		Package pack = mocksForCopyEntitySucces(repositoryToCopy);
 
 		String content = "{newEntityName: 'newEntity'}";
-		String responseBody = "\"newEntity\"";
+		String responseBody = "\"org_molgenis_blah_newEntity\"";
 		MockHttpServletRequestBuilder mockHttpServletRequestBuilder = post(HREF_COPY_ENTITY).content(content)
 				.contentType(APPLICATION_JSON);
 		mockMvc.perform(mockHttpServletRequestBuilder).andExpect(status().isCreated())
 				.andExpect(content().contentType(APPLICATION_JSON)).andExpect(content().string(responseBody))
-				.andExpect(header().string("Location", "/api/v2/newEntity"));
+				.andExpect(header().string("Location", "/api/v2/org_molgenis_blah_newEntity"));
 
-		verify(dataService).copyRepository(repositoryToCopy, "newEntity", "newEntity");
+		verify(dataService).copyRepository(repositoryToCopy, "newEntity", pack, "newEntity");
 	}
 
 	@Test
@@ -516,7 +516,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "Operation failed. Unknown entity: 'unknown'");
-		verify(dataService, never()).copyRepository(repositoryToCopy, "unknown", "unknown");
+		verify(dataService, never()).copyRepository(any(), any(), any(), any());
 	}
 
 	@Test
@@ -525,13 +525,14 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		Repository<Entity> repositoryToCopy = mock(Repository.class);
 		mocksForCopyEntitySucces(repositoryToCopy);
 
-		String content = "{newEntityName: 'entity'}";
+		String content = "{newEntityName: 'duplicateEntity'}";
 		ResultActions resultActions = mockMvc
 				.perform(post(HREF_COPY_ENTITY).content(content).contentType(APPLICATION_JSON))
 				.andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON));
 
-		this.assertEqualsErrorMessage(resultActions, "Operation failed. Duplicate entity: 'entity'");
-		verify(dataService, never()).copyRepository(repositoryToCopy, "entity", "entity");
+		this.assertEqualsErrorMessage(resultActions,
+				"Operation failed. Duplicate entity: 'org_molgenis_blah_duplicateEntity'");
+		verify(dataService, never()).copyRepository(any(), any(), any(), any());
 	}
 
 	@Test
@@ -549,7 +550,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.andExpect(status().isUnauthorized()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "No read permission on entity entity");
-		verify(dataService, never()).copyRepository(repositoryToCopy, "newEntity", "newEntity");
+		verify(dataService, never()).copyRepository(any(), any(), any(), any());
 	}
 
 	@Test
@@ -570,21 +571,22 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.andExpect(status().isBadRequest()).andExpect(content().contentType(APPLICATION_JSON));
 
 		this.assertEqualsErrorMessage(resultActions, "No write capabilities for entity entity");
-		verify(dataService, never()).copyRepository(repositoryToCopy, "newEntity", "newEntity");
+		verify(dataService, never()).copyRepository(any(), any(), any(), any());
 	}
 
-	private void mocksForCopyEntitySucces(Repository<Entity> repositoryToCopy)
+	private Package mocksForCopyEntitySucces(Repository<Entity> repositoryToCopy)
 	{
+		Package pack = mock(Package.class);
+		when(pack.getName()).thenReturn("org_molgenis_blah");
+
 		when(dataService.hasRepository("entity")).thenReturn(true);
-		when(dataService.hasRepository("newEntity")).thenReturn(false);
+		when(dataService.hasRepository("org_molgenis_blah_duplicateEntity")).thenReturn(true);
+		when(dataService.hasRepository("org_molgenis_blah_newEntity")).thenReturn(false);
 		when(dataService.getRepository("entity")).thenReturn(repositoryToCopy);
 
-		// Return package name
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(repositoryToCopy.getEntityMetaData()).thenReturn(entityMetaData);
-		Package package_ = mock(Package.class);
-		when(entityMetaData.getPackage()).thenReturn(package_);
-		when(package_.getName()).thenReturn("base");
+		when(entityMetaData.getPackage()).thenReturn(pack);
 
 		when(repositoryToCopy.getName()).thenReturn("entity");
 		when(molgenisPermissionService.hasPermissionOnEntity("entity", Permission.READ)).thenReturn(true);
@@ -592,12 +594,13 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		when(dataService.getCapabilities("entity")).thenReturn(capabilities);
 
 		Repository<Entity> repository = mock(Repository.class);
-		when(repository.getName()).thenReturn("newEntity");
-		when(dataService.getRepository("newEntity")).thenReturn(repository);
-		when(dataService.copyRepository(repositoryToCopy, "newEntity", "newEntity")).thenReturn(repository);
+		when(repository.getName()).thenReturn("org_molgenis_blah_newEntity");
+		when(dataService.getRepository("org_molgenis_blah_newEntity")).thenReturn(repository);
+		when(dataService.copyRepository(repositoryToCopy, "newEntity", pack, "newEntity")).thenReturn(repository);
 
 		doNothing().when(permissionSystemService)
 				.giveUserEntityPermissions(any(SecurityContext.class), Collections.singletonList(any(String.class)));
+		return pack;
 	}
 
 	/**
@@ -843,7 +846,8 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.fromJson(responseWithAttrs.getContentAsString(), new TypeToken<Map<String, Object>>()
 				{
 				}.getType());
-		@SuppressWarnings("unchecked") Map<String, Object> lvl2 = (Map<String, Object>) lvl1.get("selfRef");
+		@SuppressWarnings("unchecked")
+		Map<String, Object> lvl2 = (Map<String, Object>) lvl1.get("selfRef");
 		assertEquals(lvl2.get("selfRef").toString(),
 				"{_href=/api/v2/selfRefEntity/0, id=0, selfRef={_href=/api/v2/selfRefEntity/0, id=0}}");
 	}
