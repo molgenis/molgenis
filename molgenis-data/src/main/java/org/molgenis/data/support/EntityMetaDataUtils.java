@@ -166,10 +166,10 @@ public class EntityMetaDataUtils
 	}
 
 	/**
-	 * Returns whether the attribute type is a string type.
+	 * Returns whether the attribute type is a text type.
 	 *
 	 * @param attr attribute
-	 * @return true if the attribute is a string type.
+	 * @return true if the attribute is a text type.
 	 */
 	public static boolean isTextType(AttributeMetaData attr)
 	{
