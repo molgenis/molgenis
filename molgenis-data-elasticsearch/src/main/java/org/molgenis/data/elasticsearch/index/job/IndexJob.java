@@ -223,7 +223,7 @@ public class IndexJob extends Job
 	/**
 	 * Retrieves the query to get all index actions sorted
 	 */
-	protected static Query<IndexAction> createQueryGetAllIndexActions(String transactionId)
+	public static Query<IndexAction> createQueryGetAllIndexActions(String transactionId)
 	{
 		QueryRule rule = new QueryRule(INDEX_ACTION_GROUP_ATTR, EQUALS, transactionId);
 		QueryImpl<IndexAction> q = new QueryImpl<>(rule);
