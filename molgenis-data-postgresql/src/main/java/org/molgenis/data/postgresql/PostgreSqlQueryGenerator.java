@@ -252,7 +252,18 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlDropColumn(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		return "ALTER TABLE " + getTableName(entityMeta) + " DROP COLUMN " + getColumnName(attr);
+		String tableName, columnName;
+		if (attr.getDataType() == ONE_TO_MANY && attr.getMappedBy() != null)
+		{
+			tableName = getTableName(attr.getRefEntity());
+			columnName = getSequenceColumnName(attr);
+		}
+		else
+		{
+			tableName = getTableName(entityMeta);
+			columnName = getColumnName(attr);
+		}
+		return "ALTER TABLE " + tableName + " DROP COLUMN " + columnName;
 	}
 
 	static String getSqlInsert(EntityMetaData entityMeta)
@@ -485,7 +496,7 @@ class PostgreSqlQueryGenerator
 	 * @param attr many to one attribute
 	 * @return sequence column name
 	 */
-	private static String getSequenceColumnName(AttributeMetaData attr)
+	static String getSequenceColumnName(AttributeMetaData attr)
 	{
 		return getColumnName(attr.getMappedBy() + "_order");
 	}

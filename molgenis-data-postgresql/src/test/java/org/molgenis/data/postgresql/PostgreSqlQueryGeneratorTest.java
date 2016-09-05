@@ -473,6 +473,23 @@ public class PostgreSqlQueryGeneratorTest
 	}
 
 	@Test
+	public void getSqlDropColumnOneToManyMappedBy()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refAttr").getMock();
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(attr.getMappedBy()).thenReturn("refAttr");
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		when(refAttr.getDataType()).thenReturn(XREF);
+		when(refAttr.getInversedBy()).thenReturn(attr);
+		when(refAttr.getRefEntity()).thenReturn(entityMeta);
+		assertEquals(PostgreSqlQueryGenerator.getSqlDropColumn(entityMeta, attr),
+				"ALTER TABLE \"refEntity\" DROP COLUMN \"refAttr_order\"");
+	}
+
+	@Test
 	public void getSqlCreateJunctionTableIndex()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();

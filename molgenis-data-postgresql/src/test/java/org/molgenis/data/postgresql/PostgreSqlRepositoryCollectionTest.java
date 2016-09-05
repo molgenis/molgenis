@@ -613,6 +613,30 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
+	public void deleteAttributeOneToManyMappedBy()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+
+		String attrName = "attr";
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		String refAttrName = "refAttr";
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(refAttrName).getMock();
+
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		when(attr.getMappedBy()).thenReturn(refAttrName);
+
+		when(refAttr.getDataType()).thenReturn(XREF);
+		when(refAttr.getRefEntity()).thenReturn(entityMeta);
+		when(refAttr.getInversedBy()).thenReturn(attr);
+
+		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		postgreSqlRepoCollection.deleteAttribute(entityMeta, attr);
+		verify(jdbcTemplate).execute("ALTER TABLE \"refEntity\" DROP COLUMN \"refAttr_order\"");
+	}
+
+	@Test
 	public void deleteAttributeAbstractEntity()
 	{
 		EntityMetaData abstractEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("root").getMock();
