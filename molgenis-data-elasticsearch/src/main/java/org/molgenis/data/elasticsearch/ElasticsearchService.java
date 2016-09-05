@@ -402,10 +402,10 @@ public class ElasticsearchService implements SearchService
 			delete(entityMetaData.getName());
 		}
 		createMappings(entityMetaData);
-		LOG.info("Reindexing {} repository in batches of size {}...", entityMetaData.getName(), BATCH_SIZE);
+		LOG.info("Indexing {} repository in batches of size {}...", entityMetaData.getName(), BATCH_SIZE);
 		repository.forEachBatched(createFetchForReindexing(entityMetaData),
 				entities -> index(entities, entityMetaData, IndexingMode.ADD), BATCH_SIZE);
-		LOG.info("Reindexed {} repository.", entityMetaData.getName());
+		LOG.info("Indexed {} repository.", entityMetaData.getName());
 	}
 
 	@Override
