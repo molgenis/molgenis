@@ -219,7 +219,8 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		}
 		else
 		{
-			if (isMultipleReferenceType(attr) && attr.getMappedBy() == null)
+			boolean bidirectionalOneToMany = attr.getDataType() == ONE_TO_MANY && attr.isMappedBy();
+			if (isMultipleReferenceType(attr) && !bidirectionalOneToMany)
 			{
 				createJunctionTable(entityMeta, attr);
 			}

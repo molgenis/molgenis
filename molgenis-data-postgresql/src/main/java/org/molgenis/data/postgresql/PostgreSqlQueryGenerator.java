@@ -127,8 +127,23 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlAddColumn(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		StringBuilder sql = new StringBuilder("ALTER TABLE ").append(getTableName(entityMeta)).append(" ADD ");
-		sql.append(getSqlColumn(entityMeta, attr));
+		StringBuilder sql = new StringBuilder("ALTER TABLE ");
+
+		EntityMetaData tableEntityMeta;
+		String columnSql;
+		boolean bidirectionalOneToMany = attr.getDataType() == ONE_TO_MANY && attr.isMappedBy();
+		if (bidirectionalOneToMany)
+		{
+			tableEntityMeta = attr.getRefEntity();
+			columnSql = getSqlOrderColumn(attr);
+		}
+		else
+		{
+			tableEntityMeta = entityMeta;
+			columnSql = getSqlColumn(entityMeta, attr);
+		}
+		sql.append(getTableName(tableEntityMeta)).append(" ADD ").append(columnSql);
+
 		List<String> sqlTableConstraints = getSqlTableConstraints(entityMeta, attr);
 		if (!sqlTableConstraints.isEmpty())
 		{

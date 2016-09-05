@@ -592,6 +592,31 @@ public class PostgreSqlRepositoryCollectionTest
 		verifyZeroInteractions(jdbcTemplate);
 	}
 
+	@Test
+	public void addAttributeOneToManyMappedBy()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refAttr").getMock();
+
+		when(refAttr.getDataType()).thenReturn(XREF);
+		when(refAttr.isInversedBy()).thenReturn(true);
+		when(refAttr.getInversedBy()).thenReturn(attr);
+
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		when(attr.getMappedBy()).thenReturn("refAttr");
+		when(attr.isMappedBy()).thenReturn(true);
+
+		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+
+		postgreSqlRepoCollection.addAttribute(entityMeta, attr);
+		verify(jdbcTemplate).execute("ALTER TABLE \"refEntity\" ADD \"refAttr_order\" SERIAL");
+	}
+
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void addAttributeAlreadyExists()
 	{
