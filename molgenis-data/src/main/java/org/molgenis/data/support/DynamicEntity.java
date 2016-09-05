@@ -10,11 +10,13 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.StreamSupport.stream;
 
 /**
@@ -231,7 +233,6 @@ public class DynamicEntity implements Entity
 			case CATEGORICAL:
 				// expected type is FileMeta. validation is not possible because molgenis-data does not depend on molgenis-file
 			case FILE:
-			case MANY_TO_ONE:
 			case XREF:
 				if (!(value instanceof Entity))
 				{
@@ -302,5 +303,33 @@ public class DynamicEntity implements Entity
 			default:
 				throw new RuntimeException(format("Unknown data type [%s]", dataType.toString()));
 		}
+	}
+
+	@Override
+	public String toString()
+	{
+		StringBuilder strBuilder = new StringBuilder(entityMeta.getName()).append('{');
+		strBuilder.append(stream(entityMeta.getAtomicAttributes().spliterator(), false).map(attr ->
+		{
+			StringBuilder attrStrBuilder = new StringBuilder(attr.getName()).append('=');
+			if (EntityMetaDataUtils.isSingleReferenceType(attr))
+			{
+				Entity refEntity = getEntity(attr.getName());
+				attrStrBuilder.append(refEntity != null ? refEntity.getIdValue() : null);
+			}
+			else if (EntityMetaDataUtils.isMultipleReferenceType(attr))
+			{
+				attrStrBuilder.append('[')
+						.append(stream(getEntities(attr.getName()).spliterator(), false).map(Entity::getIdValue)
+								.map(Object::toString).collect(joining(","))).append(']');
+			}
+			else
+			{
+				attrStrBuilder.append(get(attr.getName()));
+			}
+			return attrStrBuilder.toString();
+		}).collect(Collectors.joining("&")));
+		strBuilder.append('}');
+		return strBuilder.toString();
 	}
 }

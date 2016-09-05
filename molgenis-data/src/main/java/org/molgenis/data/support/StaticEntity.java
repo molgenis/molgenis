@@ -162,4 +162,10 @@ public abstract class StaticEntity implements Entity
 	{
 		entity.setIdValue(id);
 	}
+
+	@Override
+	public String toString()
+	{
+		return entity.toString();
+	}
 }
