@@ -1030,9 +1030,10 @@ public class RestController
 						AttributeMetaData attribute = entityMetaData.getAttribute(queryRule.getField());
 						if (queryRule.getOperator() == IN || queryRule.getOperator() == RANGE)
 						{
+							//noinspection unchecked
 							queryRule.setValue(restService.toEntityValue(attribute,
-									stream(((Iterable) queryRule.getValue()).spliterator(), false)
-											.map(val -> restService.toEntityValue(attribute, queryRule.getValue()))
+									stream(((Iterable<Object>) queryRule.getValue()).spliterator(), false)
+											.map(val -> restService.toEntityValue(attribute, val))
 											.collect(toList())));
 						}
 						else
