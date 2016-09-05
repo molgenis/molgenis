@@ -152,12 +152,14 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		decoratedRepository = new RepositoryValidationDecorator(dataService, decoratedRepository,
 				entityAttributesValidator, expressionValidator);
 
+		// 2.5 bidirectional update decorated
+		decoratedRepository = new BidirectionalAttributeUpdateDecorator(decoratedRepository, dataService);
+
 		// 2. auto value decorator
 		decoratedRepository = new AutoValueRepositoryDecorator(decoratedRepository, idGenerator);
 
 		// 1. security decorator
 		decoratedRepository = new RepositorySecurityDecorator(decoratedRepository, appSettings);
-
 		return decoratedRepository;
 	}
 
