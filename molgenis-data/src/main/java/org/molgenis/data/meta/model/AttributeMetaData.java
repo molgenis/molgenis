@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
+import org.molgenis.data.Sort;
 import org.molgenis.data.support.StaticEntity;
 
 import java.util.List;
@@ -22,6 +23,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.*;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
+import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
 
 /**
  * Attribute defines the properties of an entity. Synonyms: feature, column, data item.
@@ -244,6 +246,35 @@ public class AttributeMetaData extends StaticEntity
 	public AttributeMetaData setRefEntity(EntityMetaData refEntity)
 	{
 		set(REF_ENTITY, refEntity);
+		return this;
+	}
+
+	public String getMappedBy()
+	{
+		return getString(MAPPED_BY);
+	}
+
+	public AttributeMetaData setMappedBy(String mappedBy)
+	{
+		set(MAPPED_BY, mappedBy);
+		return this;
+	}
+
+	public boolean isMappedBy()
+	{
+		return getMappedBy() != null;
+	}
+
+	public Sort getOrderBy()
+	{
+		String orderByStr = getString(ORDER_BY);
+		return orderByStr != null ? Sort.parse(orderByStr) : null;
+	}
+
+	public AttributeMetaData setOrderBy(Sort sort)
+	{
+		String orderByStr = sort != null ? sort.toSortString() : null;
+		set(ORDER_BY, orderByStr);
 		return this;
 	}
 
@@ -577,5 +608,24 @@ public class AttributeMetaData extends StaticEntity
 	public String toString()
 	{
 		return "AttributeMetaData{" + "name=" + getName() + '}';
+	}
+
+	public AttributeMetaData getInversedBy()
+	{
+		if (isReferenceType(this))
+		{
+			// TODO check entity name and attr name
+			return stream(getRefEntity().getAtomicAttributes().spliterator(), false)
+					.filter(attr -> getName().equals(attr.getMappedBy())).findFirst().orElse(null);
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	public boolean isInversedBy()
+	{
+		return getInversedBy() != null;
 	}
 }

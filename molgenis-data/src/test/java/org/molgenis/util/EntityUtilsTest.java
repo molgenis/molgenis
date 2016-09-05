@@ -84,7 +84,7 @@ public class EntityUtilsTest
 	}
 
 	@Test
-	public void getTypedValueStringAttributeMetaDataEntityManagerManyToOne()
+	public void getTypedValueStringAttributeMetaDataEntityManagerXref()
 	{
 		String valueStr = "0";
 		AttributeMetaData attr = mock(AttributeMetaData.class);
@@ -93,7 +93,7 @@ public class EntityUtilsTest
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
-		when(attr.getDataType()).thenReturn(MANY_TO_ONE);
+		when(attr.getDataType()).thenReturn(XREF);
 		Entity entity = mock(Entity.class);
 		EntityManager entityManager = mock(EntityManager.class);
 		when(entityManager.getReference(refEntityMeta, valueStr)).thenReturn(entity);

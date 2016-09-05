@@ -99,7 +99,7 @@ public class EntityAttributesValidatorTest
 	@DataProvider(name = "checkXrefValidProvider")
 	public static Iterator<Object[]> checkXrefValidProvider()
 	{
-		return newArrayList(new Object[] { XREF }, new Object[] { MANY_TO_ONE }).iterator();
+		return newArrayList(new Object[] { XREF }, new Object[] { CATEGORICAL }).iterator();
 	}
 
 	@Test(dataProvider = "checkXrefValidProvider")

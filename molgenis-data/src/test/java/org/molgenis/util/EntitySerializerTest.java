@@ -14,8 +14,8 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.MANY_TO_ONE;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.ONE_TO_MANY;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.testng.Assert.assertEquals;
 
 public class EntitySerializerTest
@@ -39,9 +39,9 @@ public class EntitySerializerTest
 		when(oneToManyAttr.getName()).thenReturn(oneToManyAttrName);
 		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
 		AttributeMetaData manyToOneAttr = mock(AttributeMetaData.class);
-		String manyToOneAttrName = "manyToOneAttr";
+		String manyToOneAttrName = "xrefAttr";
 		when(manyToOneAttr.getName()).thenReturn(manyToOneAttrName);
-		when(manyToOneAttr.getDataType()).thenReturn(MANY_TO_ONE);
+		when(manyToOneAttr.getDataType()).thenReturn(XREF);
 		when(entityMeta.getAtomicAttributes()).thenReturn(newArrayList(oneToManyAttr, manyToOneAttr));
 
 		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
@@ -63,8 +63,8 @@ public class EntitySerializerTest
 
 		List<Entity> oneToManyEntities = newArrayList(oneToManyEntity0, oneToManyEntity1);
 
-		String manyToOneEntityIdValue = "manyToOneEntity0";
-		String manyToOneEntityLabelValue = "manyToOneEntityLabel0";
+		String manyToOneEntityIdValue = "xrefEntity0";
+		String manyToOneEntityLabelValue = "xrefEntityLabel0";
 		Entity manyToOneEntity = mock(Entity.class);
 		when(manyToOneEntity.getEntityMetaData()).thenReturn(refEntityMeta);
 		when(manyToOneEntity.getIdValue()).thenReturn(manyToOneEntityIdValue);
@@ -86,7 +86,7 @@ public class EntitySerializerTest
 		when(context.serialize(manyToOneEntityIdValue)).thenReturn(new JsonPrimitive(manyToOneEntityIdValue));
 		when(context.serialize(manyToOneEntityLabelValue)).thenReturn(new JsonPrimitive(manyToOneEntityLabelValue));
 
-		String expectedJson = "{\"__entityName\":\"entity\",\"oneToManyAttr\":[{\"__entityName\":\"refEntity\",\"__idValue\":\"oneToManyEntity0\",\"__labelValue\":\"oneToManyEntityLabel0\"},{\"__entityName\":\"refEntity\",\"__idValue\":\"oneToManyEntity1\",\"__labelValue\":\"oneToManyEntityLabel1\"}],\"manyToOneAttr\":{\"__entityName\":\"refEntity\",\"__idValue\":\"manyToOneEntity0\",\"__labelValue\":\"manyToOneEntityLabel0\"}}";
+		String expectedJson = "{\"__entityName\":\"entity\",\"oneToManyAttr\":[{\"__entityName\":\"refEntity\",\"__idValue\":\"oneToManyEntity0\",\"__labelValue\":\"oneToManyEntityLabel0\"},{\"__entityName\":\"refEntity\",\"__idValue\":\"oneToManyEntity1\",\"__labelValue\":\"oneToManyEntityLabel1\"}],\"xrefAttr\":{\"__entityName\":\"refEntity\",\"__idValue\":\"xrefEntity0\",\"__labelValue\":\"xrefEntityLabel0\"}}";
 		assertEquals(entitySerializer.serialize(entity, type, context).toString(), expectedJson);
 	}
 }

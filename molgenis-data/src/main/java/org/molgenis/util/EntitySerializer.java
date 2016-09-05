@@ -45,7 +45,6 @@ public class EntitySerializer implements JsonSerializer<Entity>
 					case CATEGORICAL:
 					case XREF:
 					case FILE:
-					case MANY_TO_ONE:
 						Entity refEntity = entity.getEntity(attributeName);
 						result.add(attributeName, serializeReference(refEntity, context));
 						break;

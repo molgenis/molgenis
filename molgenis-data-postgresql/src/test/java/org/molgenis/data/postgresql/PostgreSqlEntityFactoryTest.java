@@ -62,7 +62,7 @@ public class PostgreSqlEntityFactoryTest
 	}
 
 	@Test
-	public void createRowMapperManyToOne() throws Exception
+	public void createRowMapperXref() throws Exception
 	{
 		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
 		when(refIdAttr.getDataType()).thenReturn(STRING);
@@ -70,16 +70,16 @@ public class PostgreSqlEntityFactoryTest
 		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 
-		String oneToManyAttrName = "oneToManyAttr";
+		String xrefAttr = "xrefAttr";
 		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
-		when(oneToManyAttr.getName()).thenReturn(oneToManyAttrName);
-		when(oneToManyAttr.getDataType()).thenReturn(MANY_TO_ONE);
+		when(oneToManyAttr.getName()).thenReturn(xrefAttr);
+		when(oneToManyAttr.getDataType()).thenReturn(XREF);
 		when(oneToManyAttr.getRefEntity()).thenReturn(refEntityMeta);
 
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
 		when(entityMeta.getAtomicAttributes()).thenReturn(singleton(oneToManyAttr));
 		ResultSet rs = mock(ResultSet.class);
-		when(rs.getString(oneToManyAttrName)).thenReturn("id0");
+		when(rs.getString(xrefAttr)).thenReturn("id0");
 		int rowNum = 0;
 
 		Entity entity = mock(Entity.class);
@@ -87,6 +87,6 @@ public class PostgreSqlEntityFactoryTest
 		Entity refEntity = mock(Entity.class);
 		when(entityManager.getReference(refEntityMeta, "id0")).thenReturn(refEntity);
 		assertEquals(postgreSqlEntityFactory.createRowMapper(entityMeta, null).mapRow(rs, rowNum), entity);
-		verify(entity).set(oneToManyAttrName, refEntity);
+		verify(entity).set(xrefAttr, refEntity);
 	}
 }

@@ -6,13 +6,13 @@ import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.support.OneToManyUtils;
 import org.molgenis.data.support.QueryImpl;
 
 import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.lang.String.format;
@@ -57,26 +57,6 @@ class PostgreSqlQueryGenerator
 	private static String getSqlUniqueKey(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		return "CONSTRAINT " + getUniqueKeyName(entityMeta, attr) + " UNIQUE (" + getColumnName(attr) + ')';
-	}
-
-	/**
-	 * Returns the unique constraint SQL for the sequence column of a many to one attribute.
-	 *
-	 * @param entityMeta entity meta data
-	 * @param attr       many to one attribute
-	 * @return unique constraint SQL
-	 * @throws MolgenisDataException if attribute is not of type many to one
-	 */
-	private static String getSqlUniqueKeySequence(EntityMetaData entityMeta, AttributeMetaData attr)
-	{
-		if (attr.getDataType() != MANY_TO_ONE)
-		{
-			throw new MolgenisDataException(format("Attribute [%s] is of type [%s] instead of [%s]", attr.getName(),
-					attr.getDataType().toString(), MANY_TO_ONE.toString()));
-		}
-
-		return "CONSTRAINT " + getUniqueKeyName(entityMeta, attr) + " UNIQUE (" + getColumnName(attr) + ','
-				+ getSequenceColumnName(attr) + ')';
 	}
 
 	private static String getSqlCheckConstraint(EntityMetaData entityMeta, AttributeMetaData attr)
@@ -159,20 +139,23 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlCreateTable(EntityMetaData entityMeta)
 	{
-		List<AttributeMetaData> persistedNonMrefAttrs = getPersistedAttributesNonMref(entityMeta).collect(toList());
+		List<AttributeMetaData> persistedTableAttrs = getTableAttributes(entityMeta).collect(toList());
 
 		StringBuilder sql = new StringBuilder("CREATE TABLE ").append(getTableName(entityMeta)).append('(');
 
 		// add columns
-		for (Iterator<AttributeMetaData> it = persistedNonMrefAttrs.iterator(); it.hasNext(); )
+		for (Iterator<AttributeMetaData> it = persistedTableAttrs.iterator(); it.hasNext(); )
 		{
 			AttributeMetaData attr = it.next();
 			sql.append(getSqlColumn(entityMeta, attr));
 
-			// add an additional sequence number column for many to one attributes
-			if (attr.getDataType() == MANY_TO_ONE)
+			if (isSingleReferenceType(attr) && attr.isInversedBy())
 			{
-				sql.append(',').append(getSqlColumnSequence(attr));
+				AttributeMetaData mappedToAttr = attr.getInversedBy();
+				if (mappedToAttr.getOrderBy() == null)
+				{
+					sql.append(',').append(getSqlOrderColumn(mappedToAttr));
+				}
 			}
 
 			if (it.hasNext())
@@ -182,9 +165,9 @@ class PostgreSqlQueryGenerator
 		}
 
 		// add table constraints
-		for (AttributeMetaData persistedNonMrefAttr : persistedNonMrefAttrs)
+		for (AttributeMetaData persistedTableAttr : persistedTableAttrs)
 		{
-			List<String> sqlTableConstraints = getSqlTableConstraints(entityMeta, persistedNonMrefAttr);
+			List<String> sqlTableConstraints = getSqlTableConstraints(entityMeta, persistedTableAttr);
 			if (!sqlTableConstraints.isEmpty())
 			{
 				sqlTableConstraints.forEach(sqlTableConstraint -> sql.append(',').append(sqlTableConstraint));
@@ -226,7 +209,20 @@ class PostgreSqlQueryGenerator
 			}
 		}
 
-		sql.append(", UNIQUE (").append(getColumnName(idAttr)).append(',').append(getColumnName(attr)).append(')');
+		AttributeType attrType = attr.getDataType();
+		switch (attrType)
+		{
+			case ONE_TO_MANY:
+				sql.append(", UNIQUE (").append(getColumnName(attr)).append(')');
+				break;
+			case CATEGORICAL_MREF:
+			case MREF:
+				sql.append(", UNIQUE (").append(getColumnName(idAttr)).append(',').append(getColumnName(attr))
+						.append(')');
+				break;
+			default:
+				throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+		}
 		sql.append(", UNIQUE (").append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(',')
 				.append(getColumnName(idAttr)).append(')');
 
@@ -263,7 +259,7 @@ class PostgreSqlQueryGenerator
 	{
 		StringBuilder sql = new StringBuilder("INSERT INTO ").append(getTableName(entityMeta)).append(" (");
 		StringBuilder params = new StringBuilder();
-		getPersistedAttributesNonMref(entityMeta).forEach(attr ->
+		getTableAttributes(entityMeta).forEach(attr ->
 		{
 			sql.append(getColumnName(attr)).append(", ");
 			params.append("?, ");
@@ -328,15 +324,35 @@ class PostgreSqlQueryGenerator
 				{
 					if (includeMrefs)
 					{
-						if (attr.getDataType() == ONE_TO_MANY)
+						if (attr.getDataType() == ONE_TO_MANY && attr.getMappedBy() != null)
 						{
-							String mrefSelect = "(SELECT array_agg(ARRAY[" + getTableName(attr.getRefEntity()) + '.'
-									+ getSequenceColumnName(entityMeta, attr) + "::TEXT," + getColumnName(idAttribute)
-									+ "::TEXT]) FROM " + getTableName(attr.getRefEntity()) + " WHERE this."
-									+ getColumnName(idAttribute) + " = " + getTableName(attr.getRefEntity()) + '.'
-									+ getColumnName(OneToManyUtils.getManyToOneAttrName(entityMeta, attr)) + ") AS "
-									+ getColumnName(attr);
-							select.append(mrefSelect);
+							if (attr.getOrderBy() != null)
+							{
+								String mrefSelect =
+										"(SELECT array_agg(" + getColumnName(idAttribute) + " ORDER BY " + stream(
+												attr.getOrderBy().spliterator(), false).map(order ->
+										{
+											String sqlOrder = order.getAttr();
+											if (order.getDirection() == Sort.Direction.DESC)
+											{
+												sqlOrder += " DESC";
+											}
+											return sqlOrder;
+										}).collect(Collectors.joining(", ")) + ") FROM " + getTableName(
+												attr.getRefEntity()) + " WHERE this." + getColumnName(idAttribute)
+												+ " = " + getTableName(attr.getRefEntity()) + '.' + getColumnName(
+												attr.getMappedBy()) + ") AS " + getColumnName(attr);
+								select.append(mrefSelect);
+							}
+							else
+							{
+								String mrefSelect = "(SELECT array_agg(ARRAY[" + getTableName(attr.getRefEntity()) + '.'
+										+ getSequenceColumnName(attr) + "::TEXT," + getColumnName(idAttribute)
+										+ "::TEXT]) FROM " + getTableName(attr.getRefEntity()) + " WHERE this."
+										+ getColumnName(idAttribute) + " = " + getTableName(attr.getRefEntity()) + '.'
+										+ getColumnName(attr.getMappedBy()) + ") AS " + getColumnName(attr);
+								select.append(mrefSelect);
+							}
 						}
 						else
 						{
@@ -401,13 +417,23 @@ class PostgreSqlQueryGenerator
 
 		// create sql
 		StringBuilder sql = new StringBuilder("UPDATE ").append(getTableName(entityMeta)).append(" SET ");
-		getPersistedAttributesNonMref(entityMeta).forEach(attr -> sql.append(getColumnName(attr)).append(" = ?, "));
+		getTableAttributes(entityMeta).forEach(attr -> sql.append(getColumnName(attr)).append(" = ?, "));
 		if (sql.charAt(sql.length() - 1) == ' ' && sql.charAt(sql.length() - 2) == ',')
 		{
 			sql.setLength(sql.length() - 2);
 		}
 		sql.append(" WHERE ").append(getColumnName(idAttribute)).append("= ?");
 		return sql.toString();
+	}
+
+	static String getSqlUpdateOrder(AttributeMetaData attr)
+	{
+		EntityMetaData entityMeta = attr.getRefEntity();
+		AttributeMetaData idAttribute = entityMeta.getIdAttribute();
+
+		// create sql
+		return "UPDATE " + getTableName(entityMeta) + " SET " + getSequenceColumnName(attr) + " = ? WHERE "
+				+ getColumnName(idAttribute) + "= ?";
 	}
 
 	/**
@@ -447,22 +473,20 @@ class PostgreSqlQueryGenerator
 		return sqlBuilder.toString();
 	}
 
-	/**
-	 * Return the column SQL for MANY_TO_ONE attribute sequence column.
-	 *
-	 * @param attr MANY_TO_ONE attribute
-	 * @return SQL for the sequence column
-	 * @throws MolgenisDataException if attribute is not of type MANY_TO_ONE
-	 */
-	private static String getSqlColumnSequence(AttributeMetaData attr)
+	private static String getSqlOrderColumn(AttributeMetaData attr)
 	{
-		if (attr.getDataType() != MANY_TO_ONE)
-		{
-			throw new MolgenisDataException(format("Attribute [%s] is of type [%s] instead of [%s]", attr.getName(),
-					attr.getDataType().toString(), MANY_TO_ONE.toString()));
-		}
+		return new StringBuilder(getSequenceColumnName(attr)).append(" SERIAL").toString();
+	}
 
-		return getSequenceColumnName(attr) + " integer";
+	/**
+	 * Returns the name of the sequence column of the many to one attribute.
+	 *
+	 * @param attr many to one attribute
+	 * @return sequence column name
+	 */
+	private static String getSequenceColumnName(AttributeMetaData attr)
+	{
+		return getColumnName(attr.getMappedBy() + "_order");
 	}
 
 	private static String getSqlColumn(EntityMetaData entityMeta, AttributeMetaData attr)
@@ -489,7 +513,6 @@ class PostgreSqlQueryGenerator
 				break;
 			case CATEGORICAL:
 			case FILE:
-			case MANY_TO_ONE:
 			case XREF:
 				sqlBuilder.append(getPostgreSqlType(attr.getRefEntity().getIdAttribute()));
 				break;
@@ -541,14 +564,9 @@ class PostgreSqlQueryGenerator
 			{
 				tableConstraints.add(getSqlUniqueKey(entityMeta, attr));
 			}
-
 			if (attr.getDataType() == ENUM)
 			{
 				tableConstraints.add(getSqlCheckConstraint(entityMeta, attr));
-			}
-			else if (attr.getDataType() == MANY_TO_ONE)
-			{
-				tableConstraints.add(getSqlUniqueKeySequence(entityMeta, attr));
 			}
 		}
 
@@ -697,14 +715,7 @@ class PostgreSqlQueryGenerator
 						predicate.append("this");
 					}
 
-					if (attr.getDataType() == ONE_TO_MANY)
-					{
-						predicate.append('.').append(getColumnName(attr.getRefEntity().getIdAttribute().getName()));
-					}
-					else
-					{
-						predicate.append('.').append(getColumnName(r.getField()));
-					}
+					predicate.append('.').append(getColumnName(r.getField()));
 					if (r.getValue() == null)
 					{
 						// expression = null is not valid, use IS NULL
@@ -840,21 +851,10 @@ class PostgreSqlQueryGenerator
 		{
 			// extra join so we can filter on the mrefs
 			AttributeMetaData mrefAttr = mrefAttrsInQuery.get(i);
-			if (mrefAttr.getDataType() == ONE_TO_MANY)
-			{
-				from.append(" LEFT JOIN ").append(getTableName(mrefAttr.getRefEntity())).append(" AS ")
-						.append(getFilterColumnName(mrefAttr, i + 1)).append(" ON (this.")
-						.append(getColumnName(idAttribute)).append(" = ").append(getFilterColumnName(mrefAttr, i + 1))
-						.append('.').append(getColumnName(OneToManyUtils.getManyToOneAttrName(entityMeta, mrefAttr)))
-						.append(')');
-			}
-			else
-			{
-				from.append(" LEFT JOIN ").append(getJunctionTableName(entityMeta, mrefAttr)).append(" AS ")
-						.append(getFilterColumnName(mrefAttr, i + 1)).append(" ON (this.")
-						.append(getColumnName(idAttribute)).append(" = ").append(getFilterColumnName(mrefAttr, i + 1))
-						.append('.').append(getColumnName(idAttribute)).append(')');
-			}
+			from.append(" LEFT JOIN ").append(getJunctionTableName(entityMeta, mrefAttr)).append(" AS ")
+					.append(getFilterColumnName(mrefAttr, i + 1)).append(" ON (this.")
+					.append(getColumnName(idAttribute)).append(" = ").append(getFilterColumnName(mrefAttr, i + 1))
+					.append('.').append(getColumnName(idAttribute)).append(')');
 		}
 
 		return from.toString();
@@ -870,48 +870,13 @@ class PostgreSqlQueryGenerator
 		{
 			// extra join so we can filter on the mrefs
 			AttributeMetaData mrefAttr = mrefAttrsInQuery.get(i);
-			if (mrefAttr.getDataType() == ONE_TO_MANY)
-			{
-				from.append(" LEFT JOIN ").append(getTableName(mrefAttr.getRefEntity())).append(" AS ")
-						.append(getFilterColumnName(mrefAttr, i + 1)).append(" ON (this.")
-						.append(getColumnName(idAttribute)).append(" = ").append(getFilterColumnName(mrefAttr, i + 1))
-						.append('.').append(getColumnName(OneToManyUtils.getManyToOneAttrName(entityMeta, mrefAttr)))
-						.append(')');
-			}
-			else
-			{
-				from.append(" LEFT JOIN ").append(getJunctionTableName(entityMeta, mrefAttr)).append(" AS ")
-						.append(getFilterColumnName(mrefAttr, i + 1)).append(" ON (this.")
-						.append(getColumnName(idAttribute)).append(" = ").append(getFilterColumnName(mrefAttr, i + 1))
-						.append('.').append(getColumnName(idAttribute)).append(')');
-			}
+			from.append(" LEFT JOIN ").append(getJunctionTableName(entityMeta, mrefAttr)).append(" AS ")
+					.append(getFilterColumnName(mrefAttr, i + 1)).append(" ON (this.")
+					.append(getColumnName(idAttribute)).append(" = ").append(getFilterColumnName(mrefAttr, i + 1))
+					.append('.').append(getColumnName(idAttribute)).append(')');
 		}
 
 		return from.toString();
-	}
-
-	/**
-	 * Returns the name of the sequence column of the many to one attribute.
-	 *
-	 * @param attr many to one attribute
-	 * @return sequence column name
-	 */
-	private static String getSequenceColumnName(AttributeMetaData attr)
-	{
-		return getColumnName("_seq_" + attr.getName());
-	}
-
-	/**
-	 * Returns the name of the sequence column of the many to one attribute corresponding to the given one to many
-	 * attribute.
-	 *
-	 * @param entityMeta entity meta data
-	 * @param attr       one to many attribute
-	 * @return sequence column name
-	 */
-	private static String getSequenceColumnName(EntityMetaData entityMeta, AttributeMetaData attr)
-	{
-		return getColumnName("_seq_" + OneToManyUtils.getManyToOneAttrName(entityMeta, attr));
 	}
 
 	private static String getColumnName(AttributeMetaData attr)
@@ -994,7 +959,6 @@ class PostgreSqlQueryGenerator
 				case CATEGORICAL:
 				case XREF:
 				case FILE:
-				case MANY_TO_ONE:
 					attr = attr.getRefEntity().getIdAttribute();
 					continue;
 				case DATE:

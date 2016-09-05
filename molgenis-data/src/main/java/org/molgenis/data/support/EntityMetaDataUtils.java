@@ -31,7 +31,6 @@ public class EntityMetaDataUtils
 			case CATEGORICAL:
 			case FILE:
 			case XREF:
-			case MANY_TO_ONE:
 				return true;
 			case BOOL:
 			case CATEGORICAL_MREF:
@@ -84,7 +83,6 @@ public class EntityMetaDataUtils
 			case HYPERLINK:
 			case INT:
 			case LONG:
-			case MANY_TO_ONE:
 			case SCRIPT:
 			case STRING:
 			case TEXT:
@@ -119,7 +117,6 @@ public class EntityMetaDataUtils
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
 			case FILE:
-			case MANY_TO_ONE:
 			case MREF:
 			case ONE_TO_MANY:
 			case XREF:

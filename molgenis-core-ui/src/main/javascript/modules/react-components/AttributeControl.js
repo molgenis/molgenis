@@ -167,12 +167,11 @@ var AttributeControl = React.createClass({
                 case 'LONG':
                     return this._createNumberControl(controlProps, '1');
                 case 'XREF':
-                case 'MANY_TO_ONE':
                     return this._createEntitySelectBox(controlProps, props.multiple || false, props.placeholder || this.state.i18nStrings.form_xref_control_placeholder, props.value);
                 case 'MREF':
                     return this._createEntitySelectBox(controlProps, props.multiple || true, props.placeholder || this.state.i18nStrings.form_mref_control_placeholder, props.value);
                 case 'ONE_TO_MANY':
-                    var query = {field: this.props.entity.name + '_' + attr.name, operator: 'EQUALS', value: null};
+                    var query = {field: attr.mappedBy, operator: 'EQUALS', value: null};
                     return this._createEntitySelectBox(controlProps, props.multiple || true, props.placeholder || this.state.i18nStrings.form_mref_control_placeholder, props.value, query);
                 case 'SCRIPT':
                     return CodeEditor(_.extend({}, controlProps, {

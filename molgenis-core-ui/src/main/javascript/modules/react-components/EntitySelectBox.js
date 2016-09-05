@@ -117,36 +117,16 @@ var EntitySelectBox = React.createClass({
                     }.bind(this))
                 });
                 rules.push({operator: 'NESTED', nestedRules: nestedRules});
+                if (term.length > 0) {
+                    rules.push({operator: 'AND'});
+                    nestedRule = {operator: 'NESTED', nestedRules: []};
+                    rules.push(nestedRule);
+                }
+
             } else {
                 rules.push(this.props.query);
-            }
-
-            if (term.length > 0) {
-                rules.push({operator: 'AND'});
-                nestedRule = {operator: 'NESTED', nestedRules: []};
-                rules.push(nestedRule);
-                var attrs = this._getAttrs();
-                for (var i = 0; i < attrs.length; ++i) {
-                    var operator = 'LIKE';
-                    switch (this.state.entity.attributes[attrs[i]].fieldType) {
-                        case 'INT':
-                        case 'LONG':
-                        case 'BOOL':
-                        case 'DATE':
-                        case 'DATE_TIME':
-                        case 'DECIMAL':
-                            operator = 'EQUALS';
-                            break;
-                        case 'TEXT':
-                            operator = 'SEARCH';
-                            break;
-                        case 'COMPOUND':
-                            continue;
-                    }
-                    if (i > 0) {
-                        likeRules.push({operator: 'OR'});
-                    }
-                    likeRules.push({field: attrs[i], operator: operator, value: term});
+                if (term.length > 0) {
+                    rules.push({operator: 'AND'});
                 }
             }
         }
@@ -243,7 +223,6 @@ var EntitySelectBox = React.createClass({
                 case 'MREF':
                 case 'XREF':
                 case 'ONE_TO_MANY':
-                case 'MANY_TO_ONE':
                     return true;
                 default:
                     return false;

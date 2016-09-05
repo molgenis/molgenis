@@ -110,7 +110,6 @@ public class RestService
 				break;
 			case CATEGORICAL:
 			case XREF:
-			case MANY_TO_ONE:
 				value = convertRef(attr, paramValue);
 				break;
 			case CATEGORICAL_MREF:

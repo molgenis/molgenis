@@ -165,7 +165,6 @@ public class ElasticsearchEntityFactory
 			case CATEGORICAL:
 			case XREF:
 			case FILE:
-			case MANY_TO_ONE:
 			{
 				Entity xrefEntity = entity.getEntity(attrName);
 				if (xrefEntity != null)

@@ -93,7 +93,6 @@ public class EntityAttributesValidator
 					break;
 				case CATEGORICAL:
 				case FILE:
-				case MANY_TO_ONE:
 				case XREF:
 					violation = checkXref(entity, attr, meta);
 					break;

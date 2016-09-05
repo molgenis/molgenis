@@ -25,6 +25,17 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 	public static final String NAME = "name";
 	public static final String DATA_TYPE = "dataType";
 	public static final String REF_ENTITY = "refEntity";
+	/**
+	 * For attributes with data type ONE_TO_MANY defines the attribute in the referenced entity that owns the relationship.
+	 */
+	public static final String MAPPED_BY = "mappedBy";
+	/**
+	 * For attributes with data type ONE_TO_MANY defines how to sort the entity collection.
+	 * Syntax: attribute_name,[ASC | DESC] [;attribute_name,[ASC | DESC]]*
+	 * - If ASC or DESC is not specified, ASC (ascending order) is assumed.
+	 * - If the ordering element is not specified, ordering by the id attribute of the associated entity is assumed.
+	 */
+	public static final String ORDER_BY = "orderBy";
 	public static final String EXPRESSION = "expression";
 	public static final String NILLABLE = "nillable";
 	public static final String AUTO = "auto";
@@ -63,6 +74,10 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(PARTS).setDataType(MREF).setRefEntity(this).setLabel("Attribute parts");
 		addAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityMetaMeta).setLabel("Referenced entity")
 				.setValidationExpression(getRefEntityValidationExpression());
+		addAttribute(MAPPED_BY).setLabel("Mapped by").setDescription(
+				"Attribute in the referenced entity that owns the relationship of a onetomany attribute");
+		addAttribute(ORDER_BY).setLabel("Order by")
+				.setDescription("Order expression that defines entity collection order of a onetomany attribute");
 		addAttribute(EXPRESSION).setNillable(true).setLabel("Expression")
 				.setDescription("Computed value expression in Magma JavaScript");
 		addAttribute(NILLABLE).setDataType(BOOL).setNillable(false).setLabel("Nillable");

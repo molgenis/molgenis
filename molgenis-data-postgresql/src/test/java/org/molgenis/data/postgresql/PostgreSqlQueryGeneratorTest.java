@@ -81,8 +81,7 @@ public class PostgreSqlQueryGeneratorTest
 				{
 					for (AttributeType attrType : AttributeType.values())
 					{
-						if (attrType != COMPOUND && !(!nillable && attrType == MANY_TO_ONE
-								|| unique && attrType == MANY_TO_ONE))
+						if (attrType != COMPOUND)
 						{
 							attrNameBuilder.setLength(0);
 							attrNameBuilder.append(attrType.toString().toLowerCase());
@@ -106,8 +105,7 @@ public class PostgreSqlQueryGeneratorTest
 							when(attr.isUnique()).thenReturn(unique);
 							when(attr.isNillable()).thenReturn(nillable);
 
-							if (attrType == CATEGORICAL || attrType == CATEGORICAL_MREF || attrType == ONE_TO_MANY
-									|| attrType == MANY_TO_ONE)
+							if (attrType == CATEGORICAL || attrType == CATEGORICAL_MREF || attrType == ONE_TO_MANY)
 							{
 								when(attr.getRefEntity()).thenReturn(refEntityMetaString);
 							}

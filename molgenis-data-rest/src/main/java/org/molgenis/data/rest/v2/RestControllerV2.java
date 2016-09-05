@@ -698,7 +698,6 @@ class RestControllerV2
 					case CATEGORICAL:
 					case XREF:
 					case FILE:
-					case MANY_TO_ONE:
 						Entity refEntity = entity.getEntity(attrName);
 						Map<String, Object> refEntityResponse;
 						if (refEntity != null)

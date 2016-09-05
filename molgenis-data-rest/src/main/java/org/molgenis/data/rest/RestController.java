@@ -1024,7 +1024,9 @@ public class RestController
 					if (queryRule.getValue() != null)
 					{
 						AttributeMetaData attribute = entityMetaData.getAttribute(queryRule.getField());
-						queryRule.setValue(restService.toEntityValue(attribute, queryRule.getValue()));
+
+						// FIXME value can be a list for IN queries
+						//queryRule.setValue(restService.toEntityValue(attribute, queryRule.getValue()));
 					}
 				}
 			}
@@ -1142,7 +1144,6 @@ public class RestController
 						dataService, languageService);
 			case CATEGORICAL:
 			case XREF:
-			case MANY_TO_ONE:
 				Map<String, Object> entityXrefAttributeMap = getEntityAsMap((Entity) entity.get(refAttributeName),
 						attr.getRefEntity(), attributesSet, attributeExpandSet);
 				entityXrefAttributeMap.put("href", attrHref);
@@ -1248,12 +1249,12 @@ public class RestController
 							.format(date) : null);
 				}
 				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF && attrType != CATEGORICAL_MREF
-						&& attrType != ONE_TO_MANY && attrType != MANY_TO_ONE
+						&& attrType != ONE_TO_MANY
 						&& attrType != FILE)
 				{
 					entityMap.put(attrName, entity.get(attr.getName()));
 				}
-				else if ((attrType == XREF || attrType == CATEGORICAL || attrType == FILE || attrType == MANY_TO_ONE)
+				else if ((attrType == XREF || attrType == CATEGORICAL || attrType == FILE)
 						&& attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
 					Entity refEntity = entity.getEntity(attr.getName());

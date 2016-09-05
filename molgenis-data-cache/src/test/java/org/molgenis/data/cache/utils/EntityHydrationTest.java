@@ -32,8 +32,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.MANY_TO_ONE;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.ONE_TO_MANY;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -138,7 +138,7 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void dehydrateManyToOne()
+	public void dehydrateXref()
 	{
 		String attrName = "attr";
 		Entity entity = mock(Entity.class);
@@ -147,10 +147,10 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 		when(manyToOneEntity.getIdValue()).thenReturn(manyToOneEntityIdValue);
 		when(entity.getEntity(attrName)).thenReturn(manyToOneEntity);
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData manyToOneAttr = mock(AttributeMetaData.class);
-		when(manyToOneAttr.getName()).thenReturn(attrName);
-		when(manyToOneAttr.getDataType()).thenReturn(MANY_TO_ONE);
-		when(entityMeta.getAtomicAttributes()).thenReturn(singleton(manyToOneAttr));
+		AttributeMetaData xrefAttr = mock(AttributeMetaData.class);
+		when(xrefAttr.getName()).thenReturn(attrName);
+		when(xrefAttr.getDataType()).thenReturn(XREF);
+		when(entityMeta.getAtomicAttributes()).thenReturn(singleton(xrefAttr));
 		when(entity.getEntityMetaData()).thenReturn(entityMeta);
 		assertEquals(EntityHydration.dehydrate(entity), singletonMap(attrName, manyToOneEntityIdValue));
 	}

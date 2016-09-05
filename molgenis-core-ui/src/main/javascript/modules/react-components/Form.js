@@ -131,7 +131,6 @@ var Form = React.createClass({
                     break;
                 case 'XREF':
                 case 'CATEGORICAL':
-                case 'MANY_TO_ONE':
                     var value = {
                         href: attr.refEntity.hrefCollection + '/' + attr.defaultValue
                     };
@@ -378,7 +377,6 @@ var Form = React.createClass({
         switch (attr.fieldType) {
             case 'CATEGORICAL':
             case 'XREF':
-            case 'MANY_TO_ONE':
                 val = value !== null && value !== undefined ? value[attr.refEntity.idAttribute] : null;
                 break;
             case 'CATEGORICAL_MREF':
@@ -450,7 +448,6 @@ var Form = React.createClass({
                     case 'MREF':
                     case 'XREF':
                     case 'ONE_TO_MANY':
-                    case 'MANY_TO_ONE':
                     case 'DATE':
                     case 'DATE_TIME':
                         this._persistAttributeValue(attr, value);
@@ -633,7 +630,6 @@ var Form = React.createClass({
                 switch (type) {
                     case 'CATEGORICAL':
                     case 'XREF':
-                    case 'MANY_TO_ONE':
                         queryValue = value[attr.refEntity.idAttribute];
                         break;
                     case 'CATEGORICAL_MREF':
@@ -685,7 +681,6 @@ var Form = React.createClass({
                 switch (attr.fieldType) {
                     case 'CATEGORICAL':
                     case 'XREF':
-                    case 'MANY_TO_ONE':
                         form[attr.name] = value[attr.refEntity.idAttribute];
                         break;
                     case 'CATEGORICAL_MREF':

@@ -113,7 +113,6 @@ public class EntityHydration
 		{
 			case CATEGORICAL:
 			case FILE:
-			case MANY_TO_ONE:
 			case XREF:
 				Entity xrefEntity = entity.getEntity(name);
 				value = xrefEntity != null ? xrefEntity.getIdValue() : null;

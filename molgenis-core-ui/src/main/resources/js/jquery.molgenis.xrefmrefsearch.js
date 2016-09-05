@@ -187,7 +187,7 @@
             width: width,
             minimumInputLength: 1,
             multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'CATEGORICAL_MREF'
-            || attributeMetaData.fieldType === 'XREF' || attributeMetaData.fieldType === 'FILE' || attributeMetaData.fieldType === 'ONE_TO_MANY' || attributeMetaData.fieldType === 'MANY_TO_ONE'),
+            || attributeMetaData.fieldType === 'XREF' || attributeMetaData.fieldType === 'FILE' || attributeMetaData.fieldType === 'ONE_TO_MANY'),
             closeOnSelect: false,
             query: function (options) {
                 var query = createQuery(lookupAttributes, options.term.match(/[^ ]+/g), false, true);
@@ -296,7 +296,7 @@
                 $container.addClass("select2-bootstrap-prepend");
                 $container.prepend($dropdown);
             }
-            else if (attributeMetaData.fieldType === 'XREF' || attributeMetaData.fieldType === 'MANY_TO_ONE') {
+            else if (attributeMetaData.fieldType === 'XREF') {
                 $operatorInput.val('OR');
                 $container.append($('<div class="input-group-addon dropdown-toggle-container"><button class="btn btn-default" type="button" disabled>OR</button></div>'));
                 $container.append($operatorInput);

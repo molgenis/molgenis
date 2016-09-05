@@ -726,7 +726,6 @@ var div = React.DOM.div, table = React.DOM.table, thead = React.DOM.thead, tbody
 						CellContent = span(null, value.toString());
 						break;
 					case 'CATEGORICAL':
-                    case 'MANY_TO_ONE':
 					case 'XREF':
 						if(attr.expression) {
 							// computed refs refer to entities that only exist within the context of entity that refers to them 

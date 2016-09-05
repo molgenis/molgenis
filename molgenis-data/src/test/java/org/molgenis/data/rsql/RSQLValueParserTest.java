@@ -29,7 +29,7 @@ public class RSQLValueParserTest
 	public static Iterator<Object[]> parseProvider()
 	{
 		return newArrayList(new Object[] { ONE_TO_MANY, INT, 1 }, new Object[] { ONE_TO_MANY, STRING, "1" },
-				new Object[] { MANY_TO_ONE, INT, 1 }, new Object[] { MANY_TO_ONE, STRING, "1" }).iterator();
+				new Object[] { XREF, INT, 1 }, new Object[] { XREF, STRING, "1" }).iterator();
 	}
 
 	@Test(dataProvider = "parseProvider")

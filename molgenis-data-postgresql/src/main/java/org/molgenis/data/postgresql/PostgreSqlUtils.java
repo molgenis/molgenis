@@ -39,7 +39,6 @@ class PostgreSqlUtils
 				return entity.getBoolean(attrName);
 			case CATEGORICAL:
 			case XREF:
-			case MANY_TO_ONE:
 				Entity xrefEntity = entity.getEntity(attrName);
 				return xrefEntity != null ? getPostgreSqlValue(xrefEntity,
 						xrefEntity.getEntityMetaData().getIdAttribute()) : null;
@@ -111,7 +110,6 @@ class PostgreSqlUtils
 				case MREF: // one query value
 				case XREF:
 				case ONE_TO_MANY:
-				case MANY_TO_ONE:
 					// queries values referencing an entity can either be the entity itself or the entity id
 					if (queryValue != null)
 					{

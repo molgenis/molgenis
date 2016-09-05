@@ -33,13 +33,13 @@ public class DependencyResolverTest
 		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
 		when(oneToManyAttr.getRefEntity()).thenReturn(manyToOneEntityMeta);
 
-		AttributeMetaData manyToOneAttr = mock(AttributeMetaData.class);
-		when(manyToOneAttr.getName()).thenReturn("manyToOneAttr");
-		when(manyToOneAttr.getDataType()).thenReturn(MANY_TO_ONE);
-		when(manyToOneAttr.getRefEntity()).thenReturn(oneToManyEntityMeta);
+		AttributeMetaData xrefAttr = mock(AttributeMetaData.class);
+		when(xrefAttr.getName()).thenReturn("xrefAttr");
+		when(xrefAttr.getDataType()).thenReturn(XREF);
+		when(xrefAttr.getRefEntity()).thenReturn(oneToManyEntityMeta);
 
 		when(oneToManyEntityMeta.getAtomicAttributes()).thenReturn(singleton(oneToManyAttr));
-		when(manyToOneEntityMeta.getAtomicAttributes()).thenReturn(singleton(manyToOneAttr));
+		when(manyToOneEntityMeta.getAtomicAttributes()).thenReturn(singleton(xrefAttr));
 		assertEquals(
 				DependencyResolver.resolve(newLinkedHashSet(newArrayList(manyToOneEntityMeta, oneToManyEntityMeta))),
 				newArrayList(oneToManyEntityMeta, manyToOneEntityMeta));

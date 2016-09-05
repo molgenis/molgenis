@@ -37,7 +37,7 @@ public class DataConverterTest
 	public static Iterator<Object[]> convertObjectAttributeMetaDataProvider()
 	{
 		Object object = mock(Object.class);
-		return newArrayList(new Object[] { object, ONE_TO_MANY, object }, new Object[] { object, MANY_TO_ONE, object })
+		return newArrayList(new Object[] { object, ONE_TO_MANY, object }, new Object[] { object, XREF, object })
 				.iterator();
 	}
 

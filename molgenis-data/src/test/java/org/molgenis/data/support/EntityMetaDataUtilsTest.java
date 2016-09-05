@@ -31,7 +31,7 @@ public class EntityMetaDataUtilsTest
 			when(attr.toString()).thenReturn("attr_" + attrType.toString());
 
 			boolean isRefAttr = attrType == CATEGORICAL || attrType == CATEGORICAL_MREF || attrType == FILE
-					|| attrType == MANY_TO_ONE || attrType == MREF || attrType == ONE_TO_MANY || attrType == XREF;
+					|| attrType == MREF || attrType == ONE_TO_MANY || attrType == XREF;
 			dataList.add(new Object[] { attr, isRefAttr });
 		}
 		return dataList.iterator();
@@ -50,7 +50,7 @@ public class EntityMetaDataUtilsTest
 		for (AttributeType attrType : AttributeType.values())
 		{
 			boolean isRefAttr = attrType == CATEGORICAL || attrType == CATEGORICAL_MREF || attrType == FILE
-					|| attrType == MANY_TO_ONE || attrType == MREF || attrType == ONE_TO_MANY || attrType == XREF;
+					|| attrType == MREF || attrType == ONE_TO_MANY || attrType == XREF;
 			dataList.add(new Object[] { attrType, isRefAttr });
 		}
 		return dataList.iterator();

@@ -83,7 +83,6 @@ export function isRefAttr(attr) {
     switch(attr.fieldType) {
         case 'CATEGORICAL':
         case 'CATEGORICAL_MREF':
-        case 'MANY_TO_ONE':
         case 'MREF':
         case 'ONE_TO_MANY':
         case 'XREF':
@@ -95,7 +94,7 @@ export function isRefAttr(attr) {
 }
 
 export function isXrefAttr(attr) {
-    return attr.fieldType === 'CATEGORICAL' || attr.fieldType === 'XREF' || attr.fieldType === 'FILE' || attr.fieldType == 'MANY_TO_ONE';
+    return attr.fieldType === 'CATEGORICAL' || attr.fieldType === 'XREF' || attr.fieldType === 'FILE';
 }
 
 export function isMrefAttr(attr) {

@@ -20,7 +20,6 @@ import static java.lang.String.format;
 import static java.util.Collections.*;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.MANY_TO_ONE;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.support.EntityMetaDataUtils.*;
 
@@ -282,8 +281,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		{
 			List<AttributeMetaData> requiredValueAttrs = StreamSupport
 					.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-					.filter(attr -> !attr.isNillable() && attr.getExpression() == null
-							&& attr.getDataType() != MANY_TO_ONE).collect(toList());
+					.filter(attr -> !attr.isNillable() && attr.getExpression() == null).collect(toList());
 
 			validationResource.setRequiredValueAttrs(requiredValueAttrs);
 		}
@@ -297,8 +295,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		{
 			// get reference attrs
 			refAttrs = StreamSupport.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-					.filter(attr -> isReferenceType(attr) && attr.getExpression() == null
-							&& attr.getDataType() != MANY_TO_ONE).collect(toList());
+					.filter(attr -> isReferenceType(attr) && attr.getExpression() == null).collect(toList());
 		}
 		else
 		{
@@ -306,9 +303,8 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			// validating other reference constraints
 			String backend = dataService.getMeta().getBackend(getEntityMetaData()).getName();
 			refAttrs = StreamSupport.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-					.filter(attr -> isReferenceType(attr) && attr.getExpression() == null
-							&& attr.getDataType() != MANY_TO_ONE && isDifferentBackend(backend, attr))
-					.collect(toList());
+					.filter(attr -> isReferenceType(attr) && attr.getExpression() == null && isDifferentBackend(backend,
+							attr)).collect(toList());
 		}
 
 		// get referenced entity ids
@@ -356,8 +352,7 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 			// get unique attributes
 			List<AttributeMetaData> uniqueAttrs = StreamSupport
 					.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-					.filter(attr -> attr.isUnique() && attr.getExpression() == null
-							&& attr.getDataType() != MANY_TO_ONE).collect(toList());
+					.filter(attr -> attr.isUnique() && attr.getExpression() == null).collect(toList());
 
 			// get existing values for each attributes
 			if (!uniqueAttrs.isEmpty())
@@ -401,8 +396,8 @@ public class RepositoryValidationDecorator implements Repository<Entity>
 		String idAttrName = getEntityMetaData().getIdAttribute().getName();
 		List<AttributeMetaData> readonlyAttrs = StreamSupport
 				.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-				.filter(attr -> attr.isReadOnly() && attr.getExpression() == null && attr.getDataType() != MANY_TO_ONE
-						&& !attr.getName().equals(idAttrName)).collect(toList());
+				.filter(attr -> attr.isReadOnly() && attr.getExpression() == null && !attr.getName().equals(idAttrName))
+				.collect(toList());
 
 		validationResource.setReadonlyAttrs(readonlyAttrs);
 	}

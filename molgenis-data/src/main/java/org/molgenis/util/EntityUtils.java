@@ -63,7 +63,6 @@ public class EntityUtils
 			case CATEGORICAL:
 			case FILE:
 			case XREF:
-			case MANY_TO_ONE:
 				EntityMetaData xrefEntity = attr.getRefEntity();
 				Object xrefIdValue = getTypedValue(valueStr, xrefEntity.getIdAttribute(), entityManager);
 				return entityManager.getReference(xrefEntity, xrefIdValue);

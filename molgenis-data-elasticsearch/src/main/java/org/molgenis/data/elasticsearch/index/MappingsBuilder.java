@@ -77,7 +77,6 @@ public class MappingsBuilder
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
 			case FILE:
-			case MANY_TO_ONE:
 			case MREF:
 			case ONE_TO_MANY:
 			case XREF:

@@ -328,7 +328,6 @@ function createInput(attr, attrs, val, lbl) {
         case 'XREF':
         case 'FILE':
         case 'ONE_TO_MANY':
-        case 'MANY_TO_ONE':
             return createBasicInput('hidden', attrs, val).addClass('form-control');
         default:
             throw 'Unknown data type: ' + dataType;

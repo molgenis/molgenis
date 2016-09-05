@@ -98,7 +98,6 @@ var Questionnaire = React.createClass({
                 switch (attr.fieldType) {
                     case 'CATEGORICAL':
                     case 'XREF':
-                    case 'MANY_TO_ONE':
                         values[attr.name] = value[attr.refEntity.idAttribute];
                         break;
                     case 'CATEGORICAL_MREF':

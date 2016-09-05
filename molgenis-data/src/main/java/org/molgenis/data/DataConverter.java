@@ -74,7 +74,6 @@ public class DataConverter
 			case MREF:
 			case FILE:
 			case ONE_TO_MANY:
-			case MANY_TO_ONE:
 				return source;
 			case COMPOUND:
 				throw new UnsupportedOperationException();

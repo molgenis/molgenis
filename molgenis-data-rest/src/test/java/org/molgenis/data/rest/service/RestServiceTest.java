@@ -94,7 +94,7 @@ public class RestServiceTest
 	}
 
 	@Test
-	public void toEntityValueManyToOne()
+	public void toEntityValueXref()
 	{
 		Entity entity0 = mock(Entity.class);
 		String refEntityName = "refEntity";
@@ -104,7 +104,7 @@ public class RestServiceTest
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 		AttributeMetaData attr = mock(AttributeMetaData.class);
-		when(attr.getDataType()).thenReturn(MANY_TO_ONE);
+		when(attr.getDataType()).thenReturn(XREF);
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
 		when(entityManager.getReference(refEntityMeta, "0")).thenReturn(entity0);
 		assertEquals(restService.toEntityValue(attr, "0"), entity0);
