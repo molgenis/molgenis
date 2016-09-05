@@ -299,25 +299,20 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	@Override
 	public void deleteById(Object id)
 	{
-		validateDeleteAllowed(findOneById(id));
-		decoratedRepo.deleteById(id);
+		AttributeMetaData attr = findOneById(id);
+		delete(attr);
 	}
 
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		decoratedRepo.deleteAll(ids.filter(id ->
-		{
-			validateDeleteAllowed(findOneById(id));
-			return true;
-		}));
+		delete(findAll(ids));
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		iterator().forEachRemaining(this::validateDeleteAllowed);
-		decoratedRepo.deleteAll();
+		delete(this.query().findAll());
 	}
 
 	@Override
