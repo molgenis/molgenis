@@ -35,12 +35,15 @@ public class VcfImporterService implements ImportService
 
 	private final DataService dataService;
 	private final PermissionSystemService permissionSystemService;
+	private final MetaDataService metaDataService;
 
 	@Autowired
-	public VcfImporterService(DataService dataService, PermissionSystemService permissionSystemService)
+	public VcfImporterService(DataService dataService, PermissionSystemService permissionSystemService,
+			MetaDataService metaDataService)
 
 	{
 		this.dataService = requireNonNull(dataService);
+		this.metaDataService = requireNonNull(metaDataService);
 		this.permissionSystemService = requireNonNull(permissionSystemService);
 	}
 
@@ -144,11 +147,13 @@ public class VcfImporterService implements ImportService
 		}
 
 		EntityMetaData entityMetaData = inRepository.getEntityMetaData();
+		entityMetaData.setBackend(metaDataService.getDefaultBackend().getName());
 
 		AttributeMetaData sampleAttribute = entityMetaData.getAttribute(VcfAttributes.SAMPLES);
 		if (sampleAttribute != null)
 		{
 			EntityMetaData samplesEntityMetaData = sampleAttribute.getRefEntity();
+			samplesEntityMetaData.setBackend(metaDataService.getDefaultBackend().getName());
 			sampleRepository = dataService.getMeta().createRepository(samplesEntityMetaData);
 			permissionSystemService.giveUserEntityPermissions(SecurityContextHolder.getContext(),
 					Collections.singletonList(samplesEntityMetaData.getName()));

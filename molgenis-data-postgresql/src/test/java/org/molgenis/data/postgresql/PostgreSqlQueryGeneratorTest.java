@@ -2,7 +2,9 @@ package org.molgenis.data.postgresql;
 
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
+import org.molgenis.data.Fetch;
 import org.molgenis.data.MolgenisDataException;
+import org.molgenis.data.Sort;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
@@ -318,6 +320,49 @@ public class PostgreSqlQueryGeneratorTest
 				+ "FROM \"org_molgenis_MasterEntity_mref2\" AS \"mref2\" "
 				+ "WHERE this.\"masterId\" = \"mref2\".\"masterId\") AS \"mref2\" "
 				+ "FROM \"org_molgenis_MasterEntity\" AS this");
+	}
+
+	@Test
+	public void getSqlSortOnUnselectedMref() throws Exception
+	{
+		Package package_ = when(mock(Package.class).getName()).thenReturn("org_molgenis").getMock();
+
+		AttributeMetaData ref1IdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("ref1Id").getMock();
+		EntityMetaData ref1Meta = when(mock(EntityMetaData.class).getName()).thenReturn("Ref1").getMock();
+		when(ref1Meta.getIdAttribute()).thenReturn(ref1IdAttr);
+
+		AttributeMetaData ref2IdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("ref2Id").getMock();
+		EntityMetaData ref2Meta = when(mock(EntityMetaData.class).getName()).thenReturn("Ref2").getMock();
+		when(ref2Meta.getIdAttribute()).thenReturn(ref2IdAttr);
+
+		AttributeMetaData masterIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("masterId").getMock();
+		when(masterIdAttr.getDataType()).thenReturn(STRING);
+		AttributeMetaData mref1Attr = when(mock(AttributeMetaData.class).getName()).thenReturn("mref1").getMock();
+		when(mref1Attr.getDataType()).thenReturn(MREF);
+		when(mref1Attr.getRefEntity()).thenReturn(ref1Meta);
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("org_molgenis_MasterEntity")
+				.getMock();
+		when(entityMeta.getPackage()).thenReturn(package_);
+		when(entityMeta.getIdAttribute()).thenReturn(masterIdAttr);
+		when(entityMeta.getAttribute("masterId")).thenReturn(masterIdAttr);
+		when(entityMeta.getAttribute("mref1")).thenReturn(mref1Attr);
+		when(entityMeta.getAtomicAttributes()).thenReturn(asList(masterIdAttr, mref1Attr));
+
+		Fetch fetch = new Fetch().field("masterId");
+		Sort sort = new Sort("mref1");
+
+		QueryImpl<Entity> q = new QueryImpl<>();
+		q.setFetch(fetch);
+		q.setSort(sort);
+
+		List<Object> parameters = Lists.newArrayList();
+
+		String sqlSelect = PostgreSqlQueryGenerator.getSqlSelect(entityMeta, q, parameters, true);
+		assertEquals(sqlSelect,
+				"SELECT this.\"masterId\", (SELECT array_agg(DISTINCT ARRAY[\"mref1\".\"order\"::TEXT,\"mref1\".\"mref1\"::TEXT])"
+						+ " FROM \"org_molgenis_MasterEntity_mref1\" AS \"mref1\" "
+						+ "WHERE this.\"masterId\" = \"mref1\".\"masterId\") AS \"mref1\" "
+						+ "FROM \"org_molgenis_MasterEntity\" AS this ORDER BY \"mref1\" ASC");
 	}
 
 	@DataProvider(name = "getSqlAddColumnProvider")

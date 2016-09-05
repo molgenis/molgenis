@@ -6,6 +6,7 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.rest.service.RestService;
@@ -344,7 +345,8 @@ class RestControllerV2
 		if (!writableCapabilities) throw createNoWriteCapabilitiesOnEntityException(entityName);
 
 		// Copy
-		this.copyRepositoryRunAsSystem(repositoryToCopyFrom, newFullName, request.getNewEntityName());
+		this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(),
+				repositoryToCopyFrom.getEntityMetaData().getPackage(), request.getNewEntityName());
 
 		// Retrieve new repo
 		Repository<Entity> repository = dataService.getRepository(newFullName);
@@ -357,11 +359,10 @@ class RestControllerV2
 		return repository.getName();
 	}
 
-	private void copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String newRepositoryId,
-			String newRepositoryLabel)
+	private void copyRepositoryRunAsSystem(Repository<Entity> repositoryToCopyFrom, String simpleName, Package pack,
+			String label)
 	{
-		RunAsSystemProxy.runAsSystem(
-				() -> dataService.copyRepository(repositoryToCopyFrom, newRepositoryId, newRepositoryLabel));
+		RunAsSystemProxy.runAsSystem(() -> dataService.copyRepository(repositoryToCopyFrom, simpleName, pack, label));
 	}
 
 	/**

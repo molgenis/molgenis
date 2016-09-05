@@ -166,4 +166,16 @@ public class Sort implements Iterable<Sort.Order>
 	{
 		ASC, DESC
 	}
+
+	public boolean hasField(String attributeName)
+	{
+		for (Order order : this.orders)
+		{
+			if (order.getAttr().equals(attributeName))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
 }
