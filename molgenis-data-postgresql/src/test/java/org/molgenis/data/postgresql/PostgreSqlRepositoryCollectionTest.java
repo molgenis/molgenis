@@ -270,6 +270,7 @@ public class PostgreSqlRepositoryCollectionTest
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		when(attr.getDataType()).thenReturn(STRING);
 		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getExpression()).thenReturn(null);
 		when(attr.isNillable()).thenReturn(false);
@@ -606,10 +607,28 @@ public class PostgreSqlRepositoryCollectionTest
 	{
 		String attrName = "attr";
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		when(attr.getDataType()).thenReturn(STRING);
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
 		postgreSqlRepoCollection.deleteAttribute(entityMeta, attr);
 		verify(jdbcTemplate).execute("ALTER TABLE \"entity\" DROP COLUMN \"attr\"");
+	}
+
+	@Test
+	public void deleteAttributeMref()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+
+		String attrName = "attr";
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+
+		when(attr.getDataType()).thenReturn(MREF);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+
+		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		postgreSqlRepoCollection.deleteAttribute(entityMeta, attr);
+		verify(jdbcTemplate).execute("DROP TABLE \"entity_attr\"");
 	}
 
 	@Test
@@ -626,10 +645,12 @@ public class PostgreSqlRepositoryCollectionTest
 		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
 		when(attr.getMappedBy()).thenReturn(refAttrName);
+		when(attr.isMappedBy()).thenReturn(true);
 
 		when(refAttr.getDataType()).thenReturn(XREF);
 		when(refAttr.getRefEntity()).thenReturn(entityMeta);
 		when(refAttr.getInversedBy()).thenReturn(attr);
+		when(refAttr.isInversedBy()).thenReturn(true);
 
 		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
 		postgreSqlRepoCollection.deleteAttribute(entityMeta, attr);
@@ -643,6 +664,7 @@ public class PostgreSqlRepositoryCollectionTest
 		when(abstractEntityMeta.isAbstract()).thenReturn(true);
 		String attrName = "attr";
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		when(attr.getDataType()).thenReturn(STRING);
 		when(abstractEntityMeta.getAttribute(attrName)).thenReturn(attr);
 		when(attr.isNillable()).thenReturn(true);
 		AttributeMetaData updatedAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();

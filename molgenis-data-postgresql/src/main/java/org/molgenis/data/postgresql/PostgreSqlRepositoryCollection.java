@@ -22,8 +22,7 @@ import static com.google.common.collect.Sets.immutableEnumSet;
 import static java.lang.String.format;
 import static java.util.EnumSet.of;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.ENUM;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.RepositoryCollectionCapability.*;
 import static org.molgenis.data.i18n.model.LanguageMetaData.*;
 import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
@@ -469,7 +468,15 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		}
 		else
 		{
-			dropColumn(entityMeta, attr);
+			boolean bidirectionalOneToMany = attr.getDataType() == ONE_TO_MANY && attr.isMappedBy();
+			if (isMultipleReferenceType(attr) && !bidirectionalOneToMany)
+			{
+				dropJunctionTable(entityMeta, attr);
+			}
+			else
+			{
+				dropColumn(entityMeta, attr);
+			}
 		}
 	}
 
