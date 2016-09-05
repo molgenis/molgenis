@@ -111,6 +111,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				asList("bbmri_nl_sample_collections", "bbmri_nl_biobanks", "bbmri_nl_juristic_persons",
 						"bbmri_nl_persons", "bbmri_nl_publications"));
 		upgradeService.addUpgrade(step32AddRowLevelSecurityMetadata);
+
+		upgradeService.addUpgrade(new Step33UpdateAttributeMappingSettings(dataSource));
 	}
 
 	@Override
