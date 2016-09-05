@@ -3,6 +3,7 @@ package org.molgenis.data;
 import org.molgenis.data.QueryRule.Operator;
 import org.testng.annotations.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -47,6 +48,13 @@ public class QueryRuleTest
 	}
 
 	@Test
+	public void valuesForRangeOperator()
+	{
+		QueryRule qr = new QueryRule("field", RANGE, Arrays.asList(10, 10));
+		assertEquals(qr.getValue(), Arrays.asList(10, 10));
+	}
+
+	@Test
 	public void equalsWithNestedRules()
 	{
 		QueryRule q = new QueryRule();
@@ -81,7 +89,7 @@ public class QueryRuleTest
 		when(entity2.getIdValue()).thenReturn("2");
 
 		List<Entity> entities = newArrayList(entity1, entity2, entity1);
-		List<String> ids = newArrayList("2", "1");
+		List<String> ids = newArrayList("1", "2", "1");
 
 		QueryRule q1 = new QueryRule("field", IN, entities);
 		QueryRule q2 = new QueryRule("field", IN, ids);

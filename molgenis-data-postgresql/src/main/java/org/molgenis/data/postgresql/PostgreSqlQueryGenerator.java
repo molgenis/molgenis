@@ -11,7 +11,6 @@ import org.molgenis.data.support.QueryImpl;
 import java.text.MessageFormat;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
@@ -19,6 +18,7 @@ import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.BOOL;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.ENUM;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
@@ -171,11 +171,10 @@ class PostgreSqlQueryGenerator
 	static String getSqlCreateJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		AttributeMetaData idAttr = entityMeta.getIdAttribute();
-		StringBuilder sql = new StringBuilder("CREATE TABLE ")
-				.append(getJunctionTableName(entityMeta, attr)).append(" (")
-				.append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(" INT,").append(getColumnName(idAttr))
-				.append(' ').append(getPostgreSqlType(idAttr)).append(" NOT NULL, ").append(getColumnName(attr))
-				.append(' ').append(getPostgreSqlType(attr.getRefEntity().getIdAttribute()))
+		StringBuilder sql = new StringBuilder("CREATE TABLE ").append(getJunctionTableName(entityMeta, attr))
+				.append(" (").append(getColumnName(JUNCTION_TABLE_ORDER_ATTR_NAME)).append(" INT,")
+				.append(getColumnName(idAttr)).append(' ').append(getPostgreSqlType(idAttr)).append(" NOT NULL, ")
+				.append(getColumnName(attr)).append(' ').append(getPostgreSqlType(attr.getRefEntity().getIdAttribute()))
 				.append(" NOT NULL, FOREIGN KEY (").append(getColumnName(idAttr)).append(") REFERENCES ")
 				.append(getTableName(entityMeta)).append('(').append(getColumnName(idAttr))
 				.append(") ON DELETE CASCADE");
@@ -560,15 +559,15 @@ class PostgreSqlQueryGenerator
 					{
 						throw new MolgenisDataException("Missing value for IN query");
 					}
-					if (!(inValue instanceof Set<?>))
+					if (!(inValue instanceof Iterable<?>))
 					{
-						throw new MolgenisDataException(format("IN value is of type [%s] instead of [Set]",
+						throw new MolgenisDataException(format("IN value is of type [%s] instead of [Iterable]",
 								inValue.getClass().getSimpleName()));
 					}
 
 					StringBuilder in = new StringBuilder();
 					AttributeMetaData inAttr = attr;
-					Stream<Object> postgreSqlIds = ((Set<?>) inValue).stream()
+					Stream<Object> postgreSqlIds = stream(((Iterable<?>) inValue).spliterator(), false)
 							.map(idValue -> PostgreSqlUtils.getPostgreSqlQueryValue(idValue, inAttr));
 					for (Iterator<Object> it = postgreSqlIds.iterator(); it.hasNext(); )
 					{

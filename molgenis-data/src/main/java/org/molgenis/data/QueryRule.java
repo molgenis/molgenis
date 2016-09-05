@@ -2,27 +2,20 @@ package org.molgenis.data;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
-import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
 /**
- * With this class an equation model can be described for a database-field (eg a column). By combining this description
- * into a single class a convenient way for passing rules to the
- * {@link org.molgenis.Database.db.Database#find(Class, QueryRule[]) Database#find(Class, QueryRule[])}.
- * <p>
- * <pre>
- * QueryRule rule = new QueryRule(&quot;Name&quot;, QueryRule.Operator.EQUALS, &quot;richard&quot;);
- * database.find(Person.class, rule);
- * </pre>
+ * With this class an equation model can be described for a database-field (eg a column).
  */
 @XmlRootElement
 public class QueryRule
 {
-	public static final QueryRule AND = new QueryRule(Operator.AND);
-	public static final QueryRule OR = new QueryRule(Operator.OR);
-
 	/**
 	 * The operator being applied to the field and value
 	 */
@@ -347,8 +340,7 @@ public class QueryRule
 	{
 		if (value instanceof Iterable<?>)
 		{
-			this.value = stream(((Iterable<?>) value).spliterator(), false).map(this::toValue)
-					.collect(toCollection(LinkedHashSet::new));
+			this.value = stream(((Iterable<?>) value).spliterator(), false).map(this::toValue).collect(toList());
 		}
 		else
 		{
