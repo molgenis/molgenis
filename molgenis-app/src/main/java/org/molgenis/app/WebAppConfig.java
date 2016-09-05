@@ -29,7 +29,7 @@ import org.molgenis.migrate.version.v1_19.Step28MigrateSorta;
 import org.molgenis.migrate.version.v1_21.Step29MigrateJobExecutionProgressMessage;
 import org.molgenis.migrate.version.v1_21.Step30MigrateJobExecutionUser;
 import org.molgenis.migrate.version.v1_22.Step31UpdateApplicationSettings;
-import org.molgenis.migrate.version.v1_22.Step32UpdateAttributeMappingSettings;
+import org.molgenis.migrate.version.v1_22.Step33UpdateAttributeMappingSettings;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.GsonConfig;
@@ -100,7 +100,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step29MigrateJobExecutionProgressMessage(dataSource));
 		upgradeService.addUpgrade(new Step30MigrateJobExecutionUser(dataSource));
 		upgradeService.addUpgrade(new Step31UpdateApplicationSettings(dataSource, idGenerator));
-		upgradeService.addUpgrade(new Step32UpdateAttributeMappingSettings(dataSource));
+		upgradeService.addUpgrade(new Step33UpdateAttributeMappingSettings(dataSource));
 	}
 
 	@Override

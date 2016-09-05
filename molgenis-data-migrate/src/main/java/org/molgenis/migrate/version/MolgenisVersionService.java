@@ -35,7 +35,7 @@ import java.util.Properties;
 @Service
 public class MolgenisVersionService
 {
-	public static final int CURRENT_VERSION = 32;
+	public static final int CURRENT_VERSION = 33;
 
 	private static final Logger LOG = LoggerFactory.getLogger(MolgenisVersionService.class);
 

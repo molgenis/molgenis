@@ -10,16 +10,16 @@ import javax.sql.DataSource;
 import static java.util.Objects.requireNonNull;
 import static org.slf4j.LoggerFactory.getLogger;
 
-public class Step32UpdateAttributeMappingSettings extends MolgenisUpgrade
+public class Step33UpdateAttributeMappingSettings extends MolgenisUpgrade
 {
-	private final Logger LOG = getLogger(Step32UpdateAttributeMappingSettings.class);
+	private final Logger LOG = getLogger(Step33UpdateAttributeMappingSettings.class);
 
 	private final JdbcTemplate jdbcTemplate;
 
 	@Autowired
-	public Step32UpdateAttributeMappingSettings(DataSource dataSource)
+	public Step33UpdateAttributeMappingSettings(DataSource dataSource)
 	{
-		super(31, 32);
+		super(31, 33);
 		this.jdbcTemplate = new JdbcTemplate(requireNonNull(dataSource));
 	}
 
