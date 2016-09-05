@@ -62,8 +62,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.data.QueryRule.Operator.IN;
+import static org.molgenis.data.QueryRule.Operator.RANGE;
 import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 import static org.springframework.http.HttpStatus.*;
@@ -1024,7 +1028,17 @@ public class RestController
 					if (queryRule.getValue() != null)
 					{
 						AttributeMetaData attribute = entityMetaData.getAttribute(queryRule.getField());
-						queryRule.setValue(restService.toEntityValue(attribute, queryRule.getValue()));
+						if (queryRule.getOperator() == IN || queryRule.getOperator() == RANGE)
+						{
+							queryRule.setValue(restService.toEntityValue(attribute,
+									stream(((Iterable) queryRule.getValue()).spliterator(), false)
+											.map(val -> restService.toEntityValue(attribute, queryRule.getValue()))
+											.collect(toList())));
+						}
+						else
+						{
+							queryRule.setValue(restService.toEntityValue(attribute, queryRule.getValue()));
+						}
 					}
 				}
 			}
@@ -1247,8 +1261,7 @@ public class RestController
 							.format(date) : null);
 				}
 				else if (attrType != XREF && attrType != CATEGORICAL && attrType != MREF && attrType != CATEGORICAL_MREF
-						&& attrType != ONE_TO_MANY
-						&& attrType != FILE)
+						&& attrType != ONE_TO_MANY && attrType != FILE)
 				{
 					entityMap.put(attrName, entity.get(attr.getName()));
 				}
@@ -1266,8 +1279,7 @@ public class RestController
 					}
 				}
 				else if ((attrType == MREF || attrType == CATEGORICAL_MREF || attrType == ONE_TO_MANY)
-						&& attributeExpandsSet != null
-						&& attributeExpandsSet.containsKey(attrName.toLowerCase()))
+						&& attributeExpandsSet != null && attributeExpandsSet.containsKey(attrName.toLowerCase()))
 				{
 					EntityMetaData refEntityMetaData = dataService.getEntityMetaData(attr.getRefEntity().getName());
 					Iterable<Entity> mrefEntities = entity.getEntities(attr.getName());
