@@ -3,7 +3,6 @@ package org.molgenis.migrate.version;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.support.DatabaseMetaDataCallback;
 import org.springframework.jdbc.support.JdbcUtils;
 import org.springframework.jdbc.support.MetaDataAccessException;
 import org.springframework.stereotype.Service;
@@ -13,23 +12,21 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
-import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.Properties;
 
 /**
  * Get the Molgenis version from molgenis-server.properties or, in absence there, from a {@link DataSource}.
- * 
+ * <p>
  * The current Molgenis version is found in the server properties under key <code>molgenis.version</code>.
- * 
+ * <p>
  * <p>
  * If this key is not present, we're either looking at a molgenis 1.4.3 or a new install should be run. We'll check the
  * datasource for the presence of a mysql entities table. If no <code>MolgenisUser</code> table exists in the
  * datasource's database, a new install is assumed, so the version will be set to the current version and no upgrade
  * will take place.
  * </p>
- * 
+ * <p>
  * <p>
  * This is done so we can upgrade the database. If we store it in the database we must access the database to get it but
  * we must upgrade before we can access the database...
@@ -38,7 +35,7 @@ import java.util.Properties;
 @Service
 public class MolgenisVersionService
 {
-	public static final int CURRENT_VERSION = 31;
+	public static final int CURRENT_VERSION = 32;
 
 	private static final Logger LOG = LoggerFactory.getLogger(MolgenisVersionService.class);
 
@@ -73,18 +70,12 @@ public class MolgenisVersionService
 		}
 		try
 		{
-			return (boolean) JdbcUtils.extractDatabaseMetaData(dataSource, new DatabaseMetaDataCallback()
+			return (boolean) JdbcUtils.extractDatabaseMetaData(dataSource, dbmd ->
 			{
-
-				@Override
-				public Object processMetaData(DatabaseMetaData dbmd) throws SQLException, MetaDataAccessException
-				{
-					ResultSet tables = dbmd.getTables(null, null, "MolgenisUser", new String[]
-					{ "TABLE" });
-					boolean resultRow = tables.first();
-					LOG.info("Table MolgenisUser {}found.", resultRow ? "" : "not ");
-					return resultRow;
-				}
+				ResultSet tables = dbmd.getTables(null, null, "MolgenisUser", new String[] { "TABLE" });
+				boolean resultRow = tables.first();
+				LOG.info("Table MolgenisUser {}found.", resultRow ? "" : "not ");
+				return resultRow;
 			});
 		}
 		catch (MetaDataAccessException e)
