@@ -25,24 +25,25 @@ public class DependencyResolverTest
 	public void resolveOneToMany()
 	{
 		EntityMetaData oneToManyEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		EntityMetaData manyToOneEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity")
+		EntityMetaData xrefEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity")
 				.getMock();
 
 		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
 		when(oneToManyAttr.getName()).thenReturn("oneToManyAttr");
 		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
-		when(oneToManyAttr.getRefEntity()).thenReturn(manyToOneEntityMeta);
+		when(oneToManyAttr.getRefEntity()).thenReturn(xrefEntityMeta);
+		when(oneToManyAttr.getMappedBy()).thenReturn("xrefAttr");
 
 		AttributeMetaData xrefAttr = mock(AttributeMetaData.class);
 		when(xrefAttr.getName()).thenReturn("xrefAttr");
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 		when(xrefAttr.getRefEntity()).thenReturn(oneToManyEntityMeta);
+		when(xrefAttr.getInversedBy()).thenReturn(oneToManyAttr);
 
 		when(oneToManyEntityMeta.getAtomicAttributes()).thenReturn(singleton(oneToManyAttr));
-		when(manyToOneEntityMeta.getAtomicAttributes()).thenReturn(singleton(xrefAttr));
-		assertEquals(
-				DependencyResolver.resolve(newLinkedHashSet(newArrayList(manyToOneEntityMeta, oneToManyEntityMeta))),
-				newArrayList(oneToManyEntityMeta, manyToOneEntityMeta));
+		when(xrefEntityMeta.getAtomicAttributes()).thenReturn(singleton(xrefAttr));
+		assertEquals(DependencyResolver.resolve(newLinkedHashSet(newArrayList(xrefEntityMeta, oneToManyEntityMeta))),
+				newArrayList(oneToManyEntityMeta, xrefEntityMeta));
 	}
 
 	@Test
@@ -53,6 +54,11 @@ public class DependencyResolverTest
 		EntityMetaData e3 = when(mock(EntityMetaData.class).getName()).thenReturn("e3").getMock();
 		EntityMetaData e4 = when(mock(EntityMetaData.class).getName()).thenReturn("e4").getMock();
 		EntityMetaData e5 = when(mock(EntityMetaData.class).getName()).thenReturn("e5").getMock();
+		when(e1.toString()).thenReturn("e1");
+		when(e2.toString()).thenReturn("e2");
+		when(e3.toString()).thenReturn("e3");
+		when(e4.toString()).thenReturn("e4");
+		when(e5.toString()).thenReturn("e5");
 
 		AttributeMetaData e1RefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("ref").getMock();
 		when(e1RefAttr.getDataType()).thenReturn(XREF);

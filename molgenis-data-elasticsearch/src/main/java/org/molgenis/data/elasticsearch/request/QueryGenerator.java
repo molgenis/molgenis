@@ -227,7 +227,8 @@ public class QueryGenerator implements QueryPartGenerator
 							break;
 						}
 						case COMPOUND:
-							throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
+							throw new MolgenisQueryException(
+									format("Illegal attribute type [%s]", attrType.toString()));
 						default:
 							throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 					}

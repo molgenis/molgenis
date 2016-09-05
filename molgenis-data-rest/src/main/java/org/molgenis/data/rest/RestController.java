@@ -1024,9 +1024,7 @@ public class RestController
 					if (queryRule.getValue() != null)
 					{
 						AttributeMetaData attribute = entityMetaData.getAttribute(queryRule.getField());
-
-						// FIXME value can be a list for IN queries
-						//queryRule.setValue(restService.toEntityValue(attribute, queryRule.getValue()));
+						queryRule.setValue(restService.toEntityValue(attribute, queryRule.getValue()));
 					}
 				}
 			}
