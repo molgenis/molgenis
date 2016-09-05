@@ -76,7 +76,7 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 				.setValidationExpression(getRefEntityValidationExpression());
 		addAttribute(MAPPED_BY).setLabel("Mapped by").setDescription(
 				"Attribute in the referenced entity that owns the relationship of a onetomany attribute")
-				.setValidationExpression(getMappedByValidationExpression());
+				.setValidationExpression(getMappedByValidationExpression()).setReadOnly(true);
 		addAttribute(ORDER_BY).setLabel("Order by")
 				.setDescription("Order expression that defines entity collection order of a onetomany attribute")
 				.setValidationExpression(getOrderByValidationExpression());

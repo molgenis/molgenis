@@ -312,6 +312,32 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		{
 			updateEnumOptions(entityMeta, attr, updatedAttr);
 		}
+
+		// orderBy change
+		if (!Objects.equals(attr.getOrderBy(), updatedAttr.getOrderBy()))
+		{
+			updateOrderBy(attr, updatedAttr);
+		}
+	}
+
+	/**
+	 * Creates/removes order column associated with a one-to-many attribute.
+	 *
+	 * @param attr        one-to-many attribute
+	 * @param updatedAttr updated one-to-many attribute
+	 */
+	private void updateOrderBy(AttributeMetaData attr, AttributeMetaData updatedAttr)
+	{
+		if (attr.getOrderBy() == null && updatedAttr.getOrderBy() != null)
+		{
+			// remove order column
+			dropColumn(attr.getRefEntity(), attr);
+		}
+		else if (attr.getOrderBy() != null && updatedAttr.getOrderBy() == null)
+		{
+			// create order column
+			createColumn(attr.getRefEntity(), attr);
+		}
 	}
 
 	/**
