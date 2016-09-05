@@ -29,6 +29,7 @@ public class AttributeMetaDataResponse
 	private final List<String> enumOptions;
 	private final Long maxLength;
 	private final Object refEntity;
+	private final String mappedBy;
 	private final Boolean auto;
 	private final Boolean nillable;
 	private final Boolean readOnly;
@@ -127,6 +128,8 @@ public class AttributeMetaDataResponse
 			}
 		}
 		else this.refEntity = null;
+
+		this.mappedBy = attr.getMappedBy();
 
 		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
 		{
