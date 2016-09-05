@@ -75,9 +75,11 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityMetaMeta).setLabel("Referenced entity")
 				.setValidationExpression(getRefEntityValidationExpression());
 		addAttribute(MAPPED_BY).setLabel("Mapped by").setDescription(
-				"Attribute in the referenced entity that owns the relationship of a onetomany attribute");
+				"Attribute in the referenced entity that owns the relationship of a onetomany attribute")
+				.setValidationExpression(getMappedByValidationExpression());
 		addAttribute(ORDER_BY).setLabel("Order by")
-				.setDescription("Order expression that defines entity collection order of a onetomany attribute");
+				.setDescription("Order expression that defines entity collection order of a onetomany attribute")
+				.setValidationExpression(getOrderByValidationExpression());
 		addAttribute(EXPRESSION).setNillable(true).setLabel("Expression")
 				.setDescription("Computed value expression in Magma JavaScript");
 		addAttribute(NILLABLE).setDataType(BOOL).setNillable(false).setLabel("Nillable");
@@ -110,6 +112,19 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 	public void setEntityMetaDataMetaData(EntityMetaDataMetaData entityMetaMeta)
 	{
 		this.entityMetaMeta = requireNonNull(entityMetaMeta);
+	}
+
+	private static String getMappedByValidationExpression()
+	{
+		return "$('" + MAPPED_BY + "').isNull().and($('" + DATA_TYPE + "').eq('" + getValueString(ONE_TO_MANY)
+				+ "').not()).or(" + "$('" + MAPPED_BY + "').isNull().not().and($('" + DATA_TYPE + "').eq('"
+				+ getValueString(ONE_TO_MANY) + "'))).value()";
+	}
+
+	private static String getOrderByValidationExpression()
+	{
+		return "$('" + ORDER_BY + "').isNull().or(" + "$('" + ORDER_BY + "').isNull().not().and($('" + DATA_TYPE
+				+ "').eq('" + getValueString(ONE_TO_MANY) + "'))).value()";
 	}
 
 	private static String getEnumOptionsValidationExpression()
