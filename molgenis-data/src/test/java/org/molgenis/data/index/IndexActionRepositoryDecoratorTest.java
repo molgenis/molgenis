@@ -14,8 +14,6 @@ import static org.mockito.Mockito.*;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
 import static org.molgenis.data.RepositoryCapability.INDEXABLE;
 import static org.molgenis.data.RepositoryCapability.MANAGABLE;
-import static org.molgenis.data.index.meta.IndexActionMetaData.CudType.*;
-import static org.molgenis.data.index.meta.IndexActionMetaData.DataType.DATA;
 import static org.testng.Assert.assertEquals;
 
 public class IndexActionRepositoryDecoratorTest
@@ -45,7 +43,7 @@ public class IndexActionRepositoryDecoratorTest
 		when(entity0.getIdValue()).thenReturn("1");
 		indexActionRepositoryDecorator.update(entity0);
 		verify(decoratedRepo, times(1)).update(entity0);
-		verify(indexActionRegisterService).register("entity", UPDATE, DATA, "1");
+		verify(indexActionRegisterService).register("entity", "1");
 	}
 
 	@Test
@@ -60,7 +58,7 @@ public class IndexActionRepositoryDecoratorTest
 		Stream<Entity> entities = Stream.empty();
 		indexActionRepositoryDecorator.update(entities);
 		verify(decoratedRepo, times(1)).update(entities);
-		verify(indexActionRegisterService).register("entity", UPDATE, DATA, null);
+		verify(indexActionRegisterService).register("entity", null);
 	}
 
 	@Test
@@ -70,7 +68,7 @@ public class IndexActionRepositoryDecoratorTest
 		when(entity0.getIdValue()).thenReturn("1");
 		indexActionRepositoryDecorator.delete(entity0);
 		verify(decoratedRepo, times(1)).delete(entity0);
-		verify(indexActionRegisterService).register("entity", DELETE, DATA, "1");
+		verify(indexActionRegisterService).register("entity", "1");
 	}
 
 	@Test
@@ -79,7 +77,7 @@ public class IndexActionRepositoryDecoratorTest
 		Stream<Entity> entities = Stream.empty();
 		indexActionRepositoryDecorator.delete(entities);
 		verify(decoratedRepo, times(1)).delete(entities);
-		verify(indexActionRegisterService, times(1)).register("entity", DELETE, DATA, null);
+		verify(indexActionRegisterService, times(1)).register("entity", null);
 	}
 
 	@Test
@@ -89,7 +87,7 @@ public class IndexActionRepositoryDecoratorTest
 		when(entity0.getIdValue()).thenReturn("1");
 		indexActionRepositoryDecorator.deleteById("1");
 		verify(decoratedRepo, times(1)).deleteById("1");
-		verify(indexActionRegisterService).register("entity", DELETE, DATA, "1");
+		verify(indexActionRegisterService).register("entity", "1");
 	}
 
 	@Test
@@ -98,7 +96,7 @@ public class IndexActionRepositoryDecoratorTest
 		Stream<Object> ids = Stream.empty();
 		indexActionRepositoryDecorator.deleteAll(ids);
 		verify(decoratedRepo, times(1)).deleteAll(ids);
-		verify(indexActionRegisterService, times(1)).register("entity", DELETE, DATA, null);
+		verify(indexActionRegisterService, times(1)).register("entity", null);
 	}
 
 	@Test
@@ -106,7 +104,7 @@ public class IndexActionRepositoryDecoratorTest
 	{
 		indexActionRepositoryDecorator.deleteAll();
 		verify(decoratedRepo, times(1)).deleteAll();
-		verify(indexActionRegisterService, times(1)).register("entity", DELETE, DATA, null);
+		verify(indexActionRegisterService, times(1)).register("entity", null);
 	}
 
 	@Test
@@ -116,7 +114,7 @@ public class IndexActionRepositoryDecoratorTest
 		when(entity0.getIdValue()).thenReturn("1");
 		indexActionRepositoryDecorator.add(entity0);
 		verify(decoratedRepo, times(1)).add(entity0);
-		verify(indexActionRegisterService).register("entity", CREATE, DATA, "1");
+		verify(indexActionRegisterService).register("entity", "1");
 	}
 
 	@Test
@@ -126,6 +124,6 @@ public class IndexActionRepositoryDecoratorTest
 		when(decoratedRepo.add(entities)).thenReturn(123);
 		assertEquals(indexActionRepositoryDecorator.add(entities), Integer.valueOf(123));
 		verify(decoratedRepo, times(1)).add(entities);
-		verify(indexActionRegisterService).register("entity", CREATE, DATA, null);
+		verify(indexActionRegisterService).register("entity", null);
 	}
 }

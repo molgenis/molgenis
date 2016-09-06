@@ -79,30 +79,6 @@ public class IndexAction extends StaticEntity
 		return this;
 	}
 
-	public IndexActionMetaData.CudType getCudType()
-	{
-		String cudTypeStr = getString(CUD_TYPE);
-		return cudTypeStr != null ? CudType.valueOf(cudTypeStr) : null;
-	}
-
-	public IndexAction setCudType(IndexActionMetaData.CudType cudType)
-	{
-		set(CUD_TYPE, cudType.toString());
-		return this;
-	}
-
-	public IndexActionMetaData.DataType getDataType()
-	{
-		String dataTypeStr = getString(DATA_TYPE);
-		return dataTypeStr != null ? DataType.valueOf(dataTypeStr) : null;
-	}
-
-	public IndexAction setDataType(IndexActionMetaData.DataType dataType)
-	{
-		set(DATA_TYPE, dataType.toString());
-		return this;
-	}
-
 	public IndexActionMetaData.IndexStatus getIndexStatus()
 	{
 		String indexStatusStr = getString(INDEX_STATUS);
