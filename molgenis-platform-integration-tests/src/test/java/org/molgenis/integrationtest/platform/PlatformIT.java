@@ -740,7 +740,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		List<Entity> entities = createDynamic(10000).collect(toList());
 		dataService.add(entityMetaDataDynamic.getName(), entities.stream());
-		waitForIndexToBeStable(entityMetaDataDynamic.getName(), reindexService, LOG);
+		waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
 
 		Query q1 = new QueryImpl<>().eq(EntityTestHarness.ATTR_STRING, "string1");
 		q1.pageSize(1000);
