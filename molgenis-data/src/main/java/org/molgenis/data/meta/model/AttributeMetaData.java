@@ -77,6 +77,8 @@ public class AttributeMetaData extends StaticEntity
 		attrMetaCopy.setName(attrMeta.getName());
 		attrMetaCopy.setDataType(attrMeta.getDataType());
 		attrMetaCopy.setRefEntity(attrMeta.getRefEntity()); // do not deep-copy
+		attrMetaCopy.setMappedBy(attrMeta.getMappedBy()); // do not deep-copy
+		attrMetaCopy.setOrderBy(attrMeta.getOrderBy());
 		attrMetaCopy.setExpression(attrMeta.getExpression());
 		attrMetaCopy.setNillable(attrMeta.isNillable());
 		attrMetaCopy.setAuto(attrMeta.isAuto());
@@ -249,14 +251,14 @@ public class AttributeMetaData extends StaticEntity
 		return this;
 	}
 
-	public String getMappedBy()
+	public AttributeMetaData getMappedBy()
 	{
-		return getString(MAPPED_BY);
+		return getEntity(MAPPED_BY, AttributeMetaData.class);
 	}
 
-	public AttributeMetaData setMappedBy(String mappedBy)
+	public AttributeMetaData setMappedBy(AttributeMetaData mappedByAttr)
 	{
-		set(MAPPED_BY, mappedBy);
+		set(MAPPED_BY, mappedByAttr);
 		return this;
 	}
 
@@ -616,7 +618,8 @@ public class AttributeMetaData extends StaticEntity
 		{
 			// TODO check entity name and attr name
 			return stream(getRefEntity().getAtomicAttributes().spliterator(), false)
-					.filter(attr -> getName().equals(attr.getMappedBy())).findFirst().orElse(null);
+					.filter(AttributeMetaData::isMappedBy)
+					.filter(attr -> getName().equals(attr.getMappedBy().getName())).findFirst().orElse(null);
 		}
 		else
 		{

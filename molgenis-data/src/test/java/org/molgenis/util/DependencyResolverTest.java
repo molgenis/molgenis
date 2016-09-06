@@ -32,13 +32,15 @@ public class DependencyResolverTest
 		when(oneToManyAttr.getName()).thenReturn("oneToManyAttr");
 		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
 		when(oneToManyAttr.getRefEntity()).thenReturn(xrefEntityMeta);
-		when(oneToManyAttr.getMappedBy()).thenReturn("xrefAttr");
+
 
 		AttributeMetaData xrefAttr = mock(AttributeMetaData.class);
 		when(xrefAttr.getName()).thenReturn("xrefAttr");
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 		when(xrefAttr.getRefEntity()).thenReturn(oneToManyEntityMeta);
 		when(xrefAttr.getInversedBy()).thenReturn(oneToManyAttr);
+
+		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
 		when(oneToManyEntityMeta.getAtomicAttributes()).thenReturn(singleton(oneToManyAttr));
 		when(xrefEntityMeta.getAtomicAttributes()).thenReturn(singleton(xrefAttr));

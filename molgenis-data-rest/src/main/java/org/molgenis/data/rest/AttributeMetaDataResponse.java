@@ -129,7 +129,8 @@ public class AttributeMetaDataResponse
 		}
 		else this.refEntity = null;
 
-		this.mappedBy = attr.getMappedBy();
+		AttributeMetaData mappedByAttr = attr.getMappedBy();
+		this.mappedBy = mappedByAttr != null ? mappedByAttr.getName() : null;
 
 		if (attributesSet == null || attributesSet.contains("attributes".toLowerCase()))
 		{

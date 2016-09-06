@@ -79,7 +79,8 @@ class AttributeMetaDataResponseV2
 		{
 			this.refEntity = null;
 		}
-		this.mappedBy = attr.getMappedBy();
+		AttributeMetaData mappedByAttr = attr.getMappedBy();
+		this.mappedBy = mappedByAttr != null ? mappedByAttr.getName() : null;
 
 		Iterable<AttributeMetaData> attrParts = attr.getAttributeParts();
 		if (attrParts != null)

@@ -258,7 +258,7 @@ public class BidirectionalAttributeUpdateDecorator extends AbstractRepositoryDec
 			Iterable<Entity> refEntities = entity.getEntities(attr.getName());
 			if (!Iterables.isEmpty(refEntities))
 			{
-				refEntities.forEach(refEntity -> refEntity.set(attr.getMappedBy(), entity));
+				refEntities.forEach(refEntity -> refEntity.set(attr.getMappedBy().getName(), entity));
 
 				String refEntityName = attr.getRefEntity().getName();
 				List<Entity> updatedRefEntities = updatedRefEntitiesMap.get(refEntityName);
@@ -345,7 +345,7 @@ public class BidirectionalAttributeUpdateDecorator extends AbstractRepositoryDec
 				{
 					addedEntityIds.stream().map(entityIdMap::get).map(refEntity ->
 					{
-						refEntity.set(attr.getMappedBy(), entity); // should we make a copy?
+						refEntity.set(attr.getMappedBy().getName(), entity);
 						return refEntity;
 					}).forEach(updatedRefEntities::add);
 				}
@@ -354,7 +354,7 @@ public class BidirectionalAttributeUpdateDecorator extends AbstractRepositoryDec
 				{
 					removedEntityIds.stream().map(existingEntityIdMap::get).map(refEntity ->
 					{
-						refEntity.set(attr.getMappedBy(), null); // should we make a copy?
+						refEntity.set(attr.getMappedBy().getName(), null);
 						return refEntity;
 					}).forEach(updatedRefEntities::add);
 				}

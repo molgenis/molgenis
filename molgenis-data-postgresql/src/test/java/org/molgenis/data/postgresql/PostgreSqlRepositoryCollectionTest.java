@@ -61,15 +61,16 @@ public class PostgreSqlRepositoryCollectionTest
 		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
 		String refAttrName = "refAttr";
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(refAttrName).getMock();
 		when(attr.isMappedBy()).thenReturn(true);
-		when(attr.getMappedBy()).thenReturn(refAttrName);
+		when(attr.getMappedBy()).thenReturn(refAttr);
 		when(attr.getOrderBy()).thenReturn(null);
 		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
 		AttributeMetaData updatedAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.getDataType()).thenReturn(ONE_TO_MANY);
 		when(attr.isMappedBy()).thenReturn(true);
-		when(attr.getMappedBy()).thenReturn(refAttrName);
+		when(attr.getMappedBy()).thenReturn(refAttr);
 		when(updatedAttr.getOrderBy()).thenReturn(new Sort("orderByAttr"));
 		when(updatedAttr.getRefEntity()).thenReturn(refEntityMeta);
 		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
@@ -88,11 +89,12 @@ public class PostgreSqlRepositoryCollectionTest
 		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 		String attrName = "attr";
-		String refAttrName = "refAttr";
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		String refAttrName = "refAttr";
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(refAttrName).getMock();
 		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
 		when(attr.isMappedBy()).thenReturn(true);
-		when(attr.getMappedBy()).thenReturn(refAttrName);
+		when(attr.getMappedBy()).thenReturn(refAttr);
 		when(attr.getOrderBy()).thenReturn(new Sort("orderByAttr"));
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
 		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
@@ -659,7 +661,7 @@ public class PostgreSqlRepositoryCollectionTest
 
 		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
-		when(attr.getMappedBy()).thenReturn("refAttr");
+		when(attr.getMappedBy()).thenReturn(refAttr);
 		when(attr.isMappedBy()).thenReturn(true);
 
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
@@ -720,7 +722,7 @@ public class PostgreSqlRepositoryCollectionTest
 
 		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
-		when(attr.getMappedBy()).thenReturn(refAttrName);
+		when(attr.getMappedBy()).thenReturn(refAttr);
 		when(attr.isMappedBy()).thenReturn(true);
 
 		when(refAttr.getDataType()).thenReturn(XREF);

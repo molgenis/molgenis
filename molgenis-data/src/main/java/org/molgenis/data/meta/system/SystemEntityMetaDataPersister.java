@@ -2,6 +2,7 @@ package org.molgenis.data.meta.system;
 
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
+import org.molgenis.data.IdGenerator;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
@@ -36,16 +37,19 @@ public class SystemEntityMetaDataPersister
 {
 	private final DataService dataService;
 	private final SystemEntityMetaDataRegistry systemEntityMetaRegistry;
+	private final IdGenerator idGenerator;
 	private TagMetaData tagMeta;
 	private AttributeMetaDataMetaData attrMetaMeta;
 	private PackageMetaData packageMeta;
 	private EntityMetaDataMetaData entityMetaMeta;
 
 	@Autowired
-	public SystemEntityMetaDataPersister(DataService dataService, SystemEntityMetaDataRegistry systemEntityMetaRegistry)
+	public SystemEntityMetaDataPersister(DataService dataService, SystemEntityMetaDataRegistry systemEntityMetaRegistry,
+			IdGenerator idGenerator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.systemEntityMetaRegistry = requireNonNull(systemEntityMetaRegistry);
+		this.idGenerator = requireNonNull(idGenerator);
 	}
 
 	public void persist(ContextRefreshedEvent event)
@@ -123,6 +127,27 @@ public class SystemEntityMetaDataPersister
 		this.entityMetaMeta = requireNonNull(entityMetaMeta);
 	}
 
+	private void generateAutoAttributeValues(EntityMetaData entityMeta)
+	{
+		entityMeta.getAllAttributes().forEach(attr ->
+		{
+			if (attr.getIdentifier() == null)
+			{
+				attr.setIdentifier(idGenerator.generateId());
+			}
+			AttributeMetaData mappedByAttr = attr.getMappedBy();
+			if (mappedByAttr != null && mappedByAttr.getIdentifier() == null)
+			{
+				mappedByAttr.setIdentifier(idGenerator.generateId());
+			}
+			AttributeMetaData inversedByAttr = attr.getInversedBy();
+			if (inversedByAttr != null && inversedByAttr.getIdentifier() == null)
+			{
+				inversedByAttr.setIdentifier(idGenerator.generateId());
+			}
+		});
+	}
+
 	private static void populateAutoAttributeValues(EntityMetaData existingEntityMeta, EntityMetaData entityMeta)
 	{
 		// inject existing auto-generated identifiers in system entity meta data
@@ -144,6 +169,8 @@ public class SystemEntityMetaDataPersister
 				.findOneById(ENTITY_META_DATA, entityMeta.getName(), getEntityMetaDataFetch(), EntityMetaData.class);
 		if (existingEntityMeta == null)
 		{
+			generateAutoAttributeValues(entityMeta);
+
 			dataService.getMeta().addEntityMeta(entityMeta);
 		}
 		else

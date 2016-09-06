@@ -513,7 +513,7 @@ class PostgreSqlQueryGenerator
 	 */
 	static String getSequenceColumnName(AttributeMetaData attr)
 	{
-		return getColumnName(attr.getMappedBy() + "_order");
+		return getColumnName(attr.getMappedBy().getName() + "_order");
 	}
 
 	private static String getSqlColumn(EntityMetaData entityMeta, AttributeMetaData attr)

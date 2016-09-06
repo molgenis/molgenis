@@ -480,7 +480,7 @@ public class PostgreSqlQueryGeneratorTest
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
 		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refAttr").getMock();
 		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
-		when(attr.getMappedBy()).thenReturn("refAttr");
+		when(attr.getMappedBy()).thenReturn(refAttr);
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
 		when(refAttr.getDataType()).thenReturn(XREF);
 		when(refAttr.getInversedBy()).thenReturn(attr);

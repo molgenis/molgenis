@@ -74,7 +74,7 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(PARTS).setDataType(MREF).setRefEntity(this).setLabel("Attribute parts");
 		addAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityMetaMeta).setLabel("Referenced entity")
 				.setValidationExpression(getRefEntityValidationExpression());
-		addAttribute(MAPPED_BY).setLabel("Mapped by").setDescription(
+		addAttribute(MAPPED_BY).setDataType(XREF).setRefEntity(this).setLabel("Mapped by").setDescription(
 				"Attribute in the referenced entity that owns the relationship of a onetomany attribute")
 				.setValidationExpression(getMappedByValidationExpression()).setReadOnly(true);
 		addAttribute(ORDER_BY).setLabel("Order by").setDescription(

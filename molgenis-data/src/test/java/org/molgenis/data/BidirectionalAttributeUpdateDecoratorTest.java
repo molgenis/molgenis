@@ -65,7 +65,7 @@ public class BidirectionalAttributeUpdateDecoratorTest
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 
 		when(oneToManyAttr.getRefEntity()).thenReturn(entityMeta);
-		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttrName);
+		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
 		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
 		when(refEntityMeta.getMappedByAttributes()).thenReturn(Stream.of(xrefAttr));
@@ -101,7 +101,7 @@ public class BidirectionalAttributeUpdateDecoratorTest
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 
 		when(oneToManyAttr.getRefEntity()).thenReturn(entityMeta);
-		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttrName);
+		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
 		String refEntityName = "refEntity";
 		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
@@ -141,7 +141,7 @@ public class BidirectionalAttributeUpdateDecoratorTest
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 
 		when(oneToManyAttr.getRefEntity()).thenReturn(entityMeta);
-		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttrName);
+		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
 		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
 		when(xrefAttr.getRefEntity()).thenReturn(refEntityMeta);
@@ -179,7 +179,7 @@ public class BidirectionalAttributeUpdateDecoratorTest
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 
 		when(oneToManyAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttrName);
+		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(xrefAttr.getRefEntity()).thenReturn(entityMeta);
@@ -228,7 +228,7 @@ public class BidirectionalAttributeUpdateDecoratorTest
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 
 		when(oneToManyAttr.getRefEntity()).thenReturn(entityMeta);
-		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttrName);
+		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
 		String refEntityName = "refEntity";
 		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
@@ -282,7 +282,7 @@ public class BidirectionalAttributeUpdateDecoratorTest
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 
 		when(oneToManyAttr.getRefEntity()).thenReturn(entityMeta);
-		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttrName);
+		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
 		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
 		when(refEntityMeta.getMappedByAttributes()).thenReturn(Stream.of(xrefAttr));
@@ -328,7 +328,7 @@ public class BidirectionalAttributeUpdateDecoratorTest
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 
 		when(oneToManyAttr.getRefEntity()).thenReturn(entityMeta);
-		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttrName);
+		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
 		String refEntityName = "refEntity";
 		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
@@ -383,7 +383,7 @@ public class BidirectionalAttributeUpdateDecoratorTest
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 
 		when(oneToManyAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttrName);
+		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(xrefAttr.getRefEntity()).thenReturn(entityMeta);
@@ -447,7 +447,7 @@ public class BidirectionalAttributeUpdateDecoratorTest
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 
 		when(oneToManyAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttrName);
+		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(xrefAttr.getRefEntity()).thenReturn(entityMeta);
@@ -510,7 +510,7 @@ public class BidirectionalAttributeUpdateDecoratorTest
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 
 		when(oneToManyAttr.getRefEntity()).thenReturn(entityMeta);
-		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttrName);
+		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
 		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
 		when(refEntityMeta.getMappedByAttributes()).thenReturn(Stream.of(xrefAttr));
@@ -546,7 +546,7 @@ public class BidirectionalAttributeUpdateDecoratorTest
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 
 		when(oneToManyAttr.getRefEntity()).thenReturn(entityMeta);
-		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttrName);
+		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
 		String refEntityName = "refEntity";
 		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
@@ -615,7 +615,7 @@ public class BidirectionalAttributeUpdateDecoratorTest
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 
 		when(oneToManyAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttrName);
+		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(xrefAttr.getRefEntity()).thenReturn(entityMeta);
@@ -690,7 +690,7 @@ public class BidirectionalAttributeUpdateDecoratorTest
 		when(xrefAttr.getDataType()).thenReturn(XREF);
 
 		when(oneToManyAttr.getRefEntity()).thenReturn(entityMeta);
-		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttrName);
+		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
 
 		String refEntityName = "refEntity";
 		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
