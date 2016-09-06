@@ -30,6 +30,7 @@ import org.molgenis.migrate.version.v1_21.Step29MigrateJobExecutionProgressMessa
 import org.molgenis.migrate.version.v1_21.Step30MigrateJobExecutionUser;
 import org.molgenis.migrate.version.v1_22.Step31UpdateApplicationSettings;
 import org.molgenis.migrate.version.v1_22.Step32AddRowLevelSecurityMetadata;
+import org.molgenis.migrate.version.v1_22.Step33UpdateAttributeMappingSettings;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.GsonConfig;
