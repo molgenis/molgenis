@@ -1,7 +1,6 @@
 package org.molgenis.app;
 
 import com.google.common.collect.Sets;
-import com.google.gson.Gson;
 import freemarker.template.TemplateException;
 import org.molgenis.CommandLineOnlyConfiguration;
 import org.molgenis.DatabaseConfig;
@@ -11,7 +10,6 @@ import org.molgenis.data.ManageableRepositoryCollection;
 import org.molgenis.data.config.HttpClientConfig;
 import org.molgenis.data.elasticsearch.ElasticsearchRepositoryCollection;
 import org.molgenis.data.elasticsearch.config.EmbeddedElasticSearchConfig;
-import org.molgenis.data.elasticsearch.factory.EmbeddedElasticSearchServiceFactory;
 import org.molgenis.data.mysql.AsyncJdbcTemplate;
 import org.molgenis.data.mysql.MySqlEntityFactory;
 import org.molgenis.data.mysql.MysqlRepository;
@@ -31,6 +29,7 @@ import org.molgenis.migrate.version.v1_19.Step28MigrateSorta;
 import org.molgenis.migrate.version.v1_21.Step29MigrateJobExecutionProgressMessage;
 import org.molgenis.migrate.version.v1_21.Step30MigrateJobExecutionUser;
 import org.molgenis.migrate.version.v1_22.Step31UpdateApplicationSettings;
+import org.molgenis.migrate.version.v1_22.Step33UpdateAttributeMappingSettings;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.GsonConfig;
@@ -57,9 +56,8 @@ import java.util.Map;
 @EnableTransactionManagement
 @EnableWebMvc
 @EnableAsync
-@ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class) )
-@Import(
-{ WebAppSecurityConfig.class, DatabaseConfig.class, HttpClientConfig.class, EmbeddedElasticSearchConfig.class,
+@ComponentScan(basePackages = "org.molgenis", excludeFilters = @Filter(type = FilterType.ANNOTATION, value = CommandLineOnlyConfiguration.class))
+@Import({ WebAppSecurityConfig.class, DatabaseConfig.class, HttpClientConfig.class, EmbeddedElasticSearchConfig.class,
 		GsonConfig.class })
 public class WebAppConfig extends MolgenisWebAppConfig
 {
@@ -74,12 +72,6 @@ public class WebAppConfig extends MolgenisWebAppConfig
 
 	@Autowired
 	private ElasticsearchRepositoryCollection elasticsearchRepositoryCollection;
-
-	@Autowired
-	private EmbeddedElasticSearchServiceFactory embeddedElasticSearchServiceFactory;
-
-	@Autowired
-	private Gson gson;
 
 	@Autowired
 	private Step20RebuildElasticsearchIndex step20RebuildElasticsearchIndex;
@@ -108,6 +100,7 @@ public class WebAppConfig extends MolgenisWebAppConfig
 		upgradeService.addUpgrade(new Step29MigrateJobExecutionProgressMessage(dataSource));
 		upgradeService.addUpgrade(new Step30MigrateJobExecutionUser(dataSource));
 		upgradeService.addUpgrade(new Step31UpdateApplicationSettings(dataSource, idGenerator));
+		upgradeService.addUpgrade(new Step33UpdateAttributeMappingSettings(dataSource));
 	}
 
 	@Override
@@ -158,8 +151,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 	@Override
 	protected void addFreemarkerVariables(Map<String, Object> freemarkerVariables)
 	{
-		freemarkerVariables.put("dataExplorerLink",
-				new DataExplorerHyperlinkDirective(molgenisPluginRegistry(), dataService));
+		freemarkerVariables
+				.put("dataExplorerLink", new DataExplorerHyperlinkDirective(molgenisPluginRegistry(), dataService));
 	}
 
 	@Override
