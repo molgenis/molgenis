@@ -1,6 +1,7 @@
 package org.molgenis.bootstrap;
 
 import org.molgenis.data.annotation.web.bootstrap.AnnotatorBootstrapper;
+import org.molgenis.data.elasticsearch.bootstrap.IndexBootstrapper;
 import org.molgenis.data.idcard.IdCardBootstrapper;
 import org.molgenis.data.jobs.JobBootstrapper;
 import org.molgenis.data.platform.bootstrap.SystemEntityMetaDataBootstrapper;
@@ -33,13 +34,15 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	private final JobBootstrapper jobBootstrapper;
 	private final IdCardBootstrapper idCardBootstrapper;
 	private final AnnotatorBootstrapper annotatorBootstrapper;
+	private final IndexBootstrapper indexBootstrapper;
 
 	@Autowired
 	public MolgenisBootstrapper(MolgenisUpgradeBootstrapper upgradeBootstrapper,
 			RegistryBootstrapper registryBootstrapper,
 			SystemEntityMetaDataBootstrapper systemEntityMetaDataBootstrapper, RepositoryPopulator repositoryPopulator,
 			FileIngesterJobRegistrar fileIngesterJobRegistrar, JobBootstrapper jobBootstrapper,
-			IdCardBootstrapper idCardBootstrapper, AnnotatorBootstrapper annotatorBootstrapper)
+			IdCardBootstrapper idCardBootstrapper, AnnotatorBootstrapper annotatorBootstrapper,
+			IndexBootstrapper indexBootstrapper)
 	{
 		this.upgradeBootstrapper = requireNonNull(upgradeBootstrapper);
 		this.registryBootstrapper = requireNonNull(registryBootstrapper);
@@ -49,6 +52,7 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		this.jobBootstrapper = requireNonNull(jobBootstrapper);
 		this.idCardBootstrapper = requireNonNull(idCardBootstrapper);
 		this.annotatorBootstrapper = requireNonNull(annotatorBootstrapper);
+		this.indexBootstrapper = requireNonNull(indexBootstrapper);
 	}
 
 	@Transactional
@@ -56,7 +60,6 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 	@Override
 	public void onApplicationEvent(ContextRefreshedEvent event)
 	{
-		// TODO index rebuilding
 
 		LOG.info("Bootstrapping application ...");
 
@@ -91,6 +94,10 @@ class MolgenisBootstrapper implements ApplicationListener<ContextRefreshedEvent>
 		LOG.trace("Bootstrapping annotators ...");
 		annotatorBootstrapper.bootstrap(event);
 		LOG.debug("Bootstrapped annotators");
+
+		LOG.trace("Bootstrapping index ...");
+		indexBootstrapper.bootstrap();
+		LOG.debug("Bootstrapped index");
 
 		LOG.info("Bootstrapping application completed");
 	}
