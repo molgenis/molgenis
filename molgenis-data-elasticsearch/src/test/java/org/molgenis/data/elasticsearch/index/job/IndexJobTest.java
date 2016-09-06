@@ -228,8 +228,6 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		verify(dataService).delete(eq(INDEX_ACTION), streamCaptor.capture());
 		assertEquals(streamCaptor.getValue().collect(toList()), newArrayList(indexAction));
 		verify(dataService).deleteById(INDEX_ACTION_GROUP, transactionId);
-
-		verify(dataService).deleteById(INDEX_ACTION_GROUP, transactionId);
 	}
 
 
