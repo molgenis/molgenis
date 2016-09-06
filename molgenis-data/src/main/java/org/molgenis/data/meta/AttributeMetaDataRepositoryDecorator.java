@@ -318,14 +318,24 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	@Override
 	public void add(AttributeMetaData attr)
 	{
-		// FIXME validate name
+		validateAdd(attr);
 		decoratedRepo.add(attr);
 	}
 
 	@Override
 	public Integer add(Stream<AttributeMetaData> attrs)
 	{
-		return decoratedRepo.add(attrs);
+		return decoratedRepo.add(attrs.filter(attr ->
+		{
+			this.validateAdd(attr);
+			return true;
+		}));
+	}
+
+	private void validateAdd(AttributeMetaData newAttr)
+	{
+		// orderBy
+		validateOrderBy(newAttr, newAttr.getOrderBy());
 	}
 
 	private void validateUpdate(AttributeMetaData currentAttr, AttributeMetaData newAttr)
@@ -346,6 +356,7 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 			validateUpdateExpression(currentExpression, newExpression);
 		}
 
+		// validation expression
 		String currentValidationExpression = currentAttr.getValidationExpression();
 		String newValidationExpression = newAttr.getValidationExpression();
 		if (!Objects.equals(currentValidationExpression, newValidationExpression))
@@ -353,11 +364,20 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 			validateUpdateExpression(currentValidationExpression, newValidationExpression);
 		}
 
+		// visible expression
 		String currentVisibleExpression = currentAttr.getVisibleExpression();
 		String newVisibleExpression = newAttr.getVisibleExpression();
 		if (!Objects.equals(currentVisibleExpression, newVisibleExpression))
 		{
 			validateUpdateExpression(currentVisibleExpression, newVisibleExpression);
+		}
+
+		// orderBy
+		Sort currentOrderBy = currentAttr.getOrderBy();
+		Sort newOrderBy = newAttr.getOrderBy();
+		if (!Objects.equals(currentOrderBy, newOrderBy))
+		{
+			validateOrderBy(newAttr, newOrderBy);
 		}
 	}
 
@@ -421,6 +441,36 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	{
 		// TODO validate with script evaluator
 		// how to get access to expression validator here since it is located in molgenis-data-validation?
+	}
+
+	/**
+	 * Validate whether the attribute names defined by the orderBy attribute point to existing attributes in the
+	 * referenced entity.
+	 *
+	 * @param attr    attribute
+	 * @param orderBy orderBy of attribute
+	 * @throws MolgenisDataException if orderBy contains attribute names that do not exist in the referenced entity.
+	 */
+	private void validateOrderBy(AttributeMetaData attr, Sort orderBy)
+	{
+		if (orderBy != null)
+		{
+			EntityMetaData refEntity = attr.getRefEntity();
+			if (refEntity != null)
+			{
+				for (Sort.Order orderClause : orderBy)
+				{
+					String refAttrName = orderClause.getAttr();
+					if (refEntity.getAttribute(refAttrName) == null)
+					{
+						throw new MolgenisDataException(
+								format("Unknown entity [%s] attribute [%s] referred to by entity [%s] attribute [%s] sortBy [%s]",
+										refEntity.getName(), refAttrName, getEntityMetaData().getName(), attr.getName(),
+										orderBy.toSortString()));
+					}
+				}
+			}
+		}
 	}
 
 	/**
