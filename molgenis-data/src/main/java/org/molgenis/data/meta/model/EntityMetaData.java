@@ -69,6 +69,7 @@ public class EntityMetaData extends StaticEntity
 	{
 		super(entityMeta);
 		setDefaultValues();
+		//FIXME: This is incorrect, the ID value is the fully qualified name, not the simple name!
 		setSimpleName(entityId);
 	}
 
@@ -88,7 +89,6 @@ public class EntityMetaData extends StaticEntity
 	public static EntityMetaData newInstance(EntityMetaData entityMeta, AttributeCopyMode attrCopyMode)
 	{
 		EntityMetaData entityMetaCopy = new EntityMetaData(entityMeta.getEntityMetaData()); // do not deep-copy
-		entityMetaCopy.setName(entityMeta.getName());
 		entityMetaCopy.setSimpleName(entityMeta.getSimpleName());
 		entityMetaCopy.setPackage(entityMeta.getPackage()); // do not deep-copy
 		entityMetaCopy.setLabel(entityMeta.getLabel());

@@ -289,7 +289,8 @@ class PostgreSqlQueryGenerator
 		final AttributeMetaData idAttribute = entityMeta.getIdAttribute();
 		getPersistedAttributes(entityMeta).forEach(attr ->
 		{
-			if (q.getFetch() == null || q.getFetch().hasField(attr.getName()))
+			if (q.getFetch() == null || q.getFetch().hasField(attr.getName()) || (q.getSort() != null && q.getSort()
+					.hasField(attr.getName())))
 			{
 				if (count.get() > 0)
 				{

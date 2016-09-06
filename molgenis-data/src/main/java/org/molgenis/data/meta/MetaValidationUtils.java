@@ -56,8 +56,7 @@ public class MetaValidationUtils
 		if (name.length() > MAX_ATTRIBUTE_LENGTH)
 		{
 			throw new MolgenisDataException(
-					"Attribute name [" + name + "] is too long: maximum length is " + MAX_ATTRIBUTE_LENGTH
-							+ " characters.");
+					"Name [" + name + "] is too long: maximum length is " + MAX_ATTRIBUTE_LENGTH + " characters.");
 		}
 
 		if (!name.matches("[a-zA-Z0-9_#]+(-[a-z]{2,3})??$"))

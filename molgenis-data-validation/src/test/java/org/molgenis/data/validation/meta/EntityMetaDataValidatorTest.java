@@ -104,7 +104,7 @@ public class EntityMetaDataValidatorTest
 		entityMetaDataValidator.validate(entityMeta);
 	}
 
-	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Attribute name \\[attributeWithNameExceedingMaxSize\\] is too long: maximum length is 30 characters.")
+	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Name \\[attributeWithNameExceedingMaxSize\\] is too long: maximum length is 30 characters.")
 	public void testValidateNameIsTooLong() throws Exception
 	{
 		when(entityMeta.getSimpleName()).thenReturn("attributeWithNameExceedingMaxSize");

@@ -88,6 +88,8 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 				return translateUniqueKeyViolation(pSqlException);
 			case "23514": // check_violation
 				return translateCheckConstraintViolation(pSqlException);
+			case "42703":
+				return translateUndefinedColumnException(pSqlException);
 			default:
 				return null;
 		}
@@ -283,6 +285,20 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 		String columnName = constraintName.substring(tableName.length() + 1, constraintName.length() - 4);
 		ConstraintViolation constraintViolation = new ConstraintViolation(
 				format("Unknown enum value for attribute '%s' of entity '%s'.", columnName, tableName), null);
+		return new MolgenisValidationException(singleton(constraintViolation));
+	}
+
+	/**
+	 * Package private for testability
+	 *
+	 * @param pSqlException PostgreSQL exception
+	 * @return translated validation exception
+	 */
+	static MolgenisValidationException translateUndefinedColumnException(PSQLException pSqlException)
+	{
+		ServerErrorMessage serverErrorMessage = pSqlException.getServerErrorMessage();
+		String message = serverErrorMessage.getMessage();
+		ConstraintViolation constraintViolation = new ConstraintViolation(message);
 		return new MolgenisValidationException(singleton(constraintViolation));
 	}
 }

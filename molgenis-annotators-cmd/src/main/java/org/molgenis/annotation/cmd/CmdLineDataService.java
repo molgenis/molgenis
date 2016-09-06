@@ -3,6 +3,7 @@ package org.molgenis.annotation.cmd;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Package;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -230,15 +231,15 @@ public class CmdLineDataService implements DataService
 	}
 
 	@Override
-	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId,
+	public Repository<Entity> copyRepository(Repository<Entity> repository, String simpleName, Package pack,
 			String newRepositoryLabel)
 	{
 		throw new UnsupportedOperationException();
 	}
 
 	@Override
-	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId,
-			String newRepositoryLabel, Query<Entity> query)
+	public Repository<Entity> copyRepository(Repository<Entity> repository, String simpleName, Package pack,
+			String label, Query<Entity> query)
 	{
 		throw new UnsupportedOperationException();
 	}
