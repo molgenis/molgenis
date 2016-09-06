@@ -541,6 +541,17 @@ $.when($,
                 $(document).trigger('changeQuery', createEntityQuery());
             });
 
+            // Workaround for IE not submitting on "enter"
+            $('#observationset-search').keypress(function (event) {
+                if (getInternetExplorerVersion() != -1) {
+
+                    if (event.which == 13) {
+                        $(document).trigger('changeQuery', createEntityQuery());
+                        $("#observationset-search").change();
+                    }
+                }
+            });
+
             $('#search-clear-button').click(function () {
                 $("#observationset-search").val('');
                 $("#observationset-search").change();

@@ -589,7 +589,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.mapper.meta", "org.molgenis.auth", "org.molgenis.data.reindex.meta" })
+	@ComponentScan({ "org.molgenis.data.mapper.meta", "org.molgenis.auth", "org.molgenis.data.index.meta" })
 	static class Config
 	{
 		@Bean

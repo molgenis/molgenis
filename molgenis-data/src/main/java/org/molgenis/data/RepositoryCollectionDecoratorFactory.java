@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
-import org.molgenis.data.reindex.ReindexActionRegisterService;
-import org.molgenis.data.reindex.ReindexActionRepositoryCollectionDecorator;
+import org.molgenis.data.index.IndexActionRegisterService;
+import org.molgenis.data.index.IndexActionRepositoryCollectionDecorator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,22 +14,22 @@ import static java.util.Objects.requireNonNull;
 public class RepositoryCollectionDecoratorFactory
 {
 	private final RepositoryDecoratorFactory repositoryDecoratorFactory;
-	private final ReindexActionRegisterService reindexActionRegisterService;
+	private final IndexActionRegisterService indexActionRegisterService;
 
 	@Autowired
 	public RepositoryCollectionDecoratorFactory(RepositoryDecoratorFactory repositoryDecoratorFactory,
-			ReindexActionRegisterService reindexActionRegisterService)
+			IndexActionRegisterService indexActionRegisterService)
 	{
 		this.repositoryDecoratorFactory = requireNonNull(repositoryDecoratorFactory);
-		this.reindexActionRegisterService = requireNonNull(reindexActionRegisterService);
+		this.indexActionRegisterService = requireNonNull(indexActionRegisterService);
 	}
 
 	public RepositoryCollection createDecoratedRepositoryCollection(RepositoryCollection repositoryCollection)
 	{
 		RepositoryCollection repoCollectionDecorator = new RepositoryCollectionDecorator(repositoryCollection,
 				repositoryDecoratorFactory);
-		repoCollectionDecorator = new ReindexActionRepositoryCollectionDecorator(repoCollectionDecorator,
-				reindexActionRegisterService);
+		repoCollectionDecorator = new IndexActionRepositoryCollectionDecorator(repoCollectionDecorator,
+				indexActionRegisterService);
 		return repoCollectionDecorator;
 	}
 

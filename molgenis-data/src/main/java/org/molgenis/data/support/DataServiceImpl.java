@@ -3,6 +3,7 @@ package org.molgenis.data.support;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.Package;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -262,37 +263,31 @@ public class DataServiceImpl implements DataService
 
 	@Transactional
 	@Override
-	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId,
+	public Repository<Entity> copyRepository(Repository<Entity> repository, String simpleName, Package pack,
 			String newRepositoryLabel)
 	{
-		return copyRepository(repository, newRepositoryId, newRepositoryLabel, new QueryImpl<>());
+		return copyRepository(repository, simpleName, pack, newRepositoryLabel, new QueryImpl<>());
 	}
 
 	@Transactional
 	@Override
-	public Repository<Entity> copyRepository(Repository<Entity> repository, String newRepositoryId,
-			String newRepositoryLabel, Query<Entity> query)
+	public Repository<Entity> copyRepository(Repository<Entity> repository, String simpleName, Package pack,
+			String label, Query<Entity> query)
 	{
-		LOG.info("Creating a copy of " + repository.getName() + " repository, with ID: " + newRepositoryId
-				+ ", and label: " + newRepositoryLabel);
-		EntityMetaData emd = EntityMetaData.newInstance(repository.getEntityMetaData(), DEEP_COPY_ATTRS);
-		emd.setName(newRepositoryId);
-		emd.setLabel(newRepositoryLabel);
+		LOG.info("Creating a copy of {} repository, with simpleName: {}, package: {} and label: {}",
+				repository.getName(), simpleName, pack, label);
 
-		metaDataService.addEntityMeta(emd);
+		// create copy of entity meta data
+		EntityMetaData emd = EntityMetaData.newInstance(repository.getEntityMetaData(), DEEP_COPY_ATTRS);
+		emd.setSimpleName(simpleName);
+		emd.setPackage(pack);
+		emd.setLabel(label);
+
+		// create repository for copied entity meta data
 		Repository<Entity> repositoryCopy = metaDataService.createRepository(emd);
-		try
-		{
-			repositoryCopy.add(repository.findAll(query));
-			return repositoryCopy;
-		}
-		catch (RuntimeException e)
-		{
-			if (repositoryCopy != null)
-			{
-				metaDataService.deleteEntityMeta(emd.getName());
-			}
-			throw e;
-		}
+
+		// copy data to new repository
+		repositoryCopy.add(repository.findAll(query));
+		return repositoryCopy;
 	}
 }
