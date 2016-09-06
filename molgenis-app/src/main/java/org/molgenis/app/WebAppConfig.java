@@ -30,6 +30,7 @@ import org.molgenis.migrate.version.v1_21.Step29MigrateJobExecutionProgressMessa
 import org.molgenis.migrate.version.v1_21.Step30MigrateJobExecutionUser;
 import org.molgenis.migrate.version.v1_22.Step31UpdateApplicationSettings;
 import org.molgenis.migrate.version.v1_22.Step32AddRowLevelSecurityMetadata;
+import org.molgenis.migrate.version.v1_22.Step33UpdateAttributeMappingSettings;
 import org.molgenis.ui.MolgenisWebAppConfig;
 import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.GsonConfig;
@@ -111,6 +112,8 @@ public class WebAppConfig extends MolgenisWebAppConfig
 				asList("bbmri_nl_sample_collections", "bbmri_nl_biobanks", "bbmri_nl_juristic_persons",
 						"bbmri_nl_persons", "bbmri_nl_publications"));
 		upgradeService.addUpgrade(step32AddRowLevelSecurityMetadata);
+
+		upgradeService.addUpgrade(new Step33UpdateAttributeMappingSettings(dataSource));
 	}
 
 	@Override
