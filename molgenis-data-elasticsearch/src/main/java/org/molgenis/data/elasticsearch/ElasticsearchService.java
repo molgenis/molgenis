@@ -272,7 +272,12 @@ public class ElasticsearchService implements SearchService
 			q.eq(attributeMetaData.getName(), referredEntity);
 		}
 		LOG.debug("q: [{}], referringEntityMetaData: [{}]", q.toString(), referringEntityMetaData.getName());
-		return searchInternalWithScanScroll(q, referringEntityMetaData);
+		if(hasMapping(referringEntityMetaData))
+		{
+			return searchInternalWithScanScroll(q, referringEntityMetaData);
+		}else{
+			return Stream.empty();
+		}
 	}
 
 	/**
