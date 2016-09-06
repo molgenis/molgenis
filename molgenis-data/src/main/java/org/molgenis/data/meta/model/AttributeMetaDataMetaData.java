@@ -77,8 +77,8 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(MAPPED_BY).setLabel("Mapped by").setDescription(
 				"Attribute in the referenced entity that owns the relationship of a onetomany attribute")
 				.setValidationExpression(getMappedByValidationExpression()).setReadOnly(true);
-		addAttribute(ORDER_BY).setLabel("Order by")
-				.setDescription("Order expression that defines entity collection order of a onetomany attribute")
+		addAttribute(ORDER_BY).setLabel("Order by").setDescription(
+				"Order expression that defines entity collection order of a onetomany attribute (e.g. \"attr0\", \"attr0,ASC\", \"attr0,DESC\" or \"attr0,ASC;attr1,DESC\"")
 				.setValidationExpression(getOrderByValidationExpression());
 		addAttribute(EXPRESSION).setNillable(true).setLabel("Expression")
 				.setDescription("Computed value expression in Magma JavaScript");
@@ -123,7 +123,8 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 
 	private static String getOrderByValidationExpression()
 	{
-		return "$('" + ORDER_BY + "').isNull().or(" + "$('" + ORDER_BY + "').isNull().not().and($('" + DATA_TYPE
+		String regex = "/^\\w+(,(ASC|DESC))?(;\\w+(,(ASC|DESC))?)*$/";
+		return "$('" + ORDER_BY + "').isNull().or(" + "$('" + ORDER_BY + "').matches(" + regex + ").and($('" + DATA_TYPE
 				+ "').eq('" + getValueString(ONE_TO_MANY) + "'))).value()";
 	}
 
