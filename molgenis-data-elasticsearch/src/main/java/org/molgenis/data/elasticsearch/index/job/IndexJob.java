@@ -11,13 +11,11 @@ import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupMetaData;
 import org.molgenis.data.index.meta.IndexActionMetaData;
-import org.molgenis.data.index.meta.IndexActionMetaData.*;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 
-import javax.management.*;
 import java.util.List;
 
 import static java.text.MessageFormat.format;
