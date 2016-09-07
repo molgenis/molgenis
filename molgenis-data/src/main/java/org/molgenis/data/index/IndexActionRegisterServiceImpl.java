@@ -10,6 +10,7 @@ import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.security.core.runas.RunAsSystem;
+import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static java.util.Collections.emptyList;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.INDEX_ACTION;
@@ -101,7 +103,17 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	@RunAsSystem
 	public void storeIndexActions(String transactionId)
 	{
-		List<IndexAction> indexActions = filterExcludedEntities(getIndexActionsForCurrentTransaction());
+		Set<IndexAction> indexActionSet = getIndexActionsForCurrentTransaction().stream()
+				.filter(indexAction -> !excludedEntities.contains(indexAction.getEntityFullName()))
+				.flatMap(this::addReferencingEntities)
+				.collect(toSet());
+
+		List<IndexAction> indexActions1 = newArrayList(indexActionSet);
+		for (int i = 0; i < indexActions1.size(); i++)
+		{
+			indexActions1.get(i).setActionOrder(i);
+		}
+		List<IndexAction> indexActions = indexActions1;
 		if (!indexActions.isEmpty())
 		{
 			LOG.debug("Store index actions for transaction {}", transactionId);
@@ -111,23 +123,30 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 		}
 	}
 
-	private List<IndexAction> filterExcludedEntities(Collection<IndexAction> indexActionsForCurrentTransaction)
-	{
-		List<IndexAction> indexActions = indexActionsForCurrentTransaction.stream()
-				.filter(indexAction -> !excludedEntities.contains(indexAction.getEntityFullName()))
-				.collect(toList());
-		for (int i = 0; i < indexActions.size(); i++)
-		{
-			indexActions.get(i).setActionOrder(i);
+	/**
+	 * Add for all referencing entities an index action
+	 *
+	 * @param indexAction
+	 * @return Stream<IndexAction>
+	 */
+	private Stream<IndexAction> addReferencingEntities(IndexAction indexAction){
+		if(indexAction.getEntityId() != null){
+			return Stream.of(indexAction);
 		}
-		return indexActions;
+		return Stream.concat(Stream.of(indexAction), EntityUtils
+				.getReferencingEntityMetaData(dataService.getEntityMetaData(indexAction.getEntityFullName()), dataService).stream().map(pair ->
+						indexActionFactory.create()
+								.setEntityFullName(pair.getA().getName())
+								.setIndexActionGroup(indexAction.getIndexActionGroup())
+								.setIndexStatus(PENDING)));
 	}
 
 	@Override
 	public boolean forgetIndexActions(String transactionId)
 	{
 		LOG.debug("Forget index actions for transaction {}", transactionId);
-		return !filterExcludedEntities(indexActionsPerTransaction.removeAll(transactionId)).isEmpty();
+		return indexActionsPerTransaction.removeAll(transactionId).stream()
+				.anyMatch(indexAction -> !excludedEntities.contains(indexAction.getEntityFullName()));
 	}
 
 	private Collection<IndexAction> getIndexActionsForCurrentTransaction()
