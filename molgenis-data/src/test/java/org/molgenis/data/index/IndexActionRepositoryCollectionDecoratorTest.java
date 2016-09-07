@@ -5,14 +5,10 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.index.meta.IndexActionMetaData.CudType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.index.meta.IndexActionMetaData.CudType.CREATE;
-import static org.molgenis.data.index.meta.IndexActionMetaData.CudType.UPDATE;
-import static org.molgenis.data.index.meta.IndexActionMetaData.DataType.METADATA;
 
 public class IndexActionRepositoryCollectionDecoratorTest
 {
@@ -42,7 +38,7 @@ public class IndexActionRepositoryCollectionDecoratorTest
 	{
 		indexActionRepositoryCollectionDecorator.deleteRepository(entityMeta);
 		verify(decoratedRepositoryCollection, times(1)).deleteRepository(entityMeta);
-		verify(indexActionRegisterService).register("repo", CudType.DELETE, METADATA, null);
+		verify(indexActionRegisterService).register("repo", null);
 	}
 
 	@Test
@@ -52,7 +48,7 @@ public class IndexActionRepositoryCollectionDecoratorTest
 		AttributeMetaData attribute = when(mock(AttributeMetaData.class).getName()).thenReturn("attribute").getMock();
 		indexActionRepositoryCollectionDecorator.addAttribute(entityMeta, attribute);
 		verify(decoratedRepositoryCollection, times(1)).addAttribute(entityMeta, attribute);
-		verify(indexActionRegisterService).register("repo", UPDATE, METADATA, null);
+		verify(indexActionRegisterService).register("repo", null);
 	}
 
 	@Test
@@ -62,7 +58,7 @@ public class IndexActionRepositoryCollectionDecoratorTest
 		AttributeMetaData attribute = when(mock(AttributeMetaData.class).getName()).thenReturn("attribute").getMock();
 		indexActionRepositoryCollectionDecorator.deleteAttribute(entityMeta, attribute);
 		verify(decoratedRepositoryCollection, times(1)).deleteAttribute(entityMeta, attribute);
-		verify(indexActionRegisterService).register("repo", UPDATE, METADATA, null);
+		verify(indexActionRegisterService).register("repo", null);
 	}
 
 	@Test
@@ -70,6 +66,6 @@ public class IndexActionRepositoryCollectionDecoratorTest
 	{
 		indexActionRepositoryCollectionDecorator.createRepository(entityMeta);
 		verify(decoratedRepositoryCollection, times(1)).createRepository(entityMeta);
-		verify(indexActionRegisterService).register("repo", CREATE, METADATA, null);
+		verify(indexActionRegisterService).register("repo", null);
 	}
 }

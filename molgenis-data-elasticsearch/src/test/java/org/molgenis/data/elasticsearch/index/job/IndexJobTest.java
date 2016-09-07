@@ -14,8 +14,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.meta.*;
-import org.molgenis.data.index.meta.IndexActionMetaData.CudType;
-import org.molgenis.data.index.meta.IndexActionMetaData.DataType;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.test.data.EntityTestHarness;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -132,8 +131,10 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	@Test
 	public void rebuildIndexDeleteSingleEntityTest()
 	{
+		when(dataService.findOneById("test", "entityId")).thenReturn(null);
+
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setCudType(CudType.DELETE).setDataType(DataType.DATA).setEntityId("entityId")
+				.setEntityFullName("test").setEntityId("entityId")
 				.setActionOrder(0).setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
@@ -146,12 +147,11 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		// verify progress messages
 		verify(progress).status("######## START Index transaction id: [aabbcc] ########");
 		verify(progress).setProgressMax(1);
-		verify(progress).progress(0, "Indexing test.entityId, CUDType = " + CudType.DELETE);
+		verify(progress).progress(0, "Indexing test.entityId");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
 		verify(progress).status("refreshIndex...");
 		verify(progress).status("refreshIndex done.");
 		verify(progress).status("######## END Index transaction id: [aabbcc] ########");
-
 		verify(searchService).refreshIndex();
 		verify(dataService, times(2)).update(INDEX_ACTION, indexAction);
 	}
@@ -159,19 +159,25 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	@Test
 	public void rebuildIndexCreateSingleEntityTest()
 	{
-		this.rebuildIndexSingleEntityTest(CudType.CREATE, IndexingMode.ADD);
+		this.rebuildIndexSingleEntityTest(IndexingMode.ADD);
 	}
 
 	@Test
 	public void rebuildIndexUpdateSingleEntityTest()
 	{
-		this.rebuildIndexSingleEntityTest(CudType.UPDATE, IndexingMode.UPDATE);
+		Entity actualEntity = dataService.findOneById("test", "entityId");
+		EntityMetaData emd = actualEntity.getEntityMetaData();
+		Query q = new QueryImpl();
+		q.eq(emd.getIdAttribute().getName(), "entityId");
+
+		when(searchService.findOne(q, emd)).thenReturn(actualEntity);
+		this.rebuildIndexSingleEntityTest(IndexingMode.UPDATE);
 	}
 
-	private void rebuildIndexSingleEntityTest(CudType cudType, IndexingMode indexingMode)
+	private void rebuildIndexSingleEntityTest(IndexingMode indexingMode)
 	{
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setCudType(cudType).setDataType(DataType.DATA).setEntityId("entityId")
+				.setEntityFullName("test").setEntityId("entityId")
 				.setActionOrder(0).setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
@@ -183,7 +189,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 
 		verify(progress).status("######## START Index transaction id: [aabbcc] ########");
 		verify(progress).setProgressMax(1);
-		verify(progress).progress(0, "Indexing test.entityId, CUDType = " + cudType.name());
+		verify(progress).progress(0, "Indexing test.entityId");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
 		verify(progress).status("refreshIndex...");
 		verify(progress).status("refreshIndex done.");
@@ -193,88 +199,55 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void rebuildIndexCreateBatchEntitiesTest()
+	private void rebuildIndexMetaUpdateDataTest()
 	{
-		this.rebuildIndexBatchEntitiesTest(CudType.CREATE);
-	}
+		when(dataService.hasRepository("test")).thenReturn(true);
+		EntityMetaData entityMeta = dataService.getEntityMetaData("test");
+		when(searchService.hasMapping(entityMeta)).thenReturn(true);
 
-	@Test
-	public void rebuildIndexDeleteBatchEntitiesTest()
-	{
-		this.rebuildIndexBatchEntitiesTest(CudType.DELETE);
-	}
-
-	@Test
-	public void rebuildIndexUpdateBatchEntitiesTest()
-	{
-		this.rebuildIndexBatchEntitiesTest(CudType.UPDATE);
-	}
-
-	private void rebuildIndexBatchEntitiesTest(CudType cudType)
-	{
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setCudType(cudType).setDataType(DataType.DATA).setEntityId(null)
+				.setEntityFullName("test").setEntityId(null)
 				.setActionOrder(0).setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
 		indexJob.call(this.progress);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
-
 		verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"));
-
 		verify(progress).status("######## START Index transaction id: [aabbcc] ########");
 		verify(progress).setProgressMax(1);
-		verify(progress).progress(0, "Indexing repository test. CUDType = " + cudType.name());
+		verify(progress).progress(0, "Rebuild index of repository test.");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
 		verify(progress).status("refreshIndex...");
 		verify(progress).status("refreshIndex done.");
 		verify(progress).status("######## END Index transaction id: [aabbcc] ########");
 
 		verify(dataService, times(2)).update(INDEX_ACTION, indexAction);
+
+		// make sure both the actions and the action job got deleted
+		verify(dataService).delete(eq(INDEX_ACTION), streamCaptor.capture());
+		assertEquals(streamCaptor.getValue().collect(toList()), newArrayList(indexAction));
+		verify(dataService).deleteById(INDEX_ACTION_GROUP, transactionId);
 	}
+
 
 	@Test
-	public void rebuildIndexCreateMetaDataTest()
+	private void rebuildIndexMetaCreateDataTest()
 	{
-		this.rebuildIndexMetaDataTest(CudType.CREATE);
-	}
+		when(dataService.hasRepository("test")).thenReturn(true);
 
-	@Test
-	public void rebuildIndexUpdateMetaDataTest()
-	{
-		this.rebuildIndexMetaDataTest(CudType.UPDATE);
-	}
-
-	private void rebuildIndexMetaDataTest(CudType cudType)
-	{
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setCudType(cudType).setDataType(DataType.METADATA).setEntityId(null)
+				.setEntityFullName("test").setEntityId(null)
 				.setActionOrder(0).setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
 		indexJob.call(this.progress);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
-
-		if (cudType == CudType.CREATE)
-		{
-			verify(this.searchService).createMappings(any());
-		}
-		else
-		{
-			verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"));
-		}
+		verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"));
 		verify(progress).status("######## START Index transaction id: [aabbcc] ########");
 		verify(progress).setProgressMax(1);
-		if (cudType == CudType.CREATE)
-		{
-			verify(progress).progress(0, "Create index mappings test. CUDType = " + cudType.name());
-		}
-		else
-		{
-			verify(progress).progress(0, "Indexing repository test. CUDType = " + cudType.name());
-		}
+		verify(progress).progress(0, "Create index of repository test");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
 		verify(progress).status("refreshIndex...");
 		verify(progress).status("refreshIndex done.");
@@ -294,7 +267,7 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	public void rebuildIndexDeleteMetaDataEntityTest()
 	{
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setCudType(CudType.DELETE).setDataType(DataType.METADATA).setEntityId(null)
+				.setEntityFullName("test").setEntityId(null)
 				.setActionOrder(0).setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
@@ -319,17 +292,17 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	public void indexSingleEntitySearchServiceThrowsExceptionOnSecondEntityId()
 	{
 		IndexAction indexAction1 = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setCudType(CudType.DELETE).setDataType(DataType.DATA)
+				.setEntityFullName("test")
 				.setEntityId("entityId1").setActionOrder(0)
 				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 
 		IndexAction indexAction2 = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setCudType(CudType.DELETE).setDataType(DataType.DATA)
+				.setEntityFullName("test")
 				.setEntityId("entityId2").setActionOrder(1)
 				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 
 		IndexAction indexAction3 = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setCudType(CudType.DELETE).setDataType(DataType.DATA)
+				.setEntityFullName("test")
 				.setEntityId("entityId3").setActionOrder(2)
 				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 

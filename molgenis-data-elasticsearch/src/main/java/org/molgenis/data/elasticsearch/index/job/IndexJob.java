@@ -1,6 +1,7 @@
 package org.molgenis.data.elasticsearch.index.job;
 
 import org.molgenis.data.*;
+import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.jobs.Job;
@@ -16,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.core.Authentication;
 
+import javax.management.*;
 import java.util.List;
 
 import static java.text.MessageFormat.format;
@@ -24,10 +26,6 @@ import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
 import static org.molgenis.data.index.meta.IndexActionMetaData.*;
-import static org.molgenis.data.index.meta.IndexActionMetaData.CudType.CREATE;
-import static org.molgenis.data.index.meta.IndexActionMetaData.CudType.DELETE;
-import static org.molgenis.data.index.meta.IndexActionMetaData.DataType.DATA;
-import static org.molgenis.data.index.meta.IndexActionMetaData.DataType.METADATA;
 
 /**
  * {@link Job} that executes a bunch of {@link IndexActionMetaData} stored in a {@link IndexActionGroupMetaData}.
@@ -112,13 +110,12 @@ class IndexJob extends Job
 	 *
 	 * @param progress      {@link Progress} to report progress to
 	 * @param progressCount the progress count for this IndexAction
-	 * @param indexAction Entity of type IndexActionMetaData
+	 * @param indexAction   Entity of type IndexActionMetaData
 	 * @return boolean indicating success or failure
 	 */
 	private boolean performAction(Progress progress, int progressCount, IndexAction indexAction)
 	{
-		requireNonNull(indexAction.getEntityMetaData());
-
+		requireNonNull(indexAction);
 		updateIndexActionStatus(indexAction, IndexActionMetaData.IndexStatus.STARTED);
 
 		try
@@ -126,33 +123,39 @@ class IndexJob extends Job
 			if (indexAction.getEntityId() != null)
 			{
 				progress.progress(progressCount,
-						format("Indexing {0}.{1}, CUDType = {2}", indexAction.getEntityFullName(),
-								indexAction.getEntityId(), indexAction.getCudType()));
-				rebuildIndexOneEntity(indexAction.getEntityFullName(), indexAction.getEntityId(),
-						indexAction.getCudType());
-			}
-			else if (indexAction.getDataType().equals(METADATA) && indexAction.getCudType() == CREATE)
-			{
-				progress.progress(progressCount,
-						format("Create index mappings {0}. CUDType = {1}", indexAction.getEntityFullName(),
-								indexAction.getCudType()));
-
-				String entityFullName = indexAction.getEntityFullName();
-				EntityMetaData entityMeta = dataService.getEntityMetaData(entityFullName);
-				searchService.createMappings(entityMeta);
-			}
-			else if (indexAction.getDataType().equals(DATA) || indexAction.getCudType() != DELETE)
-			{
-				progress.progress(progressCount,
-						format("Indexing repository {0}. CUDType = {1}", indexAction.getEntityFullName(),
-								indexAction.getCudType()));
-				rebuildIndexBatchEntities(indexAction.getEntityFullName());
+						format("Indexing {0}.{1}", indexAction.getEntityFullName(),
+								indexAction.getEntityId()));
+				rebuildIndexOneEntity(indexAction.getEntityFullName(), indexAction.getEntityId());
 			}
 			else
 			{
-				progress.progress(progressCount,
-						format("Dropping index of repository {0}.", indexAction.getEntityFullName()));
-				searchService.delete(indexAction.getEntityFullName());
+				String entityFullName = indexAction.getEntityFullName();
+				boolean actualEntityExists = dataService.hasRepository(entityFullName);
+
+				if (!actualEntityExists)
+				{
+					progress.progress(progressCount,
+							format("Dropping index of repository {0}.", indexAction.getEntityFullName()));
+					searchService.delete(indexAction.getEntityFullName());
+				}else{
+					EntityMetaData entityMeta = dataService.getEntityMetaData(entityFullName);
+					boolean indexEntityExists = searchService.hasMapping(entityMeta);
+
+					if (indexEntityExists)
+					{
+						// Update mapping + data
+						progress.progress(progressCount,
+								format("Rebuild index of repository {0}.", indexAction.getEntityFullName()));
+					}
+					else
+					{
+						// Create mapping
+						progress.progress(progressCount,
+								format("Create index of repository {0}", indexAction.getEntityFullName()));
+
+					}
+					rebuildIndex(indexAction.getEntityFullName());
+				}
 			}
 			updateIndexActionStatus(indexAction, IndexActionMetaData.IndexStatus.FINISHED);
 			return true;
@@ -169,7 +172,7 @@ class IndexJob extends Job
 	 * Updates the {@link IndexStatus} of a IndexAction and stores the change.
 	 *
 	 * @param indexAction the IndexAction of which the status is updated
-	 * @param status        the new {@link IndexStatus}
+	 * @param status      the new {@link IndexStatus}
 	 */
 	private void updateIndexActionStatus(IndexAction indexAction, IndexActionMetaData.IndexStatus status)
 	{
@@ -182,28 +185,45 @@ class IndexJob extends Job
 	 *
 	 * @param entityFullName the fully qualified name of the entity's repository
 	 * @param entityId       the identifier of the entity to update
-	 * @param cudType        the {@link CudType} of the change that was made to the entity
 	 */
-	private void rebuildIndexOneEntity(String entityFullName, String entityId, CudType cudType)
+	private void rebuildIndexOneEntity(String entityFullName, String entityId)
 	{
-		LOG.trace("Indexing [{}].[{}]... cud: [{}]", entityFullName, entityId, cudType);
-		switch (cudType)
+		LOG.trace("Indexing [{}].[{}]... ", entityFullName, entityId);
+		Entity actualEntity = dataService.findOneById(entityFullName, entityId);
+
+		if (null == actualEntity)
 		{
-			case CREATE:
-				Entity entityA = dataService.findOneById(entityFullName, entityId);
-				searchService.index(entityA, entityA.getEntityMetaData(), IndexingMode.ADD);
-				break;
-			case UPDATE:
-				Entity entityU = dataService.findOneById(entityFullName, entityId);
-				searchService.index(entityU, entityU.getEntityMetaData(), IndexingMode.UPDATE);
-				break;
-			case DELETE:
-				searchService.deleteById(entityId, dataService.getMeta().getEntityMetaData(entityFullName));
-				break;
-			default:
-				throw new IllegalStateException("Unknown CudType");
+			// Delete
+			LOG.debug("Index delete [{}].[{}].", entityFullName, entityId);
+			searchService.deleteById(entityId, dataService.getMeta().getEntityMetaData(entityFullName));
+			return;
 		}
-		LOG.debug("Indexed [{}].[{}].", entityFullName, entityId);
+
+		EntityMetaData entityMeta = actualEntity.getEntityMetaData();
+		boolean indexEntityExists = searchService.hasMapping(entityMeta);
+		if(!indexEntityExists){
+			LOG.debug("Create mapping of repository [{}] because it was not exist yet", entityFullName);
+			searchService.createMappings(entityMeta);
+		}
+
+		Query q = new QueryImpl();
+		q.eq(entityMeta.getIdAttribute().getName(), entityId);
+		Entity indexEntity = searchService.findOne(q, entityMeta);
+
+		if (null != indexEntity)
+		{
+			// update
+			LOG.debug("Index update [{}].[{}].", entityFullName, entityId);
+			searchService.index(actualEntity, actualEntity.getEntityMetaData(), IndexingMode.UPDATE);
+			return;
+		}
+		else
+		{
+			// Add
+			LOG.debug("Index add [{}].[{}].", entityFullName, entityId);
+			searchService.index(actualEntity, actualEntity.getEntityMetaData(), IndexingMode.ADD);
+			return;
+		}
 	}
 
 	/**
@@ -211,7 +231,7 @@ class IndexJob extends Job
 	 *
 	 * @param entityFullName the fully qualified name of the {@link org.molgenis.data.Repository} to index.
 	 */
-	private void rebuildIndexBatchEntities(String entityFullName)
+	private void rebuildIndex(String entityFullName)
 	{
 		LOG.trace("Indexing [{}]...", entityFullName);
 		//FIXME: Deze is gedecorate, kan in foute gevallen dus de IDs uit de index halen
