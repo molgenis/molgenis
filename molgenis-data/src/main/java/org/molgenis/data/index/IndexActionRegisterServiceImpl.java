@@ -129,12 +129,17 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	 * @param indexAction
 	 * @return Stream<IndexAction>
 	 */
-	private Stream<IndexAction> addReferencingEntities(IndexAction indexAction){
-		if(indexAction.getEntityId() != null){
+	private Stream<IndexAction> addReferencingEntities(IndexAction indexAction)
+	{
+		if (indexAction.getEntityId() != null
+				|| !dataService.hasRepository(
+				indexAction.getEntityFullName())) // When entity is deleted the entityMetaData cannot be retrieved
+		{
 			return Stream.of(indexAction);
 		}
 		return Stream.concat(Stream.of(indexAction), EntityUtils
-				.getReferencingEntityMetaData(dataService.getEntityMetaData(indexAction.getEntityFullName()), dataService).stream().map(pair ->
+				.getReferencingEntityMetaData(dataService.getEntityMetaData(indexAction.getEntityFullName()),
+						dataService).stream().map(pair ->
 						indexActionFactory.create()
 								.setEntityFullName(pair.getA().getName())
 								.setIndexActionGroup(indexAction.getIndexActionGroup())
