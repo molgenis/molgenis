@@ -8,7 +8,7 @@ import java.util.stream.Stream;
 
 public class QueryImpl<E extends Entity> implements Query<E>
 {
-	private final List<List<QueryRule>> rules = new ArrayList<List<QueryRule>>();
+	private final List<List<QueryRule>> rules = new ArrayList<>();
 
 	private int offset;
 	private int pageSize;
@@ -33,7 +33,7 @@ public class QueryImpl<E extends Entity> implements Query<E>
 
 	public static Query<Entity> query()
 	{
-		return new QueryImpl<Entity>();
+		return new QueryImpl<>();
 	}
 
 	public static Query<Entity> EQ(String attributeName, Object value)
@@ -48,7 +48,7 @@ public class QueryImpl<E extends Entity> implements Query<E>
 
 	public QueryImpl()
 	{
-		this.rules.add(new ArrayList<QueryRule>());
+		this.rules.add(new ArrayList<>());
 	}
 
 	public QueryImpl(Repository<E> repository)
@@ -208,9 +208,9 @@ public class QueryImpl<E extends Entity> implements Query<E>
 	}
 
 	@Override
-	public Query<E> in(String field, Iterable<?> objectIterator)
+	public Query<E> in(String field, Iterable<?> valueIterable)
 	{
-		rules.get(this.rules.size() - 1).add(new QueryRule(field, Operator.IN, objectIterator));
+		rules.get(this.rules.size() - 1).add(new QueryRule(field, Operator.IN, valueIterable));
 		return this;
 	}
 
@@ -246,7 +246,7 @@ public class QueryImpl<E extends Entity> implements Query<E>
 	public Query<E> nest()
 	{
 		// add element to our nesting list...
-		this.rules.add(new ArrayList<QueryRule>());
+		this.rules.add(new ArrayList<>());
 		return this;
 	}
 
@@ -358,7 +358,8 @@ public class QueryImpl<E extends Entity> implements Query<E>
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		@SuppressWarnings("unchecked") QueryImpl<Entity> other = (QueryImpl<Entity>) obj;
+		@SuppressWarnings("unchecked")
+		QueryImpl<Entity> other = (QueryImpl<Entity>) obj;
 		if (offset != other.offset) return false;
 		if (pageSize != other.pageSize) return false;
 		if (rules == null)
