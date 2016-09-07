@@ -8,8 +8,6 @@ import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
-import org.molgenis.data.index.meta.IndexActionMetaData.CudType;
-import org.molgenis.data.index.meta.IndexActionMetaData.DataType;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.testng.annotations.AfterMethod;
@@ -65,13 +63,11 @@ public class IndexActionRegisterServiceTest
 		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
 		when(indexAction.setEntityFullName("TestEntityName")).thenReturn(indexAction);
 		when(indexAction.getEntityFullName()).thenReturn("TestEntityName");
-		when(indexAction.setCudType(CudType.CREATE)).thenReturn(indexAction);
-		when(indexAction.setDataType(DataType.DATA)).thenReturn(indexAction);
 		when(indexAction.setEntityId("123")).thenReturn(indexAction);
 		when(indexAction.setActionOrder(0)).thenReturn(indexAction);
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
 
-		indexActionRegisterService.register("TestEntityName", CudType.CREATE, DataType.DATA, "123");
+		indexActionRegisterService.register("TestEntityName", "123");
 
 		verifyZeroInteractions(dataService);
 
@@ -93,13 +89,11 @@ public class IndexActionRegisterServiceTest
 		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
 		when(indexAction.setEntityFullName("TestEntityName")).thenReturn(indexAction);
 		when(indexAction.getEntityFullName()).thenReturn("TestEntityName");
-		when(indexAction.setCudType(CudType.CREATE)).thenReturn(indexAction);
-		when(indexAction.setDataType(DataType.DATA)).thenReturn(indexAction);
 		when(indexAction.setEntityId("123")).thenReturn(indexAction);
 		when(indexAction.setActionOrder(0)).thenReturn(indexAction);
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
 
-		indexActionRegisterService.register("TestEntityName", CudType.CREATE, DataType.DATA, "123");
+		indexActionRegisterService.register("TestEntityName", "123");
 
 		verifyZeroInteractions(dataService);
 
@@ -117,13 +111,10 @@ public class IndexActionRegisterServiceTest
 	{
 		when(indexActionGroupFactory.create("1")).thenReturn(indexActionGroup);
 		when(indexActionGroup.setCount(1)).thenReturn(indexActionGroup);
-
 		when(indexActionFactory.create()).thenReturn(indexAction);
 		when(indexAction.setIndexActionGroup(indexActionGroup)).thenReturn(indexAction);
 		when(indexAction.setEntityFullName("ABC")).thenReturn(indexAction);
 		when(indexAction.getEntityFullName()).thenReturn("ABC");
-		when(indexAction.setCudType(CudType.CREATE)).thenReturn(indexAction);
-		when(indexAction.setDataType(DataType.DATA)).thenReturn(indexAction);
 		when(indexAction.setEntityId("123")).thenReturn(indexAction);
 		when(indexAction.setActionOrder(0)).thenReturn(indexAction);
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
@@ -132,7 +123,7 @@ public class IndexActionRegisterServiceTest
 		when(entityMetaData.getName()).thenReturn("ABC");
 		indexActionRegisterService.addExcludedEntity("ABC");
 
-		indexActionRegisterService.register("ABC", CudType.CREATE, DataType.DATA, "123");
+		indexActionRegisterService.register("ABC", "123");
 		verifyNoMoreInteractions(dataService);
 	}
 }

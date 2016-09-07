@@ -20,16 +20,14 @@ public interface IndexActionRegisterService
 	 * Log and create locks for an add/update/delete operation on a Repository
 	 *
 	 * @param entityFullName the fully qualified name of the {@link org.molgenis.data.Repository}
-	 * @param cudType        the {@link IndexActionMetaData.CudType} of the action
-	 * @param dataType       the {@link IndexActionMetaData.DataType} of the action
 	 * @param entityId       the ID of the entity, may be null to indicate change to entire repository
 	 */
-	void register(String entityFullName, IndexActionMetaData.CudType cudType, IndexActionMetaData.DataType dataType,
+	void register(String entityFullName,
 			String entityId);
 
 	/**
 	 * Stores the index actions in the repository.
-	 * Creates a ReindesActionJob to group them by.
+	 * Creates a ReindexActionJob to group them by.
 	 *
 	 * @param transactionId ID for the transaction the index actions were registered under
 	 */
