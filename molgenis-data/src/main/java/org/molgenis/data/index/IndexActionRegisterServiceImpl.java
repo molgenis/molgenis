@@ -8,8 +8,6 @@ import org.molgenis.data.EntityKey;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionGroupFactory;
-import org.molgenis.data.index.meta.IndexActionMetaData.CudType;
-import org.molgenis.data.index.meta.IndexActionMetaData.DataType;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
@@ -71,13 +69,12 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 
 	@Transactional
 	@Override
-	public synchronized void register(String entityFullName, CudType cudType, DataType dataType, String entityId)
+	public synchronized void register(String entityFullName, String entityId)
 	{
 		String transactionId = (String) TransactionSynchronizationManager.getResource(TRANSACTION_ID_RESOURCE_NAME);
 		if (transactionId != null)
 		{
-			LOG.debug("register(entityFullName: [{}], cudType [{}], dataType: [{}], entityId: [{}])", entityFullName,
-					cudType, dataType, entityId);
+			LOG.debug("register(entityFullName: [{}], entityId: [{}])", entityFullName, entityId);
 			final int actionOrder = indexActionsPerTransaction.get(transactionId).size();
 			if (actionOrder >= LOG_EVERY && actionOrder % LOG_EVERY == 0)
 			{
@@ -87,15 +84,15 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 			}
 			IndexAction indexAction = indexActionFactory.create()
 					.setIndexActionGroup(indexActionGroupFactory.create(transactionId))
-					.setEntityFullName(entityFullName).setCudType(cudType).setDataType(dataType).setEntityId(entityId)
+					.setEntityFullName(entityFullName).setEntityId(entityId)
 					.setIndexStatus(PENDING);
 			indexActionsPerTransaction.put(transactionId, indexAction);
 		}
 		else
 		{
 			LOG.error(
-					"Transaction id is unknown, register of entityFullName [{}], cudType [{}], dataType [{}], entityId [{}]",
-					entityFullName, cudType, dataType, entityId);
+					"Transaction id is unknown, register of entityFullName [{}] dataType [{}], entityId [{}]",
+					entityFullName, entityId);
 
 		}
 	}
