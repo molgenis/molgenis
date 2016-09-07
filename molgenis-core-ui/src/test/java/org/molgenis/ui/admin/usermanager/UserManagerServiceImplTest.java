@@ -130,10 +130,12 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		String molgenisUserId0 = "id0";
 		String molgenisUserName0 = "user0";
 		MolgenisUser molgenisUser0 = when(mock(MolgenisUser.class).getId()).thenReturn(molgenisUserId0).getMock();
+		when(molgenisUser0.getIdValue()).thenReturn(molgenisUserId0);
 		when(molgenisUser0.getUsername()).thenReturn(molgenisUserName0);
 		String molgenisUserId1 = "id1";
 		String molgenisUserName1 = "user1";
 		MolgenisUser molgenisUser1 = when(mock(MolgenisUser.class).getId()).thenReturn(molgenisUserId1).getMock();
+		when(molgenisUser1.getIdValue()).thenReturn(molgenisUserId1);
 		when(molgenisUser1.getUsername()).thenReturn(molgenisUserName1);
 		when(dataService.findOneById(MolgenisUserMetaData.MOLGENIS_USER, molgenisUserId0, MolgenisUser.class))
 				.thenReturn(molgenisUser0);
