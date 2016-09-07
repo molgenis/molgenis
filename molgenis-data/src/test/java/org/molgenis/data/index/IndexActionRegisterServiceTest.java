@@ -66,6 +66,11 @@ public class IndexActionRegisterServiceTest
 		when(indexAction.setEntityId("123")).thenReturn(indexAction);
 		when(indexAction.setActionOrder(0)).thenReturn(indexAction);
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
+		EntityMetaData emd = mock(EntityMetaData.class);
+
+		// To avoid addReferencingEntities(IndexAction indexAction)
+		when(dataService.getEntityMetaData(indexAction.getEntityFullName())).thenReturn(emd);
+		when(dataService.getEntityNames()).thenReturn(Stream.empty());
 
 		indexActionRegisterService.register("TestEntityName", "123");
 
