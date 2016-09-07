@@ -126,8 +126,8 @@ class IndexJob extends Job
 			}
 			else
 			{
-				String entityFullName = indexAction.getEntityFullName();
-				boolean actualEntityExists = dataService.hasRepository(entityFullName);
+				final String entityFullName = indexAction.getEntityFullName();
+				final boolean actualEntityExists = dataService.hasRepository(entityFullName);
 
 				if (!actualEntityExists)
 				{
@@ -139,7 +139,8 @@ class IndexJob extends Job
 				{
 					progress.progress(progressCount,
 							format("Indexing repository {0}", indexAction.getEntityFullName()));
-					rebuildIndex(indexAction.getEntityFullName());
+					final Repository<Entity> repository = dataService.getRepository(entityFullName);
+					searchService.rebuildIndex(repository);
 				}
 			}
 			updateIndexActionStatus(indexAction, IndexActionMetaData.IndexStatus.FINISHED);
@@ -192,7 +193,7 @@ class IndexJob extends Job
 			searchService.createMappings(entityMeta);
 		}
 
-		Query q = new QueryImpl();
+		Query<Entity> q = new QueryImpl<>();
 		q.eq(entityMeta.getIdAttribute().getName(), entityId);
 		Entity indexEntity = searchService.findOne(q, entityMeta);
 
@@ -201,29 +202,13 @@ class IndexJob extends Job
 			// update
 			LOG.debug("Index update [{}].[{}].", entityFullName, entityId);
 			searchService.index(actualEntity, actualEntity.getEntityMetaData(), IndexingMode.UPDATE);
-			return;
 		}
 		else
 		{
 			// Add
 			LOG.debug("Index add [{}].[{}].", entityFullName, entityId);
 			searchService.index(actualEntity, actualEntity.getEntityMetaData(), IndexingMode.ADD);
-			return;
 		}
-	}
-
-	/**
-	 * Indexes all data in a {@link org.molgenis.data.Repository}
-	 *
-	 * @param entityFullName the fully qualified name of the {@link org.molgenis.data.Repository} to index.
-	 */
-	private void rebuildIndex(String entityFullName)
-	{
-		LOG.trace("Indexing [{}]...", entityFullName);
-		//FIXME: Deze is gedecorate, kan in foute gevallen dus de IDs uit de index halen
-		final Repository<Entity> repository = dataService.getRepository(entityFullName);
-		searchService.rebuildIndex(repository);
-		LOG.debug("Indexed [{}].", entityFullName);
 	}
 
 	/**
