@@ -55,7 +55,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 		// 2. delete sys_test_TypeTestDynamic metadata and wait on index
 		runAsSystem(() ->
 		{
-			metaDataService.deleteEntityMeta(entityMetaDataDynamic.getName());
+			dataService.getMeta().deleteEntityMeta(entityMetaDataDynamic.getName());
 		});
 		PlatformIT.waitForIndexToBeStable(EntityMetaDataMetaData.ENTITY_META_DATA, indexService, LOG);
 		PlatformIT.waitForWorkToBeFinished(indexService, LOG);

@@ -1,7 +1,5 @@
 package org.molgenis.data;
 
-import org.apache.commons.lang3.StringUtils;
-
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.util.Arrays;
@@ -9,22 +7,15 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
+
 /**
- * With this class an equation model can be described for a database-field (eg a column). By combining this description
- * into a single class a convenient way for passing rules to the
- * {@link org.molgenis.Database.db.Database#find(Class, QueryRule[]) Database#find(Class, QueryRule[])}.
- * <p>
- * <pre>
- * QueryRule rule = new QueryRule(&quot;Name&quot;, QueryRule.Operator.EQUALS, &quot;richard&quot;);
- * database.find(Person.class, rule);
- * </pre>
+ * With this class an equation model can be described for a database-field (eg a column).
  */
 @XmlRootElement
 public class QueryRule
 {
-	public static final QueryRule AND = new QueryRule(Operator.AND);
-	public static final QueryRule OR = new QueryRule(Operator.OR);
-
 	/**
 	 * The operator being applied to the field and value
 	 */
@@ -175,7 +166,7 @@ public class QueryRule
 		/**
 		 * Translate String label of the operator to Operator.
 		 *
-		 * @param name of the operator
+		 * @param label of the operator
 		 */
 		Operator(String label)
 		{
@@ -213,7 +204,7 @@ public class QueryRule
 		}
 		this.field = field;
 		this.operator = operator;
-		this.value = value;
+		setValue(value);
 	}
 
 	/**
@@ -228,7 +219,7 @@ public class QueryRule
 		if (operator == Operator.SEARCH)
 		{
 			this.operator = operator;
-			this.value = value;
+			setValue(value);
 		}
 		else if (Operator.NESTED.equals(operator))
 		{
@@ -301,18 +292,6 @@ public class QueryRule
 	}
 
 	/**
-	 * Returns the field-name as a JPA Attribute
-	 */
-	public String getJpaAttribute()
-	{
-		if (!StringUtils.isEmpty(field))
-		{
-			return field.substring(0, 1).toLowerCase() + field.substring(1);
-		}
-		return field;
-	}
-
-	/**
 	 * Sets a new field-name for this rule.
 	 *
 	 * @param field The new field-name.
@@ -359,7 +338,23 @@ public class QueryRule
 	 */
 	public void setValue(Object value)
 	{
-		this.value = value;
+		if (value instanceof Iterable<?>)
+		{
+			this.value = stream(((Iterable<?>) value).spliterator(), false).map(this::toValue).collect(toList());
+		}
+		else
+		{
+			this.value = toValue(value);
+		}
+	}
+
+	private Object toValue(Object value)
+	{
+		if (value instanceof Entity)
+		{
+			return ((Entity) value).getIdValue();
+		}
+		return value;
 	}
 
 	/**
