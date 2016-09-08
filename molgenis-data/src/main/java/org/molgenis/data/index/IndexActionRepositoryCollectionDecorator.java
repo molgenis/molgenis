@@ -12,8 +12,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.index.meta.IndexActionMetaData.CudType.*;
-import static org.molgenis.data.index.meta.IndexActionMetaData.DataType.METADATA;
 
 /**
  * Decorator around a {@link Repository} that registers changes made to its data with the
@@ -45,28 +43,28 @@ public class IndexActionRepositoryCollectionDecorator implements RepositoryColle
 	@Override
 	public void deleteRepository(EntityMetaData entityMeta)
 	{
-		this.indexActionRegisterService.register(entityMeta.getName(), DELETE, METADATA, null);
+		this.indexActionRegisterService.register(entityMeta.getName(), null);
 		this.decorated.deleteRepository(entityMeta);
 	}
 
 	@Override
 	public void addAttribute(EntityMetaData entityMeta, AttributeMetaData attribute)
 	{
-		this.indexActionRegisterService.register(entityMeta.getName(), UPDATE, METADATA, null);
+		this.indexActionRegisterService.register(entityMeta.getName(), null);
 		this.decorated.addAttribute(entityMeta, attribute);
 	}
 
 	@Override
 	public void updateAttribute(EntityMetaData entityMetaData, AttributeMetaData attr, AttributeMetaData updatedAttr)
 	{
-		this.indexActionRegisterService.register(entityMetaData.getName(), UPDATE, METADATA, null);
+		this.indexActionRegisterService.register(entityMetaData.getName(), null);
 		this.decorated.updateAttribute(entityMetaData, attr, updatedAttr);
 	}
 
 	@Override
 	public void deleteAttribute(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		this.indexActionRegisterService.register(entityMeta.getName(), UPDATE, METADATA, null);
+		this.indexActionRegisterService.register(entityMeta.getName(), null);
 		this.decorated.deleteAttribute(entityMeta, attr);
 	}
 
@@ -85,7 +83,7 @@ public class IndexActionRepositoryCollectionDecorator implements RepositoryColle
 	@Override
 	public Repository<Entity> createRepository(EntityMetaData entityMeta)
 	{
-		this.indexActionRegisterService.register(entityMeta.getName(), CREATE, METADATA, null);
+		this.indexActionRegisterService.register(entityMeta.getName(), null);
 		return this.decorated.createRepository(entityMeta);
 	}
 
