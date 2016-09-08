@@ -98,7 +98,13 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public boolean hasMapping(EntityMetaData entityMetaData)
 	{
-		return elasticsearchFacade.getMappings(indexName).containsKey(sanitizeMapperType(entityMetaData.getName()));
+		return hasMapping(entityMetaData.getName());
+	}
+
+	@Override
+	public boolean hasMapping(String entityName)
+	{
+		return elasticsearchFacade.getMappings(indexName).containsKey(sanitizeMapperType(entityName));
 	}
 
 	@Override
