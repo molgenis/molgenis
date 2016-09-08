@@ -69,7 +69,7 @@ public class IndexStatus
 			}
 			if (isAllIndicesStable())
 			{
-				LOG.info("All entities stable.");
+				LOG.debug("All entities stable.");
 				allEntitiesStable.signalAll();
 			}
 		}
