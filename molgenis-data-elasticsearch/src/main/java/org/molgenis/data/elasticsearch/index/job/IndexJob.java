@@ -55,9 +55,9 @@ class IndexJob extends Job
 		if (indexActionGroup != null && indexActionGroup.getCount() > 0)
 		{
 			progress.setProgressMax(indexActionGroup.getCount());
-			progress.status(format("######## START Index transaction id: [{0}] ########", transactionId));
+			progress.status(format("Start indexing for transaction id: [{0}]", transactionId));
 			performIndexActions(progress);
-			progress.status(format("######## END Index transaction id: [{0}] ########", transactionId));
+			progress.status(format("Finished indexing for transaction id: [{0}]", transactionId));
 		}
 		else
 		{
