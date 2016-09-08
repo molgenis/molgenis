@@ -145,13 +145,13 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		verify(searchService).deleteById("entityId", testEntityMetaData);
 
 		// verify progress messages
-		verify(progress).status("######## START Index transaction id: [aabbcc] ########");
+		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
 		verify(progress).progress(0, "Indexing test.entityId");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
 		verify(progress).status("refreshIndex...");
 		verify(progress).status("refreshIndex done.");
-		verify(progress).status("######## END Index transaction id: [aabbcc] ########");
+		verify(progress).status("Finished indexing for transaction id: [aabbcc]");
 		verify(searchService).refreshIndex();
 		verify(dataService, times(2)).update(INDEX_ACTION, indexAction);
 	}
@@ -187,13 +187,13 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 
 		verify(this.searchService).index(toIndexEntity, testEntityMetaData, indexingMode);
 
-		verify(progress).status("######## START Index transaction id: [aabbcc] ########");
+		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
 		verify(progress).progress(0, "Indexing test.entityId");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
 		verify(progress).status("refreshIndex...");
 		verify(progress).status("refreshIndex done.");
-		verify(progress).status("######## END Index transaction id: [aabbcc] ########");
+		verify(progress).status("Finished indexing for transaction id: [aabbcc]");
 
 		verify(dataService, times(2)).update(INDEX_ACTION, indexAction);
 	}
@@ -214,13 +214,13 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		indexJob.call(this.progress);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
 		verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"));
-		verify(progress).status("######## START Index transaction id: [aabbcc] ########");
+		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
 		verify(progress).progress(0, "Rebuild index of repository test.");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
 		verify(progress).status("refreshIndex...");
 		verify(progress).status("refreshIndex done.");
-		verify(progress).status("######## END Index transaction id: [aabbcc] ########");
+		verify(progress).status("Finished indexing for transaction id: [aabbcc]");
 
 		verify(dataService, times(2)).update(INDEX_ACTION, indexAction);
 
@@ -245,13 +245,13 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		indexJob.call(this.progress);
 		assertEquals(indexAction.getIndexStatus(), FINISHED);
 		verify(this.searchService).rebuildIndex(this.dataService.getRepository("any"));
-		verify(progress).status("######## START Index transaction id: [aabbcc] ########");
+		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
 		verify(progress).progress(0, "Create index of repository test");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
 		verify(progress).status("refreshIndex...");
 		verify(progress).status("refreshIndex done.");
-		verify(progress).status("######## END Index transaction id: [aabbcc] ########");
+		verify(progress).status("Finished indexing for transaction id: [aabbcc]");
 
 		verify(dataService, times(2)).update(INDEX_ACTION, indexAction);
 
@@ -277,13 +277,13 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 
 		verify(this.searchService).delete("test");
 
-		verify(progress).status("######## START Index transaction id: [aabbcc] ########");
+		verify(progress).status("Start indexing for transaction id: [aabbcc]");
 		verify(progress).setProgressMax(1);
 		verify(progress).progress(0, "Dropping index of repository test.");
 		verify(progress).progress(1, "Executed all index actions, cleaning up the actions...");
 		verify(progress).status("refreshIndex...");
 		verify(progress).status("refreshIndex done.");
-		verify(progress).status("######## END Index transaction id: [aabbcc] ########");
+		verify(progress).status("Finished indexing for transaction id: [aabbcc]");
 
 		verify(dataService, times(2)).update(INDEX_ACTION, indexAction);
 	}
