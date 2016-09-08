@@ -58,8 +58,6 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private Config config;
 	@Autowired
-	private IndexActionRegisterService indexActionRegisterService;
-	@Autowired
 	private DataService dataService;
 	@Autowired
 	private EntityTestHarness harness;
