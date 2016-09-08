@@ -3,7 +3,6 @@ package org.molgenis.data.elasticsearch;
 import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.SearchPhaseExecutionException;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -20,7 +19,6 @@ import org.molgenis.data.elasticsearch.response.ResponseParser;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
-import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
@@ -278,10 +276,12 @@ public class ElasticsearchService implements SearchService
 			q.eq(attributeMetaData.getName(), referredEntity);
 		}
 		LOG.debug("q: [{}], referringEntityMetaData: [{}]", q.toString(), referringEntityMetaData.getName());
-		if(hasMapping(referringEntityMetaData))
+		if (hasMapping(referringEntityMetaData))
 		{
 			return searchInternalWithScanScroll(q, referringEntityMetaData);
-		}else{
+		}
+		else
+		{
 			return Stream.empty();
 		}
 	}
@@ -418,6 +418,7 @@ public class ElasticsearchService implements SearchService
 		}
 
 		createMappings(entityMetaData);
+
 		LOG.info("Indexing {} repository in batches of size {}...", entityMetaData.getName(), BATCH_SIZE);
 		repository.forEachBatched(createFetchForReindexing(entityMetaData),
 				entities -> index(entities, entityMetaData, IndexingMode.ADD), BATCH_SIZE);
