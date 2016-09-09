@@ -1031,10 +1031,8 @@ public class RestController
 						if (queryRule.getOperator() == IN || queryRule.getOperator() == RANGE)
 						{
 							//noinspection unchecked
-							queryRule.setValue(restService.toEntityValue(attribute,
-									stream(((Iterable<Object>) queryRule.getValue()).spliterator(), false)
-											.map(val -> restService.toEntityValue(attribute, val))
-											.collect(toList())));
+							queryRule.setValue(stream(((Iterable<Object>) queryRule.getValue()).spliterator(), false)
+									.map(val -> restService.toEntityValue(attribute, val)).collect(toList()));
 						}
 						else
 						{
