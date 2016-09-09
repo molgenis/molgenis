@@ -376,7 +376,6 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	private static void populateAutoAttributeValues(EntityMetaData existingEntityMeta, EntityMetaData entityMeta)
 	{
-		// FIXME getOwnAllAttributes() instead of getAllAttributes()?
 		// inject existing auto-generated identifiers in system entity meta data
 		Map<String, String> attrMap = stream(existingEntityMeta.getOwnAllAttributes().spliterator(), false)
 				.collect(toMap(AttributeMetaData::getName, AttributeMetaData::getIdentifier));
