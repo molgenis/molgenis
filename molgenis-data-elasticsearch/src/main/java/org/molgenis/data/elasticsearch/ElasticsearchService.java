@@ -409,20 +409,19 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void rebuildIndex(Repository<? extends Entity> repository)
 	{
-		LOG.info("Rebuild index for {}...", repository.getName());
 		EntityMetaData entityMetaData = repository.getEntityMetaData();
 
 		if (hasMapping(entityMetaData))
 		{
+			LOG.debug("Delete index for repository {}...", repository.getName());
 			delete(entityMetaData.getName());
 		}
 
 		createMappings(entityMetaData);
-
-		LOG.info("Indexing {} repository in batches of size {}...", entityMetaData.getName(), BATCH_SIZE);
+		LOG.trace("Indexing {} repository in batches of size {}...", repository.getName(), BATCH_SIZE);
 		repository.forEachBatched(createFetchForReindexing(entityMetaData),
 				entities -> index(entities, entityMetaData, IndexingMode.ADD), BATCH_SIZE);
-		LOG.info("Indexed {} repository.", entityMetaData.getName());
+		LOG.debug("Create index for repository {}...", repository.getName());
 	}
 
 	@Override
