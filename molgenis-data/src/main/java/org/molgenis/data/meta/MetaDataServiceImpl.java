@@ -344,10 +344,17 @@ public class MetaDataServiceImpl implements MetaDataService
 		// 2nd pass: create mappedBy attributes and update entity
 		resolvedEntityMeta.forEach(entityMeta ->
 		{
-			EntityMetaData existingEntityMeta = existingEntityMetaMap.get(entityMeta.getName());
 			if (entityMeta.hasMappedByAttributes())
 			{
-				updateEntityMeta(entityMeta, existingEntityMeta);
+				EntityMetaData existingEntityMeta = existingEntityMetaMap.get(entityMeta.getName());
+				if (existingEntityMeta == null)
+				{
+					updateEntityMeta(entityMeta, new EntityMetaDataWithoutMappedByAttributes(entityMeta));
+				}
+				else
+				{
+					updateEntityMeta(entityMeta, existingEntityMeta);
+				}
 			}
 		});
 	}
@@ -369,10 +376,11 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	private static void populateAutoAttributeValues(EntityMetaData existingEntityMeta, EntityMetaData entityMeta)
 	{
+		// FIXME getOwnAllAttributes() instead of getAllAttributes()?
 		// inject existing auto-generated identifiers in system entity meta data
-		Map<String, String> attrMap = stream(existingEntityMeta.getAllAttributes().spliterator(), false)
+		Map<String, String> attrMap = stream(existingEntityMeta.getOwnAllAttributes().spliterator(), false)
 				.collect(toMap(AttributeMetaData::getName, AttributeMetaData::getIdentifier));
-		entityMeta.getAllAttributes().forEach(attr ->
+		entityMeta.getOwnAllAttributes().forEach(attr ->
 		{
 			String attrIdentifier = attrMap.get(attr.getName());
 			if (attrIdentifier != null)
