@@ -9,6 +9,7 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.meta.model.Package;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Stream;
@@ -185,6 +186,43 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	void addEntityMeta(EntityMetaData entityMeta);
 
 	/**
+	 * Add a collection of entity meta data and entity meta data attributes.
+	 *
+	 * @param entityMetas entity meta data collection
+	 */
+	void addEntityMetas(Collection<EntityMetaData> entityMetas);
+
+	/**
+	 * Updates entity meta data and entity meta data attributes.
+	 *
+	 * @param entityMeta entity meta data
+	 * @throws UnknownEntityException if entity meta data does not exist
+	 */
+	void updateEntityMeta(EntityMetaData entityMeta);
+
+	/**
+	 * Updates a collection of entity meta data and entity meta data attributes.
+	 *
+	 * @param entityMetas entity meta data collection
+	 * @throws UnknownEntityException if the entity meta data collection contains a entity meta data that does not exist
+	 */
+	void updateEntityMetas(Collection<EntityMetaData> entityMetas);
+
+	/**
+	 * Add or update entity meta data and entity meta data attributes.
+	 *
+	 * @param entityMeta entity meta data
+	 */
+	void upsertEntityMeta(EntityMetaData entityMeta);
+
+	/**
+	 * Add or update a collection of entity meta data and entity meta data attributes.
+	 *
+	 * @param entityMetas entity meta data collection
+	 */
+	void upsertEntityMetas(Collection<EntityMetaData> entityMetas);
+
+	/**
 	 * Deletes an EntityMeta
 	 *
 	 * @param entityName entity name
@@ -197,14 +235,6 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @param entities
 	 */
 	void delete(List<EntityMetaData> entities);
-
-	/**
-	 * Updates entity meta data and entity meta data attributes.
-	 *
-	 * @param entityMeta entity meta data
-	 * @throws UnknownEntityException if entity meta data does not exist
-	 */
-	void updateEntityMeta(EntityMetaData entityMeta);
 
 	/**
 	 * Adds an Attribute to an EntityMeta

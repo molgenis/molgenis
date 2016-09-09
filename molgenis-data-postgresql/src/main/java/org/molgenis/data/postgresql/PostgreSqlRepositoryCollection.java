@@ -336,7 +336,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		else if (attr.getOrderBy() != null && updatedAttr.getOrderBy() == null)
 		{
 			// create order column
-			createColumn(attr.getRefEntity(), attr);
+			createColumn(updatedAttr.getRefEntity(), updatedAttr);
 		}
 	}
 
@@ -699,15 +699,18 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	private void createColumn(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		String addColumnSql = getSqlAddColumn(entityMeta, attr);
-		if (LOG.isDebugEnabled())
+		if (addColumnSql != null)
 		{
-			LOG.debug("Creating column for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
-			if (LOG.isTraceEnabled())
+			if (LOG.isDebugEnabled())
 			{
-				LOG.trace("SQL: {}", addColumnSql);
+				LOG.debug("Creating column for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
+				if (LOG.isTraceEnabled())
+				{
+					LOG.trace("SQL: {}", addColumnSql);
+				}
 			}
+			jdbcTemplate.execute(addColumnSql);
 		}
-		jdbcTemplate.execute(addColumnSql);
 	}
 
 	private void dropColumn(EntityMetaData entityMeta, AttributeMetaData attr)

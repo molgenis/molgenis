@@ -42,7 +42,8 @@ public class MetaDataServiceImplTest
 		dataService = mock(DataService.class);
 		repoCollectionRegistry = mock(RepositoryCollectionRegistry.class);
 		SystemEntityMetaDataRegistry systemEntityMetaRegistry = mock(SystemEntityMetaDataRegistry.class);
-		metaDataServiceImpl = new MetaDataServiceImpl(dataService, repoCollectionRegistry, systemEntityMetaRegistry);
+		metaDataServiceImpl = new MetaDataServiceImpl(dataService, repoCollectionRegistry, systemEntityMetaRegistry,
+				null);
 	}
 
 	@Test
@@ -570,5 +571,12 @@ public class MetaDataServiceImplTest
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
 		assertEquals(metaDataServiceImpl.isMetaEntityMetaData(entityMeta), isMeta);
+	}
+
+	@Test
+	public void upsertEntityMetas()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+
 	}
 }

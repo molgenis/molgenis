@@ -4,7 +4,6 @@ import com.google.common.collect.Maps;
 import org.mockito.ArgumentCaptor;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.IdGenerator;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -37,7 +36,6 @@ public class SystemEntityMetaDataPersisterTest
 	private SystemEntityMetaDataRegistry systemEntityMetaRegistry;
 	private SystemEntityMetaDataPersister systemEntityMetaDataPersister;
 	private AttributeMetaDataMetaData attrMetaMeta;
-	private IdGenerator idGenerator;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -48,10 +46,8 @@ public class SystemEntityMetaDataPersisterTest
 		when(metaDataService.getDefaultBackend()).thenReturn(defaultRepoCollection);
 		dataService = mock(DataService.class);
 		when(dataService.getMeta()).thenReturn(metaDataService);
-		idGenerator = mock(IdGenerator.class);
 		systemEntityMetaRegistry = mock(SystemEntityMetaDataRegistry.class);
-		systemEntityMetaDataPersister = new SystemEntityMetaDataPersister(dataService, systemEntityMetaRegistry,
-				idGenerator);
+		systemEntityMetaDataPersister = new SystemEntityMetaDataPersister(dataService, systemEntityMetaRegistry);
 		systemEntityMetaDataPersister.setAttributeMetaDataMetaData(attrMetaMeta);
 	}
 

@@ -18,6 +18,7 @@ import static org.mockito.Mockito.*;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.EXTENDS;
+import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
 import static org.testng.Assert.assertEquals;
 
 public class PostgreSqlRepositoryCollectionTest
@@ -84,9 +85,11 @@ public class PostgreSqlRepositoryCollectionTest
 	{
 		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		when(entityMeta.getBackend()).thenReturn(POSTGRESQL);
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refId").getMock();
 		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityMeta.getBackend()).thenReturn(POSTGRESQL);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 		String attrName = "attr";
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
@@ -100,6 +103,8 @@ public class PostgreSqlRepositoryCollectionTest
 		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
 		AttributeMetaData updatedAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
 		when(updatedAttr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(updatedAttr.isMappedBy()).thenReturn(true);
+		when(updatedAttr.getMappedBy()).thenReturn(refAttr);
 		when(updatedAttr.getOrderBy()).thenReturn(null);
 		when(updatedAttr.getRefEntity()).thenReturn(refEntityMeta);
 		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
@@ -649,8 +654,9 @@ public class PostgreSqlRepositoryCollectionTest
 	public void addAttributeOneToManyMappedBy()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		when(entityMeta.getBackend()).thenReturn(POSTGRESQL);
 		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
-
+		when(refEntityMeta.getBackend()).thenReturn(POSTGRESQL);
 		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
 		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refAttr").getMock();

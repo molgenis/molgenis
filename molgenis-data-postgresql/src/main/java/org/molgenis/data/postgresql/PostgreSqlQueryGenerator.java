@@ -22,6 +22,7 @@ import static java.util.stream.IntStream.range;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
+import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
 import static org.molgenis.data.support.EntityMetaDataUtils.*;
 
 /**
@@ -125,6 +126,13 @@ class PostgreSqlQueryGenerator
 				+ getPostgreSqlType(attr) + " USING " + getColumnName(attr) + "::" + getPostgreSqlType(attr);
 	}
 
+	/**
+	 * Returns SQL string to add a column to an existing table.
+	 *
+	 * @param entityMeta entity meta data
+	 * @param attr       attribute
+	 * @return SQL string or <code>null</code> if no table changes are required
+	 */
 	static String getSqlAddColumn(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		StringBuilder sql = new StringBuilder("ALTER TABLE ");
@@ -135,7 +143,14 @@ class PostgreSqlQueryGenerator
 		if (bidirectionalOneToMany)
 		{
 			tableEntityMeta = attr.getRefEntity();
-			columnSql = getSqlOrderColumn(attr);
+			if (attr.getOrderBy() == null && tableEntityMeta.getBackend().equals(POSTGRESQL))
+			{
+				columnSql = getSqlOrderColumn(attr);
+			}
+			else
+			{
+				return null;
+			}
 		}
 		else
 		{
@@ -163,15 +178,6 @@ class PostgreSqlQueryGenerator
 		{
 			AttributeMetaData attr = it.next();
 			sql.append(getSqlColumn(entityMeta, attr));
-
-			if (isSingleReferenceType(attr) && attr.isInversedBy())
-			{
-				AttributeMetaData mappedToAttr = attr.getInversedBy();
-				if (mappedToAttr.getOrderBy() == null)
-				{
-					sql.append(',').append(getSqlOrderColumn(mappedToAttr));
-				}
-			}
 
 			if (it.hasNext())
 			{
@@ -502,7 +508,7 @@ class PostgreSqlQueryGenerator
 
 	private static String getSqlOrderColumn(AttributeMetaData attr)
 	{
-		return new StringBuilder(getSequenceColumnName(attr)).append(" SERIAL").toString();
+		return getSequenceColumnName(attr) + " SERIAL";
 	}
 
 	/**

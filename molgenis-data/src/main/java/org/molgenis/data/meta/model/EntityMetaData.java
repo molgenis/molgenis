@@ -767,6 +767,11 @@ public class EntityMetaData extends StaticEntity
 		return getMappedByAttributes().findFirst().orElse(null) != null;
 	}
 
+	public Stream<AttributeMetaData> getOwnMappedByAttributes()
+	{
+		return stream(getOwnAtomicAttributes().spliterator(), false).filter(AttributeMetaData::isMappedBy);
+	}
+
 	public Stream<AttributeMetaData> getMappedByAttributes()
 	{
 		return stream(getAtomicAttributes().spliterator(), false).filter(AttributeMetaData::isMappedBy);
