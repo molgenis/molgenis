@@ -24,7 +24,6 @@ import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
@@ -812,53 +811,6 @@ public class AttributeMetaDataRepositoryDecoratorTest
 		repo.delete(attr);
 
 		verify(decoratedRepo).delete(attr);
-	}
-
-	@Test
-	public void deleteInversedBy()
-	{
-		String refAttrName = "refAttrName";
-		String refEntityName = "refEntity";
-		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(refEntityName).getMock();
-		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(refAttrName).getMock();
-		String attrName = "attrName";
-		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
-		when(attr.getDataType()).thenReturn(XREF);
-		when(attr.getRefEntity()).thenReturn(refEntityMeta);
-		when(attr.isInversedBy()).thenReturn(true);
-		when(attr.getInversedBy()).thenReturn(refAttr);
-		String attrIdentifier = "id";
-		when(attr.getIdentifier()).thenReturn(attrIdentifier);
-		when(systemEntityMetaRegistry.hasSystemAttributeMetaData(attrIdentifier)).thenReturn(false);
-
-		//noinspection unchecked
-		Query<EntityMetaData> entityQ = mock(Query.class);
-		when(entityQ.eq(ATTRIBUTES, attr)).thenReturn(entityQ);
-		when(entityQ.findOne()).thenReturn(null);
-
-		//noinspection unchecked
-		Query<AttributeMetaData> attrQ = mock(Query.class);
-		when(attrQ.eq(PARTS, attr)).thenReturn(attrQ);
-		when(attrQ.findOne()).thenReturn(null);
-
-		//noinspection unchecked
-		Query<EntityMetaData> refEntityQ = mock(Query.class);
-		when(refEntityQ.eq(ATTRIBUTES, refAttr)).thenReturn(refEntityQ);
-		when(refEntityQ.findOne()).thenReturn(null);
-
-		//noinspection unchecked
-		Query<AttributeMetaData> refAttrQ = mock(Query.class);
-		when(refAttrQ.eq(PARTS, refAttr)).thenReturn(refAttrQ);
-		when(refAttrQ.findOne()).thenReturn(null);
-
-		when(dataService.query(ATTRIBUTE_META_DATA, AttributeMetaData.class)).thenReturn(attrQ).thenReturn(refAttrQ);
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(entityQ).thenReturn(refEntityQ);
-
-		repo.delete(attr);
-
-		verify(decoratedRepo).delete(attr);
-		verify(decoratedRepo).delete(refAttr);
-		verifyNoMoreInteractions(decoratedRepo);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Deleting system entity attribute \\[attrName\\] is not allowed")

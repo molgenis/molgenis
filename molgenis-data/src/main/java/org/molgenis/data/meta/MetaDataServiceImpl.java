@@ -8,8 +8,9 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
-import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,11 +23,9 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.reverse;
 import static com.google.common.collect.Maps.newLinkedHashMap;
-import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.*;
@@ -41,6 +40,8 @@ import static org.molgenis.data.meta.model.TagMetaData.TAG;
 @Component
 public class MetaDataServiceImpl implements MetaDataService
 {
+	private static final Logger LOG = LoggerFactory.getLogger(MetaDataServiceImpl.class);
+
 	private final DataService dataService;
 	private final RepositoryCollectionRegistry repoCollectionRegistry;
 	private final SystemEntityMetaDataRegistry systemEntityMetaRegistry;
@@ -159,14 +160,34 @@ public class MetaDataServiceImpl implements MetaDataService
 	public void deleteEntityMeta(String entityName)
 	{
 		dataService.deleteById(ENTITY_META_DATA, entityName);
+
+		LOG.info("Removed entity [%s]", entityName);
 	}
 
 	@Transactional
 	@Override
-	public void delete(List<EntityMetaData> entities)
+	public void deleteEntityMeta(Collection<EntityMetaData> entityMetas)
 	{
-		List<EntityMetaData> orderedEntities = DependencyResolver.resolve(newHashSet(entities));
-		reverse(orderedEntities).stream().map(EntityMetaData::getName).forEach(this::deleteEntityMeta);
+		if (entityMetas.isEmpty())
+		{
+			return;
+		}
+
+		List<EntityMetaData> resolvedEntityMetas = reverse(entityMetaDependencyResolver.resolve(entityMetas));
+
+		// 1st pass: remove mappedBy attributes
+		List<EntityMetaData> mappedByEntityMetas = resolvedEntityMetas.stream()
+				.filter(EntityMetaData::hasMappedByAttributes).map(EntityMetaDataWithoutMappedByAttributes::new)
+				.collect(toList());
+		if (!mappedByEntityMetas.isEmpty())
+		{
+			dataService.update(ENTITY_META_DATA, mappedByEntityMetas.stream());
+		}
+
+		// 2nd pass: delete entities
+		dataService.deleteAll(ENTITY_META_DATA, resolvedEntityMetas.stream().map(EntityMetaData::getName));
+
+		LOG.info("Removed entities [%s]", entityMetas.stream().map(EntityMetaData::getName).collect(joining(",")));
 	}
 
 	@Transactional
@@ -200,7 +221,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public void addEntityMetas(Collection<EntityMetaData> entityMetas)
+	public void addEntityMeta(Collection<EntityMetaData> entityMetas)
 	{
 		if (entityMetas.isEmpty())
 		{
@@ -262,7 +283,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public void updateEntityMetas(Collection<EntityMetaData> entityMetas)
+	public void updateEntityMeta(Collection<EntityMetaData> entityMetas)
 	{
 		if (entityMetas.isEmpty())
 		{
@@ -304,7 +325,7 @@ public class MetaDataServiceImpl implements MetaDataService
 
 	@Transactional
 	@Override
-	public void upsertEntityMetas(Collection<EntityMetaData> entityMetas)
+	public void upsertEntityMeta(Collection<EntityMetaData> entityMetas)
 	{
 		if (entityMetas.isEmpty())
 		{
@@ -925,7 +946,18 @@ public class MetaDataServiceImpl implements MetaDataService
 		@Override
 		public Iterable<AttributeMetaData> getOwnAttributes()
 		{
-			return entityMeta.getOwnAttributes();
+			// FIXME mappedBy attribute in compound not removed
+			return () -> stream(entityMeta.getOwnAttributes().spliterator(), false).filter(attr ->
+			{
+				if (existingEntityMeta != null)
+				{
+					return !attr.isMappedBy() || existingEntityMeta.getAttribute(attr.getName()) != null;
+				}
+				else
+				{
+					return !attr.isMappedBy();
+				}
+			}).iterator();
 		}
 
 		@Override

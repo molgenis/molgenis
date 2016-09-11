@@ -190,7 +190,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 *
 	 * @param entityMetas entity meta data collection
 	 */
-	void addEntityMetas(Collection<EntityMetaData> entityMetas);
+	void addEntityMeta(Collection<EntityMetaData> entityMetas);
 
 	/**
 	 * Updates entity meta data and entity meta data attributes.
@@ -206,7 +206,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * @param entityMetas entity meta data collection
 	 * @throws UnknownEntityException if the entity meta data collection contains a entity meta data that does not exist
 	 */
-	void updateEntityMetas(Collection<EntityMetaData> entityMetas);
+	void updateEntityMeta(Collection<EntityMetaData> entityMetas);
 
 	/**
 	 * Add or update entity meta data and entity meta data attributes.
@@ -220,7 +220,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 *
 	 * @param entityMetas entity meta data collection
 	 */
-	void upsertEntityMetas(Collection<EntityMetaData> entityMetas);
+	void upsertEntityMeta(Collection<EntityMetaData> entityMetas);
 
 	/**
 	 * Deletes an EntityMeta
@@ -230,11 +230,11 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	void deleteEntityMeta(String entityName);
 
 	/**
-	 * Deletes a list of EntityMetaData
+	 * Deletes a collection of entity meta data.
 	 *
-	 * @param entities
+	 * @param entityMetas entity meta data collection
 	 */
-	void delete(List<EntityMetaData> entities);
+	void deleteEntityMeta(Collection<EntityMetaData> entityMetas);
 
 	/**
 	 * Adds an Attribute to an EntityMeta

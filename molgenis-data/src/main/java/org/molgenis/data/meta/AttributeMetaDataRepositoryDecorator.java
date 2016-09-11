@@ -276,13 +276,6 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	{
 		validateDeleteAllowed(attr);
 
-		// remove attribute that maps this attribute
-		AttributeMetaData inversedBy = attr.getInversedBy();
-		if (inversedBy != null)
-		{
-			this.delete(inversedBy);
-		}
-
 		// remove this attribute
 		decoratedRepo.delete(attr);
 	}

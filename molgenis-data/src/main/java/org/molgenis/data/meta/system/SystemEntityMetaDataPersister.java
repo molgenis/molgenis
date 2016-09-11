@@ -1,11 +1,9 @@
 package org.molgenis.data.meta.system;
 
-import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.util.DependencyResolver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -14,10 +12,10 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.REF_ENTITY;
@@ -89,7 +87,7 @@ public class SystemEntityMetaDataPersister
 
 		// persist entity meta data
 		List<EntityMetaData> metaEntityMetaSet = systemEntityMetaRegistry.getSystemEntityMetaDatas().collect(toList());
-		dataService.getMeta().upsertEntityMetas(metaEntityMetaSet);
+		dataService.getMeta().upsertEntityMeta(metaEntityMetaSet);
 
 		// remove entity meta data
 		removeNonExistingSystemEntities();
@@ -140,19 +138,12 @@ public class SystemEntityMetaDataPersister
 				.filter(SystemEntityMetaDataPersister::isSystemEntity).collect(toSet());
 
 		// determine removed system entities
-		Map<String, EntityMetaData> removedSystemEntityMetaMap = systemEntityMetaSet.stream().filter(this::isNotExists)
-				.collect(toMap(EntityMetaData::getName, Function.identity()));
+		List<EntityMetaData> removedSystemEntityMetas = systemEntityMetaSet.stream().filter(this::isNotExists)
+				.collect(toList());
 
-		if (!removedSystemEntityMetaMap.isEmpty())
+		if (!removedSystemEntityMetas.isEmpty())
 		{
-			// sort removed entities by dependency
-			List<EntityMetaData> sortedSystemEntityMetaList = DependencyResolver.resolve(systemEntityMetaSet);
-			List<EntityMetaData> sortedRemovedSystemEntityMetaList = sortedSystemEntityMetaList.stream()
-					.filter(entityMeta -> removedSystemEntityMetaMap.containsKey(entityMeta.getName()))
-					.collect(toList());
-
-			// remove entities in reverse order of dependencies
-			dataService.delete(ENTITY_META_DATA, Lists.reverse(sortedRemovedSystemEntityMetaList).stream());
+			dataService.getMeta().deleteEntityMeta(removedSystemEntityMetas);
 		}
 	}
 
