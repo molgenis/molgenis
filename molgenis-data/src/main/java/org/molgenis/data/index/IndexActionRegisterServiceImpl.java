@@ -86,14 +86,12 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 			}
 			IndexAction indexAction = indexActionFactory.create()
 					.setIndexActionGroup(indexActionGroupFactory.create(transactionId))
-					.setEntityFullName(entityFullName).setEntityId(entityId)
-					.setIndexStatus(PENDING);
+					.setEntityFullName(entityFullName).setEntityId(entityId).setIndexStatus(PENDING);
 			indexActionsPerTransaction.put(transactionId, indexAction);
 		}
 		else
 		{
-			LOG.error(
-					"Transaction id is unknown, register of entityFullName [{}] dataType [{}], entityId [{}]",
+			LOG.error("Transaction id is unknown, register of entityFullName [{}] dataType [{}], entityId [{}]",
 					entityFullName, entityId);
 
 		}
@@ -105,8 +103,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	{
 		Set<IndexAction> indexActionSet = getIndexActionsForCurrentTransaction().stream()
 				.filter(indexAction -> !excludedEntities.contains(indexAction.getEntityFullName()))
-				.flatMap(this::addReferencingEntities)
-				.collect(toSet());
+				.flatMap(this::addReferencingEntities).collect(toSet());
 
 		List<IndexAction> indexActions1 = newArrayList(indexActionSet);
 		for (int i = 0; i < indexActions1.size(); i++)
@@ -131,19 +128,16 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	 */
 	private Stream<IndexAction> addReferencingEntities(IndexAction indexAction)
 	{
-		if (indexAction.getEntityId() != null
-				|| !dataService.hasRepository(
+		if (indexAction.getEntityId() != null || !dataService.hasRepository(
 				indexAction.getEntityFullName())) // When entity is deleted the entityMetaData cannot be retrieved
 		{
 			return Stream.of(indexAction);
 		}
 		return Stream.concat(Stream.of(indexAction), EntityUtils
 				.getReferencingEntityMetaData(dataService.getEntityMetaData(indexAction.getEntityFullName()),
-						dataService).stream().map(pair ->
-						indexActionFactory.create()
-								.setEntityFullName(pair.getA().getName())
-								.setIndexActionGroup(indexAction.getIndexActionGroup())
-								.setIndexStatus(PENDING)));
+						dataService).stream()
+				.map(pair -> indexActionFactory.create().setEntityFullName(pair.getA().getName())
+						.setIndexActionGroup(indexAction.getIndexActionGroup()).setIndexStatus(PENDING)));
 	}
 
 	@Override
@@ -174,8 +168,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	public boolean isEntireRepositoryDirty(String entityName)
 	{
 		return getIndexActionsForCurrentTransaction().stream().anyMatch(
-				indexAction -> indexAction.getEntityId() == null && indexAction.getEntityFullName()
-						.equals(entityName));
+				indexAction -> indexAction.getEntityId() == null && indexAction.getEntityFullName().equals(entityName));
 	}
 
 	@Override
@@ -188,8 +181,7 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	@Override
 	public Set<EntityKey> getDirtyEntities()
 	{
-		return getIndexActionsForCurrentTransaction().stream()
-				.filter(indexAction -> indexAction.getEntityId() != null)
+		return getIndexActionsForCurrentTransaction().stream().filter(indexAction -> indexAction.getEntityId() != null)
 				.map(indexAction -> EntityKey.create(indexAction.getEntityFullName(), indexAction.getEntityId()))
 				.collect(toSet());
 	}
@@ -197,9 +189,8 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	@Override
 	public Set<String> getEntirelyDirtyRepositories()
 	{
-		return getIndexActionsForCurrentTransaction().stream()
-				.filter(indexAction -> indexAction.getEntityId() == null).map(IndexAction::getEntityFullName)
-				.collect(toSet());
+		return getIndexActionsForCurrentTransaction().stream().filter(indexAction -> indexAction.getEntityId() == null)
+				.map(IndexAction::getEntityFullName).collect(toSet());
 	}
 
 	@Override

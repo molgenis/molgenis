@@ -32,8 +32,7 @@ public class IndexActionRepositoryDecoratorTest
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
 		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
 		indexActionRegisterService = mock(IndexActionRegisterService.class);
-		indexActionRepositoryDecorator = new IndexActionRepositoryDecorator(decoratedRepo,
-				indexActionRegisterService);
+		indexActionRepositoryDecorator = new IndexActionRepositoryDecorator(decoratedRepo, indexActionRegisterService);
 	}
 
 	@Test
