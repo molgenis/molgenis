@@ -342,6 +342,13 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 		if (!Objects.equals(currentDataType, newDataType))
 		{
 			validateUpdateDataType(currentDataType, newDataType);
+
+			if (newAttr.isInversedBy())
+			{
+				throw new MolgenisDataException(
+						format("Attribute data type change not allowed for bidirectional attribute [%s]",
+								newAttr.getName()));
+			}
 		}
 
 		// expression
