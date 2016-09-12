@@ -27,10 +27,12 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
 
 @ContextConfiguration(classes = { IndexBootstrapperTest.Config.class })
 public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
@@ -91,7 +93,8 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		when(action.getEntityId()).thenReturn("myEntityId");
 
 		when(dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
-				new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, "FAILED"), IndexJobExecution.class))
+				new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED).or().eq(JobExecutionMetaData.STATUS, PENDING)
+						.or().eq(JobExecutionMetaData.STATUS, RUNNING).or().eq(JobExecutionMetaData.STATUS, CANCELED), IndexJobExecution.class))
 				.thenReturn(Stream.of(indexJobExecution));
 		when(dataService.findAll(IndexActionMetaData.INDEX_ACTION,
 				new QueryImpl<IndexAction>().eq(IndexActionMetaData.INDEX_ACTION_GROUP_ATTR, "id"), IndexAction.class))
@@ -111,7 +114,9 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 		when(searchService.hasMapping(AttributeMetaDataMetaData.ATTRIBUTE_META_DATA)).thenReturn(true);
 
 		when(dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
-				new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, "FAILED"), IndexJobExecution.class))
+				new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED).or().eq(JobExecutionMetaData.STATUS, PENDING)
+						.or().eq(JobExecutionMetaData.STATUS, RUNNING).or().eq(JobExecutionMetaData.STATUS, CANCELED),
+				IndexJobExecution.class))
 				.thenReturn(Collections.<IndexJobExecution>emptyList().stream());
 		indexBootstrapper.bootstrap();
 
