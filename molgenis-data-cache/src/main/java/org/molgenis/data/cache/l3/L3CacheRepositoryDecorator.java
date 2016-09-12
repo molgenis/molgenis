@@ -3,6 +3,7 @@ package org.molgenis.data.cache.l3;
 import org.molgenis.data.*;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.TransactionInformation;
+import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -10,6 +11,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
+import static org.slf4j.LoggerFactory.getLogger;
 
 /**
  * Retrieves identifiers from the {@link L3Cache} based on a {@link Query}
@@ -19,6 +21,8 @@ import static org.molgenis.data.RepositoryCapability.CACHEABLE;
  */
 public class L3CacheRepositoryDecorator extends AbstractRepositoryDecorator<Entity>
 {
+	private static final Logger LOG = getLogger(L3CacheRepositoryDecorator.class);
+
 	private final L3Cache l3Cache;
 	private final boolean cacheable;
 	private final Repository<Entity> decoratedRepository;
@@ -53,11 +57,19 @@ public class L3CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	@Override
 	public Stream<Entity> findAll(Query<Entity> query)
 	{
-		if (transactionInformation.isRepositoryCompletelyClean(getName()) && cacheable && query.getPageSize() > 0
-				&& query.getPageSize() <= MAX_PAGE_SIZE)
+		if (transactionInformation.isRepositoryCompletelyClean(getName()))
 		{
-			List<Object> ids = l3Cache.get(delegate(), query);
-			return delegate().findAll(ids.stream(), query.getFetch());
+			// FIXME page size for metadata is always 0, and batching is done by the postgres repository
+			// FIXME Only superusers are able to use the L3 cache for metadata
+			if (cacheable && query.getPageSize() > 0 && query.getPageSize() <= MAX_PAGE_SIZE)
+			{
+				List<Object> ids = l3Cache.get(delegate(), query);
+				return delegate().findAll(ids.stream(), query.getFetch());
+			}
+		}
+		else
+		{
+			LOG.debug("Repository is dirty: {}", getName());
 		}
 		return delegate().findAll(query);
 	}

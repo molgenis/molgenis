@@ -18,6 +18,8 @@ public interface SearchService
 
 	boolean hasMapping(EntityMetaData entityMetaData);
 
+	boolean hasMapping(String entityName);
+
 	void createMappings(EntityMetaData entityMetaData);
 
 	void createMappings(EntityMetaData entityMetaData, boolean enableNorms, boolean createAllIndex);

@@ -24,8 +24,8 @@ import org.molgenis.data.meta.PackageRepositoryDecorator;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
-import org.molgenis.data.reindex.ReindexActionRegisterService;
-import org.molgenis.data.reindex.ReindexActionRepositoryDecorator;
+import org.molgenis.data.index.IndexActionRegisterService;
+import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.validation.EntityAttributesValidator;
@@ -61,7 +61,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final RepositoryDecoratorRegistry repositoryDecoratorRegistry;
 	private final SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
 	private final UserAuthorityFactory userAuthorityFactory;
-	private final ReindexActionRegisterService reindexActionRegisterService;
+	private final IndexActionRegisterService indexActionRegisterService;
 	private final SearchService searchService;
 	private final AttributeMetaDataFactory attrMetaFactory;
 	private final PasswordEncoder passwordEncoder;
@@ -81,7 +81,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			DataService dataService, ExpressionValidator expressionValidator,
 			RepositoryDecoratorRegistry repositoryDecoratorRegistry,
 			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, UserAuthorityFactory userAuthorityFactory,
-			ReindexActionRegisterService reindexActionRegisterService, SearchService searchService,
+			IndexActionRegisterService indexActionRegisterService, SearchService searchService,
 			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder,
 			EntityMetaDataMetaData entityMetaMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
@@ -98,7 +98,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.repositoryDecoratorRegistry = requireNonNull(repositoryDecoratorRegistry);
 		this.systemEntityMetaDataRegistry = requireNonNull(systemEntityMetaDataRegistry);
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
-		this.reindexActionRegisterService = requireNonNull(reindexActionRegisterService);
+		this.indexActionRegisterService = requireNonNull(indexActionRegisterService);
 		this.searchService = requireNonNull(searchService);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 		this.passwordEncoder = requireNonNull(passwordEncoder);
@@ -130,8 +130,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		// 9. Query the L3 cache before querying the index
 		decoratedRepository = new L3CacheRepositoryDecorator(decoratedRepository, l3Cache, transactionInformation);
 
-		// 8. Register the cud action needed to reindex indexed repositories
-		decoratedRepository = new ReindexActionRepositoryDecorator(decoratedRepository, reindexActionRegisterService);
+		// 8. Register the cud action needed to index indexed repositories
+		decoratedRepository = new IndexActionRepositoryDecorator(decoratedRepository, indexActionRegisterService);
 
 		// 7. Custom decorators
 		decoratedRepository = applyCustomRepositoryDecorators(decoratedRepository);

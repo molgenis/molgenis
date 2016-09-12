@@ -28,5 +28,5 @@ import "select2";
 import "react-components/css/wrapper/select2.css";
 import "urijs";
 import "react";
-import "react/addons"
+import "react/addons";
 import "promise";

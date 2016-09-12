@@ -20,32 +20,32 @@ var JobContainer = React.createClass({
         jobHref: React.PropTypes.string,
         onCompletion: React.PropTypes.func
     },
-    getInitialState: function() {
+    getInitialState: function () {
         return {
-            job : null
+            job: null
         }
     },
-    componentDidMount: function() {
+    componentDidMount: function () {
         this.retrieveJob();
         this.setInterval(this.retrieveJob, 1000);
     },
-    render: function() {
-        if(this.state.job) {
+    render: function () {
+        if (this.state.job) {
             return <Job job={this.state.job}/>
         } else {
             return <Spinner />;
         }
     },
-    retrieveJob: function() {
+    retrieveJob: function () {
         var self = this;
-        $.get(this.props.jobHref, function(job) {
-        	self.setState({job: job})
-        	if((job.status === 'SUCCESS' || job.status === 'FAILED' || job.status === 'FINISHED') && self.props.onCompletion) {
-        		self.props.onCompletion(job);
-        	} 
+        $.get(this.props.jobHref, function (job) {
+            self.setState({job: job})
+            if ((job.status === 'SUCCESS' || job.status === 'FAILED' || job.status === 'FINISHED') && self.props.onCompletion) {
+                self.props.onCompletion(job);
+            }
         });
     }
 });
 
-export { JobContainer };
+export {JobContainer};
 export default React.createFactory(JobContainer);
