@@ -15,29 +15,29 @@ export default class RestClient {
         var resource = null;
 
         var config = {
-            'dataType' : 'json',
-            'cache' : true,
-            'async' : async
+            'dataType': 'json',
+            'cache': true,
+            'async': async
         };
 
-        if(callback) {
-            config['success'] = function(data) {
+        if (callback) {
+            config['success'] = function (data) {
                 callback(data);
             };
-        } else if(async === false) {
-            config['success'] = function(data) {
+        } else if (async === false) {
+            config['success'] = function (data) {
                 resource = data;
             };
         }
 
         // tunnel get requests with options through a post,
         // because it might not fit in the URL
-        if(options) {
+        if (options) {
             // backward compatibility for legacy code
-            if(options.q && !Array.isArray(options.q)) {
+            if (options.q && !Array.isArray(options.q)) {
                 var obj = $.extend({}, options.q);
                 delete options.q;
-                for(var i = 0, keys = Object.keys(obj); i < keys.length; ++i) {
+                for (var i = 0, keys = Object.keys(obj); i < keys.length; ++i) {
                     options[keys[i]] = obj[keys[i]];
                 }
             }
@@ -51,15 +51,15 @@ export default class RestClient {
             url = url + '_method=GET';
 
             $.extend(config, {
-                'type' : 'POST',
-                'url' : url,
-                'data' : JSON.stringify(options),
-                'contentType' : 'application/json'
+                'type': 'POST',
+                'url': url,
+                'data': JSON.stringify(options),
+                'contentType': 'application/json'
             });
         } else {
             $.extend(config, {
-                'type' : 'GET',
-                'url' : resourceUri
+                'type': 'GET',
+                'url': resourceUri
             });
         }
 
@@ -74,8 +74,8 @@ export default class RestClient {
     _ajax(config) {
         if (this.token) {
             $.extend(config, {
-                headers : {
-                    'x-molgenis-token' : this.token
+                headers: {
+                    'x-molgenis-token': this.token
                 }
             });
         }
@@ -111,35 +111,39 @@ export default class RestClient {
 
     remove(href, callback) {
         return this._ajax({
-            type : 'POST',
-            url : href,
-            data : '_method=DELETE',
-            async : false,
-            success : callback && callback.success ? callback.success : function() {},
-            error : callback && callback.error ? callback.error : function() {}
+            type: 'POST',
+            url: href,
+            data: '_method=DELETE',
+            async: false,
+            success: callback && callback.success ? callback.success : function () {
+            },
+            error: callback && callback.error ? callback.error : function () {
+            }
         });
     };
 
     update(href, entity, callback, showSpinner) {
         return this._ajax({
-            type : 'POST',
-            url : href + '?_method=PUT',
-            contentType : 'application/json',
-            data : JSON.stringify(entity),
-            async : true,
+            type: 'POST',
+            url: href + '?_method=PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(entity),
+            async: true,
             showSpinner: showSpinner,
-            success : callback && callback.success ? callback.success : function() {},
-            error : callback && callback.error ? callback.error : function() {}
+            success: callback && callback.success ? callback.success : function () {
+            },
+            error: callback && callback.error ? callback.error : function () {
+            }
         });
     };
 
     entityExists(resourceUri) {
         var result = false;
         this._ajax({
-            dataType : 'json',
-            url : resourceUri + '/exist',
-            async : false,
-            success : function(exists) {
+            dataType: 'json',
+            url: resourceUri + '/exist',
+            async: false,
+            success: function (exists) {
                 result = exists;
             }
         });
@@ -149,32 +153,32 @@ export default class RestClient {
 
     login(username, password, callback) {
         $.ajax({
-            type : 'POST',
-            dataType : 'json',
-            url : '/api/v1/login',
-            contentType : 'application/json',
-            async : true,
-            data : JSON.stringify({
-                username : username,
-                password : password
+            type: 'POST',
+            dataType: 'json',
+            url: '/api/v1/login',
+            contentType: 'application/json',
+            async: true,
+            data: JSON.stringify({
+                username: username,
+                password: password
             }),
-            success : function(loginResult) {
+            success: function (loginResult) {
                 this.token = loginResult.token;
                 callback.success({
-                    username : loginResult.username,
-                    firstname : loginResult.firstname,
-                    lastname : loginResult.lastname
+                    username: loginResult.username,
+                    firstname: loginResult.firstname,
+                    lastname: loginResult.lastname
                 });
             },
-            error : callback.error
+            error: callback.error
         });
     };
 
     logout(callback) {
         this._ajax({
-            url : '/api/v1/logout',
-            async : true,
-            success : function() {
+            url: '/api/v1/logout',
+            async: true,
+            success: function () {
                 this.token = null;
                 callback();
             }

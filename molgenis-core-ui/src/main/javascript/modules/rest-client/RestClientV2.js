@@ -4,12 +4,12 @@ import {htmlEscape} from "../utils/HtmlUtils";
 
 var apiBaseUri = '/api/v2/';
 
-var createAttrsValue = function(attrs) {
+var createAttrsValue = function (attrs) {
     var items = [];
     for (var key in attrs) {
         if (attrs.hasOwnProperty(key)) {
-            if(attrs[key]) {
-                if(attrs[key] === '*') {
+            if (attrs[key]) {
+                if (attrs[key] === '*') {
                     items.push(encodeURIComponent(key) + '(*)'); // do not encode wildcard and parenthesis
                 } else {
                     items.push(encodeURIComponent(key) + '(' + createAttrsValue(attrs[key]) + ')'); // do not encode parenthesis
@@ -22,9 +22,9 @@ var createAttrsValue = function(attrs) {
     return items.join(','); // do not encode comma
 };
 
-var toRsqlValue = function(value) {
+var toRsqlValue = function (value) {
     var rsqlValue;
-    if (_.isString(value)===false || (value.indexOf('"') !== -1 || value.indexOf('\'') !== -1 || value.indexOf('(') !== -1 || value.indexOf(')') !== -1 || value.indexOf(';') !== -1
+    if (_.isString(value) === false || (value.indexOf('"') !== -1 || value.indexOf('\'') !== -1 || value.indexOf('(') !== -1 || value.indexOf(')') !== -1 || value.indexOf(';') !== -1
         || value.indexOf(',') !== -1 || value.indexOf('=') !== -1 || value.indexOf('!') !== -1 || value.indexOf('~') !== -1 || value.indexOf('<') !== -1
         || value.indexOf('>') !== -1 || value.indexOf(' ') !== -1)) {
         rsqlValue = '"' + encodeURIComponent(value) + '"';
@@ -34,19 +34,19 @@ var toRsqlValue = function(value) {
     return rsqlValue;
 };
 
-var createRsqlAggregateQuery = function(aggs) {
+var createRsqlAggregateQuery = function (aggs) {
     var rsql = '';
-    if(aggs.x) {
+    if (aggs.x) {
         rsql += 'x==' + toRsqlValue(aggs.x);
     }
-    if(aggs.y) {
-        if(rsql.length > 0) {
+    if (aggs.y) {
+        if (rsql.length > 0) {
             rsql += ';';
         }
         rsql += 'y==' + toRsqlValue(aggs.y);
     }
-    if(aggs.distinct) {
-        if(rsql.length > 0) {
+    if (aggs.distinct) {
+        if (rsql.length > 0) {
             rsql += ';';
         }
         rsql += 'distinct==' + toRsqlValue(aggs.distinct);
@@ -58,13 +58,13 @@ export function createRsqlQuery(rules) {
     var rsql = '';
 
     // simplify query
-    while(rules.length === 1 && rules[0].operator === 'NESTED') {
+    while (rules.length === 1 && rules[0].operator === 'NESTED') {
         rules = rules[0].nestedRules;
     }
 
-    for(var i = 0; i < rules.length; ++i) {
+    for (var i = 0; i < rules.length; ++i) {
         var rule = rules[i];
-        switch(rule.operator) {
+        switch (rule.operator) {
             case 'SEARCH':
                 var field = rule.field !== undefined ? rule.field : '*';
                 rsql += encodeURIComponent(field) + '=q=' + toRsqlValue(rule.value);
@@ -73,7 +73,7 @@ export function createRsqlQuery(rules) {
                 rsql += encodeURIComponent(rule.field) + '==' + toRsqlValue(rule.value);
                 break;
             case 'IN':
-                rsql += encodeURIComponent(rule.field) + '=in=' + '(' + $.map(rule.value, function(value) {
+                rsql += encodeURIComponent(rule.field) + '=in=' + '(' + $.map(rule.value, function (value) {
                         return toRsqlValue(value);
                     }).join(',') + ')';
                 break;
@@ -100,26 +100,26 @@ export function createRsqlQuery(rules) {
                 break;
             case 'AND':
                 // ignore dangling AND rule
-                if(i > 0 && i < rules.length - 1) {
+                if (i > 0 && i < rules.length - 1) {
                     rsql += ';';
                 }
                 break;
             case 'OR':
                 // ignore dangling OR rule
-                if(i > 0 && i < rules.length - 1) {
+                if (i > 0 && i < rules.length - 1) {
                     rsql += ',';
                 }
                 break;
             case 'NESTED':
                 // do not nest in case of only one nested rule
-                if(rule.nestedRules.length > 1) {
+                if (rule.nestedRules.length > 1) {
                     rsql += '(';
                 }
                 // ignore rule without nested rules
-                if(rule.nestedRules.length > 0) {
+                if (rule.nestedRules.length > 0) {
                     rsql += createRsqlQuery(rule.nestedRules);
                 }
-                if(rule.nestedRules.length > 1) {
+                if (rule.nestedRules.length > 1) {
                     rsql += ')';
                 }
                 break;
@@ -136,8 +136,8 @@ export function createRsqlQuery(rules) {
     return rsql;
 };
 
-var createSortValue = function(sort) {
-    var qs = _.map(sort.orders, function(order) {
+var createSortValue = function (sort) {
+    var qs = _.map(sort.orders, function (order) {
         return encodeURIComponent(order.attr) + (order.direction === 'desc' ? ':desc' : '');
     }).join(','); // do not encode comma
     return qs;
@@ -146,7 +146,7 @@ var createSortValue = function(sort) {
 export default class RestClientV2 {
 
     get(resourceUri, options) {
-        if(!resourceUri.startsWith('/api/')) {
+        if (!resourceUri.startsWith('/api/')) {
             // assume that resourceUri is a entity name
             resourceUri = apiBaseUri + htmlEscape(resourceUri);
         }
@@ -155,24 +155,24 @@ export default class RestClientV2 {
         if (options) {
             var items = [];
 
-            if(options.q) {
-                if(options.q.length > 0) {
+            if (options.q) {
+                if (options.q.length > 0) {
                     items.push('q=' + createRsqlQuery(options.q));
                 }
             }
-            if(options.aggs) {
+            if (options.aggs) {
                 items.push('aggs=' + createRsqlAggregateQuery(options.aggs));
             }
             if (options.attrs) {
                 items.push('attrs=' + createAttrsValue(options.attrs));
             }
-            if(options.sort) {
+            if (options.sort) {
                 items.push('sort=' + createSortValue(options.sort));
             }
-            if(options.start !== undefined) {
+            if (options.start !== undefined) {
                 items.push('start=' + options.start);
             }
-            if(options.num !== undefined) {
+            if (options.num !== undefined) {
                 items.push('num=' + options.num);
             }
             qs = items.join('&');
@@ -180,12 +180,12 @@ export default class RestClientV2 {
             qs = null;
         }
 
-        if((qs ? resourceUri + '?' + qs : resourceUri).length < 2048) {
+        if ((qs ? resourceUri + '?' + qs : resourceUri).length < 2048) {
             return $.ajax({
                 method: 'GET',
                 url: qs ? resourceUri + '?' + qs : resourceUri,
-                dataType : 'json',
-                cache : true
+                dataType: 'json',
+                cache: true
             });
         } else {
             // keep URLs under 2048 chars: http://stackoverflow.com/a/417184
@@ -193,18 +193,18 @@ export default class RestClientV2 {
             return $.ajax({
                 method: 'POST',
                 url: resourceUri + '?_method=GET',
-                dataType : 'json',
+                dataType: 'json',
                 contentType: 'application/x-www-form-urlencoded',
                 data: qs,
-                cache : true
+                cache: true
             });
         }
     };
 
     remove(name, id) {
         return $.ajax({
-            type : 'DELETE',
-            url : apiBaseUri + encodeURI(name) + '/' + encodeURI(id)
+            type: 'DELETE',
+            url: apiBaseUri + encodeURI(name) + '/' + encodeURI(id)
         });
     };
 }
