@@ -304,7 +304,7 @@ public class MetaDataServiceImpl implements MetaDataService
 			{
 				throw new UnknownEntityException(format("Unknown entity [%s]", entityMeta.getName()));
 			}
-			if (entityMeta.hasMappedByAttributes())
+			if (hasNewMappedByAttrs(entityMeta, existingEntityMeta))
 			{
 				entityMeta = new EntityMetaDataWithoutMappedByAttributes(entityMeta, existingEntityMeta);
 			}
@@ -316,11 +316,27 @@ public class MetaDataServiceImpl implements MetaDataService
 		resolvedEntityMeta.forEach(entityMeta ->
 		{
 			EntityMetaData existingEntityMeta = existingEntityMetaMap.get(entityMeta.getName());
-			if (entityMeta.hasMappedByAttributes())
+			if (hasNewMappedByAttrs(entityMeta, existingEntityMeta))
 			{
 				updateEntityMeta(entityMeta, existingEntityMeta);
 			}
 		});
+	}
+
+	/**
+	 * Returns true if entity meta contains mapped by attributes that do not exist in the existing entity meta.
+	 *
+	 * @param entityMeta         entity meta data
+	 * @param existingEntityMeta existing entity meta data
+	 * @return true if entity meta contains mapped by attributes that do not exist in the existing entity meta.
+	 */
+	private static boolean hasNewMappedByAttrs(EntityMetaData entityMeta, EntityMetaData existingEntityMeta)
+	{
+		Set<String> mappedByAttrs = entityMeta.getOwnMappedByAttributes().map(AttributeMetaData::getName)
+				.collect(toSet());
+		Set<String> existingMappedByAttrs = existingEntityMeta.getOwnMappedByAttributes()
+				.map(AttributeMetaData::getName).collect(toSet());
+		return !mappedByAttrs.equals(existingMappedByAttrs);
 	}
 
 	@Transactional
@@ -353,7 +369,7 @@ public class MetaDataServiceImpl implements MetaDataService
 			}
 			else
 			{
-				if (entityMeta.hasMappedByAttributes())
+				if (hasNewMappedByAttrs(entityMeta, existingEntityMeta))
 				{
 					entityMeta = new EntityMetaDataWithoutMappedByAttributes(entityMeta, existingEntityMeta);
 				}
@@ -365,14 +381,17 @@ public class MetaDataServiceImpl implements MetaDataService
 		// 2nd pass: create mappedBy attributes and update entity
 		resolvedEntityMeta.forEach(entityMeta ->
 		{
-			if (entityMeta.hasMappedByAttributes())
+			EntityMetaData existingEntityMeta = existingEntityMetaMap.get(entityMeta.getName());
+			if (existingEntityMeta == null)
 			{
-				EntityMetaData existingEntityMeta = existingEntityMetaMap.get(entityMeta.getName());
-				if (existingEntityMeta == null)
+				if (entityMeta.hasMappedByAttributes())
 				{
 					updateEntityMeta(entityMeta, new EntityMetaDataWithoutMappedByAttributes(entityMeta));
 				}
-				else
+			}
+			else
+			{
+				if (hasNewMappedByAttrs(entityMeta, existingEntityMeta))
 				{
 					updateEntityMeta(entityMeta, existingEntityMeta);
 				}
