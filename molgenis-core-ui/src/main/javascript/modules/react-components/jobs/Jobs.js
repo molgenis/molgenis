@@ -9,11 +9,10 @@
  *
  * @exports Job class
  */
-import React from 'react';
-import { RunningJobs } from './RunningJobs';
-import { JobTable } from './JobTable';
-import { Modal } from '../Modal';
-import { JobDetails } from './JobDetails';
+import React from "react";
+import {RunningJobs} from "./RunningJobs";
+import {Modal} from "../Modal";
+import {JobDetails} from "./JobDetails";
 
 var Jobs = React.createClass({
     displayName: 'Jobs',
@@ -37,7 +36,7 @@ var Jobs = React.createClass({
             </div>}
             {finishedJobs.length > 0 && <div className="row">
                 <div className="col-md-12">
-                    {React.cloneElement(this.props.children,{
+                    {React.cloneElement(this.props.children, {
                         jobs: finishedJobs,
                         onSelect: onSelect
                     })}
@@ -55,5 +54,5 @@ var Jobs = React.createClass({
     }
 });
 
-export { Jobs };
+export {Jobs};
 export default React.createFactory(Jobs);

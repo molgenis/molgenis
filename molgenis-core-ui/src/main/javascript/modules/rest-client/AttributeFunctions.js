@@ -8,18 +8,20 @@
  */
 export function getAtomicAttributes(attributes, restClient) {
     var atomicAttributes = [];
+
     function createAtomicAttributesRec(attributes) {
-        $.each(attributes, function(i, attribute) {
+        $.each(attributes, function (i, attribute) {
             if (attribute.fieldType === 'COMPOUND') {
                 // FIXME improve performance by retrieving async
                 attribute = restClient.get(attribute.href, {
-                    'expand' : [ 'attributes' ]
+                    'expand': ['attributes']
                 });
                 createAtomicAttributesRec(attribute.attributes);
             } else
                 atomicAttributes.push(attribute);
         });
     }
+
     createAtomicAttributesRec(attributes);
     return atomicAttributes;
 }
@@ -35,36 +37,40 @@ export function getAtomicAttributes(attributes, restClient) {
  */
 export function getCompoundAttributes(attributes, restClient) {
     var compoundAttributes = [];
+
     function createAtomicAttributesRec(attributes) {
-        $.each(attributes, function(i, attribute) {
+        $.each(attributes, function (i, attribute) {
             if (attribute.fieldType === 'COMPOUND') {
                 // FIXME improve performance by retrieving async
                 attribute = restClient.get(attribute.href, {
-                    'expand' : [ 'attributes' ]
+                    'expand': ['attributes']
                 });
                 compoundAttributes.push(attribute);
                 createAtomicAttributesRec(attribute.attributes);
             }
         });
     }
+
     createAtomicAttributesRec(attributes);
     return compoundAttributes;
 }
 
 export function getAllAttributes(attributes, restClient) {
     var tree = [];
+
     function createAttributesRec(attributes) {
-        $.each(attributes, function(i, attribute) {
+        $.each(attributes, function (i, attribute) {
             tree.push(attribute);
             if (attribute.fieldType === 'COMPOUND') {
                 // FIXME improve performance by retrieving async
                 attribute = restClient.get(attribute.href, {
-                    'expand' : [ 'attributes' ]
+                    'expand': ['attributes']
                 });
                 createAttributesRec(attribute.attributes);
             }
         });
     }
+
     createAttributesRec(attributes);
     return tree;
 }
@@ -80,7 +86,7 @@ export function getAttributeLabel(attribute) {
 }
 
 export function isRefAttr(attr) {
-    switch(attr.fieldType) {
+    switch (attr.fieldType) {
         case 'CATEGORICAL':
         case 'CATEGORICAL_MREF':
         case 'MREF':
