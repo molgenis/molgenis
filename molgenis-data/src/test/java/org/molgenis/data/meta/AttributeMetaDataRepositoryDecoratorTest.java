@@ -24,6 +24,8 @@ import static java.util.Collections.*;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
@@ -798,6 +800,7 @@ public class AttributeMetaDataRepositoryDecoratorTest
 		String mappedByAttrName = "mappedByAttrName";
 		AttributeMetaData mappedByAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(mappedByAttrName)
 				.getMock();
+		when(mappedByAttr.getDataType()).thenReturn(XREF);
 		when(attr.getMappedBy()).thenReturn(mappedByAttr);
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
 		repo.add(attr);
@@ -815,6 +818,25 @@ public class AttributeMetaDataRepositoryDecoratorTest
 		String mappedByAttrName = "mappedByAttrName";
 		AttributeMetaData mappedByAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(mappedByAttrName)
 				.getMock();
+		when(mappedByAttr.getDataType()).thenReturn(XREF);
+		when(attr.getMappedBy()).thenReturn(mappedByAttr);
+		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(null);
+		repo.add(attr);
+		verify(decoratedRepo).add(attr);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Invalid mappedBy attribute \\[mappedByAttrName\\] data type \\[STRING\\].")
+	public void addMappedByInvalidDataType()
+	{
+		String entityName = "entityName";
+		EntityMetaData refEntity = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
+		String attrName = "attrName";
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		when(attr.getRefEntity()).thenReturn(refEntity);
+		String mappedByAttrName = "mappedByAttrName";
+		AttributeMetaData mappedByAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(mappedByAttrName)
+				.getMock();
+		when(mappedByAttr.getDataType()).thenReturn(STRING); // invalid type
 		when(attr.getMappedBy()).thenReturn(mappedByAttr);
 		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(null);
 		repo.add(attr);

@@ -24,6 +24,7 @@ import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_M
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.PARTS;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
@@ -459,6 +460,13 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	{
 		if (mappedByAttr != null)
 		{
+			if (!isSingleReferenceType(mappedByAttr))
+			{
+				throw new MolgenisDataException(
+						format("Invalid mappedBy attribute [%s] data type [%s].", mappedByAttr.getName(),
+								mappedByAttr.getDataType()));
+			}
+
 			AttributeMetaData refAttr = attr.getRefEntity().getAttribute(mappedByAttr.getName());
 			if (refAttr == null)
 			{
