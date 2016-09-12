@@ -1,7 +1,7 @@
 import React from "react";
 import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
 import $ from "jquery";
-import _ from "underscore";
+import _ from "underscore"; // do not remove this marked-as-unused import
 
 var form = React.DOM.form;
 

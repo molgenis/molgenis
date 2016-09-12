@@ -161,7 +161,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		dataService.deleteById(ENTITY_META_DATA, entityName);
 
-		LOG.info("Removed entity [%s]", entityName);
+		LOG.info("Removed entity [{}]", entityName);
 	}
 
 	@Transactional
