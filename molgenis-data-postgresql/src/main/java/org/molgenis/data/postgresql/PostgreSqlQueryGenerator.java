@@ -362,7 +362,8 @@ class PostgreSqlQueryGenerator
 							if (attr.getOrderBy() != null)
 							{
 								String mrefSelect =
-										"(SELECT array_agg(" + getColumnName(idAttribute) + " ORDER BY " + stream(
+										"(SELECT array_agg(" + getColumnName(attr.getRefEntity().getIdAttribute())
+												+ "::TEXT ORDER BY " + stream(
 												attr.getOrderBy().spliterator(), false).map(order ->
 										{
 											String sqlOrder = order.getAttr();
@@ -380,7 +381,8 @@ class PostgreSqlQueryGenerator
 							else
 							{
 								String mrefSelect = "(SELECT array_agg(ARRAY[" + getTableName(attr.getRefEntity()) + '.'
-										+ getSequenceColumnName(attr) + "::TEXT," + getColumnName(idAttribute)
+										+ getSequenceColumnName(attr) + "::TEXT," + getColumnName(
+										attr.getRefEntity().getIdAttribute())
 										+ "::TEXT]) FROM " + getTableName(attr.getRefEntity()) + " WHERE this."
 										+ getColumnName(idAttribute) + " = " + getTableName(attr.getRefEntity()) + '.'
 										+ getColumnName(attr.getMappedBy()) + ") AS " + getColumnName(attr);
