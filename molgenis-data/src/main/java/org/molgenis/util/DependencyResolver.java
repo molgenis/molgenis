@@ -50,7 +50,9 @@ public class DependencyResolver
 	 *
 	 * @param coll
 	 * @return
+	 * @deprecated use {@link org.molgenis.data.meta.EntityMetaDataDependencyResolver} instead which is based on {@link GenericDependencyResolver}.
 	 */
+	@Deprecated
 	public static List<EntityMetaData> resolve(Set<EntityMetaData> coll)
 	{
 		// EntityMetaData by entityname
