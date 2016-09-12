@@ -1286,5 +1286,66 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				.testIndexUpdateMetaDataRemoveAttribute(entityMetaDataDynamic, EntityTestHarness.ATTR_HYPERLINK,
 						searchService, metaDataService, indexService);
 	}
+
+	// Derived from fix: https://github.com/molgenis/molgenis/issues/5227
+	@Test
+	public void testIndexBatchUpdate()
+	{
+		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityMetaDataDynamic, 2);
+		List<Entity> entities = testHarness.createTestEntities(entityMetaDataDynamic, 2, refEntities).collect(toList());
+		runAsSystem(() ->
+		{
+			dataService.add(refEntityMetaDataDynamic.getName(), refEntities.stream());
+			dataService.add(entityMetaDataDynamic.getName(), entities.stream());
+			waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
+		});
+
+		// test string1 from entity
+		Query<Entity> q0 = new QueryImpl<>();
+		q0.search("string1");
+		Stream<Entity> result0 = searchService.searchAsStream(q0, entityMetaDataDynamic);
+		assertEquals(result0.count(), 2);
+
+		// test refstring1 from ref entity
+		Query<Entity> q1 = new QueryImpl<>();
+		q1.search("refstring0");
+		Stream<Entity> result1 = searchService.searchAsStream(q1, entityMetaDataDynamic);
+		assertEquals(result1.count(), 1);
+
+		// test refstring1 from ref entity
+		Query<Entity> q2 = new QueryImpl<>();
+		q2.search("refstring1");
+		Stream<Entity> result2 = searchService.searchAsStream(q2, entityMetaDataDynamic);
+		assertEquals(result2.count(), 1);
+
+		refEntities.get(0).set(ATTR_REF_STRING, "searchTestBatchUpdate");
+		runAsSystem(() ->
+		{
+			dataService.update(refEntityMetaDataDynamic.getName(), refEntities.stream());
+			waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
+		});
+
+		// test string1 from entity
+		Stream<Entity> result3 = searchService.searchAsStream(q0, entityMetaDataDynamic);
+		assertEquals(result3.count(), 2);
+
+		// test refstring1 from ref entity
+		Query<Entity> q4 = new QueryImpl<>();
+		q4.search("refstring0");
+		Stream<Entity> result4 = searchService.searchAsStream(q4, entityMetaDataDynamic);
+		assertEquals(result4.count(), 0);
+
+		// test refstring1 from ref entity
+		Query<Entity> q5 = new QueryImpl<>();
+		q5.search("refstring1");
+		Stream<Entity> result5 = searchService.searchAsStream(q5, entityMetaDataDynamic);
+		assertEquals(result5.count(), 1);
+
+		// test refstring1 from ref entity
+		Query<Entity> q6 = new QueryImpl<>();
+		q6.search("searchTestBatchUpdate");
+		Stream<Entity> result6 = searchService.searchAsStream(q6, entityMetaDataDynamic);
+		assertEquals(result6.count(), 1);
+	}
 }
 

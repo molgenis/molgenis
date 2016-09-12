@@ -3,7 +3,6 @@ package org.molgenis.data.elasticsearch;
 import com.google.common.util.concurrent.AtomicLongMap;
 import org.elasticsearch.ElasticsearchException;
 import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.search.SearchPhaseExecutionException;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
@@ -20,7 +19,6 @@ import org.molgenis.data.elasticsearch.response.ResponseParser;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
-import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
@@ -100,7 +98,13 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public boolean hasMapping(EntityMetaData entityMetaData)
 	{
-		return elasticsearchFacade.getMappings(indexName).containsKey(sanitizeMapperType(entityMetaData.getName()));
+		return hasMapping(entityMetaData.getName());
+	}
+
+	@Override
+	public boolean hasMapping(String entityName)
+	{
+		return elasticsearchFacade.getMappings(indexName).containsKey(sanitizeMapperType(entityName));
 	}
 
 	@Override
@@ -272,10 +276,12 @@ public class ElasticsearchService implements SearchService
 			q.eq(attributeMetaData.getName(), referredEntity);
 		}
 		LOG.debug("q: [{}], referringEntityMetaData: [{}]", q.toString(), referringEntityMetaData.getName());
-		if(hasMapping(referringEntityMetaData))
+		if (hasMapping(referringEntityMetaData))
 		{
 			return searchInternalWithScanScroll(q, referringEntityMetaData);
-		}else{
+		}
+		else
+		{
 			return Stream.empty();
 		}
 	}
@@ -403,19 +409,19 @@ public class ElasticsearchService implements SearchService
 	@Override
 	public void rebuildIndex(Repository<? extends Entity> repository)
 	{
-		LOG.info("Rebuild index for {}...", repository.getName());
 		EntityMetaData entityMetaData = repository.getEntityMetaData();
 
 		if (hasMapping(entityMetaData))
 		{
+			LOG.debug("Delete index for repository {}...", repository.getName());
 			delete(entityMetaData.getName());
 		}
 
 		createMappings(entityMetaData);
-		LOG.info("Indexing {} repository in batches of size {}...", entityMetaData.getName(), BATCH_SIZE);
+		LOG.trace("Indexing {} repository in batches of size {}...", repository.getName(), BATCH_SIZE);
 		repository.forEachBatched(createFetchForReindexing(entityMetaData),
 				entities -> index(entities, entityMetaData, IndexingMode.ADD), BATCH_SIZE);
-		LOG.info("Indexed {} repository.", entityMetaData.getName());
+		LOG.debug("Create index for repository {}...", repository.getName());
 	}
 
 	@Override

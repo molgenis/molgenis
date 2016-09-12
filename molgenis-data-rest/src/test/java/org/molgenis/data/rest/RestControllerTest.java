@@ -12,7 +12,6 @@ import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.data.support.QueryResolver;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.messageconverter.CsvHttpMessageConverter;
@@ -644,12 +643,6 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		public AuthenticationManager authenticationManager()
 		{
 			return mock(AuthenticationManager.class);
-		}
-
-		@Bean
-		public QueryResolver queryResolver()
-		{
-			return new QueryResolver(dataService());
 		}
 
 		@Bean
