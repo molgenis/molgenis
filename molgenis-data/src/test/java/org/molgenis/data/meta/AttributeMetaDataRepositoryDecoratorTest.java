@@ -788,6 +788,40 @@ public class AttributeMetaDataRepositoryDecoratorTest
 	}
 
 	@Test
+	public void addMappedByValidEntity()
+	{
+		String entityName = "entityName";
+		EntityMetaData refEntity = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
+		String attrName = "attrName";
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		when(attr.getRefEntity()).thenReturn(refEntity);
+		String mappedByAttrName = "mappedByAttrName";
+		AttributeMetaData mappedByAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(mappedByAttrName)
+				.getMock();
+		when(attr.getMappedBy()).thenReturn(mappedByAttr);
+		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(mappedByAttr);
+		repo.add(attr);
+		verify(decoratedRepo).add(attr);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "mappedBy attribute \\[mappedByAttrName\\] is not part of entity \\[entityName\\].")
+	public void addMappedByInvalidEntity()
+	{
+		String entityName = "entityName";
+		EntityMetaData refEntity = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
+		String attrName = "attrName";
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		when(attr.getRefEntity()).thenReturn(refEntity);
+		String mappedByAttrName = "mappedByAttrName";
+		AttributeMetaData mappedByAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(mappedByAttrName)
+				.getMock();
+		when(attr.getMappedBy()).thenReturn(mappedByAttr);
+		when(refEntity.getAttribute(mappedByAttrName)).thenReturn(null);
+		repo.add(attr);
+		verify(decoratedRepo).add(attr);
+	}
+
+	@Test
 	public void delete()
 	{
 		String attrName = "attrName";

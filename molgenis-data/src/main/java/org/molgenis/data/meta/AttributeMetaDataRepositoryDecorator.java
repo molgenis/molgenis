@@ -327,6 +327,9 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 
 	private void validateAdd(AttributeMetaData newAttr)
 	{
+		// mappedBy
+		validateMappedBy(newAttr, newAttr.getMappedBy());
+
 		// orderBy
 		validateOrderBy(newAttr, newAttr.getOrderBy());
 	}
@@ -372,6 +375,8 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 		{
 			validateOrderBy(newAttr, newOrderBy);
 		}
+
+		// note: mappedBy is a readOnly attribute, no need to verify for updates
 	}
 
 	private static EnumMap<AttributeType, EnumSet<AttributeType>> DATA_TYPE_DISALLOWED_TRANSITIONS;
@@ -434,6 +439,27 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	{
 		// TODO validate with script evaluator
 		// how to get access to expression validator here since it is located in molgenis-data-validation?
+	}
+
+	/**
+	 * Validate whether the mappedBy attribute is part of the referenced entity.
+	 *
+	 * @param attr         attribute
+	 * @param mappedByAttr mappedBy attribute
+	 * @throws MolgenisDataException if mappedBy is an attribute that is not part of the referenced entity
+	 */
+	private static void validateMappedBy(AttributeMetaData attr, AttributeMetaData mappedByAttr)
+	{
+		if (mappedByAttr != null)
+		{
+			AttributeMetaData refAttr = attr.getRefEntity().getAttribute(mappedByAttr.getName());
+			if (refAttr == null)
+			{
+				throw new MolgenisDataException(
+						format("mappedBy attribute [%s] is not part of entity [%s].", mappedByAttr.getName(),
+								attr.getRefEntity().getName()));
+			}
+		}
 	}
 
 	/**
