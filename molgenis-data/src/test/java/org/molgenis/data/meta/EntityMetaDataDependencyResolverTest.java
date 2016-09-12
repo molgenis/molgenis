@@ -49,6 +49,7 @@ public class EntityMetaDataDependencyResolverTest
 
 		when(attr0.getRefEntity()).thenReturn(entityMeta0); // self-reference
 		when(attr1.getRefEntity()).thenReturn(entityMeta2);
+		when(attr1.isMappedBy()).thenReturn(true);
 		when(attr1.getMappedBy()).thenReturn(attr2);
 		when(attr2.getRefEntity()).thenReturn(entityMeta1);
 	}
