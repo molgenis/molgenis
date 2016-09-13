@@ -12,9 +12,8 @@
  */
 
 import React from "react";
-import { ProgressBar } from '../ProgressBar';
-
-import DeepPureRenderMixin from '../mixin/DeepPureRenderMixin';
+import {ProgressBar} from "../ProgressBar";
+import DeepPureRenderMixin from "../mixin/DeepPureRenderMixin";
 
 var Job = React.createClass({
     mixins: [DeepPureRenderMixin],
@@ -85,5 +84,5 @@ var Job = React.createClass({
     }
 });
 
-export { Job };
+export {Job};
 export default React.createFactory(Job);

@@ -1,5 +1,4 @@
 import React from "react";
-import Button from "./Button";
 import ReactLayeredComponentMixin from "./mixin/ReactLayeredComponentMixin";
 import Dialog from "./Dialog";
 
@@ -10,39 +9,40 @@ var ConfirmClick = React.createClass({
         onClick: React.PropTypes.func,
         confirmMessage: React.PropTypes.string.isRequired
     },
-    getInitialState: function() {
+    getInitialState: function () {
         return {
-            dialog : false
+            dialog: false
         };
     },
-    getDefaultProps: function() {
+    getDefaultProps: function () {
         return {
-            onClick: function() {}
+            onClick: function () {
+            }
         };
     },
-    render: function() {
+    render: function () {
         return React.cloneElement(this.props.children,
             {onClick: this._showDialog});
     },
-    renderLayer: function() {
+    renderLayer: function () {
         return this.state.dialog ? Dialog({
             type: 'confirm',
-            message : this.props.confirmMessage,
-            onCancel : this._hideDialog,
-            onConfirm : this._onConfirm
+            message: this.props.confirmMessage,
+            onCancel: this._hideDialog,
+            onConfirm: this._onConfirm
         }) : null;
     },
-    _showDialog: function() {
+    _showDialog: function () {
         this.setState({
-            dialog : true
+            dialog: true
         });
     },
-    _hideDialog: function() {
+    _hideDialog: function () {
         this.setState({
-            dialog : false
+            dialog: false
         });
     },
-    _onConfirm: function() {
+    _onConfirm: function () {
         this._hideDialog();
         this.props.onClick();
     }

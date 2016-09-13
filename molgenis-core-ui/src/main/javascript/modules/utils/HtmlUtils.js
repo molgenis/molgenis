@@ -1,16 +1,16 @@
 export function htmlEscape(string) {
     var entityMap = {
-        "&" : "&amp;",
-        "<" : "&lt;",
+        "&": "&amp;",
+        "<": "&lt;",
         "\u2264": "&lte;",
-        ">" : "&gt;",
+        ">": "&gt;",
         "\u2265": "&gte;",
-        '"' : '&quot;',
-        "'" : '&#39;',
-        "/" : '&#x2F;'
+        '"': '&quot;',
+        "'": '&#39;',
+        "/": '&#x2F;'
     };
 
-    return String(string).replace(/[&<>"'\/]/g, function(s) {
+    return String(string).replace(/[&<>"'\/]/g, function (s) {
         return entityMap[s];
     });
 };
