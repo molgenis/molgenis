@@ -9,7 +9,7 @@ import java.util.List;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static java.util.Arrays.stream;
-import static org.apache.commons.lang.StringUtils.join;
+import static org.apache.commons.lang3.StringUtils.join;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_OntologyTerm.class)
