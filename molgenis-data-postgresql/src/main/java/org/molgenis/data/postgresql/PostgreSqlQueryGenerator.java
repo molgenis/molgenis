@@ -363,16 +363,16 @@ class PostgreSqlQueryGenerator
 							{
 								String mrefSelect =
 										"(SELECT array_agg(" + getColumnName(attr.getRefEntity().getIdAttribute())
-												+ "::TEXT ORDER BY " + stream(
-												attr.getOrderBy().spliterator(), false).map(order ->
-										{
-											String sqlOrder = order.getAttr();
-											if (order.getDirection() == Sort.Direction.DESC)
-											{
-												sqlOrder += " DESC";
-											}
-											return sqlOrder;
-										}).collect(Collectors.joining(", ")) + ") FROM " + getTableName(
+												+ "::TEXT ORDER BY " + stream(attr.getOrderBy().spliterator(), false)
+												.map(order ->
+												{
+													String sqlOrder = order.getAttr();
+													if (order.getDirection() == Sort.Direction.DESC)
+													{
+														sqlOrder += " DESC";
+													}
+													return sqlOrder;
+												}).collect(Collectors.joining(", ")) + ") FROM " + getTableName(
 												attr.getRefEntity()) + " WHERE this." + getColumnName(idAttribute)
 												+ " = " + getTableName(attr.getRefEntity()) + '.' + getColumnName(
 												attr.getMappedBy()) + ") AS " + getColumnName(attr);
@@ -382,10 +382,10 @@ class PostgreSqlQueryGenerator
 							{
 								String mrefSelect = "(SELECT array_agg(ARRAY[" + getTableName(attr.getRefEntity()) + '.'
 										+ getSequenceColumnName(attr) + "::TEXT," + getColumnName(
-										attr.getRefEntity().getIdAttribute())
-										+ "::TEXT]) FROM " + getTableName(attr.getRefEntity()) + " WHERE this."
-										+ getColumnName(idAttribute) + " = " + getTableName(attr.getRefEntity()) + '.'
-										+ getColumnName(attr.getMappedBy()) + ") AS " + getColumnName(attr);
+										attr.getRefEntity().getIdAttribute()) + "::TEXT]) FROM " + getTableName(
+										attr.getRefEntity()) + " WHERE this." + getColumnName(idAttribute) + " = "
+										+ getTableName(attr.getRefEntity()) + '.' + getColumnName(attr.getMappedBy())
+										+ ") AS " + getColumnName(attr);
 								select.append(mrefSelect);
 							}
 						}
@@ -750,7 +750,16 @@ class PostgreSqlQueryGenerator
 						predicate.append("this");
 					}
 
-					predicate.append('.').append(getColumnName(r.getField()));
+					String attrName;
+					if (attr.isMappedBy())
+					{
+						attrName = attr.getRefEntity().getIdAttribute().getName();
+					}
+					else
+					{
+						attrName = r.getField();
+					}
+					predicate.append('.').append(getColumnName(attrName));
 					if (r.getValue() == null)
 					{
 						// expression = null is not valid, use IS NULL
@@ -877,22 +886,8 @@ class PostgreSqlQueryGenerator
 
 	private static <E extends Entity> String getSqlFrom(EntityMetaData entityMeta, Query<E> q)
 	{
-		StringBuilder from = new StringBuilder(" FROM ").append(getTableName(entityMeta)).append(" AS this");
-
-		AttributeMetaData idAttribute = entityMeta.getIdAttribute();
-
 		List<AttributeMetaData> mrefAttrsInQuery = getMrefQueryAttrs(entityMeta, q);
-		for (int i = 0; i < mrefAttrsInQuery.size(); i++)
-		{
-			// extra join so we can filter on the mrefs
-			AttributeMetaData mrefAttr = mrefAttrsInQuery.get(i);
-			from.append(" LEFT JOIN ").append(getJunctionTableName(entityMeta, mrefAttr)).append(" AS ")
-					.append(getFilterColumnName(mrefAttr, i + 1)).append(" ON (this.")
-					.append(getColumnName(idAttribute)).append(" = ").append(getFilterColumnName(mrefAttr, i + 1))
-					.append('.').append(getColumnName(idAttribute)).append(')');
-		}
-
-		return from.toString();
+		return getSqlFromForCount(entityMeta, mrefAttrsInQuery);
 	}
 
 	private static String getSqlFromForCount(EntityMetaData entityMeta, List<AttributeMetaData> mrefAttrsInQuery)
@@ -905,10 +900,22 @@ class PostgreSqlQueryGenerator
 		{
 			// extra join so we can filter on the mrefs
 			AttributeMetaData mrefAttr = mrefAttrsInQuery.get(i);
-			from.append(" LEFT JOIN ").append(getJunctionTableName(entityMeta, mrefAttr)).append(" AS ")
-					.append(getFilterColumnName(mrefAttr, i + 1)).append(" ON (this.")
-					.append(getColumnName(idAttribute)).append(" = ").append(getFilterColumnName(mrefAttr, i + 1))
-					.append('.').append(getColumnName(idAttribute)).append(')');
+			if (mrefAttr.isMappedBy())
+			{
+				// query table of referenced entity
+				from.append(" LEFT JOIN ").append(getTableName(mrefAttr.getRefEntity())).append(" AS ")
+						.append(getFilterColumnName(mrefAttr, i + 1)).append(" ON (this.")
+						.append(getColumnName(idAttribute)).append(" = ").append(getFilterColumnName(mrefAttr, i + 1))
+						.append('.').append(getColumnName(mrefAttr.getMappedBy())).append(')');
+			}
+			else
+			{
+				// query junction table
+				from.append(" LEFT JOIN ").append(getJunctionTableName(entityMeta, mrefAttr)).append(" AS ")
+						.append(getFilterColumnName(mrefAttr, i + 1)).append(" ON (this.")
+						.append(getColumnName(idAttribute)).append(" = ").append(getFilterColumnName(mrefAttr, i + 1))
+						.append('.').append(getColumnName(idAttribute)).append(')');
+			}
 		}
 
 		return from.toString();
