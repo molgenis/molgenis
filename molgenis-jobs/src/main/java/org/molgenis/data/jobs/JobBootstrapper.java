@@ -36,7 +36,7 @@ public class JobBootstrapper
 
 	private void bootstrap(SystemEntityMetaData systemEntityMetaData)
 	{
-		dataService.query(systemEntityMetaData.getName()).eq(STATUS, RUNNING).findAll().forEach(this::setFailed);
+		dataService.query(systemEntityMetaData.getName()).eq(STATUS, RUNNING).or().eq(STATUS, PENDING).findAll().forEach(this::setFailed);
 	}
 
 	private void setFailed(Entity jobExecutionEntity)

@@ -55,11 +55,10 @@ public class IndexBootstrapper
 		else
 		{
 			LOG.debug("Index for AttributeMetaData found, index is present, no (re)index needed");
-			List<IndexJobExecution> indexJobExecutions = dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
-					new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED).or().eq(JobExecutionMetaData.STATUS, PENDING)
-							.or().eq(JobExecutionMetaData.STATUS, RUNNING).or().eq(JobExecutionMetaData.STATUS, CANCELED),
+			List<IndexJobExecution> failedIndexJobs = dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
+					new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED),
 					IndexJobExecution.class).collect(Collectors.toList());
-			indexJobExecutions.forEach(indexJobExecution -> registerNewIndexActionForDirtyJobs(indexJobExecution));
+			failedIndexJobs.forEach(job -> registerNewIndexActionForDirtyJobs(job));
 		}
 	}
 
