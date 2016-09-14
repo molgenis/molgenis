@@ -21,6 +21,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.QueryRule.Operator.NESTED;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
 import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
 import static org.molgenis.data.support.EntityMetaDataUtils.*;
@@ -336,10 +337,64 @@ class PostgreSqlQueryGenerator
 				+ '"';
 	}
 
+	/**
+	 * Determines whether a distinct select is required based on a given query.
+	 *
+	 * @param entityMeta entity meta data
+	 * @param q          query
+	 * @param <E>        entity type
+	 * @return <code>true</code> if a distinct select is required for SQL queries based on the given query
+	 * @throws UnknownAttributeException if query field refers to an attribute that does not exist in entity meta
+	 */
+	private static <E extends Entity> boolean isDistinctSelectRequired(EntityMetaData entityMeta, Query<E> q)
+	{
+		return isDistinctSelectRequiredRec(entityMeta, q.getRules());
+	}
+
+	private static boolean isDistinctSelectRequiredRec(EntityMetaData entityMeta, List<QueryRule> queryRules)
+	{
+		if (queryRules.isEmpty())
+		{
+			return false;
+		}
+		for (QueryRule queryRule : queryRules)
+		{
+			if (queryRule.getOperator() == NESTED)
+			{
+				if (isDistinctSelectRequiredRec(entityMeta, queryRule.getNestedRules()))
+				{
+					return true;
+				}
+			}
+			else
+			{
+				String attrName = queryRule.getField();
+				if (attrName != null)
+				{
+					AttributeMetaData attr = entityMeta.getAttribute(attrName);
+					if (attr == null)
+					{
+						throw new UnknownAttributeException(
+								format("Unknown attribute [%s] in entity [%s]", attrName, entityMeta.getName()));
+					}
+					if (isMultipleReferenceType(attr))
+					{
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
 	static <E extends Entity> String getSqlSelect(EntityMetaData entityMeta, Query<E> q, List<Object> parameters,
 			boolean includeMrefs)
 	{
 		final StringBuilder select = new StringBuilder("SELECT ");
+		if (isDistinctSelectRequired(entityMeta, q))
+		{
+			select.append("DISTINCT ");
+		}
 		final StringBuilder group = new StringBuilder();
 		final AtomicInteger count = new AtomicInteger();
 		final AttributeMetaData idAttribute = entityMeta.getIdAttribute();
@@ -490,8 +545,8 @@ class PostgreSqlQueryGenerator
 		}
 		else
 		{
-			List<AttributeMetaData> mrefAttrsInQuery = getMrefQueryAttrs(entityMeta, q);
-			if (!mrefAttrsInQuery.isEmpty())
+			boolean distinctSelectRequired = isDistinctSelectRequired(entityMeta, q);
+			if (distinctSelectRequired)
 			{
 				// distinct count in case query contains one or more rules referring to MREF attributes.
 				sqlBuilder.append("(DISTINCT this.").append(idAttribute).append(')');
@@ -501,7 +556,7 @@ class PostgreSqlQueryGenerator
 				sqlBuilder.append("(*)");
 			}
 
-			String from = getSqlFromForCount(entityMeta, mrefAttrsInQuery);
+			String from = getSqlFrom(entityMeta, q);
 			String where = getSqlWhere(entityMeta, q, parameters, 0);
 			sqlBuilder.append(from).append(" WHERE ").append(where);
 		}
@@ -887,11 +942,6 @@ class PostgreSqlQueryGenerator
 	private static <E extends Entity> String getSqlFrom(EntityMetaData entityMeta, Query<E> q)
 	{
 		List<AttributeMetaData> mrefAttrsInQuery = getMrefQueryAttrs(entityMeta, q);
-		return getSqlFromForCount(entityMeta, mrefAttrsInQuery);
-	}
-
-	private static String getSqlFromForCount(EntityMetaData entityMeta, List<AttributeMetaData> mrefAttrsInQuery)
-	{
 		StringBuilder from = new StringBuilder(" FROM ").append(getTableName(entityMeta)).append(" AS this");
 
 		AttributeMetaData idAttribute = entityMeta.getIdAttribute();

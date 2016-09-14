@@ -71,7 +71,7 @@ public class PostgreSqlRepositoryTest
 		QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
 		when(query.getRules()).thenReturn(singletonList(queryRule));
 
-		String sql = "SELECT this.\"entityId\", (SELECT array_agg(ARRAY[\"RefEntity\".\"xrefAttr_order\"::TEXT,\"refEntityId\"::TEXT]) FROM \"RefEntity\" WHERE this.\"entityId\" = \"RefEntity\".\"xrefAttr\") AS \"oneToManyAttr\" FROM \"Entity\" AS this LEFT JOIN \"RefEntity\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?  LIMIT 1000";
+		String sql = "SELECT DISTINCT this.\"entityId\", (SELECT array_agg(ARRAY[\"RefEntity\".\"xrefAttr_order\"::TEXT,\"refEntityId\"::TEXT]) FROM \"RefEntity\" WHERE this.\"entityId\" = \"RefEntity\".\"xrefAttr\") AS \"oneToManyAttr\" FROM \"Entity\" AS this LEFT JOIN \"RefEntity\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?  LIMIT 1000";
 		//noinspection unchecked
 		RowMapper<Entity> rowMapper = mock(RowMapper.class);
 		when(postgreSqlEntityFactory.createRowMapper(entityMeta, null)).thenReturn(rowMapper);
@@ -115,6 +115,7 @@ public class PostgreSqlRepositoryTest
 		when(entityMeta.getName()).thenReturn(entityName);
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		when(entityMeta.getAttribute(oneToManyAttrName)).thenReturn(oneToManyAttr);
+		when(entityMeta.getAtomicAttributes()).thenReturn(newArrayList(idAttr, oneToManyAttr));
 		return entityMeta;
 	}
 }
