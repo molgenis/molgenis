@@ -13,7 +13,6 @@ public abstract class AmountWrapper
 	@Nullable
 	public abstract Amount<?> getAmount();
 
-	@Nullable
 	public abstract boolean isDetermined();
 
 	public static AmountWrapper create(Amount<?> amount)
