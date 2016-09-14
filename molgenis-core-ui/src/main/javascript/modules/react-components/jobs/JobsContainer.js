@@ -13,14 +13,11 @@
  *
  * @exports JobsContainer factory
  */
-import React from 'react';
-import RestClient from "rest-client/RestClientV2";
-import { Spinner } from '../Spinner'
-import $ from 'jquery';
-import NotificationSystem from 'react-notification-system';
-import { Jobs } from './Jobs';
-
-import SetIntervalMixin from '../mixin/SetIntervalMixin';
+import React from "react";
+import {Spinner} from "../Spinner";
+import $ from "jquery";
+import NotificationSystem from "react-notification-system";
+import SetIntervalMixin from "../mixin/SetIntervalMixin";
 
 var JobsContainer = React.createClass({
     mixins: [SetIntervalMixin],
@@ -52,7 +49,7 @@ var JobsContainer = React.createClass({
                 })}
         </div>
     },
-    _onJobSelect: function(selectedJobId) {
+    _onJobSelect: function (selectedJobId) {
         this.setState({selectedJobId: selectedJobId})
     },
     _getNewlyFinishedJobs: function (jobs) {

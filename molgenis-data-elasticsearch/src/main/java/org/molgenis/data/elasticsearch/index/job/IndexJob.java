@@ -1,16 +1,15 @@
 package org.molgenis.data.elasticsearch.index.job;
 
 import org.molgenis.data.*;
-import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.SearchService;
-import org.molgenis.data.jobs.Job;
-import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionGroup;
 import org.molgenis.data.index.meta.IndexActionGroupMetaData;
 import org.molgenis.data.index.meta.IndexActionMetaData;
+import org.molgenis.data.jobs.Job;
+import org.molgenis.data.jobs.Progress;
+import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,9 +52,9 @@ class IndexJob extends Job
 		if (indexActionGroup != null && indexActionGroup.getCount() > 0)
 		{
 			progress.setProgressMax(indexActionGroup.getCount());
-			progress.status(format("######## START Index transaction id: [{0}] ########", transactionId));
+			progress.status(format("Start indexing for transaction id: [{0}]", transactionId));
 			performIndexActions(progress);
-			progress.status(format("######## END Index transaction id: [{0}] ########", transactionId));
+			progress.status(format("Finished indexing for transaction id: [{0}]", transactionId));
 		}
 		else
 		{
@@ -127,32 +126,21 @@ class IndexJob extends Job
 			}
 			else
 			{
-				String entityFullName = indexAction.getEntityFullName();
-				boolean actualEntityExists = dataService.hasRepository(entityFullName);
+				final String entityFullName = indexAction.getEntityFullName();
+				final boolean actualEntityExists = dataService.hasRepository(entityFullName);
 
 				if (!actualEntityExists)
 				{
 					progress.progress(progressCount,
 							format("Dropping index of repository {0}.", indexAction.getEntityFullName()));
 					searchService.delete(indexAction.getEntityFullName());
-				}else{
-					EntityMetaData entityMeta = dataService.getEntityMetaData(entityFullName);
-					boolean indexEntityExists = searchService.hasMapping(entityMeta);
-
-					if (indexEntityExists)
-					{
-						// Update mapping + data
-						progress.progress(progressCount,
-								format("Rebuild index of repository {0}.", indexAction.getEntityFullName()));
-					}
-					else
-					{
-						// Create mapping
-						progress.progress(progressCount,
-								format("Create index of repository {0}", indexAction.getEntityFullName()));
-
-					}
-					rebuildIndex(indexAction.getEntityFullName());
+				}
+				else
+				{
+					progress.progress(progressCount,
+							format("Indexing repository {0}", indexAction.getEntityFullName()));
+					final Repository<Entity> repository = dataService.getRepository(entityFullName);
+					searchService.rebuildIndex(repository);
 				}
 			}
 			updateIndexActionStatus(indexAction, IndexActionMetaData.IndexStatus.FINISHED);
@@ -199,12 +187,13 @@ class IndexJob extends Job
 
 		EntityMetaData entityMeta = actualEntity.getEntityMetaData();
 		boolean indexEntityExists = searchService.hasMapping(entityMeta);
-		if(!indexEntityExists){
+		if (!indexEntityExists)
+		{
 			LOG.debug("Create mapping of repository [{}] because it was not exist yet", entityFullName);
 			searchService.createMappings(entityMeta);
 		}
 
-		Query q = new QueryImpl();
+		Query<Entity> q = new QueryImpl<>();
 		q.eq(entityMeta.getIdAttribute().getName(), entityId);
 		Entity indexEntity = searchService.findOne(q, entityMeta);
 
@@ -213,29 +202,13 @@ class IndexJob extends Job
 			// update
 			LOG.debug("Index update [{}].[{}].", entityFullName, entityId);
 			searchService.index(actualEntity, actualEntity.getEntityMetaData(), IndexingMode.UPDATE);
-			return;
 		}
 		else
 		{
 			// Add
 			LOG.debug("Index add [{}].[{}].", entityFullName, entityId);
 			searchService.index(actualEntity, actualEntity.getEntityMetaData(), IndexingMode.ADD);
-			return;
 		}
-	}
-
-	/**
-	 * Indexes all data in a {@link org.molgenis.data.Repository}
-	 *
-	 * @param entityFullName the fully qualified name of the {@link org.molgenis.data.Repository} to index.
-	 */
-	private void rebuildIndex(String entityFullName)
-	{
-		LOG.trace("Indexing [{}]...", entityFullName);
-		//FIXME: Deze is gedecorate, kan in foute gevallen dus de IDs uit de index halen
-		final Repository<Entity> repository = dataService.getRepository(entityFullName);
-		searchService.rebuildIndex(repository);
-		LOG.debug("Indexed [{}].", entityFullName);
 	}
 
 	/**

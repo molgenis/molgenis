@@ -90,4 +90,29 @@ public class IndexAction extends StaticEntity
 		set(INDEX_STATUS, indexStatus.toString());
 		return this;
 	}
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if (this == o) return true;
+		if (o == null || getClass() != o.getClass()) return false;
+
+		IndexAction that = (IndexAction) o;
+
+		if (getId() != null ? !getId().equals(that.getId()) : that.getId() != null) return false;
+		if (getEntityId() != null ? !getEntityId().equals(that.getEntityId()) : that.getEntityId() != null)
+			return false;
+		return getEntityFullName() != null ? getEntityFullName().equals(that.getEntityFullName()) :
+				that.getEntityFullName() == null;
+
+	}
+
+	@Override
+	public int hashCode()
+	{
+		int result = getId() != null ? getId().hashCode() : 0;
+		result = 31 * result + (getEntityId() != null ? getEntityId().hashCode() : 0);
+		result = 31 * result + (getEntityFullName() != null ? getEntityFullName().hashCode() : 0);
+		return result;
+	}
 }

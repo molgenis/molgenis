@@ -31,7 +31,7 @@ public class IndexTransactionListener extends DefaultMolgenisTransactionListener
 		}
 		catch (Exception ex)
 		{
-			LOG.error("Error storing index actions for transaction id {}", transactionId);
+			LOG.error("Error storing index actions for transaction id {}", transactionId, ex);
 		}
 	}
 
@@ -44,7 +44,7 @@ public class IndexTransactionListener extends DefaultMolgenisTransactionListener
 		}
 		catch (Exception ex)
 		{
-			LOG.error("Error forgetting actions for transaction id {}", transactionId);
+			LOG.error("Error forgetting actions for transaction id {}", transactionId, ex);
 		}
 	}
 
@@ -60,7 +60,7 @@ public class IndexTransactionListener extends DefaultMolgenisTransactionListener
 		}
 		catch (Exception ex)
 		{
-			LOG.error("Error during cleanupAfterCompletion");
+			LOG.error("Error during cleanupAfterCompletion", ex);
 		}
 	}
 }

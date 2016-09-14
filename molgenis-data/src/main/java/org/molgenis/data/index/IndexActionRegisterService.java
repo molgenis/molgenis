@@ -1,6 +1,5 @@
 package org.molgenis.data.index;
 
-import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.security.core.runas.RunAsSystem;
 
 /**
@@ -28,6 +27,7 @@ public interface IndexActionRegisterService
 	/**
 	 * Stores the index actions in the repository.
 	 * Creates a ReindexActionJob to group them by.
+	 * storeIndexActions uses a set as optimization to remove the double index actions before the index actions are stored in database.
 	 *
 	 * @param transactionId ID for the transaction the index actions were registered under
 	 */
