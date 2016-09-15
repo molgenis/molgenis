@@ -19,6 +19,8 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.molgenis.data.jobs.model.JobExecutionMetaData.*;
+
 @Component
 public class IndexBootstrapper
 {
@@ -54,13 +56,13 @@ public class IndexBootstrapper
 		{
 			LOG.debug("Index for AttributeMetaData found, index is present, no (re)index needed");
 			List<IndexJobExecution> failedIndexJobs = dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
-					new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, "FAILED"),
+					new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED),
 					IndexJobExecution.class).collect(Collectors.toList());
-			failedIndexJobs.forEach(indexJobExecution -> registerNewIndexActionForFailedJobs(indexJobExecution));
+			failedIndexJobs.forEach(job -> registerNewIndexActionForDirtyJobs(job));
 		}
 	}
 
-	private void registerNewIndexActionForFailedJobs(IndexJobExecution indexJobExecution)
+	private void registerNewIndexActionForDirtyJobs(IndexJobExecution indexJobExecution)
 	{
 		String id = indexJobExecution.getIndexActionJobID();
 		dataService.findAll(IndexActionMetaData.INDEX_ACTION,
