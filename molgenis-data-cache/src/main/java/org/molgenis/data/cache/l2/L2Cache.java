@@ -183,7 +183,7 @@ public class L2Cache extends DefaultMolgenisTransactionListener
 			@Override
 			public Optional<Map<String, Object>> load(@Nonnull Object id)
 			{
-				return Optional.ofNullable(repository.findOneById(id)).map(entityHydration::dehydrate);
+				return Optional.ofNullable(repository.findOneById(id)).map(EntityHydration::dehydrate);
 			}
 
 			/**

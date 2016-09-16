@@ -187,7 +187,7 @@
             width: width,
             minimumInputLength: 1,
             multiple: (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'CATEGORICAL_MREF'
-            || attributeMetaData.fieldType === 'XREF' || attributeMetaData.fieldType === 'FILE'),
+            || attributeMetaData.fieldType === 'XREF' || attributeMetaData.fieldType === 'FILE' || attributeMetaData.fieldType === 'ONE_TO_MANY'),
             closeOnSelect: false,
             query: function (options) {
                 var query = createQuery(lookupAttributes, options.term.match(/[^ ]+/g), false, true);
@@ -271,7 +271,7 @@
         if (options.isfilter) {
             var $operatorInput = $('<input type="hidden" data-filter="xrefmref-operator" value="' + options.operator + '" />');
 
-            if (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'CATEGORICAL_MREF') { // TODO remove CATEGORICAL_MREF when it is rendered like CATEGORICAL is rendered for XREF
+            if (attributeMetaData.fieldType === 'MREF' || attributeMetaData.fieldType === 'CATEGORICAL_MREF' || attributeMetaData.fieldType === 'ONE_TO_MANY') { // TODO remove CATEGORICAL_MREF when it is rendered like CATEGORICAL is rendered for XREF
                 var $dropdown = $('<div class="input-group-addon dropdown dropdown-toggle-container">');
                 var orValue = 'OR&nbsp;&nbsp;';
                 var andValue = 'AND';

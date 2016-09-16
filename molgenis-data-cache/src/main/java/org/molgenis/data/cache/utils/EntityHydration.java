@@ -17,6 +17,7 @@ import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
 import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
@@ -84,7 +85,7 @@ public class EntityHydration
 	 * @param entity the {@link Entity} to dehydrate
 	 * @return Map representation of the entity
 	 */
-	public Map<String, Object> dehydrate(Entity entity)
+	public static Map<String, Object> dehydrate(Entity entity)
 	{
 		LOG.trace("Dehydrating entity {}", entity);
 		Map<String, Object> dehydratedEntity = newHashMap();
@@ -105,19 +106,20 @@ public class EntityHydration
 		return dehydratedEntity;
 	}
 
-	private Object getValueBasedOnType(Entity entity, String name, AttributeType type)
+	private static Object getValueBasedOnType(Entity entity, String name, AttributeType type)
 	{
 		Object value;
 		switch (type)
 		{
 			case CATEGORICAL:
-			case XREF:
 			case FILE:
+			case XREF:
 				Entity xrefEntity = entity.getEntity(name);
 				value = xrefEntity != null ? xrefEntity.getIdValue() : null;
 				break;
 			case CATEGORICAL_MREF:
 			case MREF:
+			case ONE_TO_MANY:
 				List<Object> mrefIdentifiers = newArrayList();
 				entity.getEntities(name).forEach(mrefEntity ->
 				{
@@ -134,7 +136,6 @@ public class EntityHydration
 				value = dateTime != null ? dateTime : null;
 				break;
 			case BOOL:
-			case COMPOUND:
 			case DECIMAL:
 			case EMAIL:
 			case ENUM:
@@ -147,6 +148,8 @@ public class EntityHydration
 			case TEXT:
 				value = entity.get(name);
 				break;
+			case COMPOUND:
+				throw new RuntimeException(format("Illegal attribute type [%s]", type.toString()));
 			default:
 				throw new RuntimeException(String.format("Unknown attribute type [%s]", type));
 		}
