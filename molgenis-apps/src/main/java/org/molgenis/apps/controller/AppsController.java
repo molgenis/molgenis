@@ -1,31 +1,38 @@
 package org.molgenis.apps.controller;
 
-import org.molgenis.apps.model.App;
 import org.molgenis.apps.model.AppMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.support.DynamicEntity;
+import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
+import org.molgenis.file.model.FileMeta;
 import org.molgenis.ui.MolgenisPluginController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import java.io.FileInputStream;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.util.List;
 
-import static java.io.File.separator;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.apps.controller.AppsController.URI;
 import static org.molgenis.apps.model.AppMetaData.APP;
+import static org.molgenis.data.system.core.FreemarkerTemplateMetaData.*;
 
 @Controller
 @RequestMapping(URI)
 public class AppsController extends MolgenisPluginController
 {
+	private static final Logger LOG = LoggerFactory.getLogger(AppsController.class);
 
 	public static final String ID = "apps";
 	public static final String URI = MolgenisPluginController.PLUGIN_URI_PREFIX + ID;
@@ -50,24 +57,38 @@ public class AppsController extends MolgenisPluginController
 		return VIEW_NAME;
 	}
 
-	@RequestMapping("/create-app")
-	public void createApp(@RequestParam(value = "app-name") String appName,
-			@RequestParam(value = "app-url") String appUrl, @RequestParam(value = "app-sources") String sources,
-			@RequestParam(value = "active") boolean active) throws IOException
+	@RequestMapping(value = { "/{appName}" })
+	public String viewApp(@PathVariable String appName, Model model) throws IOException
 	{
-		fileStore.createDirectory(appName);
-		String appDirectory = fileStore.getStorageDir() + separator + appName;
-
-		App app = new App(new AppMetaData());
-		app.setAppName(appName);
-		app.setAppUrl(appUrl);
-		app.setSourcesDirectory(appDirectory);
-
-		if (sources != null)
+		Entity appEntity = dataService.findOneById(APP, appName);
+		if (appEntity == null)
 		{
-			fileStore.store(new FileInputStream(sources), sources);
+			model.addAttribute("appNotAvailableMessage", appName);
+			return VIEW_NAME;
 		}
-		app.setActive(active);
-		dataService.add(APP, app);
+		else
+		{
+			Entity freemarkerEntity = dataService
+					.findOne(FREEMARKER_TEMPLATE, new QueryImpl<>().eq(NAME, "view-" + appName + ".ftl"));
+			if (freemarkerEntity == null)
+			{
+				LOG.debug("No FreemarkerTemplate available yet for this app, creating one...");
+				freemarkerEntity = new DynamicEntity(dataService.getEntityMetaData(FREEMARKER_TEMPLATE));
+				freemarkerEntity.set(NAME, "view-" + appName + ".ftl");
+
+				FileMeta file = (FileMeta) appEntity.get(AppMetaData.SOURCES_DIRECTORY);
+				File myFile = fileStore.getFile(file.getFilename());
+
+				StringBuilder freemarkerBody = new StringBuilder();
+				FileReader reader = new FileReader(myFile);
+				BufferedReader br = new BufferedReader(reader);
+
+				br.lines().forEach(freemarkerBody::append);
+
+				freemarkerEntity.set(VALUE, freemarkerBody.toString());
+				dataService.add(FREEMARKER_TEMPLATE, freemarkerEntity);
+			}
+			return "view-" + appName;
+		}
 	}
 }

@@ -57,7 +57,9 @@ public class WebAppSecurityConfig extends MolgenisWebAppSecurityConfig
 
 				.antMatchers("/phenotips/**").authenticated()
 
-				.antMatchers("/charts/**").authenticated();
+				.antMatchers("/charts/**").authenticated()
+
+				.antMatchers("/apps/**").authenticated();
 	}
 
 	@Override
