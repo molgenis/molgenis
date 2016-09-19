@@ -85,7 +85,7 @@ public class EntityHydration
 	 * @param entity the {@link Entity} to dehydrate
 	 * @return Map representation of the entity
 	 */
-	public static Map<String, Object> dehydrate(Entity entity)
+	public Map<String, Object> dehydrate(Entity entity)
 	{
 		LOG.trace("Dehydrating entity {}", entity);
 		Map<String, Object> dehydratedEntity = newHashMap();
