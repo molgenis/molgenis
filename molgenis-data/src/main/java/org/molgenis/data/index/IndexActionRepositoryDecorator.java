@@ -116,7 +116,8 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 	/**
 	 * Register index actions for entity types with bidirectional attribute values.
 	 */
-	private void registerRefEntityIndexActions() {
+	private void registerRefEntityIndexActions()
+	{
 		// bidirectional attribute: register indexing actions for other side
 		getEntityMetaData().getMappedByAttributes().forEach(mappedByAttr ->
 		{
@@ -136,7 +137,8 @@ public class IndexActionRepositoryDecorator extends AbstractRepositoryDecorator<
 	 *
 	 * @param entity entity to add or delete
 	 */
-	private void registerRefEntityIndexActions(Entity entity) {
+	private void registerRefEntityIndexActions(Entity entity)
+	{
 		// bidirectional attribute: register indexing actions for other side
 		getEntityMetaData().getMappedByAttributes().forEach(mappedByAttr ->
 		{
