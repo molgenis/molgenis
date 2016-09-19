@@ -274,10 +274,10 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlCreateJunctionTableIndex(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		AttributeMetaData idxAttr = entityMeta.getIdAttribute();
+		AttributeMetaData idAttr = attr.isMappedBy() ? attr.getRefEntity().getIdAttribute() : entityMeta.getIdAttribute();
 		String junctionTableName = getJunctionTableName(entityMeta, attr);
-		String junctionTableIndexName = getJunctionTableIndexName(entityMeta, attr, idxAttr);
-		String idxColumnName = getColumnName(idxAttr);
+		String junctionTableIndexName = getJunctionTableIndexName(entityMeta, attr, idAttr);
+		String idxColumnName = getColumnName(idAttr);
 		return "CREATE INDEX " + junctionTableIndexName + " ON " + junctionTableName + " (" + idxColumnName + ')';
 	}
 

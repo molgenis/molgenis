@@ -83,7 +83,14 @@ class PostgreSqlQueryUtils
 	static String getJunctionTableIndexName(EntityMetaData entityMeta, AttributeMetaData attr,
 			AttributeMetaData idxAttr)
 	{
-		return '"' + entityMeta.getName() + '_' + attr.getName() + '_' + idxAttr.getName() + "_idx\"";
+		if (attr.isMappedBy())
+		{
+			return '"' + attr.getRefEntity().getName() + '_' + attr.getMappedBy().getName() + '_' + idxAttr.getName() + "_idx\"";
+		}
+		else
+		{
+			return '"' + entityMeta.getName() + '_' + attr.getName() + '_' + idxAttr.getName() + "_idx\"";
+		}
 	}
 
 	/**
