@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.support.QueryImpl.EQ;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_ENTITY_WRITE_PREFIX;
@@ -118,7 +119,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 
 	private Entity createQuestionnaireEntity(EntityMetaData emd, QuestionnaireStatus status)
 	{
-		Entity entity = entityManager.create(emd);
+		Entity entity = entityManager.create(emd, POPULATE);
 		entity.set(OwnedEntityMetaData.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		entity.set(QuestionnaireMetaData.ATTR_STATUS, status.toString());
 		dataService.add(emd.getName(), entity);

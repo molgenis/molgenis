@@ -1,6 +1,7 @@
 package org.molgenis.ui.controller;
 
 import org.molgenis.data.DataService;
+import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.user.MolgenisUserDetailsService;
 import org.molgenis.ui.settings.StaticContent;
@@ -132,7 +133,7 @@ public class StaticContentServiceImplTest extends AbstractTestNGSpringContextTes
 		@Bean
 		public StaticContentFactory staticContentFactory()
 		{
-			return new StaticContentFactory(staticContentMeta());
+			return new StaticContentFactory(staticContentMeta(), mock(EntityPopulator.class));
 		}
 
 		@Bean

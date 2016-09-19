@@ -30,6 +30,7 @@ import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
+import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
@@ -83,17 +84,17 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		entityMetaData.addAttribute(attributeMetaDataFactory.create().setDataType(INT).setName(ID), ROLE_ID);
 		entityMetaData.addAttribute(attributeMetaDataFactory.create().setName(COUNTRY));
 
-		when(entityManager.create(entityMetaData)).thenReturn(new DynamicEntity(entityMetaData));
+		when(entityManager.create(entityMetaData, NO_POPULATE)).thenReturn(new DynamicEntity(entityMetaData));
 
-		entity1 = entityManager.create(entityMetaData);
+		entity1 = entityManager.create(entityMetaData, NO_POPULATE);
 		entity1.set(ID, 1);
 		entity1.set(COUNTRY, "NL");
 
-		entity2 = entityManager.create(entityMetaData);
+		entity2 = entityManager.create(entityMetaData, NO_POPULATE);
 		entity2.set(ID, 2);
 		entity2.set(COUNTRY, "NL");
 
-		entity3 = entityManager.create(entityMetaData);
+		entity3 = entityManager.create(entityMetaData, NO_POPULATE);
 		entity3.set(ID, 3);
 		entity3.set(COUNTRY, "GB");
 

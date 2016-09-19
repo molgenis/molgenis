@@ -31,6 +31,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -86,7 +87,7 @@ public class EntityHydrationTest extends AbstractMolgenisSpringTest
 		dehydratedEntity.put(ATTR_MREF, singletonList("0"));
 
 		// mock entity manager
-		EntityManager entityManager = when(mock(EntityManager.class).create(entityMetaData))
+		EntityManager entityManager = when(mock(EntityManager.class).create(entityMetaData, NO_POPULATE))
 				.thenReturn(new EntityWithComputedAttributes(new DynamicEntity(entityMetaData))).getMock();
 		when(entityManager.getReference(entityMetaDataArgumentCaptor.capture(), eq("0")))
 				.thenReturn(refEntities.get(0));

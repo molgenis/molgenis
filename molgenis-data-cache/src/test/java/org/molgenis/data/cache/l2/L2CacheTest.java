@@ -39,6 +39,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -77,7 +78,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 		List<Entity> refEntities = entityTestHarness.createTestRefEntities(refEntityMetaData, 2);
 		testEntities = entityTestHarness.createTestEntities(emd, 4, refEntities).collect(toList());
 
-		when(entityManager.create(emd)).thenAnswer(new Answer<Entity>()
+		when(entityManager.create(emd, NO_POPULATE)).thenAnswer(new Answer<Entity>()
 		{
 			@Override
 			public Entity answer(InvocationOnMock invocation) throws Throwable
