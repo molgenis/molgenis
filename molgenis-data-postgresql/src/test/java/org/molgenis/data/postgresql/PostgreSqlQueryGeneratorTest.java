@@ -439,6 +439,9 @@ public class PostgreSqlQueryGeneratorTest
 	@Test
 	public void getSqlSelectOneToManyMappedBy()
 	{
+		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refIdAttr").getMock();
+		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 		AttributeMetaData refAttr= when(mock(AttributeMetaData.class).getName()).thenReturn("refAttr").getMock();
 		when(refAttr.getDataType()).thenReturn(XREF);
 
@@ -446,6 +449,7 @@ public class PostgreSqlQueryGeneratorTest
 		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
 		when(attr.isMappedBy()).thenReturn(true);
 		when(attr.getMappedBy()).thenReturn(refAttr);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
 
 		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
@@ -457,7 +461,7 @@ public class PostgreSqlQueryGeneratorTest
 		//noinspection unchecked
 		Query<Entity> q = mock(Query.class);
 		List<Object> parameters = Lists.newArrayList();
-		assertEquals(PostgreSqlQueryGenerator.getSqlSelect(entityMeta, q, parameters, true), "SELECT this.\"idAttr\", (SELECT \"attr\".\"attr\" FROM \"entity_attr\" AS \"attr\" WHERE this.\"idAttr\" = \"attr\".\"idAttr\") AS \"attr\" FROM \"entity\" AS this");
+		assertEquals(PostgreSqlQueryGenerator.getSqlSelect(entityMeta, q, parameters, true), "SELECT this.\"idAttr\", (SELECT array_agg(DISTINCT ARRAY[\"attr\".\"order\"::TEXT,\"attr\".\"refIdAttr\"::TEXT]) FROM \"refEntity_refAttr\" AS \"attr\" WHERE this.\"idAttr\" = \"attr\".\"refAttr\") AS \"attr\" FROM \"entity\" AS this");
 		assertEquals(parameters, Collections.emptyList());
 	}
 
