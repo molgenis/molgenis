@@ -163,22 +163,31 @@ public class PostgreSqlQueryGeneratorTest
 	}
 
 	@Test
-	public void getSqlCreateForeignKeyInversedBy()
+	public void getSqlCreateForeignKeyMappedBy()
 	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+
 		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refIdAttr").getMock();
 		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData refXrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("xrefAttr").getMock();
+		when(refXrefAttr.getDataType()).thenReturn(XREF);
+		when(refXrefAttr.isInversedBy()).thenReturn(true);
+		when(refXrefAttr.getInversedBy()).thenReturn(attr);
+		when(refXrefAttr.getRefEntity()).thenReturn(entityMeta);
+
 		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
-		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
-		when(refAttr.getDataType()).thenReturn(XREF);
-		when(refAttr.getRefEntity()).thenReturn(refEntityMeta);
-		when(refAttr.isInversedBy()).thenReturn(true);
 
-		String expectedSql = "ALTER TABLE \"entity_attr\" ADD CONSTRAINT \"entity_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"refEntity\"(\"refIdAttr\") DEFERRABLE INITIALLY DEFERRED";
-		assertEquals(PostgreSqlQueryGenerator.getSqlCreateForeignKey(entityMeta, refAttr), expectedSql);
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		when(attr.isMappedBy()).thenReturn(true);
+		when(attr.getMappedBy()).thenReturn(refXrefAttr);
+
+		String expectedSql = "ALTER TABLE \"refEntity_xrefAttr\" ADD CONSTRAINT \"entity_attr_fkey\" FOREIGN KEY (\"refIdAttr\") REFERENCES \"refEntity\"(\"refIdAttr\") ON DELETE CASCADE";
+		assertEquals(PostgreSqlQueryGenerator.getSqlCreateForeignKey(entityMeta, attr), expectedSql);
 	}
 
 	@Test

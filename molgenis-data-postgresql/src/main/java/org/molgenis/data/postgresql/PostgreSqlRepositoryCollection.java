@@ -746,7 +746,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	{
 		if (attr.isInversedBy())
 		{
-			createForeignKey(entityMeta, attr);
+			createForeignKey(attr.getRefEntity(), attr.getInversedBy());
 		}
 		else
 		{

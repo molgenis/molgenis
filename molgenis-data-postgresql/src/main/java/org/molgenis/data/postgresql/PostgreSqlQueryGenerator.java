@@ -42,8 +42,17 @@ class PostgreSqlQueryGenerator
 
 	private static String getSqlForeignKey(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
+		AttributeMetaData foreignKeyAttr;
+		if (attr.isMappedBy())
+		{
+			foreignKeyAttr = attr.getRefEntity().getIdAttribute();
+		}
+		else
+		{
+			foreignKeyAttr = attr;
+		}
 		StringBuilder strBuilder = new StringBuilder("CONSTRAINT ").append(getForeignKeyName(entityMeta, attr))
-				.append(" FOREIGN KEY (").append(getColumnName(attr)).append(") REFERENCES ")
+				.append(" FOREIGN KEY (").append(getColumnName(foreignKeyAttr)).append(") REFERENCES ")
 				.append(getTableName(attr.getRefEntity())).append('(')
 				.append(getColumnName(attr.getRefEntity().getIdAttribute())).append(')');
 
@@ -51,6 +60,10 @@ class PostgreSqlQueryGenerator
 		if (attr.getRefEntity().getName().equals(entityMeta.getName()) || attr.isInversedBy())
 		{
 			strBuilder.append(" DEFERRABLE INITIALLY DEFERRED");
+		}
+		if (attr.isInversedBy() || attr.isMappedBy())
+		{
+			strBuilder.append(" ON DELETE CASCADE");
 		}
 		return strBuilder.toString();
 	}
@@ -76,7 +89,7 @@ class PostgreSqlQueryGenerator
 	static String getSqlCreateForeignKey(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		String tableName;
-		if (attr.isInversedBy())
+		if (attr.isMappedBy())
 		{
 			tableName = getJunctionTableName(entityMeta, attr);
 		}
@@ -274,7 +287,8 @@ class PostgreSqlQueryGenerator
 
 	static String getSqlCreateJunctionTableIndex(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		AttributeMetaData idAttr = attr.isMappedBy() ? attr.getRefEntity().getIdAttribute() : entityMeta.getIdAttribute();
+		AttributeMetaData idAttr = attr.isMappedBy() ? attr.getRefEntity().getIdAttribute() : entityMeta
+				.getIdAttribute();
 		String junctionTableName = getJunctionTableName(entityMeta, attr);
 		String junctionTableIndexName = getJunctionTableIndexName(entityMeta, attr, idAttr);
 		String idxColumnName = getColumnName(idAttr);
