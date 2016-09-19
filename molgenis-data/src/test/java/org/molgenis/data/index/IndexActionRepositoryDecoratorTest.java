@@ -2,6 +2,7 @@ package org.molgenis.data.index;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -21,6 +22,7 @@ public class IndexActionRepositoryDecoratorTest
 	private Repository<Entity> decoratedRepo;
 	private IndexActionRegisterService indexActionRegisterService;
 	private IndexActionRepositoryDecorator indexActionRepositoryDecorator;
+	private EntityMetaData entityMeta;
 
 	@SuppressWarnings("unchecked")
 	@BeforeMethod
@@ -29,7 +31,7 @@ public class IndexActionRepositoryDecoratorTest
 		decoratedRepo = mock(Repository.class);
 		when(decoratedRepo.getName()).thenReturn("entity");
 		when(decoratedRepo.getCapabilities()).thenReturn(singleton(MANAGABLE));
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		entityMeta = mock(EntityMetaData.class);
 		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
 		indexActionRegisterService = mock(IndexActionRegisterService.class);
 		indexActionRepositoryDecorator = new IndexActionRepositoryDecorator(decoratedRepo, indexActionRegisterService);
@@ -38,11 +40,29 @@ public class IndexActionRepositoryDecoratorTest
 	@Test
 	public void updateEntity()
 	{
+		initEntityMeta();
+
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getIdValue()).thenReturn("1");
 		indexActionRepositoryDecorator.update(entity0);
 		verify(decoratedRepo, times(1)).update(entity0);
 		verify(indexActionRegisterService).register("entity", "1");
+		verifyNoMoreInteractions(indexActionRegisterService);
+	}
+
+	@Test
+	public void updateEntityBidi()
+	{
+		initEntityMetaBidi();
+
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getIdValue()).thenReturn("1");
+		indexActionRepositoryDecorator.update(entity0);
+		verify(decoratedRepo, times(1)).update(entity0);
+		verify(indexActionRegisterService).register("entity", "1");
+		verify(indexActionRegisterService).register("mappedByEntity", null);
+		verify(indexActionRegisterService).register("inversedByEntity", null);
+		verifyNoMoreInteractions(indexActionRegisterService);
 	}
 
 	@Test
@@ -54,75 +74,252 @@ public class IndexActionRepositoryDecoratorTest
 	@Test
 	public void updateStreamEntities()
 	{
+		initEntityMeta();
+
 		Stream<Entity> entities = Stream.empty();
 		indexActionRepositoryDecorator.update(entities);
 		verify(decoratedRepo, times(1)).update(entities);
 		verify(indexActionRegisterService).register("entity", null);
+		verifyNoMoreInteractions(indexActionRegisterService);
+	}
+
+	@Test
+	public void updateStreamEntitiesBidi()
+	{
+		initEntityMetaBidi();
+
+		Stream<Entity> entities = Stream.empty();
+		indexActionRepositoryDecorator.update(entities);
+		verify(decoratedRepo, times(1)).update(entities);
+		verify(indexActionRegisterService).register("entity", null);
+		verify(indexActionRegisterService).register("mappedByEntity", null);
+		verify(indexActionRegisterService).register("inversedByEntity", null);
+		verifyNoMoreInteractions(indexActionRegisterService);
 	}
 
 	@Test
 	public void deleteEntity()
 	{
+		initEntityMeta();
+
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getIdValue()).thenReturn("1");
 		indexActionRepositoryDecorator.delete(entity0);
 		verify(decoratedRepo, times(1)).delete(entity0);
 		verify(indexActionRegisterService).register("entity", "1");
+		verifyNoMoreInteractions(indexActionRegisterService);
+	}
+
+	@Test
+	public void deleteEntityBidi()
+	{
+		initEntityMetaBidi();
+
+		Entity mappedByEntity0 = mock(Entity.class);
+		when(mappedByEntity0.getIdValue()).thenReturn("mappedBy0");
+		Entity inversedByEntity0 = mock(Entity.class);
+		when(inversedByEntity0.getIdValue()).thenReturn("inversedBy0");
+
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getEntities("mappedByAttr")).thenReturn(singleton(mappedByEntity0));
+		when(entity0.getEntity("inversedByAttr")).thenReturn(inversedByEntity0);
+		when(entity0.getIdValue()).thenReturn("1");
+		indexActionRepositoryDecorator.delete(entity0);
+		verify(decoratedRepo, times(1)).delete(entity0);
+		verify(indexActionRegisterService).register("entity", "1");
+		verify(indexActionRegisterService).register("mappedByEntity", "mappedBy0");
+		verify(indexActionRegisterService).register("inversedByEntity", "inversedBy0");
+		verifyNoMoreInteractions(indexActionRegisterService);
 	}
 
 	@Test
 	public void deleteStreamEntities()
 	{
+		initEntityMeta();
+
 		Stream<Entity> entities = Stream.empty();
 		indexActionRepositoryDecorator.delete(entities);
 		verify(decoratedRepo, times(1)).delete(entities);
 		verify(indexActionRegisterService, times(1)).register("entity", null);
+		verifyNoMoreInteractions(indexActionRegisterService);
+	}
+
+	@Test
+	public void deleteStreamEntitiesBidi()
+	{
+		initEntityMetaBidi();
+
+		Stream<Entity> entities = Stream.empty();
+		indexActionRepositoryDecorator.delete(entities);
+		verify(decoratedRepo, times(1)).delete(entities);
+		verify(indexActionRegisterService, times(1)).register("entity", null);
+		verify(indexActionRegisterService).register("mappedByEntity", null);
+		verify(indexActionRegisterService).register("inversedByEntity", null);
+		verifyNoMoreInteractions(indexActionRegisterService);
 	}
 
 	@Test
 	public void deleteEntityById()
 	{
+		initEntityMeta();
+
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getIdValue()).thenReturn("1");
 		indexActionRepositoryDecorator.deleteById("1");
 		verify(decoratedRepo, times(1)).deleteById("1");
 		verify(indexActionRegisterService).register("entity", "1");
+		verifyNoMoreInteractions(indexActionRegisterService);
+	}
+
+	@Test
+	public void deleteEntityByIdBidi()
+	{
+		initEntityMetaBidi();
+
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getIdValue()).thenReturn("1");
+		indexActionRepositoryDecorator.deleteById("1");
+		verify(decoratedRepo, times(1)).deleteById("1");
+		verify(indexActionRegisterService).register("entity", "1");
+		verify(indexActionRegisterService).register("mappedByEntity", null);
+		verify(indexActionRegisterService).register("inversedByEntity", null);
+		verifyNoMoreInteractions(indexActionRegisterService);
 	}
 
 	@Test
 	public void deleteEntityByIdStream()
 	{
+		initEntityMeta();
+
 		Stream<Object> ids = Stream.empty();
 		indexActionRepositoryDecorator.deleteAll(ids);
 		verify(decoratedRepo, times(1)).deleteAll(ids);
 		verify(indexActionRegisterService, times(1)).register("entity", null);
+		verifyNoMoreInteractions(indexActionRegisterService);
+	}
+
+	@Test
+	public void deleteEntityByIdStreamBidi()
+	{
+		initEntityMetaBidi();
+
+		Stream<Object> ids = Stream.empty();
+		indexActionRepositoryDecorator.deleteAll(ids);
+		verify(decoratedRepo, times(1)).deleteAll(ids);
+		verify(indexActionRegisterService, times(1)).register("entity", null);
+		verify(indexActionRegisterService).register("mappedByEntity", null);
+		verify(indexActionRegisterService).register("inversedByEntity", null);
+		verifyNoMoreInteractions(indexActionRegisterService);
 	}
 
 	@Test
 	public void deleteAll()
 	{
+		initEntityMeta();
+
 		indexActionRepositoryDecorator.deleteAll();
 		verify(decoratedRepo, times(1)).deleteAll();
 		verify(indexActionRegisterService, times(1)).register("entity", null);
+		verifyNoMoreInteractions(indexActionRegisterService);
+	}
+
+	@Test
+	public void deleteAllBidi()
+	{
+		initEntityMetaBidi();
+
+		indexActionRepositoryDecorator.deleteAll();
+		verify(decoratedRepo, times(1)).deleteAll();
+		verify(indexActionRegisterService, times(1)).register("entity", null);
+		verify(indexActionRegisterService).register("mappedByEntity", null);
+		verify(indexActionRegisterService).register("inversedByEntity", null);
+		verifyNoMoreInteractions(indexActionRegisterService);
 	}
 
 	@Test
 	public void addEntity()
 	{
+		initEntityMeta();
+
 		Entity entity0 = mock(Entity.class);
 		when(entity0.getIdValue()).thenReturn("1");
 		indexActionRepositoryDecorator.add(entity0);
 		verify(decoratedRepo, times(1)).add(entity0);
 		verify(indexActionRegisterService).register("entity", "1");
+		verifyNoMoreInteractions(indexActionRegisterService);
+	}
+
+	@Test
+	public void addEntityBidi()
+	{
+		initEntityMetaBidi();
+
+		Entity mappedByEntity0 = mock(Entity.class);
+		when(mappedByEntity0.getIdValue()).thenReturn("mappedBy0");
+		Entity inversedByEntity0 = mock(Entity.class);
+		when(inversedByEntity0.getIdValue()).thenReturn("inversedBy0");
+
+		Entity entity0 = mock(Entity.class);
+		when(entity0.getEntities("mappedByAttr")).thenReturn(singleton(mappedByEntity0));
+		when(entity0.getEntity("inversedByAttr")).thenReturn(inversedByEntity0);
+		when(entity0.getIdValue()).thenReturn("1");
+		indexActionRepositoryDecorator.add(entity0);
+		verify(decoratedRepo, times(1)).add(entity0);
+		verify(indexActionRegisterService).register("entity", "1");
+		verify(indexActionRegisterService).register("mappedByEntity", "mappedBy0");
+		verify(indexActionRegisterService).register("inversedByEntity", "inversedBy0");
+		verifyNoMoreInteractions(indexActionRegisterService);
 	}
 
 	@Test
 	public void addEntitiesStream()
 	{
+		initEntityMeta();
+
 		Stream<Entity> entities = Stream.empty();
 		when(decoratedRepo.add(entities)).thenReturn(123);
 		assertEquals(indexActionRepositoryDecorator.add(entities), Integer.valueOf(123));
 		verify(decoratedRepo, times(1)).add(entities);
 		verify(indexActionRegisterService).register("entity", null);
+		verifyNoMoreInteractions(indexActionRegisterService);
+	}
+
+	@Test
+	public void addEntitiesStreamBidi()
+	{
+		initEntityMetaBidi();
+
+		Stream<Entity> entities = Stream.empty();
+		when(decoratedRepo.add(entities)).thenReturn(123);
+		assertEquals(indexActionRepositoryDecorator.add(entities), Integer.valueOf(123));
+		verify(decoratedRepo, times(1)).add(entities);
+		verify(indexActionRegisterService).register("entity", null);
+		verify(indexActionRegisterService).register("mappedByEntity", null);
+		verify(indexActionRegisterService).register("inversedByEntity", null);
+		verifyNoMoreInteractions(indexActionRegisterService);
+	}
+
+	private void initEntityMeta()
+	{
+		when(entityMeta.getMappedByAttributes()).thenReturn(Stream.empty());
+		when(entityMeta.getInversedByAttributes()).thenReturn(Stream.empty());
+	}
+
+	private void initEntityMetaBidi()
+	{
+		EntityMetaData mappedByEntity = mock(EntityMetaData.class);
+		when(mappedByEntity.getName()).thenReturn("mappedByEntity");
+		AttributeMetaData mappedByAttr = mock(AttributeMetaData.class);
+		when(mappedByAttr.getName()).thenReturn("mappedByAttr");
+		when(mappedByAttr.getRefEntity()).thenReturn(mappedByEntity);
+
+		EntityMetaData inversedByEntity = mock(EntityMetaData.class);
+		when(inversedByEntity.getName()).thenReturn("inversedByEntity");
+		AttributeMetaData inversedByAttr = mock(AttributeMetaData.class);
+		when(inversedByAttr.getName()).thenReturn("inversedByAttr");
+		when(inversedByAttr.getRefEntity()).thenReturn(inversedByEntity);
+
+		when(entityMeta.getMappedByAttributes()).thenReturn(Stream.of(mappedByAttr));
+		when(entityMeta.getInversedByAttributes()).thenReturn(Stream.of(inversedByAttr));
 	}
 }

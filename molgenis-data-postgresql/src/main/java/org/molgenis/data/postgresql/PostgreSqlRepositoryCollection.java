@@ -744,28 +744,36 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 
 	private void createJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		String createJunctionTableSql = getSqlCreateJunctionTable(entityMeta, attr);
-		if (LOG.isDebugEnabled())
+		if (attr.isInversedBy())
 		{
-			LOG.debug("Creating junction table for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
-			if (LOG.isTraceEnabled())
-			{
-				LOG.trace("SQL: {}", createJunctionTableSql);
-			}
+			createForeignKey(entityMeta, attr);
 		}
-		jdbcTemplate.execute(createJunctionTableSql);
+		else
+		{
+			String createJunctionTableSql = getSqlCreateJunctionTable(entityMeta, attr);
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Creating junction table for entity [{}] attribute [{}]", entityMeta.getName(),
+						attr.getName());
+				if (LOG.isTraceEnabled())
+				{
+					LOG.trace("SQL: {}", createJunctionTableSql);
+				}
+			}
+			jdbcTemplate.execute(createJunctionTableSql);
 
-		String createJunctionTableIndexSql = getSqlCreateJunctionTableIndex(entityMeta, attr);
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Creating junction table index for entity [{}] attribute [{}]", entityMeta.getName(),
-					attr.getName());
-			if (LOG.isTraceEnabled())
+			String createJunctionTableIndexSql = getSqlCreateJunctionTableIndex(entityMeta, attr);
+			if (LOG.isDebugEnabled())
 			{
-				LOG.trace("SQL: {}", createJunctionTableIndexSql);
+				LOG.debug("Creating junction table index for entity [{}] attribute [{}]", entityMeta.getName(),
+						attr.getName());
+				if (LOG.isTraceEnabled())
+				{
+					LOG.trace("SQL: {}", createJunctionTableIndexSql);
+				}
 			}
+			jdbcTemplate.execute(createJunctionTableIndexSql);
 		}
-		jdbcTemplate.execute(createJunctionTableIndexSql);
 	}
 
 	private void dropJunctionTable(EntityMetaData entityMeta, AttributeMetaData mrefAttr)
