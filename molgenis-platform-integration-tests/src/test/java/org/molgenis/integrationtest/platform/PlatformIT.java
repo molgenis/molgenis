@@ -38,6 +38,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -53,6 +54,7 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
@@ -91,8 +93,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private L2Cache l2Cache;
 	@Autowired
-	private LanguageFactory languageFactory;
-	@Autowired
 	private LanguageService languageService;
 	@Autowired
 	private I18nStringMetaData i18nStringMetaData;
@@ -102,6 +102,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private EntityMetaDataMetaData entityMetaDataMetaData;
 	@Autowired
 	private AttributeMetaDataMetaData attributeMetaDataMetaData;
+	@Autowired
+	private LanguageFactory languageFactory;
 
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
@@ -158,7 +160,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			metaDataService.addEntityMeta(selfXrefEntityMetaData);
 		});
 		setAuthentication();
-		createLanguages();
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 
@@ -218,12 +219,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 						writeI18nStringMetaData, writeEntityMetaDataMetaData, readEntityMetaDataMetaData,
 						countEntityMetaDataMetaData, "ROLE_ENTITY_READ_SYS_MD_ENTITIES",
 						"ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES", "ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
-	}
-
-	private void createLanguages()
-	{
-		dataService.add(LanguageMetaData.LANGUAGE, languageFactory.create("en", "English"));
-		dataService.add(LanguageMetaData.LANGUAGE, languageFactory.create("nl", "Nederlands"));
 	}
 
 	@AfterClass
@@ -292,8 +287,30 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testLanguageService()
 	{
+		dataService.add(LANGUAGE, languageFactory.create(LanguageService.DEFAULT_LANGUAGE_CODE, LanguageService.DEFAULT_LANGUAGE_NAME, true));
+		dataService
+				.add(LANGUAGE, languageFactory.create("nl", new Locale("nl").getDisplayName(new Locale("nl")), false));
+		dataService
+				.add(LANGUAGE, languageFactory.create("pt", new Locale("pt").getDisplayName(new Locale("pt")), false));
+		dataService
+				.add(LANGUAGE, languageFactory.create("es", new Locale("es").getDisplayName(new Locale("es")), false));
+		dataService
+				.add(LANGUAGE, languageFactory.create("de", new Locale("de").getDisplayName(new Locale("de")), false));
+		dataService
+				.add(LANGUAGE, languageFactory.create("it", new Locale("it").getDisplayName(new Locale("it")), false));
+		dataService
+				.add(LANGUAGE, languageFactory.create("fr", new Locale("fr").getDisplayName(new Locale("fr")), false));
+		dataService
+				.add(LANGUAGE, languageFactory.create("mo", "My language", false));
+
+		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getAttribute("label-en").getName(), "label-en");
+		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute("en").getName(), "label-en");
+		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute("pt").getName(), "label-pt");
+		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute("nl").getName(), "label-nl");
+		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute().getName(), "simpleName");
+
 		assertEquals(languageService.getCurrentUserLanguageCode(), "en");
-		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(), new String[] { "en", "nl" });
+		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(), new String[] {"en", "nl", "de", "es", "it", "pt", "fr", "mo"});
 
 		// NL
 		assertNotNull(dataService.getEntityMetaData(I18N_STRING).getAttribute("nl"));

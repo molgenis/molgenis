@@ -59,12 +59,6 @@ public class MetaDataServiceImpl implements MetaDataService
 	}
 
 	@Override
-	public Stream<String> getLanguageCodes()
-	{
-		return getDefaultBackend().getLanguageCodes();
-	}
-
-	@Override
 	public Repository<Entity> getRepository(String entityName)
 	{
 		EntityMetaData entityMeta = getEntityMetaData(entityName);

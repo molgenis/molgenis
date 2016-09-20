@@ -18,12 +18,14 @@ public class LanguageFactory extends AbstractSystemEntityFactory<Language, Langu
 	 *
 	 * @param code language code, e.g. "en"
 	 * @param name language name, e.g. "English"
+	 * @Param active language active, e.g "true"
 	 * @return new language
 	 */
-	public Language create(String code, String name)
+	public Language create(String code, String name, boolean active)
 	{
 		Language language = super.create(code);
 		language.setName(name);
+		language.setActive(active);
 		return language;
 	}
 }

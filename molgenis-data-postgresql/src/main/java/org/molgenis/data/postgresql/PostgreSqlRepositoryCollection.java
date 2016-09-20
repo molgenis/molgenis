@@ -72,27 +72,6 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
-	public Stream<String> getLanguageCodes()
-	{
-		if (isTableExists(LANGUAGE))
-		{
-			String sql = "SELECT \"" + CODE + "\" FROM \"" + LANGUAGE + '"';
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("Fetching languages");
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("SQL: {}", sql);
-				}
-			}
-			return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getString(CODE)).stream();
-		}
-		else
-		{
-			return Stream.of(DEFAULT_LANGUAGE_CODE);
-		}
-	}
 
 	@Override
 	public Repository<Entity> createRepository(EntityMetaData entityMeta)

@@ -14,6 +14,7 @@ import org.molgenis.data.elasticsearch.IndexedRepositoryDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.i18n.I18nStringDecorator;
 import org.molgenis.data.i18n.LanguageRepositoryDecorator;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.index.IndexActionRegisterService;
@@ -74,6 +75,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final MolgenisPermissionService permissionService;
 	private final EntityMetaDataValidator entityMetaDataValidator;
 	private final L3Cache l3Cache;
+	private final LanguageService languageService;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -86,7 +88,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			EntityMetaDataMetaData entityMetaMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
 			MolgenisPermissionService permissionService, EntityMetaDataValidator entityMetaDataValidator,
-			L3Cache l3Cache)
+			L3Cache l3Cache, LanguageService languageService)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -111,6 +113,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.permissionService = requireNonNull(permissionService);
 		this.entityMetaDataValidator = requireNonNull(entityMetaDataValidator);
 		this.l3Cache = requireNonNull(l3Cache);
+		this.languageService = requireNonNull(languageService);
 	}
 
 	@Override
@@ -200,8 +203,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		else if (repo.getName().equals(LANGUAGE))
 		{
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new LanguageRepositoryDecorator(
-					(Repository<Language>) (Repository<? extends Entity>) repo, dataService, attrMetaFactory,
-					entityMetaMeta, i18nStringMeta);
+					(Repository<Language>) (Repository<? extends Entity>) repo, languageService);
 		}
 		else if (repo.getName().equals(I18N_STRING))
 		{
