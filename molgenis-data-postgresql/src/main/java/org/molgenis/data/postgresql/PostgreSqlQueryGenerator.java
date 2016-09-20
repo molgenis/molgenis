@@ -56,15 +56,17 @@ class PostgreSqlQueryGenerator
 				.append(getTableName(attr.getRefEntity())).append('(')
 				.append(getColumnName(attr.getRefEntity().getIdAttribute())).append(')');
 
+		if (attr.isInversedBy() || attr.isMappedBy())
+		{
+			strBuilder.append(" ON DELETE CASCADE");
+		}
+
 		// for self-referencing data or inversed attributes defer checking constraints until the end of the transaction
 		if (attr.getRefEntity().getName().equals(entityMeta.getName()) || attr.isInversedBy())
 		{
 			strBuilder.append(" DEFERRABLE INITIALLY DEFERRED");
 		}
-		if (attr.isInversedBy() || attr.isMappedBy())
-		{
-			strBuilder.append(" ON DELETE CASCADE");
-		}
+
 		return strBuilder.toString();
 	}
 
