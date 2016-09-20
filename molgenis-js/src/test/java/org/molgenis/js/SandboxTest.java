@@ -8,7 +8,7 @@ import org.mozilla.javascript.EcmaError;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static freemarker.template.utility.Collections12.singletonList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.SCRIPT;
