@@ -71,7 +71,7 @@
         <dependency>
             <groupId>com.google.auto.value</groupId>
             <artifactId>auto-value</artifactId>
-            <version>1.0</version>
+            <version>${google.auto-value.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -93,7 +93,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>16.0.1</version>
+            <version>${google.guava.version}</version>
         </dependency>
         <dependency>
             <groupId>org.molgenis</groupId>

@@ -122,7 +122,31 @@ public class MolgenisUserDecoratorTest
 		doNothing().when(decoratedRepository).update(captor.capture());
 		molgenisUserDecorator.update(entities);
 		assertEquals(captor.getValue().collect(toList()), singletonList(molgenisUser));
-		verify(molgenisUser).setPassword(anyString());
+		verify(molgenisUser).setPassword("passwordHash");
+		// TODO add authority tests
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test
+	public void updateStreamUnchangedPassword()
+	{
+		when(passwordEncoder.encode("currentPasswordHash")).thenReturn("blaat");
+
+		MolgenisUser currentUser = mock(MolgenisUser.class);
+		when(currentUser.getId()).thenReturn("1");
+		when(currentUser.getPassword()).thenReturn("currentPasswordHash");
+		when(molgenisUserDecorator.findOneById("1")).thenReturn(currentUser);
+
+		MolgenisUser molgenisUser = mock(MolgenisUser.class);
+		when(molgenisUser.getId()).thenReturn("1");
+		when(molgenisUser.getPassword()).thenReturn("currentPasswordHash");
+
+		Stream<MolgenisUser> entities = Stream.of(molgenisUser);
+		ArgumentCaptor<Stream<MolgenisUser>> captor = ArgumentCaptor.forClass((Class) Stream.class);
+		doNothing().when(decoratedRepository).update(captor.capture());
+		molgenisUserDecorator.update(entities);
+		assertEquals(captor.getValue().collect(toList()), singletonList(molgenisUser));
+		verify(molgenisUser).setPassword("currentPasswordHash");
 		// TODO add authority tests
 	}
 

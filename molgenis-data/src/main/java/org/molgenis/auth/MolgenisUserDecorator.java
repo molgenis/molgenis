@@ -86,12 +86,13 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 		MolgenisUser currentUser = findOneById(molgenisUser.getId());
 
 		String currentPassword = currentUser.getPassword();
-		String password = passwordEncoder.encode(molgenisUser.getPassword());
-
-		if (!password.equals(currentPassword))
+		String password = molgenisUser.getPassword();
+		//password is updated
+		if(!currentPassword.equals(password))
 		{
-			molgenisUser.setPassword(password);
+			password = passwordEncoder.encode(molgenisUser.getPassword());
 		}
+		molgenisUser.setPassword(password);
 	}
 
 	private void encodePassword(MolgenisUser molgenisUser)
