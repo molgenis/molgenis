@@ -31,8 +31,14 @@ public class JobExecutionMetaData extends SystemEntityMetaData
 	public static final String RESULT_URL = "resultUrl";
 	public static final String SUCCESS_EMAIL = "successEmail";
 	public static final String FAILURE_EMAIL = "failureEmail";
+	public static final String PENDING = "PENDING";
+	public static final String RUNNING = "RUNNING";
+	public static final String SUCCESS = "SUCCESS";
+	public static final String FAILED = "FAILED";
+	public static final String CANCELED = "CANCELED";
 
-	private final List<String> jobStatusOptions = newArrayList("PENDING", "RUNNING", "SUCCESS", "FAILED", "CANCELED");
+
+	private final List<String> jobStatusOptions = newArrayList(PENDING, RUNNING, SUCCESS, FAILED, CANCELED);
 
 	JobExecutionMetaData()
 	{
