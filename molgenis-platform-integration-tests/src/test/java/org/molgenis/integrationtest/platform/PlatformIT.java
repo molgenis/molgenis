@@ -301,16 +301,16 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService
 				.add(LANGUAGE, languageFactory.create("fr", new Locale("fr").getDisplayName(new Locale("fr")), false));
 		dataService
-				.add(LANGUAGE, languageFactory.create("mo", "My language", false));
+				.add(LANGUAGE, languageFactory.create("jj", "My language", false));
 
 		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getAttribute("label-en").getName(), "label-en");
-		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute("en").getName(), "label-en");
-		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute("pt").getName(), "label-pt");
-		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute("nl").getName(), "label-nl");
+		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute("en").getName(), "simpleName");
+		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute("pt").getName(), "simpleName");
+		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute("nl").getName(), "simpleName");
 		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute().getName(), "simpleName");
 
 		assertEquals(languageService.getCurrentUserLanguageCode(), "en");
-		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(), new String[] {"en", "nl", "de", "es", "it", "pt", "fr", "mo"});
+		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(), new String[] {"en", "nl", "de", "es", "it", "pt", "fr", "jj"});
 
 		// NL
 		assertNotNull(dataService.getEntityMetaData(I18N_STRING).getAttribute("nl"));
