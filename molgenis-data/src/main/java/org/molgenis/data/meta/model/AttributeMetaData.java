@@ -262,6 +262,9 @@ public class AttributeMetaData extends StaticEntity
 		return this;
 	}
 
+	/**
+	 * Indicates if this attribute is the one-to-many back-reference of a bidirectionally navigable relationship.
+	 */
 	public boolean isMappedBy()
 	{
 		return getMappedBy() != null;
@@ -612,6 +615,11 @@ public class AttributeMetaData extends StaticEntity
 		return "AttributeMetaData{" + "name=" + getName() + '}';
 	}
 
+	/**
+	 * For a reference type attribute, searches the referenced entity for its inversed attribute.
+	 * This is the one-to-many attribute that has "mappedBy" set to this attribute.
+	 * Returns null if this is not a reference type attribute, or no inverse attribute exists.
+	 */
 	public AttributeMetaData getInversedBy()
 	{
 		if (isReferenceType(this))
@@ -627,6 +635,10 @@ public class AttributeMetaData extends StaticEntity
 		}
 	}
 
+	/**
+	 * Determines if this is a reference type attribute whose refEntity has an attribute that has mappedBy set to this
+	 * attribute.
+	 */
 	public boolean isInversedBy()
 	{
 		return getInversedBy() != null;
