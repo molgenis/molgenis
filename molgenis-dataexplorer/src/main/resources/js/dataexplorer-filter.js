@@ -33,11 +33,10 @@
             case 'TEXT':
             case 'SCRIPT':
                 return self.createComplexFilter(attribute, filter, wizard, 'OR');
-                break;
             case 'CATEGORICAL_MREF':
             case 'MREF':
+            case 'ONE_TO_MANY':
                 return self.createComplexFilter(attribute, filter, wizard, null);
-                break;
             case 'COMPOUND' :
                 throw 'Unsupported data type: ' + attribute.fieldType;
             default:
@@ -172,6 +171,7 @@
             case 'MREF':
             case 'XREF':
             case 'FILE':
+            case 'ONE_TO_MANY':
                 var operator = (filter.operator ? filter.operator.toLocaleLowerCase() : 'or');
                 var array = [];
                 $.each(filter.getLabels(), function (key, value) {
@@ -530,6 +530,7 @@
             case 'MREF':
             case 'CATEGORICAL_MREF':
             case 'FILE':
+            case 'ONE_TO_MANY':
                 var operator = simpleFilter ? simpleFilter.operator : 'OR';
                 var container = $('<div class="xrefmrefsearch">');
                 $controls.append(container);
@@ -639,7 +640,7 @@
                 if (value) {
                     // Add values
                     if (attribute.fieldType === 'MREF' || attribute.fieldType === 'CATEGORICAL_MREF' ||
-                        attribute.fieldType === 'XREF' || attribute.fieldType === 'FILE') {
+                        attribute.fieldType === 'XREF' || attribute.fieldType === 'FILE' || attribute.fieldType == 'ONE_TO_MANY') {
                         var mrefValues = value.split(',');
                         $(mrefValues).each(function (i) {
                             values.push(mrefValues[i]);
@@ -756,6 +757,7 @@
                         case 'LONG':
                         case 'MREF':
                         case 'XREF':
+                        case 'ONE_TO_MANY':
                         case 'FILE':
                             attrOperator = 'EQUALS';
                             break;

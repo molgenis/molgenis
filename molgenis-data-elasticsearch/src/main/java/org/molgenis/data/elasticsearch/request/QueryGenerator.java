@@ -16,6 +16,7 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import static java.lang.String.format;
 import static org.molgenis.data.elasticsearch.index.ElasticsearchIndexCreator.DEFAULT_ANALYZER;
 
 /**
@@ -177,8 +178,8 @@ public class QueryGenerator implements QueryPartGenerator
 				// construct query part
 				if (queryValue != null)
 				{
-					AttributeType dataType = attr.getDataType();
-					switch (dataType)
+					AttributeType attrType = attr.getDataType();
+					switch (attrType)
 					{
 						case BOOL:
 						case DATE:
@@ -209,6 +210,7 @@ public class QueryGenerator implements QueryPartGenerator
 						case XREF:
 						case MREF:
 						case FILE:
+						case ONE_TO_MANY:
 						{
 							if (attributePath.length > 1)
 								throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
@@ -226,9 +228,9 @@ public class QueryGenerator implements QueryPartGenerator
 						}
 						case COMPOUND:
 							throw new MolgenisQueryException(
-									"Illegal data type [" + dataType + "] for operator [" + queryOperator + "]");
+									format("Illegal attribute type [%s]", attrType.toString()));
 						default:
-							throw new RuntimeException("Unknown data type [" + dataType + "]");
+							throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 					}
 				}
 				else

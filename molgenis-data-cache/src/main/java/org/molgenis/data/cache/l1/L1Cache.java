@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static org.slf4j.LoggerFactory.getLogger;
@@ -81,6 +82,16 @@ public class L1Cache extends DefaultMolgenisTransactionListener
 		{
 			LOG.trace("Removing all entities from L1 cache that belong to {}", entityName);
 			entityCache.evictAll(entityName);
+		}
+	}
+
+	public void evict(Stream<EntityKey> entityKeys)
+	{
+		CombinedEntityCache entityCache = caches.get();
+		if (entityCache != null)
+		{
+			LOG.trace("Removing entity keys from L1 cache.");
+			entityCache.evict(entityKeys);
 		}
 	}
 

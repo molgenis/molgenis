@@ -27,6 +27,7 @@ var AttributeControl = React.createClass({
     displayName: 'AttributeControl',
     propTypes: {
         attr: React.PropTypes.oneOfType([React.PropTypes.string, React.PropTypes.object]),
+        entity: React.PropTypes.object.isRequired,
         required: React.PropTypes.bool, // optional overwrite for attr.required
         readOnly: React.PropTypes.bool, // optional overwrite for attr.readOnly
         visible: React.PropTypes.bool,  // optional overwrite for attr.visible
@@ -169,6 +170,9 @@ var AttributeControl = React.createClass({
                     return this._createEntitySelectBox(controlProps, props.multiple || false, props.placeholder || this.state.i18nStrings.form_xref_control_placeholder, props.value);
                 case 'MREF':
                     return this._createEntitySelectBox(controlProps, props.multiple || true, props.placeholder || this.state.i18nStrings.form_mref_control_placeholder, props.value);
+                case 'ONE_TO_MANY':
+                    var query = {field: attr.mappedBy, operator: 'EQUALS', value: null};
+                    return this._createEntitySelectBox(controlProps, props.multiple || true, props.placeholder || this.state.i18nStrings.form_mref_control_placeholder, props.value, query);
                 case 'SCRIPT':
                     return CodeEditor(_.extend({}, controlProps, {
                         placeholder: this.props.placeholder
@@ -247,12 +251,13 @@ var AttributeControl = React.createClass({
             time: time
         }));
     },
-    _createEntitySelectBox: function (controlProps, multiple, placeholder, value) {
+    _createEntitySelectBox: function (controlProps, multiple, placeholder, value, query) {
         return EntitySelectBox(_.extend({}, controlProps, {
             mode: 'create',
             placeholder: placeholder,
             multiple: multiple,
             entity: this.state.attr.refEntity,
+            query: query,
             value: multiple ? this._pagedValueToValue(value) : value, // TODO same for CATEGORICAL_MREF
             onValueChange: multiple ? function (event) {
                 event.value = this._valueToPagedValue(event.value);

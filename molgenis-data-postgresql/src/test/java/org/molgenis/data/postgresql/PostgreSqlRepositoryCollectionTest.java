@@ -1,10 +1,7 @@
 package org.molgenis.data.postgresql;
 
 import org.mockito.ArgumentCaptor;
-import org.molgenis.data.DataService;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Query;
-import org.molgenis.data.UnknownAttributeException;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -21,6 +18,7 @@ import static org.mockito.Mockito.*;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.EXTENDS;
+import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
 import static org.testng.Assert.assertEquals;
 
 public class PostgreSqlRepositoryCollectionTest
@@ -42,7 +40,7 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
-	public void updateAttribute() throws Exception
+	public void updateAttribute()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
@@ -56,7 +54,67 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
-	public void updateAttributeNillableToNotNillable() throws Exception
+	public void updateAttributeOrderBySet()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		String attrName = "attr";
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		String refAttrName = "refAttr";
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(refAttrName).getMock();
+		when(attr.isMappedBy()).thenReturn(true);
+		when(attr.getMappedBy()).thenReturn(refAttr);
+		when(attr.getOrderBy()).thenReturn(null);
+		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		AttributeMetaData updatedAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		when(updatedAttr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(attr.isMappedBy()).thenReturn(true);
+		when(attr.getMappedBy()).thenReturn(refAttr);
+		when(updatedAttr.getOrderBy()).thenReturn(new Sort("orderByAttr"));
+		when(updatedAttr.getRefEntity()).thenReturn(refEntityMeta);
+		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		ArgumentCaptor<String> captor = forClass(String.class);
+		verify(jdbcTemplate).execute(captor.capture());
+		assertEquals(captor.getValue(), "ALTER TABLE \"refEntity\" DROP COLUMN \"refAttr_order\"");
+	}
+
+	@Test
+	public void updateAttributeOrderByRemove()
+	{
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		when(entityMeta.getBackend()).thenReturn(POSTGRESQL);
+		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refId").getMock();
+		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityMeta.getBackend()).thenReturn(POSTGRESQL);
+		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+		String attrName = "attr";
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		String refAttrName = "refAttr";
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(refAttrName).getMock();
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(attr.isMappedBy()).thenReturn(true);
+		when(attr.getMappedBy()).thenReturn(refAttr);
+		when(attr.getOrderBy()).thenReturn(new Sort("orderByAttr"));
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		AttributeMetaData updatedAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		when(updatedAttr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(updatedAttr.isMappedBy()).thenReturn(true);
+		when(updatedAttr.getMappedBy()).thenReturn(refAttr);
+		when(updatedAttr.getOrderBy()).thenReturn(null);
+		when(updatedAttr.getRefEntity()).thenReturn(refEntityMeta);
+		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
+		ArgumentCaptor<String> captor = forClass(String.class);
+		verify(jdbcTemplate).execute(captor.capture());
+		assertEquals(captor.getValue(), "ALTER TABLE \"refEntity\" ADD \"refAttr_order\" SERIAL");
+	}
+
+	@Test
+	public void updateAttributeNillableToNotNillable()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
@@ -72,7 +130,7 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
-	public void updateAttributeNotNillableToNillable() throws Exception
+	public void updateAttributeNotNillableToNillable()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
@@ -88,7 +146,7 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
-	public void updateAttributeNotNillableToNillableIdAttr() throws Exception
+	public void updateAttributeNotNillableToNillableIdAttr()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
@@ -102,7 +160,7 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
-	public void updateAttributeUniqueToNotUnique() throws Exception
+	public void updateAttributeUniqueToNotUnique()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
@@ -118,7 +176,7 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
-	public void updateAttributeUniqueToNotUniqueIdAttr() throws Exception
+	public void updateAttributeUniqueToNotUniqueIdAttr()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
@@ -132,7 +190,7 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
-	public void updateAttributeNotUniqueToUnique() throws Exception
+	public void updateAttributeNotUniqueToUnique()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
@@ -148,7 +206,7 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
-	public void updateAttributeDataTypeToDataType() throws Exception
+	public void updateAttributeDataTypeToDataType()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
@@ -165,7 +223,7 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
-	public void updateAttributeSingleRefDataTypeToDataType() throws Exception
+	public void updateAttributeSingleRefDataTypeToDataType()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
@@ -182,7 +240,7 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
-	public void updateAttributeSingleRefDataTypeToSingleRefDataType() throws Exception
+	public void updateAttributeSingleRefDataTypeToSingleRefDataType()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
@@ -196,7 +254,7 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
-	public void updateAttributeMultiRefDataTypeToMultiRefDataType() throws Exception
+	public void updateAttributeMultiRefDataTypeToMultiRefDataType()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
@@ -210,7 +268,7 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
-	public void updateAttributeDataTypeToSingleRefDataType() throws Exception
+	public void updateAttributeDataTypeToSingleRefDataType()
 	{
 		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refIdAttr").getMock();
 		when(refIdAttr.getDataType()).thenReturn(STRING);
@@ -233,7 +291,7 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
-	public void updateAttributeDataTypeToDataTypeIdAttr() throws Exception
+	public void updateAttributeDataTypeToDataTypeIdAttr()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
@@ -245,7 +303,7 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
-	public void updateAttributeWithExpressionBefore() throws Exception
+	public void updateAttributeWithExpressionBefore()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
@@ -265,11 +323,12 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
-	public void updateAttributeWithExpressionAfter() throws Exception
+	public void updateAttributeWithExpressionAfter()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		when(attr.getDataType()).thenReturn(STRING);
 		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
 		when(attr.getExpression()).thenReturn(null);
 		when(attr.isNillable()).thenReturn(false);
@@ -281,7 +340,7 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
-	public void updateAttributeWithExpressionBeforeAfter() throws Exception
+	public void updateAttributeWithExpressionBeforeAfter()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
@@ -297,7 +356,7 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
-	public void updateAttributeCompoundBefore() throws Exception
+	public void updateAttributeCompoundBefore()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
@@ -313,7 +372,7 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
-	public void updateAttributeCompoundAfter() throws Exception
+	public void updateAttributeCompoundAfter()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
@@ -327,7 +386,7 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
-	public void updateAttributeCompoundBeforeAfter() throws Exception
+	public void updateAttributeCompoundBeforeAfter()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		String attrName = "attr";
@@ -591,6 +650,32 @@ public class PostgreSqlRepositoryCollectionTest
 		verifyZeroInteractions(jdbcTemplate);
 	}
 
+	@Test
+	public void addAttributeOneToManyMappedBy()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		when(entityMeta.getBackend()).thenReturn(POSTGRESQL);
+		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityMeta.getBackend()).thenReturn(POSTGRESQL);
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refAttr").getMock();
+
+		when(refAttr.getDataType()).thenReturn(XREF);
+		when(refAttr.isInversedBy()).thenReturn(true);
+		when(refAttr.getInversedBy()).thenReturn(attr);
+
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		when(attr.getMappedBy()).thenReturn(refAttr);
+		when(attr.isMappedBy()).thenReturn(true);
+
+		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
+
+		postgreSqlRepoCollection.addAttribute(entityMeta, attr);
+		verify(jdbcTemplate).execute("ALTER TABLE \"refEntity\" ADD \"refAttr_order\" SERIAL");
+	}
+
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void addAttributeAlreadyExists()
 	{
@@ -606,10 +691,54 @@ public class PostgreSqlRepositoryCollectionTest
 	{
 		String attrName = "attr";
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		when(attr.getDataType()).thenReturn(STRING);
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
 		postgreSqlRepoCollection.deleteAttribute(entityMeta, attr);
 		verify(jdbcTemplate).execute("ALTER TABLE \"entity\" DROP COLUMN \"attr\"");
+	}
+
+	@Test
+	public void deleteAttributeMref()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+
+		String attrName = "attr";
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+
+		when(attr.getDataType()).thenReturn(MREF);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+
+		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		postgreSqlRepoCollection.deleteAttribute(entityMeta, attr);
+		verify(jdbcTemplate).execute("DROP TABLE \"entity_attr\"");
+	}
+
+	@Test
+	public void deleteAttributeOneToManyMappedBy()
+	{
+		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
+
+		String attrName = "attr";
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		String refAttrName = "refAttr";
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(refAttrName).getMock();
+
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		when(attr.getMappedBy()).thenReturn(refAttr);
+		when(attr.isMappedBy()).thenReturn(true);
+
+		when(refAttr.getDataType()).thenReturn(XREF);
+		when(refAttr.getRefEntity()).thenReturn(entityMeta);
+		when(refAttr.getInversedBy()).thenReturn(attr);
+		when(refAttr.isInversedBy()).thenReturn(true);
+
+		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
+		postgreSqlRepoCollection.deleteAttribute(entityMeta, attr);
+		verify(jdbcTemplate).execute("ALTER TABLE \"refEntity\" DROP COLUMN \"refAttr_order\"");
 	}
 
 	@Test
@@ -619,6 +748,7 @@ public class PostgreSqlRepositoryCollectionTest
 		when(abstractEntityMeta.isAbstract()).thenReturn(true);
 		String attrName = "attr";
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
+		when(attr.getDataType()).thenReturn(STRING);
 		when(abstractEntityMeta.getAttribute(attrName)).thenReturn(attr);
 		when(attr.isNillable()).thenReturn(true);
 		AttributeMetaData updatedAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();

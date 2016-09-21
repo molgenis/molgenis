@@ -2,8 +2,12 @@ package org.molgenis.data.meta.model;
 
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.support.EntityMetaDataUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
@@ -21,6 +25,17 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 	public static final String NAME = "name";
 	public static final String DATA_TYPE = "dataType";
 	public static final String REF_ENTITY = "refEntity";
+	/**
+	 * For attributes with data type ONE_TO_MANY defines the attribute in the referenced entity that owns the relationship.
+	 */
+	public static final String MAPPED_BY = "mappedBy";
+	/**
+	 * For attributes with data type ONE_TO_MANY defines how to sort the entity collection.
+	 * Syntax: attribute_name,[ASC | DESC] [;attribute_name,[ASC | DESC]]*
+	 * - If ASC or DESC is not specified, ASC (ascending order) is assumed.
+	 * - If the ordering element is not specified, ordering by the id attribute of the associated entity is assumed.
+	 */
+	public static final String ORDER_BY = "orderBy";
 	public static final String EXPRESSION = "expression";
 	public static final String NILLABLE = "nillable";
 	public static final String AUTO = "auto";
@@ -59,6 +74,12 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(PARTS).setDataType(MREF).setRefEntity(this).setLabel("Attribute parts");
 		addAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityMetaMeta).setLabel("Referenced entity")
 				.setValidationExpression(getRefEntityValidationExpression());
+		addAttribute(MAPPED_BY).setDataType(XREF).setRefEntity(this).setLabel("Mapped by").setDescription(
+				"Attribute in the referenced entity that owns the relationship of a onetomany attribute")
+				.setValidationExpression(getMappedByValidationExpression()).setReadOnly(true);
+		addAttribute(ORDER_BY).setLabel("Order by").setDescription(
+				"Order expression that defines entity collection order of a onetomany attribute (e.g. \"attr0\", \"attr0,ASC\", \"attr0,DESC\" or \"attr0,ASC;attr1,DESC\"")
+				.setValidationExpression(getOrderByValidationExpression());
 		addAttribute(EXPRESSION).setNillable(true).setLabel("Expression")
 				.setDescription("Computed value expression in Magma JavaScript");
 		addAttribute(NILLABLE).setDataType(BOOL).setNillable(false).setLabel("Nillable");
@@ -93,6 +114,20 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 		this.entityMetaMeta = requireNonNull(entityMetaMeta);
 	}
 
+	private static String getMappedByValidationExpression()
+	{
+		return "$('" + MAPPED_BY + "').isNull().and($('" + DATA_TYPE + "').eq('" + getValueString(ONE_TO_MANY)
+				+ "').not()).or(" + "$('" + MAPPED_BY + "').isNull().not().and($('" + DATA_TYPE + "').eq('"
+				+ getValueString(ONE_TO_MANY) + "'))).value()";
+	}
+
+	private static String getOrderByValidationExpression()
+	{
+		String regex = "/^\\w+(,(ASC|DESC))?(;\\w+(,(ASC|DESC))?)*$/";
+		return "$('" + ORDER_BY + "').isNull().or(" + "$('" + ORDER_BY + "').matches(" + regex + ").and($('" + DATA_TYPE
+				+ "').eq('" + getValueString(ONE_TO_MANY) + "'))).value()";
+	}
+
 	private static String getEnumOptionsValidationExpression()
 	{
 		return "$('" + ENUM_OPTIONS + "').isNull().and($('" + DATA_TYPE + "').eq('" + getValueString(ENUM)
@@ -102,9 +137,8 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 
 	private static String getRefEntityValidationExpression()
 	{
-		String regex =
-				"/^(" + getValueString(CATEGORICAL) + '|' + getValueString(CATEGORICAL_MREF) + '|' + getValueString(
-						FILE) + '|' + getValueString(MREF) + '|' + getValueString(XREF) + ")$/";
+		String regex = "/^(" + Arrays.stream(AttributeType.values()).filter(EntityMetaDataUtils::isReferenceType)
+				.map(AttributeType::getValueString).collect(Collectors.joining("|")) + ")$/";
 
 		return "$('" + REF_ENTITY + "').isNull().and($('" + DATA_TYPE + "').matches(" + regex + ").not()).or(" + "$('"
 				+ REF_ENTITY + "').isNull().not().and($('" + DATA_TYPE + "').matches(" + regex + "))).value()";

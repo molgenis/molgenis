@@ -45,6 +45,7 @@ public class RSQLValueParser
 			case FILE:
 			case CATEGORICAL_MREF:
 			case MREF:
+			case ONE_TO_MANY:
 				return parse(valueString, attribute.getRefEntity().getIdAttribute());
 			case DATE:
 				return convertDate(attribute, valueString);

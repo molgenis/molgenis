@@ -75,6 +75,7 @@ var FormControl = React.createClass({
 
         var attributeControlProps = _.extend({}, this.props, {
             attr: attr,
+            entity: this.props.entity,
             id: id,
             name: id,
             disabled: this.props.mode === 'view',
