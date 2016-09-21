@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
+import static org.molgenis.data.index.meta.IndexPackage.PACKAGE_INDEX;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.index.meta.IndexPackage.PACKAGE_INDEX;
 
 /**
  * This entity is used to group the index actions.

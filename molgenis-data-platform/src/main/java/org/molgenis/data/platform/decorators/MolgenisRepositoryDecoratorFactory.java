@@ -16,6 +16,8 @@ import org.molgenis.data.i18n.I18nStringDecorator;
 import org.molgenis.data.i18n.LanguageRepositoryDecorator;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.Language;
+import org.molgenis.data.index.IndexActionRegisterService;
+import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.AttributeMetaDataRepositoryDecorator;
@@ -24,8 +26,6 @@ import org.molgenis.data.meta.PackageRepositoryDecorator;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
-import org.molgenis.data.index.IndexActionRegisterService;
-import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.validation.EntityAttributesValidator;
@@ -157,7 +157,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
 		// 1. security decorator
 		decoratedRepository = new RepositorySecurityDecorator(decoratedRepository, appSettings);
-
 		return decoratedRepository;
 	}
 

@@ -76,9 +76,10 @@ public class MappingsBuilder
 				break;
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
-			case MREF:
-			case XREF:
 			case FILE:
+			case MREF:
+			case ONE_TO_MANY:
+			case XREF:
 				EntityMetaData refEntity = attr.getRefEntity();
 				if (nestRefs)
 				{

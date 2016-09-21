@@ -121,8 +121,7 @@ class IndexJob extends Job
 			if (indexAction.getEntityId() != null)
 			{
 				progress.progress(progressCount,
-						format("Indexing {0}.{1}", indexAction.getEntityFullName(),
-								indexAction.getEntityId()));
+						format("Indexing {0}.{1}", indexAction.getEntityFullName(), indexAction.getEntityId()));
 				rebuildIndexOneEntity(indexAction.getEntityFullName(), indexAction.getEntityId());
 			}
 			else

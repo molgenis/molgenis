@@ -3,7 +3,6 @@ package org.molgenis.data.postgresql;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.support.EntityMetaDataUtils;
 
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -63,7 +62,14 @@ class PostgreSqlQueryUtils
 	 */
 	static String getJunctionTableName(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		return '"' + entityMeta.getName() + '_' + attr.getName() + '"';
+		if (attr.isMappedBy())
+		{
+			return '"' + attr.getRefEntity().getName() + '_' + attr.getMappedBy().getName() + '"';
+		}
+		else
+		{
+			return '"' + entityMeta.getName() + '_' + attr.getName() + '"';
+		}
 	}
 
 	/**
@@ -77,7 +83,14 @@ class PostgreSqlQueryUtils
 	static String getJunctionTableIndexName(EntityMetaData entityMeta, AttributeMetaData attr,
 			AttributeMetaData idxAttr)
 	{
-		return '"' + entityMeta.getName() + '_' + attr.getName() + '_' + idxAttr.getName() + "_idx\"";
+		if (attr.isMappedBy())
+		{
+			return '"' + attr.getRefEntity().getName() + '_' + attr.getMappedBy().getName() + '_' + idxAttr.getName() + "_idx\"";
+		}
+		else
+		{
+			return '"' + entityMeta.getName() + '_' + attr.getName() + '_' + idxAttr.getName() + "_idx\"";
+		}
 	}
 
 	/**
@@ -92,25 +105,30 @@ class PostgreSqlQueryUtils
 	}
 
 	/**
-	 * Returns all MREF attributes persisted by PostgreSQL (e.g. no compound attributes and attributes with an
-	 * expression)
+	 * Returns all non-bidirectional attributes persisted by PostgreSQL in junction tables (e.g. no compound attributes and attributes
+	 * with an expression)
 	 *
-	 * @return stream of persisted MREF attributes
+	 * @return stream of attributes persisted by PostgreSQL in junction tables
 	 */
-	static Stream<AttributeMetaData> getPersistedAttributesMref(EntityMetaData entityMeta)
+	static Stream<AttributeMetaData> getJunctionTableAttributes(EntityMetaData entityMeta)
 	{
-		return getPersistedAttributes(entityMeta).filter(EntityMetaDataUtils::isMultipleReferenceType);
+		// return all attributes referencing multiple entities except for one-to-many attributes that are mapped by
+		// another attribute
+		return getPersistedAttributes(entityMeta)
+				.filter(attr -> isMultipleReferenceType(attr) || (attr.isInversedBy() && isMultipleReferenceType(
+						attr.getInversedBy())));
 	}
 
 	/**
-	 * Returns all non-MREF attributes persisted by PostgreSQL (e.g. no compound attributes and attributes with an
-	 * expression)
+	 * Returns all attributes persisted by PostgreSQL in entity table (e.g. no compound attributes and attributes
+	 * with an expression)
 	 *
 	 * @return stream of persisted non-MREF attributes
 	 */
-	static Stream<AttributeMetaData> getPersistedAttributesNonMref(EntityMetaData entityMeta)
+	static Stream<AttributeMetaData> getTableAttributes(EntityMetaData entityMeta)
 	{
-		return getPersistedAttributes(entityMeta).filter(attr -> !isMultipleReferenceType(attr));
+		return getPersistedAttributes(entityMeta)
+				.filter(attr -> !isMultipleReferenceType(attr) && !attr.isInversedBy());
 	}
 
 	/**

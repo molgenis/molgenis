@@ -9,11 +9,10 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.ElasticsearchService.IndexingMode;
 import org.molgenis.data.elasticsearch.SearchService;
+import org.molgenis.data.index.meta.*;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.index.IndexActionRegisterService;
-import org.molgenis.data.index.meta.*;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.test.data.EntityTestHarness;
@@ -132,8 +131,8 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		when(dataService.findOneById("test", "entityId")).thenReturn(null);
 
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setEntityId("entityId")
-				.setActionOrder(0).setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+				.setEntityFullName("test").setEntityId("entityId").setActionOrder(0)
+				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
@@ -175,8 +174,8 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	private void rebuildIndexSingleEntityTest(IndexingMode indexingMode)
 	{
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setEntityId("entityId")
-				.setActionOrder(0).setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+				.setEntityFullName("test").setEntityId("entityId").setActionOrder(0)
+				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
@@ -204,8 +203,8 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		when(searchService.hasMapping(entityMeta)).thenReturn(true);
 
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setEntityId(null)
-				.setActionOrder(0).setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+				.setEntityFullName("test").setEntityId(null).setActionOrder(0)
+				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
@@ -228,15 +227,14 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 		verify(dataService).deleteById(INDEX_ACTION_GROUP, transactionId);
 	}
 
-
 	@Test
 	private void rebuildIndexMetaCreateDataTest()
 	{
 		when(dataService.hasRepository("test")).thenReturn(true);
 
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setEntityId(null)
-				.setActionOrder(0).setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+				.setEntityFullName("test").setEntityId(null).setActionOrder(0)
+				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
@@ -265,8 +263,8 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	public void rebuildIndexDeleteMetaDataEntityTest()
 	{
 		IndexAction indexAction = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test").setEntityId(null)
-				.setActionOrder(0).setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
+				.setEntityFullName("test").setEntityId(null).setActionOrder(0)
+				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 		mockGetAllIndexActions(of(indexAction));
 		indexActionGroup.setCount(1);
 
@@ -290,18 +288,15 @@ public class IndexJobTest extends AbstractMolgenisSpringTest
 	public void indexSingleEntitySearchServiceThrowsExceptionOnSecondEntityId()
 	{
 		IndexAction indexAction1 = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test")
-				.setEntityId("entityId1").setActionOrder(0)
+				.setEntityFullName("test").setEntityId("entityId1").setActionOrder(0)
 				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 
 		IndexAction indexAction2 = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test")
-				.setEntityId("entityId2").setActionOrder(1)
+				.setEntityFullName("test").setEntityId("entityId2").setActionOrder(1)
 				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 
 		IndexAction indexAction3 = indexActionFactory.create().setIndexActionGroup(indexActionGroup)
-				.setEntityFullName("test")
-				.setEntityId("entityId3").setActionOrder(2)
+				.setEntityFullName("test").setEntityId("entityId3").setActionOrder(2)
 				.setIndexStatus(IndexActionMetaData.IndexStatus.PENDING);
 
 		mockGetAllIndexActions(of(indexAction1, indexAction2, indexAction3));
