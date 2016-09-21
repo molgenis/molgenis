@@ -52,7 +52,7 @@ public class PostgreSqlRepositoryTest
 		QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
 		when(query.getRules()).thenReturn(singletonList(queryRule));
 
-		String sql = "SELECT COUNT(DISTINCT this.\"entityId\") FROM \"Entity\" AS this LEFT JOIN \"RefEntity\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?";
+		String sql = "SELECT COUNT(DISTINCT this.\"entityId\") FROM \"Entity\" AS this LEFT JOIN \"RefEntity_xrefAttr\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?";
 		long count = 123L;
 		when(jdbcTemplate.queryForObject(sql, new Object[] { queryValue }, Long.class)).thenReturn(count);
 		postgreSqlRepo.setMetaData(entityMeta);
@@ -71,7 +71,7 @@ public class PostgreSqlRepositoryTest
 		QueryRule queryRule = new QueryRule(oneToManyAttrName, EQUALS, queryValue);
 		when(query.getRules()).thenReturn(singletonList(queryRule));
 
-		String sql = "SELECT DISTINCT this.\"entityId\", (SELECT array_agg(ARRAY[\"RefEntity\".\"xrefAttr_order\"::TEXT,\"refEntityId\"::TEXT]) FROM \"RefEntity\" WHERE this.\"entityId\" = \"RefEntity\".\"xrefAttr\") AS \"oneToManyAttr\" FROM \"Entity\" AS this LEFT JOIN \"RefEntity\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?  LIMIT 1000";
+		String sql = "SELECT DISTINCT this.\"entityId\", (SELECT array_agg(DISTINCT ARRAY[\"oneToManyAttr\".\"order\"::TEXT,\"oneToManyAttr\".\"refEntityId\"::TEXT]) FROM \"RefEntity_xrefAttr\" AS \"oneToManyAttr\" WHERE this.\"entityId\" = \"oneToManyAttr\".\"xrefAttr\") AS \"oneToManyAttr\" FROM \"Entity\" AS this LEFT JOIN \"RefEntity_xrefAttr\" AS \"oneToManyAttr_filter1\" ON (this.\"entityId\" = \"oneToManyAttr_filter1\".\"xrefAttr\") WHERE \"oneToManyAttr_filter1\".\"refEntityId\" = ?  LIMIT 1000";
 		//noinspection unchecked
 		RowMapper<Entity> rowMapper = mock(RowMapper.class);
 		when(postgreSqlEntityFactory.createRowMapper(entityMeta, null)).thenReturn(rowMapper);

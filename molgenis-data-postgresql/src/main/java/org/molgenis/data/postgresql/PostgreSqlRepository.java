@@ -18,7 +18,6 @@ import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
-import org.molgenis.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.*;
@@ -37,8 +36,7 @@ import java.util.stream.Stream;
 import static com.google.common.base.Stopwatch.createStarted;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.unmodifiableSet;
+import static java.util.Collections.*;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.toList;
@@ -48,7 +46,9 @@ import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
+import static org.molgenis.data.postgresql.PostgreSqlUtils.getPostgreSqlValue;
 import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
+import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
 
 /**
  * Repository that persists entities in a PostgreSQL database
@@ -379,7 +379,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	{
 		Stopwatch stopwatch = createStarted();
 		Multimap<Object, Object> mrefIDs = ArrayListMultimap.create();
-		String junctionTableSelect = getJunctionTableSelect(entityMeta, mrefAttr, ids.size());
+		String junctionTableSelect = getSqlJunctionTableSelect(entityMeta, mrefAttr, ids.size());
 		LOG.trace("SQL: {}", junctionTableSelect);
 		jdbcTemplate.query(junctionTableSelect, (RowCallbackHandler) row -> mrefIDs
 						.put(convert(idAttributeDataType, row.getObject(1)), convert(refIdDataType, row.getObject(3))),
@@ -423,7 +423,6 @@ public class PostgreSqlRepository extends AbstractRepository
 		final AttributeMetaData idAttr = metaData.getIdAttribute();
 		final List<AttributeMetaData> tableAttrs = getTableAttributes(metaData).collect(toList());
 		final List<AttributeMetaData> junctionTableAttrs = getJunctionTableAttributes(metaData).collect(toList());
-		final List<AttributeMetaData> orderAttrs = getOrderAttributes(metaData).collect(toList());
 		final String insertSql = getSqlInsert(metaData);
 
 		Iterators.partition(entities, BATCH_SIZE).forEachRemaining(entitiesBatch ->
@@ -448,7 +447,7 @@ public class PostgreSqlRepository extends AbstractRepository
 					int fieldIndex = 1;
 					for (AttributeMetaData attr : tableAttrs)
 					{
-						Object postgreSqlValue = PostgreSqlUtils.getPostgreSqlValue(entity, attr);
+						Object postgreSqlValue = getPostgreSqlValue(entity, attr);
 						preparedStatement.setObject(fieldIndex++, postgreSqlValue);
 					}
 				}
@@ -473,7 +472,16 @@ public class PostgreSqlRepository extends AbstractRepository
 						if (entity.get(attr.getName()) != null)
 						{
 							AtomicInteger seqNr = new AtomicInteger();
-							for (Entity val : entity.getEntities(attr.getName()))
+							Iterable<Entity> refEntities;
+							if (isSingleReferenceType(attr) && attr.isInversedBy())
+							{
+								refEntities = singletonList(entity.getEntity(attr.getName()));
+							}
+							else
+							{
+								refEntities = entity.getEntities(attr.getName());
+							}
+							for (Entity val : refEntities)
 							{
 								if (val != null)
 								{
@@ -498,63 +506,10 @@ public class PostgreSqlRepository extends AbstractRepository
 				}
 			}
 
-			// persist order in referenced entity table
-			if (!orderAttrs.isEmpty())
-			{
-				updateOrderAttributeValues(orderAttrs, entitiesBatch);
-			}
-
 			count.addAndGet(entitiesBatch.size());
 		});
 
 		return count.get();
-	}
-
-	private void updateOrderAttributeValues(List<AttributeMetaData> persistedOrderAttrs,
-			List<? extends Entity> entitiesBatch)
-	{
-		for (AttributeMetaData persistedOrderAttr : persistedOrderAttrs)
-		{
-			List<Pair<Object, Integer>> refEntityOrderList = Lists.newArrayList();
-			for (Entity entity : entitiesBatch)
-			{
-				int order = 0;
-				for (Entity refEntity : entity.getEntities(persistedOrderAttr.getName()))
-				{
-					refEntityOrderList.add(new Pair<>(refEntity.getIdValue(), ++order));
-				}
-			}
-
-			if (!refEntityOrderList.isEmpty())
-			{
-				String updateOrderSql = getSqlUpdateOrder(persistedOrderAttr);
-				if (LOG.isDebugEnabled())
-				{
-					LOG.debug("Updating order values ..."); // TODO update message
-					if (LOG.isTraceEnabled())
-					{
-						LOG.trace("SQL: {}", updateOrderSql);
-					}
-				}
-
-				jdbcTemplate.batchUpdate(updateOrderSql, new BatchPreparedStatementSetter()
-				{
-					@Override
-					public void setValues(PreparedStatement preparedStatement, int rowIndex) throws SQLException
-					{
-						Pair<Object, Integer> objectIntegerPair = refEntityOrderList.get(rowIndex);
-						preparedStatement.setInt(1, objectIntegerPair.getB());
-						preparedStatement.setObject(2, objectIntegerPair.getA());
-					}
-
-					@Override
-					public int getBatchSize()
-					{
-						return refEntityOrderList.size();
-					}
-				});
-			}
-		}
 	}
 
 	private void updateBatching(Iterator<? extends Entity> entities)
@@ -562,7 +517,6 @@ public class PostgreSqlRepository extends AbstractRepository
 		final AttributeMetaData idAttr = metaData.getIdAttribute();
 		final List<AttributeMetaData> tableAttrs = getTableAttributes(metaData).collect(toList());
 		final List<AttributeMetaData> junctionTableAttrs = getJunctionTableAttributes(metaData).collect(toList());
-		final List<AttributeMetaData> persistedOrderAttrs = getOrderAttributes(metaData).collect(toList());
 		final String updateSql = getSqlUpdate(metaData);
 
 		// update values in entity table
@@ -586,11 +540,11 @@ public class PostgreSqlRepository extends AbstractRepository
 					int fieldIndex = 1;
 					for (AttributeMetaData attr : tableAttrs)
 					{
-						Object postgreSqlValue = PostgreSqlUtils.getPostgreSqlValue(entity, attr);
+						Object postgreSqlValue = getPostgreSqlValue(entity, attr);
 						preparedStatement.setObject(fieldIndex++, postgreSqlValue);
 					}
 
-					preparedStatement.setObject(fieldIndex, PostgreSqlUtils.getPostgreSqlValue(entity, idAttr));
+					preparedStatement.setObject(fieldIndex, getPostgreSqlValue(entity, idAttr));
 				}
 
 				@Override
@@ -614,7 +568,16 @@ public class PostgreSqlRepository extends AbstractRepository
 						if (entity.get(attr.getName()) != null)
 						{
 							AtomicInteger seqNr = new AtomicInteger();
-							for (Entity val : entity.getEntities(attr.getName()))
+							Iterable<Entity> refEntities;
+							if (isSingleReferenceType(attr) && attr.isInversedBy())
+							{
+								refEntities = singletonList(entity.getEntity(attr.getName()));
+							}
+							else
+							{
+								refEntities = entity.getEntities(attr.getName());
+							}
+							for (Entity val : refEntities)
 							{
 								Map<String, Object> mref = new HashMap<>();
 								mref.put(JUNCTION_TABLE_ORDER_ATTR_NAME, seqNr.getAndIncrement());
@@ -626,30 +589,21 @@ public class PostgreSqlRepository extends AbstractRepository
 					}
 				}
 				// update mrefs
-				List<Object> ids = entitiesBatch.stream()
-						.map(entity -> PostgreSqlUtils.getPostgreSqlValue(entity, idAttr)).collect(toList());
+				List<Object> ids = entitiesBatch.stream().map(entity -> getPostgreSqlValue(entity, idAttr))
+						.collect(toList());
 				for (AttributeMetaData attr : junctionTableAttrs)
 				{
-					if (isMultipleReferenceType(attr))
-					{
-						removeMrefs(ids, attr);
-						addMrefs(mrefs.get(attr.getName()), attr);
-					}
+					removeMrefs(ids, attr);
+					addMrefs(mrefs.get(attr.getName()), attr);
 				}
-			}
-
-			// persist order in referenced entity table
-			if (!persistedOrderAttrs.isEmpty())
-			{
-				updateOrderAttributeValues(persistedOrderAttrs, entitiesBatch);
 			}
 		});
 	}
 
 	private void addMrefs(final List<Map<String, Object>> mrefs, final AttributeMetaData attr)
 	{
-		AttributeMetaData idAttribute = metaData.getIdAttribute();
-		String insertMrefSql = getSqlInsertMref(metaData, attr, idAttribute);
+		final AttributeMetaData idAttr = metaData.getIdAttribute();
+		String insertMrefSql = getSqlInsertJunction(metaData, attr);
 
 		if (LOG.isDebugEnabled())
 		{
@@ -666,11 +620,22 @@ public class PostgreSqlRepository extends AbstractRepository
 			{
 				Map<String, Object> mref = mrefs.get(i);
 
+				Object idValue0, idValue1;
+				if (attr.isMappedBy())
+				{
+					Entity mrefEntity = (Entity) mref.get(attr.getName());
+					idValue0 = getPostgreSqlValue(mrefEntity, attr.getRefEntity().getIdAttribute());
+					idValue1 = mref.get(idAttr.getName());
+				}
+				else
+				{
+					idValue0 = mref.get(idAttr.getName());
+					Entity mrefEntity = (Entity) mref.get(attr.getName());
+					idValue1 = getPostgreSqlValue(mrefEntity, mrefEntity.getEntityMetaData().getIdAttribute());
+				}
 				preparedStatement.setInt(1, (int) mref.get(JUNCTION_TABLE_ORDER_ATTR_NAME));
-				preparedStatement.setObject(2, mref.get(idAttribute.getName()));
-				Entity mrefEntity = (Entity) mref.get(attr.getName());
-				preparedStatement.setObject(3, PostgreSqlUtils
-						.getPostgreSqlValue(mrefEntity, mrefEntity.getEntityMetaData().getIdAttribute()));
+				preparedStatement.setObject(2, idValue0);
+				preparedStatement.setObject(3, idValue1);
 			}
 
 			@Override
@@ -683,8 +648,8 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	private void removeMrefs(final List<Object> ids, final AttributeMetaData attr)
 	{
-		final AttributeMetaData idAttribute = metaData.getIdAttribute();
-		String deleteMrefSql = getSqlDelete(getJunctionTableName(metaData, attr), idAttribute);
+		final AttributeMetaData idAttr = attr.isMappedBy() ? attr.getMappedBy() : metaData.getIdAttribute();
+		String deleteMrefSql = getSqlDelete(getJunctionTableName(metaData, attr), idAttr);
 
 		if (LOG.isDebugEnabled())
 		{

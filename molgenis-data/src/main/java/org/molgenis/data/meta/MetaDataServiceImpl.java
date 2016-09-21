@@ -181,7 +181,7 @@ public class MetaDataServiceImpl implements MetaDataService
 		// 2nd pass: delete entities
 		dataService.deleteAll(ENTITY_META_DATA, resolvedEntityMetas.stream().map(EntityMetaData::getName));
 
-		LOG.info("Removed entities [%s]", entityMetas.stream().map(EntityMetaData::getName).collect(joining(",")));
+		LOG.info("Removed entities [{}]", entityMetas.stream().map(EntityMetaData::getName).collect(joining(",")));
 	}
 
 	@Transactional

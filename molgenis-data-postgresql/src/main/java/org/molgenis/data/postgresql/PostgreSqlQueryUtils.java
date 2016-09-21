@@ -3,12 +3,10 @@ package org.molgenis.data.postgresql;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.support.EntityMetaDataUtils;
 
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.molgenis.MolgenisFieldTypes.AttributeType.ONE_TO_MANY;
 import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
@@ -64,7 +62,14 @@ class PostgreSqlQueryUtils
 	 */
 	static String getJunctionTableName(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		return '"' + entityMeta.getName() + '_' + attr.getName() + '"';
+		if (attr.isMappedBy())
+		{
+			return '"' + attr.getRefEntity().getName() + '_' + attr.getMappedBy().getName() + '"';
+		}
+		else
+		{
+			return '"' + entityMeta.getName() + '_' + attr.getName() + '"';
+		}
 	}
 
 	/**
@@ -78,7 +83,14 @@ class PostgreSqlQueryUtils
 	static String getJunctionTableIndexName(EntityMetaData entityMeta, AttributeMetaData attr,
 			AttributeMetaData idxAttr)
 	{
-		return '"' + entityMeta.getName() + '_' + attr.getName() + '_' + idxAttr.getName() + "_idx\"";
+		if (attr.isMappedBy())
+		{
+			return '"' + attr.getRefEntity().getName() + '_' + attr.getMappedBy().getName() + '_' + idxAttr.getName() + "_idx\"";
+		}
+		else
+		{
+			return '"' + entityMeta.getName() + '_' + attr.getName() + '_' + idxAttr.getName() + "_idx\"";
+		}
 	}
 
 	/**
@@ -93,7 +105,7 @@ class PostgreSqlQueryUtils
 	}
 
 	/**
-	 * Returns all attributes persisted by PostgreSQL in junction tables (e.g. no compound attributes and attributes
+	 * Returns all non-bidirectional attributes persisted by PostgreSQL in junction tables (e.g. no compound attributes and attributes
 	 * with an expression)
 	 *
 	 * @return stream of attributes persisted by PostgreSQL in junction tables
@@ -102,9 +114,9 @@ class PostgreSqlQueryUtils
 	{
 		// return all attributes referencing multiple entities except for one-to-many attributes that are mapped by
 		// another attribute
-		return getPersistedAttributes(entityMeta).filter(EntityMetaDataUtils::isMultipleReferenceType)
-				.filter(attr -> isMultipleReferenceType(attr) && (attr.getDataType() != ONE_TO_MANY
-						|| attr.getMappedBy() == null));
+		return getPersistedAttributes(entityMeta)
+				.filter(attr -> isMultipleReferenceType(attr) || (attr.isInversedBy() && isMultipleReferenceType(
+						attr.getInversedBy())));
 	}
 
 	/**
@@ -115,14 +127,8 @@ class PostgreSqlQueryUtils
 	 */
 	static Stream<AttributeMetaData> getTableAttributes(EntityMetaData entityMeta)
 	{
-		return getPersistedAttributes(entityMeta).filter(attr -> !isMultipleReferenceType(attr));
-	}
-
-	static Stream<AttributeMetaData> getOrderAttributes(EntityMetaData entityMeta)
-	{
 		return getPersistedAttributes(entityMeta)
-				.filter(attr -> attr.getDataType() == ONE_TO_MANY && attr.getMappedBy() != null
-						&& attr.getOrderBy() == null);
+				.filter(attr -> !isMultipleReferenceType(attr) && !attr.isInversedBy());
 	}
 
 	/**
