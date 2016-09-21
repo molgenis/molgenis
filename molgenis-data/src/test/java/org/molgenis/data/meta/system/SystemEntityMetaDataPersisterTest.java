@@ -87,7 +87,7 @@ public class SystemEntityMetaDataPersisterTest
 		when(dataService.findAll(ENTITY_META_DATA, EntityMetaData.class))
 				.thenReturn(Stream.of(refEntityMeta, entityMeta, refRemovedMeta, removedMeta));
 		systemEntityMetaDataPersister.removeNonExistingSystemEntities();
-		verify(metaDataService).deleteEntityMeta(newArrayList(removedMeta, refRemovedMeta));
+		verify(metaDataService).deleteEntityMeta(newArrayList(refRemovedMeta, removedMeta));
 	}
 
 	@Test
