@@ -301,7 +301,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService
 				.add(LANGUAGE, languageFactory.create("fr", new Locale("fr").getDisplayName(new Locale("fr")), false));
 		dataService
-				.add(LANGUAGE, languageFactory.create("jj", "My language", false));
+				.add(LANGUAGE, languageFactory.create("xx", "My language", false));
 
 		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getAttribute("label-en").getName(), "label-en");
 		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute("en").getName(), "simpleName");
@@ -310,7 +310,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute().getName(), "simpleName");
 
 		assertEquals(languageService.getCurrentUserLanguageCode(), "en");
-		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(), new String[] {"en", "nl", "de", "es", "it", "pt", "fr", "jj"});
+		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(), new String[] {"en", "nl", "de", "es", "it", "pt", "fr", "xx"});
 
 		// NL
 		assertNotNull(dataService.getEntityMetaData(I18N_STRING).getAttribute("nl"));

@@ -60,7 +60,7 @@ public class WebAppDatabasePopulatorServiceImpl implements WebAppDatabasePopulat
 		dataService
 				.add(LANGUAGE, languageFactory.create("fr", new Locale("fr").getDisplayName(new Locale("fr")), false));
 		dataService
-				.add(LANGUAGE, languageFactory.create("jj", "My language", false));
+				.add(LANGUAGE, languageFactory.create("xx", "My language", false));
 	}
 
 	@Override

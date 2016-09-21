@@ -33,14 +33,14 @@ public class LanguageService
 
 	/**
 	 * "en": is default
-	 * "jj": is a placeholder for having your own language
+	 * "xx": is a placeholder for having your own language
 	 * "nl", "de", "es", "it", "pt", "fr": are extra languages
 	 *
 	 * @return
 	 */
 	public static Stream<String> getLanguageCodes()
 	{
-		return Stream.of("en", "nl", "de", "es", "it", "pt", "fr", "jj");
+		return Stream.of("en", "nl", "de", "es", "it", "pt", "fr", "xx");
 	}
 
 	/**
