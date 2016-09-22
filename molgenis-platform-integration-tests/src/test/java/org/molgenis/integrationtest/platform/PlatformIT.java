@@ -3,6 +3,7 @@ package org.molgenis.integrationtest.platform;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.*;
 import org.molgenis.data.cache.l2.L2Cache;
+import org.molgenis.data.cache.l3.L3Cache;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
 import org.molgenis.data.i18n.I18nUtils;
@@ -13,10 +14,7 @@ import org.molgenis.data.i18n.model.LanguageMetaData;
 import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.data.EntitySelfXrefTestHarness;
@@ -36,10 +34,7 @@ import org.testng.annotations.*;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -56,6 +51,7 @@ import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.test.data.EntityTestHarness.*;
@@ -104,6 +100,14 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private AttributeMetaDataMetaData attributeMetaDataMetaData;
 	@Autowired
 	private LanguageFactory languageFactory;
+	@Autowired
+	private EntityMetaDataFactory entityMetaDataFactory;
+	@Autowired
+	private AttributeMetaDataFactory attributeMetaDataFactory;
+	@Autowired
+	private EntityManager entityManager;
+	@Autowired
+	private L3Cache l3Cache;
 
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
@@ -287,7 +291,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testLanguageService()
 	{
-		dataService.add(LANGUAGE, languageFactory.create(LanguageService.DEFAULT_LANGUAGE_CODE, LanguageService.DEFAULT_LANGUAGE_NAME, true));
+		dataService.add(LANGUAGE, languageFactory
+				.create(LanguageService.DEFAULT_LANGUAGE_CODE, LanguageService.DEFAULT_LANGUAGE_NAME, true));
 		dataService
 				.add(LANGUAGE, languageFactory.create("nl", new Locale("nl").getDisplayName(new Locale("nl")), false));
 		dataService
@@ -303,14 +308,20 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService
 				.add(LANGUAGE, languageFactory.create("xx", "My language", false));
 
-		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getAttribute("label-en").getName(), "label-en");
-		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute("en").getName(), "simpleName");
-		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute("pt").getName(), "simpleName");
-		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute("nl").getName(), "simpleName");
-		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute().getName(), "simpleName");
+		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getAttribute("label-en").getName(),
+				"label-en");
+		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute("en").getName(),
+				"simpleName");
+		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute("pt").getName(),
+				"simpleName");
+		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute("nl").getName(),
+				"simpleName");
+		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute().getName(),
+				"simpleName");
 
 		assertEquals(languageService.getCurrentUserLanguageCode(), "en");
-		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(), new String[] {"en", "nl", "de", "es", "it", "pt", "fr", "xx"});
+		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(),
+				new String[] { "en", "nl", "de", "es", "it", "pt", "fr", "xx" });
 
 		// NL
 		assertNotNull(dataService.getEntityMetaData(I18N_STRING).getAttribute("nl"));
@@ -1363,6 +1374,46 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		q6.search("searchTestBatchUpdate");
 		Stream<Entity> result6 = searchService.searchAsStream(q6, entityMetaDataDynamic);
 		assertEquals(result6.count(), 1);
+	}
+
+	@Test
+	public void l3CacheTest()
+	{
+		String COUNTRY = "Country";
+		runAsSystem(() ->
+		{
+			EntityMetaData emd = EntityMetaData
+					.newInstance(dataService.getEntityMetaData(entityMetaDataDynamic.getName()), DEEP_COPY_ATTRS);
+			emd.addAttribute(attributeMetaDataFactory.create().setName(COUNTRY));
+			dataService.getMeta().updateEntityMeta(emd);
+
+			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityMetaDataDynamic, 2);
+			List<Entity> entities = testHarness.createTestEntities(entityMetaDataDynamic, 2, refEntities)
+					.collect(toList());
+
+			dataService.add(refEntityMetaDataDynamic.getName(), refEntities.stream());
+			dataService.add(entityMetaDataDynamic.getName(), entities.stream());
+			waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
+
+			dataService.update(emd.getName(),
+					StreamSupport.stream(dataService.findAll(emd.getName()).spliterator(), false).filter(e ->
+					{
+						e.set(COUNTRY, "NL" + e.getIdValue());
+						return true;
+					}));
+		});
+		waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
+
+		Query<Entity> q0 = new QueryImpl<>().eq(COUNTRY, "NL0").or().eq(COUNTRY, "NL1");
+		q0.pageSize(10); // The only reason to be cached l3, important!
+		q0.sort(new Sort().on(COUNTRY));
+
+		Repository repoQ0 = dataService.getRepository(entityMetaDataDynamic.getName());
+		runAsSystem(() ->
+		{
+			List expected = dataService.findAll(repoQ0.getName(), q0).map(e -> e.getIdValue()).collect(toList());
+			assertEquals(expected, Arrays.asList("0", "1"));
+		});
 	}
 }
 
