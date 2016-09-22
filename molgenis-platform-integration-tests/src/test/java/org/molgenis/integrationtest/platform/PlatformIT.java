@@ -19,9 +19,9 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.test.data.EntityOneToManyTestHarness;
 import org.molgenis.test.data.EntitySelfXrefTestHarness;
 import org.molgenis.test.data.EntityTestHarness;
+import org.molgenis.test.data.OneToManyTestHarness;
 import org.molgenis.test.data.staticentity.TestEntityStatic;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
@@ -46,7 +46,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -58,7 +57,6 @@ import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
-import static org.molgenis.test.data.EntityOneToManyTestHarness.*;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
@@ -74,8 +72,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private EntityMetaData entityMetaDataDynamic;
 	private EntityMetaData refEntityMetaDataDynamic;
 	private EntityMetaData selfXrefEntityMetaData;
-	private EntityMetaData authorEntityMetaData;
-	private EntityMetaData bookEntityMetaData;
 
 	@Autowired
 	private IndexService indexService;
@@ -84,7 +80,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private EntitySelfXrefTestHarness entitySelfXrefTestHarness;
 	@Autowired
-	private EntityOneToManyTestHarness entityOneToManyTestHarness;
+	private OneToManyTestHarness oneToManyTestHarness;
 	@Autowired
 	private DataService dataService;
 	@Autowired
@@ -214,6 +210,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		String writeEntityMetaDataMetaData = "ROLE_ENTITY_WRITE_" + entityMetaDataMetaData.getName().toUpperCase();
 		String readEntityMetaDataMetaData = "ROLE_ENTITY_READ_" + entityMetaDataMetaData.getName().toUpperCase();
 		String countEntityMetaDataMetaData = "ROLE_ENTITY_COUNT_" + entityMetaDataMetaData.getName().toUpperCase();
+
+		//
 
 		SecurityContextHolder.getContext().setAuthentication(
 				new TestingAuthenticationToken("user", "user", writeTestEntity, readTestEntity, readTestRefEntity,
@@ -1358,38 +1356,92 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testOneToManyInsert()
 	{
-		EntityOneToManyTestHarness.AuthorsAndBooks authorsAndBooks1 = entityOneToManyTestHarness.createEntities1();
-		EntityOneToManyTestHarness.AuthorsAndBooks authorsAndBooks2 = entityOneToManyTestHarness.createEntities2();
-		EntityOneToManyTestHarness.AuthorsAndBooks authorsAndBooks3 = entityOneToManyTestHarness.createEntities3();
-		EntityOneToManyTestHarness.AuthorsAndBooks authorsAndBooks4 = entityOneToManyTestHarness.createEntities4();
-		EntityOneToManyTestHarness.AuthorsAndBooks authorsAndBooks5 = entityOneToManyTestHarness.createEntities5();
-		EntityOneToManyTestHarness.AuthorsAndBooks authorsAndBooks6 = entityOneToManyTestHarness.createEntities6();
-
-		runAsSystem(() ->
+		for (int i = 1; i < 7; i++)
 		{
-			dataService.add(authorsAndBooks1.getBookMetaData().getName(), authorsAndBooks1.getBooks().stream());
-			dataService.add(authorsAndBooks1.getAuthorMetaData().getName(), authorsAndBooks1.getAuthors().stream());
+			OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(i);
 
-			dataService.add(authorsAndBooks2.getBookMetaData().getName(), authorsAndBooks2.getBooks().stream());
-			dataService.add(authorsAndBooks2.getAuthorMetaData().getName(), authorsAndBooks2.getAuthors().stream());
+			if (authorsAndBooks == null) continue;
 
-			dataService.add(authorsAndBooks3.getBookMetaData().getName(), authorsAndBooks3.getBooks().stream());
-			dataService.add(authorsAndBooks3.getAuthorMetaData().getName(), authorsAndBooks3.getAuthors().stream());
+			assertEquals(dataService.findOneById("sys_Book" + i, "book1"), authorsAndBooks.getAuthors().get(0));
+			assertEquals(dataService.findOneById("sys_Book" + i, "book2"), authorsAndBooks.getAuthors().get(1));
+			assertEquals(dataService.findOneById("sys_Book" + i, "book3"), authorsAndBooks.getAuthors().get(2));
 
-			dataService.add(authorsAndBooks4.getBookMetaData().getName(), authorsAndBooks4.getBooks().stream());
-			dataService.add(authorsAndBooks4.getAuthorMetaData().getName(), authorsAndBooks4.getAuthors().stream());
+			assertEquals(dataService.findOneById("sys_Author" + i, "author1"), authorsAndBooks.getAuthors().get(0));
+			assertEquals(dataService.findOneById("sys_Author" + i, "author2"), authorsAndBooks.getAuthors().get(1));
+			assertEquals(dataService.findOneById("sys_Author" + i, "author3"), authorsAndBooks.getAuthors().get(2));
+		}
+	}
 
-			dataService.add(authorsAndBooks5.getBookMetaData().getName(), authorsAndBooks5.getBooks().stream());
-			dataService.add(authorsAndBooks5.getAuthorMetaData().getName(), authorsAndBooks5.getAuthors().stream());
-
-			dataService.add(authorsAndBooks6.getBookMetaData().getName(), authorsAndBooks6.getBooks().stream());
-			dataService.add(authorsAndBooks6.getAuthorMetaData().getName(), authorsAndBooks6.getAuthors().stream());
-
-			waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
-		});
-
-		//TODO
-		// verify correct insertion
+	private OneToManyTestHarness.AuthorsAndBooks importAuthorsAndBooks(int testCase)
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks;
+		switch (testCase)
+		{
+			case 1:
+				authorsAndBooks = oneToManyTestHarness.createEntities1();
+				runAsSystem(() ->
+				{
+					// case 1: books/authors both nillable, order of import not important
+					dataService.add(authorsAndBooks.getBookMetaData().getName(), authorsAndBooks.getBooks().stream());
+					dataService
+							.add(authorsAndBooks.getAuthorMetaData().getName(), authorsAndBooks.getAuthors().stream());
+					waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
+				});
+				return authorsAndBooks;
+			case 2:
+				authorsAndBooks = oneToManyTestHarness.createEntities2();
+				runAsSystem(() ->
+				{
+					// case 2: book.author required so add Author entities first
+					dataService
+							.add(authorsAndBooks.getAuthorMetaData().getName(), authorsAndBooks.getAuthors().stream());
+					dataService.add(authorsAndBooks.getBookMetaData().getName(), authorsAndBooks.getBooks().stream());
+					waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
+				});
+				return authorsAndBooks;
+			case 3:
+				authorsAndBooks = oneToManyTestHarness.createEntities3();
+				runAsSystem(() ->
+				{
+					// case 3: author.books required so add Book entities first
+					dataService.add(authorsAndBooks.getBookMetaData().getName(), authorsAndBooks.getBooks().stream());
+					dataService
+							.add(authorsAndBooks.getAuthorMetaData().getName(), authorsAndBooks.getAuthors().stream());
+					waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
+				});
+				return authorsAndBooks;
+			case 4:
+				//				authorsAndBooks = oneToManyTestHarness.createEntities4();
+				//				runAsSystem(() -> {
+				//					// case 4: books/authors both required: impossible?
+				//					dataService.add(authorsAndBooks.getBookMetaData().getName(), authorsAndBooks.getBooks().stream());
+				//					dataService.add(authorsAndBooks.getAuthorMetaData().getName(), authorsAndBooks.getAuthors().stream());
+				//					waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
+				//				});
+				return null;
+			case 5:
+				authorsAndBooks = oneToManyTestHarness.createEntities5();
+				runAsSystem(() ->
+				{
+					dataService.add(authorsAndBooks.getBookMetaData().getName(), authorsAndBooks.getBooks().stream());
+					dataService
+							.add(authorsAndBooks.getAuthorMetaData().getName(), authorsAndBooks.getAuthors().stream());
+					waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
+				});
+				return authorsAndBooks;
+			case 6:
+				authorsAndBooks = oneToManyTestHarness.createEntities6();
+				runAsSystem(() ->
+				{
+					dataService.add(authorsAndBooks.getBookMetaData().getName(), authorsAndBooks.getBooks().stream());
+					dataService
+							.add(authorsAndBooks.getAuthorMetaData().getName(), authorsAndBooks.getAuthors().stream());
+					waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
+				});
+				return authorsAndBooks;
+			default:
+				return null;
+		}
 	}
 
 	@Test

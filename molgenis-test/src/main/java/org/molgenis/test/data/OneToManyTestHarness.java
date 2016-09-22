@@ -34,9 +34,11 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 
 import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
+import static org.molgenis.test.data.staticentity.bidirectional.test1.AuthorMetaData1.ATTR_BOOKS;
+import static org.molgenis.test.data.staticentity.bidirectional.test2.BookMetaData2.AUTHOR;
 
 @Component
-public class EntityOneToManyTestHarness
+public class OneToManyTestHarness
 {
 	@Autowired
 	AuthorFactory1 authorFactory1;
@@ -99,9 +101,9 @@ public class EntityOneToManyTestHarness
 	{
 		List<Entity> books = createBookEntities(bookFactory1);
 		List<Entity> authors = createAuthorEntities(authorFactory1);
-		authors.get(0).set(AuthorMetaData1.ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
-		authors.get(1).set(AuthorMetaData1.ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
-		authors.get(2).set(AuthorMetaData1.ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
+		authors.get(0).set(ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
+		authors.get(1).set(ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
+		authors.get(2).set(ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
 
 		return new AuthorsAndBooks(authors, books, authorMetaData1, bookMetaData1);
 	}
@@ -113,9 +115,9 @@ public class EntityOneToManyTestHarness
 	{
 		List<Entity> books = createBookEntities(bookFactory2);
 		List<Entity> authors = createAuthorEntities(authorFactory2);
-		authors.get(0).set(AuthorMetaData1.ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
-		authors.get(1).set(AuthorMetaData1.ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
-		authors.get(2).set(AuthorMetaData1.ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
+		books.get(0).set(AUTHOR, authors.get(0));
+		books.get(1).set(AUTHOR, authors.get(1));
+		books.get(2).set(AUTHOR, authors.get(2));
 		return new AuthorsAndBooks(authors, books, authorMetaData2, bookMetaData2);
 	}
 
@@ -126,9 +128,9 @@ public class EntityOneToManyTestHarness
 	{
 		List<Entity> books = createBookEntities(bookFactory3);
 		List<Entity> authors = createAuthorEntities(authorFactory3);
-		authors.get(0).set(AuthorMetaData1.ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
-		authors.get(1).set(AuthorMetaData1.ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
-		authors.get(2).set(AuthorMetaData1.ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
+		authors.get(0).set(ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
+		authors.get(1).set(ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
+		authors.get(2).set(ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
 		return new AuthorsAndBooks(authors, books, authorMetaData3, bookMetaData3);
 	}
 
@@ -139,9 +141,9 @@ public class EntityOneToManyTestHarness
 	{
 		List<Entity> books = createBookEntities(bookFactory4);
 		List<Entity> authors = createAuthorEntities(authorFactory4);
-		authors.get(0).set(AuthorMetaData1.ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
-		authors.get(1).set(AuthorMetaData1.ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
-		authors.get(2).set(AuthorMetaData1.ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
+		authors.get(0).set(ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
+		authors.get(1).set(ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
+		authors.get(2).set(ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
 		return new AuthorsAndBooks(authors, books, authorMetaData4, bookMetaData4);
 	}
 
@@ -152,9 +154,9 @@ public class EntityOneToManyTestHarness
 	{
 		List<Entity> books = createBookEntities(bookFactory5);
 		List<Entity> authors = createAuthorEntities(authorFactory5);
-		authors.get(0).set(AuthorMetaData1.ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
-		authors.get(1).set(AuthorMetaData1.ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
-		authors.get(2).set(AuthorMetaData1.ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
+		authors.get(0).set(ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
+		authors.get(1).set(ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
+		authors.get(2).set(ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
 		return new AuthorsAndBooks(authors, books, authorMetaData5, bookMetaData5);
 	}
 
@@ -165,9 +167,9 @@ public class EntityOneToManyTestHarness
 	{
 		List<Entity> books = createBookEntities(bookFactory6);
 		List<Entity> authors = createAuthorEntities(authorFactory6);
-		authors.get(0).set(AuthorMetaData1.ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
-		authors.get(1).set(AuthorMetaData1.ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
-		authors.get(2).set(AuthorMetaData1.ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
+		authors.get(0).set(ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
+		authors.get(1).set(ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
+		authors.get(2).set(ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
 		return new AuthorsAndBooks(authors, books, authorMetaData6, bookMetaData6);
 	}
 
