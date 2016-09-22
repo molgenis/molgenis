@@ -1,4 +1,4 @@
-package org.molgenis.test.data.staticentity.bidirectional;
+package org.molgenis.test.data.staticentity.bidirectional.test4;
 
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,18 +12,18 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
-public class BookMetaData extends SystemEntityMetaData
+public class BookMetaData4 extends SystemEntityMetaData
 {
-	private static final String SIMPLE_NAME = "Book";
+	private static final String SIMPLE_NAME = "Book4";
 	public static final String MY_REF_ENTITY = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";
 	public static final String LABEL = "label";
 	public static final String AUTHOR = "author";
 
-	private AuthorMetaData authorMetaData;
+	private AuthorMetaData4 authorMetaData;
 
-	BookMetaData()
+	BookMetaData4()
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
 	}
@@ -35,11 +35,11 @@ public class BookMetaData extends SystemEntityMetaData
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL).setNillable(true).setLabel("Label");
-		addAttribute(AUTHOR).setDataType(XREF).setRefEntity(authorMetaData);
+		addAttribute(AUTHOR).setDataType(XREF).setRefEntity(authorMetaData).setNillable(false);
 	}
 
 	@Autowired
-	public void setAuthorMetaData(AuthorMetaData authorMetaData)
+	public void setAuthorMetaData(AuthorMetaData4 authorMetaData)
 	{
 		this.authorMetaData = requireNonNull(authorMetaData);
 	}
