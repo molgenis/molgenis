@@ -105,7 +105,7 @@ public class GeneNetworkController extends MolgenisPluginController
 		hpoScanner.next();
 		while (hpoScanner.hasNext())
 		{
-			hpoTerms.add(hpoScanner.next());
+			hpoTerms.add(hpoScanner.next().replace(":","_"));
 		}
 		return hpoTerms;
 	}
