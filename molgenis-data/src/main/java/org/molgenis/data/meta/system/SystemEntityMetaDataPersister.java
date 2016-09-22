@@ -134,8 +134,8 @@ public class SystemEntityMetaDataPersister
 	void removeNonExistingSystemEntities()
 	{
 		// get all system entities
-		Set<EntityMetaData> systemEntityMetaSet = dataService.findAll(ENTITY_META_DATA, EntityMetaData.class)
-				.filter(SystemEntityMetaDataPersister::isSystemEntity).collect(toSet());
+		List<EntityMetaData> systemEntityMetaSet = dataService.findAll(ENTITY_META_DATA, EntityMetaData.class)
+				.filter(SystemEntityMetaDataPersister::isSystemEntity).collect(toList());
 
 		// determine removed system entities
 		List<EntityMetaData> removedSystemEntityMetas = systemEntityMetaSet.stream().filter(this::isNotExists)
