@@ -6,12 +6,10 @@ import org.molgenis.genetics.diag.genenetwork.meta.GeneNetworkScoreFactory;
 import org.molgenis.genetics.diag.genenetwork.meta.GeneNetworkScoreMetaData;
 import org.molgenis.ui.MolgenisPluginController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -49,7 +47,7 @@ public class GeneNetworkController extends MolgenisPluginController
 	}
 
 	@RequestMapping(value = "/import", method = POST)
-	@ResponseBody
+	@ResponseStatus(HttpStatus.OK)
 	public void importScores(@RequestParam(value = "genenetworkfile") String geneNetworkFile,
 			@RequestParam(value = "genemappingfile") String geneMappingFile) throws IOException
 	{
@@ -60,11 +58,11 @@ public class GeneNetworkController extends MolgenisPluginController
 			Scanner hpoScanner = new Scanner(scanner.nextLine());
 			List<String> hpoTerms = createHpoTermList(hpoScanner);
 			Map<String, String> geneMap = createEnsembleHugoMap(geneMappingFile);
-
+			List<Entity> entities = new ArrayList();
 			int rowNr = 0;
 			while (scanner.hasNext())
 			{
-				List<Entity> entities = processSingleInputLine(scanner, hpoTerms, geneMap);
+				entities.addAll(processSingleInputLine(scanner, hpoTerms, geneMap));
 				persistGeneNetworkScoreEntities(rowNr, entities);
 				rowNr++;
 			}
