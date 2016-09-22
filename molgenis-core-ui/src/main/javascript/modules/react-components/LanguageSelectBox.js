@@ -46,11 +46,13 @@ var LanguageSelectBox = React.createClass({
     },
     _loadLanguages: function () {
         var self = this;
-        var query = {'q': [{
-            'field': "active",
-            'operator': "EQUALS",
-            'value': true
-        }]};
+        var query = {
+            'q': [{
+                'field': "active",
+                'operator': "EQUALS",
+                'value': true
+            }]
+        };
         api.get('/api/v2/sys_languages', query).done(function (languages) {
             var selectedLanguage = null;
             var select2Data = languages.items.map(function (item) {
