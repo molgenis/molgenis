@@ -57,4 +57,16 @@ public class Language extends StaticEntity
 		set(LanguageMetaData.NAME, name);
 		return this;
 	}
+
+
+	public boolean isActive()
+	{
+		return getBoolean(LanguageMetaData.ACTIVE);
+	}
+
+	public Language setActive(boolean active)
+	{
+		set(LanguageMetaData.ACTIVE, active);
+		return this;
+	}
 }

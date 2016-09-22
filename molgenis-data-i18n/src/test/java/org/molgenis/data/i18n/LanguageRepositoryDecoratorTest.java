@@ -62,6 +62,8 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	private RepositoryCollection defaultBackend;
 	@Mock
 	private LanguageMetaData languageMeta;
+	@Mock
+	private LanguageService languageService;
 
 	private LanguageRepositoryDecorator languageRepositoryDecorator;
 
@@ -74,8 +76,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		when(dataService.getEntityMetaData(ENTITY_META_DATA)).thenReturn(entityMetaMeta);
 		when(dataService.getEntityMetaData(ATTRIBUTE_META_DATA)).thenReturn(attrMetaMeta);
 		when(dataService.getEntityMetaData(I18N_STRING)).thenReturn(i18nStringMetaData);
-		languageRepositoryDecorator = new LanguageRepositoryDecorator(decoratedRepo, dataService, attrMetaFactory,
-				entityMetaMeta, i18nStringMetaData);
+		languageRepositoryDecorator = new LanguageRepositoryDecorator(decoratedRepo, languageService);
 	}
 
 	@Test
@@ -95,17 +96,29 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		verify(decoratedRepo, times(1)).add(language1);
 	}
 
-	@Test
+	@Test(expectedExceptions=Exception.class, expectedExceptionsMessageRegExp = "Adding languages is not allowed")
+	public void addStreamNotAllowed()
+	{
+		Language language0 = mock(Language.class);
+		when(language0.getEntityMetaData()).thenReturn(languageMeta);
+		when(language0.getCode()).thenReturn("tt");
+
+		Stream<Language> entities = Arrays.asList(language0).stream();
+		assertEquals(languageRepositoryDecorator.add(entities), Integer.valueOf(2));
+		verify(decoratedRepo, times(1)).add(language0);
+	}
+
+	@Test(expectedExceptions=Exception.class, expectedExceptionsMessageRegExp = "Deleting languages is not allowed")
 	public void deleteStream()
 	{
 		String nl = "nl";
 		String de = "de";
 
 		// Add NL to language
-		Language languageNL = languageFactory.create(nl, "Nederlands");
+		Language languageNL = languageFactory.create(nl, "Nederlands", true);
 
 		// Add DE to language
-		Language languageDE = languageFactory.create(de, "Deutsch");
+		Language languageDE = languageFactory.create(de, "Deutsch", true);
 
 		// Add NL attribute to i18n
 		i18nStringMetaData.addAttribute(attrMetaFactory.create().setName(nl));

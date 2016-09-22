@@ -17,13 +17,6 @@ import java.util.stream.Stream;
 public interface MetaDataService extends Iterable<RepositoryCollection>
 {
 	/**
-	 * Returns the application language codes
-	 *
-	 * @return the application language codes
-	 */
-	Stream<String> getLanguageCodes();
-
-	/**
 	 * Returns the repository for the given entity name.
 	 *
 	 * @param entityName entity name
