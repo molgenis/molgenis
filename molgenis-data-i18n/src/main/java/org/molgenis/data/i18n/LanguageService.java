@@ -97,4 +97,9 @@ public class LanguageService
 			return languageCode;
 		});
 	}
+
+	public static boolean hasLanguageCode(String code)
+	{
+		return getLanguageCodes().anyMatch(e -> e.equals(code));
+	}
 }

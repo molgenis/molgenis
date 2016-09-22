@@ -62,7 +62,7 @@ public class UserAccountController extends MolgenisPluginController
 	{
 		try
 		{
-			if (!languageService.getLanguageCodes().anyMatch(e -> e.equals(languageCode)))
+			if (!languageService.hasLanguageCode(languageCode))
 			{
 				throw new MolgenisUserException("Unknown language code '" + languageCode + "'");
 			}

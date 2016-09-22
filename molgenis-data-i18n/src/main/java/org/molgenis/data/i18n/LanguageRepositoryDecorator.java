@@ -177,7 +177,7 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	public void add(Language language)
 	{
 
-		if (!languageService.getLanguageCodes().anyMatch(e -> e.equals(language.getCode())))
+		if (!languageService.hasLanguageCode(language.getCode()))
 		{
 			throw new MolgenisDataException(
 					format("Adding languages is not allowed"));
