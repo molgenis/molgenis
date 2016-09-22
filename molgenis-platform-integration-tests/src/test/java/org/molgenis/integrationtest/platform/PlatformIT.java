@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
@@ -46,6 +48,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -58,6 +61,7 @@ import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_M
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.test.data.EntityTestHarness.*;
+import static org.molgenis.test.data.OneToManyTestHarness.ONE_TO_MANY_CASES;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.testng.Assert.*;
@@ -165,64 +169,40 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 
+	private List<GrantedAuthority> makeAuthorities(String entityName, boolean write, boolean read, boolean count)
+	{
+		List<GrantedAuthority> authorities = newArrayList();
+		if (write) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + entityName.toUpperCase()));
+		if (read) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + entityName.toUpperCase()));
+		if (count) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + entityName.toUpperCase()));
+		return authorities;
+	}
+
 	private void setAuthentication()
 	{
-		// Permissions refEntityMetaDataStatic.getName()
-		String writeTestRefEntityStatic = "ROLE_ENTITY_WRITE_" + refEntityMetaDataStatic.getName().toUpperCase();
-		String readTestRefEntityStatic = "ROLE_ENTITY_READ_" + refEntityMetaDataStatic.getName().toUpperCase();
-		String countTestRefEntityStatic = "ROLE_ENTITY_COUNT_" + refEntityMetaDataStatic.getName().toUpperCase();
+		List<GrantedAuthority> authorities = newArrayList();
 
-		// Permissions entityMetaDataStatic.getName()
-		String writeTestEntityStatic = "ROLE_ENTITY_WRITE_" + entityMetaDataStatic.getName().toUpperCase();
-		String readTestEntityStatic = "ROLE_ENTITY_READ_" + entityMetaDataStatic.getName().toUpperCase();
-		String countTestEntityStatic = "ROLE_ENTITY_COUNT_" + entityMetaDataStatic.getName().toUpperCase();
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_SYS_MD_ENTITIES"));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES"));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
+		authorities.addAll(makeAuthorities(refEntityMetaDataStatic.getName(), true, true, true));
+		authorities.addAll(makeAuthorities(entityMetaDataStatic.getName(), true, true, true));
+		authorities.addAll(makeAuthorities(entityMetaDataDynamic.getName(), true, true, true));
+		authorities.addAll(makeAuthorities(refEntityMetaDataDynamic.getName(), false, true, true));
+		authorities.addAll(makeAuthorities(selfXrefEntityMetaData.getName(), true, true, true));
+		authorities.addAll(makeAuthorities(languageMetaData.getName(), true, true, true));
+		authorities.addAll(makeAuthorities(attributeMetaDataMetaData.getName(), true, true, true));
+		authorities.addAll(makeAuthorities(i18nStringMetaData.getName(), true, false, false));
+		authorities.addAll(makeAuthorities(entityMetaDataMetaData.getName(), true, true, true));
 
-		// Permissions entityMetaDataDynamic.getName()
-		String writeTestEntity = "ROLE_ENTITY_WRITE_" + entityMetaDataDynamic.getName().toUpperCase();
-		String readTestEntity = "ROLE_ENTITY_READ_" + entityMetaDataDynamic.getName().toUpperCase();
-		String countTestEntity = "ROLE_ENTITY_COUNT_" + entityMetaDataDynamic.getName().toUpperCase();
+		for (int i = 1; i <= ONE_TO_MANY_CASES; i++)
+		{
+			authorities.addAll(makeAuthorities("sys_Author" + i, true, true, true));
+			authorities.addAll(makeAuthorities("sys_Book" + i, true, true, true));
+		}
 
-		// Permissions refEntityMetaDataDynamic.getName()
-		String readTestRefEntity = "ROLE_ENTITY_READ_" + refEntityMetaDataDynamic.getName().toUpperCase();
-		String countTestRefEntity = "ROLE_ENTITY_COUNT_" + refEntityMetaDataDynamic.getName().toUpperCase();
-
-		// Permissions selfXrefEntityMetaData.getName()
-		String writeSelfXrefEntity = "ROLE_ENTITY_WRITE_" + selfXrefEntityMetaData.getName().toUpperCase();
-		String readSelfXrefEntity = "ROLE_ENTITY_READ_" + selfXrefEntityMetaData.getName().toUpperCase();
-		String countSelfXrefEntity = "ROLE_ENTITY_COUNT_" + selfXrefEntityMetaData.getName().toUpperCase();
-
-		// Permissions languageMetaData
-		String writeLanguageMetaData = "ROLE_ENTITY_WRITE_" + languageMetaData.getName().toUpperCase();
-		String readLanguageMetaData = "ROLE_ENTITY_READ_" + languageMetaData.getName().toUpperCase();
-		String countLanguageMetaData = "ROLE_ENTITY_COUNT_" + languageMetaData.getName().toUpperCase();
-
-		// Permissions attributeMetaDataMetaData
-		String writeAttributeMetaDataMetaData =
-				"ROLE_ENTITY_WRITE_" + attributeMetaDataMetaData.getName().toUpperCase();
-		String readAttributeMetaDataMetaData = "ROLE_ENTITY_READ_" + attributeMetaDataMetaData.getName().toUpperCase();
-		String countAttributeMetaDataMetaData =
-				"ROLE_ENTITY_COUNT_" + attributeMetaDataMetaData.getName().toUpperCase();
-
-		// Permissions i18nStringMetaData
-		String writeI18nStringMetaData = "ROLE_ENTITY_WRITE_" + i18nStringMetaData.getName().toUpperCase();
-
-		// EntityMetaDataMetaData
-		String writeEntityMetaDataMetaData = "ROLE_ENTITY_WRITE_" + entityMetaDataMetaData.getName().toUpperCase();
-		String readEntityMetaDataMetaData = "ROLE_ENTITY_READ_" + entityMetaDataMetaData.getName().toUpperCase();
-		String countEntityMetaDataMetaData = "ROLE_ENTITY_COUNT_" + entityMetaDataMetaData.getName().toUpperCase();
-
-		//
-
-		SecurityContextHolder.getContext().setAuthentication(
-				new TestingAuthenticationToken("user", "user", writeTestEntity, readTestEntity, readTestRefEntity,
-						countTestEntity, countTestRefEntity, writeSelfXrefEntity, readSelfXrefEntity,
-						countSelfXrefEntity, writeTestEntityStatic, readTestEntityStatic, countTestEntityStatic,
-						writeTestRefEntityStatic, readTestRefEntityStatic, countTestRefEntityStatic,
-						writeLanguageMetaData, readLanguageMetaData, countLanguageMetaData,
-						writeAttributeMetaDataMetaData, readAttributeMetaDataMetaData, countAttributeMetaDataMetaData,
-						writeI18nStringMetaData, writeEntityMetaDataMetaData, readEntityMetaDataMetaData,
-						countEntityMetaDataMetaData, "ROLE_ENTITY_READ_SYS_MD_ENTITIES",
-						"ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES", "ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
+		SecurityContextHolder.getContext()
+				.setAuthentication(new TestingAuthenticationToken("user", "user", authorities));
 	}
 
 	private void createLanguages()

@@ -89,6 +89,8 @@ public class OneToManyTestHarness
 	@Autowired
 	BookMetaData6 bookMetaData6;
 
+	public static final int ONE_TO_MANY_CASES = 6;
+
 	@PostConstruct
 	public void postConstruct()
 	{
