@@ -6,14 +6,15 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
 import org.mozilla.javascript.EcmaError;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import static freemarker.template.utility.Collections12.singletonList;
+import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.SCRIPT;
 
-public class SandboxTest extends ScriptEvaluatorTest
+public class SandboxTest
 {
 	private static EntityMetaData personFirstNameEntityMeta;
 
@@ -27,6 +28,12 @@ public class SandboxTest extends ScriptEvaluatorTest
 		personFirstNameEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("person").getMock();
 		when(personFirstNameEntityMeta.getAttribute("firstName")).thenReturn(firstNameAttr);
 		when(personFirstNameEntityMeta.getAtomicAttributes()).thenReturn(singletonList(firstNameAttr));
+	}
+
+	@BeforeMethod
+	public void beforeMethod()
+	{
+		new RhinoConfig().init();
 	}
 
 	@Test
