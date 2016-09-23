@@ -1367,18 +1367,34 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		for (int i = 1; i <= ONE_TO_MANY_CASES; i++)
 		{
 			OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(i);
+			try
+			{
+				if (authorsAndBooks == null) continue; // skip "disabled" test cases //FIXME
 
-			if (authorsAndBooks == null) continue; // skip "disabled" test cases //FIXME
+				String book = "sys_Book" + i;
+				assertTrue(EntityUtils.equals(dataService.findOneById(book, "book1").getEntity("author"),
+						authorsAndBooks.getAuthors().get(0)));
+				assertTrue(EntityUtils.equals(dataService.findOneById(book, "book2").getEntity("author"),
+						authorsAndBooks.getAuthors().get(1)));
+				assertTrue(EntityUtils.equals(dataService.findOneById(book, "book3").getEntity("author"),
+						authorsAndBooks.getAuthors().get(2)));
 
-			String book = "sys_Book" + i;
-			assertTrue(EntityUtils.equals(dataService.findOneById(book, "book1").getEntity("author"), authorsAndBooks.getAuthors().get(0)));
-			assertTrue(EntityUtils.equals(dataService.findOneById(book, "book2").getEntity("author"), authorsAndBooks.getAuthors().get(1)));
-			assertTrue(EntityUtils.equals(dataService.findOneById(book, "book3").getEntity("author"), authorsAndBooks.getAuthors().get(2)));
-
-			String author = "sys_Author" + i;
-			assertTrue(EntityUtils.equals(dataService.findOneById(author, "author1").getEntities("books").iterator().next(), authorsAndBooks.getBooks().get(0)));
-			assertTrue(EntityUtils.equals(dataService.findOneById(author, "author2").getEntities("books").iterator().next(), authorsAndBooks.getBooks().get(1)));
-			assertTrue(EntityUtils.equals(dataService.findOneById(author, "author3").getEntities("books").iterator().next(), authorsAndBooks.getBooks().get(2)));
+				String author = "sys_Author" + i;
+				assertTrue(EntityUtils
+						.equals(dataService.findOneById(author, "author1").getEntities("books").iterator().next(),
+								authorsAndBooks.getBooks().get(0)));
+				assertTrue(EntityUtils
+						.equals(dataService.findOneById(author, "author2").getEntities("books").iterator().next(),
+								authorsAndBooks.getBooks().get(1)));
+				assertTrue(EntityUtils
+						.equals(dataService.findOneById(author, "author3").getEntities("books").iterator().next(),
+								authorsAndBooks.getBooks().get(2)));
+			}
+			finally
+			{
+				dataService.deleteAll(authorsAndBooks.getBookMetaData().getName());
+				dataService.deleteAll(authorsAndBooks.getAuthorMetaData().getName());
+			}
 		}
 	}
 
