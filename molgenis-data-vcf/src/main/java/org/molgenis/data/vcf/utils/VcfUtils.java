@@ -245,7 +245,7 @@ public class VcfUtils
 		}
 
 		String[] step1 = description.split(":");
-		String entityName = org.apache.commons.lang.StringUtils.deleteWhitespace(step1[0]);
+		String entityName = StringUtils.deleteWhitespace(step1[0]);
 		String value = step1[1].replaceAll("^\\s'|'$", "");
 
 		Map<Integer, AttributeMetaData> metadataMap = parseDescription(value, annotatorAttributes);
@@ -303,7 +303,7 @@ public class VcfUtils
 			MolgenisFieldTypes.AttributeType type = annotatorAttributeMap.containsKey(attribute) ? annotatorAttributeMap
 					.get(attribute).getDataType() : MolgenisFieldTypes.AttributeType.STRING;
 			AttributeMetaData attr = attributeMetaDataFactory.create()
-					.setName(org.apache.commons.lang.StringUtils.deleteWhitespace(attribute)).setDataType(type)
+					.setName(StringUtils.deleteWhitespace(attribute)).setDataType(type)
 					.setLabel(attribute);
 			attributeMap.put(i, attr);
 		}

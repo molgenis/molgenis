@@ -72,27 +72,6 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
-	public Stream<String> getLanguageCodes()
-	{
-		if (isTableExists(LANGUAGE))
-		{
-			String sql = "SELECT \"" + CODE + "\" FROM \"" + LANGUAGE + '"';
-			if (LOG.isDebugEnabled())
-			{
-				LOG.debug("Fetching languages");
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("SQL: {}", sql);
-				}
-			}
-			return jdbcTemplate.query(sql, (rs, rowNum) -> rs.getString(CODE)).stream();
-		}
-		else
-		{
-			return Stream.of(DEFAULT_LANGUAGE_CODE);
-		}
-	}
 
 	@Override
 	public Repository<Entity> createRepository(EntityMetaData entityMeta)
@@ -744,28 +723,36 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 
 	private void createJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		String createJunctionTableSql = getSqlCreateJunctionTable(entityMeta, attr);
-		if (LOG.isDebugEnabled())
+		if (attr.isInversedBy())
 		{
-			LOG.debug("Creating junction table for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
-			if (LOG.isTraceEnabled())
-			{
-				LOG.trace("SQL: {}", createJunctionTableSql);
-			}
+			createForeignKey(attr.getRefEntity(), attr.getInversedBy());
 		}
-		jdbcTemplate.execute(createJunctionTableSql);
+		else
+		{
+			String createJunctionTableSql = getSqlCreateJunctionTable(entityMeta, attr);
+			if (LOG.isDebugEnabled())
+			{
+				LOG.debug("Creating junction table for entity [{}] attribute [{}]", entityMeta.getName(),
+						attr.getName());
+				if (LOG.isTraceEnabled())
+				{
+					LOG.trace("SQL: {}", createJunctionTableSql);
+				}
+			}
+			jdbcTemplate.execute(createJunctionTableSql);
 
-		String createJunctionTableIndexSql = getSqlCreateJunctionTableIndex(entityMeta, attr);
-		if (LOG.isDebugEnabled())
-		{
-			LOG.debug("Creating junction table index for entity [{}] attribute [{}]", entityMeta.getName(),
-					attr.getName());
-			if (LOG.isTraceEnabled())
+			String createJunctionTableIndexSql = getSqlCreateJunctionTableIndex(entityMeta, attr);
+			if (LOG.isDebugEnabled())
 			{
-				LOG.trace("SQL: {}", createJunctionTableIndexSql);
+				LOG.debug("Creating junction table index for entity [{}] attribute [{}]", entityMeta.getName(),
+						attr.getName());
+				if (LOG.isTraceEnabled())
+				{
+					LOG.trace("SQL: {}", createJunctionTableIndexSql);
+				}
 			}
+			jdbcTemplate.execute(createJunctionTableIndexSql);
 		}
-		jdbcTemplate.execute(createJunctionTableIndexSql);
 	}
 
 	private void dropJunctionTable(EntityMetaData entityMeta, AttributeMetaData mrefAttr)
