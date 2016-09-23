@@ -442,6 +442,7 @@ public class EntityUtils
 							.equals(otherXrefValue.getIdValue())) return false;
 					break;
 				case CATEGORICAL_MREF:
+				case ONE_TO_MANY:
 				case MREF:
 					List<Entity> entities = newArrayList(entity.getEntities(attrName));
 					List<Entity> otherEntities = newArrayList(otherEntity.getEntities(attrName));
@@ -510,6 +511,7 @@ public class EntityUtils
 					hValue = Objects.hashCode(xrefIdValue);
 					break;
 				case CATEGORICAL_MREF:
+				case ONE_TO_MANY:
 				case MREF:
 					for (Entity mrefValue : entity.getEntities(attrName))
 					{
