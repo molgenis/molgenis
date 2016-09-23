@@ -14,7 +14,7 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 @Component
 public class BookMetaData6 extends SystemEntityMetaData
 {
-	private static final String SIMPLE_NAME = "Book1";
+	private static final String SIMPLE_NAME = "Book6";
 	public static final String MY_REF_ENTITY = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";

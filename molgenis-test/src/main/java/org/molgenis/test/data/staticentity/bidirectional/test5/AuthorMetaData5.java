@@ -20,7 +20,7 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 @Component
 public class AuthorMetaData5 extends SystemEntityMetaData
 {
-	private static final String SIMPLE_NAME = "Author1";
+	private static final String SIMPLE_NAME = "Author5";
 	public static final String MY_ENTITY = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";

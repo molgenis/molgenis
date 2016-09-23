@@ -1336,19 +1336,21 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testOneToManyInsert()
 	{
-		for (int i = 1; i < 7; i++)
+		for (int i = 1; i <= ONE_TO_MANY_CASES; i++)
 		{
 			OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(i);
 
-			if (authorsAndBooks == null) continue;
+			if (authorsAndBooks == null) continue; // skip "disabled" test cases //FIXME
 
-			assertEquals(dataService.findOneById("sys_Book" + i, "book1"), authorsAndBooks.getAuthors().get(0));
-			assertEquals(dataService.findOneById("sys_Book" + i, "book2"), authorsAndBooks.getAuthors().get(1));
-			assertEquals(dataService.findOneById("sys_Book" + i, "book3"), authorsAndBooks.getAuthors().get(2));
+			String book = "sys_Book" + i;
+			assertTrue(EntityUtils.equals(dataService.findOneById(book, "book1").getEntity("author"), authorsAndBooks.getAuthors().get(0)));
+			assertTrue(EntityUtils.equals(dataService.findOneById(book, "book2").getEntity("author"), authorsAndBooks.getAuthors().get(1)));
+			assertTrue(EntityUtils.equals(dataService.findOneById(book, "book3").getEntity("author"), authorsAndBooks.getAuthors().get(2)));
 
-			assertEquals(dataService.findOneById("sys_Author" + i, "author1"), authorsAndBooks.getAuthors().get(0));
-			assertEquals(dataService.findOneById("sys_Author" + i, "author2"), authorsAndBooks.getAuthors().get(1));
-			assertEquals(dataService.findOneById("sys_Author" + i, "author3"), authorsAndBooks.getAuthors().get(2));
+			String author = "sys_Author" + i;
+			assertTrue(EntityUtils.equals(dataService.findOneById(author, "author1").getEntities("books").iterator().next(), authorsAndBooks.getBooks().get(0)));
+			assertTrue(EntityUtils.equals(dataService.findOneById(author, "author2").getEntities("books").iterator().next(), authorsAndBooks.getBooks().get(1)));
+			assertTrue(EntityUtils.equals(dataService.findOneById(author, "author3").getEntities("books").iterator().next(), authorsAndBooks.getBooks().get(2)));
 		}
 	}
 
@@ -1391,6 +1393,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				});
 				return authorsAndBooks;
 			case 4:
+				// FIXME
 				//				authorsAndBooks = oneToManyTestHarness.createEntities4();
 				//				runAsSystem(() -> {
 				//					// case 4: books/authors both required: impossible?
