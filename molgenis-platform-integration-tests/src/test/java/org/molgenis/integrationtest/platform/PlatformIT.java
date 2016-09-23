@@ -1,5 +1,6 @@
 package org.molgenis.integrationtest.platform;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.*;
 import org.molgenis.data.cache.l2.L2Cache;
@@ -21,6 +22,8 @@ import org.molgenis.test.data.EntitySelfXrefTestHarness;
 import org.molgenis.test.data.EntityTestHarness;
 import org.molgenis.test.data.OneToManyTestHarness;
 import org.molgenis.test.data.staticentity.TestEntityStatic;
+import org.molgenis.test.data.staticentity.bidirectional.test1.AuthorMetaData1;
+import org.molgenis.test.data.staticentity.bidirectional.test1.BookMetaData1;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +35,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
+import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.*;
 
 import java.io.File;
@@ -1477,6 +1481,115 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		//TODO
 		// For all test cases
 		// Retrieve/update (with and without queries) some books and authors. Request again and verify they contain correct data
+	}
+
+	@Test
+	@Transactional
+	public void testL1OneToManySingleEntityUpdate()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(1);
+		try
+		{
+			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), "book1");
+			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), "author1");
+			Entity author2 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), "author2");
+
+			book1.set(BookMetaData1.AUTHOR, author2);
+			dataService.update(book1.getEntityMetaData().getName(), book1);
+
+			Entity author1RetrievedAgain = dataService
+					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author1.getIdValue());
+			assertEquals(Collections.emptyList(),
+					Lists.newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)));
+
+			Entity author2Retrieved = dataService
+					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author2.getIdValue());
+			Iterable<Entity> author2Books = author2Retrieved.getEntities(AuthorMetaData1.ATTR_BOOKS);
+			List<Object> retrievedAuthor2BookIds = StreamSupport.stream(author2Books.spliterator(), false)
+					.map(Entity::getIdValue).collect(toList());
+			assertEquals(retrievedAuthor2BookIds, newArrayList("book2", "book1"));
+		}
+		finally
+		{
+			dataService.deleteAll(authorsAndBooks.getBookMetaData().getName());
+			dataService.deleteAll(authorsAndBooks.getAuthorMetaData().getName());
+		}
+	}
+
+	@Test
+	@Transactional
+	public void testL1OneToManyStreamingEntityUpdate()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(1);
+		try
+		{
+			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), "book1");
+			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), "author1");
+			Entity author2 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), "author2");
+
+			book1.set(BookMetaData1.AUTHOR, author2);
+			dataService.update(book1.getEntityMetaData().getName(), Stream.of(book1));
+
+			Entity author1RetrievedAgain = dataService
+					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author1.getIdValue());
+			assertEquals(Collections.emptyList(),
+					Lists.newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)));
+
+			Entity author2Retrieved = dataService
+					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author2.getIdValue());
+			Iterable<Entity> author2Books = author2Retrieved.getEntities(AuthorMetaData1.ATTR_BOOKS);
+			List<Object> retrievedAuthor2BookIds = StreamSupport.stream(author2Books.spliterator(), false)
+					.map(Entity::getIdValue).collect(toList());
+			assertEquals(retrievedAuthor2BookIds, newArrayList("book2", "book1"));
+		}
+		finally
+		{
+			dataService.deleteAll(authorsAndBooks.getBookMetaData().getName());
+			dataService.deleteAll(authorsAndBooks.getAuthorMetaData().getName());
+		}
+	}
+
+	@Test
+	@Transactional
+	public void testL1OneToManyEntitySingleEntityDelete()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(1);
+		Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), "book1");
+		Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), "author1");
+
+		dataService.delete(book1.getEntityMetaData().getName(), book1);
+
+		Entity author1RetrievedAgain = dataService
+				.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author1.getIdValue());
+		assertEquals(Collections.emptyList(),
+				Lists.newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)));
+
+		dataService.deleteAll(authorsAndBooks.getBookMetaData().getName());
+		dataService.deleteAll(authorsAndBooks.getAuthorMetaData().getName());
+	}
+
+	@Test
+	@Transactional
+	public void testL1OneToManyEntityStreamingEntityDelete()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(1);
+		try
+		{
+			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), "book1");
+			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), "author1");
+
+			dataService.delete(book1.getEntityMetaData().getName(), Stream.of(book1));
+
+			Entity author1RetrievedAgain = dataService
+					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author1.getIdValue());
+			assertEquals(Collections.emptyList(),
+					Lists.newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)));
+		}
+		finally
+		{
+			dataService.deleteAll(authorsAndBooks.getBookMetaData().getName());
+			dataService.deleteAll(authorsAndBooks.getAuthorMetaData().getName());
+		}
 	}
 
 	@Test
