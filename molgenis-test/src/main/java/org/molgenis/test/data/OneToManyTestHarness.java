@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import java.util.List;
 
-import static autovalue.shaded.com.google.common.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayList;
 import static org.molgenis.test.data.staticentity.bidirectional.test1.AuthorMetaData1.ATTR_BOOKS;
 import static org.molgenis.test.data.staticentity.bidirectional.test2.BookMetaData2.AUTHOR;
 
