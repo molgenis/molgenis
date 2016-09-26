@@ -273,7 +273,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			dataService.deleteAll(selfXrefEntityMetaData.getName());
 
 			deleteAuthorsThenBooks(1);
-			deleteBooksThenAuthors(1);
+			deleteBooksThenAuthors(2);
 			deleteAuthorsThenBooks(3);
 			deleteAuthorsThenBooks(4);
 			deleteAuthorsThenBooks(5);
@@ -1469,14 +1469,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@Test (enabled = false)
-	public void testOneToManyCaching()
-	{
-		//TODO
-		// For all test cases
-		// Retrieve/update (with and without queries) some books and authors. Request again and verify they contain correct data
-	}
-
 	@Test
 	@Transactional
 	public void testL1OneToManySingleEntityUpdate()
@@ -1499,9 +1491,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			Entity author2Retrieved = dataService
 					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author2.getIdValue());
 			Iterable<Entity> author2Books = author2Retrieved.getEntities(AuthorMetaData1.ATTR_BOOKS);
-			List<Object> retrievedAuthor2BookIds = StreamSupport.stream(author2Books.spliterator(), false)
-					.map(Entity::getIdValue).collect(toList());
-			assertEquals(retrievedAuthor2BookIds, newArrayList("book2", "book1"));
+
+			// FIXME what order do we expect? (change set to list when decided)
+			Set<Object> retrievedAuthor2BookIds = StreamSupport.stream(author2Books.spliterator(), false)
+					.map(Entity::getIdValue).collect(toSet());
+			assertEquals(retrievedAuthor2BookIds, newHashSet("book2", "book1"));
 		}
 		finally
 		{
@@ -1532,9 +1526,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			Entity author2Retrieved = dataService
 					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author2.getIdValue());
 			Iterable<Entity> author2Books = author2Retrieved.getEntities(AuthorMetaData1.ATTR_BOOKS);
-			List<Object> retrievedAuthor2BookIds = StreamSupport.stream(author2Books.spliterator(), false)
-					.map(Entity::getIdValue).collect(toList());
-			assertEquals(retrievedAuthor2BookIds, newArrayList("book2", "book1"));
+
+			// FIXME what order do we expect? (change set to list when decided)
+			Set<Object> retrievedAuthor2BookIds = StreamSupport.stream(author2Books.spliterator(), false)
+					.map(Entity::getIdValue).collect(toSet());
+			assertEquals(retrievedAuthor2BookIds, newHashSet("book2", "book1"));
 		}
 		finally
 		{
@@ -1586,26 +1582,21 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@Test (enabled = false)
-	public void testOneToManyOrdering()
+	@Test (expectedExceptions = MolgenisDataException.class)
+	public void testOneToManyAuthorRequiredSetBooksNull()
 	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(5); // book.author required
-
-		//TODO
-		// test case 1, 5, 6
-		// Verify order is correct
-		// Update book name, verify books attribute in author has new and correct ordering
-	}
-
-	@Test (enabled = false, expectedExceptions = MolgenisDataException.class)
-	public void testOneToManyAuthorRequiredSetNull()
-	{
-		// FIXME book.author can be set to null
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
 		Entity author = authorsAndBooks.getAuthors().get(0);
 		author.set("books", null);
 		dataService.update(authorsAndBooks.getAuthorMetaData().getName(), author);
+	}
 
+	@Test (enabled = false, expectedExceptions = MolgenisDataException.class)
+	public void testOneToManyAuthorRequiredSetAuthorsNull()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
+
+		// FIXME book.author can be set to null
 		Entity book = authorsAndBooks.getBooks().get(0);
 		book.set("author", null);
 		dataService.update(authorsAndBooks.getBookMetaData().getName(), book);
@@ -1622,23 +1613,48 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		Entity updatedBook = dataService.findOneById("sys_Book2", "book1");
 		assertEquals(updatedBook.getEntity("author").getIdValue(), "author2");
 
-		// FIXME which order do we expect? (change set to list when decided)
+		// FIXME what order do we expect? (change set to list when decided)
 		Entity updatedAuthor1 = dataService.findOneById("sys_Author2", "author1");
 		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities("books").spliterator(), false).map(Entity::getIdValue).collect(toSet()), newHashSet());
 
-		// FIXME which order do we expect? (change set to list when decided)
+		// FIXME what order do we expect? (change set to list when decided)
 		Entity updatedAuthor2 = dataService.findOneById("sys_Author2", "author2");
 		assertEquals(StreamSupport.stream(updatedAuthor2.getEntities("books").spliterator(), false).map(Entity::getIdValue).collect(toSet()), newHashSet("book2", "book1"));
 	}
 
-	@Test
-	public void testOneToManyBookRequiredSetNull(){
-		// TODO
+	@Test (enabled = false, expectedExceptions = MolgenisDataException.class)
+	public void testOneToManyBookRequiredSetAuthorNull(){
+		//FIXME author.books can be set to null
+		importAuthorsAndBooks(3); // author.books required
+		Entity book = dataService.findOneById("sys_Book3", "book1");
+		book.set("author", null);
+		dataService.update("sys_Book3", book);
+	}
+
+	@Test (enabled = false, expectedExceptions = MolgenisDataException.class)
+	public void testOneToManyBookRequiredSetBooksNull(){
+		//FIXME author.books can be set to null
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(3); // author.books required
+		Entity author = dataService.findOneById("sys_Author3", "author1");
+		author.set("books", null);
+		dataService.update("sys_Author2", author);
 	}
 
 	@Test
 	public void testOneToManyBookRequiredUpdateValue(){
-		// TODO
+		importAuthorsAndBooks(3); // book.author required
+		Entity author = dataService.findOneById("sys_Author3", "author1");
+		author.set("books", dataService.findOneById("sys_Book3", "book2"));
+		dataService.update("sys_Author3", author);
+
+		Entity updatedAuthor = dataService.findOneById("sys_Author3", "author1");
+		assertEquals(updatedAuthor.getEntities("book").iterator().next().getIdValue(), "book2");
+
+		Entity updatedBook1 = dataService.findOneById("sys_Book3", "book1");
+		assertEquals(updatedBook1.getEntity("author").getIdValue(), null);
+
+		Entity updatedBook2 = dataService.findOneById("sys_Book3", "book2");
+		assertEquals(updatedBook2.getEntity("author").getIdValue(), "author1");
 	}
 
 	@Test
