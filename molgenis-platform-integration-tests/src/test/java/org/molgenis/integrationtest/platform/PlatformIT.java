@@ -1598,7 +1598,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test (expectedExceptions = MolgenisDataException.class)
 	public void testOneToManyAuthorRequiredSetNull()
 	{
-		// FIXME book.author can be set to null
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
 		Entity author = authorsAndBooks.getAuthors().get(0);
 		author.set("books", null);
