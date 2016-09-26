@@ -198,11 +198,8 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	 */
 	private void evictBiDiReferencedEntityTypes()
 	{
-		// bidirectional relations: evict all entities on the other side of the relation
-		// Entity types that have a
 		getEntityMetaData().getMappedByAttributes().map(AttributeMetaData::getRefEntity).map(EntityMetaData::getName)
 				.forEach(l1Cache::evictAll);
-
 		getEntityMetaData().getInversedByAttributes().map(AttributeMetaData::getRefEntity).map(EntityMetaData::getName)
 				.forEach(l1Cache::evictAll);
 	}
@@ -214,7 +211,6 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	 */
 	private void evictBiDiReferencedEntities(Entity entity)
 	{
-		// For each one-to-many attribute that is mappedBy a reference type attribute, evicts the
 		Stream<EntityKey> backreffingEntities = getEntityMetaData().getMappedByAttributes()
 				.flatMap(mappedByAttr -> stream(entity.getEntities(mappedByAttr.getName()).spliterator(), false))
 				.map(EntityKey::create);
