@@ -265,6 +265,13 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			dataService.deleteAll(entityMetaDataDynamic.getName());
 			dataService.deleteAll(refEntityMetaDataDynamic.getName());
 			dataService.deleteAll(selfXrefEntityMetaData.getName());
+
+			deleteAuthorsThenBooks(1);
+			deleteBooksThenAuthors(1);
+			deleteAuthorsThenBooks(3);
+			deleteAuthorsThenBooks(4);
+			deleteAuthorsThenBooks(5);
+			deleteAuthorsThenBooks(6);
 		});
 		waitForIndexToBeStable(entityMetaDataStatic.getName(), indexService, LOG);
 		waitForIndexToBeStable(refEntityMetaDataStatic.getName(), indexService, LOG);
@@ -273,7 +280,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForIndexToBeStable(selfXrefEntityMetaData.getName(), indexService, LOG);
 	}
 
-	//@Test //FIXME
+	@Test
 	public void testLanguageService()
 	{
 		dataService.add(LANGUAGE, languageFactory
@@ -290,8 +297,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				.add(LANGUAGE, languageFactory.create("it", new Locale("it").getDisplayName(new Locale("it")), false));
 		dataService
 				.add(LANGUAGE, languageFactory.create("fr", new Locale("fr").getDisplayName(new Locale("fr")), false));
-		dataService
-				.add(LANGUAGE, languageFactory.create("xx", "My language", false));
+		dataService.add(LANGUAGE, languageFactory.create("xx", "My language", false));
 
 		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getAttribute("label-en").getName(),
 				"label-en");
@@ -1369,17 +1375,55 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(i);
 
 			if (authorsAndBooks == null) continue; // skip "disabled" test cases //FIXME
+			System.out.println(i);
 
 			String book = "sys_Book" + i;
-			assertTrue(EntityUtils.equals(dataService.findOneById(book, "book1").getEntity("author"), authorsAndBooks.getAuthors().get(0)));
-			assertTrue(EntityUtils.equals(dataService.findOneById(book, "book2").getEntity("author"), authorsAndBooks.getAuthors().get(1)));
-			assertTrue(EntityUtils.equals(dataService.findOneById(book, "book3").getEntity("author"), authorsAndBooks.getAuthors().get(2)));
+			assertEquals(dataService.findOneById(book, "book1").getEntity("author").getIdValue(), "author1");
+			assertEquals(dataService.findOneById(book, "book2").getEntity("author").getIdValue(), "author2");
+			assertEquals(dataService.findOneById(book, "book3").getEntity("author").getIdValue(), "author3");
 
 			String author = "sys_Author" + i;
-			assertTrue(EntityUtils.equals(dataService.findOneById(author, "author1").getEntities("books").iterator().next(), authorsAndBooks.getBooks().get(0)));
-			assertTrue(EntityUtils.equals(dataService.findOneById(author, "author2").getEntities("books").iterator().next(), authorsAndBooks.getBooks().get(1)));
-			assertTrue(EntityUtils.equals(dataService.findOneById(author, "author3").getEntities("books").iterator().next(), authorsAndBooks.getBooks().get(2)));
+			assertEquals(dataService.findOneById(author, "author1").getEntities("books").iterator().next().getIdValue(),
+					"book1");
+			assertEquals(dataService.findOneById(author, "author2").getEntities("books").iterator().next().getIdValue(),
+					"book2");
+			assertEquals(dataService.findOneById(author, "author3").getEntities("books").iterator().next().getIdValue(),
+					"book3");
 		}
+	}
+
+	private void importBooksThenAuthors(OneToManyTestHarness.AuthorsAndBooks authorsAndBooks)
+	{
+		runAsSystem(() ->
+		{
+			dataService.add(authorsAndBooks.getBookMetaData().getName(), authorsAndBooks.getBooks().stream());
+			dataService.add(authorsAndBooks.getAuthorMetaData().getName(), authorsAndBooks.getAuthors().stream());
+			waitForIndexToBeStable(authorsAndBooks.getAuthorMetaData().getName(), indexService, LOG);
+			waitForIndexToBeStable(authorsAndBooks.getBookMetaData().getName(), indexService, LOG);
+		});
+	}
+
+	private void importAuthorsThenBooks(OneToManyTestHarness.AuthorsAndBooks authorsAndBooks)
+	{
+		runAsSystem(() ->
+		{
+			dataService.add(authorsAndBooks.getAuthorMetaData().getName(), authorsAndBooks.getAuthors().stream());
+			dataService.add(authorsAndBooks.getBookMetaData().getName(), authorsAndBooks.getBooks().stream());
+			waitForIndexToBeStable(authorsAndBooks.getAuthorMetaData().getName(), indexService, LOG);
+			waitForIndexToBeStable(authorsAndBooks.getBookMetaData().getName(), indexService, LOG);
+		});
+	}
+
+	private void deleteBooksThenAuthors(int testCase)
+	{
+		dataService.deleteAll("Book" + testCase);
+		dataService.deleteAll("Author" + testCase);
+	}
+
+	private void deleteAuthorsThenBooks(int testCase)
+	{
+		dataService.deleteAll("Author" + testCase);
+		dataService.deleteAll("Book" + testCase);
 	}
 
 	private OneToManyTestHarness.AuthorsAndBooks importAuthorsAndBooks(int testCase)
@@ -1389,66 +1433,30 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		{
 			case 1:
 				authorsAndBooks = oneToManyTestHarness.createEntities1();
-				runAsSystem(() ->
-				{
-					// case 1: books/authors both nillable, order of import not important
-					dataService.add(authorsAndBooks.getBookMetaData().getName(), authorsAndBooks.getBooks().stream());
-					dataService
-							.add(authorsAndBooks.getAuthorMetaData().getName(), authorsAndBooks.getAuthors().stream());
-					waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
-				});
+				// case 1: books/authors both nillable, order of import not important
+				importBooksThenAuthors(authorsAndBooks);
 				return authorsAndBooks;
 			case 2:
 				authorsAndBooks = oneToManyTestHarness.createEntities2();
-				runAsSystem(() ->
-				{
-					// case 2: book.author required so add Author entities first
-					dataService
-							.add(authorsAndBooks.getAuthorMetaData().getName(), authorsAndBooks.getAuthors().stream());
-					dataService.add(authorsAndBooks.getBookMetaData().getName(), authorsAndBooks.getBooks().stream());
-					waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
-				});
+				// case 2: book.author required so add Author entities first
+				importAuthorsThenBooks(authorsAndBooks);
 				return authorsAndBooks;
 			case 3:
 				authorsAndBooks = oneToManyTestHarness.createEntities3();
-				runAsSystem(() ->
-				{
-					// case 3: author.books required so add Book entities first
-					dataService.add(authorsAndBooks.getBookMetaData().getName(), authorsAndBooks.getBooks().stream());
-					dataService
-							.add(authorsAndBooks.getAuthorMetaData().getName(), authorsAndBooks.getAuthors().stream());
-					waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
-				});
+				// case 3: author.books required so add Book entities first
+				importBooksThenAuthors(authorsAndBooks);
 				return authorsAndBooks;
 			case 4:
 				// FIXME
-				//				authorsAndBooks = oneToManyTestHarness.createEntities4();
-				//				runAsSystem(() -> {
-				//					// case 4: books/authors both required: impossible?
-				//					dataService.add(authorsAndBooks.getBookMetaData().getName(), authorsAndBooks.getBooks().stream());
-				//					dataService.add(authorsAndBooks.getAuthorMetaData().getName(), authorsAndBooks.getAuthors().stream());
-				//					waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
-				//				});
+				// case 4: books/authors both required: impossible?
 				return null;
 			case 5:
 				authorsAndBooks = oneToManyTestHarness.createEntities5();
-				runAsSystem(() ->
-				{
-					dataService.add(authorsAndBooks.getBookMetaData().getName(), authorsAndBooks.getBooks().stream());
-					dataService
-							.add(authorsAndBooks.getAuthorMetaData().getName(), authorsAndBooks.getAuthors().stream());
-					waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
-				});
+				importBooksThenAuthors(authorsAndBooks);
 				return authorsAndBooks;
 			case 6:
 				authorsAndBooks = oneToManyTestHarness.createEntities6();
-				runAsSystem(() ->
-				{
-					dataService.add(authorsAndBooks.getBookMetaData().getName(), authorsAndBooks.getBooks().stream());
-					dataService
-							.add(authorsAndBooks.getAuthorMetaData().getName(), authorsAndBooks.getAuthors().stream());
-					waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
-				});
+				importBooksThenAuthors(authorsAndBooks);
 				return authorsAndBooks;
 			default:
 				return null;
@@ -1482,6 +1490,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		// Verify required attributes can't be set to null
 	}
 
+	@Test
 	public void l3CacheTest()
 	{
 		String COUNTRY = "Country";
