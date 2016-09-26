@@ -44,7 +44,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
+import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.rest.RestController.BASE_URI;
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -154,7 +154,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(repo.getEntityMetaData()).thenReturn(entityMeta);
 		when(repo.getName()).thenReturn(ENTITY_NAME);
 		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(entityMeta);
-		when(entityManager.create(entityMeta, NO_POPULATE)).thenReturn(new DynamicEntity(entityMeta));
+		when(entityManager.create(entityMeta, POPULATE)).thenReturn(new DynamicEntity(entityMeta));
 
 		// test entities
 		Entity entityXref = new DynamicEntity(entityMeta);

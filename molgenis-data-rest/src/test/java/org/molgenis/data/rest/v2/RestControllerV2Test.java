@@ -63,6 +63,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
+import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
@@ -351,7 +352,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		assertEquals(refRefEntity.getIdValue(), REF_REF_ENTITY_ID);
 		assertEquals(selfRefEntity.getIdValue(), "0");
 
-		when(entityManager.create(entityMeta, NO_POPULATE)).thenAnswer(new Answer<Entity>()
+		when(entityManager.create(entityMeta, POPULATE)).thenAnswer(new Answer<Entity>()
 		{
 			@Override
 			public Entity answer(InvocationOnMock invocation) throws Throwable
