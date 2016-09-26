@@ -1452,9 +1452,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				importBooksThenAuthors(authorsAndBooks);
 				return authorsAndBooks;
 			case 4:
-				// FIXME can't import when both sides of onetomany are required
-				// case 4: books/authors both required: impossible?
-				return null;
+				authorsAndBooks = oneToManyTestHarness.createEntities4();
+				// case 4: books/authors both required
+				importBooksThenAuthors(authorsAndBooks);
+				return authorsAndBooks;
 			case 5:
 				authorsAndBooks = oneToManyTestHarness.createEntities5();
 				importBooksThenAuthors(authorsAndBooks);
