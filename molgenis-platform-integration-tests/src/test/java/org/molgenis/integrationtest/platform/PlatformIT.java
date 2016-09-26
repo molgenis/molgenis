@@ -1380,8 +1380,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		{
 			OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(i);
 
-			if (authorsAndBooks == null) continue; // skip "disabled" test cases //FIXME
-
 			String book = "sys_Book" + i;
 			assertEquals(dataService.findOneById(book, "book1").getEntity("author").getIdValue(), "author1");
 			assertEquals(dataService.findOneById(book, "book2").getEntity("author").getIdValue(), "author2");
