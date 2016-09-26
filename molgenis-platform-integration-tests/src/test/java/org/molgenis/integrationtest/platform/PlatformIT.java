@@ -1597,7 +1597,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		// Update book name, verify books attribute in author has new and correct ordering
 	}
 
-	@Test (enabled = false, expectedExceptions = MolgenisDataException.class)
+	@Test (expectedExceptions = MolgenisDataException.class)
 	public void testOneToManyAuthorRequiredSetNull()
 	{
 		// FIXME book.author can be set to null
