@@ -377,19 +377,20 @@ public class PostgreSqlRepository extends AbstractRepository
 	private Multimap<Object, Object> selectMrefIDsForAttribute(EntityMetaData entityMeta,
 			AttributeType idAttributeDataType, AttributeMetaData mrefAttr, Set<Object> ids, AttributeType refIdDataType)
 	{
-		Stopwatch stopwatch = createStarted();
-		Multimap<Object, Object> mrefIDs = ArrayListMultimap.create();
+		Stopwatch stopwatch = null;
+		if (LOG.isTraceEnabled()) stopwatch = createStarted();
+
 		String junctionTableSelect = getSqlJunctionTableSelect(entityMeta, mrefAttr, ids.size());
 		LOG.trace("SQL: {}", junctionTableSelect);
+
+		Multimap<Object, Object> mrefIDs = ArrayListMultimap.create();
 		jdbcTemplate.query(junctionTableSelect, (RowCallbackHandler) row -> mrefIDs
 						.put(convert(idAttributeDataType, row.getObject(1)), convert(refIdDataType, row.getObject(3))),
 				ids.toArray());
 
 		if (LOG.isTraceEnabled())
-		{
 			LOG.trace("Selected {} ID values for MREF attribute {} in {}",
 					mrefIDs.values().stream().collect(counting()), mrefAttr.getName(), stopwatch);
-		}
 		return mrefIDs;
 	}
 
