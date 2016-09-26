@@ -17,6 +17,8 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.QueryImpl;
+import org.molgenis.data.validation.ConstraintViolation;
+import org.molgenis.data.validation.MolgenisValidationException;
 import org.molgenis.fieldtypes.FieldType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +38,7 @@ import java.util.stream.Stream;
 import static com.google.common.base.Stopwatch.createStarted;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
+import static java.lang.String.format;
 import static java.util.Collections.*;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.counting;
@@ -388,9 +391,8 @@ public class PostgreSqlRepository extends AbstractRepository
 						.put(convert(idAttributeDataType, row.getObject(1)), convert(refIdDataType, row.getObject(3))),
 				ids.toArray());
 
-		if (LOG.isTraceEnabled())
-			LOG.trace("Selected {} ID values for MREF attribute {} in {}",
-					mrefIDs.values().stream().collect(counting()), mrefAttr.getName(), stopwatch);
+		if (LOG.isTraceEnabled()) LOG.trace("Selected {} ID values for MREF attribute {} in {}",
+				mrefIDs.values().stream().collect(counting()), mrefAttr.getName(), stopwatch);
 		return mrefIDs;
 	}
 
@@ -603,6 +605,14 @@ public class PostgreSqlRepository extends AbstractRepository
 
 	private void addMrefs(final List<Map<String, Object>> mrefs, final AttributeMetaData attr)
 	{
+		// database doesn't validate NOT NULL constraint for attribute values referencing multiple entities,
+		// so validate it ourselves
+		if (!attr.isNillable() && mrefs.isEmpty())
+		{
+			throw new MolgenisValidationException(new ConstraintViolation(
+					format("Entity [%s] attribute [%s] value cannot be null", metaData.getName(), attr.getName())));
+		}
+
 		final AttributeMetaData idAttr = metaData.getIdAttribute();
 		String insertMrefSql = getSqlInsertJunction(metaData, attr);
 

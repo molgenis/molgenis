@@ -1376,12 +1376,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testOneToManyInsert()
 	{
-		//FIXME case 5 and 6: L2 Cache exception when findOneById()
-		for (int i = 1; i <= 4; i++)
+		for (int i = 1; i <= 6; i++)
 		{
 			OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(i);
-
-			if (authorsAndBooks == null) continue; // skip "disabled" test cases //FIXME
 
 			String book = "sys_Book" + i;
 			assertEquals(dataService.findOneById(book, "book1").getEntity("author").getIdValue(), "author1");
@@ -1453,9 +1450,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				importBooksThenAuthors(authorsAndBooks);
 				return authorsAndBooks;
 			case 4:
-				// FIXME can't import when both sides of onetomany are required
-				// case 4: books/authors both required: impossible?
-				return null;
+				authorsAndBooks = oneToManyTestHarness.createEntities4();
+				// case 4: books/authors both required
+				importBooksThenAuthors(authorsAndBooks);
+				return authorsAndBooks;
 			case 5:
 				authorsAndBooks = oneToManyTestHarness.createEntities5();
 				importBooksThenAuthors(authorsAndBooks);
@@ -1597,10 +1595,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		// Update book name, verify books attribute in author has new and correct ordering
 	}
 
-	@Test (enabled = false, expectedExceptions = MolgenisDataException.class)
+	@Test (expectedExceptions = MolgenisDataException.class)
 	public void testOneToManyAuthorRequiredSetNull()
 	{
-		// FIXME book.author can be set to null
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
 		Entity author = authorsAndBooks.getAuthors().get(0);
 		author.set("books", null);
@@ -1622,11 +1619,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		Entity updatedBook = dataService.findOneById("sys_Book2", "book1");
 		assertEquals(updatedBook.getEntity("author").getIdValue(), "author2");
 
-		// FIXME which order do we expect? (change set to list when decided)
+		// expected behavior: book.author changed, new author.books order is undefined
 		Entity updatedAuthor1 = dataService.findOneById("sys_Author2", "author1");
 		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities("books").spliterator(), false).map(Entity::getIdValue).collect(toSet()), newHashSet());
 
-		// FIXME which order do we expect? (change set to list when decided)
 		Entity updatedAuthor2 = dataService.findOneById("sys_Author2", "author2");
 		assertEquals(StreamSupport.stream(updatedAuthor2.getEntities("books").spliterator(), false).map(Entity::getIdValue).collect(toSet()), newHashSet("book2", "book1"));
 	}
