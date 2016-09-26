@@ -15,6 +15,9 @@ import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LAB
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
+/**
+ * AuthorMetaData4 and BookMetaData4 define two entities with a OneToMany relation of which both sides are required.
+ */
 @Component
 public class AuthorMetaData4 extends SystemEntityMetaData
 {

@@ -18,6 +18,9 @@ import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LAB
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
+/**
+ * AuthorMetaData6 and BookMetaData6 define two entities with a OneToMany with a descending order.
+ */
 @Component
 public class AuthorMetaData6 extends SystemEntityMetaData
 {

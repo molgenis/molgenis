@@ -11,6 +11,9 @@ import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LAB
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
+/**
+ * AuthorMetaData2 and BookMetaData2 define two entities with a OneToMany relation of which the Xref part (Book.author) is required.
+ */
 @Component
 public class BookMetaData2 extends SystemEntityMetaData
 {

@@ -15,6 +15,9 @@ import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LAB
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
+/**
+ * AuthorMetaData3 and BookMetaData3 define two entities with a OneToMany relation of which the OneToMany part (Author.books) is required.
+ */
 @Component
 public class AuthorMetaData3 extends SystemEntityMetaData
 {
@@ -40,7 +43,8 @@ public class AuthorMetaData3 extends SystemEntityMetaData
 		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL).setNillable(true).setLabel("Label");
 		AttributeMetaData attribute = bookMetaData.getAttribute(BookMetaData3.AUTHOR);
-		addAttribute(ATTR_BOOKS).setDataType(ONE_TO_MANY).setRefEntity(bookMetaData).setMappedBy(attribute).setNillable(false);
+		addAttribute(ATTR_BOOKS).setDataType(ONE_TO_MANY).setRefEntity(bookMetaData).setMappedBy(attribute)
+				.setNillable(false);
 	}
 
 	@Autowired
