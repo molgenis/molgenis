@@ -1622,11 +1622,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		Entity updatedBook = dataService.findOneById("sys_Book2", "book1");
 		assertEquals(updatedBook.getEntity("author").getIdValue(), "author2");
 
-		// FIXME which order do we expect? (change set to list when decided)
+		// expected behavior: book.author changed, new author.books order is undefined
 		Entity updatedAuthor1 = dataService.findOneById("sys_Author2", "author1");
 		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities("books").spliterator(), false).map(Entity::getIdValue).collect(toSet()), newHashSet());
 
-		// FIXME which order do we expect? (change set to list when decided)
 		Entity updatedAuthor2 = dataService.findOneById("sys_Author2", "author2");
 		assertEquals(StreamSupport.stream(updatedAuthor2.getEntities("books").spliterator(), false).map(Entity::getIdValue).collect(toSet()), newHashSet("book2", "book1"));
 	}
