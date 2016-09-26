@@ -3,6 +3,7 @@ package org.molgenis.data.meta.model;
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityFactory;
+import org.molgenis.data.populate.EntityPopulator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +16,13 @@ import static java.util.Objects.requireNonNull;
 @Component
 public class AttributeMetaDataFactory implements EntityFactory<AttributeMetaData, String>
 {
+	private final EntityPopulator entityPopulator;
 	private AttributeMetaDataMetaData attrMetaMeta;
+
+	@Autowired
+	public AttributeMetaDataFactory(EntityPopulator entityPopulator) {
+		this.entityPopulator = requireNonNull(entityPopulator);
+	}
 
 	@Override
 	public String getEntityName()
@@ -26,7 +33,9 @@ public class AttributeMetaDataFactory implements EntityFactory<AttributeMetaData
 	@Override
 	public AttributeMetaData create()
 	{
-		return new AttributeMetaData(attrMetaMeta);
+		AttributeMetaData attrMeta = new AttributeMetaData(attrMetaMeta);
+		entityPopulator.populate(attrMeta);
+		return attrMeta;
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 package org.molgenis.data.mapper.config;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.IdGenerator;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.data.mapper.algorithmgenerator.service.impl.AlgorithmGeneratorServiceImpl;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;

@@ -1,7 +1,7 @@
 package org.molgenis.ontology.sorta.job;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.IdGenerator;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.ontology.sorta.service.SortaService;

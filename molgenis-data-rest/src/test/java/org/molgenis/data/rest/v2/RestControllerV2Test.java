@@ -12,6 +12,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.rest.service.RestService;
 import org.molgenis.data.rest.v2.RestControllerV2Test.RestControllerV2Config;
 import org.molgenis.data.support.DynamicEntity;
@@ -61,6 +62,8 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
+import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
@@ -349,7 +352,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		assertEquals(refRefEntity.getIdValue(), REF_REF_ENTITY_ID);
 		assertEquals(selfRefEntity.getIdValue(), "0");
 
-		when(entityManager.create(entityMeta)).thenAnswer(new Answer<Entity>()
+		when(entityManager.create(entityMeta, POPULATE)).thenAnswer(new Answer<Entity>()
 		{
 			@Override
 			public Entity answer(InvocationOnMock invocation) throws Throwable
