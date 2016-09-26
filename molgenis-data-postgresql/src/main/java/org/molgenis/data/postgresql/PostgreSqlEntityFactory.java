@@ -182,54 +182,30 @@ public class PostgreSqlEntityFactory
 		{
 			EntityMetaData entityMeta = attr.getRefEntity();
 			Object value;
-			if (attr.getOrderBy() != null)
+			String[][] mrefIdsAndOrder = (String[][]) arrayValue.getArray();
+			if (mrefIdsAndOrder.length > 0 && mrefIdsAndOrder[0][0] != null)
 			{
-				String[] oneToManyIdStrings = (String[]) arrayValue.getArray();
-				if (oneToManyIdStrings.length > 0)
+				if(attr.getOrderBy() == null)
 				{
-					AttributeMetaData idAttr = entityMeta.getIdAttribute();
-					Object[] oneToManyIds = new Object[oneToManyIdStrings.length];
-					for (int i = 0; i < oneToManyIdStrings.length; ++i)
-					{
-						String oneToManyIdString = oneToManyIdStrings[i];
-						Object oneToManyId =
-								oneToManyIdString != null ? convertMrefIdValue(oneToManyIdString, idAttr) : null;
-						oneToManyIds[i] = oneToManyId;
-					}
+					Arrays.sort(mrefIdsAndOrder, (arr0, arr1) -> Integer.compare(Integer.valueOf(arr0[0]), Integer.valueOf(arr1[0])));
+				}
 
-					// convert ids to (lazy) entities
-					value = entityManager.getReferences(entityMeta, asList(oneToManyIds));
-				}
-				else
+				AttributeMetaData idAttr = entityMeta.getIdAttribute();
+				Object[] mrefIds = new Object[mrefIdsAndOrder.length];
+				for (int i = 0; i < mrefIdsAndOrder.length; ++i)
 				{
-					value = null;
+					String[] mrefIdAndOrder = mrefIdsAndOrder[i];
+					String mrefIdStr = mrefIdAndOrder[1];
+					Object mrefId = mrefIdStr != null ? convertMrefIdValue(mrefIdStr, idAttr) : null;
+					mrefIds[i] = mrefId;
 				}
+
+				// convert ids to (lazy) entities
+				value = entityManager.getReferences(entityMeta, asList(mrefIds));
 			}
 			else
 			{
-				String[][] mrefIdsAndOrder = (String[][]) arrayValue.getArray();
-				if (mrefIdsAndOrder.length > 0 && mrefIdsAndOrder[0][0] != null)
-				{
-					Arrays.sort(mrefIdsAndOrder,
-							(arr0, arr1) -> Integer.compare(Integer.valueOf(arr0[0]), Integer.valueOf(arr1[0])));
-
-					AttributeMetaData idAttr = entityMeta.getIdAttribute();
-					Object[] mrefIds = new Object[mrefIdsAndOrder.length];
-					for (int i = 0; i < mrefIdsAndOrder.length; ++i)
-					{
-						String[] mrefIdAndOrder = mrefIdsAndOrder[i];
-						String mrefIdStr = mrefIdAndOrder[1];
-						Object mrefId = mrefIdStr != null ? convertMrefIdValue(mrefIdStr, idAttr) : null;
-						mrefIds[i] = mrefId;
-					}
-
-					// convert ids to (lazy) entities
-					value = entityManager.getReferences(entityMeta, asList(mrefIds));
-				}
-				else
-				{
-					value = null;
-				}
+				value = null;
 			}
 			return value;
 		}

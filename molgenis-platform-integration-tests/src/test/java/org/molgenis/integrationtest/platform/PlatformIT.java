@@ -1376,8 +1376,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testOneToManyInsert()
 	{
-		//FIXME case 5 and 6: L2 Cache exception when findOneById()
-		for (int i = 1; i <= 4; i++)
+		for (int i = 1; i <= 6; i++)
 		{
 			OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(i);
 
