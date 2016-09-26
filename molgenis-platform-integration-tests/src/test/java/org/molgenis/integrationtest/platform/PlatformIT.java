@@ -1416,14 +1416,14 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 	private void deleteBooksThenAuthors(int testCase)
 	{
-		dataService.deleteAll("Book" + testCase);
-		dataService.deleteAll("Author" + testCase);
+		dataService.deleteAll("sys_Book" + testCase);
+		dataService.deleteAll("sys_Author" + testCase);
 	}
 
 	private void deleteAuthorsThenBooks(int testCase)
 	{
-		dataService.deleteAll("Author" + testCase);
-		dataService.deleteAll("Book" + testCase);
+		dataService.deleteAll("sys_Author" + testCase);
+		dataService.deleteAll("sys_Book" + testCase);
 	}
 
 	private OneToManyTestHarness.AuthorsAndBooks importAuthorsAndBooks(int testCase)
