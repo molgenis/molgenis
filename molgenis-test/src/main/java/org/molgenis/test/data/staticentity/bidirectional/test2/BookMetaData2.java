@@ -34,7 +34,7 @@ public class BookMetaData2 extends SystemEntityMetaData
 		setLabel("Book");
 
 		addAttribute(ID, ROLE_ID).setLabel("Identifier");
-		addAttribute(LABEL, ROLE_LABEL).setNillable(true).setLabel("Label");
+		addAttribute(LABEL, ROLE_LABEL).setNillable(false).setLabel("Label");
 		addAttribute(AUTHOR).setDataType(XREF).setRefEntity(authorMetaData).setNillable(false);
 	}
 

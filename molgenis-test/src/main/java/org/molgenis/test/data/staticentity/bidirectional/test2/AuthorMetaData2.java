@@ -41,8 +41,6 @@ public class AuthorMetaData2 extends SystemEntityMetaData
 		addAttribute(LABEL, ROLE_LABEL).setNillable(true).setLabel("Label");
 		AttributeMetaData attribute = bookMetaData.getAttribute(BookMetaData2.AUTHOR);
 		addAttribute(ATTR_BOOKS).setDataType(ONE_TO_MANY).setRefEntity(bookMetaData).setMappedBy(attribute);
-		// .setOrderBy(new Sort(MyRefEntityMetaData.LABEL, ASC));
-		// .setOrderBy(new Sort(MyRefEntityMetaData.LABEL, DESC));
 	}
 
 	@Autowired
