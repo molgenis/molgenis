@@ -111,7 +111,7 @@ public class OneToManyTestHarness
 	/**
 	 * Creates Author and Book entity test sets for a specific use case. Entities are always linked up as follows (when
 	 * imported): author1 -> book1, author2 -> book2, author3 -> book3, and vice versa.
-	 *
+	 * <p>
 	 * Case 1: Author.books = nillable, Book.author = nillable | no ordering
 	 * Case 2: Author.books = nillable, Book.author = required | no ordering
 	 * Case 3: Author.books = required, Book.author = nillable | no ordering
@@ -124,22 +124,17 @@ public class OneToManyTestHarness
 		switch (testCase)
 		{
 			case 1:
-				return createTestEntitiesPopulateAuthors(authorFactory1, bookFactory1, authorMetaData1,
-						authorMetaData1);
+				return createTestEntitiesSetAuthorField(authorFactory1, bookFactory1, authorMetaData1, bookMetaData1);
 			case 2:
-				return createTestEntitiesPopulateBooks(authorFactory2, bookFactory2, authorMetaData2, bookMetaData2);
+				return createTestEntitiesSetBooksField(authorFactory2, bookFactory2, authorMetaData2, bookMetaData2);
 			case 3:
-				return createTestEntitiesPopulateAuthors(authorFactory3, bookFactory3, authorMetaData3,
-						authorMetaData3);
+				return createTestEntitiesSetAuthorField(authorFactory3, bookFactory3, authorMetaData3, bookMetaData3);
 			case 4:
-				return createTestEntitiesPopulateAuthors(authorFactory4, bookFactory4, authorMetaData4,
-						authorMetaData4);
+				return createTestEntitiesSetAuthorField(authorFactory4, bookFactory4, authorMetaData4, bookMetaData4);
 			case 5:
-				return createTestEntitiesPopulateAuthors(authorFactory5, bookFactory5, authorMetaData5,
-						authorMetaData5);
+				return createTestEntitiesSetAuthorField(authorFactory5, bookFactory5, authorMetaData5, bookMetaData5);
 			case 6:
-				return createTestEntitiesPopulateAuthors(authorFactory6, bookFactory6, authorMetaData6,
-						authorMetaData6);
+				return createTestEntitiesSetAuthorField(authorFactory6, bookFactory6, authorMetaData6, bookMetaData6);
 			default:
 				throw new IllegalArgumentException("Unknown test case " + testCase);
 		}
@@ -148,7 +143,7 @@ public class OneToManyTestHarness
 	/**
 	 * Create Author and Book test entities and set the Author.books fields.
 	 */
-	private AuthorsAndBooks createTestEntitiesPopulateAuthors(AbstractSystemEntityFactory authorFactory,
+	private AuthorsAndBooks createTestEntitiesSetAuthorField(AbstractSystemEntityFactory authorFactory,
 			AbstractSystemEntityFactory bookFactory, EntityMetaData authorMetaData, EntityMetaData bookMetaData)
 	{
 		List<Entity> authors = createAuthorEntities(authorFactory);
@@ -162,7 +157,7 @@ public class OneToManyTestHarness
 	/**
 	 * Create Author and Book test entities and set the Books.author fields.
 	 */
-	private AuthorsAndBooks createTestEntitiesPopulateBooks(AbstractSystemEntityFactory authorFactory,
+	private AuthorsAndBooks createTestEntitiesSetBooksField(AbstractSystemEntityFactory authorFactory,
 			AbstractSystemEntityFactory bookFactory, EntityMetaData authorMetaData, EntityMetaData bookMetaData)
 	{
 		List<Entity> authors = createAuthorEntities(authorFactory);

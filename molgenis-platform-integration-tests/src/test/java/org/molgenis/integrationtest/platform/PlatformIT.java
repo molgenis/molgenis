@@ -1393,7 +1393,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	{
 		for (int i = 1; i <= ONE_TO_MANY_CASES; i++)
 		{
-			OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(i);
+			importAuthorsAndBooks(i);
 
 			String book = "sys_Book" + i;
 			assertEquals(dataService.findOneById(book, BOOK_1).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_1);
