@@ -34,8 +34,6 @@ import javax.annotation.PostConstruct;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.molgenis.test.data.staticentity.bidirectional.test1.AuthorMetaData1.ATTR_BOOKS;
-import static org.molgenis.test.data.staticentity.bidirectional.test2.BookMetaData2.AUTHOR;
 
 @Component
 public class OneToManyTestHarness
@@ -91,6 +89,17 @@ public class OneToManyTestHarness
 
 	public static final int ONE_TO_MANY_CASES = 6;
 
+	public static final String BOOK_1 = "book1";
+	public static final String BOOK_2 = "book2";
+	public static final String BOOK_3 = "book3";
+
+	public static final String AUTHOR_1 = "author1";
+	public static final String AUTHOR_2 = "author2";
+	public static final String AUTHOR_3 = "author3";
+
+	public static final String ATTR_BOOKS = "books";
+	public static final String ATTR_AUTHOR = "author";
+
 	@PostConstruct
 	public void postConstruct()
 	{
@@ -117,9 +126,9 @@ public class OneToManyTestHarness
 	{
 		List<Entity> books = createBookEntities(bookFactory2);
 		List<Entity> authors = createAuthorEntities(authorFactory2);
-		books.get(0).set(AUTHOR, authors.get(0));
-		books.get(1).set(AUTHOR, authors.get(1));
-		books.get(2).set(AUTHOR, authors.get(2));
+		books.get(0).set(ATTR_AUTHOR, authors.get(0));
+		books.get(1).set(ATTR_AUTHOR, authors.get(1));
+		books.get(2).set(ATTR_AUTHOR, authors.get(2));
 		return new AuthorsAndBooks(authors, books, authorMetaData2, bookMetaData2);
 	}
 
@@ -178,15 +187,15 @@ public class OneToManyTestHarness
 	private List<Entity> createAuthorEntities(AbstractSystemEntityFactory authorFactory)
 	{
 		Entity author1 = authorFactory.create();
-		author1.set(AuthorMetaData1.ID, "author1");
+		author1.set(AuthorMetaData1.ID, AUTHOR_1);
 		author1.set(AuthorMetaData1.LABEL, "Fabian");
 
 		Entity author2 = authorFactory.create();
-		author2.set(AuthorMetaData1.ID, "author2");
+		author2.set(AuthorMetaData1.ID, AUTHOR_2);
 		author2.set(AuthorMetaData1.LABEL, "Mechteld");
 
 		Entity author3 = authorFactory.create();
-		author3.set(AuthorMetaData1.ID, "author3");
+		author3.set(AuthorMetaData1.ID, AUTHOR_3);
 		author3.set(AuthorMetaData1.LABEL, "Henk");
 
 		return newArrayList(author1, author2, author3);
@@ -196,15 +205,15 @@ public class OneToManyTestHarness
 	{
 		Entity book1 = bookFactory.create();
 
-		book1.set(BookMetaData1.ID, "book1");
+		book1.set(BookMetaData1.ID, BOOK_1);
 		book1.set(BookMetaData1.LABEL, "MOLGENIS for Dummies");
 
 		Entity book2 = bookFactory.create();
-		book2.set(BookMetaData1.ID, "book2");
+		book2.set(BookMetaData1.ID, BOOK_2);
 		book2.set(BookMetaData1.LABEL, "A history of MOLGENIS");
 
 		Entity book3 = bookFactory.create();
-		book3.set(BookMetaData1.ID, "book3");
+		book3.set(BookMetaData1.ID, BOOK_3);
 		book3.set(BookMetaData1.LABEL, "Do you know where MOLGENIS?");
 
 		return newArrayList(book1, book2, book3);
