@@ -624,7 +624,6 @@ public class AttributeMetaData extends StaticEntity
 	{
 		if (isReferenceType(this))
 		{
-			// TODO check entity name and attr name
 			return stream(getRefEntity().getAtomicAttributes().spliterator(), false)
 					.filter(AttributeMetaData::isMappedBy)
 					.filter(attr -> getName().equals(attr.getMappedBy().getName())).findFirst().orElse(null);
