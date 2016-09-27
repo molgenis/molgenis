@@ -36,8 +36,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 
 /**
- * Generates entities with a OneToMany relation in the form of Authors and Books to use in tests. Generates three Author
- * entities and three Book entities, which are linked like this: author1 -> book1, author2 -> book2, author3, book3
+ * Generates entities to use in tests with a OneToMany relation in the form of Authors and Books, or Persons with self reference.
  */
 @Component
 public class OneToManyTestHarness
@@ -110,81 +109,68 @@ public class OneToManyTestHarness
 	}
 
 	/**
-	 * Test case 1: author.books nillable, book.author nillable, no ordering
+	 * Creates Author and Book entity test sets for a specific use case. Entities are always linked up as follows (when
+	 * imported): author1 -> book1, author2 -> book2, author3 -> book3, and vice versa.
+	 *
+	 * Case 1: Author.books = nillable, Book.author = nillable | no ordering
+	 * Case 2: Author.books = nillable, Book.author = required | no ordering
+	 * Case 3: Author.books = required, Book.author = nillable | no ordering
+	 * Case 4: Author.books = required, Book.author = required | no ordering
+	 * Case 5: Author.books = nillable, Book.author = nillable | ascending order
+	 * Case 6: Author.books = nillable, Book.author = nillable | descending order
 	 */
-	public AuthorsAndBooks createEntities1()
+	public AuthorsAndBooks createAuthorAndBookEntities(int testCase)
 	{
-		List<Entity> books = createBookEntities(bookFactory1);
-		List<Entity> authors = createAuthorEntities(authorFactory1);
-		authors.get(0).set(ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
-		authors.get(1).set(ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
-		authors.get(2).set(ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
-		return new AuthorsAndBooks(authors, books, authorMetaData1, bookMetaData1);
+		switch (testCase)
+		{
+			case 1:
+				return createTestEntitiesPopulateAuthors(authorFactory1, bookFactory1, authorMetaData1,
+						authorMetaData1);
+			case 2:
+				return createTestEntitiesPopulateBooks(authorFactory2, bookFactory2, authorMetaData2, bookMetaData2);
+			case 3:
+				return createTestEntitiesPopulateAuthors(authorFactory3, bookFactory3, authorMetaData3,
+						authorMetaData3);
+			case 4:
+				return createTestEntitiesPopulateAuthors(authorFactory4, bookFactory4, authorMetaData4,
+						authorMetaData4);
+			case 5:
+				return createTestEntitiesPopulateAuthors(authorFactory5, bookFactory5, authorMetaData5,
+						authorMetaData5);
+			case 6:
+				return createTestEntitiesPopulateAuthors(authorFactory6, bookFactory6, authorMetaData6,
+						authorMetaData6);
+			default:
+				throw new IllegalArgumentException("Unknown test case " + testCase);
+		}
 	}
 
 	/**
-	 * Test case 2: author.books nillable, book.author required, no ordering
+	 * Create Author and Book test entities and set the Author.books fields.
 	 */
-	public AuthorsAndBooks createEntities2()
+	private AuthorsAndBooks createTestEntitiesPopulateAuthors(AbstractSystemEntityFactory authorFactory,
+			AbstractSystemEntityFactory bookFactory, EntityMetaData authorMetaData, EntityMetaData bookMetaData)
 	{
-		List<Entity> books = createBookEntities(bookFactory2);
-		List<Entity> authors = createAuthorEntities(authorFactory2);
-		books.get(0).set(ATTR_AUTHOR, authors.get(0));
-		books.get(1).set(ATTR_AUTHOR, authors.get(1));
-		books.get(2).set(ATTR_AUTHOR, authors.get(2));
-		return new AuthorsAndBooks(authors, books, authorMetaData2, bookMetaData2);
-	}
-
-	/**
-	 * Test case 3: author.books required, book.author nillable, no ordering
-	 */
-	public AuthorsAndBooks createEntities3()
-	{
-		List<Entity> books = createBookEntities(bookFactory3);
-		List<Entity> authors = createAuthorEntities(authorFactory3);
+		List<Entity> authors = createAuthorEntities(authorFactory);
+		List<Entity> books = createBookEntities(bookFactory);
 		authors.get(0).set(ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
 		authors.get(1).set(ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
 		authors.get(2).set(ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
-		return new AuthorsAndBooks(authors, books, authorMetaData3, bookMetaData3);
+		return new AuthorsAndBooks(authors, books, authorMetaData, bookMetaData);
 	}
 
 	/**
-	 * Test case 4: author.books required, book.author required, no ordering
+	 * Create Author and Book test entities and set the Books.author fields.
 	 */
-	public AuthorsAndBooks createEntities4()
+	private AuthorsAndBooks createTestEntitiesPopulateBooks(AbstractSystemEntityFactory authorFactory,
+			AbstractSystemEntityFactory bookFactory, EntityMetaData authorMetaData, EntityMetaData bookMetaData)
 	{
-		List<Entity> books = createBookEntities(bookFactory4);
-		List<Entity> authors = createAuthorEntities(authorFactory4);
-		authors.get(0).set(ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
-		authors.get(1).set(ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
-		authors.get(2).set(ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
-		return new AuthorsAndBooks(authors, books, authorMetaData4, bookMetaData4);
-	}
-
-	/**
-	 * Test case 5: author.books nillable, book.author nillable, ascending order
-	 */
-	public AuthorsAndBooks createEntities5()
-	{
-		List<Entity> books = createBookEntities(bookFactory5);
-		List<Entity> authors = createAuthorEntities(authorFactory5);
-		authors.get(0).set(ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
-		authors.get(1).set(ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
-		authors.get(2).set(ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
-		return new AuthorsAndBooks(authors, books, authorMetaData5, bookMetaData5);
-	}
-
-	/**
-	 * Test case 6: author.books nillable, book.author nillable, descending order
-	 */
-	public AuthorsAndBooks createEntities6()
-	{
-		List<Entity> books = createBookEntities(bookFactory6);
-		List<Entity> authors = createAuthorEntities(authorFactory6);
-		authors.get(0).set(ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
-		authors.get(1).set(ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
-		authors.get(2).set(ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
-		return new AuthorsAndBooks(authors, books, authorMetaData6, bookMetaData6);
+		List<Entity> authors = createAuthorEntities(authorFactory);
+		List<Entity> books = createBookEntities(bookFactory);
+		books.get(0).set(ATTR_AUTHOR, authors.get(0)); // book1 -> author1
+		books.get(1).set(ATTR_AUTHOR, authors.get(1)); // book2 -> author2
+		books.get(2).set(ATTR_AUTHOR, authors.get(2)); // book3 -> author3
+		return new AuthorsAndBooks(authors, books, authorMetaData, bookMetaData);
 	}
 
 	private List<Entity> createAuthorEntities(AbstractSystemEntityFactory authorFactory)

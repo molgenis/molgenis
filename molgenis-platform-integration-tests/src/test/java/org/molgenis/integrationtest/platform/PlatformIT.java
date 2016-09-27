@@ -35,7 +35,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.*;
@@ -1454,31 +1453,33 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		switch (testCase)
 		{
 			case 1:
-				authorsAndBooks = oneToManyTestHarness.createEntities1();
 				// case 1: books/authors both nillable, order of import not important
+				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(1);
 				importBooksThenAuthors(authorsAndBooks);
 				return authorsAndBooks;
 			case 2:
-				authorsAndBooks = oneToManyTestHarness.createEntities2();
 				// case 2: book.author required so add Author entities first
+				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(2);
 				importAuthorsThenBooks(authorsAndBooks);
 				return authorsAndBooks;
 			case 3:
-				authorsAndBooks = oneToManyTestHarness.createEntities3();
 				// case 3: author.books required so add Book entities first
+				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(3);
 				importBooksThenAuthors(authorsAndBooks);
 				return authorsAndBooks;
 			case 4:
-				authorsAndBooks = oneToManyTestHarness.createEntities4();
 				// case 4: books/authors both required
+				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(4);
 				importBooksThenAuthors(authorsAndBooks);
 				return authorsAndBooks;
 			case 5:
-				authorsAndBooks = oneToManyTestHarness.createEntities5();
+				// case 5: books/authors both nillable, ascending order
+				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(5);
 				importBooksThenAuthors(authorsAndBooks);
 				return authorsAndBooks;
 			case 6:
-				authorsAndBooks = oneToManyTestHarness.createEntities6();
+				// case 6: books/authors both nillable, descending order
+				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(6);
 				importBooksThenAuthors(authorsAndBooks);
 				return authorsAndBooks;
 			default:
