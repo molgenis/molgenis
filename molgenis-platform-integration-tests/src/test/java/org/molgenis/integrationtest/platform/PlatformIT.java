@@ -1610,7 +1610,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService.update(authorsAndBooks.getAuthorMetaData().getName(), author);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
+	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
 	public void testOneToManyAuthorRequiredSetAuthorsNull()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
@@ -1643,7 +1643,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_2, BOOK_1));
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
+	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
 	public void testOneToManyBooksRequiredSetAuthorNull()
 	{
 		// FIXME doesn't throw exception
@@ -1655,7 +1655,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService.update(bookName, book);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
+	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
 	public void testOneToManyBooksRequiredSetBooksNull()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(3); // author.books required
@@ -1666,7 +1666,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService.update(authorName, author);
 	}
 
-	@Test
+	@Test(groups = GROUPS_ONE_TO_MANY)
 	public void testOneToManyBookRequiredUpdateValue()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(3); // book.author required
@@ -1687,7 +1687,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(updatedBook2.getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_1);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
+	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
 	public void testOneToManyBookAndAuthorRequiredSetAuthorNull()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
@@ -1698,7 +1698,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService.update(bookName, book);
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
+	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
 	public void testOneToManyBookAndAuthorRequiredSetBooksNull()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
@@ -1709,7 +1709,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService.update(authorName, author);
 	}
 
-	@Test
+	@Test(groups = GROUPS_ONE_TO_MANY)
 	public void testOneToManyBookAndAuthorRequiredUpdateValue()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
@@ -1737,7 +1737,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_1));
 	}
 
-	@Test
+	@Test(groups = GROUPS_ONE_TO_MANY)
 	public void testOneToManyAscendingOrderUpdateAuthorValue()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(5);
@@ -1767,7 +1767,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(Iterables.size(updatedAuthor2.getEntities(ATTR_BOOKS)), 0);
 	}
 
-	@Test
+	@Test(groups = GROUPS_ONE_TO_MANY)
 	public void testOneToManyAscendingOrderUpdateBooksValue()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(5);
@@ -1794,7 +1794,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(updatedBook3.getEntity(ATTR_AUTHOR), null);
 	}
 
-	@Test
+	@Test(groups = GROUPS_ONE_TO_MANY)
 	public void testOneToManyDescendingOrderUpdateAuthorValue()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(6);
@@ -1825,7 +1825,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(Iterables.size(updatedAuthor2.getEntities(ATTR_BOOKS)), 0);
 	}
 
-	@Test
+	@Test(groups = GROUPS_ONE_TO_MANY)
 	public void testOneToManyDescendingOrderUpdateBooksValue()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(6);
