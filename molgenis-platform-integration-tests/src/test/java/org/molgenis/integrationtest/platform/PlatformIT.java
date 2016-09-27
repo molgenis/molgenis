@@ -284,8 +284,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForIndexToBeStable(selfXrefEntityMetaData.getName(), indexService, LOG);
 	}
 
-
-	@AfterGroups(groups = GROUPS_ONE_TO_MANY)
+	@AfterMethod(groups = GROUPS_ONE_TO_MANY)
 	public void afterGroupsOneToMany()
 	{
 		runAsSystem(() ->
@@ -300,7 +299,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 
-	private void addDefaultLanguages(){
+	private void addDefaultLanguages()
+	{
 		dataService.add(LANGUAGE, languageFactory
 				.create(LanguageService.DEFAULT_LANGUAGE_CODE, LanguageService.DEFAULT_LANGUAGE_NAME, true));
 		dataService
@@ -1601,7 +1601,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
 	public void testOneToManyAuthorRequiredSetBooksNull()
-
 	{
 		// FIXME doesn't throw exception
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
@@ -1733,7 +1732,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_2));
 
 		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
-		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
+		assertEquals(StreamSupport.stream(updatedAuthor2.getEntities(ATTR_BOOKS).spliterator(), false)
 				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_1));
 	}
 
