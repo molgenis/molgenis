@@ -76,6 +76,7 @@ import static org.testng.Assert.*;
 public class PlatformIT extends AbstractTestNGSpringContextTests
 {
 	private final Logger LOG = LoggerFactory.getLogger(PlatformIT.class);
+	private final String GROUPS_ONE_TO_MANY = "oneToMany";
 
 	private EntityMetaData entityMetaDataStatic;
 	private EntityMetaData refEntityMetaDataStatic;
@@ -174,9 +175,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		runAsSystem(() ->
 		{
+			addDefaultLanguages();
 			metaDataService.addEntityMeta(refEntityMetaDataDynamic);
 			metaDataService.addEntityMeta(entityMetaDataDynamic);
 			metaDataService.addEntityMeta(selfXrefEntityMetaData);
+
 		});
 		setAuthentication();
 		waitForWorkToBeFinished(indexService, LOG);
@@ -273,13 +276,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			dataService.deleteAll(entityMetaDataDynamic.getName());
 			dataService.deleteAll(refEntityMetaDataDynamic.getName());
 			dataService.deleteAll(selfXrefEntityMetaData.getName());
-
-			deleteAuthorsThenBooks(1);
-			deleteBooksThenAuthors(2);
-			deleteAuthorsThenBooks(3);
-			deleteAuthorsThenBooks(4);
-			deleteAuthorsThenBooks(5);
-			deleteAuthorsThenBooks(6);
 		});
 		waitForIndexToBeStable(entityMetaDataStatic.getName(), indexService, LOG);
 		waitForIndexToBeStable(refEntityMetaDataStatic.getName(), indexService, LOG);
@@ -288,9 +284,23 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForIndexToBeStable(selfXrefEntityMetaData.getName(), indexService, LOG);
 	}
 
-	@Test
-	public void testLanguageService()
+
+	@AfterGroups(groups = GROUPS_ONE_TO_MANY)
+	public void afterGroupsOneToMany()
 	{
+		runAsSystem(() ->
+		{
+			deleteAuthorsThenBooks(1);
+			deleteBooksThenAuthors(2);
+			deleteAuthorsThenBooks(3);
+			deleteAuthorsThenBooks(4);
+			deleteAuthorsThenBooks(5);
+			deleteAuthorsThenBooks(6);
+		});
+		waitForWorkToBeFinished(indexService, LOG);
+	}
+
+	private void addDefaultLanguages(){
 		dataService.add(LANGUAGE, languageFactory
 				.create(LanguageService.DEFAULT_LANGUAGE_CODE, LanguageService.DEFAULT_LANGUAGE_NAME, true));
 		dataService
@@ -306,7 +316,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService
 				.add(LANGUAGE, languageFactory.create("fr", new Locale("fr").getDisplayName(new Locale("fr")), false));
 		dataService.add(LANGUAGE, languageFactory.create("xx", "My language", false));
+	}
 
+	@Test
+	public void testLanguageService()
+	{
 		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getAttribute("label-en").getName(),
 				"label-en");
 		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getLabelAttribute("en").getName(),
@@ -1017,7 +1031,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertNotNull(dataService.getMeta());
 	}
 
-	@Test()
+	@Test
 	public void testGetKnownRepository()
 	{
 		Repository<Entity> repo = dataService.getRepository(entityMetaDataDynamic.getName());
@@ -1375,7 +1389,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(result6.count(), 1);
 	}
 
-	@Test
+	@Test(groups = GROUPS_ONE_TO_MANY)
 	public void testOneToManyInsert()
 	{
 		for (int i = 1; i <= ONE_TO_MANY_CASES; i++)
@@ -1472,7 +1486,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@Test
+	@Test(groups = GROUPS_ONE_TO_MANY)
 	@Transactional
 	public void testL1OneToManySingleEntityUpdate()
 	{
@@ -1507,7 +1521,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@Test
+	@Test(groups = GROUPS_ONE_TO_MANY)
 	@Transactional
 	public void testL1OneToManyStreamingEntityUpdate()
 	{
@@ -1542,7 +1556,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@Test
+	@Test(groups = GROUPS_ONE_TO_MANY)
 	@Transactional
 	public void testL1OneToManyEntitySingleEntityDelete()
 	{
@@ -1561,7 +1575,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService.deleteAll(authorsAndBooks.getAuthorMetaData().getName());
 	}
 
-	@Test
+	@Test(groups = GROUPS_ONE_TO_MANY)
 	@Transactional
 	public void testL1OneToManyEntityStreamingEntityDelete()
 	{
@@ -1585,8 +1599,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@Test(expectedExceptions = MolgenisDataException.class)
+	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
 	public void testOneToManyAuthorRequiredSetBooksNull()
+
 	{
 		// FIXME doesn't throw exception
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
@@ -1604,7 +1619,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService.update(authorsAndBooks.getBookMetaData().getName(), book);
 	}
 
-	@Test
+	@Test(groups = GROUPS_ONE_TO_MANY)
 	public void testOneToManyAuthorRequiredUpdateValue()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
@@ -1841,11 +1856,13 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	public void l3CacheTest()
 	{
 		String COUNTRY = "Country";
+		final EntityMetaData emd = EntityMetaData
+				.newInstance(dataService.getEntityMetaData(entityMetaDataDynamic.getName()), DEEP_COPY_ATTRS);
+		final AttributeMetaData newAttr = attributeMetaDataFactory.create().setName(COUNTRY);
+
 		runAsSystem(() ->
 		{
-			EntityMetaData emd = EntityMetaData
-					.newInstance(dataService.getEntityMetaData(entityMetaDataDynamic.getName()), DEEP_COPY_ATTRS);
-			emd.addAttribute(attributeMetaDataFactory.create().setName(COUNTRY));
+			emd.addAttribute(newAttr);
 			dataService.getMeta().updateEntityMeta(emd);
 
 			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityMetaDataDynamic, 2);
@@ -1874,6 +1891,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		{
 			List expected = dataService.findAll(repoQ0.getName(), q0).map(e -> e.getIdValue()).collect(toList());
 			assertEquals(expected, Arrays.asList("0", "1"));
+
+			// Remove added attribute
+			emd.removeAttribute(newAttr);
+			dataService.getMeta().updateEntityMeta(emd);
+			waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
 		});
 	}
 }
