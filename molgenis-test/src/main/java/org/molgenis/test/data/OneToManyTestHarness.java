@@ -35,6 +35,10 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 
+/**
+ * Generates entities with a OneToMany relation in the form of Authors and Books to use in tests. Generates three Author
+ * entities and three Book entities, which are linked like this: author1 -> book1, author2 -> book2, author3, book3
+ */
 @Component
 public class OneToManyTestHarness
 {
@@ -115,7 +119,6 @@ public class OneToManyTestHarness
 		authors.get(0).set(ATTR_BOOKS, books.subList(0, 1)); // author1 -> book1
 		authors.get(1).set(ATTR_BOOKS, books.subList(1, 2)); // author2 -> book2
 		authors.get(2).set(ATTR_BOOKS, books.subList(2, 3)); // author3 -> book3
-
 		return new AuthorsAndBooks(authors, books, authorMetaData1, bookMetaData1);
 	}
 

@@ -1585,6 +1585,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testOneToManyAuthorRequiredSetBooksNull()
 	{
+		// FIXME doesn't throw exception
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
 		Entity author = authorsAndBooks.getAuthors().get(0);
 		author.set(ATTR_BOOKS, null);
@@ -1629,6 +1630,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(expectedExceptions = MolgenisDataException.class)
 	public void testOneToManyBooksRequiredSetAuthorNull()
 	{
+		// FIXME doesn't throw exception
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(3); // author.books required
 		String bookName = authorsAndBooks.getBookMetaData().getName();
 
@@ -1656,8 +1658,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		String authorName = authorsAndBooks.getAuthorMetaData().getName();
 
 		Entity author = dataService.findOneById(authorName, AUTHOR_1);
-		author.set(ATTR_BOOKS, dataService.findOneById(bookName, BOOK_2));
-		dataService.update(authorName, author);
+		author.set(ATTR_BOOKS, newArrayList(dataService.findOneById(bookName, BOOK_2)));
+		dataService.update(authorName, author); //FIXME duplicate value 'book2'
 
 		Entity updatedAuthor = dataService.findOneById(authorName, AUTHOR_1);
 		assertEquals(updatedAuthor.getEntities(ATTR_BOOKS).iterator().next().getIdValue(), BOOK_2);
@@ -1713,7 +1715,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		Entity author3 = dataService.findOneById(authorName, AUTHOR_3);
 		author3.set(ATTR_BOOKS, newArrayList(book2, book1));
-		dataService.update(authorName, author3);
+		dataService.update(authorName, author3); //FIXME duplicate value 'book2'
 
 		Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
 		assertEquals(
@@ -1743,7 +1745,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
 		assertEquals(
 				StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false).map(Entity::getIdValue)
-						.collect(toList()), newArrayList(BOOK_3, BOOK_1));
+						.collect(toList()), newArrayList(BOOK_3, BOOK_1)); // FIXME expected book3 but found book1
 
 		Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
 		assertEquals(Iterables.size(updatedAuthor3.getEntities(ATTR_BOOKS)), 0);
@@ -1764,16 +1766,16 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test
 	public void testOneToManyDescendingOrderUpdateBooksValue()
 	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(5);
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(6);
 		String bookName = authorsAndBooks.getBookMetaData().getName();
 		String authorName = authorsAndBooks.getAuthorMetaData().getName();
-		
+
 		Entity book1 = dataService.findOneById(bookName, BOOK_1);
 		Entity book2 = dataService.findOneById(bookName, BOOK_2);
 
 		Entity author3 = dataService.findOneById(authorName, AUTHOR_3);
 		author3.set(ATTR_BOOKS, newArrayList(book2, book1));
-		dataService.update(authorName, author3);
+		dataService.update(authorName, author3); // FIXME duplicate value 'book2'
 
 		Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
 		assertEquals(
