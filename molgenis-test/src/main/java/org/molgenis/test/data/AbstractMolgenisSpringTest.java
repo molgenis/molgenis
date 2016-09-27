@@ -30,7 +30,7 @@ public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringCon
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.meta.model", "org.molgenis.data.system.model", "org.molgenis.test.data" })
+	@ComponentScan({ "org.molgenis.data.meta.model", "org.molgenis.data.system.model", "org.molgenis.data.populate", "org.molgenis.test.data" })
 	public static class Config
 	{
 		@Bean

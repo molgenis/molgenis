@@ -1,6 +1,7 @@
 package org.molgenis.script;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
+import org.molgenis.data.populate.EntityPopulator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -8,8 +9,8 @@ import org.springframework.stereotype.Component;
 public class ScriptFactory extends AbstractSystemEntityFactory<Script, ScriptMetaData, String>
 {
 	@Autowired
-	ScriptFactory(ScriptMetaData scriptMetaData)
+	ScriptFactory(ScriptMetaData scriptMetaData, EntityPopulator entityPopulator)
 	{
-		super(Script.class, scriptMetaData);
+		super(Script.class, scriptMetaData, entityPopulator);
 	}
 }

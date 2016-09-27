@@ -19,8 +19,10 @@ import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.populate.EntityPopulator;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.security.permission.PermissionSystemService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.EntityUtils;
@@ -625,7 +627,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		@Bean
 		public AttributeMetaDataFactory attributeMetaDataFactory()
 		{
-			return new AttributeMetaDataFactory();
+			return new AttributeMetaDataFactory(mock(EntityPopulator.class));
 		}
 
 		@Bean

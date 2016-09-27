@@ -11,7 +11,7 @@ import org.molgenis.data.platform.bootstrap.SystemEntityMetaDataBootstrapper;
 import org.molgenis.data.platform.config.PlatformConfig;
 import org.molgenis.data.postgresql.PostgreSqlConfiguration;
 import org.molgenis.data.settings.AppSettings;
-import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.integrationtest.data.TestAppSettings;

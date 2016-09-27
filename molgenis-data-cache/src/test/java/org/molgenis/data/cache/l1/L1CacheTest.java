@@ -26,6 +26,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.data.EntityKey.create;
+import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
@@ -64,9 +65,9 @@ public class L1CacheTest extends AbstractMolgenisSpringTest
 		entityMetaData.addAttribute(attributeMetaDataFactory.create().setName("ID"), ROLE_ID);
 		entityMetaData.addAttribute(attributeMetaDataFactory.create().setName("ATTRIBUTE_1"));
 
-		Mockito.when(entityManager.create(entityMetaData)).thenReturn(new DynamicEntity(entityMetaData));
+		Mockito.when(entityManager.create(entityMetaData, NO_POPULATE)).thenReturn(new DynamicEntity(entityMetaData));
 
-		mockEntity = entityManager.create(entityMetaData);
+		mockEntity = entityManager.create(entityMetaData, NO_POPULATE);
 		mockEntity.set("ID", entityID);
 		mockEntity.set("ATTRIBUTE_1", "test_value_1");
 	}

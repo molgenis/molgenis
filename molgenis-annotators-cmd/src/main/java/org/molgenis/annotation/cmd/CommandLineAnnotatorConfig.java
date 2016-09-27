@@ -8,7 +8,8 @@ import org.molgenis.data.convert.StringToDateConverter;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
-import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.data.populate.EntityPopulator;
+import org.molgenis.data.populate.UuidGenerator;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -92,13 +93,19 @@ public class CommandLineAnnotatorConfig
 	@Bean
 	EntityManager entityManager()
 	{
-		return new EntityManagerImpl(dataService(), new EntityFactoryRegistry());
+		return new EntityManagerImpl(dataService(), new EntityFactoryRegistry(), entityPopulator());
 	}
 
 	@Bean
 	public CmdLineAnnotator cmdLineAnnotator()
 	{
 		return new CmdLineAnnotator();
+	}
+
+	@Bean
+	public EntityPopulator entityPopulator()
+	{
+		return new EntityPopulator(uuidGenerator());
 	}
 
 	@Bean

@@ -106,6 +106,9 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 		when(package_.getIdValue()).thenReturn("pck0");
 		expectedEntityMeta.setPackage(package_);
 		actualEntityMeta.setPackage(package_);
+
+		expectedEntityMeta.getAllAttributes().forEach(attr -> attr.setIdentifier(null));
+		actualEntityMeta.getAllAttributes().forEach(attr -> attr.setIdentifier(null));
 		assertTrue(EntityUtils.equals(expectedEntityMeta, actualEntityMeta));
 	}
 
