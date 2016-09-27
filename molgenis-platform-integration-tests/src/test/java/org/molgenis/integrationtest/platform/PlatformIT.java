@@ -928,7 +928,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(found.get().findFirst().get().getId(), entities.get(0).getIdValue());
 	}
 
-	//2@Test
+	@Test
 	public void testFindOne()
 	{
 		Entity entity = createDynamic(1).findFirst().get();
