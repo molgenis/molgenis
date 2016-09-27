@@ -1388,11 +1388,14 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			assertEquals(dataService.findOneById(book, BOOK_3).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_3);
 
 			String author = "sys_Author" + i;
-			assertEquals(dataService.findOneById(author, AUTHOR_1).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
+			assertEquals(
+					dataService.findOneById(author, AUTHOR_1).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
 					BOOK_1);
-			assertEquals(dataService.findOneById(author, AUTHOR_2).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
+			assertEquals(
+					dataService.findOneById(author, AUTHOR_2).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
 					BOOK_2);
-			assertEquals(dataService.findOneById(author, AUTHOR_3).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
+			assertEquals(
+					dataService.findOneById(author, AUTHOR_3).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
 					BOOK_3);
 		}
 	}
@@ -1617,14 +1620,12 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 
 		// expected behavior: book.author changed, new author.books order is undefined
 		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
-		assertEquals(
-				StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false).map(Entity::getIdValue)
-						.collect(toSet()), newHashSet());
+		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toSet()), newHashSet());
 
 		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
-		assertEquals(
-				StreamSupport.stream(updatedAuthor2.getEntities(ATTR_BOOKS).spliterator(), false).map(Entity::getIdValue)
-						.collect(toSet()), newHashSet(BOOK_2, BOOK_1));
+		assertEquals(StreamSupport.stream(updatedAuthor2.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_2, BOOK_1));
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
@@ -1671,21 +1672,70 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(updatedBook2.getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_1);
 	}
 
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testOneToManyBookAndAuthorRequiredSetAuthorNull()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
+		String bookName = authorsAndBooks.getBookMetaData().getName();
+
+		Entity book = dataService.findOneById(bookName, BOOK_1);
+		book.set(ATTR_AUTHOR, null);
+		dataService.update(bookName, book);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class)
+	public void testOneToManyBookAndAuthorRequiredSetBooksNull()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
+		String authorName = authorsAndBooks.getAuthorMetaData().getName();
+
+		Entity author = dataService.findOneById(authorName, AUTHOR_1);
+		author.set(ATTR_BOOKS, null);
+		dataService.update(authorName, author);
+	}
+
+	@Test
+	public void testOneToManyBookAndAuthorRequiredUpdateValue()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
+		String bookName = authorsAndBooks.getBookMetaData().getName();
+		String authorName = authorsAndBooks.getAuthorMetaData().getName();
+
+		Entity author1 = dataService.findOneById(authorName, AUTHOR_1);
+		Entity author2 = dataService.findOneById(authorName, AUTHOR_2);
+		Entity book1 = dataService.findOneById(bookName, BOOK_1);
+		Entity book2 = dataService.findOneById(bookName, BOOK_2);
+		book1.set(ATTR_AUTHOR, author2); // switch authors
+		book2.set(ATTR_AUTHOR, author1);
+
+		dataService.update(bookName, Stream.of(book1, book2));
+
+		assertEquals(dataService.findOneById(bookName, BOOK_1).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_2);
+		assertEquals(dataService.findOneById(bookName, BOOK_2).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_1);
+
+		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
+		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_2));
+
+		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
+		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_1));
+	}
+
 	@Test
 	public void testOneToManyAscendingOrderUpdateAuthorValue()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(5);
 		String bookName = authorsAndBooks.getBookMetaData().getName();
 		String authorName = authorsAndBooks.getAuthorMetaData().getName();
-		
+
 		Entity book3 = dataService.findOneById(bookName, BOOK_3);
 		book3.set(ATTR_AUTHOR, dataService.findOneById(authorName, AUTHOR_1));
 		dataService.update(bookName, book3);
 
 		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
-		assertEquals(
-				StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false).map(Entity::getIdValue)
-						.collect(toList()), newArrayList(BOOK_1, BOOK_3));
+		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toList()), newArrayList(BOOK_1, BOOK_3));
 
 		Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
 		assertEquals(Iterables.size(updatedAuthor3.getEntities(ATTR_BOOKS)), 0);
@@ -1695,9 +1745,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService.update(bookName, book2);
 
 		updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
-		assertEquals(
-				StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false).map(Entity::getIdValue)
-						.collect(toList()), newArrayList(BOOK_1, BOOK_2, BOOK_3));
+		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toList()), newArrayList(BOOK_1, BOOK_2, BOOK_3));
 
 		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
 		assertEquals(Iterables.size(updatedAuthor2.getEntities(ATTR_BOOKS)), 0);
@@ -1718,9 +1767,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService.update(authorName, author3); //FIXME duplicate value 'book2'
 
 		Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
-		assertEquals(
-				StreamSupport.stream(updatedAuthor3.getEntities(ATTR_BOOKS).spliterator(), false).map(Entity::getIdValue)
-						.collect(toList()), newArrayList(BOOK_1, BOOK_2));
+		assertEquals(StreamSupport.stream(updatedAuthor3.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toList()), newArrayList(BOOK_1, BOOK_2));
 
 		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
 		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
@@ -1743,9 +1791,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService.update(bookName, book3);
 
 		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
-		assertEquals(
-				StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false).map(Entity::getIdValue)
-						.collect(toList()), newArrayList(BOOK_3, BOOK_1)); // FIXME expected book3 but found book1
+		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
+						.map(Entity::getIdValue).collect(toList()),
+				newArrayList(BOOK_3, BOOK_1)); // FIXME expected book3 but found book1 at index 0
 
 		Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
 		assertEquals(Iterables.size(updatedAuthor3.getEntities(ATTR_BOOKS)), 0);
@@ -1755,9 +1803,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService.update(bookName, book2);
 
 		updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
-		assertEquals(
-				StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false).map(Entity::getIdValue)
-						.collect(toList()), newArrayList(BOOK_3, BOOK_2, BOOK_1));
+		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toList()), newArrayList(BOOK_3, BOOK_2, BOOK_1));
 
 		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
 		assertEquals(Iterables.size(updatedAuthor2.getEntities(ATTR_BOOKS)), 0);
@@ -1778,9 +1825,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService.update(authorName, author3); // FIXME duplicate value 'book2'
 
 		Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
-		assertEquals(
-				StreamSupport.stream(updatedAuthor3.getEntities(ATTR_BOOKS).spliterator(), false).map(Entity::getIdValue)
-						.collect(toList()), newArrayList(BOOK_2, BOOK_1));
+		assertEquals(StreamSupport.stream(updatedAuthor3.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toList()), newArrayList(BOOK_2, BOOK_1));
 
 		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
 		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
