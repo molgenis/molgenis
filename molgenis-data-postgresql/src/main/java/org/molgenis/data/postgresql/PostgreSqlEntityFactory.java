@@ -185,10 +185,7 @@ public class PostgreSqlEntityFactory
 			String[][] mrefIdsAndOrder = (String[][]) arrayValue.getArray();
 			if (mrefIdsAndOrder.length > 0 && mrefIdsAndOrder[0][0] != null)
 			{
-				if(attr.getOrderBy() == null)
-				{
-					Arrays.sort(mrefIdsAndOrder, (arr0, arr1) -> Integer.compare(Integer.valueOf(arr0[0]), Integer.valueOf(arr1[0])));
-				}
+				Arrays.sort(mrefIdsAndOrder, (arr0, arr1) -> Integer.compare(Integer.valueOf(arr0[0]), Integer.valueOf(arr1[0])));
 
 				AttributeMetaData idAttr = entityMeta.getIdAttribute();
 				Object[] mrefIds = new Object[mrefIdsAndOrder.length];
