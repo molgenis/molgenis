@@ -115,7 +115,7 @@ public class OneToManyTestHarness
 	@Autowired
 	PersonMetaData4 personMetaData4;
 
-	public static final int ONE_TO_MANY_CASES = 6;
+	public static final int ONE_TO_MANY_CASES = 4;
 
 	public static final String BOOK_1 = "book1";
 	public static final String BOOK_2 = "book2";
@@ -131,6 +131,9 @@ public class OneToManyTestHarness
 	public static final String PERSON_1 = "person1";
 	public static final String PERSON_2 = "person2";
 	public static final String PERSON_3 = "person3";
+
+	public static final String ATTR_PARENT = "parent";
+	public static final String ATTR_CHILDREN = "children";
 
 	@PostConstruct
 	public void postConstruct()

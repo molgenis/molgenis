@@ -15,7 +15,7 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 public class PersonMetaData2 extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "Person2";
-	public static final String MY_ENTITY = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
+	public static final String NAME = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";
 	public static final String LABEL = "label";
@@ -32,7 +32,7 @@ public class PersonMetaData2 extends SystemEntityMetaData
 	{
 		setLabel("Person");
 
-		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
+		addAttribute(ID, ROLE_ID).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL).setNillable(true).setLabel("Label");
 		AttributeMetaData parentAttr = addAttribute(ATTR_PARENT).setDataType(XREF).setRefEntity(this)
 				.setNillable(false);
