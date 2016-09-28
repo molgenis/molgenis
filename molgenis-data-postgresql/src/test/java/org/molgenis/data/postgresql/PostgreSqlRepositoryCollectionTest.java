@@ -54,66 +54,6 @@ public class PostgreSqlRepositoryCollectionTest
 	}
 
 	@Test
-	public void updateAttributeOrderBySet()
-	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		String attrName = "attr";
-		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
-		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
-		String refAttrName = "refAttr";
-		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(refAttrName).getMock();
-		when(attr.isMappedBy()).thenReturn(true);
-		when(attr.getMappedBy()).thenReturn(refAttr);
-		when(attr.getOrderBy()).thenReturn(null);
-		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
-		when(attr.getRefEntity()).thenReturn(refEntityMeta);
-		AttributeMetaData updatedAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
-		when(updatedAttr.getDataType()).thenReturn(ONE_TO_MANY);
-		when(attr.isMappedBy()).thenReturn(true);
-		when(attr.getMappedBy()).thenReturn(refAttr);
-		when(updatedAttr.getOrderBy()).thenReturn(new Sort("orderByAttr"));
-		when(updatedAttr.getRefEntity()).thenReturn(refEntityMeta);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
-		ArgumentCaptor<String> captor = forClass(String.class);
-		verify(jdbcTemplate).execute(captor.capture());
-		assertEquals(captor.getValue(), "ALTER TABLE \"refEntity\" DROP COLUMN \"refAttr_order\"");
-	}
-
-	@Test
-	public void updateAttributeOrderByRemove()
-	{
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.getBackend()).thenReturn(POSTGRESQL);
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
-		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refId").getMock();
-		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
-		when(refEntityMeta.getBackend()).thenReturn(POSTGRESQL);
-		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
-		String attrName = "attr";
-		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
-		String refAttrName = "refAttr";
-		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(refAttrName).getMock();
-		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
-		when(attr.isMappedBy()).thenReturn(true);
-		when(attr.getMappedBy()).thenReturn(refAttr);
-		when(attr.getOrderBy()).thenReturn(new Sort("orderByAttr"));
-		when(attr.getRefEntity()).thenReturn(refEntityMeta);
-		when(entityMeta.getAttribute(attrName)).thenReturn(attr);
-		AttributeMetaData updatedAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(attrName).getMock();
-		when(updatedAttr.getDataType()).thenReturn(ONE_TO_MANY);
-		when(updatedAttr.isMappedBy()).thenReturn(true);
-		when(updatedAttr.getMappedBy()).thenReturn(refAttr);
-		when(updatedAttr.getOrderBy()).thenReturn(null);
-		when(updatedAttr.getRefEntity()).thenReturn(refEntityMeta);
-		postgreSqlRepoCollection.updateAttribute(entityMeta, attr, updatedAttr);
-		ArgumentCaptor<String> captor = forClass(String.class);
-		verify(jdbcTemplate).execute(captor.capture());
-		assertEquals(captor.getValue(), "ALTER TABLE \"refEntity\" ADD \"refAttr_order\" SERIAL");
-	}
-
-	@Test
 	public void updateAttributeNillableToNotNillable()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();

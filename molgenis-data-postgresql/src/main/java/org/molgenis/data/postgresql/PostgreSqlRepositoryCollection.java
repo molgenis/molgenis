@@ -16,7 +16,6 @@ import java.sql.ResultSet;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static com.google.common.collect.Sets.immutableEnumSet;
 import static java.lang.String.format;
@@ -24,7 +23,6 @@ import static java.util.EnumSet.of;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.RepositoryCollectionCapability.*;
-import static org.molgenis.data.i18n.model.LanguageMetaData.*;
 import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
@@ -71,7 +69,6 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	{
 		throw new UnsupportedOperationException();
 	}
-
 
 	@Override
 	public Repository<Entity> createRepository(EntityMetaData entityMeta)
@@ -290,32 +287,6 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		if (!Objects.equals(attr.getEnumOptions(), updatedAttr.getEnumOptions()))
 		{
 			updateEnumOptions(entityMeta, attr, updatedAttr);
-		}
-
-		// orderBy change
-		if (!Objects.equals(attr.getOrderBy(), updatedAttr.getOrderBy()))
-		{
-			updateOrderBy(attr, updatedAttr);
-		}
-	}
-
-	/**
-	 * Creates/removes order column associated with a one-to-many attribute.
-	 *
-	 * @param attr        one-to-many attribute
-	 * @param updatedAttr updated one-to-many attribute
-	 */
-	private void updateOrderBy(AttributeMetaData attr, AttributeMetaData updatedAttr)
-	{
-		if (attr.getOrderBy() == null && updatedAttr.getOrderBy() != null)
-		{
-			// remove order column
-			dropColumn(attr.getRefEntity(), attr);
-		}
-		else if (attr.getOrderBy() != null && updatedAttr.getOrderBy() == null)
-		{
-			// create order column
-			createColumn(updatedAttr.getRefEntity(), updatedAttr);
 		}
 	}
 

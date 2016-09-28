@@ -330,9 +330,6 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	{
 		// mappedBy
 		validateMappedBy(newAttr, newAttr.getMappedBy());
-
-		// orderBy
-		validateOrderBy(newAttr, newAttr.getOrderBy());
 	}
 
 	private void validateUpdate(AttributeMetaData currentAttr, AttributeMetaData newAttr)
@@ -374,14 +371,6 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 		if (!Objects.equals(currentVisibleExpression, newVisibleExpression))
 		{
 			validateUpdateExpression(currentVisibleExpression, newVisibleExpression);
-		}
-
-		// orderBy
-		Sort currentOrderBy = currentAttr.getOrderBy();
-		Sort newOrderBy = newAttr.getOrderBy();
-		if (!Objects.equals(currentOrderBy, newOrderBy))
-		{
-			validateOrderBy(newAttr, newOrderBy);
 		}
 
 		// note: mappedBy is a readOnly attribute, no need to verify for updates
@@ -473,36 +462,6 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 				throw new MolgenisDataException(
 						format("mappedBy attribute [%s] is not part of entity [%s].", mappedByAttr.getName(),
 								attr.getRefEntity().getName()));
-			}
-		}
-	}
-
-	/**
-	 * Validate whether the attribute names defined by the orderBy attribute point to existing attributes in the
-	 * referenced entity.
-	 *
-	 * @param attr    attribute
-	 * @param orderBy orderBy of attribute
-	 * @throws MolgenisDataException if orderBy contains attribute names that do not exist in the referenced entity.
-	 */
-	private void validateOrderBy(AttributeMetaData attr, Sort orderBy)
-	{
-		if (orderBy != null)
-		{
-			EntityMetaData refEntity = attr.getRefEntity();
-			if (refEntity != null)
-			{
-				for (Sort.Order orderClause : orderBy)
-				{
-					String refAttrName = orderClause.getAttr();
-					if (refEntity.getAttribute(refAttrName) == null)
-					{
-						throw new MolgenisDataException(
-								format("Unknown entity [%s] attribute [%s] referred to by entity [%s] attribute [%s] sortBy [%s]",
-										refEntity.getName(), refAttrName, getEntityMetaData().getName(), attr.getName(),
-										orderBy.toSortString()));
-					}
-				}
 			}
 		}
 	}

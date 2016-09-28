@@ -658,33 +658,13 @@ public class PostgreSqlQueryGeneratorTest
 	}
 
 	@Test
-	public void getSqlAddColumnMappedByOrderBy()
+	public void getSqlAddColumnMappedBy()
 	{
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
 		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
-		when(attr.getOrderBy()).thenReturn(new Sort("orderAttr"));
-		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
-		when(refEntityMeta.getBackend()).thenReturn(POSTGRESQL);
-		when(attr.getRefEntity()).thenReturn(refEntityMeta);
-		when(attr.isMappedBy()).thenReturn(true);
-		AttributeMetaData mappedByAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("mappedByAttr")
-				.getMock();
-		when(attr.getMappedBy()).thenReturn(mappedByAttr);
-		assertNull(PostgreSqlQueryGenerator.getSqlAddColumn(entityMeta, attr));
-	}
-
-	@Test
-	public void getSqlAddColumnMappedByWithoutOrderBy()
-	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
-		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
-		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
-		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
-		when(attr.getOrderBy()).thenReturn(null);
 		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
 		when(refEntityMeta.getBackend()).thenReturn(POSTGRESQL);
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
