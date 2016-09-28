@@ -1388,29 +1388,29 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(result6.count(), 1);
 	}
 
-	@Test(groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyInsert()
+	@Test(groups = GROUPS_ONE_TO_MANY, dataProvider = "authorsAndBooksDataProvider")
+	public void testOneToManyInsert(int testCase)
 	{
-		for (int i = 1; i <= ONE_TO_MANY_CASES; i++)
-		{
-			importAuthorsAndBooks(i);
+		importAuthorsAndBooks(testCase);
 
-			String book = "sys_Book" + i;
-			assertEquals(dataService.findOneById(book, BOOK_1).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_1);
-			assertEquals(dataService.findOneById(book, BOOK_2).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_2);
-			assertEquals(dataService.findOneById(book, BOOK_3).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_3);
+		String book = "sys_Book" + testCase;
+		assertEquals(dataService.findOneById(book, BOOK_1).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_1);
+		assertEquals(dataService.findOneById(book, BOOK_2).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_2);
+		assertEquals(dataService.findOneById(book, BOOK_3).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_3);
 
-			String author = "sys_Author" + i;
-			assertEquals(
-					dataService.findOneById(author, AUTHOR_1).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
-					BOOK_1);
-			assertEquals(
-					dataService.findOneById(author, AUTHOR_2).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
-					BOOK_2);
-			assertEquals(
-					dataService.findOneById(author, AUTHOR_3).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
-					BOOK_3);
-		}
+		String author = "sys_Author" + testCase;
+		assertEquals(dataService.findOneById(author, AUTHOR_1).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
+				BOOK_1);
+		assertEquals(dataService.findOneById(author, AUTHOR_2).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
+				BOOK_2);
+		assertEquals(dataService.findOneById(author, AUTHOR_3).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
+				BOOK_3);
+	}
+
+	@DataProvider(name = "authorsAndBooksDataProvider")
+	public Object[][] authorsAndBooksDataProvider()
+	{
+		return new Object[][] { { 1 }, { 2 }, { 3 }, { 4 }, { 5 }, { 6 } };
 	}
 
 	private void importBooksThenAuthors(OneToManyTestHarness.AuthorsAndBooks authorsAndBooks)
