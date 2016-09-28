@@ -1,5 +1,6 @@
 package org.molgenis.integrationtest.platform;
 
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.*;
@@ -65,7 +66,7 @@ import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.test.data.EntityTestHarness.*;
-import static org.molgenis.test.data.OneToManyTestHarness.ONE_TO_MANY_CASES;
+import static org.molgenis.test.data.OneToManyTestHarness.*;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.testng.Assert.*;
@@ -282,14 +283,13 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForIndexToBeStable(selfXrefEntityMetaData.getName(), indexService, LOG);
 	}
 
-
-	@AfterGroups(groups = GROUPS_ONE_TO_MANY)
+	@AfterMethod(groups = GROUPS_ONE_TO_MANY)
 	public void afterGroupsOneToMany()
 	{
 		runAsSystem(() ->
 		{
 			deleteAuthorsThenBooks(1);
-			deleteBooksThenAuthors(1);
+			deleteBooksThenAuthors(2);
 			deleteAuthorsThenBooks(3);
 			deleteAuthorsThenBooks(4);
 			deleteAuthorsThenBooks(5);
@@ -298,7 +298,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 
-	private void addDefaultLanguages(){
+	private void addDefaultLanguages()
+	{
 		dataService.add(LANGUAGE, languageFactory
 				.create(LanguageService.DEFAULT_LANGUAGE_CODE, LanguageService.DEFAULT_LANGUAGE_NAME, true));
 		dataService
@@ -1390,22 +1391,25 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Test(groups = GROUPS_ONE_TO_MANY)
 	public void testOneToManyInsert()
 	{
-		for (int i = 1; i <= 6; i++)
+		for (int i = 1; i <= ONE_TO_MANY_CASES; i++)
 		{
-			OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(i);
+			importAuthorsAndBooks(i);
 
 			String book = "sys_Book" + i;
-			assertEquals(dataService.findOneById(book, "book1").getEntity("author").getIdValue(), "author1");
-			assertEquals(dataService.findOneById(book, "book2").getEntity("author").getIdValue(), "author2");
-			assertEquals(dataService.findOneById(book, "book3").getEntity("author").getIdValue(), "author3");
+			assertEquals(dataService.findOneById(book, BOOK_1).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_1);
+			assertEquals(dataService.findOneById(book, BOOK_2).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_2);
+			assertEquals(dataService.findOneById(book, BOOK_3).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_3);
 
 			String author = "sys_Author" + i;
-			assertEquals(dataService.findOneById(author, "author1").getEntities("books").iterator().next().getIdValue(),
-					"book1");
-			assertEquals(dataService.findOneById(author, "author2").getEntities("books").iterator().next().getIdValue(),
-					"book2");
-			assertEquals(dataService.findOneById(author, "author3").getEntities("books").iterator().next().getIdValue(),
-					"book3");
+			assertEquals(
+					dataService.findOneById(author, AUTHOR_1).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
+					BOOK_1);
+			assertEquals(
+					dataService.findOneById(author, AUTHOR_2).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
+					BOOK_2);
+			assertEquals(
+					dataService.findOneById(author, AUTHOR_3).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
+					BOOK_3);
 		}
 	}
 
@@ -1449,44 +1453,38 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		switch (testCase)
 		{
 			case 1:
-				authorsAndBooks = oneToManyTestHarness.createEntities1();
 				// case 1: books/authors both nillable, order of import not important
+				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(1);
 				importBooksThenAuthors(authorsAndBooks);
 				return authorsAndBooks;
 			case 2:
-				authorsAndBooks = oneToManyTestHarness.createEntities2();
 				// case 2: book.author required so add Author entities first
+				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(2);
 				importAuthorsThenBooks(authorsAndBooks);
 				return authorsAndBooks;
 			case 3:
-				authorsAndBooks = oneToManyTestHarness.createEntities3();
 				// case 3: author.books required so add Book entities first
+				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(3);
 				importBooksThenAuthors(authorsAndBooks);
 				return authorsAndBooks;
 			case 4:
-				authorsAndBooks = oneToManyTestHarness.createEntities4();
 				// case 4: books/authors both required
+				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(4);
 				importBooksThenAuthors(authorsAndBooks);
 				return authorsAndBooks;
 			case 5:
-				authorsAndBooks = oneToManyTestHarness.createEntities5();
+				// case 5: books/authors both nillable, ascending order
+				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(5);
 				importBooksThenAuthors(authorsAndBooks);
 				return authorsAndBooks;
 			case 6:
-				authorsAndBooks = oneToManyTestHarness.createEntities6();
+				// case 6: books/authors both nillable, descending order
+				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(6);
 				importBooksThenAuthors(authorsAndBooks);
 				return authorsAndBooks;
 			default:
 				return null;
 		}
-	}
-
-	@Test (enabled = false, groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyCaching()
-	{
-		//TODO
-		// For all test cases
-		// Retrieve/update (with and without queries) some books and authors. Request again and verify they contain correct data
 	}
 
 	@Test(groups = GROUPS_ONE_TO_MANY)
@@ -1496,9 +1494,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(1);
 		try
 		{
-			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), "book1");
-			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), "author1");
-			Entity author2 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), "author2");
+			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), BOOK_1);
+			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), AUTHOR_1);
+			Entity author2 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), AUTHOR_2);
 
 			book1.set(BookMetaData1.AUTHOR, author2);
 			dataService.update(book1.getEntityMetaData().getName(), book1);
@@ -1511,9 +1509,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			Entity author2Retrieved = dataService
 					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author2.getIdValue());
 			Iterable<Entity> author2Books = author2Retrieved.getEntities(AuthorMetaData1.ATTR_BOOKS);
-			List<Object> retrievedAuthor2BookIds = StreamSupport.stream(author2Books.spliterator(), false)
-					.map(Entity::getIdValue).collect(toList());
-			assertEquals(retrievedAuthor2BookIds, newArrayList("book2", "book1"));
+
+			// expected behavior: book.author changed, new author.books order is undefined
+			Set<Object> retrievedAuthor2BookIds = StreamSupport.stream(author2Books.spliterator(), false)
+					.map(Entity::getIdValue).collect(toSet());
+			assertEquals(retrievedAuthor2BookIds, newHashSet(BOOK_2, BOOK_1));
 		}
 		finally
 		{
@@ -1529,9 +1529,9 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(1);
 		try
 		{
-			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), "book1");
-			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), "author1");
-			Entity author2 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), "author2");
+			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), BOOK_1);
+			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), AUTHOR_1);
+			Entity author2 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), AUTHOR_2);
 
 			book1.set(BookMetaData1.AUTHOR, author2);
 			dataService.update(book1.getEntityMetaData().getName(), Stream.of(book1));
@@ -1544,9 +1544,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			Entity author2Retrieved = dataService
 					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author2.getIdValue());
 			Iterable<Entity> author2Books = author2Retrieved.getEntities(AuthorMetaData1.ATTR_BOOKS);
-			List<Object> retrievedAuthor2BookIds = StreamSupport.stream(author2Books.spliterator(), false)
-					.map(Entity::getIdValue).collect(toList());
-			assertEquals(retrievedAuthor2BookIds, newArrayList("book2", "book1"));
+
+			// expected behavior: book.author changed, new author.books order is undefined
+			Set<Object> retrievedAuthor2BookIds = StreamSupport.stream(author2Books.spliterator(), false)
+					.map(Entity::getIdValue).collect(toSet());
+			assertEquals(retrievedAuthor2BookIds, newHashSet(BOOK_2, BOOK_1));
 		}
 		finally
 		{
@@ -1560,8 +1562,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	public void testL1OneToManyEntitySingleEntityDelete()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(1);
-		Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), "book1");
-		Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), "author1");
+		Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), BOOK_1);
+		Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), AUTHOR_1);
 
 		dataService.delete(book1.getEntityMetaData().getName(), book1);
 
@@ -1581,8 +1583,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(1);
 		try
 		{
-			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), "book1");
-			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), "author1");
+			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), BOOK_1);
+			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), AUTHOR_1);
 
 			dataService.delete(book1.getEntityMetaData().getName(), Stream.of(book1));
 
@@ -1598,57 +1600,256 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@Test (enabled = false, groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyOrdering()
+	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
+	public void testOneToManyAuthorRequiredSetBooksNull()
 	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(5); // book.author required
-
-		//TODO
-		// test case 1, 5, 6
-		// Verify order is correct
-		// Update book name, verify books attribute in author has new and correct ordering
-	}
-
-	@Test (expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyAuthorRequiredSetNull()
-	{
+		// FIXME doesn't throw exception
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
 		Entity author = authorsAndBooks.getAuthors().get(0);
-		author.set("books", null);
+		author.set(ATTR_BOOKS, null);
 		dataService.update(authorsAndBooks.getAuthorMetaData().getName(), author);
+	}
 
+	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
+	public void testOneToManyAuthorRequiredSetAuthorsNull()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
 		Entity book = authorsAndBooks.getBooks().get(0);
-		book.set("author", null);
+		book.set(ATTR_AUTHOR, null);
 		dataService.update(authorsAndBooks.getBookMetaData().getName(), book);
 	}
 
 	@Test(groups = GROUPS_ONE_TO_MANY)
 	public void testOneToManyAuthorRequiredUpdateValue()
 	{
-		importAuthorsAndBooks(2); // book.author required
-		Entity book = dataService.findOneById("sys_Book2", "book1");
-		book.set("author", dataService.findOneById("sys_Author2", "author2"));
-		dataService.update("sys_Book2", book);
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
+		String bookName = authorsAndBooks.getBookMetaData().getName();
+		String authorName = authorsAndBooks.getAuthorMetaData().getName();
 
-		Entity updatedBook = dataService.findOneById("sys_Book2", "book1");
-		assertEquals(updatedBook.getEntity("author").getIdValue(), "author2");
+		Entity book = dataService.findOneById(bookName, BOOK_1);
+		book.set(ATTR_AUTHOR, dataService.findOneById(authorName, AUTHOR_2));
+		dataService.update(bookName, book);
+
+		Entity updatedBook = dataService.findOneById(bookName, BOOK_1);
+		assertEquals(updatedBook.getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_2);
 
 		// expected behavior: book.author changed, new author.books order is undefined
-		Entity updatedAuthor1 = dataService.findOneById("sys_Author2", "author1");
-		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities("books").spliterator(), false).map(Entity::getIdValue).collect(toSet()), newHashSet());
+		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
+		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toSet()), newHashSet());
 
-		Entity updatedAuthor2 = dataService.findOneById("sys_Author2", "author2");
-		assertEquals(StreamSupport.stream(updatedAuthor2.getEntities("books").spliterator(), false).map(Entity::getIdValue).collect(toSet()), newHashSet("book2", "book1"));
+		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
+		assertEquals(StreamSupport.stream(updatedAuthor2.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_2, BOOK_1));
 	}
 
-	@Test(enabled = false, groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyBookRequiredSetNull(){
-		// TODO
+	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
+	public void testOneToManyBooksRequiredSetAuthorNull()
+	{
+		// FIXME doesn't throw exception
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(3); // author.books required
+		String bookName = authorsAndBooks.getBookMetaData().getName();
+
+		Entity book = dataService.findOneById(bookName, BOOK_1);
+		book.set(ATTR_AUTHOR, null);
+		dataService.update(bookName, book);
 	}
 
-	@Test(enabled = false, groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyBookRequiredUpdateValue(){
-		// TODO
+	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
+	public void testOneToManyBooksRequiredSetBooksNull()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(3); // author.books required
+		String authorName = authorsAndBooks.getAuthorMetaData().getName();
+
+		Entity author = dataService.findOneById(authorName, AUTHOR_1);
+		author.set(ATTR_BOOKS, null);
+		dataService.update(authorName, author);
+	}
+
+	@Test(groups = GROUPS_ONE_TO_MANY)
+	public void testOneToManyBookRequiredUpdateValue()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(3); // book.author required
+		String bookName = authorsAndBooks.getBookMetaData().getName();
+		String authorName = authorsAndBooks.getAuthorMetaData().getName();
+
+		Entity author = dataService.findOneById(authorName, AUTHOR_1);
+		author.set(ATTR_BOOKS, newArrayList(dataService.findOneById(bookName, BOOK_2)));
+		dataService.update(authorName, author); //FIXME duplicate value 'book2'
+
+		Entity updatedAuthor = dataService.findOneById(authorName, AUTHOR_1);
+		assertEquals(updatedAuthor.getEntities(ATTR_BOOKS).iterator().next().getIdValue(), BOOK_2);
+
+		Entity updatedBook1 = dataService.findOneById(bookName, BOOK_1);
+		assertEquals(updatedBook1.getEntity(ATTR_AUTHOR).getIdValue(), null);
+
+		Entity updatedBook2 = dataService.findOneById(bookName, BOOK_2);
+		assertEquals(updatedBook2.getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_1);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
+	public void testOneToManyBookAndAuthorRequiredSetAuthorNull()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
+		String bookName = authorsAndBooks.getBookMetaData().getName();
+
+		Entity book = dataService.findOneById(bookName, BOOK_1);
+		book.set(ATTR_AUTHOR, null);
+		dataService.update(bookName, book);
+	}
+
+	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
+	public void testOneToManyBookAndAuthorRequiredSetBooksNull()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
+		String authorName = authorsAndBooks.getAuthorMetaData().getName();
+
+		Entity author = dataService.findOneById(authorName, AUTHOR_1);
+		author.set(ATTR_BOOKS, null);
+		dataService.update(authorName, author);
+	}
+
+	@Test(groups = GROUPS_ONE_TO_MANY)
+	public void testOneToManyBookAndAuthorRequiredUpdateValue()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
+		String bookName = authorsAndBooks.getBookMetaData().getName();
+		String authorName = authorsAndBooks.getAuthorMetaData().getName();
+
+		Entity author1 = dataService.findOneById(authorName, AUTHOR_1);
+		Entity author2 = dataService.findOneById(authorName, AUTHOR_2);
+		Entity book1 = dataService.findOneById(bookName, BOOK_1);
+		Entity book2 = dataService.findOneById(bookName, BOOK_2);
+		book1.set(ATTR_AUTHOR, author2); // switch authors
+		book2.set(ATTR_AUTHOR, author1);
+
+		dataService.update(bookName, Stream.of(book1, book2));
+
+		assertEquals(dataService.findOneById(bookName, BOOK_1).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_2);
+		assertEquals(dataService.findOneById(bookName, BOOK_2).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_1);
+
+		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
+		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_2));
+
+		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
+		assertEquals(StreamSupport.stream(updatedAuthor2.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_1));
+	}
+
+	@Test(groups = GROUPS_ONE_TO_MANY)
+	public void testOneToManyAscendingOrderUpdateAuthorValue()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(5);
+		String bookName = authorsAndBooks.getBookMetaData().getName();
+		String authorName = authorsAndBooks.getAuthorMetaData().getName();
+
+		Entity book3 = dataService.findOneById(bookName, BOOK_3);
+		book3.set(ATTR_AUTHOR, dataService.findOneById(authorName, AUTHOR_1));
+		dataService.update(bookName, book3);
+
+		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
+		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toList()), newArrayList(BOOK_1, BOOK_3));
+
+		Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
+		assertEquals(Iterables.size(updatedAuthor3.getEntities(ATTR_BOOKS)), 0);
+
+		Entity book2 = dataService.findOneById(bookName, BOOK_2);
+		book2.set(ATTR_AUTHOR, updatedAuthor1);
+		dataService.update(bookName, book2);
+
+		updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
+		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toList()), newArrayList(BOOK_1, BOOK_2, BOOK_3));
+
+		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
+		assertEquals(Iterables.size(updatedAuthor2.getEntities(ATTR_BOOKS)), 0);
+	}
+
+	@Test(groups = GROUPS_ONE_TO_MANY)
+	public void testOneToManyAscendingOrderUpdateBooksValue()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(5);
+		String bookName = authorsAndBooks.getBookMetaData().getName();
+		String authorName = authorsAndBooks.getAuthorMetaData().getName();
+
+		Entity book1 = dataService.findOneById(bookName, BOOK_1);
+		Entity book2 = dataService.findOneById(bookName, BOOK_2);
+
+		Entity author3 = dataService.findOneById(authorName, AUTHOR_3);
+		author3.set(ATTR_BOOKS, newArrayList(book2, book1));
+		dataService.update(authorName, author3); //FIXME duplicate value 'book2'
+
+		Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
+		assertEquals(StreamSupport.stream(updatedAuthor3.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toList()), newArrayList(BOOK_1, BOOK_2));
+
+		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
+		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
+		assertEquals(Iterables.size(updatedAuthor1.getEntities(ATTR_BOOKS)), 0);
+		assertEquals(Iterables.size(updatedAuthor2.getEntities(ATTR_BOOKS)), 0);
+
+		Entity updatedBook3 = dataService.findOneById(bookName, BOOK_3);
+		assertEquals(updatedBook3.getEntity(ATTR_AUTHOR), null);
+	}
+
+	@Test(groups = GROUPS_ONE_TO_MANY)
+	public void testOneToManyDescendingOrderUpdateAuthorValue()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(6);
+		String bookName = authorsAndBooks.getBookMetaData().getName();
+		String authorName = authorsAndBooks.getAuthorMetaData().getName();
+
+		Entity book3 = dataService.findOneById(bookName, BOOK_3);
+		book3.set(ATTR_AUTHOR, dataService.findOneById(authorName, AUTHOR_1));
+		dataService.update(bookName, book3);
+
+		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
+		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
+						.map(Entity::getIdValue).collect(toList()),
+				newArrayList(BOOK_3, BOOK_1)); // FIXME expected book3 but found book1 at index 0
+
+		Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
+		assertEquals(Iterables.size(updatedAuthor3.getEntities(ATTR_BOOKS)), 0);
+
+		Entity book2 = dataService.findOneById(bookName, BOOK_2);
+		book2.set(ATTR_AUTHOR, updatedAuthor1);
+		dataService.update(bookName, book2);
+
+		updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
+		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toList()), newArrayList(BOOK_3, BOOK_2, BOOK_1));
+
+		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
+		assertEquals(Iterables.size(updatedAuthor2.getEntities(ATTR_BOOKS)), 0);
+	}
+
+	@Test(groups = GROUPS_ONE_TO_MANY)
+	public void testOneToManyDescendingOrderUpdateBooksValue()
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(6);
+		String bookName = authorsAndBooks.getBookMetaData().getName();
+		String authorName = authorsAndBooks.getAuthorMetaData().getName();
+
+		Entity book1 = dataService.findOneById(bookName, BOOK_1);
+		Entity book2 = dataService.findOneById(bookName, BOOK_2);
+
+		Entity author3 = dataService.findOneById(authorName, AUTHOR_3);
+		author3.set(ATTR_BOOKS, newArrayList(book2, book1));
+		dataService.update(authorName, author3); // FIXME duplicate value 'book2'
+
+		Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
+		assertEquals(StreamSupport.stream(updatedAuthor3.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toList()), newArrayList(BOOK_2, BOOK_1));
+
+		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
+		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
+		assertEquals(Iterables.size(updatedAuthor1.getEntities(ATTR_BOOKS)), 0);
+		assertEquals(Iterables.size(updatedAuthor2.getEntities(ATTR_BOOKS)), 0);
+
+		Entity updatedBook3 = dataService.findOneById(bookName, BOOK_3);
+		assertEquals(updatedBook3.getEntity(ATTR_AUTHOR), null);
 	}
 
 	@Test
