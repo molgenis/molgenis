@@ -18,7 +18,7 @@
 </div>
 <div class="row">
 <#list apps as app>
-    <div class="col-sm-4 col-md-2">
+    <div class="col-sm-6 col-md-3">
         <div class="thumbnail">
             <div class="well">
                 <#if app.active>
@@ -35,7 +35,7 @@
             <#if !app.active>
                 <button class="btn btn-success activate-app-btn" data-appname="${app.name}">Activate!</button>
             <#else>
-                <button class="btn btn-danger deactivate-app-btn" data-appname="${app.name}">DeActivate!</button>
+                <button class="btn btn-default deactivate-app-btn" data-appname="${app.name}">Deactivate!</button>
             </#if>
         </div>
     </div>

@@ -19,7 +19,7 @@ $(function() {
 
     $('.deactivate-app-btn').on('click', function (){
         var appname = $(this).data('appname')
-        $.post(molgenis.contextUrl + "/" + appname + "/activate").then(function() {
+        $.post(molgenis.contextUrl + "/" + appname + "/deactivate").then(function() {
             location.reload()
         })
     });

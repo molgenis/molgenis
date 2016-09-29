@@ -77,8 +77,6 @@ public class AppsController extends MolgenisPluginController
 		}
 		else
 		{
-			// TODO if not active
-
 			return "view-" + appName;
 		}
 	}
@@ -91,15 +89,22 @@ public class AppsController extends MolgenisPluginController
 		app.setActive(true);
 
 		File fileStoreFile = fileStore.getFile(app.getSourceFiles().getId());
-		ZipFile zipFile = new ZipFile(fileStoreFile);
-		zipFile.extractAll(fileStore.getStorageDir() + separator + "appstore" + separator + appName + separator);
+		if (fileStoreFile != null)
+		{
+			ZipFile zipFile = new ZipFile(fileStoreFile);
+			zipFile.extractAll(fileStore.getStorageDir() + separator + "appstore" + separator + appName + separator);
 
-		dataService.update(APP, app);
+			dataService.update(APP, app);
+		}
+		else
+		{
+			// TODO Send message?
+		}
 	}
 
 	@RequestMapping(value = "/{appName}/deactivate")
 	@ResponseBody
-	public void deActivateApp(@PathVariable String appName) throws IOException
+	public void deactivateApp(@PathVariable String appName) throws IOException
 	{
 		App app = dataService.findOneById(APP, appName, App.class);
 		app.setActive(false);
