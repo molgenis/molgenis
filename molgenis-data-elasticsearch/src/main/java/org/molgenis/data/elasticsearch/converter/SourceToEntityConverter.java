@@ -16,6 +16,7 @@ import java.util.stream.StreamSupport;
 
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 
 @Component
 public class SourceToEntityConverter
@@ -30,7 +31,7 @@ public class SourceToEntityConverter
 
 	public Entity convert(Map<String, Object> source, EntityMetaData entityMeta)
 	{
-		Entity entity = entityManager.create(entityMeta);
+		Entity entity = entityManager.create(entityMeta, NO_POPULATE);
 		source.entrySet().forEach(entry ->
 		{
 			String attrName = entry.getKey();

@@ -190,6 +190,15 @@ public class ImportWizardController extends AbstractWizardController
 		dataService.getEntityNames().forEach(entityClassId ->
 		{
 			GroupAuthority authority = getGroupAuthority(groupId, entityClassId);
+
+			boolean newGroupAuthority;
+			if(authority == null) {
+				newGroupAuthority = true;
+				authority = groupAuthorityFactory.create();
+			} else {
+				newGroupAuthority = false;
+			}
+
 			String param = "radio-" + entityClassId;
 			String value = webRequest.getParameter(param);
 			if (value != null && (SecurityUtils
@@ -202,7 +211,7 @@ public class ImportWizardController extends AbstractWizardController
 					authority.setMolgenisGroup(dataService.findOneById(MOLGENIS_GROUP, groupId, MolgenisGroup.class));
 					authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId
 							.toUpperCase());
-					if (authority.getId() == null)
+					if (newGroupAuthority)
 					{
 						authority.setId(UUID.randomUUID().toString());
 						dataService.add(GROUP_AUTHORITY, authority);
@@ -296,12 +305,19 @@ public class ImportWizardController extends AbstractWizardController
 		return permissions;
 	}
 
+	/**
+	 * Returns a group authority based on group and entity class identifier.
+	 *
+	 * @param groupId group identifier
+	 * @param entityClassId entity class identifier
+	 * @return existing group authority or <code>null</code> if no matching group authority exists.
+	 */
 	private GroupAuthority getGroupAuthority(String groupId, String entityClassId)
 	{
-		GroupAuthority authority = groupAuthorityFactory.create();
 		Stream<GroupAuthority> stream = dataService.findAll(GROUP_AUTHORITY,
 				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.MOLGENIS_GROUP, groupId),
 				GroupAuthority.class);
+		GroupAuthority existingGroupAuthority = null;
 		for (Iterator<GroupAuthority> it = stream.iterator(); it.hasNext(); )
 		{
 			GroupAuthority groupAuthority = it.next();
@@ -321,10 +337,10 @@ public class ImportWizardController extends AbstractWizardController
 			}
 			if (entity.equals(entityClassId.toUpperCase()))
 			{
-				authority = groupAuthority;
+				existingGroupAuthority = groupAuthority;
 			}
 		}
-		return authority;
+		return existingGroupAuthority;
 
 	}
 

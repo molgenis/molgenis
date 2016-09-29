@@ -206,7 +206,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.meta.model", "org.molgenis.data.system.model" })
+	@ComponentScan({ "org.molgenis.data.meta.model", "org.molgenis.data.system.model", "org.molgenis.data.populate" })
 	public static class Config
 	{
 	}

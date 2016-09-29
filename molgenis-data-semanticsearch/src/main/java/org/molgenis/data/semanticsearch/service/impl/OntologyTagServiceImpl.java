@@ -6,7 +6,7 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.IdGenerator;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;

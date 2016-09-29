@@ -5,7 +5,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
@@ -39,6 +39,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.importer.EmxMetaDataParser.*;
@@ -199,7 +200,7 @@ public class ImportWriter
 	 */
 	private Entity toEntity(EntityMetaData entityMeta, Entity emxEntity)
 	{
-		Entity entity = entityManager.create(entityMeta);
+		Entity entity = entityManager.create(entityMeta, POPULATE);
 		for (AttributeMetaData attr : entityMeta.getAtomicAttributes())
 		{
 			if (attr.getExpression() == null)
