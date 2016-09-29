@@ -45,7 +45,7 @@ public class AppMetaData extends SystemEntityMetaData
 		addAttribute(RESOURCE_FILES).setDataType(FILE).setRefEntity(dataService.getEntityMetaData(FILE_META))
 				.setNillable(true).setLabel("Resource files in ZIP format")
 				.setDescription("A zip containing all the javascript and css for this app");
-		addAttribute(ACTIVE).setDataType(BOOL).setLabel("Active app?")
+		addAttribute(ACTIVE).setDataType(BOOL).setLabel("Active app?").setVisible(false)
 				.setDescription("Boolean determining whether an app is active and available for in the menu").setDefaultValue("FALSE");
 		addAttribute(APP_INDEX_HTML).setDataType(XREF)
 				.setRefEntity(dataService.getEntityMetaData(FREEMARKER_TEMPLATE))

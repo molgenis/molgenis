@@ -3,8 +3,7 @@ package org.molgenis.apps.model;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
-
-import java.io.File;
+import org.molgenis.file.model.FileMeta;
 
 import static org.molgenis.apps.model.AppMetaData.*;
 
@@ -36,9 +35,9 @@ public class App extends StaticEntity
 		set(APP_NAME, name);
 	}
 
-	public File getSourceFiles()
+	public FileMeta getSourceFiles()
 	{
-		return (File) get(RESOURCE_FILES);
+		return getEntity(RESOURCE_FILES, FileMeta.class);
 	}
 
 	public void setSourceFiles(String sourcesDirectory)

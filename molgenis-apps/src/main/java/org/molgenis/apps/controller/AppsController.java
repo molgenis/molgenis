@@ -1,5 +1,8 @@
 package org.molgenis.apps.controller;
 
+import net.lingala.zip4j.core.ZipFile;
+import net.lingala.zip4j.exception.ZipException;
+import org.molgenis.apps.model.App;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.file.FileStore;
@@ -16,9 +19,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
+import static java.io.File.separator;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.apps.controller.AppsController.URI;
@@ -78,11 +83,29 @@ public class AppsController extends MolgenisPluginController
 		}
 	}
 
-	@RequestMapping(value = "/activate/{appName}")
+	@RequestMapping(value = "/{appName}/activate")
 	@ResponseBody
-	public void activateApp()
+	public void activateApp(@PathVariable String appName) throws ZipException
 	{
+		App app = dataService.findOneById(APP, appName, App.class);
+		app.setActive(true);
 
+		File fileStoreFile = fileStore.getFile(app.getSourceFiles().getId());
+		ZipFile zipFile = new ZipFile(fileStoreFile);
+		zipFile.extractAll(fileStore.getStorageDir() + separator + "appstore" + separator + appName + separator);
+
+		dataService.update(APP, app);
+	}
+
+	@RequestMapping(value = "/{appName}/deactivate")
+	@ResponseBody
+	public void deActivateApp(@PathVariable String appName) throws IOException
+	{
+		App app = dataService.findOneById(APP, appName, App.class);
+		app.setActive(false);
+
+		fileStore.deleteDirectory("appstore" + separator + appName);
+		dataService.update(APP, app);
 	}
 
 	private static String getApiUrl(HttpServletRequest request)
