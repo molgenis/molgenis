@@ -32,10 +32,11 @@
                 <p>${app.description}</p>
             </div>
 
+            <button class="btn btn-warning" id="edit-app-btn" data-appname="${app.name}">Edit app details</button>
             <#if !app.active>
-                <button class="btn btn-success activate-app-btn" data-appname="${app.name}">Activate!</button>
+                <button class="btn btn-success activate-app-btn" data-appname="${app.name}">Activate app</button>
             <#else>
-                <button class="btn btn-default deactivate-app-btn" data-appname="${app.name}">Deactivate!</button>
+                <button class="btn btn-default deactivate-app-btn" data-appname="${app.name}">Deactivate app</button>
             </#if>
         </div>
     </div>
@@ -43,5 +44,6 @@
 </div>
 
 <div id="create-app-form"></div>
+<div id="edit-app-form"></div>
 
 <@footer/>
