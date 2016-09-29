@@ -185,7 +185,7 @@ public class Form extends UISchema
 		}
 
 		/** */
-		private ViewType(String val)
+		ViewType(String val)
 		{
 			this.val = val;
 		}
@@ -253,8 +253,6 @@ public class Form extends UISchema
 			throw new MolgenisModelException("SortOrder can only be 'asc' or 'desc'");
 		}
 	}
-
-	;
 
 	/**
 	 * Option to have a compact view only showing the assigned fields.. The

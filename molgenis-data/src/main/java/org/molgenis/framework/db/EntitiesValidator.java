@@ -5,5 +5,5 @@ import java.io.IOException;
 
 public interface EntitiesValidator
 {
-	public EntitiesValidationReport validate(File file) throws IOException;
+	EntitiesValidationReport validate(File file) throws IOException;
 }

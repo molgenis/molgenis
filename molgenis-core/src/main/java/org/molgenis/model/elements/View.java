@@ -165,7 +165,6 @@ public class View extends DBSchema implements Record
 				}
 				catch (Exception ex)
 				{
-					;
 				}
 			}
 
@@ -180,7 +179,6 @@ public class View extends DBSchema implements Record
 				}
 				catch (Exception ex)
 				{
-					;
 				}
 			}
 		}

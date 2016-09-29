@@ -19,5 +19,5 @@ public @interface AutoGson
 {
 	// A reference to the AutoValue-generated class (e.g. AutoValue_MyClass). This is
 	// necessary to handle obfuscation of the class names.
-	public Class autoValueClass();
+	Class autoValueClass();
 }

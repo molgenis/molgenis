@@ -215,7 +215,7 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 	 *
 	 * @author Oliver Gierke
 	 */
-	public static enum DirectionV1
+	public enum DirectionV1
 	{
 
 		ASC, DESC;

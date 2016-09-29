@@ -98,22 +98,16 @@ public class TabixReader
 		}
 	}
 
-	;
-
 	private class TIndex
 	{
 		HashMap<Integer, TPair64[]> b; // binning index
 		long[] l; // linear index
 	}
 
-	;
-
 	private class TIntv
 	{
 		int internalChromosomeID, beginPosition, end;
 	}
-
-	;
 
 	private static int reg2bins(final int beginposition, final int endPosition, final int[] list)
 	{
@@ -404,8 +398,6 @@ public class TabixReader
 			return null;
 		}
 	}
-
-	;
 
 	public Iterator query(final int internalChromosomeID, final int beginPosition, final int endPosition)
 	{

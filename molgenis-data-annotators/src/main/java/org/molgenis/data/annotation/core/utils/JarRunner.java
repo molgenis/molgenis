@@ -10,5 +10,5 @@ import java.util.List;
 public interface JarRunner
 {
 
-	public File runJar(String outputFileName, List<String> params, File input) throws IOException, InterruptedException;
+	File runJar(String outputFileName, List<String> params, File input) throws IOException, InterruptedException;
 }

@@ -26,7 +26,7 @@ public interface AttributeMappingRepository
 	 *                                 {@link AttributeMetaData}
 	 * @return a list of {@link AttributeMapping}s.
 	 */
-	abstract List<AttributeMapping> getAttributeMappings(List<Entity> attributeMappingEntities,
+	List<AttributeMapping> getAttributeMappings(List<Entity> attributeMappingEntities,
 			EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData);
 
 	/**
@@ -35,7 +35,7 @@ public interface AttributeMappingRepository
 	 *
 	 * @return a list of Entities that have been added or updated
 	 */
-	abstract List<Entity> upsert(Collection<AttributeMapping> collection);
+	List<Entity> upsert(Collection<AttributeMapping> collection);
 
 	/**
 	 * Translates an algorithm to a list of {@link AttributeMetaData} based on the algorithm, and the
@@ -45,7 +45,7 @@ public interface AttributeMappingRepository
 	 * @param sourceEntityMetaData
 	 * @return a list of {@link AttributeMetaData}
 	 */
-	abstract List<AttributeMetaData> retrieveAttributeMetaDatasFromAlgorithm(String algorithm,
+	List<AttributeMetaData> retrieveAttributeMetaDatasFromAlgorithm(String algorithm,
 			EntityMetaData sourceEntityMetaData);
 
 }

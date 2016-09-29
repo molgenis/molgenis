@@ -488,7 +488,6 @@ public class CmdLineParser
 			}
 			catch (Exception e)
 			{
-				;
 			}
 
 			stream.print(option.name());

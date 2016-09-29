@@ -21,4 +21,4 @@ public enum DatabaseAction
 	 * Adds new records, ignores existing records
 	 */
 	ADD_IGNORE_EXISTING
-};
+}

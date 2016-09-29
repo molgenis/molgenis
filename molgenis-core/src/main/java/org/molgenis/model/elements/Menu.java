@@ -28,7 +28,7 @@ public class Menu extends UISchema
 
 		private String tag;
 
-		private Position(String tag)
+		Position(String tag)
 		{
 			this.tag = tag;
 		}
@@ -51,8 +51,6 @@ public class Menu extends UISchema
 					"position='" + position + "' is UNKNOWN for menu. Valid options: " + optionsBuilder.toString());
 		}
 	}
-
-	;
 
 	// constructor(s)
 

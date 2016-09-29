@@ -31,7 +31,7 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 
 		private final boolean valid;
 
-		private AttributeState(boolean valid)
+		AttributeState(boolean valid)
 		{
 			this.valid = valid;
 		}
