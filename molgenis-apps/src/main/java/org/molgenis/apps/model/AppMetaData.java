@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
+import static org.molgenis.data.system.core.FreemarkerTemplateMetaData.FREEMARKER_TEMPLATE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 
@@ -18,10 +19,11 @@ public class AppMetaData extends SystemEntityMetaData
 	public static final String APP = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String APP_NAME = "name";
-	public static final String APP_URL = "url";
 	public static final String APP_DESCRIPTION = "description";
-	public static final String SOURCES_DIRECTORY = "sourcefiles";
+	public static final String RESOURCE_FILES = "resourcefiles";
 	public static final String ACTIVE = "active";
+	public static final String APP_ICON_URL = "appiconurl";
+	public static final String APP_INDEX_HTML = "appindexhtml";
 
 	private final DataService dataService;
 
@@ -38,14 +40,16 @@ public class AppMetaData extends SystemEntityMetaData
 		setLabel("App");
 		addAttribute(APP_NAME, AttributeRole.ROLE_ID).setNillable(false).setLabel("App name")
 				.setDescription("The name of the app");
-		addAttribute(APP_URL).setDataType(HYPERLINK).setNillable(true).setLabel("App url")
-				.setDescription("URL with which the app can be reached");
 		addAttribute(APP_DESCRIPTION).setDataType(TEXT).setNillable(true).setLabel("App description");
-		addAttribute(SOURCES_DIRECTORY).setDataType(FILE).setRefEntity(dataService.getEntityMetaData(FILE_META))
-				.setNillable(true).setLabel("Source directory")
-				.setDescription("The directory containing all the source files for this app");
+		addAttribute(APP_ICON_URL).setDataType(HYPERLINK).setNillable(true).setLabel("URL for your App icon");
+		addAttribute(RESOURCE_FILES).setDataType(FILE).setRefEntity(dataService.getEntityMetaData(FILE_META))
+				.setNillable(true).setLabel("Resource files in ZIP format")
+				.setDescription("A zip containing all the javascript and css for this app");
 		addAttribute(ACTIVE).setDataType(BOOL).setLabel("Active app?")
-				.setDescription("Boolean determining whether an app is active and available for in the menu");
-
+				.setDescription("Boolean determining whether an app is active and available for in the menu").setDefaultValue("FALSE");
+		addAttribute(APP_INDEX_HTML).setDataType(XREF)
+				.setRefEntity(dataService.getEntityMetaData(FREEMARKER_TEMPLATE))
+				.setNillable(false).setLabel("HTML for your page")
+				.setDescription("For any app, this is your main html page.");
 	}
 }

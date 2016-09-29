@@ -36,24 +36,14 @@ public class App extends StaticEntity
 		set(APP_NAME, name);
 	}
 
-	public String getAppUrl()
+	public File getSourceFiles()
 	{
-		return getString(APP_URL);
+		return (File) get(RESOURCE_FILES);
 	}
 
-	public void setAppUrl(String url)
+	public void setSourceFiles(String sourcesDirectory)
 	{
-		set(APP_URL, url);
-	}
-
-	public File getSourcesDirectory()
-	{
-		return (File) get(SOURCES_DIRECTORY);
-	}
-
-	public void setSourcesDirectory(String sourcesDirectory)
-	{
-		set(SOURCES_DIRECTORY, sourcesDirectory);
+		set(RESOURCE_FILES, sourcesDirectory);
 	}
 
 	public boolean isActive()

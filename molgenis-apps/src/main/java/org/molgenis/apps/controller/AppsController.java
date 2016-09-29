@@ -45,6 +45,7 @@ public class AppsController extends MolgenisPluginController
 	public AppsController(DataService dataService, FileStore fileStore)
 	{
 		super(URI);
+
 		this.dataService = requireNonNull(dataService);
 		this.fileStore = requireNonNull(fileStore);
 	}
@@ -76,7 +77,7 @@ public class AppsController extends MolgenisPluginController
 				freemarkerEntity = new DynamicEntity(dataService.getEntityMetaData(FREEMARKER_TEMPLATE));
 				freemarkerEntity.set(NAME, "view-" + appName + ".ftl");
 
-				FileMeta file = (FileMeta) appEntity.get(AppMetaData.SOURCES_DIRECTORY);
+				FileMeta file = (FileMeta) appEntity.get(AppMetaData.RESOURCE_FILES);
 				File myFile = fileStore.getFile(file.getFilename());
 
 				StringBuilder freemarkerBody = new StringBuilder();
