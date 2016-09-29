@@ -83,7 +83,7 @@ public class XYDataChartRequest extends ChartRequest
 	}
 
 	/**
-	 * @param split
+	 * @return the split
 	 */
 	public String getSplit()
 	{

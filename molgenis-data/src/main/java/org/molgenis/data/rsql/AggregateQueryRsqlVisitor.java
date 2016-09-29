@@ -15,7 +15,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * RSQLVisitor implementation for molgenis Query.
  *
- * @see https://github.com/jirutka/rsql-parser
+ * @see <a href="https://github.com/jirutka/rsql-parser">https://github.com/jirutka/rsql-parser</a>
  */
 public class AggregateQueryRsqlVisitor extends NoArgRSQLVisitorAdapter<AggregateQuery>
 {

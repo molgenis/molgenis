@@ -21,7 +21,6 @@ public class ValidationUtils
 	 * @param expression
 	 * @param entity
 	 * @param meta
-	 * @param attribute
 	 * @return true or false
 	 * @throws MolgenisDataException if the script resolves to null or to a non boolean
 	 */

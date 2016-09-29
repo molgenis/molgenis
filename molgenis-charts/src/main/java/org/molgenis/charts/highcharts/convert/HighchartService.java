@@ -64,7 +64,6 @@ public class HighchartService extends AbstractChartVisualizationService
 	 * Create the Highcharts options from the given BoxPlotChart
 	 *
 	 * @param boxPlotChart
-	 * @param model
 	 * @return Options
 	 */
 	protected Options createBoxPlotChart(BoxPlotChart boxPlotChart)
@@ -103,7 +102,6 @@ public class HighchartService extends AbstractChartVisualizationService
 	 *
 	 * @param xYDataChart
 	 * @param chartConstructorType - When defining the chartConstructorType u can invloed the type of the Highchart constructor types
-	 * @param model                - is not used
 	 * @return Options
 	 */
 	protected Options createXYDataChart(XYDataChart xYDataChart, ChartConstructorType chartConstructorType)

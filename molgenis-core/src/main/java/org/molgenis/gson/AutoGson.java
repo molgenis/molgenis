@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * Annotation to allow {@link Gson} to construct @AutoValue annotated classes
  *
  * @author JakeWharton
- * @see https://gist.github.com/JakeWharton/0d67d01badcee0ae7bc9
+ * @see <a href="https://gist.github.com/JakeWharton/0d67d01badcee0ae7bc9">https://gist.github.com/JakeWharton/0d67d01badcee0ae7bc9</a>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)

@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Properties;
 
 /**
- * Option to parameterize the {@link Molgenis} and the {@link org.molgenis.framework.server.MolgenisServer}
+ * Option to parameterize Molgenis and the MolgenisServer
  *
  * @author Morris Swertz
  */

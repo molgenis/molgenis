@@ -24,8 +24,6 @@ public interface OntologyService
 	/**
 	 * Finds ontology terms that are exact matches to a certain search string.
 	 *
-	 * @param ontologies {@link Ontology}s to search in
-	 * @param search     search term
 	 * @param pageSize   number of results to return.
 	 * @return List of {@link OntologyTerm}s that match the search term.
 	 */
@@ -34,8 +32,6 @@ public interface OntologyService
 	/**
 	 * Finds ontology terms that match a certain search string.
 	 *
-	 * @param ontologies {@link Ontology}s to search in
-	 * @param search     search term
 	 * @param pageSize   number of results to return.
 	 * @return List of {@link OntologyTerm}s that match the search term.
 	 */
@@ -54,8 +50,6 @@ public interface OntologyService
 	/**
 	 * Retrieves a specific OntologyTerm
 	 *
-	 * @param ontology the IRI of the {@link Ontology} to search in
-	 * @param IRI      comma separated list of IRIs to look for
 	 * @return Combined {@link OntologyTerm} for all IRI's listed
 	 */
 	OntologyTerm getOntologyTerm(String iri);
