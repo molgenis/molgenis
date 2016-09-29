@@ -17,15 +17,13 @@
 <#list apps as app>
     <div class="col-sm-6 col-md-4">
         <div class="thumbnail">
-            <img src="http://www.cheatsheet.com/wp-content/uploads/2012/04/apple_app_store.jpeg" alt="App"
-                 height="100px" width="100px">
+            <a href="/menu/main/apps/${app.name}"><img src="http://www.cheatsheet.com/wp-content/uploads/2012/04/apple_app_store.jpeg" alt="App"
+                 height="100px" width="100px"></a>
             <div class="caption">
                 <h3>${app.name}</h3>
                 <p>${app.description}</p>
                 <ul>
-                    <li>${app.url}</li>
-                    <li>${app.sourcefiles}</li>
-                    <li>${app.active?string("true", "false")}</li>
+
                 </ul>
             </div>
         </div>
