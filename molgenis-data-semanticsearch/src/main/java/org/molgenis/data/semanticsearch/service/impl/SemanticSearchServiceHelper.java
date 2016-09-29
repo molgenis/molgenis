@@ -184,7 +184,7 @@ public class SemanticSearchServiceHelper
 		Map<String, String> expandedQueryMap = new LinkedHashMap<String, String>();
 
 		queryTerms.stream().filter(StringUtils::isNotBlank)
-				.forEach(queryTerm -> expandedQueryMap.put(stemmer.cleanStemPhrase(queryTerm), queryTerm));
+				.forEach(queryTerm -> expandedQueryMap.put(Stemmer.cleanStemPhrase(queryTerm), queryTerm));
 
 		for (OntologyTerm ontologyTerm : ontologyTerms)
 		{
@@ -208,12 +208,12 @@ public class SemanticSearchServiceHelper
 		if (ontologyTerm != null)
 		{
 			getOtLabelAndSynonyms(ontologyTerm)
-					.forEach(term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
+					.forEach(term -> expanedQueryMap.put(Stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
 
 			for (OntologyTerm childOntologyTerm : ontologyService.getChildren(ontologyTerm))
 			{
 				getOtLabelAndSynonyms(childOntologyTerm)
-						.forEach(term -> expanedQueryMap.put(stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
+						.forEach(term -> expanedQueryMap.put(Stemmer.cleanStemPhrase(term), ontologyTerm.getLabel()));
 			}
 		}
 	}
