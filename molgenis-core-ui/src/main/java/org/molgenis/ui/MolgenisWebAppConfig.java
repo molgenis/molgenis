@@ -101,7 +101,7 @@ public abstract class MolgenisWebAppConfig extends WebMvcConfigurerAdapter
 
 		// Add resource handler for apps
 		FileStore fileStore = fileStore();
-		registry.addResourceHandler("/apps/**").addResourceLocations("file:///" + fileStore.getStorageDir());
+		registry.addResourceHandler("/appstore/**").addResourceLocations("file:///" + fileStore.getStorageDir() + "/appstore/");
 	}
 
 	@Value("${environment:production}")
