@@ -278,9 +278,9 @@ public class OneToManyTestHarness
 		person2.set(PersonMetaData1.ID, PERSON_3);
 		person2.set(PersonMetaData1.LABEL, "Klaas");
 
-		person1.set(PersonMetaData1.ATTR_CHILDREN, person2); // person1 -> person2 (circular)
-		person2.set(PersonMetaData1.ATTR_CHILDREN, person1); // person2 -> person1 (circular)
-		person3.set(PersonMetaData1.ATTR_CHILDREN, person2); // person3 -> person2
+		person1.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person2)); // person1 -> person2 (circular)
+		person2.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person1)); // person2 -> person1 (circular)
+		person3.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person2)); // person3 -> person2
 
 		return newArrayList(person1, person2, person3);
 	}
