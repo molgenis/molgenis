@@ -44,7 +44,7 @@ public class HugeSetTest
 	@Test
 	public void clear()
 	{
-		List<String> contents = Arrays.asList("test1", "test2", "test3");
+		List<String> contents = Arrays.asList("authorbook1", "authorbook2", "authorbook3");
 		hugeSet.addAll(contents);
 		hugeSet.clear();
 		assertTrue(hugeSet.isEmpty());
@@ -61,10 +61,10 @@ public class HugeSetTest
 	@Test
 	public void contains()
 	{
-		List<String> contents = Arrays.asList("test1", "test2", "test3");
+		List<String> contents = Arrays.asList("authorbook1", "authorbook2", "authorbook3");
 		hugeSet.addAll(contents);
-		assertTrue(hugeSet.contains("test2"));
-		assertFalse(hugeSet.contains("test4"));
+		assertTrue(hugeSet.contains("authorbook2"));
+		assertFalse(hugeSet.contains("authorbook4"));
 	}
 
 	@Test
@@ -78,7 +78,7 @@ public class HugeSetTest
 	@Test
 	public void containsAll()
 	{
-		List<String> contents = Arrays.asList("test1", "test2", "test3");
+		List<String> contents = Arrays.asList("authorbook1", "authorbook2", "authorbook3");
 		hugeSet.addAll(contents);
 		assertTrue(hugeSet.containsAll(contents));
 	}
@@ -95,7 +95,7 @@ public class HugeSetTest
 	@Test
 	public void iterator()
 	{
-		List<String> contents = Arrays.asList("test1", "test2", "test3");
+		List<String> contents = Arrays.asList("authorbook1", "authorbook2", "authorbook3");
 		hugeSet.addAll(contents);
 
 		Iterator<String> it = hugeSet.iterator();
@@ -127,9 +127,9 @@ public class HugeSetTest
 	@Test
 	public void remove()
 	{
-		List<String> contents = Arrays.asList("test1", "test2", "test3");
+		List<String> contents = Arrays.asList("authorbook1", "authorbook2", "authorbook3");
 		hugeSet.addAll(contents);
-		hugeSet.remove("test1");
+		hugeSet.remove("authorbook1");
 		assertEquals(hugeSet.size(), 2);
 	}
 
@@ -144,7 +144,7 @@ public class HugeSetTest
 	@Test
 	public void removeAll()
 	{
-		List<String> contents = Arrays.asList("test1", "test2", "test3");
+		List<String> contents = Arrays.asList("authorbook1", "authorbook2", "authorbook3");
 		hugeSet.addAll(contents);
 		hugeSet.removeAll(contents);
 		assertEquals(hugeSet.size(), 0);
@@ -165,9 +165,9 @@ public class HugeSetTest
 	@Test
 	public void retainAll()
 	{
-		List<String> contents = Arrays.asList("test1", "test2", "test3");
+		List<String> contents = Arrays.asList("authorbook1", "authorbook2", "authorbook3");
 		hugeSet.addAll(contents);
-		hugeSet.retainAll(Arrays.asList("test2", "test3"));
+		hugeSet.retainAll(Arrays.asList("authorbook2", "authorbook3"));
 		assertEquals(hugeSet.size(), 2);
 	}
 
@@ -182,7 +182,7 @@ public class HugeSetTest
 	@Test
 	public void toArray()
 	{
-		List<String> contents = Arrays.asList("test1", "test2", "test3");
+		List<String> contents = Arrays.asList("authorbook1", "authorbook2", "authorbook3");
 		hugeSet.addAll(contents);
 		assertEquals(hugeSet.toArray().length, 3);
 	}

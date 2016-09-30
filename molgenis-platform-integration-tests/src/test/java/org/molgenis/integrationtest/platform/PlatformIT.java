@@ -1,6 +1,5 @@
 package org.molgenis.integrationtest.platform;
 
-import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.*;
@@ -27,8 +26,8 @@ import org.molgenis.test.data.staticentity.bidirectional.person1.PersonMetaData1
 import org.molgenis.test.data.staticentity.bidirectional.person2.PersonMetaData2;
 import org.molgenis.test.data.staticentity.bidirectional.person3.PersonMetaData3;
 import org.molgenis.test.data.staticentity.bidirectional.person4.PersonMetaData4;
-import org.molgenis.test.data.staticentity.bidirectional.test1.AuthorMetaData1;
-import org.molgenis.test.data.staticentity.bidirectional.test1.BookMetaData1;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook1.AuthorMetaData1;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook1.BookMetaData1;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

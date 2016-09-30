@@ -3,7 +3,7 @@ package org.molgenis.test.data.staticentity.bidirectional;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
-import org.molgenis.test.data.staticentity.bidirectional.test1.AuthorMetaData1;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook1.AuthorMetaData1;
 
 public class Author extends StaticEntity
 {
