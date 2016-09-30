@@ -27,14 +27,6 @@ import org.molgenis.test.data.staticentity.bidirectional.test4.AuthorFactory4;
 import org.molgenis.test.data.staticentity.bidirectional.test4.AuthorMetaData4;
 import org.molgenis.test.data.staticentity.bidirectional.test4.BookFactory4;
 import org.molgenis.test.data.staticentity.bidirectional.test4.BookMetaData4;
-import org.molgenis.test.data.staticentity.bidirectional.test5.AuthorFactory5;
-import org.molgenis.test.data.staticentity.bidirectional.test5.AuthorMetaData5;
-import org.molgenis.test.data.staticentity.bidirectional.test5.BookFactory5;
-import org.molgenis.test.data.staticentity.bidirectional.test5.BookMetaData5;
-import org.molgenis.test.data.staticentity.bidirectional.test6.AuthorFactory6;
-import org.molgenis.test.data.staticentity.bidirectional.test6.AuthorMetaData6;
-import org.molgenis.test.data.staticentity.bidirectional.test6.BookFactory6;
-import org.molgenis.test.data.staticentity.bidirectional.test6.BookMetaData6;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -58,10 +50,6 @@ public class OneToManyTestHarness
 	@Autowired
 	AuthorFactory4 authorFactory4;
 	@Autowired
-	AuthorFactory5 authorFactory5;
-	@Autowired
-	AuthorFactory6 authorFactory6;
-	@Autowired
 	AuthorMetaData1 authorMetaData1;
 	@Autowired
 	AuthorMetaData2 authorMetaData2;
@@ -69,10 +57,6 @@ public class OneToManyTestHarness
 	AuthorMetaData3 authorMetaData3;
 	@Autowired
 	AuthorMetaData4 authorMetaData4;
-	@Autowired
-	AuthorMetaData5 authorMetaData5;
-	@Autowired
-	AuthorMetaData6 authorMetaData6;
 	@Autowired
 	BookFactory1 bookFactory1;
 	@Autowired
@@ -82,10 +66,6 @@ public class OneToManyTestHarness
 	@Autowired
 	BookFactory4 bookFactory4;
 	@Autowired
-	BookFactory5 bookFactory5;
-	@Autowired
-	BookFactory6 bookFactory6;
-	@Autowired
 	BookMetaData1 bookMetaData1;
 	@Autowired
 	BookMetaData2 bookMetaData2;
@@ -93,10 +73,6 @@ public class OneToManyTestHarness
 	BookMetaData3 bookMetaData3;
 	@Autowired
 	BookMetaData4 bookMetaData4;
-	@Autowired
-	BookMetaData5 bookMetaData5;
-	@Autowired
-	BookMetaData6 bookMetaData6;
 
 	@Autowired
 	PersonFactory1 personFactory1;
@@ -163,10 +139,6 @@ public class OneToManyTestHarness
 				return createTestEntitiesSetAuthorField(authorFactory3, bookFactory3, authorMetaData3, bookMetaData3);
 			case 4:
 				return createTestEntitiesSetAuthorField(authorFactory4, bookFactory4, authorMetaData4, bookMetaData4);
-			case 5:
-				return createTestEntitiesSetAuthorField(authorFactory5, bookFactory5, authorMetaData5, bookMetaData5);
-			case 6:
-				return createTestEntitiesSetAuthorField(authorFactory6, bookFactory6, authorMetaData6, bookMetaData6);
 			default:
 				throw new IllegalArgumentException("Unknown test case " + testCase);
 		}
