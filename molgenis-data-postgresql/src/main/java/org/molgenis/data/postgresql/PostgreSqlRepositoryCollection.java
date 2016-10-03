@@ -559,7 +559,15 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		jdbcTemplate.execute(createTableSql);
 
 		// create junction tables for attributes referencing multiple entities
-		getJunctionTableAttributes(entityMeta).forEach(attr -> createJunctionTable(entityMeta, attr));
+		createJunctionTables(entityMeta);
+	}
+
+	private void createJunctionTables(EntityMetaData entityMeta)
+	{
+		getJunctionTableAttributes(entityMeta).filter(attr -> !attr.isInversedBy())
+				.forEach(attr -> createJunctionTable(entityMeta, attr));
+		getJunctionTableAttributes(entityMeta).filter(AttributeMetaData::isInversedBy)
+				.forEach(attr -> createJunctionTable(entityMeta, attr));
 	}
 
 	private void createForeignKey(EntityMetaData entityMeta, AttributeMetaData attr)

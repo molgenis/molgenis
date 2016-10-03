@@ -608,6 +608,7 @@ public class AttributeMetaData extends StaticEntity
 	 */
 	public AttributeMetaData getInversedBy()
 	{
+		// FIXME besides checking mappedBy attr name also check attr.getRefEntity().getName
 		if (isReferenceType(this))
 		{
 			return stream(getRefEntity().getAtomicAttributes().spliterator(), false)
