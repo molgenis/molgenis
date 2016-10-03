@@ -1423,7 +1423,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		Entity person2 = dataService.findOneById(personEntityName, PERSON_2);
 		Entity person3 = dataService.findOneById(personEntityName, PERSON_3);
 
-		assertEquals(person1.getEntity(ATTR_PARENT).getIdValue(), PERSON_2);
+		assertEquals(person1.getEntity(ATTR_PARENT).getIdValue(), PERSON_3);
 		assertEquals(person2.getEntity(ATTR_PARENT).getIdValue(), PERSON_1);
 		assertEquals(person3.getEntity(ATTR_PARENT).getIdValue(), PERSON_2);
 
@@ -1432,10 +1432,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 						.collect(toSet()), newHashSet(PERSON_2));
 		assertEquals(
 				StreamSupport.stream(person2.getEntities(ATTR_CHILDREN).spliterator(), false).map(Entity::getIdValue)
-						.collect(toSet()), newHashSet(PERSON_1));
+						.collect(toSet()), newHashSet(PERSON_3));
 		assertEquals(
 				StreamSupport.stream(person3.getEntities(ATTR_CHILDREN).spliterator(), false).map(Entity::getIdValue)
-						.collect(toSet()), newHashSet());
+						.collect(toSet()), newHashSet(PERSON_1));
 	}
 
 	@DataProvider(name = "oneToManyTestCaseDataProvider")

@@ -3,6 +3,7 @@ package org.molgenis.test.data;
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.test.data.staticentity.bidirectional.Person;
 import org.molgenis.test.data.staticentity.bidirectional.person1.PersonFactory1;
 import org.molgenis.test.data.staticentity.bidirectional.person1.PersonMetaData1;
 import org.molgenis.test.data.staticentity.bidirectional.person2.PersonFactory2;
@@ -247,12 +248,12 @@ public class OneToManyTestHarness
 		person2.set(PersonMetaData1.LABEL, "Sjonny");
 
 		Entity person3 = personFactory.create();
-		person2.set(PersonMetaData1.ID, PERSON_3);
-		person2.set(PersonMetaData1.LABEL, "Klaas");
+		person3.set(PersonMetaData1.ID, PERSON_3);
+		person3.set(PersonMetaData1.LABEL, "Klaas");
 
-		person1.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person2)); // person1 -> person2 (circular)
-		person2.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person1)); // person2 -> person1 (circular)
-		person3.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person2)); // person3 -> person2
+		person1.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person2));
+		person2.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person3));
+		person3.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person1));
 
 		return newArrayList(person1, person2, person3);
 	}
