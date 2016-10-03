@@ -7,7 +7,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.core.meta.Ontology;
+import org.molgenis.ontology.core.meta.OntologyEntity;
 import org.molgenis.ontology.core.meta.OntologyFactory;
 import org.molgenis.ontology.core.meta.OntologyMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
@@ -53,7 +53,7 @@ public class InformationContentServiceTest extends AbstractMolgenisSpringTest
 	{
 		String ontologyIri = "http://www.molgenis.org";
 
-		Ontology ontology = ontologyFactory.create();
+		OntologyEntity ontology = ontologyFactory.create();
 		ontology.setOntologyIri(ontologyIri);
 		when(dataService.findOne(ONTOLOGY, new QueryImpl<>().eq(OntologyMetaData.ONTOLOGY_IRI, ontologyIri)))
 				.thenReturn(ontology);

@@ -1,7 +1,9 @@
 package org.molgenis.ontology.core.model;
 
-import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
+import org.molgenis.ontology.core.model.AutoValue_Ontology;
+
+import com.google.auto.value.AutoValue;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_Ontology.class)

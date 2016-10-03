@@ -1,7 +1,26 @@
 package org.molgenis.data.mapper.service.impl;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Multimap;
+import static com.google.common.collect.Sets.newLinkedHashSet;
+import static java.lang.Double.parseDouble;
+import static java.lang.Math.round;
+import static java.lang.Math.toIntExact;
+import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.isEmpty;
+import static org.molgenis.js.ScriptEvaluator.eval;
+import static org.mozilla.javascript.Context.jsToJava;
+import static org.mozilla.javascript.Context.toBoolean;
+import static org.mozilla.javascript.Context.toNumber;
+
+import java.util.Collection;
+import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.DataService;
@@ -14,7 +33,7 @@ import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedMatchCandidate;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DynamicEntity;
@@ -27,20 +46,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import static com.google.common.collect.Sets.newLinkedHashSet;
-import static java.lang.Double.parseDouble;
-import static java.lang.Math.round;
-import static java.lang.Math.toIntExact;
-import static java.util.Collections.emptyList;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.molgenis.js.ScriptEvaluator.eval;
-import static org.mozilla.javascript.Context.*;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Multimap;
 
 public class AlgorithmServiceImpl implements AlgorithmService
 {
@@ -67,8 +74,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	public String generateAlgorithm(AttributeMetaData targetAttribute, EntityMetaData targetEntityMetaData,
 			List<AttributeMetaData> sourceAttributes, EntityMetaData sourceEntityMetaData)
 	{
-		return algorithmGeneratorService
-				.generate(targetAttribute, sourceAttributes, targetEntityMetaData, sourceEntityMetaData);
+		return algorithmGeneratorService.generate(targetAttribute, sourceAttributes, targetEntityMetaData,
+				sourceEntityMetaData);
 	}
 
 	@Override
@@ -77,14 +84,14 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			EntityMapping mapping, AttributeMetaData targetAttribute)
 	{
 		LOG.debug("createAttributeMappingIfOnlyOneMatch: target= " + targetAttribute.getName());
-		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService
-				.getTagsForAttribute(targetEntityMetaData, targetAttribute);
+		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService.getTagsForAttribute(targetEntityMetaData,
+				targetAttribute);
 
-		Map<AttributeMetaData, ExplainedAttributeMetaData> relevantAttributes = semanticSearchService
+		Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> relevantAttributes = semanticSearchService
 				.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute, tagsForAttribute.values(),
 						null);
-		GeneratedAlgorithm generatedAlgorithm = algorithmGeneratorService
-				.generate(targetAttribute, relevantAttributes, targetEntityMetaData, sourceEntityMetaData);
+		GeneratedAlgorithm generatedAlgorithm = algorithmGeneratorService.generate(targetAttribute, relevantAttributes,
+				targetEntityMetaData, sourceEntityMetaData);
 
 		if (StringUtils.isNotBlank(generatedAlgorithm.getAlgorithm()))
 		{
@@ -92,8 +99,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 			attributeMapping.setAlgorithm(generatedAlgorithm.getAlgorithm());
 			attributeMapping.getSourceAttributeMetaDatas().addAll(generatedAlgorithm.getSourceAttributes());
 			attributeMapping.setAlgorithmState(generatedAlgorithm.getAlgorithmState());
-			LOG.debug("Creating attribute mapping: " + targetAttribute.getName() + " = " + generatedAlgorithm
-					.getAlgorithm());
+			LOG.debug("Creating attribute mapping: " + targetAttribute.getName() + " = "
+					+ generatedAlgorithm.getAlgorithm());
 		}
 	}
 
@@ -103,8 +110,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 	{
 		final Collection<String> attributeNames = getSourceAttributeNames(algorithm);
 
-		return Iterables.transform(sourceEntities, entity ->
-		{
+		return Iterables.transform(sourceEntities, entity -> {
 			AlgorithmEvaluation algorithmResult = new AlgorithmEvaluation(entity);
 
 			Object derivedValue;
@@ -179,8 +185,8 @@ public class AlgorithmServiceImpl implements AlgorithmService
 					break;
 				case XREF:
 				case CATEGORICAL:
-					convertedValue = dataService
-							.findOneById(attributeMetaData.getRefEntity().getName(), Context.toString(value));
+					convertedValue = dataService.findOneById(attributeMetaData.getRefEntity().getName(),
+							Context.toString(value));
 					break;
 				case MREF:
 				case CATEGORICAL_MREF:

@@ -1,4 +1,4 @@
-package org.molgenis.ontology.ic;
+package org.molgenis.ontology.core.meta;
 
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.ontology.core.model.OntologyPackage;

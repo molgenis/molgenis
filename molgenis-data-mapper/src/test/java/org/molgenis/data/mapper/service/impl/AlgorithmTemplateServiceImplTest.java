@@ -1,18 +1,34 @@
 package org.molgenis.data.mapper.service.impl;
 
-import com.google.common.collect.Maps;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.script.ScriptMetaData.SCRIPT;
+import static org.molgenis.script.ScriptMetaData.TYPE;
+import static org.molgenis.script.ScriptParameterMetaData.SCRIPT_PARAMETER;
+import static org.testng.Assert.assertEquals;
+
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedMatchCandidate;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.file.FileStore;
 import org.molgenis.js.magma.JsMagmaScriptRunner;
-import org.molgenis.script.*;
+import org.molgenis.script.Script;
+import org.molgenis.script.ScriptFactory;
+import org.molgenis.script.ScriptMetaData;
+import org.molgenis.script.ScriptParameter;
+import org.molgenis.script.ScriptParameterFactory;
 import org.molgenis.security.core.token.TokenService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,18 +39,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.script.ScriptMetaData.SCRIPT;
-import static org.molgenis.script.ScriptMetaData.TYPE;
-import static org.molgenis.script.ScriptParameterMetaData.SCRIPT_PARAMETER;
-import static org.testng.Assert.assertEquals;
+import com.google.common.collect.Maps;
 
 @ContextConfiguration(classes = AlgorithmTemplateServiceImplTest.Config.class)
 public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
@@ -90,13 +95,13 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 		AttributeMetaData sourceAttr1 = attrMetaFactory.create().setName(sourceAttr1Name);
 		sourceEntityMeta.addAttribute(sourceAttr0);
 		sourceEntityMeta.addAttribute(sourceAttr1);
-		ExplainedQueryString sourceAttr0Explain = ExplainedQueryString.create("a", "b", param0Name, 1.0);
-		ExplainedQueryString sourceAttr1Explain = ExplainedQueryString.create("a", "b", param1Name, 0.5);
-		Map<AttributeMetaData, ExplainedAttributeMetaData> attrResults = Maps.newHashMap();
+		ExplainedQueryString sourceAttr0Explain = ExplainedQueryString.create("b", param0Name, 1.0);
+		ExplainedQueryString sourceAttr1Explain = ExplainedQueryString.create("b", param1Name, 0.5);
+		Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> attrResults = Maps.newHashMap();
 		attrResults.put(sourceAttr0,
-				ExplainedAttributeMetaData.create(sourceAttr0, singletonList(sourceAttr0Explain), false));
+				ExplainedMatchCandidate.create(sourceAttr0, singletonList(sourceAttr0Explain), false));
 		attrResults.put(sourceAttr1,
-				ExplainedAttributeMetaData.create(sourceAttr1, singletonList(sourceAttr1Explain), false));
+				ExplainedMatchCandidate.create(sourceAttr1, singletonList(sourceAttr1Explain), false));
 
 		Stream<AlgorithmTemplate> templateStream = algorithmTemplateServiceImpl.find(attrResults);
 
@@ -109,7 +114,8 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.script" })
+	@ComponentScan(
+	{ "org.molgenis.script" })
 	public static class Config
 	{
 		@Bean

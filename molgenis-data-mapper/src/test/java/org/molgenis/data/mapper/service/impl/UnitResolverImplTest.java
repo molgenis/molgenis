@@ -1,6 +1,20 @@
 package org.molgenis.data.mapper.service.impl;
 
-import com.google.common.collect.Sets;
+import static com.google.common.collect.Sets.newHashSet;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.molgenis.data.mapper.service.impl.UnitResolverImpl.UNIT_ONTOLOGY_IRI;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
+
+import java.util.List;
+import java.util.Set;
+
+import javax.measure.quantity.Quantity;
+import javax.measure.unit.Unit;
+
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.ontology.core.model.Ontology;
@@ -14,19 +28,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.Unit;
-import java.util.List;
-import java.util.Set;
-
-import static com.google.common.collect.Sets.newHashSet;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.molgenis.data.mapper.service.impl.UnitResolverImpl.UNIT_ONTOLOGY_IRI;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import com.google.common.collect.Sets;
 
 @ContextConfiguration(classes = UnitResolverImplTest.Config.class)
 public class UnitResolverImplTest extends AbstractMolgenisSpringTest
@@ -186,12 +188,12 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 			OntologyService ontologyService = mock(OntologyService.class);
 			when(ontologyService.getOntology(UNIT_ONTOLOGY_IRI)).thenReturn(ontology);
 
-			when(ontologyService
-					.findExcatOntologyTerms(ontologyIds, Sets.newLinkedHashSet(asList("weight", "kilogram")),
-							Integer.MAX_VALUE)).thenReturn(singletonList(KG_ONTOLOGY_TERM));
-			when(ontologyService
-					.findExcatOntologyTerms(ontologyIds, Sets.newLinkedHashSet(asList("label", "height", "centimeter")),
-							Integer.MAX_VALUE)).thenReturn(singletonList(CM_ONTOLOGY_TERM));
+			when(ontologyService.findExcatOntologyTerms(ontologyIds,
+					Sets.newLinkedHashSet(asList("weight", "kilogram")), Integer.MAX_VALUE))
+							.thenReturn(singletonList(KG_ONTOLOGY_TERM));
+			when(ontologyService.findExcatOntologyTerms(ontologyIds,
+					Sets.newLinkedHashSet(asList("label", "height", "centimeter")), Integer.MAX_VALUE))
+							.thenReturn(singletonList(CM_ONTOLOGY_TERM));
 
 			when(ontologyService.findExcatOntologyTerms(ontologyIds, newHashSet(kgTerm, cmTerm), Integer.MAX_VALUE))
 					.thenReturn(asList(KG_ONTOLOGY_TERM, CM_ONTOLOGY_TERM));

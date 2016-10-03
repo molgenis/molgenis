@@ -1,15 +1,16 @@
 package org.molgenis.ontology.core.model;
 
-import com.google.auto.value.AutoValue;
-import org.molgenis.gson.AutoGson;
+import static java.util.Arrays.stream;
+import static java.util.Collections.emptyList;
+import static org.apache.commons.lang3.StringUtils.join;
 
-import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.List;
 
-import static com.google.common.collect.ImmutableList.copyOf;
-import static java.util.Arrays.stream;
-import static org.apache.commons.lang3.StringUtils.join;
+import javax.annotation.Nullable;
+
+import org.molgenis.gson.AutoGson;
+
+import com.google.auto.value.AutoValue;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_OntologyTerm.class)
@@ -24,34 +25,39 @@ public abstract class OntologyTerm
 
 	public abstract List<String> getSynonyms();
 
+	public abstract List<String> getNodePaths();
+
+	@Nullable
+	public abstract List<OntologyTermAnnotation> getAnnotations();
+
+	@Nullable
+	public abstract List<SemanticType> getSemanticTypes();
+
 	public static OntologyTerm create(String iri, String label)
 	{
-		return new AutoValue_OntologyTerm(iri, label, null, Collections.singletonList(label));
+		return new AutoValue_OntologyTerm(iri, label, null, emptyList(), emptyList(), emptyList(), emptyList());
 	}
 
 	public static OntologyTerm create(String iri, String label, List<String> synonyms)
 	{
-		return new AutoValue_OntologyTerm(iri, label, null, copyOf(synonyms));
+		return new AutoValue_OntologyTerm(iri, label, null, synonyms, emptyList(), emptyList(), emptyList());
 	}
 
-	public static OntologyTerm create(String iri, String label, String description)
+	public static OntologyTerm create(String iri, String label, String description, List<String> synonyms,
+			List<String> nodePaths, List<OntologyTermAnnotation> annotations, List<SemanticType> semanticTypes)
 	{
-		return new AutoValue_OntologyTerm(iri, label, description, Collections.singletonList((description)));
-	}
-
-	public static OntologyTerm create(String iri, String label, String description, List<String> synonyms)
-	{
-		return new AutoValue_OntologyTerm(iri, label, description, copyOf(synonyms));
+		return new AutoValue_OntologyTerm(iri, label, description, synonyms, nodePaths, annotations, semanticTypes);
 	}
 
 	/**
 	 * Creates a new {@link OntologyTerm} that is the combined ontology term of a couple ontology terms. Its IRI will be
 	 * a comma separated list of all original ontology term IRIs. Its label will be for instance
 	 * <code>(term1 and term2 and term3)</code>. It won't have any synonyms.
-	 * <p>
+	 * 
 	 * This can be used to tag an attribute with (hypertension and medication).
-	 *
-	 * @param terms the {@link OntologyTerm}s to combine
+	 * 
+	 * @param terms
+	 *            the {@link OntologyTerm}s to combine
 	 * @return the combined OntologyTerm
 	 */
 	public static OntologyTerm and(OntologyTerm... terms)

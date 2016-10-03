@@ -1,6 +1,8 @@
 package org.molgenis.ontology.core.config;
 
 import org.molgenis.data.DataService;
+import org.molgenis.ontology.core.meta.OntologyTermMetaData;
+import org.molgenis.ontology.core.meta.TermFrequencyFactory;
 import org.molgenis.ontology.core.repository.OntologyRepository;
 import org.molgenis.ontology.core.repository.OntologyTermRepository;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -17,6 +19,12 @@ public class OntologyConfig
 	@Autowired
 	DataService dataService;
 
+	@Autowired
+	TermFrequencyFactory termFrequencyFactory;
+
+	@Autowired
+	OntologyTermMetaData ontologyTermMetData;
+
 	@Bean
 	public OntologyService ontologyService()
 	{
@@ -32,12 +40,12 @@ public class OntologyConfig
 	@Bean
 	public OntologyTermRepository ontologyTermRepository()
 	{
-		return new OntologyTermRepository(dataService);
+		return new OntologyTermRepository(dataService, ontologyTermMetData);
 	}
 
 	@Bean
 	public TermFrequencyService termFrequencyService()
 	{
-		return new OntologyTermFrequencyServiceImpl(dataService);
+		return new OntologyTermFrequencyServiceImpl(dataService, termFrequencyFactory);
 	}
 }

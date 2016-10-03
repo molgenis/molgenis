@@ -1,9 +1,5 @@
 package org.molgenis.ontology.ic;
 
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStream;
@@ -14,6 +10,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class PubMedTermFrequencyService
 {
 	private static final Logger LOG = LoggerFactory.getLogger(PubMedTermFrequencyService.class);
@@ -21,9 +21,13 @@ public class PubMedTermFrequencyService
 	private static final Pattern PATTERN_REGEX = Pattern.compile("<Count>(\\d*)</Count>");
 	private static final int TIME_OUT = 20000;
 	private static final long TOTAL_NUMBER_PUBLICATION = 24000000;
+	private static final int THRESHOLD_VALUE = 30000;
+	private static final PubMedTFEntity DEFAULT_TF_ENTITY = new PubMedTFEntity(THRESHOLD_VALUE, 1);
 
 	public PubMedTFEntity getTermFrequency(String term)
 	{
+		if (term.length() < 4) return DEFAULT_TF_ENTITY;
+
 		String response = httpGet(BASE_URL + "\"" + term + "\"");
 		return parseResponse(response);
 	}
@@ -37,10 +41,18 @@ public class PubMedTermFrequencyService
 			if (StringUtils.isNotEmpty(countString))
 			{
 				int occurrence = Integer.parseInt(countString);
-				if (occurrence != 0)
+				if (occurrence >= THRESHOLD_VALUE)
 				{
-					double frequency = Math.abs(Math.log10((double) occurrence / TOTAL_NUMBER_PUBLICATION));
-					return new PubMedTFEntity(occurrence, frequency);
+					if (occurrence != 0)
+					{
+						double frequency = Math.pow(Math.log10((double) occurrence / TOTAL_NUMBER_PUBLICATION) * 1.5,
+								2);
+						return new PubMedTFEntity(occurrence, frequency);
+					}
+				}
+				else
+				{
+					return DEFAULT_TF_ENTITY;
 				}
 			}
 		}
@@ -75,7 +87,10 @@ public class PubMedTermFrequencyService
 		}
 		catch (Exception e)
 		{
-			LOG.error(e.getMessage());
+			if (LOG.isTraceEnabled())
+			{
+				LOG.error(e.getMessage());
+			}
 			return StringUtils.EMPTY;
 		}
 	}

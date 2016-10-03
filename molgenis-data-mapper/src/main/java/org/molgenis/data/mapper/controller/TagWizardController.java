@@ -1,7 +1,18 @@
 package org.molgenis.data.mapper.controller;
 
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
+import static com.google.common.collect.Lists.newArrayList;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static org.elasticsearch.common.collect.ImmutableSet.of;
+import static org.molgenis.data.mapper.controller.TagWizardController.URI;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import javax.validation.Valid;
+
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
@@ -29,19 +40,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-import javax.validation.Valid;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static com.google.common.collect.Lists.newArrayList;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static org.elasticsearch.common.collect.ImmutableSet.of;
-import static org.molgenis.data.mapper.controller.TagWizardController.URI;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 @Controller
 @RequestMapping(URI)
@@ -74,8 +82,10 @@ public class TagWizardController extends MolgenisPluginController
 	/**
 	 * Displays on tag wizard button press
 	 *
-	 * @param target The target entity name
-	 * @param model  the model
+	 * @param target
+	 *            The target entity name
+	 * @param model
+	 *            the model
 	 * @return name of the tag wizard view
 	 */
 	@RequestMapping
@@ -117,42 +127,37 @@ public class TagWizardController extends MolgenisPluginController
 	/**
 	 * Add a tag for a single attribute
 	 *
-	 * @param request the {@link AddTagRequest} containing the entityName, attributeName, relationIRI and ontologyTermIRIs
+	 * @param request
+	 *            the {@link AddTagRequest} containing the entityName, attributeName, relationIRI and ontologyTermIRIs
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/tagattribute")
-	public
-	@ResponseBody
-	OntologyTag addTagAttribute(@Valid @RequestBody AddTagRequest request)
+	public @ResponseBody OntologyTag addTagAttribute(@Valid @RequestBody AddTagRequest request)
 	{
-		return ontologyTagService
-				.addAttributeTag(request.getEntityName(), request.getAttributeName(), request.getRelationIRI(),
-						request.getOntologyTermIRIs());
+		return ontologyTagService.addAttributeTag(request.getEntityName(), request.getAttributeName(),
+				request.getRelationIRI(), request.getOntologyTermIRIs());
 	}
 
 	/**
 	 * Delete a single tag
 	 *
-	 * @param request the {@link RemoveTagRequest} containing entityName, attributeName, relationIRI and ontologyTermIRI
+	 * @param request
+	 *            the {@link RemoveTagRequest} containing entityName, attributeName, relationIRI and ontologyTermIRI
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/deletesingletag")
-	public
-	@ResponseBody
-	void deleteSingleTag(@Valid @RequestBody RemoveTagRequest request)
+	public @ResponseBody void deleteSingleTag(@Valid @RequestBody RemoveTagRequest request)
 	{
-		ontologyTagService
-				.removeAttributeTag(request.getEntityName(), request.getAttributeName(), request.getRelationIRI(),
-						request.getOntologyTermIRI());
+		ontologyTagService.removeAttributeTag(request.getEntityName(), request.getAttributeName(),
+				request.getRelationIRI(), request.getOntologyTermIRI());
 	}
 
 	/**
 	 * Clears all tags from every attribute in the current target entity
 	 *
-	 * @param entityName The name of the {@link Entity}
+	 * @param entityName
+	 *            The name of the {@link Entity}
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/clearalltags")
-	public
-	@ResponseBody
-	void clearAllTags(@RequestParam String entityName)
+	public @ResponseBody void clearAllTags(@RequestParam String entityName)
 	{
 		ontologyTagService.removeAllTagsFromEntity(entityName);
 	}
@@ -161,13 +166,12 @@ public class TagWizardController extends MolgenisPluginController
 	 * Automatically tags all attributes in the current entity using Lucene lexical matching. Stores the tags in the
 	 * OntologyTag Repository.
 	 *
-	 * @param request containing the entityName and selected ontology identifiers
+	 * @param request
+	 *            containing the entityName and selected ontology identifiers
 	 * @return A {@link Map} containing AttributeMetaData name and a Map of Tag iri and label
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/autotagattributes")
-	public
-	@ResponseBody
-	Map<String, OntologyTag> autoTagAttributes(@Valid @RequestBody AutoTagRequest request)
+	public @ResponseBody Map<String, OntologyTag> autoTagAttributes(@Valid @RequestBody AutoTagRequest request)
 	{
 		Map<AttributeMetaData, Hit<OntologyTerm>> autoGeneratedTags = semanticSearchService
 				.findTags(request.getEntityName(), request.getOntologyIds());
@@ -179,13 +183,12 @@ public class TagWizardController extends MolgenisPluginController
 	/**
 	 * Returns ontology terms based on a search term and a selected ontology
 	 *
-	 * @param request Containing ontology identifiers and a search term
+	 * @param request
+	 *            Containing ontology identifiers and a search term
 	 * @return A {@link List} of {@link OntologyTerm}s
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/getontologyterms")
-	public
-	@ResponseBody
-	List<OntologyTerm> getAllOntologyTerms(@Valid @RequestBody GetOntologyTermRequest request)
+	public @ResponseBody List<OntologyTerm> getAllOntologyTerms(@Valid @RequestBody GetOntologyTermRequest request)
 	{
 		return ontologyService.findOntologyTerms(request.getOntologyIds(), of(request.getSearchTerm()), 100);
 	}

@@ -1,24 +1,31 @@
 package org.molgenis.ontology.core.meta;
 
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ID;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_DYNAMIC_ANNOTATION;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_IRI;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_NAME;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_NODE_PATH;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_SEMANTIC_TYPE;
+import static org.molgenis.ontology.core.meta.OntologyTermMetaData.ONTOLOGY_TERM_SYNONYM;
+
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
-import static org.molgenis.ontology.core.meta.OntologyTermMetaData.*;
-
-public class OntologyTerm extends StaticEntity
+public class OntologyTermEntity extends StaticEntity
 {
-	public OntologyTerm(Entity entity)
+	public OntologyTermEntity(Entity entity)
 	{
 		super(entity);
 	}
 
-	public OntologyTerm(EntityMetaData entityMeta)
+	public OntologyTermEntity(EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 	}
 
-	public OntologyTerm(String id, EntityMetaData entityMeta)
+	public OntologyTermEntity(String id, EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 		setId(id);
@@ -84,12 +91,22 @@ public class OntologyTerm extends StaticEntity
 		set(ONTOLOGY_TERM_NODE_PATH, ontologyTermNodePaths);
 	}
 
-	public Ontology getOntology()
+	public Iterable<SemanticTypeEntity> getSemanticTypes()
 	{
-		return getEntity(ONTOLOGY, Ontology.class);
+		return getEntities(ONTOLOGY_TERM_SEMANTIC_TYPE, SemanticTypeEntity.class);
 	}
 
-	public void setOntology(Ontology ontology)
+	public void setSemanticTypes(Iterable<SemanticTypeEntity> semanticTypes)
+	{
+		set(ONTOLOGY_TERM_SEMANTIC_TYPE, semanticTypes);
+	}
+
+	public OntologyEntity getOntology()
+	{
+		return getEntity(ONTOLOGY, OntologyEntity.class);
+	}
+
+	public void setOntology(OntologyEntity ontology)
 	{
 		set(ONTOLOGY, ontology);
 	}
