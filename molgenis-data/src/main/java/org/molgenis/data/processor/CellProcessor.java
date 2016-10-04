@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 public interface CellProcessor extends Serializable
 {
-	public String process(String value);
+	String process(String value);
 
-	public boolean processHeader();
+	boolean processHeader();
 
-	public boolean processData();
+	boolean processData();
 }

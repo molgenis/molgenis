@@ -37,7 +37,6 @@ public class MolgenisClient
 	 *
 	 * @param token token to put in the molgenis header
 	 * @param body  body to put in the {@link HttpEntity}
-	 * @param T     The type of the body
 	 * @return the {@link HttpEntity}
 	 */
 	private static <T> HttpEntity<T> createHttpEntity(String token, T body)

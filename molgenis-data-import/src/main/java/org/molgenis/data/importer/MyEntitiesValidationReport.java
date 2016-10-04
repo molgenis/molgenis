@@ -31,7 +31,7 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 
 		private final boolean valid;
 
-		private AttributeState(boolean valid)
+		AttributeState(boolean valid)
 		{
 			this.valid = valid;
 		}
@@ -74,7 +74,7 @@ public class MyEntitiesValidationReport implements EntitiesValidationReport
 	}
 
 	/**
-	 * Creates a new report, with an attribute with state {@value AttributeState#IMPORTABLE} added to the last added
+	 * Creates a new report, with an attribute with state {@link AttributeState#IMPORTABLE} added to the last added
 	 * entity;
 	 *
 	 * @param attributeName

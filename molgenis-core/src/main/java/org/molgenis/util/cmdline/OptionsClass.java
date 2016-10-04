@@ -17,4 +17,4 @@ public @interface OptionsClass
 	String version() default "0.0.0";
 
 	String description() default "";
-};
+}

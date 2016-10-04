@@ -71,7 +71,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 		private final MenuManagerServiceImpl menuManagerServiceImpl;
 
 		@Autowired
-		public Meta(MenuManagerServiceImpl menuManagerServiceImpl)
+		public Meta(@SuppressWarnings("SpringJavaAutowiringInspection") MenuManagerServiceImpl menuManagerServiceImpl)
 		{
 			super(ID);
 			this.menuManagerServiceImpl = requireNonNull(menuManagerServiceImpl);

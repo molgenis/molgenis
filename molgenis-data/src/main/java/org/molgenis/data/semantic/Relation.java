@@ -16,7 +16,7 @@ public enum Relation
 
 	private String iri;
 
-	private Relation(String iri)
+	Relation(String iri)
 	{
 		this.iri = iri;
 	}

@@ -6,11 +6,6 @@ import java.util.Set;
 
 public class FileExtensionUtils
 {
-	/**
-	 * Checks if an entity contains data or not
-	 *
-	 * @param entity
-	 */
 	public static String findExtensionFromPossibilities(String fileName, Set<String> fileExtensions)
 	{
 		String name = fileName.toLowerCase();

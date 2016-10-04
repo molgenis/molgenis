@@ -9,7 +9,6 @@ import org.molgenis.data.index.meta.IndexActionGroupMetaData;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
@@ -121,8 +120,7 @@ class IndexJob extends Job
 			if (indexAction.getEntityId() != null)
 			{
 				progress.progress(progressCount,
-						format("Indexing {0}.{1}", indexAction.getEntityFullName(),
-								indexAction.getEntityId()));
+						format("Indexing {0}.{1}", indexAction.getEntityFullName(), indexAction.getEntityId()));
 				rebuildIndexOneEntity(indexAction.getEntityFullName(), indexAction.getEntityId());
 			}
 			else

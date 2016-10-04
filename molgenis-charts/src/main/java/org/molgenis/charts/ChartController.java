@@ -117,7 +117,6 @@ public class ChartController
 	 * @param out
 	 * @param name
 	 * @param extension
-	 * @param fileNames
 	 * @param response
 	 * @throws IOException
 	 */

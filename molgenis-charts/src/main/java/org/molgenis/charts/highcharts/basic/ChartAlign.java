@@ -6,7 +6,7 @@ public enum ChartAlign
 
 	private String align;
 
-	private ChartAlign(String align)
+	ChartAlign(String align)
 	{
 		this.align = align;
 	}

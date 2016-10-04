@@ -17,6 +17,7 @@ import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DA
  * Package defines the structure and attributes of a Package. Attributes are unique. Other software components can use
  * this to interact with Packages and/or to configure backends and frontends, including Repository instances.
  */
+@SuppressWarnings("SpringJavaAutowiringInspection")
 public class Package extends StaticEntity
 {
 	public static final String PACKAGE_SEPARATOR = "_";

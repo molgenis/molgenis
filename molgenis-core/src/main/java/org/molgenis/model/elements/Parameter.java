@@ -30,7 +30,7 @@ public class Parameter implements Serializable
 	/**
 	 * Description of the different types of a field.
 	 */
-	public static enum Type
+	public enum Type
 	{
 		/**
 		 * The type is unknown, this case should raise an exception.
@@ -71,7 +71,7 @@ public class Parameter implements Serializable
 		 * The standard constructor, which binds a string to the
 		 * enumeration-type.
 		 */
-		private Type(String tag)
+		Type(String tag)
 		{
 			this.tag = tag;
 		}
@@ -136,8 +136,6 @@ public class Parameter implements Serializable
 		 */
 		public final String tag;
 	}
-
-	;
 
 	/**
 	 * Fixed value used for determining the not-set value for the varchar.

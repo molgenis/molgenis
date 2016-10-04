@@ -8,7 +8,7 @@ import org.molgenis.data.meta.model.EntityMetaData;
 /**
  * Create MOLGENIS Query from RSQL node based on entity meta data.
  *
- * @see https://github.com/jirutka/rsql-parser
+ * @see <a href="https://github.com/jirutka/rsql-parser">https://github.com/jirutka/rsql-parser</a>
  */
 public class QueryRsql
 {

@@ -108,6 +108,6 @@ public class IndexActionMetaData extends SystemEntityMetaData
 		/**
 		 * index action is just created and is not yet processed
 		 */
-		PENDING;
+		PENDING
 	}
 }

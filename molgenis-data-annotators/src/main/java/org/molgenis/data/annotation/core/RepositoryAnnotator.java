@@ -16,7 +16,7 @@ import java.util.List;
 
 public interface RepositoryAnnotator
 {
-	final static String ANNOTATOR_PREFIX = "molgenis_annotated_";
+	String ANNOTATOR_PREFIX = "molgenis_annotated_";
 
 	AnnotatorInfo getInfo();
 
@@ -30,7 +30,7 @@ public interface RepositoryAnnotator
 		return this.annotate(source);
 	}
 
-	public Iterator<Entity> annotate(Iterable<Entity> source);
+	Iterator<Entity> annotate(Iterable<Entity> source);
 
 	/**
 	 * Checks if folder and files that were set with a runtime property actually exist, or if a webservice can be
