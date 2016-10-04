@@ -33,8 +33,8 @@ public class QueryRuleTest
 	@Test
 	public void equalsWithDifferentValues()
 	{
-		QueryRule q1 = new QueryRule("field", EQUALS, "authorbook1");
-		QueryRule q2 = new QueryRule("field", EQUALS, "authorbook2");
+		QueryRule q1 = new QueryRule("field", EQUALS, "test1");
+		QueryRule q2 = new QueryRule("field", EQUALS, "test2");
 		assertFalse(q1.equals(q2));
 	}
 

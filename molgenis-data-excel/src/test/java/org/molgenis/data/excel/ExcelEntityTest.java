@@ -121,11 +121,11 @@ public class ExcelEntityTest
 				// noop
 			}
 		};
-		entity.set("attr1", "authorbook1");
-		entity.set("attr2", "authorbook2");
+		entity.set("attr1", "test1");
+		entity.set("attr2", "test2");
 
 		excelEntity.set(entity);
-		assertEquals(excelEntity.get("attr1"), "authorbook1");
+		assertEquals(excelEntity.get("attr1"), "test1");
 		assertNull(excelEntity.get("attr2"));
 	}
 }
