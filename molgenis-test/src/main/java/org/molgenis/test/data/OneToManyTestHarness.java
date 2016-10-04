@@ -3,7 +3,6 @@ package org.molgenis.test.data;
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.test.data.staticentity.bidirectional.Person;
 import org.molgenis.test.data.staticentity.bidirectional.person1.PersonFactory1;
 import org.molgenis.test.data.staticentity.bidirectional.person1.PersonMetaData1;
 import org.molgenis.test.data.staticentity.bidirectional.person2.PersonFactory2;
