@@ -111,6 +111,10 @@ public class OneToManyTestHarness
 	public static final String ATTR_PARENT = "parent";
 	public static final String ATTR_CHILDREN = "children";
 
+	public enum TestCaseType{
+		BOTH_NULLABLE, XREF_REQUIRED, ONE_TO_MANY_REQUIRED, BOTH_REQUIRED;
+	}
+
 	@PostConstruct
 	public void postConstruct()
 	{
@@ -127,17 +131,17 @@ public class OneToManyTestHarness
 	 * Case 5: Author.books = nillable, Book.author = nillable | ascending order
 	 * Case 6: Author.books = nillable, Book.author = nillable | descending order
 	 */
-	public AuthorsAndBooks createAuthorAndBookEntities(int testCase)
+	public AuthorsAndBooks createAuthorAndBookEntities(TestCaseType testCase)
 	{
 		switch (testCase)
 		{
-			case 1:
+			case BOTH_NULLABLE:
 				return createTestEntitiesSetAuthorField(authorFactory1, bookFactory1, authorMetaData1, bookMetaData1);
-			case 2:
+			case XREF_REQUIRED:
 				return createTestEntitiesSetBooksField(authorFactory2, bookFactory2, authorMetaData2, bookMetaData2);
-			case 3:
+			case ONE_TO_MANY_REQUIRED:
 				return createTestEntitiesSetAuthorField(authorFactory3, bookFactory3, authorMetaData3, bookMetaData3);
-			case 4:
+			case BOTH_REQUIRED:
 				return createTestEntitiesSetAuthorField(authorFactory4, bookFactory4, authorMetaData4, bookMetaData4);
 			default:
 				throw new IllegalArgumentException("Unknown test case " + testCase);
@@ -153,17 +157,17 @@ public class OneToManyTestHarness
 	 * Case 3: Person.parent = required, Person.children = nillable
 	 * Case 4: Person.parent = required, Person.children = required
 	 */
-	public List<Entity> createPersonEntities(int testCase)
+	public List<Entity> createPersonEntities(TestCaseType testCase)
 	{
 		switch (testCase)
 		{
-			case 1:
+			case BOTH_NULLABLE:
 				return createPersonEntities(personFactory1);
-			case 2:
+			case XREF_REQUIRED:
 				return createPersonEntities(personFactory2);
-			case 3:
+			case ONE_TO_MANY_REQUIRED:
 				return createPersonEntities(personFactory3);
-			case 4:
+			case BOTH_REQUIRED:
 				return createPersonEntities(personFactory4);
 			default:
 				throw new IllegalArgumentException("Unknown test case " + testCase);
