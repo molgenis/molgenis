@@ -11,7 +11,6 @@ import org.molgenis.test.data.staticentity.bidirectional.authorbook1.BookMetaDat
 import org.molgenis.test.data.staticentity.bidirectional.person1.PersonMetaData1;
 import org.molgenis.test.data.staticentity.bidirectional.person2.PersonMetaData2;
 import org.molgenis.test.data.staticentity.bidirectional.person3.PersonMetaData3;
-import org.molgenis.test.data.staticentity.bidirectional.person4.PersonMetaData4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,13 +79,12 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 			dataService.deleteAll(PersonMetaData1.NAME);
 			dataService.deleteAll(PersonMetaData2.NAME);
 			dataService.deleteAll(PersonMetaData3.NAME);
-			dataService.deleteAll(PersonMetaData4.NAME);
 		});
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 
-	@Test(singleThreaded = true, dataProvider = "oneToManyAllTestCaseDataProvider")
-	public void testOneToManyAuthorAndBookInsert(int testCase)
+	@Test(singleThreaded = true, dataProvider = "allTestCaseDataProvider")
+	public void testAuthorAndBookInsert(int testCase)
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(testCase);
 
@@ -104,8 +102,8 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 				.getIdValue(), BOOK_3);
 	}
 
-	@Test(singleThreaded = true, dataProvider = "oneToManyAllTestCaseDataProvider")
-	public void testOneToManyPersonInsert(int testCase)
+	@Test(singleThreaded = true, dataProvider = "allTestCaseDataProvider")
+	public void testPersonInsert(int testCase)
 	{
 		List<Entity> persons = importPersons(testCase);
 
@@ -129,21 +127,21 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 						.collect(toSet()), newHashSet(PERSON_1));
 	}
 
-	@DataProvider(name = "oneToManyAllTestCaseDataProvider")
-	private Object[][] oneToManyAllTestCaseDataProvider()
+	@DataProvider(name = "allTestCaseDataProvider")
+	private Object[][] allTestCaseDataProvider()
 	{
 		return new Object[][] { { 1 }, { 2 }, { 3 }, { 4 } };
 	}
 
-	@DataProvider(name = "oneToManyRequiredTestCaseDataProvider")
-	private Object[][] oneToManyRequiredTestCaseDataProvider()
+	@DataProvider(name = "requiredTestCaseDataProvider")
+	private Object[][] requiredTestCaseDataProvider()
 	{
 		return new Object[][] { { 2 }, { 3 }, { 4 } };
 	}
 
 	@Test(singleThreaded = true)
 	@Transactional
-	public void testL1OneToManySingleEntityUpdate()
+	public void testL1SingleEntityUpdate()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(1);
 		try
@@ -178,7 +176,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 
 	@Test(singleThreaded = true)
 	@Transactional
-	public void testL1OneToManyStreamingEntityUpdate()
+	public void testL1StreamingEntityUpdate()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(1);
 		try
@@ -213,7 +211,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 
 	@Test(singleThreaded = true)
 	@Transactional
-	public void testL1OneToManyEntitySingleEntityDelete()
+	public void testL1EntitySingleEntityDelete()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(1);
 		Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), BOOK_1);
@@ -232,7 +230,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 
 	@Test(singleThreaded = true)
 	@Transactional
-	public void testL1OneToManyEntityStreamingEntityDelete()
+	public void testL1EntityStreamingEntityDelete()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(1);
 		try
@@ -255,7 +253,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class)
-	public void testOneToManyAuthorRequiredSetBooksNull()
+	public void testAuthorRequiredSetBooksNull()
 	{
 		// FIXME doesn't throw exception
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
@@ -265,7 +263,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class)
-	public void testOneToManyAuthorRequiredSetAuthorsNull()
+	public void testAuthorRequiredSetAuthorsNull()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
 		Entity book = authorsAndBooks.getBooks().get(0);
@@ -274,7 +272,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(singleThreaded = true)
-	public void testOneToManyAuthorRequiredUpdateValue()
+	public void testAuthorRequiredUpdateValue()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
 		String bookName = authorsAndBooks.getBookMetaData().getName();
@@ -298,7 +296,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class)
-	public void testOneToManyBooksRequiredSetAuthorNull()
+	public void testBooksRequiredSetAuthorNull()
 	{
 		// FIXME doesn't throw exception
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(3); // author.books required
@@ -310,7 +308,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class)
-	public void testOneToManyBooksRequiredSetBooksNull()
+	public void testBooksRequiredSetBooksNull()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(3); // author.books required
 		String authorName = authorsAndBooks.getAuthorMetaData().getName();
@@ -321,7 +319,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(singleThreaded = true)
-	public void testOneToManyBookRequiredUpdateValue()
+	public void testBookRequiredUpdateValue()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(3); // book.author required
 		String bookName = authorsAndBooks.getBookMetaData().getName();
@@ -344,7 +342,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class)
-	public void testOneToManyBookAndAuthorRequiredSetAuthorNull()
+	public void testBookAndAuthorRequiredSetAuthorNull()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
 		String bookName = authorsAndBooks.getBookMetaData().getName();
@@ -355,7 +353,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class)
-	public void testOneToManyBookAndAuthorRequiredSetBooksNull()
+	public void testBookAndAuthorRequiredSetBooksNull()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
 		String authorName = authorsAndBooks.getAuthorMetaData().getName();
@@ -366,7 +364,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(singleThreaded = true)
-	public void testOneToManyBookAndAuthorRequiredUpdateValue()
+	public void testBookAndAuthorRequiredUpdateValue()
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
 		String bookName = authorsAndBooks.getBookMetaData().getName();
@@ -393,8 +391,8 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_1));
 	}
 
-	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class, dataProvider = "oneToManyRequiredTestCaseDataProvider")
-	public void testOneToManyParentRequiredSetChildrenNull(int testCase)
+	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class, dataProvider = "requiredTestCaseDataProvider")
+	public void testParentRequiredSetChildrenNull(int testCase)
 	{
 		List<Entity> persons = importPersons(testCase);
 		Entity person = persons.get(0);
@@ -402,8 +400,8 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		dataService.update(persons.get(0).getEntityMetaData().getName(), person);
 	}
 
-	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class, dataProvider = "oneToManyRequiredTestCaseDataProvider")
-	public void testOneToManyParentRequiredSetParentNull(int testCase)
+	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class, dataProvider = "requiredTestCaseDataProvider")
+	public void testParentRequiredSetParentNull(int testCase)
 	{
 		List<Entity> persons = importPersons(testCase);
 		Entity person = persons.get(0);
@@ -412,17 +410,17 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(singleThreaded = true)
-	public void testOneToManyParentRequiredUpdateValue()
+	public void testParentRequiredUpdateValue()
 	{
 	}
 
 	@Test(singleThreaded = true)
-	public void testOneToManyChildrenRequiredUpdateValue()
+	public void testChildrenRequiredUpdateValue()
 	{
 	}
 
 	@Test(singleThreaded = true)
-	public void testOneToManyParentAndChildrenRequiredSetUpdateValue()
+	public void testParentAndChildrenRequiredSetUpdateValue()
 	{
 	}
 
