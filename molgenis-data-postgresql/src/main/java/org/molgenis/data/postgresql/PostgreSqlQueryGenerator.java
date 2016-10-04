@@ -167,7 +167,7 @@ class PostgreSqlQueryGenerator
 		if (bidirectionalOneToMany)
 		{
 			tableEntityMeta = attr.getRefEntity();
-			if (tableEntityMeta.getBackend().equals(POSTGRESQL))
+			if (attr.getOrderBy() == null && tableEntityMeta.getBackend().equals(POSTGRESQL))
 			{
 				columnSql = getSqlOrderColumn(attr);
 			}
