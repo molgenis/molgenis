@@ -52,7 +52,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private DataService dataService;
 
-
 	@BeforeClass
 	public void setUp()
 	{
@@ -86,7 +85,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 
-	@Test(singleThreaded = true, dataProvider = "oneToManyTestCaseDataProvider")
+	@Test(singleThreaded = true, dataProvider = "oneToManyAllTestCaseDataProvider")
 	public void testOneToManyAuthorAndBookInsert(int testCase)
 	{
 		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(testCase);
@@ -105,7 +104,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 				.getIdValue(), BOOK_3);
 	}
 
-	@Test(singleThreaded = true, dataProvider = "oneToManyTestCaseDataProvider")
+	@Test(singleThreaded = true, dataProvider = "oneToManyAllTestCaseDataProvider")
 	public void testOneToManyPersonInsert(int testCase)
 	{
 		List<Entity> persons = importPersons(testCase);
@@ -130,10 +129,16 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 						.collect(toSet()), newHashSet(PERSON_1));
 	}
 
-	@DataProvider(name = "oneToManyTestCaseDataProvider")
-	public Object[][] oneToManyTestCaseDataProvider()
+	@DataProvider(name = "oneToManyAllTestCaseDataProvider")
+	private Object[][] oneToManyAllTestCaseDataProvider()
 	{
 		return new Object[][] { { 1 }, { 2 }, { 3 }, { 4 } };
+	}
+
+	@DataProvider(name = "oneToManyRequiredTestCaseDataProvider")
+	private Object[][] oneToManyRequiredTestCaseDataProvider()
+	{
+		return new Object[][] { { 2 }, { 3 }, { 4 } };
 	}
 
 	@Test(singleThreaded = true)
@@ -388,43 +393,38 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_1));
 	}
 
-	@Test(singleThreaded = true)
-	public void testOneToManyParentRequiredSetChildrenNull()
+	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class, dataProvider = "oneToManyRequiredTestCaseDataProvider")
+	public void testOneToManyParentRequiredSetChildrenNull(int testCase)
 	{
+		List<Entity> persons = importPersons(testCase);
+		Entity person = persons.get(0);
+		person.set(ATTR_CHILDREN, null);
+		dataService.update(persons.get(0).getEntityMetaData().getName(), person);
+	}
 
+	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class, dataProvider = "oneToManyRequiredTestCaseDataProvider")
+	public void testOneToManyParentRequiredSetParentNull(int testCase)
+	{
+		List<Entity> persons = importPersons(testCase);
+		Entity person = persons.get(0);
+		person.set(ATTR_PARENT, null);
+		dataService.update(persons.get(0).getEntityMetaData().getName(), person);
 	}
 
 	@Test(singleThreaded = true)
-	public void testOneToManyParentRequiredSetParentNull()
-	{}
-
-	@Test(singleThreaded = true)
 	public void testOneToManyParentRequiredUpdateValue()
-	{}
-
-	@Test(singleThreaded = true)
-	public void testOneToManyChildrenRequiredSetChildrenNull()
-	{}
-
-	@Test(singleThreaded = true)
-	public void testOneToManyChildrenRequiredSetParentNull()
-	{}
+	{
+	}
 
 	@Test(singleThreaded = true)
 	public void testOneToManyChildrenRequiredUpdateValue()
-	{}
-
-	@Test(singleThreaded = true)
-	public void testOneToManyParentAndChildrenRequiredSetChildrenNull()
-	{}
-
-	@Test(singleThreaded = true)
-	public void testOneToManyParentAndChildrenRequiredSetParentNull()
-	{}
+	{
+	}
 
 	@Test(singleThreaded = true)
 	public void testOneToManyParentAndChildrenRequiredSetUpdateValue()
-	{}
+	{
+	}
 
 	private void importBooksThenAuthors(OneToManyTestHarness.AuthorsAndBooks authorsAndBooks)
 	{
