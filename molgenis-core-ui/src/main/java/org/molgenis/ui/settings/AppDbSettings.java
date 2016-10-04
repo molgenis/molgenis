@@ -1,7 +1,7 @@
 package org.molgenis.ui.settings;
 
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.settings.DefaultSettingsEntity;
 import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
@@ -125,7 +125,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 							"Custom javascript headers, specified as comma separated list. These headers will be included in the molgenis header before the applications own javascript headers.");
 
 			// tracking settings
-			AttributeMetaData trackingAttr = addAttribute(TRACKING).setDataType(COMPOUND).setLabel("Tracking");
+			Attribute trackingAttr = addAttribute(TRACKING).setDataType(COMPOUND).setLabel("Tracking");
 
 			addAttribute(GOOGLE_ANALYTICS_IP_ANONYMIZATION, trackingAttr).setDataType(BOOL).setNillable(false)
 					.setDefaultValue(String.valueOf(DEFAULT_GOOGLE_ANALYTICS_IP_ANONYMIZATION))

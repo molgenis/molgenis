@@ -3,7 +3,7 @@ package org.molgenis.data.support;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -21,7 +21,7 @@ public class LazyEntityTest
 	private static final String ID_ATTR_NAME = "id";
 
 	private EntityMetaData entityMeta;
-	private AttributeMetaData idAttr;
+	private Attribute idAttr;
 	private DataService dataService;
 	private Object id;
 	private LazyEntity lazyEntity;
@@ -32,7 +32,7 @@ public class LazyEntityTest
 	{
 		entityMeta = mock(EntityMetaData.class);
 		when(entityMeta.getName()).thenReturn(ENTITY_NAME);
-		idAttr = mock(AttributeMetaData.class);
+		idAttr = mock(Attribute.class);
 		when(idAttr.getName()).thenReturn(ID_ATTR_NAME);
 		when(entityMeta.getIdAttribute()).thenReturn(idAttr);
 		dataService = mock(DataService.class);
@@ -69,8 +69,8 @@ public class LazyEntityTest
 	public void getAttributeNames()
 	{
 		Entity entity = new DynamicEntity(entityMeta);
-		AttributeMetaData attr0 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr0").getMock();
-		AttributeMetaData attr1 = when(mock(AttributeMetaData.class).getName()).thenReturn("attr1").getMock();
+		Attribute attr0 = when(mock(Attribute.class).getName()).thenReturn("attr0").getMock();
+		Attribute attr1 = when(mock(Attribute.class).getName()).thenReturn("attr1").getMock();
 		when(entityMeta.getAtomicAttributes()).thenReturn(Arrays.asList(attr0, attr1));
 		assertEquals(Lists.newArrayList(entity.getAttributeNames()), Arrays.asList("attr0", "attr1"));
 	}

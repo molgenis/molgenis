@@ -1,7 +1,7 @@
 package org.molgenis.data.annotation.core.entity;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 import java.util.List;
 
@@ -31,10 +31,10 @@ public abstract class AnnotatorInfo
 
 	public abstract String getDescription();
 
-	public abstract List<AttributeMetaData> getOutputAttributes();
+	public abstract List<Attribute> getOutputAttributes();
 
 	public static AnnotatorInfo create(Status status, Type type, String code, String description,
-			List<AttributeMetaData> outputAttributes)
+			List<Attribute> outputAttributes)
 	{
 		return new AutoValue_AnnotatorInfo(status, type, code, description, outputAttributes);
 	}

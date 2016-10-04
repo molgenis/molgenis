@@ -1,7 +1,7 @@
 package org.molgenis.data.vcf.model;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,53 +24,53 @@ public class VcfAttributes
 	public static final String FORMAT_GT = "GT";
 	public static final String SAMPLES = "SAMPLES_ENTITIES";
 
-	private final AttributeMetaDataFactory attributeMetaDataFactory;
+	private final AttributeFactory attributeFactory;
 
 	@Autowired
-	public VcfAttributes(AttributeMetaDataFactory attributeMetaDataFactory)
+	public VcfAttributes(AttributeFactory attributeFactory)
 	{
-		this.attributeMetaDataFactory = requireNonNull(attributeMetaDataFactory);
+		this.attributeFactory = requireNonNull(attributeFactory);
 	}
 
-	public AttributeMetaData getChromAttribute()
+	public Attribute getChromAttribute()
 	{
-		return attributeMetaDataFactory.create().setName(CHROM).setDataType(STRING).setAggregatable(true)
+		return attributeFactory.create().setName(CHROM).setDataType(STRING).setAggregatable(true)
 				.setNillable(false).setDescription("The chromosome on which the variant is observed");
 	}
 
-	public AttributeMetaData getAltAttribute()
+	public Attribute getAltAttribute()
 	{
-		return attributeMetaDataFactory.create().setName(ALT).setDataType(TEXT).setAggregatable(true).setNillable(false)
+		return attributeFactory.create().setName(ALT).setDataType(TEXT).setAggregatable(true).setNillable(false)
 				.setDescription("The alternative allele observed");
 	}
 
-	public AttributeMetaData getPosAttribute()
+	public Attribute getPosAttribute()
 	{
-		return attributeMetaDataFactory.create().setName(POS).setDataType(INT).setAggregatable(true).setNillable(false)
+		return attributeFactory.create().setName(POS).setDataType(INT).setAggregatable(true).setNillable(false)
 				.setDescription("The position on the chromosome which the variant is observed");
 	}
 
-	public AttributeMetaData getRefAttribute()
+	public Attribute getRefAttribute()
 	{
-		return attributeMetaDataFactory.create().setName(REF).setDataType(TEXT).setAggregatable(true).setNillable(false)
+		return attributeFactory.create().setName(REF).setDataType(TEXT).setAggregatable(true).setNillable(false)
 				.setDescription("The reference allele");
 	}
 
-	public AttributeMetaData getFilterAttribute()
+	public Attribute getFilterAttribute()
 	{
-		return attributeMetaDataFactory.create().setName(FILTER).setDataType(STRING).setAggregatable(true)
+		return attributeFactory.create().setName(FILTER).setDataType(STRING).setAggregatable(true)
 				.setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 	}
 
-	public AttributeMetaData getQualAttribute()
+	public Attribute getQualAttribute()
 	{
-		return attributeMetaDataFactory.create().setName(QUAL).setDataType(STRING).setAggregatable(true)
+		return attributeFactory.create().setName(QUAL).setDataType(STRING).setAggregatable(true)
 				.setNillable(true).setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 	}
 
-	public AttributeMetaData getIdAttribute()
+	public Attribute getIdAttribute()
 	{
-		return attributeMetaDataFactory.create().setName(ID).setDataType(STRING).setNillable(true)
+		return attributeFactory.create().setName(ID).setDataType(STRING).setNillable(true)
 				.setDescription(DEFAULT_ATTRIBUTE_DESCRIPTION);
 	}
 }

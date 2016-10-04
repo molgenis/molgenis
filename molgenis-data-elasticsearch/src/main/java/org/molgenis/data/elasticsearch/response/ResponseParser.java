@@ -12,7 +12,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.util.ArrayList;
@@ -84,7 +84,7 @@ public class ResponseParser
 					}
 					else
 					{
-						AttributeMetaData attributeMetaData = entityMetaData.getAttribute(fieldName).getRefEntity()
+						Attribute attribute = entityMetaData.getAttribute(fieldName).getRefEntity()
 								.getLabelAttribute();
 						List<Object> values = new ArrayList<Object>();
 						if (entry.getValue() instanceof List<?>)
@@ -95,7 +95,7 @@ public class ResponseParser
 								{
 									for (Map.Entry<?, ?> entrySet : ((Map<?, ?>) eachElement).entrySet())
 									{
-										if (entrySet.getKey().toString().equalsIgnoreCase(attributeMetaData.getName()))
+										if (entrySet.getKey().toString().equalsIgnoreCase(attribute.getName()))
 										{
 											Object value = entrySet.getValue();
 											if (value != null)

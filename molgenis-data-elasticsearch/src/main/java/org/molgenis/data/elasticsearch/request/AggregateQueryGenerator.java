@@ -9,7 +9,7 @@ import org.elasticsearch.search.aggregations.bucket.nested.ReverseNestedBuilder;
 import org.elasticsearch.search.aggregations.metrics.cardinality.CardinalityBuilder;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,8 +27,8 @@ public class AggregateQueryGenerator
 	public static final String AGGREGATION_DISTINCT_POSTFIX = "_distinct";
 	public static final String AGGREGATION_TERMS_POSTFIX = "_terms";
 
-	public void generate(SearchRequestBuilder searchRequestBuilder, AttributeMetaData aggAttr1,
-			AttributeMetaData aggAttr2, AttributeMetaData aggAttrDistinct)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Attribute aggAttr1,
+			Attribute aggAttr2, Attribute aggAttrDistinct)
 	{
 		// validate request
 		if (aggAttr1 == null)
@@ -69,7 +69,7 @@ public class AggregateQueryGenerator
 		// collect aggregates
 		searchRequestBuilder.setSize(0);
 
-		LinkedList<AttributeMetaData> aggAttrs = new LinkedList<AttributeMetaData>();
+		LinkedList<Attribute> aggAttrs = new LinkedList<Attribute>();
 		aggAttrs.add(aggAttr1);
 		if (aggAttr2 != null)
 		{
@@ -84,10 +84,10 @@ public class AggregateQueryGenerator
 		}
 	}
 
-	private List<AggregationBuilder<?>> createAggregations(LinkedList<AttributeMetaData> attrs,
-			AttributeMetaData parentAttr, AttributeMetaData distinctAttr)
+	private List<AggregationBuilder<?>> createAggregations(LinkedList<Attribute> attrs,
+			Attribute parentAttr, Attribute distinctAttr)
 	{
-		AttributeMetaData attr = attrs.pop();
+		Attribute attr = attrs.pop();
 
 		List<AggregationBuilder<?>> aggs = new ArrayList<AggregationBuilder<?>>();
 
@@ -205,12 +205,12 @@ public class AggregateQueryGenerator
 		return aggs;
 	}
 
-	public static boolean isNestedType(AttributeMetaData attr)
+	public static boolean isNestedType(Attribute attr)
 	{
 		return isReferenceType(attr);
 	}
 
-	private String getAggregateFieldName(AttributeMetaData attr)
+	private String getAggregateFieldName(Attribute attr)
 	{
 		String attrName = attr.getName();
 		AttributeType dataType = attr.getDataType();

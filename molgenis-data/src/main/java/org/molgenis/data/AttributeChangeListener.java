@@ -1,9 +1,9 @@
 package org.molgenis.data;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 /**
- * Listener that when added to a {@link AttributeMetaData} fires when an attribute property changes.
+ * Listener that when added to a {@link Attribute} fires when an attribute property changes.
  */
 public interface AttributeChangeListener
 {
@@ -20,5 +20,5 @@ public interface AttributeChangeListener
 	 * @param attrName attribute of the the given attribute that changed
 	 * @param attr     changed attribute
 	 */
-	void onChange(String attrName, AttributeMetaData attr);
+	void onChange(String attrName, Attribute attr);
 }

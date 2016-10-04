@@ -9,7 +9,7 @@ import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.GoNLAnnotatorSettings;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -42,7 +42,7 @@ public class GoNLAnnotatorTest extends AbstractMolgenisSpringTest
 	ApplicationContext context;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityMetaDataFactory entityMetaDataFactory;
@@ -70,10 +70,10 @@ public class GoNLAnnotatorTest extends AbstractMolgenisSpringTest
 		emd.addAttribute(vcfAttributes.getPosAttribute());
 		emd.addAttribute(vcfAttributes.getRefAttribute());
 		emd.addAttribute(vcfAttributes.getAltAttribute());
-		emd.addAttribute(attributeMetaDataFactory.create().setName(GONL_GENOME_AF).setDataType(STRING)
+		emd.addAttribute(attributeFactory.create().setName(GONL_GENOME_AF).setDataType(STRING)
 				.setDescription("The allele frequency for variants seen in the population used for the GoNL project")
 				.setLabel(GONL_AF_LABEL));
-		emd.addAttribute(attributeMetaDataFactory.create().setName(GONL_GENOME_GTC).setDataType(STRING).setDescription(
+		emd.addAttribute(attributeFactory.create().setName(GONL_GENOME_GTC).setDataType(STRING).setDescription(
 				"GenoType Counts. For each ALT allele in the same order as listed = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 1/0, 0|1 and 1|0 are all counted as 0/1. When one or more alleles is not called for a genotype in a specific sample (./., ./0, ./1, ./2, etc.), that sample's genotype is completely discarded for calculating GTC.")
 				.setLabel(GONL_GTC_LABEL));
 

@@ -4,7 +4,7 @@ import com.google.common.base.Stopwatch;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
 import org.mozilla.javascript.EcmaError;
@@ -38,13 +38,13 @@ public class ScriptEvaluatorTest
 	@BeforeClass
 	protected static void beforeClass()
 	{
-		AttributeMetaData weightAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("weight").getMock();
+		Attribute weightAttr = when(mock(Attribute.class).getName()).thenReturn("weight").getMock();
 		when(weightAttr.getDataType()).thenReturn(INT);
 		personWeightEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("person").getMock();
 		when(personWeightEntityMeta.getAttribute("weight")).thenReturn(weightAttr);
 		when(personWeightEntityMeta.getAtomicAttributes()).thenReturn(singletonList(weightAttr));
 
-		AttributeMetaData heightAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("height").getMock();
+		Attribute heightAttr = when(mock(Attribute.class).getName()).thenReturn("height").getMock();
 		when(heightAttr.getDataType()).thenReturn(INT);
 		personHeightEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("person").getMock();
 		when(personHeightEntityMeta.getAttribute("height")).thenReturn(heightAttr);
@@ -55,27 +55,27 @@ public class ScriptEvaluatorTest
 		when(personWeightAndHeightEntityMeta.getAttribute("height")).thenReturn(heightAttr);
 		when(personWeightAndHeightEntityMeta.getAtomicAttributes()).thenReturn(asList(weightAttr, heightAttr));
 
-		AttributeMetaData birtDateAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("birthdate")
+		Attribute birtDateAttr = when(mock(Attribute.class).getName()).thenReturn("birthdate")
 				.getMock();
 		when(birtDateAttr.getDataType()).thenReturn(DATE);
 		personBirthDateMeta = when(mock(EntityMetaData.class).getName()).thenReturn("person").getMock();
 		when(personBirthDateMeta.getAttribute("birthdate")).thenReturn(birtDateAttr);
 		when(personBirthDateMeta.getAtomicAttributes()).thenReturn(singletonList(birtDateAttr));
 
-		AttributeMetaData ageAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("age").getMock();
+		Attribute ageAttr = when(mock(Attribute.class).getName()).thenReturn("age").getMock();
 		when(ageAttr.getDataType()).thenReturn(INT);
 		personAgeEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("person").getMock();
 		when(personAgeEntityMeta.getAttribute("age")).thenReturn(ageAttr);
 		when(personAgeEntityMeta.getAtomicAttributes()).thenReturn(singletonList(ageAttr));
 
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(idAttr.getDataType()).thenReturn(STRING);
 		genderEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("gender").getMock();
 		when(genderEntityMeta.getIdAttribute()).thenReturn(idAttr);
 		when(genderEntityMeta.getAttribute("id")).thenReturn(idAttr);
 		when(genderEntityMeta.getAtomicAttributes()).thenReturn(singletonList(idAttr));
 
-		AttributeMetaData genderAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("gender").getMock();
+		Attribute genderAttr = when(mock(Attribute.class).getName()).thenReturn("gender").getMock();
 		when(genderAttr.getDataType()).thenReturn(CATEGORICAL);
 		personGenderEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("person").getMock();
 		when(personGenderEntityMeta.getAttribute("gender")).thenReturn(genderAttr);
@@ -149,9 +149,9 @@ public class ScriptEvaluatorTest
 	@Test
 	public void testAverageValueOfMultipleNumericAttributes()
 	{
-		AttributeMetaData sbp1Attr = when(mock(AttributeMetaData.class).getName()).thenReturn("SBP_1").getMock();
+		Attribute sbp1Attr = when(mock(Attribute.class).getName()).thenReturn("SBP_1").getMock();
 		when(sbp1Attr.getDataType()).thenReturn(DECIMAL);
-		AttributeMetaData sbp2Attr = when(mock(AttributeMetaData.class).getName()).thenReturn("SBP_2").getMock();
+		Attribute sbp2Attr = when(mock(Attribute.class).getName()).thenReturn("SBP_2").getMock();
 		when(sbp2Attr.getDataType()).thenReturn(DECIMAL);
 		EntityMetaData sbpPersonEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("person").getMock();
 		when(sbpPersonEntityMeta.getAttribute("SBP_1")).thenReturn(sbp1Attr);
@@ -277,9 +277,9 @@ public class ScriptEvaluatorTest
 	@Test
 	public void combinePlusGroupMapFunctions()
 	{
-		AttributeMetaData food59Attr = when(mock(AttributeMetaData.class).getName()).thenReturn("FOOD59A1").getMock();
+		Attribute food59Attr = when(mock(Attribute.class).getName()).thenReturn("FOOD59A1").getMock();
 		when(food59Attr.getDataType()).thenReturn(INT);
-		AttributeMetaData food60Attr = when(mock(AttributeMetaData.class).getName()).thenReturn("FOOD60A1").getMock();
+		Attribute food60Attr = when(mock(Attribute.class).getName()).thenReturn("FOOD60A1").getMock();
 		when(food60Attr.getDataType()).thenReturn(INT);
 		EntityMetaData foodPersonEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("person").getMock();
 		when(foodPersonEntityMeta.getAttribute("FOOD59A1")).thenReturn(food59Attr);
@@ -368,7 +368,7 @@ public class ScriptEvaluatorTest
 	@Test
 	public void testGlucose()
 	{
-		AttributeMetaData gluc1Attr = when(mock(AttributeMetaData.class).getName()).thenReturn("GLUC_1").getMock();
+		Attribute gluc1Attr = when(mock(Attribute.class).getName()).thenReturn("GLUC_1").getMock();
 		when(gluc1Attr.getDataType()).thenReturn(DECIMAL);
 		EntityMetaData personGlucoseMeta = when(mock(EntityMetaData.class).getName()).thenReturn("glucose").getMock();
 		when(personGlucoseMeta.getAttribute("GLUC_1")).thenReturn(gluc1Attr);

@@ -3,7 +3,7 @@ package org.molgenis.data.cache.utils;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public class EntityHydration
 
 		Entity hydratedEntity = entityManager.create(entityMetaData);
 
-		for (AttributeMetaData attribute : entityMetaData.getAtomicAttributes())
+		for (Attribute attribute : entityMetaData.getAtomicAttributes())
 		{
 			// Only hydrate the attribute if it is NOT computed.
 			// Computed attributes will be calculated based on the metadata

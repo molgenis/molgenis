@@ -1,10 +1,10 @@
 package org.molgenis.data.meta;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
-import org.molgenis.data.meta.system.SystemAttributeMetaData;
+import org.molgenis.data.meta.system.SystemAttribute;
 import org.molgenis.data.support.BootstrapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -21,7 +21,7 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
  */
 public abstract class SystemEntityMetaData extends EntityMetaData
 {
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	private final String entityName;
 	private final String systemPackageName;
@@ -80,14 +80,14 @@ public abstract class SystemEntityMetaData extends EntityMetaData
 		return entityName;
 	}
 
-	public AttributeMetaData addAttribute(String attrName, AttributeRole... attrTypes)
+	public Attribute addAttribute(String attrName, AttributeRole... attrTypes)
 	{
 		return addAttribute(attrName, null, attrTypes);
 	}
 
-	public AttributeMetaData addAttribute(String attrName, AttributeMetaData parentAttr, AttributeRole... attrTypes)
+	public Attribute addAttribute(String attrName, Attribute parentAttr, AttributeRole... attrTypes)
 	{
-		AttributeMetaData attr = new SystemAttributeMetaData(attributeMetaDataFactory.getAttributeMetaDataMetaData());
+		Attribute attr = new SystemAttribute(attributeFactory.getAttributeMetaDataMetaData());
 		attr.setDefaultValues();
 		attr.setName(attrName);
 		if (parentAttr != null)
@@ -104,9 +104,9 @@ public abstract class SystemEntityMetaData extends EntityMetaData
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
 	@Autowired
-	public void setAttributeMetaDataFactory(AttributeMetaDataFactory attributeMetaDataFactory)
+	public void setAttributeFactory(AttributeFactory attributeFactory)
 	{
-		this.attributeMetaDataFactory = requireNonNull(attributeMetaDataFactory);
+		this.attributeFactory = requireNonNull(attributeFactory);
 	}
 
 	/**

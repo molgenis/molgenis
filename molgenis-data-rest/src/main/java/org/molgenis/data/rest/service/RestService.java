@@ -3,7 +3,7 @@ package org.molgenis.data.rest.service;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileStore;
@@ -62,7 +62,7 @@ public class RestService
 	{
 		final Entity entity = entityManager.create(meta);
 
-		for (AttributeMetaData attr : meta.getAtomicAttributes())
+		for (Attribute attr : meta.getAtomicAttributes())
 		{
 			if (attr.getExpression() == null)
 			{
@@ -84,7 +84,7 @@ public class RestService
 	 * @param paramValue HTTP parameter value
 	 * @return Object
 	 */
-	public Object toEntityValue(AttributeMetaData attr, Object paramValue)
+	public Object toEntityValue(Attribute attr, Object paramValue)
 	{
 		// Treat empty strings as null
 		if (paramValue != null && (paramValue instanceof String) && ((String) paramValue).isEmpty())
@@ -142,7 +142,7 @@ public class RestService
 		return value;
 	}
 
-	private static Long convertLong(AttributeMetaData attr, Object paramValue)
+	private static Long convertLong(Attribute attr, Object paramValue)
 	{
 		Long value;
 		if (paramValue != null)
@@ -171,7 +171,7 @@ public class RestService
 		return value;
 	}
 
-	private static Integer convertInt(AttributeMetaData attr, Object paramValue)
+	private static Integer convertInt(Attribute attr, Object paramValue)
 	{
 		Integer value;
 		if (paramValue != null)
@@ -200,7 +200,7 @@ public class RestService
 		return value;
 	}
 
-	private FileMeta convertFile(AttributeMetaData attr, Object paramValue)
+	private FileMeta convertFile(Attribute attr, Object paramValue)
 	{
 		FileMeta value;
 		if (paramValue != null)
@@ -240,7 +240,7 @@ public class RestService
 		return value;
 	}
 
-	private static Double convertDecimal(AttributeMetaData attr, Object paramValue)
+	private static Double convertDecimal(Attribute attr, Object paramValue)
 	{
 		Double value;
 		if (paramValue != null)
@@ -269,7 +269,7 @@ public class RestService
 		return value;
 	}
 
-	private static Date convertDateTime(AttributeMetaData attr, Object paramValue)
+	private static Date convertDateTime(Attribute attr, Object paramValue)
 	{
 		Date value;
 		if (paramValue != null)
@@ -307,7 +307,7 @@ public class RestService
 		return value;
 	}
 
-	private static Date convertDate(AttributeMetaData attr, Object paramValue)
+	private static Date convertDate(Attribute attr, Object paramValue)
 	{
 		Date value;
 		if (paramValue != null)
@@ -344,7 +344,7 @@ public class RestService
 		return value;
 	}
 
-	private List<?> convertMref(AttributeMetaData attr, Object paramValue)
+	private List<?> convertMref(Attribute attr, Object paramValue)
 	{
 		List<?> value;
 		if (paramValue != null)
@@ -367,7 +367,7 @@ public class RestService
 			}
 
 			EntityMetaData mrefEntity = attr.getRefEntity();
-			AttributeMetaData mrefEntityIdAttr = mrefEntity.getIdAttribute();
+			Attribute mrefEntityIdAttr = mrefEntity.getIdAttribute();
 			value = mrefParamValues.stream().map(mrefParamValue -> toEntityValue(mrefEntityIdAttr, mrefParamValue))
 					.map(mrefIdValue -> entityManager.getReference(mrefEntity, mrefIdValue)).collect(toList());
 		}
@@ -378,7 +378,7 @@ public class RestService
 		return value;
 	}
 
-	private Object convertRef(AttributeMetaData attr, Object paramValue)
+	private Object convertRef(Attribute attr, Object paramValue)
 	{
 		Object value;
 		if (paramValue != null)
@@ -393,7 +393,7 @@ public class RestService
 		return value;
 	}
 
-	private static String convertString(AttributeMetaData attr, Object paramValue)
+	private static String convertString(Attribute attr, Object paramValue)
 	{
 		String value;
 		if (paramValue != null)
@@ -416,7 +416,7 @@ public class RestService
 		return value;
 	}
 
-	private static Boolean convertBool(AttributeMetaData attr, Object paramValue)
+	private static Boolean convertBool(Attribute attr, Object paramValue)
 	{
 		Boolean value;
 		if (paramValue != null)

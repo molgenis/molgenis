@@ -45,14 +45,14 @@ public class IndexBootstrapper
 		if (!searchService.hasMapping(AttributeMetaDataMetaData.ATTRIBUTE_META_DATA))
 		{
 			LOG.debug(
-					"No index for AttributeMetaData found, asuming missing index, schedule (re)index for all entities");
+					"No index for Attribute found, asuming missing index, schedule (re)index for all entities");
 			metaDataService.getRepositories()
 					.forEach(repo -> indexActionRegisterService.register(repo.getName(), null));
 			LOG.debug("Done scheduling (re)index jobs for all entities");
 		}
 		else
 		{
-			LOG.debug("Index for AttributeMetaData found, index is present, no (re)index needed");
+			LOG.debug("Index for Attribute found, index is present, no (re)index needed");
 			List<IndexJobExecution> failedIndexJobs = dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
 					new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, "FAILED"),
 					IndexJobExecution.class).collect(Collectors.toList());

@@ -9,7 +9,7 @@ import org.apache.poi.ss.util.CellReference;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.processor.AbstractCellProcessor;
@@ -36,7 +36,7 @@ public class ExcelRepository extends AbstractRepository
 {
 	private final Sheet sheet;
 	private final EntityMetaDataFactory entityMetaFactory;
-	private final AttributeMetaDataFactory attrMetaFactory;
+	private final AttributeFactory attrMetaFactory;
 
 	/**
 	 * process cells after reading
@@ -49,13 +49,13 @@ public class ExcelRepository extends AbstractRepository
 	private EntityMetaData entityMetaData;
 
 	public ExcelRepository(String fileName, Sheet sheet, EntityMetaDataFactory entityMetaFactory,
-			AttributeMetaDataFactory attrMetaFactory)
+			AttributeFactory attrMetaFactory)
 	{
 		this(fileName, sheet, entityMetaFactory, attrMetaFactory, null);
 	}
 
 	public ExcelRepository(String fileName, Sheet sheet, EntityMetaDataFactory entityMetaFactory,
-			AttributeMetaDataFactory attrMetaFactory, List<CellProcessor> cellProcessors)
+			AttributeFactory attrMetaFactory, List<CellProcessor> cellProcessors)
 	{
 		this.sheet = requireNonNull(sheet);
 		if (sheet.getNumMergedRegions() > 0)

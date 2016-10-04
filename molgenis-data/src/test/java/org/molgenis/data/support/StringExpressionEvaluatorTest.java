@@ -2,7 +2,7 @@ package org.molgenis.data.support;
 
 import com.google.gson.JsonSyntaxException;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.springframework.core.convert.ConversionFailedException;
 import org.testng.annotations.BeforeTest;
@@ -23,16 +23,16 @@ public class StringExpressionEvaluatorTest
 	public void createEntity()
 	{
 		emd = when(mock(EntityMetaData.class).getName()).thenReturn("Source").getMock();
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("Identifier").getMock();
+		Attribute idAttr = when(mock(Attribute.class).getName()).thenReturn("Identifier").getMock();
 		when(idAttr.getDataType()).thenReturn(INT);
-		AttributeMetaData intAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("Int").getMock();
+		Attribute intAttr = when(mock(Attribute.class).getName()).thenReturn("Int").getMock();
 		when(intAttr.getDataType()).thenReturn(INT);
-		AttributeMetaData stringAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("String").getMock();
+		Attribute stringAttr = when(mock(Attribute.class).getName()).thenReturn("String").getMock();
 		when(stringAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData nonNumericStringAttr = when(mock(AttributeMetaData.class).getName())
+		Attribute nonNumericStringAttr = when(mock(Attribute.class).getName())
 				.thenReturn("NonNumericString").getMock();
 		when(nonNumericStringAttr.getDataType()).thenReturn(STRING);
-		AttributeMetaData longAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("Long").getMock();
+		Attribute longAttr = when(mock(Attribute.class).getName()).thenReturn("Long").getMock();
 		when(longAttr.getDataType()).thenReturn(LONG);
 		when(emd.getIdAttribute()).thenReturn(idAttr);
 		when(emd.getAttribute("Identifier")).thenReturn(idAttr);
@@ -51,7 +51,7 @@ public class StringExpressionEvaluatorTest
 	@Test
 	public void testStringEvaluatorConstructorChecksIfAttributeHasExpression()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
 		when(amd.getDataType()).thenReturn(STRING);
 		try
 		{
@@ -68,7 +68,7 @@ public class StringExpressionEvaluatorTest
 	@Test
 	public void testStringEvaluatorConstructorChecksIfExpressionIsMap()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
 		when(amd.getDataType()).thenReturn(STRING);
 		when(amd.getExpression()).thenReturn("{}");
 		try
@@ -85,7 +85,7 @@ public class StringExpressionEvaluatorTest
 	@Test
 	public void testStringEvaluatorConstructorChecksIfAttributeMentionsExistingAttribute()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
 		when(amd.getDataType()).thenReturn(STRING);
 		when(amd.getExpression()).thenReturn("bogus");
 		try
@@ -104,7 +104,7 @@ public class StringExpressionEvaluatorTest
 	@Test
 	public void testStringEvaluatorLookupAttributeAndConvertFromIntToString()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#CHROM").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#CHROM").getMock();
 		when(amd.getDataType()).thenReturn(STRING);
 		when(amd.getExpression()).thenReturn("Int");
 		assertEquals(new StringExpressionEvaluator(amd, emd).evaluate(entity), "1");
@@ -113,7 +113,7 @@ public class StringExpressionEvaluatorTest
 	@Test
 	public void testStringEvaluatorLookupAttributeAndConvertFromIntToLong()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#POS").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
 		when(amd.getDataType()).thenReturn(LONG);
 		when(amd.getExpression()).thenReturn("Int");
 		assertEquals(new StringExpressionEvaluator(amd, emd).evaluate(entity), 1L);
@@ -122,7 +122,7 @@ public class StringExpressionEvaluatorTest
 	@Test
 	public void testStringEvaluatorLookupAttributeAndConvertFromLongToInt()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#POS").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
 		when(amd.getDataType()).thenReturn(INT);
 		when(amd.getExpression()).thenReturn("Long");
 		assertEquals(new StringExpressionEvaluator(amd, emd).evaluate(entity), 10);
@@ -131,7 +131,7 @@ public class StringExpressionEvaluatorTest
 	@Test
 	public void testStringEvaluatorLookupAttributeAndConvertFromStringToLong()
 	{
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#POS").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
 		when(amd.getDataType()).thenReturn(LONG);
 		when(amd.getExpression()).thenReturn("String");
 		assertEquals(new StringExpressionEvaluator(amd, emd).evaluate(entity), 12L);
@@ -141,7 +141,7 @@ public class StringExpressionEvaluatorTest
 	public void testStringEvaluatorLookupAttributeAndConvertFromNonNumericStringToLongFails()
 	{
 
-		AttributeMetaData amd = when(mock(AttributeMetaData.class).getName()).thenReturn("#POS").getMock();
+		Attribute amd = when(mock(Attribute.class).getName()).thenReturn("#POS").getMock();
 		when(amd.getDataType()).thenReturn(LONG);
 		when(amd.getExpression()).thenReturn("NonNumericString");
 		try

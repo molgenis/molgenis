@@ -96,7 +96,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	@Autowired
 	private RestControllerV2 restControllerV2;
@@ -138,23 +138,23 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		EntityMetaData refRefEntityMeta = entityMetaDataFactory.create().setName(REF_REF_ENTITY_NAME)
 				.setLabel(REF_REF_ENTITY_NAME)
-				.addAttribute(attributeMetaDataFactory.create().setName(REF_REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL,
-						ROLE_LOOKUP).addAttribute(attributeMetaDataFactory.create().setName(REF_REF_ATTR_VALUE_NAME));
+				.addAttribute(attributeFactory.create().setName(REF_REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL,
+						ROLE_LOOKUP).addAttribute(attributeFactory.create().setName(REF_REF_ATTR_VALUE_NAME));
 
 		EntityMetaData selfRefEntityMeta = entityMetaDataFactory.create().setName(SELF_REF_ENTITY_NAME)
 				.setLabel(SELF_REF_ENTITY_NAME)
-				.addAttribute(attributeMetaDataFactory.create().setName("id"), ROLE_ID, ROLE_LABEL, ROLE_LOOKUP);
+				.addAttribute(attributeFactory.create().setName("id"), ROLE_ID, ROLE_LABEL, ROLE_LOOKUP);
 		selfRefEntityMeta.addAttribute(
-				attributeMetaDataFactory.create().setName("selfRef").setDataType(XREF).setRefEntity(selfRefEntityMeta));
+				attributeFactory.create().setName("selfRef").setDataType(XREF).setRefEntity(selfRefEntityMeta));
 
 		Entity selfRefEntity = new DynamicEntity(selfRefEntityMeta);
 		selfRefEntity.set("id", "0");
 		selfRefEntity.set("selfRef", selfRefEntity);
 
 		EntityMetaData refEntityMeta = entityMetaDataFactory.create().setName(REF_ENTITY_NAME).setLabel(REF_ENTITY_NAME)
-				.addAttribute(attributeMetaDataFactory.create().setName(REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL,
-						ROLE_LOOKUP).addAttribute(attributeMetaDataFactory.create().setName(REF_ATTR_VALUE_NAME))
-				.addAttribute(attributeMetaDataFactory.create().setName(REF_ATTR_REF_NAME).setDataType(XREF)
+				.addAttribute(attributeFactory.create().setName(REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL,
+						ROLE_LOOKUP).addAttribute(attributeFactory.create().setName(REF_ATTR_VALUE_NAME))
+				.addAttribute(attributeFactory.create().setName(REF_ATTR_REF_NAME).setDataType(XREF)
 						.setRefEntity(refRefEntityMeta));
 		// required
 		String attrIdName = "id";
@@ -206,67 +206,67 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		// required
 		EntityMetaData entityMeta = entityMetaDataFactory.create().setName(ENTITY_NAME).setLabel(ENTITY_NAME);
-		AttributeMetaData attrId = attributeMetaDataFactory.create().setName(attrIdName);
+		Attribute attrId = attributeFactory.create().setName(attrIdName);
 		entityMeta.addAttribute(attrId, ROLE_ID, ROLE_LABEL, ROLE_LOOKUP);
-		AttributeMetaData attrBool = createAttributeMeta(entityMeta, attrBoolName, BOOL).setNillable(false);
-		AttributeMetaData attrCategorical = createAttributeMeta(entityMeta, attrCategoricalName, CATEGORICAL,
+		Attribute attrBool = createAttributeMeta(entityMeta, attrBoolName, BOOL).setNillable(false);
+		Attribute attrCategorical = createAttributeMeta(entityMeta, attrCategoricalName, CATEGORICAL,
 				refEntityMeta).setNillable(false);
-		AttributeMetaData attrCategoricalMref = createAttributeMeta(entityMeta, attrCategoricalMrefName,
+		Attribute attrCategoricalMref = createAttributeMeta(entityMeta, attrCategoricalMrefName,
 				CATEGORICAL_MREF, refEntityMeta).setNillable(false);
-		AttributeMetaData attrCompound = createAttributeMeta(entityMeta, attrCompoundName, COMPOUND);
-		AttributeMetaData attrDate = createAttributeMeta(entityMeta, attrDateName, DATE).setNillable(false);
-		AttributeMetaData attrDateTime = createAttributeMeta(entityMeta, attrDateTimeName, DATE_TIME)
+		Attribute attrCompound = createAttributeMeta(entityMeta, attrCompoundName, COMPOUND);
+		Attribute attrDate = createAttributeMeta(entityMeta, attrDateName, DATE).setNillable(false);
+		Attribute attrDateTime = createAttributeMeta(entityMeta, attrDateTimeName, DATE_TIME)
 				.setNillable(false);
-		AttributeMetaData attrDecimal = createAttributeMeta(entityMeta, attrDecimalName, DECIMAL, null)
+		Attribute attrDecimal = createAttributeMeta(entityMeta, attrDecimalName, DECIMAL, null)
 				.setReadOnly(true).setNillable(false);
-		AttributeMetaData attrEmail = createAttributeMeta(entityMeta, attrEmailName, EMAIL).setNillable(false);
-		AttributeMetaData attrEnum = createAttributeMeta(entityMeta, attrEnumName, ENUM)
+		Attribute attrEmail = createAttributeMeta(entityMeta, attrEmailName, EMAIL).setNillable(false);
+		Attribute attrEnum = createAttributeMeta(entityMeta, attrEnumName, ENUM)
 				.setEnumOptions(asList(enum0, enum1, enum2)).setNillable(false);
-		AttributeMetaData attrHtml = createAttributeMeta(entityMeta, attrHtmlName, HTML).setNillable(false);
-		AttributeMetaData attrHyperlink = createAttributeMeta(entityMeta, attrHyperlinkName, HYPERLINK)
+		Attribute attrHtml = createAttributeMeta(entityMeta, attrHtmlName, HTML).setNillable(false);
+		Attribute attrHyperlink = createAttributeMeta(entityMeta, attrHyperlinkName, HYPERLINK)
 				.setNillable(false);
-		AttributeMetaData attrInt = createAttributeMeta(entityMeta, attrIntName, INT).setNillable(false);
-		AttributeMetaData attrLong = createAttributeMeta(entityMeta, attrLongName, LONG).setNillable(false);
-		AttributeMetaData attrMref = createAttributeMeta(entityMeta, attrMrefName, MREF, refEntityMeta)
+		Attribute attrInt = createAttributeMeta(entityMeta, attrIntName, INT).setNillable(false);
+		Attribute attrLong = createAttributeMeta(entityMeta, attrLongName, LONG).setNillable(false);
+		Attribute attrMref = createAttributeMeta(entityMeta, attrMrefName, MREF, refEntityMeta)
 				.setNillable(false);
-		AttributeMetaData attrScript = createAttributeMeta(entityMeta, attrScriptName, SCRIPT).setNillable(false);
-		AttributeMetaData attrString = createAttributeMeta(entityMeta, attrStringName, STRING).setNillable(false);
-		AttributeMetaData attrText = createAttributeMeta(entityMeta, attrTextName, TEXT).setNillable(false);
-		AttributeMetaData attrXref = createAttributeMeta(entityMeta, attrXrefName, XREF, refEntityMeta)
+		Attribute attrScript = createAttributeMeta(entityMeta, attrScriptName, SCRIPT).setNillable(false);
+		Attribute attrString = createAttributeMeta(entityMeta, attrStringName, STRING).setNillable(false);
+		Attribute attrText = createAttributeMeta(entityMeta, attrTextName, TEXT).setNillable(false);
+		Attribute attrXref = createAttributeMeta(entityMeta, attrXrefName, XREF, refEntityMeta)
 				.setNillable(false);
 
 		// optional
-		AttributeMetaData attrBoolOptional = createAttributeMeta(entityMeta, attrBoolOptionalName, BOOL);
-		AttributeMetaData attrCategoricalOptional = createAttributeMeta(entityMeta, attrCategoricalOptionalName,
+		Attribute attrBoolOptional = createAttributeMeta(entityMeta, attrBoolOptionalName, BOOL);
+		Attribute attrCategoricalOptional = createAttributeMeta(entityMeta, attrCategoricalOptionalName,
 				CATEGORICAL, refEntityMeta);
-		AttributeMetaData attrCategoricalMrefOptional = createAttributeMeta(entityMeta, attrCategoricalMrefOptionalName,
+		Attribute attrCategoricalMrefOptional = createAttributeMeta(entityMeta, attrCategoricalMrefOptionalName,
 				CATEGORICAL_MREF, refEntityMeta);
-		AttributeMetaData attrDateOptional = createAttributeMeta(entityMeta, attrDateOptionalName, DATE);
-		AttributeMetaData attrDateTimeOptional = createAttributeMeta(entityMeta, attrDateTimeOptionalName, DATE_TIME);
-		AttributeMetaData attrDecimalOptional = createAttributeMeta(entityMeta, attrDecimalOptionalName, DECIMAL, null);
-		AttributeMetaData attrEmailOptional = createAttributeMeta(entityMeta, attrEmailOptionalName, EMAIL);
-		AttributeMetaData attrEnumOptional = createAttributeMeta(entityMeta, attrEnumOptionalName, ENUM)
+		Attribute attrDateOptional = createAttributeMeta(entityMeta, attrDateOptionalName, DATE);
+		Attribute attrDateTimeOptional = createAttributeMeta(entityMeta, attrDateTimeOptionalName, DATE_TIME);
+		Attribute attrDecimalOptional = createAttributeMeta(entityMeta, attrDecimalOptionalName, DECIMAL, null);
+		Attribute attrEmailOptional = createAttributeMeta(entityMeta, attrEmailOptionalName, EMAIL);
+		Attribute attrEnumOptional = createAttributeMeta(entityMeta, attrEnumOptionalName, ENUM)
 				.setEnumOptions(asList(enum0, enum1, enum2));
-		AttributeMetaData attrHtmlOptional = createAttributeMeta(entityMeta, attrHtmlOptionalName, HTML);
-		AttributeMetaData attrHyperlinkOptional = createAttributeMeta(entityMeta, attrHyperlinkOptionalName, HYPERLINK);
-		AttributeMetaData attrIntOptional = createAttributeMeta(entityMeta, attrIntOptionalName, INT);
-		AttributeMetaData attrLongOptional = createAttributeMeta(entityMeta, attrLongOptionalName, LONG);
-		AttributeMetaData attrMrefOptional = createAttributeMeta(entityMeta, attrMrefOptionalName, MREF, refEntityMeta);
-		AttributeMetaData attrScriptOptional = createAttributeMeta(entityMeta, attrScriptOptionalName, SCRIPT);
-		AttributeMetaData attrStringOptional = createAttributeMeta(entityMeta, attrStringOptionalName, STRING);
-		AttributeMetaData attrTextOptional = createAttributeMeta(entityMeta, attrTextOptionalName, TEXT);
-		AttributeMetaData attrXrefOptional = createAttributeMeta(entityMeta, attrXrefOptionalName, XREF, refEntityMeta);
+		Attribute attrHtmlOptional = createAttributeMeta(entityMeta, attrHtmlOptionalName, HTML);
+		Attribute attrHyperlinkOptional = createAttributeMeta(entityMeta, attrHyperlinkOptionalName, HYPERLINK);
+		Attribute attrIntOptional = createAttributeMeta(entityMeta, attrIntOptionalName, INT);
+		Attribute attrLongOptional = createAttributeMeta(entityMeta, attrLongOptionalName, LONG);
+		Attribute attrMrefOptional = createAttributeMeta(entityMeta, attrMrefOptionalName, MREF, refEntityMeta);
+		Attribute attrScriptOptional = createAttributeMeta(entityMeta, attrScriptOptionalName, SCRIPT);
+		Attribute attrStringOptional = createAttributeMeta(entityMeta, attrStringOptionalName, STRING);
+		Attribute attrTextOptional = createAttributeMeta(entityMeta, attrTextOptionalName, TEXT);
+		Attribute attrXrefOptional = createAttributeMeta(entityMeta, attrXrefOptionalName, XREF, refEntityMeta);
 
-		AttributeMetaData compoundAttrCompoundAttr0 = createAttributeMeta(null, attrCompoundAttrCompoundAttr0Name,
+		Attribute compoundAttrCompoundAttr0 = createAttributeMeta(null, attrCompoundAttrCompoundAttr0Name,
 				STRING).setNillable(false);
-		AttributeMetaData compoundAttrCompoundAttr0Optional = createAttributeMeta(null,
+		Attribute compoundAttrCompoundAttr0Optional = createAttributeMeta(null,
 				attrCompoundAttrCompoundAttr0OptionalName, STRING).setNillable(true);
 
-		AttributeMetaData compoundAttrCompound = createAttributeMeta(null, attrCompoundAttrCompoundName, COMPOUND);
+		Attribute compoundAttrCompound = createAttributeMeta(null, attrCompoundAttrCompoundName, COMPOUND);
 		compoundAttrCompound.setAttributeParts(asList(compoundAttrCompoundAttr0, compoundAttrCompoundAttr0Optional));
 
-		AttributeMetaData compoundAttr0 = createAttributeMeta(null, attrCompoundAttr0Name, STRING).setNillable(false);
-		AttributeMetaData compoundAttr0Optional = createAttributeMeta(null, attrCompoundAttr0OptionalName, STRING)
+		Attribute compoundAttr0 = createAttributeMeta(null, attrCompoundAttr0Name, STRING).setNillable(false);
+		Attribute compoundAttr0Optional = createAttributeMeta(null, attrCompoundAttr0OptionalName, STRING)
 				.setNillable(true);
 		attrCompound.setAttributeParts(asList(compoundAttr0, compoundAttr0Optional, compoundAttrCompound));
 
@@ -362,15 +362,15 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 				.setConversionService(conversionService).build();
 	}
 
-	private AttributeMetaData createAttributeMeta(EntityMetaData entityMeta, String attrName, AttributeType type)
+	private Attribute createAttributeMeta(EntityMetaData entityMeta, String attrName, AttributeType type)
 	{
 		return createAttributeMeta(entityMeta, attrName, type, null);
 	}
 
-	private AttributeMetaData createAttributeMeta(EntityMetaData entityMeta, String attrName, AttributeType type,
+	private Attribute createAttributeMeta(EntityMetaData entityMeta, String attrName, AttributeType type,
 			EntityMetaData refEntityMeta)
 	{
-		AttributeMetaData attr = attributeMetaDataFactory.create().setName(attrName).setLabel(attrName)
+		Attribute attr = attributeFactory.create().setName(attrName).setLabel(attrName)
 				.setDataType(type).setRefEntity(refEntityMeta).setNillable(true);
 
 		if (entityMeta != null)

@@ -4,7 +4,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
@@ -236,8 +236,8 @@ public class MetaDataServiceImplTest
 
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
 		when(entityMeta.getBackend()).thenReturn(backendName);
-		AttributeMetaData attr0 = mock(AttributeMetaData.class);
-		AttributeMetaData attr1 = mock(AttributeMetaData.class);
+		Attribute attr0 = mock(Attribute.class);
+		Attribute attr1 = mock(Attribute.class);
 		when(entityMeta.getOwnAllAttributes()).thenReturn(newArrayList(attr0, attr1));
 
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
@@ -269,8 +269,8 @@ public class MetaDataServiceImplTest
 		Class<Package> entityClass = Package.class;
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
 		when(entityMeta.getBackend()).thenReturn(backendName);
-		AttributeMetaData attr0 = mock(AttributeMetaData.class);
-		AttributeMetaData attr1 = mock(AttributeMetaData.class);
+		Attribute attr0 = mock(Attribute.class);
+		Attribute attr1 = mock(Attribute.class);
 		when(entityMeta.getOwnAllAttributes()).thenReturn(newArrayList(attr0, attr1));
 
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
@@ -431,8 +431,8 @@ public class MetaDataServiceImplTest
 	public void addEntityMeta()
 	{
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		AttributeMetaData attr0 = mock(AttributeMetaData.class);
-		AttributeMetaData attr1 = mock(AttributeMetaData.class);
+		Attribute attr0 = mock(Attribute.class);
+		Attribute attr1 = mock(Attribute.class);
 		when(entityMeta.getOwnAllAttributes()).thenReturn(newArrayList(attr0, attr1));
 		metaDataServiceImpl.addEntityMeta(entityMeta);
 
@@ -469,24 +469,24 @@ public class MetaDataServiceImplTest
 		String attrShared1Name = "attrUpdated";
 		String attrAddedName = "attrAdded";
 		String attrDeletedName = "attrDeleted";
-		AttributeMetaData attrShared0 = when(mock(AttributeMetaData.class).getName()).thenReturn(attrShared0Name)
+		Attribute attrShared0 = when(mock(Attribute.class).getName()).thenReturn(attrShared0Name)
 				.getMock();
 		when(attrShared0.getAttributeParts()).thenReturn(emptyList());
 		when(attrShared0.getTags()).thenReturn(emptyList());
-		AttributeMetaData attrShared1 = when(mock(AttributeMetaData.class).getName()).thenReturn(attrShared1Name)
+		Attribute attrShared1 = when(mock(Attribute.class).getName()).thenReturn(attrShared1Name)
 				.getMock();
 		when(attrShared1.getLabel()).thenReturn("label");
 		when(attrShared1.getAttributeParts()).thenReturn(emptyList());
 		when(attrShared1.getTags()).thenReturn(emptyList());
-		AttributeMetaData attrShared1Updated = when(mock(AttributeMetaData.class).getName()).thenReturn(attrShared1Name)
+		Attribute attrShared1Updated = when(mock(Attribute.class).getName()).thenReturn(attrShared1Name)
 				.getMock();
 		when(attrShared1Updated.getLabel()).thenReturn("new label");
 		when(attrShared1Updated.getAttributeParts()).thenReturn(emptyList());
 		when(attrShared1Updated.getTags()).thenReturn(emptyList());
-		AttributeMetaData attrAdded = when(mock(AttributeMetaData.class).getName()).thenReturn(attrAddedName).getMock();
+		Attribute attrAdded = when(mock(Attribute.class).getName()).thenReturn(attrAddedName).getMock();
 		when(attrAdded.getAttributeParts()).thenReturn(emptyList());
 		when(attrAdded.getTags()).thenReturn(emptyList());
-		AttributeMetaData attrDeleted = when(mock(AttributeMetaData.class).getName()).thenReturn(attrDeletedName)
+		Attribute attrDeleted = when(mock(Attribute.class).getName()).thenReturn(attrDeletedName)
 				.getMock();
 		when(attrDeleted.getAttributeParts()).thenReturn(emptyList());
 		when(attrDeleted.getTags()).thenReturn(emptyList());
@@ -544,7 +544,7 @@ public class MetaDataServiceImplTest
 	@Test
 	public void addAttribute()
 	{
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		Attribute attr = mock(Attribute.class);
 		metaDataServiceImpl.addAttribute(attr);
 		verify(dataService).add(ATTRIBUTE_META_DATA, attr);
 	}

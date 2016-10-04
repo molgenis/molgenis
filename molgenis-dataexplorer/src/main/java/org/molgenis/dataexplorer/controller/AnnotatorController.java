@@ -8,7 +8,7 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecution;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionFactory;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -127,7 +127,7 @@ public class AnnotatorController
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(dataSetName);
 			for (RepositoryAnnotator annotator : annotationService.getAllAnnotators())
 			{
-				List<AttributeMetaData> outputAttrs = annotator.getOutputAttributes();
+				List<Attribute> outputAttrs = annotator.getOutputAttributes();
 				outputAttrs = getAtomicAttributesFromList(outputAttrs);
 				Map<String, Object> map = new HashMap<String, Object>();
 				map.put("description", annotator.getDescription());
@@ -146,7 +146,7 @@ public class AnnotatorController
 		return mapOfAnnotators;
 	}
 
-	private List<Map<String, Object>> createAttrsResponse(List<AttributeMetaData> inputMetaData)
+	private List<Map<String, Object>> createAttrsResponse(List<Attribute> inputMetaData)
 	{
 		return inputMetaData.stream().map(attr ->
 		{
@@ -157,7 +157,7 @@ public class AnnotatorController
 		}).collect(Collectors.toList());
 	}
 
-	private List<AttributeMetaData> getAtomicAttributesFromList(List<AttributeMetaData> outputAttrs)
+	private List<Attribute> getAtomicAttributesFromList(List<Attribute> outputAttrs)
 	{
 		if (outputAttrs.size() == 1 && outputAttrs.get(0).getDataType() == COMPOUND)
 		{
@@ -169,10 +169,10 @@ public class AnnotatorController
 		}
 	}
 
-	private Map<String, String> toMap(Iterable<AttributeMetaData> attrs)
+	private Map<String, String> toMap(Iterable<Attribute> attrs)
 	{
 		Map<String, String> result = new HashMap<>();
-		for (AttributeMetaData attr : attrs)
+		for (Attribute attr : attrs)
 		{
 			result.put(attr.getName(), attr.getDataType().toString());
 		}

@@ -9,7 +9,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.Range;
 import org.molgenis.data.i18n.LanguageService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.EntityMetaDataUtils;
@@ -53,7 +53,7 @@ class AttributeMetaDataResponseV2
 	 * @param fetch             set of lowercase attribute names to include in response
 	 * @param permissionService
 	 */
-	public AttributeMetaDataResponseV2(final String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,
+	public AttributeMetaDataResponseV2(final String entityParentName, EntityMetaData entityMeta, Attribute attr,
 			Fetch fetch, MolgenisPermissionService permissionService, DataService dataService,
 			LanguageService languageService)
 	{
@@ -79,7 +79,7 @@ class AttributeMetaDataResponseV2
 			this.refEntity = null;
 		}
 
-		Iterable<AttributeMetaData> attrParts = attr.getAttributeParts();
+		Iterable<Attribute> attrParts = attr.getAttributeParts();
 		if (attrParts != null)
 		{
 			// filter attribute parts
@@ -87,10 +87,10 @@ class AttributeMetaDataResponseV2
 
 			// create attribute response
 			this.attributes = Lists.newArrayList(
-					Iterables.transform(attrParts, new Function<AttributeMetaData, AttributeMetaDataResponseV2>()
+					Iterables.transform(attrParts, new Function<Attribute, AttributeMetaDataResponseV2>()
 					{
 						@Override
-						public AttributeMetaDataResponseV2 apply(AttributeMetaData attr)
+						public AttributeMetaDataResponseV2 apply(Attribute attr)
 						{
 							Fetch subAttrFetch;
 							if (fetch != null)
@@ -137,14 +137,14 @@ class AttributeMetaDataResponseV2
 		this.validationExpression = attr.getValidationExpression();
 	}
 
-	public static Iterable<AttributeMetaData> filterAttributes(Fetch fetch, Iterable<AttributeMetaData> attrs)
+	public static Iterable<Attribute> filterAttributes(Fetch fetch, Iterable<Attribute> attrs)
 	{
 		if (fetch != null)
 		{
-			return Iterables.filter(attrs, new Predicate<AttributeMetaData>()
+			return Iterables.filter(attrs, new Predicate<Attribute>()
 			{
 				@Override
-				public boolean apply(AttributeMetaData attr)
+				public boolean apply(Attribute attr)
 				{
 					return filterAttributeRec(fetch, attr);
 				}
@@ -156,11 +156,11 @@ class AttributeMetaDataResponseV2
 		}
 	}
 
-	public static boolean filterAttributeRec(Fetch fetch, AttributeMetaData attr)
+	public static boolean filterAttributeRec(Fetch fetch, Attribute attr)
 	{
 		if (attr.getDataType() == COMPOUND)
 		{
-			for (AttributeMetaData attrPart : attr.getAttributeParts())
+			for (Attribute attrPart : attr.getAttributeParts())
 			{
 				if (filterAttributeRec(fetch, attrPart))
 				{

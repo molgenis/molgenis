@@ -63,7 +63,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final UserAuthorityFactory userAuthorityFactory;
 	private final IndexActionRegisterService indexActionRegisterService;
 	private final SearchService searchService;
-	private final AttributeMetaDataFactory attrMetaFactory;
+	private final AttributeFactory attrMetaFactory;
 	private final PasswordEncoder passwordEncoder;
 	private final EntityMetaDataMetaData entityMetaMeta;
 	private final I18nStringMetaData i18nStringMeta;
@@ -82,7 +82,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			RepositoryDecoratorRegistry repositoryDecoratorRegistry,
 			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, UserAuthorityFactory userAuthorityFactory,
 			IndexActionRegisterService indexActionRegisterService, SearchService searchService,
-			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder,
+			AttributeFactory attrMetaFactory, PasswordEncoder passwordEncoder,
 			EntityMetaDataMetaData entityMetaMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
 			MolgenisPermissionService permissionService, EntityMetaDataValidator entityMetaDataValidator,
@@ -178,7 +178,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		else if (repo.getName().equals(ATTRIBUTE_META_DATA))
 		{
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new AttributeMetaDataRepositoryDecorator(
-					(Repository<AttributeMetaData>) (Repository<? extends Entity>) repo, systemEntityMetaDataRegistry,
+					(Repository<Attribute>) (Repository<? extends Entity>) repo, systemEntityMetaDataRegistry,
 					dataService, permissionService);
 		}
 		else if (repo.getName().equals(ENTITY_META_DATA))

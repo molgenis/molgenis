@@ -32,8 +32,8 @@ import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeN
  */
 public class EntityMetaData extends StaticEntity
 {
-	private transient Map<String, AttributeMetaData> cachedAttrs;
-	private transient List<AttributeMetaData> cachedOwnAtomicAttrs;
+	private transient Map<String, Attribute> cachedAttrs;
+	private transient List<Attribute> cachedOwnAtomicAttrs;
 	private transient Boolean cachedHasAttrWithExpession;
 
 	public EntityMetaData(Entity entity)
@@ -97,25 +97,25 @@ public class EntityMetaData extends StaticEntity
 		// Own attributes (deep copy or shallow copy)
 		if (attrCopyMode == DEEP_COPY_ATTRS)
 		{
-			LinkedHashMap<String, AttributeMetaData> ownAttrMap = stream(entityMeta.getOwnAttributes().spliterator(),
-					false).map(attr -> AttributeMetaData.newInstance(attr, attrCopyMode))
+			LinkedHashMap<String, Attribute> ownAttrMap = stream(entityMeta.getOwnAttributes().spliterator(),
+					false).map(attr -> Attribute.newInstance(attr, attrCopyMode))
 					.map(attrCopy -> attrCopy.setIdentifier(null))
-					.collect(toMap(AttributeMetaData::getName, Function.identity(), (u, v) ->
+					.collect(toMap(Attribute::getName, Function.identity(), (u, v) ->
 					{
 						throw new IllegalStateException(String.format("Duplicate key %s", u));
 					}, LinkedHashMap::new));
 			entityMetaCopy.setOwnAttributes(ownAttrMap.values());
 
 			// Own id attribute (use attribute reference from attributes map)
-			AttributeMetaData ownIdAttribute = entityMeta.getOwnIdAttribute();
+			Attribute ownIdAttribute = entityMeta.getOwnIdAttribute();
 			entityMetaCopy.setIdAttribute(ownIdAttribute != null ? ownAttrMap.get(ownIdAttribute.getName()) : null);
 
 			// Own label attribute (use attribute reference from attributes map)
-			AttributeMetaData ownLabelAttr = entityMeta.getOwnLabelAttribute();
+			Attribute ownLabelAttr = entityMeta.getOwnLabelAttribute();
 			entityMetaCopy.setLabelAttribute(ownLabelAttr != null ? ownAttrMap.get(ownLabelAttr.getName()) : null);
 
 			// Own lookup attrs (use attribute reference from attributes map)
-			Iterable<AttributeMetaData> ownLookupAttrs = entityMeta.getOwnLookupAttributes();
+			Iterable<Attribute> ownLookupAttrs = entityMeta.getOwnLookupAttributes();
 			entityMetaCopy.setLookupAttributes(stream(ownLookupAttrs.spliterator(), false)
 					.map(ownLookupAttr -> ownAttrMap.get(ownLookupAttr.getName())).collect(toList()));
 		}
@@ -138,8 +138,8 @@ public class EntityMetaData extends StaticEntity
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
-		return stream(getEntities(ATTRIBUTES, AttributeMetaData.class).spliterator(), false)
-				.map(AttributeMetaData::getName)::iterator;
+		return stream(getEntities(ATTRIBUTES, Attribute.class).spliterator(), false)
+				.map(Attribute::getName)::iterator;
 	}
 
 	/**
@@ -310,9 +310,9 @@ public class EntityMetaData extends StaticEntity
 	 *
 	 * @return id attribute
 	 */
-	public AttributeMetaData getIdAttribute()
+	public Attribute getIdAttribute()
 	{
-		AttributeMetaData idAttr = getOwnIdAttribute();
+		Attribute idAttr = getOwnIdAttribute();
 		if (idAttr == null)
 		{
 			EntityMetaData extends_ = getExtends();
@@ -329,12 +329,12 @@ public class EntityMetaData extends StaticEntity
 	 *
 	 * @return id attribute
 	 */
-	public AttributeMetaData getOwnIdAttribute()
+	public Attribute getOwnIdAttribute()
 	{
-		return getEntity(ID_ATTRIBUTE, AttributeMetaData.class);
+		return getEntity(ID_ATTRIBUTE, Attribute.class);
 	}
 
-	public EntityMetaData setIdAttribute(AttributeMetaData idAttr)
+	public EntityMetaData setIdAttribute(Attribute idAttr)
 	{
 		set(ID_ATTRIBUTE, idAttr);
 		if (idAttr != null)
@@ -355,9 +355,9 @@ public class EntityMetaData extends StaticEntity
 	 *
 	 * @return label attribute
 	 */
-	public AttributeMetaData getLabelAttribute()
+	public Attribute getLabelAttribute()
 	{
-		AttributeMetaData labelAttr = getOwnLabelAttribute();
+		Attribute labelAttr = getOwnLabelAttribute();
 		if (labelAttr == null)
 		{
 			EntityMetaData extends_ = getExtends();
@@ -375,10 +375,10 @@ public class EntityMetaData extends StaticEntity
 	 * @param langCode language code
 	 * @return label attribute
 	 */
-	public AttributeMetaData getLabelAttribute(String langCode)
+	public Attribute getLabelAttribute(String langCode)
 	{
-		AttributeMetaData labelAttr = getLabelAttribute();
-		AttributeMetaData i18nLabelAttr = labelAttr != null ? getAttribute(labelAttr.getName() + '-' + langCode) : null;
+		Attribute labelAttr = getLabelAttribute();
+		Attribute i18nLabelAttr = labelAttr != null ? getAttribute(labelAttr.getName() + '-' + langCode) : null;
 		return i18nLabelAttr != null ? i18nLabelAttr : labelAttr;
 	}
 
@@ -388,17 +388,17 @@ public class EntityMetaData extends StaticEntity
 	 *
 	 * @return label attribute
 	 */
-	public AttributeMetaData getOwnLabelAttribute()
+	public Attribute getOwnLabelAttribute()
 	{
-		return getEntity(LABEL_ATTRIBUTE, AttributeMetaData.class);
+		return getEntity(LABEL_ATTRIBUTE, Attribute.class);
 	}
 
-	public AttributeMetaData getOwnLabelAttribute(String languageCode)
+	public Attribute getOwnLabelAttribute(String languageCode)
 	{
-		return getEntity(getI18nAttributeName(LABEL_ATTRIBUTE, languageCode), AttributeMetaData.class);
+		return getEntity(getI18nAttributeName(LABEL_ATTRIBUTE, languageCode), Attribute.class);
 	}
 
-	public EntityMetaData setLabelAttribute(AttributeMetaData labelAttr)
+	public EntityMetaData setLabelAttribute(Attribute labelAttr)
 	{
 		set(LABEL_ATTRIBUTE, labelAttr);
 		return this;
@@ -410,7 +410,7 @@ public class EntityMetaData extends StaticEntity
 	 * @param lookupAttrName lookup attribute name
 	 * @return lookup attribute or <tt>null</tt>
 	 */
-	public AttributeMetaData getLookupAttribute(String lookupAttrName)
+	public Attribute getLookupAttribute(String lookupAttrName)
 	{
 		return stream(getLookupAttributes().spliterator(), false)
 				.filter(lookupAttr -> lookupAttr.getName().equals(lookupAttrName)).findFirst().orElse(null);
@@ -421,9 +421,9 @@ public class EntityMetaData extends StaticEntity
 	 *
 	 * @return lookup attributes
 	 */
-	public Iterable<AttributeMetaData> getLookupAttributes()
+	public Iterable<Attribute> getLookupAttributes()
 	{
-		Iterable<AttributeMetaData> lookupAttributes = getOwnLookupAttributes();
+		Iterable<Attribute> lookupAttributes = getOwnLookupAttributes();
 		EntityMetaData extends_ = getExtends();
 		if (extends_ != null)
 		{
@@ -437,12 +437,12 @@ public class EntityMetaData extends StaticEntity
 	 *
 	 * @return lookup attributes
 	 */
-	public Iterable<AttributeMetaData> getOwnLookupAttributes()
+	public Iterable<Attribute> getOwnLookupAttributes()
 	{
-		return getEntities(LOOKUP_ATTRIBUTES, AttributeMetaData.class);
+		return getEntities(LOOKUP_ATTRIBUTES, Attribute.class);
 	}
 
-	public EntityMetaData setLookupAttributes(Iterable<AttributeMetaData> lookupAttrs)
+	public EntityMetaData setLookupAttributes(Iterable<Attribute> lookupAttrs)
 	{
 		set(LOOKUP_ATTRIBUTES, lookupAttrs);
 		return this;
@@ -487,13 +487,13 @@ public class EntityMetaData extends StaticEntity
 	 *
 	 * @return entity attributes without extended entity attributes
 	 */
-	public Iterable<AttributeMetaData> getOwnAttributes()
+	public Iterable<Attribute> getOwnAttributes()
 	{
-		return getEntities(ATTRIBUTES, AttributeMetaData.class);
+		return getEntities(ATTRIBUTES, Attribute.class);
 	}
 
 	/**
-	 * Returns a list of {@link AttributeMetaData} which is ordered in case of compound attributes.
+	 * Returns a list of {@link Attribute} which is ordered in case of compound attributes.
 	 * Order: 1. attributeParts 2. parentAttribute
 	 * <p>
 	 * When adding attributes through the {@link org.molgenis.data.DataService}, adding a compound attribute is immediately
@@ -502,13 +502,13 @@ public class EntityMetaData extends StaticEntity
 	 * <p>
 	 * By adding attributeParts before the parent compound attribute, import errors are prevented
 	 *
-	 * @return A {@link List} of {@link AttributeMetaData} containing all own attributes, with compound attributes being placed after
+	 * @return A {@link List} of {@link Attribute} containing all own attributes, with compound attributes being placed after
 	 * their respective attribute parts
 	 */
-	public LinkedHashSet<AttributeMetaData> getCompoundOrderedAttributes()
+	public LinkedHashSet<Attribute> getCompoundOrderedAttributes()
 	{
-		LinkedHashSet<AttributeMetaData> attributes = newLinkedHashSet();
-		getEntities(ATTRIBUTES, AttributeMetaData.class).forEach(attribute ->
+		LinkedHashSet<Attribute> attributes = newLinkedHashSet();
+		getEntities(ATTRIBUTES, Attribute.class).forEach(attribute ->
 		{
 			if (attribute.getDataType() == COMPOUND)
 			{
@@ -520,8 +520,8 @@ public class EntityMetaData extends StaticEntity
 		return attributes;
 	}
 
-	private void resolvePossibleNestedCompounds(AttributeMetaData attribute,
-			LinkedHashSet<AttributeMetaData> attributes)
+	private void resolvePossibleNestedCompounds(Attribute attribute,
+			LinkedHashSet<Attribute> attributes)
 	{
 		if (attribute.getDataType() == COMPOUND)
 		{
@@ -532,7 +532,7 @@ public class EntityMetaData extends StaticEntity
 		return;
 	}
 
-	public EntityMetaData setOwnAttributes(Iterable<AttributeMetaData> attrs)
+	public EntityMetaData setOwnAttributes(Iterable<Attribute> attrs)
 	{
 		set(ATTRIBUTES, attrs);
 		return this;
@@ -549,9 +549,9 @@ public class EntityMetaData extends StaticEntity
 	 *
 	 * @return entity attributes
 	 */
-	public Iterable<AttributeMetaData> getAttributes()
+	public Iterable<Attribute> getAttributes()
 	{
-		Iterable<AttributeMetaData> attrs = getOwnAttributes();
+		Iterable<Attribute> attrs = getOwnAttributes();
 		EntityMetaData extends_ = getExtends();
 		if (extends_ != null)
 		{
@@ -569,9 +569,9 @@ public class EntityMetaData extends StaticEntity
 	 *
 	 * @return atomic attributes
 	 */
-	public Iterable<AttributeMetaData> getAtomicAttributes()
+	public Iterable<Attribute> getAtomicAttributes()
 	{
-		Iterable<AttributeMetaData> atomicAttrs = getCachedOwnAtomicAttrs();
+		Iterable<Attribute> atomicAttrs = getCachedOwnAtomicAttrs();
 		EntityMetaData extends_ = getExtends();
 		if (extends_ != null)
 		{
@@ -580,9 +580,9 @@ public class EntityMetaData extends StaticEntity
 		return atomicAttrs;
 	}
 
-	public Iterable<AttributeMetaData> getAllAttributes()
+	public Iterable<Attribute> getAllAttributes()
 	{
-		Iterable<AttributeMetaData> allAttrs = getOwnAllAttributes();
+		Iterable<Attribute> allAttrs = getOwnAllAttributes();
 		EntityMetaData extends_ = getExtends();
 		if (extends_ != null)
 		{
@@ -591,9 +591,9 @@ public class EntityMetaData extends StaticEntity
 		return allAttrs;
 	}
 
-	public Iterable<AttributeMetaData> getOwnAllAttributes()
+	public Iterable<Attribute> getOwnAllAttributes()
 	{
-		List<AttributeMetaData> allAttrs = new ArrayList<>();
+		List<Attribute> allAttrs = new ArrayList<>();
 		getOwnAllAttributesRec(getOwnAttributes(), allAttrs);
 		return allAttrs;
 	}
@@ -603,9 +603,9 @@ public class EntityMetaData extends StaticEntity
 	 *
 	 * @return attribute or <tt>null</tt>
 	 */
-	public AttributeMetaData getAttribute(String attrName)
+	public Attribute getAttribute(String attrName)
 	{
-		AttributeMetaData attr = getCachedAttrs().get(attrName);
+		Attribute attr = getCachedAttrs().get(attrName);
 		if (attr == null)
 		{
 			// look up attribute in parent entity
@@ -618,22 +618,22 @@ public class EntityMetaData extends StaticEntity
 		return attr;
 	}
 
-	public EntityMetaData addAttribute(AttributeMetaData attr, AttributeRole... attrTypes)
+	public EntityMetaData addAttribute(Attribute attr, AttributeRole... attrTypes)
 	{
 		invalidateCachedAttrs();
 
-		Iterable<AttributeMetaData> attrs = getEntities(ATTRIBUTES, AttributeMetaData.class);
+		Iterable<Attribute> attrs = getEntities(ATTRIBUTES, Attribute.class);
 		set(ATTRIBUTES, concat(attrs, singletonList(attr)));
 		setAttributeRoles(attr, attrTypes);
 		return this;
 	}
 
-	public void addAttributes(Iterable<AttributeMetaData> attrs)
+	public void addAttributes(Iterable<Attribute> attrs)
 	{
 		attrs.forEach(this::addAttribute);
 	}
 
-	protected void setAttributeRoles(AttributeMetaData attr, AttributeRole... attrTypes)
+	protected void setAttributeRoles(Attribute attr, AttributeRole... attrTypes)
 	{
 		if (attrTypes != null)
 		{
@@ -677,19 +677,19 @@ public class EntityMetaData extends StaticEntity
 		return cachedHasAttrWithExpession;
 	}
 
-	public void removeAttribute(AttributeMetaData attr)
+	public void removeAttribute(Attribute attr)
 	{
 		requireNonNull(attr);
 		// FIXME does not remove attr if attr is located in a compound attr
-		Iterable<AttributeMetaData> existingAttrs = getEntities(ATTRIBUTES, AttributeMetaData.class);
-		List<AttributeMetaData> filteredAttrs = stream(existingAttrs.spliterator(), false)
+		Iterable<Attribute> existingAttrs = getEntities(ATTRIBUTES, Attribute.class);
+		List<Attribute> filteredAttrs = stream(existingAttrs.spliterator(), false)
 				.filter(existingAttr -> !existingAttr.getName().equals(attr.getName())).collect(toList());
 		set(ATTRIBUTES, filteredAttrs);
 	}
 
-	public void addLookupAttribute(AttributeMetaData lookupAttr)
+	public void addLookupAttribute(Attribute lookupAttr)
 	{
-		Iterable<AttributeMetaData> lookupAttrs = getEntities(LOOKUP_ATTRIBUTES, AttributeMetaData.class);
+		Iterable<Attribute> lookupAttrs = getEntities(LOOKUP_ATTRIBUTES, Attribute.class);
 		if (!Iterables.contains(lookupAttrs, lookupAttr))
 		{
 			set(LOOKUP_ATTRIBUTES, concat(lookupAttrs, singletonList(lookupAttr)));
@@ -749,9 +749,9 @@ public class EntityMetaData extends StaticEntity
 	 *
 	 * @return atomic attributes without extended entity atomic attributes
 	 */
-	public Iterable<AttributeMetaData> getOwnAtomicAttributes()
+	public Iterable<Attribute> getOwnAtomicAttributes()
 	{
-		List<AttributeMetaData> atomicAttrs = new ArrayList<>();
+		List<Attribute> atomicAttrs = new ArrayList<>();
 		getOwnAtomicAttributesRec(getOwnAttributes(), atomicAttrs);
 		return atomicAttrs;
 	}
@@ -770,9 +770,9 @@ public class EntityMetaData extends StaticEntity
 		}
 	}
 
-	private void getOwnAtomicAttributesRec(Iterable<AttributeMetaData> attrs, List<AttributeMetaData> atomicAttrs)
+	private void getOwnAtomicAttributesRec(Iterable<Attribute> attrs, List<Attribute> atomicAttrs)
 	{
-		for (AttributeMetaData attr : attrs)
+		for (Attribute attr : attrs)
 		{
 			if (attr.getDataType() == COMPOUND)
 			{
@@ -785,9 +785,9 @@ public class EntityMetaData extends StaticEntity
 		}
 	}
 
-	private void getOwnAllAttributesRec(Iterable<AttributeMetaData> attrs, List<AttributeMetaData> allAttrs)
+	private void getOwnAllAttributesRec(Iterable<Attribute> attrs, List<Attribute> allAttrs)
 	{
-		for (AttributeMetaData attr : attrs)
+		for (Attribute attr : attrs)
 		{
 			if (attr.getDataType() == COMPOUND)
 			{
@@ -821,20 +821,20 @@ public class EntityMetaData extends StaticEntity
 		setAbstract(false);
 	}
 
-	private Map<String, AttributeMetaData> getCachedAttrs()
+	private Map<String, Attribute> getCachedAttrs()
 	{
 		if (cachedAttrs == null)
 		{
 			cachedAttrs = Maps.newHashMap();
-			Iterable<AttributeMetaData> attrs = getEntities(ATTRIBUTES, AttributeMetaData.class);
+			Iterable<Attribute> attrs = getEntities(ATTRIBUTES, Attribute.class);
 			fillCachedAttrsRec(attrs);
 		}
 		return cachedAttrs;
 	}
 
-	private void fillCachedAttrsRec(Iterable<AttributeMetaData> attrs)
+	private void fillCachedAttrsRec(Iterable<Attribute> attrs)
 	{
-		for (AttributeMetaData attr : attrs)
+		for (Attribute attr : attrs)
 		{
 			cachedAttrs.put(attr.getName(), attr);
 			if (attr.getDataType() == COMPOUND)
@@ -844,7 +844,7 @@ public class EntityMetaData extends StaticEntity
 		}
 	}
 
-	private List<AttributeMetaData> getCachedOwnAtomicAttrs()
+	private List<Attribute> getCachedOwnAtomicAttrs()
 	{
 		if (cachedOwnAtomicAttrs == null)
 		{
@@ -854,9 +854,9 @@ public class EntityMetaData extends StaticEntity
 		return cachedOwnAtomicAttrs;
 	}
 
-	private void fillCachedAtomicAttrsRec(Iterable<AttributeMetaData> attrs)
+	private void fillCachedAtomicAttrsRec(Iterable<Attribute> attrs)
 	{
-		for (AttributeMetaData attr : attrs)
+		for (Attribute attr : attrs)
 		{
 			if (attr.getDataType() == COMPOUND)
 			{

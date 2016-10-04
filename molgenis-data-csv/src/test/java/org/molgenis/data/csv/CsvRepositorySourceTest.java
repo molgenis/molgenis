@@ -3,7 +3,7 @@ package org.molgenis.data.csv;
 import com.google.common.collect.Iterables;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.MolgenisInvalidFormatException;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,7 +24,7 @@ public class CsvRepositorySourceTest extends AbstractMolgenisSpringTest
 	private EntityMetaDataFactory entityMetaFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@Test
 	public void getRepositoriesCsv() throws IOException, MolgenisInvalidFormatException

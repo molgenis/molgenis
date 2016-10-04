@@ -9,8 +9,8 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.rest.EntityCollectionResponse;
@@ -102,7 +102,7 @@ public class SortaServiceController extends MolgenisPluginController
 	private final OntologyTermMetaData ontologyTermMetaData;
 	private final SortaJobExecutionFactory sortaJobExecutionFactory;
 	private final EntityMetaDataFactory entityMetaFactory;
-	private final AttributeMetaDataFactory attrMetaFactory;
+	private final AttributeFactory attrMetaFactory;
 
 	public static final String MATCH_VIEW_NAME = "sorta-match-view";
 	public static final String ID = "sortaservice";
@@ -119,7 +119,7 @@ public class SortaServiceController extends MolgenisPluginController
 			PermissionSystemService permissionSystemService, MatchingTaskContentMetaData matchingTaskContentMetaData,
 			SortaJobExecutionMetaData sortaJobExecutionMetaData, OntologyTermMetaData ontologyTermMetaData,
 			SortaJobExecutionFactory sortaJobExecutionFactory, EntityMetaDataFactory entityMetaFactory,
-			AttributeMetaDataFactory attrMetaFactory)
+			AttributeFactory attrMetaFactory)
 	{
 		super(URI);
 		this.ontologyService = requireNonNull(ontologyService);
@@ -451,10 +451,10 @@ public class SortaServiceController extends MolgenisPluginController
 			List<String> columnHeaders = new ArrayList<String>();
 
 			EntityMetaData sourceMetaData = dataService.getEntityMetaData(sortaJobExecution.getSourceEntityName());
-			for (AttributeMetaData attributeMetaData : sourceMetaData.getAttributes())
+			for (Attribute attribute : sourceMetaData.getAttributes())
 			{
-				if (!attributeMetaData.getName().equalsIgnoreCase(SortaCsvRepository.ALLOWED_IDENTIFIER))
-					columnHeaders.add(attributeMetaData.getName());
+				if (!attribute.getName().equalsIgnoreCase(SortaCsvRepository.ALLOWED_IDENTIFIER))
+					columnHeaders.add(attribute.getName());
 			}
 			columnHeaders.addAll(Arrays
 					.asList(OntologyTermMetaData.ONTOLOGY_TERM_NAME, OntologyTermMetaData.ONTOLOGY_TERM_IRI,
@@ -593,7 +593,7 @@ public class SortaServiceController extends MolgenisPluginController
 	private boolean validateFileHeader(Repository<Entity> repository)
 	{
 		boolean containsName = StreamSupport.stream(repository.getEntityMetaData().getAttributes().spliterator(), false)
-				.map(AttributeMetaData::getName)
+				.map(Attribute::getName)
 				.anyMatch(name -> name.equalsIgnoreCase(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD));
 		return containsName;
 	}
@@ -601,7 +601,7 @@ public class SortaServiceController extends MolgenisPluginController
 	private boolean validateEmptyFileHeader(Repository<Entity> repository)
 	{
 		boolean evaluation = StreamSupport.stream(repository.getEntityMetaData().getAttributes().spliterator(), false)
-				.map(AttributeMetaData::getName).anyMatch(StringUtils::isNotBlank);
+				.map(Attribute::getName).anyMatch(StringUtils::isNotBlank);
 		return evaluation;
 	}
 

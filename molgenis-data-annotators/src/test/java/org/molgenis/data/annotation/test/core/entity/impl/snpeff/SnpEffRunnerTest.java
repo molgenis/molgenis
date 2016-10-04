@@ -49,7 +49,7 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	ApplicationContext context;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityMetaDataFactory entityMetaDataFactory;
@@ -94,21 +94,21 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 		IdGenerator idGenerator = new UuidGenerator();
 
 		snpEffRunner = new SnpEffRunner(jarRunner, snpEffAnnotatorSettings, idGenerator, vcfAttributes, effectsMetaData,
-				entityMetaDataFactory, attributeMetaDataFactory);
+				entityMetaDataFactory, attributeFactory);
 
 		metaDataCanAnnotate = entityMetaDataFactory.create().setName("test").setSimpleName("test");
-		AttributeMetaData attributeMetaDataChrom = vcfAttributes.getChromAttribute();
-		AttributeMetaData attributeMetaDataPos = vcfAttributes.getPosAttribute();
-		AttributeMetaData attributeMetaDataRef = vcfAttributes.getRefAttribute();
-		AttributeMetaData attributeMetaDataAlt = vcfAttributes.getAltAttribute();
+		Attribute attributeChrom = vcfAttributes.getChromAttribute();
+		Attribute attributePos = vcfAttributes.getPosAttribute();
+		Attribute attributeRef = vcfAttributes.getRefAttribute();
+		Attribute attributeAlt = vcfAttributes.getAltAttribute();
 
-		metaDataCanAnnotate.addAttribute(attributeMetaDataChrom, ROLE_ID);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataPos);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataRef);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataAlt);
+		metaDataCanAnnotate.addAttribute(attributeChrom, ROLE_ID);
+		metaDataCanAnnotate.addAttribute(attributePos);
+		metaDataCanAnnotate.addAttribute(attributeRef);
+		metaDataCanAnnotate.addAttribute(attributeAlt);
 
 		effectsEMD = entityMetaDataFactory.create().setSimpleName("test_EFFECTS");
-		effectsEMD.addAttribute(attributeMetaDataFactory.create().setName("ID").setAuto(true).setVisible(false));
+		effectsEMD.addAttribute(attributeFactory.create().setName("ID").setAuto(true).setVisible(false));
 		effectsEMD.addAttribute(effectsMetaData.getAltAttr());
 		effectsEMD.addAttribute(effectsMetaData.getGeneNameAttr());
 		effectsEMD.addAttribute(effectsMetaData.getAnnotationAttr());
@@ -126,7 +126,7 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 		effectsEMD.addAttribute(effectsMetaData.getDistanceToFeatureAttr());
 		effectsEMD.addAttribute(effectsMetaData.getErrorsAttr());
 		effectsEMD.addAttribute(
-				attributeMetaDataFactory.create().setName(EffectsMetaData.VARIANT).setNillable(false).setDataType(XREF)
+				attributeFactory.create().setName(EffectsMetaData.VARIANT).setNillable(false).setDataType(XREF)
 						.setRefEntity(metaDataCanAnnotate));
 
 		Entity singleAlleleEntity1 = new DynamicEntity(metaDataCanAnnotate);

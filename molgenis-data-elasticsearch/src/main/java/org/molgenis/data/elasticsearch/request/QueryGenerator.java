@@ -8,7 +8,7 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.util.MolgenisDateFormat;
 
@@ -166,13 +166,13 @@ public class QueryGenerator implements QueryPartGenerator
 				{
 					String[] attributePath = parseAttributePath(queryField);
 
-					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					Attribute attr = getAttribute(entityMetaData, attributePath);
 					queryValue = getESDateQueryValue((Date) queryValue, attr);
 				}
 
 				FilterBuilder filterBuilder;
 				String[] attributePath = parseAttributePath(queryField);
-				AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+				Attribute attr = getAttribute(entityMetaData, attributePath);
 
 				// construct query part
 				if (queryValue != null)
@@ -217,7 +217,7 @@ public class QueryGenerator implements QueryPartGenerator
 							Object queryIdValue = queryValue instanceof Entity ? ((Entity) queryValue)
 									.getIdValue() : queryValue;
 
-							AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
+							Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
 							String indexFieldName = getXRefEqualsInSearchFieldName(refIdAttr, queryField);
 
 							filterBuilder = FilterBuilders
@@ -256,7 +256,7 @@ public class QueryGenerator implements QueryPartGenerator
 						case FILE:
 						case MREF:
 						case XREF:
-							AttributeMetaData refIdAttr = attr.getRefEntity().getIdAttribute();
+							Attribute refIdAttr = attr.getRefEntity().getIdAttribute();
 							String indexFieldName = getXRefEqualsInSearchFieldName(refIdAttr, queryField);
 
 							// see https://github.com/elastic/elasticsearch/issues/3495
@@ -284,7 +284,7 @@ public class QueryGenerator implements QueryPartGenerator
 				// Workaround for Elasticsearch Date to String conversion issue
 				if (queryValue instanceof Date)
 				{
-					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					Attribute attr = getAttribute(entityMetaData, attributePath);
 					queryValue = getESDateQueryValue((Date) queryValue, attr);
 				}
 
@@ -304,7 +304,7 @@ public class QueryGenerator implements QueryPartGenerator
 				// Workaround for Elasticsearch Date to String conversion issue
 				if (queryValue instanceof Date)
 				{
-					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					Attribute attr = getAttribute(entityMetaData, attributePath);
 					queryValue = getESDateQueryValue((Date) queryValue, attr);
 				}
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gte(queryValue);
@@ -325,7 +325,7 @@ public class QueryGenerator implements QueryPartGenerator
 				Iterable<?> iterable = (Iterable<?>) queryValue;
 
 				String[] attributePath = parseAttributePath(queryField);
-				AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+				Attribute attr = getAttribute(entityMetaData, attributePath);
 				AttributeType dataType = attr.getDataType();
 
 				FilterBuilder filterBuilder;
@@ -399,7 +399,7 @@ public class QueryGenerator implements QueryPartGenerator
 				// Workaround for Elasticsearch Date to String conversion issue
 				if (queryValue instanceof Date)
 				{
-					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					Attribute attr = getAttribute(entityMetaData, attributePath);
 					queryValue = getESDateQueryValue((Date) queryValue, attr);
 				}
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).lt(queryValue);
@@ -417,7 +417,7 @@ public class QueryGenerator implements QueryPartGenerator
 				// Workaround for Elasticsearch Date to String conversion issue
 				if (queryValue instanceof Date)
 				{
-					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					Attribute attr = getAttribute(entityMetaData, attributePath);
 					queryValue = getESDateQueryValue((Date) queryValue, attr);
 				}
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).lte(queryValue);
@@ -441,7 +441,7 @@ public class QueryGenerator implements QueryPartGenerator
 				Iterator<?> iterator = iterable.iterator();
 
 				String[] attributePath = parseAttributePath(queryField);
-				AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+				Attribute attr = getAttribute(entityMetaData, attributePath);
 
 				Object queryValueFrom = iterator.next();
 
@@ -476,7 +476,7 @@ public class QueryGenerator implements QueryPartGenerator
 			case LIKE:
 			{
 				String[] attributePath = parseAttributePath(queryField);
-				AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+				Attribute attr = getAttribute(entityMetaData, attributePath);
 
 				// construct query part
 				AttributeType dataType = attr.getDataType();
@@ -530,7 +530,7 @@ public class QueryGenerator implements QueryPartGenerator
 				{
 					String[] attributePath = parseAttributePath(queryField);
 
-					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					Attribute attr = getAttribute(entityMetaData, attributePath);
 
 					// construct query part
 					AttributeType dataType = attr.getDataType();
@@ -586,7 +586,7 @@ public class QueryGenerator implements QueryPartGenerator
 				}
 				else
 				{
-					AttributeMetaData attr = entityMetaData.getAttribute(queryField);
+					Attribute attr = entityMetaData.getAttribute(queryField);
 					if (attr == null) throw new UnknownAttributeException(queryField);
 					// construct query part
 					AttributeType dataType = attr.getDataType();
@@ -636,7 +636,7 @@ public class QueryGenerator implements QueryPartGenerator
 				}
 				else
 				{
-					AttributeMetaData attr = entityMetaData.getAttribute(queryField);
+					Attribute attr = entityMetaData.getAttribute(queryField);
 					if (attr == null) throw new UnknownAttributeException(queryField);
 					// construct query part
 					AttributeType dataType = attr.getDataType();
@@ -677,7 +677,7 @@ public class QueryGenerator implements QueryPartGenerator
 		return queryBuilder;
 	}
 
-	private String getFieldName(AttributeMetaData attr, String queryField)
+	private String getFieldName(Attribute attr, String queryField)
 	{
 		AttributeType dataType = attr.getDataType();
 
@@ -711,7 +711,7 @@ public class QueryGenerator implements QueryPartGenerator
 		}
 	}
 
-	private String getXRefEqualsInSearchFieldName(AttributeMetaData refIdAttr, String queryField)
+	private String getXRefEqualsInSearchFieldName(Attribute refIdAttr, String queryField)
 	{
 		String indexFieldName = queryField + '.' + refIdAttr.getName();
 		return getFieldName(refIdAttr, indexFieldName);
@@ -806,7 +806,7 @@ public class QueryGenerator implements QueryPartGenerator
 	/**
 	 * Returns the target attribute. Looks in the reference entity when it is a nested query.
 	 */
-	private AttributeMetaData getAttribute(EntityMetaData entityMetaData, String[] attributePath)
+	private Attribute getAttribute(EntityMetaData entityMetaData, String[] attributePath)
 	{
 		if (attributePath.length > 2)
 			throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
@@ -814,13 +814,13 @@ public class QueryGenerator implements QueryPartGenerator
 
 		if (attributePath.length == 1)
 		{
-			AttributeMetaData attr = entityMetaData.getAttribute(attributePath[0]);
+			Attribute attr = entityMetaData.getAttribute(attributePath[0]);
 			if (attr == null) throw new UnknownAttributeException(attributePath[0]);
 			return attr;
 		}
 		else
 		{
-			AttributeMetaData attr = entityMetaData.getAttribute(attributePath[0]);
+			Attribute attr = entityMetaData.getAttribute(attributePath[0]);
 			if (attr == null) throw new UnknownAttributeException(attributePath[0]);
 
 			attr = attr.getRefEntity().getAttribute(attributePath[1]);
@@ -830,7 +830,7 @@ public class QueryGenerator implements QueryPartGenerator
 		}
 	}
 
-	private String getESDateQueryValue(Date queryValue, AttributeMetaData attr)
+	private String getESDateQueryValue(Date queryValue, Attribute attr)
 	{
 		if (attr.getDataType() == AttributeType.DATE_TIME)
 		{

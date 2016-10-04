@@ -9,8 +9,8 @@ import org.molgenis.data.annotation.core.entity.EntityAnnotator;
 import org.molgenis.data.annotation.core.entity.QueryCreator;
 import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.core.resources.Resources;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -38,13 +38,13 @@ public abstract class IdAnnotatorImpl implements EntityAnnotator
 	private final String sourceRepositoryName;
 	private final AnnotatorInfo info;
 	private final CmdLineAnnotatorSettingsConfigurer cmdLineAnnotatorSettingsConfigurer;
-	private final AttributeMetaDataFactory attributeMetaDataFactory;
+	private final AttributeFactory attributeFactory;
 	private final EntityMetaDataFactory entityMetaDataFactory;
 
 	public IdAnnotatorImpl(String sourceRepositoryName, AnnotatorInfo info, QueryCreator queryCreator,
 			DataService dataService, Resources resources,
 			CmdLineAnnotatorSettingsConfigurer cmdLineAnnotatorSettingsConfigurer,
-			AttributeMetaDataFactory attributeMetaDataFactory, EntityMetaDataFactory entityMetaDataFactory)
+			AttributeFactory attributeFactory, EntityMetaDataFactory entityMetaDataFactory)
 	{
 		this.sourceRepositoryName = sourceRepositoryName;
 		this.dataService = dataService;
@@ -52,7 +52,7 @@ public abstract class IdAnnotatorImpl implements EntityAnnotator
 		this.queryCreator = requireNonNull(queryCreator);
 		this.info = info;
 		this.cmdLineAnnotatorSettingsConfigurer = cmdLineAnnotatorSettingsConfigurer;
-		this.attributeMetaDataFactory = attributeMetaDataFactory;
+		this.attributeFactory = attributeFactory;
 		this.entityMetaDataFactory = entityMetaDataFactory;
 	}
 
@@ -69,9 +69,9 @@ public abstract class IdAnnotatorImpl implements EntityAnnotator
 	}
 
 	@Override
-	public List<AttributeMetaData> getRequiredAttributes()
+	public List<Attribute> getRequiredAttributes()
 	{
-		List<AttributeMetaData> sourceMetaData = new ArrayList<>();
+		List<Attribute> sourceMetaData = new ArrayList<>();
 		sourceMetaData.addAll(queryCreator.getRequiredAttributes());
 		return sourceMetaData;
 	}

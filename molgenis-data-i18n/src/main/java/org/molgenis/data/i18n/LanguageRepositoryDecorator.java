@@ -5,8 +5,8 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageMetaData;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 
@@ -31,12 +31,12 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 {
 	private final Repository<Language> decorated;
 	private final DataService dataService;
-	private final AttributeMetaDataFactory attrMetaFactory;
+	private final AttributeFactory attrMetaFactory;
 	private final EntityMetaDataMetaData entityMetaMeta;
 	private final I18nStringMetaData i18nStringMeta;
 
 	public LanguageRepositoryDecorator(Repository<Language> decorated, DataService dataService,
-			AttributeMetaDataFactory attrMetaFactory, EntityMetaDataMetaData entityMetaMeta,
+			AttributeFactory attrMetaFactory, EntityMetaDataMetaData entityMetaMeta,
 			I18nStringMetaData i18nStringMeta)
 	{
 		this.decorated = requireNonNull(decorated);
@@ -173,7 +173,7 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 		decorated.delete(language);
 
 		// remove i18n attributes from i18n string meta data
-		AttributeMetaData attrLanguageCode = i18nStringMeta.getAttribute(languageCode);
+		Attribute attrLanguageCode = i18nStringMeta.getAttribute(languageCode);
 
 		EntityMetaData i18nMeta = EntityMetaData
 				.newInstance(dataService.getEntityMetaData(I18nStringMetaData.I18N_STRING), SHALLOW_COPY_ATTRS);
@@ -186,8 +186,8 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 		i18nMetaUpdated.removeAttribute(attrLanguageCode);
 
 		// remove i18n attributes from entity meta data
-		AttributeMetaData entityLabel = entityMetaMeta.getAttribute(LABEL + '-' + languageCode);
-		AttributeMetaData entityDescription = entityMetaMeta.getAttribute(DESCRIPTION + '-' + languageCode);
+		Attribute entityLabel = entityMetaMeta.getAttribute(LABEL + '-' + languageCode);
+		Attribute entityDescription = entityMetaMeta.getAttribute(DESCRIPTION + '-' + languageCode);
 
 		EntityMetaData entityMeta = EntityMetaData
 				.newInstance(dataService.getEntityMetaData(ENTITY_META_DATA), SHALLOW_COPY_ATTRS);
@@ -203,8 +203,8 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 
 		// remove i18n attributes from attribute meta data
 		EntityMetaData attrMetaMeta = attrMetaFactory.getAttributeMetaDataMetaData();
-		AttributeMetaData attrLabel = attrMetaMeta.getAttribute(LABEL + '-' + languageCode);
-		AttributeMetaData attrDescription = attrMetaMeta.getAttribute(DESCRIPTION + '-' + languageCode);
+		Attribute attrLabel = attrMetaMeta.getAttribute(LABEL + '-' + languageCode);
+		Attribute attrDescription = attrMetaMeta.getAttribute(DESCRIPTION + '-' + languageCode);
 
 		EntityMetaData attrMeta = EntityMetaData
 				.newInstance(dataService.getEntityMetaData(ATTRIBUTE_META_DATA), SHALLOW_COPY_ATTRS);
@@ -268,9 +268,9 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	private void addLanguageToAttributes(String languageCode)
 	{
 		// Add language attributes for attribute meta data
-		AttributeMetaData attrLabel = attrMetaFactory.create().setName(LABEL + '-' + languageCode).setNillable(true)
+		Attribute attrLabel = attrMetaFactory.create().setName(LABEL + '-' + languageCode).setNillable(true)
 				.setLabel("Label (" + languageCode + ')');
-		AttributeMetaData attrDescription = attrMetaFactory.create().setName(DESCRIPTION + '-' + languageCode)
+		Attribute attrDescription = attrMetaFactory.create().setName(DESCRIPTION + '-' + languageCode)
 				.setNillable(true).setLabel("Description (" + languageCode + ')');
 		dataService.add(ATTRIBUTE_META_DATA, Stream.of(attrLabel, attrDescription));
 
@@ -295,10 +295,10 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	private void addLanguageToEntities(String languageCode)
 	{
 		// Add language attributes for entity meta data
-		AttributeMetaData entityLabel = attrMetaFactory.create()
+		Attribute entityLabel = attrMetaFactory.create()
 				.setName(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true)
 				.setLabel("Label (" + languageCode + ')');
-		AttributeMetaData entityDescription = attrMetaFactory.create()
+		Attribute entityDescription = attrMetaFactory.create()
 				.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true)
 				.setLabel("Description (" + languageCode + ')');
 		dataService.add(ATTRIBUTE_META_DATA, Stream.of(entityLabel, entityDescription));
@@ -317,7 +317,7 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	 */
 	private void addLanguageToI18N(String languageCode)
 	{
-		AttributeMetaData languageCodeAttr = attrMetaFactory.create().setName(languageCode).setNillable(true)
+		Attribute languageCodeAttr = attrMetaFactory.create().setName(languageCode).setNillable(true)
 				.setDataType(TEXT);
 		dataService.add(ATTRIBUTE_META_DATA, Stream.of(languageCodeAttr));
 

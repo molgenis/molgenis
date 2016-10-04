@@ -8,7 +8,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.AbstractRepository;
@@ -28,16 +28,16 @@ public class HPORepository extends AbstractRepository
 	public static final String HPO_ID_COL_NAME = "HPO-ID";
 	public static final String HPO_TERM_COL_NAME = "HPO-term-name";
 	private final EntityMetaDataFactory entityMetaDataFactory;
-	private final AttributeMetaDataFactory attributeMetaDataFactory;
+	private final AttributeFactory attributeFactory;
 	private Map<String, List<Entity>> entitiesByGeneSymbol;
 	private final File file;
 
 	public HPORepository(File file, EntityMetaDataFactory entityMetaDataFactory,
-			AttributeMetaDataFactory attributeMetaDataFactory)
+			AttributeFactory attributeFactory)
 	{
 		this.file = file;
 		this.entityMetaDataFactory = entityMetaDataFactory;
-		this.attributeMetaDataFactory = attributeMetaDataFactory;
+		this.attributeFactory = attributeFactory;
 	}
 
 	@Override
@@ -50,10 +50,10 @@ public class HPORepository extends AbstractRepository
 	public EntityMetaData getEntityMetaData()
 	{
 		EntityMetaData entityMeta = entityMetaDataFactory.create().setSimpleName("HPO");
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(HPO_DISEASE_ID_COL_NAME));
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(HPO_GENE_SYMBOL_COL_NAME));
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(HPO_ID_COL_NAME), ROLE_ID);
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(HPO_TERM_COL_NAME));
+		entityMeta.addAttribute(attributeFactory.create().setName(HPO_DISEASE_ID_COL_NAME));
+		entityMeta.addAttribute(attributeFactory.create().setName(HPO_GENE_SYMBOL_COL_NAME));
+		entityMeta.addAttribute(attributeFactory.create().setName(HPO_ID_COL_NAME), ROLE_ID);
+		entityMeta.addAttribute(attributeFactory.create().setName(HPO_TERM_COL_NAME));
 		return entityMeta;
 	}
 

@@ -3,7 +3,7 @@ package org.molgenis.data;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.SetMultimap;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.*;
 import org.molgenis.util.BatchingIterable;
@@ -126,7 +126,7 @@ public class EntityManagerImpl implements EntityManager
 			return entities;
 		}
 
-		List<AttributeMetaData> resolvableAttrs = getResolvableAttrs(entityMeta, fetch);
+		List<Attribute> resolvableAttrs = getResolvableAttrs(entityMeta, fetch);
 
 		// entity has no references, nothing to resolve
 		if (resolvableAttrs.isEmpty())
@@ -179,7 +179,7 @@ public class EntityManagerImpl implements EntityManager
 			return entities;
 		}
 
-		List<AttributeMetaData> resolvableAttrs = getResolvableAttrs(entityMeta, fetch);
+		List<Attribute> resolvableAttrs = getResolvableAttrs(entityMeta, fetch);
 
 		// entity has no references, nothing to resolve
 		if (resolvableAttrs.isEmpty())
@@ -195,15 +195,15 @@ public class EntityManagerImpl implements EntityManager
 		});
 	}
 
-	private List<Entity> resolveReferences(List<AttributeMetaData> resolvableAttrs, List<Entity> entities, Fetch fetch)
+	private List<Entity> resolveReferences(List<Attribute> resolvableAttrs, List<Entity> entities, Fetch fetch)
 	{
 		// entity name --> entity ids
 		SetMultimap<String, Object> lazyRefEntityIdsMap = HashMultimap.create(resolvableAttrs.size(), 16);
 		// entity name --> attributes referring to this entity
-		SetMultimap<String, AttributeMetaData> refEntityAttrsMap = HashMultimap.create(resolvableAttrs.size(), 2);
+		SetMultimap<String, Attribute> refEntityAttrsMap = HashMultimap.create(resolvableAttrs.size(), 2);
 
 		// fill maps
-		for (AttributeMetaData attr : resolvableAttrs)
+		for (Attribute attr : resolvableAttrs)
 		{
 			String refEntityName = attr.getRefEntity().getName();
 
@@ -241,7 +241,7 @@ public class EntityManagerImpl implements EntityManager
 
 			// create a fetch for the referenced entity which is a union of the fetches defined by attributes
 			// referencing this entity
-			Set<AttributeMetaData> attrs = refEntityAttrsMap.get(refEntityName);
+			Set<Attribute> attrs = refEntityAttrsMap.get(refEntityName);
 			Fetch subFetch = createSubFetch(fetch, attrs);
 
 			// retrieve referenced entities
@@ -250,7 +250,7 @@ public class EntityManagerImpl implements EntityManager
 			Map<Object, Entity> refEntitiesIdMap = refEntities
 					.collect(Collectors.toMap(Entity::getIdValue, Function.identity()));
 
-			for (AttributeMetaData attr : attrs)
+			for (Attribute attr : attrs)
 			{
 				if (isSingleReferenceType(attr))
 				{
@@ -288,10 +288,10 @@ public class EntityManagerImpl implements EntityManager
 		return entities;
 	}
 
-	private static Fetch createSubFetch(Fetch fetch, Iterable<AttributeMetaData> attrs)
+	private static Fetch createSubFetch(Fetch fetch, Iterable<Attribute> attrs)
 	{
 		Fetch subFetch = null;
-		for (AttributeMetaData attr : attrs)
+		for (Attribute attr : attrs)
 		{
 			Fetch attrSubFetch = fetch.getFetch(attr.getName());
 			if (attrSubFetch != null)
@@ -349,7 +349,7 @@ public class EntityManagerImpl implements EntityManager
 	 * @param fetch      entity fetch
 	 * @return resolved attributes
 	 */
-	private static List<AttributeMetaData> getResolvableAttrs(EntityMetaData entityMeta, Fetch fetch)
+	private static List<Attribute> getResolvableAttrs(EntityMetaData entityMeta, Fetch fetch)
 	{
 		return stream(entityMeta.getAtomicAttributes().spliterator(), false)
 				.filter(EntityMetaDataUtils::isReferenceType).filter(attr -> attr.getExpression() == null)

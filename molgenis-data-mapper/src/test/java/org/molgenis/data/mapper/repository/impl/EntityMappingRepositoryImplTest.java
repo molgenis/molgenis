@@ -9,8 +9,8 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.Attribute;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
@@ -46,7 +46,7 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 	private EntityMetaDataFactory entityMetaFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@Autowired
 	private AttributeMappingMetaData attrMappingMeta;
@@ -65,15 +65,15 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testToEntityMappings()
 	{
-		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName("targetAttribute");
-		List<AttributeMetaData> sourceAttributeMetaDatas = Lists.newArrayList();
+		Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
+		List<Attribute> sourceAttributes = Lists.newArrayList();
 		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
 		EntityMetaData targetEntityMetaData = entityMetaFactory.create("target");
-		targetEntityMetaData.addAttribute(targetAttributeMetaData);
+		targetEntityMetaData.addAttribute(targetAttribute);
 
 		List<AttributeMapping> attributeMappings = Lists.newArrayList();
 		attributeMappings
-				.add(new AttributeMapping("1", targetAttributeMetaData, "algorithm", sourceAttributeMetaDatas));
+				.add(new AttributeMapping("1", targetAttribute, "algorithm", sourceAttributes));
 
 		List<EntityMapping> entityMappings = singletonList(
 				new EntityMapping(AUTO_ID, sourceEntityMetaData, targetEntityMetaData, attributeMappings));
@@ -108,14 +108,14 @@ public class EntityMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testUpsert()
 	{
-		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName("targetAttribute");
-		List<AttributeMetaData> sourceAttributeMetaDatas = Lists.newArrayList();
+		Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
+		List<Attribute> sourceAttributes = Lists.newArrayList();
 		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
 		EntityMetaData targetEntityMetaData = entityMetaFactory.create("target");
-		targetEntityMetaData.addAttribute(targetAttributeMetaData);
+		targetEntityMetaData.addAttribute(targetAttribute);
 
 		List<AttributeMapping> attributeMappings = Lists.newArrayList();
-		attributeMappings.add(new AttributeMapping("1", targetAttributeMetaData, "algorithm", sourceAttributeMetaDatas,
+		attributeMappings.add(new AttributeMapping("1", targetAttribute, "algorithm", sourceAttributes,
 				CURATED.toString()));
 
 		Collection<EntityMapping> entityMappings = singletonList(

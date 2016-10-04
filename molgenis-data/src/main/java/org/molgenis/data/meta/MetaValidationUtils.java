@@ -3,7 +3,7 @@ package org.molgenis.data.meta;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.ReservedKeywords;
 import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.util.Set;
@@ -74,9 +74,9 @@ public class MetaValidationUtils
 	/**
 	 * Recursively traverses attributes and validates the names.
 	 */
-	private static void validateAttributes(Iterable<AttributeMetaData> amds)
+	private static void validateAttributes(Iterable<Attribute> amds)
 	{
-		for (AttributeMetaData amd : amds)
+		for (Attribute amd : amds)
 		{
 			validateAttribute(amd);
 			if (amd.getDataType() == COMPOUND)
@@ -86,7 +86,7 @@ public class MetaValidationUtils
 		}
 	}
 
-	protected static void validateAttribute(AttributeMetaData amd)
+	protected static void validateAttribute(Attribute amd)
 	{
 		validateName(amd.getName());
 		if (amd.getDefaultValue() != null)

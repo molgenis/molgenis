@@ -5,7 +5,7 @@ import org.mockito.Matchers;
 import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.rest.RestControllerTest.RestControllerConfig;
 import org.molgenis.data.rest.service.RestService;
@@ -103,7 +103,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		// test entity meta data
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
 
-		AttributeMetaData attrId = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		Attribute attrId = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(attrId.getLabel()).thenReturn("id");
 		when(attrId.getLabel(anyString())).thenReturn("id");
 		when(attrId.getDataType()).thenReturn(STRING);
@@ -114,7 +114,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(attrId.getAttributeParts()).thenReturn(emptyList());
 		when(attrId.getEnumOptions()).thenReturn(emptyList());
 
-		AttributeMetaData attrName = when(mock(AttributeMetaData.class).getName()).thenReturn("name").getMock();
+		Attribute attrName = when(mock(Attribute.class).getName()).thenReturn("name").getMock();
 		when(attrName.getLabel()).thenReturn("name");
 		when(attrName.getLabel(anyString())).thenReturn("name");
 		when(attrName.getDataType()).thenReturn(STRING);
@@ -123,7 +123,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(attrName.getAttributeParts()).thenReturn(emptyList());
 		when(attrName.getEnumOptions()).thenReturn(emptyList());
 
-		AttributeMetaData attrEnum = when(mock(AttributeMetaData.class).getName()).thenReturn("enum").getMock();
+		Attribute attrEnum = when(mock(Attribute.class).getName()).thenReturn("enum").getMock();
 		when(attrEnum.getLabel()).thenReturn("enum");
 		when(attrEnum.getLabel(anyString())).thenReturn("enum");
 		when(attrEnum.getDataType()).thenReturn(ENUM);
@@ -132,7 +132,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(attrEnum.isVisible()).thenReturn(true);
 		when(attrEnum.getAttributeParts()).thenReturn(emptyList());
 
-		AttributeMetaData attrInt = when(mock(AttributeMetaData.class).getName()).thenReturn("int").getMock();
+		Attribute attrInt = when(mock(Attribute.class).getName()).thenReturn("int").getMock();
 		when(attrInt.getLabel()).thenReturn("int");
 		when(attrInt.getLabel(anyString())).thenReturn("int");
 		when(attrInt.getDataType()).thenReturn(INT);
@@ -406,7 +406,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		EntityMetaData entityMetaData = mock(EntityMetaData.class);
 		when(entityMetaData.getAttribute("name")).thenReturn(null);
-		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
+		Attribute idAttr = when(mock(Attribute.class).getDataType()).thenReturn(STRING).getMock();
 		when(entityMetaData.getIdAttribute()).thenReturn(idAttr);
 		when(repo.getEntityMetaData()).thenReturn(entityMetaData);
 		when(dataService.getEntityMetaData(ENTITY_NAME)).thenReturn(entityMetaData);
@@ -433,7 +433,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		// entity meta data
 		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
 
-		AttributeMetaData attrId = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		Attribute attrId = when(mock(Attribute.class).getName()).thenReturn("id").getMock();
 		when(attrId.getLabel()).thenReturn("id");
 		when(attrId.getLabel(anyString())).thenReturn("id");
 		when(attrId.getDataType()).thenReturn(STRING);
@@ -444,7 +444,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 		when(attrId.getAttributeParts()).thenReturn(emptyList());
 		when(attrId.getEnumOptions()).thenReturn(emptyList());
 
-		AttributeMetaData attrName = when(mock(AttributeMetaData.class).getName()).thenReturn("name").getMock();
+		Attribute attrName = when(mock(Attribute.class).getName()).thenReturn("name").getMock();
 		when(attrName.getLabel()).thenReturn("name");
 		when(attrName.getLabel(anyString())).thenReturn("name");
 		when(attrName.getDataType()).thenReturn(STRING);
@@ -462,7 +462,7 @@ public class RestControllerTest extends AbstractTestNGSpringContextTests
 
 		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(ENTITY_NAME).getMock();
 
-		AttributeMetaData attrXref = when(mock(AttributeMetaData.class).getName()).thenReturn("xrefValue").getMock();
+		Attribute attrXref = when(mock(Attribute.class).getName()).thenReturn("xrefValue").getMock();
 		when(attrXref.getLabel()).thenReturn("xrefValue");
 		when(attrXref.getLabel(anyString())).thenReturn("xrefValue");
 		when(attrXref.getDataType()).thenReturn(XREF);

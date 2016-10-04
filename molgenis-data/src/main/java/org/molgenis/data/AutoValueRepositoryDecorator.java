@@ -3,7 +3,7 @@ package org.molgenis.data;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 		generateAutoDateOrDateTime(Arrays.asList(entity), getEntityMetaData().getAttributes());
 
 		// auto id
-		AttributeMetaData idAttr = getEntityMetaData().getIdAttribute();
+		Attribute idAttr = getEntityMetaData().getIdAttribute();
 		if (idAttr != null && idAttr.isAuto() && entity.getIdValue() == null && (idAttr.getDataType() == STRING))
 		{
 			entity.set(idAttr.getName(), idGenerator.generateId());
@@ -49,7 +49,7 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 	@Override
 	public Integer add(Stream<Entity> entities)
 	{
-		List<AttributeMetaData> autoAttrs = getAutoAttrs();
+		List<Attribute> autoAttrs = getAutoAttrs();
 		if (!autoAttrs.isEmpty())
 		{
 			entities = entities.map(entity -> initAutoAttrs(entity, autoAttrs));
@@ -201,13 +201,13 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 		decoratedRepository.deleteAll();
 	}
 
-	private void generateAutoDateOrDateTime(Iterable<? extends Entity> entities, Iterable<AttributeMetaData> attrs)
+	private void generateAutoDateOrDateTime(Iterable<? extends Entity> entities, Iterable<Attribute> attrs)
 	{
 		// get auto date and datetime attributes
-		Iterable<AttributeMetaData> autoAttrs = Iterables.filter(attrs, new Predicate<AttributeMetaData>()
+		Iterable<Attribute> autoAttrs = Iterables.filter(attrs, new Predicate<Attribute>()
 		{
 			@Override
-			public boolean apply(AttributeMetaData attr)
+			public boolean apply(Attribute attr)
 			{
 				if (attr.isAuto())
 				{
@@ -225,7 +225,7 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 		Date dateNow = new Date();
 		for (Entity entity : entities)
 		{
-			for (AttributeMetaData attr : autoAttrs)
+			for (Attribute attr : autoAttrs)
 			{
 				AttributeType type = attr.getDataType();
 				if (type == DATE)
@@ -245,15 +245,15 @@ public class AutoValueRepositoryDecorator implements Repository<Entity>
 		}
 	}
 
-	private List<AttributeMetaData> getAutoAttrs()
+	private List<Attribute> getAutoAttrs()
 	{
 		return StreamSupport.stream(getEntityMetaData().getAtomicAttributes().spliterator(), false)
-				.filter(AttributeMetaData::isAuto).collect(Collectors.toList());
+				.filter(Attribute::isAuto).collect(Collectors.toList());
 	}
 
-	private Entity initAutoAttrs(Entity entity, List<AttributeMetaData> autoAttrs)
+	private Entity initAutoAttrs(Entity entity, List<Attribute> autoAttrs)
 	{
-		for (AttributeMetaData autoAttr : autoAttrs)
+		for (Attribute autoAttr : autoAttrs)
 		{
 			// set auto values unless a value already exists
 			String autoAttrName = autoAttr.getName();

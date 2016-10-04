@@ -5,7 +5,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -61,7 +61,7 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	private EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	@Autowired
 	private EntityManager entityManager;
@@ -80,8 +80,8 @@ public class L3CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		initMocks(this);
 
 		entityMetaData = entityMetaDataFactory.create(repositoryName);
-		entityMetaData.addAttribute(attributeMetaDataFactory.create().setDataType(INT).setName(ID), ROLE_ID);
-		entityMetaData.addAttribute(attributeMetaDataFactory.create().setName(COUNTRY));
+		entityMetaData.addAttribute(attributeFactory.create().setDataType(INT).setName(ID), ROLE_ID);
+		entityMetaData.addAttribute(attributeFactory.create().setName(COUNTRY));
 
 		when(entityManager.create(entityMetaData)).thenReturn(new DynamicEntity(entityMetaData));
 

@@ -3,16 +3,16 @@ package org.molgenis.data.elasticsearch.util;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.support.QueryImpl;
 
 public class SearchRequest
 {
 	private String documentType;
 	private QueryImpl<Entity> query;
-	private AttributeMetaData aggregateField1;
-	private AttributeMetaData aggregateField2;
-	private AttributeMetaData aggregateFieldDistinct;
+	private Attribute aggregateField1;
+	private Attribute aggregateField2;
+	private Attribute aggregateFieldDistinct;
 
 	public SearchRequest()
 	{
@@ -24,8 +24,8 @@ public class SearchRequest
 		this.query = new QueryImpl<>(query);
 	}
 
-	public SearchRequest(String documentType, Query<Entity> query, AttributeMetaData aggregateField1,
-			AttributeMetaData aggregateField2, AttributeMetaData aggregateFieldDistinct)
+	public SearchRequest(String documentType, Query<Entity> query, Attribute aggregateField1,
+			Attribute aggregateField2, Attribute aggregateFieldDistinct)
 	{
 		this(documentType, query);
 		this.aggregateField1 = aggregateField1;
@@ -48,17 +48,17 @@ public class SearchRequest
 		return query;
 	}
 
-	public AttributeMetaData getAggregateField1()
+	public Attribute getAggregateField1()
 	{
 		return aggregateField1;
 	}
 
-	public AttributeMetaData getAggregateField2()
+	public Attribute getAggregateField2()
 	{
 		return aggregateField2;
 	}
 
-	public AttributeMetaData getAggregateFieldDistinct()
+	public Attribute getAggregateFieldDistinct()
 	{
 		return aggregateFieldDistinct;
 	}
