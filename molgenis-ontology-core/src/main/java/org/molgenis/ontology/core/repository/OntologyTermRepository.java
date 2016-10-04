@@ -139,17 +139,17 @@ public class OntologyTermRepository
 				.collect(Collectors.toList());
 	}
 
-	private boolean isOntologyTermExactMatch(Set<String> terms, OntologyTermImpl ontologyTerm)
+	private boolean isOntologyTermExactMatch(Set<String> terms, OntologyTermImpl ontologyTermImpl)
 	{
 		Set<String> lowerCaseSearchTerms = terms.stream().map(StringUtils::lowerCase).collect(Collectors.toSet());
-		for (String synonym : ontologyTerm.getSynonyms())
+		for (String synonym : ontologyTermImpl.getSynonyms())
 		{
 			if (lowerCaseSearchTerms.contains(synonym.toLowerCase()))
 			{
 				return true;
 			}
 		}
-		if (lowerCaseSearchTerms.contains(ontologyTerm.getLabel().toLowerCase()))
+		if (lowerCaseSearchTerms.contains(ontologyTermImpl.getLabel().toLowerCase()))
 		{
 			return true;
 		}
@@ -251,7 +251,7 @@ public class OntologyTermRepository
 
 	public List<OntologyTermImpl> getOntologyTerms(List<String> iris)
 	{
-		List<OntologyTermImpl> ontologyTerms = Lists.newArrayList();
+		List<OntologyTermImpl> ontologyTermImpls = Lists.newArrayList();
 		for (String iri : iris)
 		{
 			OntologyTermEntity ontologyTermEntity = dataService.findOne(ONTOLOGY_TERM,
@@ -259,27 +259,27 @@ public class OntologyTermRepository
 
 			if (nonNull(ontologyTermEntity))
 			{
-				ontologyTerms.add(toOntologyTerm(ontologyTermEntity));
+				ontologyTermImpls.add(toOntologyTerm(ontologyTermEntity));
 			}
 		}
-		return ontologyTerms;
+		return ontologyTermImpls;
 	}
 
 	/**
 	 * Calculate the distance between any two ontology terms in the ontology tree structure by calculating the
 	 * difference in nodePaths.
 	 *
-	 * @param ontologyTerm1
-	 * @param ontologyTerm2
+	 * @param ontologyTermImpl1
+	 * @param ontologyTermImpl2
 	 *
 	 * @return the distance between two ontology terms
 	 */
-	public Integer getOntologyTermDistance(OntologyTermImpl ontologyTerm1, OntologyTermImpl ontologyTerm2)
+	public Integer getOntologyTermDistance(OntologyTermImpl ontologyTermImpl1, OntologyTermImpl ontologyTermImpl2)
 	{
-		if (ontologyTerm1.getNodePaths().isEmpty() || ontologyTerm2.getNodePaths().isEmpty()) return 0;
+		if (ontologyTermImpl1.getNodePaths().isEmpty() || ontologyTermImpl2.getNodePaths().isEmpty()) return 0;
 
-		OptionalInt min = ontologyTerm1.getNodePaths().stream()
-				.flatMap(nodePath1 -> ontologyTerm2.getNodePaths().stream()
+		OptionalInt min = ontologyTermImpl1.getNodePaths().stream()
+				.flatMap(nodePath1 -> ontologyTermImpl2.getNodePaths().stream()
 						.map(nodePath2 -> calculateNodePathDistance(nodePath1, nodePath2)))
 				.mapToInt(Integer::valueOf).min();
 
@@ -289,19 +289,20 @@ public class OntologyTermRepository
 	/**
 	 * Calculate the semantic relatedness between any two ontology terms in the ontology tree
 	 *
-	 * @param ontologyTerm1
-	 * @param ontologyTerm2
+	 * @param ontologyTermImpl1
+	 * @param ontologyTermImpl2
 	 *
 	 * @return the distance between two ontology terms
 	 */
-	public double getOntologyTermSemanticRelatedness(OntologyTermImpl ontologyTerm1, OntologyTermImpl ontologyTerm2)
+	public double getOntologyTermSemanticRelatedness(OntologyTermImpl ontologyTermImpl1,
+			OntologyTermImpl ontologyTermImpl2)
 	{
-		if (ontologyTerm1.getIRI().equals(ontologyTerm2.getIRI())) return 1;
+		if (ontologyTermImpl1.getIRI().equals(ontologyTermImpl2.getIRI())) return 1;
 
-		if (ontologyTerm1.getNodePaths().isEmpty() || ontologyTerm2.getNodePaths().isEmpty()) return 0;
+		if (ontologyTermImpl1.getNodePaths().isEmpty() || ontologyTermImpl2.getNodePaths().isEmpty()) return 0;
 
-		OptionalDouble max = ontologyTerm1.getNodePaths().stream()
-				.flatMap(nodePath1 -> ontologyTerm2.getNodePaths().stream()
+		OptionalDouble max = ontologyTermImpl1.getNodePaths().stream()
+				.flatMap(nodePath1 -> ontologyTermImpl2.getNodePaths().stream()
 						.map(nodePath2 -> calculateRelatedness(nodePath1, nodePath2)))
 				.mapToDouble(Double::valueOf).max();
 
@@ -348,11 +349,11 @@ public class OntologyTermRepository
 		return overlapBlock;
 	}
 
-	public Iterable<OntologyTermImpl> getParents(OntologyTermImpl ontologyTerm, int maxLevel)
+	public Iterable<OntologyTermImpl> getParents(OntologyTermImpl ontologyTermImpl, int maxLevel)
 	{
 		List<OntologyTermImpl> parentOntologyTerms = new ArrayList<>();
 
-		List<String> nodePaths = ontologyTerm.getNodePaths();
+		List<String> nodePaths = ontologyTermImpl.getNodePaths();
 
 		for (int i = 0; i < maxLevel; i++)
 		{
@@ -393,11 +394,11 @@ public class OntologyTermRepository
 	/**
 	 * Get the {@link OntologyTermImpl} children at the specified level
 	 * 
-	 * @param ontologyTerm
+	 * @param ontologyTermImpl
 	 * @param maxLevel
 	 * @return
 	 */
-	public Iterable<OntologyTermImpl> getChildren(OntologyTermImpl ontologyTerm, int maxLevel)
+	public Iterable<OntologyTermImpl> getChildren(OntologyTermImpl ontologyTermImpl, int maxLevel)
 	{
 		BiPredicate<String, String> ontologyTermChildrenPredicate = new BiPredicate<String, String>()
 		{
@@ -406,25 +407,25 @@ public class OntologyTermRepository
 				return calculateNodePathDistance(parentNodePath, childNodePath) <= maxLevel;
 			}
 		};
-		return getChildren(ontologyTerm, ontologyTermChildrenPredicate);
+		return getChildren(ontologyTermImpl, ontologyTermChildrenPredicate);
 	}
 
 	/**
 	 * Retrieve all {@link OntologyTermImpl} children that satisfy the children predicate containing the instruction to
 	 * stop retrieving children at the given max level
 	 * 
-	 * @param ontologyTerm
+	 * @param ontologyTermImpl
 	 * @param ontologyTermChildrenPredicate
 	 * @return
 	 */
-	private Iterable<OntologyTermImpl> getChildren(OntologyTermImpl ontologyTerm,
+	private Iterable<OntologyTermImpl> getChildren(OntologyTermImpl ontologyTermImpl,
 			BiPredicate<String, String> ontologyTermChildrenPredicate)
 	{
 		Fetch fetch = new Fetch();
 		ontologyTermMetaData.getAtomicAttributes().forEach(attribute -> fetch.field(attribute.getName()));
 
 		OntologyTermEntity ontologyTermEntity = dataService.findOne(OntologyTermMetaData.ONTOLOGY_TERM,
-				new QueryImpl<OntologyTermEntity>().eq(ONTOLOGY_TERM_IRI, ontologyTerm.getIRI()).fetch(fetch),
+				new QueryImpl<OntologyTermEntity>().eq(ONTOLOGY_TERM_IRI, ontologyTermImpl.getIRI()).fetch(fetch),
 				OntologyTermEntity.class);
 
 		Iterable<OntologyTermImpl> iterable = null;
@@ -450,7 +451,7 @@ public class OntologyTermRepository
 				for (Entry<String, Collection<String>> entrySet : uniqueSubTrees.asMap().entrySet())
 				{
 					String nodePath = entrySet.getValue().iterator().next();
-					Iterable<OntologyTermImpl> childOntologyTermStream = childOntologyTermStream(ontologyTerm,
+					Iterable<OntologyTermImpl> childOntologyTermStream = childOntologyTermStream(ontologyTermImpl,
 							ontologyEntity, nodePath, ontologyTermChildrenPredicate);
 					iterable = iterable == null ? childOntologyTermStream
 							: Iterables.concat(iterable, childOntologyTermStream);
@@ -468,7 +469,7 @@ public class OntologyTermRepository
 	// expensive operation, luckily all the similar nodePaths are sorted based on the relevance, so we can stop looking
 	// when we encounter the first nodePath (mismatch) that is not a child of the currentNodePath because we know the
 	// rest of the nodePaths cannot be more similar than the first mismatch.
-	Iterable<OntologyTermImpl> childOntologyTermStream(OntologyTermImpl ontologyTerm, Entity ontologyEntity,
+	Iterable<OntologyTermImpl> childOntologyTermStream(OntologyTermImpl ontologyTermImpl, Entity ontologyEntity,
 			final String parentNodePath, BiPredicate<String, String> childrenPredicate)
 	{
 		Query<OntologyTermNodePath> ontologyTermNodePathQuery = new QueryImpl<OntologyTermNodePath>(
@@ -536,15 +537,15 @@ public class OntologyTermRepository
 				.collect(Collectors.toList());
 	}
 
-	public boolean related(OntologyTermImpl ontologyTerm1, OntologyTermImpl ontologyTerm2, int stopLevel)
+	public boolean related(OntologyTermImpl ontologyTermImpl1, OntologyTermImpl ontologyTermImpl2, int stopLevel)
 	{
-		if (ontologyTerm1.getIRI().equals(ontologyTerm2.getIRI())) return true;
+		if (ontologyTermImpl1.getIRI().equals(ontologyTermImpl2.getIRI())) return true;
 
-		List<String> targetNodePaths = ontologyTerm1.getNodePaths().stream()
+		List<String> targetNodePaths = ontologyTermImpl1.getNodePaths().stream()
 				.filter(nodePath -> nodePath.split(ESCAPED_NODEPATH_SEPARATOR).length > stopLevel)
 				.collect(Collectors.toList());
 
-		List<String> sourceNodePaths = ontologyTerm2.getNodePaths().stream()
+		List<String> sourceNodePaths = ontologyTermImpl2.getNodePaths().stream()
 				.filter(nodePath -> nodePath.split(ESCAPED_NODEPATH_SEPARATOR).length > stopLevel)
 				.collect(Collectors.toList());
 
@@ -560,19 +561,21 @@ public class OntologyTermRepository
 	/**
 	 * If any of the nodePaths of both of {@link OntologyTermImpl}s are within (less and equal) the max distance.
 	 * 
-	 * @param ontologyTerm1
-	 * @param ontologyTerm2
+	 * @param ontologyTermImpl1
+	 * @param ontologyTermImpl2
 	 * @param maxDistance
 	 * @return
 	 */
-	public boolean areWithinDistance(OntologyTermImpl ontologyTerm1, OntologyTermImpl ontologyTerm2, int maxDistance)
+	public boolean areWithinDistance(OntologyTermImpl ontologyTermImpl1, OntologyTermImpl ontologyTermImpl2,
+			int maxDistance)
 	{
-		if (ontologyTerm1.getIRI().equals(ontologyTerm2.getIRI())) return true;
+		if (ontologyTermImpl1.getIRI().equals(ontologyTermImpl2.getIRI())) return true;
 
-		if (ontologyTerm1.getNodePaths().isEmpty() || ontologyTerm2.getNodePaths().isEmpty()) return false;
+		if (ontologyTermImpl1.getNodePaths().isEmpty() || ontologyTermImpl2.getNodePaths().isEmpty()) return false;
 
-		boolean anyMatch = ontologyTerm1.getNodePaths().stream().anyMatch(nodePath1 -> ontologyTerm2.getNodePaths()
-				.stream().anyMatch(nodePath2 -> calculateNodePathDistance(nodePath1, nodePath2) <= maxDistance));
+		boolean anyMatch = ontologyTermImpl1.getNodePaths().stream()
+				.anyMatch(nodePath1 -> ontologyTermImpl2.getNodePaths().stream()
+						.anyMatch(nodePath2 -> calculateNodePathDistance(nodePath1, nodePath2) <= maxDistance));
 
 		return anyMatch;
 	}

@@ -41,7 +41,7 @@ public class OntologyServiceImpl implements OntologyService
 			{
 				public Iterable<OntologyTermImpl> load(ChildrenRetrievalParam childrenRetrievalParam)
 				{
-					return ontologyTermRepository.getChildren(childrenRetrievalParam.getOntologyTerm(),
+					return ontologyTermRepository.getChildren(childrenRetrievalParam.getOntologyTermImpl(),
 							childrenRetrievalParam.getMaxLevel());
 				}
 			});
@@ -126,23 +126,23 @@ public class OntologyServiceImpl implements OntologyService
 	}
 
 	@Override
-	public Iterable<OntologyTermImpl> getAllParents(OntologyTermImpl ontologyTerm)
+	public Iterable<OntologyTermImpl> getAllParents(OntologyTermImpl ontologyTermImpl)
 	{
-		return getParents(ontologyTerm, Integer.MAX_VALUE);
+		return getParents(ontologyTermImpl, Integer.MAX_VALUE);
 	}
 
 	@Override
-	public Iterable<OntologyTermImpl> getParents(OntologyTermImpl ontologyTerm, int maxLevel)
+	public Iterable<OntologyTermImpl> getParents(OntologyTermImpl ontologyTermImpl, int maxLevel)
 	{
-		return getParents(ontologyTerm, maxLevel);
+		return getParents(ontologyTermImpl, maxLevel);
 	}
 
 	@Override
-	public Iterable<OntologyTermImpl> getAllChildren(OntologyTermImpl ontologyTerm)
+	public Iterable<OntologyTermImpl> getAllChildren(OntologyTermImpl ontologyTermImpl)
 	{
 		try
 		{
-			return cachedOntologyTermChildren.get(ChildrenRetrievalParam.create(ontologyTerm, Integer.MAX_VALUE));
+			return cachedOntologyTermChildren.get(ChildrenRetrievalParam.create(ontologyTermImpl, Integer.MAX_VALUE));
 		}
 		catch (ExecutionException e)
 		{
@@ -152,11 +152,11 @@ public class OntologyServiceImpl implements OntologyService
 	}
 
 	@Override
-	public Iterable<OntologyTermImpl> getChildren(OntologyTermImpl ontologyTerm, int maxLevel)
+	public Iterable<OntologyTermImpl> getChildren(OntologyTermImpl ontologyTermImpl, int maxLevel)
 	{
 		try
 		{
-			return cachedOntologyTermChildren.get(ChildrenRetrievalParam.create(ontologyTerm, maxLevel));
+			return cachedOntologyTermChildren.get(ChildrenRetrievalParam.create(ontologyTermImpl, maxLevel));
 		}
 		catch (ExecutionException e)
 		{
@@ -166,39 +166,40 @@ public class OntologyServiceImpl implements OntologyService
 	}
 
 	@Override
-	public Integer getOntologyTermDistance(OntologyTermImpl ontologyTerm1, OntologyTermImpl ontologyTerm2)
+	public Integer getOntologyTermDistance(OntologyTermImpl ontologyTermImpl1, OntologyTermImpl ontologyTermImpl2)
 	{
-		return ontologyTermRepository.getOntologyTermDistance(ontologyTerm1, ontologyTerm2);
+		return ontologyTermRepository.getOntologyTermDistance(ontologyTermImpl1, ontologyTermImpl2);
 	}
 
 	@Override
-	public Double getOntologyTermSemanticRelatedness(OntologyTermImpl ontologyTerm1, OntologyTermImpl ontologyTerm2)
+	public Double getOntologyTermSemanticRelatedness(OntologyTermImpl ontologyTermImpl1,
+			OntologyTermImpl ontologyTermImpl2)
 	{
-		return ontologyTermRepository.getOntologyTermSemanticRelatedness(ontologyTerm1, ontologyTerm2);
+		return ontologyTermRepository.getOntologyTermSemanticRelatedness(ontologyTermImpl1, ontologyTermImpl2);
 	}
 
 	@Override
-	public boolean related(OntologyTermImpl targetOntologyTerm, OntologyTermImpl sourceOntologyTerm, int stopLevel)
+	public boolean related(OntologyTermImpl ontologyTermImpl1, OntologyTermImpl ontologyTermImpl2, int stopLevel)
 	{
-		return ontologyTermRepository.related(targetOntologyTerm, sourceOntologyTerm, stopLevel);
+		return ontologyTermRepository.related(ontologyTermImpl1, ontologyTermImpl2, stopLevel);
 	}
 
 	@Override
-	public boolean areWithinDistance(OntologyTermImpl targetOntologyTerm, OntologyTermImpl sourceOntologyTerm,
+	public boolean areWithinDistance(OntologyTermImpl ontologyTermImpl1, OntologyTermImpl ontologyTermImpl2,
 			int maxDistance)
 	{
-		return ontologyTermRepository.areWithinDistance(targetOntologyTerm, sourceOntologyTerm, maxDistance);
+		return ontologyTermRepository.areWithinDistance(ontologyTermImpl1, ontologyTermImpl2, maxDistance);
 	}
 
 	@Override
-	public boolean isDescendant(OntologyTermImpl targetOntologyTerm, OntologyTermImpl sourceOntologyTerm)
+	public boolean isDescendant(OntologyTermImpl ontologyTermImpl1, OntologyTermImpl ontologyTermImpl2)
 	{
-		if (targetOntologyTerm.getNodePaths().isEmpty() || sourceOntologyTerm.getNodePaths().isEmpty())
+		if (ontologyTermImpl1.getNodePaths().isEmpty() || ontologyTermImpl2.getNodePaths().isEmpty())
 		{
 			return false;
 		}
 
-		return targetOntologyTerm.getNodePaths().stream().anyMatch(targetNodePath -> sourceOntologyTerm.getNodePaths()
+		return ontologyTermImpl1.getNodePaths().stream().anyMatch(targetNodePath -> ontologyTermImpl2.getNodePaths()
 				.stream().anyMatch(sourceNodePath -> targetNodePath.contains(sourceNodePath)));
 	}
 
@@ -208,10 +209,10 @@ public class OntologyServiceImpl implements OntologyService
 		return ontologyTermRepository.getAllSemanticType();
 	}
 
-	private boolean isOntologyTermExactMatch(Set<String> terms, OntologyTermImpl ontologyTerm)
+	private boolean isOntologyTermExactMatch(Set<String> terms, OntologyTermImpl ontologyTermImpl)
 	{
-		List<String> synonyms = Lists.newArrayList(ontologyTerm.getSynonyms());
-		synonyms.add(ontologyTerm.getLabel());
+		List<String> synonyms = Lists.newArrayList(ontologyTermImpl.getSynonyms());
+		synonyms.add(ontologyTermImpl.getLabel());
 		return synonyms.stream().anyMatch(synonym -> terms.containsAll(splitAndStem(synonym.toString())));
 	}
 }

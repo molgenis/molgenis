@@ -56,11 +56,11 @@ public interface OntologyService
 	 * @param ontologyIds
 	 * @param terms
 	 * @param pageSize
-	 * @param scope
+	 * @param ontologyTermDomains
 	 * @return
 	 */
 	List<OntologyTermImpl> findOntologyTerms(List<String> ontologyIds, Set<String> terms, int pageSize,
-			List<OntologyTermImpl> scope);
+			List<OntologyTermImpl> ontologyTermDomains);
 
 	/**
 	 * Retrieve all ontology terms from the specified ontology
