@@ -20,6 +20,6 @@ public interface EntityCollection extends Iterable<Entity>
 	 *
 	 * @return whether this entity collection is lazy
 	 */
-	public boolean isLazy();
+	boolean isLazy();
 
 }

@@ -119,7 +119,7 @@ public class AggregateQueryGenerator
 			String cardinalityAggName = distinctAttr.getName() + AGGREGATION_DISTINCT_POSTFIX;
 			String cardinalityAggFieldName = getAggregateFieldName(distinctAttr);
 			CardinalityBuilder distinctAgg = AggregationBuilders.cardinality(cardinalityAggName)
-					.field(cardinalityAggFieldName).precisionThreshold(40000l);
+					.field(cardinalityAggFieldName).precisionThreshold(40000L);
 
 			// CardinalityBuilder does not implement AggregationBuilder interface, so we need some more code
 			AbstractAggregationBuilder wrappedDistinctAgg;

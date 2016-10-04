@@ -5,6 +5,7 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMeta;
@@ -26,6 +27,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
@@ -60,16 +62,19 @@ public class RestService
 	 */
 	public Entity toEntity(final EntityMetaData meta, final Map<String, Object> request)
 	{
-		final Entity entity = entityManager.create(meta);
+		final Entity entity = entityManager.create(meta, POPULATE);
 
 		for (Attribute attr : meta.getAtomicAttributes())
 		{
 			if (attr.getExpression() == null)
 			{
 				String paramName = attr.getName();
-				final Object paramValue = request.get(paramName);
-				final Object value = this.toEntityValue(attr, paramValue);
-				entity.set(attr.getName(), value);
+				if(request.containsKey(paramName))
+				{
+					final Object paramValue = request.get(paramName);
+					final Object value = this.toEntityValue(attr, paramValue);
+					entity.set(attr.getName(), value);
+				}
 			}
 		}
 

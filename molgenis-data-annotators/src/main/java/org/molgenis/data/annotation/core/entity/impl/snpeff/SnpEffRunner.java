@@ -4,7 +4,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
 import org.molgenis.data.Entity;
-import org.molgenis.data.IdGenerator;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.utils.JarRunner;

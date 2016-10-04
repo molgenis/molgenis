@@ -13,7 +13,7 @@ import java.util.List;
  */
 public interface Annotator
 {
-	public static final String ANNOTATORPREFIX = "MOLGENIS_";
+	String ANNOTATORPREFIX = "MOLGENIS_";
 
 	/**
 	 * @return {@link AnnotatorInfo} for the {@link Annotator}

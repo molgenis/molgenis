@@ -2,9 +2,9 @@ package org.molgenis.util;
 
 public interface Cell<T>
 {
-	public Integer getId();
+	Integer getId();
 
-	public String getKey();
+	String getKey();
 
-	public T getValue();
+	T getValue();
 }

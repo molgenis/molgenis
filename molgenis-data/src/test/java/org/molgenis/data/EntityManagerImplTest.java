@@ -2,6 +2,7 @@ package org.molgenis.data;
 
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -19,19 +20,21 @@ public class EntityManagerImplTest
 	private DataService dataService;
 	private EntityManagerImpl entityManagerImpl;
 	private EntityFactoryRegistry entityFactoryRegistry;
+	private EntityPopulator entityPopulator;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		dataService = mock(DataService.class);
 		entityFactoryRegistry = mock(EntityFactoryRegistry.class);
-		entityManagerImpl = new EntityManagerImpl(dataService, entityFactoryRegistry);
+		entityPopulator = mock(EntityPopulator.class);
+		entityManagerImpl = new EntityManagerImpl(dataService, entityFactoryRegistry, entityPopulator);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void EntityManagerImpl()
 	{
-		new EntityManagerImpl(null, null);
+		new EntityManagerImpl(null, null, null);
 	}
 
 	@Test

@@ -16,5 +16,5 @@ public interface OntologyTagService extends TagService<OntologyTerm, Ontology>
 
 	void removeAttributeTag(String entityName, String attributeName, String relationIRI, String ontologyTermIRI);
 
-	public Map<String, OntologyTag> tagAttributesInEntity(String entity, Map<Attribute, OntologyTerm> tags);
+	Map<String, OntologyTag> tagAttributesInEntity(String entity, Map<Attribute, OntologyTerm> tags);
 }

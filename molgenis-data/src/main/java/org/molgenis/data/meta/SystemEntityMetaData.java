@@ -5,6 +5,7 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.meta.system.SystemAttribute;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.BootstrapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -22,6 +23,7 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 public abstract class SystemEntityMetaData extends EntityMetaData
 {
 	private AttributeFactory attributeFactory;
+	private IdGenerator idGenerator;
 
 	private final String entityName;
 	private final String systemPackageName;
@@ -88,6 +90,7 @@ public abstract class SystemEntityMetaData extends EntityMetaData
 	public Attribute addAttribute(String attrName, Attribute parentAttr, AttributeRole... attrTypes)
 	{
 		Attribute attr = new SystemAttribute(attributeFactory.getAttributeMetaDataMetaData());
+		attr.setIdentifier(idGenerator.generateId());
 		attr.setDefaultValues();
 		attr.setName(attrName);
 		if (parentAttr != null)
@@ -107,6 +110,12 @@ public abstract class SystemEntityMetaData extends EntityMetaData
 	public void setAttributeFactory(AttributeFactory attributeFactory)
 	{
 		this.attributeFactory = requireNonNull(attributeFactory);
+	}
+
+	@Autowired
+	public void setIdGenerator(IdGenerator idGenerator)
+	{
+		this.idGenerator = requireNonNull(idGenerator);
 	}
 
 	/**

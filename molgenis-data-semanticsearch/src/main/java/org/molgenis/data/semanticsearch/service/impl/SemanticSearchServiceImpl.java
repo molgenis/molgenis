@@ -289,7 +289,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		}
 
 		List<Hit<OntologyTerm>> hits = candidates.stream()
-				.filter(ontologyTerm -> filterOntologyTerm(splitIntoTerms(stemmer.stemAndJoin(searchTerms)),
+				.filter(ontologyTerm -> filterOntologyTerm(splitIntoTerms(Stemmer.stemAndJoin(searchTerms)),
 						ontologyTerm, stemmer)).map(ontolgoyTerm -> Hit.<OntologyTerm>create(ontolgoyTerm,
 						bestMatchingSynonym(ontolgoyTerm, searchTerms).getScore())).sorted(Ordering.natural().reverse())
 				.collect(Collectors.toList());
@@ -345,7 +345,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 		for (String synonym : ontologyTermSynonyms)
 		{
-			Set<String> splitIntoTerms = splitIntoTerms(stemmer.stemAndJoin(splitIntoTerms(synonym)));
+			Set<String> splitIntoTerms = splitIntoTerms(Stemmer.stemAndJoin(splitIntoTerms(synonym)));
 			if (splitIntoTerms.size() != 0 && keywordsFromAttribute.containsAll(splitIntoTerms)) return true;
 		}
 
@@ -372,8 +372,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 	float distanceFrom(String synonym, Set<String> searchTerms, Stemmer stemmer)
 	{
-		String s1 = stemmer.stemAndJoin(splitIntoTerms(synonym));
-		String s2 = stemmer.stemAndJoin(searchTerms);
+		String s1 = Stemmer.stemAndJoin(splitIntoTerms(synonym));
+		String s2 = Stemmer.stemAndJoin(searchTerms);
 		float distance = (float) NGramDistanceAlgorithm.stringMatching(s1, s2) / 100;
 		LOG.debug("Similarity between: {} and {} is {}", s1, s2, distance);
 		return distance;

@@ -34,5 +34,5 @@ public interface EntityAnnotator extends Annotator
 	 */
 	boolean sourceExists();
 
-	public CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer();
+	CmdLineAnnotatorSettingsConfigurer getCmdLineAnnotatorSettingsConfigurer();
 }

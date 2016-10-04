@@ -22,7 +22,7 @@ public class BrowserDetectionFilter implements Filter
 	private static final String UNSUPPORTED_BROWSER_MESSAGE_PAGE = "/html/unsupported-browser-message.html";
 	private static final List<Browser> UNSUPPORTED_BROWSERS = Arrays
 			.asList(Browser.IE5, Browser.IE5_5, Browser.IE6, Browser.IE7, Browser.IE8);
-	private static String CONTINUE_WITH_UNSUPPORTED_BROWSER_TOKEN = "continueWithUnsupportedBrowser";
+	private static final String CONTINUE_WITH_UNSUPPORTED_BROWSER_TOKEN = "continueWithUnsupportedBrowser";
 
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)

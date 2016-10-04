@@ -16,8 +16,8 @@ public interface SemanticSearchService
 	/**
 	 * Find all relevant source attributes with an explanation based on ontology terms and search terms
 	 *
-	 * @param source
-	 * @param attribute
+	 * @param sourceEntityMetaData
+	 * @param queryTerms
 	 * @param ontologyTerms
 	 * @return Attribute of resembling attributes, sorted by relevance
 	 */
@@ -40,7 +40,7 @@ public interface SemanticSearchService
 	 * Finds {@link OntologyTerm}s that can be used to tag an attribute.
 	 *
 	 * @param entity     name of the entity
-	 * @param ontologies IDs of ontologies to take the {@link OntologyTerm}s from.
+	 * @param ontologyIDs IDs of ontologies to take the {@link OntologyTerm}s from.
 	 * @return {@link Map} of {@link Hit}s for {@link OntologyTerm} results
 	 */
 	Map<Attribute, Hit<OntologyTerm>> findTags(String entity, List<String> ontologyIDs);

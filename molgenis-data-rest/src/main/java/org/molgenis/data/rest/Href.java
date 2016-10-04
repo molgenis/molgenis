@@ -58,8 +58,6 @@ public class Href
 	/**
 	 * Create an encoded href for an attribute meta
 	 *
-	 * @param qualifiedEntityName
-	 * @param entityIdValue
 	 * @param attributeName
 	 * @return
 	 * @throws UnsupportedEncodingException
@@ -107,7 +105,6 @@ public class Href
 	 * Create an encoded href for an entity meta
 	 *
 	 * @param qualifiedEntityName
-	 * @param entityIdValue
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */
@@ -139,7 +136,6 @@ public class Href
 	 * Create an encoded href for an entity collection
 	 *
 	 * @param qualifiedEntityName
-	 * @param entityIdValue
 	 * @return
 	 * @throws UnsupportedEncodingException
 	 */

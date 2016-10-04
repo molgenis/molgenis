@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.populate.IdGenerator;
 
 import java.io.IOException;
 import java.util.*;

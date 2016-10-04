@@ -23,7 +23,7 @@ public @interface Option
 	 * information the parser knows whether to look for an argument or not for
 	 * the option.
 	 */
-	public enum Type
+	enum Type
 	{
 		/**
 		 * The option never has an argument (e.g. -o)
@@ -37,14 +37,10 @@ public @interface Option
 	OPTIONAL_ARGUMENT
 	}
 
-	;
-
-	public enum Param
+	enum Param
 	{
 		BOOLEAN, INTEGER, DOUBLE, STRING, COLLECTION, FILEPATH, DIRPATH, PASSWORD, CLASS, ENUM, LOG4JLEVEL
 	}
-
-	;
 
 	/**
 	 * Defines the name of the option. This can be a single character, but als a
@@ -68,4 +64,4 @@ public @interface Option
 	 * The type of this option.
 	 */
 	Option.Type type();// default Option.Type.REQUIRED_ARGUMENT;
-};
+}

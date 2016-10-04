@@ -2,9 +2,9 @@ package org.molgenis.ontology.ic;
 
 public interface TermFrequencyService
 {
-	abstract Double getTermFrequency(String term);
+	Double getTermFrequency(String term);
 
-	abstract Integer getTermOccurrence(String term);
+	Integer getTermOccurrence(String term);
 
-	abstract void updateTermFrequency();
+	void updateTermFrequency();
 }

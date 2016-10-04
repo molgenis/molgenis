@@ -194,7 +194,7 @@ public class JobExecution extends StaticEntity
 
 	public enum Status
 	{
-		PENDING, RUNNING, SUCCESS, FAILED, CANCELED;
+		PENDING, RUNNING, SUCCESS, FAILED, CANCELED
 	}
 
 	private void setDefaultValues()

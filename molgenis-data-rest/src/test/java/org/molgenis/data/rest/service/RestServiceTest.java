@@ -3,6 +3,7 @@ package org.molgenis.data.rest.service;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.util.MolgenisDateFormat;

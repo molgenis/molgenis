@@ -18,6 +18,7 @@ import java.util.Map;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Objects.requireNonNull;
+import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
 import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
 
@@ -48,7 +49,7 @@ public class EntityHydration
 	{
 		LOG.trace("Hydrating entity: {} for entity {}", dehydratedEntity, entityMetaData.getName());
 
-		Entity hydratedEntity = entityManager.create(entityMetaData);
+		Entity hydratedEntity = entityManager.create(entityMetaData, NO_POPULATE);
 
 		for (Attribute attribute : entityMetaData.getAtomicAttributes())
 		{

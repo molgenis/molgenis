@@ -203,11 +203,6 @@ class RestControllerV2
 		dataService.deleteById(entityName, id);
 	}
 
-	private AttributeType getIdAttributeAttributeType(@PathVariable("entityName") String entityName)
-	{
-		return dataService.getMeta().getEntityMetaData(entityName).getIdAttribute().getDataType();
-	}
-
 	/**
 	 * Retrieve an entity collection, optionally specify which attributes to include in the response.
 	 *

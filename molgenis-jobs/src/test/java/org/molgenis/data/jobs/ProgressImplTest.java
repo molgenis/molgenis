@@ -101,7 +101,7 @@ public class ProgressImplTest extends AbstractMolgenisSpringTest
 	}
 
 	@Configuration
-	@ComponentScan({ "org.molgenis.data.jobs.model" })
+	@ComponentScan({ "org.molgenis.data.populate", "org.molgenis.data.jobs.model" })
 	public static class Config
 	{
 

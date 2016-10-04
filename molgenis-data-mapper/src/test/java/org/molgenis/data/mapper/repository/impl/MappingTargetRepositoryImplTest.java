@@ -5,7 +5,7 @@ import org.mockito.Captor;
 import org.mockito.MockitoAnnotations;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.IdGenerator;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;

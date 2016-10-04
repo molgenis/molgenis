@@ -5,8 +5,6 @@ import org.postgresql.util.PSQLException;
 import org.postgresql.util.ServerErrorMessage;
 import org.testng.annotations.Test;
 
-import javax.sql.DataSource;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -22,8 +20,6 @@ public class PostgreSqlExceptionTranslatorTest
 	@Test
 	public void translateNotNullViolation()
 	{
-		DataSource dataSource = mock(DataSource.class);
-		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getSQLState()).thenReturn("23502");
 		when(serverErrorMessage.getTable()).thenReturn("mytable");
@@ -38,8 +34,6 @@ public class PostgreSqlExceptionTranslatorTest
 	@Test(expectedExceptions = RuntimeException.class)
 	public void translateNotNullViolationBadMessage()
 	{
-		DataSource dataSource = mock(DataSource.class);
-		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getSQLState()).thenReturn("23502");
 		when(serverErrorMessage.getTable()).thenReturn("mytable");
@@ -51,8 +45,6 @@ public class PostgreSqlExceptionTranslatorTest
 	@Test
 	public void translateForeignKeyViolation()
 	{
-		DataSource dataSource = mock(DataSource.class);
-		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getSQLState()).thenReturn("23503");
 		when(serverErrorMessage.getTable()).thenReturn("mytable");
@@ -66,8 +58,6 @@ public class PostgreSqlExceptionTranslatorTest
 	@Test
 	public void translateForeignKeyViolationNotPresent()
 	{
-		DataSource dataSource = mock(DataSource.class);
-		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getSQLState()).thenReturn("23503");
 		when(serverErrorMessage.getTable()).thenReturn("mytable");
@@ -81,8 +71,6 @@ public class PostgreSqlExceptionTranslatorTest
 	@Test
 	public void translateForeignKeyViolationStillReferenced()
 	{
-		DataSource dataSource = mock(DataSource.class);
-		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getSQLState()).thenReturn("23503");
 		when(serverErrorMessage.getTable()).thenReturn("mytable");
@@ -97,8 +85,6 @@ public class PostgreSqlExceptionTranslatorTest
 	@Test(expectedExceptions = RuntimeException.class)
 	public void translateForeignKeyViolationBadMessage()
 	{
-		DataSource dataSource = mock(DataSource.class);
-		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getSQLState()).thenReturn("23503");
 		when(serverErrorMessage.getTable()).thenReturn("mytable");
@@ -110,8 +96,6 @@ public class PostgreSqlExceptionTranslatorTest
 	@Test
 	public void translateUniqueKeyViolation()
 	{
-		DataSource dataSource = mock(DataSource.class);
-		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getSQLState()).thenReturn("23505");
 		when(serverErrorMessage.getTable()).thenReturn("mytable");
@@ -126,8 +110,6 @@ public class PostgreSqlExceptionTranslatorTest
 	@Test(expectedExceptions = RuntimeException.class)
 	public void translateUniqueKeyViolationBadMessage()
 	{
-		DataSource dataSource = mock(DataSource.class);
-		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getSQLState()).thenReturn("23505");
 		when(serverErrorMessage.getTable()).thenReturn("mytable");
@@ -139,8 +121,6 @@ public class PostgreSqlExceptionTranslatorTest
 	@Test
 	public void translateInvalidIntegerExceptionInteger()
 	{
-		DataSource dataSource = mock(DataSource.class);
-		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getMessage()).thenReturn("invalid input syntax for integer: \"str1\"");
 		//noinspection ThrowableResultOfMethodCallIgnored
@@ -152,8 +132,6 @@ public class PostgreSqlExceptionTranslatorTest
 	@Test
 	public void translateInvalidIntegerExceptionBoolean()
 	{
-		DataSource dataSource = mock(DataSource.class);
-		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getMessage()).thenReturn("invalid input syntax for type boolean: \"str1\"");
 		//noinspection ThrowableResultOfMethodCallIgnored
@@ -165,8 +143,6 @@ public class PostgreSqlExceptionTranslatorTest
 	@Test
 	public void translateInvalidIntegerExceptionDouble()
 	{
-		DataSource dataSource = mock(DataSource.class);
-		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getMessage()).thenReturn("invalid input syntax for type double precision: \"str1\"");
 		//noinspection ThrowableResultOfMethodCallIgnored
@@ -178,8 +154,6 @@ public class PostgreSqlExceptionTranslatorTest
 	@Test
 	public void translateInvalidIntegerExceptionDate()
 	{
-		DataSource dataSource = mock(DataSource.class);
-		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getMessage()).thenReturn("invalid input syntax for type date: \"str1\"");
 		//noinspection ThrowableResultOfMethodCallIgnored
@@ -191,8 +165,6 @@ public class PostgreSqlExceptionTranslatorTest
 	@Test
 	public void translateInvalidIntegerExceptionDateTime()
 	{
-		DataSource dataSource = mock(DataSource.class);
-		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getMessage()).thenReturn("invalid input syntax for type timestamp: \"str1\"");
 		//noinspection ThrowableResultOfMethodCallIgnored
@@ -204,12 +176,11 @@ public class PostgreSqlExceptionTranslatorTest
 	@Test
 	public void translateCheckConstraintViolation()
 	{
-		DataSource dataSource = mock(DataSource.class);
-		PostgreSqlExceptionTranslator postgreSqlExceptionTranslator = new PostgreSqlExceptionTranslator(dataSource);
 		ServerErrorMessage serverErrorMessage = mock(ServerErrorMessage.class);
 		when(serverErrorMessage.getTable()).thenReturn("entity");
 		when(serverErrorMessage.getConstraint()).thenReturn("entity_column_chk");
-		MolgenisValidationException e = postgreSqlExceptionTranslator
+		//noinspection ThrowableResultOfMethodCallIgnored
+		MolgenisValidationException e = PostgreSqlExceptionTranslator
 				.translateCheckConstraintViolation(new PSQLException(serverErrorMessage));
 		assertEquals(e.getMessage(), "Unknown enum value for attribute 'column' of entity 'entity'.");
 	}

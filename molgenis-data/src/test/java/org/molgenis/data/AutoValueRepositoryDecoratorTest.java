@@ -6,6 +6,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;

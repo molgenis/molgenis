@@ -9,7 +9,7 @@ public enum Impact
 
 	private final String color;
 
-	private Impact(String color)
+	Impact(String color)
 	{
 		this.color = color;
 	}

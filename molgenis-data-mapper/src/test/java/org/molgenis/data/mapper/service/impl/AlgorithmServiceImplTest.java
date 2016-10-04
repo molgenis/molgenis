@@ -11,7 +11,7 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.IdGenerator;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.data.mapper.algorithmgenerator.service.impl.AlgorithmGeneratorServiceImpl;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;

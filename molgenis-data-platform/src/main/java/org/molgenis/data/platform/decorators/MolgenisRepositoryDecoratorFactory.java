@@ -54,7 +54,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 {
 	private final EntityManager entityManager;
 	private final EntityAttributesValidator entityAttributesValidator;
-	private final IdGenerator idGenerator;
 	private final AppSettings appSettings;
 	private final DataService dataService;
 	private final ExpressionValidator expressionValidator;
@@ -77,9 +76,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
-			EntityAttributesValidator entityAttributesValidator, IdGenerator idGenerator, AppSettings appSettings,
-			DataService dataService, ExpressionValidator expressionValidator,
-			RepositoryDecoratorRegistry repositoryDecoratorRegistry,
+			EntityAttributesValidator entityAttributesValidator, AppSettings appSettings, DataService dataService,
+			ExpressionValidator expressionValidator, RepositoryDecoratorRegistry repositoryDecoratorRegistry,
 			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, UserAuthorityFactory userAuthorityFactory,
 			IndexActionRegisterService indexActionRegisterService, SearchService searchService,
 			AttributeFactory attrMetaFactory, PasswordEncoder passwordEncoder,
@@ -91,7 +89,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	{
 		this.entityManager = requireNonNull(entityManager);
 		this.entityAttributesValidator = requireNonNull(entityAttributesValidator);
-		this.idGenerator = requireNonNull(idGenerator);
 		this.appSettings = requireNonNull(appSettings);
 		this.dataService = requireNonNull(dataService);
 		this.expressionValidator = requireNonNull(expressionValidator);
@@ -151,9 +148,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		// 3. validation decorator
 		decoratedRepository = new RepositoryValidationDecorator(dataService, decoratedRepository,
 				entityAttributesValidator, expressionValidator);
-
-		// 2. auto value decorator
-		decoratedRepository = new AutoValueRepositoryDecorator(decoratedRepository, idGenerator);
 
 		// 1. security decorator
 		decoratedRepository = new RepositorySecurityDecorator(decoratedRepository, appSettings);

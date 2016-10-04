@@ -1,6 +1,6 @@
 package org.molgenis.data.transaction;
 
-import org.molgenis.data.support.UuidGenerator;
+import org.molgenis.data.populate.UuidGenerator;
 import org.testng.annotations.Test;
 
 import javax.sql.DataSource;

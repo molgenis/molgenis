@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
  * <p>
  * Creates a Query object from a rsql/fiql query string.
  *
- * @see https://github.com/jirutka/rsql-parser
+ * @see <a href="https://github.com/jirutka/rsql-parser">https://github.com/jirutka/rsql-parser</a>
  */
 @Service
 public class MolgenisRSQL

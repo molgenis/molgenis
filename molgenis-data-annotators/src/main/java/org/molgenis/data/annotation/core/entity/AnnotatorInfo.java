@@ -13,12 +13,12 @@ import java.util.List;
 @AutoValue
 public abstract class AnnotatorInfo
 {
-	public static enum Status
+	public enum Status
 	{
 		READY, BETA, INDEV, UNKNOWN
 	}
 
-	public static enum Type
+	public enum Type
 	{
 		EFFECT_PREDICTION, AUTOMATED_PROTOCOL, PATHOGENICITY_ESTIMATE, POPULATION_REFERENCE, PHENOTYPE_ASSOCIATION, GENOMIC_FEATURE, UNUSED, UNKNOWN
 	}

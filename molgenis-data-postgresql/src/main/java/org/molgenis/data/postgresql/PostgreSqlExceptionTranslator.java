@@ -9,6 +9,7 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.support.SQLErrorCodeSQLExceptionTranslator;
 
 import javax.sql.DataSource;
+import java.sql.BatchUpdateException;
 import java.sql.SQLException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,6 +59,10 @@ public class PostgreSqlExceptionTranslator extends SQLErrorCodeSQLExceptionTrans
 
 	private static MolgenisDataException doTranslate(SQLException sqlException)
 	{
+		if (sqlException instanceof BatchUpdateException)
+		{
+			sqlException = sqlException.getNextException();
+		}
 		if (!(sqlException instanceof PSQLException))
 		{
 			throw new RuntimeException(

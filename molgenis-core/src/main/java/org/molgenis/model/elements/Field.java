@@ -178,7 +178,6 @@ public class Field implements Serializable
 			}
 			catch (Exception e)
 			{
-				;
 			}
 		}
 
