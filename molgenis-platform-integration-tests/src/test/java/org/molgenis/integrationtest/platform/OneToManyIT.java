@@ -252,25 +252,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class)
-	public void testAuthorRequiredSetBooksNull()
-	{
-		// FIXME doesn't throw exception
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
-		Entity author = authorsAndBooks.getAuthors().get(0);
-		author.set(ATTR_BOOKS, null);
-		dataService.update(authorsAndBooks.getAuthorMetaData().getName(), author);
-	}
-
-	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class)
-	public void testAuthorRequiredSetAuthorsNull()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
-		Entity book = authorsAndBooks.getBooks().get(0);
-		book.set(ATTR_AUTHOR, null);
-		dataService.update(authorsAndBooks.getBookMetaData().getName(), book);
-	}
-
 	@Test(singleThreaded = true)
 	public void testAuthorRequiredUpdateValue()
 	{
@@ -293,29 +274,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
 		assertEquals(StreamSupport.stream(updatedAuthor2.getEntities(ATTR_BOOKS).spliterator(), false)
 				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_2, BOOK_1));
-	}
-
-	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class)
-	public void testBooksRequiredSetAuthorNull()
-	{
-		// FIXME doesn't throw exception
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(3); // author.books required
-		String bookName = authorsAndBooks.getBookMetaData().getName();
-
-		Entity book = dataService.findOneById(bookName, BOOK_1);
-		book.set(ATTR_AUTHOR, null);
-		dataService.update(bookName, book);
-	}
-
-	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class)
-	public void testBooksRequiredSetBooksNull()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(3); // author.books required
-		String authorName = authorsAndBooks.getAuthorMetaData().getName();
-
-		Entity author = dataService.findOneById(authorName, AUTHOR_1);
-		author.set(ATTR_BOOKS, null);
-		dataService.update(authorName, author);
 	}
 
 	@Test(singleThreaded = true)
@@ -341,10 +299,10 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		assertEquals(updatedBook2.getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_1);
 	}
 
-	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class)
-	public void testBookAndAuthorRequiredSetAuthorNull()
+	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class, dataProvider = "requiredTestCaseDataProvider")
+	public void testRequiredSetAuthorNull(int testCase)
 	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(testCase);
 		String bookName = authorsAndBooks.getBookMetaData().getName();
 
 		Entity book = dataService.findOneById(bookName, BOOK_1);
@@ -352,10 +310,10 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		dataService.update(bookName, book);
 	}
 
-	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class)
-	public void testBookAndAuthorRequiredSetBooksNull()
+	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class, dataProvider = "requiredTestCaseDataProvider")
+	public void testRequiredSetBooksNull(int testCase)
 	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(testCase);
 		String authorName = authorsAndBooks.getAuthorMetaData().getName();
 
 		Entity author = dataService.findOneById(authorName, AUTHOR_1);
@@ -410,7 +368,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(singleThreaded = true, dataProvider = "allTestCaseDataProvider")
-	public void testUpdateValue(int testCase)
+	public void testUpdateParentValue(int testCase)
 	{
 		List<Entity> persons = importPersons(testCase);
 		String personName = persons.get(0).getEntityMetaData().getName();
