@@ -3,7 +3,7 @@ package org.molgenis.data.semanticsearch.explain.bean;
 import java.util.Map;
 
 import org.molgenis.gson.AutoGson;
-import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTermImpl;
 
 import com.google.auto.value.AutoValue;
 
@@ -11,11 +11,11 @@ import com.google.auto.value.AutoValue;
 @AutoGson(autoValueClass = AutoValue_OntologyTermQueryExpansionSolution.class)
 public abstract class OntologyTermQueryExpansionSolution implements Comparable<OntologyTermQueryExpansionSolution>
 {
-	public abstract Map<OntologyTerm, OntologyTerm> getMatchOntologyTerms();
+	public abstract Map<OntologyTermImpl, OntologyTermImpl> getMatchOntologyTerms();
 
 	public abstract boolean isHighQuality();
 
-	public static OntologyTermQueryExpansionSolution create(Map<OntologyTerm, OntologyTerm> matchOntologyTerms,
+	public static OntologyTermQueryExpansionSolution create(Map<OntologyTermImpl, OntologyTermImpl> matchOntologyTerms,
 			boolean highQuality)
 	{
 		return new AutoValue_OntologyTermQueryExpansionSolution(matchOntologyTerms, highQuality);

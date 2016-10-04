@@ -21,7 +21,7 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.ontology.core.model.Ontology;
-import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTermImpl;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +68,7 @@ public class UnitResolverImpl implements UnitResolver
 			if (isUnitEmpty(unit))
 			{
 				// Option 2: Search unit ontology for a match
-				OntologyTerm unitOntologyTerm = resolveUnitOntologyTerm(
+				OntologyTermImpl unitOntologyTerm = resolveUnitOntologyTerm(
 						tokens.stream().map(this::convertNumberToOntologyTermStyle).collect(Collectors.toSet()));
 
 				if (unitOntologyTerm != null)
@@ -98,16 +98,16 @@ public class UnitResolverImpl implements UnitResolver
 		return unit;
 	}
 
-	private OntologyTerm resolveUnitOntologyTerm(Set<String> tokens)
+	private OntologyTermImpl resolveUnitOntologyTerm(Set<String> tokens)
 	{
-		OntologyTerm unitOntologyTerm;
+		OntologyTermImpl unitOntologyTerm;
 		Ontology unitOntology = ontologyService.getOntology(UNIT_ONTOLOGY_IRI);
 		if (unitOntology != null)
 		{
 			if (!tokens.isEmpty())
 			{
 				List<String> ontologyIds = Arrays.asList(unitOntology.getId());
-				List<OntologyTerm> ontologyTerms = ontologyService.findExcatOntologyTerms(ontologyIds, tokens,
+				List<OntologyTermImpl> ontologyTerms = ontologyService.findExcatOntologyTerms(ontologyIds, tokens,
 						Integer.MAX_VALUE);
 				if (ontologyTerms != null && !ontologyTerms.isEmpty())
 				{

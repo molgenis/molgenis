@@ -5,6 +5,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.data.QueryRule.Operator.AND;
@@ -38,7 +39,7 @@ import org.molgenis.ontology.core.meta.OntologyTermEntity;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermNodePathMetaData;
 import org.molgenis.ontology.core.meta.OntologyTermSynonym;
-import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTermImpl;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -70,6 +71,12 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 
 	@Captor
 	ArgumentCaptor<Query<OntologyTermEntity>> argumentCaptor;
+
+	// @Captor
+	// ArgumentCaptor<String> argumentCaptor;
+	//
+	// @Captor
+	// ArgumentCaptor<Query<OntologyTermEntity>> argumentCaptor;
 
 	@BeforeTest
 	public void beforeTest()
@@ -140,11 +147,11 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 		when(dataService.findAll(ONTOLOGY_TERM, new QueryImpl<OntologyTermEntity>(rules).pageSize(100),
 				OntologyTermEntity.class)).thenReturn(Stream.of(ontologyTermEntity1, ontologyTermEntity2));
 
-		List<OntologyTerm> exactOntologyTerms = ontologyTermRepository.findExcatOntologyTerms(asList("1", "2"),
+		List<OntologyTermImpl> exactOntologyTerms = ontologyTermRepository.findExcatOntologyTerms(asList("1", "2"),
 				of("weight"), 100);
 
 		assertEquals(exactOntologyTerms, singletonList(
-				OntologyTerm.create("http://www.test.nl/iri/2", "Weight", Arrays.asList("Weight"))));
+				OntologyTermImpl.create("12", "http://www.test.nl/iri/2", "Weight", Arrays.asList("Weight"))));
 	}
 
 	@Test
@@ -158,16 +165,17 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 		List<QueryRule> rules = asList(new QueryRule(ONTOLOGY, IN, asList("1", "2")), new QueryRule(AND),
 				innerQueryRule);
 
-		when(dataService.findAll(ONTOLOGY_TERM, argumentCaptor.capture(), OntologyTermEntity.class))
+		when(dataService.findAll(eq(ONTOLOGY_TERM), argumentCaptor.capture(), eq(OntologyTermEntity.class)))
 				.thenReturn(Stream.of(ontologyTermEntity));
 
-		List<OntologyTerm> terms = ontologyTermRepository.findOntologyTerms(asList("1", "2"),
+		List<OntologyTermImpl> terms = ontologyTermRepository.findOntologyTerms(asList("1", "2"),
 				of("term1", "term2", "term3"), 100);
 
-		assertEquals(terms, singletonList(
-				OntologyTerm.create("Ontology term", null, singletonList("Ontology term"))));
+		assertEquals(terms, singletonList(OntologyTermImpl.create("12", "http://www.test.nl/iri", "Ontology term",
+				singletonList("Ontology term synonym"))));
 
-		assertEquals(argumentCaptor.getValue().toString(), rules.toString());
+		assertEquals(argumentCaptor.getValue().toString(),
+				new QueryImpl<OntologyTermEntity>(rules).pageSize(100).toString());
 	}
 
 	@Test
@@ -236,11 +244,11 @@ public class OntologyTermRepositoryTest extends AbstractMolgenisSpringTest
 				new QueryImpl<OntologyTermEntity>().eq(ONTOLOGY_TERM_IRI, "http://www.test.nl/iri"),
 				OntologyTermEntity.class)).thenReturn(ontologyTermEntity);
 
-		String[] iris =
-		{ "http://www.test.nl/iri" };
+		List<String> iris = Arrays.asList("http://www.test.nl/iri");
 
-		OntologyTerm ontologyTerm = ontologyTermRepository.getOntologyTerm(iris);
-		assertEquals(ontologyTerm, OntologyTerm.create("http://www.test.nl/iri", "Ontology term", singletonList("Ontology term synonym")));
+		List<OntologyTermImpl> ontologyTerm = ontologyTermRepository.getOntologyTerms(iris);
+		assertEquals(ontologyTerm, Arrays.asList(OntologyTermImpl.create("12", "http://www.test.nl/iri",
+				"Ontology term", singletonList("Ontology term synonym"))));
 	}
 
 	@Configuration

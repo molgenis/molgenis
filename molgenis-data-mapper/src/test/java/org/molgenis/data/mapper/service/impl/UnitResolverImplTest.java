@@ -18,7 +18,7 @@ import javax.measure.unit.Unit;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.ontology.core.model.Ontology;
-import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTermImpl;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -182,8 +182,8 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 			List<String> ontologyIds = singletonList(ontologyId);
 
 			Ontology ontology = Ontology.create(ontologyId, UNIT_ONTOLOGY_IRI, "unit ontology");
-			OntologyTerm KG_ONTOLOGY_TERM = OntologyTerm.create(UNIT_ONTOLOGY_IRI, kgTerm, asList(kgTerm, "kg"));
-			OntologyTerm CM_ONTOLOGY_TERM = OntologyTerm.create(UNIT_ONTOLOGY_IRI, cmTerm, asList(cmTerm, "cm"));
+			OntologyTermImpl KG_ONTOLOGY_TERM = OntologyTermImpl.create(UNIT_ONTOLOGY_IRI, kgTerm, asList(kgTerm, "kg"));
+			OntologyTermImpl CM_ONTOLOGY_TERM = OntologyTermImpl.create(UNIT_ONTOLOGY_IRI, cmTerm, asList(cmTerm, "cm"));
 
 			OntologyService ontologyService = mock(OntologyService.class);
 			when(ontologyService.getOntology(UNIT_ONTOLOGY_IRI)).thenReturn(ontology);

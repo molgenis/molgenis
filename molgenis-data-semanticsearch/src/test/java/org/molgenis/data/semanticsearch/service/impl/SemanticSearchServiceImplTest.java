@@ -35,7 +35,7 @@ import org.molgenis.data.semanticsearch.service.TagGroupGenerator;
 import org.molgenis.data.semanticsearch.service.bean.SearchParam;
 import org.molgenis.data.semanticsearch.service.bean.TagGroup;
 import org.molgenis.data.support.QueryImpl;
-import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTermImpl;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,7 +109,8 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 						.thenReturn(sourceEntityMetaDataEntity);
 
 		// Mock the ontologyterm
-		OntologyTerm standingHeight = OntologyTerm.create("http://onto/height", "height", asList("height", "length"));
+		OntologyTermImpl standingHeight = OntologyTermImpl.create("1", "http://onto/height", "height",
+				asList("height", "length"));
 
 		// Mock the search parameter
 		List<TagGroup> tagGroups = Arrays.asList(TagGroup.create(Arrays.asList(standingHeight), "height", 0.5f));

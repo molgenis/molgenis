@@ -21,7 +21,7 @@ import org.molgenis.data.semanticsearch.service.TagGroupGenerator;
 import org.molgenis.data.semanticsearch.service.bean.SearchParam;
 import org.molgenis.data.semanticsearch.service.bean.TagGroup;
 import org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils;
-import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTermImpl;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -58,8 +58,9 @@ public class ExplainMappingServiceImplTest extends AbstractTestNGSpringContextTe
 		Set<String> heightCandidateWords = SemanticSearchServiceUtils.splitRemoveStopWords(heightCandidate);
 		Set<String> weightCandidateWords = SemanticSearchServiceUtils.splitRemoveStopWords(weightCandidate);
 
-		OntologyTerm height = OntologyTerm.create("iri1", "Height", Arrays.asList("Height", "Body Length"));
-		OntologyTerm weight = OntologyTerm.create("iri2", "Weight", Arrays.asList("Weight"));
+		OntologyTermImpl height = OntologyTermImpl.create("1", "iri1", "Height",
+				Arrays.asList("Height", "Body Length"));
+		OntologyTermImpl weight = OntologyTermImpl.create("2", "iri2", "Weight", Arrays.asList("Weight"));
 
 		TagGroup targetTagGroup = TagGroup.create(Arrays.asList(height, weight), "Height Weight", 1.0f);
 		TagGroup heightTagGroup = TagGroup.create(Arrays.asList(height), "Heigh", 0.8f);
@@ -68,7 +69,7 @@ public class ExplainMappingServiceImplTest extends AbstractTestNGSpringContextTe
 		SearchParam searchParam = SearchParam.create(Sets.newHashSet("Body Mass Index"), Arrays.asList(targetTagGroup));
 
 		when(ontologyService.getAllOntologiesIds()).thenReturn(Arrays.asList("1"));
-		when(ontologyService.getAtomicOntologyTerms(targetTagGroup.getCombinedOntologyTerm()))
+		when(ontologyService.getOntologyTerms(targetTagGroup.getCombinedOntologyTerm().getAtomicIRIs()))
 				.thenReturn(Arrays.asList(height, weight));
 
 		when(ontologyService.getChildren(height, DEFAULT_EXPANSION_LEVEL)).thenReturn(Collections.emptyList());
@@ -112,7 +113,8 @@ public class ExplainMappingServiceImplTest extends AbstractTestNGSpringContextTe
 		String target = "have you ever had hypertension";
 		String source = "high blood pressure";
 
-		OntologyTerm hypertension = OntologyTerm.create("irii", "hypertension", Arrays.asList("high blood pressure"));
+		OntologyTermImpl hypertension = OntologyTermImpl.create("1", "iri1", "hypertension",
+				Arrays.asList("high blood pressure"));
 
 		OntologyTermQueryExpansionSolution queryExpansionSolution = OntologyTermQueryExpansionSolution
 				.create(ImmutableMap.of(hypertension, hypertension), true);
@@ -135,9 +137,10 @@ public class ExplainMappingServiceImplTest extends AbstractTestNGSpringContextTe
 		String target = "have you ever taken any medication for hypertension?";
 		String source = "have you ever taken any drugs for high blood pressure";
 
-		OntologyTerm hypertension = OntologyTerm.create("irii", "hypertension", Arrays.asList("high blood pressure"));
+		OntologyTermImpl hypertension = OntologyTermImpl.create("1", "iri1", "hypertension",
+				Arrays.asList("high blood pressure"));
 
-		OntologyTerm medication = OntologyTerm.create("iri2", "medication", Arrays.asList("drugs"));
+		OntologyTermImpl medication = OntologyTermImpl.create("2", "iri2", "medication", Arrays.asList("drugs"));
 
 		OntologyTermQueryExpansionSolution queryExpansionSolution1 = OntologyTermQueryExpansionSolution
 				.create(ImmutableMap.of(hypertension, hypertension, medication, medication), true);

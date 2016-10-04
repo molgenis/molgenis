@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.molgenis.data.semanticsearch.service.bean.TagGroup;
-import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTermImpl;
 import org.molgenis.ontology.core.service.OntologyService;
 
 import com.google.common.collect.LinkedHashMultimap;
@@ -19,30 +19,31 @@ import com.google.common.collect.Multimap;
 
 public class OntologyTermQueryExpansion
 {
-	private final OntologyTerm ontologyTerm;
+	private final List<OntologyTermImpl> ontologyTerms;
 	private final OntologyService ontologyService;
-	private Multimap<OntologyTerm, OntologyTerm> queryExpansionRelation;
+	private Multimap<OntologyTermImpl, OntologyTermImpl> queryExpansionRelation;
 
-	public OntologyTermQueryExpansion(OntologyTerm ontologyTerm, OntologyService ontologyService)
+	public OntologyTermQueryExpansion(List<OntologyTermImpl> ontologyTerms, OntologyService ontologyService)
 	{
-		this.ontologyTerm = requireNonNull(ontologyTerm);
+		this.ontologyTerms = requireNonNull(ontologyTerms);
 		this.ontologyService = requireNonNull(ontologyService);
 		this.queryExpansionRelation = LinkedHashMultimap.create();
 		populate();
 	}
 
-	public List<OntologyTerm> getOntologyTerms()
+	public List<OntologyTermImpl> getOntologyTerms()
 	{
 		return Lists.newArrayList(queryExpansionRelation.values());
 	}
 
 	public OntologyTermQueryExpansionSolution getQueryExpansionSolution(TagGroup tagGroup)
 	{
-		Map<OntologyTerm, OntologyTerm> matchedOntologyTerms = new LinkedHashMap<>();
+		Map<OntologyTermImpl, OntologyTermImpl> matchedOntologyTerms = new LinkedHashMap<>();
 
-		for (OntologyTerm sourceOntologyTerm : tagGroup.getOntologyTerms())
+		for (OntologyTermImpl sourceOntologyTerm : tagGroup.getOntologyTerms())
 		{
-			for (Entry<OntologyTerm, Collection<OntologyTerm>> entry : queryExpansionRelation.asMap().entrySet())
+			for (Entry<OntologyTermImpl, Collection<OntologyTermImpl>> entry : queryExpansionRelation.asMap()
+					.entrySet())
 			{
 				if (entry.getValue().contains(sourceOntologyTerm))
 				{
@@ -59,7 +60,7 @@ public class OntologyTermQueryExpansion
 
 	private void populate()
 	{
-		for (OntologyTerm atomicOntologyTerm : ontologyService.getAtomicOntologyTerms(ontologyTerm))
+		for (OntologyTermImpl atomicOntologyTerm : ontologyTerms)
 		{
 			queryExpansionRelation.put(atomicOntologyTerm, atomicOntologyTerm);
 			queryExpansionRelation.putAll(atomicOntologyTerm,

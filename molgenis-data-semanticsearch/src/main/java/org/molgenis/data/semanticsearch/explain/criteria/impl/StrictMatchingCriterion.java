@@ -5,13 +5,13 @@ import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.
 import java.util.Set;
 
 import org.molgenis.data.semanticsearch.explain.criteria.MatchingCriterion;
-import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTermImpl;
 import org.molgenis.ontology.utils.Stemmer;
 
 public class StrictMatchingCriterion implements MatchingCriterion
 {
 	@Override
-	public boolean apply(Set<String> words, OntologyTerm ontologyTerm)
+	public boolean apply(Set<String> words, OntologyTermImpl ontologyTerm)
 	{
 		Set<String> ontologyTermSynonyms = collectLowerCaseTerms(ontologyTerm);
 		for (String synonym : ontologyTermSynonyms)

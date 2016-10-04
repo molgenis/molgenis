@@ -53,7 +53,7 @@ import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DynamicEntity;
-import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTermImpl;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -394,7 +394,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 				ExplainedMatchCandidate.create(sourceAttribute,
 						singletonList(ExplainedQueryString.create("height", "height", "height", 100)), true));
 
-		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap.create();
+		LinkedHashMultimap<Relation, OntologyTermImpl> ontologyTermTags = LinkedHashMultimap.create();
 
 		when(semanticSearchService.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute,
 				ontologyTermTags.values(), null)).thenReturn(matches);
@@ -479,7 +479,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 				ExplainedMatchCandidate.create(sourceAttribute1), sourceAttribute2,
 				ExplainedMatchCandidate.create(sourceAttribute2));
 
-		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap.create();
+		LinkedHashMultimap<Relation, OntologyTermImpl> ontologyTermTags = LinkedHashMultimap.create();
 
 		when(semanticSearchService.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute,
 				ontologyTermTags.values(), null)).thenReturn(mappings);

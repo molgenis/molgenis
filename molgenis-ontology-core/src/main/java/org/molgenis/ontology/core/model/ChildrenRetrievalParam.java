@@ -8,11 +8,11 @@ import com.google.auto.value.AutoValue;
 @AutoGson(autoValueClass = AutoValue_ChildrenRetrievalParam.class)
 public abstract class ChildrenRetrievalParam
 {
-	public abstract OntologyTerm getOntologyTerm();
+	public abstract OntologyTermImpl getOntologyTerm();
 
 	public abstract int getMaxLevel();
 
-	public static ChildrenRetrievalParam create(OntologyTerm ontologyTerm, int maxLevel)
+	public static ChildrenRetrievalParam create(OntologyTermImpl ontologyTerm, int maxLevel)
 	{
 		return new AutoValue_ChildrenRetrievalParam(ontologyTerm, maxLevel);
 	}

@@ -31,6 +31,7 @@ import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTermImpl;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.molgenis.util.ErrorMessageResponse;
@@ -185,10 +186,10 @@ public class TagWizardController extends MolgenisPluginController
 	 *
 	 * @param request
 	 *            Containing ontology identifiers and a search term
-	 * @return A {@link List} of {@link OntologyTerm}s
+	 * @return A {@link List} of {@link OntologyTermImpl}s
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/getontologyterms")
-	public @ResponseBody List<OntologyTerm> getAllOntologyTerms(@Valid @RequestBody GetOntologyTermRequest request)
+	public @ResponseBody List<OntologyTermImpl> getAllOntologyTerms(@Valid @RequestBody GetOntologyTermRequest request)
 	{
 		return ontologyService.findOntologyTerms(request.getOntologyIds(), of(request.getSearchTerm()), 100);
 	}

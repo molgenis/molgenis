@@ -145,8 +145,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		}
 		else
 		{
-			tagGroups = ontologyTermsFromTags.stream()
-					.map(ot -> TagGroup.create(ontologyService.getAtomicOntologyTerms(ot), ot.getLabel(), 1.0f))
+			tagGroups = ontologyTermsFromTags.stream().map(
+					ot -> TagGroup.create(ontologyService.getOntologyTerms(ot.getAtomicIRIs()), ot.getLabel(), 1.0f))
 					.collect(toList());
 		}
 
@@ -198,6 +198,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			Hit<OntologyTerm> tag = generateTagGroups.stream()
 					.map(tagGroup -> Hit.create(tagGroup.getCombinedOntologyTerm(), tagGroup.getScore())).findFirst()
 					.orElse(null);
+
 			if (tag != null)
 			{
 				result.put(amd, tag);

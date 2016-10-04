@@ -37,8 +37,10 @@ import org.molgenis.data.semantic.SemanticTag;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.semantic.OntologyTag;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
+import org.molgenis.ontology.core.model.CombinedOntologyTermImpl;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
+import org.molgenis.ontology.core.model.OntologyTermImpl;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
@@ -163,8 +165,8 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		boolean added = false;
 		Entity attributeEntity = findAttributeEntity(entity, attribute);
 		Tag tag = new Tag(tagMetaData);
-		Stream<OntologyTerm> terms = ontologyTermIRIs.stream().map(ontologyService::getOntologyTerm);
-		OntologyTerm combinedOntologyTerm = OntologyTerm.and(terms.toArray(OntologyTerm[]::new));
+		Stream<OntologyTermImpl> terms = ontologyTermIRIs.stream().map(ontologyService::getOntologyTerm);
+		OntologyTerm combinedOntologyTerm = CombinedOntologyTermImpl.and(terms.toArray(OntologyTermImpl[]::new));
 		Relation relation = Relation.forIRI(relationIRI);
 		tag.setIdentifier(idGenerator.generateId());
 		tag.setCodeSystem(null);
@@ -319,11 +321,14 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	private OntologyTerm asOntologyTerm(Entity tagEntity)
 	{
 		String objectIRI = tagEntity.getString(TagMetaData.OBJECT_IRI);
+		String objectLabel = tagEntity.getString(TagMetaData.LABEL);
+
 		if (objectIRI == null)
 		{
 			return null;
 		}
-		return ontologyService.getOntologyTerm(objectIRI);
+
+		return CombinedOntologyTermImpl.create(objectIRI, objectLabel);
 	}
 
 	private Ontology asOntology(Entity tagEntity)
