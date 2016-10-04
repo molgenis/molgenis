@@ -11,6 +11,7 @@ import org.molgenis.test.data.staticentity.bidirectional.authorbook1.BookMetaDat
 import org.molgenis.test.data.staticentity.bidirectional.person1.PersonMetaData1;
 import org.molgenis.test.data.staticentity.bidirectional.person2.PersonMetaData2;
 import org.molgenis.test.data.staticentity.bidirectional.person3.PersonMetaData3;
+import org.molgenis.test.data.staticentity.bidirectional.person4.PersonMetaData4;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,6 +80,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 			dataService.deleteAll(PersonMetaData1.NAME);
 			dataService.deleteAll(PersonMetaData2.NAME);
 			dataService.deleteAll(PersonMetaData3.NAME);
+			dataService.deleteAll(PersonMetaData4.NAME);
 		});
 		waitForWorkToBeFinished(indexService, LOG);
 	}
@@ -125,24 +127,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		assertEquals(
 				StreamSupport.stream(person3.getEntities(ATTR_CHILDREN).spliterator(), false).map(Entity::getIdValue)
 						.collect(toSet()), newHashSet(PERSON_1));
-	}
-
-	/**
-	 * Serves all test case numbers.
-	 */
-	@DataProvider(name = "allTestCaseDataProvider")
-	private Object[][] allTestCaseDataProvider()
-	{
-		return new Object[][] { { 1 }, { 2 }, { 3 }, { 4 } };
-	}
-
-	/**
-	 * Serves the test case numbers in which one or both fields of the OneToMany are required.
-	 */
-	@DataProvider(name = "requiredTestCaseDataProvider")
-	private Object[][] requiredTestCaseDataProvider()
-	{
-		return new Object[][] { { 2 }, { 3 }, { 4 } };
 	}
 
 	@Test(singleThreaded = true)
@@ -308,6 +292,34 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_1));
 	}
 
+	@Test(singleThreaded = true, dataProvider = "allTestCaseDataProvider")
+	public void testUpdateBooksValue(int testCase)
+	{
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(testCase);
+		String bookName = authorsAndBooks.getBookMetaData().getName();
+		String authorName = authorsAndBooks.getAuthorMetaData().getName();
+
+		Entity author1 = dataService.findOneById(authorName, AUTHOR_1);
+		Entity author2 = dataService.findOneById(authorName, AUTHOR_2);
+		Entity book1 = dataService.findOneById(bookName, BOOK_1);
+		Entity book2 = dataService.findOneById(bookName, BOOK_2);
+		author1.set(ATTR_BOOKS, newArrayList(book2)); // switch books
+		author2.set(ATTR_BOOKS, newArrayList(book1));
+
+		dataService.update(authorName, Stream.of(author1, author2));
+
+		assertEquals(dataService.findOneById(bookName, BOOK_1).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_2);
+		assertEquals(dataService.findOneById(bookName, BOOK_2).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_1);
+
+		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
+		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_2));
+
+		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
+		assertEquals(StreamSupport.stream(updatedAuthor2.getEntities(ATTR_BOOKS).spliterator(), false)
+				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_1));
+	}
+
 	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class, dataProvider = "requiredTestCaseDataProvider")
 	public void testRequiredSetChildrenNull(int testCase)
 	{
@@ -338,6 +350,37 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		person1.set(ATTR_PARENT, person2); // switch parents
 		person2.set(ATTR_PARENT, person3);
 		person3.set(ATTR_PARENT, person1);
+		dataService.update(personName, Stream.of(person1, person2, person3));
+
+		assertEquals(dataService.findOneById(personName, PERSON_1).getEntity(ATTR_PARENT).getIdValue(), PERSON_2);
+		assertEquals(dataService.findOneById(personName, PERSON_2).getEntity(ATTR_PARENT).getIdValue(), PERSON_3);
+		assertEquals(dataService.findOneById(personName, PERSON_3).getEntity(ATTR_PARENT).getIdValue(), PERSON_1);
+
+		Entity updatedPerson1 = dataService.findOneById(personName, PERSON_1);
+		assertEquals(StreamSupport.stream(updatedPerson1.getEntities(ATTR_CHILDREN).spliterator(), false)
+				.map(Entity::getIdValue).collect(toSet()), newHashSet(PERSON_3));
+
+		Entity updatedPerson2 = dataService.findOneById(personName, PERSON_2);
+		assertEquals(StreamSupport.stream(updatedPerson2.getEntities(ATTR_CHILDREN).spliterator(), false)
+				.map(Entity::getIdValue).collect(toSet()), newHashSet(PERSON_1));
+
+		Entity updatedPerson3 = dataService.findOneById(personName, PERSON_3);
+		assertEquals(StreamSupport.stream(updatedPerson3.getEntities(ATTR_CHILDREN).spliterator(), false)
+				.map(Entity::getIdValue).collect(toSet()), newHashSet(PERSON_2));
+	}
+
+	@Test(singleThreaded = true, dataProvider = "allTestCaseDataProvider")
+	public void testUpdateChildrenValue(int testCase)
+	{
+		List<Entity> persons = importPersons(testCase);
+		String personName = persons.get(0).getEntityMetaData().getName();
+
+		Entity person1 = dataService.findOneById(personName, PERSON_1);
+		Entity person2 = dataService.findOneById(personName, PERSON_2);
+		Entity person3 = dataService.findOneById(personName, PERSON_3);
+		person1.set(ATTR_CHILDREN, newArrayList(person3)); // switch parents
+		person2.set(ATTR_CHILDREN, newArrayList(person1));
+		person3.set(ATTR_CHILDREN, newArrayList(person2));
 		dataService.update(personName, Stream.of(person1, person2, person3));
 
 		assertEquals(dataService.findOneById(personName, PERSON_1).getEntity(ATTR_PARENT).getIdValue(), PERSON_2);
@@ -440,5 +483,23 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 			waitForIndexToBeStable(persons.get(0).getEntityMetaData().getName(), indexService, LOG);
 		});
 		return persons;
+	}
+
+	/**
+	 * Serves all test case numbers.
+	 */
+	@DataProvider(name = "allTestCaseDataProvider")
+	private Object[][] allTestCaseDataProvider()
+	{
+		return new Object[][] { { 1 }, { 2 }, { 3 }, { 4 } };
+	}
+
+	/**
+	 * Serves the test case numbers in which one or both fields of the OneToMany are required.
+	 */
+	@DataProvider(name = "requiredTestCaseDataProvider")
+	private Object[][] requiredTestCaseDataProvider()
+	{
+		return new Object[][] { { 2 }, { 3 }, { 4 } };
 	}
 }
