@@ -146,7 +146,7 @@ public class OneToManyTestHarness
 
 	/**
 	 * Creates Person entity test sets for a specific use case. Entities are always linked as folows (when imported):
-	 * person1 -> person2, person2 -> person1, person3 -> person2
+	 * person1 -> person2, person2 -> person3, person3 -> person1
 	 * <p>
 	 * Case 1: Person.parent = nillable, Person.children = nillable
 	 * Case 2: Person.parent = nillable, Person.children = required

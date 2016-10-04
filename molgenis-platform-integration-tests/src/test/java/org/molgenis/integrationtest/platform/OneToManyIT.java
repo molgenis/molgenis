@@ -392,7 +392,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class, dataProvider = "requiredTestCaseDataProvider")
-	public void testParentRequiredSetChildrenNull(int testCase)
+	public void testRequiredSetChildrenNull(int testCase)
 	{
 		List<Entity> persons = importPersons(testCase);
 		Entity person = persons.get(0);
@@ -401,7 +401,7 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 	}
 
 	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class, dataProvider = "requiredTestCaseDataProvider")
-	public void testParentRequiredSetParentNull(int testCase)
+	public void testRequiredSetParentNull(int testCase)
 	{
 		List<Entity> persons = importPersons(testCase);
 		Entity person = persons.get(0);
@@ -409,19 +409,35 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		dataService.update(persons.get(0).getEntityMetaData().getName(), person);
 	}
 
-	@Test(singleThreaded = true)
-	public void testParentRequiredUpdateValue()
+	@Test(singleThreaded = true, dataProvider = "allTestCaseDataProvider")
+	public void testUpdateValue(int testCase)
 	{
-	}
+		List<Entity> persons = importPersons(testCase);
+		String personName = persons.get(0).getEntityMetaData().getName();
 
-	@Test(singleThreaded = true)
-	public void testChildrenRequiredUpdateValue()
-	{
-	}
+		Entity person1 = dataService.findOneById(personName, PERSON_1);
+		Entity person2 = dataService.findOneById(personName, PERSON_2);
+		Entity person3 = dataService.findOneById(personName, PERSON_3);
+		person1.set(ATTR_PARENT, person2); // switch parents
+		person2.set(ATTR_PARENT, person3);
+		person3.set(ATTR_PARENT, person1);
+		dataService.update(personName, Stream.of(person1, person2, person3));
 
-	@Test(singleThreaded = true)
-	public void testParentAndChildrenRequiredSetUpdateValue()
-	{
+		assertEquals(dataService.findOneById(personName, PERSON_1).getEntity(ATTR_PARENT).getIdValue(), PERSON_2);
+		assertEquals(dataService.findOneById(personName, PERSON_2).getEntity(ATTR_PARENT).getIdValue(), PERSON_3);
+		assertEquals(dataService.findOneById(personName, PERSON_3).getEntity(ATTR_PARENT).getIdValue(), PERSON_1);
+
+		Entity updatedPerson1 = dataService.findOneById(personName, PERSON_1);
+		assertEquals(StreamSupport.stream(updatedPerson1.getEntities(ATTR_CHILDREN).spliterator(), false)
+				.map(Entity::getIdValue).collect(toSet()), newHashSet(PERSON_3));
+
+		Entity updatedPerson2 = dataService.findOneById(personName, PERSON_2);
+		assertEquals(StreamSupport.stream(updatedPerson2.getEntities(ATTR_CHILDREN).spliterator(), false)
+				.map(Entity::getIdValue).collect(toSet()), newHashSet(PERSON_1));
+
+		Entity updatedPerson3 = dataService.findOneById(personName, PERSON_3);
+		assertEquals(StreamSupport.stream(updatedPerson3.getEntities(ATTR_CHILDREN).spliterator(), false)
+				.map(Entity::getIdValue).collect(toSet()), newHashSet(PERSON_2));
 	}
 
 	private void importBooksThenAuthors(OneToManyTestHarness.AuthorsAndBooks authorsAndBooks)
