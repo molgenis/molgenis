@@ -81,7 +81,7 @@ public class Options
 	}
 
 	/**
-	 * @param xAxis the xAxis to set
+	 * @param xAxes the xAxis to set
 	 */
 	public void setxAxes(List<XAxis> xAxes)
 	{
@@ -105,7 +105,7 @@ public class Options
 	}
 
 	/**
-	 * @param yAxis the yAxis to set
+	 * @param yAxes the yAxis to set
 	 */
 	public void setyAxes(List<YAxis> yAxes)
 	{
@@ -113,7 +113,7 @@ public class Options
 	}
 
 	/**
-	 * @param xAxis the xAxis to add
+	 * @param yAxis the xAxis to add
 	 */
 	public void addyAxis(YAxis yAxis)
 	{

@@ -135,7 +135,7 @@ public class Sort implements Iterable<Sort.Order>
 		}
 	}
 
-	public static enum Direction
+	public enum Direction
 	{
 		ASC, DESC
 	}

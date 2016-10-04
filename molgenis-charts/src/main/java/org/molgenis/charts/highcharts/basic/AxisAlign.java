@@ -6,7 +6,7 @@ public enum AxisAlign
 
 	private String align;
 
-	private AxisAlign(String align)
+	AxisAlign(String align)
 	{
 		this.align = align;
 	}

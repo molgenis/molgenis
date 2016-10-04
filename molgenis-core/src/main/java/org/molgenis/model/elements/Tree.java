@@ -48,7 +48,7 @@ public class Tree extends UISchema
 		}
 
 		/** */
-		private ViewType(String val)
+		ViewType(String val)
 		{
 			this.val = val;
 		}

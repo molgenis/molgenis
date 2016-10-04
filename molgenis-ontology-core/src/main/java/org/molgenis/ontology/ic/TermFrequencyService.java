@@ -2,9 +2,24 @@ package org.molgenis.ontology.ic;
 
 public interface TermFrequencyService
 {
-	public abstract float getTermFrequency(String term);
+	/**
+	 * Get the inverse document frequency of the given term
+	 * 
+	 * @param term
+	 * @return
+	 */
+	float getTermFrequency(String term);
 
-	public abstract Integer getTermOccurrence(String term);
+	/**
+	 * Get the occurrence of the given term
+	 * 
+	 * @param term
+	 * @return
+	 */
+	int getTermOccurrence(String term);
 
-	public abstract void updateTermFrequency();
+	/**
+	 * Update the term frequency information
+	 */
+	void updateTermFrequency();
 }

@@ -878,7 +878,7 @@ public class EntityMetaData extends StaticEntity
 
 	public enum AttributeRole
 	{
-		ROLE_ID, ROLE_LABEL, ROLE_LOOKUP;
+		ROLE_ID, ROLE_LABEL, ROLE_LOOKUP
 	}
 
 	@Override

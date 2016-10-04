@@ -12,5 +12,5 @@ public interface SettingsEntityListener
 	 *
 	 * @param entity settings entity
 	 */
-	public void postUpdate(Entity entity);
+	void postUpdate(Entity entity);
 }

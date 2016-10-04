@@ -6,7 +6,7 @@ public enum AxisType
 
 	String type;
 
-	private AxisType(String type)
+	AxisType(String type)
 	{
 		this.type = type;
 	}

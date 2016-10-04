@@ -68,7 +68,7 @@ public class AggregateResponseParser
 		{
 			List<Long> yValues = new ArrayList<Long>(nrYLabels);
 			for (int j = 0; j < nrYLabels; ++j)
-				yValues.add(0l);
+				yValues.add(0L);
 			matrix.add(yValues);
 		}
 

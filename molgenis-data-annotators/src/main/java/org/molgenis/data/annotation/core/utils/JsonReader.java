@@ -1,4 +1,4 @@
-package org.molgenis.data.annotation.utils;
+package org.molgenis.data.annotation.core.utils;
 
 import org.json.JSONArray;
 import org.json.JSONException;

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.molgenis.ontology.core.meta.OntologyEntity;
-import org.molgenis.ontology.core.meta.SemanticTypeEntity;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTermImpl;
 import org.molgenis.ontology.core.model.SemanticType;
@@ -96,78 +95,86 @@ public interface OntologyService
 	/**
 	 * Retrieves all parents
 	 * 
-	 * @param ontologyTerm
+	 * @param ontologyTermImpl
 	 * @return
 	 */
-	Iterable<OntologyTermImpl> getAllParents(OntologyTermImpl ontologyTerm);
+	Iterable<OntologyTermImpl> getAllParents(OntologyTermImpl ontologyTermImpl);
 
 	/**
 	 * Retrieves {@link OntologyTermImpl} parents with a max level indicating at which level in the hierarchy the
 	 * children should be retrieved.
 	 * 
-	 * @param ontologyTerm
+	 * @param ontologyTermImpl
 	 * @param continuePredicate
 	 * @return
 	 */
-	Iterable<OntologyTermImpl> getParents(OntologyTermImpl ontologyTerm, int maxLevel);
+	Iterable<OntologyTermImpl> getParents(OntologyTermImpl ontologyTermImpl, int maxLevel);
 
 	/**
 	 * Get all {@link OntologyTermImpl} children
 	 * 
-	 * @param ontologyTerm
+	 * @param ontologyTermImpl
 	 * @return
 	 */
-	Iterable<OntologyTermImpl> getAllChildren(OntologyTermImpl ontologyTerm);
+	Iterable<OntologyTermImpl> getAllChildren(OntologyTermImpl ontologyTermImpl);
 
 	/**
 	 * Retrieves {@link OntologyTermImpl} children with a max level indicating at which level in the hierarchy the
 	 * children should be retrieved.
 	 * 
-	 * @param ontologyTerm
-	 * @param continuePredicate
+	 * @param ontologyTermImpl
+	 * @param maxLevel
 	 * @return
 	 */
-	Iterable<OntologyTermImpl> getChildren(OntologyTermImpl ontologyTerm, int maxLevel);
+	Iterable<OntologyTermImpl> getChildren(OntologyTermImpl ontologyTermImpl, int maxLevel);
 
 	/**
-	 * Calculate distance between two ontology terms
+	 * Calculate distance between two {@link OntologyTermImpl}s
 	 * 
-	 * @param ontologyTerm1
-	 * @param ontologyTerm2
+	 * @param ontologyTermImpl1
+	 * @param ontologyTermImpl2
 	 * @return
 	 */
-	Integer getOntologyTermDistance(OntologyTermImpl ontologyTerm1, OntologyTermImpl ontologyTerm2);
+	Integer getOntologyTermDistance(OntologyTermImpl ontologyTermImpl1, OntologyTermImpl ontologyTermImpl2);
 
 	/**
-	 * Calculate relatedness between two ontology terms by the 2 * overlap / (depth1 + depth2)
+	 * Calculate relatedness between two {@link OntologyTermImpl}s by the 2 * overlap / (depth1 + depth2)
 	 * 
-	 * @param ontologyTerm1
-	 * @param ontologyTerm2
+	 * @param ontologyTermImpl1
+	 * @param ontologyTermImpl2
 	 * @return
 	 */
-	Double getOntologyTermSemanticRelatedness(OntologyTermImpl ontologyTerm1, OntologyTermImpl ontologyTerm2);
+	Double getOntologyTermSemanticRelatedness(OntologyTermImpl ontologyTermImpl1, OntologyTermImpl ontologyTermImpl2);
 
 	/**
 	 * Check if the first {@link OntologyTermImpl} is either the parent of or child of the second
 	 * {@link OntologyTermImpl}
 	 * 
-	 * @param ontologyTerm1
-	 * @param ontologyTerm2
+	 * @param ontologyTermImpl1
+	 * @param ontologyTermImpl2
 	 * @param stopLevel
 	 * @return
 	 */
-	boolean related(OntologyTermImpl ontologyTerm1, OntologyTermImpl ontologyTerm2, int stopLevel);
+	boolean related(OntologyTermImpl ontologyTermImpl1, OntologyTermImpl ontologyTermImpl2, int stopLevel);
 
 	/**
 	 * is the first {@link OntologyTermImpl} descendant of the second {@link OntologyTermImpl}
 	 * 
-	 * @param ontologyTerm1
-	 * @param ontologyTerm2
+	 * @param ontologyTermImpl1
+	 * @param ontologyTermImpl2
 	 * @return
 	 */
-	boolean isDescendant(OntologyTermImpl ontologyTerm1, OntologyTermImpl ontologyTerm2);
+	boolean isDescendant(OntologyTermImpl ontologyTermImpl1, OntologyTermImpl ontologyTermImpl2);
 
-	boolean areWithinDistance(OntologyTermImpl ontologyTerm1, OntologyTermImpl ontologyTerm2, int maxDistance);
+	/**
+	 * Check if the distance between two {@link OntologyTermImpl}s is within the maxDistance
+	 * 
+	 * @param ontologyTermImpl1
+	 * @param ontologyTermImpl2
+	 * @param maxDistance
+	 * @return
+	 */
+	boolean areWithinDistance(OntologyTermImpl ontologyTermImpl1, OntologyTermImpl ontologyTermImpl2, int maxDistance);
 
 	/**
 	 * Retrieves all ontologies ids.
@@ -177,9 +184,9 @@ public interface OntologyService
 	List<String> getAllOntologiesIds();
 
 	/**
-	 * Get all {@link SemanticTypeEntity}s
+	 * Get all {@link SemanticTypey}s
 	 * 
-	 * @return a list of {@link SemanticTypeEntity}s
+	 * @return a list of {@link SemanticType}s
 	 */
 	List<SemanticType> getAllSemanticTypes();
 }
