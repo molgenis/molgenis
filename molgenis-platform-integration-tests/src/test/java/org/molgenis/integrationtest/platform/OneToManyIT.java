@@ -127,12 +127,18 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 						.collect(toSet()), newHashSet(PERSON_1));
 	}
 
+	/**
+	 * Serves all test case numbers.
+	 */
 	@DataProvider(name = "allTestCaseDataProvider")
 	private Object[][] allTestCaseDataProvider()
 	{
 		return new Object[][] { { 1 }, { 2 }, { 3 }, { 4 } };
 	}
 
+	/**
+	 * Serves the test case numbers in which one or both fields of the OneToMany are required.
+	 */
 	@DataProvider(name = "requiredTestCaseDataProvider")
 	private Object[][] requiredTestCaseDataProvider()
 	{
@@ -252,53 +258,6 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@Test(singleThreaded = true)
-	public void testAuthorRequiredUpdateValue()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
-		String bookName = authorsAndBooks.getBookMetaData().getName();
-		String authorName = authorsAndBooks.getAuthorMetaData().getName();
-
-		Entity book = dataService.findOneById(bookName, BOOK_1);
-		book.set(ATTR_AUTHOR, dataService.findOneById(authorName, AUTHOR_2));
-		dataService.update(bookName, book);
-
-		Entity updatedBook = dataService.findOneById(bookName, BOOK_1);
-		assertEquals(updatedBook.getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_2);
-
-		// expected behavior: book.author changed, new author.books order is undefined
-		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
-		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
-				.map(Entity::getIdValue).collect(toSet()), newHashSet());
-
-		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
-		assertEquals(StreamSupport.stream(updatedAuthor2.getEntities(ATTR_BOOKS).spliterator(), false)
-				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_2, BOOK_1));
-	}
-
-	@Test(singleThreaded = true)
-	public void testBookRequiredUpdateValue()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(3); // book.author required
-		String bookName = authorsAndBooks.getBookMetaData().getName();
-		String authorName = authorsAndBooks.getAuthorMetaData().getName();
-
-		Entity author1 = dataService.findOneById(authorName, AUTHOR_1);
-		author1.set(ATTR_BOOKS, newArrayList(dataService.findOneById(bookName, BOOK_2)));
-		Entity author2 = dataService.findOneById(authorName, AUTHOR_2);
-		author2.set(ATTR_BOOKS, newArrayList(dataService.findOneById(bookName, BOOK_1)));
-		dataService.update(authorName, Stream.of(author1, author2));
-
-		Entity updatedAuthor = dataService.findOneById(authorName, AUTHOR_1);
-		assertEquals(updatedAuthor.getEntities(ATTR_BOOKS).iterator().next().getIdValue(), BOOK_2);
-
-		Entity updatedBook1 = dataService.findOneById(bookName, BOOK_1);
-		assertEquals(updatedBook1.getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_2);
-
-		Entity updatedBook2 = dataService.findOneById(bookName, BOOK_2);
-		assertEquals(updatedBook2.getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_1);
-	}
-
 	@Test(singleThreaded = true, expectedExceptions = MolgenisDataException.class, dataProvider = "requiredTestCaseDataProvider")
 	public void testRequiredSetAuthorNull(int testCase)
 	{
@@ -321,10 +280,10 @@ public class OneToManyIT extends AbstractTestNGSpringContextTests
 		dataService.update(authorName, author);
 	}
 
-	@Test(singleThreaded = true)
-	public void testBookAndAuthorRequiredUpdateValue()
+	@Test(singleThreaded = true, dataProvider = "allTestCaseDataProvider")
+	public void testUpdateAuthorValue(int testCase)
 	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
+		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(testCase);
 		String bookName = authorsAndBooks.getBookMetaData().getName();
 		String authorName = authorsAndBooks.getAuthorMetaData().getName();
 
