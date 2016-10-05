@@ -11,7 +11,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.file.FileStore;
@@ -64,7 +64,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	private EntityMetaDataFactory entityMetaFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	public static final String VIEW_NAME = "sorta-match-anonymous-view";
 	public static final String ID = "sorta_anonymous";

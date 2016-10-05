@@ -9,7 +9,7 @@ import org.molgenis.data.annotation.core.entity.impl.ClinvarAnnotator;
 import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.settings.ClinvarAnnotatorSettings;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -45,7 +45,7 @@ public class ClinvarAnnotatorTest extends AbstractMolgenisSpringTest
 	ApplicationContext context;
 
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityMetaDataFactory entityMetaDataFactory;
@@ -72,8 +72,8 @@ public class ClinvarAnnotatorTest extends AbstractMolgenisSpringTest
 		sourceMeta.addAttribute(vcfAttributes.getAltAttribute());
 
 		EntityMetaData annotatedSourceMeta = sourceMeta;
-		annotatedSourceMeta.addAttribute(attributeMetaDataFactory.create().setName(ClinvarAnnotator.CLINVAR_CLNSIG));
-		annotatedSourceMeta.addAttribute(attributeMetaDataFactory.create().setName(ClinvarAnnotator.CLINVAR_CLNALLE));
+		annotatedSourceMeta.addAttribute(attributeFactory.create().setName(ClinvarAnnotator.CLINVAR_CLNSIG));
+		annotatedSourceMeta.addAttribute(attributeFactory.create().setName(ClinvarAnnotator.CLINVAR_CLNALLE));
 
 		// no clinvar annotation
 		Entity source0 = new DynamicEntity(sourceMeta);

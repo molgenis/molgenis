@@ -2,7 +2,7 @@ package org.molgenis.data.mapper.service.impl;
 
 import com.google.common.collect.Sets;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -32,7 +32,7 @@ import static org.testng.Assert.assertNull;
 public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@Autowired
 	private UnitResolverImpl unitResolverImpl;

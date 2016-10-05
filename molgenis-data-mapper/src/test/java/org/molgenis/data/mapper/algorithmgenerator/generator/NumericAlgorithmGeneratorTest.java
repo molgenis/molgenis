@@ -3,7 +3,7 @@ package org.molgenis.data.mapper.algorithmgenerator.generator;
 import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.mapper.service.impl.UnitResolverImpl;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.ontology.core.model.Ontology;
@@ -30,7 +30,7 @@ public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest
 	private EntityMetaDataFactory entityMetaFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@Autowired
 	private OntologyService ontologyService;

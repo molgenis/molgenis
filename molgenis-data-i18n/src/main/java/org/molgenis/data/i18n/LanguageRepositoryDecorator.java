@@ -6,7 +6,7 @@ import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageMetaData;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 
@@ -31,12 +31,12 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 {
 	private final Repository<Language> decorated;
 	private final DataService dataService;
-	private final AttributeMetaDataFactory attrMetaFactory;
+	private final AttributeFactory attrMetaFactory;
 	private final EntityMetaDataMetaData entityMetaMeta;
 	private final I18nStringMetaData i18nStringMeta;
 
 	public LanguageRepositoryDecorator(Repository<Language> decorated, DataService dataService,
-			AttributeMetaDataFactory attrMetaFactory, EntityMetaDataMetaData entityMetaMeta,
+			AttributeFactory attrMetaFactory, EntityMetaDataMetaData entityMetaMeta,
 			I18nStringMetaData i18nStringMeta)
 	{
 		this.decorated = requireNonNull(decorated);

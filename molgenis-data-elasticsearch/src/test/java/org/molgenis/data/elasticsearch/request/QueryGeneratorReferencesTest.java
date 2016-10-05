@@ -9,7 +9,7 @@ import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.QueryImpl;
@@ -72,7 +72,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 	EntityMetaDataFactory entityMetaFactory;
 
 	@Autowired
-	AttributeMetaDataFactory attrFactory;
+	AttributeFactory attrFactory;
 
 	@BeforeMethod
 	public void setUp()

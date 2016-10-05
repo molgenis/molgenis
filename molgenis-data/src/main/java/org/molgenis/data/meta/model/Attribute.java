@@ -36,7 +36,7 @@ public class Attribute extends StaticEntity
 	}
 
 	/**
-	 * Creates a new attribute. Normally called by its {@link AttributeMetaDataFactory entity factory}.
+	 * Creates a new attribute. Normally called by its {@link AttributeFactory entity factory}.
 	 *
 	 * @param entityMeta attribute meta data
 	 */
@@ -47,7 +47,7 @@ public class Attribute extends StaticEntity
 	}
 
 	/**
-	 * Creates a new attribute with the given identifier. Normally called by its {@link AttributeMetaDataFactory entity factory}.
+	 * Creates a new attribute with the given identifier. Normally called by its {@link AttributeFactory entity factory}.
 	 *
 	 * @param attrId     attribute identifier (not the attribute name)
 	 * @param entityMeta attribute meta data

@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepository;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -34,7 +34,7 @@ import static org.testng.Assert.assertTrue;
 public class TabixVcfRepositoryTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityMetaDataFactory entityMetaDataFactory;
@@ -57,13 +57,13 @@ public class TabixVcfRepositoryTest extends AbstractMolgenisSpringTest
 		repoMetaData.addAttribute(vcfAttributes.getQualAttribute());
 		repoMetaData.addAttribute(vcfAttributes.getIdAttribute());
 		repoMetaData.addAttribute(
-				attributeMetaDataFactory.create().setName("INTERNAL_ID").setDataType(STRING).setVisible(false),
+				attributeFactory.create().setName("INTERNAL_ID").setDataType(STRING).setVisible(false),
 				ROLE_ID);
-		repoMetaData.addAttribute(attributeMetaDataFactory.create().setName("INFO").setDataType(COMPOUND));
+		repoMetaData.addAttribute(attributeFactory.create().setName("INFO").setDataType(COMPOUND));
 
 		File file = ResourceUtils.getFile(getClass(), "/tabixtest.vcf.gz");
 		tabixVcfRepository = new TabixVcfRepository(file, "TabixTest", vcfAttributes, entityMetaDataFactory,
-				attributeMetaDataFactory);
+				attributeFactory);
 	}
 
 	@Test

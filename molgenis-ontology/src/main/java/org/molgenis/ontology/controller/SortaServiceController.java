@@ -10,7 +10,7 @@ import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.populate.IdGenerator;
@@ -103,7 +103,7 @@ public class SortaServiceController extends MolgenisPluginController
 	private final OntologyTermMetaData ontologyTermMetaData;
 	private final SortaJobExecutionFactory sortaJobExecutionFactory;
 	private final EntityMetaDataFactory entityMetaFactory;
-	private final AttributeMetaDataFactory attrMetaFactory;
+	private final AttributeFactory attrMetaFactory;
 
 	public static final String MATCH_VIEW_NAME = "sorta-match-view";
 	public static final String ID = "sortaservice";
@@ -120,7 +120,7 @@ public class SortaServiceController extends MolgenisPluginController
 			PermissionSystemService permissionSystemService, MatchingTaskContentMetaData matchingTaskContentMetaData,
 			SortaJobExecutionMetaData sortaJobExecutionMetaData, OntologyTermMetaData ontologyTermMetaData,
 			SortaJobExecutionFactory sortaJobExecutionFactory, EntityMetaDataFactory entityMetaFactory,
-			AttributeMetaDataFactory attrMetaFactory)
+			AttributeFactory attrMetaFactory)
 	{
 		super(URI);
 		this.ontologyService = requireNonNull(ontologyService);

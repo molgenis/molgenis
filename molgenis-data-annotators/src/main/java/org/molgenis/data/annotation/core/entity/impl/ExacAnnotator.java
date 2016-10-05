@@ -19,7 +19,7 @@ import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepositoryFactory;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +66,7 @@ public class ExacAnnotator implements AnnotatorConfig
 	private EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
@@ -80,19 +80,19 @@ public class ExacAnnotator implements AnnotatorConfig
 	public void init()
 	{
 
-		Attribute outputAttribute_AF = getExacAFAttr(attributeMetaDataFactory);
-		Attribute outputAttribute_AC_HOM = getExacAcHomAttr(attributeMetaDataFactory);
-		Attribute outputAttribute_AC_HET = getExacAcHetAttr(attributeMetaDataFactory);
+		Attribute outputAttribute_AF = getExacAFAttr(attributeFactory);
+		Attribute outputAttribute_AC_HOM = getExacAcHomAttr(attributeFactory);
+		Attribute outputAttribute_AC_HET = getExacAcHetAttr(attributeFactory);
 
 		List<Attribute> outputMetaData = new ArrayList<Attribute>(Arrays.asList(
 				new Attribute[] { outputAttribute_AF, outputAttribute_AC_HOM, outputAttribute_AC_HET }));
 
 		List<Attribute> resourceMetaData = new ArrayList<Attribute>(Arrays.asList(
 				new Attribute[] {
-						attributeMetaDataFactory.create().setName(EXAC_AF_ResourceAttributeName).setDataType(STRING),
-						attributeMetaDataFactory.create().setName(EXAC_AC_HOM_ResourceAttributeName).setDataType(
+						attributeFactory.create().setName(EXAC_AF_ResourceAttributeName).setDataType(STRING),
+						attributeFactory.create().setName(EXAC_AC_HOM_ResourceAttributeName).setDataType(
 								STRING),
-						attributeMetaDataFactory.create().setName(EXAC_AC_HET_ResourceAttributeName).setDataType(
+						attributeFactory.create().setName(EXAC_AC_HET_ResourceAttributeName).setDataType(
 								STRING) }));
 
 		AnnotatorInfo exacInfo = AnnotatorInfo.create(Status.READY, AnnotatorInfo.Type.POPULATION_REFERENCE, "exac",
@@ -123,21 +123,21 @@ public class ExacAnnotator implements AnnotatorConfig
 		annotator.init(entityAnnotator);
 	}
 
-	public static Attribute getExacAcHetAttr(AttributeMetaDataFactory attributeMetaDataFactory)
+	public static Attribute getExacAcHetAttr(AttributeFactory attributeFactory)
 	{
-		return attributeMetaDataFactory.create().setName(EXAC_AC_HET).setDataType(STRING)
+		return attributeFactory.create().setName(EXAC_AC_HET).setDataType(STRING)
 				.setDescription("The ExAC heterozygous genotype count").setLabel(EXAC_AC_HET_LABEL);
 	}
 
-	public static Attribute getExacAcHomAttr(AttributeMetaDataFactory attributeMetaDataFactory)
+	public static Attribute getExacAcHomAttr(AttributeFactory attributeFactory)
 	{
-		return attributeMetaDataFactory.create().setName(EXAC_AC_HOM).setDataType(STRING)
+		return attributeFactory.create().setName(EXAC_AC_HOM).setDataType(STRING)
 				.setDescription("The ExAC homozygous alternative genotype count").setLabel(EXAC_AC_HOM_LABEL);
 	}
 
-	public static Attribute getExacAFAttr(AttributeMetaDataFactory attributeMetaDataFactory)
+	public static Attribute getExacAFAttr(AttributeFactory attributeFactory)
 	{
-		return attributeMetaDataFactory.create().setName(EXAC_AF).setDataType(STRING)
+		return attributeFactory.create().setName(EXAC_AF).setDataType(STRING)
 				.setDescription("The ExAC allele frequency").setLabel(EXAC_AF_LABEL);
 	}
 
@@ -151,7 +151,7 @@ public class ExacAnnotator implements AnnotatorConfig
 			public RepositoryFactory getRepositoryFactory()
 			{
 				return new TabixVcfRepositoryFactory(EXAC_TABIX_RESOURCE, vcfAttributes, entityMetaDataFactory,
-						attributeMetaDataFactory);
+						attributeFactory);
 			}
 		};
 

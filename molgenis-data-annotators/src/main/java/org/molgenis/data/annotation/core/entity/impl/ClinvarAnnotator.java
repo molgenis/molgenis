@@ -19,7 +19,7 @@ import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepositoryFactory;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +57,7 @@ public class ClinvarAnnotator implements AnnotatorConfig
 	private VcfAttributes vcfAttributes;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	@Autowired
 	private EntityMetaDataFactory entityMetaDataFactory;
@@ -76,12 +76,12 @@ public class ClinvarAnnotator implements AnnotatorConfig
 	{
 		List<Attribute> attributes = new ArrayList<>();
 
-		Attribute clinvar_clnsig = attributeMetaDataFactory.create().setName(CLINVAR_CLNSIG).setDataType(STRING)
+		Attribute clinvar_clnsig = attributeFactory.create().setName(CLINVAR_CLNSIG).setDataType(STRING)
 				.setDescription(
 						"Value representing clinical significant allele 0 means ref 1 means first alt allele etc.")
 				.setLabel(CLINVAR_CLNSIG_LABEL);
 
-		Attribute clinvar_clnalle = attributeMetaDataFactory.create().setName(CLINVAR_CLNALLE)
+		Attribute clinvar_clnalle = attributeFactory.create().setName(CLINVAR_CLNALLE)
 				.setDataType(STRING).setDescription("Value representing the clinical significanct according to ClinVar")
 				.setLabel(CLINVAR_CLNALLE_LABEL);
 
@@ -143,7 +143,7 @@ public class ClinvarAnnotator implements AnnotatorConfig
 			public RepositoryFactory getRepositoryFactory()
 			{
 				return new TabixVcfRepositoryFactory(CLINVAR_TABIX_RESOURCE, vcfAttributes, entityMetaDataFactory,
-						attributeMetaDataFactory);
+						attributeFactory);
 			}
 		};
 

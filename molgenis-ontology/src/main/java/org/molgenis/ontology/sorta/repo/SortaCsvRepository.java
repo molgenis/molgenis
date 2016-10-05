@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.processor.CellProcessor;
@@ -34,7 +34,7 @@ public class SortaCsvRepository extends AbstractRepository
 			.asList(new LowerCaseProcessor(), new TrimProcessor());
 
 	public SortaCsvRepository(File file, EntityMetaDataFactory entityMetaFactory,
-			AttributeMetaDataFactory attrMetaFactory)
+			AttributeFactory attrMetaFactory)
 	{
 		this.csvRepository = new CsvRepository(file, entityMetaFactory, attrMetaFactory, LOWERCASE_AND_TRIM,
 				SortaServiceImpl.DEFAULT_SEPARATOR);
@@ -43,7 +43,7 @@ public class SortaCsvRepository extends AbstractRepository
 	}
 
 	public SortaCsvRepository(String entityName, String entityLabel, File uploadedFile,
-			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
+			EntityMetaDataFactory entityMetaFactory, AttributeFactory attrMetaFactory)
 	{
 		this.csvRepository = new CsvRepository(uploadedFile, entityMetaFactory, attrMetaFactory, LOWERCASE_AND_TRIM,
 				SortaServiceImpl.DEFAULT_SEPARATOR);
@@ -56,7 +56,7 @@ public class SortaCsvRepository extends AbstractRepository
 	{
 		if (entityMetaData == null)
 		{
-			AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
+			AttributeFactory attrMetaFactory = getApplicationContext().getBean(AttributeFactory.class);
 
 			entityMetaData = EntityMetaData.newInstance(csvRepository.getEntityMetaData(), DEEP_COPY_ATTRS);
 			entityMetaData.setName(entityName);

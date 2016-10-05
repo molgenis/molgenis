@@ -3,7 +3,7 @@ package org.molgenis.data.annotation;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -21,7 +21,7 @@ import static org.molgenis.data.vcf.model.VcfAttributes.*;
 public abstract class AnnotatorTestData extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityMetaDataFactory entityMetaDataFactory;
@@ -32,12 +32,12 @@ public abstract class AnnotatorTestData extends AbstractMolgenisSpringTest
 	public EntityMetaData metaDataCanAnnotate = entityMetaDataFactory.create().setName("test");
 	public EntityMetaData metaDataCantAnnotate = entityMetaDataFactory.create().setName("test");
 
-	public Attribute attributeChrom = attributeMetaDataFactory.create().setName(CHROM)
+	public Attribute attributeChrom = attributeFactory.create().setName(CHROM)
 			.setDataType(STRING);
-	public Attribute attributePos = attributeMetaDataFactory.create().setName(POS).setDataType(LONG);
-	public Attribute attributeRef = attributeMetaDataFactory.create().setName(REF).setDataType(STRING);
-	public Attribute attributeAlt = attributeMetaDataFactory.create().setName(ALT).setDataType(STRING);
-	public Attribute attributeCantAnnotateChrom = attributeMetaDataFactory.create().setName(CHROM)
+	public Attribute attributePos = attributeFactory.create().setName(POS).setDataType(LONG);
+	public Attribute attributeRef = attributeFactory.create().setName(REF).setDataType(STRING);
+	public Attribute attributeAlt = attributeFactory.create().setName(ALT).setDataType(STRING);
+	public Attribute attributeCantAnnotateChrom = attributeFactory.create().setName(CHROM)
 			.setDataType(LONG);
 	public ArrayList<Entity> input = new ArrayList<>();
 	public ArrayList<Entity> input1 = new ArrayList<>();

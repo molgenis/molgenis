@@ -3,7 +3,7 @@ package org.molgenis.data.annotation.core.query;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -26,7 +26,7 @@ import static org.testng.Assert.assertEquals;
 public class LocusQueryCreatorTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	AttributeMetaDataFactory attributeMetaDataFactory;
+	AttributeFactory attributeFactory;
 
 	@Autowired
 	EntityMetaDataFactory entityMetaDataFactory;
@@ -37,7 +37,7 @@ public class LocusQueryCreatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void createQueryEntity()
 	{
-		Attribute idAttr = attributeMetaDataFactory.create().setName("idAttribute").setAuto(true);
+		Attribute idAttr = attributeFactory.create().setName("idAttribute").setAuto(true);
 		EntityMetaData emd = entityMetaDataFactory.create().setName("testEntity");
 		emd.addAttributes(Arrays.asList(idAttr, vcfAttributes.getChromAttribute(), vcfAttributes.getPosAttribute()));
 		emd.setIdAttribute(idAttr);

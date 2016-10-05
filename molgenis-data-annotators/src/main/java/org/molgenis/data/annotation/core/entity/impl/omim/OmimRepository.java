@@ -7,7 +7,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.AbstractRepository;
@@ -36,7 +36,7 @@ public class OmimRepository extends AbstractRepository
 	public static final String OMIM_CYTO_LOCATION_COL_NAME = "CytoLocation";
 	public static final String OMIM_ENTRY_COL_NAME = "OmimEntry";
 	public static final String OMIM_TYPE_COL_NAME = "OmimType";
-	private final AttributeMetaDataFactory attributeMetaDataFactory;
+	private final AttributeFactory attributeFactory;
 	private final EntityMetaDataFactory entityMetaDataFactory;
 
 	private Map<String, List<Entity>> entitiesByGeneSymbol;
@@ -44,11 +44,11 @@ public class OmimRepository extends AbstractRepository
 	private final File file;
 
 	public OmimRepository(File file, EntityMetaDataFactory entityMetaDataFactory,
-			AttributeMetaDataFactory attributeMetaDataFactory)
+			AttributeFactory attributeFactory)
 	{
 		this.file = file;
 		this.entityMetaDataFactory = entityMetaDataFactory;
-		this.attributeMetaDataFactory = attributeMetaDataFactory;
+		this.attributeFactory = attributeFactory;
 	}
 
 	@Override
@@ -61,12 +61,12 @@ public class OmimRepository extends AbstractRepository
 	public EntityMetaData getEntityMetaData()
 	{
 		EntityMetaData entityMeta = entityMetaDataFactory.create().setSimpleName(NAME);
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME), ROLE_ID);
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(OMIM_PHENOTYPE_COL_NAME));
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(OMIM_MIM_NUMBER_COL_NAME));
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(OMIM_CYTO_LOCATION_COL_NAME));
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(OMIM_ENTRY_COL_NAME));
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(OMIM_TYPE_COL_NAME));
+		entityMeta.addAttribute(attributeFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME), ROLE_ID);
+		entityMeta.addAttribute(attributeFactory.create().setName(OMIM_PHENOTYPE_COL_NAME));
+		entityMeta.addAttribute(attributeFactory.create().setName(OMIM_MIM_NUMBER_COL_NAME));
+		entityMeta.addAttribute(attributeFactory.create().setName(OMIM_CYTO_LOCATION_COL_NAME));
+		entityMeta.addAttribute(attributeFactory.create().setName(OMIM_ENTRY_COL_NAME));
+		entityMeta.addAttribute(attributeFactory.create().setName(OMIM_TYPE_COL_NAME));
 		return entityMeta;
 	}
 

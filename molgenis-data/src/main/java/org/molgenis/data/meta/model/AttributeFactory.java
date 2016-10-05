@@ -14,13 +14,13 @@ import static java.util.Objects.requireNonNull;
  * {@link AbstractSystemEntityFactory} to prevent a circular bean dependency.
  */
 @Component
-public class AttributeMetaDataFactory implements EntityFactory<Attribute, String>
+public class AttributeFactory implements EntityFactory<Attribute, String>
 {
 	private final EntityPopulator entityPopulator;
 	private AttributeMetaDataMetaData attrMetaMeta;
 
 	@Autowired
-	public AttributeMetaDataFactory(EntityPopulator entityPopulator) {
+	public AttributeFactory(EntityPopulator entityPopulator) {
 		this.entityPopulator = requireNonNull(entityPopulator);
 	}
 

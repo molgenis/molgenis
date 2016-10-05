@@ -34,24 +34,24 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	@Autowired
 	private EntityMetaDataFactory entityMetaDataFactory;
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	private EntityMetaData createDynamicLocationMetaData()
 	{
 		return entityMetaDataFactory.create().setSimpleName("Location")
-				.addAttribute(attributeMetaDataFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
-				.addAttribute(attributeMetaDataFactory.create().setName("Chromosome").setDataType(STRING))
-				.addAttribute(attributeMetaDataFactory.create().setName("Position").setDataType(STRING));
+				.addAttribute(attributeFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
+				.addAttribute(attributeFactory.create().setName("Chromosome").setDataType(STRING))
+				.addAttribute(attributeFactory.create().setName("Position").setDataType(STRING));
 	}
 
 	private EntityMetaData createDynamicSourceMetaData()
 	{
 		return entityMetaDataFactory.create().setSimpleName("Source")
-				.addAttribute(attributeMetaDataFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
-				.addAttribute(attributeMetaDataFactory.create().setName("Int").setDataType(INT))
-				.addAttribute(attributeMetaDataFactory.create().setName("String").setDataType(STRING))
-				.addAttribute(attributeMetaDataFactory.create().setName("NonNumericString").setDataType(STRING))
-				.addAttribute(attributeMetaDataFactory.create().setName("Long").setDataType(LONG));
+				.addAttribute(attributeFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
+				.addAttribute(attributeFactory.create().setName("Int").setDataType(INT))
+				.addAttribute(attributeFactory.create().setName("String").setDataType(STRING))
+				.addAttribute(attributeFactory.create().setName("NonNumericString").setDataType(STRING))
+				.addAttribute(attributeFactory.create().setName("Long").setDataType(LONG));
 	}
 
 	@BeforeMethod

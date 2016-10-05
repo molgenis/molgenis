@@ -19,7 +19,7 @@ import org.molgenis.data.annotation.core.resources.impl.MultiResourceConfigImpl;
 import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepositoryFactory;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,7 +58,7 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 	private EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 	private RepositoryAnnotatorImpl annotator;
 
 	@Bean
@@ -71,7 +71,7 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		Attribute outputAttribute = attributeMetaDataFactory.create().setName(THOUSAND_GENOME_AF)
+		Attribute outputAttribute = attributeFactory.create().setName(THOUSAND_GENOME_AF)
 				.setDataType(STRING).setDescription(
 						"The allele frequency for variants seen in the population used for the thousand genomes project")
 				.setLabel(THOUSAND_GENOME_AF_LABEL);
@@ -92,7 +92,7 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 		LocusQueryCreator locusQueryCreator = new LocusQueryCreator(vcfAttributes);
 
 		MultiAllelicResultFilter multiAllelicResultFilter = new MultiAllelicResultFilter(Collections.singletonList(
-				attributeMetaDataFactory.create().setName(THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME)
+				attributeFactory.create().setName(THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME)
 						.setDataType(DECIMAL)), vcfAttributes);
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(THOUSAND_GENOME_MULTI_FILE_RESOURCE, thousandGenomeInfo,
@@ -129,7 +129,7 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 			public RepositoryFactory getRepositoryFactory()
 			{
 				return new TabixVcfRepositoryFactory(THOUSAND_GENOME_MULTI_FILE_RESOURCE, vcfAttributes,
-						entityMetaDataFactory, attributeMetaDataFactory);
+						entityMetaDataFactory, attributeFactory);
 			}
 		};
 	}

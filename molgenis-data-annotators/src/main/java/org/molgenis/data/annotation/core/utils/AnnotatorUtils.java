@@ -9,7 +9,7 @@ import org.molgenis.data.annotation.core.EffectsAnnotator;
 import org.molgenis.data.annotation.core.RefEntityAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.VcfRepository;
@@ -81,11 +81,11 @@ public class AnnotatorUtils
 	 * Adds a new compound attribute to an existing CrudRepository
 	 *
 	 * @param entityMetaData           {@link EntityMetaData} for the existing repository
-	 * @param attributeMetaDataFactory
+	 * @param attributeFactory
 	 * @param annotator
 	 */
 	public static EntityMetaData addAnnotatorMetaDataToRepositories(EntityMetaData entityMetaData,
-			AttributeMetaDataFactory attributeMetaDataFactory, RepositoryAnnotator annotator)
+			AttributeFactory attributeFactory, RepositoryAnnotator annotator)
 	{
 		List<Attribute> attributes = annotator.getOutputAttributes();
 		Attribute compound;
@@ -93,18 +93,18 @@ public class AnnotatorUtils
 		compound = entityMetaData.getAttribute(compoundName);
 		if (compound == null)
 		{
-			createCompoundForAnnotator(entityMetaData, attributeMetaDataFactory, annotator, attributes,
+			createCompoundForAnnotator(entityMetaData, attributeFactory, annotator, attributes,
 					compoundName);
 		}
 		return entityMetaData;
 	}
 
 	private static void createCompoundForAnnotator(EntityMetaData entityMetaData,
-			AttributeMetaDataFactory attributeMetaDataFactory, RepositoryAnnotator annotator,
+			AttributeFactory attributeFactory, RepositoryAnnotator annotator,
 			List<Attribute> attributes, String compoundName)
 	{
 		Attribute compound;
-		compound = attributeMetaDataFactory.create().setName(compoundName).setLabel(annotator.getFullName())
+		compound = attributeFactory.create().setName(compoundName).setLabel(annotator.getFullName())
 				.setDataType(MolgenisFieldTypes.AttributeType.COMPOUND).setLabel(annotator.getSimpleName());
 		Attribute finalCompound = compound;
 		attributes.stream().filter(part -> entityMetaData.getAttribute(part.getName()) == null)
@@ -118,7 +118,7 @@ public class AnnotatorUtils
 	 * @param annotator                the annotator to be runned
 	 * @param vcfAttributes            utility class for vcf metadata
 	 * @param entityMetaDataFactory    factory for molgenis entityMetaData
-	 * @param attributeMetaDataFactory factory for molgenis entityMetaData
+	 * @param attributeFactory factory for molgenis entityMetaData
 	 * @param vcfUtils                 utility class for working with vcf data in molgenis
 	 * @param inputVcfFile             the vcf file to be annotated
 	 * @param outputVCFFile            the resulting, annotated vcf file
@@ -129,7 +129,7 @@ public class AnnotatorUtils
 	 * @throws MolgenisInvalidFormatException
 	 */
 	public static String annotate(RepositoryAnnotator annotator, VcfAttributes vcfAttributes,
-			EntityMetaDataFactory entityMetaDataFactory, AttributeMetaDataFactory attributeMetaDataFactory,
+			EntityMetaDataFactory entityMetaDataFactory, AttributeFactory attributeFactory,
 			VcfUtils vcfUtils, File inputVcfFile, File outputVCFFile, List<String> attributesToInclude, boolean update)
 			throws IOException, MolgenisInvalidFormatException
 	{
@@ -137,17 +137,17 @@ public class AnnotatorUtils
 		try (BufferedWriter outputVCFWriter = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
 				VcfRepository vcfRepo = new VcfRepository(inputVcfFile, inputVcfFile.getName(), vcfAttributes,
-						entityMetaDataFactory, attributeMetaDataFactory))
+						entityMetaDataFactory, attributeFactory))
 		{
 
 			List<Attribute> outputMetaData = getOutputAttributeMetaDatasForAnnotator(annotator,
-					entityMetaDataFactory, attributeMetaDataFactory, attributesToInclude, vcfRepo);
+					entityMetaDataFactory, attributeFactory, attributesToInclude, vcfRepo);
 
 			VcfWriterUtils
 					.writeVcfHeader(inputVcfFile, outputVCFWriter, VcfUtils.getAtomicAttributesFromList(outputMetaData),
 							attributesToInclude);
 
-			Iterable<Entity> entitiesToAnnotate = addAnnotatorMetaDataToRepository(annotator, attributeMetaDataFactory,
+			Iterable<Entity> entitiesToAnnotate = addAnnotatorMetaDataToRepository(annotator, attributeFactory,
 					vcfUtils, vcfRepo);
 
 			Iterator<Entity> annotatedRecords = annotateRepo(annotator, vcfUtils, update, entitiesToAnnotate);
@@ -169,7 +169,7 @@ public class AnnotatorUtils
 	}
 
 	private static Iterable<Entity> addAnnotatorMetaDataToRepository(RepositoryAnnotator annotator,
-			AttributeMetaDataFactory attributeMetaDataFactory, VcfUtils vcfUtils, VcfRepository vcfRepo)
+			AttributeFactory attributeFactory, VcfUtils vcfUtils, VcfRepository vcfRepo)
 	{
 		addAnnotatorAttributesToInfoAttribute(annotator, vcfRepo);
 		Iterable<Entity> entitiesToAnnotate;
@@ -187,7 +187,7 @@ public class AnnotatorUtils
 		}
 		else
 		{
-			AnnotatorUtils.addAnnotatorMetaDataToRepositories(vcfRepo.getEntityMetaData(), attributeMetaDataFactory,
+			AnnotatorUtils.addAnnotatorMetaDataToRepositories(vcfRepo.getEntityMetaData(), attributeFactory,
 					annotator);
 			entitiesToAnnotate = vcfRepo;
 		}
@@ -221,7 +221,7 @@ public class AnnotatorUtils
 	}
 
 	private static List<Attribute> getOutputAttributeMetaDatasForAnnotator(RepositoryAnnotator annotator,
-			EntityMetaDataFactory entityMetaDataFactory, AttributeMetaDataFactory attributeMetaDataFactory,
+			EntityMetaDataFactory entityMetaDataFactory, AttributeFactory attributeFactory,
 			List<String> attributesToInclude, VcfRepository vcfRepo)
 	{
 		if (!attributesToInclude.isEmpty())
@@ -240,7 +240,7 @@ public class AnnotatorUtils
 			{
 				effectRefEntity.addAttribute(outputAttribute);
 			}
-			Attribute effect = attributeMetaDataFactory.create().setName(EFFECT);
+			Attribute effect = attributeFactory.create().setName(EFFECT);
 			effect.setDataType(MREF).setRefEntity(effectRefEntity);
 			outputMetaData.add(effect);
 		}

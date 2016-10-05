@@ -98,7 +98,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	@Autowired
 	private RestControllerV2 restControllerV2;
@@ -140,23 +140,23 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		EntityMetaData refRefEntityMeta = entityMetaDataFactory.create().setName(REF_REF_ENTITY_NAME)
 				.setLabel(REF_REF_ENTITY_NAME)
-				.addAttribute(attributeMetaDataFactory.create().setName(REF_REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL,
-						ROLE_LOOKUP).addAttribute(attributeMetaDataFactory.create().setName(REF_REF_ATTR_VALUE_NAME));
+				.addAttribute(attributeFactory.create().setName(REF_REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL,
+						ROLE_LOOKUP).addAttribute(attributeFactory.create().setName(REF_REF_ATTR_VALUE_NAME));
 
 		EntityMetaData selfRefEntityMeta = entityMetaDataFactory.create().setName(SELF_REF_ENTITY_NAME)
 				.setLabel(SELF_REF_ENTITY_NAME)
-				.addAttribute(attributeMetaDataFactory.create().setName("id"), ROLE_ID, ROLE_LABEL, ROLE_LOOKUP);
+				.addAttribute(attributeFactory.create().setName("id"), ROLE_ID, ROLE_LABEL, ROLE_LOOKUP);
 		selfRefEntityMeta.addAttribute(
-				attributeMetaDataFactory.create().setName("selfRef").setDataType(XREF).setRefEntity(selfRefEntityMeta));
+				attributeFactory.create().setName("selfRef").setDataType(XREF).setRefEntity(selfRefEntityMeta));
 
 		Entity selfRefEntity = new DynamicEntity(selfRefEntityMeta);
 		selfRefEntity.set("id", "0");
 		selfRefEntity.set("selfRef", selfRefEntity);
 
 		EntityMetaData refEntityMeta = entityMetaDataFactory.create().setName(REF_ENTITY_NAME).setLabel(REF_ENTITY_NAME)
-				.addAttribute(attributeMetaDataFactory.create().setName(REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL,
-						ROLE_LOOKUP).addAttribute(attributeMetaDataFactory.create().setName(REF_ATTR_VALUE_NAME))
-				.addAttribute(attributeMetaDataFactory.create().setName(REF_ATTR_REF_NAME).setDataType(XREF)
+				.addAttribute(attributeFactory.create().setName(REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL,
+						ROLE_LOOKUP).addAttribute(attributeFactory.create().setName(REF_ATTR_VALUE_NAME))
+				.addAttribute(attributeFactory.create().setName(REF_ATTR_REF_NAME).setDataType(XREF)
 						.setRefEntity(refRefEntityMeta));
 		// required
 		String attrIdName = "id";
@@ -208,7 +208,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 
 		// required
 		EntityMetaData entityMeta = entityMetaDataFactory.create().setName(ENTITY_NAME).setLabel(ENTITY_NAME);
-		Attribute attrId = attributeMetaDataFactory.create().setName(attrIdName);
+		Attribute attrId = attributeFactory.create().setName(attrIdName);
 		entityMeta.addAttribute(attrId, ROLE_ID, ROLE_LABEL, ROLE_LOOKUP);
 		Attribute attrBool = createAttributeMeta(entityMeta, attrBoolName, BOOL).setNillable(false);
 		Attribute attrCategorical = createAttributeMeta(entityMeta, attrCategoricalName, CATEGORICAL,
@@ -372,7 +372,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private Attribute createAttributeMeta(EntityMetaData entityMeta, String attrName, AttributeType type,
 			EntityMetaData refEntityMeta)
 	{
-		Attribute attr = attributeMetaDataFactory.create().setName(attrName).setLabel(attrName)
+		Attribute attr = attributeFactory.create().setName(attrName).setLabel(attrName)
 				.setDataType(type).setRefEntity(refEntityMeta).setNillable(true);
 
 		if (entityMeta != null)

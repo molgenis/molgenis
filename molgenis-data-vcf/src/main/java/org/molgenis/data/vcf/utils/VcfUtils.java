@@ -9,7 +9,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.support.DynamicEntity;
@@ -41,7 +41,7 @@ public class VcfUtils
 	private EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	/**
 	 * Creates a internal molgenis id from a vcf entity
@@ -157,7 +157,7 @@ public class VcfUtils
 				{
 					effectsEMD = effect.getEntityMetaData();
 					resultEMD = entityMetaDataFactory.create(variantEMD);
-					resultEMD.addAttribute(attributeMetaDataFactory.create().setName(VcfWriterUtils.EFFECT)
+					resultEMD.addAttribute(attributeFactory.create().setName(VcfWriterUtils.EFFECT)
 							.setDataType(MolgenisFieldTypes.AttributeType.MREF).setRefEntity(effectsEMD));
 				}
 			}
@@ -267,11 +267,11 @@ public class VcfUtils
 	{
 		EntityMetaData xrefMetaData = entityMetaDataFactory.create().setName(entityName);
 		xrefMetaData
-				.addAttribute(attributeMetaDataFactory.create().setName("identifier").setAuto(true).setVisible(false),
+				.addAttribute(attributeFactory.create().setName("identifier").setAuto(true).setVisible(false),
 						EntityMetaData.AttributeRole.ROLE_ID);
 		xrefMetaData.addAttributes(com.google.common.collect.Lists.newArrayList(metadataMap.values()));
 		xrefMetaData.addAttribute(
-				attributeMetaDataFactory.create().setName(VARIANT).setDataType(MolgenisFieldTypes.AttributeType.XREF));
+				attributeFactory.create().setName(VARIANT).setDataType(MolgenisFieldTypes.AttributeType.XREF));
 		return xrefMetaData;
 	}
 
@@ -301,7 +301,7 @@ public class VcfUtils
 			String attribute = attributeStrings[i];
 			MolgenisFieldTypes.AttributeType type = annotatorAttributeMap.containsKey(attribute) ? annotatorAttributeMap
 					.get(attribute).getDataType() : MolgenisFieldTypes.AttributeType.STRING;
-			Attribute attr = attributeMetaDataFactory.create()
+			Attribute attr = attributeFactory.create()
 					.setName(StringUtils.deleteWhitespace(attribute)).setDataType(type)
 					.setLabel(attribute);
 			attributeMap.put(i, attr);

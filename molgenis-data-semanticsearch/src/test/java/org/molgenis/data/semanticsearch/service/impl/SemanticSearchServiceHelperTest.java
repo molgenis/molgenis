@@ -41,7 +41,7 @@ import static org.testng.Assert.assertTrue;
 public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@Autowired
 	private EntityMetaDataFactory entityMetaFactory;

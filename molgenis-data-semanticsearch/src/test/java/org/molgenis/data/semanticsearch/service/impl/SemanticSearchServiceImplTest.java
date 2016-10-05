@@ -45,7 +45,7 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 	private EntityMetaDataFactory entityMetaFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaDataFactory;
+	private AttributeFactory attrMetaDataFactory;
 
 	@Autowired
 	private OntologyService ontologyService;

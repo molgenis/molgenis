@@ -30,7 +30,7 @@ public class EntitySelfXrefTestHarness
 	private EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	@Autowired
 	private TestPackage testPackage;
@@ -49,7 +49,7 @@ public class EntitySelfXrefTestHarness
 
 	private Attribute createAttribute(String name, AttributeType dataType)
 	{
-		return attributeMetaDataFactory.create().setName(name).setDataType(dataType);
+		return attributeFactory.create().setName(name).setDataType(dataType);
 	}
 
 	public Stream<Entity> createTestEntities(EntityMetaData entityMetaData, int numberOfEntities)

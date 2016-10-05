@@ -10,7 +10,7 @@ import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.i18n.model.LanguageMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -50,7 +50,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	private LanguageFactory languageFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attrMetaFactory;
+	private AttributeFactory attrMetaFactory;
 
 	@Mock
 	private Repository<Language> decoratedRepo;

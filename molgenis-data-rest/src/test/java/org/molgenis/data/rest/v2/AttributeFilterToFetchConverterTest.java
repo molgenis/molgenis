@@ -4,7 +4,7 @@ import org.molgenis.auth.SecurityPackage;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.system.model.RootSystemPackage;
@@ -73,7 +73,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	@Autowired
 	private EntityMetaDataFactory entityMetaDataFactory;
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 	@Autowired
 	private FileMetaMetaData fileMetaMeta;
 
@@ -81,39 +81,39 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	public void setUpBeforeMethod()
 	{
 		selfRefEntityMetaData = entityMetaDataFactory.create().setName("SelfRefEntity");
-		Attribute selfRefIdAttr = attributeMetaDataFactory.create().setName("id");
+		Attribute selfRefIdAttr = attributeFactory.create().setName("id");
 		selfRefEntityMetaData.addAttribute(selfRefIdAttr, ROLE_ID)
-				.addAttribute(attributeMetaDataFactory.create().setName("label"), ROLE_LABEL).addAttribute(
-				attributeMetaDataFactory.create().setName("selfRef").setDataType(XREF)
+				.addAttribute(attributeFactory.create().setName("label"), ROLE_LABEL).addAttribute(
+				attributeFactory.create().setName("selfRef").setDataType(XREF)
 						.setRefEntity(selfRefEntityMetaData));
 
-		labelAttr = attributeMetaDataFactory.create().setName(REF_LABEL_ATTR_NAME);
+		labelAttr = attributeFactory.create().setName(REF_LABEL_ATTR_NAME);
 		xrefEntityMeta = entityMetaDataFactory.create().setName("xrefEntity")
-				.addAttribute(attributeMetaDataFactory.create().setName(REF_ID_ATTR_NAME), ROLE_ID)
+				.addAttribute(attributeFactory.create().setName(REF_ID_ATTR_NAME), ROLE_ID)
 				.addAttribute(labelAttr, ROLE_LABEL)
-				.addAttribute(attributeMetaDataFactory.create().setName(REF_ATTR_NAME));
+				.addAttribute(attributeFactory.create().setName(REF_ATTR_NAME));
 
 		entityMeta = entityMetaDataFactory.create().setName("entity")
-				.addAttribute(attributeMetaDataFactory.create().setName(ID_ATTR_NAME), ROLE_ID)
-				.addAttribute(attributeMetaDataFactory.create().setName(LABEL_ATTR_NAME), ROLE_LABEL);
+				.addAttribute(attributeFactory.create().setName(ID_ATTR_NAME), ROLE_ID)
+				.addAttribute(attributeFactory.create().setName(LABEL_ATTR_NAME), ROLE_LABEL);
 
-		Attribute compoundPartAttr = attributeMetaDataFactory.create().setName(COMPOUND_PART_ATTR_NAME)
+		Attribute compoundPartAttr = attributeFactory.create().setName(COMPOUND_PART_ATTR_NAME)
 				.setDataType(COMPOUND);
-		Attribute compoundPartFileAttr = attributeMetaDataFactory.create().setName(COMPOUND_PART_FILE_ATTR_NAME)
+		Attribute compoundPartFileAttr = attributeFactory.create().setName(COMPOUND_PART_FILE_ATTR_NAME)
 				.setDataType(FILE).setRefEntity(fileMetaMeta);
-		Attribute compoundAttr = attributeMetaDataFactory.create().setName(COMPOUND_ATTR_NAME)
+		Attribute compoundAttr = attributeFactory.create().setName(COMPOUND_ATTR_NAME)
 				.setDataType(COMPOUND);
-		Attribute compoundPartCompoundAttr = attributeMetaDataFactory.create()
+		Attribute compoundPartCompoundAttr = attributeFactory.create()
 				.setName(COMPOUND_PART_COMPOUND_ATTR_NAME).setDataType(COMPOUND);
-		Attribute compoundPartCompoundPartAttr = attributeMetaDataFactory.create()
+		Attribute compoundPartCompoundPartAttr = attributeFactory.create()
 				.setName(COMPOUND_PART_COMPOUND_PART_ATTR_NAME);
-		Attribute compoundPartCompoundPartAttr2 = attributeMetaDataFactory.create()
+		Attribute compoundPartCompoundPartAttr2 = attributeFactory.create()
 				.setName(COMPOUND_PART_COMPOUND_PART_ATTR2_NAME);
 		compoundAttr.setAttributeParts(asList(compoundPartAttr, compoundPartFileAttr, compoundPartCompoundAttr));
 		compoundPartCompoundAttr.setAttributeParts(asList(compoundPartCompoundPartAttr, compoundPartCompoundPartAttr2));
 		entityMeta.addAttribute(compoundAttr);
 
-		xrefAttr = attributeMetaDataFactory.create().setName(XREF_ATTR_NAME).setDataType(XREF)
+		xrefAttr = attributeFactory.create().setName(XREF_ATTR_NAME).setDataType(XREF)
 				.setRefEntity(xrefEntityMeta);
 		entityMeta.addAttribute(xrefAttr);
 	}

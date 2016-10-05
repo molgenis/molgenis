@@ -17,7 +17,7 @@ import org.molgenis.data.annotation.core.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +63,7 @@ public class OmimAnnotator implements AnnotatorConfig
 	private EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	@Autowired
 	GeneNameQueryCreator geneNameQueryCreator;
@@ -72,34 +72,34 @@ public class OmimAnnotator implements AnnotatorConfig
 
 	public Attribute getPhenotypeAttr()
 	{
-		return attributeMetaDataFactory.create().setName(OMIM_DISORDER).setDataType(TEXT)
+		return attributeFactory.create().setName(OMIM_DISORDER).setDataType(TEXT)
 				.setDescription("OMIM phenotype").setLabel("OMIM_Disorders");
 	}
 
 	public Attribute getMimNumberAttr()
 	{
-		return attributeMetaDataFactory.create().setName(OMIM_CAUSAL_IDENTIFIER).setDataType(TEXT)
+		return attributeFactory.create().setName(OMIM_CAUSAL_IDENTIFIER).setDataType(TEXT)
 				.setDescription("Number that represents the MIM database dataType for the Locus / Gene")
 				.setLabel("OMIM_Causal_ID");
 	}
 
 	public Attribute getEntryAttr()
 	{
-		return attributeMetaDataFactory.create().setName(OMIM_CYTO_LOCATIONS).setDataType(TEXT)
+		return attributeFactory.create().setName(OMIM_CYTO_LOCATIONS).setDataType(TEXT)
 				.setDescription("Cytogenic location associated with an OMIM phenotype")
 				.setLabel("OMIM_Cytogenic_Location");
 	}
 
 	public Attribute getTypeAttr()
 	{
-		return attributeMetaDataFactory.create().setName(OMIM_ENTRY).setDataType(TEXT)
+		return attributeFactory.create().setName(OMIM_ENTRY).setDataType(TEXT)
 				.setDescription("Number that represents the MIM database dataType for the phenotype")
 				.setLabel("OMIM_Entry");
 	}
 
 	public Attribute getOmimLocationAttr()
 	{
-		return attributeMetaDataFactory.create().setName(OMIM_TYPE).setDataType(TEXT).setDescription(
+		return attributeFactory.create().setName(OMIM_TYPE).setDataType(TEXT).setDescription(
 				"Phenotype Mapping key: 1 - the disorder is placed on the map based on its "
 						+ "association witha gene, but the underlying defect is not known. 2 - the disorder "
 						+ "has been placed on the map by linkage or other statistical method; no mutation has "
@@ -130,7 +130,7 @@ public class OmimAnnotator implements AnnotatorConfig
 						outputAttributes);
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(OMIM_RESOURCE, omimInfo, geneNameQueryCreator,
-				new OmimResultFilter(entityMetaDataFactory, attributeMetaDataFactory, this), dataService, resources,
+				new OmimResultFilter(entityMetaDataFactory, attributeFactory, this), dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(OMIM_LOCATION, omimAnnotatorSettings));
 
 		annotator.init(entityAnnotator);
@@ -149,7 +149,7 @@ public class OmimAnnotator implements AnnotatorConfig
 					@Override
 					public Repository<Entity> createRepository(File file) throws IOException
 					{
-						return new OmimRepository(file, entityMetaDataFactory, attributeMetaDataFactory);
+						return new OmimRepository(file, entityMetaDataFactory, attributeFactory);
 					}
 				};
 			}

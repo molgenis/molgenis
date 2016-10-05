@@ -19,7 +19,7 @@ import org.molgenis.data.annotation.core.resources.impl.tabix.TabixRepositoryFac
 import org.molgenis.data.annotation.web.settings.CaddAnnotatorSettings;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataFactory;
+import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -59,7 +59,7 @@ public class CaddAnnotator implements AnnotatorConfig
 	private EntityMetaDataFactory entityMetaDataFactory;
 
 	@Autowired
-	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private AttributeFactory attributeFactory;
 
 	private RepositoryAnnotatorImpl annotator;
 
@@ -74,8 +74,8 @@ public class CaddAnnotator implements AnnotatorConfig
 	public void init()
 	{
 		List<Attribute> attributes = new ArrayList<>();
-		Attribute cadd_abs = getCaddAbsAttr(attributeMetaDataFactory);
-		Attribute cadd_scaled = getCaddScaledAttr(attributeMetaDataFactory);
+		Attribute cadd_abs = getCaddAbsAttr(attributeFactory);
+		Attribute cadd_scaled = getCaddScaledAttr(attributeFactory);
 
 		attributes.add(cadd_abs);
 		attributes.add(cadd_scaled);
@@ -104,9 +104,9 @@ public class CaddAnnotator implements AnnotatorConfig
 		annotator.init(entityAnnotator);
 	}
 
-	public static Attribute getCaddScaledAttr(AttributeMetaDataFactory attributeMetaDataFactory)
+	public static Attribute getCaddScaledAttr(AttributeFactory attributeFactory)
 	{
-		return attributeMetaDataFactory.create().setName(CADD_SCALED).setDataType(STRING).setDescription(
+		return attributeFactory.create().setName(CADD_SCALED).setDataType(STRING).setDescription(
 				"Since the raw scores do have relative meaning, one can take a specific group of variants, define the rank for each variant within that group, and then use "
 						+ "that value as a \"normalized\" and now externally comparable unit of analysis. In our case, we scored and ranked all ~8.6 billion SNVs of the "
 						+ "GRCh37/hg19 reference and then \"PHRED-scaled\" those values by expressing the rank in order of magnitude terms rather than the precise rank itself. "
@@ -115,9 +115,9 @@ public class CaddAnnotator implements AnnotatorConfig
 				.setLabel(CADD_SCALED_LABEL);
 	}
 
-	public static Attribute getCaddAbsAttr(AttributeMetaDataFactory attributeMetaDataFactory)
+	public static Attribute getCaddAbsAttr(AttributeFactory attributeFactory)
 	{
-		return attributeMetaDataFactory.create().setName(CADD_ABS).setDataType(STRING).setDescription(
+		return attributeFactory.create().setName(CADD_ABS).setDataType(STRING).setDescription(
 				"\"Raw\" CADD scores come straight from the model, and are interpretable as the extent to which the annotation profile for a given variant suggests that "
 						+ "that variant is likely to be \"observed\" (negative values) vs \"simulated\" (positive values). These values have no absolute unit of meaning and are "
 						+ "incomparable across distinct annotation combinations, training sets, or model parameters. However, raw values do have relative meaning, with higher values "
@@ -140,9 +140,9 @@ public class CaddAnnotator implements AnnotatorConfig
 				repoMetaData.addAttribute(vcfAttributes.getPosAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getRefAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getAltAttribute());
-				repoMetaData.addAttribute(attributeMetaDataFactory.create().setName(CADD_ABS).setDataType(STRING));
-				repoMetaData.addAttribute(attributeMetaDataFactory.create().setName(CADD_SCALED).setDataType(STRING));
-				Attribute idAttribute = attributeMetaDataFactory.create().setName(idAttrName)
+				repoMetaData.addAttribute(attributeFactory.create().setName(CADD_ABS).setDataType(STRING));
+				repoMetaData.addAttribute(attributeFactory.create().setName(CADD_SCALED).setDataType(STRING));
+				Attribute idAttribute = attributeFactory.create().setName(idAttrName)
 						.setVisible(false);
 				repoMetaData.addAttribute(idAttribute);
 				repoMetaData.setIdAttribute(idAttribute);
