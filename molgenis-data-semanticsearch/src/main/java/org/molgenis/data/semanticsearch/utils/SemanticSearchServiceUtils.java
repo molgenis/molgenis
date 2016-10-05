@@ -1,10 +1,10 @@
 package org.molgenis.data.semanticsearch.utils;
 
-import static com.google.common.collect.Sets.newLinkedHashSet;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toList;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.molgenis.ontology.utils.NGramDistanceAlgorithm.STOPWORDSLIST;
+import com.google.common.collect.Sets;
+import org.apache.commons.lang3.StringUtils;
+import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.ontology.core.model.OntologyTermImpl;
+import org.molgenis.ontology.utils.Stemmer;
 
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -12,12 +12,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.StringUtils;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.ontology.core.model.OntologyTermImpl;
-import org.molgenis.ontology.utils.Stemmer;
-
-import com.google.common.collect.Sets;
+import static com.google.common.collect.Sets.newLinkedHashSet;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toList;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.molgenis.ontology.utils.NGramDistanceAlgorithm.STOPWORDSLIST;
 
 public class SemanticSearchServiceUtils
 {

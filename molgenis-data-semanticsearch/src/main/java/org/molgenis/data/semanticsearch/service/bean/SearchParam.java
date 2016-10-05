@@ -1,11 +1,10 @@
 package org.molgenis.data.semanticsearch.service.bean;
 
-import java.util.List;
-import java.util.Set;
-
+import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
 
-import com.google.auto.value.AutoValue;
+import java.util.List;
+import java.util.Set;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_SearchParam.class)

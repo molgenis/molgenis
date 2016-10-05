@@ -1,12 +1,12 @@
 package org.molgenis.data.semanticsearch.service;
 
-import java.util.List;
-import java.util.Map;
-
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.semanticsearch.semantic.OntologyTag;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
+
+import java.util.List;
+import java.util.Map;
 
 public interface OntologyTagService extends TagService<OntologyTerm, Ontology>
 {

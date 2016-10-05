@@ -1,7 +1,11 @@
 package org.molgenis.data.semanticsearch.explain.bean;
 
-import static java.util.Objects.requireNonNull;
-import static org.molgenis.ontology.core.repository.OntologyTermRepository.DEFAULT_EXPANSION_LEVEL;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import org.molgenis.data.semanticsearch.service.bean.TagGroup;
+import org.molgenis.ontology.core.model.OntologyTermImpl;
+import org.molgenis.ontology.core.service.OntologyService;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -9,13 +13,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.molgenis.data.semanticsearch.service.bean.TagGroup;
-import org.molgenis.ontology.core.model.OntologyTermImpl;
-import org.molgenis.ontology.core.service.OntologyService;
-
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
+import static java.util.Objects.requireNonNull;
+import static org.molgenis.ontology.core.repository.OntologyTermRepository.DEFAULT_EXPANSION_LEVEL;
 
 public class OntologyTermQueryExpansion
 {

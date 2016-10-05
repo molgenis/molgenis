@@ -1,11 +1,11 @@
 package org.molgenis.data.semanticsearch.repository;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.model.TagFactory;
 import org.molgenis.data.meta.model.TagMetaData;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.semantic.Relation;
 
 import static java.util.Objects.requireNonNull;

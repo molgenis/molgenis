@@ -1,11 +1,10 @@
 package org.molgenis.data.semanticsearch.explain.bean;
 
-import java.util.Map;
-
+import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
 import org.molgenis.ontology.core.model.OntologyTermImpl;
 
-import com.google.auto.value.AutoValue;
+import java.util.Map;
 
 @AutoValue
 @AutoGson(autoValueClass = AutoValue_OntologyTermQueryExpansionSolution.class)

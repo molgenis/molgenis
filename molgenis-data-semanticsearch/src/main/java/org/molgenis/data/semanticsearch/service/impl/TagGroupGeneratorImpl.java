@@ -1,23 +1,9 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
-import static com.google.common.collect.Sets.newLinkedHashSet;
-import static java.util.Arrays.stream;
-import static java.util.Collections.emptyList;
-import static java.util.Comparator.reverseOrder;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
-import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.collectLowerCaseTerms;
-import static org.molgenis.ontology.utils.NGramDistanceAlgorithm.STOPWORDSLIST;
-import static org.molgenis.ontology.utils.NGramDistanceAlgorithm.stringMatching;
-import static org.molgenis.ontology.utils.Stemmer.cleanStemPhrase;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Sets;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.search.spell.StringDistance;
 import org.elasticsearch.common.base.Joiner;
@@ -35,10 +21,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static com.google.common.collect.Sets.newLinkedHashSet;
+import static java.util.Arrays.stream;
+import static java.util.Collections.emptyList;
+import static java.util.Comparator.reverseOrder;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
+import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.collectLowerCaseTerms;
+import static org.molgenis.ontology.utils.NGramDistanceAlgorithm.STOPWORDSLIST;
+import static org.molgenis.ontology.utils.NGramDistanceAlgorithm.stringMatching;
+import static org.molgenis.ontology.utils.Stemmer.cleanStemPhrase;
 
 public class TagGroupGeneratorImpl implements TagGroupGenerator
 {
@@ -77,12 +76,12 @@ public class TagGroupGeneratorImpl implements TagGroupGenerator
 			LOG.debug("findTagGroups({},{},{})", ontologyIds, queryWords, MAX_NUM_TAGS);
 		}
 
-		List<OntologyTermImpl> relevantOntologyTerms = ontologyService.findOntologyTerms(ontologyIds, queryWords,
-				MAX_NUM_TAGS);
+		List<OntologyTermImpl> relevantOntologyTerms = ontologyService
+				.findOntologyTerms(ontologyIds, queryWords, MAX_NUM_TAGS);
 
 		List<TagGroup> candidateTagGroups = applyTagMatchingCriterion(relevantOntologyTerms, queryWords,
 				STRICT_MATCHING_CRITERION).stream().filter(tagGroup -> tagGroupKeyConcept(globalKeyConcepts, tagGroup))
-						.collect(toList());
+				.collect(toList());
 
 		if (LOG.isDebugEnabled())
 		{
@@ -101,7 +100,7 @@ public class TagGroupGeneratorImpl implements TagGroupGenerator
 
 	/**
 	 * Finds the best combinations of @{link OntologyTerm}s based on the given search terms
-	 * 
+	 *
 	 * @param queryWords
 	 * @param relevantOntologyTerms
 	 * @return
@@ -165,8 +164,9 @@ public class TagGroupGeneratorImpl implements TagGroupGenerator
 
 		if (combinedTagGroups.size() > 0)
 		{
-			float maxScore = (float) combinedTagGroups.stream().map(TagGroup::getScore).mapToDouble(Float::doubleValue)
-					.max().getAsDouble() * 0.8f;
+			float maxScore =
+					(float) combinedTagGroups.stream().map(TagGroup::getScore).mapToDouble(Float::doubleValue).max()
+							.getAsDouble() * 0.8f;
 			combinedTagGroups = combinedTagGroups.stream().sorted(reverseOrder())
 					.filter(tagGroup -> tagGroup.getScore() >= maxScore).limit(20).collect(toList());
 			if (LOG.isDebugEnabled())
@@ -219,8 +219,8 @@ public class TagGroupGeneratorImpl implements TagGroupGenerator
 	private TagGroup createTagGroup(Set<String> stemmedSearchTerms, OntologyTermImpl ontologyTerm)
 	{
 		Hit<String> bestMatchingSynonym = bestMatchingSynonym(ontologyTerm, stemmedSearchTerms);
-		return TagGroup.create(ontologyTerm, cleanStemPhrase(bestMatchingSynonym.getResult()),
-				bestMatchingSynonym.getScore());
+		return TagGroup
+				.create(ontologyTerm, cleanStemPhrase(bestMatchingSynonym.getResult()), bestMatchingSynonym.getScore());
 	}
 
 	List<List<OntologyTermImpl>> createTagGroups(Multimap<String, TagGroup> candidates)
@@ -261,11 +261,9 @@ public class TagGroupGeneratorImpl implements TagGroupGenerator
 	 * Computes the best matching synonym which is closest to a set of search terms.<br/>
 	 * Will stem the {@link OntologyTermImpl} 's synonyms and the search terms, and then compute the maximum
 	 * {@link StringDistance} between them. 0 means disjunct, 1 means identical
-	 * 
-	 * @param ontologyTerm
-	 *            the {@link OntologyTermImpl}
-	 * @param queryWords
-	 *            the search terms
+	 *
+	 * @param ontologyTerm the {@link OntologyTermImpl}
+	 * @param queryWords   the search terms
 	 * @return the maximum {@link StringDistance} between the ontologyterm and the search terms
 	 */
 	Hit<String> bestMatchingSynonym(OntologyTermImpl ontologyTerm, Set<String> queryWords)

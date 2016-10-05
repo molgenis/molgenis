@@ -1,35 +1,14 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
-import static com.google.common.collect.LinkedHashMultimap.create;
-import static java.util.Collections.emptyList;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
-import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
-import static org.molgenis.data.meta.model.TagMetaData.TAG;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.stream.Stream;
-
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.meta.model.PackageMetaData;
-import org.molgenis.data.meta.model.Tag;
-import org.molgenis.data.meta.model.TagMetaData;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.semantic.LabeledResource;
 import org.molgenis.data.semantic.Relation;
@@ -46,10 +25,19 @@ import org.molgenis.security.core.runas.RunAsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.stream.Stream;
+
+import static com.google.common.collect.LinkedHashMultimap.create;
+import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
+import static org.molgenis.data.meta.model.TagMetaData.TAG;
 
 /**
  * Service to tag metadata with ontology terms.
@@ -254,12 +242,9 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	 * The attribute just got updated, but the entity does not know this yet. To reindex this document in elasticsearch,
 	 * update it.
 	 *
-	 * @param entity
-	 *            name of the entity
-	 * @param attribute
-	 *            the name of the attribute that got changed
-	 * @param attributeEntity
-	 *            the entity of the attribute that got changed
+	 * @param entity          name of the entity
+	 * @param attribute       the name of the attribute that got changed
+	 * @param attributeEntity the entity of the attribute that got changed
 	 */
 	private void updateEntityMetaDataEntityWithNewAttributeEntity(String entity, String attribute,
 			Entity attributeEntity)
@@ -273,8 +258,8 @@ public class OntologyTagServiceImpl implements OntologyTagService
 
 	private boolean isSameTag(String relationIRI, String ontologyTermIRI, Entity e)
 	{
-		return ontologyTermIRI.equals(e.getString(TagMetaData.OBJECT_IRI))
-				&& relationIRI.equals(e.getString(TagMetaData.RELATION_IRI));
+		return ontologyTermIRI.equals(e.getString(TagMetaData.OBJECT_IRI)) && relationIRI
+				.equals(e.getString(TagMetaData.RELATION_IRI));
 	}
 
 	@RunAsSystem

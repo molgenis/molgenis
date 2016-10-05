@@ -4,12 +4,12 @@ import java.text.DecimalFormat;
 
 public class NumberToEnglishWords
 {
-	private static final String[] TEN_NAMES =
-	{ "", " ten", " twenty", " thirty", " forty", " fifty", " sixty", " seventy", " eighty", " ninety" };
+	private static final String[] TEN_NAMES = { "", " ten", " twenty", " thirty", " forty", " fifty", " sixty",
+			" seventy", " eighty", " ninety" };
 
-	private static final String[] NUM_NAMES =
-	{ "", " one", " two", " three", " four", " five", " six", " seven", " eight", " nine", " ten", " eleven", " twelve",
-			" thirteen", " fourteen", " fifteen", " sixteen", " seventeen", " eighteen", " nineteen" };
+	private static final String[] NUM_NAMES = { "", " one", " two", " three", " four", " five", " six", " seven",
+			" eight", " nine", " ten", " eleven", " twelve", " thirteen", " fourteen", " fifteen", " sixteen",
+			" seventeen", " eighteen", " nineteen" };
 
 	private static String convertLessThanOneThousand(int number)
 	{

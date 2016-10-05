@@ -1,16 +1,16 @@
 package org.molgenis.data.semanticsearch.service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedMatchCandidate;
 import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.data.semanticsearch.service.bean.TagGroup;
 import org.molgenis.ontology.core.model.OntologyTerm;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public interface SemanticSearchService
 {
@@ -19,7 +19,7 @@ public interface SemanticSearchService
 	 *
 	 * @param sourceEntityMetaData
 	 * @param queryTerms
-	 * @param ontologyTerms
+	 * @param tagGroups
 	 * @return AttributeMetaData of resembling attributes, sorted by relevance
 	 */
 	Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> findAttributes(
@@ -40,11 +40,8 @@ public interface SemanticSearchService
 	/**
 	 * Finds {@link OntologyTerm}s that can be used to tag an attribute.
 	 *
-	 * @param entity
-	 *            name of the entity
-	 * @param ontologyIDs
-	 *            IDs of ontologies to take the {@link OntologyTerm}s from.
-	 * 
+	 * @param entity      name of the entity
+	 * @param ontologyIDs IDs of ontologies to take the {@link OntologyTerm}s from.
 	 * @return {@link Map} of {@link Hit}s for {@link OntologyTerm} results
 	 */
 	Map<AttributeMetaData, Hit<OntologyTerm>> findTags(String entity, List<String> ontologyIDs);

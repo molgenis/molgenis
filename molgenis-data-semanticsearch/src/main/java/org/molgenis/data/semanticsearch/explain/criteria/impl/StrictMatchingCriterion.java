@@ -1,12 +1,12 @@
 package org.molgenis.data.semanticsearch.explain.criteria.impl;
 
-import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.collectLowerCaseTerms;
-
-import java.util.Set;
-
 import org.molgenis.data.semanticsearch.explain.criteria.MatchingCriterion;
 import org.molgenis.ontology.core.model.OntologyTermImpl;
 import org.molgenis.ontology.utils.Stemmer;
+
+import java.util.Set;
+
+import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.collectLowerCaseTerms;
 
 public class StrictMatchingCriterion implements MatchingCriterion
 {

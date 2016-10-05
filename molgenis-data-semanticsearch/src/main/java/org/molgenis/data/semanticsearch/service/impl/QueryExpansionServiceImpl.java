@@ -1,33 +1,12 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
-import static com.google.common.collect.Sets.newLinkedHashSet;
-import static java.util.Collections.emptyList;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
-import static org.molgenis.data.QueryRule.Operator.DIS_MAX;
-import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH;
-import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.getLowerCaseTerms;
-import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.splitRemoveStopWords;
-import static org.molgenis.ontology.core.repository.OntologyTermRepository.DEFAULT_EXPANSION_LEVEL;
-
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
-
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.elasticsearch.common.base.Joiner;
@@ -46,13 +25,27 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-import com.google.common.collect.Iterables;
-import com.google.common.collect.LinkedHashMultimap;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.*;
+import java.util.Map.Entry;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
+import static com.google.common.collect.Sets.newLinkedHashSet;
+import static java.util.Collections.emptyList;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toMap;
+import static org.molgenis.data.QueryRule.Operator.DIS_MAX;
+import static org.molgenis.data.QueryRule.Operator.FUZZY_MATCH;
+import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.getLowerCaseTerms;
+import static org.molgenis.data.semanticsearch.utils.SemanticSearchServiceUtils.splitRemoveStopWords;
+import static org.molgenis.ontology.core.repository.OntologyTermRepository.DEFAULT_EXPANSION_LEVEL;
 
 public class QueryExpansionServiceImpl implements QueryExpansionService
 {
@@ -70,7 +63,8 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 	private Joiner termJoiner = Joiner.on(' ');
 
 	private LoadingCache<OntologyTermImpl, List<String>> cachedOntologyTermQuery = CacheBuilder.newBuilder()
-			.maximumSize(1000).expireAfterWrite(1, TimeUnit.HOURS).build(new CacheLoader<OntologyTermImpl, List<String>>()
+			.maximumSize(1000).expireAfterWrite(1, TimeUnit.HOURS)
+			.build(new CacheLoader<OntologyTermImpl, List<String>>()
 			{
 				public List<String> load(OntologyTermImpl ontologyTerm)
 				{
@@ -90,7 +84,6 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 	 *
 	 * @param tagGroups
 	 * @param lexicalQueries
-	 *
 	 * @return disMaxJunc queryRule
 	 */
 	public QueryRule expand(SearchParam searchParam)
@@ -143,7 +136,7 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 
 	/**
 	 * Creates a disMax query rule that only contains all information from the ontology terms as well as their children
-	 * 
+	 *
 	 * @param ontologyTermHits
 	 * @return
 	 */
@@ -166,7 +159,8 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 				Map<OntologyTermImpl, Float> ontologyTermGroupWeight = normalizeBoostValueForOntologyTermGroup(
 						atomicOntologyTermGroups);
 
-				Function<OntologyTermImpl, QueryRule> ontologyTermGroupToQueryRule = groupKey -> {
+				Function<OntologyTermImpl, QueryRule> ontologyTermGroupToQueryRule = groupKey ->
+				{
 
 					List<String> queryTermsFromSameGroup = atomicOntologyTermGroups.get(groupKey).stream()
 							.flatMap(ot -> getCachedQueriesForOntologyTerm(ot).stream()).collect(toList());
@@ -194,7 +188,7 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 
 	/**
 	 * Gets the cached list of queries from the {@link LoadingCache}
-	 * 
+	 *
 	 * @param ontologyTerm
 	 * @param queryExpansionParam
 	 * @return a list of cached queries
@@ -216,7 +210,7 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 	/**
 	 * Create a list of string queries based on the information collected from current ontologyterm including label,
 	 * synonyms and child ontologyterms
-	 * 
+	 *
 	 * @param ontologyTerm
 	 * @return
 	 */
@@ -227,7 +221,7 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 
 		Function<OntologyTermImpl, Stream<String>> mapChildOntologyTermToQueries = relatedOntologyTerm -> getLowerCaseTerms(
 				relatedOntologyTerm).stream().map(query -> parseBoostQueryString(query,
-						Math.pow(0.5, ontologyService.getOntologyTermDistance(ontologyTerm, relatedOntologyTerm))));
+				Math.pow(0.5, ontologyService.getOntologyTermDistance(ontologyTerm, relatedOntologyTerm))));
 
 		LOG.trace("Started retrieving the children for the OntologyTerm: {}", ontologyTerm.toString());
 
@@ -259,22 +253,24 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 				.collect(toMap(Entry::getKey, e -> new Float(e.getValue() / maxIdfValue)));
 	}
 
-	private Multimap<OntologyTermImpl, OntologyTermImpl> groupAtomicOntologyTermsBySynonym(List<TagGroup> ontologyTermHits)
+	private Multimap<OntologyTermImpl, OntologyTermImpl> groupAtomicOntologyTermsBySynonym(
+			List<TagGroup> ontologyTermHits)
 	{
 		Multimap<OntologyTermImpl, OntologyTermImpl> multiMap = LinkedHashMultimap.create();
 		ontologyTermHits.get(0).getOntologyTerms().forEach(ot -> multiMap.put(ot, ot));
 
 		ontologyTermHits.stream().skip(1).flatMap(hit -> hit.getOntologyTerms().stream())
-				.filter(ot -> !multiMap.containsKey(ot)).forEach(atomicOntologyTerm -> {
+				.filter(ot -> !multiMap.containsKey(ot)).forEach(atomicOntologyTerm ->
+		{
 
-					OntologyTermImpl ontologyTermInTheMap = multiMap.keySet().stream()
-							.filter(ot -> hasSameSynonyms(ot, atomicOntologyTerm)).findFirst().orElse(null);
+			OntologyTermImpl ontologyTermInTheMap = multiMap.keySet().stream()
+					.filter(ot -> hasSameSynonyms(ot, atomicOntologyTerm)).findFirst().orElse(null);
 
-					if (ontologyTermInTheMap != null)
-					{
-						multiMap.put(ontologyTermInTheMap, atomicOntologyTerm);
-					}
-				});
+			if (ontologyTermInTheMap != null)
+			{
+				multiMap.put(ontologyTermInTheMap, atomicOntologyTerm);
+			}
+		});
 
 		return multiMap;
 	}
@@ -290,7 +286,7 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 
 	/**
 	 * Create disMaxJunc query rule based a list of queryTerm. All queryTerms are lower cased and stop words are removed
-	 * 
+	 *
 	 * @param queryTerms
 	 * @return disMaxJunc queryRule
 	 */
@@ -299,7 +295,8 @@ public class QueryExpansionServiceImpl implements QueryExpansionService
 		List<QueryRule> rules = new ArrayList<QueryRule>();
 		newLinkedHashSet(queryTerms).stream().filter(StringUtils::isNotEmpty)
 				.map(string -> QueryParser.escape(string).replace(ESCAPED_CARET_CHARACTER, CARET_CHARACTER))
-				.forEach(query -> {
+				.forEach(query ->
+				{
 					rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, FUZZY_MATCH, query));
 					rules.add(new QueryRule(AttributeMetaDataMetaData.DESCRIPTION, FUZZY_MATCH, query));
 				});

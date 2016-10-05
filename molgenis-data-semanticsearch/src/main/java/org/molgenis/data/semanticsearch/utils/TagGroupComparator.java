@@ -1,11 +1,11 @@
 package org.molgenis.data.semanticsearch.utils;
 
+import org.molgenis.data.semanticsearch.service.bean.TagGroup;
+import org.molgenis.ontology.utils.Stemmer;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import org.molgenis.data.semanticsearch.service.bean.TagGroup;
-import org.molgenis.ontology.utils.Stemmer;
 
 public class TagGroupComparator implements Comparator<TagGroup>
 {
@@ -77,8 +77,8 @@ public class TagGroupComparator implements Comparator<TagGroup>
 
 	boolean synonymEquals(String synonym1, String synonym2)
 	{
-		return synonym1.equals(synonym2)
-				|| Stemmer.cleanStemPhrase(synonym1).equalsIgnoreCase(Stemmer.cleanStemPhrase(synonym2));
+		return synonym1.equals(synonym2) || Stemmer.cleanStemPhrase(synonym1)
+				.equalsIgnoreCase(Stemmer.cleanStemPhrase(synonym2));
 	}
 
 	boolean isOntologyTermNameMatched(TagGroup hit)

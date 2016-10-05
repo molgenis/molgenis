@@ -1,14 +1,13 @@
 package org.molgenis.data.semanticsearch.service.bean;
 
-import java.util.Arrays;
-import java.util.List;
-
+import com.google.auto.value.AutoValue;
 import org.molgenis.gson.AutoGson;
 import org.molgenis.ontology.core.model.CombinedOntologyTermImpl;
 import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.model.OntologyTermImpl;
 
-import com.google.auto.value.AutoValue;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * {@link OntologyTermImpl}s that got matched to an attribute.
