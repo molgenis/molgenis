@@ -625,7 +625,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		public AttributeFactory attributeMetaDataFactory()
+		public AttributeFactory attributeFactory()
 		{
 			return new AttributeFactory(mock(EntityPopulator.class));
 		}
@@ -634,7 +634,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 		public MappingService mappingService()
 		{
 			return new MappingServiceImpl(dataService(), algorithmService(), idGenerator(), mappingProjectRepository(),
-					permissionSystemService(), attributeMetaDataFactory());
+					permissionSystemService(), attributeFactory());
 		}
 	}
 }
