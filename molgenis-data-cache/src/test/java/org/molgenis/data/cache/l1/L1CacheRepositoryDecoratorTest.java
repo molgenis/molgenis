@@ -99,7 +99,6 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		authorMetaData.addAttribute(
 				attributeFactory.create().setName("books").setDataType(ONE_TO_MANY).setMappedBy(authorAttribute)
 						.setRefEntity(bookMetaData));
-
 		bookMetaData.addAttribute(attributeFactory.create().setName("ID"), ROLE_ID);
 		bookMetaData.addAttribute(attributeFactory.create().setName("title"));
 		bookMetaData.addAttribute(authorAttribute);
