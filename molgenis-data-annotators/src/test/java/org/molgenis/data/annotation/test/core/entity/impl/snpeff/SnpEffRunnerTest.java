@@ -39,7 +39,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.data.annotation.core.effects.EffectsMetaData.*;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { SnpEffRunnerTest.Config.class })
@@ -73,9 +73,9 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 
 	private final ArrayList<Entity> entities = new ArrayList<>();
 	;
-	private EntityMetaData metaDataCanAnnotate;
+	private EntityType metaDataCanAnnotate;
 
-	private EntityMetaData effectsEMD;
+	private EntityType effectsEMD;
 
 	@InjectMocks
 	private SnpEffRunner snpEffRunner;
@@ -899,11 +899,11 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testGetOutputMetaData()
 	{
-		EntityMetaData sourceEMD = entityTypeFactory.create().setSimpleName("source");
+		EntityType sourceEMD = entityTypeFactory.create().setSimpleName("source");
 		sourceEMD.setPackage(packageFactory.create("package").setName("package"));
 		sourceEMD.setBackend("TestBackend");
 
-		EntityMetaData outputEMD = snpEffRunner.getTargetEntityMetaData(sourceEMD);
+		EntityType outputEMD = snpEffRunner.getTargetEntityType(sourceEMD);
 
 		assertEquals(outputEMD.getBackend(), "TestBackend");
 		assertEquals(outputEMD.getName(), "package_source_EFFECTS");

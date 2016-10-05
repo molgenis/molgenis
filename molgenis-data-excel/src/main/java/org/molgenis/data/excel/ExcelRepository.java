@@ -10,7 +10,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
@@ -35,7 +35,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 public class ExcelRepository extends AbstractRepository
 {
 	private final Sheet sheet;
-	private final EntityTypeFactory entityMetaFactory;
+	private final EntityTypeFactory entityTypeFactory;
 	private final AttributeMetaDataFactory attrMetaFactory;
 
 	/**
@@ -46,15 +46,15 @@ public class ExcelRepository extends AbstractRepository
 	 * column names index
 	 */
 	private Map<String, Integer> colNamesMap;
-	private EntityMetaData entityMetaData;
+	private EntityType entityType;
 
-	public ExcelRepository(String fileName, Sheet sheet, EntityTypeFactory entityMetaFactory,
+	public ExcelRepository(String fileName, Sheet sheet, EntityTypeFactory entityTypeFactory,
 			AttributeMetaDataFactory attrMetaFactory)
 	{
-		this(fileName, sheet, entityMetaFactory, attrMetaFactory, null);
+		this(fileName, sheet, entityTypeFactory, attrMetaFactory, null);
 	}
 
-	public ExcelRepository(String fileName, Sheet sheet, EntityTypeFactory entityMetaFactory,
+	public ExcelRepository(String fileName, Sheet sheet, EntityTypeFactory entityTypeFactory,
 			AttributeMetaDataFactory attrMetaFactory, List<CellProcessor> cellProcessors)
 	{
 		this.sheet = requireNonNull(sheet);
@@ -63,7 +63,7 @@ public class ExcelRepository extends AbstractRepository
 			throw new MolgenisDataException(
 					format("Sheet [%s] contains merged regions which is not supported", sheet.getSheetName()));
 		}
-		this.entityMetaFactory = requireNonNull(entityMetaFactory);
+		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 		this.cellProcessors = cellProcessors;
 	}
@@ -98,7 +98,7 @@ public class ExcelRepository extends AbstractRepository
 				// iterator skips empty lines.
 				if (it.hasNext() && next == null)
 				{
-					ExcelEntity entity = new ExcelEntity(it.next(), colNamesMap, cellProcessors, getEntityMetaData());
+					ExcelEntity entity = new ExcelEntity(it.next(), colNamesMap, cellProcessors, getEntityType());
 
 					// check if there is any column containing a value
 					for (String name : entity.getAttributeNames())
@@ -141,12 +141,11 @@ public class ExcelRepository extends AbstractRepository
 		cellProcessors.add(cellProcessor);
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		if (entityMetaData == null)
+		if (entityType == null)
 		{
-			EntityMetaData entityMetaData = entityMetaFactory.create().setName(sheet.getSheetName());
+			EntityType entityType = entityTypeFactory.create().setName(sheet.getSheetName());
 
 			if (colNamesMap == null)
 			{
@@ -162,13 +161,13 @@ public class ExcelRepository extends AbstractRepository
 			{
 				for (String colName : colNamesMap.keySet())
 				{
-					entityMetaData.addAttribute(attrMetaFactory.create().setName(colName).setDataType(STRING));
+					entityType.addAttribute(attrMetaFactory.create().setName(colName).setDataType(STRING));
 				}
 			}
-			this.entityMetaData = entityMetaData;
+			this.entityType = entityType;
 		}
 
-		return entityMetaData;
+		return entityType;
 	}
 
 	private Map<String, Integer> toColNamesMap(Row headerRow)

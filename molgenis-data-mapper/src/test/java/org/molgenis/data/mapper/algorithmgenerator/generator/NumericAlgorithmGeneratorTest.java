@@ -4,7 +4,7 @@ import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.mapper.service.impl.UnitResolverImpl;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.service.OntologyService;
@@ -27,7 +27,7 @@ import static org.testng.Assert.*;
 public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;
@@ -38,11 +38,11 @@ public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private NumericAlgorithmGenerator numericAlgorithmGenerator;
 
-	private EntityMetaData targetEntityMetaData;
+	private EntityType targetEntityType;
 
 	private AttributeMetaData targetAttribute;
 
-	private EntityMetaData sourceEntityMetaData;
+	private EntityType sourceEntityType;
 
 	private AttributeMetaData sourceAttribute;
 
@@ -54,34 +54,34 @@ public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest
 		when(ontologyService.getOntology("http://purl.obolibrary.org/obo/uo.owl"))
 				.thenReturn(Ontology.create("1", "http://purl.obolibrary.org/obo/uo.owl", "unit ontology"));
 
-		targetEntityMetaData = entityMetaFactory.create("target");
+		targetEntityType = entityTypeFactory.create("target");
 		targetAttribute = attrMetaFactory.create().setName("targetHeight");
 		targetAttribute.setLabel("height in m");
 		targetAttribute.setDataType(DECIMAL);
-		targetEntityMetaData.addAttribute(targetAttribute);
+		targetEntityType.addAttribute(targetAttribute);
 
-		sourceEntityMetaData = entityMetaFactory.create("source");
+		sourceEntityType = entityTypeFactory.create("source");
 		sourceAttribute = attrMetaFactory.create().setName("sourceHeight");
 		sourceAttribute.setDataType(DECIMAL);
 		sourceAttribute.setLabel("body length in cm");
-		sourceEntityMetaData.addAttribute(sourceAttribute);
+		sourceEntityType.addAttribute(sourceAttribute);
 
 		sourceAttribute1 = attrMetaFactory.create().setName("sourceHeight1");
 		sourceAttribute1.setDataType(DECIMAL);
 		sourceAttribute1.setLabel("body length in cm second time");
-		sourceEntityMetaData.addAttribute(sourceAttribute1);
+		sourceEntityType.addAttribute(sourceAttribute1);
 	}
 
 	@Test
 	public void generate()
 	{
 		String generate = numericAlgorithmGenerator
-				.generate(targetAttribute, asList(sourceAttribute), targetEntityMetaData, sourceEntityMetaData);
+				.generate(targetAttribute, asList(sourceAttribute), targetEntityType, sourceEntityType);
 		assertEquals(generate, "$('sourceHeight').unit('cm').toUnit('m').value();");
 
 		String generateAverageValue = numericAlgorithmGenerator
-				.generate(targetAttribute, asList(sourceAttribute, sourceAttribute1), targetEntityMetaData,
-						sourceEntityMetaData);
+				.generate(targetAttribute, asList(sourceAttribute, sourceAttribute1), targetEntityType,
+						sourceEntityType);
 		String expected = "var counter = 0;\nvar SUM=newValue(0);\nif(!$('sourceHeight').isNull().value()){\n\tSUM.plus($('sourceHeight').unit('cm').toUnit('m').value());\n\tcounter++;\n}\nif(!$('sourceHeight1').isNull().value()){\n\tSUM.plus($('sourceHeight1').unit('cm').toUnit('m').value());\n\tcounter++;\n}\nif(counter !== 0){\n\tSUM.div(counter);\n\tSUM.value();\n}else{\n\tnull;\n}";
 
 		assertEquals(generateAverageValue, expected);
@@ -91,8 +91,7 @@ public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest
 	public void generateUnitConversionAlgorithm()
 	{
 		String generateUnitConversionAlgorithm = numericAlgorithmGenerator
-				.generateUnitConversionAlgorithm(targetAttribute, targetEntityMetaData, sourceAttribute,
-						sourceEntityMetaData);
+				.generateUnitConversionAlgorithm(targetAttribute, targetEntityType, sourceAttribute, sourceEntityType);
 		assertEquals(generateUnitConversionAlgorithm, "$('sourceHeight').unit('cm').toUnit('m').value();");
 	}
 

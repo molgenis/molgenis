@@ -2,7 +2,7 @@ package org.molgenis.data.validation.meta;
 
 import org.molgenis.data.AbstractRepositoryDecorator;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.stream.Stream;
 
@@ -11,12 +11,12 @@ import static java.util.Objects.requireNonNull;
 /**
  * Validates entity meta before adding or updating the delegated repository
  */
-public class EntityTypeRepositoryValidationDecorator extends AbstractRepositoryDecorator<EntityMetaData>
+public class EntityTypeRepositoryValidationDecorator extends AbstractRepositoryDecorator<EntityType>
 {
-	private final Repository<EntityMetaData> decoratedRepo;
+	private final Repository<EntityType> decoratedRepo;
 	private final EntityTypeValidator entityTypeValidator;
 
-	public EntityTypeRepositoryValidationDecorator(Repository<EntityMetaData> decoratedRepo,
+	public EntityTypeRepositoryValidationDecorator(Repository<EntityType> decoratedRepo,
 			EntityTypeValidator entityTypeValidator)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
@@ -24,41 +24,41 @@ public class EntityTypeRepositoryValidationDecorator extends AbstractRepositoryD
 	}
 
 	@Override
-	public Repository<EntityMetaData> delegate()
+	public Repository<EntityType> delegate()
 	{
 		return decoratedRepo;
 	}
 
 	@Override
-	public void update(EntityMetaData entityMeta)
+	public void update(EntityType entityType)
 	{
-		entityTypeValidator.validate(entityMeta);
-		decoratedRepo.update(entityMeta);
+		entityTypeValidator.validate(entityType);
+		decoratedRepo.update(entityType);
 	}
 
 	@Override
-	public void update(Stream<EntityMetaData> entities)
+	public void update(Stream<EntityType> entities)
 	{
-		decoratedRepo.update(entities.filter(entityMeta ->
+		decoratedRepo.update(entities.filter(entityType ->
 		{
-			entityTypeValidator.validate(entityMeta);
+			entityTypeValidator.validate(entityType);
 			return true;
 		}));
 	}
 
 	@Override
-	public void add(EntityMetaData entityMeta)
+	public void add(EntityType entityType)
 	{
-		entityTypeValidator.validate(entityMeta);
-		decoratedRepo.add(entityMeta);
+		entityTypeValidator.validate(entityType);
+		decoratedRepo.add(entityType);
 	}
 
 	@Override
-	public Integer add(Stream<EntityMetaData> entities)
+	public Integer add(Stream<EntityType> entities)
 	{
-		return decoratedRepo.add(entities.filter(entityMeta ->
+		return decoratedRepo.add(entities.filter(entityType ->
 		{
-			entityTypeValidator.validate(entityMeta);
+			entityTypeValidator.validate(entityType);
 			return true;
 		}));
 	}

@@ -15,7 +15,7 @@ import org.molgenis.data.mapper.service.impl.AlgorithmTemplateService;
 import org.molgenis.data.mapper.utils.AlgorithmGeneratorHelper;
 import org.molgenis.data.mapper.utils.MagmaUnitConverter;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -50,7 +50,7 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 
 	@Override
 	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
-			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData)
+			EntityType targetEntityType, EntityType sourceEntityType)
 	{
 		if (sourceAttributes.size() > 0)
 		{
@@ -59,17 +59,17 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 				if (generator.isSuitable(targetAttribute, sourceAttributes))
 				{
 					return generator
-							.generate(targetAttribute, sourceAttributes, targetEntityMetaData, sourceEntityMetaData);
+							.generate(targetAttribute, sourceAttributes, targetEntityType, sourceEntityType);
 				}
 			}
-			return generateMixedTypes(targetAttribute, sourceAttributes, targetEntityMetaData, sourceEntityMetaData);
+			return generateMixedTypes(targetAttribute, sourceAttributes, targetEntityType, sourceEntityType);
 		}
 
 		return StringUtils.EMPTY;
 	}
 
 	String generateMixedTypes(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
-			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData)
+			EntityType targetEntityType, EntityType sourceEntityType)
 	{
 		StringBuilder stringBuilder = new StringBuilder();
 
@@ -81,8 +81,8 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 		{
 			for (AttributeMetaData sourceAttribute : sourceAttributes)
 			{
-				stringBuilder.append(generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityMetaData,
-						sourceEntityMetaData));
+				stringBuilder.append(generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityType,
+						sourceEntityType));
 			}
 		}
 
@@ -91,8 +91,8 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 
 	@Override
 	public GeneratedAlgorithm generate(AttributeMetaData targetAttribute,
-			Map<AttributeMetaData, ExplainedAttributeMetaData> sourceAttributes, EntityMetaData targetEntityMetaData,
-			EntityMetaData sourceEntityMetaData)
+			Map<AttributeMetaData, ExplainedAttributeMetaData> sourceAttributes, EntityType targetEntityType,
+			EntityType sourceEntityType)
 	{
 		String algorithm = StringUtils.EMPTY;
 		AlgorithmState algorithmState = null;
@@ -106,9 +106,9 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 			{
 				algorithm = algorithmTemplate.render();
 				mappedSourceAttributes = AlgorithmGeneratorHelper
-						.extractSourceAttributesFromAlgorithm(algorithm, sourceEntityMetaData);
-				algorithm = convertUnitForTemplateAlgorithm(algorithm, targetAttribute, targetEntityMetaData,
-						mappedSourceAttributes, sourceEntityMetaData);
+						.extractSourceAttributesFromAlgorithm(algorithm, sourceEntityType);
+				algorithm = convertUnitForTemplateAlgorithm(algorithm, targetAttribute, targetEntityType,
+						mappedSourceAttributes, sourceEntityType);
 				algorithmState = GENERATED_HIGH;
 			}
 			else
@@ -116,10 +116,10 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 				Entry<AttributeMetaData, ExplainedAttributeMetaData> firstEntry = sourceAttributes.entrySet().stream()
 						.findFirst().get();
 				AttributeMetaData sourceAttribute = firstEntry.getKey();
-				algorithm = generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityMetaData,
-						sourceEntityMetaData);
+				algorithm = generate(targetAttribute, Arrays.asList(sourceAttribute), targetEntityType,
+						sourceEntityType);
 				mappedSourceAttributes = AlgorithmGeneratorHelper
-						.extractSourceAttributesFromAlgorithm(algorithm, sourceEntityMetaData);
+						.extractSourceAttributesFromAlgorithm(algorithm, sourceEntityType);
 				algorithmState = firstEntry.getValue().isHighQuality() ? GENERATED_HIGH : GENERATED_LOW;
 			}
 		}
@@ -128,14 +128,14 @@ public class AlgorithmGeneratorServiceImpl implements AlgorithmGeneratorService
 	}
 
 	String convertUnitForTemplateAlgorithm(String algorithm, AttributeMetaData targetAttribute,
-			EntityMetaData targetEntityMetaData, Set<AttributeMetaData> sourceAttributes,
-			EntityMetaData sourceEntityMetaData)
+			EntityType targetEntityType, Set<AttributeMetaData> sourceAttributes,
+			EntityType sourceEntityType)
 	{
-		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute, targetEntityMetaData);
+		Unit<? extends Quantity> targetUnit = unitResolver.resolveUnit(targetAttribute, targetEntityType);
 
 		for (AttributeMetaData sourceAttribute : sourceAttributes)
 		{
-			Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(sourceAttribute, sourceEntityMetaData);
+			Unit<? extends Quantity> sourceUnit = unitResolver.resolveUnit(sourceAttribute, sourceEntityType);
 
 			String convertUnit = magmaUnitConverter.convertUnit(targetUnit, sourceUnit);
 

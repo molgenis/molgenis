@@ -11,7 +11,7 @@ import org.molgenis.data.mapper.data.request.AutoTagRequest;
 import org.molgenis.data.mapper.data.request.GetOntologyTermRequest;
 import org.molgenis.data.mapper.data.request.RemoveTagRequest;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.semantic.Hit;
@@ -99,7 +99,7 @@ public class TagWizardController extends MolgenisPluginController
 		}
 
 		List<Ontology> ontologies = ontologyService.getOntologies();
-		EntityMetaData emd = dataService.getEntityMetaData(target);
+		EntityType emd = dataService.getEntityType(target);
 		List<AttributeMetaData> attributes = newArrayList(emd.getAttributes());
 		Map<String, Multimap<Relation, OntologyTerm>> taggedAttributeMetaDatas = attributes.stream()
 				.collect(toMap((x -> x.getName()), (x -> ontologyTagService.getTagsForAttribute(emd, x))));

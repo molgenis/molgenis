@@ -5,7 +5,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
@@ -46,7 +46,7 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 	private ScriptParameterFactory scriptParameterFactory;
 
 	@Autowired
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;
@@ -85,11 +85,11 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 	{
 		String sourceAttr0Name = "sourceAttr0";
 		String sourceAttr1Name = "sourceAttr1";
-		EntityMetaData sourceEntityMeta = entityMetaFactory.create("source");
+		EntityType sourceEntityType = entityTypeFactory.create("source");
 		AttributeMetaData sourceAttr0 = attrMetaFactory.create().setName(sourceAttr0Name);
 		AttributeMetaData sourceAttr1 = attrMetaFactory.create().setName(sourceAttr1Name);
-		sourceEntityMeta.addAttribute(sourceAttr0);
-		sourceEntityMeta.addAttribute(sourceAttr1);
+		sourceEntityType.addAttribute(sourceAttr0);
+		sourceEntityType.addAttribute(sourceAttr1);
 		ExplainedQueryString sourceAttr0Explain = ExplainedQueryString.create("a", "b", param0Name, 1.0);
 		ExplainedQueryString sourceAttr1Explain = ExplainedQueryString.create("a", "b", param1Name, 0.5);
 		Map<AttributeMetaData, ExplainedAttributeMetaData> attrResults = Maps.newHashMap();

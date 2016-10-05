@@ -14,28 +14,28 @@ import static java.util.Objects.requireNonNull;
  * Discovers and registers system entity meta data with the system entity meta data registry.
  *
  * @see SystemEntityType
- * @see SystemEntityMetaDataRegistry
+ * @see SystemEntityTypeRegistry
  */
 @Component
-public class SystemEntityMetaDataRegistrar
+public class SystemEntityTypeRegistrar
 {
-	private final SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
+	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 
 	@Autowired
-	public SystemEntityMetaDataRegistrar(SystemEntityMetaDataRegistry systemEntityMetaDataRegistry)
+	public SystemEntityTypeRegistrar(SystemEntityTypeRegistry systemEntityTypeRegistry)
 	{
-		this.systemEntityMetaDataRegistry = requireNonNull(systemEntityMetaDataRegistry);
+		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 	}
 
 	public void register(ContextRefreshedEvent event)
 	{
 		ApplicationContext ctx = event.getApplicationContext();
-		Map<String, SystemEntityType> systemEntityMetaDataMap = ctx.getBeansOfType(SystemEntityType.class);
-		systemEntityMetaDataMap.values().forEach(this::register);
+		Map<String, SystemEntityType> systemEntityTypeMap = ctx.getBeansOfType(SystemEntityType.class);
+		systemEntityTypeMap.values().forEach(this::register);
 	}
 
 	private void register(SystemEntityType systemEntityType)
 	{
-		systemEntityMetaDataRegistry.addSystemEntityMetaData(systemEntityType);
+		systemEntityTypeRegistry.addSystemEntityType(systemEntityType);
 	}
 }

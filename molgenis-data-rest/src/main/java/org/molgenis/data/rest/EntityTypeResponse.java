@@ -9,7 +9,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
 
@@ -37,7 +37,7 @@ public class EntityTypeResponse
 	/**
 	 * @param meta
 	 */
-	public EntityTypeResponse(EntityMetaData meta, MolgenisPermissionService permissionService,
+	public EntityTypeResponse(EntityType meta, MolgenisPermissionService permissionService,
 			DataService dataService, LanguageService languageService)
 	{
 		this(meta, null, null, permissionService, dataService, languageService);
@@ -48,7 +48,7 @@ public class EntityTypeResponse
 	 * @param attributesSet       set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */
-	public EntityTypeResponse(EntityMetaData meta, Set<String> attributesSet,
+	public EntityTypeResponse(EntityType meta, Set<String> attributesSet,
 			Map<String, Set<String>> attributeExpandsSet, MolgenisPermissionService permissionService,
 			DataService dataService, LanguageService languageService)
 	{

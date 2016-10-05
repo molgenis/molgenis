@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.EntityPopulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,36 +25,36 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
 
 	private final Class<E> entityClass;
 	private final Constructor<E> entityConstructorWithEntity;
-	private final Constructor<E> entityConstructorWithEntityMeta;
-	private final M systemEntityMetaData;
+	private final Constructor<E> entityConstructorWithEntityType;
+	private final M systemEntityType;
 	private final EntityPopulator entityPopulator;
 
 	/**
 	 * Constructs a new entity factory that creates entities of the given type, meta data type and id type
 	 *  @param entityClass      entity type
-	 * @param systemEntityMeta entity meta data type
+	 * @param systemEntityType entity meta data type
 	 * @param entityPopulator
 	 */
-	protected AbstractSystemEntityFactory(Class<E> entityClass, M systemEntityMeta, EntityPopulator entityPopulator)
+	protected AbstractSystemEntityFactory(Class<E> entityClass, M systemEntityType, EntityPopulator entityPopulator)
 	{
 		this.entityClass = requireNonNull(entityClass);
 
 		// determining constructors at creation time validates that required constructors exist on start-up
 		this.entityConstructorWithEntity = getConstructorEntity(entityClass);
-		this.entityConstructorWithEntityMeta = getConstructorEntityMeta(entityClass);
-		this.systemEntityMetaData = systemEntityMeta;
+		this.entityConstructorWithEntityType = getConstructorEntityType(entityClass);
+		this.systemEntityType = systemEntityType;
 		this.entityPopulator = requireNonNull(entityPopulator);
 	}
 
-	public M getEntityMetaData()
+	public M getEntityType()
 	{
-		return systemEntityMetaData;
+		return systemEntityType;
 	}
 
 	@Override
 	public String getEntityName()
 	{
-		return systemEntityMetaData.getName();
+		return systemEntityType.getName();
 	}
 
 	@Override
@@ -63,7 +63,7 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
 		E entity;
 		try
 		{
-			entity = entityConstructorWithEntityMeta.newInstance(systemEntityMetaData);
+			entity = entityConstructorWithEntityType.newInstance(systemEntityType);
 		}
 		catch (InstantiationException | IllegalAccessException | InvocationTargetException e)
 		{
@@ -117,16 +117,16 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
 		}
 	}
 
-	private Constructor<E> getConstructorEntityMeta(Class<E> entityClass)
+	private Constructor<E> getConstructorEntityType(Class<E> entityClass)
 	{
 		try
 		{
-			return entityClass.getConstructor(EntityMetaData.class);
+			return entityClass.getConstructor(EntityType.class);
 		}
 		catch (NoSuchMethodException e)
 		{
 			LOG.error("[{}] is missing the required constructor [public {}({})", entityClass.getName(),
-					entityClass.getSimpleName(), EntityMetaData.class.getSimpleName());
+					entityClass.getSimpleName(), EntityType.class.getSimpleName());
 			throw new RuntimeException(e);
 		}
 	}

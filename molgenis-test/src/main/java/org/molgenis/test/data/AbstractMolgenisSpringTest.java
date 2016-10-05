@@ -22,10 +22,10 @@ public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringCon
 		// bootstrap meta data
 		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
 		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityTypeMeta);
-		Map<String, SystemEntityType> systemEntityMetaDataMap = applicationContext
+		Map<String, SystemEntityType> systemEntityTypeMap = applicationContext
 				.getBeansOfType(SystemEntityType.class);
-		new GenericDependencyResolver().resolve(systemEntityMetaDataMap.values(), SystemEntityType::getDependencies)
-				.stream().forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityTypeMeta));
+		new GenericDependencyResolver().resolve(systemEntityTypeMap.values(), SystemEntityType::getDependencies)
+				.stream().forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
 
 	}
 

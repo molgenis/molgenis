@@ -11,7 +11,7 @@ import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionException;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.mem.InMemoryRepository;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.dataexplorer.controller.AnnotationJob;
 import org.springframework.security.core.Authentication;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -48,7 +48,7 @@ public class AnnotationJobTest
 	public void beforeMethod()
 	{
 		MockitoAnnotations.initMocks(this);
-		EntityMetaData emd = when(mock(EntityMetaData.class).getName()).thenReturn("repo").getMock();
+		EntityType emd = when(mock(EntityType.class).getName()).thenReturn("repo").getMock();
 		when(emd.getLabel()).thenReturn("My repo");
 
 		repository = new InMemoryRepository(emd);

@@ -7,7 +7,7 @@ import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 
 import java.io.IOException;
@@ -23,7 +23,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.*;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.SHALLOW_COPY_ATTRS;
+import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.SHALLOW_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
@@ -82,10 +82,9 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 		return decorated.getName();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return decorated.getEntityMetaData();
+		return decorated.getEntityType();
 	}
 
 	@Override
@@ -175,46 +174,46 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 		// remove i18n attributes from i18n string meta data
 		AttributeMetaData attrLanguageCode = i18nStringMeta.getAttribute(languageCode);
 
-		EntityMetaData i18nMeta = EntityMetaData
-				.newInstance(dataService.getEntityMetaData(I18nStringMetaData.I18N_STRING), SHALLOW_COPY_ATTRS);
+		EntityType i18nMeta = EntityType
+				.newInstance(dataService.getEntityType(I18nStringMetaData.I18N_STRING), SHALLOW_COPY_ATTRS);
 		i18nMeta.removeAttribute(attrLanguageCode);
 
 		runAsSystem(() -> dataService.update(ENTITY_META_DATA, i18nMeta));
 
 		// hack: update in memory representation
-		EntityMetaData i18nMetaUpdated = dataService.getEntityMetaData(I18N_STRING);
+		EntityType i18nMetaUpdated = dataService.getEntityType(I18N_STRING);
 		i18nMetaUpdated.removeAttribute(attrLanguageCode);
 
 		// remove i18n attributes from entity meta data
 		AttributeMetaData entityLabel = entityTypeMeta.getAttribute(LABEL + '-' + languageCode);
 		AttributeMetaData entityDescription = entityTypeMeta.getAttribute(DESCRIPTION + '-' + languageCode);
 
-		EntityMetaData entityMeta = EntityMetaData
-				.newInstance(dataService.getEntityMetaData(ENTITY_META_DATA), SHALLOW_COPY_ATTRS);
-		entityMeta.removeAttribute(entityLabel);
-		entityMeta.removeAttribute(entityDescription);
+		EntityType entityType = EntityType
+				.newInstance(dataService.getEntityType(ENTITY_META_DATA), SHALLOW_COPY_ATTRS);
+		entityType.removeAttribute(entityLabel);
+		entityType.removeAttribute(entityDescription);
 
-		runAsSystem(() -> dataService.update(ENTITY_META_DATA, entityMeta));
+		runAsSystem(() -> dataService.update(ENTITY_META_DATA, entityType));
 
 		// hack: update in memory representation
-		EntityMetaData entityMetaUpdated = dataService.getEntityMetaData(ENTITY_META_DATA);
-		entityMetaUpdated.removeAttribute(entityLabel);
-		entityMetaUpdated.removeAttribute(entityDescription);
+		EntityType entityTypeUpdated = dataService.getEntityType(ENTITY_META_DATA);
+		entityTypeUpdated.removeAttribute(entityLabel);
+		entityTypeUpdated.removeAttribute(entityDescription);
 
 		// remove i18n attributes from attribute meta data
-		EntityMetaData attrMetaMeta = attrMetaFactory.getAttributeMetaDataMetaData();
+		EntityType attrMetaMeta = attrMetaFactory.getAttributeMetaDataMetaData();
 		AttributeMetaData attrLabel = attrMetaMeta.getAttribute(LABEL + '-' + languageCode);
 		AttributeMetaData attrDescription = attrMetaMeta.getAttribute(DESCRIPTION + '-' + languageCode);
 
-		EntityMetaData attrMeta = EntityMetaData
-				.newInstance(dataService.getEntityMetaData(ATTRIBUTE_META_DATA), SHALLOW_COPY_ATTRS);
+		EntityType attrMeta = EntityType
+				.newInstance(dataService.getEntityType(ATTRIBUTE_META_DATA), SHALLOW_COPY_ATTRS);
 		attrMeta.removeAttribute(attrLabel);
 		attrMeta.removeAttribute(attrDescription);
 
 		runAsSystem(() -> dataService.update(ENTITY_META_DATA, attrMeta));
 
 		// hack: update in memory representation
-		EntityMetaData attrMetaUpdated = dataService.getEntityMetaData(ATTRIBUTE_META_DATA);
+		EntityType attrMetaUpdated = dataService.getEntityType(ATTRIBUTE_META_DATA);
 		attrMetaUpdated.removeAttribute(attrLabel);
 		attrMetaUpdated.removeAttribute(attrDescription);
 	}
@@ -274,14 +273,14 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 				.setNillable(true).setLabel("Description (" + languageCode + ')');
 		dataService.add(ATTRIBUTE_META_DATA, Stream.of(attrLabel, attrDescription));
 
-		EntityMetaData attrMeta = EntityMetaData
-				.newInstance(dataService.getEntityMetaData(ATTRIBUTE_META_DATA), SHALLOW_COPY_ATTRS);
+		EntityType attrMeta = EntityType
+				.newInstance(dataService.getEntityType(ATTRIBUTE_META_DATA), SHALLOW_COPY_ATTRS);
 		attrMeta.addAttribute(attrLabel);
 		attrMeta.addAttribute(attrDescription);
 		runAsSystem(() -> dataService.update(ENTITY_META_DATA, attrMeta));
 
 		//FIXME Hack: metaData of system entities is not updated after update
-		EntityMetaData attrMetaUpdated = dataService.getEntityMetaData(ATTRIBUTE_META_DATA);
+		EntityType attrMetaUpdated = dataService.getEntityType(ATTRIBUTE_META_DATA);
 		attrMetaUpdated.addAttribute(attrLabel);
 		attrMetaUpdated.addAttribute(attrDescription);
 	}
@@ -303,11 +302,11 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 				.setLabel("Description (" + languageCode + ')');
 		dataService.add(ATTRIBUTE_META_DATA, Stream.of(entityLabel, entityDescription));
 
-		EntityMetaData entityMeta = EntityMetaData
-				.newInstance(dataService.getEntityMetaData(ENTITY_META_DATA), SHALLOW_COPY_ATTRS);
-		entityMeta.addAttribute(entityLabel);
-		entityMeta.addAttribute(entityDescription);
-		runAsSystem(() -> dataService.update(ENTITY_META_DATA, entityMeta));
+		EntityType entityType = EntityType
+				.newInstance(dataService.getEntityType(ENTITY_META_DATA), SHALLOW_COPY_ATTRS);
+		entityType.addAttribute(entityLabel);
+		entityType.addAttribute(entityDescription);
+		runAsSystem(() -> dataService.update(ENTITY_META_DATA, entityType));
 	}
 
 	/**
@@ -321,13 +320,13 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 				.setDataType(TEXT);
 		dataService.add(ATTRIBUTE_META_DATA, Stream.of(languageCodeAttr));
 
-		EntityMetaData i18nMeta = EntityMetaData
-				.newInstance(dataService.getEntityMetaData(I18N_STRING), SHALLOW_COPY_ATTRS);
+		EntityType i18nMeta = EntityType
+				.newInstance(dataService.getEntityType(I18N_STRING), SHALLOW_COPY_ATTRS);
 		i18nMeta.addAttribute(languageCodeAttr);
 		runAsSystem(() -> dataService.update(ENTITY_META_DATA, i18nMeta));
 
 		//FIXME Hack: metaData of system entities is not updated after update
-		EntityMetaData i18nMetaUpdated = dataService.getEntityMetaData(I18N_STRING);
+		EntityType i18nMetaUpdated = dataService.getEntityType(I18N_STRING);
 		i18nMetaUpdated.addAttribute(languageCodeAttr);
 	}
 

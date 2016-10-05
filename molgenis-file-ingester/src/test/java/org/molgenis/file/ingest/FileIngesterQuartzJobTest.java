@@ -7,7 +7,7 @@ import org.molgenis.auth.MolgenisUserFactory;
 import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.file.ingest.execution.FileIngestJob;
 import org.molgenis.file.ingest.execution.FileIngestJobFactory;
@@ -66,7 +66,7 @@ public class FileIngesterQuartzJobTest extends AbstractMolgenisSpringTest
 		jobDataMap.put(FileIngesterQuartzJob.ENTITY_KEY, "abcde");
 		when(contextMock.getMergedJobDataMap()).thenReturn(jobDataMap);
 
-		EntityMetaData targetEntity = entityTypeFactory.create();
+		EntityType targetEntity = entityTypeFactory.create();
 		targetEntity.setName("org_molgenis_test_TypeTest");
 
 		FileIngest fileIngest = fileIngestFactory.create();

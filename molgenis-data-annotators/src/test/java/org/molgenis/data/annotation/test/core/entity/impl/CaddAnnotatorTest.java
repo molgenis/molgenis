@@ -11,7 +11,7 @@ import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.CaddAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -60,8 +60,8 @@ public class CaddAnnotatorTest extends AbstractMolgenisSpringTest
 	@Autowired
 	CaddAnnotator caddAnnotator;
 
-	public EntityMetaData metaDataCanAnnotate;
-	public EntityMetaData metaDataCantAnnotate;
+	public EntityType metaDataCanAnnotate;
+	public EntityType metaDataCantAnnotate;
 
 	public ArrayList<Entity> input;
 	public ArrayList<Entity> input1;

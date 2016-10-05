@@ -23,11 +23,11 @@ public class TabixVcfRepositoryFactory implements RepositoryFactory
 	private EntityTypeFactory entityTypeFactory;
 	private AttributeMetaDataFactory attributeMetaDataFactory;
 
-	public TabixVcfRepositoryFactory(String name, VcfAttributes vcfAttributes, EntityTypeFactory entityMetaFactory,
+	public TabixVcfRepositoryFactory(String name, VcfAttributes vcfAttributes, EntityTypeFactory entityTypeFactory,
 			AttributeMetaDataFactory attrMetaFactory)
 	{
 		this.name = requireNonNull(name);
-		this.entityTypeFactory = requireNonNull(entityMetaFactory);
+		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.attributeMetaDataFactory = requireNonNull(attrMetaFactory);
 		this.vcfAttributes = requireNonNull(vcfAttributes);
 	}

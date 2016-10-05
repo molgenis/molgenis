@@ -30,34 +30,34 @@ public class Package extends StaticEntity
 	/**
 	 * Constructs a package with the given meta data
 	 *
-	 * @param entityMeta package meta data
+	 * @param entityType package meta data
 	 */
-	public Package(EntityMetaData entityMeta)
+	public Package(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
 	/**
 	 * Constructs a package with the given type code and meta data
 	 *
 	 * @param packageId  package identifier (fully qualified package name)
-	 * @param entityMeta language meta data
+	 * @param entityType language meta data
 	 */
-	public Package(String packageId, EntityMetaData entityMeta)
+	public Package(String packageId, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setSimpleName(packageId);
 	}
 
 	/**
-	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #Package(EntityMetaData)})
+	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to {@link #Package(EntityType)})
 	 *
 	 * @param package_ package
 	 * @return deep copy of package
 	 */
 	public static Package newInstance(Package package_)
 	{
-		Package packageCopy = new Package(package_.getEntityMetaData());
+		Package packageCopy = new Package(package_.getEntityType());
 		packageCopy.setName(package_.getName());
 		packageCopy.setSimpleName(package_.getSimpleName());
 		packageCopy.setLabel(package_.getLabel());
@@ -200,11 +200,11 @@ public class Package extends StaticEntity
 	 *
 	 * @return package entities
 	 */
-	public Iterable<EntityMetaData> getEntityMetaDatas()
+	public Iterable<EntityType> getEntityTypes()
 	{
-		// TODO Use one-to-many relationship for EntityMetaData.package
+		// TODO Use one-to-many relationship for EntityType.package
 		DataService dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
-		Query<EntityMetaData> query = dataService.query(ENTITY_META_DATA, EntityMetaData.class)
+		Query<EntityType> query = dataService.query(ENTITY_META_DATA, EntityType.class)
 				.eq(EntityTypeMetadata.PACKAGE, getName());
 		return () -> query.findAll().iterator();
 	}

@@ -5,7 +5,7 @@ import com.google.common.util.concurrent.UncheckedExecutionException;
 import org.mockito.Mock;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -25,7 +25,7 @@ import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.fail;
 
@@ -33,7 +33,7 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 {
 	private L3Cache l3Cache;
 
-	private EntityMetaData entityMetaData;
+	private EntityType entityType;
 
 	private Entity entity1;
 	private Entity entity2;
@@ -63,19 +63,19 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 	{
 		initMocks(this);
 
-		entityMetaData = entityTypeFactory.create(repositoryName);
-		entityMetaData.addAttribute(attributeMetaDataFactory.create().setDataType(INT).setName(ID), ROLE_ID);
-		entityMetaData.addAttribute(attributeMetaDataFactory.create().setName(COUNTRY));
+		entityType = entityTypeFactory.create(repositoryName);
+		entityType.addAttribute(attributeMetaDataFactory.create().setDataType(INT).setName(ID), ROLE_ID);
+		entityType.addAttribute(attributeMetaDataFactory.create().setName(COUNTRY));
 
-		entity1 = new DynamicEntity(entityMetaData);
+		entity1 = new DynamicEntity(entityType);
 		entity1.set(ID, 1);
 		entity1.set(COUNTRY, "NL");
 
-		entity2 = new DynamicEntity(entityMetaData);
+		entity2 = new DynamicEntity(entityType);
 		entity2.set(ID, 2);
 		entity2.set(COUNTRY, "NL");
 
-		entity3 = new DynamicEntity(entityMetaData);
+		entity3 = new DynamicEntity(entityType);
 		entity3.set(ID, 3);
 		entity3.set(COUNTRY, "GB");
 	}
@@ -87,7 +87,7 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 
 		when(decoratedRepository.getCapabilities()).thenReturn(Sets.newHashSet(CACHEABLE));
 		when(decoratedRepository.getName()).thenReturn(repositoryName);
-		when(decoratedRepository.getEntityMetaData()).thenReturn(entityMetaData);
+		when(decoratedRepository.getEntityType()).thenReturn(entityType);
 
 		l3Cache = new L3Cache(molgenisTransactionManager, transactionInformation);
 	}
@@ -95,7 +95,7 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testGet()
 	{
-		Fetch idAttributeFetch = new Fetch().field(entityMetaData.getIdAttribute().getName());
+		Fetch idAttributeFetch = new Fetch().field(entityType.getIdAttribute().getName());
 		Query<Entity> fetchLessQuery = new QueryImpl<>().eq(COUNTRY, "NL").fetch(idAttributeFetch);
 
 		when(decoratedRepository.findAll(fetchLessQuery)).thenReturn(Stream.of(entity1, entity2));
@@ -108,14 +108,14 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 
 		verify(decoratedRepository, times(1)).findAll(fetchLessQuery);
 		verify(decoratedRepository, atLeast(0)).getName();
-		verify(decoratedRepository, atLeast(0)).getEntityMetaData();
+		verify(decoratedRepository, atLeast(0)).getEntityType();
 		verifyNoMoreInteractions(decoratedRepository);
 	}
 
 	@Test
 	public void testGetThrowsException()
 	{
-		Fetch idAttributeFetch = new Fetch().field(entityMetaData.getIdAttribute().getName());
+		Fetch idAttributeFetch = new Fetch().field(entityType.getIdAttribute().getName());
 		Query<Entity> fetchLessQuery = new QueryImpl<>().eq(COUNTRY, "NL").fetch(idAttributeFetch);
 
 		when(decoratedRepository.findAll(fetchLessQuery)).thenThrow(new MolgenisDataException("What table?"));
@@ -149,7 +149,7 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testAfterCommitTransactionDirtyRepository()
 	{
-		Fetch idAttributeFetch = new Fetch().field(entityMetaData.getIdAttribute().getName());
+		Fetch idAttributeFetch = new Fetch().field(entityType.getIdAttribute().getName());
 		Query<Entity> fetchLessQuery = new QueryImpl<>().eq(COUNTRY, "NL").fetch(idAttributeFetch);
 
 		when(decoratedRepository.findAll(fetchLessQuery)).thenReturn(Stream.of(entity1, entity2));
@@ -174,7 +174,7 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testAfterCommitTransactionCleanRepository()
 	{
-		Fetch idAttributeFetch = new Fetch().field(entityMetaData.getIdAttribute().getName());
+		Fetch idAttributeFetch = new Fetch().field(entityType.getIdAttribute().getName());
 		Query<Entity> fetchLessQuery = new QueryImpl<>().eq(COUNTRY, "NL").fetch(idAttributeFetch);
 
 		when(decoratedRepository.findAll(fetchLessQuery)).thenReturn(Stream.of(entity1, entity2));
@@ -193,7 +193,7 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 
 		verify(decoratedRepository, times(1)).findAll(fetchLessQuery);
 		verify(decoratedRepository, atLeast(0)).getName();
-		verify(decoratedRepository, atLeast(0)).getEntityMetaData();
+		verify(decoratedRepository, atLeast(0)).getEntityType();
 		verifyNoMoreInteractions(decoratedRepository);
 	}
 }

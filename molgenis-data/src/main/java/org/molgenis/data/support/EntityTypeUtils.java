@@ -3,7 +3,7 @@ package org.molgenis.data.support;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 
 import static java.lang.String.format;
@@ -235,10 +235,10 @@ public class EntityTypeUtils
 		}
 	}
 
-	public static Fetch createFetchForReindexing(EntityMetaData refEntityMetaData)
+	public static Fetch createFetchForReindexing(EntityType refEntityType)
 	{
 		Fetch fetch = new Fetch();
-		for (AttributeMetaData attr : refEntityMetaData.getAtomicAttributes())
+		for (AttributeMetaData attr : refEntityType.getAtomicAttributes())
 		{
 			if (attr.getRefEntity() != null)
 			{

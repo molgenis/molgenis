@@ -1,7 +1,7 @@
 package org.molgenis.data.mapper.mapping.model;
 
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -14,27 +14,27 @@ import java.util.Map;
 public class EntityMapping
 {
 	private String identifier;
-	private final EntityMetaData sourceEntityMetaData;
-	private final EntityMetaData targetEntityMetaData;
+	private final EntityType sourceEntityType;
+	private final EntityType targetEntityType;
 	private final Map<String, AttributeMapping> attributeMappings;
 
 	/**
 	 * Creates a new empty EntityMapping with no {@link AttributeMapping}s.
 	 */
-	public EntityMapping(EntityMetaData source, EntityMetaData target)
+	public EntityMapping(EntityType source, EntityType target)
 	{
 		this.identifier = null;
-		this.sourceEntityMetaData = source;
-		this.targetEntityMetaData = target;
+		this.sourceEntityType = source;
+		this.targetEntityType = target;
 		this.attributeMappings = new LinkedHashMap<String, AttributeMapping>();
 	}
 
-	public EntityMapping(String identifier, EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData,
+	public EntityMapping(String identifier, EntityType sourceEntityType, EntityType targetEntityType,
 			List<AttributeMapping> attributeMappings)
 	{
 		this.identifier = identifier;
-		this.sourceEntityMetaData = sourceEntityMetaData;
-		this.targetEntityMetaData = targetEntityMetaData;
+		this.sourceEntityType = sourceEntityType;
+		this.targetEntityType = targetEntityType;
 		this.attributeMappings = new LinkedHashMap<String, AttributeMapping>();
 		for (AttributeMapping mapping : attributeMappings)
 		{
@@ -60,30 +60,30 @@ public class EntityMapping
 
 	public String getName()
 	{
-		if (sourceEntityMetaData == null)
+		if (sourceEntityType == null)
 		{
 			return null;
 		}
-		return sourceEntityMetaData.getName();
+		return sourceEntityType.getName();
 	}
 
 	public String getLabel()
 	{
-		if (sourceEntityMetaData == null)
+		if (sourceEntityType == null)
 		{
 			return null;
 		}
-		return sourceEntityMetaData.getLabel();
+		return sourceEntityType.getLabel();
 	}
 
-	public EntityMetaData getSourceEntityMetaData()
+	public EntityType getSourceEntityType()
 	{
-		return sourceEntityMetaData;
+		return sourceEntityType;
 	}
 
-	public EntityMetaData getTargetEntityMetaData()
+	public EntityType getTargetEntityType()
 	{
-		return targetEntityMetaData;
+		return targetEntityType;
 	}
 
 	public Collection<AttributeMapping> getAttributeMappings()
@@ -109,7 +109,7 @@ public class EntityMapping
 			throw new IllegalStateException(
 					"AttributeMapping already exists for target attribute " + targetAttributeName);
 		}
-		AttributeMetaData targetAttributeMetaData = targetEntityMetaData.getAttribute(targetAttributeName);
+		AttributeMetaData targetAttributeMetaData = targetEntityType.getAttribute(targetAttributeName);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMappings.put(targetAttributeName, attributeMapping);
 		return attributeMapping;
@@ -122,8 +122,8 @@ public class EntityMapping
 		int result = 1;
 		result = prime * result + ((attributeMappings == null) ? 0 : attributeMappings.hashCode());
 		result = prime * result + ((identifier == null) ? 0 : identifier.hashCode());
-		result = prime * result + ((sourceEntityMetaData == null) ? 0 : sourceEntityMetaData.hashCode());
-		result = prime * result + ((targetEntityMetaData == null) ? 0 : targetEntityMetaData.hashCode());
+		result = prime * result + ((sourceEntityType == null) ? 0 : sourceEntityType.hashCode());
+		result = prime * result + ((targetEntityType == null) ? 0 : targetEntityType.hashCode());
 		return result;
 	}
 
@@ -144,24 +144,24 @@ public class EntityMapping
 			if (other.identifier != null) return false;
 		}
 		else if (!identifier.equals(other.identifier)) return false;
-		if (sourceEntityMetaData == null)
+		if (sourceEntityType == null)
 		{
-			if (other.sourceEntityMetaData != null) return false;
+			if (other.sourceEntityType != null) return false;
 		}
-		else if (!sourceEntityMetaData.equals(other.sourceEntityMetaData)) return false;
-		if (targetEntityMetaData == null)
+		else if (!sourceEntityType.equals(other.sourceEntityType)) return false;
+		if (targetEntityType == null)
 		{
-			if (other.targetEntityMetaData != null) return false;
+			if (other.targetEntityType != null) return false;
 		}
-		else if (!targetEntityMetaData.equals(other.targetEntityMetaData)) return false;
+		else if (!targetEntityType.equals(other.targetEntityType)) return false;
 		return true;
 	}
 
 	@Override
 	public String toString()
 	{
-		return "EntityMapping [identifier=" + identifier + ", sourceEntityMetaData=" + sourceEntityMetaData
-				+ ", targetEntityMetaData=" + targetEntityMetaData + ", attributeMappings=" + attributeMappings + "]";
+		return "EntityMapping [identifier=" + identifier + ", sourceEntityType=" + sourceEntityType
+				+ ", targetEntityType=" + targetEntityType + ", attributeMappings=" + attributeMappings + "]";
 	}
 
 	public void deleteAttributeMapping(String attribute)

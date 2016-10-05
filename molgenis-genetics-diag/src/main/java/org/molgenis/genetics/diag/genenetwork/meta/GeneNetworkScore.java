@@ -1,7 +1,7 @@
 package org.molgenis.genetics.diag.genenetwork.meta;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 public class GeneNetworkScore extends StaticEntity
@@ -17,14 +17,14 @@ public class GeneNetworkScore extends StaticEntity
 		super(entity);
 	}
 
-	public GeneNetworkScore(EntityMetaData entityMeta)
+	public GeneNetworkScore(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public GeneNetworkScore(String id, EntityMetaData entityMeta)
+	public GeneNetworkScore(String id, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setId(id);
 	}
 

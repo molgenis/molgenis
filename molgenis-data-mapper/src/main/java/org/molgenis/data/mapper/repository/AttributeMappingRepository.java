@@ -6,7 +6,7 @@ import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,14 +20,14 @@ public interface AttributeMappingRepository
 	 * Creates a list of fully reconstructed {@link AttributeMapping}s.
 	 *
 	 * @param attributeMappingEntities List of {@link Entity}s with {@link AttributeMappingMetaData} metadata
-	 * @param sourceEntityMetaData     {@link EntityMetaData} of the source entity of the attribute mapping, used to look up the
+	 * @param sourceEntityType     {@link EntityType} of the source entity of the attribute mapping, used to look up the
 	 *                                 {@link AttributeMetaData}
-	 * @param targetEntityMetaData     {@link EntityMetaData} of the target entity of the attribute mapping, used to look up the
+	 * @param targetEntityType     {@link EntityType} of the target entity of the attribute mapping, used to look up the
 	 *                                 {@link AttributeMetaData}
 	 * @return a list of {@link AttributeMapping}s.
 	 */
 	List<AttributeMapping> getAttributeMappings(List<Entity> attributeMappingEntities,
-			EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData);
+			EntityType sourceEntityType, EntityType targetEntityType);
 
 	/**
 	 * Inserts or updates a {@link Collection} of {@link AttributeMapping}. Will generate IDs if they are not yet
@@ -39,13 +39,13 @@ public interface AttributeMappingRepository
 
 	/**
 	 * Translates an algorithm to a list of {@link AttributeMetaData} based on the algorithm, and the
-	 * {@link EntityMetaData} of the source entity
+	 * {@link EntityType} of the source entity
 	 *
 	 * @param algorithm
-	 * @param sourceEntityMetaData
+	 * @param sourceEntityType
 	 * @return a list of {@link AttributeMetaData}
 	 */
 	List<AttributeMetaData> retrieveAttributeMetaDatasFromAlgorithm(String algorithm,
-			EntityMetaData sourceEntityMetaData);
+			EntityType sourceEntityType);
 
 }

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
@@ -88,7 +88,7 @@ public class AttributeMetaDataMetaData extends SystemEntityType
 	}
 
 	@Autowired
-	public void setEntityMetaDataMetaData(EntityTypeMetadata entityTypeMeta)
+	public void setEntityTypeMetaData(EntityTypeMetadata entityTypeMeta)
 	{
 		this.entityTypeMeta = requireNonNull(entityTypeMeta);
 	}

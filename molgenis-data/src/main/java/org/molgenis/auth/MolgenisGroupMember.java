@@ -1,7 +1,7 @@
 package org.molgenis.auth;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.auth.MolgenisGroupMemberMetaData.*;
@@ -13,14 +13,14 @@ public class MolgenisGroupMember extends StaticEntity
 		super(entity);
 	}
 
-	public MolgenisGroupMember(EntityMetaData entityMeta)
+	public MolgenisGroupMember(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public MolgenisGroupMember(String id, EntityMetaData entityMeta)
+	public MolgenisGroupMember(String id, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setId(id);
 	}
 

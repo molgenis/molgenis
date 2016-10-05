@@ -10,7 +10,7 @@ import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.ExacAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -31,7 +31,7 @@ import java.util.Iterator;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { ExacAnnotatorTest.Config.class, ExacAnnotator.class })
@@ -65,7 +65,7 @@ public class ExacAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testAnnotate()
 	{
-		EntityMetaData emdIn = entityTypeFactory.create().setName("exac");
+		EntityType emdIn = entityTypeFactory.create().setName("exac");
 		emdIn.addAttribute(vcfAttributes.getChromAttribute(), ROLE_ID);
 		emdIn.addAttribute(vcfAttributes.getPosAttribute());
 		emdIn.addAttribute(vcfAttributes.getRefAttribute());

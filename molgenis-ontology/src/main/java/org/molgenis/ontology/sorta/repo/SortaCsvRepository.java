@@ -5,7 +5,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.csv.CsvRepository;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.LowerCaseProcessor;
@@ -19,13 +19,13 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.commons.lang3.StringUtils.isEmpty;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 public class SortaCsvRepository extends AbstractRepository
 {
-	private EntityMetaData entityMetaData = null;
+	private EntityType entityType = null;
 	private final CsvRepository csvRepository;
 	private final String entityName;
 	private final String entityLabel;
@@ -33,43 +33,42 @@ public class SortaCsvRepository extends AbstractRepository
 	private final static List<CellProcessor> LOWERCASE_AND_TRIM = Arrays
 			.asList(new LowerCaseProcessor(), new TrimProcessor());
 
-	public SortaCsvRepository(File file, EntityTypeFactory entityMetaFactory,
+	public SortaCsvRepository(File file, EntityTypeFactory entityTypeFactory,
 			AttributeMetaDataFactory attrMetaFactory)
 	{
-		this.csvRepository = new CsvRepository(file, entityMetaFactory, attrMetaFactory, LOWERCASE_AND_TRIM,
+		this.csvRepository = new CsvRepository(file, entityTypeFactory, attrMetaFactory, LOWERCASE_AND_TRIM,
 				SortaServiceImpl.DEFAULT_SEPARATOR);
 		this.entityName = file.getName();
 		this.entityLabel = file.getName();
 	}
 
 	public SortaCsvRepository(String entityName, String entityLabel, File uploadedFile,
-			EntityTypeFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
+			EntityTypeFactory entityTypeFactory, AttributeMetaDataFactory attrMetaFactory)
 	{
-		this.csvRepository = new CsvRepository(uploadedFile, entityMetaFactory, attrMetaFactory, LOWERCASE_AND_TRIM,
+		this.csvRepository = new CsvRepository(uploadedFile, entityTypeFactory, attrMetaFactory, LOWERCASE_AND_TRIM,
 				SortaServiceImpl.DEFAULT_SEPARATOR);
 		this.entityName = entityName;
 		this.entityLabel = entityLabel;
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		if (entityMetaData == null)
+		if (entityType == null)
 		{
 			AttributeMetaDataFactory attrMetaFactory = getApplicationContext().getBean(AttributeMetaDataFactory.class);
 
-			entityMetaData = EntityMetaData.newInstance(csvRepository.getEntityMetaData(), DEEP_COPY_ATTRS);
-			entityMetaData.setName(entityName);
-			entityMetaData.setLabel(entityLabel);
-			entityMetaData
+			entityType = EntityType.newInstance(csvRepository.getEntityType(), DEEP_COPY_ATTRS);
+			entityType.setName(entityName);
+			entityType.setLabel(entityLabel);
+			entityType
 					.addAttribute(attrMetaFactory.create().setName(ALLOWED_IDENTIFIER).setNillable(false), ROLE_ID);
-			AttributeMetaData nameAttribute = entityMetaData.getAttribute(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
+			AttributeMetaData nameAttribute = entityType.getAttribute(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
 			if (nameAttribute != null)
 			{
-				entityMetaData.setLabelAttribute(nameAttribute);
+				entityType.setLabelAttribute(nameAttribute);
 			}
 		}
-		return entityMetaData;
+		return entityType;
 	}
 
 	@Override

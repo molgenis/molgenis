@@ -25,7 +25,7 @@ import static org.testng.Assert.*;
 public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;
@@ -77,7 +77,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 		when(processor.process("col1")).thenReturn("col1");
 		when(processor.process("col2")).thenReturn("col2");
 
-		CsvRepository csvRepository = new CsvRepository(test, entityMetaFactory, attrMetaFactory, null);
+		CsvRepository csvRepository = new CsvRepository(test, entityTypeFactory, attrMetaFactory, null);
 		try
 		{
 			csvRepository.addCellProcessor(processor);
@@ -97,7 +97,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 	public void addCellProcessor_data() throws IOException
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
-		CsvRepository csvRepository = new CsvRepository(test, entityMetaFactory, attrMetaFactory, null);
+		CsvRepository csvRepository = new CsvRepository(test, entityTypeFactory, attrMetaFactory, null);
 		try
 		{
 			csvRepository.addCellProcessor(processor);
@@ -119,9 +119,9 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 		CsvRepository csvRepository = null;
 		try
 		{
-			csvRepository = new CsvRepository(testdata, entityMetaFactory, attrMetaFactory, null);
+			csvRepository = new CsvRepository(testdata, entityTypeFactory, attrMetaFactory, null);
 			assertEquals(csvRepository.getName(), "testdata");
-			Iterator<AttributeMetaData> it = csvRepository.getEntityMetaData().getAttributes().iterator();
+			Iterator<AttributeMetaData> it = csvRepository.getEntityType().getAttributes().iterator();
 			assertTrue(it.hasNext());
 			assertEquals(it.next().getName(), "col1");
 			assertTrue(it.hasNext());
@@ -145,7 +145,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 		CsvRepository csvRepository = null;
 		try
 		{
-			csvRepository = new CsvRepository(testdata, entityMetaFactory, attrMetaFactory, null);
+			csvRepository = new CsvRepository(testdata, entityTypeFactory, attrMetaFactory, null);
 			Iterator<Entity> it = csvRepository.iterator();
 
 			assertTrue(it.hasNext());
@@ -185,7 +185,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void iterator_noValues() throws IOException
 	{
-		CsvRepository csvRepository = new CsvRepository(novalues, entityMetaFactory, attrMetaFactory, null);
+		CsvRepository csvRepository = new CsvRepository(novalues, entityTypeFactory, attrMetaFactory, null);
 		try
 		{
 			Iterator<Entity> it = csvRepository.iterator();
@@ -200,7 +200,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void iterator_emptyValues() throws IOException
 	{
-		CsvRepository csvRepository = new CsvRepository(emptyvalues, entityMetaFactory, attrMetaFactory, null);
+		CsvRepository csvRepository = new CsvRepository(emptyvalues, entityTypeFactory, attrMetaFactory, null);
 		try
 		{
 			Iterator<Entity> it = csvRepository.iterator();
@@ -216,7 +216,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void iterator_tsv() throws IOException
 	{
-		CsvRepository tsvRepository = new CsvRepository(testtsv, entityMetaFactory, attrMetaFactory, null);
+		CsvRepository tsvRepository = new CsvRepository(testtsv, entityTypeFactory, attrMetaFactory, null);
 		try
 		{
 			Iterator<Entity> it = tsvRepository.iterator();
@@ -234,7 +234,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void iterator_emptylines() throws IOException
 	{
-		CsvRepository csvRepository = new CsvRepository(emptylines, entityMetaFactory, attrMetaFactory, null);
+		CsvRepository csvRepository = new CsvRepository(emptylines, entityTypeFactory, attrMetaFactory, null);
 		try
 		{
 			Iterator<Entity> it = csvRepository.iterator();
@@ -252,7 +252,7 @@ public class CsvRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void iterator_emptylines_singlecol() throws IOException
 	{
-		CsvRepository csvRepository = new CsvRepository(emptylinessinglecol, entityMetaFactory, attrMetaFactory, null);
+		CsvRepository csvRepository = new CsvRepository(emptylinessinglecol, entityTypeFactory, attrMetaFactory, null);
 		try
 		{
 			Iterator<Entity> it = csvRepository.iterator();

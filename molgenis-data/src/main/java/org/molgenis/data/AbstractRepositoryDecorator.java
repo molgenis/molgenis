@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
 import com.google.common.collect.ForwardingObject;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -43,10 +43,9 @@ public abstract class AbstractRepositoryDecorator<E extends Entity> extends Forw
 		return delegate().getName();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return delegate().getEntityMetaData();
+		return delegate().getEntityType();
 	}
 
 	@Override

@@ -10,7 +10,7 @@ import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.TrimProcessor;
@@ -36,7 +36,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	private final String name;
 	private final Workbook workbook;
 
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 	private AttributeMetaDataFactory attrMetaFactory;
 
 	public ExcelRepositoryCollection(File file) throws IOException, MolgenisInvalidFormatException
@@ -94,7 +94,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 			return null;
 		}
 
-		return new ExcelRepository(name, poiSheet, entityMetaFactory, attrMetaFactory, cellProcessors);
+		return new ExcelRepository(name, poiSheet, entityTypeFactory, attrMetaFactory, cellProcessors);
 	}
 
 	public int getNumberOfSheets()
@@ -115,7 +115,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 			return null;
 		}
 
-		return new ExcelRepository(name, poiSheet, entityMetaFactory, attrMetaFactory, cellProcessors);
+		return new ExcelRepository(name, poiSheet, entityTypeFactory, attrMetaFactory, cellProcessors);
 	}
 
 	public ExcelSheetWriter createWritable(String entityName, List<AttributeMetaData> attributes,
@@ -179,15 +179,15 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public boolean hasRepository(EntityMetaData entityMeta)
+	public boolean hasRepository(EntityType entityType)
 	{
-		return hasRepository(entityMeta.getName());
+		return hasRepository(entityType.getName());
 	}
 
 	@Autowired
-	public void setEntityMetaDataFactory(EntityTypeFactory entityMetaFactory)
+	public void setEntityTypeFactory(EntityTypeFactory entityTypeFactory)
 	{
-		this.entityMetaFactory = entityMetaFactory;
+		this.entityTypeFactory = entityTypeFactory;
 	}
 
 	@Autowired

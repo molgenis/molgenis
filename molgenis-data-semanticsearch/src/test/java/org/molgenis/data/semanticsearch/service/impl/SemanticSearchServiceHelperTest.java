@@ -44,7 +44,7 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 	private AttributeMetaDataFactory attrMetaFactory;
 
 	@Autowired
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private OntologyService ontologyService;
@@ -162,12 +162,12 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testGetAttributeIdentifiers()
 	{
-		EntityMetaData sourceEntityMetaData = entityMetaFactory.create().setName("sourceEntityMetaData");
-		Entity entityMetaDataEntity = mock(Entity.class);
+		EntityType sourceEntityType = entityTypeFactory.create().setName("sourceEntityType");
+		Entity EntityTypeEntity = mock(Entity.class);
 
 		when(dataService.findOne(ENTITY_META_DATA,
-				new QueryImpl<>().eq(EntityTypeMetadata.FULL_NAME, sourceEntityMetaData.getName())))
-				.thenReturn(entityMetaDataEntity);
+				new QueryImpl<>().eq(EntityTypeMetadata.FULL_NAME, sourceEntityType.getName())))
+				.thenReturn(EntityTypeEntity);
 
 		AttributeMetaData attributeEntity1 = attrMetaFactory.create();
 		attributeEntity1.setIdentifier("1");
@@ -175,11 +175,11 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 		AttributeMetaData attributeEntity2 = attrMetaFactory.create();
 		attributeEntity2.setIdentifier("2");
 		attributeEntity2.setDataType(STRING);
-		when(entityMetaDataEntity.getEntities(EntityTypeMetadata.ATTRIBUTES))
+		when(EntityTypeEntity.getEntities(EntityTypeMetadata.ATTRIBUTES))
 				.thenReturn(asList(attributeEntity1, attributeEntity2));
 
 		List<String> expactedAttributeIdentifiers = asList("1", "2");
-		assertEquals(semanticSearchServiceHelper.getAttributeIdentifiers(sourceEntityMetaData),
+		assertEquals(semanticSearchServiceHelper.getAttributeIdentifiers(sourceEntityType),
 				expactedAttributeIdentifiers);
 	}
 

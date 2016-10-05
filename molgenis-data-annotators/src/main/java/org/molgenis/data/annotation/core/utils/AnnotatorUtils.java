@@ -10,7 +10,7 @@ import org.molgenis.data.annotation.core.RefEntityAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -80,26 +80,26 @@ public class AnnotatorUtils
 	/**
 	 * Adds a new compound attribute to an existing CrudRepository
 	 *
-	 * @param entityMetaData           {@link EntityMetaData} for the existing repository
+	 * @param entityType           {@link EntityType} for the existing repository
 	 * @param attributeMetaDataFactory
 	 * @param annotator
 	 */
-	public static EntityMetaData addAnnotatorMetaDataToRepositories(EntityMetaData entityMetaData,
+	public static EntityType addAnnotatorMetaDataToRepositories(EntityType entityType,
 			AttributeMetaDataFactory attributeMetaDataFactory, RepositoryAnnotator annotator)
 	{
 		List<AttributeMetaData> attributeMetaDatas = annotator.getOutputAttributes();
 		AttributeMetaData compound;
 		String compoundName = annotator.getFullName();
-		compound = entityMetaData.getAttribute(compoundName);
+		compound = entityType.getAttribute(compoundName);
 		if (compound == null)
 		{
-			createCompoundForAnnotator(entityMetaData, attributeMetaDataFactory, annotator, attributeMetaDatas,
+			createCompoundForAnnotator(entityType, attributeMetaDataFactory, annotator, attributeMetaDatas,
 					compoundName);
 		}
-		return entityMetaData;
+		return entityType;
 	}
 
-	private static void createCompoundForAnnotator(EntityMetaData entityMetaData,
+	private static void createCompoundForAnnotator(EntityType entityType,
 			AttributeMetaDataFactory attributeMetaDataFactory, RepositoryAnnotator annotator,
 			List<AttributeMetaData> attributeMetaDatas, String compoundName)
 	{
@@ -107,9 +107,9 @@ public class AnnotatorUtils
 		compound = attributeMetaDataFactory.create().setName(compoundName).setLabel(annotator.getFullName())
 				.setDataType(MolgenisFieldTypes.AttributeType.COMPOUND).setLabel(annotator.getSimpleName());
 		AttributeMetaData finalCompound = compound;
-		attributeMetaDatas.stream().filter(part -> entityMetaData.getAttribute(part.getName()) == null)
+		attributeMetaDatas.stream().filter(part -> entityType.getAttribute(part.getName()) == null)
 				.forEachOrdered(finalCompound::addAttributePart);
-		entityMetaData.addAttribute(compound);
+		entityType.addAttribute(compound);
 	}
 
 	/**
@@ -117,8 +117,8 @@ public class AnnotatorUtils
 	 *
 	 * @param annotator                the annotator to be runned
 	 * @param vcfAttributes            utility class for vcf metadata
-	 * @param entityTypeFactory    factory for molgenis entityMetaData
-	 * @param attributeMetaDataFactory factory for molgenis entityMetaData
+	 * @param entityTypeFactory    factory for molgenis EntityType
+	 * @param attributeMetaDataFactory factory for molgenis EntityType
 	 * @param vcfUtils                 utility class for working with vcf data in molgenis
 	 * @param inputVcfFile             the vcf file to be annotated
 	 * @param outputVCFFile            the resulting, annotated vcf file
@@ -176,18 +176,18 @@ public class AnnotatorUtils
 
 		if (annotator instanceof EffectsAnnotator)
 		{
-			entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(vcfRepo.getEntityMetaData(), EFFECT,
+			entitiesToAnnotate = vcfUtils.createEntityStructureForVcf(vcfRepo.getEntityType(), EFFECT,
 					StreamSupport.stream(vcfRepo.spliterator(), false));
 
 			// Add metadata to repository that will be annotated, instead of repository with variants
 			for (Entity entity : entitiesToAnnotate)
 			{
-				entity.getEntityMetaData().addAttributes(annotator.getOutputAttributes());
+				entity.getEntityType().addAttributes(annotator.getOutputAttributes());
 			}
 		}
 		else
 		{
-			AnnotatorUtils.addAnnotatorMetaDataToRepositories(vcfRepo.getEntityMetaData(), attributeMetaDataFactory,
+			AnnotatorUtils.addAnnotatorMetaDataToRepositories(vcfRepo.getEntityType(), attributeMetaDataFactory,
 					annotator);
 			entitiesToAnnotate = vcfRepo;
 		}
@@ -209,7 +209,7 @@ public class AnnotatorUtils
 
 	private static void addAnnotatorAttributesToInfoAttribute(RepositoryAnnotator annotator, VcfRepository vcfRepo)
 	{
-		EntityMetaData emd = vcfRepo.getEntityMetaData();
+		EntityType emd = vcfRepo.getEntityType();
 		AttributeMetaData infoAttribute = emd.getAttribute(VcfAttributes.INFO);
 		for (AttributeMetaData attribute : annotator.getOutputAttributes())
 		{
@@ -234,7 +234,7 @@ public class AnnotatorUtils
 		List<AttributeMetaData> outputMetaData = newArrayList();
 		if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
 		{
-			EntityMetaData effectRefEntity = entityTypeFactory.create()
+			EntityType effectRefEntity = entityTypeFactory.create()
 					.setName(annotator.getSimpleName() + "_EFFECTS");
 			for (AttributeMetaData outputAttribute : annotator.getOutputAttributes())
 			{
@@ -259,7 +259,7 @@ public class AnnotatorUtils
 				.stream().map(AttributeMetaData::getName).collect(Collectors.toList());
 
 		List<String> inputAttributeNames = VcfUtils
-				.getAtomicAttributesFromList(vcfRepo.getEntityMetaData().getAtomicAttributes()).stream()
+				.getAtomicAttributesFromList(vcfRepo.getEntityType().getAtomicAttributes()).stream()
 				.map(AttributeMetaData::getName).collect(Collectors.toList());
 
 		for (Object attrName : attributesToInclude)

@@ -8,7 +8,7 @@ import org.molgenis.data.Fetch;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.security.core.MolgenisPermissionService;
@@ -41,7 +41,7 @@ class EntityTypeResponseV2
 	/**
 	 * @param meta
 	 */
-	public EntityTypeResponseV2(EntityMetaData meta, MolgenisPermissionService permissionService,
+	public EntityTypeResponseV2(EntityType meta, MolgenisPermissionService permissionService,
 			DataService dataService, LanguageService languageService)
 	{
 		this(meta, null, permissionService, dataService, languageService);
@@ -51,7 +51,7 @@ class EntityTypeResponseV2
 	 * @param meta
 	 * @param fetch set of lowercase attribute names to include in response
 	 */
-	public EntityTypeResponseV2(EntityMetaData meta, Fetch fetch, MolgenisPermissionService permissionService,
+	public EntityTypeResponseV2(EntityType meta, Fetch fetch, MolgenisPermissionService permissionService,
 			DataService dataService, LanguageService languageService)
 	{
 		String name = meta.getName();

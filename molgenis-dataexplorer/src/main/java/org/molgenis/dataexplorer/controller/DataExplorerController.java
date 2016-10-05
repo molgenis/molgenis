@@ -8,7 +8,7 @@ import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.GenomicDataSettings;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.download.DataExplorerDownloadHandler;
@@ -113,8 +113,8 @@ public class DataExplorerController extends MolgenisPluginController
 	{
 		boolean entityExists = false;
 		boolean hasEntityPermission = false;
-		List<EntityMetaData> entitiesMeta = dataService.getMeta().getEntityMetaDatas()
-				.filter(entityMeta -> !entityMeta.isAbstract()).collect(toList());
+		List<EntityType> entitiesMeta = dataService.getMeta().getEntityTypes()
+				.filter(entityType -> !entityType.isAbstract()).collect(toList());
 		model.addAttribute("entitiesMeta", entitiesMeta);
 		if (selectedEntityName != null)
 		{
@@ -276,24 +276,24 @@ public class DataExplorerController extends MolgenisPluginController
 	private Map<String, String> getGenomeBrowserEntities()
 	{
 		Map<String, String> genomeEntities = new HashMap<>();
-		dataService.getMeta().getEntityMetaDatas().filter(this::isGenomeBrowserEntity).forEach(entityMeta ->
+		dataService.getMeta().getEntityTypes().filter(this::isGenomeBrowserEntity).forEach(entityType ->
 		{
-			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityMeta.getName(), READ);
-			boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityMeta.getName(), WRITE);
+			boolean canRead = molgenisPermissionService.hasPermissionOnEntity(entityType.getName(), READ);
+			boolean canWrite = molgenisPermissionService.hasPermissionOnEntity(entityType.getName(), WRITE);
 			if (canRead || canWrite)
 			{
-				genomeEntities.put(entityMeta.getName(), entityMeta.getLabel());
+				genomeEntities.put(entityType.getName(), entityType.getLabel());
 			}
 		});
 		return genomeEntities;
 	}
 
-	private boolean isGenomeBrowserEntity(EntityMetaData entityMetaData)
+	private boolean isGenomeBrowserEntity(EntityType entityType)
 	{
 		AttributeMetaData attributeStartPosition = genomicDataSettings
-				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_POS, entityMetaData);
+				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_POS, entityType);
 		AttributeMetaData attributeChromosome = genomicDataSettings
-				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM, entityMetaData);
+				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM, entityType);
 		return attributeStartPosition != null && attributeChromosome != null;
 	}
 
@@ -382,7 +382,7 @@ public class DataExplorerController extends MolgenisPluginController
 			@RequestParam(value = "entityId") String entityId, Model model) throws Exception
 	{
 		model.addAttribute("entity", dataService.getRepository(entityName).findOneById(entityId));
-		model.addAttribute("entityMetadata", dataService.getEntityMetaData(entityName));
+		model.addAttribute("EntityType", dataService.getEntityType(entityName));
 		model.addAttribute("viewName", getViewName(entityName));
 		return "view-entityreport";
 	}

@@ -7,7 +7,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -30,14 +30,14 @@ import static org.molgenis.data.EntityKey.create;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.RepositoryCapability.CACHEABLE;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = L1CacheRepositoryDecoratorTest.Config.class)
 public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 {
 	private L1CacheRepositoryDecorator l1CacheRepositoryDecorator;
-	private EntityMetaData entityMetaData;
+	private EntityType entityType;
 	private Entity mockEntity;
 
 	private final String repository = "TestRepository";
@@ -63,19 +63,19 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	{
 		initMocks(this);
 
-		entityMetaData = entityTypeFactory.create(repository);
-		entityMetaData.addAttribute(attributeMetaDataFactory.create().setName("ID"), ROLE_ID);
-		entityMetaData.addAttribute(attributeMetaDataFactory.create().setName("ATTRIBUTE_1"));
+		entityType = entityTypeFactory.create(repository);
+		entityType.addAttribute(attributeMetaDataFactory.create().setName("ID"), ROLE_ID);
+		entityType.addAttribute(attributeMetaDataFactory.create().setName("ATTRIBUTE_1"));
 
-		when(entityManager.create(entityMetaData, NO_POPULATE)).thenReturn(new DynamicEntity(entityMetaData));
+		when(entityManager.create(entityType, NO_POPULATE)).thenReturn(new DynamicEntity(entityType));
 
-		mockEntity = entityManager.create(entityMetaData, NO_POPULATE);
+		mockEntity = entityManager.create(entityType, NO_POPULATE);
 		mockEntity.set("ID", entityID);
 		mockEntity.set("ATTRIBUTE_1", "test_value_1");
 
 		when(decoratedRepository.getCapabilities()).thenReturn(Sets.newHashSet(CACHEABLE, WRITABLE));
 		when(decoratedRepository.getName()).thenReturn(repository);
-		when(decoratedRepository.getEntityMetaData()).thenReturn(entityMetaData);
+		when(decoratedRepository.getEntityType()).thenReturn(entityType);
 
 		l1CacheRepositoryDecorator = new L1CacheRepositoryDecorator(decoratedRepository, l1Cache);
 	}
@@ -152,7 +152,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testFindOneByIdReturnsEntity()
 	{
-		when(l1Cache.get(repository, entityID, entityMetaData)).thenReturn(of(mockEntity));
+		when(l1Cache.get(repository, entityID, entityType)).thenReturn(of(mockEntity));
 		Entity actualEntity = l1CacheRepositoryDecorator.findOneById(entityID);
 		assertEquals(actualEntity, mockEntity);
 
@@ -162,7 +162,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testFindOneByIdReturnsEmpty()
 	{
-		when(l1Cache.get(repository, entityID, entityMetaData)).thenReturn(empty());
+		when(l1Cache.get(repository, entityID, entityType)).thenReturn(empty());
 		Entity actualEntity = l1CacheRepositoryDecorator.findOneById(entityID);
 		assertNull(actualEntity);
 
@@ -172,7 +172,7 @@ public class L1CacheRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testFindOneByIdReturnsNull()
 	{
-		when(l1Cache.get(repository, entityID, entityMetaData)).thenReturn(null);
+		when(l1Cache.get(repository, entityID, entityType)).thenReturn(null);
 		Entity actualEntity = l1CacheRepositoryDecorator.findOneById(entityID);
 		assertNull(actualEntity);
 

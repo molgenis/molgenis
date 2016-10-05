@@ -1,7 +1,7 @@
 package org.molgenis.data.validation;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -20,7 +20,7 @@ public class ExpressionValidator
 	 * @param meta
 	 * @return
 	 */
-	public boolean resolveBooleanExpression(String expression, Entity entity, EntityMetaData meta)
+	public boolean resolveBooleanExpression(String expression, Entity entity, EntityType meta)
 	{
 		return ValidationUtils.resolveBooleanExpression(expression, entity, meta);
 	}
@@ -33,7 +33,7 @@ public class ExpressionValidator
 	 * @param meta
 	 * @return
 	 */
-	public List<Boolean> resolveBooleanExpressions(List<String> expressions, Entity entity, EntityMetaData meta)
+	public List<Boolean> resolveBooleanExpressions(List<String> expressions, Entity entity, EntityType meta)
 	{
 		return ValidationUtils.resolveBooleanExpressions(expressions, entity, meta);
 	}

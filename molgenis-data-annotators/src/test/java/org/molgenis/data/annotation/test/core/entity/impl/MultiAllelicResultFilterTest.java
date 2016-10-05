@@ -6,7 +6,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.filter.MultiAllelicResultFilter;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -39,8 +39,8 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	@Autowired
 	VcfAttributes vcfAttributes;
 
-	private EntityMetaData emd;
-	private EntityMetaData resultEmd;
+	private EntityType emd;
+	private EntityType resultEmd;
 	private DynamicEntity entity1;
 	private DynamicEntity entity2;
 	private DynamicEntity entity3;
@@ -420,7 +420,7 @@ public class MultiAllelicResultFilterTest extends AbstractMolgenisSpringTest
 	{
 
 		String customAttrb = "MyAnnotation";
-		EntityMetaData multiLineTestEMD = entityTypeFactory.create().setName("entity");
+		EntityType multiLineTestEMD = entityTypeFactory.create().setName("entity");
 
 		multiLineTestEMD.addAttribute(vcfAttributes.getChromAttribute());
 		multiLineTestEMD.addAttribute(vcfAttributes.getPosAttribute());

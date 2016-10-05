@@ -5,7 +5,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepository;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -25,7 +25,7 @@ import java.util.Iterator;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
@@ -43,7 +43,7 @@ public class TabixVcfRepositoryTest extends AbstractMolgenisSpringTest
 	VcfAttributes vcfAttributes;
 
 	private TabixVcfRepository tabixVcfRepository;
-	private EntityMetaData repoMetaData;
+	private EntityType repoMetaData;
 
 	@BeforeClass
 	public void before() throws IOException
@@ -67,9 +67,9 @@ public class TabixVcfRepositoryTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void testGetEntityMetaData()
+	public void testGetEntityType()
 	{
-		EntityMetaData vcfMetaData = tabixVcfRepository.getEntityMetaData();
+		EntityType vcfMetaData = tabixVcfRepository.getEntityType();
 
 		vcfMetaData.getAllAttributes().forEach(attr -> attr.setIdentifier(null));
 		repoMetaData.getAllAttributes().forEach(attr -> attr.setIdentifier(null));
@@ -87,7 +87,7 @@ public class TabixVcfRepositoryTest extends AbstractMolgenisSpringTest
 		Entity other = iterator.next();
 		Entity entity = newEntity("1", 249240543, "A", "AGG", "PASS", "100", "", "zG7SPcGIh_8_IicI1uLeoQ");
 		boolean equal = true;
-		for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
+		for (AttributeMetaData attr : entity.getEntityType().getAtomicAttributes())
 		{
 			equal = other.get(attr.getName()).equals(entity.get(attr.getName()));
 			if (!equal) break;
@@ -105,7 +105,7 @@ public class TabixVcfRepositoryTest extends AbstractMolgenisSpringTest
 		iterator.hasNext();
 		Entity other = iterator.next();
 		boolean equal = true;
-		for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
+		for (AttributeMetaData attr : entity.getEntityType().getAtomicAttributes())
 		{
 			equal = other.get(attr.getName()).equals(entity.get(attr.getName()));
 			if (!equal)

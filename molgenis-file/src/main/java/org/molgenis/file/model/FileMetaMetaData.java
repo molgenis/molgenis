@@ -1,7 +1,7 @@
 package org.molgenis.file.model;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.security.owned.OwnedEntityMetaData;
+import org.molgenis.security.owned.OwnedEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +10,7 @@ import java.util.Set;
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
@@ -26,20 +26,20 @@ public class FileMetaMetaData extends SystemEntityType
 	public static final String SIZE = "size";
 	public static final String URL = "url";
 
-	private final OwnedEntityMetaData ownedEntityMetaData;
+	private final OwnedEntityType ownedEntityType;
 
 	@Autowired
-	FileMetaMetaData(OwnedEntityMetaData ownedEntityMetaData)
+	FileMetaMetaData(OwnedEntityType ownedEntityType)
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
-		this.ownedEntityMetaData = requireNonNull(ownedEntityMetaData);
+		this.ownedEntityType = requireNonNull(ownedEntityType);
 	}
 
 	@Override
 	public void init()
 	{
 		setLabel("File metadata");
-		setExtends(ownedEntityMetaData);
+		setExtends(ownedEntityType);
 		addAttribute(ID, ROLE_ID).setVisible(false).setLabel("Id");
 		addAttribute(FILENAME, ROLE_LABEL, ROLE_LOOKUP).setDataType(STRING).setNillable(false).setLabel("Filename");
 		addAttribute(CONTENT_TYPE, ROLE_LOOKUP).setDataType(STRING).setLabel("Content-type");
@@ -50,6 +50,6 @@ public class FileMetaMetaData extends SystemEntityType
 	@Override
 	public Set<SystemEntityType> getDependencies()
 	{
-		return singleton(ownedEntityMetaData);
+		return singleton(ownedEntityType);
 	}
 }

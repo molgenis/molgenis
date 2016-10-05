@@ -3,7 +3,7 @@ package org.molgenis.data.index;
 import com.google.common.collect.Lists;
 import org.mockito.*;
 import org.molgenis.data.DataService;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionFactory;
 import org.molgenis.data.index.meta.IndexActionGroup;
@@ -66,10 +66,10 @@ public class IndexActionRegisterServiceTest
 		when(indexAction.setEntityId("123")).thenReturn(indexAction);
 		when(indexAction.setActionOrder(0)).thenReturn(indexAction);
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
-		EntityMetaData emd = mock(EntityMetaData.class);
+		EntityType emd = mock(EntityType.class);
 
 		// To avoid addReferencingEntities(IndexAction indexAction)
-		when(dataService.getEntityMetaData(indexAction.getEntityFullName())).thenReturn(emd);
+		when(dataService.getEntityType(indexAction.getEntityFullName())).thenReturn(emd);
 		when(dataService.getEntityNames()).thenReturn(Stream.empty());
 
 		indexActionRegisterService.register("TestEntityName", "123");
@@ -124,8 +124,8 @@ public class IndexActionRegisterServiceTest
 		when(indexAction.setActionOrder(0)).thenReturn(indexAction);
 		when(indexAction.setIndexStatus(PENDING)).thenReturn(indexAction);
 
-		EntityMetaData entityMetaData = mock(EntityMetaData.class);
-		when(entityMetaData.getName()).thenReturn("ABC");
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getName()).thenReturn("ABC");
 		indexActionRegisterService.addExcludedEntity("ABC");
 
 		indexActionRegisterService.register("ABC", "123");

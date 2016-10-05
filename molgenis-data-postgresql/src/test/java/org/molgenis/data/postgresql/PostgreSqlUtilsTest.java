@@ -4,7 +4,7 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.model.FileMeta;
 import org.molgenis.file.model.FileMetaMetaData;
 import org.testng.annotations.BeforeClass;
@@ -98,18 +98,18 @@ public class PostgreSqlUtilsTest
 		when(attrRefStringId.getName()).thenReturn(attrRefStringIdName);
 		when(attrRefStringId.getDataType()).thenReturn(STRING);
 
-		EntityMetaData refStringIdEntityMeta = mock(EntityMetaData.class);
-		when(refStringIdEntityMeta.getIdAttribute()).thenReturn(attrRefStringId);
-		when(refStringIdEntityMeta.toString()).thenReturn("refStringId");
+		EntityType refStringIdEntityType = mock(EntityType.class);
+		when(refStringIdEntityType.getIdAttribute()).thenReturn(attrRefStringId);
+		when(refStringIdEntityType.toString()).thenReturn("refStringId");
 
 		String attrRefIntIdName = "refIntId";
 		AttributeMetaData attrRefIntId = mock(AttributeMetaData.class);
 		when(attrRefIntId.getName()).thenReturn(attrRefIntIdName);
 		when(attrRefIntId.getDataType()).thenReturn(INT);
 
-		EntityMetaData refIntIdEntityMeta = mock(EntityMetaData.class);
-		when(refIntIdEntityMeta.getIdAttribute()).thenReturn(attrRefIntId);
-		when(refIntIdEntityMeta.toString()).thenReturn("refIntId");
+		EntityType refIntIdEntityType = mock(EntityType.class);
+		when(refIntIdEntityType.getIdAttribute()).thenReturn(attrRefIntId);
+		when(refIntIdEntityType.toString()).thenReturn("refIntId");
 
 		String attrRefFileIdName = FileMetaMetaData.ID;
 		AttributeMetaData attrRefFileId = mock(AttributeMetaData.class);
@@ -126,14 +126,14 @@ public class PostgreSqlUtilsTest
 		String attrBoolNillableName = "attrBoolNillable";
 		attrBoolNillable = createAttr(attrBoolNillableName, BOOL);
 		String attrCategoricalName = "attrCategorical";
-		attrCategorical = createAttr(attrCategoricalName, CATEGORICAL, refStringIdEntityMeta);
+		attrCategorical = createAttr(attrCategoricalName, CATEGORICAL, refStringIdEntityType);
 		String attrCategoricalNillableName = "attrCategoricalNillable";
-		attrCategoricalNillable = createAttr(attrCategoricalNillableName, CATEGORICAL, refStringIdEntityMeta);
+		attrCategoricalNillable = createAttr(attrCategoricalNillableName, CATEGORICAL, refStringIdEntityType);
 		String attrCategoricalMrefName = "attrCategoricalMref";
-		attrCategoricalMref = createAttr(attrCategoricalMrefName, CATEGORICAL_MREF, refStringIdEntityMeta);
+		attrCategoricalMref = createAttr(attrCategoricalMrefName, CATEGORICAL_MREF, refStringIdEntityType);
 		String attrCategoricalMrefNillableName = "attrCategoricalMrefNillable";
 		attrCategoricalMrefNillable = createAttr(attrCategoricalMrefNillableName, CATEGORICAL_MREF,
-				refStringIdEntityMeta);
+				refStringIdEntityType);
 		String attrDateName = "attrDate";
 		attrDate = createAttr(attrDateName, DATE);
 		String attrDateNillableName = "attrDateNillable";
@@ -175,9 +175,9 @@ public class PostgreSqlUtilsTest
 		String attrLongNillableName = "attrLongNillable";
 		attrLongNillable = createAttr(attrLongNillableName, LONG);
 		String attrMrefName = "attrMref";
-		attrMref = createAttr(attrMrefName, MREF, refIntIdEntityMeta);
+		attrMref = createAttr(attrMrefName, MREF, refIntIdEntityType);
 		String attrMrefNillableName = "attrMrefNillable";
-		attrMrefNillable = createAttr(attrMrefNillableName, MREF, refIntIdEntityMeta);
+		attrMrefNillable = createAttr(attrMrefNillableName, MREF, refIntIdEntityType);
 		String attrScriptName = "attrScript";
 		attrScript = createAttr(attrScriptName, SCRIPT);
 		String attrScriptNillableName = "attrScriptNillable";
@@ -191,9 +191,9 @@ public class PostgreSqlUtilsTest
 		String attrTextNillableName = "attrTextNillable";
 		attrTextNillable = createAttr(attrTextNillableName, TEXT);
 		String attrXrefName = "attrXref";
-		attrXref = createAttr(attrXrefName, XREF, refIntIdEntityMeta);
+		attrXref = createAttr(attrXrefName, XREF, refIntIdEntityType);
 		String attrXrefNillableName = "attrXrefNillable";
-		attrXrefNillable = createAttr(attrXrefNillableName, XREF, refIntIdEntityMeta);
+		attrXrefNillable = createAttr(attrXrefNillableName, XREF, refIntIdEntityType);
 
 		// create entity
 		entity = mock(Entity.class);
@@ -203,7 +203,7 @@ public class PostgreSqlUtilsTest
 		when(entity.getBoolean(attrBoolNillableName)).thenReturn(null);
 
 		categoricalValueId = "id0";
-		categoricalValue = when(mock(Entity.class).getEntityMetaData()).thenReturn(refStringIdEntityMeta).getMock();
+		categoricalValue = when(mock(Entity.class).getEntityType()).thenReturn(refStringIdEntityType).getMock();
 		when(categoricalValue.getIdValue()).thenReturn(categoricalValueId);
 		when(categoricalValue.toString()).thenReturn("categoricalValue");
 		when(categoricalValue.getString(attrRefStringIdName)).thenReturn(categoricalValueId);
@@ -212,11 +212,11 @@ public class PostgreSqlUtilsTest
 
 		categoricalMrefValueId0 = "id0";
 		categoricalMrefValueId1 = "id1";
-		categoricalMrefValue0 = when(mock(Entity.class).getEntityMetaData()).thenReturn(refStringIdEntityMeta)
+		categoricalMrefValue0 = when(mock(Entity.class).getEntityType()).thenReturn(refStringIdEntityType)
 				.getMock();
 		when(categoricalMrefValue0.toString()).thenReturn("categoricalMrefValue0");
 		when(categoricalMrefValue0.getIdValue()).thenReturn(categoricalMrefValueId0);
-		Entity categoricalMrefValue1 = when(mock(Entity.class).getEntityMetaData()).thenReturn(refStringIdEntityMeta)
+		Entity categoricalMrefValue1 = when(mock(Entity.class).getEntityType()).thenReturn(refStringIdEntityType)
 				.getMock();
 		when(categoricalMrefValue1.toString()).thenReturn("categoricalMrefValue1");
 		when(categoricalMrefValue1.getIdValue()).thenReturn(categoricalMrefValueId1);
@@ -247,7 +247,7 @@ public class PostgreSqlUtilsTest
 		when(entity.getString(attrEnumNillableName)).thenReturn(null);
 
 		fileValueId = "id0";
-		fileValue = when(mock(FileMeta.class).getEntityMetaData()).thenReturn(fileMetaMeta).getMock();
+		fileValue = when(mock(FileMeta.class).getEntityType()).thenReturn(fileMetaMeta).getMock();
 		when(fileValue.toString()).thenReturn("fileValue");
 		when(fileValue.getIdValue()).thenReturn(fileValueId);
 		when(fileValue.getString(attrRefFileIdName)).thenReturn(fileValueId);
@@ -272,10 +272,10 @@ public class PostgreSqlUtilsTest
 
 		mrefValueId0 = 3;
 		mrefValueId1 = 4;
-		mrefValue0 = when(mock(Entity.class).getEntityMetaData()).thenReturn(refIntIdEntityMeta).getMock();
+		mrefValue0 = when(mock(Entity.class).getEntityType()).thenReturn(refIntIdEntityType).getMock();
 		when(mrefValue0.toString()).thenReturn("mrefValue0");
 		when(mrefValue0.getIdValue()).thenReturn(mrefValueId0);
-		Entity mrefValue1 = when(mock(Entity.class).getEntityMetaData()).thenReturn(refIntIdEntityMeta).getMock();
+		Entity mrefValue1 = when(mock(Entity.class).getEntityType()).thenReturn(refIntIdEntityType).getMock();
 		when(mrefValue1.toString()).thenReturn("mrefValue1");
 		when(mrefValue1.getIdValue()).thenReturn(mrefValueId1);
 		when(mrefValue0.getInt(attrRefIntIdName)).thenReturn(mrefValueId0);
@@ -296,7 +296,7 @@ public class PostgreSqlUtilsTest
 		when(entity.getString(attrTextNillableName)).thenReturn(null);
 
 		xrefValueId = 3;
-		xrefValue = when(mock(Entity.class).getEntityMetaData()).thenReturn(refIntIdEntityMeta).getMock();
+		xrefValue = when(mock(Entity.class).getEntityType()).thenReturn(refIntIdEntityType).getMock();
 		when(xrefValue.toString()).thenReturn("xrefValue");
 		when(xrefValue.getIdValue()).thenReturn(xrefValueId);
 		when(xrefValue.getInt(attrRefIntIdName)).thenReturn(xrefValueId);
@@ -431,10 +431,10 @@ public class PostgreSqlUtilsTest
 		return attr;
 	}
 
-	private static AttributeMetaData createAttr(String attrName, AttributeType attrType, EntityMetaData refEntityMeta)
+	private static AttributeMetaData createAttr(String attrName, AttributeType attrType, EntityType refEntityType)
 	{
 		AttributeMetaData attr = createAttr(attrName, attrType);
-		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		when(attr.getRefEntity()).thenReturn(refEntityType);
 		return attr;
 	}
 }

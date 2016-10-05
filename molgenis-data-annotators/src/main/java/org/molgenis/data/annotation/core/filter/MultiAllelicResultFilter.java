@@ -138,7 +138,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 			// also compile a list of original source alleles and their values for use in 'update mode'
 			if (updateMode && sourceEntity.get(attributeMetaData.getName()) != null)
 			{
-				AttributeMetaData sourceAttr = sourceEntity.getEntityMetaData()
+				AttributeMetaData sourceAttr = sourceEntity.getEntityType()
 						.getAttribute(attributeMetaData.getName());
 				if (EntityTypeUtils.isTextType(sourceAttr) || EntityTypeUtils.isStringType(sourceAttr))
 				{

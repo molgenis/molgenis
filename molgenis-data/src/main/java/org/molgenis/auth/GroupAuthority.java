@@ -1,7 +1,7 @@
 package org.molgenis.auth;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import static org.molgenis.auth.GroupAuthorityMetaData.ID;
 import static org.molgenis.auth.GroupAuthorityMetaData.MOLGENIS_GROUP;
@@ -13,14 +13,14 @@ public class GroupAuthority extends Authority
 		super(entity);
 	}
 
-	public GroupAuthority(EntityMetaData entityMeta)
+	public GroupAuthority(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public GroupAuthority(String id, EntityMetaData entityMeta)
+	public GroupAuthority(String id, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setId(id);
 	}
 

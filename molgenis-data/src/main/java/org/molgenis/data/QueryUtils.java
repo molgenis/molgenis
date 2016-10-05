@@ -2,7 +2,7 @@ package org.molgenis.data;
 
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.EnumSet;
 import java.util.List;
@@ -40,29 +40,29 @@ public class QueryUtils
 		return false;
 	}
 
-	public static boolean containsComputedAttribute(Query<Entity> query, EntityMetaData entityMetaData)
+	public static boolean containsComputedAttribute(Query<Entity> query, EntityType entityType)
 	{
-		return (containsComputedAttribute(query.getSort(), entityMetaData) || containsComputedAttribute(
-				query.getRules(), entityMetaData));
+		return (containsComputedAttribute(query.getSort(), entityType) || containsComputedAttribute(
+				query.getRules(), entityType));
 	}
 
-	public static boolean containsComputedAttribute(Sort sort, EntityMetaData entityMetaData)
+	public static boolean containsComputedAttribute(Sort sort, EntityType entityType)
 	{
 		return ((sort != null) && !stream(sort.spliterator(), false)
-				.allMatch(order -> !entityMetaData.getAttribute(order.getAttr()).hasExpression()));
+				.allMatch(order -> !entityType.getAttribute(order.getAttr()).hasExpression()));
 	}
 
-	public static boolean containsComputedAttribute(Iterable<QueryRule> rules, EntityMetaData entityMetaData)
+	public static boolean containsComputedAttribute(Iterable<QueryRule> rules, EntityType entityType)
 	{
 		for (QueryRule rule : rules)
 		{
 			List<QueryRule> nestedRules = rule.getNestedRules();
-			if (!nestedRules.isEmpty() && containsComputedAttribute(nestedRules, entityMetaData))
+			if (!nestedRules.isEmpty() && containsComputedAttribute(nestedRules, entityType))
 			{
 				return true;
 			}
 
-			AttributeMetaData amd = entityMetaData.getAttribute(rule.getField());
+			AttributeMetaData amd = entityType.getAttribute(rule.getField());
 			if (amd != null && amd.hasExpression())
 			{
 				return true;

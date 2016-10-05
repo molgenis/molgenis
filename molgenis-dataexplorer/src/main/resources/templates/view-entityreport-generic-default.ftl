@@ -12,7 +12,7 @@
         <table class="table">
             <tbody>
             <tr>
-            <#list entity.getEntityMetaData().getAtomicAttributes() as atomicAttribute>
+            <#list entity.getEntityType().getAtomicAttributes() as atomicAttribute>
                 <#assign key = atomicAttribute.getName()>
 
                 <#if counter == 3>

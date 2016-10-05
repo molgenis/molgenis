@@ -2,7 +2,7 @@ package org.molgenis.data.rest.service;
 
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMetaFactory;
@@ -52,14 +52,14 @@ public class RestServiceTest
 		String refEntityName = "refEntity";
 		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
 		when(refIdAttr.getDataType()).thenReturn(INT);
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
-		when(refEntityMeta.getName()).thenReturn(refEntityName);
-		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+		EntityType refEntityType = mock(EntityType.class);
+		when(refEntityType.getName()).thenReturn(refEntityName);
+		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
 		AttributeMetaData attr = mock(AttributeMetaData.class);
 		when(attr.getDataType()).thenReturn(MREF);
-		when(attr.getRefEntity()).thenReturn(refEntityMeta);
-		when(entityManager.getReference(refEntityMeta, 0)).thenReturn(entity0);
-		when(entityManager.getReference(refEntityMeta, 1)).thenReturn(entity1);
+		when(attr.getRefEntity()).thenReturn(refEntityType);
+		when(entityManager.getReference(refEntityType, 0)).thenReturn(entity0);
+		when(entityManager.getReference(refEntityType, 1)).thenReturn(entity1);
 		Object entityValue = restService.toEntityValue(attr, "0,1"); // string
 		assertEquals(entityValue, Arrays.asList(entity0, entity1));
 	}
@@ -72,14 +72,14 @@ public class RestServiceTest
 		String refEntityName = "refEntity";
 		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
 		when(refIdAttr.getDataType()).thenReturn(STRING);
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
-		when(refEntityMeta.getName()).thenReturn(refEntityName);
-		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+		EntityType refEntityType = mock(EntityType.class);
+		when(refEntityType.getName()).thenReturn(refEntityName);
+		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
 		AttributeMetaData attr = mock(AttributeMetaData.class);
 		when(attr.getDataType()).thenReturn(MREF);
-		when(attr.getRefEntity()).thenReturn(refEntityMeta);
-		when(entityManager.getReference(refEntityMeta, "0")).thenReturn(entity0);
-		when(entityManager.getReference(refEntityMeta, "1")).thenReturn(entity1);
+		when(attr.getRefEntity()).thenReturn(refEntityType);
+		when(entityManager.getReference(refEntityType, "0")).thenReturn(entity0);
+		when(entityManager.getReference(refEntityType, "1")).thenReturn(entity1);
 		Object entityValue = restService.toEntityValue(attr, "0,1"); // string
 		assertEquals(entityValue, Arrays.asList(entity0, entity1));
 	}

@@ -5,9 +5,9 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
+import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -41,8 +41,8 @@ public class MetaDataServiceImplTest
 	{
 		dataService = mock(DataService.class);
 		repoCollectionRegistry = mock(RepositoryCollectionRegistry.class);
-		SystemEntityMetaDataRegistry systemEntityMetaRegistry = mock(SystemEntityMetaDataRegistry.class);
-		metaDataServiceImpl = new MetaDataServiceImpl(dataService, repoCollectionRegistry, systemEntityMetaRegistry);
+		SystemEntityTypeRegistry systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
+		metaDataServiceImpl = new MetaDataServiceImpl(dataService, repoCollectionRegistry, systemEntityTypeRegistry);
 	}
 
 	@Test
@@ -65,27 +65,27 @@ public class MetaDataServiceImplTest
 	public void getRepository()
 	{
 		String entityName = "entity";
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).isAbstract()).thenReturn(false).getMock();
+		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(false).getMock();
 		String backendName = "backend";
-		when(entityMeta.getBackend()).thenReturn(backendName);
-		when(dataService.findOneById(eq(ENTITY_META_DATA), eq(entityName), any(Fetch.class), eq(EntityMetaData.class)))
-				.thenReturn(entityMeta);
+		when(entityType.getBackend()).thenReturn(backendName);
+		when(dataService.findOneById(eq(ENTITY_META_DATA), eq(entityName), any(Fetch.class), eq(EntityType.class)))
+				.thenReturn(entityType);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		Repository<Entity> repo = mock(Repository.class);
-		when(repoCollection.getRepository(entityMeta)).thenReturn(repo);
+		when(repoCollection.getRepository(entityType)).thenReturn(repo);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
 		assertEquals(metaDataServiceImpl.getRepository(entityName), repo);
 	}
 
 	@Test
-	public void getRepositoryAbstractEntityMeta()
+	public void getRepositoryAbstractEntityType()
 	{
 		String entityName = "entity";
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).isAbstract()).thenReturn(true).getMock();
+		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
 		String backendName = "backend";
-		when(entityMeta.getBackend()).thenReturn(backendName);
-		when(dataService.findOneById(eq(ENTITY_META_DATA), eq(entityName), any(Fetch.class), eq(EntityMetaData.class)))
-				.thenReturn(entityMeta);
+		when(entityType.getBackend()).thenReturn(backendName);
+		when(dataService.findOneById(eq(ENTITY_META_DATA), eq(entityName), any(Fetch.class), eq(EntityType.class)))
+				.thenReturn(entityType);
 		assertNull(metaDataServiceImpl.getRepository(entityName));
 	}
 
@@ -99,27 +99,27 @@ public class MetaDataServiceImplTest
 	public void getRepositoryTyped()
 	{
 		String entityName = "entity";
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).isAbstract()).thenReturn(false).getMock();
+		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(false).getMock();
 		String backendName = "backend";
-		when(entityMeta.getBackend()).thenReturn(backendName);
-		when(dataService.findOneById(eq(ENTITY_META_DATA), eq(entityName), any(Fetch.class), eq(EntityMetaData.class)))
-				.thenReturn(entityMeta);
+		when(entityType.getBackend()).thenReturn(backendName);
+		when(dataService.findOneById(eq(ENTITY_META_DATA), eq(entityName), any(Fetch.class), eq(EntityType.class)))
+				.thenReturn(entityType);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		Repository<Package> repo = mock(Repository.class);
-		when(repoCollection.getRepository(entityMeta)).thenReturn((Repository<Entity>) (Repository<?>) repo);
+		when(repoCollection.getRepository(entityType)).thenReturn((Repository<Entity>) (Repository<?>) repo);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
 		assertEquals(metaDataServiceImpl.getRepository(entityName, Package.class), repo);
 	}
 
 	@Test
-	public void getRepositoryTypedAbstractEntityMeta()
+	public void getRepositoryTypedAbstractEntityType()
 	{
 		String entityName = "entity";
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).isAbstract()).thenReturn(true).getMock();
+		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
 		String backendName = "backend";
-		when(entityMeta.getBackend()).thenReturn(backendName);
-		when(dataService.findOneById(eq(ENTITY_META_DATA), eq(entityName), any(Fetch.class), eq(EntityMetaData.class)))
-				.thenReturn(entityMeta);
+		when(entityType.getBackend()).thenReturn(backendName);
+		when(dataService.findOneById(eq(ENTITY_META_DATA), eq(entityName), any(Fetch.class), eq(EntityType.class)))
+				.thenReturn(entityType);
 		assertNull(metaDataServiceImpl.getRepository(entityName, Package.class));
 	}
 
@@ -130,43 +130,43 @@ public class MetaDataServiceImplTest
 	}
 
 	@Test
-	public void getRepositoryEntityMeta()
+	public void getRepositoryEntityType()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).isAbstract()).thenReturn(false).getMock();
+		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(false).getMock();
 		String backendName = "backend";
-		when(entityMeta.getBackend()).thenReturn(backendName);
+		when(entityType.getBackend()).thenReturn(backendName);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		Repository<Entity> repo = mock(Repository.class);
-		when(repoCollection.getRepository(entityMeta)).thenReturn(repo);
+		when(repoCollection.getRepository(entityType)).thenReturn(repo);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
-		assertEquals(metaDataServiceImpl.getRepository(entityMeta), repo);
+		assertEquals(metaDataServiceImpl.getRepository(entityType), repo);
 	}
 
 	@Test
-	public void getRepositoryEntityMetaAbstract()
+	public void getRepositoryEntityTypeAbstract()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).isAbstract()).thenReturn(true).getMock();
-		assertNull(metaDataServiceImpl.getRepository(entityMeta));
+		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
+		assertNull(metaDataServiceImpl.getRepository(entityType));
 	}
 
 	@Test
-	public void getRepositoryTypedEntityMeta()
+	public void getRepositoryTypedEntityType()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).isAbstract()).thenReturn(false).getMock();
+		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(false).getMock();
 		String backendName = "backend";
-		when(entityMeta.getBackend()).thenReturn(backendName);
+		when(entityType.getBackend()).thenReturn(backendName);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		Repository<Package> repo = mock(Repository.class);
-		when(repoCollection.getRepository(entityMeta)).thenReturn((Repository<Entity>) (Repository<?>) repo);
+		when(repoCollection.getRepository(entityType)).thenReturn((Repository<Entity>) (Repository<?>) repo);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
-		assertEquals(metaDataServiceImpl.getRepository(entityMeta, Package.class), repo);
+		assertEquals(metaDataServiceImpl.getRepository(entityType, Package.class), repo);
 	}
 
 	@Test
-	public void getRepositoryTypedEntityMetaAbstract()
+	public void getRepositoryTypedEntityTypeAbstract()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).isAbstract()).thenReturn(true).getMock();
-		assertNull(metaDataServiceImpl.getRepository(entityMeta, Package.class));
+		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
+		assertNull(metaDataServiceImpl.getRepository(entityType, Package.class));
 	}
 
 	@Test
@@ -175,23 +175,23 @@ public class MetaDataServiceImplTest
 		String backendName0 = "backend0";
 		String backendName1 = "backend1";
 
-		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
-		when(entityMeta0.getBackend()).thenReturn(backendName0);
-		EntityMetaData entityMeta1 = mock(EntityMetaData.class);
-		when(entityMeta1.getBackend()).thenReturn(backendName1);
+		EntityType entityType0 = mock(EntityType.class);
+		when(entityType0.getBackend()).thenReturn(backendName0);
+		EntityType entityType1 = mock(EntityType.class);
+		when(entityType1.getBackend()).thenReturn(backendName1);
 
-		Query<EntityMetaData> entityQ = mock(Query.class);
+		Query<EntityType> entityQ = mock(Query.class);
 		when(entityQ.eq(ABSTRACT, false)).thenReturn(entityQ);
 		when(entityQ.fetch(any())).thenReturn(entityQ);
-		when(entityQ.findAll()).thenReturn(Stream.of(entityMeta0, entityMeta1));
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(entityQ);
+		when(entityQ.findAll()).thenReturn(Stream.of(entityType0, entityType1));
+		when(dataService.query(ENTITY_META_DATA, EntityType.class)).thenReturn(entityQ);
 		RepositoryCollection repoCollection0 = mock(RepositoryCollection.class);
 		Repository<Entity> repo0 = mock(Repository.class);
-		when(repoCollection0.getRepository(entityMeta0)).thenReturn(repo0);
+		when(repoCollection0.getRepository(entityType0)).thenReturn(repo0);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName0)).thenReturn(repoCollection0);
 		Repository<Entity> repo1 = mock(Repository.class);
 		RepositoryCollection repoCollection1 = mock(RepositoryCollection.class);
-		when(repoCollection1.getRepository(entityMeta1)).thenReturn(repo1);
+		when(repoCollection1.getRepository(entityType1)).thenReturn(repo1);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName1)).thenReturn(repoCollection1);
 		assertEquals(metaDataServiceImpl.getRepositories().collect(toList()), newArrayList(repo0, repo1));
 	}
@@ -200,27 +200,27 @@ public class MetaDataServiceImplTest
 	public void hasRepository()
 	{
 		String entityName = "entity";
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).isAbstract()).thenReturn(false).getMock();
+		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(false).getMock();
 
-		Query<EntityMetaData> entityQ = mock(Query.class);
-		Query<EntityMetaData> entityQ2 = mock(Query.class);
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(entityQ);
+		Query<EntityType> entityQ = mock(Query.class);
+		Query<EntityType> entityQ2 = mock(Query.class);
+		when(dataService.query(ENTITY_META_DATA, EntityType.class)).thenReturn(entityQ);
 		when(entityQ.eq(FULL_NAME, entityName)).thenReturn(entityQ);
 		when(entityQ.and()).thenReturn(entityQ2);
 		when(entityQ2.eq(ABSTRACT, false)).thenReturn(entityQ2);
-		when(entityQ2.findOne()).thenReturn(entityMeta);
+		when(entityQ2.findOne()).thenReturn(entityType);
 
 		assertTrue(metaDataServiceImpl.hasRepository(entityName));
 	}
 
 	@Test
-	public void hasRepositoryAbstractEntityMeta()
+	public void hasRepositoryAbstractEntityType()
 	{
 		String entityName = "entity";
 
-		Query<EntityMetaData> entityQ = mock(Query.class);
-		Query<EntityMetaData> entityQ2 = mock(Query.class);
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(entityQ);
+		Query<EntityType> entityQ = mock(Query.class);
+		Query<EntityType> entityQ2 = mock(Query.class);
+		when(dataService.query(ENTITY_META_DATA, EntityType.class)).thenReturn(entityQ);
 		when(entityQ.eq(FULL_NAME, entityName)).thenReturn(entityQ);
 		when(entityQ.and()).thenReturn(entityQ2);
 		when(entityQ2.eq(ABSTRACT, false)).thenReturn(entityQ2);
@@ -234,32 +234,32 @@ public class MetaDataServiceImplTest
 	{
 		String backendName = "backend";
 
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getBackend()).thenReturn(backendName);
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getBackend()).thenReturn(backendName);
 		AttributeMetaData attr0 = mock(AttributeMetaData.class);
 		AttributeMetaData attr1 = mock(AttributeMetaData.class);
-		when(entityMeta.getOwnAllAttributes()).thenReturn(newArrayList(attr0, attr1));
+		when(entityType.getOwnAllAttributes()).thenReturn(newArrayList(attr0, attr1));
 
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
 		Repository<Entity> repo = mock(Repository.class);
-		when(repoCollection.getRepository(entityMeta)).thenReturn(repo);
-		assertEquals(metaDataServiceImpl.createRepository(entityMeta), repo);
+		when(repoCollection.getRepository(entityType)).thenReturn(repo);
+		assertEquals(metaDataServiceImpl.createRepository(entityType), repo);
 
 		ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
 		assertEquals(attrsCaptor.getValue().collect(toList()), newArrayList(attr0, attr1));
 
-		verify(dataService).add(ENTITY_META_DATA, entityMeta);
+		verify(dataService).add(ENTITY_META_DATA, entityType);
 
 		verifyNoMoreInteractions(dataService);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
-	public void createRepositoryAbstractEntityMeta()
+	public void createRepositoryAbstractEntityType()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).isAbstract()).thenReturn(true).getMock();
-		metaDataServiceImpl.createRepository(entityMeta);
+		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
+		metaDataServiceImpl.createRepository(entityType);
 	}
 
 	@Test
@@ -267,32 +267,32 @@ public class MetaDataServiceImplTest
 	{
 		String backendName = "backend";
 		Class<Package> entityClass = Package.class;
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getBackend()).thenReturn(backendName);
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getBackend()).thenReturn(backendName);
 		AttributeMetaData attr0 = mock(AttributeMetaData.class);
 		AttributeMetaData attr1 = mock(AttributeMetaData.class);
-		when(entityMeta.getOwnAllAttributes()).thenReturn(newArrayList(attr0, attr1));
+		when(entityType.getOwnAllAttributes()).thenReturn(newArrayList(attr0, attr1));
 
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		when(repoCollectionRegistry.getRepositoryCollection(backendName)).thenReturn(repoCollection);
 		Repository<Package> repo = mock(Repository.class);
-		when(repoCollection.getRepository(entityMeta)).thenReturn((Repository<Entity>) (Repository<?>) repo);
-		assertEquals(metaDataServiceImpl.createRepository(entityMeta, entityClass), repo);
+		when(repoCollection.getRepository(entityType)).thenReturn((Repository<Entity>) (Repository<?>) repo);
+		assertEquals(metaDataServiceImpl.createRepository(entityType, entityClass), repo);
 
 		ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
 		assertEquals(attrsCaptor.getValue().collect(toList()), newArrayList(attr0, attr1));
 
-		verify(dataService).add(ENTITY_META_DATA, entityMeta);
+		verify(dataService).add(ENTITY_META_DATA, entityType);
 
 		verifyNoMoreInteractions(dataService);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class)
-	public void createRepositoryTypedAbstractEntityMeta()
+	public void createRepositoryTypedAbstractEntityType()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).isAbstract()).thenReturn(true).getMock();
-		metaDataServiceImpl.createRepository(entityMeta, Package.class);
+		EntityType entityType = when(mock(EntityType.class).isAbstract()).thenReturn(true).getMock();
+		metaDataServiceImpl.createRepository(entityType, Package.class);
 	}
 
 	@Test
@@ -402,54 +402,54 @@ public class MetaDataServiceImplTest
 	}
 
 	@Test
-	public void getEntityMeta()
+	public void getEntityType()
 	{
 		String entityName = "entity";
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(dataService.findOneById(eq(ENTITY_META_DATA), eq(entityName), any(Fetch.class), eq(EntityMetaData.class)))
-				.thenReturn(entityMeta);
-		assertEquals(metaDataServiceImpl.getEntityMetaData(entityName), entityMeta);
+		EntityType entityType = mock(EntityType.class);
+		when(dataService.findOneById(eq(ENTITY_META_DATA), eq(entityName), any(Fetch.class), eq(EntityType.class)))
+				.thenReturn(entityType);
+		assertEquals(metaDataServiceImpl.getEntityType(entityName), entityType);
 	}
 
 	@Test
-	public void getEntityMetaUnknownEntity()
+	public void getEntityTypeUnknownEntity()
 	{
 		String entityName = "entity";
-		when(dataService.findOneById(eq(ENTITY_META_DATA), eq(entityName), any(Fetch.class), eq(EntityMetaData.class)))
+		when(dataService.findOneById(eq(ENTITY_META_DATA), eq(entityName), any(Fetch.class), eq(EntityType.class)))
 				.thenReturn(null);
-		assertNull(metaDataServiceImpl.getEntityMetaData(entityName));
+		assertNull(metaDataServiceImpl.getEntityType(entityName));
 	}
 
 	// TODO how to test forEach?
 	//	@Test
-	//	public void getEntityMetas()
+	//	public void getEntityTypes()
 	//	{
 	//
 	//	}
 
 	@Test
-	public void addEntityMeta()
+	public void addEntityType()
 	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
+		EntityType entityType = mock(EntityType.class);
 		AttributeMetaData attr0 = mock(AttributeMetaData.class);
 		AttributeMetaData attr1 = mock(AttributeMetaData.class);
-		when(entityMeta.getOwnAllAttributes()).thenReturn(newArrayList(attr0, attr1));
-		metaDataServiceImpl.addEntityMeta(entityMeta);
+		when(entityType.getOwnAllAttributes()).thenReturn(newArrayList(attr0, attr1));
+		metaDataServiceImpl.addEntityType(entityType);
 
 		ArgumentCaptor<Stream<Entity>> attrsCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrsCaptor.capture());
 		assertEquals(attrsCaptor.getValue().collect(toList()), newArrayList(attr0, attr1));
 
-		verify(dataService).add(ENTITY_META_DATA, entityMeta);
+		verify(dataService).add(ENTITY_META_DATA, entityType);
 
 		verifyNoMoreInteractions(dataService);
 	}
 
 	@Test
-	public void deleteEntityMeta()
+	public void deleteEntityType()
 	{
 		String entityName = "entity";
-		metaDataServiceImpl.deleteEntityMeta(entityName);
+		metaDataServiceImpl.deleteEntityType(entityName);
 		verify(dataService).deleteById(ENTITY_META_DATA, entityName);
 		verifyNoMoreInteractions(dataService);
 	}
@@ -461,7 +461,7 @@ public class MetaDataServiceImplTest
 	//	}
 
 	@Test
-	public void updateEntityMeta()
+	public void updateEntityType()
 	{
 		String entityName = "entity";
 
@@ -493,29 +493,29 @@ public class MetaDataServiceImplTest
 		String attrDeletedIdentifier = "identifier";
 		when(attrDeleted.getIdentifier()).thenReturn(attrDeletedIdentifier);
 
-		EntityMetaData existingEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
-		when(existingEntityMeta.getLabel()).thenReturn("label");
-		when(existingEntityMeta.getSimpleName()).thenReturn(entityName);
-		when(existingEntityMeta.getOwnAllAttributes()).thenReturn(newArrayList(attrShared0, attrShared1, attrDeleted));
-		when(existingEntityMeta.getOwnAttributes()).thenReturn(emptyList());
-		when(existingEntityMeta.getOwnLookupAttributes()).thenReturn(emptyList());
-		when(existingEntityMeta.getTags()).thenReturn(emptyList());
+		EntityType existingEntityType = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		when(existingEntityType.getLabel()).thenReturn("label");
+		when(existingEntityType.getSimpleName()).thenReturn(entityName);
+		when(existingEntityType.getOwnAllAttributes()).thenReturn(newArrayList(attrShared0, attrShared1, attrDeleted));
+		when(existingEntityType.getOwnAttributes()).thenReturn(emptyList());
+		when(existingEntityType.getOwnLookupAttributes()).thenReturn(emptyList());
+		when(existingEntityType.getTags()).thenReturn(emptyList());
 
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
-		when(entityMeta.getLabel()).thenReturn("new label");
-		when(entityMeta.getSimpleName()).thenReturn(entityName);
-		when(entityMeta.getOwnAllAttributes()).thenReturn(newArrayList(attrShared0, attrShared1Updated, attrAdded));
-		when(entityMeta.getOwnAttributes()).thenReturn(emptyList());
-		when(entityMeta.getOwnLookupAttributes()).thenReturn(emptyList());
-		when(entityMeta.getTags()).thenReturn(emptyList());
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		when(entityType.getLabel()).thenReturn("new label");
+		when(entityType.getSimpleName()).thenReturn(entityName);
+		when(entityType.getOwnAllAttributes()).thenReturn(newArrayList(attrShared0, attrShared1Updated, attrAdded));
+		when(entityType.getOwnAttributes()).thenReturn(emptyList());
+		when(entityType.getOwnLookupAttributes()).thenReturn(emptyList());
+		when(entityType.getTags()).thenReturn(emptyList());
 
-		Query<EntityMetaData> entityQ = mock(Query.class);
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(entityQ);
+		Query<EntityType> entityQ = mock(Query.class);
+		when(dataService.query(ENTITY_META_DATA, EntityType.class)).thenReturn(entityQ);
 		when(entityQ.eq(FULL_NAME, entityName)).thenReturn(entityQ);
 		when(entityQ.fetch(any())).thenReturn(entityQ);
-		when(entityQ.findOne()).thenReturn(existingEntityMeta);
+		when(entityQ.findOne()).thenReturn(existingEntityType);
 
-		metaDataServiceImpl.updateEntityMeta(entityMeta);
+		metaDataServiceImpl.updateEntityType(entityType);
 
 		ArgumentCaptor<Stream<Entity>> attrAddCaptor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).add(eq(ATTRIBUTE_META_DATA), attrAddCaptor.capture());
@@ -525,20 +525,20 @@ public class MetaDataServiceImplTest
 		verify(dataService).update(eq(ATTRIBUTE_META_DATA), attrUpdateCaptor.capture());
 		assertEquals(attrUpdateCaptor.getValue().collect(toList()), singletonList(attrShared1Updated));
 
-		verify(dataService).update(ENTITY_META_DATA, entityMeta);
+		verify(dataService).update(ENTITY_META_DATA, entityType);
 	}
 
 	@Test(expectedExceptions = UnknownEntityException.class)
-	public void updateEntityMetaEntityDoesNotExist()
+	public void updateEntityTypeEntityDoesNotExist()
 	{
 		String entityName = "entity";
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
-		Query<EntityMetaData> entityQ = mock(Query.class);
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		Query<EntityType> entityQ = mock(Query.class);
 		when(entityQ.eq(FULL_NAME, entityName)).thenReturn(entityQ);
 		when(entityQ.fetch(any())).thenReturn(entityQ);
 		when(entityQ.findOne()).thenReturn(null);
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(entityQ);
-		metaDataServiceImpl.updateEntityMeta(entityMeta);
+		when(dataService.query(ENTITY_META_DATA, EntityType.class)).thenReturn(entityQ);
+		metaDataServiceImpl.updateEntityType(entityType);
 	}
 
 	@Test
@@ -557,18 +557,18 @@ public class MetaDataServiceImplTest
 		verify(dataService).deleteById(ATTRIBUTE_META_DATA, attrId);
 	}
 
-	@DataProvider(name = "isMetaEntityMetaDataProvider")
-	public static Iterator<Object[]> isMetaEntityMetaDataProvider()
+	@DataProvider(name = "isMetaEntityTypeProvider")
+	public static Iterator<Object[]> isMetaEntityTypeProvider()
 	{
 		return newArrayList(new Object[] { ENTITY_META_DATA, true }, new Object[] { ATTRIBUTE_META_DATA, true },
 				new Object[] { TAG, true }, new Object[] { PACKAGE, true }, new Object[] { "noMeta", false })
 				.iterator();
 	}
 
-	@Test(dataProvider = "isMetaEntityMetaDataProvider")
-	public void isMetaEntityMetaData(String entityName, boolean isMeta)
+	@Test(dataProvider = "isMetaEntityTypeProvider")
+	public void isMetaEntityType(String entityName, boolean isMeta)
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
-		assertEquals(metaDataServiceImpl.isMetaEntityMetaData(entityMeta), isMeta);
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		assertEquals(metaDataServiceImpl.isMetaEntityType(entityType), isMeta);
 	}
 }

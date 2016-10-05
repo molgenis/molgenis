@@ -61,7 +61,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	private FileStore fileStore;
 
 	@Autowired
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;
@@ -121,7 +121,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		{
 			File uploadFile = new File(filePath.toString());
 			SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile.getName(), uploadFile.getName(),
-					uploadFile, entityMetaFactory, attrMetaFactory);
+					uploadFile, entityTypeFactory, attrMetaFactory);
 
 			if (validateUserInputHeader(csvRepository) && validateUserInputContent(csvRepository))
 			{
@@ -151,7 +151,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 
 				String ontologyIri = ontologyIriObject.toString();
 				File uploadFile = new File(filePath.toString());
-				SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile, entityMetaFactory,
+				SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile, entityTypeFactory,
 						attrMetaFactory);
 
 				List<String> columnHeaders = createDownloadTableHeaders(csvRepository);
@@ -200,7 +200,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 
 	private List<String> createDownloadTableHeaders(SortaCsvRepository csvRepository)
 	{
-		List<String> inputAttributeNames = FluentIterable.from(csvRepository.getEntityMetaData().getAtomicAttributes())
+		List<String> inputAttributeNames = FluentIterable.from(csvRepository.getEntityType().getAtomicAttributes())
 				.transform(new Function<AttributeMetaData, String>()
 				{
 					public String apply(AttributeMetaData attributeMetaData)
@@ -235,7 +235,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	private void validateSortaInput(String ontologyIri, File uploadFile, HttpServletRequest httpServletRequest,
 			Model model)
 	{
-		SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile, entityMetaFactory, attrMetaFactory);
+		SortaCsvRepository csvRepository = new SortaCsvRepository(uploadFile, entityTypeFactory, attrMetaFactory);
 
 		HttpSession session = httpServletRequest.getSession();
 		session.setAttribute("filePath", uploadFile.getAbsoluteFile());
@@ -260,7 +260,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 
 	private boolean validateUserInputHeader(Repository<Entity> repository)
 	{
-		return Iterables.any(repository.getEntityMetaData().getAtomicAttributes(), new Predicate<AttributeMetaData>()
+		return Iterables.any(repository.getEntityType().getAtomicAttributes(), new Predicate<AttributeMetaData>()
 		{
 			public boolean apply(AttributeMetaData attr)
 			{

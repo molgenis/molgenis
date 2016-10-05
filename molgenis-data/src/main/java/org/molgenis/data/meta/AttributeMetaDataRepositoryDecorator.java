@@ -3,8 +3,8 @@ package org.molgenis.data.meta;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -40,16 +40,16 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserisSystem
 public class AttributeMetaDataRepositoryDecorator implements Repository<AttributeMetaData>
 {
 	private final Repository<AttributeMetaData> decoratedRepo;
-	private final SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
+	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final DataService dataService;
 	private final MolgenisPermissionService permissionService;
 
 	public AttributeMetaDataRepositoryDecorator(Repository<AttributeMetaData> decoratedRepo,
-			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, DataService dataService,
+			SystemEntityTypeRegistry systemEntityTypeRegistry, DataService dataService,
 			MolgenisPermissionService permissionService)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
-		this.systemEntityMetaDataRegistry = requireNonNull(systemEntityMetaDataRegistry);
+		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.dataService = requireNonNull(dataService);
 		this.permissionService = requireNonNull(permissionService);
 	}
@@ -78,10 +78,9 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 		return decoratedRepo.getQueryOperators();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return decoratedRepo.getEntityMetaData();
+		return decoratedRepo.getEntityType();
 	}
 
 	@Override
@@ -414,7 +413,7 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	private void validateUpdateAllowed(AttributeMetaData attr)
 	{
 		String attrIdentifier = attr.getIdentifier();
-		AttributeMetaData systemAttr = systemEntityMetaDataRegistry.getSystemAttributeMetaData(attrIdentifier);
+		AttributeMetaData systemAttr = systemEntityTypeRegistry.getSystemAttributeMetaData(attrIdentifier);
 		if (systemAttr != null && !EntityUtils.equals(attr, systemAttr))
 		{
 			throw new MolgenisDataException(
@@ -430,18 +429,18 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	private void validateDeleteAllowed(AttributeMetaData attr)
 	{
 		String attrIdentifier = attr.getIdentifier();
-		if (systemEntityMetaDataRegistry.hasSystemAttributeMetaData(attrIdentifier))
+		if (systemEntityTypeRegistry.hasSystemAttributeMetaData(attrIdentifier))
 		{
 			throw new MolgenisDataException(
 					format("Deleting system entity attribute [%s] is not allowed", attr.getName()));
 		}
-		EntityMetaData entityMeta = dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(ATTRIBUTES, attr)
+		EntityType entityType = dataService.query(ENTITY_META_DATA, EntityType.class).eq(ATTRIBUTES, attr)
 				.findOne();
-		if (entityMeta != null)
+		if (entityType != null)
 		{
 			throw new MolgenisDataException(
 					format("Deleting attribute [%s] is not allowed, since it is referenced by entity [%s]",
-							attr.getName(), entityMeta.getName()));
+							attr.getName(), entityType.getName()));
 		}
 		AttributeMetaData attrMeta = dataService.query(ATTRIBUTE_META_DATA, AttributeMetaData.class).eq(PARTS, attr)
 				.findOne();
@@ -455,13 +454,13 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 
 	private void updateEntities(AttributeMetaData attr, AttributeMetaData updatedAttr)
 	{
-		getEntities(updatedAttr).forEach((entityMetaData) -> updateEntity(entityMetaData, attr, updatedAttr));
+		getEntities(updatedAttr).forEach((EntityType) -> updateEntity(EntityType, attr, updatedAttr));
 	}
 
-	private void updateEntity(EntityMetaData entityMetaData, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	private void updateEntity(EntityType entityType, AttributeMetaData attr, AttributeMetaData updatedAttr)
 	{
-		dataService.getMeta().getBackend(entityMetaData.getBackend())
-				.updateAttribute(entityMetaData, attr, updatedAttr);
+		dataService.getMeta().getBackend(entityType.getBackend())
+				.updateAttribute(entityType, attr, updatedAttr);
 	}
 
 	/**
@@ -470,16 +469,16 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	 * @param attr attribute
 	 * @return entities referencing this attribute
 	 */
-	private Stream<EntityMetaData> getEntities(AttributeMetaData attr)
+	private Stream<EntityType> getEntities(AttributeMetaData attr)
 	{
 		return getEntitiesRec(Collections.singletonList(attr));
 	}
 
-	private Stream<EntityMetaData> getEntitiesRec(List<AttributeMetaData> attrs)
+	private Stream<EntityType> getEntitiesRec(List<AttributeMetaData> attrs)
 	{
 		// find entities referencing attributes
-		Query<EntityMetaData> entityQ = dataService.query(ENTITY_META_DATA, EntityMetaData.class);
-		Stream<EntityMetaData> entities;
+		Query<EntityType> entityQ = dataService.query(ENTITY_META_DATA, EntityType.class);
+		Stream<EntityType> entities;
 		if (attrs.size() == 1)
 		{
 			entities = entityQ.eq(ATTRIBUTES, attrs.iterator().next()).findAll();
@@ -537,8 +536,8 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	{
 		return attrs.filter(attr ->
 		{
-			Stream<EntityMetaData> entities = runAsSystem(() -> getEntities(attr));
-			for (Iterator<EntityMetaData> it = entities.iterator(); it.hasNext(); )
+			Stream<EntityType> entities = runAsSystem(() -> getEntities(attr));
+			for (Iterator<EntityType> it = entities.iterator(); it.hasNext(); )
 			{
 				if (permissionService.hasPermissionOnEntity(it.next().getName(), permission))
 				{

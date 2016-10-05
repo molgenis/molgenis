@@ -6,8 +6,8 @@ import org.molgenis.auth.GroupAuthority;
 import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -48,19 +48,19 @@ import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
  * <p>
  * TODO replace permission based entity filtering with generic row-level security once available
  */
-public class EntityTypeRepositoryDecorator implements Repository<EntityMetaData>
+public class EntityTypeRepositoryDecorator implements Repository<EntityType>
 {
-	private final Repository<EntityMetaData> decoratedRepo;
+	private final Repository<EntityType> decoratedRepo;
 	private final DataService dataService;
-	private final SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
+	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final MolgenisPermissionService permissionService;
 
-	public EntityTypeRepositoryDecorator(Repository<EntityMetaData> decoratedRepo, DataService dataService,
-			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, MolgenisPermissionService permissionService)
+	public EntityTypeRepositoryDecorator(Repository<EntityType> decoratedRepo, DataService dataService,
+			SystemEntityTypeRegistry systemEntityTypeRegistry, MolgenisPermissionService permissionService)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
 		this.dataService = requireNonNull(dataService);
-		this.systemEntityMetaDataRegistry = requireNonNull(systemEntityMetaDataRegistry);
+		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.permissionService = requireNonNull(permissionService);
 	}
 
@@ -88,10 +88,9 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityMetaData>
 		return decoratedRepo.getQueryOperators();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return decoratedRepo.getEntityMetaData();
+		return decoratedRepo.getEntityType();
 	}
 
 	@Override
@@ -103,19 +102,19 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityMetaData>
 		}
 		else
 		{
-			Stream<EntityMetaData> entityMetaDatas = StreamSupport.stream(decoratedRepo.spliterator(), false);
-			return filterCountPermission(entityMetaDatas).count();
+			Stream<EntityType> EntityTypes = StreamSupport.stream(decoratedRepo.spliterator(), false);
+			return filterCountPermission(EntityTypes).count();
 		}
 	}
 
 	@Override
-	public Query<EntityMetaData> query()
+	public Query<EntityType> query()
 	{
 		return decoratedRepo.query();
 	}
 
 	@Override
-	public long count(Query<EntityMetaData> q)
+	public long count(Query<EntityType> q)
 	{
 		if (currentUserIsSu() || currentUserisSystem())
 		{
@@ -124,15 +123,15 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityMetaData>
 		else
 		{
 			// ignore query offset and page size
-			Query<EntityMetaData> qWithoutLimitOffset = new QueryImpl<>(q);
+			Query<EntityType> qWithoutLimitOffset = new QueryImpl<>(q);
 			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
-			Stream<EntityMetaData> entityMetaDatas = decoratedRepo.findAll(qWithoutLimitOffset);
-			return filterCountPermission(entityMetaDatas).count();
+			Stream<EntityType> EntityTypes = decoratedRepo.findAll(qWithoutLimitOffset);
+			return filterCountPermission(EntityTypes).count();
 		}
 	}
 
 	@Override
-	public Stream<EntityMetaData> findAll(Query<EntityMetaData> q)
+	public Stream<EntityType> findAll(Query<EntityType> q)
 	{
 		if (currentUserIsSu() || currentUserisSystem())
 		{
@@ -140,24 +139,24 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityMetaData>
 		}
 		else
 		{
-			Query<EntityMetaData> qWithoutLimitOffset = new QueryImpl<>(q);
+			Query<EntityType> qWithoutLimitOffset = new QueryImpl<>(q);
 			qWithoutLimitOffset.offset(0).pageSize(Integer.MAX_VALUE);
-			Stream<EntityMetaData> entityMetaDatas = decoratedRepo.findAll(qWithoutLimitOffset);
-			Stream<EntityMetaData> filteredEntityMetaDatas = filterReadPermission(entityMetaDatas);
+			Stream<EntityType> EntityTypes = decoratedRepo.findAll(qWithoutLimitOffset);
+			Stream<EntityType> filteredEntityTypes = filterReadPermission(EntityTypes);
 			if (q.getOffset() > 0)
 			{
-				filteredEntityMetaDatas = filteredEntityMetaDatas.skip(q.getOffset());
+				filteredEntityTypes = filteredEntityTypes.skip(q.getOffset());
 			}
 			if (q.getPageSize() > 0)
 			{
-				filteredEntityMetaDatas = filteredEntityMetaDatas.limit(q.getPageSize());
+				filteredEntityTypes = filteredEntityTypes.limit(q.getPageSize());
 			}
-			return filteredEntityMetaDatas;
+			return filteredEntityTypes;
 		}
 	}
 
 	@Override
-	public Iterator<EntityMetaData> iterator()
+	public Iterator<EntityType> iterator()
 	{
 		if (currentUserIsSu() || currentUserisSystem())
 		{
@@ -165,13 +164,13 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityMetaData>
 		}
 		else
 		{
-			Stream<EntityMetaData> entityMetaDataStream = StreamSupport.stream(decoratedRepo.spliterator(), false);
-			return filterReadPermission(entityMetaDataStream).iterator();
+			Stream<EntityType> EntityTypeStream = StreamSupport.stream(decoratedRepo.spliterator(), false);
+			return filterReadPermission(EntityTypeStream).iterator();
 		}
 	}
 
 	@Override
-	public void forEachBatched(Fetch fetch, Consumer<List<EntityMetaData>> consumer, int batchSize)
+	public void forEachBatched(Fetch fetch, Consumer<List<EntityType>> consumer, int batchSize)
 	{
 		if (currentUserIsSu() || currentUserisSystem())
 		{
@@ -185,7 +184,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityMetaData>
 	}
 
 	@Override
-	public EntityMetaData findOne(Query<EntityMetaData> q)
+	public EntityType findOne(Query<EntityType> q)
 	{
 		if (currentUserIsSu() || currentUserisSystem())
 		{
@@ -199,7 +198,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityMetaData>
 	}
 
 	@Override
-	public EntityMetaData findOneById(Object id)
+	public EntityType findOneById(Object id)
 	{
 		if (currentUserIsSu() || currentUserisSystem())
 		{
@@ -212,7 +211,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityMetaData>
 	}
 
 	@Override
-	public EntityMetaData findOneById(Object id, Fetch fetch)
+	public EntityType findOneById(Object id, Fetch fetch)
 	{
 		if (currentUserIsSu() || currentUserisSystem())
 		{
@@ -225,7 +224,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityMetaData>
 	}
 
 	@Override
-	public Stream<EntityMetaData> findAll(Stream<Object> ids)
+	public Stream<EntityType> findAll(Stream<Object> ids)
 	{
 		if (currentUserIsSu() || currentUserisSystem())
 		{
@@ -238,7 +237,7 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityMetaData>
 	}
 
 	@Override
-	public Stream<EntityMetaData> findAll(Stream<Object> ids, Fetch fetch)
+	public Stream<EntityType> findAll(Stream<Object> ids, Fetch fetch)
 	{
 		if (currentUserIsSu() || currentUserisSystem())
 		{
@@ -264,144 +263,144 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityMetaData>
 	}
 
 	@Override
-	public void update(EntityMetaData entity)
+	public void update(EntityType entity)
 	{
 		updateEntity(entity);
 	}
 
 	@Override
-	public void update(Stream<EntityMetaData> entities)
+	public void update(Stream<EntityType> entities)
 	{
 		entities.forEach(this::updateEntity);
 	}
 
 	@Override
-	public void delete(EntityMetaData entity)
+	public void delete(EntityType entity)
 	{
-		deleteEntityMetaData(entity);
+		deleteEntityType(entity);
 	}
 
 	@Override
-	public void delete(Stream<EntityMetaData> entities)
+	public void delete(Stream<EntityType> entities)
 	{
-		entities.forEach(this::deleteEntityMetaData);
+		entities.forEach(this::deleteEntityType);
 	}
 
 	@Override
 	public void deleteById(Object id)
 	{
-		EntityMetaData entityMetaData = findOneById(id);
-		if (entityMetaData == null)
+		EntityType entityType = findOneById(id);
+		if (entityType == null)
 		{
 			throw new UnknownEntityException(
 					format("Unknown entity meta data [%s] with id [%s]", getName(), id.toString()));
 		}
-		deleteEntityMetaData(entityMetaData);
+		deleteEntityType(entityType);
 	}
 
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		findAll(ids).forEach(this::deleteEntityMetaData);
+		findAll(ids).forEach(this::deleteEntityType);
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		iterator().forEachRemaining(this::deleteEntityMetaData);
+		iterator().forEachRemaining(this::deleteEntityType);
 	}
 
 	@Override
-	public void add(EntityMetaData entity)
+	public void add(EntityType entity)
 	{
-		addEntityMetaData(entity);
+		addEntityType(entity);
 	}
 
 	@Override
-	public Integer add(Stream<EntityMetaData> entities)
+	public Integer add(Stream<EntityType> entities)
 	{
 		AtomicInteger count = new AtomicInteger();
 		entities.filter(entity ->
 		{
 			count.incrementAndGet();
 			return true;
-		}).forEach(this::addEntityMetaData);
+		}).forEach(this::addEntityType);
 		return count.get();
 	}
 
-	private void addEntityMetaData(EntityMetaData entityMetaData)
+	private void addEntityType(EntityType entityType)
 	{
-		validatePermission(entityMetaData.getName(), Permission.WRITEMETA);
+		validatePermission(entityType.getName(), Permission.WRITEMETA);
 
 		// add row to entities table
-		decoratedRepo.add(entityMetaData);
-		if (!entityMetaData.isAbstract() && !dataService.getMeta().isMetaEntityMetaData(entityMetaData))
+		decoratedRepo.add(entityType);
+		if (!entityType.isAbstract() && !dataService.getMeta().isMetaEntityType(entityType))
 		{
-			RepositoryCollection repoCollection = dataService.getMeta().getBackend(entityMetaData.getBackend());
+			RepositoryCollection repoCollection = dataService.getMeta().getBackend(entityType.getBackend());
 			if (repoCollection == null)
 			{
-				throw new MolgenisDataException(format("Unknown backend [%s]", entityMetaData.getBackend()));
+				throw new MolgenisDataException(format("Unknown backend [%s]", entityType.getBackend()));
 			}
-			repoCollection.createRepository(entityMetaData);
+			repoCollection.createRepository(entityType);
 		}
 	}
 
-	private void updateEntity(EntityMetaData entityMeta)
+	private void updateEntity(EntityType entityType)
 	{
-		validateUpdateAllowed(entityMeta);
+		validateUpdateAllowed(entityType);
 
-		EntityMetaData existingEntityMeta = findOneById(entityMeta.getIdValue(),
+		EntityType existingEntityType = findOneById(entityType.getIdValue(),
 				new Fetch().field(FULL_NAME).field(ATTRIBUTES, new Fetch().field(NAME)));
-		if (existingEntityMeta == null)
+		if (existingEntityType == null)
 		{
 			throw new UnknownEntityException(format("Unknown entity meta data [%s] with id [%s]", getName(),
-					entityMeta.getIdValue().toString()));
+					entityType.getIdValue().toString()));
 		}
 
 		Map<String, AttributeMetaData> currentAttrMap = StreamSupport
-				.stream(existingEntityMeta.getOwnAllAttributes().spliterator(), false)
+				.stream(existingEntityType.getOwnAllAttributes().spliterator(), false)
 				.collect(toMap(AttributeMetaData::getName, Function.identity()));
 		Map<String, AttributeMetaData> updateAttrMap = StreamSupport
-				.stream(entityMeta.getOwnAllAttributes().spliterator(), false)
+				.stream(entityType.getOwnAllAttributes().spliterator(), false)
 				.collect(toMap(AttributeMetaData::getName, Function.identity()));
 
 		// add attributes
 		Set<String> addedAttrNames = Sets.difference(updateAttrMap.keySet(), currentAttrMap.keySet());
 		if (!addedAttrNames.isEmpty())
 		{
-			String backend = entityMeta.getBackend();
+			String backend = entityType.getBackend();
 			RepositoryCollection repoCollection = dataService.getMeta().getBackend(backend);
 			addedAttrNames.stream().map(updateAttrMap::get).forEach(addedAttrEntity ->
 			{
-				repoCollection.addAttribute(existingEntityMeta, addedAttrEntity);
+				repoCollection.addAttribute(existingEntityType, addedAttrEntity);
 
-				if (entityMeta.getName().equals(ENTITY_META_DATA))
+				if (entityType.getName().equals(ENTITY_META_DATA))
 				{
 					// update system entity meta data
-					systemEntityMetaDataRegistry.getSystemEntityMetaData(ENTITY_META_DATA)
+					systemEntityTypeRegistry.getSystemEntityType(ENTITY_META_DATA)
 							.addAttribute(addedAttrEntity);
 				}
 			});
 		}
 
 		// update entity
-		decoratedRepo.update(entityMeta);
+		decoratedRepo.update(entityType);
 
 		// remove attributes
 		Set<String> deletedAttrNames = Sets.difference(currentAttrMap.keySet(), updateAttrMap.keySet());
 
 		if (!deletedAttrNames.isEmpty())
 		{
-			String backend = entityMeta.getBackend();
+			String backend = entityType.getBackend();
 			RepositoryCollection repoCollection = dataService.getMeta().getBackend(backend);
 			deletedAttrNames.forEach(deletedAttrName ->
 			{
-				repoCollection.deleteAttribute(existingEntityMeta, currentAttrMap.get(deletedAttrName));
+				repoCollection.deleteAttribute(existingEntityType, currentAttrMap.get(deletedAttrName));
 
-				if (entityMeta.getName().equals(ENTITY_META_DATA))
+				if (entityType.getName().equals(ENTITY_META_DATA))
 				{
 					// update system entity meta data
-					systemEntityMetaDataRegistry.getSystemEntityMetaData(ENTITY_META_DATA)
+					systemEntityTypeRegistry.getSystemEntityType(ENTITY_META_DATA)
 							.removeAttribute(currentAttrMap.get(deletedAttrName));
 				}
 			});
@@ -414,59 +413,59 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityMetaData>
 	}
 
 	/**
-	 * Updating entityMetaData meta data is allowed for non-system entities. For system entities updating entityMetaData meta data is
+	 * Updating entityType meta data is allowed for non-system entities. For system entities updating entityType meta data is
 	 * only allowed if the meta data defined in Java differs from the meta data stored in the database (in other words
 	 * the Java code was updated).
 	 *
-	 * @param entityMetaData entity meta data
+	 * @param entityType entity meta data
 	 */
-	private void validateUpdateAllowed(EntityMetaData entityMetaData)
+	private void validateUpdateAllowed(EntityType entityType)
 	{
-		String entityName = entityMetaData.getName();
+		String entityName = entityType.getName();
 		validatePermission(entityName, Permission.WRITEMETA);
 
-		SystemEntityType systemEntityMeta = systemEntityMetaDataRegistry.getSystemEntityMetaData(entityName);
-		if (systemEntityMeta != null && !currentUserisSystem())
+		SystemEntityType systemEntityType = systemEntityTypeRegistry.getSystemEntityType(entityName);
+		if (systemEntityType != null && !currentUserisSystem())
 		{
 			throw new MolgenisDataException(format("Updating system entity meta data [%s] is not allowed", entityName));
 		}
 	}
 
-	private void deleteEntityMetaData(EntityMetaData entityMeta)
+	private void deleteEntityType(EntityType entityType)
 	{
-		validateDeleteAllowed(entityMeta);
+		validateDeleteAllowed(entityType);
 
-		// delete entityMetaData table
-		if (!entityMeta.isAbstract())
+		// delete EntityType table
+		if (!entityType.isAbstract())
 		{
-			deleteEntityRepository(entityMeta);
+			deleteEntityRepository(entityType);
 		}
 
-		// delete entityMetaData permissions
-		deleteEntityPermissions(entityMeta);
+		// delete EntityType permissions
+		deleteEntityPermissions(entityType);
 
 		// delete row from entities table
-		decoratedRepo.delete(entityMeta);
+		decoratedRepo.delete(entityType);
 
 		// delete rows from attributes table
-		deleteEntityAttributes(entityMeta);
+		deleteEntityAttributes(entityType);
 	}
 
-	private void validateDeleteAllowed(EntityMetaData entityMetaData)
+	private void validateDeleteAllowed(EntityType entityType)
 	{
-		String entityName = entityMetaData.getName();
+		String entityName = entityType.getName();
 		validatePermission(entityName, Permission.WRITEMETA);
 
-		boolean isSystem = systemEntityMetaDataRegistry.hasSystemEntityMetaData(entityName);
+		boolean isSystem = systemEntityTypeRegistry.hasSystemEntityType(entityName);
 		if (isSystem)
 		{
 			throw new MolgenisDataException(format("Deleting system entity meta data [%s] is not allowed", entityName));
 		}
 	}
 
-	private void deleteEntityAttributes(EntityMetaData entityMetaData)
+	private void deleteEntityAttributes(EntityType entityType)
 	{
-		Iterable<AttributeMetaData> rootAttrs = entityMetaData.getOwnAttributes();
+		Iterable<AttributeMetaData> rootAttrs = entityType.getOwnAttributes();
 		Stream<AttributeMetaData> allAttrs = StreamSupport.stream(rootAttrs.spliterator(), false).flatMap(
 				attrEntity -> StreamSupport
 						.stream(new AttributeMetaDataTreeTraverser().preOrderTraversal(attrEntity).spliterator(),
@@ -474,15 +473,15 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityMetaData>
 		dataService.delete(ATTRIBUTE_META_DATA, allAttrs);
 	}
 
-	private void deleteEntityRepository(EntityMetaData entityMetaData)
+	private void deleteEntityRepository(EntityType entityType)
 	{
-		String backend = entityMetaData.getBackend();
-		dataService.getMeta().getBackend(backend).deleteRepository(entityMetaData);
+		String backend = entityType.getBackend();
+		dataService.getMeta().getBackend(backend).deleteRepository(entityType);
 	}
 
-	private void deleteEntityPermissions(EntityMetaData entityMetaData)
+	private void deleteEntityPermissions(EntityType entityType)
 	{
-		String entityName = entityMetaData.getName();
+		String entityName = entityType.getName();
 		List<String> authorities = SecurityUtils.getEntityAuthorities(entityName);
 
 		// User permissions
@@ -512,44 +511,44 @@ public class EntityTypeRepositoryDecorator implements Repository<EntityMetaData>
 
 	}
 
-	private EntityMetaData filterReadPermission(EntityMetaData entityMeta)
+	private EntityType filterReadPermission(EntityType entityType)
 	{
-		return entityMeta != null ? filterReadPermission(Stream.of(entityMeta)).findFirst().orElse(null) : null;
+		return entityType != null ? filterReadPermission(Stream.of(entityType)).findFirst().orElse(null) : null;
 	}
 
-	private Stream<EntityMetaData> filterReadPermission(Stream<EntityMetaData> entityMetaDataStream)
+	private Stream<EntityType> filterReadPermission(Stream<EntityType> EntityTypeStream)
 	{
-		return filterPermission(entityMetaDataStream, READ);
+		return filterPermission(EntityTypeStream, READ);
 	}
 
-	private Stream<EntityMetaData> filterCountPermission(Stream<EntityMetaData> entityMetaDataStream)
+	private Stream<EntityType> filterCountPermission(Stream<EntityType> EntityTypeStream)
 	{
-		return filterPermission(entityMetaDataStream, COUNT);
+		return filterPermission(EntityTypeStream, COUNT);
 	}
 
-	private Stream<EntityMetaData> filterPermission(Stream<EntityMetaData> entityMetaDataStream, Permission permission)
+	private Stream<EntityType> filterPermission(Stream<EntityType> EntityTypeStream, Permission permission)
 	{
-		return entityMetaDataStream
-				.filter(entityMeta -> permissionService.hasPermissionOnEntity(entityMeta.getName(), permission));
+		return EntityTypeStream
+				.filter(entityType -> permissionService.hasPermissionOnEntity(entityType.getName(), permission));
 	}
 
 	private static class FilteredConsumer
 	{
-		private final Consumer<List<EntityMetaData>> consumer;
+		private final Consumer<List<EntityType>> consumer;
 		private final MolgenisPermissionService permissionService;
 
-		FilteredConsumer(Consumer<List<EntityMetaData>> consumer, MolgenisPermissionService permissionService)
+		FilteredConsumer(Consumer<List<EntityType>> consumer, MolgenisPermissionService permissionService)
 		{
 			this.consumer = requireNonNull(consumer);
 			this.permissionService = requireNonNull(permissionService);
 		}
 
-		public void filter(List<EntityMetaData> entityMetas)
+		public void filter(List<EntityType> entityTypes)
 		{
-			List<EntityMetaData> filteredEntityMetas = entityMetas.stream()
-					.filter(entityMeta -> permissionService.hasPermissionOnEntity(entityMeta.getName(), READ))
+			List<EntityType> filteredEntityTypes = entityTypes.stream()
+					.filter(entityType -> permissionService.hasPermissionOnEntity(entityType.getName(), READ))
 					.collect(toList());
-			consumer.accept(filteredEntityMetas);
+			consumer.accept(filteredEntityTypes);
 		}
 	}
 }

@@ -1,7 +1,7 @@
 package org.molgenis.data.index.meta;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.data.index.meta.IndexActionMetaData.*;
@@ -13,14 +13,14 @@ public class IndexAction extends StaticEntity
 		super(entity);
 	}
 
-	public IndexAction(EntityMetaData entityMeta)
+	public IndexAction(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public IndexAction(String id, EntityMetaData entityMeta)
+	public IndexAction(String id, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		set(ID, id);
 	}
 

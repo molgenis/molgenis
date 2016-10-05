@@ -11,7 +11,7 @@ import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.DannAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -57,10 +57,10 @@ public class DannAnnotatorTest extends AbstractMolgenisSpringTest
 	Resources resourcess;
 
 	// Can annotate
-	public EntityMetaData metaDataCanAnnotate;
+	public EntityType metaDataCanAnnotate;
 
 	// Negative test cannot annotate
-	public EntityMetaData metaDataCantAnnotate;
+	public EntityType metaDataCantAnnotate;
 
 	public ArrayList<Entity> input1;
 	public ArrayList<Entity> input2;

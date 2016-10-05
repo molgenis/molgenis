@@ -8,7 +8,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -34,7 +34,7 @@ public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 	private DataService dataServiceMock;
 
 	@Autowired
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;
 
@@ -53,15 +53,15 @@ public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 
 		AttributeMetaData patientAttr = attrMetaFactory.create().setName("patient");
 		AttributeMetaData probeAttr = attrMetaFactory.create().setName("probe").setDataType(DECIMAL);
-		EntityMetaData entityMetaData = entityMetaFactory.create();
-		entityMetaData.addAttributes(newArrayList(patientAttr, probeAttr));
+		EntityType entityType = entityTypeFactory.create();
+		entityType.addAttributes(newArrayList(patientAttr, probeAttr));
 
-		Entity e1 = new DynamicEntity(entityMetaData);
+		Entity e1 = new DynamicEntity(entityType);
 		e1.set("patient", "patient1");
 		e1.set("probe", 1.5);
 		entities.add(e1);
 
-		Entity e2 = new DynamicEntity(entityMetaData);
+		Entity e2 = new DynamicEntity(entityType);
 		e2.set("patient", "patient2");
 		e2.set("probe", 1.6);
 		entities.add(e2);

@@ -4,12 +4,12 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.mapper.repository.AttributeMappingRepository;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.DynamicEntity;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -67,14 +67,14 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 
 	@Override
 	public List<AttributeMapping> getAttributeMappings(List<Entity> attributeMappingEntities,
-			EntityMetaData sourceEntityMetaData, EntityMetaData targetEntityMetaData)
+			EntityType sourceEntityType, EntityType targetEntityType)
 	{
 		return Lists.transform(attributeMappingEntities, new Function<Entity, AttributeMapping>()
 		{
 			@Override
 			public AttributeMapping apply(Entity attributeMappingEntity)
 			{
-				return toAttributeMapping(attributeMappingEntity, sourceEntityMetaData, targetEntityMetaData);
+				return toAttributeMapping(attributeMappingEntity, sourceEntityType, targetEntityType);
 			}
 		});
 
@@ -82,7 +82,7 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 
 	@Override
 	public List<AttributeMetaData> retrieveAttributeMetaDatasFromAlgorithm(String algorithm,
-			EntityMetaData sourceEntityMetaData)
+			EntityType sourceEntityType)
 	{
 		List<AttributeMetaData> sourceAttributeMetaDatas = Lists.newArrayList();
 
@@ -91,7 +91,7 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 
 		while (matcher.find())
 		{
-			AttributeMetaData attribute = sourceEntityMetaData.getAttribute(matcher.group(1));
+			AttributeMetaData attribute = sourceEntityType.getAttribute(matcher.group(1));
 			if (!sourceAttributeMetaDatas.contains(attribute))
 			{
 				sourceAttributeMetaDatas.add(attribute);
@@ -101,16 +101,16 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		return sourceAttributeMetaDatas;
 	}
 
-	private AttributeMapping toAttributeMapping(Entity attributeMappingEntity, EntityMetaData sourceEntityMetaData,
-			EntityMetaData targetEntityMetaData)
+	private AttributeMapping toAttributeMapping(Entity attributeMappingEntity, EntityType sourceEntityType,
+			EntityType targetEntityType)
 	{
 		String identifier = attributeMappingEntity.getString(IDENTIFIER);
 		String targetAtributeName = attributeMappingEntity.getString(TARGETATTRIBUTEMETADATA);
-		AttributeMetaData targetAttributeMetaData = targetEntityMetaData.getAttribute(targetAtributeName);
+		AttributeMetaData targetAttributeMetaData = targetEntityType.getAttribute(targetAtributeName);
 		String algorithm = attributeMappingEntity.getString(ALGORITHM);
 		String algorithmState = attributeMappingEntity.getString(ALGORITHMSTATE);
 		List<AttributeMetaData> sourceAttributeMetaDatas = retrieveAttributeMetaDatasFromAlgorithm(algorithm,
-				sourceEntityMetaData);
+				sourceEntityType);
 
 		return new AttributeMapping(identifier, targetAttributeMetaData, algorithm, sourceAttributeMetaDatas,
 				algorithmState);

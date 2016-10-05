@@ -8,7 +8,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.*;
 import org.molgenis.data.cache.utils.EntityHydration;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.EntityWithComputedAttributes;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
@@ -67,15 +67,15 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	private ArgumentCaptor<Stream<Object>> idStreamCaptor;
 
 	private List<Entity> testEntities;
-	private EntityMetaData emd;
+	private EntityType emd;
 
 	@BeforeClass
 	public void beforeClass()
 	{
 		initMocks(this);
-		EntityMetaData refEntityMetaData = entityTestHarness.createDynamicRefEntityMetaData();
-		emd = entityTestHarness.createDynamicTestEntityMetaData();
-		List<Entity> refEntities = entityTestHarness.createTestRefEntities(refEntityMetaData, 2);
+		EntityType refEntityType = entityTestHarness.createDynamicRefEntityType();
+		emd = entityTestHarness.createDynamicTestEntityType();
+		List<Entity> refEntities = entityTestHarness.createTestRefEntities(refEntityType, 2);
 		testEntities = entityTestHarness.createTestEntities(emd, 4, refEntities).collect(toList());
 
 		when(entityManager.create(emd, NO_POPULATE)).thenAnswer(new Answer<Entity>()
@@ -86,11 +86,11 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 				return new EntityWithComputedAttributes(new DynamicEntity(emd));
 			}
 		});
-		when(entityManager.getReference(any(EntityMetaData.class), eq("0"))).thenReturn(refEntities.get(0));
-		when(entityManager.getReference(any(EntityMetaData.class), eq("1"))).thenReturn(refEntities.get(1));
-		when(entityManager.getReferences(any(EntityMetaData.class), eq(newArrayList("0"))))
+		when(entityManager.getReference(any(EntityType.class), eq("0"))).thenReturn(refEntities.get(0));
+		when(entityManager.getReference(any(EntityType.class), eq("1"))).thenReturn(refEntities.get(1));
+		when(entityManager.getReferences(any(EntityType.class), eq(newArrayList("0"))))
 				.thenReturn(newArrayList(refEntities.get(0)));
-		when(entityManager.getReferences(any(EntityMetaData.class), eq(newArrayList("1"))))
+		when(entityManager.getReferences(any(EntityType.class), eq(newArrayList("1"))))
 				.thenReturn(newArrayList(refEntities.get(1)));
 	}
 
@@ -98,7 +98,7 @@ public class L2CacheTest extends AbstractMolgenisSpringTest
 	public void beforeMethod()
 	{
 		reset(repository, transactionInformation);
-		when(repository.getEntityMetaData()).thenReturn(emd);
+		when(repository.getEntityType()).thenReturn(emd);
 		when(repository.getName()).thenReturn(emd.getName());
 
 		l2Cache = new L2Cache(molgenisTransactionManager, entityHydration, transactionInformation);

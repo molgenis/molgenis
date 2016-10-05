@@ -9,7 +9,7 @@ import org.molgenis.data.annotation.core.entity.impl.GoNLAnnotator;
 import org.molgenis.data.annotation.core.entity.impl.ThousandGenomesAnnotator;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -74,14 +74,14 @@ public class AnnotatorChainingIT extends AbstractMolgenisSpringTest
 				tgAnnotator.getCmdLineAnnotatorSettingsConfigurer()
 						.addSettings(ResourceUtils.getFile(getClass(), "/1000g").getPath());
 
-				AnnotatorUtils.addAnnotatorMetaDataToRepositories(repo.getEntityMetaData(), attributeMetaDataFactory,
+				AnnotatorUtils.addAnnotatorMetaDataToRepositories(repo.getEntityType(), attributeMetaDataFactory,
 						gonlAnnotator);
 
 				Iterator<Entity> it = gonlAnnotator.annotate(repo);
 				assertNotNull(it);
 				assertTrue(it.hasNext());
 
-				AnnotatorUtils.addAnnotatorMetaDataToRepositories(repo.getEntityMetaData(), attributeMetaDataFactory,
+				AnnotatorUtils.addAnnotatorMetaDataToRepositories(repo.getEntityType(), attributeMetaDataFactory,
 						tgAnnotator);
 				it = tgAnnotator.annotate(it);
 				assertNotNull(it);
@@ -92,7 +92,7 @@ public class AnnotatorChainingIT extends AbstractMolgenisSpringTest
 				assertNotNull(entity.get(GoNLAnnotator.GONL_GENOME_GTC));
 				assertNotNull(entity.get(ThousandGenomesAnnotator.THOUSAND_GENOME_AF));
 
-				EntityMetaData meta = entity.getEntityMetaData();
+				EntityType meta = entity.getEntityType();
 				assertNotNull(meta);
 				assertNotNull(meta.getAttribute(GoNLAnnotator.GONL_GENOME_AF));
 				assertNotNull(meta.getAttribute(GoNLAnnotator.GONL_GENOME_GTC));

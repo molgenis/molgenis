@@ -2,7 +2,7 @@ package org.molgenis.security.owned;
 
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.runas.SystemSecurityToken;
 import org.molgenis.security.core.utils.SecurityUtils;
@@ -17,10 +17,10 @@ import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
-import static org.molgenis.security.owned.OwnedEntityMetaData.OWNED;
+import static org.molgenis.security.owned.OwnedEntityType.OWNED;
 
 /**
- * RepositoryDecorator that works on EntityMetaData that extends OwnedEntityMetaData.
+ * RepositoryDecorator that works on EntityType that extends OwnedEntityType.
  * <p>
  * Ensures that when an Entity is created the owner is set to the current user, users can only view, update, delete
  * their own entities.
@@ -48,7 +48,7 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	{
 		if (fetch != null)
 		{
-			fetch.field(OwnedEntityMetaData.OWNER_USERNAME);
+			fetch.field(OwnedEntityType.OWNER_USERNAME);
 		}
 		decoratedRepo.forEachBatched(fetch, entities ->
 		{
@@ -88,10 +88,9 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 		return decoratedRepo.getName();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return decoratedRepo.getEntityMetaData();
+		return decoratedRepo.getEntityType();
 	}
 
 	@Override
@@ -149,7 +148,7 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	{
 		if (fetch != null)
 		{
-			fetch.field(OwnedEntityMetaData.OWNER_USERNAME);
+			fetch.field(OwnedEntityType.OWNER_USERNAME);
 		}
 		Entity e = decoratedRepo.findOneById(id, fetch);
 
@@ -177,7 +176,7 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	{
 		if (fetch != null)
 		{
-			fetch.field(OwnedEntityMetaData.OWNER_USERNAME);
+			fetch.field(OwnedEntityType.OWNER_USERNAME);
 		}
 		Stream<Entity> entities = decoratedRepo.findAll(ids, fetch);
 		if (mustAddRowLevelSecurity())
@@ -197,24 +196,24 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	@Override
 	public void update(Entity entity)
 	{
-		if (isOwnedEntityMetaData() && (mustAddRowLevelSecurity()
-				|| entity.get(OwnedEntityMetaData.OWNER_USERNAME) == null))
-			entity.set(OwnedEntityMetaData.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
+		if (isOwnedEntityType() && (mustAddRowLevelSecurity()
+				|| entity.get(OwnedEntityType.OWNER_USERNAME) == null))
+			entity.set(OwnedEntityType.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		decoratedRepo.update(entity);
 	}
 
 	@Override
 	public void update(Stream<Entity> entities)
 	{
-		if (isOwnedEntityMetaData())
+		if (isOwnedEntityType())
 		{
 			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
 			String currentUsername = SecurityUtils.getCurrentUsername();
 			entities = entities.map(entity ->
 			{
-				if (mustAddRowLevelSecurity || entity.get(OwnedEntityMetaData.OWNER_USERNAME) == null)
+				if (mustAddRowLevelSecurity || entity.get(OwnedEntityType.OWNER_USERNAME) == null)
 				{
-					entity.set(OwnedEntityMetaData.OWNER_USERNAME, currentUsername);
+					entity.set(OwnedEntityType.OWNER_USERNAME, currentUsername);
 				}
 				return entity;
 			});
@@ -282,10 +281,10 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	@Override
 	public void add(Entity entity)
 	{
-		if (isOwnedEntityMetaData() && (mustAddRowLevelSecurity()
-				|| entity.get(OwnedEntityMetaData.OWNER_USERNAME) == null))
+		if (isOwnedEntityType() && (mustAddRowLevelSecurity()
+				|| entity.get(OwnedEntityType.OWNER_USERNAME) == null))
 		{
-			entity.set(OwnedEntityMetaData.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
+			entity.set(OwnedEntityType.OWNER_USERNAME, SecurityUtils.getCurrentUsername());
 		}
 
 		decoratedRepo.add(entity);
@@ -294,15 +293,15 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	@Override
 	public Integer add(Stream<Entity> entities)
 	{
-		if (isOwnedEntityMetaData())
+		if (isOwnedEntityType())
 		{
 			boolean mustAddRowLevelSecurity = mustAddRowLevelSecurity();
 			String currentUsername = SecurityUtils.getCurrentUsername();
 			entities = entities.map(entity ->
 			{
-				if (mustAddRowLevelSecurity || entity.get(OwnedEntityMetaData.OWNER_USERNAME) == null)
+				if (mustAddRowLevelSecurity || entity.get(OwnedEntityType.OWNER_USERNAME) == null)
 				{
-					entity.set(OwnedEntityMetaData.OWNER_USERNAME, currentUsername);
+					entity.set(OwnedEntityType.OWNER_USERNAME, currentUsername);
 				}
 				return entity;
 			});
@@ -315,12 +314,12 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 	{
 		if (SecurityUtils.currentUserIsSu() || SecurityUtils.currentUserHasRole(SystemSecurityToken.ROLE_SYSTEM))
 			return false;
-		return isOwnedEntityMetaData();
+		return isOwnedEntityType();
 	}
 
-	private boolean isOwnedEntityMetaData()
+	private boolean isOwnedEntityType()
 	{
-		return EntityUtils.doesExtend(getEntityMetaData(), OWNED);
+		return EntityUtils.doesExtend(getEntityType(), OWNED);
 	}
 
 	private void addRowLevelSecurity(Query<Entity> q)
@@ -329,13 +328,13 @@ public class OwnedEntityRepositoryDecorator implements Repository<Entity>
 		if (user != null)
 		{
 			if (!q.getRules().isEmpty()) q.and();
-			q.eq(OwnedEntityMetaData.OWNER_USERNAME, user);
+			q.eq(OwnedEntityType.OWNER_USERNAME, user);
 		}
 	}
 
 	private String getOwnerUserName(Entity questionnaire)
 	{
-		return questionnaire.getString(OwnedEntityMetaData.OWNER_USERNAME);
+		return questionnaire.getString(OwnedEntityType.OWNER_USERNAME);
 	}
 
 	private boolean currentUserIsOwner(Entity entity)

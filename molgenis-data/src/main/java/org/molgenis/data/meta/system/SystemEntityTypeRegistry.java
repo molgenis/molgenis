@@ -18,43 +18,43 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
  * Registry containing all {@link SystemEntityType}.
  */
 @Component
-public class SystemEntityMetaDataRegistry
+public class SystemEntityTypeRegistry
 {
-	private final Logger LOG = LoggerFactory.getLogger(SystemEntityMetaDataRegistry.class);
+	private final Logger LOG = LoggerFactory.getLogger(SystemEntityTypeRegistry.class);
 
-	private final Map<String, SystemEntityType> systemEntityMetaDataMap;
+	private final Map<String, SystemEntityType> systemEntityTypeMap;
 
-	public SystemEntityMetaDataRegistry()
+	public SystemEntityTypeRegistry()
 	{
-		systemEntityMetaDataMap = Maps.newHashMap();
+		systemEntityTypeMap = Maps.newHashMap();
 	}
 
-	public SystemEntityType getSystemEntityMetaData(String entityName)
+	public SystemEntityType getSystemEntityType(String entityName)
 	{
-		return systemEntityMetaDataMap.get(entityName);
+		return systemEntityTypeMap.get(entityName);
 	}
 
-	public Stream<SystemEntityType> getSystemEntityMetaDatas()
+	public Stream<SystemEntityType> getSystemEntityTypes()
 	{
-		return systemEntityMetaDataMap.values().stream();
+		return systemEntityTypeMap.values().stream();
 	}
 
-	public boolean hasSystemEntityMetaData(String entityName)
+	public boolean hasSystemEntityType(String entityName)
 	{
-		return systemEntityMetaDataMap.containsKey(entityName);
+		return systemEntityTypeMap.containsKey(entityName);
 	}
 
-	public void addSystemEntityMetaData(SystemEntityType systemEntityType)
+	public void addSystemEntityType(SystemEntityType systemEntityType)
 	{
-		String systemEntityMetaDataName = systemEntityType.getName();
-		if (systemEntityMetaDataName == null)
+		String systemEntityTypeName = systemEntityType.getName();
+		if (systemEntityTypeName == null)
 		{
 			throw new IllegalArgumentException(format("[%s] is missing name, did you forget to call setName()?",
 					systemEntityType.getClass().getSimpleName()));
 		}
 
-		LOG.trace("Registering system entity [{}] ...", systemEntityMetaDataName);
-		systemEntityMetaDataMap.put(systemEntityMetaDataName, systemEntityType);
+		LOG.trace("Registering system entity [{}] ...", systemEntityTypeName);
+		systemEntityTypeMap.put(systemEntityTypeName, systemEntityType);
 	}
 
 	public boolean hasSystemAttributeMetaData(String attrIdentifier)
@@ -64,8 +64,8 @@ public class SystemEntityMetaDataRegistry
 
 	public AttributeMetaData getSystemAttributeMetaData(String attrIdentifier)
 	{
-		return getSystemEntityMetaDatas()
-				.map(systemEntityMetaData -> getSystemAttributeMetaData(systemEntityMetaData, attrIdentifier))
+		return getSystemEntityTypes()
+				.map(systemEntityType -> getSystemAttributeMetaData(systemEntityType, attrIdentifier))
 				.filter(Objects::nonNull).findFirst().orElse(null);
 	}
 

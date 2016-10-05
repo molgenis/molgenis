@@ -23,7 +23,7 @@ import static org.testng.Assert.assertNotNull;
 public class ExcelRepositorySourceTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;
@@ -36,7 +36,7 @@ public class ExcelRepositorySourceTest extends AbstractMolgenisSpringTest
 	{
 		is = getClass().getResourceAsStream("/test.xls");
 		excelRepositoryCollection = new ExcelRepositoryCollection("test.xls", is);
-		excelRepositoryCollection.setEntityMetaDataFactory(entityMetaFactory);
+		excelRepositoryCollection.setEntityTypeFactory(entityTypeFactory);
 		excelRepositoryCollection.setAttributeMetaDataFactory(attrMetaFactory);
 	}
 

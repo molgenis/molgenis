@@ -181,7 +181,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 	{
 		if (attribute == null)
 		{
-			attribute = config.getAttributeNameForAttributeNameArray(fieldName, entity.getEntityMetaData());
+			attribute = config.getAttributeNameForAttributeNameArray(fieldName, entity.getEntityType());
 		}
 		return attribute;
 	}
@@ -190,7 +190,7 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 	{
 
 		String chromosomeAttribute = config.getAttributeNameForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM,
-				dataService.getEntityMetaData(dataSet));
+				dataService.getEntityType(dataSet));
 		Query<Entity> q = new QueryImpl<Entity>().eq(chromosomeAttribute, segmentId);
 		q.pageSize(maxbins);
 		return dataService.findAll(dataSet, q);

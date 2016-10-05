@@ -32,7 +32,7 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest
 	private VcfAttributes vcfAttrs;
 
 	@Autowired
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;
@@ -55,11 +55,11 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void metaData() throws IOException
 	{
-		try (VcfRepository vcfRepository = new VcfRepository(testData, "testData", vcfAttrs, entityMetaFactory,
+		try (VcfRepository vcfRepository = new VcfRepository(testData, "testData", vcfAttrs, entityTypeFactory,
 				attrMetaFactory))
 		{
 			assertEquals(vcfRepository.getName(), "testData");
-			Iterator<AttributeMetaData> it = vcfRepository.getEntityMetaData().getAttributes().iterator();
+			Iterator<AttributeMetaData> it = vcfRepository.getEntityType().getAttributes().iterator();
 			assertTrue(it.hasNext());
 			testAttribute(it.next(), VcfAttributes.CHROM, STRING);
 			assertTrue(it.hasNext());
@@ -93,7 +93,7 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void iterator() throws IOException
 	{
-		try (VcfRepository vcfRepository = new VcfRepository(testData, "testData", vcfAttrs, entityMetaFactory,
+		try (VcfRepository vcfRepository = new VcfRepository(testData, "testData", vcfAttrs, entityTypeFactory,
 				attrMetaFactory))
 		{
 			Iterator<Entity> it = vcfRepository.iterator();
@@ -142,7 +142,7 @@ public class VcfRepositoryTest extends AbstractMolgenisSpringTest
 	@Test
 	public void iterator_noValues() throws IOException
 	{
-		try (VcfRepository vcfRepository = new VcfRepository(testNoData, "testNoData", vcfAttrs, entityMetaFactory,
+		try (VcfRepository vcfRepository = new VcfRepository(testNoData, "testNoData", vcfAttrs, entityTypeFactory,
 				attrMetaFactory))
 		{
 			Iterator<Entity> it = vcfRepository.iterator();

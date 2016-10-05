@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixRepository;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -29,7 +29,7 @@ import static org.molgenis.data.vcf.model.VcfAttributes.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-@ContextConfiguration(classes = { TabixVcfRepositoryTest.Config.class })
+@ContextConfiguration(classes = { org.molgenis.data.annotation.impl.tabix.TabixVcfRepositoryTest.Config.class })
 public class TabixRepositoryTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
@@ -42,7 +42,7 @@ public class TabixRepositoryTest extends AbstractMolgenisSpringTest
 	private VcfAttributes vcfAttributes;
 
 	private TabixRepository tabixRepository;
-	private EntityMetaData repoMetaData;
+	private EntityType repoMetaData;
 
 	@BeforeClass
 	public void beforeClass() throws IOException
@@ -60,9 +60,9 @@ public class TabixRepositoryTest extends AbstractMolgenisSpringTest
 	}
 
 	@Test
-	public void testGetEntityMetaData()
+	public void testGetEntityType()
 	{
-		assertEquals(tabixRepository.getEntityMetaData(), repoMetaData);
+		assertEquals(tabixRepository.getEntityType(), repoMetaData);
 	}
 
 	@Test

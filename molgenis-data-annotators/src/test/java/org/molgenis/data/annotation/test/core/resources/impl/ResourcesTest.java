@@ -9,7 +9,7 @@ import org.molgenis.data.annotation.core.resources.Resource;
 import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -48,7 +48,7 @@ public class ResourcesTest extends AbstractMolgenisSpringTest
 	@Autowired
 	private Resources resources;
 
-	private EntityMetaData emd;
+	private EntityType emd;
 
 	private Entity e1;
 

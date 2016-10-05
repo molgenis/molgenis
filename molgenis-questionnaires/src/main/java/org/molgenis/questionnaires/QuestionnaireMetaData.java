@@ -1,7 +1,7 @@
 package org.molgenis.questionnaires;
 
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.security.owned.OwnedEntityMetaData;
+import org.molgenis.security.owned.OwnedEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 /**
- * Base EntityMetaData for 'questionnaire' entities
+ * Base EntityType for 'questionnaire' entities
  */
 @Component
 public class QuestionnaireMetaData extends SystemEntityType
@@ -24,13 +24,13 @@ public class QuestionnaireMetaData extends SystemEntityType
 
 	public static final String ATTR_STATUS = "status";
 
-	private final OwnedEntityMetaData ownedEntityMetaData;
+	private final OwnedEntityType ownedEntityType;
 
 	@Autowired
-	QuestionnaireMetaData(OwnedEntityMetaData ownedEntityMetaData)
+	QuestionnaireMetaData(OwnedEntityType ownedEntityType)
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
-		this.ownedEntityMetaData = requireNonNull(ownedEntityMetaData);
+		this.ownedEntityType = requireNonNull(ownedEntityType);
 	}
 
 	@Override
@@ -38,7 +38,7 @@ public class QuestionnaireMetaData extends SystemEntityType
 	{
 		setLabel("Questionnaire");
 		setAbstract(true);
-		setExtends(ownedEntityMetaData);
+		setExtends(ownedEntityType);
 
 		List<String> enumOptions = new ArrayList<>();
 		for (QuestionnaireStatus questionnaireStatus : QuestionnaireStatus.values())

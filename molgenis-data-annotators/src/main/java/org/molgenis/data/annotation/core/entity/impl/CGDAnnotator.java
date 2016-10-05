@@ -41,7 +41,7 @@ import static org.molgenis.data.annotation.core.entity.impl.CGDAnnotator.General
 import static org.molgenis.data.annotation.web.settings.CGDAnnotatorSettings.Meta.CGD_LOCATION;
 
 /**
- * Annotator that can add HGNC_ID and ENTREZ_GENE_ID and other attributes to an entityMetaData that has a attribute named 'GENE'
+ * Annotator that can add HGNC_ID and ENTREZ_GENE_ID and other attributes to an EntityType that has a attribute named 'GENE'
  * that must be the HGNC gene dataType.
  * <p>
  * It reads this info from a tab separated CGD file. The location of this file is defined by a RuntimeProperty named

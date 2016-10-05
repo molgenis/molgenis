@@ -8,7 +8,7 @@ import org.molgenis.data.idcard.model.IdCardBiobank;
 import org.molgenis.data.idcard.model.IdCardBiobankFactory;
 import org.molgenis.data.idcard.model.IdCardBiobankMetaData;
 import org.molgenis.data.idcard.settings.IdCardIndexerSettings;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AbstractRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,8 +62,7 @@ public class IdCardBiobankRepository extends AbstractRepository
 		return repoCapabilities;
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
 		return idCardBiobankMetaData;
 	}
@@ -71,13 +70,13 @@ public class IdCardBiobankRepository extends AbstractRepository
 	@Override
 	public long count(Query<Entity> q)
 	{
-		return elasticsearchService.count(q, getEntityMetaData());
+		return elasticsearchService.count(q, getEntityType());
 	}
 
 	@Override
 	public Stream<Entity> findAll(Query<Entity> q)
 	{
-		return elasticsearchService.searchAsStream(q, getEntityMetaData());
+		return elasticsearchService.searchAsStream(q, getEntityType());
 	}
 
 	@Override
@@ -109,7 +108,7 @@ public class IdCardBiobankRepository extends AbstractRepository
 	@Override
 	public AggregateResult aggregate(AggregateQuery aggregateQuery)
 	{
-		return elasticsearchService.aggregate(aggregateQuery, getEntityMetaData());
+		return elasticsearchService.aggregate(aggregateQuery, getEntityType());
 	}
 
 	@Override
@@ -160,12 +159,12 @@ public class IdCardBiobankRepository extends AbstractRepository
 		Iterable<? extends Entity> entities = idCardClient
 				.getIdCardBiobanks(idCardIndexerSettings.getIndexRebuildTimeout());
 
-		EntityMetaData entityMeta = getEntityMetaData();
-		if (!elasticsearchService.hasMapping(entityMeta))
+		EntityType entityType = getEntityType();
+		if (!elasticsearchService.hasMapping(entityType))
 		{
-			elasticsearchService.createMappings(entityMeta);
+			elasticsearchService.createMappings(entityType);
 		}
-		elasticsearchService.index(entities, entityMeta, IndexingMode.UPDATE);
+		elasticsearchService.index(entities, entityType, IndexingMode.UPDATE);
 		LOG.debug("Indexed ID-Card biobanks");
 	}
 

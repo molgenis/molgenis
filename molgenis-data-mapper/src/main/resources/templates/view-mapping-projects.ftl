@@ -132,8 +132,8 @@
                         <label>Select the Target entity</label>
                         <select name="target-entity" id="target-entity-select" class="form-control" required="required"
                                 placeholder="Select a target entity">
-                            <#list entityMetaDatas as entityMetaData>
-                                <option value="${entityMetaData.name?html}">${entityMetaData.name?html}</option>
+                            <#list entityMetaDatas as entityType>
+                                <option value="${entityType.name?html}">${entityType.name?html}</option>
                             </#list>
                         </select>
                     </div>

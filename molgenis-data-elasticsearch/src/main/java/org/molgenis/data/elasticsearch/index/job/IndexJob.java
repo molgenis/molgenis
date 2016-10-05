@@ -9,7 +9,7 @@ import org.molgenis.data.index.meta.IndexActionGroupMetaData;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.jobs.Job;
 import org.molgenis.data.jobs.Progress;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -180,33 +180,33 @@ class IndexJob extends Job
 		{
 			// Delete
 			LOG.debug("Index delete [{}].[{}].", entityFullName, entityId);
-			searchService.deleteById(entityId, dataService.getMeta().getEntityMetaData(entityFullName));
+			searchService.deleteById(entityId, dataService.getMeta().getEntityType(entityFullName));
 			return;
 		}
 
-		EntityMetaData entityMeta = actualEntity.getEntityMetaData();
-		boolean indexEntityExists = searchService.hasMapping(entityMeta);
+		EntityType entityType = actualEntity.getEntityType();
+		boolean indexEntityExists = searchService.hasMapping(entityType);
 		if (!indexEntityExists)
 		{
 			LOG.debug("Create mapping of repository [{}] because it was not exist yet", entityFullName);
-			searchService.createMappings(entityMeta);
+			searchService.createMappings(entityType);
 		}
 
 		Query<Entity> q = new QueryImpl<>();
-		q.eq(entityMeta.getIdAttribute().getName(), entityId);
-		Entity indexEntity = searchService.findOne(q, entityMeta);
+		q.eq(entityType.getIdAttribute().getName(), entityId);
+		Entity indexEntity = searchService.findOne(q, entityType);
 
 		if (null != indexEntity)
 		{
 			// update
 			LOG.debug("Index update [{}].[{}].", entityFullName, entityId);
-			searchService.index(actualEntity, actualEntity.getEntityMetaData(), IndexingMode.UPDATE);
+			searchService.index(actualEntity, actualEntity.getEntityType(), IndexingMode.UPDATE);
 		}
 		else
 		{
 			// Add
 			LOG.debug("Index add [{}].[{}].", entityFullName, entityId);
-			searchService.index(actualEntity, actualEntity.getEntityMetaData(), IndexingMode.ADD);
+			searchService.index(actualEntity, actualEntity.getEntityType(), IndexingMode.ADD);
 		}
 	}
 

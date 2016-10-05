@@ -12,7 +12,7 @@ import org.molgenis.data.Sort.Direction;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 /**
  * Adds Sort to the SearchRequestBuilder object.
@@ -23,7 +23,7 @@ public class SortGenerator implements QueryPartGenerator
 {
 
 	@Override
-	public void generate(SearchRequestBuilder searchRequestBuilder, Query<Entity> query, EntityMetaData entityMetaData)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Query<Entity> query, EntityType entityType)
 	{
 		if (query.getSort() != null)
 		{
@@ -35,7 +35,7 @@ public class SortGenerator implements QueryPartGenerator
 				Direction sortDirection = sort.getDirection();
 				if (sortDirection == null) throw new IllegalArgumentException("Missing sort direction");
 
-				AttributeMetaData sortAttr = entityMetaData.getAttribute(sortAttrName);
+				AttributeMetaData sortAttr = entityType.getAttribute(sortAttrName);
 				if (sortAttr == null) throw new UnknownAttributeException(sortAttrName);
 
 				String sortField = getSortField(sortAttr);

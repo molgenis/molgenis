@@ -5,7 +5,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 
@@ -45,20 +45,20 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	/**
 	 * Returns the repository for the given entity meta data
 	 *
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 * @return entity repository or null if no repository exists for the entity (e.g. the entity is abstract)
 	 */
-	Repository<Entity> getRepository(EntityMetaData entityMeta);
+	Repository<Entity> getRepository(EntityType entityType);
 
 	/**
 	 * Returns the typed repository for the given entity meta data
 	 *
-	 * @param entityMeta  entity meta data
+	 * @param entityType  entity meta data
 	 * @param entityClass entity class
 	 * @param <E>         entity type
 	 * @return typed entity repository or null if no repository exists for the entity (e.g. the entity is abstract).
 	 */
-	<E extends Entity> Repository<E> getRepository(EntityMetaData entityMeta, Class<E> entityClass);
+	<E extends Entity> Repository<E> getRepository(EntityType entityType, Class<E> entityClass);
 
 	/**
 	 * Returns whether a {@link Repository} exists for the given entity name. Always returns false for abstract entities.
@@ -71,22 +71,22 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	/**
 	 * Create a repository for the given entity meta data.
 	 *
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 * @return repository
 	 * @throws org.molgenis.data.MolgenisDataException if entity meta data is abstract
 	 */
-	Repository<Entity> createRepository(EntityMetaData entityMeta);
+	Repository<Entity> createRepository(EntityType entityType);
 
 	/**
 	 * Create a typed repository for the given entity meta data.
 	 *
-	 * @param entityMeta  entity meta data
+	 * @param entityType  entity meta data
 	 * @param entityClass entity class
 	 * @param <E>         entity type
 	 * @return typed repository
 	 * @throws org.molgenis.data.MolgenisDataException if entity meta data is abstract
 	 */
-	<E extends Entity> Repository<E> createRepository(EntityMetaData entityMeta, Class<E> entityClass);
+	<E extends Entity> Repository<E> createRepository(EntityType entityType, Class<E> entityClass);
 
 	/**
 	 * Get a backend by name or null if it does not exists
@@ -97,12 +97,12 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	RepositoryCollection getBackend(String backendName);
 
 	/**
-	 * Get the backend the EntityMetaData belongs to
+	 * Get the backend the EntityType belongs to
 	 *
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 * @return repository collection, null if entity meta data is abstract
 	 */
-	RepositoryCollection getBackend(EntityMetaData entityMeta);
+	RepositoryCollection getBackend(EntityType entityType);
 
 	/**
 	 * Has backend will check if the requested backend already exists and is registered.
@@ -159,16 +159,16 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 * Gets the entity meta data for a given entity.
 	 *
 	 * @param name the fullyQualifiedName of the entity
-	 * @return EntityMetaData of the entity, or null if the entity does not exist
+	 * @return EntityType of the entity, or null if the entity does not exist
 	 */
-	EntityMetaData getEntityMetaData(String name);
+	EntityType getEntityType(String name);
 
 	/**
-	 * Returns a stream of all {@link EntityMetaData entity meta data}.
+	 * Returns a stream of all {@link EntityType entity meta data}.
 	 *
 	 * @return all entity meta data
 	 */
-	Stream<EntityMetaData> getEntityMetaDatas();
+	Stream<EntityType> getEntityTypes();
 
 	/**
 	 * Returns a stream of all {@link Repository repositories}.
@@ -180,34 +180,34 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	/**
 	 * Add entity meta data and entity meta data attributes.
 	 *
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 */
-	void addEntityMeta(EntityMetaData entityMeta);
+	void addEntityType(EntityType entityType);
 
 	/**
-	 * Deletes an EntityMeta
+	 * Deletes an entityType
 	 *
 	 * @param entityName entity name
 	 */
-	void deleteEntityMeta(String entityName);
+	void deleteEntityType(String entityName);
 
 	/**
-	 * Deletes a list of EntityMetaData
+	 * Deletes a list of EntityType
 	 *
 	 * @param entities
 	 */
-	void delete(List<EntityMetaData> entities);
+	void delete(List<EntityType> entities);
 
 	/**
 	 * Updates entity meta data and entity meta data attributes.
 	 *
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 * @throws UnknownEntityException if entity meta data does not exist
 	 */
-	void updateEntityMeta(EntityMetaData entityMeta);
+	void updateEntityType(EntityType entityType);
 
 	/**
-	 * Adds an Attribute to an EntityMeta
+	 * Adds an Attribute to an entityType
 	 *
 	 * @param attribute
 	 */
@@ -230,20 +230,20 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	LinkedHashMap<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection);
 
 	/**
-	 * Returns whether the given {@link EntityMetaData} defines a meta entity such as {@link EntityTypeMetadata} or
+	 * Returns whether the given {@link EntityType} defines a meta entity such as {@link EntityTypeMetadata} or
 	 * {@link AttributeMetaData}.
 	 *
-	 * @param entityMetaData
+	 * @param entityType
 	 * @return
 	 */
-	boolean isMetaEntityMetaData(EntityMetaData entityMetaData);
+	boolean isMetaEntityType(EntityType entityType);
 
 	/**
-	 * Returns whether the given {@link EntityMetaData} attributes are compatible with
+	 * Returns whether the given {@link EntityType} attributes are compatible with
 	 * the attributes of an existing repository with the same name
 	 *
-	 * @param entityMetaData
+	 * @param entityType
 	 * @return
 	 */
-	boolean isEntityMetaDataCompatible(EntityMetaData entityMetaData);
+	boolean isEntityTypeCompatible(EntityType entityType);
 }

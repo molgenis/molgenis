@@ -2,7 +2,7 @@ package org.molgenis.data.index;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -29,8 +29,8 @@ public class IndexActionRepositoryDecoratorTest
 		decoratedRepo = mock(Repository.class);
 		when(decoratedRepo.getName()).thenReturn("entity");
 		when(decoratedRepo.getCapabilities()).thenReturn(singleton(MANAGABLE));
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
+		EntityType entityType = mock(EntityType.class);
+		when(decoratedRepo.getEntityType()).thenReturn(entityType);
 		indexActionRegisterService = mock(IndexActionRegisterService.class);
 		indexActionRepositoryDecorator = new IndexActionRepositoryDecorator(decoratedRepo,
 				indexActionRegisterService);

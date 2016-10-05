@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -34,17 +34,17 @@ public class PostgreSqlEntityFactoryTest
 		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 
-		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
-		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+		EntityType refEntityType = mock(EntityType.class);
+		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
 
 		String xrefAttr = "xrefAttr";
 		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
 		when(oneToManyAttr.getName()).thenReturn(xrefAttr);
 		when(oneToManyAttr.getDataType()).thenReturn(XREF);
-		when(oneToManyAttr.getRefEntity()).thenReturn(refEntityMeta);
+		when(oneToManyAttr.getRefEntity()).thenReturn(refEntityType);
 
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getAtomicAttributes()).thenReturn(singleton(oneToManyAttr));
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getAtomicAttributes()).thenReturn(singleton(oneToManyAttr));
 		ResultSet rs = mock(ResultSet.class);
 		when(rs.getString(xrefAttr)).thenReturn("id0");
 		int rowNum = 0;
@@ -52,10 +52,10 @@ public class PostgreSqlEntityFactoryTest
 		Entity entity = mock(Entity.class);
 		Fetch fetch = null;
 		//noinspection ConstantConditions
-		when(entityManager.create(entityMeta, fetch)).thenReturn(entity);
+		when(entityManager.create(entityType, fetch)).thenReturn(entity);
 		Entity refEntity = mock(Entity.class);
-		when(entityManager.getReference(refEntityMeta, "id0")).thenReturn(refEntity);
-		assertEquals(postgreSqlEntityFactory.createRowMapper(entityMeta, null).mapRow(rs, rowNum), entity);
+		when(entityManager.getReference(refEntityType, "id0")).thenReturn(refEntity);
+		assertEquals(postgreSqlEntityFactory.createRowMapper(entityType, null).mapRow(rs, rowNum), entity);
 		verify(entity).set(xrefAttr, refEntity);
 	}
 }

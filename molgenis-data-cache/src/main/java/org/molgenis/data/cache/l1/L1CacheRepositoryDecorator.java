@@ -3,7 +3,7 @@ package org.molgenis.data.cache.l1;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Iterator;
 import java.util.List;
@@ -73,7 +73,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	{
 		if (cacheable)
 		{
-			Optional<Entity> entity = l1Cache.get(getName(), id, getEntityMetaData());
+			Optional<Entity> entity = l1Cache.get(getName(), id, getEntityType());
 			if (entity != null)
 			{
 				return entity.orElse(null);
@@ -105,8 +105,8 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	private List<Entity> findAllBatch(List<Object> batch)
 	{
 		String entityName = getName();
-		EntityMetaData entityMetaData = getEntityMetaData();
-		List<Object> missingIds = batch.stream().filter(id -> l1Cache.get(entityName, id, entityMetaData) == null)
+		EntityType entityType = getEntityType();
+		List<Object> missingIds = batch.stream().filter(id -> l1Cache.get(entityName, id, entityType) == null)
 				.collect(toList());
 
 		Map<Object, Entity> missingEntities = delegate().findAll(missingIds.stream())
@@ -114,7 +114,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 
 		return Lists.transform(batch, id ->
 		{
-			Optional<Entity> result = l1Cache.get(entityName, id, getEntityMetaData());
+			Optional<Entity> result = l1Cache.get(entityName, id, getEntityType());
 			if (result == null)
 			{
 				return missingEntities.get(id);

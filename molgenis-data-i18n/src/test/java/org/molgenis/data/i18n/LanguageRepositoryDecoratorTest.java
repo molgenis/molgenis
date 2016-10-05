@@ -71,9 +71,9 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		MockitoAnnotations.initMocks(this);
 		when(metaDataService.getDefaultBackend()).thenReturn(defaultBackend);
 		when(dataService.getMeta()).thenReturn(metaDataService);
-		when(dataService.getEntityMetaData(ENTITY_META_DATA)).thenReturn(entityTypeMeta);
-		when(dataService.getEntityMetaData(ATTRIBUTE_META_DATA)).thenReturn(attrMetaMeta);
-		when(dataService.getEntityMetaData(I18N_STRING)).thenReturn(i18nStringMetaData);
+		when(dataService.getEntityType(ENTITY_META_DATA)).thenReturn(entityTypeMeta);
+		when(dataService.getEntityType(ATTRIBUTE_META_DATA)).thenReturn(attrMetaMeta);
+		when(dataService.getEntityType(I18N_STRING)).thenReturn(i18nStringMetaData);
 		languageRepositoryDecorator = new LanguageRepositoryDecorator(decoratedRepo, dataService, attrMetaFactory,
 				entityTypeMeta, i18nStringMetaData);
 	}
@@ -82,11 +82,11 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	public void addStream()
 	{
 		Language language0 = mock(Language.class);
-		when(language0.getEntityMetaData()).thenReturn(languageMeta);
+		when(language0.getEntityType()).thenReturn(languageMeta);
 		when(language0.getCode()).thenReturn("nl");
 
 		Language language1 = mock(Language.class);
-		when(language1.getEntityMetaData()).thenReturn(languageMeta);
+		when(language1.getEntityType()).thenReturn(languageMeta);
 		when(language1.getCode()).thenReturn("de");
 
 		Stream<Language> entities = Arrays.asList(language0, language1).stream();

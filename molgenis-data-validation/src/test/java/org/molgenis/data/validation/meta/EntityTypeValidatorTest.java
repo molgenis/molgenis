@@ -5,7 +5,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.validation.MolgenisValidationException;
 import org.testng.annotations.BeforeMethod;
@@ -28,10 +28,10 @@ public class EntityTypeValidatorTest
 	private EntityTypeValidator entityTypeValidator;
 	private DataService dataService;
 
-	private EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+	private EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 	private AttributeMetaData idAttr;
 	private AttributeMetaData labelAttr;
-	private Query<EntityMetaData> entityQ;
+	private Query<EntityType> entityQ;
 	private Query<AttributeMetaData> attrQ;
 
 	@BeforeMethod
@@ -47,7 +47,7 @@ public class EntityTypeValidatorTest
 		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
 
 		// valid entity meta
-		entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 
 		idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
 		when(idAttr.getIdentifier()).thenReturn("#idAttr");
@@ -60,11 +60,11 @@ public class EntityTypeValidatorTest
 
 		//noinspection unchecked
 		entityQ = mock(Query.class);
-		when(dataService.query(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(entityQ);
+		when(dataService.query(ENTITY_META_DATA, EntityType.class)).thenReturn(entityQ);
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ0 = mock(Query.class);
+		Query<EntityType> entityQ0 = mock(Query.class);
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ1 = mock(Query.class);
+		Query<EntityType> entityQ1 = mock(Query.class);
 		when(entityQ.eq(ATTRIBUTES, idAttr)).thenReturn(entityQ0);
 		when(entityQ.eq(ATTRIBUTES, labelAttr)).thenReturn(entityQ1);
 		when(entityQ0.findOne()).thenReturn(null);
@@ -84,82 +84,82 @@ public class EntityTypeValidatorTest
 
 		String packageName = "package";
 		Package package_ = when(mock(Package.class).getName()).thenReturn(packageName).getMock();
-		when(entityMeta.getPackage()).thenReturn(package_);
+		when(entityType.getPackage()).thenReturn(package_);
 		String name = "name";
-		when(entityMeta.getName()).thenReturn(packageName + '_' + name);
-		when(entityMeta.getSimpleName()).thenReturn(name);
-		when(entityMeta.getOwnAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
-		when(entityMeta.getOwnIdAttribute()).thenReturn(idAttr);
-		when(entityMeta.getOwnLabelAttribute()).thenReturn(labelAttr);
-		when(entityMeta.getOwnLookupAttributes()).thenReturn(singletonList(labelAttr));
-		when(entityMeta.isAbstract()).thenReturn(false);
-		when(entityMeta.getExtends()).thenReturn(null);
-		when(entityMeta.getBackend()).thenReturn(backendName);
+		when(entityType.getName()).thenReturn(packageName + '_' + name);
+		when(entityType.getSimpleName()).thenReturn(name);
+		when(entityType.getOwnAllAttributes()).thenReturn(newArrayList(idAttr, labelAttr));
+		when(entityType.getOwnIdAttribute()).thenReturn(idAttr);
+		when(entityType.getOwnLabelAttribute()).thenReturn(labelAttr);
+		when(entityType.getOwnLookupAttributes()).thenReturn(singletonList(labelAttr));
+		when(entityType.isAbstract()).thenReturn(false);
+		when(entityType.getExtends()).thenReturn(null);
+		when(entityType.getBackend()).thenReturn(backendName);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Name \\[abstract\\] is not allowed because it is a reserved keyword.")
 	public void testValidateNameIsReservedKeyword() throws Exception
 	{
-		when(entityMeta.getSimpleName()).thenReturn("abstract");
-		entityTypeValidator.validate(entityMeta);
+		when(entityType.getSimpleName()).thenReturn("abstract");
+		entityTypeValidator.validate(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Name \\[attributeWithNameExceedingMaxSize\\] is too long: maximum length is 30 characters.")
 	public void testValidateNameIsTooLong() throws Exception
 	{
-		when(entityMeta.getSimpleName()).thenReturn("attributeWithNameExceedingMaxSize");
-		entityTypeValidator.validate(entityMeta);
+		when(entityType.getSimpleName()).thenReturn("attributeWithNameExceedingMaxSize");
+		entityTypeValidator.validate(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Qualified entity name \\[package_name\\] not equal to entity package name \\[package\\] underscore entity name \\[invalidName\\]")
 	public void testValidateFullNameDoesNotMatchPackageAndSimpleName()
 	{
-		when(entityMeta.getSimpleName()).thenReturn("invalidName");
-		entityTypeValidator.validate(entityMeta);
+		when(entityType.getSimpleName()).thenReturn("invalidName");
+		entityTypeValidator.validate(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Qualified entity name \\[name\\] not equal to entity name \\[invalidName\\]")
 	public void testValidateFullNameDoesNotMatchSimpleName()
 	{
-		when(entityMeta.getPackage()).thenReturn(null);
-		when(entityMeta.getName()).thenReturn("name");
-		when(entityMeta.getSimpleName()).thenReturn("invalidName");
-		entityTypeValidator.validate(entityMeta);
+		when(entityType.getPackage()).thenReturn(null);
+		when(entityType.getName()).thenReturn("name");
+		when(entityType.getSimpleName()).thenReturn("invalidName");
+		entityTypeValidator.validate(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Attribute \\[labelAttr\\] is owned by entity \\[ownerEntity\\]")
 	public void testValidateAttributeOwnedByOtherEntity()
 	{
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ0 = mock(Query.class);
+		Query<EntityType> entityQ0 = mock(Query.class);
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ1 = mock(Query.class);
+		Query<EntityType> entityQ1 = mock(Query.class);
 		when(entityQ.eq(ATTRIBUTES, idAttr)).thenReturn(entityQ0);
 		when(entityQ.eq(ATTRIBUTES, labelAttr)).thenReturn(entityQ1);
 		when(entityQ0.findOne()).thenReturn(null);
-		EntityMetaData ownerEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("ownerEntity").getMock();
-		when(entityQ1.findOne()).thenReturn(ownerEntityMeta);
+		EntityType ownerEntityType = when(mock(EntityType.class).getName()).thenReturn("ownerEntity").getMock();
+		when(entityQ1.findOne()).thenReturn(ownerEntityType);
 		when(dataService.query(ATTRIBUTE_META_DATA, AttributeMetaData.class)).thenReturn(attrQ);
 		when(attrQ.eq(PARTS, idAttr)).thenReturn(attrQ);
 		when(attrQ.findOne()).thenReturn(null);
-		entityTypeValidator.validate(entityMeta);
+		entityTypeValidator.validate(entityType);
 	}
 
 	@Test
 	public void testValidateAttributeOwnedBySameEntity()
 	{
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ0 = mock(Query.class);
+		Query<EntityType> entityQ0 = mock(Query.class);
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ1 = mock(Query.class);
+		Query<EntityType> entityQ1 = mock(Query.class);
 		when(entityQ.eq(ATTRIBUTES, idAttr)).thenReturn(entityQ0);
 		when(entityQ.eq(ATTRIBUTES, labelAttr)).thenReturn(entityQ1);
 		when(entityQ0.findOne()).thenReturn(null);
-		when(entityQ1.findOne()).thenReturn(entityMeta); // same entity
+		when(entityQ1.findOne()).thenReturn(entityType); // same entity
 		when(dataService.query(ATTRIBUTE_META_DATA, AttributeMetaData.class)).thenReturn(attrQ);
 		when(attrQ.eq(PARTS, idAttr)).thenReturn(attrQ);
 		when(attrQ.findOne()).thenReturn(null);
-		entityTypeValidator.validate(entityMeta); // should not throw an exception
+		entityTypeValidator.validate(entityType); // should not throw an exception
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Attribute \\[labelAttr\\] is owned by entity \\[ownerEntity\\]")
@@ -179,11 +179,11 @@ public class EntityTypeValidatorTest
 		AttributeMetaData attrParent = when(mock(AttributeMetaData.class).getName()).thenReturn("attrParent").getMock();
 		when(attrQ1.findOne()).thenReturn(attrParent);
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ0 = mock(Query.class);
+		Query<EntityType> entityQ0 = mock(Query.class);
 		when(entityQ.eq(ATTRIBUTES, attrParent)).thenReturn(entityQ0);
-		EntityMetaData ownerEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("ownerEntity").getMock();
-		when(entityQ0.findOne()).thenReturn(ownerEntityMeta);
-		entityTypeValidator.validate(entityMeta);
+		EntityType ownerEntityType = when(mock(EntityType.class).getName()).thenReturn("ownerEntity").getMock();
+		when(entityQ0.findOne()).thenReturn(ownerEntityType);
+		entityTypeValidator.validate(entityType);
 	}
 
 	@Test
@@ -203,104 +203,104 @@ public class EntityTypeValidatorTest
 		AttributeMetaData attrParent = when(mock(AttributeMetaData.class).getName()).thenReturn("attrParent").getMock();
 		when(attrQ1.findOne()).thenReturn(attrParent);
 		//noinspection unchecked
-		Query<EntityMetaData> entityQ0 = mock(Query.class);
+		Query<EntityType> entityQ0 = mock(Query.class);
 		when(entityQ.eq(ATTRIBUTES, attrParent)).thenReturn(entityQ0);
-		when(entityQ0.findOne()).thenReturn(entityMeta);
-		entityTypeValidator.validate(entityMeta); // should not throw an exception
+		when(entityQ0.findOne()).thenReturn(entityType);
+		entityTypeValidator.validate(entityType); // should not throw an exception
 	}
 
 	@Test
 	public void testValidateAttributeNotOwnedByExtendedEntity()
 	{
-		EntityMetaData extendsEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(extendsEntityMeta.getAllAttributes()).thenReturn(emptyList());
-		when(entityMeta.getExtends()).thenReturn(extendsEntityMeta);
-		entityTypeValidator.validate(entityMeta); // should not throw an exception
+		EntityType extendsEntityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(extendsEntityType.getAllAttributes()).thenReturn(emptyList());
+		when(entityType.getExtends()).thenReturn(extendsEntityType);
+		entityTypeValidator.validate(entityType); // should not throw an exception
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "An attribute with name \\[idAttr\\] already exists in entity \\[extendsEntity\\] or one of its parents")
 	public void testValidateAttributeOwnedByExtendedEntity()
 	{
-		EntityMetaData extendsEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("extendsEntity")
+		EntityType extendsEntityType = when(mock(EntityType.class).getName()).thenReturn("extendsEntity")
 				.getMock();
-		when(extendsEntityMeta.getAllAttributes()).thenReturn(singletonList(idAttr));
-		when(entityMeta.getExtends()).thenReturn(extendsEntityMeta);
-		entityTypeValidator.validate(entityMeta);
+		when(extendsEntityType.getAllAttributes()).thenReturn(singletonList(idAttr));
+		when(entityType.getExtends()).thenReturn(extendsEntityType);
+		entityTypeValidator.validate(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "ID attribute \\[idAttr\\] is not part of the entity attributes")
 	public void testValidateOwnIdAttributeInAttributes()
 	{
-		when(entityMeta.getOwnAllAttributes()).thenReturn(singletonList(labelAttr));
-		entityTypeValidator.validate(entityMeta);
+		when(entityType.getOwnAllAttributes()).thenReturn(singletonList(labelAttr));
+		entityTypeValidator.validate(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "ID attribute \\[idAttr\\] type \\[XREF\\] is not allowed")
 	public void testValidateOwnIdAttributeTypeAllowed()
 	{
 		when(idAttr.getDataType()).thenReturn(XREF);
-		entityTypeValidator.validate(entityMeta);
+		entityTypeValidator.validate(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "ID attribute \\[idAttr\\] is not a unique attribute")
 	public void testValidateOwnIdAttributeUnique()
 	{
 		when(idAttr.isUnique()).thenReturn(false);
-		entityTypeValidator.validate(entityMeta);
+		entityTypeValidator.validate(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "ID attribute \\[idAttr\\] is not a non-nillable attribute")
 	public void testValidateOwnIdAttributeNonNillable()
 	{
 		when(idAttr.isNillable()).thenReturn(true);
-		entityTypeValidator.validate(entityMeta);
+		entityTypeValidator.validate(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Missing required ID attribute")
 	public void testValidateOwnIdAttributeNullIdAttributeNull()
 	{
-		when(entityMeta.getOwnIdAttribute()).thenReturn(null);
-		when(entityMeta.getIdAttribute()).thenReturn(null);
-		entityTypeValidator.validate(entityMeta);
+		when(entityType.getOwnIdAttribute()).thenReturn(null);
+		when(entityType.getIdAttribute()).thenReturn(null);
+		entityTypeValidator.validate(entityType);
 	}
 
 	@Test
 	public void testValidateOwnIdAttributeNullIdAttributeNullAbstract()
 	{
-		when(entityMeta.isAbstract()).thenReturn(true);
-		when(entityMeta.getOwnIdAttribute()).thenReturn(null);
-		when(entityMeta.getIdAttribute()).thenReturn(null);
-		entityTypeValidator.validate(entityMeta); // valid
+		when(entityType.isAbstract()).thenReturn(true);
+		when(entityType.getOwnIdAttribute()).thenReturn(null);
+		when(entityType.getIdAttribute()).thenReturn(null);
+		entityTypeValidator.validate(entityType); // valid
 	}
 
 	@Test
 	public void testValidateOwnIdAttributeNullIdAttributeNotNull()
 	{
-		when(entityMeta.getOwnIdAttribute()).thenReturn(null);
+		when(entityType.getOwnIdAttribute()).thenReturn(null);
 		AttributeMetaData parentIdAttr = mock(AttributeMetaData.class);
-		when(entityMeta.getIdAttribute()).thenReturn(parentIdAttr);
-		entityTypeValidator.validate(entityMeta); // valid
+		when(entityType.getIdAttribute()).thenReturn(parentIdAttr);
+		entityTypeValidator.validate(entityType); // valid
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Label attribute \\[labelAttr\\] is not part of the entity attributes")
 	public void testValidateOwnLabelAttributeInAttributes()
 	{
-		when(entityMeta.getOwnAllAttributes()).thenReturn(singletonList(idAttr));
-		entityTypeValidator.validate(entityMeta);
+		when(entityType.getOwnAllAttributes()).thenReturn(singletonList(idAttr));
+		entityTypeValidator.validate(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Lookup attribute \\[labelAttr\\] is not part of the entity attributes")
 	public void testValidateOwnLookupAttributesInAttributes()
 	{
-		when(entityMeta.getOwnAllAttributes()).thenReturn(singletonList(idAttr));
-		when(entityMeta.getOwnLabelAttribute()).thenReturn(null);
-		entityTypeValidator.validate(entityMeta);
+		when(entityType.getOwnAllAttributes()).thenReturn(singletonList(idAttr));
+		when(entityType.getOwnLabelAttribute()).thenReturn(null);
+		entityTypeValidator.validate(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisValidationException.class, expectedExceptionsMessageRegExp = "Unknown backend \\[invalidBackend\\]")
 	public void testValidateBackend()
 	{
-		when(entityMeta.getBackend()).thenReturn("invalidBackend");
-		entityTypeValidator.validate(entityMeta);
+		when(entityType.getBackend()).thenReturn("invalidBackend");
+		entityTypeValidator.validate(entityType);
 	}
 }

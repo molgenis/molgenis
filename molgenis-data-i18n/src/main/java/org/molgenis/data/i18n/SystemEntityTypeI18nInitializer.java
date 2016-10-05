@@ -21,12 +21,12 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
  * @see SystemEntityType
  */
 @Component
-public class SystemEntityMetaDataI18nInitializer
+public class SystemEntityTypeI18nInitializer
 {
 	private final MetaDataService metaDataService;
 
 	@Autowired
-	public SystemEntityMetaDataI18nInitializer(MetaDataService metaDataService)
+	public SystemEntityTypeI18nInitializer(MetaDataService metaDataService)
 	{
 		this.metaDataService = requireNonNull(metaDataService);
 	}

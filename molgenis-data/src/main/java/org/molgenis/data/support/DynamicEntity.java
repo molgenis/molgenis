@@ -5,7 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -29,7 +29,7 @@ public class DynamicEntity implements Entity
 	/**
 	 * Entity meta data
 	 */
-	private final EntityMetaData entityMeta;
+	private final EntityType entityType;
 
 	/**
 	 * Maps attribute names to values. Value class types are determined by attribute data type.
@@ -39,54 +39,53 @@ public class DynamicEntity implements Entity
 	/**
 	 * Constructs an entity with the given entity meta data.
 	 *
-	 * @param entityMeta entity meta
+	 * @param entityType entity meta
 	 */
-	public DynamicEntity(EntityMetaData entityMeta)
+	public DynamicEntity(EntityType entityType)
 	{
-		this.entityMeta = requireNonNull(entityMeta);
+		this.entityType = requireNonNull(entityType);
 		this.values = newHashMap();
 	}
 
 	/**
 	 * Constructs an entity with the given entity meta data and initialized the entity with the given data.
 	 *
-	 * @param entityMeta entity meta
+	 * @param entityType entity meta
 	 * @param values     map with attribute name-value pairs
 	 */
-	public DynamicEntity(EntityMetaData entityMeta, Map<String, Object> values)
+	public DynamicEntity(EntityType entityType, Map<String, Object> values)
 	{
-		this(entityMeta);
+		this(entityType);
 		values.forEach(this::set);
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return entityMeta;
+		return entityType;
 	}
 
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
-		return stream(entityMeta.getAtomicAttributes().spliterator(), false).map(AttributeMetaData::getName)::iterator;
+		return stream(entityType.getAtomicAttributes().spliterator(), false).map(AttributeMetaData::getName)::iterator;
 	}
 
 	@Override
 	public Object getIdValue()
 	{
 		// abstract entities might not have an id attribute
-		AttributeMetaData idAttr = entityMeta.getIdAttribute();
+		AttributeMetaData idAttr = entityType.getIdAttribute();
 		return idAttr != null ? get(idAttr.getName()) : null;
 	}
 
 	@Override
 	public void setIdValue(Object id)
 	{
-		AttributeMetaData idAttr = entityMeta.getIdAttribute();
+		AttributeMetaData idAttr = entityType.getIdAttribute();
 		if (idAttr == null)
 		{
 			throw new IllegalArgumentException(
-					format("Entity [%s] doesn't have an id attribute", entityMeta.getName()));
+					format("Entity [%s] doesn't have an id attribute", entityType.getName()));
 		}
 		set(idAttr.getName(), id);
 	}
@@ -95,7 +94,7 @@ public class DynamicEntity implements Entity
 	public Object getLabelValue()
 	{
 		// abstract entities might not have an label attribute
-		AttributeMetaData labelAttr = entityMeta.getLabelAttribute();
+		AttributeMetaData labelAttr = entityType.getLabelAttribute();
 		return labelAttr != null ? get(labelAttr.getName()) : null;
 	}
 
@@ -211,7 +210,7 @@ public class DynamicEntity implements Entity
 			return;
 		}
 
-		AttributeMetaData attr = entityMeta.getAttribute(attrName);
+		AttributeMetaData attr = entityType.getAttribute(attrName);
 		if (attr == null)
 		{
 			throw new UnknownAttributeException(format("Unknown attribute [%s]", attrName));

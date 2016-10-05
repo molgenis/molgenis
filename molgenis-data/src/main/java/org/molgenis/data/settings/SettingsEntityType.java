@@ -4,12 +4,12 @@ import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 
 @Component
-public class SettingsEntityMeta extends SystemEntityType
+public class SettingsEntityType extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "settings";
 	public static final String SETTINGS = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -18,7 +18,7 @@ public class SettingsEntityMeta extends SystemEntityType
 
 	private SettingsPackage settingsPackage;
 
-	public SettingsEntityMeta()
+	public SettingsEntityType()
 	{
 		super(SIMPLE_NAME, PACKAGE_SETTINGS);
 	}

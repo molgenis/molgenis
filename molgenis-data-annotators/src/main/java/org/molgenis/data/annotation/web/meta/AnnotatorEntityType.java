@@ -4,7 +4,7 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 
 import java.util.LinkedList;
 
-public interface AnnotatorEntityMetaData
+public interface AnnotatorEntityType
 {
 	LinkedList<AttributeMetaData> getOrderedAttributes();
 }

@@ -4,7 +4,7 @@ import cz.jirutka.rsql.parser.ast.Node;
 import org.molgenis.data.AggregateQuery;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -22,9 +22,9 @@ public class AggregateQueryRsql
 		this.rootNode = checkNotNull(rootNode);
 	}
 
-	public AggregateQuery createAggregateQuery(EntityMetaData entityMetaData, Query<Entity> query)
+	public AggregateQuery createAggregateQuery(EntityType entityType, Query<Entity> query)
 	{
-		AggregateQueryRsqlVisitor rsqlVisitor = new AggregateQueryRsqlVisitor(entityMetaData, query);
+		AggregateQueryRsqlVisitor rsqlVisitor = new AggregateQueryRsqlVisitor(entityType, query);
 		return rootNode.accept(rsqlVisitor);
 	}
 }

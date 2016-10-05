@@ -11,6 +11,7 @@ import org.molgenis.auth.MolgenisUser;
 import org.molgenis.auth.MolgenisUserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.mapper.algorithmgenerator.service.AlgorithmGeneratorService;
 import org.molgenis.data.mapper.algorithmgenerator.service.impl.AlgorithmGeneratorServiceImpl;
@@ -21,7 +22,6 @@ import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
@@ -56,8 +56,8 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
@@ -65,7 +65,7 @@ import static org.testng.Assert.assertNull;
 public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;
@@ -112,11 +112,11 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		String identifier = "id";
 		String sourceIntAttribute = "age";
 
-		EntityMetaData entityMetaData = entityMetaFactory.create("testInt");
-		entityMetaData.addAttribute(attrMetaFactory.create().setName(identifier).setDataType(INT), ROLE_ID);
-		entityMetaData.addAttribute(attrMetaFactory.create().setName(sourceIntAttribute).setDataType(INT));
+		EntityType entityType = entityTypeFactory.create("testInt");
+		entityType.addAttribute(attrMetaFactory.create().setName(identifier).setDataType(INT), ROLE_ID);
+		entityType.addAttribute(attrMetaFactory.create().setName(sourceIntAttribute).setDataType(INT));
 
-		Entity source = new DynamicEntity(entityMetaData);
+		Entity source = new DynamicEntity(entityType);
 		source.set(identifier, 1);
 		source.set(sourceIntAttribute, 25);
 
@@ -127,7 +127,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('age').value()");
 
-		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
+		Object result = algorithmService.apply(attributeMapping, source, entityType);
 		assertEquals(result, 25);
 	}
 
@@ -137,11 +137,11 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		String identifier = "id";
 		String sourceBoolAttribute = "has_had_coffee";
 
-		EntityMetaData entityMetaData = entityMetaFactory.create("testInt");
-		entityMetaData.addAttribute(attrMetaFactory.create().setName(identifier).setDataType(INT), ROLE_ID);
-		entityMetaData.addAttribute(attrMetaFactory.create().setName(sourceBoolAttribute).setDataType(BOOL));
+		EntityType entityType = entityTypeFactory.create("testInt");
+		entityType.addAttribute(attrMetaFactory.create().setName(identifier).setDataType(INT), ROLE_ID);
+		entityType.addAttribute(attrMetaFactory.create().setName(sourceBoolAttribute).setDataType(BOOL));
 
-		Entity source = new DynamicEntity(entityMetaData);
+		Entity source = new DynamicEntity(entityType);
 		source.set(identifier, 1);
 		source.set(sourceBoolAttribute, false);
 
@@ -152,7 +152,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('has_had_coffee').value()");
 
-		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
+		Object result = algorithmService.apply(attributeMapping, source, entityType);
 		assertEquals(result, false);
 	}
 
@@ -162,11 +162,11 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		String identifier = "id";
 		String sourceLongAttribute = "serial_number";
 
-		EntityMetaData entityMetaData = entityMetaFactory.create("testInt");
-		entityMetaData.addAttribute(attrMetaFactory.create().setName(identifier).setDataType(INT), ROLE_ID);
-		entityMetaData.addAttribute(attrMetaFactory.create().setName(sourceLongAttribute).setDataType(LONG));
+		EntityType entityType = entityTypeFactory.create("testInt");
+		entityType.addAttribute(attrMetaFactory.create().setName(identifier).setDataType(INT), ROLE_ID);
+		entityType.addAttribute(attrMetaFactory.create().setName(sourceLongAttribute).setDataType(LONG));
 
-		Entity source = new DynamicEntity(entityMetaData);
+		Entity source = new DynamicEntity(entityType);
 		source.set(identifier, 1);
 		source.set(sourceLongAttribute, 529387981723498l);
 
@@ -177,7 +177,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('serial_number').value()");
 
-		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
+		Object result = algorithmService.apply(attributeMapping, source, entityType);
 		assertEquals(result, 529387981723498l);
 	}
 
@@ -185,10 +185,10 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 	public void testDate() throws ParseException
 	{
 		String idAttrName = "id";
-		EntityMetaData entityMetaData = entityMetaFactory.create("LL");
-		entityMetaData.addAttribute(attrMetaFactory.create().setName(idAttrName).setDataType(INT), ROLE_ID);
-		entityMetaData.addAttribute(attrMetaFactory.create().setName("dob").setDataType(DATE));
-		Entity source = new DynamicEntity(entityMetaData);
+		EntityType entityType = entityTypeFactory.create("LL");
+		entityType.addAttribute(attrMetaFactory.create().setName(idAttrName).setDataType(INT), ROLE_ID);
+		entityType.addAttribute(attrMetaFactory.create().setName("dob").setDataType(DATE));
+		Entity source = new DynamicEntity(entityType);
 		source.set(idAttrName, 1);
 		source.set("dob", new SimpleDateFormat("dd-MM-yyyy").parse("13-05-2015"));
 
@@ -196,7 +196,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		targetAttributeMetaData.setDataType(DATE);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('dob').value()");
-		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
+		Object result = algorithmService.apply(attributeMapping, source, entityType);
 		assertEquals(result.toString(), "Wed May 13 00:00:00 CEST 2015");
 	}
 
@@ -204,10 +204,10 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 	public void testGetAgeScript() throws ParseException
 	{
 		String idAttrName = "id";
-		EntityMetaData entityMetaData = entityMetaFactory.create("LL");
-		entityMetaData.addAttribute(attrMetaFactory.create().setName(idAttrName).setDataType(INT), ROLE_ID);
-		entityMetaData.addAttribute(attrMetaFactory.create().setName("dob").setDataType(DATE));
-		Entity source = new DynamicEntity(entityMetaData);
+		EntityType entityType = entityTypeFactory.create("LL");
+		entityType.addAttribute(attrMetaFactory.create().setName(idAttrName).setDataType(INT), ROLE_ID);
+		entityType.addAttribute(attrMetaFactory.create().setName("dob").setDataType(DATE));
+		Entity source = new DynamicEntity(entityType);
 		source.set(idAttrName, 1);
 		source.set("dob", new SimpleDateFormat("dd-MM-yyyy").parse("28-08-1973"));
 
@@ -216,7 +216,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm(
 				"Math.floor((new Date('02/12/2015') - $('dob').value())/(365.2425 * 24 * 60 * 60 * 1000))");
-		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
+		Object result = algorithmService.apply(attributeMapping, source, entityType);
 		assertEquals(result, 41);
 	}
 
@@ -224,35 +224,35 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 	public void testGetXrefScript() throws ParseException
 	{
 		// xref entities
-		EntityMetaData entityMetaDataXref = entityMetaFactory.create("xrefEntity1");
-		entityMetaDataXref.addAttribute(attrMetaFactory.create().setName("id").setDataType(INT), ROLE_ID);
-		entityMetaDataXref.addAttribute(attrMetaFactory.create().setName("field1"));
-		Entity xref1a = new DynamicEntity(entityMetaDataXref);
+		EntityType entityTypeXref = entityTypeFactory.create("xrefEntity1");
+		entityTypeXref.addAttribute(attrMetaFactory.create().setName("id").setDataType(INT), ROLE_ID);
+		entityTypeXref.addAttribute(attrMetaFactory.create().setName("field1"));
+		Entity xref1a = new DynamicEntity(entityTypeXref);
 		xref1a.set("id", 1);
 		xref1a.set("field1", "Test");
 
-		EntityMetaData entityMetaDataXref2 = entityMetaFactory.create("xrefEntity2");
-		entityMetaDataXref2.addAttribute(attrMetaFactory.create().setName("id").setDataType(INT), ROLE_ID);
-		entityMetaDataXref2.addAttribute(attrMetaFactory.create().setName("field2"));
-		Entity xref2a = new DynamicEntity(entityMetaDataXref2);
+		EntityType entityTypeXref2 = entityTypeFactory.create("xrefEntity2");
+		entityTypeXref2.addAttribute(attrMetaFactory.create().setName("id").setDataType(INT), ROLE_ID);
+		entityTypeXref2.addAttribute(attrMetaFactory.create().setName("field2"));
+		Entity xref2a = new DynamicEntity(entityTypeXref2);
 		xref2a.set("id", 2);
 		xref2a.set("field2", "Test");
 
 		// source Entity
-		EntityMetaData entityMetaDataSource = entityMetaFactory.create("Source");
-		entityMetaDataSource.addAttribute(attrMetaFactory.create().setName("id").setDataType(INT), ROLE_ID);
-		entityMetaDataSource.addAttribute(attrMetaFactory.create().setName("xref").setDataType(XREF));
-		Entity source = new DynamicEntity(entityMetaDataSource);
+		EntityType entityTypeSource = entityTypeFactory.create("Source");
+		entityTypeSource.addAttribute(attrMetaFactory.create().setName("id").setDataType(INT), ROLE_ID);
+		entityTypeSource.addAttribute(attrMetaFactory.create().setName("xref").setDataType(XREF));
+		Entity source = new DynamicEntity(entityTypeSource);
 		source.set("id", 1);
 		source.set("xref", xref2a);
 
 		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName("field1");
 		targetAttributeMetaData.setDataType(XREF);
-		targetAttributeMetaData.setRefEntity(entityMetaDataXref);
+		targetAttributeMetaData.setRefEntity(entityTypeXref);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('xref').map({'1':'2', '2':'1'}).value();");
 		when(dataService.findOneById("xrefEntity1", "1")).thenReturn(xref1a);
-		Entity result = (Entity) algorithmService.apply(attributeMapping, source, entityMetaDataSource);
+		Entity result = (Entity) algorithmService.apply(attributeMapping, source, entityTypeSource);
 		assertEquals(result.get("field1"), xref2a.get("field2"));
 	}
 
@@ -271,22 +271,22 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		String targetEntityAttrName = "mref-target";
 
 		// ref entities
-		EntityMetaData refEntityMeta = entityMetaFactory.create(refEntityName);
-		refEntityMeta.addAttribute(attrMetaFactory.create().setName(refEntityIdAttrName), ROLE_ID);
-		refEntityMeta
+		EntityType refEntityType = entityTypeFactory.create(refEntityName);
+		refEntityType.addAttribute(attrMetaFactory.create().setName(refEntityIdAttrName), ROLE_ID);
+		refEntityType
 				.addAttribute(attrMetaFactory.create().setName(refEntityLabelAttrName).setDataType(STRING), ROLE_LABEL);
 
-		Entity refEntity0 = new DynamicEntity(refEntityMeta);
+		Entity refEntity0 = new DynamicEntity(refEntityType);
 		refEntity0.set(refEntityIdAttrName, refEntityId0);
 		refEntity0.set(refEntityLabelAttrName, "label0");
 
-		Entity refEntity1 = new DynamicEntity(refEntityMeta);
+		Entity refEntity1 = new DynamicEntity(refEntityType);
 		refEntity1.set(refEntityIdAttrName, refEntityId1);
 		refEntity1.set(refEntityLabelAttrName, "label1");
 
 		// mapping
 		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName(targetEntityAttrName);
-		targetAttributeMetaData.setDataType(MREF).setNillable(false).setRefEntity(refEntityMeta);
+		targetAttributeMetaData.setDataType(MREF).setNillable(false).setRefEntity(refEntityType);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('" + sourceEntityAttrName + "').value()");
 
@@ -308,17 +308,17 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		});
 
 		// source Entity
-		EntityMetaData entityMetaDataSource = entityMetaFactory.create(sourceEntityName);
-		entityMetaDataSource
+		EntityType entityTypeSource = entityTypeFactory.create(sourceEntityName);
+		entityTypeSource
 				.addAttribute(attrMetaFactory.create().setName(refEntityIdAttrName).setDataType(INT).setAuto(true),
 						ROLE_ID);
-		entityMetaDataSource.addAttribute(
+		entityTypeSource.addAttribute(
 				attrMetaFactory.create().setName(sourceEntityAttrName).setDataType(MREF).setNillable(false)
-						.setRefEntity(refEntityMeta));
-		Entity source = new DynamicEntity(entityMetaDataSource);
+						.setRefEntity(refEntityType));
+		Entity source = new DynamicEntity(entityTypeSource);
 		source.set(sourceEntityAttrName, Arrays.asList(refEntity0, refEntity1));
 
-		Object result = algorithmService.apply(attributeMapping, source, entityMetaDataSource);
+		Object result = algorithmService.apply(attributeMapping, source, entityTypeSource);
 		assertEquals(result, Arrays.asList(refEntity0, refEntity1));
 	}
 
@@ -334,44 +334,44 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		String targetEntityAttrName = "mref-target";
 
 		// ref entities
-		EntityMetaData refEntityMeta = entityMetaFactory.create(refEntityName);
-		refEntityMeta.addAttribute(attrMetaFactory.create().setName(refEntityIdAttrName), ROLE_ID);
-		refEntityMeta.addAttribute(attrMetaFactory.create().setName(refEntityLabelAttrName), ROLE_LABEL);
+		EntityType refEntityType = entityTypeFactory.create(refEntityName);
+		refEntityType.addAttribute(attrMetaFactory.create().setName(refEntityIdAttrName), ROLE_ID);
+		refEntityType.addAttribute(attrMetaFactory.create().setName(refEntityLabelAttrName), ROLE_LABEL);
 
 		// mapping
 		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName(targetEntityAttrName);
-		targetAttributeMetaData.setDataType(MREF).setNillable(true).setRefEntity(refEntityMeta);
+		targetAttributeMetaData.setDataType(MREF).setNillable(true).setRefEntity(refEntityType);
 		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
 		attributeMapping.setAlgorithm("$('" + sourceEntityAttrName + "').value()");
 
 		// source Entity
-		EntityMetaData entityMetaDataSource = entityMetaFactory.create(sourceEntityName);
-		entityMetaDataSource
+		EntityType entityTypeSource = entityTypeFactory.create(sourceEntityName);
+		entityTypeSource
 				.addAttribute(attrMetaFactory.create().setName(refEntityIdAttrName).setDataType(INT).setAuto(true),
 						ROLE_ID);
-		entityMetaDataSource.addAttribute(
+		entityTypeSource.addAttribute(
 				attrMetaFactory.create().setName(sourceEntityAttrName).setDataType(MREF).setNillable(true)
-						.setRefEntity(refEntityMeta));
+						.setRefEntity(refEntityType));
 
-		Entity source = new DynamicEntity(entityMetaDataSource);
+		Entity source = new DynamicEntity(entityTypeSource);
 		source.set(sourceEntityAttrName, null);
 
-		Object result = algorithmService.apply(attributeMapping, source, entityMetaDataSource);
+		Object result = algorithmService.apply(attributeMapping, source, entityTypeSource);
 		assertNull(result);
 	}
 
 	@Test
 	public void testCreateAttributeMappingIfOnlyOneMatch()
 	{
-		EntityMetaData targetEntityMetaData = entityMetaFactory.create("target");
+		EntityType targetEntityType = entityTypeFactory.create("target");
 		AttributeMetaData targetAttribute = attrMetaFactory.create().setName("targetHeight");
 		targetAttribute.setDescription("height");
-		targetEntityMetaData.addAttribute(targetAttribute);
+		targetEntityType.addAttribute(targetAttribute);
 
-		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
+		EntityType sourceEntityType = entityTypeFactory.create("source");
 		AttributeMetaData sourceAttribute = attrMetaFactory.create().setName("sourceHeight");
 		sourceAttribute.setDescription("height");
-		sourceEntityMetaData.addAttribute(sourceAttribute);
+		sourceEntityType.addAttribute(sourceAttribute);
 
 		MolgenisUser owner = molgenisUserFactory.create();
 		owner.setUsername("flup");
@@ -383,9 +383,9 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		owner.setLastName("de Flap");
 
 		MappingProject project = new MappingProject("project", owner);
-		project.addTarget(targetEntityMetaData);
+		project.addTarget(targetEntityType);
 
-		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
+		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
 
 		Map<AttributeMetaData, ExplainedAttributeMetaData> matches = ImmutableMap.of(sourceAttribute,
 				ExplainedAttributeMetaData.create(sourceAttribute,
@@ -394,13 +394,13 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap.create();
 
 		when(semanticSearchService
-				.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute, ontologyTermTags.values(),
+				.decisionTreeToFindRelevantAttributes(sourceEntityType, targetAttribute, ontologyTermTags.values(),
 						null)).thenReturn(matches);
 
-		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute))
+		when(ontologyTagService.getTagsForAttribute(targetEntityType, targetAttribute))
 				.thenReturn(ontologyTermTags);
 
-		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping, targetAttribute);
+		algorithmService.autoGenerateAlgorithm(sourceEntityType, targetEntityType, mapping, targetAttribute);
 
 		assertEquals(mapping.getAttributeMapping("targetHeight").getAlgorithm(), "$('sourceHeight').value();");
 	}
@@ -408,15 +408,15 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testWhenSourceDoesNotMatchThenNoMappingGetsCreated()
 	{
-		EntityMetaData targetEntityMetaData = entityMetaFactory.create("target");
+		EntityType targetEntityType = entityTypeFactory.create("target");
 		AttributeMetaData targetAttribute = attrMetaFactory.create().setName("targetHeight");
 		targetAttribute.setDescription("height");
-		targetEntityMetaData.addAttribute(targetAttribute);
+		targetEntityType.addAttribute(targetAttribute);
 
-		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
+		EntityType sourceEntityType = entityTypeFactory.create("source");
 		AttributeMetaData sourceAttribute = attrMetaFactory.create().setName("sourceHeight");
 		sourceAttribute.setDescription("weight");
-		sourceEntityMetaData.addAttribute(sourceAttribute);
+		sourceEntityType.addAttribute(sourceAttribute);
 
 		MolgenisUser owner = molgenisUserFactory.create();
 		owner.setUsername("flup");
@@ -428,17 +428,17 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		owner.setLastName("de Flap");
 
 		MappingProject project = new MappingProject("project", owner);
-		project.addTarget(targetEntityMetaData);
+		project.addTarget(targetEntityType);
 
-		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
+		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
 
-		when(semanticSearchService.findAttributes(sourceEntityMetaData, Sets.newHashSet("targetHeight", "height"),
+		when(semanticSearchService.findAttributes(sourceEntityType, Sets.newHashSet("targetHeight", "height"),
 				Collections.emptyList())).thenReturn(emptyMap());
 
-		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute))
+		when(ontologyTagService.getTagsForAttribute(targetEntityType, targetAttribute))
 				.thenReturn(LinkedHashMultimap.create());
 
-		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping, targetAttribute);
+		algorithmService.autoGenerateAlgorithm(sourceEntityType, targetEntityType, mapping, targetAttribute);
 
 		assertNull(mapping.getAttributeMapping("targetHeight"));
 	}
@@ -446,18 +446,18 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testWhenSourceHasMultipleMatchesThenFirstMappingGetsCreated()
 	{
-		EntityMetaData targetEntityMetaData = entityMetaFactory.create("target");
+		EntityType targetEntityType = entityTypeFactory.create("target");
 		AttributeMetaData targetAttribute = attrMetaFactory.create().setName("targetHeight");
 		targetAttribute.setDescription("height");
-		targetEntityMetaData.addAttribute(targetAttribute);
+		targetEntityType.addAttribute(targetAttribute);
 
-		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
+		EntityType sourceEntityType = entityTypeFactory.create("source");
 		AttributeMetaData sourceAttribute1 = attrMetaFactory.create().setName("sourceHeight1");
 		sourceAttribute1.setDescription("height");
 		AttributeMetaData sourceAttribute2 = attrMetaFactory.create().setName("sourceHeight2");
 		sourceAttribute2.setDescription("height");
 
-		sourceEntityMetaData.addAttributes(Arrays.asList(sourceAttribute1, sourceAttribute2));
+		sourceEntityType.addAttributes(Arrays.asList(sourceAttribute1, sourceAttribute2));
 
 		MolgenisUser owner = molgenisUserFactory.create();
 		owner.setUsername("flup");
@@ -469,9 +469,9 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		owner.setLastName("de Flap");
 
 		MappingProject project = new MappingProject("project", owner);
-		project.addTarget(targetEntityMetaData);
+		project.addTarget(targetEntityType);
 
-		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
+		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityType);
 
 		Map<AttributeMetaData, ExplainedAttributeMetaData> mappings = ImmutableMap
 				.of(sourceAttribute1, ExplainedAttributeMetaData.create(sourceAttribute1), sourceAttribute2,
@@ -480,13 +480,13 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap.create();
 
 		when(semanticSearchService
-				.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute, ontologyTermTags.values(),
+				.decisionTreeToFindRelevantAttributes(sourceEntityType, targetAttribute, ontologyTermTags.values(),
 						null)).thenReturn(mappings);
 
-		when(ontologyTagService.getTagsForAttribute(targetEntityMetaData, targetAttribute))
+		when(ontologyTagService.getTagsForAttribute(targetEntityType, targetAttribute))
 				.thenReturn(ontologyTermTags);
 
-		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping, targetAttribute);
+		algorithmService.autoGenerateAlgorithm(sourceEntityType, targetEntityType, mapping, targetAttribute);
 
 		assertEquals(mapping.getAttributeMapping("targetHeight").getSourceAttributeMetaDatas().get(0),
 				sourceAttribute1);

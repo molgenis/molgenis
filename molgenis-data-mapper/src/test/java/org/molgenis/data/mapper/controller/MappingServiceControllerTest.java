@@ -12,7 +12,7 @@ import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
@@ -50,7 +50,7 @@ import static org.testng.Assert.assertEquals;
 public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;
@@ -84,8 +84,8 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 
 	private MolgenisUser me;
 
-	private EntityMetaData lifeLines;
-	private EntityMetaData hop;
+	private EntityType lifeLines;
+	private EntityType hop;
 	private MappingProject mappingProject;
 	private static final String ID = "mappingservice";
 
@@ -100,9 +100,9 @@ public class MappingServiceControllerTest extends AbstractMolgenisSpringTest
 		authentication.setAuthenticated(true);
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 
-		hop = entityMetaFactory.create("HOP");
+		hop = entityTypeFactory.create("HOP");
 		hop.addAttribute(attrMetaFactory.create().setName("age").setDataType(INT));
-		lifeLines = entityMetaFactory.create("LifeLines");
+		lifeLines = entityTypeFactory.create("LifeLines");
 		hop.addAttribute(attrMetaFactory.create().setName("dob").setDataType(DATE));
 
 		mappingProject = new MappingProject("hop hop hop", me);

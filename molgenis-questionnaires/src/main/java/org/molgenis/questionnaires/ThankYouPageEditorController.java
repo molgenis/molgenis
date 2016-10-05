@@ -42,7 +42,7 @@ public class ThankYouPageEditorController extends MolgenisPluginController
 			@RequestParam(value = "edit", required = false, defaultValue = "false") String edit, Model model,
 			HttpServletResponse response) throws IOException
 	{
-		if ((questionnaireName != null) && dataService.getMeta().getEntityMetaData(questionnaireName) == null)
+		if ((questionnaireName != null) && dataService.getMeta().getEntityType(questionnaireName) == null)
 		{
 			response.sendError(404);
 			return null;
@@ -68,7 +68,7 @@ public class ThankYouPageEditorController extends MolgenisPluginController
 	public String save(@RequestParam("questionnaireName") String questionnaireName,
 			@RequestParam("content") String content, Model model)
 	{
-		if (dataService.getMeta().getEntityMetaData(questionnaireName) != null)
+		if (dataService.getMeta().getEntityType(questionnaireName) != null)
 		{
 			thankYouTextService.saveThankYouText(questionnaireName, content);
 		}

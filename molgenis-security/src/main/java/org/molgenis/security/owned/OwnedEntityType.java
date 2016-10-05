@@ -11,15 +11,15 @@ import static org.molgenis.auth.SecurityPackage.PACKAGE_SECURITY;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 /**
- * Defines an abstract EntityMetaData for entities that have an 'owner'.
+ * Defines an abstract EntityType for entities that have an 'owner'.
  * <p>
  * These entities can only be viewed/updated/deleted by it's creator.
  * <p>
- * Defines one attribute 'ownerUsername', that is the username of the owner. You can extend this EntityMetaData to
+ * Defines one attribute 'ownerUsername', that is the username of the owner. You can extend this EntityType to
  * inherit this behavior.
  */
 @Component
-public class OwnedEntityMetaData extends SystemEntityType
+public class OwnedEntityType extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "Owned";
 	public static final String OWNED = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -29,7 +29,7 @@ public class OwnedEntityMetaData extends SystemEntityType
 	private final SecurityPackage securityPackage;
 
 	@Autowired
-	public OwnedEntityMetaData(SecurityPackage securityPackage)
+	public OwnedEntityType(SecurityPackage securityPackage)
 	{
 		super(SIMPLE_NAME, PACKAGE_SECURITY);
 		this.securityPackage = requireNonNull(securityPackage);

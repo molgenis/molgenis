@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
 import com.google.auto.value.AutoValue;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 /**
  * Value object to store Entity name / Entity ID combinations.
@@ -18,13 +18,13 @@ public abstract class EntityKey
 		return new AutoValue_EntityKey(entityName, id);
 	}
 
-	public static EntityKey create(EntityMetaData entityMetaData, Object id)
+	public static EntityKey create(EntityType entityType, Object id)
 	{
-		return create(entityMetaData.getName(), id);
+		return create(entityType.getName(), id);
 	}
 
 	public static EntityKey create(Entity entity)
 	{
-		return create(entity.getEntityMetaData(), entity.getIdValue());
+		return create(entity.getEntityType(), entity.getIdValue());
 	}
 }

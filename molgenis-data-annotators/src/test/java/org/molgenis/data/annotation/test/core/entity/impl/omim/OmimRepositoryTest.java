@@ -56,7 +56,7 @@ public class OmimRepositoryTest extends AbstractMolgenisSpringTest
 	{
 		repo = new OmimRepository(omimFile, entityTypeFactory, attributeMetaDataFactory);
 
-		entity1 = new DynamicEntity(repo.getEntityMetaData());
+		entity1 = new DynamicEntity(repo.getEntityType());
 		entity1.set(OMIM_PHENOTYPE_COL_NAME, "{Thyroid cancer, nonmedullary, 4}");
 		entity1.set(OMIM_GENE_SYMBOLS_COL_NAME, "FOXE1");
 		entity1.set(OMIM_MIM_NUMBER_COL_NAME, "602617");
@@ -64,7 +64,7 @@ public class OmimRepositoryTest extends AbstractMolgenisSpringTest
 		entity1.set(OMIM_ENTRY_COL_NAME, "616534");
 		entity1.set(OMIM_TYPE_COL_NAME, "3");
 
-		entity2 = new DynamicEntity(repo.getEntityMetaData());
+		entity2 = new DynamicEntity(repo.getEntityType());
 		entity2.set(OMIM_PHENOTYPE_COL_NAME, "17,20-lyase deficiency, isolated");
 		entity2.set(OMIM_GENE_SYMBOLS_COL_NAME, "CYP17A1");
 		entity2.set(OMIM_MIM_NUMBER_COL_NAME, "609300");
@@ -72,7 +72,7 @@ public class OmimRepositoryTest extends AbstractMolgenisSpringTest
 		entity2.set(OMIM_ENTRY_COL_NAME, "202110");
 		entity2.set(OMIM_TYPE_COL_NAME, "3");
 
-		entity3 = new DynamicEntity(repo.getEntityMetaData());
+		entity3 = new DynamicEntity(repo.getEntityType());
 		entity3.set(OMIM_PHENOTYPE_COL_NAME, "17,20-lyase deficiency, isolated");
 		entity3.set(OMIM_GENE_SYMBOLS_COL_NAME, "CYP17");
 		entity3.set(OMIM_MIM_NUMBER_COL_NAME, "609300");
@@ -80,7 +80,7 @@ public class OmimRepositoryTest extends AbstractMolgenisSpringTest
 		entity3.set(OMIM_ENTRY_COL_NAME, "202110");
 		entity3.set(OMIM_TYPE_COL_NAME, "3");
 
-		entity4 = new DynamicEntity(repo.getEntityMetaData());
+		entity4 = new DynamicEntity(repo.getEntityType());
 		entity4.set(OMIM_PHENOTYPE_COL_NAME, "{Thyroid cancer, monmedullary, 1}");
 		entity4.set(OMIM_GENE_SYMBOLS_COL_NAME, "NKX2-1");
 		entity4.set(OMIM_MIM_NUMBER_COL_NAME, "600635");
@@ -88,7 +88,7 @@ public class OmimRepositoryTest extends AbstractMolgenisSpringTest
 		entity4.set(OMIM_ENTRY_COL_NAME, "188550");
 		entity4.set(OMIM_TYPE_COL_NAME, "3");
 
-		entity5 = new DynamicEntity(repo.getEntityMetaData());
+		entity5 = new DynamicEntity(repo.getEntityType());
 		entity5.set(OMIM_PHENOTYPE_COL_NAME, "{Thyroid cancer, monmedullary, 1}");
 		entity5.set(OMIM_GENE_SYMBOLS_COL_NAME, "NMTC1");
 		entity5.set(OMIM_MIM_NUMBER_COL_NAME, "600635");

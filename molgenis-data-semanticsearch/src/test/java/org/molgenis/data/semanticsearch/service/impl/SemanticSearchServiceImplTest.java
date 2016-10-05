@@ -42,7 +42,7 @@ import static org.testng.Assert.*;
 public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaDataFactory;
@@ -199,11 +199,11 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testFindAttributes()
 	{
-		EntityMetaData sourceEntityMetaData = entityMetaFactory.create().setSimpleName("sourceEntityMetaData");
+		EntityType sourceEntityType = entityTypeFactory.create().setSimpleName("sourceEntityType");
 
 		// Mock the id's of the attribute entities that should be searched
 		List<String> attributeIdentifiers = asList("1", "2");
-		when(semanticSearchServiceHelper.getAttributeIdentifiers(sourceEntityMetaData))
+		when(semanticSearchServiceHelper.getAttributeIdentifiers(sourceEntityType))
 				.thenReturn(attributeIdentifiers);
 
 		// Mock the createDisMaxQueryRule method
@@ -235,15 +235,15 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 
 		AttributeMetaData attributeHeight = attrMetaDataFactory.create().setName("height_0");
 		AttributeMetaData attributeWeight = attrMetaDataFactory.create().setName("weight_0");
-		sourceEntityMetaData.addAttribute(attributeHeight);
-		sourceEntityMetaData.addAttribute(attributeWeight);
+		sourceEntityType.addAttribute(attributeHeight);
+		sourceEntityType.addAttribute(attributeWeight);
 
 		// Case 1
 		when(dataService.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(disMaxQueryRules)))
 				.thenReturn(Stream.of(entity1));
 
 		Map<AttributeMetaData, ExplainedAttributeMetaData> termsActual1 = semanticSearchService
-				.findAttributes(sourceEntityMetaData, Sets.newHashSet("targetAttribute"), Collections.emptyList());
+				.findAttributes(sourceEntityType, Sets.newHashSet("targetAttribute"), Collections.emptyList());
 
 		Map<AttributeMetaData, ExplainedAttributeMetaData> termsExpected1 = ImmutableMap
 				.of(attributeHeight, ExplainedAttributeMetaData.create(attributeHeight));
@@ -254,7 +254,7 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataService.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(disMaxQueryRules))).thenReturn(Stream.empty());
 
 		Map<AttributeMetaData, ExplainedAttributeMetaData> termsActual2 = semanticSearchService
-				.findAttributes(sourceEntityMetaData, Sets.newHashSet("targetAttribute"), Collections.emptyList());
+				.findAttributes(sourceEntityType, Sets.newHashSet("targetAttribute"), Collections.emptyList());
 
 		Map<AttributeMetaData, ExplainedAttributeMetaData> termsExpected2 = ImmutableMap.of();
 

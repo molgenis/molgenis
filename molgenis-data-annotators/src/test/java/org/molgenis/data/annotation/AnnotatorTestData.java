@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.LONG;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
 
 public abstract class AnnotatorTestData extends AbstractMolgenisSpringTest
@@ -29,8 +29,8 @@ public abstract class AnnotatorTestData extends AbstractMolgenisSpringTest
 	@Autowired
 	VcfAttributes vcfAttributes;
 
-	public EntityMetaData metaDataCanAnnotate = entityTypeFactory.create().setName("test");
-	public EntityMetaData metaDataCantAnnotate = entityTypeFactory.create().setName("test");
+	public EntityType metaDataCanAnnotate = entityTypeFactory.create().setName("test");
+	public EntityType metaDataCantAnnotate = entityTypeFactory.create().setName("test");
 
 	public AttributeMetaData attributeMetaDataChrom = attributeMetaDataFactory.create().setName(CHROM)
 			.setDataType(STRING);

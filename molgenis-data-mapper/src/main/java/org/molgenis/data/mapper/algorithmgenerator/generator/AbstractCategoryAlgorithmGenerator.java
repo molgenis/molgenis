@@ -6,7 +6,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.mapper.algorithmgenerator.bean.Category;
 import org.molgenis.data.mapper.algorithmgenerator.categorymapper.CategoryMapperUtil;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +30,7 @@ public abstract class AbstractCategoryAlgorithmGenerator implements AlgorithmGen
 	public List<Category> convertToCategory(AttributeMetaData attributeMetaData)
 	{
 		List<Category> categories = new ArrayList<Category>();
-		EntityMetaData refEntity = attributeMetaData.getRefEntity();
+		EntityType refEntity = attributeMetaData.getRefEntity();
 		if (refEntity != null)
 		{
 			dataService.findAll(refEntity.getName()).forEach(entity ->

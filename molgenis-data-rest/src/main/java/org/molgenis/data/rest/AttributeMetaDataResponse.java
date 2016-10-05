@@ -8,7 +8,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Range;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.security.core.MolgenisPermissionService;
 
 import java.util.Collections;
@@ -43,20 +43,20 @@ public class AttributeMetaDataResponse
 	private String visibleExpression;
 	private String validationExpression;
 
-	public AttributeMetaDataResponse(String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,
+	public AttributeMetaDataResponse(String entityParentName, EntityType entityType, AttributeMetaData attr,
 			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
-		this(entityParentName, entityMeta, attr, null, null, permissionService, dataService, languageService);
+		this(entityParentName, entityType, attr, null, null, permissionService, dataService, languageService);
 	}
 
 	/**
 	 * @param entityParentName
-	 * @param entityMeta
+	 * @param entityType
 	 * @param attr
 	 * @param attributesSet       set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */
-	public AttributeMetaDataResponse(final String entityParentName, EntityMetaData entityMeta, AttributeMetaData attr,
+	public AttributeMetaDataResponse(final String entityParentName, EntityType entityType, AttributeMetaData attr,
 			Set<String> attributesSet, final Map<String, Set<String>> attributeExpandsSet,
 			MolgenisPermissionService permissionService, DataService dataService, LanguageService languageService)
 	{
@@ -107,7 +107,7 @@ public class AttributeMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("refEntity".toLowerCase()))
 		{
-			EntityMetaData refEntity = attr.getRefEntity();
+			EntityType refEntity = attr.getRefEntity();
 			if (attributeExpandsSet != null && attributeExpandsSet.containsKey("refEntity".toLowerCase()))
 			{
 				Set<String> subAttributesSet = attributeExpandsSet.get("refEntity".toLowerCase());
@@ -142,7 +142,7 @@ public class AttributeMetaDataResponse
 									.containsKey("attributes".toLowerCase()))
 							{
 								Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
-								return new AttributeMetaDataResponse(entityParentName, entityMeta, attributeMetaData,
+								return new AttributeMetaDataResponse(entityParentName, entityType, attributeMetaData,
 										subAttributesSet, Collections.singletonMap("refEntity".toLowerCase(), null),
 										permissionService, dataService, languageService);
 							}
@@ -183,7 +183,7 @@ public class AttributeMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("labelAttribute".toLowerCase()))
 		{
-			this.labelAttribute = attr.equals(entityMeta.getLabelAttribute());
+			this.labelAttribute = attr.equals(entityType.getLabelAttribute());
 		}
 		else this.labelAttribute = null;
 
@@ -195,7 +195,7 @@ public class AttributeMetaDataResponse
 
 		if (attributesSet == null || attributesSet.contains("lookupAttribute".toLowerCase()))
 		{
-			this.lookupAttribute = entityMeta.getLookupAttribute(attr.getName()) != null;
+			this.lookupAttribute = entityType.getLookupAttribute(attr.getName()) != null;
 		}
 		else this.lookupAttribute = null;
 

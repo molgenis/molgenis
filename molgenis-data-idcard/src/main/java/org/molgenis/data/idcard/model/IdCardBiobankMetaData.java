@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.idcard.model.IdCardPackage.PACKAGE_ID_CARD;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component

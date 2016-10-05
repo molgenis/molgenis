@@ -45,25 +45,25 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		this.tagRepository = tagRepository;
 	}
 
-	private Entity findAttributeEntity(EntityMetaData entityMetaData, String attributeName)
+	private Entity findAttributeEntity(EntityType entityType, String attributeName)
 	{
-		Entity entityMetaDataEntity = dataService.findOneById(ENTITY_META_DATA, entityMetaData.getName());
-		Optional<Entity> result = stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false)
+		Entity EntityTypeEntity = dataService.findOneById(ENTITY_META_DATA, entityType.getName());
+		Optional<Entity> result = stream(EntityTypeEntity.getEntities(ATTRIBUTES).spliterator(), false)
 				.filter(att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst();
 		return result.isPresent() ? result.get() : null;
 	}
 
-	private Entity findEntity(EntityMetaData emd)
+	private Entity findEntity(EntityType emd)
 	{
 		return dataService.findOneById(ENTITY_META_DATA, emd.getName());
 	}
 
 	@Override
-	public void removeAttributeTag(EntityMetaData entityMetaData,
+	public void removeAttributeTag(EntityType entityType,
 			SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> removeTag)
 	{
 		AttributeMetaData attributeMetaData = removeTag.getSubject();
-		Entity attributeEntity = findAttributeEntity(entityMetaData, attributeMetaData.getName());
+		Entity attributeEntity = findAttributeEntity(entityType, attributeMetaData.getName());
 		List<Entity> tags = new ArrayList<Entity>();
 		for (Entity tagEntity : attributeEntity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
@@ -80,10 +80,10 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	@Override
 	@RunAsSystem
-	public Multimap<Relation, LabeledResource> getTagsForAttribute(EntityMetaData entityMetaData,
+	public Multimap<Relation, LabeledResource> getTagsForAttribute(EntityType entityType,
 			AttributeMetaData attributeMetaData)
 	{
-		Entity entity = findAttributeEntity(entityMetaData, attributeMetaData.getName());
+		Entity entity = findAttributeEntity(entityType, attributeMetaData.getName());
 		if (entity == null) return ArrayListMultimap.<Relation, LabeledResource>create();
 
 		Multimap<Relation, LabeledResource> tags = ArrayListMultimap.<Relation, LabeledResource>create();
@@ -98,30 +98,30 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 
 	@Override
 	@RunAsSystem
-	public Iterable<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> getTagsForEntity(
-			EntityMetaData entityMetaData)
+	public Iterable<SemanticTag<EntityType, LabeledResource, LabeledResource>> getTagsForEntity(
+			EntityType entityType)
 	{
-		List<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> result = new ArrayList<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>>();
-		Entity entity = findEntity(entityMetaData);
+		List<SemanticTag<EntityType, LabeledResource, LabeledResource>> result = new ArrayList<SemanticTag<EntityType, LabeledResource, LabeledResource>>();
+		Entity entity = findEntity(entityType);
 		if (entity == null)
 		{
-			LOG.warn("No known entity with name " + entityMetaData.getName() + ".");
+			LOG.warn("No known entity with name " + entityType.getName() + ".");
 		}
 		else
 		{
 			for (Entity tagEntity : entity.getEntities(EntityTypeMetadata.TAGS))
 			{
-				result.add(SemanticTag.asTag(entityMetaData, tagEntity));
+				result.add(SemanticTag.asTag(entityType, tagEntity));
 			}
 		}
 		return result;
 	}
 
 	@Override
-	public void addAttributeTag(EntityMetaData entityMetaData,
+	public void addAttributeTag(EntityType entityType,
 			SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> tag)
 	{
-		Entity entity = findAttributeEntity(entityMetaData, tag.getSubject().getName());
+		Entity entity = findAttributeEntity(entityType, tag.getSubject().getName());
 		List<Entity> tags = new ArrayList<Entity>();
 		for (Entity tagEntity : entity.getEntities(AttributeMetaDataMetaData.TAGS))
 		{
@@ -133,14 +133,14 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	}
 
 	@Override
-	public void addEntityTag(SemanticTag<EntityMetaData, LabeledResource, LabeledResource> tag)
+	public void addEntityTag(SemanticTag<EntityType, LabeledResource, LabeledResource> tag)
 	{
 		Entity entity = findEntity(tag.getSubject());
 		if (entity == null)
 		{
 			throw new UnknownEntityException("Unknown entity [" + tag.getSubject().getName() + "]");
 		}
-		ImmutableList<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> existingTags = ImmutableList.<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>>copyOf(
+		ImmutableList<SemanticTag<EntityType, LabeledResource, LabeledResource>> existingTags = ImmutableList.<SemanticTag<EntityType, LabeledResource, LabeledResource>>copyOf(
 				getTagsForEntity(tag.getSubject()));
 		if (existingTags.contains(tag))
 		{
@@ -183,7 +183,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	}
 
 	@Override
-	public void removeEntityTag(SemanticTag<EntityMetaData, LabeledResource, LabeledResource> tag)
+	public void removeEntityTag(SemanticTag<EntityType, LabeledResource, LabeledResource> tag)
 	{
 		throw new UnsupportedOperationException("not yet implemented");
 	}

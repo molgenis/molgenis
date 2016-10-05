@@ -106,11 +106,11 @@ public class ThousandGenomesAnnotator implements AnnotatorConfig
 		})
 		{
 			@Override
-			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity entityMetaData)
+			protected Object getResourceAttributeValue(AttributeMetaData attr, Entity EntityType)
 			{
 				String attrName = THOUSAND_GENOME_AF
 						.equals(attr.getName()) ? THOUSAND_GENOME_AF_RESOURCE_ATTRIBUTE_NAME : attr.getName();
-				return entityMetaData.get(attrName);
+				return EntityType.get(attrName);
 			}
 		};
 

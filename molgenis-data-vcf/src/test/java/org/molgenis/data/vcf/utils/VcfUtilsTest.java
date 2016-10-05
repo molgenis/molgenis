@@ -3,7 +3,7 @@ package org.molgenis.data.vcf.utils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
 import static org.testng.Assert.assertEquals;
 
@@ -37,9 +37,9 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 	@Autowired
 	VcfAttributes vcfAttributes;
 
-	private EntityMetaData annotatedEntityMetadata;
-	public EntityMetaData metaDataCanAnnotate;
-	public EntityMetaData metaDataCantAnnotate;
+	private EntityType annotatedEntityType;
+	public EntityType metaDataCanAnnotate;
+	public EntityType metaDataCantAnnotate;
 
 	public AttributeMetaData attributeMetaDataChrom;
 	public AttributeMetaData attributeMetaDataPos;
@@ -59,7 +59,7 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void beforeClass()
 	{
-		annotatedEntityMetadata = entityTypeFactory.create().setName("test");
+		annotatedEntityType = entityTypeFactory.create().setName("test");
 		metaDataCanAnnotate = entityTypeFactory.create().setName("test");
 		metaDataCantAnnotate = entityTypeFactory.create().setName("test");
 
@@ -105,17 +105,17 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 		INFO.addAttributePart(GTC);
 		metaDataCanAnnotate.addAttribute(INFO);
 
-		annotatedEntityMetadata.addAttribute(attributeMetaDataChrom, ROLE_ID);
-		annotatedEntityMetadata.addAttribute(attributeMetaDataPos);
-		annotatedEntityMetadata.addAttribute(attributeMetaDataRef);
-		annotatedEntityMetadata.addAttribute(attributeMetaDataAlt);
+		annotatedEntityType.addAttribute(attributeMetaDataChrom, ROLE_ID);
+		annotatedEntityType.addAttribute(attributeMetaDataPos);
+		annotatedEntityType.addAttribute(attributeMetaDataRef);
+		annotatedEntityType.addAttribute(attributeMetaDataAlt);
 
-		annotatedEntityMetadata.addAttribute(attributeMetaDataFactory.create().setName(ID).setDataType(STRING));
-		annotatedEntityMetadata.addAttribute(attributeMetaDataFactory.create().setName(QUAL).setDataType(STRING));
-		annotatedEntityMetadata.addAttribute((attributeMetaDataFactory.create().setName(FILTER).setDataType(STRING))
+		annotatedEntityType.addAttribute(attributeMetaDataFactory.create().setName(ID).setDataType(STRING));
+		annotatedEntityType.addAttribute(attributeMetaDataFactory.create().setName(QUAL).setDataType(STRING));
+		annotatedEntityType.addAttribute((attributeMetaDataFactory.create().setName(FILTER).setDataType(STRING))
 				.setDescription("Test that description is not: '" + VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION + "'"));
 		INFO.addAttributePart(attributeMetaDataFactory.create().setName("ANNO").setDataType(STRING));
-		annotatedEntityMetadata.addAttribute(INFO);
+		annotatedEntityType.addAttribute(INFO);
 
 		entity1.set(VcfAttributes.CHROM, "1");
 		entity1.set(VcfAttributes.POS, 10050000);

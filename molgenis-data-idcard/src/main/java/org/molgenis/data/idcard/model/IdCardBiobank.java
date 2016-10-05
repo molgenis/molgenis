@@ -1,7 +1,7 @@
 package org.molgenis.data.idcard.model;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.data.idcard.model.IdCardBiobankMetaData.ORGANIZATION_ID;
@@ -13,14 +13,14 @@ public class IdCardBiobank extends StaticEntity
 		super(entity);
 	}
 
-	public IdCardBiobank(EntityMetaData entityMeta)
+	public IdCardBiobank(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public IdCardBiobank(Integer identifier, EntityMetaData entityMeta)
+	public IdCardBiobank(Integer identifier, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		set(ORGANIZATION_ID, identifier);
 	}
 

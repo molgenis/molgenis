@@ -8,7 +8,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -33,8 +33,8 @@ import static org.testng.Assert.assertEquals;
 public class SystemEntityTypePersisterTest
 {
 	private DataService dataService;
-	private SystemEntityMetaDataRegistry systemEntityMetaRegistry;
-	private SystemEntityMetaDataPersister systemEntityMetaDataPersister;
+	private SystemEntityTypeRegistry systemEntityTypeRegistry;
+	private SystemEntityTypePersister systemEntityTypePersister;
 	private AttributeMetaDataMetaData attrMetaMeta;
 
 	@BeforeMethod
@@ -46,9 +46,9 @@ public class SystemEntityTypePersisterTest
 		when(metaDataService.getDefaultBackend()).thenReturn(defaultRepoCollection);
 		dataService = mock(DataService.class);
 		when(dataService.getMeta()).thenReturn(metaDataService);
-		systemEntityMetaRegistry = mock(SystemEntityMetaDataRegistry.class);
-		systemEntityMetaDataPersister = new SystemEntityMetaDataPersister(dataService, systemEntityMetaRegistry);
-		systemEntityMetaDataPersister.setAttributeMetaDataMetaData(attrMetaMeta);
+		systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
+		systemEntityTypePersister = new SystemEntityTypePersister(dataService, systemEntityTypeRegistry);
+		systemEntityTypePersister.setAttributeMetaDataMetaData(attrMetaMeta);
 	}
 
 	@Test
@@ -57,36 +57,36 @@ public class SystemEntityTypePersisterTest
 		Package systemPackage = mock(Package.class);
 		when(systemPackage.getName()).thenReturn(PACKAGE_SYSTEM);
 
-		EntityMetaData refRemovedMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refRemoved").getMock();
+		EntityType refRemovedMeta = when(mock(EntityType.class).getName()).thenReturn("refRemoved").getMock();
 		when(refRemovedMeta.getPackage()).thenReturn(systemPackage);
 		when(refRemovedMeta.toString()).thenReturn("refRemoved");
 		when(refRemovedMeta.getAtomicAttributes()).thenReturn(emptyList());
 
-		EntityMetaData removedMeta = when(mock(EntityMetaData.class).getName()).thenReturn("removed").getMock();
+		EntityType removedMeta = when(mock(EntityType.class).getName()).thenReturn("removed").getMock();
 		when(removedMeta.getPackage()).thenReturn(systemPackage);
 		when(removedMeta.toString()).thenReturn("removed");
 		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getRefEntity()).thenReturn(refRemovedMeta)
 				.getMock();
 		when(removedMeta.getAtomicAttributes()).thenReturn(singletonList(refAttr));
 
-		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
-		when(refEntityMeta.getPackage()).thenReturn(systemPackage);
-		when(refEntityMeta.toString()).thenReturn("refEntity");
-		when(refEntityMeta.getAtomicAttributes()).thenReturn(emptyList());
+		EntityType refEntityType = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityType.getPackage()).thenReturn(systemPackage);
+		when(refEntityType.toString()).thenReturn("refEntity");
+		when(refEntityType.getAtomicAttributes()).thenReturn(emptyList());
 
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.getPackage()).thenReturn(systemPackage);
-		when(entityMeta.toString()).thenReturn("entity");
-		when(entityMeta.getAtomicAttributes()).thenReturn(emptyList());
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getPackage()).thenReturn(systemPackage);
+		when(entityType.toString()).thenReturn("entity");
+		when(entityType.getAtomicAttributes()).thenReturn(emptyList());
 
-		when(systemEntityMetaRegistry.hasSystemEntityMetaData("removed")).thenReturn(false);
-		when(systemEntityMetaRegistry.hasSystemEntityMetaData("refRemoved")).thenReturn(false);
-		when(systemEntityMetaRegistry.hasSystemEntityMetaData("entity")).thenReturn(true);
-		when(systemEntityMetaRegistry.hasSystemEntityMetaData("refEntity")).thenReturn(true);
+		when(systemEntityTypeRegistry.hasSystemEntityType("removed")).thenReturn(false);
+		when(systemEntityTypeRegistry.hasSystemEntityType("refRemoved")).thenReturn(false);
+		when(systemEntityTypeRegistry.hasSystemEntityType("entity")).thenReturn(true);
+		when(systemEntityTypeRegistry.hasSystemEntityType("refEntity")).thenReturn(true);
 
-		when(dataService.findAll(ENTITY_META_DATA, EntityMetaData.class))
-				.thenReturn(Stream.of(refEntityMeta, entityMeta, refRemovedMeta, removedMeta));
-		systemEntityMetaDataPersister.removeNonExistingSystemEntities();
+		when(dataService.findAll(ENTITY_META_DATA, EntityType.class))
+				.thenReturn(Stream.of(refEntityType, entityType, refRemovedMeta, removedMeta));
+		systemEntityTypePersister.removeNonExistingSystemEntities();
 		//noinspection unchecked
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).delete(eq(ENTITY_META_DATA), captor.capture());
@@ -99,8 +99,8 @@ public class SystemEntityTypePersisterTest
 		AttributeMetaData attr = mock(AttributeMetaData.class);
 		when(attrMetaMeta.getAttribute(REF_ENTITY)).thenReturn(attr);
 		when(attr.setDataType(any())).thenReturn(attr);
-		when(dataService.findAll(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(Stream.empty());
-		when(systemEntityMetaRegistry.getSystemEntityMetaDatas()).thenReturn(Stream.empty());
+		when(dataService.findAll(ENTITY_META_DATA, EntityType.class)).thenReturn(Stream.empty());
+		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenReturn(Stream.empty());
 
 		ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);
 		ApplicationContext applicationContext = mock(ApplicationContext.class);
@@ -115,7 +115,7 @@ public class SystemEntityTypePersisterTest
 		when(event.getApplicationContext()).thenReturn(applicationContext);
 		when(dataService.findOneById(PACKAGE, packageName0, Package.class)).thenReturn(package0);
 		when(dataService.findOneById(PACKAGE, packageName1, Package.class)).thenReturn(null);
-		systemEntityMetaDataPersister.persist(event);
+		systemEntityTypePersister.persist(event);
 		//noinspection unchecked
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).add(eq(PACKAGE), captor.capture());
@@ -129,8 +129,8 @@ public class SystemEntityTypePersisterTest
 		AttributeMetaData attr = mock(AttributeMetaData.class);
 		when(attrMetaMeta.getAttribute(REF_ENTITY)).thenReturn(attr);
 		when(attr.setDataType(any())).thenReturn(attr);
-		when(dataService.findAll(ENTITY_META_DATA, EntityMetaData.class)).thenReturn(Stream.empty());
-		when(systemEntityMetaRegistry.getSystemEntityMetaDatas()).thenReturn(Stream.empty());
+		when(dataService.findAll(ENTITY_META_DATA, EntityType.class)).thenReturn(Stream.empty());
+		when(systemEntityTypeRegistry.getSystemEntityTypes()).thenReturn(Stream.empty());
 
 		ContextRefreshedEvent event = mock(ContextRefreshedEvent.class);
 		ApplicationContext applicationContext = mock(ApplicationContext.class);
@@ -145,7 +145,7 @@ public class SystemEntityTypePersisterTest
 		when(event.getApplicationContext()).thenReturn(applicationContext);
 		when(dataService.findOneById(PACKAGE, packageName0, Package.class)).thenReturn(package0);
 		when(dataService.findOneById(PACKAGE, packageName1, Package.class)).thenReturn(package1);
-		systemEntityMetaDataPersister.persist(event);
+		systemEntityTypePersister.persist(event);
 		//noinspection unchecked
 		verify(dataService, times(0)).add(eq(PACKAGE), any(Stream.class));
 	}

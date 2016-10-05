@@ -2,7 +2,7 @@ package org.molgenis.data.jobs.model;
 
 import org.molgenis.auth.MolgenisUser;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 import org.springframework.util.StringUtils;
 
@@ -22,16 +22,16 @@ public class JobExecution extends StaticEntity
 		super(entity);
 	}
 
-	public JobExecution(EntityMetaData entityMeta)
+	public JobExecution(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setDefaultValues();
 
 	}
 
-	public JobExecution(String identifier, EntityMetaData entityMeta)
+	public JobExecution(String identifier, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setDefaultValues();
 
 		setIdentifier(identifier);

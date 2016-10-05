@@ -19,8 +19,8 @@
     <div class="col-md-12">
     <#-- Hidden fields containing information needed for ajax requests -->
         <input id="mappingProjectId" type="hidden" name="mappingProjectId" value="${mappingProject.identifier?html}"/>
-        <input id="target" type="hidden" name="target" value="${entityMapping.targetEntityMetaData.name?html}"/>
-        <input id="source" type="hidden" name="source" value="${entityMapping.sourceEntityMetaData.name?html}"/>
+        <input id="target" type="hidden" name="target" value="${entityMapping.targetEntityType.name?html}"/>
+        <input id="source" type="hidden" name="source" value="${entityMapping.sourceEntityType.name?html}"/>
         <input id="targetAttribute" type="hidden" name="targetAttribute"
                value="${attributeMapping.targetAttributeMetaData.name?html}"/>
         <input id="targetAttributeType" type="hidden" name="targetAttributeType"
@@ -48,8 +48,8 @@
 </div>
 <div class="row">
     <div class="col-md-12 col-lg-12">
-        <center><h4>Mapping to <i>${entityMapping.targetEntityMetaData.name}
-            .${attributeMapping.targetAttributeMetaData.name}</i> from <i>${entityMapping.sourceEntityMetaData.name}</i>
+        <center><h4>Mapping to <i>${entityMapping.targetEntityType.name}
+            .${attributeMapping.targetAttributeMetaData.name}</i> from <i>${entityMapping.sourceEntityType.name}</i>
         </h4></center>
     </div>
 </div>
@@ -105,21 +105,21 @@
                 <td class="td-align-top"><strong>Categories</strong></td>
                 <td class="td-align-top">
                 <#if attributeMapping.targetAttributeMetaData.dataType == "xref" || attributeMapping.targetAttributeMetaData.dataType == "categorical" && (categories)?has_content>
-                    <#assign refEntityMetaData = attributeMapping.targetAttributeMetaData.refEntity>
+                    <#assign refEntityType = attributeMapping.targetAttributeMetaData.refEntity>
                     <#list categories as category>
-                        <#list refEntityMetaData.attributes as attribute>
+                        <#list refEntityType.attributes as attribute>
                             <#assign attributeName = attribute.name>
                             <#if (category[attributeName])??>
                                 <#assign value = category[attributeName] />
                                 <#assign dataType = attribute.dataType />
                                 <#if dataType == "datetime">
-                                ${value?datetime}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>
+                                ${value?datetime}<#if refEntityType.attributes?seq_index_of(attribute) != refEntityType.attributes?size - 1>
                                     =</#if>
                                 <#elseif dataType == "date">
-                                ${value?date}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>
+                                ${value?date}<#if refEntityType.attributes?seq_index_of(attribute) != refEntityType.attributes?size - 1>
                                     =</#if>
                                 <#else>
-                                ${value?string}<#if refEntityMetaData.attributes?seq_index_of(attribute) != refEntityMetaData.attributes?size - 1>
+                                ${value?string}<#if refEntityType.attributes?seq_index_of(attribute) != refEntityType.attributes?size - 1>
                                     =</#if>
                                 </#if>
                             </#if>
@@ -152,7 +152,7 @@
                         <div class="form-group">
                             <div class="input-group">
                                 <input id="attribute-search-field" type="text" class="form-control"
-                                       placeholder="Search all ${sourceAttributesSize?html} attributes from ${entityMapping.sourceEntityMetaData.name?html}">
+                                       placeholder="Search all ${sourceAttributesSize?html} attributes from ${entityMapping.sourceEntityType.name?html}">
                                 <span class="input-group-btn">
 									<button id="attribute-search-field-button" type="button"
                                             class="btn btn-default"><span

@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,36 +35,36 @@ public class PostgreSqlEntityFactory
 		this.entityManager = requireNonNull(entityManager);
 	}
 
-	RowMapper<Entity> createRowMapper(EntityMetaData entityMeta, Fetch fetch)
+	RowMapper<Entity> createRowMapper(EntityType entityType, Fetch fetch)
 	{
-		return new EntityMapper(entityManager, entityMeta, fetch);
+		return new EntityMapper(entityManager, entityType, fetch);
 	}
 
-	Iterable<Entity> getReferences(EntityMetaData refEntityMeta, Iterable<?> ids)
+	Iterable<Entity> getReferences(EntityType refEntityType, Iterable<?> ids)
 	{
-		return entityManager.getReferences(refEntityMeta, ids);
+		return entityManager.getReferences(refEntityType, ids);
 	}
 
 	private static class EntityMapper implements RowMapper<Entity>
 	{
 		private final EntityManager entityManager;
-		private final EntityMetaData entityMetaData;
+		private final EntityType entityType;
 		private final Fetch fetch;
 
-		private EntityMapper(EntityManager entityManager, EntityMetaData entityMetaData, Fetch fetch)
+		private EntityMapper(EntityManager entityManager, EntityType entityType, Fetch fetch)
 		{
 			this.entityManager = requireNonNull(entityManager);
-			this.entityMetaData = requireNonNull(entityMetaData);
+			this.entityType = requireNonNull(entityType);
 			this.fetch = fetch; // can be null
 		}
 
 		@Override
 		public Entity mapRow(ResultSet resultSet, int i) throws SQLException
 		{
-			Entity e = entityManager.create(entityMetaData, fetch);
+			Entity e = entityManager.create(entityType, fetch);
 
 			// TODO performance, iterate over fetch if available
-			for (AttributeMetaData attr : entityMetaData.getAtomicAttributes())
+			for (AttributeMetaData attr : entityType.getAtomicAttributes())
 			{
 				if (fetch == null || fetch.hasField(attr.getName()))
 				{
@@ -115,15 +115,15 @@ public class PostgreSqlEntityFactory
 				case CATEGORICAL:
 				case FILE:
 				case XREF:
-					EntityMetaData xrefEntityMeta = attr.getRefEntity();
-					Object refIdValue = mapValue(resultSet, xrefEntityMeta.getIdAttribute(), colName);
-					value = refIdValue != null ? entityManager.getReference(xrefEntityMeta, refIdValue) : null;
+					EntityType xrefEntityType = attr.getRefEntity();
+					Object refIdValue = mapValue(resultSet, xrefEntityType.getIdAttribute(), colName);
+					value = refIdValue != null ? entityManager.getReference(xrefEntityType, refIdValue) : null;
 					break;
 				case CATEGORICAL_MREF:
 				case MREF:
-					EntityMetaData mrefEntityMeta = attr.getRefEntity();
+					EntityType mrefEntityType = attr.getRefEntity();
 					Array arrayValue = resultSet.getArray(colName);
-					value = resultSet.wasNull() ? null : mapValueMref(arrayValue, mrefEntityMeta);
+					value = resultSet.wasNull() ? null : mapValueMref(arrayValue, mrefEntityType);
 					break;
 				case COMPOUND:
 					throw new RuntimeException(
@@ -167,11 +167,11 @@ public class PostgreSqlEntityFactory
 		 * Maps a single results set array value to an entity value for mref attributes.
 		 *
 		 * @param arrayValue result set array value
-		 * @param entityMeta entity meta data
+		 * @param entityType entity meta data
 		 * @return mapped value
 		 * @throws SQLException if an error occurs while attempting to access the array
 		 */
-		private Object mapValueMref(Array arrayValue, EntityMetaData entityMeta) throws SQLException
+		private Object mapValueMref(Array arrayValue, EntityType entityType) throws SQLException
 		{
 			// ResultSet contains a two dimensional array for MREF attribute values:
 			// [[<order_nr_as_string>,<mref_id_as_string>],[<order_nr_as_string>,<mref_id_as_string>], ...]
@@ -181,7 +181,7 @@ public class PostgreSqlEntityFactory
 			String[][] mrefIdsAndOrder = (String[][]) arrayValue.getArray();
 			if (mrefIdsAndOrder.length > 0 && mrefIdsAndOrder[0][0] != null)
 			{
-				AttributeMetaData idAttr = entityMeta.getIdAttribute();
+				AttributeMetaData idAttr = entityType.getIdAttribute();
 				Object[] mrefIds = new Object[mrefIdsAndOrder.length];
 				for (String[] mrefIdAndOrder : mrefIdsAndOrder)
 				{
@@ -192,7 +192,7 @@ public class PostgreSqlEntityFactory
 				}
 
 				// convert ids to (lazy) entities
-				value = entityManager.getReferences(entityMeta, asList(mrefIds));
+				value = entityManager.getReferences(entityType, asList(mrefIds));
 			}
 			else
 			{

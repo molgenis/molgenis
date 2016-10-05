@@ -21,7 +21,7 @@ import static org.testng.Assert.assertNotNull;
 public class CsvRepositorySourceTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;
@@ -34,7 +34,7 @@ public class CsvRepositorySourceTest extends AbstractMolgenisSpringTest
 		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
 
 		CsvRepositoryCollection repo = new CsvRepositoryCollection(csvFile);
-		repo.setEntityMetaDataFactory(entityMetaFactory);
+		repo.setEntityTypeFactory(entityTypeFactory);
 		repo.setAttributeMetaDataFactory(attrMetaFactory);
 		assertNotNull(repo.getEntityNames());
 		assertEquals(Iterables.size(repo.getEntityNames()), 1);
@@ -84,7 +84,7 @@ public class CsvRepositorySourceTest extends AbstractMolgenisSpringTest
 		}
 
 		CsvRepositoryCollection repo = new CsvRepositoryCollection(zip);
-		repo.setEntityMetaDataFactory(entityMetaFactory);
+		repo.setEntityTypeFactory(entityTypeFactory);
 		repo.setAttributeMetaDataFactory(attrMetaFactory);
 		assertNotNull(repo.getEntityNames());
 		assertEquals(Iterables.size(repo.getEntityNames()), 3);

@@ -10,7 +10,7 @@ import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfi
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.web.settings.SnpEffAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
 import java.util.ArrayList;
@@ -64,7 +64,7 @@ public class SnpEffRepositoryAnnotator extends AbstractRepositoryAnnotator imple
 	}
 
 	@Override
-	public String canAnnotate(EntityMetaData repoMetaData)
+	public String canAnnotate(EntityType repoMetaData)
 	{
 		if (dataService.hasRepository(repoMetaData.getName() + SnpEffRunner.ENTITY_NAME_SUFFIX))
 		{
@@ -108,9 +108,9 @@ public class SnpEffRepositoryAnnotator extends AbstractRepositoryAnnotator imple
 	}
 
 	@Override
-	public EntityMetaData getTargetEntityMetaData(EntityMetaData sourceEMD)
+	public EntityType getTargetEntityType(EntityType sourceEntityType)
 	{
-		return snpEffRunner.getTargetEntityMetaData(sourceEMD);
+		return snpEffRunner.getTargetEntityType(sourceEntityType);
 	}
 
 	@Override

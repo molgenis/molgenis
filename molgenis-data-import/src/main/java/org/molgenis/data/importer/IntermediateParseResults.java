@@ -6,7 +6,7 @@ import org.molgenis.data.i18n.model.I18nString;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.importer.EmxMetaDataParser.EmxAttribute;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.LabeledResource;
@@ -28,9 +28,9 @@ import static com.google.common.collect.ImmutableSetMultimap.copyOf;
 public final class IntermediateParseResults
 {
 	/**
-	 * Maps full name to EntityMetaData
+	 * Maps full name to EntityType
 	 */
-	private final Map<String, EntityMetaData> entities;
+	private final Map<String, EntityType> entities;
 	/**
 	 * Maps full name to PackageImpl (with tags)
 	 */
@@ -42,7 +42,7 @@ public final class IntermediateParseResults
 	/**
 	 * Contains all {@link Entity} tags
 	 */
-	private final List<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> entityTags;
+	private final List<SemanticTag<EntityType, LabeledResource, LabeledResource>> entityTags;
 	/**
 	 * Contains all tag entities from the tag sheet
 	 */
@@ -107,22 +107,22 @@ public final class IntermediateParseResults
 
 	public void addAttributes(String entityName, List<EmxAttribute> emxAttrs)
 	{
-		EntityMetaData entityMeta = getEntityMetaData(entityName);
-		if (entityMeta == null) entityMeta = addEntityMetaData(entityName);
+		EntityType entityType = getEntityType(entityName);
+		if (entityType == null) entityType = addEntityType(entityName);
 
 		for (EmxAttribute emxAttr : emxAttrs)
 		{
 			AttributeMetaData attr = emxAttr.getAttr();
-			entityMeta.addAttribute(attr);
+			entityType.addAttribute(attr);
 
 			// set attribute roles
-			if (emxAttr.isIdAttr()) entityMeta.setIdAttribute(attr);
-			if (emxAttr.isLabelAttr()) entityMeta.setLabelAttribute(attr);
-			if (emxAttr.isLookupAttr()) entityMeta.addLookupAttribute(attr);
+			if (emxAttr.isIdAttr()) entityType.setIdAttribute(attr);
+			if (emxAttr.isLabelAttr()) entityType.setLabelAttribute(attr);
+			if (emxAttr.isLookupAttr()) entityType.addLookupAttribute(attr);
 		}
 	}
 
-	public EntityMetaData addEntityMetaData(String name)
+	public EntityType addEntityType(String name)
 	{
 		String simpleName = name;
 		for (String packageName : packages.keySet())
@@ -133,12 +133,12 @@ public final class IntermediateParseResults
 			}
 		}
 
-		EntityMetaData emd = entityTypeFactory.create().setName(name).setSimpleName(simpleName);
+		EntityType emd = entityTypeFactory.create().setName(name).setSimpleName(simpleName);
 		entities.put(name, emd);
 		return emd;
 	}
 
-	public EntityMetaData getEntityMetaData(String name)
+	public EntityType getEntityType(String name)
 	{
 		return entities.get(name);
 	}
@@ -169,12 +169,12 @@ public final class IntermediateParseResults
 		packages.put(name, p);
 	}
 
-	public ImmutableMap<String, EntityMetaData> getEntityMap()
+	public ImmutableMap<String, EntityType> getEntityMap()
 	{
 		return copyOf(entities);
 	}
 
-	public ImmutableList<EntityMetaData> getEntities()
+	public ImmutableList<EntityType> getEntities()
 	{
 		return copyOf(entities.values());
 	}
@@ -189,7 +189,7 @@ public final class IntermediateParseResults
 		return copyOf(attributeTags);
 	}
 
-	public ImmutableList<SemanticTag<EntityMetaData, LabeledResource, LabeledResource>> getEntityTags()
+	public ImmutableList<SemanticTag<EntityType, LabeledResource, LabeledResource>> getEntityTags()
 	{
 		return copyOf(entityTags);
 	}

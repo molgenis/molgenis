@@ -1,6 +1,6 @@
 package org.molgenis.data.rest;
 
-public class EntityMetaRequest
+public class EntityTypeRequest
 {
 	private String[] attributes;
 	private String[] expand;

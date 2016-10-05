@@ -9,7 +9,7 @@ import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.exception.UnresolvedAnnotatorDependencyException;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -68,9 +68,9 @@ public class AnnotatorDependencyOrderResolverTest extends AbstractMolgenisSpring
 		AttributeMetaData attri = attributeMetaDataFactory.create().setName("I").setDataType(STRING);
 		AttributeMetaData attrj = attributeMetaDataFactory.create().setName("J").setDataType(STRING);
 
-		EntityMetaData emd = entityTypeFactory.create().setName("test");
+		EntityType emd = entityTypeFactory.create().setName("test");
 		emd.addAttributes(Arrays.asList(attra, attrb));
-		when(repo.getEntityMetaData()).thenReturn(emd);
+		when(repo.getEntityType()).thenReturn(emd);
 
 		when(annotator1.getInfo()).thenReturn(annotator1info);
 		when(annotator2.getInfo()).thenReturn(annotator2info);

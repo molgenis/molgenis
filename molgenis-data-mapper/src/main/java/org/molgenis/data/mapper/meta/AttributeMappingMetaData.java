@@ -13,7 +13,7 @@ import static java.util.stream.Collectors.toList;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.ENUM;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
 import static org.molgenis.data.mapper.meta.MapperPackage.PACKAGE_MAPPER;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component

@@ -21,22 +21,22 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.DESCRIPTION;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.LABEL;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
+import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
 
 /**
- * EntityMetaData defines the structure and attributes of an Entity. Attributes are unique. Other software components
+ * EntityType defines the structure and attributes of an Entity. Attributes are unique. Other software components
  * can use this to interact with Entity and/or to configure backends and frontends, including Repository instances.
  */
-public class EntityMetaData extends StaticEntity
+public class EntityType extends StaticEntity
 {
 	private transient Map<String, AttributeMetaData> cachedAttrs;
 	private transient List<AttributeMetaData> cachedOwnAtomicAttrs;
 	private transient Boolean cachedHasAttrWithExpession;
 
-	public EntityMetaData(Entity entity)
+	public EntityType(Entity entity)
 	{
 		super(entity);
 	}
@@ -44,18 +44,18 @@ public class EntityMetaData extends StaticEntity
 	/**
 	 * Creates a new entity meta data.
 	 */
-	protected EntityMetaData()
+	protected EntityType()
 	{
 	}
 
 	/**
 	 * Creates a new entity meta data. Normally called by its {@link EntityTypeFactory entity factory}.
 	 *
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 */
-	public EntityMetaData(EntityMetaData entityMeta)
+	public EntityType(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setDefaultValues();
 	}
 
@@ -63,11 +63,11 @@ public class EntityMetaData extends StaticEntity
 	 * Creates a new entity meta data with the given identifier. Normally called by its {@link EntityTypeFactory entity factory}.
 	 *
 	 * @param entityId   entity identifier (fully qualified entity name)
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 */
-	public EntityMetaData(String entityId, EntityMetaData entityMeta)
+	public EntityType(String entityId, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setDefaultValues();
 		//FIXME: This is incorrect, the ID value is the fully qualified name, not the simple name!
 		setSimpleName(entityId);
@@ -80,59 +80,59 @@ public class EntityMetaData extends StaticEntity
 
 	/**
 	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to
-	 * {@link #EntityMetaData(EntityMetaData)}). Creates shallow-copy of package, tags and extended entity.
+	 * {@link #EntityType(EntityType)}). Creates shallow-copy of package, tags and extended entity.
 	 *
-	 * @param entityMeta   entity meta data
+	 * @param entityType   entity meta data
 	 * @param attrCopyMode attribute copy mode that defines whether to deep-copy or shallow-copy attributes
 	 * @return copy of entity meta data
 	 */
-	public static EntityMetaData newInstance(EntityMetaData entityMeta, AttributeCopyMode attrCopyMode)
+	public static EntityType newInstance(EntityType entityType, AttributeCopyMode attrCopyMode)
 	{
-		EntityMetaData entityMetaCopy = new EntityMetaData(entityMeta.getEntityMetaData()); // do not deep-copy
-		entityMetaCopy.setSimpleName(entityMeta.getSimpleName());
-		entityMetaCopy.setPackage(entityMeta.getPackage()); // do not deep-copy
-		entityMetaCopy.setLabel(entityMeta.getLabel());
-		entityMetaCopy.setDescription(entityMeta.getDescription());
+		EntityType entityTypeCopy = new EntityType(entityType.getEntityType()); // do not deep-copy
+		entityTypeCopy.setSimpleName(entityType.getSimpleName());
+		entityTypeCopy.setPackage(entityType.getPackage()); // do not deep-copy
+		entityTypeCopy.setLabel(entityType.getLabel());
+		entityTypeCopy.setDescription(entityType.getDescription());
 
 		// Own attributes (deep copy or shallow copy)
 		if (attrCopyMode == DEEP_COPY_ATTRS)
 		{
-			LinkedHashMap<String, AttributeMetaData> ownAttrMap = stream(entityMeta.getOwnAttributes().spliterator(),
+			LinkedHashMap<String, AttributeMetaData> ownAttrMap = stream(entityType.getOwnAttributes().spliterator(),
 					false).map(attr -> AttributeMetaData.newInstance(attr, attrCopyMode))
 					.map(attrCopy -> attrCopy.setIdentifier(null))
 					.collect(toMap(AttributeMetaData::getName, Function.identity(), (u, v) ->
 					{
 						throw new IllegalStateException(String.format("Duplicate key %s", u));
 					}, LinkedHashMap::new));
-			entityMetaCopy.setOwnAttributes(ownAttrMap.values());
+			entityTypeCopy.setOwnAttributes(ownAttrMap.values());
 
 			// Own id attribute (use attribute reference from attributes map)
-			AttributeMetaData ownIdAttribute = entityMeta.getOwnIdAttribute();
-			entityMetaCopy.setIdAttribute(ownIdAttribute != null ? ownAttrMap.get(ownIdAttribute.getName()) : null);
+			AttributeMetaData ownIdAttribute = entityType.getOwnIdAttribute();
+			entityTypeCopy.setIdAttribute(ownIdAttribute != null ? ownAttrMap.get(ownIdAttribute.getName()) : null);
 
 			// Own label attribute (use attribute reference from attributes map)
-			AttributeMetaData ownLabelAttr = entityMeta.getOwnLabelAttribute();
-			entityMetaCopy.setLabelAttribute(ownLabelAttr != null ? ownAttrMap.get(ownLabelAttr.getName()) : null);
+			AttributeMetaData ownLabelAttr = entityType.getOwnLabelAttribute();
+			entityTypeCopy.setLabelAttribute(ownLabelAttr != null ? ownAttrMap.get(ownLabelAttr.getName()) : null);
 
 			// Own lookup attrs (use attribute reference from attributes map)
-			Iterable<AttributeMetaData> ownLookupAttrs = entityMeta.getOwnLookupAttributes();
-			entityMetaCopy.setLookupAttributes(stream(ownLookupAttrs.spliterator(), false)
+			Iterable<AttributeMetaData> ownLookupAttrs = entityType.getOwnLookupAttributes();
+			entityTypeCopy.setLookupAttributes(stream(ownLookupAttrs.spliterator(), false)
 					.map(ownLookupAttr -> ownAttrMap.get(ownLookupAttr.getName())).collect(toList()));
 		}
 		else
 		{
-			entityMetaCopy.setOwnAttributes(newArrayList(entityMeta.getOwnAttributes()));
-			entityMetaCopy.setIdAttribute(entityMeta.getOwnIdAttribute());
-			entityMetaCopy.setLabelAttribute(entityMeta.getOwnLabelAttribute());
-			entityMetaCopy.setLookupAttributes(newArrayList(entityMeta.getOwnLookupAttributes()));
+			entityTypeCopy.setOwnAttributes(newArrayList(entityType.getOwnAttributes()));
+			entityTypeCopy.setIdAttribute(entityType.getOwnIdAttribute());
+			entityTypeCopy.setLabelAttribute(entityType.getOwnLabelAttribute());
+			entityTypeCopy.setLookupAttributes(newArrayList(entityType.getOwnLookupAttributes()));
 		}
 
-		entityMetaCopy.setAbstract(entityMeta.isAbstract());
-		entityMetaCopy.setExtends(entityMeta.getExtends()); // do not deep-copy
-		entityMetaCopy.setTags(newArrayList(entityMeta.getTags())); // do not deep-copy
-		entityMetaCopy.setBackend(entityMeta.getBackend());
+		entityTypeCopy.setAbstract(entityType.isAbstract());
+		entityTypeCopy.setExtends(entityType.getExtends()); // do not deep-copy
+		entityTypeCopy.setTags(newArrayList(entityType.getTags())); // do not deep-copy
+		entityTypeCopy.setBackend(entityType.getBackend());
 
-		return entityMetaCopy;
+		return entityTypeCopy;
 	}
 
 	@Override
@@ -159,7 +159,7 @@ public class EntityMetaData extends StaticEntity
 	 * @param fullName fully qualified entity name.
 	 * @return this entity meta data for chaining
 	 */
-	public EntityMetaData setName(String fullName)
+	public EntityType setName(String fullName)
 	{
 		set(FULL_NAME, fullName);
 		if (getSimpleName() == null)
@@ -190,7 +190,7 @@ public class EntityMetaData extends StaticEntity
 	 * @param simpleName entity name.
 	 * @return this entity meta data for chaining
 	 */
-	public EntityMetaData setSimpleName(String simpleName)
+	public EntityType setSimpleName(String simpleName)
 	{
 		set(SIMPLE_NAME, simpleName);
 		updateFullName();
@@ -223,7 +223,7 @@ public class EntityMetaData extends StaticEntity
 		return i18nLabel != null ? i18nLabel : getLabel();
 	}
 
-	public EntityMetaData setLabel(String label)
+	public EntityType setLabel(String label)
 	{
 		if (label == null)
 		{
@@ -233,7 +233,7 @@ public class EntityMetaData extends StaticEntity
 		return this;
 	}
 
-	public EntityMetaData setLabel(String languageCode, String label)
+	public EntityType setLabel(String languageCode, String label)
 	{
 		set(getI18nAttributeName(LABEL, languageCode), label);
 		return this;
@@ -260,13 +260,13 @@ public class EntityMetaData extends StaticEntity
 		return i18nDescription != null ? i18nDescription : getDescription();
 	}
 
-	public EntityMetaData setDescription(String description)
+	public EntityType setDescription(String description)
 	{
 		set(DESCRIPTION, description);
 		return this;
 	}
 
-	public EntityMetaData setDescription(String languageCode, String description)
+	public EntityType setDescription(String languageCode, String description)
 	{
 		set(getI18nAttributeName(DESCRIPTION, languageCode), description);
 		return this;
@@ -282,7 +282,7 @@ public class EntityMetaData extends StaticEntity
 		return getString(BACKEND);
 	}
 
-	public EntityMetaData setBackend(String backend)
+	public EntityType setBackend(String backend)
 	{
 		set(BACKEND, backend);
 		return this;
@@ -298,7 +298,7 @@ public class EntityMetaData extends StaticEntity
 		return getEntity(PACKAGE, Package.class);
 	}
 
-	public EntityMetaData setPackage(Package package_)
+	public EntityType setPackage(Package package_)
 	{
 		set(PACKAGE, package_);
 		updateFullName();
@@ -315,7 +315,7 @@ public class EntityMetaData extends StaticEntity
 		AttributeMetaData idAttr = getOwnIdAttribute();
 		if (idAttr == null)
 		{
-			EntityMetaData extends_ = getExtends();
+			EntityType extends_ = getExtends();
 			if (extends_ != null)
 			{
 				idAttr = extends_.getIdAttribute();
@@ -334,7 +334,7 @@ public class EntityMetaData extends StaticEntity
 		return getEntity(ID_ATTRIBUTE, AttributeMetaData.class);
 	}
 
-	public EntityMetaData setIdAttribute(AttributeMetaData idAttr)
+	public EntityType setIdAttribute(AttributeMetaData idAttr)
 	{
 		set(ID_ATTRIBUTE, idAttr);
 		if (idAttr != null)
@@ -360,7 +360,7 @@ public class EntityMetaData extends StaticEntity
 		AttributeMetaData labelAttr = getOwnLabelAttribute();
 		if (labelAttr == null)
 		{
-			EntityMetaData extends_ = getExtends();
+			EntityType extends_ = getExtends();
 			if (extends_ != null)
 			{
 				labelAttr = extends_.getLabelAttribute();
@@ -398,7 +398,7 @@ public class EntityMetaData extends StaticEntity
 		return getEntity(getI18nAttributeName(LABEL_ATTRIBUTE, languageCode), AttributeMetaData.class);
 	}
 
-	public EntityMetaData setLabelAttribute(AttributeMetaData labelAttr)
+	public EntityType setLabelAttribute(AttributeMetaData labelAttr)
 	{
 		set(LABEL_ATTRIBUTE, labelAttr);
 		return this;
@@ -424,7 +424,7 @@ public class EntityMetaData extends StaticEntity
 	public Iterable<AttributeMetaData> getLookupAttributes()
 	{
 		Iterable<AttributeMetaData> lookupAttributes = getOwnLookupAttributes();
-		EntityMetaData extends_ = getExtends();
+		EntityType extends_ = getExtends();
 		if (extends_ != null)
 		{
 			lookupAttributes = concat(lookupAttributes, extends_.getLookupAttributes());
@@ -442,7 +442,7 @@ public class EntityMetaData extends StaticEntity
 		return getEntities(LOOKUP_ATTRIBUTES, AttributeMetaData.class);
 	}
 
-	public EntityMetaData setLookupAttributes(Iterable<AttributeMetaData> lookupAttrs)
+	public EntityType setLookupAttributes(Iterable<AttributeMetaData> lookupAttrs)
 	{
 		set(LOOKUP_ATTRIBUTES, lookupAttrs);
 		return this;
@@ -460,7 +460,7 @@ public class EntityMetaData extends StaticEntity
 		return abstract_ != null ? abstract_ : false;
 	}
 
-	public EntityMetaData setAbstract(boolean abstract_)
+	public EntityType setAbstract(boolean abstract_)
 	{
 		set(ABSTRACT, abstract_);
 		return this;
@@ -471,12 +471,12 @@ public class EntityMetaData extends StaticEntity
 	 *
 	 * @return parent entity
 	 */
-	public EntityMetaData getExtends()
+	public EntityType getExtends()
 	{
-		return getEntity(EXTENDS, EntityMetaData.class);
+		return getEntity(EXTENDS, EntityType.class);
 	}
 
-	public EntityMetaData setExtends(EntityMetaData extends_)
+	public EntityType setExtends(EntityType extends_)
 	{
 		set(EXTENDS, extends_);
 		return this;
@@ -532,7 +532,7 @@ public class EntityMetaData extends StaticEntity
 		return;
 	}
 
-	public EntityMetaData setOwnAttributes(Iterable<AttributeMetaData> attrs)
+	public EntityType setOwnAttributes(Iterable<AttributeMetaData> attrs)
 	{
 		set(ATTRIBUTES, attrs);
 		return this;
@@ -544,7 +544,7 @@ public class EntityMetaData extends StaticEntity
 	 * Returns all attributes. In case of compound attributes (attributes consisting of atomic attributes) only the
 	 * compound attribute is returned. This attribute can be used to retrieve parts of the compound attribute.
 	 * <p>
-	 * In case EntityMetaData extends other EntityMetaData then the attributes of this EntityMetaData as well as its
+	 * In case EntityType extends other EntityType then the attributes of this EntityType as well as its
 	 * parent class are returned.
 	 *
 	 * @return entity attributes
@@ -552,7 +552,7 @@ public class EntityMetaData extends StaticEntity
 	public Iterable<AttributeMetaData> getAttributes()
 	{
 		Iterable<AttributeMetaData> attrs = getOwnAttributes();
-		EntityMetaData extends_ = getExtends();
+		EntityType extends_ = getExtends();
 		if (extends_ != null)
 		{
 			attrs = concat(attrs, extends_.getAttributes());
@@ -564,7 +564,7 @@ public class EntityMetaData extends StaticEntity
 	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of atomic attributes) only
 	 * the descendant atomic attributes are returned. The compound attribute itself is not returned.
 	 * <p>
-	 * In case EntityMetaData extends other EntityMetaData then the attributes of this EntityMetaData as well as its
+	 * In case EntityType extends other EntityType then the attributes of this EntityType as well as its
 	 * parent class are returned.
 	 *
 	 * @return atomic attributes
@@ -572,7 +572,7 @@ public class EntityMetaData extends StaticEntity
 	public Iterable<AttributeMetaData> getAtomicAttributes()
 	{
 		Iterable<AttributeMetaData> atomicAttrs = getCachedOwnAtomicAttrs();
-		EntityMetaData extends_ = getExtends();
+		EntityType extends_ = getExtends();
 		if (extends_ != null)
 		{
 			atomicAttrs = Iterables.concat(extends_.getAtomicAttributes(), atomicAttrs);
@@ -583,7 +583,7 @@ public class EntityMetaData extends StaticEntity
 	public Iterable<AttributeMetaData> getAllAttributes()
 	{
 		Iterable<AttributeMetaData> allAttrs = getOwnAllAttributes();
-		EntityMetaData extends_ = getExtends();
+		EntityType extends_ = getExtends();
 		if (extends_ != null)
 		{
 			allAttrs = concat(allAttrs, extends_.getAllAttributes());
@@ -609,16 +609,16 @@ public class EntityMetaData extends StaticEntity
 		if (attr == null)
 		{
 			// look up attribute in parent entity
-			EntityMetaData extendsEntityMeta = getExtends();
-			if (extendsEntityMeta != null)
+			EntityType extendsEntityType = getExtends();
+			if (extendsEntityType != null)
 			{
-				attr = extendsEntityMeta.getAttribute(attrName);
+				attr = extendsEntityType.getAttribute(attrName);
 			}
 		}
 		return attr;
 	}
 
-	public EntityMetaData addAttribute(AttributeMetaData attr, AttributeRole... attrTypes)
+	public EntityType addAttribute(AttributeMetaData attr, AttributeRole... attrTypes)
 	{
 		invalidateCachedAttrs();
 
@@ -712,7 +712,7 @@ public class EntityMetaData extends StaticEntity
 	 * @param tags entity tags
 	 * @return this entity
 	 */
-	public EntityMetaData setTags(Iterable<Tag> tags)
+	public EntityType setTags(Iterable<Tag> tags)
 	{
 		set(TAGS, tags);
 		return this;
@@ -744,7 +744,7 @@ public class EntityMetaData extends StaticEntity
 	 * Returns all atomic attributes. In case of compound attributes (attributes consisting of atomic attributes) only
 	 * the descendant atomic attributes are returned. The compound attribute itself is not returned.
 	 * <p>
-	 * In case EntityMetaData extends other EntityMetaData then the attributes of this EntityMetaData as well as its
+	 * In case EntityType extends other EntityType then the attributes of this EntityType as well as its
 	 * parent class are returned.
 	 *
 	 * @return atomic attributes without extended entity atomic attributes
@@ -884,6 +884,6 @@ public class EntityMetaData extends StaticEntity
 	@Override
 	public String toString()
 	{
-		return "EntityMetaData{" + "name=" + getName() + '}';
+		return "EntityType{" + "name=" + getName() + '}';
 	}
 }

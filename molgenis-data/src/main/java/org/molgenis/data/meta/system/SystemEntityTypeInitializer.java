@@ -22,7 +22,7 @@ import static java.util.Objects.requireNonNull;
  * Discovers and initializes {@link SystemEntityType} beans.
  */
 @Component
-public class SystemEntityMetaDataInitializer
+public class SystemEntityTypeInitializer
 {
 	private final MetaDataService metaDataService;
 	private final RootSystemPackage rootSystemPackage;
@@ -30,7 +30,7 @@ public class SystemEntityMetaDataInitializer
 	private final GenericDependencyResolver genericDependencyResolver;
 
 	@Autowired
-	public SystemEntityMetaDataInitializer(MetaDataService metaDataService, RootSystemPackage rootSystemPackage,
+	public SystemEntityTypeInitializer(MetaDataService metaDataService, RootSystemPackage rootSystemPackage,
 			MetaPackage metaPackage, GenericDependencyResolver genericDependencyResolver)
 	{
 		this.metaDataService = requireNonNull(metaDataService);
@@ -49,9 +49,9 @@ public class SystemEntityMetaDataInitializer
 		ctx.getBean(AttributeMetaDataMetaData.class).bootstrap(entityTypeMetadata);
 		//TODO: doesn't this mean all attributes get added twice?
 
-		Map<String, SystemEntityType> systemEntityMetaDataMap = ctx.getBeansOfType(SystemEntityType.class);
-		genericDependencyResolver.resolve(systemEntityMetaDataMap.values(), SystemEntityType::getDependencies)
-				.stream().forEach(systemEntityMetaData -> initialize(systemEntityMetaData, entityTypeMetadata));
+		Map<String, SystemEntityType> systemEntityTypeMap = ctx.getBeansOfType(SystemEntityType.class);
+		genericDependencyResolver.resolve(systemEntityTypeMap.values(), SystemEntityType::getDependencies)
+				.stream().forEach(systemEntityType -> initialize(systemEntityType, entityTypeMetadata));
 	}
 
 	private void initialize(SystemEntityType systemEntityType, EntityTypeMetadata entityTypeMetadata)
@@ -84,7 +84,7 @@ public class SystemEntityMetaDataInitializer
 	{
 		if (systemEntityType.getPackage() == null)
 		{
-			if (metaDataService.isMetaEntityMetaData(systemEntityType))
+			if (metaDataService.isMetaEntityType(systemEntityType))
 			{
 				systemEntityType.setPackage(metaPackage);
 			}

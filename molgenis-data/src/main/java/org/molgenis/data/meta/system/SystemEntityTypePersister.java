@@ -23,7 +23,7 @@ import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
-import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
+import static org.molgenis.data.meta.MetaUtils.getEntityTypeFetch;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.REF_ENTITY;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
@@ -33,20 +33,20 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
  * Persists {@link SystemEntityType} in the meta data {@link org.molgenis.data.RepositoryCollection}.
  */
 @Component
-public class SystemEntityMetaDataPersister
+public class SystemEntityTypePersister
 {
 	private final DataService dataService;
-	private final SystemEntityMetaDataRegistry systemEntityMetaRegistry;
+	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private TagMetaData tagMeta;
 	private AttributeMetaDataMetaData attrMetaMeta;
 	private PackageMetaData packageMeta;
 	private EntityTypeMetadata entityTypeMeta;
 
 	@Autowired
-	public SystemEntityMetaDataPersister(DataService dataService, SystemEntityMetaDataRegistry systemEntityMetaRegistry)
+	public SystemEntityTypePersister(DataService dataService, SystemEntityTypeRegistry systemEntityTypeRegistry)
 	{
 		this.dataService = requireNonNull(dataService);
-		this.systemEntityMetaRegistry = requireNonNull(systemEntityMetaRegistry);
+		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 	}
 
 	public void persist(ContextRefreshedEvent event)
@@ -59,7 +59,7 @@ public class SystemEntityMetaDataPersister
 		attrMetaMeta.getAttribute(REF_ENTITY).setDataType(STRING).setRefEntity(null);
 
 		// create meta entity tables
-		// TODO make generic with dependency resolving, use MetaDataService.isMetaEntityMetaData
+		// TODO make generic with dependency resolving, use MetaDataService.isMetaEntityType
 		if (!repositoryCollection.hasRepository(tagMeta))
 		{
 			repositoryCollection.createRepository(tagMeta);
@@ -92,8 +92,8 @@ public class SystemEntityMetaDataPersister
 		}
 
 		// persist entity meta data
-		Set<EntityMetaData> metaEntityMetaSet = systemEntityMetaRegistry.getSystemEntityMetaDatas().collect(toSet());
-		DependencyResolver.resolve(metaEntityMetaSet).forEach(this::persist);
+		Set<EntityType> metaEntityTypeSet = systemEntityTypeRegistry.getSystemEntityTypes().collect(toSet());
+		DependencyResolver.resolve(metaEntityTypeSet).forEach(this::persist);
 
 		// remove entity meta data
 		removeNonExistingSystemEntities();
@@ -119,17 +119,17 @@ public class SystemEntityMetaDataPersister
 	}
 
 	@Autowired
-	public void setEntityMetaDataMetaData(EntityTypeMetadata entityTypeMeta)
+	public void setEntityTypeMetaData(EntityTypeMetadata entityTypeMeta)
 	{
 		this.entityTypeMeta = requireNonNull(entityTypeMeta);
 	}
 
-	private static void populateAutoAttributeValues(EntityMetaData existingEntityMeta, EntityMetaData entityMeta)
+	private static void populateAutoAttributeValues(EntityType existingEntityType, EntityType entityType)
 	{
 		// inject existing auto-generated identifiers in system entity meta data
-		Map<String, String> attrMap = stream(existingEntityMeta.getAllAttributes().spliterator(), false)
+		Map<String, String> attrMap = stream(existingEntityType.getAllAttributes().spliterator(), false)
 				.collect(toMap(AttributeMetaData::getName, AttributeMetaData::getIdentifier));
-		entityMeta.getAllAttributes().forEach(attr ->
+		entityType.getAllAttributes().forEach(attr ->
 		{
 			String attrIdentifier = attrMap.get(attr.getName());
 			if (attrIdentifier != null)
@@ -139,21 +139,21 @@ public class SystemEntityMetaDataPersister
 		});
 	}
 
-	private void persist(EntityMetaData entityMeta)
+	private void persist(EntityType entityType)
 	{
-		EntityMetaData existingEntityMeta = dataService
-				.findOneById(ENTITY_META_DATA, entityMeta.getName(), getEntityMetaDataFetch(), EntityMetaData.class);
-		if (existingEntityMeta == null)
+		EntityType existingEntityType = dataService
+				.findOneById(ENTITY_META_DATA, entityType.getName(), getEntityTypeFetch(), EntityType.class);
+		if (existingEntityType == null)
 		{
-			dataService.getMeta().addEntityMeta(entityMeta);
+			dataService.getMeta().addEntityType(entityType);
 		}
 		else
 		{
-			populateAutoAttributeValues(existingEntityMeta, entityMeta);
+			populateAutoAttributeValues(existingEntityType, entityType);
 
-			if (!EntityUtils.equals(entityMeta, existingEntityMeta))
+			if (!EntityUtils.equals(entityType, existingEntityType))
 			{
-				dataService.getMeta().updateEntityMeta(entityMeta);
+				dataService.getMeta().updateEntityType(entityType);
 			}
 		}
 	}
@@ -174,29 +174,29 @@ public class SystemEntityMetaDataPersister
 	void removeNonExistingSystemEntities()
 	{
 		// get all system entities
-		Set<EntityMetaData> systemEntityMetaSet = dataService.findAll(ENTITY_META_DATA, EntityMetaData.class)
-				.filter(SystemEntityMetaDataPersister::isSystemEntity).collect(toSet());
+		Set<EntityType> systemEntityTypeSet = dataService.findAll(ENTITY_META_DATA, EntityType.class)
+				.filter(SystemEntityTypePersister::isSystemEntity).collect(toSet());
 
 		// determine removed system entities
-		Map<String, EntityMetaData> removedSystemEntityMetaMap = systemEntityMetaSet.stream().filter(this::isNotExists)
-				.collect(toMap(EntityMetaData::getName, Function.identity()));
+		Map<String, EntityType> removedSystemEntityTypeMap = systemEntityTypeSet.stream().filter(this::isNotExists)
+				.collect(toMap(EntityType::getName, Function.identity()));
 
-		if (!removedSystemEntityMetaMap.isEmpty())
+		if (!removedSystemEntityTypeMap.isEmpty())
 		{
 			// sort removed entities by dependency
-			List<EntityMetaData> sortedSystemEntityMetaList = DependencyResolver.resolve(systemEntityMetaSet);
-			List<EntityMetaData> sortedRemovedSystemEntityMetaList = sortedSystemEntityMetaList.stream()
-					.filter(entityMeta -> removedSystemEntityMetaMap.containsKey(entityMeta.getName()))
+			List<EntityType> sortedSystemEntityTypeList = DependencyResolver.resolve(systemEntityTypeSet);
+			List<EntityType> sortedRemovedSystemEntityTypeList = sortedSystemEntityTypeList.stream()
+					.filter(entityType -> removedSystemEntityTypeMap.containsKey(entityType.getName()))
 					.collect(toList());
 
 			// remove entities in reverse order of dependencies
-			dataService.delete(ENTITY_META_DATA, Lists.reverse(sortedRemovedSystemEntityMetaList).stream());
+			dataService.delete(ENTITY_META_DATA, Lists.reverse(sortedRemovedSystemEntityTypeList).stream());
 		}
 	}
 
-	private static boolean isSystemEntity(EntityMetaData entityMeta)
+	private static boolean isSystemEntity(EntityType entityType)
 	{
-		Package package_ = entityMeta.getPackage();
+		Package package_ = entityType.getPackage();
 		if (package_ == null)
 		{
 			return false;
@@ -209,8 +209,8 @@ public class SystemEntityMetaDataPersister
 		return rootPackage != null && rootPackage.getName().equals(PACKAGE_SYSTEM);
 	}
 
-	private boolean isNotExists(EntityMetaData entityMeta)
+	private boolean isNotExists(EntityType entityType)
 	{
-		return !systemEntityMetaRegistry.hasSystemEntityMetaData(entityMeta.getName());
+		return !systemEntityTypeRegistry.hasSystemEntityType(entityType.getName());
 	}
 }

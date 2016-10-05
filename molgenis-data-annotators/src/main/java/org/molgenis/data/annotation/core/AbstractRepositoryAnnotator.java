@@ -4,7 +4,7 @@ import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Iterator;
 import java.util.stream.Collectors;
@@ -13,7 +13,7 @@ import java.util.stream.StreamSupport;
 public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 {
 	@Override
-	public String canAnnotate(EntityMetaData repoMetaData)
+	public String canAnnotate(EntityType repoMetaData)
 	{
 		Iterable<AttributeMetaData> annotatorAttributes = getRequiredAttributes();
 		for (AttributeMetaData annotatorAttribute : annotatorAttributes)
@@ -38,7 +38,7 @@ public abstract class AbstractRepositoryAnnotator implements RepositoryAnnotator
 			}
 			if (annotatorAttribute.getDataType().equals(MolgenisFieldTypes.AttributeType.XREF))
 			{
-				EntityMetaData refEntity = repoMetaData.getAttribute(annotatorAttribute.getName()).getRefEntity();
+				EntityType refEntity = repoMetaData.getAttribute(annotatorAttribute.getName()).getRefEntity();
 				for (AttributeMetaData refAttribute : annotatorAttribute.getRefEntity().getAtomicAttributes())
 				{
 					if (refEntity.getAttribute(refAttribute.getName()) == null)

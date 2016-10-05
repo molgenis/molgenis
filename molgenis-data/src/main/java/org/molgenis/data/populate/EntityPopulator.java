@@ -37,10 +37,10 @@ public class EntityPopulator
 	public void populate(Entity entity)
 	{
 		// auto date
-		generateAutoDateOrDateTime(singletonList(entity), entity.getEntityMetaData().getAttributes());
+		generateAutoDateOrDateTime(singletonList(entity), entity.getEntityType().getAttributes());
 
 		// auto id
-		AttributeMetaData idAttr = entity.getEntityMetaData().getIdAttribute();
+		AttributeMetaData idAttr = entity.getEntityType().getIdAttribute();
 		if (idAttr != null && idAttr.isAuto() && entity.getIdValue() == null && (idAttr.getDataType() == STRING))
 		{
 			entity.set(idAttr.getName(), idGenerator.generateId());

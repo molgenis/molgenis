@@ -1,7 +1,7 @@
 package org.molgenis.data;
 
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -47,10 +47,10 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	}
 
 	@Override
-	public Repository<Entity> createRepository(EntityMetaData entityMeta)
+	public Repository<Entity> createRepository(EntityType entityType)
 	{
 		return repositoryDecoratorFactory
-				.createDecoratedRepository(decoratedRepositoryCollection.createRepository(entityMeta));
+				.createDecoratedRepository(decoratedRepositoryCollection.createRepository(entityType));
 	}
 
 	@Override
@@ -67,9 +67,9 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	}
 
 	@Override
-	public Repository<Entity> getRepository(EntityMetaData entityMeta)
+	public Repository<Entity> getRepository(EntityType entityType)
 	{
-		Repository<Entity> repository = decoratedRepositoryCollection.getRepository(entityMeta);
+		Repository<Entity> repository = decoratedRepositoryCollection.getRepository(entityType);
 		return repository != null ? repositoryDecoratorFactory.createDecoratedRepository(repository) : null;
 	}
 
@@ -80,33 +80,33 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	}
 
 	@Override
-	public boolean hasRepository(EntityMetaData entityMeta)
+	public boolean hasRepository(EntityType entityType)
 	{
-		return decoratedRepositoryCollection.hasRepository(entityMeta);
+		return decoratedRepositoryCollection.hasRepository(entityType);
 	}
 
 	@Override
-	public void deleteRepository(EntityMetaData entityMeta)
+	public void deleteRepository(EntityType entityType)
 	{
-		decoratedRepositoryCollection.deleteRepository(entityMeta);
+		decoratedRepositoryCollection.deleteRepository(entityType);
 	}
 
 	@Override
-	public void addAttribute(EntityMetaData entityMeta, AttributeMetaData attribute)
+	public void addAttribute(EntityType entityType, AttributeMetaData attribute)
 	{
-		decoratedRepositoryCollection.addAttribute(entityMeta, attribute);
+		decoratedRepositoryCollection.addAttribute(entityType, attribute);
 	}
 
 	@Override
-	public void updateAttribute(EntityMetaData entityMetaData, AttributeMetaData attr, AttributeMetaData updatedAttr)
+	public void updateAttribute(EntityType entityType, AttributeMetaData attr, AttributeMetaData updatedAttr)
 	{
-		decoratedRepositoryCollection.updateAttribute(entityMetaData, attr, updatedAttr);
+		decoratedRepositoryCollection.updateAttribute(entityType, attr, updatedAttr);
 	}
 
 	@Override
-	public void deleteAttribute(EntityMetaData entityMeta, AttributeMetaData attr)
+	public void deleteAttribute(EntityType entityType, AttributeMetaData attr)
 	{
-		decoratedRepositoryCollection.deleteAttribute(entityMeta, attr);
+		decoratedRepositoryCollection.deleteAttribute(entityType, attr);
 	}
 
 	@Override

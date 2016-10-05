@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 
-public abstract class DefaultSettingsEntityMetaData extends SystemEntityType
+public abstract class DefaultSettingsEntityType extends SystemEntityType
 {
 	public static final String ATTR_ID = "id";
 
@@ -23,12 +23,12 @@ public abstract class DefaultSettingsEntityMetaData extends SystemEntityType
 	private EntityManager entityManager;
 
 	@Autowired
-	public SettingsEntityMeta settingsEntityMeta;
+	public SettingsEntityType settingsEntityType;
 
 	@Autowired
 	private SettingsPackage settingsPackage;
 
-	public DefaultSettingsEntityMetaData(String id)
+	public DefaultSettingsEntityType(String id)
 	{
 		super(id, PACKAGE_SETTINGS);
 	}
@@ -36,7 +36,7 @@ public abstract class DefaultSettingsEntityMetaData extends SystemEntityType
 	@Override
 	public void init()
 	{
-		setExtends(settingsEntityMeta);
+		setExtends(settingsEntityType);
 		setPackage(settingsPackage);
 	}
 

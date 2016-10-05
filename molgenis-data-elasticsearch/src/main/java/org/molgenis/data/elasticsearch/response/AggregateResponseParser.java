@@ -14,7 +14,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.elasticsearch.request.AggregateQueryGenerator;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -362,10 +362,10 @@ public class AggregateResponseParser
 	 * "Total".
 	 *
 	 * @param idLabels
-	 * @param entityMetaData
+	 * @param entityType
 	 * @param dataService
 	 */
-	private void convertIdtoLabelLabels(List<Object> idLabels, EntityMetaData entityMetaData, DataService dataService)
+	private void convertIdtoLabelLabels(List<Object> idLabels, EntityType entityType, DataService dataService)
 	{
 		final int nrLabels = idLabels.size();
 		if (nrLabels > 0)
@@ -376,7 +376,7 @@ public class AggregateResponseParser
 
 			// Map entity ids to labels
 			Map<String, Entity> idToLabelMap = new HashMap<>();
-			dataService.findAll(entityMetaData.getName(), idLabelsWithoutNull).forEach(entity ->
+			dataService.findAll(entityType.getName(), idLabelsWithoutNull).forEach(entity ->
 			{
 				idToLabelMap.put(entity.getIdValue().toString(), entity);
 			});

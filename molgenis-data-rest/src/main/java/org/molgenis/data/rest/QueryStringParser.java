@@ -5,7 +5,7 @@ import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.rsql.MolgenisRSQL;
 import org.molgenis.data.support.QueryImpl;
 
@@ -29,12 +29,12 @@ import java.util.Map;
  */
 public class QueryStringParser
 {
-	private final EntityMetaData entityMetaData;
+	private final EntityType entityType;
 	private final MolgenisRSQL molgenisRSQL;
 
-	public QueryStringParser(EntityMetaData entityMetaData, MolgenisRSQL molgenisRSQL)
+	public QueryStringParser(EntityType entityType, MolgenisRSQL molgenisRSQL)
 	{
-		this.entityMetaData = entityMetaData;
+		this.entityType = entityType;
 		this.molgenisRSQL = molgenisRSQL;
 	}
 
@@ -59,7 +59,7 @@ public class QueryStringParser
 				}
 				else if (paramName.equalsIgnoreCase("q"))
 				{
-					Query<Entity> query = molgenisRSQL.createQuery(paramValues[0], entityMetaData);
+					Query<Entity> query = molgenisRSQL.createQuery(paramValues[0], entityType);
 					for (QueryRule rule : query.getRules())
 					{
 						q.addRule(rule);

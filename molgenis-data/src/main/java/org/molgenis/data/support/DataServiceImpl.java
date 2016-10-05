@@ -2,7 +2,7 @@ package org.molgenis.data.support;
 
 import org.molgenis.data.*;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
+import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
 
 /**
@@ -33,15 +33,15 @@ public class DataServiceImpl implements DataService
 	}
 
 	@Override
-	public EntityMetaData getEntityMetaData(String entityName)
+	public EntityType getEntityType(String entityName)
 	{
-		return metaDataService.getEntityMetaData(entityName);
+		return metaDataService.getEntityType(entityName);
 	}
 
 	@Override
 	public synchronized Stream<String> getEntityNames()
 	{
-		return metaDataService.getEntityMetaDatas().map(EntityMetaData::getName);
+		return metaDataService.getEntityTypes().map(EntityType::getName);
 	}
 
 	@Override
@@ -278,7 +278,7 @@ public class DataServiceImpl implements DataService
 				repository.getName(), simpleName, pack, label);
 
 		// create copy of entity meta data
-		EntityMetaData emd = EntityMetaData.newInstance(repository.getEntityMetaData(), DEEP_COPY_ATTRS);
+		EntityType emd = EntityType.newInstance(repository.getEntityType(), DEEP_COPY_ATTRS);
 		emd.setSimpleName(simpleName);
 		emd.setPackage(pack);
 		emd.setLabel(label);

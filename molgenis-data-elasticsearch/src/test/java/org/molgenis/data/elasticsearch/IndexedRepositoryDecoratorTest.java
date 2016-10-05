@@ -3,7 +3,7 @@ package org.molgenis.data.elasticsearch;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AggregateQueryImpl;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -28,7 +28,7 @@ public class IndexedRepositoryDecoratorTest
 	private IndexedRepositoryDecorator indexedRepositoryDecorator;
 	private SearchService searchService;
 	private Repository<Entity> decoratedRepo;
-	private EntityMetaData repositoryEntityMetaData;
+	private EntityType repositoryEntityType;
 	private String idAttrName;
 	private Query<Entity> query;
 	private Query<Entity> unsupportedQuery;
@@ -40,20 +40,20 @@ public class IndexedRepositoryDecoratorTest
 		searchService = mock(SearchService.class);
 		decoratedRepo = mock(Repository.class);
 		String entityName = "entity";
-		repositoryEntityMetaData = mock(EntityMetaData.class);
-		when(repositoryEntityMetaData.getName()).thenReturn(entityName);
+		repositoryEntityType = mock(EntityType.class);
+		when(repositoryEntityType.getName()).thenReturn(entityName);
 		idAttrName = "id";
 		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn(idAttrName).getMock();
 
 		when(idAttr.getExpression()).thenReturn(null);
-		when(repositoryEntityMetaData.getIdAttribute()).thenReturn(idAttr);
-		when(decoratedRepo.getEntityMetaData()).thenReturn(repositoryEntityMetaData);
+		when(repositoryEntityType.getIdAttribute()).thenReturn(idAttr);
+		when(decoratedRepo.getEntityType()).thenReturn(repositoryEntityType);
 		when(decoratedRepo.getName()).thenReturn("entity");
 		when(decoratedRepo.getCapabilities()).thenReturn(EnumSet.of(QUERYABLE, MANAGABLE, VALIDATE_NOTNULL_CONSTRAINT));
 		when(decoratedRepo.getQueryOperators()).thenReturn(EnumSet.of(IN, LESS, EQUALS, AND, OR));
 		indexedRepositoryDecorator = new IndexedRepositoryDecorator(decoratedRepo, searchService);
 
-		when(repositoryEntityMetaData.getAtomicAttributes()).thenReturn(newArrayList(idAttr));
+		when(repositoryEntityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr));
 
 		query = mock(Query.class);
 		QueryRule rule1 = mock(QueryRule.class);
@@ -113,7 +113,7 @@ public class IndexedRepositoryDecoratorTest
 				.query(q);
 
 		indexedRepositoryDecorator.aggregate(aggregateQuery);
-		verify(searchService).aggregate(aggregateQuery, repositoryEntityMetaData);
+		verify(searchService).aggregate(aggregateQuery, repositoryEntityType);
 	}
 
 	@Test
@@ -144,7 +144,7 @@ public class IndexedRepositoryDecoratorTest
 	public void countQueryUnsupported()
 	{
 		indexedRepositoryDecorator.count(unsupportedQuery);
-		verify(searchService).count(unsupportedQuery, repositoryEntityMetaData);
+		verify(searchService).count(unsupportedQuery, repositoryEntityType);
 		verify(decoratedRepo, never()).count(unsupportedQuery);
 	}
 
@@ -196,10 +196,10 @@ public class IndexedRepositoryDecoratorTest
 	public void findOneQueryUnsupported()
 	{
 		Entity entity0 = mock(Entity.class);
-		when(searchService.findOne(unsupportedQuery, repositoryEntityMetaData)).thenReturn(entity0);
+		when(searchService.findOne(unsupportedQuery, repositoryEntityType)).thenReturn(entity0);
 
 		indexedRepositoryDecorator.findOne(unsupportedQuery);
-		verify(searchService).findOne(unsupportedQuery, repositoryEntityMetaData);
+		verify(searchService).findOne(unsupportedQuery, repositoryEntityType);
 		verify(decoratedRepo, never()).findOne(unsupportedQuery);
 	}
 
@@ -226,15 +226,15 @@ public class IndexedRepositoryDecoratorTest
 	}
 
 	@Test
-	public void getEntityMetaData()
+	public void getEntityType()
 	{
-		assertEquals(indexedRepositoryDecorator.getEntityMetaData(), repositoryEntityMetaData);
+		assertEquals(indexedRepositoryDecorator.getEntityType(), repositoryEntityType);
 	}
 
 	@Test
 	public void getName()
 	{
-		assertEquals(indexedRepositoryDecorator.getName(), repositoryEntityMetaData.getName());
+		assertEquals(indexedRepositoryDecorator.getName(), repositoryEntityType.getName());
 	}
 
 	@Test
@@ -297,7 +297,7 @@ public class IndexedRepositoryDecoratorTest
 	public void findAllQueryUnsupported()
 	{
 		indexedRepositoryDecorator.findAll(unsupportedQuery);
-		verify(searchService).searchAsStream(unsupportedQuery, repositoryEntityMetaData);
+		verify(searchService).searchAsStream(unsupportedQuery, repositoryEntityType);
 		verify(decoratedRepo, never()).findAll(unsupportedQuery);
 	}
 
@@ -356,15 +356,15 @@ public class IndexedRepositoryDecoratorTest
 		when(q.getRules()).thenReturn(newArrayList(qRule1, qRule2));
 
 		AttributeMetaData attr1 = mock(AttributeMetaData.class);
-		when(repositoryEntityMetaData.getAttribute("attr1")).thenReturn(attr1);
+		when(repositoryEntityType.getAttribute("attr1")).thenReturn(attr1);
 		when(attr1.hasExpression()).thenReturn(true);
 
 		AttributeMetaData attr2 = mock(AttributeMetaData.class);
-		when(repositoryEntityMetaData.getAttribute("attr2")).thenReturn(attr2);
+		when(repositoryEntityType.getAttribute("attr2")).thenReturn(attr2);
 		when(attr2.hasExpression()).thenReturn(true);
 
 		indexedRepositoryDecorator.count(q);
-		verify(searchService).count(q, repositoryEntityMetaData);
+		verify(searchService).count(q, repositoryEntityType);
 		verify(decoratedRepo, never()).count(q);
 	}
 
@@ -377,11 +377,11 @@ public class IndexedRepositoryDecoratorTest
 		when(q.getSort()).thenReturn(sort);
 
 		AttributeMetaData attr1 = mock(AttributeMetaData.class);
-		when(repositoryEntityMetaData.getAttribute("attr1")).thenReturn(attr1);
+		when(repositoryEntityType.getAttribute("attr1")).thenReturn(attr1);
 		when(attr1.hasExpression()).thenReturn(true);
 
 		AttributeMetaData attr2 = mock(AttributeMetaData.class);
-		when(repositoryEntityMetaData.getAttribute("attr2")).thenReturn(attr2);
+		when(repositoryEntityType.getAttribute("attr2")).thenReturn(attr2);
 		when(attr2.hasExpression()).thenReturn(true);
 
 		Sort.Order o1 = mock(Sort.Order.class);
@@ -393,7 +393,7 @@ public class IndexedRepositoryDecoratorTest
 		when(sort.spliterator()).thenReturn(newArrayList(o1, o2).spliterator());
 
 		indexedRepositoryDecorator.count(q);
-		verify(searchService).count(q, repositoryEntityMetaData);
+		verify(searchService).count(q, repositoryEntityType);
 		verify(decoratedRepo, never()).count(q);
 	}
 }

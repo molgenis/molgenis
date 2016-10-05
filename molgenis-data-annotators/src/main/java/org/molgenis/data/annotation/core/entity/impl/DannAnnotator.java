@@ -19,7 +19,7 @@ import org.molgenis.data.annotation.core.resources.impl.tabix.TabixRepositoryFac
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,7 +119,7 @@ public class DannAnnotator implements AnnotatorConfig
 			{
 
 				String idAttrName = "id";
-				EntityMetaData repoMetaData = entityTypeFactory.create().setName(DANN_TABIX_RESOURCE);
+				EntityType repoMetaData = entityTypeFactory.create().setName(DANN_TABIX_RESOURCE);
 				repoMetaData.addAttribute(vcfAttributes.getChromAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getPosAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getRefAttribute());

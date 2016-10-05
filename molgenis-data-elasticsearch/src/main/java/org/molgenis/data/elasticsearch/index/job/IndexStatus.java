@@ -2,7 +2,7 @@ package org.molgenis.data.elasticsearch.index.job;
 
 import com.google.common.util.concurrent.AtomicLongMap;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,20 +95,20 @@ public class IndexStatus
 		}
 	}
 
-	private boolean isIndexStableIncludingReferences(EntityMetaData emd)
+	private boolean isIndexStableIncludingReferences(EntityType emd)
 	{
 		if (isAllIndicesStable())
 		{
 			return true;
 		}
 		Set<String> referencedEntityNames = stream(emd.getAtomicAttributes().spliterator(), false)
-				.map(AttributeMetaData::getRefEntity).filter(e -> e != null).map(EntityMetaData::getName)
+				.map(AttributeMetaData::getRefEntity).filter(e -> e != null).map(EntityType::getName)
 				.collect(toSet());
 		referencedEntityNames.add(emd.getName());
 		return referencedEntityNames.stream().noneMatch(actionCountsPerEntity::containsKey);
 	}
 
-	void waitForIndexToBeStableIncludingReferences(EntityMetaData emd) throws InterruptedException
+	void waitForIndexToBeStableIncludingReferences(EntityType emd) throws InterruptedException
 	{
 		lock.lock();
 		try

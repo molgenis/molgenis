@@ -3,7 +3,7 @@ package org.molgenis.data.rsql;
 import cz.jirutka.rsql.parser.ast.*;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.QueryImpl;
 
 import java.util.Iterator;
@@ -19,12 +19,12 @@ import static java.util.stream.Collectors.toList;
 public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
 {
 	private final QueryImpl<Entity> q = new QueryImpl<>();
-	private final EntityMetaData entityMetaData;
+	private final EntityType entityType;
 	private final RSQLValueParser rsqlValueParser = new RSQLValueParser();
 
-	public MolgenisRSQLVisitor(EntityMetaData entityMetaData)
+	public MolgenisRSQLVisitor(EntityType entityType)
 	{
-		this.entityMetaData = entityMetaData;
+		this.entityType = entityType;
 	}
 
 	@Override
@@ -177,16 +177,16 @@ public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
 		String attrName = node.getSelector();
 
 		String[] attrTokens = attrName.split("\\.");
-		AttributeMetaData attr = entityMetaData.getAttribute(attrTokens[0]);
+		AttributeMetaData attr = entityType.getAttribute(attrTokens[0]);
 		if (attr == null)
 		{
 			throw new UnknownAttributeException("Unknown attribute [" + attrName + "]");
 		}
-		EntityMetaData entityMetaDataAtDepth;
+		EntityType entityTypeAtDepth;
 		for (int i = 1; i < attrTokens.length; ++i)
 		{
-			entityMetaDataAtDepth = attr.getRefEntity();
-			attr = entityMetaDataAtDepth.getAttribute(attrTokens[i]);
+			entityTypeAtDepth = attr.getRefEntity();
+			attr = entityTypeAtDepth.getAttribute(attrTokens[i]);
 			if (attr == null)
 			{
 				throw new UnknownAttributeException("Unknown attribute [" + attrName + "]");

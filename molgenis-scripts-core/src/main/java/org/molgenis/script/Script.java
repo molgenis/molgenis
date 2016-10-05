@@ -8,7 +8,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.FileWriterWithEncoding;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 import org.molgenis.file.FileStore;
 
@@ -27,14 +27,14 @@ public class Script extends StaticEntity
 		super(entity);
 	}
 
-	public Script(EntityMetaData entityMeta)
+	public Script(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public Script(String name, EntityMetaData entityMeta)
+	public Script(String name, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setName(name);
 	}
 

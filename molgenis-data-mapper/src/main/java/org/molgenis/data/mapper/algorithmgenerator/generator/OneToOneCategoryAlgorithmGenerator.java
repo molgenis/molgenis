@@ -11,7 +11,7 @@ import org.molgenis.data.mapper.algorithmgenerator.rules.impl.MissingCategoryRul
 import org.molgenis.data.mapper.algorithmgenerator.rules.impl.NegativeCategoryRule;
 import org.molgenis.data.mapper.algorithmgenerator.rules.impl.PositiveCategoryRule;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.List;
 
@@ -43,7 +43,7 @@ public class OneToOneCategoryAlgorithmGenerator extends AbstractCategoryAlgorith
 
 	@Override
 	public String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
-			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData)
+			EntityType targetEntityType, EntityType sourceEntityType)
 	{
 		String mapAlgorithm = null;
 		if (sourceAttributes.size() > 0)

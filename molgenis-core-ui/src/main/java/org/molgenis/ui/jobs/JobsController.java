@@ -67,7 +67,7 @@ public class JobsController extends MolgenisPluginController
 		Date weekAgo = cal.getTime();
 		MolgenisUser currentUser = userAccountService.getCurrentUser();
 
-		dataService.getMeta().getEntityMetaDatas()
+		dataService.getMeta().getEntityTypes()
 				.filter(e -> e.getExtends() != null && e.getExtends().getName().equals(jobMetaDataMetaData.getName()))
 				.forEach(e ->
 				{
@@ -79,14 +79,8 @@ public class JobsController extends MolgenisPluginController
 					dataService.findAll(e.getName(), q).forEach(jobs::add);
 				});
 
-		Collections.sort(jobs, new Comparator<Entity>()
-		{
-			@Override
-			public int compare(Entity job1, Entity job2)
-			{
-				return job2.getUtilDate(SUBMISSION_DATE).compareTo(job1.getUtilDate(SUBMISSION_DATE));
-			}
-		});
+		Collections.sort(jobs,
+				(job1, job2) -> job2.getUtilDate(SUBMISSION_DATE).compareTo(job1.getUtilDate(SUBMISSION_DATE)));
 		if (jobs.size() > MAX_JOBS_TO_RETURN)
 		{
 			return jobs.subList(0, MAX_JOBS_TO_RETURN);

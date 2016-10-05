@@ -10,7 +10,7 @@ import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.CGDAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -67,7 +67,7 @@ public class CGDAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void annotateTestMatch()
 	{
-		EntityMetaData emdIn = entityTypeFactory.create().setName("Test");
+		EntityType emdIn = entityTypeFactory.create().setName("Test");
 		emdIn.addAttribute(attributeMetaDataFactory.create().setName(GENE.getAttributeName()));
 		emdIn.addAttribute(attributeMetaDataFactory.create().setName(HGNC_ID.getAttributeName()).setDataType(STRING));
 		emdIn.addAttribute(
@@ -121,7 +121,7 @@ public class CGDAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void annotateTestNoMatch()
 	{
-		EntityMetaData emdIn = entityTypeFactory.create().setName("Test");
+		EntityType emdIn = entityTypeFactory.create().setName("Test");
 		emdIn.addAttribute(attributeMetaDataFactory.create().setName(GENE.getAttributeName()));
 
 		Entity inputEntity = new DynamicEntity(emdIn);

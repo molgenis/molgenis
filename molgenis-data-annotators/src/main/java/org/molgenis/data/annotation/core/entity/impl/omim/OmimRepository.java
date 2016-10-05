@@ -8,7 +8,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DynamicEntity;
@@ -25,7 +25,7 @@ import static java.util.Collections.emptySet;
 import static org.apache.commons.lang3.StringUtils.join;
 import static org.molgenis.data.annotation.core.entity.impl.omim.OmimAnnotator.NAME;
 import static org.molgenis.data.annotation.core.entity.impl.omim.OmimAnnotator.SEPARATOR;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 
 public class OmimRepository extends AbstractRepository
 {
@@ -57,17 +57,16 @@ public class OmimRepository extends AbstractRepository
 		return emptySet();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		EntityMetaData entityMeta = entityTypeFactory.create().setSimpleName(NAME);
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME), ROLE_ID);
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(OMIM_PHENOTYPE_COL_NAME));
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(OMIM_MIM_NUMBER_COL_NAME));
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(OMIM_CYTO_LOCATION_COL_NAME));
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(OMIM_ENTRY_COL_NAME));
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(OMIM_TYPE_COL_NAME));
-		return entityMeta;
+		EntityType entityType = entityTypeFactory.create().setSimpleName(NAME);
+		entityType.addAttribute(attributeMetaDataFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME), ROLE_ID);
+		entityType.addAttribute(attributeMetaDataFactory.create().setName(OMIM_PHENOTYPE_COL_NAME));
+		entityType.addAttribute(attributeMetaDataFactory.create().setName(OMIM_MIM_NUMBER_COL_NAME));
+		entityType.addAttribute(attributeMetaDataFactory.create().setName(OMIM_CYTO_LOCATION_COL_NAME));
+		entityType.addAttribute(attributeMetaDataFactory.create().setName(OMIM_ENTRY_COL_NAME));
+		entityType.addAttribute(attributeMetaDataFactory.create().setName(OMIM_TYPE_COL_NAME));
+		return entityType;
 	}
 
 	@Override
@@ -147,7 +146,7 @@ public class OmimRepository extends AbstractRepository
 	 */
 	private void addEntityToGeneEntityList(Map<String, List<List<String>>> omimEntriesByGeneSymbol, String geneSymbol)
 	{
-		Entity entity = new DynamicEntity(getEntityMetaData());
+		Entity entity = new DynamicEntity(getEntityType());
 		entity.set(OMIM_GENE_SYMBOLS_COL_NAME, geneSymbol);
 		entity.set(OMIM_PHENOTYPE_COL_NAME, join(omimEntriesByGeneSymbol.get(geneSymbol).get(0), ","));
 		entity.set(OMIM_MIM_NUMBER_COL_NAME, join(omimEntriesByGeneSymbol.get(geneSymbol).get(1), ","));

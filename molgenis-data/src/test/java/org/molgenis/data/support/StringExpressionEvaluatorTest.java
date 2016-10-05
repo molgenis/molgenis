@@ -3,7 +3,7 @@ package org.molgenis.data.support;
 import com.google.gson.JsonSyntaxException;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.springframework.core.convert.ConversionFailedException;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -17,12 +17,12 @@ import static org.testng.Assert.fail;
 public class StringExpressionEvaluatorTest
 {
 	private Entity entity;
-	private EntityMetaData emd;
+	private EntityType emd;
 
 	@BeforeTest
 	public void createEntity()
 	{
-		emd = when(mock(EntityMetaData.class).getName()).thenReturn("Source").getMock();
+		emd = when(mock(EntityType.class).getName()).thenReturn("Source").getMock();
 		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("Identifier").getMock();
 		when(idAttr.getDataType()).thenReturn(INT);
 		AttributeMetaData intAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("Int").getMock();

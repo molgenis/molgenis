@@ -3,7 +3,7 @@ package org.molgenis.util;
 import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.Test;
 
@@ -23,11 +23,11 @@ public class DependencyResolverTest
 	@Test
 	public void resolve()
 	{
-		EntityMetaData e1 = when(mock(EntityMetaData.class).getName()).thenReturn("e1").getMock();
-		EntityMetaData e2 = when(mock(EntityMetaData.class).getName()).thenReturn("e2").getMock();
-		EntityMetaData e3 = when(mock(EntityMetaData.class).getName()).thenReturn("e3").getMock();
-		EntityMetaData e4 = when(mock(EntityMetaData.class).getName()).thenReturn("e4").getMock();
-		EntityMetaData e5 = when(mock(EntityMetaData.class).getName()).thenReturn("e5").getMock();
+		EntityType e1 = when(mock(EntityType.class).getName()).thenReturn("e1").getMock();
+		EntityType e2 = when(mock(EntityType.class).getName()).thenReturn("e2").getMock();
+		EntityType e3 = when(mock(EntityType.class).getName()).thenReturn("e3").getMock();
+		EntityType e4 = when(mock(EntityType.class).getName()).thenReturn("e4").getMock();
+		EntityType e5 = when(mock(EntityType.class).getName()).thenReturn("e5").getMock();
 
 		AttributeMetaData e1RefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("ref").getMock();
 		when(e1RefAttr.getDataType()).thenReturn(XREF);
@@ -53,14 +53,14 @@ public class DependencyResolverTest
 		when(e4.getAtomicAttributes()).thenReturn(asList(e4RefAttr));
 		when(e5.getAtomicAttributes()).thenReturn(asList(e3RefAttr, e3SelfRefAttr));
 
-		List<EntityMetaData> resolved = DependencyResolver.resolve(newHashSet(e1, e2, e3, e4, e5));
+		List<EntityType> resolved = DependencyResolver.resolve(newHashSet(e1, e2, e3, e4, e5));
 		assertEquals(resolved, asList(e2, e4, e3, e5, e1));
 	}
 
 	@Test
 	public void resolveSelfReferences()
 	{
-		EntityMetaData emd = when(mock(EntityMetaData.class).getName()).thenReturn("Person").getMock();
+		EntityType emd = when(mock(EntityType.class).getName()).thenReturn("Person").getMock();
 		AttributeMetaData nameAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("name").getMock();
 		when(nameAttr.getDataType()).thenReturn(STRING);
 		AttributeMetaData fatherAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("father").getMock();

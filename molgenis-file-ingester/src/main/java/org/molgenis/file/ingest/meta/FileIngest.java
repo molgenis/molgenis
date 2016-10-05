@@ -1,7 +1,7 @@
 package org.molgenis.file.ingest.meta;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import java.net.MalformedURLException;
@@ -16,14 +16,14 @@ public class FileIngest extends StaticEntity
 		super(entity);
 	}
 
-	public FileIngest(EntityMetaData entityMeta)
+	public FileIngest(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
-	public FileIngest(String id, EntityMetaData entityMeta)
+	public FileIngest(String id, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setId(id);
 	}
 
@@ -77,14 +77,14 @@ public class FileIngest extends StaticEntity
 		return getString(LOADER);
 	}
 
-	public void setTargetEntity(EntityMetaData entityMetaData)
+	public void setTargetEntity(EntityType entityType)
 	{
-		set(ENTITY_META_DATA, entityMetaData);
+		set(ENTITY_META_DATA, entityType);
 	}
 
 	public String getTargetEntityName()
 	{
-		return getEntity(ENTITY_META_DATA, EntityMetaData.class).getName();
+		return getEntity(ENTITY_META_DATA, EntityType.class).getName();
 	}
 
 	public void setCronExpression(String cronExpression)

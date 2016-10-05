@@ -61,13 +61,13 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 			});
 
 			// Search in entities
-			dataService.findAll(ENTITY_META_DATA, q).forEach(entityMetaData ->
+			dataService.findAll(ENTITY_META_DATA, q).forEach(EntityType ->
 			{
-				Package p = getRootPackage(entityMetaData);
+				Package p = getRootPackage(EntityType);
 				if (p != null)
 				{
 					String matchDesc =
-							"Matched: entity '" + entityMetaData.getString(EntityTypeMetadata.SIMPLE_NAME) + "'";
+							"Matched: entity '" + EntityType.getString(EntityTypeMetadata.SIMPLE_NAME) + "'";
 					PackageSearchResultItem item = new PackageSearchResultItem(p.getRootPackage(), matchDesc);
 					if ((p != null) && !results.contains(item)) results.add(item);
 				}
@@ -93,9 +93,9 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 	}
 
 	// Get the root package of an entity
-	private Package getRootPackage(Entity entityMetaData)
+	private Package getRootPackage(Entity EntityType)
 	{
-		Entity packageEntity = entityMetaData.getEntity(EntityTypeMetadata.PACKAGE);
+		Entity packageEntity = EntityType.getEntity(EntityTypeMetadata.PACKAGE);
 		if (packageEntity != null)
 		{
 			String packageName = packageEntity.getString(PackageMetaData.FULL_NAME);

@@ -176,8 +176,8 @@
                         <label>Select a new source to map against the target attribute</label>
                         <select name="source" id="source-entity-select" class="form-control" required="required"
                                 placeholder="Select source entity">
-                        <#list entityMetaDatas as entityMetaData>
-                            <option value="${entityMetaData.name?html}">${entityMetaData.name?html}</option>
+                        <#list entityMetaDatas as entityType>
+                            <option value="${entityType.name?html}">${entityType.name?html}</option>
                         </#list>
                         </select>
                     </div>

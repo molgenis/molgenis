@@ -1,7 +1,7 @@
 package org.molgenis.util;
 
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.Test;
 
@@ -18,44 +18,44 @@ public class EntityUtilsTest
 	@Test
 	public void isEmptyNoAttributes()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.getAtomicAttributes()).thenReturn(emptyList());
-		assertTrue(EntityUtils.isEmpty(new DynamicEntity(entityMeta)));
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getAtomicAttributes()).thenReturn(emptyList());
+		assertTrue(EntityUtils.isEmpty(new DynamicEntity(entityType)));
 	}
 
 	@Test
 	public void isEmptyAttributeValuesNull()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(STRING);
-		when(entityMeta.getAtomicAttributes()).thenReturn(singletonList(attr));
-		when(entityMeta.getAttribute("attr")).thenReturn(attr);
-		assertTrue(EntityUtils.isEmpty(new DynamicEntity(entityMeta, singletonMap("attr", null))));
+		when(entityType.getAtomicAttributes()).thenReturn(singletonList(attr));
+		when(entityType.getAttribute("attr")).thenReturn(attr);
+		assertTrue(EntityUtils.isEmpty(new DynamicEntity(entityType, singletonMap("attr", null))));
 	}
 
 	@Test
 	public void isEmptyAttributeValuesNotNull()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(STRING);
-		when(entityMeta.getAtomicAttributes()).thenReturn(singletonList(attr));
-		when(entityMeta.getAttribute("attr")).thenReturn(attr);
-		assertFalse(EntityUtils.isEmpty(new DynamicEntity(entityMeta, of("attr", "val"))));
+		when(entityType.getAtomicAttributes()).thenReturn(singletonList(attr));
+		when(entityType.getAttribute("attr")).thenReturn(attr);
+		assertFalse(EntityUtils.isEmpty(new DynamicEntity(entityType, of("attr", "val"))));
 	}
 
 	@Test
 	public void doesExtend()
 	{
-		EntityMetaData grandfather = when(mock(EntityMetaData.class).getName()).thenReturn("grandfather").getMock();
+		EntityType grandfather = when(mock(EntityType.class).getName()).thenReturn("grandfather").getMock();
 		assertFalse(EntityUtils.doesExtend(grandfather, "grandfather"));
 
-		EntityMetaData father = when(mock(EntityMetaData.class).getName()).thenReturn("father").getMock();
+		EntityType father = when(mock(EntityType.class).getName()).thenReturn("father").getMock();
 		when(father.getExtends()).thenReturn(grandfather);
 		assertTrue(EntityUtils.doesExtend(father, "grandfather"));
 
-		EntityMetaData child = when(mock(EntityMetaData.class).getName()).thenReturn("child").getMock();
+		EntityType child = when(mock(EntityType.class).getName()).thenReturn("child").getMock();
 		when(child.getExtends()).thenReturn(father);
 		assertTrue(EntityUtils.doesExtend(child, "grandfather"));
 	}

@@ -21,22 +21,22 @@ import java.util.Map;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { MapOfStringsExpressionEvaluatorTest.Config.class })
 public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringContextTests
 {
 	private Entity entity;
-	private EntityMetaData emd;
-	private EntityMetaData refEmd;
+	private EntityType emd;
+	private EntityType refEmd;
 
 	@Autowired
 	private EntityTypeFactory entityTypeFactory;
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
 
-	private EntityMetaData createDynamicLocationMetaData()
+	private EntityType createDynamicLocationMetaData()
 	{
 		return entityTypeFactory.create().setSimpleName("Location")
 				.addAttribute(attributeMetaDataFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
@@ -44,7 +44,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 				.addAttribute(attributeMetaDataFactory.create().setName("Position").setDataType(STRING));
 	}
 
-	private EntityMetaData createDynamicSourceMetaData()
+	private EntityType createDynamicSourceMetaData()
 	{
 		return entityTypeFactory.create().setSimpleName("Source")
 				.addAttribute(attributeMetaDataFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
@@ -181,7 +181,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 		when(amd.getDataType()).thenReturn(XREF);
 		when(amd.getRefEntity()).thenReturn(refEmd);
 		when(amd.getExpression()).thenReturn("{'Chromosome':String, 'Position':Int}");
-		when(amd.getEntityMetaData()).thenReturn(mock(EntityMetaData.class));
+		when(amd.getEntityType()).thenReturn(mock(EntityType.class));
 		when(amd.getDataType()).thenReturn(MolgenisFieldTypes.AttributeType.XREF);
 		ExpressionEvaluator evaluator = new MapOfStringsExpressionEvaluator(amd, emd);
 		Entity expected = new DynamicEntity(refEmd);
@@ -200,9 +200,9 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 		// bootstrap meta data
 		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
 		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityTypeMeta);
-		Map<String, SystemEntityType> systemEntityMetaMap = applicationContext
+		Map<String, SystemEntityType> systemEntityTypeMap = applicationContext
 				.getBeansOfType(SystemEntityType.class);
-		systemEntityMetaMap.values().forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityTypeMeta));
+		systemEntityTypeMap.values().forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
 	}
 
 	@Configuration

@@ -2,7 +2,7 @@ package org.molgenis.file.ingest.meta;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.model.JobExecution;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.file.model.FileMeta;
 
 import static org.molgenis.file.ingest.meta.FileIngestJobExecutionMetaData.*;
@@ -14,15 +14,15 @@ public class FileIngestJobExecution extends JobExecution
 		super(entity);
 	}
 
-	public FileIngestJobExecution(EntityMetaData entityMeta)
+	public FileIngestJobExecution(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setDefaultValues();
 	}
 
-	public FileIngestJobExecution(String identifier, EntityMetaData entityMeta)
+	public FileIngestJobExecution(String identifier, EntityType entityType)
 	{
-		super(identifier, entityMeta);
+		super(identifier, entityType);
 		setDefaultValues();
 	}
 

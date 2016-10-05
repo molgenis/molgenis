@@ -2,7 +2,7 @@ package org.molgenis.data.meta;
 
 import com.google.common.collect.TreeTraverser;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetaData;
@@ -59,10 +59,9 @@ public class PackageRepositoryDecorator implements Repository<Package>
 		return decoratedRepo.getQueryOperators();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return decoratedRepo.getEntityMetaData();
+		return decoratedRepo.getEntityType();
 	}
 
 	@Override
@@ -232,8 +231,8 @@ public class PackageRepositoryDecorator implements Repository<Package>
 	private void deletePackageAndContents(Package package_)
 	{
 		// delete entities in package
-		Repository<EntityMetaData> entityRepo = getEntityRepository();
-		Set<EntityMetaData> entities = entityRepo.query().eq(EntityTypeMetadata.PACKAGE, package_).findAll()
+		Repository<EntityType> entityRepo = getEntityRepository();
+		Set<EntityType> entities = entityRepo.query().eq(EntityTypeMetadata.PACKAGE, package_).findAll()
 				.collect(toSet());
 		entityRepo.delete(DependencyResolver.resolve(entities).stream());
 
@@ -274,9 +273,9 @@ public class PackageRepositoryDecorator implements Repository<Package>
 				.getRootPackage().getName().equals(PACKAGE_SYSTEM));
 	}
 
-	private Repository<EntityMetaData> getEntityRepository()
+	private Repository<EntityType> getEntityRepository()
 	{
-		return dataService.getRepository(ENTITY_META_DATA, EntityMetaData.class);
+		return dataService.getRepository(ENTITY_META_DATA, EntityType.class);
 	}
 
 	private class PackageTreeTraverser extends TreeTraverser<Package>

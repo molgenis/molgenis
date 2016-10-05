@@ -5,7 +5,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
@@ -178,11 +178,11 @@ class RestControllerV2
 
 	private Map<String, Object> getEntityResponse(String entityName, String untypedId, AttributeFilter attributeFilter)
 	{
-		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
-		Object id = getTypedValue(untypedId, entityMeta.getIdAttribute());
+		EntityType entityType = dataService.getEntityType(entityName);
+		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
 
 		Fetch fetch = AttributeFilterToFetchConverter
-				.convert(attributeFilter, entityMeta, languageService.getCurrentUserLanguageCode());
+				.convert(attributeFilter, entityType, languageService.getCurrentUserLanguageCode());
 
 		Entity entity = dataService.findOneById(entityName, id, fetch);
 		if (entity == null)
@@ -197,8 +197,8 @@ class RestControllerV2
 	@ResponseStatus(NO_CONTENT)
 	public void deleteEntity(@PathVariable("entityName") String entityName, @PathVariable("id") String untypedId)
 	{
-		EntityMetaData entityMeta = dataService.getEntityMetaData(entityName);
-		Object id = getTypedValue(untypedId, entityMeta.getIdAttribute());
+		EntityType entityType = dataService.getEntityType(entityName);
+		Object id = getTypedValue(untypedId, entityType.getIdAttribute());
 
 		dataService.deleteById(entityName, id);
 	}
@@ -264,7 +264,7 @@ class RestControllerV2
 	public EntityCollectionBatchCreateResponseBodyV2 createEntities(@PathVariable("entityName") String entityName,
 			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 	{
-		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		final EntityType meta = dataService.getEntityType(entityName);
 		if (meta == null)
 		{
 			throw createUnknownEntityException(entityName);
@@ -325,7 +325,7 @@ class RestControllerV2
 
 		// Check if the entity already exists
 		String newFullName = EntityTypeUtils
-				.buildFullName(repositoryToCopyFrom.getEntityMetaData().getPackage(), request.getNewEntityName());
+				.buildFullName(repositoryToCopyFrom.getEntityType().getPackage(), request.getNewEntityName());
 		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
 
 		// Permission
@@ -340,7 +340,7 @@ class RestControllerV2
 
 		// Copy
 		this.copyRepositoryRunAsSystem(repositoryToCopyFrom, request.getNewEntityName(),
-				repositoryToCopyFrom.getEntityMetaData().getPackage(), request.getNewEntityName());
+				repositoryToCopyFrom.getEntityType().getPackage(), request.getNewEntityName());
 
 		// Retrieve new repo
 		Repository<Entity> repository = dataService.getRepository(newFullName);
@@ -371,7 +371,7 @@ class RestControllerV2
 	public synchronized void updateEntities(@PathVariable("entityName") String entityName,
 			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 	{
-		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		final EntityType meta = dataService.getEntityType(entityName);
 		if (meta == null)
 		{
 			throw createUnknownEntityException(entityName);
@@ -405,7 +405,7 @@ class RestControllerV2
 			@PathVariable("attributeName") String attributeName,
 			@RequestBody @Valid EntityCollectionBatchRequestV2 request, HttpServletResponse response) throws Exception
 	{
-		final EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		final EntityType meta = dataService.getEntityType(entityName);
 		if (meta == null)
 		{
 			throw createUnknownEntityException(entityName);
@@ -544,7 +544,7 @@ class RestControllerV2
 
 	private AttributeMetaDataResponseV2 createAttributeMetaDataResponse(String entityName, String attributeName)
 	{
-		EntityMetaData entity = dataService.getEntityMetaData(entityName);
+		EntityType entity = dataService.getEntityType(entityName);
 		if (entity == null)
 		{
 			throw new UnknownEntityException(entityName + " not found");
@@ -563,7 +563,7 @@ class RestControllerV2
 	private EntityCollectionResponseV2 createEntityCollectionResponse(String entityName,
 			EntityCollectionRequestV2 request, HttpServletRequest httpRequest)
 	{
-		EntityMetaData meta = dataService.getEntityMetaData(entityName);
+		EntityType meta = dataService.getEntityType(entityName);
 
 		Query<Entity> q = request.getQ() != null ? request.getQ().createQuery(meta) : new QueryImpl<>();
 		q.pageSize(request.getNum()).offset(request.getStart()).sort(request.getSort());
@@ -656,21 +656,21 @@ class RestControllerV2
 		Map<String, Object> responseData = new LinkedHashMap<String, Object>();
 		if (includeMetaData)
 		{
-			createEntityMetaResponse(entity.getEntityMetaData(), fetch, responseData);
+			createEntityTypeResponse(entity.getEntityType(), fetch, responseData);
 		}
 		createEntityValuesResponse(entity, fetch, responseData);
 		return responseData;
 	}
 
-	private void createEntityMetaResponse(EntityMetaData entityMetaData, Fetch fetch, Map<String, Object> responseData)
+	private void createEntityTypeResponse(EntityType entityType, Fetch fetch, Map<String, Object> responseData)
 	{
 		responseData.put("_meta",
-				new EntityTypeResponseV2(entityMetaData, fetch, permissionService, dataService, languageService));
+				new EntityTypeResponseV2(entityType, fetch, permissionService, dataService, languageService));
 	}
 
 	private void createEntityValuesResponse(Entity entity, Fetch fetch, Map<String, Object> responseData)
 	{
-		Iterable<AttributeMetaData> attrs = entity.getEntityMetaData().getAtomicAttributes();
+		Iterable<AttributeMetaData> attrs = entity.getEntityType().getAtomicAttributes();
 		createEntityValuesResponseRec(entity, attrs, fetch, responseData);
 	}
 
@@ -678,7 +678,7 @@ class RestControllerV2
 			Map<String, Object> responseData)
 	{
 		responseData.put("_href",
-				Href.concatEntityHref(BASE_URI, entity.getEntityMetaData().getName(), entity.getIdValue()));
+				Href.concatEntityHref(BASE_URI, entity.getEntityType().getName(), entity.getIdValue()));
 		for (AttributeMetaData attr : attrs) // TODO performance use fetch instead of attrs
 		{
 			String attrName = attr.getName();

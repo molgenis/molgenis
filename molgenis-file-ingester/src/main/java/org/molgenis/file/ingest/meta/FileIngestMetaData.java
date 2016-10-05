@@ -8,7 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
@@ -23,7 +23,7 @@ public class FileIngestMetaData extends SystemEntityType
 	public static final String DESCRIPTION = "description";
 	public static final String URL = "url";
 	public static final String LOADER = "loader";
-	public static final String ENTITY_META_DATA = "entityMetaData";
+	public static final String ENTITY_META_DATA = "EntityType";
 	public static final String CRONEXPRESSION = "cronexpression";
 	public static final String ACTIVE = "active";
 	public static final String FAILURE_EMAIL = "failureEmail";
@@ -48,7 +48,7 @@ public class FileIngestMetaData extends SystemEntityType
 		addAttribute(URL).setLabel("Url").setDescription("Url of the file to download.").setNillable(false);
 		addAttribute(LOADER).setDataType(ENUM).setEnumOptions(LOADERS).setLabel("Loader type").setNillable(false);
 		addAttribute(ENTITY_META_DATA).setDataType(XREF).setRefEntity(entityTypeMetadata)
-				.setLabel("Target EntityMetaData").setNillable(false);
+				.setLabel("Target EntityType").setNillable(false);
 		addAttribute(CRONEXPRESSION).setLabel("Cronexpression").setNillable(false)
 				.setValidationExpression("$('" + CRONEXPRESSION + "').matches(" + StringField.CRON_REGEX + ").value()");
 		addAttribute(ACTIVE).setDataType(BOOL).setLabel("Active").setNillable(false);

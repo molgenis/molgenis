@@ -41,9 +41,9 @@ public class CommandLineAnnotatorConfig
 	{
 		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
 		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityTypeMeta);
-		Map<String, SystemEntityType> systemEntityMetaMap = applicationContext
+		Map<String, SystemEntityType> systemEntityTypeMap = applicationContext
 				.getBeansOfType(SystemEntityType.class);
-		systemEntityMetaMap.values().forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityTypeMeta));
+		systemEntityTypeMap.values().forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
 	}
 
 	@Value("${vcf-validator-location:@null}")

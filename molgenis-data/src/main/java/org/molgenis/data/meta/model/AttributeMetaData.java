@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.*;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
+import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
 
 /**
@@ -38,11 +38,11 @@ public class AttributeMetaData extends StaticEntity
 	/**
 	 * Creates a new attribute. Normally called by its {@link AttributeMetaDataFactory entity factory}.
 	 *
-	 * @param entityMeta attribute meta data
+	 * @param entityType attribute meta data
 	 */
-	public AttributeMetaData(EntityMetaData entityMeta)
+	public AttributeMetaData(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setDefaultValues();
 	}
 
@@ -50,18 +50,18 @@ public class AttributeMetaData extends StaticEntity
 	 * Creates a new attribute with the given identifier. Normally called by its {@link AttributeMetaDataFactory entity factory}.
 	 *
 	 * @param attrId     attribute identifier (not the attribute name)
-	 * @param entityMeta attribute meta data
+	 * @param entityType attribute meta data
 	 */
-	public AttributeMetaData(String attrId, EntityMetaData entityMeta)
+	public AttributeMetaData(String attrId, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setDefaultValues();
 		setIdentifier(attrId);
 	}
 
 	/**
 	 * Copy-factory (instead of copy-constructor to avoid accidental method overloading to
-	 * {@link #AttributeMetaData(EntityMetaData)}). Creates a copy of attribute with a shallow copy of referenced
+	 * {@link #AttributeMetaData(EntityType)}). Creates a copy of attribute with a shallow copy of referenced
 	 * entity and tags.
 	 *
 	 * @param attrMeta     attribute
@@ -70,7 +70,7 @@ public class AttributeMetaData extends StaticEntity
 	 */
 	public static AttributeMetaData newInstance(AttributeMetaData attrMeta, AttributeCopyMode attrCopyMode)
 	{
-		AttributeMetaData attrMetaCopy = new AttributeMetaData(attrMeta.getEntityMetaData()); // do not deep-copy
+		AttributeMetaData attrMetaCopy = new AttributeMetaData(attrMeta.getEntityType()); // do not deep-copy
 		attrMetaCopy.setIdentifier(attrMeta.getIdentifier());
 		attrMetaCopy.setName(attrMeta.getName());
 		attrMetaCopy.setDataType(attrMeta.getDataType());
@@ -236,12 +236,12 @@ public class AttributeMetaData extends StaticEntity
 	 *
 	 * @return referenced entity
 	 */
-	public EntityMetaData getRefEntity()
+	public EntityType getRefEntity()
 	{
-		return getEntity(REF_ENTITY, EntityMetaData.class);
+		return getEntity(REF_ENTITY, EntityType.class);
 	}
 
-	public AttributeMetaData setRefEntity(EntityMetaData refEntity)
+	public AttributeMetaData setRefEntity(EntityType refEntity)
 	{
 		set(REF_ENTITY, refEntity);
 		return this;

@@ -20,7 +20,7 @@ import org.molgenis.data.annotation.web.settings.CaddAnnotatorSettings;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -135,7 +135,7 @@ public class CaddAnnotator implements AnnotatorConfig
 			public RepositoryFactory getRepositoryFactory()
 			{
 				String idAttrName = "id";
-				EntityMetaData repoMetaData = entityTypeFactory.create().setName(CADD_TABIX_RESOURCE);
+				EntityType repoMetaData = entityTypeFactory.create().setName(CADD_TABIX_RESOURCE);
 				repoMetaData.addAttribute(vcfAttributes.getChromAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getPosAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getRefAttribute());

@@ -4,7 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.file.FileDownloadController;
 import org.molgenis.file.FileStore;
@@ -60,7 +60,7 @@ public class RestService
 	 * @param request HTTP request parameters
 	 * @return entity created from HTTP request parameters
 	 */
-	public Entity toEntity(final EntityMetaData meta, final Map<String, Object> request)
+	public Entity toEntity(final EntityType meta, final Map<String, Object> request)
 	{
 		final Entity entity = entityManager.create(meta, POPULATE);
 
@@ -371,7 +371,7 @@ public class RestService
 								List.class.getSimpleName()));
 			}
 
-			EntityMetaData mrefEntity = attr.getRefEntity();
+			EntityType mrefEntity = attr.getRefEntity();
 			AttributeMetaData mrefEntityIdAttr = mrefEntity.getIdAttribute();
 			value = mrefParamValues.stream().map(mrefParamValue -> toEntityValue(mrefEntityIdAttr, mrefParamValue))
 					.map(mrefIdValue -> entityManager.getReference(mrefEntity, mrefIdValue)).collect(toList());

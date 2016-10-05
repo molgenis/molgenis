@@ -133,12 +133,12 @@ public class IndexActionRegisterServiceImpl implements TransactionInformation, I
 	{
 		if (indexAction.getEntityId() != null
 				|| !dataService.hasRepository(
-				indexAction.getEntityFullName())) // When entity is deleted the entityMetaData cannot be retrieved
+				indexAction.getEntityFullName())) // When entity is deleted the EntityType cannot be retrieved
 		{
 			return Stream.of(indexAction);
 		}
 		return Stream.concat(Stream.of(indexAction), EntityUtils
-				.getReferencingEntityMetaData(dataService.getEntityMetaData(indexAction.getEntityFullName()),
+				.getReferencingEntityType(dataService.getEntityType(indexAction.getEntityFullName()),
 						dataService).stream().map(pair ->
 						indexActionFactory.create()
 								.setEntityFullName(pair.getA().getName())

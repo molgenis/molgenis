@@ -9,7 +9,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.GenomicDataSettings;
@@ -37,8 +37,8 @@ import java.util.stream.Stream;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.INT;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_LABEL;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_LABEL;
 import static org.molgenis.data.support.GenomicDataSettings.Meta.*;
 import static org.testng.Assert.assertEquals;
 import static uk.ac.ebi.mydas.model.DasFeatureOrientation.ORIENTATION_NOT_APPLICABLE;
@@ -46,7 +46,7 @@ import static uk.ac.ebi.mydas.model.DasFeatureOrientation.ORIENTATION_NOT_APPLIC
 public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;
 
@@ -68,8 +68,8 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 		when(ctx.getBean(GenomicDataSettings.class)).thenReturn(genomicDataSettings);
 		new ApplicationContextProvider().setApplicationContext(ctx);
 
-		EntityMetaData metaData = entityMetaFactory.create().setName("dataset");
-		when(dataService.getEntityMetaData("dataset")).thenReturn(metaData);
+		EntityType metaData = entityTypeFactory.create().setName("dataset");
+		when(dataService.getEntityType("dataset")).thenReturn(metaData);
 		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, metaData)).thenReturn("CHROM");
 
 		DasType type = new DasType("0", "", "", "type");
@@ -96,7 +96,7 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 		Query<Entity> q = new QueryImpl<>().eq("CHROM", "1");
 		q.pageSize(100);
 		SearchResult result = mock(SearchResult.class);
-		EntityMetaData emd = entityMetaFactory.create().setName("DAS");
+		EntityType emd = entityTypeFactory.create().setName("DAS");
 		emd.addAttribute(attrMetaFactory.create().setName("STOP").setDataType(INT));
 		emd.addAttribute(attrMetaFactory.create().setName("linkout"));
 		emd.addAttribute(attrMetaFactory.create().setName("NAME"), ROLE_LABEL);
@@ -133,19 +133,19 @@ public class RepositoryRangeHandlingDataSourceTest extends AbstractMolgenisSprin
 		});
 		when(result.iterator()).thenReturn(resultList.iterator());
 
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, entity.getEntityMetaData()))
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_CHROM, entity.getEntityType()))
 				.thenReturn("CHROM");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_POS, entity.getEntityMetaData()))
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_POS, entity.getEntityType()))
 				.thenReturn("POS");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_STOP, entity.getEntityMetaData()))
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_STOP, entity.getEntityType()))
 				.thenReturn("STOP");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_IDENTIFIER, entity.getEntityMetaData()))
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_IDENTIFIER, entity.getEntityType()))
 				.thenReturn("ID");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_DESCRIPTION, entity.getEntityMetaData()))
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_DESCRIPTION, entity.getEntityType()))
 				.thenReturn("INFO");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_NAME, entity.getEntityMetaData()))
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_NAME, entity.getEntityType()))
 				.thenReturn("NAME");
-		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_LINKOUT, entity.getEntityMetaData()))
+		when(genomicDataSettings.getAttributeNameForAttributeNameArray(ATTRS_LINKOUT, entity.getEntityType()))
 				.thenReturn("linkout");
 
 	}

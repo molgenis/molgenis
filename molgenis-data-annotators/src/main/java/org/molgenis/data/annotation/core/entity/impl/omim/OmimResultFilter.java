@@ -7,7 +7,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 
@@ -46,7 +46,7 @@ public class OmimResultFilter implements ResultFilter
 		}
 		Optional<Entity> firstResult = FluentIterable.from(results).first();
 
-		EntityMetaData emd = entityTypeFactory.create().setName(OmimAnnotator.NAME);
+		EntityType emd = entityTypeFactory.create().setName(OmimAnnotator.NAME);
 		emd.addAttributes(Arrays.asList(omimAnnotator.getPhenotypeAttr(), omimAnnotator.getMimNumberAttr(),
 				omimAnnotator.getOmimLocationAttr(), omimAnnotator.getEntryAttr(), omimAnnotator.getTypeAttr()));
 		AttributeMetaData id = attributeMetaDataFactory.create().setName("ID").setAuto(true);

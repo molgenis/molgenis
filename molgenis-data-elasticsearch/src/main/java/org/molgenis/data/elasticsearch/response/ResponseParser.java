@@ -13,7 +13,7 @@ import org.molgenis.data.elasticsearch.util.Hit;
 import org.molgenis.data.elasticsearch.util.SearchRequest;
 import org.molgenis.data.elasticsearch.util.SearchResult;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -37,7 +37,7 @@ public class ResponseParser
 	}
 
 	public SearchResult parseSearchResponse(SearchRequest request, SearchResponse response,
-			EntityMetaData entityMetaData, DataService dataService)
+			EntityType entityType, DataService dataService)
 	{
 		ShardSearchFailure[] failures = response.getShardFailures();
 		if ((failures != null) && (failures.length > 0))
@@ -76,15 +76,15 @@ public class ResponseParser
 					// information for labelAttribute from refeEntity and put it
 					// in the Hit result map
 					String fieldName = entry.getKey();
-					if (entityMetaData == null || entityMetaData.getAttribute(fieldName) == null
-							|| entityMetaData.getAttribute(fieldName).getDataType() != MREF)
+					if (entityType == null || entityType.getAttribute(fieldName) == null
+							|| entityType.getAttribute(fieldName).getDataType() != MREF)
 
 					{
 						columnValueMap.put(entry.getKey(), entry.getValue());
 					}
 					else
 					{
-						AttributeMetaData attributeMetaData = entityMetaData.getAttribute(fieldName).getRefEntity()
+						AttributeMetaData attributeMetaData = entityType.getAttribute(fieldName).getRefEntity()
 								.getLabelAttribute();
 						List<Object> values = new ArrayList<Object>();
 						if (entry.getValue() instanceof List<?>)

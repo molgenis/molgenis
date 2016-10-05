@@ -6,8 +6,8 @@ import org.molgenis.auth.UserAuthority;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
+import org.molgenis.data.meta.model.EntityType;
+import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.springframework.security.authentication.TestingAuthenticationToken;
@@ -44,10 +44,10 @@ import static org.testng.Assert.assertNull;
 public class EntityTypeRepositoryDecoratorTest
 {
 	private EntityTypeRepositoryDecorator repo;
-	private Repository<EntityMetaData> decoratedRepo;
+	private Repository<EntityType> decoratedRepo;
 	private DataService dataService;
 	private MetaDataService metaDataService;
-	private SystemEntityMetaDataRegistry systemEntityMetaRegistry;
+	private SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private MolgenisPermissionService permissionService;
 
 	@BeforeMethod
@@ -57,9 +57,9 @@ public class EntityTypeRepositoryDecoratorTest
 		dataService = mock(DataService.class);
 		metaDataService = mock(MetaDataService.class);
 		when(dataService.getMeta()).thenReturn(metaDataService);
-		systemEntityMetaRegistry = mock(SystemEntityMetaDataRegistry.class);
+		systemEntityTypeRegistry = mock(SystemEntityTypeRegistry.class);
 		permissionService = mock(MolgenisPermissionService.class);
-		repo = new EntityTypeRepositoryDecorator(decoratedRepo, dataService, systemEntityMetaRegistry,
+		repo = new EntityTypeRepositoryDecorator(decoratedRepo, dataService, systemEntityTypeRegistry,
 				permissionService);
 	}
 
@@ -95,11 +95,11 @@ public class EntityTypeRepositoryDecoratorTest
 	}
 
 	@Test
-	public void getEntityMetaData() throws Exception
+	public void getEntityType() throws Exception
 	{
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(decoratedRepo.getEntityMetaData()).thenReturn(entityMeta);
-		assertEquals(repo.getEntityMetaData(), entityMeta);
+		EntityType entityType = mock(EntityType.class);
+		when(decoratedRepo.getEntityType()).thenReturn(entityType);
+		assertEquals(repo.getEntityType(), entityType);
 	}
 
 	@Test
@@ -127,13 +127,13 @@ public class EntityTypeRepositoryDecoratorTest
 	public void countUser() throws Exception
 	{
 		setUserAuthentication();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		String entityMeta1Name = "entity1";
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta1Name).getMock();
-		when(decoratedRepo.spliterator()).thenReturn(asList(entityMeta0, entityMeta1).spliterator());
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, COUNT)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntity(entityMeta1Name, COUNT)).thenReturn(true);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		String entityType1Name = "entity1";
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		when(decoratedRepo.spliterator()).thenReturn(asList(entityType0, entityType1).spliterator());
+		when(permissionService.hasPermissionOnEntity(entityType0Name, COUNT)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, COUNT)).thenReturn(true);
 		assertEquals(repo.count(), 1L);
 	}
 
@@ -142,17 +142,17 @@ public class EntityTypeRepositoryDecoratorTest
 	{
 		SecurityContextHolder.getContext()
 				.setAuthentication(new TestingAuthenticationToken("anonymous", null, "ROLE_SU"));
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.getSimpleName()).thenReturn("entity");
-		when(entityMeta.getAttributes()).thenReturn(emptyList());
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getSimpleName()).thenReturn("entity");
+		when(entityType.getAttributes()).thenReturn(emptyList());
 		String backendName = "knownBackend";
-		when(entityMeta.getBackend()).thenReturn(backendName);
+		when(entityType.getBackend()).thenReturn(backendName);
 		MetaDataService metaDataService = mock(MetaDataService.class);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
 		when(dataService.getMeta()).thenReturn(metaDataService);
-		repo.add(entityMeta);
-		verify(decoratedRepo).add(entityMeta);
+		repo.add(entityType);
+		verify(decoratedRepo).add(entityType);
 	}
 
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Unknown backend \\[unknownBackend\\]")
@@ -160,16 +160,16 @@ public class EntityTypeRepositoryDecoratorTest
 	{
 		SecurityContextHolder.getContext()
 				.setAuthentication(new TestingAuthenticationToken("anonymous", null, "ROLE_SU"));
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.getSimpleName()).thenReturn("entity");
-		when(entityMeta.getAttributes()).thenReturn(emptyList());
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getSimpleName()).thenReturn("entity");
+		when(entityType.getAttributes()).thenReturn(emptyList());
 		String backendName = "unknownBackend";
-		when(entityMeta.getBackend()).thenReturn(backendName);
+		when(entityType.getBackend()).thenReturn(backendName);
 		MetaDataService metaDataService = mock(MetaDataService.class);
 		when(metaDataService.getBackend(backendName)).thenReturn(null);
 		when(dataService.getMeta()).thenReturn(metaDataService);
-		repo.add(entityMeta);
-		verify(decoratedRepo).add(entityMeta);
+		repo.add(entityType);
+		verify(decoratedRepo).add(entityType);
 	}
 
 	@Test
@@ -206,15 +206,15 @@ public class EntityTypeRepositoryDecoratorTest
 	public void countQueryUser() throws Exception
 	{
 		setUserAuthentication();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		String entityMeta1Name = "entity1";
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta1Name).getMock();
-		Query<EntityMetaData> q = new QueryImpl<>();
-		ArgumentCaptor<Query<EntityMetaData>> queryCaptor = forClass((Class) Query.class);
-		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityMeta0, entityMeta1));
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, COUNT)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntity(entityMeta1Name, COUNT)).thenReturn(true);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		String entityType1Name = "entity1";
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		Query<EntityType> q = new QueryImpl<>();
+		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass((Class) Query.class);
+		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityType0, entityType1));
+		when(permissionService.hasPermissionOnEntity(entityType0Name, COUNT)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, COUNT)).thenReturn(true);
 		assertEquals(repo.count(q), 1L);
 		assertEquals(queryCaptor.getValue().getOffset(), 0);
 		assertEquals(queryCaptor.getValue().getPageSize(), Integer.MAX_VALUE);
@@ -236,31 +236,31 @@ public class EntityTypeRepositoryDecoratorTest
 
 	private void findAllQuerySuOrSystem() throws Exception
 	{
-		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
-		EntityMetaData entityMeta1 = mock(EntityMetaData.class);
+		EntityType entityType0 = mock(EntityType.class);
+		EntityType entityType1 = mock(EntityType.class);
 		Query q = mock(Query.class);
-		when(decoratedRepo.findAll(q)).thenReturn(Stream.of(entityMeta0, entityMeta1));
-		assertEquals(repo.findAll(q).collect(toList()), asList(entityMeta0, entityMeta1));
+		when(decoratedRepo.findAll(q)).thenReturn(Stream.of(entityType0, entityType1));
+		assertEquals(repo.findAll(q).collect(toList()), asList(entityType0, entityType1));
 	}
 
 	@Test
 	public void findAllQueryUser() throws Exception
 	{
 		setUserAuthentication();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		String entityMeta1Name = "entity1";
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta1Name).getMock();
-		String entityMeta2Name = "entity2";
-		EntityMetaData entityMeta2 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta2Name).getMock();
-		Query<EntityMetaData> q = mock(Query.class);
-		ArgumentCaptor<Query<EntityMetaData>> queryCaptor = forClass((Class) Query.class);
-		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityMeta0, entityMeta1, entityMeta2));
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(true);
-		when(permissionService.hasPermissionOnEntity(entityMeta1Name, READ)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntity(entityMeta2Name, READ)).thenReturn(true);
-		assertEquals(repo.findAll(q).collect(toList()), asList(entityMeta0, entityMeta2));
-		Query<EntityMetaData> decoratedQ = queryCaptor.getValue();
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		String entityType1Name = "entity1";
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		String entityType2Name = "entity2";
+		EntityType entityType2 = when(mock(EntityType.class).getName()).thenReturn(entityType2Name).getMock();
+		Query<EntityType> q = mock(Query.class);
+		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass((Class) Query.class);
+		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityType0, entityType1, entityType2));
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType2Name, READ)).thenReturn(true);
+		assertEquals(repo.findAll(q).collect(toList()), asList(entityType0, entityType2));
+		Query<EntityType> decoratedQ = queryCaptor.getValue();
 		assertEquals(decoratedQ.getOffset(), 0);
 		assertEquals(decoratedQ.getPageSize(), Integer.MAX_VALUE);
 	}
@@ -269,22 +269,22 @@ public class EntityTypeRepositoryDecoratorTest
 	public void findAllQueryUserOffsetLimit() throws Exception
 	{
 		setUserAuthentication();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		String entityMeta1Name = "entity1";
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta1Name).getMock();
-		String entityMeta2Name = "entity2";
-		EntityMetaData entityMeta2 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta2Name).getMock();
-		Query<EntityMetaData> q = mock(Query.class);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		String entityType1Name = "entity1";
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		String entityType2Name = "entity2";
+		EntityType entityType2 = when(mock(EntityType.class).getName()).thenReturn(entityType2Name).getMock();
+		Query<EntityType> q = mock(Query.class);
 		when(q.getOffset()).thenReturn(1);
 		when(q.getPageSize()).thenReturn(1);
-		ArgumentCaptor<Query<EntityMetaData>> queryCaptor = forClass((Class) Query.class);
-		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityMeta0, entityMeta1, entityMeta2));
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(true);
-		when(permissionService.hasPermissionOnEntity(entityMeta1Name, READ)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntity(entityMeta2Name, READ)).thenReturn(true);
-		assertEquals(repo.findAll(q).collect(toList()), singletonList(entityMeta2));
-		Query<EntityMetaData> decoratedQ = queryCaptor.getValue();
+		ArgumentCaptor<Query<EntityType>> queryCaptor = forClass((Class) Query.class);
+		when(decoratedRepo.findAll(queryCaptor.capture())).thenReturn(Stream.of(entityType0, entityType1, entityType2));
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType2Name, READ)).thenReturn(true);
+		assertEquals(repo.findAll(q).collect(toList()), singletonList(entityType2));
+		Query<EntityType> decoratedQ = queryCaptor.getValue();
 		assertEquals(decoratedQ.getOffset(), 0);
 		assertEquals(decoratedQ.getPageSize(), Integer.MAX_VALUE);
 	}
@@ -305,27 +305,27 @@ public class EntityTypeRepositoryDecoratorTest
 
 	private void iteratorSuOrSystem() throws Exception
 	{
-		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
-		EntityMetaData entityMeta1 = mock(EntityMetaData.class);
-		when(decoratedRepo.iterator()).thenReturn(asList(entityMeta0, entityMeta1).iterator());
-		assertEquals(newArrayList(repo.iterator()), asList(entityMeta0, entityMeta1));
+		EntityType entityType0 = mock(EntityType.class);
+		EntityType entityType1 = mock(EntityType.class);
+		when(decoratedRepo.iterator()).thenReturn(asList(entityType0, entityType1).iterator());
+		assertEquals(newArrayList(repo.iterator()), asList(entityType0, entityType1));
 	}
 
 	@Test
 	public void iteratorUser() throws Exception
 	{
 		setUserAuthentication();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		String entityMeta1Name = "entity1";
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta1Name).getMock();
-		String entityMeta2Name = "entity2";
-		EntityMetaData entityMeta2 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta2Name).getMock();
-		when(decoratedRepo.spliterator()).thenReturn(asList(entityMeta0, entityMeta1, entityMeta2).spliterator());
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(true);
-		when(permissionService.hasPermissionOnEntity(entityMeta1Name, READ)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntity(entityMeta2Name, READ)).thenReturn(true);
-		assertEquals(newArrayList(repo.iterator()), asList(entityMeta0, entityMeta2));
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		String entityType1Name = "entity1";
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		String entityType2Name = "entity2";
+		EntityType entityType2 = when(mock(EntityType.class).getName()).thenReturn(entityType2Name).getMock();
+		when(decoratedRepo.spliterator()).thenReturn(asList(entityType0, entityType1, entityType2).spliterator());
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType2Name, READ)).thenReturn(true);
+		assertEquals(newArrayList(repo.iterator()), asList(entityType0, entityType2));
 	}
 
 	@Test
@@ -345,7 +345,7 @@ public class EntityTypeRepositoryDecoratorTest
 	private void forEachBatchedSuOrSystem() throws Exception
 	{
 		Fetch fetch = mock(Fetch.class);
-		Consumer<List<EntityMetaData>> consumer = mock(Consumer.class);
+		Consumer<List<EntityType>> consumer = mock(Consumer.class);
 		repo.forEachBatched(fetch, consumer, 10);
 		verify(decoratedRepo).forEachBatched(fetch, consumer, 10);
 	}
@@ -373,33 +373,33 @@ public class EntityTypeRepositoryDecoratorTest
 
 	private void findOneQuerySuOrSystem() throws Exception
 	{
-		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
+		EntityType entityType0 = mock(EntityType.class);
 		Query q = mock(Query.class);
-		when(decoratedRepo.findOne(q)).thenReturn(entityMeta0);
-		assertEquals(repo.findOne(q), entityMeta0);
+		when(decoratedRepo.findOne(q)).thenReturn(entityType0);
+		assertEquals(repo.findOne(q), entityType0);
 	}
 
 	@Test
 	public void findOneQueryUserPermissionAllowed() throws Exception
 	{
 		setUserAuthentication();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		Query<EntityMetaData> q = mock(Query.class);
-		when(decoratedRepo.findOne(q)).thenReturn(entityMeta0);
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(true);
-		assertEquals(repo.findOne(q), entityMeta0);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		Query<EntityType> q = mock(Query.class);
+		when(decoratedRepo.findOne(q)).thenReturn(entityType0);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
+		assertEquals(repo.findOne(q), entityType0);
 	}
 
 	@Test
 	public void findOneQueryUserPermissionDenied() throws Exception
 	{
 		setUserAuthentication();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		Query<EntityMetaData> q = mock(Query.class);
-		when(decoratedRepo.findOne(q)).thenReturn(entityMeta0);
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(false);
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		Query<EntityType> q = mock(Query.class);
+		when(decoratedRepo.findOne(q)).thenReturn(entityType0);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(false);
 		assertNull(repo.findOne(q));
 	}
 
@@ -419,33 +419,33 @@ public class EntityTypeRepositoryDecoratorTest
 
 	private void findOneByIdSuOrSystem() throws Exception
 	{
-		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
+		EntityType entityType0 = mock(EntityType.class);
 		Object id = "0";
-		when(decoratedRepo.findOneById(id)).thenReturn(entityMeta0);
-		assertEquals(repo.findOneById(id), entityMeta0);
+		when(decoratedRepo.findOneById(id)).thenReturn(entityType0);
+		assertEquals(repo.findOneById(id), entityType0);
 	}
 
 	@Test
 	public void findOneByIdUserPermissionAllowed() throws Exception
 	{
 		setUserAuthentication();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
 		Object id = "0";
-		when(decoratedRepo.findOneById(id)).thenReturn(entityMeta0);
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(true);
-		assertEquals(repo.findOneById(id), entityMeta0);
+		when(decoratedRepo.findOneById(id)).thenReturn(entityType0);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
+		assertEquals(repo.findOneById(id), entityType0);
 	}
 
 	@Test
 	public void findOneByIdUserPermissionDenied() throws Exception
 	{
 		setUserAuthentication();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
 		Object id = "0";
-		when(decoratedRepo.findOneById(id)).thenReturn(entityMeta0);
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(false);
+		when(decoratedRepo.findOneById(id)).thenReturn(entityType0);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(false);
 		assertNull(repo.findOneById(id));
 	}
 
@@ -465,35 +465,35 @@ public class EntityTypeRepositoryDecoratorTest
 
 	private void findOneByIdFetchSuOrSystem() throws Exception
 	{
-		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
+		EntityType entityType0 = mock(EntityType.class);
 		Object id = "0";
-		when(decoratedRepo.findOneById(id)).thenReturn(entityMeta0);
-		assertEquals(repo.findOneById(id), entityMeta0);
+		when(decoratedRepo.findOneById(id)).thenReturn(entityType0);
+		assertEquals(repo.findOneById(id), entityType0);
 	}
 
 	@Test
 	public void findOneByIdFetchUserPermissionAllowed() throws Exception
 	{
 		setUserAuthentication();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
 		Object id = "0";
 		Fetch fetch = mock(Fetch.class);
-		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entityMeta0);
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(true);
-		assertEquals(repo.findOneById(id, fetch), entityMeta0);
+		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entityType0);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
+		assertEquals(repo.findOneById(id, fetch), entityType0);
 	}
 
 	@Test
 	public void findOneByIdFetchUserPermissionDenied() throws Exception
 	{
 		setUserAuthentication();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
 		Object id = "0";
 		Fetch fetch = mock(Fetch.class);
-		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entityMeta0);
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(false);
+		when(decoratedRepo.findOneById(id, fetch)).thenReturn(entityType0);
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(false);
 		assertNull(repo.findOneById(id, fetch));
 	}
 
@@ -513,29 +513,29 @@ public class EntityTypeRepositoryDecoratorTest
 
 	private void findAllIdsSuOrSystem() throws Exception
 	{
-		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
-		EntityMetaData entityMeta1 = mock(EntityMetaData.class);
+		EntityType entityType0 = mock(EntityType.class);
+		EntityType entityType1 = mock(EntityType.class);
 		Stream<Object> ids = Stream.of("0", "1");
-		when(decoratedRepo.findAll(ids)).thenReturn(Stream.of(entityMeta0, entityMeta1));
-		assertEquals(repo.findAll(ids).collect(toList()), asList(entityMeta0, entityMeta1));
+		when(decoratedRepo.findAll(ids)).thenReturn(Stream.of(entityType0, entityType1));
+		assertEquals(repo.findAll(ids).collect(toList()), asList(entityType0, entityType1));
 	}
 
 	@Test
 	public void findAllIdsUser() throws Exception
 	{
 		setUserAuthentication();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		String entityMeta1Name = "entity1";
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta1Name).getMock();
-		String entityMeta2Name = "entity2";
-		EntityMetaData entityMeta2 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta2Name).getMock();
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		String entityType1Name = "entity1";
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		String entityType2Name = "entity2";
+		EntityType entityType2 = when(mock(EntityType.class).getName()).thenReturn(entityType2Name).getMock();
 		Stream<Object> ids = Stream.of("0", "1");
-		when(decoratedRepo.findAll(ids)).thenReturn(Stream.of(entityMeta0, entityMeta1, entityMeta2));
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(true);
-		when(permissionService.hasPermissionOnEntity(entityMeta1Name, READ)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntity(entityMeta2Name, READ)).thenReturn(true);
-		assertEquals(repo.findAll(ids).collect(toList()), asList(entityMeta0, entityMeta2));
+		when(decoratedRepo.findAll(ids)).thenReturn(Stream.of(entityType0, entityType1, entityType2));
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType2Name, READ)).thenReturn(true);
+		assertEquals(repo.findAll(ids).collect(toList()), asList(entityType0, entityType2));
 	}
 
 	@Test
@@ -554,31 +554,31 @@ public class EntityTypeRepositoryDecoratorTest
 
 	private void findAllIdsFetchSuOrSystem() throws Exception
 	{
-		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
-		EntityMetaData entityMeta1 = mock(EntityMetaData.class);
+		EntityType entityType0 = mock(EntityType.class);
+		EntityType entityType1 = mock(EntityType.class);
 		Stream<Object> ids = Stream.of("0", "1");
 		Fetch fetch = mock(Fetch.class);
-		when(decoratedRepo.findAll(ids, fetch)).thenReturn(Stream.of(entityMeta0, entityMeta1));
-		assertEquals(repo.findAll(ids, fetch).collect(toList()), asList(entityMeta0, entityMeta1));
+		when(decoratedRepo.findAll(ids, fetch)).thenReturn(Stream.of(entityType0, entityType1));
+		assertEquals(repo.findAll(ids, fetch).collect(toList()), asList(entityType0, entityType1));
 	}
 
 	@Test
 	public void findAllIdsFetchUser() throws Exception
 	{
 		setUserAuthentication();
-		String entityMeta0Name = "entity0";
-		EntityMetaData entityMeta0 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta0Name).getMock();
-		String entityMeta1Name = "entity1";
-		EntityMetaData entityMeta1 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta1Name).getMock();
-		String entityMeta2Name = "entity2";
-		EntityMetaData entityMeta2 = when(mock(EntityMetaData.class).getName()).thenReturn(entityMeta2Name).getMock();
+		String entityType0Name = "entity0";
+		EntityType entityType0 = when(mock(EntityType.class).getName()).thenReturn(entityType0Name).getMock();
+		String entityType1Name = "entity1";
+		EntityType entityType1 = when(mock(EntityType.class).getName()).thenReturn(entityType1Name).getMock();
+		String entityType2Name = "entity2";
+		EntityType entityType2 = when(mock(EntityType.class).getName()).thenReturn(entityType2Name).getMock();
 		Stream<Object> ids = Stream.of("0", "1");
 		Fetch fetch = mock(Fetch.class);
-		when(decoratedRepo.findAll(ids, fetch)).thenReturn(Stream.of(entityMeta0, entityMeta1, entityMeta2));
-		when(permissionService.hasPermissionOnEntity(entityMeta0Name, READ)).thenReturn(true);
-		when(permissionService.hasPermissionOnEntity(entityMeta1Name, READ)).thenReturn(false);
-		when(permissionService.hasPermissionOnEntity(entityMeta2Name, READ)).thenReturn(true);
-		assertEquals(repo.findAll(ids, fetch).collect(toList()), asList(entityMeta0, entityMeta2));
+		when(decoratedRepo.findAll(ids, fetch)).thenReturn(Stream.of(entityType0, entityType1, entityType2));
+		when(permissionService.hasPermissionOnEntity(entityType0Name, READ)).thenReturn(true);
+		when(permissionService.hasPermissionOnEntity(entityType1Name, READ)).thenReturn(false);
+		when(permissionService.hasPermissionOnEntity(entityType2Name, READ)).thenReturn(true);
+		assertEquals(repo.findAll(ids, fetch).collect(toList()), asList(entityType0, entityType2));
 	}
 
 	@Test
@@ -627,7 +627,7 @@ public class EntityTypeRepositoryDecoratorTest
 
 	private void deleteSuOrSystem()
 	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		AttributeMetaData attr0 = mock(AttributeMetaData.class);
 		when(attr0.getAttributeParts()).thenReturn(emptyList());
 		AttributeMetaData attrCompound = mock(AttributeMetaData.class);
@@ -636,10 +636,10 @@ public class EntityTypeRepositoryDecoratorTest
 		AttributeMetaData attr1b = mock(AttributeMetaData.class);
 		when(attr1b.getAttributeParts()).thenReturn(emptyList());
 		when(attrCompound.getAttributeParts()).thenReturn(newArrayList(attr1a, attr1b));
-		when(entityMeta.getOwnAttributes()).thenReturn(newArrayList(attr0, attrCompound));
+		when(entityType.getOwnAttributes()).thenReturn(newArrayList(attr0, attrCompound));
 
 		String backendName = "backend";
-		when(entityMeta.getBackend()).thenReturn(backendName);
+		when(entityType.getBackend()).thenReturn(backendName);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
 		//noinspection unchecked
@@ -660,10 +660,10 @@ public class EntityTypeRepositoryDecoratorTest
 		when(groupAuthorityQ.findAll()).thenReturn(singletonList(groupAuthority).stream());
 		when(dataService.query(GROUP_AUTHORITY, GroupAuthority.class)).thenReturn(groupAuthorityQ);
 
-		repo.delete(entityMeta);
+		repo.delete(entityType);
 
-		verify(decoratedRepo).delete(entityMeta);
-		verify(repoCollection).deleteRepository(entityMeta);
+		verify(decoratedRepo).delete(entityType);
+		verify(repoCollection).deleteRepository(entityType);
 
 		//noinspection unchecked
 		ArgumentCaptor<Stream<UserAuthority>> userAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -685,22 +685,22 @@ public class EntityTypeRepositoryDecoratorTest
 	public void deleteUser()
 	{
 		setUserAuthentication();
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		repo.delete(entityMeta);
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		repo.delete(entityType);
 	}
 
 	@Test
 	public void deleteAbstract()
 	{
 		setSystemAuthentication();
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		when(entityMeta.isAbstract()).thenReturn(true);
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.isAbstract()).thenReturn(true);
 		AttributeMetaData attr0 = mock(AttributeMetaData.class);
 		when(attr0.getAttributeParts()).thenReturn(emptyList());
-		when(entityMeta.getOwnAttributes()).thenReturn(singletonList(attr0));
+		when(entityType.getOwnAttributes()).thenReturn(singletonList(attr0));
 
 		String backendName = "backend";
-		when(entityMeta.getBackend()).thenReturn(backendName);
+		when(entityType.getBackend()).thenReturn(backendName);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
 		//noinspection unchecked
@@ -721,10 +721,10 @@ public class EntityTypeRepositoryDecoratorTest
 		when(groupAuthorityQ.findAll()).thenReturn(singletonList(groupAuthority).stream());
 		when(dataService.query(GROUP_AUTHORITY, GroupAuthority.class)).thenReturn(groupAuthorityQ);
 
-		repo.delete(entityMeta);
+		repo.delete(entityType);
 
-		verify(decoratedRepo).delete(entityMeta);
-		verify(repoCollection, times(0)).deleteRepository(entityMeta); // entity is abstract
+		verify(decoratedRepo).delete(entityType);
+		verify(repoCollection, times(0)).deleteRepository(entityType); // entity is abstract
 
 		//noinspection unchecked
 		ArgumentCaptor<Stream<UserAuthority>> userAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -747,15 +747,15 @@ public class EntityTypeRepositoryDecoratorTest
 	{
 		setSystemAuthentication();
 		String entityName = "entity";
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn(entityName).getMock();
-		when(entityMeta.isAbstract()).thenReturn(true);
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn(entityName).getMock();
+		when(entityType.isAbstract()).thenReturn(true);
 		AttributeMetaData attr0 = mock(AttributeMetaData.class);
 		when(attr0.getAttributeParts()).thenReturn(emptyList());
-		when(entityMeta.getOwnAttributes()).thenReturn(singletonList(attr0));
-		when(systemEntityMetaRegistry.hasSystemEntityMetaData(entityName)).thenReturn(true);
+		when(entityType.getOwnAttributes()).thenReturn(singletonList(attr0));
+		when(systemEntityTypeRegistry.hasSystemEntityType(entityName)).thenReturn(true);
 
 		String backendName = "backend";
-		when(entityMeta.getBackend()).thenReturn(backendName);
+		when(entityType.getBackend()).thenReturn(backendName);
 		RepositoryCollection repoCollection = mock(RepositoryCollection.class);
 		when(metaDataService.getBackend(backendName)).thenReturn(repoCollection);
 		//noinspection unchecked
@@ -776,10 +776,10 @@ public class EntityTypeRepositoryDecoratorTest
 		when(groupAuthorityQ.findAll()).thenReturn(singletonList(groupAuthority).stream());
 		when(dataService.query(GROUP_AUTHORITY, GroupAuthority.class)).thenReturn(groupAuthorityQ);
 
-		repo.delete(entityMeta);
+		repo.delete(entityType);
 
-		verify(decoratedRepo).delete(entityMeta);
-		verify(repoCollection, times(0)).deleteRepository(entityMeta); // entity is abstract
+		verify(decoratedRepo).delete(entityType);
+		verify(repoCollection, times(0)).deleteRepository(entityType); // entity is abstract
 
 		//noinspection unchecked
 		ArgumentCaptor<Stream<UserAuthority>> userAuthorityCaptor = ArgumentCaptor.forClass((Class) Stream.class);

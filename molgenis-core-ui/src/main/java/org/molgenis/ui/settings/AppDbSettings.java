@@ -4,7 +4,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.settings.DefaultSettingsEntity;
-import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
+import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.molgenis.ui.menumanager.MenuManagerServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -30,7 +30,7 @@ public class AppDbSettings extends DefaultSettingsEntity implements AppSettings
 	}
 
 	@Component
-	public static class Meta extends DefaultSettingsEntityMetaData
+	public static class Meta extends DefaultSettingsEntityType
 	{
 		private static final String TITLE = "title";
 		private static final String LOGO_NAVBAR_HREF = "logo_href_navbar";

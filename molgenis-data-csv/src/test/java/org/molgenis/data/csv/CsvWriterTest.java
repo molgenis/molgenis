@@ -2,7 +2,7 @@ package org.molgenis.data.csv;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.DynamicEntity;
@@ -22,12 +22,12 @@ import static org.testng.Assert.assertEquals;
 public class CsvWriterTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;
 
-	private EntityMetaData entityMeta;
+	private EntityType entityType;
 
 	@SuppressWarnings("resource")
 	@Test(expectedExceptions = IllegalArgumentException.class)
@@ -39,9 +39,9 @@ public class CsvWriterTest extends AbstractMolgenisSpringTest
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		entityMeta = entityMetaFactory.create();
-		entityMeta.addAttribute(attrMetaFactory.create().setName("col1"));
-		entityMeta.addAttribute(attrMetaFactory.create().setName("col2"));
+		entityType = entityTypeFactory.create();
+		entityType.addAttribute(attrMetaFactory.create().setName("col1"));
+		entityType.addAttribute(attrMetaFactory.create().setName("col2"));
 	}
 
 	@Test
@@ -68,7 +68,7 @@ public class CsvWriterTest extends AbstractMolgenisSpringTest
 	{
 		CellProcessor processor = when(mock(CellProcessor.class).processData()).thenReturn(true).getMock();
 
-		Entity entity = new DynamicEntity(entityMeta);
+		Entity entity = new DynamicEntity(entityType);
 		entity.set("col1", "val1");
 		entity.set("col2", "val2");
 
@@ -95,7 +95,7 @@ public class CsvWriterTest extends AbstractMolgenisSpringTest
 		try
 		{
 			csvWriter.writeAttributeNames(Arrays.asList("col1", "col2"));
-			Entity entity = new DynamicEntity(entityMeta);
+			Entity entity = new DynamicEntity(entityType);
 			entity.set("col1", "val1");
 			entity.set("col2", "val2");
 			csvWriter.add(entity);
@@ -115,7 +115,7 @@ public class CsvWriterTest extends AbstractMolgenisSpringTest
 		try
 		{
 			csvWriter.writeAttributes(Arrays.asList("col1", "col2"), Arrays.asList("label1", "label2"));
-			Entity entity = new DynamicEntity(entityMeta);
+			Entity entity = new DynamicEntity(entityType);
 			entity.set("col1", "val1");
 			entity.set("col2", "val2");
 			csvWriter.add(entity);

@@ -25,7 +25,7 @@ public class UiAnnotationException extends AnnotationException
 		else
 		{
 			message +=
-					" entity with [" + concatAttributeNameValue(getFailedEntity().getEntityMetaData().getIdAttribute())
+					" entity with [" + concatAttributeNameValue(getFailedEntity().getEntityType().getIdAttribute())
 							+ ", " + getRequiredAttributes().stream().map(this::concatAttributeNameValue)
 							.collect(Collectors.joining(", ")) + "]";
 		}

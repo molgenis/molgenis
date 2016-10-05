@@ -2,7 +2,7 @@ package org.molgenis.data.postgresql;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.EntityTypeUtils;
 
 import java.util.stream.Stream;
@@ -25,28 +25,28 @@ class PostgreSqlQueryUtils
 	/**
 	 * Returns the double-quoted table name based on entity name
 	 *
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 * @return table name for this entity
 	 */
-	static String getTableName(EntityMetaData entityMeta)
+	static String getTableName(EntityType entityType)
 	{
-		return getTableName(entityMeta, true);
+		return getTableName(entityType, true);
 	}
 
 	/**
 	 * Returns the table name based on entity name
 	 *
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 * @return PostgreSQL table name
 	 */
-	static String getTableName(EntityMetaData entityMeta, boolean quoteSystemIdentifiers)
+	static String getTableName(EntityType entityType, boolean quoteSystemIdentifiers)
 	{
 		StringBuilder strBuilder = new StringBuilder(32);
 		if (quoteSystemIdentifiers)
 		{
 			strBuilder.append('"');
 		}
-		strBuilder.append(entityMeta.getName());
+		strBuilder.append(entityType.getName());
 		if (quoteSystemIdentifiers)
 		{
 			strBuilder.append('"');
@@ -57,27 +57,27 @@ class PostgreSqlQueryUtils
 	/**
 	 * Returns the junction table name for the given attribute of the given entity
 	 *
-	 * @param entityMeta entity meta data that owns the attribute
+	 * @param entityType entity meta data that owns the attribute
 	 * @param attr       attribute
 	 * @return PostgreSQL junction table name
 	 */
-	static String getJunctionTableName(EntityMetaData entityMeta, AttributeMetaData attr)
+	static String getJunctionTableName(EntityType entityType, AttributeMetaData attr)
 	{
-		return '"' + entityMeta.getName() + '_' + attr.getName() + '"';
+		return '"' + entityType.getName() + '_' + attr.getName() + '"';
 	}
 
 	/**
 	 * Returns the junction table index name for the given indexed attribute in a junction table
 	 *
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 * @param attr       attribute
 	 * @param idxAttr    indexed attribute
 	 * @return PostgreSQL junction table index name
 	 */
-	static String getJunctionTableIndexName(EntityMetaData entityMeta, AttributeMetaData attr,
+	static String getJunctionTableIndexName(EntityType entityType, AttributeMetaData attr,
 			AttributeMetaData idxAttr)
 	{
-		return '"' + entityMeta.getName() + '_' + attr.getName() + '_' + idxAttr.getName() + "_idx\"";
+		return '"' + entityType.getName() + '_' + attr.getName() + '_' + idxAttr.getName() + "_idx\"";
 	}
 
 	/**
@@ -85,9 +85,9 @@ class PostgreSqlQueryUtils
 	 *
 	 * @return stream of persisted attributes
 	 */
-	static Stream<AttributeMetaData> getPersistedAttributes(EntityMetaData entityMeta)
+	static Stream<AttributeMetaData> getPersistedAttributes(EntityType entityType)
 	{
-		return StreamSupport.stream(entityMeta.getAtomicAttributes().spliterator(), false)
+		return StreamSupport.stream(entityType.getAtomicAttributes().spliterator(), false)
 				.filter(atomicAttr -> atomicAttr.getExpression() == null);
 	}
 
@@ -97,9 +97,9 @@ class PostgreSqlQueryUtils
 	 *
 	 * @return stream of persisted MREF attributes
 	 */
-	static Stream<AttributeMetaData> getPersistedAttributesMref(EntityMetaData entityMeta)
+	static Stream<AttributeMetaData> getPersistedAttributesMref(EntityType entityType)
 	{
-		return getPersistedAttributes(entityMeta).filter(EntityTypeUtils::isMultipleReferenceType);
+		return getPersistedAttributes(entityType).filter(EntityTypeUtils::isMultipleReferenceType);
 	}
 
 	/**
@@ -108,20 +108,20 @@ class PostgreSqlQueryUtils
 	 *
 	 * @return stream of persisted non-MREF attributes
 	 */
-	static Stream<AttributeMetaData> getPersistedAttributesNonMref(EntityMetaData entityMeta)
+	static Stream<AttributeMetaData> getPersistedAttributesNonMref(EntityType entityType)
 	{
-		return getPersistedAttributes(entityMeta).filter(attr -> !isMultipleReferenceType(attr));
+		return getPersistedAttributes(entityType).filter(attr -> !isMultipleReferenceType(attr));
 	}
 
 	/**
 	 * Returns whether the given entity is persisted in PostgreSQL
 	 *
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 * @return true is the entity is persisted in PostgreSQL
 	 */
-	static boolean isPersistedInPostgreSql(EntityMetaData entityMeta)
+	static boolean isPersistedInPostgreSql(EntityType entityType)
 	{
-		String backend = entityMeta.getBackend();
+		String backend = entityType.getBackend();
 		if (backend == null)
 		{
 			// TODO remove this check after getBackend always returns the backend

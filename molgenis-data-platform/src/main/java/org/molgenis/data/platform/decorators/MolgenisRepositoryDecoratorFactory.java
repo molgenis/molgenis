@@ -23,7 +23,7 @@ import org.molgenis.data.meta.EntityTypeRepositoryDecorator;
 import org.molgenis.data.meta.PackageRepositoryDecorator;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
-import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
+import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
 import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.settings.AppSettings;
@@ -47,7 +47,7 @@ import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
-import static org.molgenis.security.owned.OwnedEntityMetaData.OWNED;
+import static org.molgenis.security.owned.OwnedEntityType.OWNED;
 
 @Component
 public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFactory
@@ -58,7 +58,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final DataService dataService;
 	private final ExpressionValidator expressionValidator;
 	private final RepositoryDecoratorRegistry repositoryDecoratorRegistry;
-	private final SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
+	private final SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private final UserAuthorityFactory userAuthorityFactory;
 	private final IndexActionRegisterService indexActionRegisterService;
 	private final SearchService searchService;
@@ -78,7 +78,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
 			EntityAttributesValidator entityAttributesValidator, AppSettings appSettings, DataService dataService,
 			ExpressionValidator expressionValidator, RepositoryDecoratorRegistry repositoryDecoratorRegistry,
-			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, UserAuthorityFactory userAuthorityFactory,
+			SystemEntityTypeRegistry systemEntityTypeRegistry, UserAuthorityFactory userAuthorityFactory,
 			IndexActionRegisterService indexActionRegisterService, SearchService searchService,
 			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder,
 			EntityTypeMetadata entityTypeMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache,
@@ -93,7 +93,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.dataService = requireNonNull(dataService);
 		this.expressionValidator = requireNonNull(expressionValidator);
 		this.repositoryDecoratorRegistry = requireNonNull(repositoryDecoratorRegistry);
-		this.systemEntityMetaDataRegistry = requireNonNull(systemEntityMetaDataRegistry);
+		this.systemEntityTypeRegistry = requireNonNull(systemEntityTypeRegistry);
 		this.userAuthorityFactory = requireNonNull(userAuthorityFactory);
 		this.indexActionRegisterService = requireNonNull(indexActionRegisterService);
 		this.searchService = requireNonNull(searchService);
@@ -134,7 +134,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		decoratedRepository = applyCustomRepositoryDecorators(decoratedRepository);
 
 		// 6. Owned decorator
-		if (EntityUtils.doesExtend(decoratedRepository.getEntityMetaData(), OWNED))
+		if (EntityUtils.doesExtend(decoratedRepository.getEntityType(), OWNED))
 		{
 			decoratedRepository = new OwnedEntityRepositoryDecorator(decoratedRepository);
 		}
@@ -172,17 +172,17 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		else if (repo.getName().equals(ATTRIBUTE_META_DATA))
 		{
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new AttributeMetaDataRepositoryDecorator(
-					(Repository<AttributeMetaData>) (Repository<? extends Entity>) repo, systemEntityMetaDataRegistry,
+					(Repository<AttributeMetaData>) (Repository<? extends Entity>) repo, systemEntityTypeRegistry,
 					dataService, permissionService);
 		}
 		else if (repo.getName().equals(ENTITY_META_DATA))
 		{
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityTypeRepositoryValidationDecorator(
-					(Repository<EntityMetaData>) (Repository<? extends Entity>) repo, entityTypeValidator);
+					(Repository<EntityType>) (Repository<? extends Entity>) repo, entityTypeValidator);
 
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityTypeRepositoryDecorator(
-					(Repository<EntityMetaData>) (Repository<? extends Entity>) repo, dataService,
-					systemEntityMetaDataRegistry, permissionService);
+					(Repository<EntityType>) (Repository<? extends Entity>) repo, dataService,
+					systemEntityTypeRegistry, permissionService);
 		}
 		else if (repo.getName().equals(PACKAGE))
 		{

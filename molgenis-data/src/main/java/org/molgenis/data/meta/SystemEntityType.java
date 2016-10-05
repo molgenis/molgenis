@@ -1,9 +1,9 @@
 package org.molgenis.data.meta;
 
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.system.SystemAttributeMetaData;
 import org.molgenis.data.support.BootstrapEntity;
@@ -20,7 +20,7 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 /**
  * Base class for all system entity meta data.
  */
-public abstract class SystemEntityType extends EntityMetaData
+public abstract class SystemEntityType extends EntityType
 {
 	private AttributeMetaDataFactory attributeMetaDataFactory;
 	private IdGenerator idGenerator;

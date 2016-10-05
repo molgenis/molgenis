@@ -5,7 +5,7 @@ import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.AnnotationServiceImpl;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -63,7 +63,7 @@ public class AnnotationServiceImplTest extends AbstractMolgenisSpringTest
 	@ComponentScan({ "org.molgenis.data.vcf.model" })
 	static class Config
 	{
-		public static EntityMetaData metaData = mock(EntityMetaData.class);
+		public static EntityType metaData = mock(EntityType.class);
 
 		@Bean
 		public DataService dataService()

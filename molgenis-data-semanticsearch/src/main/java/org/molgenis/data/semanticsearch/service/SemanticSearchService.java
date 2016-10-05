@@ -1,7 +1,7 @@
 package org.molgenis.data.semanticsearch.service;
 
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -16,12 +16,12 @@ public interface SemanticSearchService
 	/**
 	 * Find all relevant source attributes with an explanation based on ontology terms and search terms
 	 *
-	 * @param sourceEntityMetaData
+	 * @param sourceEntityType
 	 * @param queryTerms
 	 * @param ontologyTerms
 	 * @return AttributeMetaData of resembling attributes, sorted by relevance
 	 */
-	Map<AttributeMetaData, ExplainedAttributeMetaData> findAttributes(EntityMetaData sourceEntityMetaData,
+	Map<AttributeMetaData, ExplainedAttributeMetaData> findAttributes(EntityType sourceEntityType,
 			Set<String> queryTerms, Collection<OntologyTerm> ontologyTerms);
 
 	/**
@@ -33,7 +33,7 @@ public interface SemanticSearchService
 	 * @return AttributeMetaData of resembling attributes, sorted by relevance
 	 */
 	Map<AttributeMetaData, ExplainedAttributeMetaData> decisionTreeToFindRelevantAttributes(
-			EntityMetaData sourceEntityMetaData, AttributeMetaData targetAttribute,
+			EntityType sourceEntityType, AttributeMetaData targetAttribute,
 			Collection<OntologyTerm> ontologyTermsFromTags, Set<String> searchTerms);
 
 	/**

@@ -3,13 +3,13 @@ package org.molgenis.data.mapper.repository.impl;
 import org.mockito.Mockito;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.mapper.config.MappingConfig;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
@@ -43,7 +43,7 @@ import static org.testng.Assert.assertTrue;
 public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;
@@ -76,12 +76,12 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 		List<Entity> attributeMappingEntities = newArrayList();
 		attributeMappingEntities.add(attributeMappingEntity);
 
-		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
-		EntityMetaData targetEntityMetaData = entityMetaFactory.create("target");
-		targetEntityMetaData.addAttribute(targetAttributeMetaData);
+		EntityType sourceEntityType = entityTypeFactory.create("source");
+		EntityType targetEntityType = entityTypeFactory.create("target");
+		targetEntityType.addAttribute(targetAttributeMetaData);
 
 		assertEquals(attributeMappingRepository
-						.getAttributeMappings(attributeMappingEntities, sourceEntityMetaData, targetEntityMetaData),
+						.getAttributeMappings(attributeMappingEntities, sourceEntityType, targetEntityType),
 				attributeMappings);
 	}
 
@@ -154,16 +154,16 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 		AttributeMetaData attr1 = attrMetaFactory.create().setName("attribute_1");
 		AttributeMetaData attr2 = attrMetaFactory.create().setName("attribute_2");
 
-		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
-		sourceEntityMetaData.addAttribute(attr1);
-		sourceEntityMetaData.addAttribute(attr2);
+		EntityType sourceEntityType = entityTypeFactory.create("source");
+		sourceEntityType.addAttribute(attr1);
+		sourceEntityType.addAttribute(attr2);
 
 		List<AttributeMetaData> sourceAttributeMetaDatas = newArrayList();
 		sourceAttributeMetaDatas.add(attr1);
 		sourceAttributeMetaDatas.add(attr2);
 
 		assertEquals(
-				attributeMappingRepository.retrieveAttributeMetaDatasFromAlgorithm(algorithm, sourceEntityMetaData),
+				attributeMappingRepository.retrieveAttributeMetaDatasFromAlgorithm(algorithm, sourceEntityType),
 				sourceAttributeMetaDatas);
 	}
 

@@ -4,12 +4,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.gson.Gson;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.SHALLOW_COPY_ATTRS;
+import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.SHALLOW_COPY_ATTRS;
 
 public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 {
@@ -20,9 +20,9 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 	 * Constructs a new expression evaluator for an attribute whose expression is a simple string.
 	 *
 	 * @param attrMeta   attribute meta data
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 */
-	public MapOfStringsExpressionEvaluator(AttributeMetaData attrMeta, EntityMetaData entityMeta)
+	public MapOfStringsExpressionEvaluator(AttributeMetaData attrMeta, EntityType entityType)
 	{
 		targetAttributeMetaData = attrMeta;
 		String expression = attrMeta.getExpression();
@@ -30,7 +30,7 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 		{
 			throw new NullPointerException("Attribute has no expression.");
 		}
-		EntityMetaData refEntity = attrMeta.getRefEntity();
+		EntityType refEntity = attrMeta.getRefEntity();
 		if (refEntity == null)
 		{
 			throw new NullPointerException("refEntity not specified.");
@@ -50,7 +50,7 @@ public class MapOfStringsExpressionEvaluator implements ExpressionEvaluator
 				}
 				AttributeMetaData amd = AttributeMetaData.newInstance(targetAttributeMetaData, SHALLOW_COPY_ATTRS)
 						.setExpression(entry.getValue());
-				StringExpressionEvaluator evaluator = new StringExpressionEvaluator(amd, entityMeta);
+				StringExpressionEvaluator evaluator = new StringExpressionEvaluator(amd, entityType);
 				builder.put(entry.getKey(), evaluator);
 			}
 			evaluators = builder.build();

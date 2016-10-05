@@ -3,7 +3,7 @@ package org.molgenis.auth;
 import com.google.common.collect.Iterators;
 import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.io.IOException;
@@ -152,10 +152,9 @@ public class MolgenisUserDecorator implements Repository<MolgenisUser>
 		return decoratedRepository.getName();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		return decoratedRepository.getEntityMetaData();
+		return decoratedRepository.getEntityType();
 	}
 
 	@Override

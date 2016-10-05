@@ -17,14 +17,14 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.testng.Assert.*;
 
-public class EntityMetaDataTest
+public class EntityTypeTest
 {
-	private EntityMetaData entityMetaData;
+	private EntityType entityType;
 	private AttributeMetaData randomAttribute;
 	private AttributeMetaData compoundAttribute;
 	private AttributeMetaData attributePart;
 
-	private EntityMetaData nestedEntityMetaData;
+	private EntityType nestedEntityType;
 	private AttributeMetaData nestedCompoundParent;
 	private AttributeMetaData nestedCompoundPart;
 	private AttributeMetaData nestedAttributePart;
@@ -48,7 +48,7 @@ public class EntityMetaDataTest
 
 		Entity entity = when(mock(Entity.class).getEntities(ATTRIBUTES, AttributeMetaData.class))
 				.thenReturn(mockedAttributes).getMock();
-		entityMetaData = new EntityMetaData(entity);
+		entityType = new EntityType(entity);
 
 		// Setup for nested compound test
 		nestedAttributePart = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
@@ -65,85 +65,85 @@ public class EntityMetaDataTest
 
 		Entity nestedEntity = when(mock(Entity.class).getEntities(ATTRIBUTES, AttributeMetaData.class))
 				.thenReturn(mockedNestedAttributes).getMock();
-		nestedEntityMetaData = new EntityMetaData(nestedEntity);
+		nestedEntityType = new EntityType(nestedEntity);
 	}
 
 	@Test
 	public void setNameNoSimpleNameNoLabel()
 	{
-		EntityMetaData entityMeta = new EntityMetaData(createentityTypeMeta());
+		EntityType entityType = new EntityType(createEntityTypeMeta());
 		String name = "name";
-		entityMeta.setName(name);
-		assertEquals(entityMeta.getName(), name);
-		assertEquals(entityMeta.getSimpleName(), name);
-		assertEquals(entityMeta.getLabel(), name);
+		entityType.setName(name);
+		assertEquals(entityType.getName(), name);
+		assertEquals(entityType.getSimpleName(), name);
+		assertEquals(entityType.getLabel(), name);
 	}
 
 	@Test
 	public void setNameExistingSimpleNameExistingLabel()
 	{
-		EntityMetaData entityMeta = new EntityMetaData(createentityTypeMeta());
+		EntityType entityType = new EntityType(createEntityTypeMeta());
 		String label = "label";
 		String simpleName = "simpleName";
 		String name = "name";
-		entityMeta.setLabel(label);
-		entityMeta.setSimpleName(simpleName);
-		entityMeta.setName(name);
-		assertEquals(entityMeta.getName(), name);
-		assertEquals(entityMeta.getSimpleName(), simpleName);
-		assertEquals(entityMeta.getLabel(), label);
+		entityType.setLabel(label);
+		entityType.setSimpleName(simpleName);
+		entityType.setName(name);
+		assertEquals(entityType.getName(), name);
+		assertEquals(entityType.getSimpleName(), simpleName);
+		assertEquals(entityType.getLabel(), label);
 	}
 
 	@Test
 	public void setSimpleNameNoNameNoLabel()
 	{
-		EntityMetaData entityMeta = new EntityMetaData(createentityTypeMeta());
+		EntityType entityType = new EntityType(createEntityTypeMeta());
 		String simpleName = "simpleName";
-		entityMeta.setSimpleName(simpleName);
-		assertEquals(entityMeta.getSimpleName(), simpleName);
-		assertEquals(entityMeta.getString(SIMPLE_NAME), simpleName);
-		assertEquals(entityMeta.getName(), simpleName);
-		assertEquals(entityMeta.getString(FULL_NAME), simpleName);
-		assertEquals(entityMeta.getLabel(), simpleName);
-		assertEquals(entityMeta.getString(LABEL), simpleName);
+		entityType.setSimpleName(simpleName);
+		assertEquals(entityType.getSimpleName(), simpleName);
+		assertEquals(entityType.getString(SIMPLE_NAME), simpleName);
+		assertEquals(entityType.getName(), simpleName);
+		assertEquals(entityType.getString(FULL_NAME), simpleName);
+		assertEquals(entityType.getLabel(), simpleName);
+		assertEquals(entityType.getString(LABEL), simpleName);
 	}
 
 	@Test
 	public void setSimpleNameExistingNameExistingLabel()
 	{
-		EntityMetaData entityMeta = new EntityMetaData(createentityTypeMeta());
+		EntityType entityType = new EntityType(createEntityTypeMeta());
 		String label = "label";
 		String simpleName = "simpleName";
-		entityMeta.setName("name");
-		entityMeta.setLabel(label);
-		entityMeta.setSimpleName(simpleName);
-		assertEquals(entityMeta.getSimpleName(), simpleName);
-		assertEquals(entityMeta.getString(SIMPLE_NAME), simpleName);
-		assertEquals(entityMeta.getName(), simpleName);
-		assertEquals(entityMeta.getString(FULL_NAME), simpleName);
-		assertEquals(entityMeta.getLabel(), label);
-		assertEquals(entityMeta.getString(LABEL), label);
+		entityType.setName("name");
+		entityType.setLabel(label);
+		entityType.setSimpleName(simpleName);
+		assertEquals(entityType.getSimpleName(), simpleName);
+		assertEquals(entityType.getString(SIMPLE_NAME), simpleName);
+		assertEquals(entityType.getName(), simpleName);
+		assertEquals(entityType.getString(FULL_NAME), simpleName);
+		assertEquals(entityType.getLabel(), label);
+		assertEquals(entityType.getString(LABEL), label);
 	}
 
 	@Test
 	public void setLabel()
 	{
-		EntityMetaData entityMeta = new EntityMetaData(createentityTypeMeta());
+		EntityType entityType = new EntityType(createEntityTypeMeta());
 		String label = "label";
-		entityMeta.setLabel(label);
-		assertEquals(entityMeta.getLabel(), label);
-		assertEquals(entityMeta.getString(LABEL), label);
+		entityType.setLabel(label);
+		assertEquals(entityType.getLabel(), label);
+		assertEquals(entityType.getString(LABEL), label);
 	}
 
 	@Test
 	public void setLabelNull()
 	{
-		EntityMetaData entityMeta = new EntityMetaData(createentityTypeMeta());
+		EntityType entityType = new EntityType(createEntityTypeMeta());
 		String simpleName = "simpleName";
-		entityMeta.setSimpleName(simpleName);
-		entityMeta.setLabel(null);
-		assertEquals(entityMeta.getLabel(), simpleName);
-		assertEquals(entityMeta.getString(LABEL), simpleName);
+		entityType.setSimpleName(simpleName);
+		entityType.setLabel(null);
+		assertEquals(entityType.getLabel(), simpleName);
+		assertEquals(entityType.getString(LABEL), simpleName);
 	}
 
 	@Test
@@ -154,7 +154,7 @@ public class EntityMetaDataTest
 		expectedAttributes.add(compoundAttribute);
 		expectedAttributes.add(randomAttribute);
 
-		LinkedHashSet<AttributeMetaData> actualAttributes = entityMetaData.getCompoundOrderedAttributes();
+		LinkedHashSet<AttributeMetaData> actualAttributes = entityType.getCompoundOrderedAttributes();
 		assertEquals(actualAttributes, expectedAttributes);
 	}
 
@@ -166,7 +166,7 @@ public class EntityMetaDataTest
 		expectedAttributes.add(randomAttribute);
 		expectedAttributes.add(attributePart);
 
-		LinkedHashSet<AttributeMetaData> actualAttributes = entityMetaData.getCompoundOrderedAttributes();
+		LinkedHashSet<AttributeMetaData> actualAttributes = entityType.getCompoundOrderedAttributes();
 
 		Iterator<AttributeMetaData> expectedAttributesIterator = expectedAttributes.iterator();
 		Iterator<AttributeMetaData> actualAttributesIterator = actualAttributes.iterator();
@@ -186,19 +186,19 @@ public class EntityMetaDataTest
 		expectedAttributes.add(nestedCompoundParent);
 		expectedAttributes.add(randomAttribute);
 
-		LinkedHashSet<AttributeMetaData> actualAttributes = nestedEntityMetaData.getCompoundOrderedAttributes();
+		LinkedHashSet<AttributeMetaData> actualAttributes = nestedEntityType.getCompoundOrderedAttributes();
 		assertEquals(actualAttributes, expectedAttributes);
 	}
 
 	@Test
 	public void newInstanceShallowCopy()
 	{
-		EntityMetaData entityTypeMeta = createentityTypeMeta();
+		EntityType entityTypeMeta = createEntityTypeMeta();
 
 		Package package_ = mock(Package.class);
 		when(package_.getName()).thenReturn("myPackage");
 
-		EntityMetaData extendsEntityMeta = mock(EntityMetaData.class);
+		EntityType extendsEntityType = mock(EntityType.class);
 
 		AttributeMetaData attrId = mock(AttributeMetaData.class);
 		AttributeMetaData attrLabel = mock(AttributeMetaData.class);
@@ -207,58 +207,58 @@ public class EntityMetaDataTest
 		Tag tag0 = mock(Tag.class);
 		Tag tag1 = mock(Tag.class);
 
-		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getEntityMetaData()).thenReturn(entityTypeMeta);
-		when(entityMeta.getSimpleName()).thenReturn("myEntity");
-		when(entityMeta.getName()).thenReturn("myPackage_myEntity");
-		when(entityMeta.getPackage()).thenReturn(package_);
-		when(entityMeta.getLabel()).thenReturn("label");
-		when(entityMeta.getDescription()).thenReturn("description");
+		EntityType entityType = mock(EntityType.class);
+		when(entityType.getEntityType()).thenReturn(entityTypeMeta);
+		when(entityType.getSimpleName()).thenReturn("myEntity");
+		when(entityType.getName()).thenReturn("myPackage_myEntity");
+		when(entityType.getPackage()).thenReturn(package_);
+		when(entityType.getLabel()).thenReturn("label");
+		when(entityType.getDescription()).thenReturn("description");
 
-		when(entityMeta.getOwnAttributes()).thenReturn(asList(attrId, attrLabel, attrCompound));
-		when(entityMeta.getOwnIdAttribute()).thenReturn(attrId);
-		when(entityMeta.getOwnLabelAttribute()).thenReturn(attrLabel);
-		when(entityMeta.getOwnLookupAttributes()).thenReturn(asList(attrId, attrLabel));
-		when(entityMeta.isAbstract()).thenReturn(false);
-		when(entityMeta.getExtends()).thenReturn(extendsEntityMeta);
-		when(entityMeta.getTags()).thenReturn(asList(tag0, tag1));
-		when(entityMeta.getBackend()).thenReturn("backend");
+		when(entityType.getOwnAttributes()).thenReturn(asList(attrId, attrLabel, attrCompound));
+		when(entityType.getOwnIdAttribute()).thenReturn(attrId);
+		when(entityType.getOwnLabelAttribute()).thenReturn(attrLabel);
+		when(entityType.getOwnLookupAttributes()).thenReturn(asList(attrId, attrLabel));
+		when(entityType.isAbstract()).thenReturn(false);
+		when(entityType.getExtends()).thenReturn(extendsEntityType);
+		when(entityType.getTags()).thenReturn(asList(tag0, tag1));
+		when(entityType.getBackend()).thenReturn("backend");
 
-		EntityMetaData entityMetaCopy = EntityMetaData
-				.newInstance(entityMeta, EntityMetaData.AttributeCopyMode.SHALLOW_COPY_ATTRS);
-		assertSame(entityMetaCopy.getEntityMetaData(), entityTypeMeta);
-		assertEquals(entityMetaCopy.getSimpleName(), "myEntity");
-		assertEquals(entityMetaCopy.getName(), "myPackage_myEntity");
-		assertSame(entityMetaCopy.getPackage(), package_);
-		assertEquals(entityMetaCopy.getLabel(), "label");
-		assertEquals(entityMetaCopy.getDescription(), "description");
+		EntityType entityTypeCopy = EntityType
+				.newInstance(entityType, EntityType.AttributeCopyMode.SHALLOW_COPY_ATTRS);
+		assertSame(entityTypeCopy.getEntityType(), entityTypeMeta);
+		assertEquals(entityTypeCopy.getSimpleName(), "myEntity");
+		assertEquals(entityTypeCopy.getName(), "myPackage_myEntity");
+		assertSame(entityTypeCopy.getPackage(), package_);
+		assertEquals(entityTypeCopy.getLabel(), "label");
+		assertEquals(entityTypeCopy.getDescription(), "description");
 
-		List<AttributeMetaData> ownAttrsCopy = newArrayList(entityMeta.getOwnAttributes());
+		List<AttributeMetaData> ownAttrsCopy = newArrayList(entityType.getOwnAttributes());
 		assertEquals(ownAttrsCopy.size(), 3);
 		assertSame(ownAttrsCopy.get(0), attrId);
 		assertSame(ownAttrsCopy.get(1), attrLabel);
 		assertSame(ownAttrsCopy.get(2), attrCompound);
-		assertSame(entityMetaCopy.getIdAttribute(), attrId);
-		assertSame(entityMetaCopy.getLabelAttribute(), attrLabel);
+		assertSame(entityTypeCopy.getIdAttribute(), attrId);
+		assertSame(entityTypeCopy.getLabelAttribute(), attrLabel);
 
-		List<AttributeMetaData> ownLookAttrsCopy = newArrayList(entityMetaCopy.getOwnLookupAttributes());
+		List<AttributeMetaData> ownLookAttrsCopy = newArrayList(entityTypeCopy.getOwnLookupAttributes());
 		assertEquals(ownLookAttrsCopy.size(), 2);
 		assertSame(ownLookAttrsCopy.get(0), attrId);
 		assertSame(ownLookAttrsCopy.get(1), attrLabel);
 
-		assertEquals(entityMetaCopy.isAbstract(), false);
-		assertSame(entityMetaCopy.getExtends(), extendsEntityMeta);
+		assertEquals(entityTypeCopy.isAbstract(), false);
+		assertSame(entityTypeCopy.getExtends(), extendsEntityType);
 
-		List<Tag> tagsCopy = newArrayList(entityMetaCopy.getTags());
+		List<Tag> tagsCopy = newArrayList(entityTypeCopy.getTags());
 		assertEquals(tagsCopy.size(), 2);
 		assertSame(tagsCopy.get(0), tag0);
 		assertSame(tagsCopy.get(1), tag1);
-		assertEquals(entityMetaCopy.getBackend(), "backend");
+		assertEquals(entityTypeCopy.getBackend(), "backend");
 	}
 
-	private static EntityMetaData createentityTypeMeta()
+	private static EntityType createEntityTypeMeta()
 	{
-		EntityMetaData entityTypeMeta = mock(EntityMetaData.class);
+		EntityType entityTypeMeta = mock(EntityType.class);
 		AttributeMetaData strAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
 		AttributeMetaData boolAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(BOOL).getMock();
 		AttributeMetaData xrefAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(XREF).getMock();

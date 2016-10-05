@@ -99,7 +99,7 @@ public class EntityAggregatesResponse extends EntityCollectionResponseV2
 				{
 					Map<String, Object> valueMap = new HashMap<String, Object>();
 					Entity entity = (Entity) xLabel;
-					for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
+					for (AttributeMetaData attr : entity.getEntityType().getAtomicAttributes())
 					{
 						switch (attr.getDataType())
 						{

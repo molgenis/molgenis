@@ -9,7 +9,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.util.MolgenisDateFormat;
 
 import java.util.Date;
@@ -26,16 +26,16 @@ public class QueryGenerator implements QueryPartGenerator
 	static final String ATTRIBUTE_SEPARATOR = ".";
 
 	@Override
-	public void generate(SearchRequestBuilder searchRequestBuilder, Query<Entity> query, EntityMetaData entityMetaData)
+	public void generate(SearchRequestBuilder searchRequestBuilder, Query<Entity> query, EntityType entityType)
 	{
 		List<QueryRule> queryRules = query.getRules();
 		if (queryRules == null || queryRules.isEmpty()) return;
 
-		QueryBuilder q = createQueryBuilder(queryRules, entityMetaData);
+		QueryBuilder q = createQueryBuilder(queryRules, entityType);
 		searchRequestBuilder.setQuery(q);
 	}
 
-	public QueryBuilder createQueryBuilder(List<QueryRule> queryRules, EntityMetaData entityMetaData)
+	public QueryBuilder createQueryBuilder(List<QueryRule> queryRules, EntityType entityType)
 	{
 		QueryBuilder queryBuilder;
 
@@ -43,7 +43,7 @@ public class QueryGenerator implements QueryPartGenerator
 		if (nrQueryRules == 1)
 		{
 			// simple query consisting of one query clause
-			queryBuilder = createQueryClause(queryRules.get(0), entityMetaData);
+			queryBuilder = createQueryClause(queryRules.get(0), entityType);
 		}
 		else
 		{
@@ -86,7 +86,7 @@ public class QueryGenerator implements QueryPartGenerator
 					}
 				}
 
-				QueryBuilder queryPartBuilder = createQueryClause(queryRule, entityMetaData);
+				QueryBuilder queryPartBuilder = createQueryClause(queryRule, entityType);
 				if (queryPartBuilder == null) continue; // skip SHOULD and DIS_MAX query rules
 
 				// add query part to query
@@ -115,11 +115,11 @@ public class QueryGenerator implements QueryPartGenerator
 	 * Create query clause for query rule
 	 *
 	 * @param queryRule
-	 * @param entityMetaData
+	 * @param entityType
 	 * @return query class or null for SHOULD and DIS_MAX query rules
 	 */
 	@SuppressWarnings("unchecked")
-	private QueryBuilder createQueryClause(QueryRule queryRule, EntityMetaData entityMetaData)
+	private QueryBuilder createQueryClause(QueryRule queryRule, EntityType entityType)
 	{
 		// create query rule
 		String queryField = queryRule.getField();
@@ -138,7 +138,7 @@ public class QueryGenerator implements QueryPartGenerator
 				BoolQueryBuilder boolQueryBuilder = QueryBuilders.boolQuery();
 				for (QueryRule subQuery : queryRule.getNestedRules())
 				{
-					boolQueryBuilder.should(createQueryClause(subQuery, entityMetaData));
+					boolQueryBuilder.should(createQueryClause(subQuery, entityType));
 				}
 				queryBuilder = boolQueryBuilder;
 				break;
@@ -146,7 +146,7 @@ public class QueryGenerator implements QueryPartGenerator
 				DisMaxQueryBuilder disMaxQueryBuilder = QueryBuilders.disMaxQuery();
 				for (QueryRule subQuery : queryRule.getNestedRules())
 				{
-					disMaxQueryBuilder.add(createQueryClause(subQuery, entityMetaData));
+					disMaxQueryBuilder.add(createQueryClause(subQuery, entityType));
 				}
 				disMaxQueryBuilder.tieBreaker((float) 0.0);
 				if (queryRule.getValue() != null)
@@ -166,13 +166,13 @@ public class QueryGenerator implements QueryPartGenerator
 				{
 					String[] attributePath = parseAttributePath(queryField);
 
-					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					AttributeMetaData attr = getAttribute(entityType, attributePath);
 					queryValue = getESDateQueryValue((Date) queryValue, attr);
 				}
 
 				FilterBuilder filterBuilder;
 				String[] attributePath = parseAttributePath(queryField);
-				AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+				AttributeMetaData attr = getAttribute(entityType, attributePath);
 
 				// construct query part
 				if (queryValue != null)
@@ -277,14 +277,14 @@ public class QueryGenerator implements QueryPartGenerator
 			case GREATER:
 			{
 				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-				validateNumericalQueryField(queryField, entityMetaData);
+				validateNumericalQueryField(queryField, entityType);
 
 				String[] attributePath = parseAttributePath(queryField);
 
 				// Workaround for Elasticsearch Date to String conversion issue
 				if (queryValue instanceof Date)
 				{
-					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					AttributeMetaData attr = getAttribute(entityType, attributePath);
 					queryValue = getESDateQueryValue((Date) queryValue, attr);
 				}
 
@@ -297,14 +297,14 @@ public class QueryGenerator implements QueryPartGenerator
 			case GREATER_EQUAL:
 			{
 				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-				validateNumericalQueryField(queryField, entityMetaData);
+				validateNumericalQueryField(queryField, entityType);
 
 				String[] attributePath = parseAttributePath(queryField);
 
 				// Workaround for Elasticsearch Date to String conversion issue
 				if (queryValue instanceof Date)
 				{
-					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					AttributeMetaData attr = getAttribute(entityType, attributePath);
 					queryValue = getESDateQueryValue((Date) queryValue, attr);
 				}
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).gte(queryValue);
@@ -325,7 +325,7 @@ public class QueryGenerator implements QueryPartGenerator
 				Iterable<?> iterable = (Iterable<?>) queryValue;
 
 				String[] attributePath = parseAttributePath(queryField);
-				AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+				AttributeMetaData attr = getAttribute(entityType, attributePath);
 				AttributeType dataType = attr.getDataType();
 
 				FilterBuilder filterBuilder;
@@ -392,14 +392,14 @@ public class QueryGenerator implements QueryPartGenerator
 			case LESS:
 			{
 				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-				validateNumericalQueryField(queryField, entityMetaData);
+				validateNumericalQueryField(queryField, entityType);
 
 				String[] attributePath = parseAttributePath(queryField);
 
 				// Workaround for Elasticsearch Date to String conversion issue
 				if (queryValue instanceof Date)
 				{
-					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					AttributeMetaData attr = getAttribute(entityType, attributePath);
 					queryValue = getESDateQueryValue((Date) queryValue, attr);
 				}
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).lt(queryValue);
@@ -410,14 +410,14 @@ public class QueryGenerator implements QueryPartGenerator
 			case LESS_EQUAL:
 			{
 				if (queryValue == null) throw new MolgenisQueryException("Query value cannot be null");
-				validateNumericalQueryField(queryField, entityMetaData);
+				validateNumericalQueryField(queryField, entityType);
 
 				String[] attributePath = parseAttributePath(queryField);
 
 				// Workaround for Elasticsearch Date to String conversion issue
 				if (queryValue instanceof Date)
 				{
-					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					AttributeMetaData attr = getAttribute(entityType, attributePath);
 					queryValue = getESDateQueryValue((Date) queryValue, attr);
 				}
 				FilterBuilder filterBuilder = FilterBuilders.rangeFilter(queryField).lte(queryValue);
@@ -436,12 +436,12 @@ public class QueryGenerator implements QueryPartGenerator
 				}
 				Iterable<?> iterable = (Iterable<?>) queryValue;
 
-				validateNumericalQueryField(queryField, entityMetaData);
+				validateNumericalQueryField(queryField, entityType);
 
 				Iterator<?> iterator = iterable.iterator();
 
 				String[] attributePath = parseAttributePath(queryField);
-				AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+				AttributeMetaData attr = getAttribute(entityType, attributePath);
 
 				Object queryValueFrom = iterator.next();
 
@@ -471,12 +471,12 @@ public class QueryGenerator implements QueryPartGenerator
 				{
 					throw new MolgenisQueryException("Missing nested rules for nested query");
 				}
-				queryBuilder = createQueryBuilder(nestedQueryRules, entityMetaData);
+				queryBuilder = createQueryBuilder(nestedQueryRules, entityType);
 				break;
 			case LIKE:
 			{
 				String[] attributePath = parseAttributePath(queryField);
-				AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+				AttributeMetaData attr = getAttribute(entityType, attributePath);
 
 				// construct query part
 				AttributeType dataType = attr.getDataType();
@@ -530,7 +530,7 @@ public class QueryGenerator implements QueryPartGenerator
 				{
 					String[] attributePath = parseAttributePath(queryField);
 
-					AttributeMetaData attr = getAttribute(entityMetaData, attributePath);
+					AttributeMetaData attr = getAttribute(entityType, attributePath);
 
 					// construct query part
 					AttributeType dataType = attr.getDataType();
@@ -586,7 +586,7 @@ public class QueryGenerator implements QueryPartGenerator
 				}
 				else
 				{
-					AttributeMetaData attr = entityMetaData.getAttribute(queryField);
+					AttributeMetaData attr = entityType.getAttribute(queryField);
 					if (attr == null) throw new UnknownAttributeException(queryField);
 					// construct query part
 					AttributeType dataType = attr.getDataType();
@@ -636,7 +636,7 @@ public class QueryGenerator implements QueryPartGenerator
 				}
 				else
 				{
-					AttributeMetaData attr = entityMetaData.getAttribute(queryField);
+					AttributeMetaData attr = entityType.getAttribute(queryField);
 					if (attr == null) throw new UnknownAttributeException(queryField);
 					// construct query part
 					AttributeType dataType = attr.getDataType();
@@ -717,11 +717,11 @@ public class QueryGenerator implements QueryPartGenerator
 		return getFieldName(refIdAttr, indexFieldName);
 	}
 
-	private void validateNumericalQueryField(String queryField, EntityMetaData entityMetaData)
+	private void validateNumericalQueryField(String queryField, EntityType entityType)
 	{
 		String[] attributePath = parseAttributePath(queryField);
 
-		AttributeType dataType = getAttribute(entityMetaData, attributePath).getDataType();
+		AttributeType dataType = getAttribute(entityType, attributePath).getDataType();
 
 		switch (dataType)
 		{
@@ -806,7 +806,7 @@ public class QueryGenerator implements QueryPartGenerator
 	/**
 	 * Returns the target attribute. Looks in the reference entity when it is a nested query.
 	 */
-	private AttributeMetaData getAttribute(EntityMetaData entityMetaData, String[] attributePath)
+	private AttributeMetaData getAttribute(EntityType entityType, String[] attributePath)
 	{
 		if (attributePath.length > 2)
 			throw new UnsupportedOperationException("Can not filter on references deeper than 1.");
@@ -814,13 +814,13 @@ public class QueryGenerator implements QueryPartGenerator
 
 		if (attributePath.length == 1)
 		{
-			AttributeMetaData attr = entityMetaData.getAttribute(attributePath[0]);
+			AttributeMetaData attr = entityType.getAttribute(attributePath[0]);
 			if (attr == null) throw new UnknownAttributeException(attributePath[0]);
 			return attr;
 		}
 		else
 		{
-			AttributeMetaData attr = entityMetaData.getAttribute(attributePath[0]);
+			AttributeMetaData attr = entityType.getAttribute(attributePath[0]);
 			if (attr == null) throw new UnknownAttributeException(attributePath[0]);
 
 			attr = attr.getRefEntity().getAttribute(attributePath[1]);

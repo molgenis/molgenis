@@ -10,7 +10,7 @@ import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.ThousendGenomesAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -34,7 +34,7 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.data.annotation.core.entity.impl.ThousandGenomesAnnotator.THOUSAND_GENOME_AF;
 import static org.molgenis.data.annotation.core.entity.impl.ThousandGenomesAnnotator.THOUSAND_GENOME_AF_LABEL;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = { ThousandGenomesAnnotatorTest.Config.class, ThousandGenomesAnnotator.class })
@@ -69,7 +69,7 @@ public class ThousandGenomesAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testAnnotate()
 	{
-		EntityMetaData emdIn = entityTypeFactory.create().setName("test");
+		EntityType emdIn = entityTypeFactory.create().setName("test");
 		emdIn.addAttribute(vcfAttributes.getChromAttribute(), ROLE_ID);
 		emdIn.addAttribute(vcfAttributes.getPosAttribute());
 		emdIn.addAttribute(vcfAttributes.getRefAttribute());
@@ -100,7 +100,7 @@ public class ThousandGenomesAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testAnnotateNegative()
 	{
-		EntityMetaData emdIn = entityTypeFactory.create().setName("test");
+		EntityType emdIn = entityTypeFactory.create().setName("test");
 		emdIn.addAttribute(vcfAttributes.getChromAttribute(), ROLE_ID);
 		emdIn.addAttribute(vcfAttributes.getPosAttribute());
 		emdIn.addAttribute(vcfAttributes.getRefAttribute());

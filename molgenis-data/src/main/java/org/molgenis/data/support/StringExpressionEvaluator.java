@@ -4,7 +4,7 @@ import com.google.gson.Gson;
 import org.molgenis.data.DataConverter;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 public class StringExpressionEvaluator implements ExpressionEvaluator
 {
@@ -15,9 +15,9 @@ public class StringExpressionEvaluator implements ExpressionEvaluator
 	 * Constructs a new expression evaluator for an attribute whose expression is a simple string.
 	 *
 	 * @param attrMeta   attribute meta data
-	 * @param entityMeta entity meta data
+	 * @param entityType entity meta data
 	 */
-	public StringExpressionEvaluator(AttributeMetaData attrMeta, EntityMetaData entityMeta)
+	public StringExpressionEvaluator(AttributeMetaData attrMeta, EntityType entityType)
 	{
 		targetAttributeMetaData = attrMeta;
 		String expression = attrMeta.getExpression();
@@ -27,7 +27,7 @@ public class StringExpressionEvaluator implements ExpressionEvaluator
 		}
 		Gson gson = new Gson();
 		String attributeName = gson.fromJson(expression, String.class);
-		sourceAttributeMetaData = entityMeta.getAttribute(attributeName);
+		sourceAttributeMetaData = entityType.getAttribute(attributeName);
 		if (sourceAttributeMetaData == null)
 		{
 			throw new IllegalArgumentException(

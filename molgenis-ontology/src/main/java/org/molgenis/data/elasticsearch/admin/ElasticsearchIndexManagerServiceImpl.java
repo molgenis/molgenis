@@ -2,7 +2,7 @@ package org.molgenis.data.elasticsearch.admin;
 
 import org.molgenis.data.*;
 import org.molgenis.data.elasticsearch.ElasticsearchService;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -31,22 +31,22 @@ public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexM
 
 	@Override
 	@PreAuthorize("hasAnyRole('ROLE_SU, ROLE_PLUGIN_READ_INDEXMANAGER')")
-	public List<EntityMetaData> getIndexedEntities()
+	public List<EntityType> getIndexedEntities()
 	{
 		// collect indexed repos
-		List<EntityMetaData> indexedEntityMetaDataList = new ArrayList<>();
+		List<EntityType> indexedEntityTypeList = new ArrayList<>();
 		dataService.getEntityNames().forEach(entityName ->
 		{
 			Repository<Entity> repository = dataService.getRepository(entityName);
 			if (repository != null && repository.getCapabilities().contains(RepositoryCapability.INDEXABLE))
 			{
-				indexedEntityMetaDataList.add(repository.getEntityMetaData());
+				indexedEntityTypeList.add(repository.getEntityType());
 			}
 		});
 
 		// sort indexed repos by entity label
-		Collections.sort(indexedEntityMetaDataList, (e1, e2) -> e1.getLabel().compareTo(e2.getLabel()));
-		return indexedEntityMetaDataList;
+		Collections.sort(indexedEntityTypeList, (e1, e2) -> e1.getLabel().compareTo(e2.getLabel()));
+		return indexedEntityTypeList;
 	}
 
 	@Override

@@ -1,7 +1,7 @@
 package org.molgenis.data.i18n.model;
 
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.StaticEntity;
 
 import static org.molgenis.data.i18n.model.I18nStringMetaData.DESCRIPTION;
@@ -20,22 +20,22 @@ public class I18nString extends StaticEntity
 	/**
 	 * Constructs an internationalized string with the given meta data
 	 *
-	 * @param entityMeta language meta data
+	 * @param entityType language meta data
 	 */
-	public I18nString(EntityMetaData entityMeta)
+	public I18nString(EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 	}
 
 	/**
 	 * Constructs an internationalized string with the given id and meta data
 	 *
 	 * @param msgId      message id
-	 * @param entityMeta internationalized string meta data
+	 * @param entityType internationalized string meta data
 	 */
-	public I18nString(String msgId, EntityMetaData entityMeta)
+	public I18nString(String msgId, EntityType entityType)
 	{
-		super(entityMeta);
+		super(entityType);
 		setMessageId(msgId);
 	}
 

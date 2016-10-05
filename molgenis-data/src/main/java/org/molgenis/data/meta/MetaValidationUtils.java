@@ -4,7 +4,7 @@ import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.ReservedKeywords;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Set;
 
@@ -113,30 +113,30 @@ public class MetaValidationUtils
 	/**
 	 * Validates an entity and all of its attributes.
 	 *
-	 * @param entityMeta entity meta data to validate
+	 * @param entityType entity meta data to validate
 	 * @throw MolgenisDataException if entity meta data is not valid
 	 */
-	public static void validateEntityMetaData(EntityMetaData entityMeta)
+	public static void validateEntityType(EntityType entityType)
 	{
 		try
 		{
-			if (!entityMeta.getName().equals(ATTRIBUTE_META_DATA) && !entityMeta.getName().equals(ENTITY_META_DATA)
-					&& !entityMeta.getName().equals(PACKAGE))
+			if (!entityType.getName().equals(ATTRIBUTE_META_DATA) && !entityType.getName().equals(ENTITY_META_DATA)
+					&& !entityType.getName().equals(PACKAGE))
 			{
-				validateName(entityMeta.getSimpleName());
-				validateAttributes(entityMeta.getAttributes());
+				validateName(entityType.getSimpleName());
+				validateAttributes(entityType.getAttributes());
 			}
 
-			if (entityMeta.getIdAttribute() != null && entityMeta.getIdAttribute().getDefaultValue() != null)
+			if (entityType.getIdAttribute() != null && entityType.getIdAttribute().getDefaultValue() != null)
 			{
 				throw new MolgenisDataException(
-						"ID attribute " + entityMeta.getIdAttribute().getName() + " cannot have default value");
+						"ID attribute " + entityType.getIdAttribute().getName() + " cannot have default value");
 			}
 		}
 		catch (MolgenisDataException e)
 		{
 			throw new MolgenisDataException(
-					"Validation error in entity [" + entityMeta.getName() + "]: " + e.getMessage(), e);
+					"Validation error in entity [" + entityType.getName() + "]: " + e.getMessage(), e);
 		}
 	}
 

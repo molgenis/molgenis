@@ -2,9 +2,9 @@ package org.molgenis.data.support;
 
 import com.google.common.collect.Sets;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.settings.DefaultSettingsEntity;
-import org.molgenis.data.settings.DefaultSettingsEntityMetaData;
+import org.molgenis.data.settings.DefaultSettingsEntityType;
 import org.springframework.stereotype.Component;
 
 import java.util.Set;
@@ -21,7 +21,7 @@ public class GenomicDataSettings extends DefaultSettingsEntity
 		super(ID);
 	}
 
-	public AttributeMetaData getAttributeMetadataForAttributeNameArray(String propertyName, EntityMetaData metadata)
+	public AttributeMetaData getAttributeMetadataForAttributeNameArray(String propertyName, EntityType metadata)
 	{
 		String attrNamesStr = getString(propertyName);
 		if (attrNamesStr != null)
@@ -38,7 +38,7 @@ public class GenomicDataSettings extends DefaultSettingsEntity
 		return null;
 	}
 
-	public String getAttributeNameForAttributeNameArray(String propertyName, EntityMetaData metadata)
+	public String getAttributeNameForAttributeNameArray(String propertyName, EntityType metadata)
 	{
 		AttributeMetaData attribute = getAttributeMetadataForAttributeNameArray(propertyName, metadata);
 		if (attribute != null)
@@ -49,7 +49,7 @@ public class GenomicDataSettings extends DefaultSettingsEntity
 	}
 
 	@Component
-	public static class Meta extends DefaultSettingsEntityMetaData
+	public static class Meta extends DefaultSettingsEntityType
 	{
 		public static final String ATTRS_POS = "start";
 		public static final String ATTRS_CHROM = "chromosome";

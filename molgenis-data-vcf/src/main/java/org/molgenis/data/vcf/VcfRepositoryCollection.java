@@ -5,7 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -31,7 +31,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	private VcfAttributes vcfAttributes;
 
 	@Autowired
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;
@@ -81,7 +81,7 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 		if (!entityName.equals(name)) throw new MolgenisDataException("Unknown entity name [" + name + "]");
 		try
 		{
-			return new VcfRepository(file, name, vcfAttributes, entityMetaFactory, attrMetaFactory);
+			return new VcfRepository(file, name, vcfAttributes, entityTypeFactory, attrMetaFactory);
 		}
 		catch (IOException e)
 		{
@@ -130,8 +130,8 @@ public class VcfRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Override
-	public boolean hasRepository(EntityMetaData entityMeta)
+	public boolean hasRepository(EntityType entityType)
 	{
-		return hasRepository(entityMeta.getName());
+		return hasRepository(entityType.getName());
 	}
 }

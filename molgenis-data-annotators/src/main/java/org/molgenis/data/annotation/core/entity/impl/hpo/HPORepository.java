@@ -9,7 +9,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DynamicEntity;
@@ -19,7 +19,7 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.stream.Stream;
 
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 
 public class HPORepository extends AbstractRepository
 {
@@ -46,15 +46,14 @@ public class HPORepository extends AbstractRepository
 		return Collections.emptySet();
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
-		EntityMetaData entityMeta = entityTypeFactory.create().setSimpleName("HPO");
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(HPO_DISEASE_ID_COL_NAME));
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(HPO_GENE_SYMBOL_COL_NAME));
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(HPO_ID_COL_NAME), ROLE_ID);
-		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(HPO_TERM_COL_NAME));
-		return entityMeta;
+		EntityType entityType = entityTypeFactory.create().setSimpleName("HPO");
+		entityType.addAttribute(attributeMetaDataFactory.create().setName(HPO_DISEASE_ID_COL_NAME));
+		entityType.addAttribute(attributeMetaDataFactory.create().setName(HPO_GENE_SYMBOL_COL_NAME));
+		entityType.addAttribute(attributeMetaDataFactory.create().setName(HPO_ID_COL_NAME), ROLE_ID);
+		entityType.addAttribute(attributeMetaDataFactory.create().setName(HPO_TERM_COL_NAME));
+		return entityType;
 	}
 
 	@Override
@@ -106,7 +105,7 @@ public class HPORepository extends AbstractRepository
 				{
 					String geneSymbol = values[1];
 
-					Entity entity = new DynamicEntity(getEntityMetaData());
+					Entity entity = new DynamicEntity(getEntityType());
 					entity.set(HPO_DISEASE_ID_COL_NAME, values[0]);
 					entity.set(HPO_GENE_SYMBOL_COL_NAME, geneSymbol);
 					entity.set(HPO_ID_COL_NAME, values[3]);

@@ -13,7 +13,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
 import org.molgenis.data.support.EntityTypeUtils;
@@ -84,7 +84,7 @@ public class PostgreSqlRepository extends AbstractRepository
 	private final DataSource dataSource;
 	private final PlatformTransactionManager transactionManager;
 
-	private EntityMetaData metaData;
+	private EntityType metaData;
 
 	public PostgreSqlRepository(PostgreSqlEntityFactory postgreSqlEntityFactory, JdbcTemplate jdbcTemplate,
 			DataSource dataSource, PlatformTransactionManager transactionManager)
@@ -95,7 +95,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		this.transactionManager = requireNonNull(transactionManager);
 	}
 
-	void setMetaData(EntityMetaData metaData)
+	void setMetaData(EntityType metaData)
 	{
 		this.metaData = metaData;
 	}
@@ -125,8 +125,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		return QUERY_OPERATORS;
 	}
 
-	@Override
-	public EntityMetaData getEntityMetaData()
+	public EntityType getEntityType()
 	{
 		return metaData;
 	}
@@ -301,18 +300,18 @@ public class PostgreSqlRepository extends AbstractRepository
 		{
 			query.fetch(fetch);
 		}
-		final EntityMetaData entityMeta = metaData;
-		final String allRowsSelect = getSqlSelect(entityMeta, query, emptyList(), false);
+		final EntityType entityType = metaData;
+		final String allRowsSelect = getSqlSelect(entityType, query, emptyList(), false);
 		LOG.debug("Fetching [{}] data...", getName());
 		LOG.trace("SQL: {}", allRowsSelect);
-		RowMapper<Entity> rowMapper = postgreSqlEntityFactory.createRowMapper(entityMeta, fetch);
+		RowMapper<Entity> rowMapper = postgreSqlEntityFactory.createRowMapper(entityType, fetch);
 		template.query(allRowsSelect,
-				(ResultSetExtractor) resultSet -> processResultSet(consumer, batchSize, entityMeta, rowMapper,
+				(ResultSetExtractor) resultSet -> processResultSet(consumer, batchSize, entityType, rowMapper,
 						resultSet));
 		LOG.debug("Streamed entire repository in batches of size {} in {}.", batchSize, stopwatch);
 	}
 
-	private Object processResultSet(Consumer<List<Entity>> consumer, int batchSize, EntityMetaData entityMeta,
+	private Object processResultSet(Consumer<List<Entity>> consumer, int batchSize, EntityType entityType,
 			RowMapper<Entity> rowMapper, ResultSet resultSet) throws SQLException
 	{
 		int rowNum = 0;
@@ -323,13 +322,13 @@ public class PostgreSqlRepository extends AbstractRepository
 			batch.put(entity.getIdValue(), entity);
 			if (rowNum % batchSize == 0)
 			{
-				handleBatch(consumer, entityMeta, batch);
+				handleBatch(consumer, entityType, batch);
 				batch = newHashMap();
 			}
 		}
 		if (!batch.isEmpty())
 		{
-			handleBatch(consumer, entityMeta, batch);
+			handleBatch(consumer, entityType, batch);
 		}
 		return null;
 	}
@@ -339,24 +338,24 @@ public class PostgreSqlRepository extends AbstractRepository
 	 * entities. Then feeds the entities to the {@link Consumer}
 	 *
 	 * @param consumer   {@link Consumer} to feed the batch to after setting the MREF ID values
-	 * @param entityMeta EntityMetaData for the {@link Entity}s in the batch
+	 * @param entityType EntityType for the {@link Entity}s in the batch
 	 * @param batch      {@link Map} mapping entity ID to entity for all {@link Entity}s in the batch
 	 */
-	private void handleBatch(Consumer<List<Entity>> consumer, EntityMetaData entityMeta, Map<Object, Entity> batch)
+	private void handleBatch(Consumer<List<Entity>> consumer, EntityType entityType, Map<Object, Entity> batch)
 	{
-		AttributeType idAttributeDataType = entityMeta.getIdAttribute().getDataType();
+		AttributeType idAttributeDataType = entityType.getIdAttribute().getDataType();
 		LOG.debug("Select ID values for a batch of MREF attributes...");
-		for (AttributeMetaData mrefAttr : entityMeta.getAtomicAttributes())
+		for (AttributeMetaData mrefAttr : entityType.getAtomicAttributes())
 		{
 			if (mrefAttr.getExpression() == null && isMultipleReferenceType(mrefAttr))
 			{
-				EntityMetaData refEntityMeta = mrefAttr.getRefEntity();
-				Multimap<Object, Object> mrefIDs = selectMrefIDsForAttribute(entityMeta, idAttributeDataType, mrefAttr,
-						batch.keySet(), refEntityMeta.getIdAttribute().getDataType());
+				EntityType refEntityType = mrefAttr.getRefEntity();
+				Multimap<Object, Object> mrefIDs = selectMrefIDsForAttribute(entityType, idAttributeDataType, mrefAttr,
+						batch.keySet(), refEntityType.getIdAttribute().getDataType());
 				for (Map.Entry entry : batch.entrySet())
 				{
 					batch.get(entry.getKey()).set(mrefAttr.getName(), postgreSqlEntityFactory
-							.getReferences(refEntityMeta, newArrayList(mrefIDs.get(entry.getKey()))));
+							.getReferences(refEntityType, newArrayList(mrefIDs.get(entry.getKey()))));
 				}
 			}
 		}
@@ -367,19 +366,19 @@ public class PostgreSqlRepository extends AbstractRepository
 	/**
 	 * Selects MREF IDs for an MREF attribute from the junction table, in the order of the MREF attribute value.
 	 *
-	 * @param entityMeta          EntityMetaData for the entities
+	 * @param entityType          EntityType for the entities
 	 * @param idAttributeDataType {@link AttributeType} of the ID attribute of the entity
 	 * @param mrefAttr            AttributeMetaData of the MREF attribute to select the values for
 	 * @param ids                 {@link Set} of {@link Object}s containing the values for the ID attribute of the entity
 	 * @param refIdDataType       {@link AttributeType} of the ID attribute of the refEntity of the attribute
 	 * @return Multimap mapping entity ID to a list containing the MREF IDs for the values in the attribute
 	 */
-	private Multimap<Object, Object> selectMrefIDsForAttribute(EntityMetaData entityMeta,
+	private Multimap<Object, Object> selectMrefIDsForAttribute(EntityType entityType,
 			AttributeType idAttributeDataType, AttributeMetaData mrefAttr, Set<Object> ids, AttributeType refIdDataType)
 	{
 		Stopwatch stopwatch = createStarted();
 		Multimap<Object, Object> mrefIDs = ArrayListMultimap.create();
-		String junctionTableSelect = getJunctionTableSelect(entityMeta, mrefAttr, ids.size());
+		String junctionTableSelect = getJunctionTableSelect(entityType, mrefAttr, ids.size());
 		LOG.trace("SQL: {}", junctionTableSelect);
 		jdbcTemplate.query(junctionTableSelect, (RowCallbackHandler) row -> mrefIDs
 						.put(convert(idAttributeDataType, row.getObject(1)), convert(refIdDataType, row.getObject(3))),
@@ -402,9 +401,9 @@ public class PostgreSqlRepository extends AbstractRepository
 			{
 				List<Object> parameters = new ArrayList<>();
 
-				String sql = getSqlSelect(getEntityMetaData(), batchQuery, parameters, true);
+				String sql = getSqlSelect(getEntityType(), batchQuery, parameters, true);
 				RowMapper<Entity> entityMapper = postgreSqlEntityFactory
-						.createRowMapper(getEntityMetaData(), batchQuery.getFetch());
+						.createRowMapper(getEntityType(), batchQuery.getFetch());
 				LOG.debug("Fetching [{}] data for query [{}]", getName(), batchQuery);
 				LOG.trace("SQL: {}, parameters: {}", sql, parameters);
 				Stopwatch sw = createStarted();
@@ -615,7 +614,7 @@ public class PostgreSqlRepository extends AbstractRepository
 				preparedStatement.setObject(2, mref.get(idAttribute.getName()));
 				Entity mrefEntity = (Entity) mref.get(attr.getName());
 				preparedStatement.setObject(3, PostgreSqlUtils
-						.getPostgreSqlValue(mrefEntity, mrefEntity.getEntityMetaData().getIdAttribute()));
+						.getPostgreSqlValue(mrefEntity, mrefEntity.getEntityType().getIdAttribute()));
 			}
 
 			@Override

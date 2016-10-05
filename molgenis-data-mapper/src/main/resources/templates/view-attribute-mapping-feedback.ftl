@@ -15,7 +15,7 @@
             <tr>
             <#-- Dataexplorer can't be initialized with query at the moment, for forward compatibility already construct URL -->
                 <td><a class="btn btn-default btn-xs"
-                       href="javascript:window.location='${dataexplorerUri?html}?entity=${source?html}&q=' + molgenis.createRsqlQuery([{field: '${feedbackRow.sourceEntity.getEntityMetaData().getIdAttribute().getName()?html}', operator: 'EQUALS', value: '${feedbackRow.sourceEntity.getIdValue()?string?html}' }]);"
+                       href="javascript:window.location='${dataexplorerUri?html}?entity=${source?html}&q=' + molgenis.createRsqlQuery([{field: '${feedbackRow.sourceEntity.getEntityType().getIdAttribute().getName()?html}', operator: 'EQUALS', value: '${feedbackRow.sourceEntity.getIdValue()?string?html}' }]);"
                        role="button"><span class="glyphicon glyphicon-search"></span></a></td>
                 <#if (sourceAttributes)?has_content>
                     <#list sourceAttributes as sourceAttribute>
@@ -23,8 +23,8 @@
                             <#if feedbackRow.sourceEntity.get(sourceAttribute.name)??>
                                 <td>
                                     <#assign refEntity = feedbackRow.sourceEntity.get(sourceAttribute.name)>
-                                    <#assign refEntityMetaData = sourceAttribute.refEntity>
-                                    <#list refEntityMetaData.attributes as refAttribute>
+                                    <#assign refEntityType = sourceAttribute.refEntity>
+                                    <#list refEntityType.attributes as refAttribute>
                                         <#assign refAttributeName = refAttribute.name>
                                         <#if (refEntity[refAttributeName])??>
                                             <#assign value = refEntity[refAttributeName]>
@@ -38,7 +38,7 @@
                             <#if feedbackRow.sourceEntity.get(sourceAttribute.name)??>
                                 <td>
                                     <#assign refEntity = feedbackRow.sourceEntity.get(sourceAttribute.name)>
-											<#assign refEntityMetaData = sourceAttribute.refEntity>
+											<#assign refEntityType = sourceAttribute.refEntity>
                                             <#list refEntity as entity>
                                 ${entity.getIdValue()}
                                 </#list>

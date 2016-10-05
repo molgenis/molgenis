@@ -13,7 +13,7 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
+import static org.molgenis.data.meta.model.EntityType.AttributeRole.*;
 import static org.testng.Assert.assertEquals;
 
 public class SystemEntityTypeTest

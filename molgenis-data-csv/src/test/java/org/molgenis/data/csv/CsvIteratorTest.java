@@ -5,7 +5,7 @@ import com.google.common.collect.Sets;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,19 +24,19 @@ import static org.testng.Assert.assertEquals;
 public class CsvIteratorTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityTypeFactory entityMetaFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;
 
-	private EntityMetaData entityMeta;
+	private EntityType entityType;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		entityMeta = entityMetaFactory.create();
-		entityMeta.addAttribute(attrMetaFactory.create().setName("col1"));
-		entityMeta.addAttribute(attrMetaFactory.create().setName("col2"));
+		entityType = entityTypeFactory.create();
+		entityType.addAttribute(attrMetaFactory.create().setName("col1"));
+		entityType.addAttribute(attrMetaFactory.create().setName("col2"));
 	}
 
 	@Test
@@ -46,11 +46,11 @@ public class CsvIteratorTest extends AbstractMolgenisSpringTest
 		File csvFile = new File(FileUtils.getTempDirectory(), "testdata.csv");
 		FileCopyUtils.copy(in, new FileOutputStream(csvFile));
 
-		CsvIterator it = new CsvIterator(csvFile, "testdata", null, null, entityMeta);
+		CsvIterator it = new CsvIterator(csvFile, "testdata", null, null, entityType);
 		assertEquals(it.getColNamesMap().keySet(), Sets.newLinkedHashSet(Arrays.asList("col1", "col2")));
 		assertEquals(Iterators.size(it), 5);
 
-		it = new CsvIterator(csvFile, "testdata", null, null, entityMeta);
+		it = new CsvIterator(csvFile, "testdata", null, null, entityType);
 		Entity entity = it.next();
 		assertEquals(entity.get("col1"), "val1");
 		assertEquals(entity.get("col2"), "val2");

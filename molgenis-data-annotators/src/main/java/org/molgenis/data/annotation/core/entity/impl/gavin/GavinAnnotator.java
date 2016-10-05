@@ -138,13 +138,13 @@ public class GavinAnnotator implements AnnotatorConfig
 			public List<AttributeMetaData> getRequiredAttributes()
 			{
 				List<AttributeMetaData> requiredAttributes = new ArrayList<>();
-				EntityMetaData entityMetaData = entityTypeFactory.create().setName(VARIANT);
+				EntityType entityType = entityTypeFactory.create().setName(VARIANT);
 				List<AttributeMetaData> refAttributesList = Arrays
 						.asList(CaddAnnotator.getCaddScaledAttr(attributeMetaDataFactory),
 								ExacAnnotator.getExacAFAttr(attributeMetaDataFactory), vcfAttributes.getAltAttribute());
-				entityMetaData.addAttributes(refAttributesList);
+				entityType.addAttributes(refAttributesList);
 				AttributeMetaData refAttr = attributeMetaDataFactory.create().setName(VARIANT).setDataType(XREF)
-						.setRefEntity(entityMetaData).setDescription(
+						.setRefEntity(entityType).setDescription(
 								"This annotator needs a references to an entity containing: " + StreamSupport
 										.stream(refAttributesList.spliterator(), false).map(AttributeMetaData::getName)
 										.collect(Collectors.joining(", ")));
