@@ -19,7 +19,7 @@ import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.AttributeMetaDataRepositoryDecorator;
-import org.molgenis.data.meta.EntityMetaDataRepositoryDecorator;
+import org.molgenis.data.meta.EntityTypeRepositoryDecorator;
 import org.molgenis.data.meta.PackageRepositoryDecorator;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
@@ -180,7 +180,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityMetaDataRepositoryValidationDecorator(
 					(Repository<EntityMetaData>) (Repository<? extends Entity>) repo, entityMetaDataValidator);
 
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityMetaDataRepositoryDecorator(
+			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityTypeRepositoryDecorator(
 					(Repository<EntityMetaData>) (Repository<? extends Entity>) repo, dataService,
 					systemEntityMetaDataRegistry, permissionService);
 		}

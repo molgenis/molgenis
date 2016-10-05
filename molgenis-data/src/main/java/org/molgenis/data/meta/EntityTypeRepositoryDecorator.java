@@ -48,14 +48,14 @@ import static org.molgenis.util.SecurityDecoratorUtils.validatePermission;
  * <p>
  * TODO replace permission based entity filtering with generic row-level security once available
  */
-public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaData>
+public class EntityTypeRepositoryDecorator implements Repository<EntityMetaData>
 {
 	private final Repository<EntityMetaData> decoratedRepo;
 	private final DataService dataService;
 	private final SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
 	private final MolgenisPermissionService permissionService;
 
-	public EntityMetaDataRepositoryDecorator(Repository<EntityMetaData> decoratedRepo, DataService dataService,
+	public EntityTypeRepositoryDecorator(Repository<EntityMetaData> decoratedRepo, DataService dataService,
 			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, MolgenisPermissionService permissionService)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);

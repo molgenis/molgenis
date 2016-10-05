@@ -41,9 +41,9 @@ import static org.molgenis.security.core.utils.SecurityUtils.AUTHORITY_SU;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNull;
 
-public class EntityMetaDataRepositoryDecoratorTest
+public class EntityTypeRepositoryDecoratorTest
 {
-	private EntityMetaDataRepositoryDecorator repo;
+	private EntityTypeRepositoryDecorator repo;
 	private Repository<EntityMetaData> decoratedRepo;
 	private DataService dataService;
 	private MetaDataService metaDataService;
@@ -59,7 +59,7 @@ public class EntityMetaDataRepositoryDecoratorTest
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		systemEntityMetaRegistry = mock(SystemEntityMetaDataRegistry.class);
 		permissionService = mock(MolgenisPermissionService.class);
-		repo = new EntityMetaDataRepositoryDecorator(decoratedRepo, dataService, systemEntityMetaRegistry,
+		repo = new EntityTypeRepositoryDecorator(decoratedRepo, dataService, systemEntityMetaRegistry,
 				permissionService);
 	}
 
