@@ -10,7 +10,7 @@ import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.repository.MappingProjectRepository;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.MappingService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.populate.IdGenerator;
@@ -246,14 +246,14 @@ public class MappingServiceImpl implements MappingService
 	 */
 	private void compareTargetMetaDatas(EntityMetaData targetRepositoryMetaData, EntityMetaData mappingTargetMetaData)
 	{
-		Map<String, AttributeMetaData> targetRepositoryAttributeMap = newHashMap();
+		Map<String, Attribute> targetRepositoryAttributeMap = newHashMap();
 		targetRepositoryMetaData.getAtomicAttributes()
 				.forEach(attribute -> targetRepositoryAttributeMap.put(attribute.getName(), attribute));
 
-		for (AttributeMetaData mappingTargetAttribute : mappingTargetMetaData.getAtomicAttributes())
+		for (Attribute mappingTargetAttribute : mappingTargetMetaData.getAtomicAttributes())
 		{
 			String mappingTargetAttributeName = mappingTargetAttribute.getName();
-			AttributeMetaData targetRepositoryAttribute = targetRepositoryAttributeMap.get(mappingTargetAttributeName);
+			Attribute targetRepositoryAttribute = targetRepositoryAttributeMap.get(mappingTargetAttributeName);
 			if (targetRepositoryAttribute == null)
 			{
 				throw new MolgenisDataException(format("Target repository does not contain the following attribute: %s",
@@ -337,7 +337,7 @@ public class MappingServiceImpl implements MappingService
 	private void applyMappingToAttribute(AttributeMapping attributeMapping, Entity sourceEntity, Entity target,
 			EntityMetaData entityMetaData)
 	{
-		String targetAttributeName = attributeMapping.getTargetAttributeMetaData().getName();
+		String targetAttributeName = attributeMapping.getTargetAttribute().getName();
 		Object typedValue = algorithmService.apply(attributeMapping, sourceEntity, entityMetaData);
 		target.set(targetAttributeName, typedValue);
 	}

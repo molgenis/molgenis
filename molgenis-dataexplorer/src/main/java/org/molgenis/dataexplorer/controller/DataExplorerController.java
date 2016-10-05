@@ -6,7 +6,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.annotation.web.meta.AnnotationJobExecutionMetaData;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.GenomicDataSettings;
@@ -290,9 +290,9 @@ public class DataExplorerController extends MolgenisPluginController
 
 	private boolean isGenomeBrowserEntity(EntityMetaData entityMetaData)
 	{
-		AttributeMetaData attributeStartPosition = genomicDataSettings
+		Attribute attributeStartPosition = genomicDataSettings
 				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_POS, entityMetaData);
-		AttributeMetaData attributeChromosome = genomicDataSettings
+		Attribute attributeChromosome = genomicDataSettings
 				.getAttributeMetadataForAttributeNameArray(GenomicDataSettings.Meta.ATTRS_CHROM, entityMetaData);
 		return attributeStartPosition != null && attributeChromosome != null;
 	}

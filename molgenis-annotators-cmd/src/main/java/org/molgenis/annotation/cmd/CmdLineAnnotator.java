@@ -13,7 +13,7 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.entity.AnnotatorConfig;
 import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -262,7 +262,7 @@ public class CmdLineAnnotator
 		System.out.println("Status:      " + info.getStatus());
 		System.out.print("Attributes:  ");
 
-		List<AttributeMetaData> attributes = info.getOutputAttributes();
+		List<Attribute> attributes = info.getOutputAttributes();
 		if (attributes.isEmpty())
 		{
 			System.out.println();

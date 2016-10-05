@@ -1,7 +1,7 @@
 package org.molgenis.data.support;
 
 import org.molgenis.MolgenisFieldTypes.AttributeType;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 import static java.lang.String.format;
 
@@ -22,7 +22,7 @@ public class AttributeMetaDataUtils
 	 * @param attr attribute
 	 * @return true if this attribute can be used as ID attribute
 	 */
-	public static boolean isIdAttributeTypeAllowed(AttributeMetaData attr)
+	public static boolean isIdAttributeTypeAllowed(Attribute attr)
 	{
 		AttributeType attrType = attr.getDataType();
 		switch (attrType)

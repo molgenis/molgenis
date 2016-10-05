@@ -9,7 +9,7 @@ import org.molgenis.data.annotation.core.entity.AnnotatorInfo;
 import org.molgenis.data.annotation.core.resources.CmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.annotation.web.settings.SnpEffAnnotatorSettings;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
@@ -77,9 +77,9 @@ public class SnpEffRepositoryAnnotator extends AbstractRepositoryAnnotator imple
 	}
 
 	@Override
-	public List<AttributeMetaData> getRequiredAttributes()
+	public List<Attribute> getRequiredAttributes()
 	{
-		List<AttributeMetaData> attributes = new ArrayList<>();
+		List<Attribute> attributes = new ArrayList<>();
 		attributes.add(vcfAttributes.getChromAttribute());
 		attributes.add(vcfAttributes.getPosAttribute());
 		attributes.add(vcfAttributes.getRefAttribute());
@@ -114,7 +114,7 @@ public class SnpEffRepositoryAnnotator extends AbstractRepositoryAnnotator imple
 	}
 
 	@Override
-	public List<AttributeMetaData> getOutputAttributes()
+	public List<Attribute> getOutputAttributes()
 	{
 		return effectsMetaData.getOrderedAttributes();
 	}

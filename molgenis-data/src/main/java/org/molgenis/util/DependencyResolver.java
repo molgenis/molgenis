@@ -4,7 +4,7 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +71,7 @@ public class DependencyResolver
 				dependencies.add(meta.getExtends().getName());
 			}
 
-			for (AttributeMetaData attr : meta.getAtomicAttributes())
+			for (Attribute attr : meta.getAtomicAttributes())
 			{
 				if ((attr.getRefEntity() != null) && !attr.getRefEntity().getName()
 						.equals(meta.getName()))// self reference
@@ -139,7 +139,7 @@ public class DependencyResolver
 
 	public static boolean hasSelfReferences(EntityMetaData emd)
 	{
-		for (AttributeMetaData attr : emd.getAtomicAttributes())
+		for (Attribute attr : emd.getAtomicAttributes())
 		{
 			if (attr.getRefEntity() != null)
 			{
@@ -161,8 +161,8 @@ public class DependencyResolver
 	 */
 	public Iterable<Entity> resolveSelfReferences(Iterable<Entity> entities, EntityMetaData emd)
 	{
-		List<AttributeMetaData> selfRefAttributes = Lists.newArrayList();
-		for (AttributeMetaData attr : emd.getAtomicAttributes())
+		List<Attribute> selfRefAttributes = Lists.newArrayList();
+		for (Attribute attr : emd.getAtomicAttributes())
 		{
 			if ((attr.getRefEntity() != null) && attr.getRefEntity().equals(emd))
 			{
@@ -197,7 +197,7 @@ public class DependencyResolver
 		// Get the dependencies
 		for (Entity entity : entities)
 		{
-			for (AttributeMetaData attr : selfRefAttributes)
+			for (Attribute attr : selfRefAttributes)
 			{
 				List<Entity> refs = Lists.newArrayList();
 

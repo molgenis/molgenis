@@ -16,7 +16,7 @@ import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -70,34 +70,34 @@ public class OmimAnnotator implements AnnotatorConfig
 
 	private RepositoryAnnotatorImpl annotator;
 
-	public AttributeMetaData getPhenotypeAttr()
+	public Attribute getPhenotypeAttr()
 	{
 		return attributeMetaDataFactory.create().setName(OMIM_DISORDER).setDataType(TEXT)
 				.setDescription("OMIM phenotype").setLabel("OMIM_Disorders");
 	}
 
-	public AttributeMetaData getMimNumberAttr()
+	public Attribute getMimNumberAttr()
 	{
 		return attributeMetaDataFactory.create().setName(OMIM_CAUSAL_IDENTIFIER).setDataType(TEXT)
 				.setDescription("Number that represents the MIM database dataType for the Locus / Gene")
 				.setLabel("OMIM_Causal_ID");
 	}
 
-	public AttributeMetaData getEntryAttr()
+	public Attribute getEntryAttr()
 	{
 		return attributeMetaDataFactory.create().setName(OMIM_CYTO_LOCATIONS).setDataType(TEXT)
 				.setDescription("Cytogenic location associated with an OMIM phenotype")
 				.setLabel("OMIM_Cytogenic_Location");
 	}
 
-	public AttributeMetaData getTypeAttr()
+	public Attribute getTypeAttr()
 	{
 		return attributeMetaDataFactory.create().setName(OMIM_ENTRY).setDataType(TEXT)
 				.setDescription("Number that represents the MIM database dataType for the phenotype")
 				.setLabel("OMIM_Entry");
 	}
 
-	public AttributeMetaData getOmimLocationAttr()
+	public Attribute getOmimLocationAttr()
 	{
 		return attributeMetaDataFactory.create().setName(OMIM_TYPE).setDataType(TEXT).setDescription(
 				"Phenotype Mapping key: 1 - the disorder is placed on the map based on its "
@@ -118,7 +118,7 @@ public class OmimAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		List<AttributeMetaData> outputAttributes = new ArrayList<>();
+		List<Attribute> outputAttributes = new ArrayList<>();
 		outputAttributes.addAll(Arrays
 				.asList(getPhenotypeAttr(), getMimNumberAttr(), getOmimLocationAttr(), getEntryAttr(), getTypeAttr()));
 

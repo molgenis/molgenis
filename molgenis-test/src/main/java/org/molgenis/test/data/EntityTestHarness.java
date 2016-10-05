@@ -110,7 +110,7 @@ public class EntityTestHarness
 				.addAttribute(createAttribute(ATTR_COMPUTED_INT, INT).setExpression(ATTR_INT));
 	}
 
-	private AttributeMetaData createAttribute(String name, AttributeType dataType)
+	private Attribute createAttribute(String name, AttributeType dataType)
 	{
 		return attributeMetaDataFactory.create().setName(name).setDataType(dataType);
 	}

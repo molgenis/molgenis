@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 import java.util.*;
 import java.util.Map.Entry;
@@ -66,7 +66,7 @@ public class Fetch implements Iterable<Entry<String, Fetch>>
 	 * @param attr
 	 * @return
 	 */
-	public Fetch getFetch(AttributeMetaData attr)
+	public Fetch getFetch(Attribute attr)
 	{
 		return getFetch(attr.getName());
 	}
@@ -85,10 +85,10 @@ public class Fetch implements Iterable<Entry<String, Fetch>>
 	/**
 	 * Indicates if a field is included in this Fetch
 	 *
-	 * @param attr {@link AttributeMetaData} for the field
+	 * @param attr {@link Attribute} for the field
 	 * @return true if the field is included in this Fetch, otherwise false
 	 */
-	public boolean hasField(AttributeMetaData attr)
+	public boolean hasField(Attribute attr)
 	{
 		return hasField(attr.getName());
 	}

@@ -2,7 +2,7 @@ package org.molgenis.data.mapper.algorithmgenerator.generator;
 
 import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.mapper.service.impl.UnitResolverImpl;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -40,13 +40,13 @@ public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest
 
 	private EntityMetaData targetEntityMetaData;
 
-	private AttributeMetaData targetAttribute;
+	private Attribute targetAttribute;
 
 	private EntityMetaData sourceEntityMetaData;
 
-	private AttributeMetaData sourceAttribute;
+	private Attribute sourceAttribute;
 
-	private AttributeMetaData sourceAttribute1;
+	private Attribute sourceAttribute1;
 
 	@BeforeMethod
 	public void setup()
@@ -99,7 +99,7 @@ public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void isSuitable()
 	{
-		AttributeMetaData stringAttribute = attrMetaFactory.create().setName("source_string");
+		Attribute stringAttribute = attrMetaFactory.create().setName("source_string");
 		assertTrue(numericAlgorithmGenerator.isSuitable(targetAttribute, singletonList(sourceAttribute)));
 		assertFalse(numericAlgorithmGenerator.isSuitable(targetAttribute, asList(sourceAttribute, stringAttribute)));
 	}

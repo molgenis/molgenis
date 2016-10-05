@@ -17,7 +17,7 @@ import org.molgenis.data.annotation.core.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixRepositoryFactory;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -70,8 +70,8 @@ public class FitConAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		List<AttributeMetaData> attributes = new ArrayList<>();
-		AttributeMetaData dann_score = attributeMetaDataFactory.create().setName(FITCON_SCORE).setDataType(STRING)
+		List<Attribute> attributes = new ArrayList<>();
+		Attribute dann_score = attributeMetaDataFactory.create().setName(FITCON_SCORE).setDataType(STRING)
 				.setDescription("fitness consequence score annotation of genetic variants using Fitcon scoring.")
 				.setLabel(FITCON_SCORE_LABEL);
 
@@ -235,10 +235,10 @@ public class FitConAnnotator implements AnnotatorConfig
 				repoMetaData.addAttribute(attributeMetaDataFactory.create().setName("RawScore"));
 				repoMetaData.addAttribute(attributeMetaDataFactory.create().setName("PHRED"));
 
-				AttributeMetaData idAttributeMetaData = attributeMetaDataFactory.create().setName("id")
+				Attribute idAttribute = attributeMetaDataFactory.create().setName("id")
 						.setVisible(false);
-				repoMetaData.addAttribute(idAttributeMetaData);
-				repoMetaData.setIdAttribute(idAttributeMetaData);
+				repoMetaData.addAttribute(idAttribute);
+				repoMetaData.setIdAttribute(idAttribute);
 
 				return new TabixRepositoryFactory(repoMetaData);
 			}

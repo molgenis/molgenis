@@ -11,7 +11,7 @@ import org.molgenis.data.mapper.mapping.model.MappingTarget;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
 import org.molgenis.data.mapper.meta.MappingTargetMetaData;
 import org.molgenis.data.mapper.repository.EntityMappingRepository;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -91,8 +91,8 @@ public class MappingTargetRepositoryImplTest extends AbstractMolgenisSpringTest
 		// POJOs
 		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
 		targetEntityMetaData = entityMetaFactory.create("target");
-		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName("targetAttribute");
-		targetEntityMetaData.addAttribute(targetAttributeMetaData);
+		Attribute targetAttribute = attrMetaFactory.create().setName("targetAttribute");
+		targetEntityMetaData.addAttribute(targetAttribute);
 		entityMappings = asList(
 				new EntityMapping("entityMappingID", sourceEntityMetaData, targetEntityMetaData, emptyList()));
 		mappingTargets = asList(new MappingTarget("mappingTargetID", targetEntityMetaData, entityMappings));

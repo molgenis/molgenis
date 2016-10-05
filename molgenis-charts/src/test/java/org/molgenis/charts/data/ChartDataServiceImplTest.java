@@ -6,7 +6,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.Repository;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -51,8 +51,8 @@ public class ChartDataServiceImplTest extends AbstractMolgenisSpringTest
 		String entityName = "entity";
 		List<Entity> entities = new ArrayList<Entity>();
 
-		AttributeMetaData patientAttr = attrMetaFactory.create().setName("patient");
-		AttributeMetaData probeAttr = attrMetaFactory.create().setName("probe").setDataType(DECIMAL);
+		Attribute patientAttr = attrMetaFactory.create().setName("patient");
+		Attribute probeAttr = attrMetaFactory.create().setName("probe").setDataType(DECIMAL);
 		EntityMetaData entityMetaData = entityMetaFactory.create();
 		entityMetaData.addAttributes(newArrayList(patientAttr, probeAttr));
 

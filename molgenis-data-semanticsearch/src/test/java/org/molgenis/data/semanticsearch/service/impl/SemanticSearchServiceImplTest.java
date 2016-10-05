@@ -71,7 +71,7 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 
 	private List<OntologyTerm> ontologyTerms;
 
-	private AttributeMetaData attribute;
+	private Attribute attribute;
 
 	@BeforeMethod
 	public void beforeTest()
@@ -233,8 +233,8 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 				new QueryRule(AttributeMetaDataMetaData.IDENTIFIER, QueryRule.Operator.IN, attributeIdentifiers),
 				new QueryRule(QueryRule.Operator.AND), disMaxQueryRule);
 
-		AttributeMetaData attributeHeight = attrMetaDataFactory.create().setName("height_0");
-		AttributeMetaData attributeWeight = attrMetaDataFactory.create().setName("weight_0");
+		Attribute attributeHeight = attrMetaDataFactory.create().setName("height_0");
+		Attribute attributeWeight = attrMetaDataFactory.create().setName("weight_0");
 		sourceEntityMetaData.addAttribute(attributeHeight);
 		sourceEntityMetaData.addAttribute(attributeWeight);
 
@@ -242,10 +242,10 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		when(dataService.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(disMaxQueryRules)))
 				.thenReturn(Stream.of(entity1));
 
-		Map<AttributeMetaData, ExplainedAttributeMetaData> termsActual1 = semanticSearchService
+		Map<Attribute, ExplainedAttributeMetaData> termsActual1 = semanticSearchService
 				.findAttributes(sourceEntityMetaData, Sets.newHashSet("targetAttribute"), Collections.emptyList());
 
-		Map<AttributeMetaData, ExplainedAttributeMetaData> termsExpected1 = ImmutableMap
+		Map<Attribute, ExplainedAttributeMetaData> termsExpected1 = ImmutableMap
 				.of(attributeHeight, ExplainedAttributeMetaData.create(attributeHeight));
 
 		assertEquals(termsActual1.toString(), termsExpected1.toString());
@@ -253,10 +253,10 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 		// Case 2
 		when(dataService.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(disMaxQueryRules))).thenReturn(Stream.empty());
 
-		Map<AttributeMetaData, ExplainedAttributeMetaData> termsActual2 = semanticSearchService
+		Map<Attribute, ExplainedAttributeMetaData> termsActual2 = semanticSearchService
 				.findAttributes(sourceEntityMetaData, Sets.newHashSet("targetAttribute"), Collections.emptyList());
 
-		Map<AttributeMetaData, ExplainedAttributeMetaData> termsExpected2 = ImmutableMap.of();
+		Map<Attribute, ExplainedAttributeMetaData> termsExpected2 = ImmutableMap.of();
 
 		assertEquals(termsActual2, termsExpected2);
 

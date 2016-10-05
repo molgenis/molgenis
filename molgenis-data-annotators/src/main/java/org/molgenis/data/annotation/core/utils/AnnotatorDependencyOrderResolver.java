@@ -6,7 +6,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.annotation.core.EffectsAnnotator;
 import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.exception.UnresolvedAnnotatorDependencyException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 
@@ -87,7 +87,7 @@ public class AnnotatorDependencyOrderResolver
 
 	private void resolveAnnotatorDependencies(RepositoryAnnotator selectedAnnotator,
 			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> annotatorQueue,
-			EntityMetaData entityMetaData, AttributeMetaData requiredAttribute, RepositoryAnnotator annotator)
+			EntityMetaData entityMetaData, Attribute requiredAttribute, RepositoryAnnotator annotator)
 	{
 		if (isRequiredAttributeAvailable(annotator.getInfo().getOutputAttributes(), requiredAttribute))
 		{
@@ -109,10 +109,10 @@ public class AnnotatorDependencyOrderResolver
 		}
 	}
 
-	private boolean areRequiredAttributesAvailable(List<AttributeMetaData> availableAttributes,
-			List<AttributeMetaData> requiredAttributes)
+	private boolean areRequiredAttributesAvailable(List<Attribute> availableAttributes,
+			List<Attribute> requiredAttributes)
 	{
-		for (AttributeMetaData attr : requiredAttributes)
+		for (Attribute attr : requiredAttributes)
 		{
 			if (!isRequiredAttributeAvailable(availableAttributes, attr))
 			{
@@ -122,10 +122,10 @@ public class AnnotatorDependencyOrderResolver
 		return true;
 	}
 
-	private boolean isRequiredAttributeAvailable(List<AttributeMetaData> availableAttributes,
-			AttributeMetaData requiredAttribute)
+	private boolean isRequiredAttributeAvailable(List<Attribute> availableAttributes,
+			Attribute requiredAttribute)
 	{
-		for (AttributeMetaData availableAttribute : availableAttributes)
+		for (Attribute availableAttribute : availableAttributes)
 		{
 			if (requiredAttribute.getName().equals(availableAttribute.getName()))
 			{

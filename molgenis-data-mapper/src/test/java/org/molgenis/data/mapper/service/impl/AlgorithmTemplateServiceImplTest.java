@@ -3,7 +3,7 @@ package org.molgenis.data.mapper.service.impl;
 import com.google.common.collect.Maps;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -86,13 +86,13 @@ public class AlgorithmTemplateServiceImplTest extends AbstractMolgenisSpringTest
 		String sourceAttr0Name = "sourceAttr0";
 		String sourceAttr1Name = "sourceAttr1";
 		EntityMetaData sourceEntityMeta = entityMetaFactory.create("source");
-		AttributeMetaData sourceAttr0 = attrMetaFactory.create().setName(sourceAttr0Name);
-		AttributeMetaData sourceAttr1 = attrMetaFactory.create().setName(sourceAttr1Name);
+		Attribute sourceAttr0 = attrMetaFactory.create().setName(sourceAttr0Name);
+		Attribute sourceAttr1 = attrMetaFactory.create().setName(sourceAttr1Name);
 		sourceEntityMeta.addAttribute(sourceAttr0);
 		sourceEntityMeta.addAttribute(sourceAttr1);
 		ExplainedQueryString sourceAttr0Explain = ExplainedQueryString.create("a", "b", param0Name, 1.0);
 		ExplainedQueryString sourceAttr1Explain = ExplainedQueryString.create("a", "b", param1Name, 0.5);
-		Map<AttributeMetaData, ExplainedAttributeMetaData> attrResults = Maps.newHashMap();
+		Map<Attribute, ExplainedAttributeMetaData> attrResults = Maps.newHashMap();
 		attrResults.put(sourceAttr0,
 				ExplainedAttributeMetaData.create(sourceAttr0, singletonList(sourceAttr0Explain), false));
 		attrResults.put(sourceAttr1,

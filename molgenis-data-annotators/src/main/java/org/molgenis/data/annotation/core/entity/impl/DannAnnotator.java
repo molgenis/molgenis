@@ -17,7 +17,7 @@ import org.molgenis.data.annotation.core.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixRepositoryFactory;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -70,8 +70,8 @@ public class DannAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		List<AttributeMetaData> attributes = new ArrayList<>();
-		AttributeMetaData dann_score = attributeMetaDataFactory.create().setName(DANN_SCORE).setDataType(STRING)
+		List<Attribute> attributes = new ArrayList<>();
+		Attribute dann_score = attributeMetaDataFactory.create().setName(DANN_SCORE).setDataType(STRING)
 				.setDescription("deleterious score of genetic variants using neural networks.")
 				.setLabel(DANN_SCORE_LABEL);
 
@@ -125,10 +125,10 @@ public class DannAnnotator implements AnnotatorConfig
 				repoMetaData.addAttribute(vcfAttributes.getRefAttribute());
 				repoMetaData.addAttribute(vcfAttributes.getAltAttribute());
 				repoMetaData.addAttribute(attributeMetaDataFactory.create().setName("DANN_SCORE").setDataType(STRING));
-				AttributeMetaData idAttributeMetaData = attributeMetaDataFactory.create().setName(idAttrName)
+				Attribute idAttribute = attributeMetaDataFactory.create().setName(idAttrName)
 						.setVisible(false);
-				repoMetaData.addAttribute(idAttributeMetaData);
-				repoMetaData.setIdAttribute(idAttributeMetaData);
+				repoMetaData.addAttribute(idAttribute);
+				repoMetaData.setIdAttribute(idAttribute);
 				return new TabixRepositoryFactory(repoMetaData);
 			}
 		};

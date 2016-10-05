@@ -9,7 +9,7 @@ import org.molgenis.data.annotation.core.resources.Resources;
 import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.CaddAnnotatorSettings;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -85,24 +85,24 @@ public class CaddAnnotatorTest extends AbstractMolgenisSpringTest
 		metaDataCanAnnotate = entityMetaDataFactory.create().setName("test");
 		metaDataCantAnnotate = entityMetaDataFactory.create().setName("test");
 
-		AttributeMetaData attributeMetaDataChrom = attributeMetaDataFactory.create().setName(CHROM).setDataType(STRING);
-		AttributeMetaData attributeMetaDataPos = attributeMetaDataFactory.create().setName(POS).setDataType(INT);
-		AttributeMetaData attributeMetaDataRef = attributeMetaDataFactory.create().setName(REF).setDataType(TEXT);
-		AttributeMetaData attributeMetaDataAlt = attributeMetaDataFactory.create().setName(ALT).setDataType(TEXT);
-		AttributeMetaData attributeMetaDataCantAnnotateChrom = attributeMetaDataFactory.create().setName(CHROM)
+		Attribute attributeChrom = attributeMetaDataFactory.create().setName(CHROM).setDataType(STRING);
+		Attribute attributePos = attributeMetaDataFactory.create().setName(POS).setDataType(INT);
+		Attribute attributeRef = attributeMetaDataFactory.create().setName(REF).setDataType(TEXT);
+		Attribute attributeAlt = attributeMetaDataFactory.create().setName(ALT).setDataType(TEXT);
+		Attribute attributeCantAnnotateChrom = attributeMetaDataFactory.create().setName(CHROM)
 				.setDataType(LONG);
 
-		metaDataCanAnnotate.addAttribute(attributeMetaDataChrom);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataPos);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataRef);
-		metaDataCanAnnotate.addAttribute(attributeMetaDataAlt);
+		metaDataCanAnnotate.addAttribute(attributeChrom);
+		metaDataCanAnnotate.addAttribute(attributePos);
+		metaDataCanAnnotate.addAttribute(attributeRef);
+		metaDataCanAnnotate.addAttribute(attributeAlt);
 		metaDataCanAnnotate.addAttribute(caddAnnotator.getCaddAbsAttr(attributeMetaDataFactory));
 		metaDataCanAnnotate.addAttribute(caddAnnotator.getCaddScaledAttr(attributeMetaDataFactory));
 
-		metaDataCantAnnotate.addAttribute(attributeMetaDataCantAnnotateChrom);
-		metaDataCantAnnotate.addAttribute(attributeMetaDataPos);
-		metaDataCantAnnotate.addAttribute(attributeMetaDataRef);
-		metaDataCantAnnotate.addAttribute(attributeMetaDataAlt);
+		metaDataCantAnnotate.addAttribute(attributeCantAnnotateChrom);
+		metaDataCantAnnotate.addAttribute(attributePos);
+		metaDataCantAnnotate.addAttribute(attributeRef);
+		metaDataCantAnnotate.addAttribute(attributeAlt);
 
 		entity = new DynamicEntity(metaDataCanAnnotate);
 		entity1 = new DynamicEntity(metaDataCanAnnotate);

@@ -18,7 +18,7 @@ import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixRepositoryFactory;
 import org.molgenis.data.annotation.web.settings.CaddAnnotatorSettings;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -73,9 +73,9 @@ public class CaddAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		List<AttributeMetaData> attributes = new ArrayList<>();
-		AttributeMetaData cadd_abs = getCaddAbsAttr(attributeMetaDataFactory);
-		AttributeMetaData cadd_scaled = getCaddScaledAttr(attributeMetaDataFactory);
+		List<Attribute> attributes = new ArrayList<>();
+		Attribute cadd_abs = getCaddAbsAttr(attributeMetaDataFactory);
+		Attribute cadd_scaled = getCaddScaledAttr(attributeMetaDataFactory);
 
 		attributes.add(cadd_abs);
 		attributes.add(cadd_scaled);
@@ -104,7 +104,7 @@ public class CaddAnnotator implements AnnotatorConfig
 		annotator.init(entityAnnotator);
 	}
 
-	public static AttributeMetaData getCaddScaledAttr(AttributeMetaDataFactory attributeMetaDataFactory)
+	public static Attribute getCaddScaledAttr(AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		return attributeMetaDataFactory.create().setName(CADD_SCALED).setDataType(STRING).setDescription(
 				"Since the raw scores do have relative meaning, one can take a specific group of variants, define the rank for each variant within that group, and then use "
@@ -115,7 +115,7 @@ public class CaddAnnotator implements AnnotatorConfig
 				.setLabel(CADD_SCALED_LABEL);
 	}
 
-	public static AttributeMetaData getCaddAbsAttr(AttributeMetaDataFactory attributeMetaDataFactory)
+	public static Attribute getCaddAbsAttr(AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		return attributeMetaDataFactory.create().setName(CADD_ABS).setDataType(STRING).setDescription(
 				"\"Raw\" CADD scores come straight from the model, and are interpretable as the extent to which the annotation profile for a given variant suggests that "
@@ -142,10 +142,10 @@ public class CaddAnnotator implements AnnotatorConfig
 				repoMetaData.addAttribute(vcfAttributes.getAltAttribute());
 				repoMetaData.addAttribute(attributeMetaDataFactory.create().setName(CADD_ABS).setDataType(STRING));
 				repoMetaData.addAttribute(attributeMetaDataFactory.create().setName(CADD_SCALED).setDataType(STRING));
-				AttributeMetaData idAttributeMetaData = attributeMetaDataFactory.create().setName(idAttrName)
+				Attribute idAttribute = attributeMetaDataFactory.create().setName(idAttrName)
 						.setVisible(false);
-				repoMetaData.addAttribute(idAttributeMetaData);
-				repoMetaData.setIdAttribute(idAttributeMetaData);
+				repoMetaData.addAttribute(idAttribute);
+				repoMetaData.setIdAttribute(idAttribute);
 				return new TabixRepositoryFactory(repoMetaData);
 			}
 		};

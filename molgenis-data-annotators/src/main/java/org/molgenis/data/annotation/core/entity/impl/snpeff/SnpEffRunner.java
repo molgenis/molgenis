@@ -4,12 +4,12 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
 import org.molgenis.data.Entity;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.effects.EffectsMetaData;
 import org.molgenis.data.annotation.core.utils.JarRunner;
 import org.molgenis.data.annotation.web.settings.SnpEffAnnotatorSettings;
-import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -332,11 +332,11 @@ public class SnpEffRunner
 		EntityMetaData emd = entityMetaDataFactory.create()
 				.setSimpleName(sourceEMD.getSimpleName() + ENTITY_NAME_SUFFIX).setPackage(sourceEMD.getPackage());
 		emd.setBackend(sourceEMD.getBackend());
-		AttributeMetaData id = attributeMetaDataFactory.create().setName(EffectsMetaData.ID).setAuto(true)
+		Attribute id = attributeMetaDataFactory.create().setName(EffectsMetaData.ID).setAuto(true)
 				.setVisible(false);
 		emd.addAttribute(id);
 		emd.setIdAttribute(id);
-		for (AttributeMetaData attr : effectsMetaData.getOrderedAttributes())
+		for (Attribute attr : effectsMetaData.getOrderedAttributes())
 		{
 			emd.addAttribute(attr);
 		}

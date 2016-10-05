@@ -3,7 +3,7 @@ package org.molgenis.data.csv;
 import com.google.common.collect.Iterables;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -76,7 +76,7 @@ public class CsvRepository extends AbstractRepository
 
 			for (String attrName : new CsvIterator(file, sheetName, null, separator).getColNamesMap().keySet())
 			{
-				AttributeMetaData attr = attrMetaFactory.create().setName(attrName).setDataType(STRING);
+				Attribute attr = attrMetaFactory.create().setName(attrName).setDataType(STRING);
 				entityMetaData.addAttribute(attr);
 			}
 		}

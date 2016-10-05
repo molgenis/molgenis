@@ -145,7 +145,7 @@ public class ImportWriter
 
 		for (EntityMetaData emd : parsedMetaData.getAttributeTags().keySet())
 		{
-			for (SemanticTag<AttributeMetaData, LabeledResource, LabeledResource> tag : parsedMetaData
+			for (SemanticTag<Attribute, LabeledResource, LabeledResource> tag : parsedMetaData
 					.getAttributeTags().get(emd))
 			{
 				tagService.addAttributeTag(emd, tag);
@@ -201,7 +201,7 @@ public class ImportWriter
 	private Entity toEntity(EntityMetaData entityMeta, Entity emxEntity)
 	{
 		Entity entity = entityManager.create(entityMeta, POPULATE);
-		for (AttributeMetaData attr : entityMeta.getAtomicAttributes())
+		for (Attribute attr : entityMeta.getAtomicAttributes())
 		{
 			if (attr.getExpression() == null)
 			{
@@ -278,7 +278,7 @@ public class ImportWriter
 							else
 							{
 								EntityMetaData mrefEntity = attr.getRefEntity();
-								AttributeMetaData refIdAttr = mrefEntity.getIdAttribute();
+								Attribute refIdAttr = mrefEntity.getIdAttribute();
 
 								String[] tokens = StringUtils.split(emxValue.toString(), ',');
 								List<Entity> mrefEntities = new ArrayList<>();
@@ -316,10 +316,10 @@ public class ImportWriter
 	{
 		return Iterables.filter(entities, entity ->
 		{
-			Iterator<AttributeMetaData> attributes = entity.getEntityMetaData().getAttributes().iterator();
+			Iterator<Attribute> attributes = entity.getEntityMetaData().getAttributes().iterator();
 			while (attributes.hasNext())
 			{
-				AttributeMetaData attribute = attributes.next();
+				Attribute attribute = attributes.next();
 				if (attribute.getRefEntity() != null && attribute.getRefEntity().getName()
 						.equals(entity.getEntityMetaData().getName()))
 				{
@@ -389,7 +389,7 @@ public class ImportWriter
 					// inject identifiers
 					Map<String, String> attrNameIdentifierMap = stream(
 							existingEntityMeta.getOwnAllAttributes().spliterator(), false)
-							.collect(toMap(AttributeMetaData::getName, AttributeMetaData::getIdentifier));
+							.collect(toMap(Attribute::getName, Attribute::getIdentifier));
 					entityMetaData.getOwnAllAttributes().forEach(attr ->
 					{
 						String identifier = attrNameIdentifierMap.get(attr.getName());

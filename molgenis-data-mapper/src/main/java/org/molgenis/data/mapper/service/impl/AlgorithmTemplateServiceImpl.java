@@ -1,7 +1,7 @@
 package org.molgenis.data.mapper.service.impl;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.js.magma.JsMagmaScriptRunner;
@@ -31,7 +31,7 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	}
 
 	@Override
-	public Stream<AlgorithmTemplate> find(Map<AttributeMetaData, ExplainedAttributeMetaData> attrMatches)
+	public Stream<AlgorithmTemplate> find(Map<Attribute, ExplainedAttributeMetaData> attrMatches)
 	{
 		// get all algorithm templates
 		Stream<Script> jsScripts = dataService
@@ -42,14 +42,14 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	}
 
 	private Stream<AlgorithmTemplate> toAlgorithmTemplate(Script script,
-			Map<AttributeMetaData, ExplainedAttributeMetaData> attrMatches)
+			Map<Attribute, ExplainedAttributeMetaData> attrMatches)
 	{
 		// find attribute for each parameter
 		boolean paramMatch = true;
 		Map<String, String> model = new HashMap<>();
 		for (ScriptParameter param : script.getParameters())
 		{
-			AttributeMetaData attr = mapParamToAttribute(param, attrMatches);
+			Attribute attr = mapParamToAttribute(param, attrMatches);
 			if (attr != null)
 			{
 				model.put(param.getName(), attr.getName());
@@ -67,8 +67,8 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 		return paramMatch ? Stream.of(algorithmTemplate) : Stream.empty();
 	}
 
-	private AttributeMetaData mapParamToAttribute(ScriptParameter param,
-			Map<AttributeMetaData, ExplainedAttributeMetaData> attrMatches)
+	private Attribute mapParamToAttribute(ScriptParameter param,
+			Map<Attribute, ExplainedAttributeMetaData> attrMatches)
 	{
 
 		return attrMatches.entrySet().stream().filter(entry -> !entry.getValue().getExplainedQueryStrings().isEmpty())

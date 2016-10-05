@@ -9,7 +9,7 @@ import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.i18n.model.LanguageMetaData;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
@@ -114,31 +114,31 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		i18nStringMetaData.addAttribute(attrMetaFactory.create().setName(de));
 
 		// Add language NL attributes for entity meta data
-		AttributeMetaData entityLabelNL = attrMetaFactory.create().setName(EntityMetaDataMetaData.LABEL + '-' + nl);
-		AttributeMetaData entityDescriptionNL = attrMetaFactory.create()
+		Attribute entityLabelNL = attrMetaFactory.create().setName(EntityMetaDataMetaData.LABEL + '-' + nl);
+		Attribute entityDescriptionNL = attrMetaFactory.create()
 				.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + nl);
 		entityMetaMeta.addAttribute(entityLabelNL);
 		entityMetaMeta.addAttribute(entityDescriptionNL);
 
 		// Add language DE attributes for entity meta data
-		AttributeMetaData entityLabelDE = attrMetaFactory.create().setName(EntityMetaDataMetaData.LABEL + '-' + de);
-		AttributeMetaData entityDescriptionDE = attrMetaFactory.create()
+		Attribute entityLabelDE = attrMetaFactory.create().setName(EntityMetaDataMetaData.LABEL + '-' + de);
+		Attribute entityDescriptionDE = attrMetaFactory.create()
 				.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + de);
 		entityMetaMeta.addAttribute(entityLabelDE);
 		entityMetaMeta.addAttribute(entityDescriptionDE);
 
 		// Add language NL attributes for attribute meta data
-		AttributeMetaData attributeLabelNL = attrMetaFactory.create()
+		Attribute attributeLabelNL = attrMetaFactory.create()
 				.setName(AttributeMetaDataMetaData.LABEL + '-' + nl);
-		AttributeMetaData attributeDescriptionNL = attrMetaFactory.create()
+		Attribute attributeDescriptionNL = attrMetaFactory.create()
 				.setName(AttributeMetaDataMetaData.DESCRIPTION + '-' + nl);
 		attrMetaMeta.addAttribute(attributeLabelNL);
 		attrMetaMeta.addAttribute(attributeDescriptionNL);
 
 		// Add language DE attributes for attribute meta data
-		AttributeMetaData attributeLabelDE = attrMetaFactory.create()
+		Attribute attributeLabelDE = attrMetaFactory.create()
 				.setName(AttributeMetaDataMetaData.LABEL + '-' + de);
-		AttributeMetaData attributeDescriptionDE = attrMetaFactory.create()
+		Attribute attributeDescriptionDE = attrMetaFactory.create()
 				.setName(AttributeMetaDataMetaData.DESCRIPTION + '-' + de);
 		attrMetaMeta.addAttribute(attributeLabelDE);
 		attrMetaMeta.addAttribute(attributeDescriptionDE);

@@ -6,7 +6,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -36,13 +36,13 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 
 	private OneToManyCategoryAlgorithmGenerator categoryAlgorithmGenerator;
 
-	private AttributeMetaData targetAttributeMetaData;
+	private Attribute targetAttribute;
 
-	private AttributeMetaData sourceAttributeMetaData;
+	private Attribute sourceAttribute;
 
-	private AttributeMetaData sourceAttributeMetaData1;
+	private Attribute sourceAttribute1;
 
-	private AttributeMetaData sourceAttributeMetaData2;
+	private Attribute sourceAttribute2;
 
 	private EntityMetaData targetEntityMetaData;
 
@@ -55,14 +55,14 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 		categoryAlgorithmGenerator = new OneToManyCategoryAlgorithmGenerator(dataService);
 
 		EntityMetaData targetRefEntityMeta = entityMetaFactory.create("POTATO_REF");
-		AttributeMetaData targetCodeAttributeMetaData = attrMetaFactory.create().setName("code").setDataType(INT);
-		AttributeMetaData targetLabelAttributeMetaData = attrMetaFactory.create().setName("label");
-		targetRefEntityMeta.addAttribute(targetCodeAttributeMetaData, ROLE_ID);
-		targetRefEntityMeta.addAttribute(targetLabelAttributeMetaData, ROLE_LABEL);
+		Attribute targetCodeAttribute = attrMetaFactory.create().setName("code").setDataType(INT);
+		Attribute targetLabelAttribute = attrMetaFactory.create().setName("label");
+		targetRefEntityMeta.addAttribute(targetCodeAttribute, ROLE_ID);
+		targetRefEntityMeta.addAttribute(targetLabelAttribute, ROLE_LABEL);
 
-		targetAttributeMetaData = attrMetaFactory.create().setName("Current Consumption Frequency of Potatoes")
+		targetAttribute = attrMetaFactory.create().setName("Current Consumption Frequency of Potatoes")
 				.setDataType(CATEGORICAL);
-		targetAttributeMetaData.setRefEntity(targetRefEntityMeta);
+		targetAttribute.setRefEntity(targetRefEntityMeta);
 
 		Entity targetEntity1 = new DynamicEntity(targetRefEntityMeta, of("code", 1, "label", "Almost daily + daily"));
 		Entity targetEntity2 = new DynamicEntity(targetRefEntityMeta, of("code", 2, "label", "Several times a week"));
@@ -81,14 +81,14 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 		});
 
 		targetEntityMetaData = entityMetaFactory.create("target");
-		targetEntityMetaData.addAttribute(targetAttributeMetaData);
+		targetEntityMetaData.addAttribute(targetAttribute);
 
 		EntityMetaData sourceRefEntityMetaData = createEntityMetaData("LifeLines_POTATO_REF");
 
-		sourceAttributeMetaData = attrMetaFactory.create().setName("MESHED_POTATO").setDataType(CATEGORICAL);
-		sourceAttributeMetaData.setLabel(
+		sourceAttribute = attrMetaFactory.create().setName("MESHED_POTATO").setDataType(CATEGORICAL);
+		sourceAttribute.setLabel(
 				"How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later");
-		sourceAttributeMetaData.setRefEntity(sourceRefEntityMetaData);
+		sourceAttribute.setRefEntity(sourceRefEntityMetaData);
 
 		Entity sourceEntity1 = new DynamicEntity(targetRefEntityMeta, of("code", 1, "label", "Not this month"));
 		Entity sourceEntity2 = new DynamicEntity(targetRefEntityMeta, of("code", 2, "label", "1 day per month"));
@@ -111,10 +111,10 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 
 		EntityMetaData sourceRefEntityMetaData1 = createEntityMetaData("Mitchelstown_POTATO_REF");
 
-		sourceAttributeMetaData1 = attrMetaFactory.create().setName("MESHED_POTATO_1").setDataType(CATEGORICAL);
-		sourceAttributeMetaData1.setLabel(
+		sourceAttribute1 = attrMetaFactory.create().setName("MESHED_POTATO_1").setDataType(CATEGORICAL);
+		sourceAttribute1.setLabel(
 				"How often did you eat boiled or mashed potatoes (also in stew) in the past month? Baked potatoes are asked later");
-		sourceAttributeMetaData1.setRefEntity(sourceRefEntityMetaData1);
+		sourceAttribute1.setRefEntity(sourceRefEntityMetaData1);
 
 		Entity sourceEntity8 = new DynamicEntity(targetRefEntityMeta,
 				of("code", 1, "label", "never/less than 1 per month"));
@@ -139,9 +139,9 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 
 		EntityMetaData sourceRefEntityMetaData2 = createEntityMetaData("Mitchelstown_Stroke_REF");
 
-		sourceAttributeMetaData2 = attrMetaFactory.create().setName("Stroke").setDataType(CATEGORICAL);
-		sourceAttributeMetaData2.setLabel("History of stroke");
-		sourceAttributeMetaData2.setRefEntity(sourceRefEntityMetaData2);
+		sourceAttribute2 = attrMetaFactory.create().setName("Stroke").setDataType(CATEGORICAL);
+		sourceAttribute2.setLabel("History of stroke");
+		sourceAttribute2.setRefEntity(sourceRefEntityMetaData2);
 
 		Entity sourceEntity17 = new DynamicEntity(targetRefEntityMeta, of("code", 1, "label", "yes"));
 		Entity sourceEntity18 = new DynamicEntity(targetRefEntityMeta, of("code", 2, "label", "no"));
@@ -158,17 +158,17 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 
 		sourceEntityMetaData = entityMetaFactory.create("source");
 		sourceEntityMetaData.addAttributes(
-				Lists.newArrayList(sourceAttributeMetaData, sourceAttributeMetaData1, sourceAttributeMetaData2));
+				Lists.newArrayList(sourceAttribute, sourceAttribute1, sourceAttribute2));
 	}
 
 	private EntityMetaData createEntityMetaData(String entityName)
 	{
 		EntityMetaData sourceRefEntityMetaData = entityMetaFactory.create(entityName);
 
-		AttributeMetaData sourceCodeAttributeMetaData = attrMetaFactory.create().setName("code").setDataType(INT);
-		AttributeMetaData sourceLabelAttributeMetaData = attrMetaFactory.create().setName("label");
-		sourceRefEntityMetaData.addAttribute(sourceCodeAttributeMetaData, ROLE_ID);
-		sourceRefEntityMetaData.addAttribute(sourceLabelAttributeMetaData, ROLE_LABEL);
+		Attribute sourceCodeAttribute = attrMetaFactory.create().setName("code").setDataType(INT);
+		Attribute sourceLabelAttribute = attrMetaFactory.create().setName("label");
+		sourceRefEntityMetaData.addAttribute(sourceCodeAttribute, ROLE_ID);
+		sourceRefEntityMetaData.addAttribute(sourceLabelAttribute, ROLE_LABEL);
 		return sourceRefEntityMetaData;
 	}
 
@@ -176,7 +176,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 	public void testIsSuitable()
 	{
 		Assert.assertTrue(categoryAlgorithmGenerator
-				.isSuitable(targetAttributeMetaData, Arrays.asList(sourceAttributeMetaData, sourceAttributeMetaData1)));
+				.isSuitable(targetAttribute, Arrays.asList(sourceAttribute, sourceAttribute1)));
 	}
 
 	@Test
@@ -184,7 +184,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 	{
 		String expected = "var SUM_WEIGHT;\nif($('MESHED_POTATO').isNull().value() && $('MESHED_POTATO_1').isNull().value()){\n\tSUM_WEIGHT = new newValue();\n\tSUM_WEIGHT.value();\n}else{\n\tSUM_WEIGHT = new newValue(0);\n\tSUM_WEIGHT.plus($('MESHED_POTATO').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());\n\tSUM_WEIGHT.plus($('MESHED_POTATO_1').map({\"1\":0.1,\"2\":0.5,\"3\":1,\"4\":3,\"5\":5.5,\"6\":7,\"7\":17.5,\"8\":31.5,\"9\":42}, null, null).value());\n\tSUM_WEIGHT.group([0,1,3,6,7]).map({\"-0\":\"4\",\"0-1\":\"4\",\"1-3\":\"3\",\"3-6\":\"2\",\"6-7\":\"1\",\"7+\":\"1\"}, null, null).value();\n}";
 		String generateMultipleAttributes = categoryAlgorithmGenerator
-				.generate(targetAttributeMetaData, Arrays.asList(sourceAttributeMetaData, sourceAttributeMetaData1),
+				.generate(targetAttribute, Arrays.asList(sourceAttribute, sourceAttribute1),
 						targetEntityMetaData, sourceEntityMetaData);
 		Assert.assertEquals(generateMultipleAttributes, expected);
 	}
@@ -193,7 +193,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 	public void testGenerateWeightedMap()
 	{
 		String expected = "$('MESHED_POTATO').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value()";
-		String actual = categoryAlgorithmGenerator.generateWeightedMap(sourceAttributeMetaData);
+		String actual = categoryAlgorithmGenerator.generateWeightedMap(sourceAttribute);
 
 		Assert.assertEquals(actual, expected);
 	}
@@ -201,25 +201,25 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 	@Test
 	public void testGenerateWeightedMapForTarget()
 	{
-		Assert.assertEquals(categoryAlgorithmGenerator.groupCategoryValues(targetAttributeMetaData),
+		Assert.assertEquals(categoryAlgorithmGenerator.groupCategoryValues(targetAttribute),
 				".group([0,1,3,6,7]).map({\"-0\":\"4\",\"0-1\":\"4\",\"1-3\":\"3\",\"3-6\":\"2\",\"6-7\":\"1\",\"7+\":\"1\"}, null, null).value();");
 	}
 
 	@Test
 	public void testGenerateWeightedMapForSource()
 	{
-		Assert.assertEquals(categoryAlgorithmGenerator.groupCategoryValues(sourceAttributeMetaData),
+		Assert.assertEquals(categoryAlgorithmGenerator.groupCategoryValues(sourceAttribute),
 				".group([0,1,2,3,4,5,6,7]).map({\"-0\":\"1\",\"0-1\":\"4\",\"1-2\":\"4\",\"2-3\":\"5\",\"4-5\":\"6\",\"6-7\":\"7\",\"7+\":\"7\"}, null, null).value();");
 	}
 
 	@Test
 	public void testSuitableForGeneratingWeightedMap()
 	{
-		Assert.assertTrue(categoryAlgorithmGenerator.suitableForGeneratingWeightedMap(targetAttributeMetaData,
-				Arrays.asList(sourceAttributeMetaData, sourceAttributeMetaData1)));
+		Assert.assertTrue(categoryAlgorithmGenerator.suitableForGeneratingWeightedMap(targetAttribute,
+				Arrays.asList(sourceAttribute, sourceAttribute1)));
 
-		Assert.assertFalse(categoryAlgorithmGenerator.suitableForGeneratingWeightedMap(targetAttributeMetaData,
-				Arrays.asList(sourceAttributeMetaData, sourceAttributeMetaData1, sourceAttributeMetaData2)));
+		Assert.assertFalse(categoryAlgorithmGenerator.suitableForGeneratingWeightedMap(targetAttribute,
+				Arrays.asList(sourceAttribute, sourceAttribute1, sourceAttribute2)));
 	}
 
 	@Test
@@ -227,7 +227,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 	{
 		String expectedAlgorithm = "var SUM_WEIGHT;\nif($('MESHED_POTATO').isNull().value() && $('MESHED_POTATO_1').isNull().value()){\n\tSUM_WEIGHT = new newValue();\n\tSUM_WEIGHT.value();\n}else{\n\tSUM_WEIGHT = new newValue(0);\n\tSUM_WEIGHT.plus($('MESHED_POTATO').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());\n\tSUM_WEIGHT.plus($('MESHED_POTATO_1').map({\"1\":0.1,\"2\":0.5,\"3\":1,\"4\":3,\"5\":5.5,\"6\":7,\"7\":17.5,\"8\":31.5,\"9\":42}, null, null).value());\n\tSUM_WEIGHT.group([0,1,3,6,7]).map({\"-0\":\"4\",\"0-1\":\"4\",\"1-3\":\"3\",\"3-6\":\"2\",\"6-7\":\"1\",\"7+\":\"1\"}, null, null).value();\n}";
 		Assert.assertEquals(categoryAlgorithmGenerator
-				.generate(targetAttributeMetaData, Arrays.asList(sourceAttributeMetaData, sourceAttributeMetaData1),
+				.generate(targetAttribute, Arrays.asList(sourceAttribute, sourceAttribute1),
 						targetEntityMetaData, sourceEntityMetaData), expectedAlgorithm);
 	}
 
@@ -235,8 +235,8 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 	public void testHeterogenousGenerator()
 	{
 		String expectedAlgorithm = "$('MESHED_POTATO_1').map({\"1\":\"4\",\"2\":\"4\",\"3\":\"3\",\"4\":\"2\",\"5\":\"2\",\"6\":\"1\",\"7\":\"1\",\"8\":\"1\",\"9\":\"1\"}, null, null).value();$('MESHED_POTATO').map({\"1\":\"4\",\"2\":\"4\",\"3\":\"4\",\"4\":\"3\",\"5\":\"2\",\"6\":\"2\",\"7\":\"1\"}, null, null).value();$('Stroke').map({\"1\":\"2\",\"2\":\"4\",\"9\":\"9\"}, null, null).value();";
-		String actual = categoryAlgorithmGenerator.generate(targetAttributeMetaData,
-				Arrays.asList(sourceAttributeMetaData1, sourceAttributeMetaData, sourceAttributeMetaData2),
+		String actual = categoryAlgorithmGenerator.generate(targetAttribute,
+				Arrays.asList(sourceAttribute1, sourceAttribute, sourceAttribute2),
 				targetEntityMetaData, sourceEntityMetaData);
 		Assert.assertEquals(actual, expectedAlgorithm);
 	}
@@ -246,7 +246,7 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 	{
 		String actual = "var SUM_WEIGHT;\nif($('MESHED_POTATO_1').isNull().value() && $('MESHED_POTATO').isNull().value() && $('Stroke').isNull().value()){\n\tSUM_WEIGHT = new newValue();\n\tSUM_WEIGHT.value();\n}";
 		String createAlgorithmNullCheck = categoryAlgorithmGenerator.createAlgorithmNullCheckIfStatement(
-				Arrays.asList(sourceAttributeMetaData1, sourceAttributeMetaData, sourceAttributeMetaData2));
+				Arrays.asList(sourceAttribute1, sourceAttribute, sourceAttribute2));
 		Assert.assertEquals(createAlgorithmNullCheck, actual);
 	}
 
@@ -254,8 +254,8 @@ public class OneToManyCategoryAlgorithmGeneratorTest extends AbstractMolgenisSpr
 	void testCreateAlgorithmElseBlock()
 	{
 		String actual = "else{\n\tSUM_WEIGHT = new newValue(0);\n\tSUM_WEIGHT.plus($('MESHED_POTATO_1').map({\"1\":0.1,\"2\":0.5,\"3\":1,\"4\":3,\"5\":5.5,\"6\":7,\"7\":17.5,\"8\":31.5,\"9\":42}, null, null).value());\n\tSUM_WEIGHT.plus($('MESHED_POTATO').map({\"1\":0,\"2\":0.2,\"3\":0.6,\"4\":1,\"5\":2.5,\"6\":4.5,\"7\":6.5}, null, null).value());\n\tSUM_WEIGHT.group([0,1,3,6,7]).map({\"-0\":\"4\",\"0-1\":\"4\",\"1-3\":\"3\",\"3-6\":\"2\",\"6-7\":\"1\",\"7+\":\"1\"}, null, null).value();\n}";
-		String createAlgorithmElseBlock = categoryAlgorithmGenerator.createAlgorithmElseBlock(targetAttributeMetaData,
-				Arrays.asList(sourceAttributeMetaData1, sourceAttributeMetaData, sourceAttributeMetaData2));
+		String createAlgorithmElseBlock = categoryAlgorithmGenerator.createAlgorithmElseBlock(targetAttribute,
+				Arrays.asList(sourceAttribute1, sourceAttribute, sourceAttribute2));
 		Assert.assertEquals(createAlgorithmElseBlock, actual);
 	}
 }

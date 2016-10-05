@@ -47,7 +47,7 @@ public class EntitySelfXrefTestHarness
 				.addAttribute(createAttribute(ATTR_STRING, STRING), ROLE_LABEL);
 	}
 
-	private AttributeMetaData createAttribute(String name, AttributeType dataType)
+	private Attribute createAttribute(String name, AttributeType dataType)
 	{
 		return attributeMetaDataFactory.create().setName(name).setDataType(dataType);
 	}

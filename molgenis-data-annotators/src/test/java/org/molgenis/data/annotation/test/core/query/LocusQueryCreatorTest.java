@@ -2,7 +2,7 @@ package org.molgenis.data.annotation.core.query;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -37,7 +37,7 @@ public class LocusQueryCreatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void createQueryEntity()
 	{
-		AttributeMetaData idAttr = attributeMetaDataFactory.create().setName("idAttribute").setAuto(true);
+		Attribute idAttr = attributeMetaDataFactory.create().setName("idAttribute").setAuto(true);
 		EntityMetaData emd = entityMetaDataFactory.create().setName("testEntity");
 		emd.addAttributes(Arrays.asList(idAttr, vcfAttributes.getChromAttribute(), vcfAttributes.getPosAttribute()));
 		emd.setIdAttribute(idAttr);
@@ -52,7 +52,7 @@ public class LocusQueryCreatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void getRequiredAttributes()
 	{
-		Iterator<AttributeMetaData> requiredAttrs = new LocusQueryCreator(vcfAttributes).getRequiredAttributes()
+		Iterator<Attribute> requiredAttrs = new LocusQueryCreator(vcfAttributes).getRequiredAttributes()
 				.iterator();
 		EntityUtils.equals(requiredAttrs.next(), vcfAttributes.getChromAttribute());
 		EntityUtils.equals(requiredAttrs.next(), vcfAttributes.getPosAttribute());

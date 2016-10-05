@@ -5,7 +5,7 @@ import org.molgenis.data.mapper.mapping.model.AttributeMapping;
 import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.meta.AttributeMappingMetaData;
 import org.molgenis.data.mapper.meta.EntityMappingMetaData;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import java.util.Collection;
@@ -21,9 +21,9 @@ public interface AttributeMappingRepository
 	 *
 	 * @param attributeMappingEntities List of {@link Entity}s with {@link AttributeMappingMetaData} metadata
 	 * @param sourceEntityMetaData     {@link EntityMetaData} of the source entity of the attribute mapping, used to look up the
-	 *                                 {@link AttributeMetaData}
+	 *                                 {@link Attribute}
 	 * @param targetEntityMetaData     {@link EntityMetaData} of the target entity of the attribute mapping, used to look up the
-	 *                                 {@link AttributeMetaData}
+	 *                                 {@link Attribute}
 	 * @return a list of {@link AttributeMapping}s.
 	 */
 	List<AttributeMapping> getAttributeMappings(List<Entity> attributeMappingEntities,
@@ -38,14 +38,14 @@ public interface AttributeMappingRepository
 	List<Entity> upsert(Collection<AttributeMapping> collection);
 
 	/**
-	 * Translates an algorithm to a list of {@link AttributeMetaData} based on the algorithm, and the
+	 * Translates an algorithm to a list of {@link Attribute} based on the algorithm, and the
 	 * {@link EntityMetaData} of the source entity
 	 *
 	 * @param algorithm
 	 * @param sourceEntityMetaData
-	 * @return a list of {@link AttributeMetaData}
+	 * @return a list of {@link Attribute}
 	 */
-	List<AttributeMetaData> retrieveAttributeMetaDatasFromAlgorithm(String algorithm,
+	List<Attribute> retrieveAttributeMetaDatasFromAlgorithm(String algorithm,
 			EntityMetaData sourceEntityMetaData);
 
 }

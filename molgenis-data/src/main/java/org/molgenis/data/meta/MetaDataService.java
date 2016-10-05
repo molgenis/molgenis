@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.Repository;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownEntityException;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.meta.model.Package;
@@ -211,7 +211,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	 *
 	 * @param attribute
 	 */
-	void addAttribute(AttributeMetaData attribute);
+	void addAttribute(Attribute attribute);
 
 	/**
 	 * Deletes an Attribute from an Entity
@@ -231,7 +231,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 
 	/**
 	 * Returns whether the given {@link EntityMetaData} defines a meta entity such as {@link EntityMetaDataMetaData} or
-	 * {@link AttributeMetaData}.
+	 * {@link Attribute}.
 	 *
 	 * @param entityMetaData
 	 * @return

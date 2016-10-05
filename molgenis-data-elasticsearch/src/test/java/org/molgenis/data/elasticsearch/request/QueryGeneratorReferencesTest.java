@@ -8,7 +8,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisQueryException;
 import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.index.MappingsBuilder;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -85,9 +85,9 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 		refEntityMetaData.addAttribute(
 				attrFactory.create().setName(refCategoricalAttributeName).setDataType(CATEGORICAL)
 						.setRefEntity(refEntityMetaData).setNillable(true));
-		AttributeMetaData compoundPart0Attribute = attrFactory.create().setName(refCompoundPart0AttributeName)
+		Attribute compoundPart0Attribute = attrFactory.create().setName(refCompoundPart0AttributeName)
 				.setDataType(STRING);
-		AttributeMetaData compoundPart1Attribute = attrFactory.create().setName(refCompoundPart1AttributeName)
+		Attribute compoundPart1Attribute = attrFactory.create().setName(refCompoundPart1AttributeName)
 				.setDataType(STRING);
 		refEntityMetaData.addAttribute(attrFactory.create().setName(refCompoundAttributeName).setDataType(COMPOUND)
 				.setAttributeParts(Arrays.asList(compoundPart0Attribute, compoundPart1Attribute)));

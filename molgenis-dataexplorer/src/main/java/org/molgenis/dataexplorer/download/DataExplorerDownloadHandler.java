@@ -6,7 +6,7 @@ import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.excel.ExcelSheetWriter;
 import org.molgenis.data.excel.ExcelWriter;
 import org.molgenis.data.excel.ExcelWriter.FileFormat;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
@@ -48,7 +48,7 @@ public class DataExplorerDownloadHandler
 		{
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 			final Set<String> attributeNames = new LinkedHashSet<String>(dataRequest.getAttributeNames());
-			Iterable<AttributeMetaData> attributes = filter(entityMetaData.getAtomicAttributes(),
+			Iterable<Attribute> attributes = filter(entityMetaData.getAtomicAttributes(),
 					attributeMetaData -> attributeNames.contains(attributeMetaData.getName()));
 
 			switch (dataRequest.getColNames())
@@ -109,7 +109,7 @@ public class DataExplorerDownloadHandler
 		{
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 			final Set<String> attributeNames = new HashSet<String>(dataRequest.getAttributeNames());
-			Iterable<AttributeMetaData> attributes = filter(entityMetaData.getAtomicAttributes(),
+			Iterable<Attribute> attributes = filter(entityMetaData.getAtomicAttributes(),
 					attributeMetaData -> attributeNames.contains(attributeMetaData.getName()));
 
 			switch (dataRequest.getColNames())
@@ -118,7 +118,7 @@ public class DataExplorerDownloadHandler
 					csvWriter.writeAttributes(attributes);
 					break;
 				case ATTRIBUTE_NAMES:
-					csvWriter.writeAttributeNames(transform(attributes, AttributeMetaData::getName));
+					csvWriter.writeAttributeNames(transform(attributes, Attribute::getName));
 					break;
 			}
 

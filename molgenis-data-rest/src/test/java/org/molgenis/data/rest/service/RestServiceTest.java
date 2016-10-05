@@ -1,7 +1,7 @@
 package org.molgenis.data.rest.service;
 
 import org.molgenis.data.*;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.file.FileStore;
@@ -38,7 +38,7 @@ public class RestServiceTest
 	@Test
 	public void toEntityValue()
 	{
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		Attribute attr = mock(Attribute.class);
 		when(attr.getDataType()).thenReturn(MREF);
 		assertEquals(restService.toEntityValue(attr, null), emptyList());
 	}
@@ -50,12 +50,12 @@ public class RestServiceTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		String refEntityName = "refEntity";
-		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
+		Attribute refIdAttr = mock(Attribute.class);
 		when(refIdAttr.getDataType()).thenReturn(INT);
 		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		Attribute attr = mock(Attribute.class);
 		when(attr.getDataType()).thenReturn(MREF);
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
 		when(entityManager.getReference(refEntityMeta, 0)).thenReturn(entity0);
@@ -70,12 +70,12 @@ public class RestServiceTest
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
 		String refEntityName = "refEntity";
-		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
+		Attribute refIdAttr = mock(Attribute.class);
 		when(refIdAttr.getDataType()).thenReturn(STRING);
 		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
-		AttributeMetaData attr = mock(AttributeMetaData.class);
+		Attribute attr = mock(Attribute.class);
 		when(attr.getDataType()).thenReturn(MREF);
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
 		when(entityManager.getReference(refEntityMeta, "0")).thenReturn(entity0);
@@ -87,7 +87,7 @@ public class RestServiceTest
 	@Test
 	public void toEntityDateStringValueValid() throws ParseException
 	{
-		AttributeMetaData dateAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("dateAttr").getMock();
+		Attribute dateAttr = when(mock(Attribute.class).getName()).thenReturn("dateAttr").getMock();
 		when(dateAttr.getDataType()).thenReturn(DATE);
 		assertEquals(restService.toEntityValue(dateAttr, "2000-12-31"),
 				MolgenisDateFormat.getDateFormat().parse("2000-12-31"));
@@ -96,7 +96,7 @@ public class RestServiceTest
 	@Test(expectedExceptions = MolgenisDataException.class, expectedExceptionsMessageRegExp = "Attribute \\[dateAttr\\] value \\[invalidDate\\] does not match date format \\[yyyy-MM-dd\\]")
 	public void toEntityDateStringValueInvalid()
 	{
-		AttributeMetaData dateAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("dateAttr").getMock();
+		Attribute dateAttr = when(mock(Attribute.class).getName()).thenReturn("dateAttr").getMock();
 		when(dateAttr.getDataType()).thenReturn(DATE);
 		restService.toEntityValue(dateAttr, "invalidDate");
 	}

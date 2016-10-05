@@ -3,7 +3,7 @@ package org.molgenis.data.annotation.impl.tabix;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepository;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -87,7 +87,7 @@ public class TabixVcfRepositoryTest extends AbstractMolgenisSpringTest
 		Entity other = iterator.next();
 		Entity entity = newEntity("1", 249240543, "A", "AGG", "PASS", "100", "", "zG7SPcGIh_8_IicI1uLeoQ");
 		boolean equal = true;
-		for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
+		for (Attribute attr : entity.getEntityMetaData().getAtomicAttributes())
 		{
 			equal = other.get(attr.getName()).equals(entity.get(attr.getName()));
 			if (!equal) break;
@@ -105,7 +105,7 @@ public class TabixVcfRepositoryTest extends AbstractMolgenisSpringTest
 		iterator.hasNext();
 		Entity other = iterator.next();
 		boolean equal = true;
-		for (AttributeMetaData attr : entity.getEntityMetaData().getAtomicAttributes())
+		for (Attribute attr : entity.getEntityMetaData().getAtomicAttributes())
 		{
 			equal = other.get(attr.getName()).equals(entity.get(attr.getName()));
 			if (!equal)

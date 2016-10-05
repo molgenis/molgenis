@@ -5,7 +5,7 @@ import com.google.common.collect.FluentIterable;
 import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -17,7 +17,7 @@ public class FirstResultFilter implements ResultFilter
 {
 
 	@Override
-	public Collection<AttributeMetaData> getRequiredAttributes()
+	public Collection<Attribute> getRequiredAttributes()
 	{
 		return Collections.emptyList();
 	}

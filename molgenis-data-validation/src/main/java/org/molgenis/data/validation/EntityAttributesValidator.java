@@ -5,7 +5,7 @@ import org.hibernate.validator.constraints.impl.EmailValidator;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.fieldtypes.FieldType;
 import org.springframework.stereotype.Component;
@@ -36,7 +36,7 @@ public class EntityAttributesValidator
 	{
 		Set<ConstraintViolation> violations = checkValidationExpressions(entity, meta);
 
-		for (AttributeMetaData attr : meta.getAtomicAttributes())
+		for (Attribute attr : meta.getAtomicAttributes())
 		{
 			ConstraintViolation violation = null;
 
@@ -114,7 +114,7 @@ public class EntityAttributesValidator
 		return violations;
 	}
 
-	private ConstraintViolation checkMref(Entity entity, AttributeMetaData attr, EntityMetaData meta)
+	private ConstraintViolation checkMref(Entity entity, Attribute attr, EntityMetaData meta)
 	{
 		Iterable<Entity> refEntities;
 		try
@@ -143,7 +143,7 @@ public class EntityAttributesValidator
 		return null;
 	}
 
-	private ConstraintViolation checkXref(Entity entity, AttributeMetaData attr, EntityMetaData meta)
+	private ConstraintViolation checkXref(Entity entity, Attribute attr, EntityMetaData meta)
 	{
 		Entity refEntity;
 		try
@@ -169,9 +169,9 @@ public class EntityAttributesValidator
 	private Set<ConstraintViolation> checkValidationExpressions(Entity entity, EntityMetaData meta)
 	{
 		List<String> validationExpressions = new ArrayList<>();
-		List<AttributeMetaData> expressionAttributes = new ArrayList<>();
+		List<Attribute> expressionAttributes = new ArrayList<>();
 
-		for (AttributeMetaData attribute : meta.getAtomicAttributes())
+		for (Attribute attribute : meta.getAtomicAttributes())
 		{
 			if (StringUtils.isNotBlank(attribute.getValidationExpression()))
 			{
@@ -198,7 +198,7 @@ public class EntityAttributesValidator
 		return violations;
 	}
 
-	private ConstraintViolation checkEmail(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
+	private ConstraintViolation checkEmail(Entity entity, Attribute attribute, EntityMetaData meta)
 	{
 		String email = entity.getString(attribute.getName());
 		if (email == null)
@@ -224,7 +224,7 @@ public class EntityAttributesValidator
 		return null;
 	}
 
-	private ConstraintViolation checkBoolean(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
+	private ConstraintViolation checkBoolean(Entity entity, Attribute attribute, EntityMetaData meta)
 	{
 		try
 		{
@@ -237,7 +237,7 @@ public class EntityAttributesValidator
 		}
 	}
 
-	private ConstraintViolation checkDateTime(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
+	private ConstraintViolation checkDateTime(Entity entity, Attribute attribute, EntityMetaData meta)
 	{
 		try
 		{
@@ -250,7 +250,7 @@ public class EntityAttributesValidator
 		}
 	}
 
-	private ConstraintViolation checkDate(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
+	private ConstraintViolation checkDate(Entity entity, Attribute attribute, EntityMetaData meta)
 	{
 		try
 		{
@@ -263,7 +263,7 @@ public class EntityAttributesValidator
 		}
 	}
 
-	private ConstraintViolation checkDecimal(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
+	private ConstraintViolation checkDecimal(Entity entity, Attribute attribute, EntityMetaData meta)
 	{
 		try
 		{
@@ -276,7 +276,7 @@ public class EntityAttributesValidator
 		}
 	}
 
-	private ConstraintViolation checkHyperlink(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
+	private ConstraintViolation checkHyperlink(Entity entity, Attribute attribute, EntityMetaData meta)
 	{
 		String link = entity.getString(attribute.getName());
 		if (link == null)
@@ -301,7 +301,7 @@ public class EntityAttributesValidator
 		return null;
 	}
 
-	private ConstraintViolation checkInt(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
+	private ConstraintViolation checkInt(Entity entity, Attribute attribute, EntityMetaData meta)
 	{
 		try
 		{
@@ -314,7 +314,7 @@ public class EntityAttributesValidator
 		}
 	}
 
-	private ConstraintViolation checkLong(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
+	private ConstraintViolation checkLong(Entity entity, Attribute attribute, EntityMetaData meta)
 	{
 		try
 		{
@@ -327,7 +327,7 @@ public class EntityAttributesValidator
 		}
 	}
 
-	private ConstraintViolation checkRange(Entity entity, AttributeMetaData attr, EntityMetaData meta)
+	private ConstraintViolation checkRange(Entity entity, Attribute attr, EntityMetaData meta)
 	{
 		Range range = attr.getRange();
 		Long value;
@@ -353,7 +353,7 @@ public class EntityAttributesValidator
 		return null;
 	}
 
-	private ConstraintViolation checkText(Entity entity, AttributeMetaData attribute, EntityMetaData meta,
+	private ConstraintViolation checkText(Entity entity, Attribute attribute, EntityMetaData meta,
 			FieldType fieldType)
 	{
 		String text = entity.getString(attribute.getName());
@@ -370,7 +370,7 @@ public class EntityAttributesValidator
 		return null;
 	}
 
-	private ConstraintViolation checkEnum(Entity entity, AttributeMetaData attribute, EntityMetaData meta)
+	private ConstraintViolation checkEnum(Entity entity, Attribute attribute, EntityMetaData meta)
 	{
 		String value = entity.getString(attribute.getName());
 		if (value != null)
@@ -393,7 +393,7 @@ public class EntityAttributesValidator
 		return null;
 	}
 
-	private ConstraintViolation createConstraintViolation(Entity entity, AttributeMetaData attribute,
+	private ConstraintViolation createConstraintViolation(Entity entity, Attribute attribute,
 			EntityMetaData meta)
 	{
 		String message = format("Invalid %s value '%s' for attribute '%s' of entity '%s'.",
@@ -415,7 +415,7 @@ public class EntityAttributesValidator
 		return new ConstraintViolation(message, entity.get(attribute.getName()), entity, attribute, meta, null);
 	}
 
-	private ConstraintViolation createConstraintViolation(Entity entity, AttributeMetaData attribute,
+	private ConstraintViolation createConstraintViolation(Entity entity, Attribute attribute,
 			EntityMetaData meta, String message)
 	{
 		String dataValue = getDataValuesForType(entity, attribute).toString();
@@ -426,7 +426,7 @@ public class EntityAttributesValidator
 		return new ConstraintViolation(fullMessage, dataValue, entity, attribute, meta, null);
 	}
 
-	private Object getDataValuesForType(Entity entity, AttributeMetaData attribute)
+	private Object getDataValuesForType(Entity entity, Attribute attribute)
 	{
 		String attributeName = attribute.getName();
 		switch (attribute.getDataType())

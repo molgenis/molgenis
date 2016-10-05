@@ -3,7 +3,7 @@ package org.molgenis.ontology.sorta.repo;
 import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.csv.CsvRepository;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -63,7 +63,7 @@ public class SortaCsvRepository extends AbstractRepository
 			entityMetaData.setLabel(entityLabel);
 			entityMetaData
 					.addAttribute(attrMetaFactory.create().setName(ALLOWED_IDENTIFIER).setNillable(false), ROLE_ID);
-			AttributeMetaData nameAttribute = entityMetaData.getAttribute(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
+			Attribute nameAttribute = entityMetaData.getAttribute(SortaServiceImpl.DEFAULT_MATCHING_NAME_FIELD);
 			if (nameAttribute != null)
 			{
 				entityMetaData.setLabelAttribute(nameAttribute);

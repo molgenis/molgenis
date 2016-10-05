@@ -19,7 +19,7 @@ import org.molgenis.data.annotation.core.resources.impl.MultiFileResource;
 import org.molgenis.data.annotation.core.resources.impl.MultiResourceConfigImpl;
 import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepositoryFactory;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -80,13 +80,13 @@ public class GoNLAnnotator implements AnnotatorConfig
 	@Override
 	public void init()
 	{
-		List<AttributeMetaData> attributes = new ArrayList<>();
-		AttributeMetaData goNlAfAttribute = attributeMetaDataFactory.create().setName(GONL_GENOME_AF)
+		List<Attribute> attributes = new ArrayList<>();
+		Attribute goNlAfAttribute = attributeMetaDataFactory.create().setName(GONL_GENOME_AF)
 				.setDataType(STRING)
 				.setDescription("The allele frequency for variants seen in the population used for the GoNL project")
 				.setLabel(GONL_AF_LABEL);
 
-		AttributeMetaData goNlGtcAttribute = attributeMetaDataFactory.create().setName(GONL_GENOME_GTC)
+		Attribute goNlGtcAttribute = attributeMetaDataFactory.create().setName(GONL_GENOME_GTC)
 				.setDataType(STRING).setDescription(
 						"GenoType Counts. For each ALT allele in the same order as listed = 0/0,0/1,1/1,0/2,1/2,2/2,0/3,1/3,2/3,3/3,etc. Phasing is ignored; hence 1/0, 0|1 and 1|0 are all counted as 0/1. When one or more alleles is not called for a genotype in a specific sample (./., ./0, ./1, ./2, etc.), that sample's genotype is completely discarded for calculating GTC.")
 				.setLabel(GONL_GTC_LABEL);

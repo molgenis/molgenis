@@ -1,7 +1,7 @@
 package org.molgenis.data.mapper.service.impl;
 
 import com.google.common.collect.Sets;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -87,7 +87,7 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void resolveUnitLabelNoUnit()
 	{
-		AttributeMetaData attr = attrMetaFactory.create().setName("attr").setLabel("weight").setDescription(null);
+		Attribute attr = attrMetaFactory.create().setName("attr").setLabel("weight").setDescription(null);
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertNull(unit);
 	}
@@ -95,7 +95,7 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void resolveUnitLabelNoUnitDescriptionNoUnit()
 	{
-		AttributeMetaData attr = attrMetaFactory.create().setName("attr").setLabel("weight").setDescription("weight");
+		Attribute attr = attrMetaFactory.create().setName("attr").setLabel("weight").setDescription("weight");
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertNull(unit);
 	}
@@ -103,7 +103,7 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void resolveUnitLabelWithUnit_directUnitMatch()
 	{
-		AttributeMetaData attr = attrMetaFactory.create().setName("attr").setLabel("weight (kg)").setDescription(null);
+		Attribute attr = attrMetaFactory.create().setName("attr").setLabel("weight (kg)").setDescription(null);
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("kg"));
 	}
@@ -111,7 +111,7 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatch()
 	{
-		AttributeMetaData attr = attrMetaFactory.create().setName("attr").setLabel("label")
+		Attribute attr = attrMetaFactory.create().setName("attr").setLabel("label")
 				.setDescription("height (cm)");
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("cm"));
@@ -120,7 +120,7 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatchRaw_kgm2()
 	{
-		AttributeMetaData attr = attrMetaFactory.create().setName("attr").setLabel("label")
+		Attribute attr = attrMetaFactory.create().setName("attr").setLabel("label")
 				.setDescription("area density (kg/m2)");
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("kg/m²"));
@@ -129,7 +129,7 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void resolveUnitLabelNoUnitDescriptionWithUnit_unitOntologyMatch_kgm2()
 	{
-		AttributeMetaData attr = attrMetaFactory.create().setName("attr").setLabel("label")
+		Attribute attr = attrMetaFactory.create().setName("attr").setLabel("label")
 				.setDescription("area density (kg/m^2)");
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("kg/m²"));
@@ -138,7 +138,7 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void resolveUnitLabelNoUnitDescriptionWithUnit_directUnitMatch_kgm2_2()
 	{
-		AttributeMetaData attr = attrMetaFactory.create().setName("attr").setLabel("label")
+		Attribute attr = attrMetaFactory.create().setName("attr").setLabel("label")
 				.setDescription("area density (kg/m²)");
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("kg/m²"));
@@ -147,7 +147,7 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void resolveUnitLabelWithUnit_unitOntologyMatch()
 	{
-		AttributeMetaData attr = attrMetaFactory.create().setName("attr").setLabel("weight (kilogram)")
+		Attribute attr = attrMetaFactory.create().setName("attr").setLabel("weight (kilogram)")
 				.setDescription(null);
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("kg"));
@@ -156,7 +156,7 @@ public class UnitResolverImplTest extends AbstractMolgenisSpringTest
 	@Test
 	public void resolveUnitLabelNoUnitDescriptionWithUnit_unitOntologyMatch()
 	{
-		AttributeMetaData attr = attrMetaFactory.create().setName("attr").setLabel("label")
+		Attribute attr = attrMetaFactory.create().setName("attr").setLabel("label")
 				.setDescription("height (centimeter)");
 		Unit<? extends Quantity> unit = unitResolverImpl.resolveUnit(attr, null);
 		assertEquals(unit, Unit.valueOf("cm"));

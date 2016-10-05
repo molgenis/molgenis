@@ -19,7 +19,7 @@ import org.molgenis.data.mapper.mapping.model.EntityMapping;
 import org.molgenis.data.mapper.mapping.model.MappingProject;
 import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.mapper.service.UnitResolver;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
@@ -122,9 +122,9 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		String targetIntAttribute = "years_lived";
 
-		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName(targetIntAttribute)
+		Attribute targetAttribute = attrMetaFactory.create().setName(targetIntAttribute)
 				.setDataType(INT);
-		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
+		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
 		attributeMapping.setAlgorithm("$('age').value()");
 
 		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
@@ -147,9 +147,9 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		String targetBoolAttribute = "awake";
 
-		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName(targetBoolAttribute)
+		Attribute targetAttribute = attrMetaFactory.create().setName(targetBoolAttribute)
 				.setDataType(BOOL);
-		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
+		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
 		attributeMapping.setAlgorithm("$('has_had_coffee').value()");
 
 		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
@@ -172,9 +172,9 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		String targetLongAttribute = "super_id_code";
 
-		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName(targetLongAttribute)
+		Attribute targetAttribute = attrMetaFactory.create().setName(targetLongAttribute)
 				.setDataType(LONG);
-		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
+		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
 		attributeMapping.setAlgorithm("$('serial_number').value()");
 
 		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
@@ -192,9 +192,9 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		source.set(idAttrName, 1);
 		source.set("dob", new SimpleDateFormat("dd-MM-yyyy").parse("13-05-2015"));
 
-		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName("bob");
-		targetAttributeMetaData.setDataType(DATE);
-		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
+		Attribute targetAttribute = attrMetaFactory.create().setName("bob");
+		targetAttribute.setDataType(DATE);
+		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
 		attributeMapping.setAlgorithm("$('dob').value()");
 		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
 		assertEquals(result.toString(), "Wed May 13 00:00:00 CEST 2015");
@@ -211,9 +211,9 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		source.set(idAttrName, 1);
 		source.set("dob", new SimpleDateFormat("dd-MM-yyyy").parse("28-08-1973"));
 
-		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName("age");
-		targetAttributeMetaData.setDataType(INT);
-		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
+		Attribute targetAttribute = attrMetaFactory.create().setName("age");
+		targetAttribute.setDataType(INT);
+		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
 		attributeMapping.setAlgorithm(
 				"Math.floor((new Date('02/12/2015') - $('dob').value())/(365.2425 * 24 * 60 * 60 * 1000))");
 		Object result = algorithmService.apply(attributeMapping, source, entityMetaData);
@@ -246,10 +246,10 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		source.set("id", 1);
 		source.set("xref", xref2a);
 
-		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName("field1");
-		targetAttributeMetaData.setDataType(XREF);
-		targetAttributeMetaData.setRefEntity(entityMetaDataXref);
-		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
+		Attribute targetAttribute = attrMetaFactory.create().setName("field1");
+		targetAttribute.setDataType(XREF);
+		targetAttribute.setRefEntity(entityMetaDataXref);
+		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
 		attributeMapping.setAlgorithm("$('xref').map({'1':'2', '2':'1'}).value();");
 		when(dataService.findOneById("xrefEntity1", "1")).thenReturn(xref1a);
 		Entity result = (Entity) algorithmService.apply(attributeMapping, source, entityMetaDataSource);
@@ -285,9 +285,9 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		refEntity1.set(refEntityLabelAttrName, "label1");
 
 		// mapping
-		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName(targetEntityAttrName);
-		targetAttributeMetaData.setDataType(MREF).setNillable(false).setRefEntity(refEntityMeta);
-		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
+		Attribute targetAttribute = attrMetaFactory.create().setName(targetEntityAttrName);
+		targetAttribute.setDataType(MREF).setNillable(false).setRefEntity(refEntityMeta);
+		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
 		attributeMapping.setAlgorithm("$('" + sourceEntityAttrName + "').value()");
 
 		when(dataService.findAll(eq(refEntityName), argThat(new ArgumentMatcher<Stream<Object>>()
@@ -339,9 +339,9 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		refEntityMeta.addAttribute(attrMetaFactory.create().setName(refEntityLabelAttrName), ROLE_LABEL);
 
 		// mapping
-		AttributeMetaData targetAttributeMetaData = attrMetaFactory.create().setName(targetEntityAttrName);
-		targetAttributeMetaData.setDataType(MREF).setNillable(true).setRefEntity(refEntityMeta);
-		AttributeMapping attributeMapping = new AttributeMapping(targetAttributeMetaData);
+		Attribute targetAttribute = attrMetaFactory.create().setName(targetEntityAttrName);
+		targetAttribute.setDataType(MREF).setNillable(true).setRefEntity(refEntityMeta);
+		AttributeMapping attributeMapping = new AttributeMapping(targetAttribute);
 		attributeMapping.setAlgorithm("$('" + sourceEntityAttrName + "').value()");
 
 		// source Entity
@@ -364,12 +364,12 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 	public void testCreateAttributeMappingIfOnlyOneMatch()
 	{
 		EntityMetaData targetEntityMetaData = entityMetaFactory.create("target");
-		AttributeMetaData targetAttribute = attrMetaFactory.create().setName("targetHeight");
+		Attribute targetAttribute = attrMetaFactory.create().setName("targetHeight");
 		targetAttribute.setDescription("height");
 		targetEntityMetaData.addAttribute(targetAttribute);
 
 		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
-		AttributeMetaData sourceAttribute = attrMetaFactory.create().setName("sourceHeight");
+		Attribute sourceAttribute = attrMetaFactory.create().setName("sourceHeight");
 		sourceAttribute.setDescription("height");
 		sourceEntityMetaData.addAttribute(sourceAttribute);
 
@@ -387,7 +387,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		Map<AttributeMetaData, ExplainedAttributeMetaData> matches = ImmutableMap.of(sourceAttribute,
+		Map<Attribute, ExplainedAttributeMetaData> matches = ImmutableMap.of(sourceAttribute,
 				ExplainedAttributeMetaData.create(sourceAttribute,
 						singletonList(ExplainedQueryString.create("height", "height", "height", 100)), true));
 
@@ -409,12 +409,12 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 	public void testWhenSourceDoesNotMatchThenNoMappingGetsCreated()
 	{
 		EntityMetaData targetEntityMetaData = entityMetaFactory.create("target");
-		AttributeMetaData targetAttribute = attrMetaFactory.create().setName("targetHeight");
+		Attribute targetAttribute = attrMetaFactory.create().setName("targetHeight");
 		targetAttribute.setDescription("height");
 		targetEntityMetaData.addAttribute(targetAttribute);
 
 		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
-		AttributeMetaData sourceAttribute = attrMetaFactory.create().setName("sourceHeight");
+		Attribute sourceAttribute = attrMetaFactory.create().setName("sourceHeight");
 		sourceAttribute.setDescription("weight");
 		sourceEntityMetaData.addAttribute(sourceAttribute);
 
@@ -447,14 +447,14 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 	public void testWhenSourceHasMultipleMatchesThenFirstMappingGetsCreated()
 	{
 		EntityMetaData targetEntityMetaData = entityMetaFactory.create("target");
-		AttributeMetaData targetAttribute = attrMetaFactory.create().setName("targetHeight");
+		Attribute targetAttribute = attrMetaFactory.create().setName("targetHeight");
 		targetAttribute.setDescription("height");
 		targetEntityMetaData.addAttribute(targetAttribute);
 
 		EntityMetaData sourceEntityMetaData = entityMetaFactory.create("source");
-		AttributeMetaData sourceAttribute1 = attrMetaFactory.create().setName("sourceHeight1");
+		Attribute sourceAttribute1 = attrMetaFactory.create().setName("sourceHeight1");
 		sourceAttribute1.setDescription("height");
-		AttributeMetaData sourceAttribute2 = attrMetaFactory.create().setName("sourceHeight2");
+		Attribute sourceAttribute2 = attrMetaFactory.create().setName("sourceHeight2");
 		sourceAttribute2.setDescription("height");
 
 		sourceEntityMetaData.addAttributes(Arrays.asList(sourceAttribute1, sourceAttribute2));
@@ -473,7 +473,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		Map<AttributeMetaData, ExplainedAttributeMetaData> mappings = ImmutableMap
+		Map<Attribute, ExplainedAttributeMetaData> mappings = ImmutableMap
 				.of(sourceAttribute1, ExplainedAttributeMetaData.create(sourceAttribute1), sourceAttribute2,
 						ExplainedAttributeMetaData.create(sourceAttribute2));
 
@@ -488,7 +488,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		algorithmService.autoGenerateAlgorithm(sourceEntityMetaData, targetEntityMetaData, mapping, targetAttribute);
 
-		assertEquals(mapping.getAttributeMapping("targetHeight").getSourceAttributeMetaDatas().get(0),
+		assertEquals(mapping.getAttributeMapping("targetHeight").getSourceAttributes().get(0),
 				sourceAttribute1);
 	}
 

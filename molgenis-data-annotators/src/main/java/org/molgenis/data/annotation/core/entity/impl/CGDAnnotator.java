@@ -20,7 +20,7 @@ import org.molgenis.data.annotation.core.resources.impl.RepositoryFactory;
 import org.molgenis.data.annotation.core.resources.impl.ResourceImpl;
 import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -178,9 +178,9 @@ public class CGDAnnotator implements AnnotatorConfig
 				getOutputAttributes());
 	}
 
-	private List<AttributeMetaData> getOutputAttributes()
+	private List<Attribute> getOutputAttributes()
 	{
-		List<AttributeMetaData> attributes = new ArrayList<>();
+		List<Attribute> attributes = new ArrayList<>();
 
 		attributes.add(attributeMetaDataFactory.create().setName(HGNC_ID.getAttributeName()).setDataType(STRING));
 		attributes.add(attributeMetaDataFactory.create().setName(ENTREZ_GENE_ID.getAttributeName()).setDataType(TEXT));
@@ -216,7 +216,7 @@ public class CGDAnnotator implements AnnotatorConfig
 		}
 
 		@Override
-		protected Object getResourceAttributeValue(AttributeMetaData attr, Entity sourceEntity)
+		protected Object getResourceAttributeValue(Attribute attr, Entity sourceEntity)
 		{
 			if (attr.getName().equals(GENERALIZED_INHERITANCE.getAttributeName()))
 			{

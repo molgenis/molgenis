@@ -7,7 +7,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
@@ -84,7 +84,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 				1);
 
 		// 2. change dataType value of ATTR_EMAIL
-		AttributeMetaData toUpdateAttribute = entityMetaDataDynamic.getAttribute(EntityTestHarness.ATTR_EMAIL);
+		Attribute toUpdateAttribute = entityMetaDataDynamic.getAttribute(EntityTestHarness.ATTR_EMAIL);
 		toUpdateAttribute.setDataType(MolgenisFieldTypes.AttributeType.STRING);
 		Object toUpdateAttributeId = toUpdateAttribute.getIdValue();
 
@@ -127,7 +127,7 @@ public class IndexMetadataCUDOperationsPlatformIT
 				1);
 
 		// 2. remove attribute
-		AttributeMetaData toRemoveAttribute = emd.getAttribute(attributeName);
+		Attribute toRemoveAttribute = emd.getAttribute(attributeName);
 		emd.removeAttribute(toRemoveAttribute);
 
 		// 3. Preform update
