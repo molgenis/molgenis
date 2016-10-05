@@ -6,11 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class MolgenisUserFactory extends AbstractSystemEntityFactory<MolgenisUser, MolgenisUserMetaData, String>
+public class TokenFactory extends AbstractSystemEntityFactory<Token, TokenMetaData, String>
 {
 	@Autowired
-	MolgenisUserFactory(MolgenisUserMetaData molgenisUserMetaData, EntityPopulator entityPopulator)
+	TokenFactory(TokenMetaData tokenMetaData, EntityPopulator entityPopulator)
 	{
-		super(MolgenisUser.class, molgenisUserMetaData, entityPopulator);
+		super(Token.class, tokenMetaData, entityPopulator);
 	}
 }

@@ -49,7 +49,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 		{
 			// Search in packages
 			Query<Entity> q = new QueryImpl<>().search(searchTerm);
-			// for (Entity packageEntity : dataService.findAllAsIterable(PackageMetaData.MOLGENIS_GROUP_MEMBER, q))
+			// for (Entity packageEntity : dataService.findAllAsIterable(PackageMetaData.GROUP_MEMBER, q))
 			dataService.findAll(PACKAGE, q).forEach(packageEntity ->
 			{
 				Package p = metaDataService.getPackage(packageEntity.getString(PackageMetaData.FULL_NAME));

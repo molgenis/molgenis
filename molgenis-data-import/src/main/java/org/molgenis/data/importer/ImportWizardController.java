@@ -47,7 +47,7 @@ import static java.util.Objects.requireNonNull;
 import static org.apache.commons.io.FilenameUtils.getBaseName;
 import static org.apache.commons.io.FilenameUtils.getExtension;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
-import static org.molgenis.auth.MolgenisGroupMetaData.MOLGENIS_GROUP;
+import static org.molgenis.auth.GroupMetaData.GROUP;
 import static org.molgenis.data.importer.ImportWizardController.URI;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.security.core.Permission.*;
@@ -160,9 +160,9 @@ public class ImportWizardController extends AbstractWizardController
 	public Permissions getGroupEntityClassPermissions(@PathVariable String groupId, WebRequest webRequest)
 	{
 		boolean allowed = false;
-		for (MolgenisGroup molgenisGroup : userAccountService.getCurrentUserGroups())
+		for (Group group : userAccountService.getCurrentUserGroups())
 		{
-			if (molgenisGroup.getId().equals(groupId))
+			if (group.getId().equals(groupId))
 			{
 				allowed = true;
 			}
@@ -174,9 +174,9 @@ public class ImportWizardController extends AbstractWizardController
 		String entitiesString = webRequest.getParameter("entityIds");
 		List<String> entities = Arrays.asList(entitiesString.split(","));
 
-		MolgenisGroup molgenisGroup = dataService.findOneById(MOLGENIS_GROUP, groupId, MolgenisGroup.class);
-		if (molgenisGroup == null) throw new RuntimeException("unknown group id [" + groupId + "]");
-		List<Authority> groupPermissions = getGroupPermissions(molgenisGroup);
+		Group group = dataService.findOneById(GROUP, groupId, Group.class);
+		if (group == null) throw new RuntimeException("unknown group id [" + groupId + "]");
+		List<Authority> groupPermissions = getGroupPermissions(group);
 		Permissions permissions = createPermissions(groupPermissions, entities);
 		permissions.setGroupId(groupId);
 		return permissions;
@@ -208,7 +208,7 @@ public class ImportWizardController extends AbstractWizardController
 				if (value.equalsIgnoreCase(READ.toString()) || value.equalsIgnoreCase(COUNT.toString()) || value
 						.equalsIgnoreCase(WRITE.toString()) || value.equalsIgnoreCase(WRITEMETA.toString()))
 				{
-					authority.setMolgenisGroup(dataService.findOneById(MOLGENIS_GROUP, groupId, MolgenisGroup.class));
+					authority.setGroup(dataService.findOneById(GROUP, groupId, Group.class));
 					authority.setRole(SecurityUtils.AUTHORITY_ENTITY_PREFIX + value.toUpperCase() + "_" + entityClassId
 							.toUpperCase());
 					if (newGroupAuthority)
@@ -242,10 +242,10 @@ public class ImportWizardController extends AbstractWizardController
 		});
 	}
 
-	private List<Authority> getGroupPermissions(MolgenisGroup molgenisGroup)
+	private List<Authority> getGroupPermissions(Group group)
 	{
 		return dataService.findAll(GROUP_AUTHORITY,
-				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.MOLGENIS_GROUP, molgenisGroup),
+				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, group),
 				GroupAuthority.class).collect(Collectors.toList());
 	}
 
@@ -276,7 +276,7 @@ public class ImportWizardController extends AbstractWizardController
 				permission.setType(authorityType);
 				if (authority instanceof GroupAuthority)
 				{
-					permission.setGroup(((GroupAuthority) authority).getMolgenisGroup().getName());
+					permission.setGroup(((GroupAuthority) authority).getGroup().getName());
 					permissions.addGroupPermission(authorityPluginId, permission);
 				}
 			}
@@ -315,7 +315,7 @@ public class ImportWizardController extends AbstractWizardController
 	private GroupAuthority getGroupAuthority(String groupId, String entityClassId)
 	{
 		Stream<GroupAuthority> stream = dataService.findAll(GROUP_AUTHORITY,
-				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.MOLGENIS_GROUP, groupId),
+				new QueryImpl<GroupAuthority>().eq(GroupAuthorityMetaData.GROUP, groupId),
 				GroupAuthority.class);
 		GroupAuthority existingGroupAuthority = null;
 		for (Iterator<GroupAuthority> it = stream.iterator(); it.hasNext(); )

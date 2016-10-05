@@ -7,7 +7,7 @@ import org.testng.annotations.Test;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class MolgenisUserDetailsCheckerTest
+public class UserDetailsCheckerTest
 {
 	@Test
 	public void check_enabledUser()

@@ -5,7 +5,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.system.ImportRun;
 import org.molgenis.data.system.ImportRunFactory;
 import org.molgenis.security.core.runas.RunAsSystem;
-import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.security.user.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,16 +26,16 @@ public class ImportRunService
 
 	private final DataService dataService;
 	private final MailSender mailSender;
-	private final MolgenisUserService molgenisUserService;
+	private final UserService userService;
 	private final ImportRunFactory importRunFactory;
 
 	@Autowired
-	public ImportRunService(DataService dataService, MailSender mailSender, MolgenisUserService molgenisUserService,
+	public ImportRunService(DataService dataService, MailSender mailSender, UserService userService,
 			ImportRunFactory importRunFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.mailSender = requireNonNull(mailSender);
-		this.molgenisUserService = requireNonNull(molgenisUserService);
+		this.userService = requireNonNull(userService);
 		this.importRunFactory = requireNonNull(importRunFactory);
 	}
 
@@ -80,7 +80,7 @@ public class ImportRunService
 		try
 		{
 			SimpleMailMessage mailMessage = new SimpleMailMessage();
-			mailMessage.setTo(molgenisUserService.getUser(importRun.getUserName()).getEmail());
+			mailMessage.setTo(userService.getUser(importRun.getUserName()).getEmail());
 			mailMessage.setSubject(createMailTitle(importRun));
 			mailMessage.setText(createMailText(importRun));
 			mailSender.send(mailMessage);

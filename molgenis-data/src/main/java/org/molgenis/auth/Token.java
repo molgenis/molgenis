@@ -6,21 +6,21 @@ import org.molgenis.data.support.StaticEntity;
 
 import java.util.Date;
 
-import static org.molgenis.auth.MolgenisTokenMetaData.*;
+import static org.molgenis.auth.TokenMetaData.*;
 
-public class MolgenisToken extends StaticEntity
+public class Token extends StaticEntity
 {
-	public MolgenisToken(Entity entity)
+	public Token(Entity entity)
 	{
 		super(entity);
 	}
 
-	public MolgenisToken(EntityMetaData entityMeta)
+	public Token(EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 	}
 
-	public MolgenisToken(String id, EntityMetaData entityMeta)
+	public Token(String id, EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 		setId(id);
@@ -36,24 +36,24 @@ public class MolgenisToken extends StaticEntity
 		set(ID, id);
 	}
 
-	public MolgenisUser getMolgenisUser()
+	public User getUser()
 	{
-		return getEntity(MOLGENIS_USER, MolgenisUser.class);
+		return getEntity(USER, User.class);
 	}
 
-	public void setMolgenisUser(MolgenisUser molgenisUser)
+	public void setUser(User user)
 	{
-		set(MOLGENIS_USER, molgenisUser);
+		set(USER, user);
 	}
 
 	public String getToken()
 	{
-		return getString(TOKEN);
+		return getString(TOKEN_ATTR);
 	}
 
 	public void setToken(String token)
 	{
-		set(TOKEN, token);
+		set(TOKEN_ATTR, token);
 	}
 
 	public Date getExpirationDate()

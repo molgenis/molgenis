@@ -1,6 +1,6 @@
 package org.molgenis.data.i18n;
 
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
@@ -20,7 +20,7 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.testng.Assert.assertEquals;
 
@@ -36,7 +36,7 @@ public class LanguageServiceTest
 	{
 		dataServiceMock = mock(DataService.class);
 		queryMock = mock(Query.class);
-		when(dataServiceMock.query(MOLGENIS_USER)).thenReturn(queryMock);
+		when(dataServiceMock.query(USER)).thenReturn(queryMock);
 		when(queryMock.eq(any(), any())).thenReturn(queryMock);
 		appSettingsMock = mock(AppSettings.class);
 		languageService = new LanguageService(dataServiceMock, appSettingsMock);
@@ -63,9 +63,9 @@ public class LanguageServiceTest
 	public void getCurrentUserLanguageAppSettings()
 	{
 		SecurityContextHolder.getContext().setAuthentication(new TestingAuthenticationToken("test", "test"));
-		MolgenisUser molgenisUser = mock(MolgenisUser.class);
-		when(molgenisUser.getLanguageCode()).thenReturn("de");
-		when(queryMock.findOne()).thenReturn(molgenisUser);
+		User user = mock(User.class);
+		when(user.getLanguageCode()).thenReturn("de");
+		when(queryMock.findOne()).thenReturn(user);
 		when(appSettingsMock.getLanguageCode()).thenReturn("de");
 		Language language = mock(Language.class);
 		when(dataServiceMock.findOneById(LANGUAGE, "de")).thenReturn(language);

@@ -7,8 +7,8 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Matchers;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.molgenis.auth.MolgenisUser;
-import org.molgenis.auth.MolgenisUserFactory;
+import org.molgenis.auth.User;
+import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.populate.IdGenerator;
@@ -86,7 +86,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 	private AlgorithmTemplateService algorithmTemplateService;
 
 	@Autowired
-	private MolgenisUserFactory molgenisUserFactory;
+	private UserFactory userFactory;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
@@ -373,7 +373,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		sourceAttribute.setDescription("height");
 		sourceEntityMetaData.addAttribute(sourceAttribute);
 
-		MolgenisUser owner = molgenisUserFactory.create();
+		User owner = userFactory.create();
 		owner.setUsername("flup");
 		owner.setPassword("geheim");
 		owner.setId("12345");
@@ -418,7 +418,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 		sourceAttribute.setDescription("weight");
 		sourceEntityMetaData.addAttribute(sourceAttribute);
 
-		MolgenisUser owner = molgenisUserFactory.create();
+		User owner = userFactory.create();
 		owner.setUsername("flup");
 		owner.setPassword("geheim");
 		owner.setId("12345");
@@ -459,7 +459,7 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		sourceEntityMetaData.addAttributes(Arrays.asList(sourceAttribute1, sourceAttribute2));
 
-		MolgenisUser owner = molgenisUserFactory.create();
+		User owner = userFactory.create();
 		owner.setUsername("flup");
 		owner.setPassword("geheim");
 		owner.setId("12345");

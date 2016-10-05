@@ -1,12 +1,12 @@
 package org.molgenis.security.google;
 
 import com.google.api.client.googleapis.auth.oauth2.GooglePublicKeysManager;
-import org.molgenis.auth.MolgenisGroupMemberFactory;
-import org.molgenis.auth.MolgenisUserFactory;
+import org.molgenis.auth.GroupMemberFactory;
+import org.molgenis.auth.UserFactory;
 import org.molgenis.data.DataService;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.core.token.UnknownTokenException;
-import org.molgenis.security.user.MolgenisUserDetailsService;
+import org.molgenis.security.user.UserDetailsService;
 import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.core.AuthenticationException;
 import org.testng.annotations.BeforeMethod;
@@ -31,13 +31,13 @@ public class GoogleAuthenticationProcessingFilterTest
 	public void setUp()
 	{
 		appSettings = mock(AppSettings.class);
-		MolgenisUserDetailsService molgenisUserDetailsService = mock(MolgenisUserDetailsService.class);
+		UserDetailsService userDetailsService = mock(UserDetailsService.class);
 		DataService dataService = mock(DataService.class);
 		GooglePublicKeysManager googlePublicKeysManager = mock(GooglePublicKeysManager.class);
-		MolgenisUserFactory molgenisUserFactory = mock(MolgenisUserFactory.class);
-		MolgenisGroupMemberFactory molgenisGroupMemberFactory = mock(MolgenisGroupMemberFactory.class);
+		UserFactory userFactory = mock(UserFactory.class);
+		GroupMemberFactory groupMemberFactory = mock(GroupMemberFactory.class);
 		googleAuthenticationProcessingFilter = new GoogleAuthenticationProcessingFilter(googlePublicKeysManager,
-				dataService, molgenisUserDetailsService, appSettings, molgenisUserFactory, molgenisGroupMemberFactory);
+				dataService, userDetailsService, appSettings, userFactory, groupMemberFactory);
 		request = mock(HttpServletRequest.class);
 		response = mock(HttpServletResponse.class);
 	}
