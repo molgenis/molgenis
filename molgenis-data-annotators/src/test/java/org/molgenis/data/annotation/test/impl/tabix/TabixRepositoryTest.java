@@ -29,7 +29,7 @@ import static org.molgenis.data.vcf.model.VcfAttributes.*;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
-@ContextConfiguration(classes = { org.molgenis.data.annotation.impl.tabix.TabixVcfRepositoryTest.Config.class })
+@ContextConfiguration(classes = { TabixRepositoryTest.Config.class })
 public class TabixRepositoryTest extends AbstractMolgenisSpringTest
 {
 	@Autowired

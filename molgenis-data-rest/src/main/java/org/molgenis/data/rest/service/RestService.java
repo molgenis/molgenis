@@ -119,6 +119,7 @@ public class RestService
 				break;
 			case CATEGORICAL_MREF:
 			case MREF:
+			case ONE_TO_MANY:
 				value = convertMref(attr, paramValue);
 				break;
 			case DATE:

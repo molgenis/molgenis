@@ -185,4 +185,18 @@ public class LazyEntity implements Entity
 		}
 		return entity;
 	}
+
+	@Override
+	public String toString()
+	{
+		if (entity != null)
+		{
+			return entity.toString();
+		}
+		else
+		{
+			return entityType.getName() + '{' + entityType.getIdAttribute().getName() + '=' + id
+					+ ",<lazy attributes not loaded>}";
+		}
+	}
 }

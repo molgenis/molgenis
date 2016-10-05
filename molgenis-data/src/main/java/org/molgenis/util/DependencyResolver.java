@@ -50,7 +50,9 @@ public class DependencyResolver
 	 *
 	 * @param coll
 	 * @return
+	 * @deprecated use {@link org.molgenis.data.meta.EntityTypeDependencyResolver} instead which is based on {@link GenericDependencyResolver}.
 	 */
+	@Deprecated
 	public static List<EntityType> resolve(Set<EntityType> coll)
 	{
 		// EntityType by entityname
@@ -73,8 +75,8 @@ public class DependencyResolver
 
 			for (AttributeMetaData attr : meta.getAtomicAttributes())
 			{
-				if ((attr.getRefEntity() != null) && !attr.getRefEntity().getName()
-						.equals(meta.getName()))// self reference
+				if (attr.getMappedBy() == null && (attr.getRefEntity() != null) && !attr.getRefEntity().getName()
+						.equals(meta.getName()))
 				{
 					dependencies.add(attr.getRefEntity().getName());
 				}

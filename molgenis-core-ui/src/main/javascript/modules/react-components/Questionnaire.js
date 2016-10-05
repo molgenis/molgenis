@@ -102,6 +102,7 @@ var Questionnaire = React.createClass({
                         break;
                     case 'CATEGORICAL_MREF':
                     case 'MREF':
+                    case 'ONE_TO_MANY':
                         values[attr.name] = _.map(value.items, function (item) {
                             return item[attr.refEntity.idAttribute];
                         }).join();

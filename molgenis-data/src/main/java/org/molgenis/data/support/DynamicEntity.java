@@ -10,11 +10,13 @@ import org.molgenis.data.meta.model.EntityType;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.joining;
 import static java.util.stream.StreamSupport.stream;
 
 /**
@@ -219,7 +221,6 @@ public class DynamicEntity implements Entity
 		MolgenisFieldTypes.AttributeType dataType = attr.getDataType();
 		switch (dataType)
 		{
-
 			case BOOL:
 				if (!(value instanceof Boolean))
 				{
@@ -241,6 +242,7 @@ public class DynamicEntity implements Entity
 				break;
 			case CATEGORICAL_MREF:
 			case MREF:
+			case ONE_TO_MANY:
 				if (!(value instanceof Iterable))
 				{
 					throw new MolgenisDataException(
@@ -300,5 +302,33 @@ public class DynamicEntity implements Entity
 			default:
 				throw new RuntimeException(format("Unknown data type [%s]", dataType.toString()));
 		}
+	}
+
+	@Override
+	public String toString()
+	{
+		StringBuilder strBuilder = new StringBuilder(entityType.getName()).append('{');
+		strBuilder.append(stream(entityType.getAtomicAttributes().spliterator(), false).map(attr ->
+		{
+			StringBuilder attrStrBuilder = new StringBuilder(attr.getName()).append('=');
+			if (EntityTypeUtils.isSingleReferenceType(attr))
+			{
+				Entity refEntity = getEntity(attr.getName());
+				attrStrBuilder.append(refEntity != null ? refEntity.getIdValue() : null);
+			}
+			else if (EntityTypeUtils.isMultipleReferenceType(attr))
+			{
+				attrStrBuilder.append('[')
+						.append(stream(getEntities(attr.getName()).spliterator(), false).map(Entity::getIdValue)
+								.map(Object::toString).collect(joining(","))).append(']');
+			}
+			else
+			{
+				attrStrBuilder.append(get(attr.getName()));
+			}
+			return attrStrBuilder.toString();
+		}).collect(Collectors.joining("&")));
+		strBuilder.append('}');
+		return strBuilder.toString();
 	}
 }

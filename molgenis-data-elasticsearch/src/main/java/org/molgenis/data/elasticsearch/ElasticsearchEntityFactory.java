@@ -189,6 +189,7 @@ public class ElasticsearchEntityFactory
 			}
 			case CATEGORICAL_MREF:
 			case MREF:
+			case ONE_TO_MANY:
 			{
 				Iterable<Entity> mrefEntities = entity.getEntities(attrName);
 				if (!Iterables.isEmpty(mrefEntities))

@@ -230,30 +230,33 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 		assertNull(AttributeFilterToFetchConverter.createDefaultAttributeFetch(labelAttr, "en"));
 	}
 
-	@Test
 	/**
 	 * attrs=~id,selfRef should fetch id, and selfRef(id, label)
-	 */ public void testConvertSelfRefIncludeId()
+	 */
+	@Test
+	public void testConvertSelfRefIncludeId()
 	{
 		AttributeFilter filter = new AttributeFilter().setIncludeIdAttr(true).add("selfRef");
 		Fetch fetch = AttributeFilterToFetchConverter.convert(filter, selfRefEntityType, "en");
 		assertEquals(fetch, new Fetch().field("id").field("selfRef", new Fetch().field("id").field("label")));
 	}
 
-	@Test
 	/**
 	 * attrs=id,selfRef should fetch id, and selfRef(id, label)
-	 */ public void testConvertIdSelfRef()
+	 */
+	@Test
+	public void testConvertIdSelfRef()
 	{
 		AttributeFilter filter = new AttributeFilter().add("id").add("selfRef");
 		Fetch fetch = AttributeFilterToFetchConverter.convert(filter, selfRefEntityType, "en");
 		assertEquals(fetch, new Fetch().field("id").field("selfRef", new Fetch().field("id").field("label")));
 	}
 
-	@Test
 	/**
 	 * A Fetch for attrs=~id,selfRef(*) should fetch id and selfRef(id, label, selfRef(id, label))
-	 */ public void testConvertNestedSelfRef()
+	 */
+	@Test
+	public void testConvertNestedSelfRef()
 	{
 		AttributeFilter filter = new AttributeFilter().setIncludeIdAttr(true)
 				.add("selfRef", new AttributeFilter().setIncludeAllAttrs(true));
@@ -262,11 +265,12 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 				new Fetch().field("id").field("label").field("selfRef", new Fetch().field("id").field("label"))));
 	}
 
-	@Test
 	/**
 	 * An AttributeFilter for ~id,~lbl,selfRef(*,selfRef(*)) should fetch (id, label, selfRef(id, label, selfRef(id,
 	 * label)))
-	 */ public void testConvertDoubleNestedSelfRef()
+	 */
+	@Test
+	public void testConvertDoubleNestedSelfRef()
 	{
 		AttributeFilter filter = new AttributeFilter().setIncludeIdAttr(true).setIncludeLabelAttr(true).add("selfRef",
 				new AttributeFilter().setIncludeAllAttrs(true)

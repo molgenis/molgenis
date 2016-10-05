@@ -38,7 +38,8 @@ var EntitySelectBox = React.createClass({
     getInitialState: function () {
         return {
             entity: null,
-            modal: false
+            modal: false,
+            value: this.props.value // store initial value in state
         };
     },
     render: function () {
@@ -106,33 +107,26 @@ var EntitySelectBox = React.createClass({
         var nestedRule = null;
 
         if (this.props.query) {
-            rules.push(this.props.query);
-            if (term.length > 0) {
-                rules.push({operator: 'AND'});
-                nestedRule = {operator: 'NESTED', nestedRules: []};
-                rules.push(nestedRule);
-                var attrs = this._getAttrs();
-                for (var i = 0; i < attrs.length; ++i) {
-                    var operator = 'LIKE';
-                    switch (this.state.entity.attributes[attrs[i]].fieldType) {
-                        case 'INT':
-                        case 'LONG':
-                        case 'BOOL':
-                        case 'DATE':
-                        case 'DATE_TIME':
-                        case 'DECIMAL':
-                            operator = 'EQUALS';
-                            break;
-                        case 'TEXT':
-                            operator = 'SEARCH';
-                            break;
-                        case 'COMPOUND':
-                            continue;
-                    }
-                    if (i > 0) {
-                        likeRules.push({operator: 'OR'});
-                    }
-                    likeRules.push({field: attrs[i], operator: operator, value: term});
+            if (this.state.value && this.state.value.length > 0) {
+                var nestedRules = [];
+                nestedRules.push(this.props.query);
+                nestedRules.push({operator: 'OR'});
+                nestedRules.push({
+                    field: this.props.entity.idAttribute, operator: 'IN', value: this.state.value.map(function (val) {
+                        return val[this.props.entity.idAttribute];
+                    }.bind(this))
+                });
+                rules.push({operator: 'NESTED', nestedRules: nestedRules});
+                if (term.length > 0) {
+                    rules.push({operator: 'AND'});
+                    nestedRule = {operator: 'NESTED', nestedRules: []};
+                    rules.push(nestedRule);
+                }
+
+            } else {
+                rules.push(this.props.query);
+                if (term.length > 0) {
+                    rules.push({operator: 'AND'});
                 }
             }
         }
@@ -228,6 +222,7 @@ var EntitySelectBox = React.createClass({
                 case 'CATEGORICAL_MREF':
                 case 'MREF':
                 case 'XREF':
+                case 'ONE_TO_MANY':
                     return true;
                 default:
                     return false;

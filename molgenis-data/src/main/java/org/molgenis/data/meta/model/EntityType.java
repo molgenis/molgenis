@@ -7,6 +7,7 @@ import org.molgenis.data.support.StaticEntity;
 
 import java.util.*;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import static com.google.common.collect.Iterables.concat;
 import static com.google.common.collect.Iterables.removeAll;
@@ -754,6 +755,36 @@ public class EntityType extends StaticEntity
 		List<AttributeMetaData> atomicAttrs = new ArrayList<>();
 		getOwnAtomicAttributesRec(getOwnAttributes(), atomicAttrs);
 		return atomicAttrs;
+	}
+
+	public boolean hasBidirectionalAttributes()
+	{
+		return hasMappedByAttributes() || hasInversedByAttributes();
+	}
+
+	public boolean hasMappedByAttributes()
+	{
+		return getMappedByAttributes().findFirst().orElse(null) != null;
+	}
+
+	public Stream<AttributeMetaData> getOwnMappedByAttributes()
+	{
+		return stream(getOwnAtomicAttributes().spliterator(), false).filter(AttributeMetaData::isMappedBy);
+	}
+
+	public Stream<AttributeMetaData> getMappedByAttributes()
+	{
+		return stream(getAtomicAttributes().spliterator(), false).filter(AttributeMetaData::isMappedBy);
+	}
+
+	public boolean hasInversedByAttributes()
+	{
+		return getInversedByAttributes().findFirst().orElse(null) != null;
+	}
+
+	public Stream<AttributeMetaData> getInversedByAttributes()
+	{
+		return stream(getAtomicAttributes().spliterator(), false).filter(AttributeMetaData::isInversedBy);
 	}
 
 	@Override

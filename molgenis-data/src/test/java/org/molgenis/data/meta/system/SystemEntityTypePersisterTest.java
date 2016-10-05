@@ -36,12 +36,13 @@ public class SystemEntityTypePersisterTest
 	private SystemEntityTypeRegistry systemEntityTypeRegistry;
 	private SystemEntityTypePersister systemEntityTypePersister;
 	private AttributeMetaDataMetaData attrMetaMeta;
+	private MetaDataService metaDataService;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		attrMetaMeta = mock(AttributeMetaDataMetaData.class);
-		MetaDataService metaDataService = mock(MetaDataService.class);
+		metaDataService = mock(MetaDataService.class);
 		RepositoryCollection defaultRepoCollection = mock(RepositoryCollection.class);
 		when(metaDataService.getDefaultBackend()).thenReturn(defaultRepoCollection);
 		dataService = mock(DataService.class);
@@ -87,7 +88,6 @@ public class SystemEntityTypePersisterTest
 		when(dataService.findAll(ENTITY_META_DATA, EntityType.class))
 				.thenReturn(Stream.of(refEntityType, entityType, refRemovedMeta, removedMeta));
 		systemEntityTypePersister.removeNonExistingSystemEntities();
-		//noinspection unchecked
 		ArgumentCaptor<Stream<Entity>> captor = ArgumentCaptor.forClass((Class) Stream.class);
 		verify(dataService).delete(eq(ENTITY_META_DATA), captor.capture());
 		assertEquals(captor.getValue().collect(toList()), Arrays.asList(removedMeta, refRemovedMeta));

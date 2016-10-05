@@ -1,8 +1,8 @@
 package org.molgenis.data.elasticsearch.index.job;
 
+import org.molgenis.data.index.meta.IndexPackage;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.SystemEntityType;
-import org.molgenis.data.index.meta.IndexPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,8 +10,8 @@ import java.util.Set;
 
 import static java.util.Collections.singleton;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.index.meta.IndexPackage.PACKAGE_INDEX;
+import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 /**
  * This entity is used to track the progress of the execution of a IndexActionJob.

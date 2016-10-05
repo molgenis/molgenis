@@ -14,8 +14,11 @@ import org.molgenis.data.elasticsearch.IndexedRepositoryDecorator;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.i18n.I18nStringDecorator;
 import org.molgenis.data.i18n.LanguageRepositoryDecorator;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.Language;
+import org.molgenis.data.index.IndexActionRegisterService;
+import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.AttributeMetaDataRepositoryDecorator;
@@ -24,8 +27,6 @@ import org.molgenis.data.meta.PackageRepositoryDecorator;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.system.SystemEntityTypeRegistry;
-import org.molgenis.data.index.IndexActionRegisterService;
-import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.validation.EntityAttributesValidator;
@@ -73,6 +74,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final MolgenisPermissionService permissionService;
 	private final EntityTypeValidator entityTypeValidator;
 	private final L3Cache l3Cache;
+	private final LanguageService languageService;
 
 	@Autowired
 	public MolgenisRepositoryDecoratorFactory(EntityManager entityManager,
@@ -83,8 +85,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder,
 			EntityTypeMetadata entityTypeMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
-			MolgenisPermissionService permissionService, EntityTypeValidator entityTypeValidator,
-			L3Cache l3Cache)
+			MolgenisPermissionService permissionService, EntityTypeValidator entityTypeValidator, L3Cache l3Cache,
+			LanguageService languageService)
 
 	{
 		this.entityManager = requireNonNull(entityManager);
@@ -108,6 +110,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.permissionService = requireNonNull(permissionService);
 		this.entityTypeValidator = requireNonNull(entityTypeValidator);
 		this.l3Cache = requireNonNull(l3Cache);
+		this.languageService = requireNonNull(languageService);
 	}
 
 	@Override
@@ -151,7 +154,6 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 
 		// 1. security decorator
 		decoratedRepository = new RepositorySecurityDecorator(decoratedRepository, appSettings);
-
 		return decoratedRepository;
 	}
 
@@ -181,8 +183,8 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 					(Repository<EntityType>) (Repository<? extends Entity>) repo, entityTypeValidator);
 
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityTypeRepositoryDecorator(
-					(Repository<EntityType>) (Repository<? extends Entity>) repo, dataService,
-					systemEntityTypeRegistry, permissionService);
+					(Repository<EntityType>) (Repository<? extends Entity>) repo, dataService, systemEntityTypeRegistry,
+					permissionService);
 		}
 		else if (repo.getName().equals(PACKAGE))
 		{
@@ -192,13 +194,11 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		else if (repo.getName().equals(LANGUAGE))
 		{
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new LanguageRepositoryDecorator(
-					(Repository<Language>) (Repository<? extends Entity>) repo, dataService, attrMetaFactory,
-					entityTypeMeta, i18nStringMeta);
+			(Repository<Language>) (Repository<? extends Entity>) repo, languageService);
 		}
 		else if (repo.getName().equals(I18N_STRING))
 		{
 			repo = new I18nStringDecorator(repo);
-		}
-		return repo;
+		} return repo;
 	}
 }

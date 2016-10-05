@@ -7,6 +7,7 @@ import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.empty;
@@ -85,4 +86,8 @@ public class CombinedEntityCache
 		cache.put(EntityKey.create(entityName, entity.getIdValue()), Optional.of(entityHydration.dehydrate(entity)));
 	}
 
+	public void evict(Stream<EntityKey> entityKeys)
+	{
+		entityKeys.forEach(cache::invalidate);
+	}
 }

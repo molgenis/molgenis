@@ -1,17 +1,19 @@
 package org.molgenis.util;
 
+import org.molgenis.data.Entity;
+import org.molgenis.data.EntityManager;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.support.DynamicEntity;
 import org.testng.annotations.Test;
 
 import static com.google.common.collect.ImmutableMap.of;
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.testng.Assert.*;
 
 public class EntityUtilsTest
 {
@@ -58,5 +60,43 @@ public class EntityUtilsTest
 		EntityType child = when(mock(EntityType.class).getName()).thenReturn("child").getMock();
 		when(child.getExtends()).thenReturn(father);
 		assertTrue(EntityUtils.doesExtend(child, "grandfather"));
+	}
+
+	@Test
+	public void getTypedValueStringAttributeMetaDataEntityManagerOneToMany()
+	{
+		String valueStr = "0,1,2";
+		AttributeMetaData attr = mock(AttributeMetaData.class);
+		EntityType refEntityType = mock(EntityType.class);
+		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
+		when(refIdAttr.getDataType()).thenReturn(INT);
+		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
+		when(attr.getRefEntity()).thenReturn(refEntityType);
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		EntityManager entityManager = mock(EntityManager.class);
+		Entity entity0 = mock(Entity.class);
+		Entity entity1 = mock(Entity.class);
+		Entity entity2 = mock(Entity.class);
+		when(entityManager.getReference(refEntityType, 0)).thenReturn(entity0);
+		when(entityManager.getReference(refEntityType, 1)).thenReturn(entity1);
+		when(entityManager.getReference(refEntityType, 2)).thenReturn(entity2);
+		assertEquals(EntityUtils.getTypedValue(valueStr, attr, entityManager), newArrayList(entity0, entity1, entity2));
+	}
+
+	@Test
+	public void getTypedValueStringAttributeMetaDataEntityManagerXref()
+	{
+		String valueStr = "0";
+		AttributeMetaData attr = mock(AttributeMetaData.class);
+		EntityType refEntityType = mock(EntityType.class);
+		AttributeMetaData refIdAttr = mock(AttributeMetaData.class);
+		when(refIdAttr.getDataType()).thenReturn(STRING);
+		when(refEntityType.getIdAttribute()).thenReturn(refIdAttr);
+		when(attr.getRefEntity()).thenReturn(refEntityType);
+		when(attr.getDataType()).thenReturn(XREF);
+		Entity entity = mock(Entity.class);
+		EntityManager entityManager = mock(EntityManager.class);
+		when(entityManager.getReference(refEntityType, valueStr)).thenReturn(entity);
+		assertEquals(EntityUtils.getTypedValue(valueStr, attr, entityManager), entity);
 	}
 }

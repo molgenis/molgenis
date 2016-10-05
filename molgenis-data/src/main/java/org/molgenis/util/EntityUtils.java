@@ -8,6 +8,7 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.Tag;
+import org.molgenis.data.support.EntityTypeUtils;
 
 import java.text.ParseException;
 import java.util.Iterator;
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Iterables.*;
 import static com.google.common.collect.Lists.newArrayList;
 import static java.lang.String.format;
+import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
@@ -35,17 +37,10 @@ public class EntityUtils
 	 */
 	public static Object getTypedValue(String valueStr, AttributeMetaData attr)
 	{
-		switch (attr.getDataType())
+		if (EntityTypeUtils.isReferenceType(attr))
 		{
-			case CATEGORICAL:
-			case FILE:
-			case XREF:
-			case CATEGORICAL_MREF:
-			case MREF:
-				throw new MolgenisDataException(
-						"getTypedValue(String, AttributeMetaData) can't be used for attributes referencing entities");
-			default:
-				break;
+			throw new MolgenisDataException(
+					"getTypedValue(String, AttributeMetaData) can't be used for attributes referencing entities");
 		}
 		return getTypedValue(valueStr, attr, null);
 	}
@@ -73,11 +68,13 @@ public class EntityUtils
 				return entityManager.getReference(xrefEntity, xrefIdValue);
 			case CATEGORICAL_MREF:
 			case MREF:
+			case ONE_TO_MANY:
 				EntityType mrefEntity = attr.getRefEntity();
 				List<String> mrefIdStrValues = ListEscapeUtils.toList(valueStr);
 				return mrefIdStrValues.stream()
 						.map(mrefIdStrValue -> getTypedValue(mrefIdStrValue, mrefEntity.getIdAttribute(),
-								entityManager));
+								entityManager)).map(mrefIdValue -> entityManager.getReference(mrefEntity, mrefIdValue))
+						.collect(toList());
 			case COMPOUND:
 				throw new IllegalArgumentException("Compound attribute has no value");
 			case DATE:
@@ -131,8 +128,8 @@ public class EntityUtils
 		return true;
 	}
 
-	public static List<Pair<EntityType, List<AttributeMetaData>>> getReferencingEntityType(
-			EntityType entityType, DataService dataService)
+	public static List<Pair<EntityType, List<AttributeMetaData>>> getReferencingEntityType(EntityType entityType,
+			DataService dataService)
 	{
 		List<Pair<EntityType, List<AttributeMetaData>>> referencingEntityType = newArrayList();
 
@@ -176,8 +173,9 @@ public class EntityUtils
 		Iterable<String> atomicAttributes = transform(entityType.getAtomicAttributes(), AttributeMetaData::getName);
 
 		// compound
-		Iterable<String> compoundAttributes = transform(filter(entityType.getAttributes(),
-				attributeMetaData -> attributeMetaData.getDataType() == COMPOUND), AttributeMetaData::getName);
+		Iterable<String> compoundAttributes = transform(
+				filter(entityType.getAttributes(), attributeMetaData -> attributeMetaData.getDataType() == COMPOUND),
+				AttributeMetaData::getName);
 
 		// all = atomic + compound
 		return concat(atomicAttributes, compoundAttributes);
@@ -445,6 +443,7 @@ public class EntityUtils
 							.equals(otherXrefValue.getIdValue())) return false;
 					break;
 				case CATEGORICAL_MREF:
+				case ONE_TO_MANY:
 				case MREF:
 					List<Entity> entities = newArrayList(entity.getEntities(attrName));
 					List<Entity> otherEntities = newArrayList(otherEntity.getEntities(attrName));
@@ -513,6 +512,7 @@ public class EntityUtils
 					hValue = Objects.hashCode(xrefIdValue);
 					break;
 				case CATEGORICAL_MREF:
+				case ONE_TO_MANY:
 				case MREF:
 					for (Entity mrefValue : entity.getEntities(attrName))
 					{

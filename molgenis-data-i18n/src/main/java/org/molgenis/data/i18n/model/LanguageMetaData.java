@@ -1,5 +1,6 @@
 package org.molgenis.data.i18n.model;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
@@ -13,11 +14,9 @@ public class LanguageMetaData extends SystemEntityType
 	private static final String SIMPLE_NAME = "languages";
 	public static final String LANGUAGE = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
-	public static final String DEFAULT_LANGUAGE_CODE = "en";
-	public static final String DEFAULT_LANGUAGE_NAME = "English";
-
 	public static final String CODE = "code";
 	public static final String NAME = "name";
+	public static final String ACTIVE = "active";
 
 	LanguageMetaData()
 	{
@@ -33,5 +32,6 @@ public class LanguageMetaData extends SystemEntityType
 		addAttribute(CODE, ROLE_ID).setDescription("Lowercase ISO 639 alpha-2 or alpha-3 code")
 				.setValidationExpression("/^[a-z]{2,3}$/.test($('code').value())");
 		addAttribute(NAME).setNillable(false);
+		addAttribute(ACTIVE).setDataType(MolgenisFieldTypes.AttributeType.BOOL).setNillable(false);
 	}
 }

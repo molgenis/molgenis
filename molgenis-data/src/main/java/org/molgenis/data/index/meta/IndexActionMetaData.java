@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component;
 
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.index.meta.IndexPackage.PACKAGE_INDEX;
 import static org.molgenis.data.meta.model.EntityType.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.index.meta.IndexPackage.PACKAGE_INDEX;
 
 /**
  * The index action is used to describe the action that needs to be done to make a
@@ -92,22 +92,18 @@ public class IndexActionMetaData extends SystemEntityType
 		/**
 		 * index action is finished
 		 */
-		FINISHED,
-		/**
-		 * index action is canceled
-		 */
-		CANCELED,
-		/**
-		 * index action failed
-		 */
-		FAILED,
-		/**
-		 * index action is started
-		 */
-		STARTED,
-		/**
-		 * index action is just created and is not yet processed
-		 */
-		PENDING
+		FINISHED, /**
+	 * index action is canceled
+	 */
+	CANCELED, /**
+	 * index action failed
+	 */
+	FAILED, /**
+	 * index action is started
+	 */
+	STARTED, /**
+	 * index action is just created and is not yet processed
+	 */
+	PENDING
 	}
 }

@@ -24,7 +24,7 @@
                 <th>${key?html}</th>
                 <#if entity.get(key)??>
                     <#assign type = atomicAttribute.getDataType()>
-                    <td><#if type == "CATEGORICAL_MREF" || type == "MREF"><#list entity.getEntities(key) as entity>${entity.getLabelValue()!?html}<#sep>
+                    <td><#if type == "CATEGORICAL_MREF" || type == "MREF" || type == "ONE_TO_MANY"><#list entity.getEntities(key) as entity>${entity.getLabelValue()!?html}<#sep>
                         , </#sep></#list>
                     <#elseif type == "CATEGORICAL" || type == "FILE" || type == "XREF"><#if entity.getEntity(key)??>${entity.getEntity(key).getLabelValue()!?html}</#if>
                     <#elseif type == "BOOL">${entity.getBoolean(key)?c}

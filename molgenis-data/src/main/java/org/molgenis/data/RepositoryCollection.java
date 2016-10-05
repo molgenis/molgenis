@@ -87,9 +87,9 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	/**
 	 * Updates {@link Repository repositories} for the given updated attribute.
 	 *
-	 * @param entityType entity meta data
-	 * @param attr           attribute
-	 * @param updatedAttr    updated attribute
+	 * @param entityType  entity meta data
+	 * @param attr        attribute
+	 * @param updatedAttr updated attribute
 	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#UPDATABLE}
 	 */
 	void updateAttribute(EntityType entityType, AttributeMetaData attr, AttributeMetaData updatedAttr);
@@ -102,12 +102,4 @@ public interface RepositoryCollection extends Iterable<Repository<Entity>>
 	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#UPDATABLE}
 	 */
 	void deleteAttribute(EntityType entityType, AttributeMetaData attr);
-
-	/**
-	 * Returns the language codes defined in the meta data stored in this repository collection.
-	 *
-	 * @return stream of language codes
-	 * @throws UnsupportedOperationException if this repository collection is not {@link RepositoryCollectionCapability#META_DATA_PERSISTABLE}
-	 */
-	Stream<String> getLanguageCodes();
 }

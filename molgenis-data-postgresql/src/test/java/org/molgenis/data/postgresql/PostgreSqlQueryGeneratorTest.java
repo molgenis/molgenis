@@ -1,10 +1,7 @@
 package org.molgenis.data.postgresql;
 
 import org.molgenis.MolgenisFieldTypes.AttributeType;
-import org.molgenis.data.Entity;
-import org.molgenis.data.Fetch;
-import org.molgenis.data.MolgenisDataException;
-import org.molgenis.data.Sort;
+import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityType;
 import org.molgenis.data.meta.model.Package;
@@ -23,7 +20,9 @@ import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
+import static org.molgenis.data.postgresql.PostgreSqlRepositoryCollection.POSTGRESQL;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNull;
 
 public class PostgreSqlQueryGeneratorTest
 {
@@ -107,7 +106,7 @@ public class PostgreSqlQueryGeneratorTest
 							when(attr.isUnique()).thenReturn(unique);
 							when(attr.isNillable()).thenReturn(nillable);
 
-							if (attrType == CATEGORICAL || attrType == CATEGORICAL_MREF)
+							if (attrType == CATEGORICAL || attrType == CATEGORICAL_MREF || attrType == ONE_TO_MANY)
 							{
 								when(attr.getRefEntity()).thenReturn(refEntityTypeString);
 							}
@@ -161,6 +160,34 @@ public class PostgreSqlQueryGeneratorTest
 
 		String expectedSql = "ALTER TABLE \"entity\" ADD CONSTRAINT \"entity_attr_fkey\" FOREIGN KEY (\"attr\") REFERENCES \"entity\"(\"idAttr\") DEFERRABLE INITIALLY DEFERRED";
 		assertEquals(PostgreSqlQueryGenerator.getSqlCreateForeignKey(entityType, refAttr), expectedSql);
+	}
+
+	@Test
+	public void getSqlCreateForeignKeyMappedBy()
+	{
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+
+		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refIdAttr").getMock();
+		EntityType refEntityMeta = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+
+		AttributeMetaData refXrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("xrefAttr").getMock();
+		when(refXrefAttr.getDataType()).thenReturn(XREF);
+		when(refXrefAttr.isInversedBy()).thenReturn(true);
+		when(refXrefAttr.getInversedBy()).thenReturn(attr);
+		when(refXrefAttr.getRefEntity()).thenReturn(entityType);
+
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		when(attr.isMappedBy()).thenReturn(true);
+		when(attr.getMappedBy()).thenReturn(refXrefAttr);
+
+		String expectedSql = "ALTER TABLE \"refEntity_xrefAttr\" ADD CONSTRAINT \"entity_attr_fkey\" FOREIGN KEY (\"refIdAttr\") REFERENCES \"refEntity\"(\"refIdAttr\") ON DELETE CASCADE";
+		assertEquals(PostgreSqlQueryGenerator.getSqlCreateForeignKey(entityType, attr), expectedSql);
 	}
 
 	@Test
@@ -262,6 +289,34 @@ public class PostgreSqlQueryGeneratorTest
 	}
 
 	@Test
+	public void getSqlCreateJunctionTableOneToManyBidi()
+	{
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+
+		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refIdAttr").getMock();
+		when(refIdAttr.getDataType()).thenReturn(STRING);
+		AttributeMetaData refXrefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("xrefAttr").getMock();
+		when(refXrefAttr.getDataType()).thenReturn(XREF);
+		when(refXrefAttr.isInversedBy()).thenReturn(true);
+		when(refXrefAttr.getInversedBy()).thenReturn(attr);
+		when(refXrefAttr.getRefEntity()).thenReturn(entityType);
+		EntityType refEntityMeta = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
+		when(idAttr.getDataType()).thenReturn(STRING);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(attr.isMappedBy()).thenReturn(true);
+		when(attr.getMappedBy()).thenReturn(refXrefAttr);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+
+		String expectedSql = "CREATE TABLE \"refEntity_xrefAttr\" (\"order\" INT,\"refIdAttr\" character varying(255) NOT NULL, \"xrefAttr\" character varying(255) NOT NULL, FOREIGN KEY (\"xrefAttr\") REFERENCES \"entity\"(\"idAttr\") ON DELETE CASCADE, UNIQUE (\"refIdAttr\"), UNIQUE (\"order\",\"refIdAttr\"))";
+		assertEquals(PostgreSqlQueryGenerator.getSqlCreateJunctionTable(entityType, attr), expectedSql);
+	}
+
+	@Test
 	public void getSqlCreateJunctionTableSelfReferencing()
 	{
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
@@ -277,7 +332,162 @@ public class PostgreSqlQueryGeneratorTest
 	}
 
 	@Test
-	public void getSqlSelectMref() throws Exception
+	public void getJunctionTableSelect()
+	{
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(MREF);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		assertEquals(PostgreSqlQueryGenerator.getSqlJunctionTableSelect(entityType, attr, 3),
+				"SELECT \"idAttr\", \"order\",\"attr\" FROM \"entity_attr\" WHERE \"idAttr\" in (?, ?, ?) ORDER BY \"idAttr\", \"order\"");
+	}
+
+	@Test
+	public void getJunctionTableSelectMappedBy()
+	{
+		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refIdAttr").getMock();
+		EntityType refEntityMeta = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refAttr").getMock();
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(MREF);
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(attr.isMappedBy()).thenReturn(true);
+		when(attr.getMappedBy()).thenReturn(refAttr);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		assertEquals(PostgreSqlQueryGenerator.getSqlJunctionTableSelect(entityType, attr, 3),
+				"SELECT \"refAttr\", \"order\",\"refIdAttr\" FROM \"refEntity_refAttr\" WHERE \"refAttr\" in (?, ?, ?) ORDER BY \"refAttr\", \"order\"");
+	}
+
+	@Test
+	public void getSqlInsertJunction()
+	{
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(MREF);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		assertEquals(PostgreSqlQueryGenerator.getSqlInsertJunction(entityType, attr),
+				"INSERT INTO \"entity_attr\" (\"order\",\"idAttr\",\"attr\") VALUES (?,?,?)");
+	}
+
+	@Test
+	public void getSqlInsertJunctionMappedBy()
+	{
+		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refIdAttr").getMock();
+		EntityType refEntityMeta = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refAttr").getMock();
+
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(attr.isMappedBy()).thenReturn(true);
+		when(attr.getMappedBy()).thenReturn(refAttr);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		assertEquals(PostgreSqlQueryGenerator.getSqlInsertJunction(entityType, attr),
+				"INSERT INTO \"refEntity_refAttr\" (\"order\",\"refIdAttr\",\"refAttr\") VALUES (?,?,?)");
+	}
+
+	@Test
+	public void getSqlInsertJunctionInversedBy()
+	{
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(XREF);
+		when(attr.isInversedBy()).thenReturn(true);
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		assertEquals(PostgreSqlQueryGenerator.getSqlInsertJunction(entityType, attr),
+				"INSERT INTO \"entity_attr\" (\"order\",\"idAttr\",\"attr\") VALUES (?,?,?)");
+	}
+
+	@Test
+	public void getSqlSelectXref()
+	{
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(XREF);
+		when(attr.isInversedBy()).thenReturn(false);
+
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
+		when(idAttr.getDataType()).thenReturn(STRING);
+
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, attr));
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+
+		//noinspection unchecked
+		Query<Entity> q = mock(Query.class);
+		List<Object> parameters = Lists.newArrayList();
+		assertEquals(PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true),
+				"SELECT this.\"idAttr\", this.\"attr\" FROM \"entity\" AS this");
+		assertEquals(parameters, Collections.emptyList());
+	}
+
+	@Test
+	public void getSqlSelectXrefInversed()
+	{
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refAttr").getMock();
+		when(refAttr.getDataType()).thenReturn(ONE_TO_MANY);
+
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(XREF);
+		when(attr.isInversedBy()).thenReturn(true);
+		when(attr.getInversedBy()).thenReturn(refAttr);
+
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
+		when(idAttr.getDataType()).thenReturn(STRING);
+
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, attr));
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+
+		//noinspection unchecked
+		Query<Entity> q = mock(Query.class);
+		List<Object> parameters = Lists.newArrayList();
+		assertEquals(PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true),
+				"SELECT this.\"idAttr\", (SELECT \"attr\".\"attr\" FROM \"entity_attr\" AS \"attr\" WHERE this.\"idAttr\" = \"attr\".\"idAttr\") AS \"attr\" FROM \"entity\" AS this");
+		assertEquals(parameters, Collections.emptyList());
+	}
+
+	@Test
+	public void getSqlSelectOneToManyMappedBy()
+	{
+		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refIdAttr").getMock();
+		EntityType refEntityMeta = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refAttr").getMock();
+		when(refAttr.getDataType()).thenReturn(XREF);
+
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(attr.isMappedBy()).thenReturn(true);
+		when(attr.getMappedBy()).thenReturn(refAttr);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
+		when(idAttr.getDataType()).thenReturn(STRING);
+
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		when(entityType.getAtomicAttributes()).thenReturn(newArrayList(idAttr, attr));
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+
+		//noinspection unchecked
+		Query<Entity> q = mock(Query.class);
+		List<Object> parameters = Lists.newArrayList();
+		assertEquals(PostgreSqlQueryGenerator.getSqlSelect(entityType, q, parameters, true),
+				"SELECT this.\"idAttr\", (SELECT array_agg(DISTINCT ARRAY[\"attr\".\"order\"::TEXT,\"attr\".\"refIdAttr\"::TEXT]) FROM \"refEntity_refAttr\" AS \"attr\" WHERE this.\"idAttr\" = \"attr\".\"refAttr\") AS \"attr\" FROM \"entity\" AS this");
+		assertEquals(parameters, Collections.emptyList());
+	}
+
+	@Test
+	public void getSqlSelectMref()
 	{
 		Package package_ = when(mock(Package.class).getName()).thenReturn("org_molgenis").getMock();
 
@@ -447,6 +657,43 @@ public class PostgreSqlQueryGeneratorTest
 		assertEquals(PostgreSqlQueryGenerator.getSqlAddColumn(entityType, attr), sql);
 	}
 
+	@Test
+	public void getSqlAddColumnMappedBy()
+	{
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		EntityType refEntityMeta = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityMeta.getBackend()).thenReturn(POSTGRESQL);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		when(attr.isMappedBy()).thenReturn(true);
+		AttributeMetaData mappedByAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("mappedByAttr")
+				.getMock();
+		when(attr.getMappedBy()).thenReturn(mappedByAttr);
+		assertEquals(PostgreSqlQueryGenerator.getSqlAddColumn(entityType, attr),
+				"ALTER TABLE \"refEntity\" ADD \"mappedByAttr_order\" SERIAL");
+	}
+
+	@Test
+	public void getSqlAddColumnMappedByCrossRepositoryCollection()
+	{
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("id").getMock();
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		EntityType refEntityMeta = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityMeta.getBackend()).thenReturn("notPostgreSQL");
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		when(attr.isMappedBy()).thenReturn(true);
+		AttributeMetaData mappedByAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("mappedByAttr")
+				.getMock();
+		when(attr.getMappedBy()).thenReturn(mappedByAttr);
+		assertNull(PostgreSqlQueryGenerator.getSqlAddColumn(entityType, attr));
+	}
+
 	@DataProvider(name = "getSqlAddColumnInvalidType")
 	public static Iterator<Object[]> getSqlAddColumnInvalidTypeProvider()
 	{
@@ -473,13 +720,50 @@ public class PostgreSqlQueryGeneratorTest
 	}
 
 	@Test
+	public void getSqlDropColumnOneToManyMappedBy()
+	{
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		EntityType refEntityMeta = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refAttr").getMock();
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(attr.getMappedBy()).thenReturn(refAttr);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		when(refAttr.getDataType()).thenReturn(XREF);
+		when(refAttr.getInversedBy()).thenReturn(attr);
+		when(refAttr.getRefEntity()).thenReturn(entityType);
+		assertEquals(PostgreSqlQueryGenerator.getSqlDropColumn(entityType, attr),
+				"ALTER TABLE \"refEntity\" DROP COLUMN \"refAttr_order\"");
+	}
+
+	@Test
 	public void getSqlCreateJunctionTableIndex()
 	{
 		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
-		AttributeMetaData idxAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idxAttr").getMock();
+		AttributeMetaData idxAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
 		when(entityType.getIdAttribute()).thenReturn(idxAttr);
 		assertEquals(PostgreSqlQueryGenerator.getSqlCreateJunctionTableIndex(entityType, attr),
-				"CREATE INDEX \"entity_attr_idxAttr_idx\" ON \"entity_attr\" (\"idxAttr\")");
+				"CREATE INDEX \"entity_attr_idAttr_idx\" ON \"entity_attr\" (\"idAttr\")");
+	}
+
+	@Test
+	public void getSqlCreateJunctionTableIndexMappedBy()
+	{
+		AttributeMetaData refIdAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refIdAttr").getMock();
+		EntityType refEntityMeta = when(mock(EntityType.class).getName()).thenReturn("refEntity").getMock();
+		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refAttr").getMock();
+		when(refAttr.getDataType()).thenReturn(XREF);
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
+		when(attr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(attr.isMappedBy()).thenReturn(true);
+		when(attr.getMappedBy()).thenReturn(refAttr);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		AttributeMetaData idAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("idAttr").getMock();
+		when(entityType.getIdAttribute()).thenReturn(idAttr);
+		assertEquals(PostgreSqlQueryGenerator.getSqlCreateJunctionTableIndex(entityType, attr),
+				"CREATE INDEX \"refEntity_refAttr_refIdAttr_idx\" ON \"refEntity_refAttr\" (\"refIdAttr\")");
 	}
 }

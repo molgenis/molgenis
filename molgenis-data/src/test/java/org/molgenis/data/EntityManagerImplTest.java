@@ -12,7 +12,9 @@ import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static freemarker.template.utility.Collections12.singletonList;
 import static org.mockito.Mockito.*;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.testng.Assert.*;
 
 public class EntityManagerImplTest
@@ -102,7 +104,7 @@ public class EntityManagerImplTest
 	@Test
 	public void resolveReferencesNoFetch()
 	{
-		EntityType entityType = mock(EntityType.class);
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
 
 		Entity entity0 = new DynamicEntity(entityType); // do not mock, setters will be called
 		Entity entity1 = new DynamicEntity(entityType); // do not mock, setters will be called
@@ -115,9 +117,12 @@ public class EntityManagerImplTest
 	@Test
 	public void resolveReferencesStreamNoFetch()
 	{
-		EntityType entityType = mock(EntityType.class);
-		AttributeMetaData labelAttr = mock(AttributeMetaData.class);
+		EntityType entityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		AttributeMetaData labelAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("labelAttr").getMock();
+		when(labelAttr.getDataType()).thenReturn(STRING);
 		when(entityType.getLabelAttribute()).thenReturn(labelAttr);
+		when(entityType.getAtomicAttributes()).thenReturn(singletonList(labelAttr));
+
 		Entity entity0 = new DynamicEntity(entityType); // do not mock, setters will be called
 		Entity entity1 = new DynamicEntity(entityType); // do not mock, setters will be called
 

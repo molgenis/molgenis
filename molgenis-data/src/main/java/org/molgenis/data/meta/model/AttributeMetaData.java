@@ -22,6 +22,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.*;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
+import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 
 /**
  * Attribute defines the properties of an entity. Synonyms: feature, column, data item.
@@ -75,6 +76,7 @@ public class AttributeMetaData extends StaticEntity
 		attrMetaCopy.setName(attrMeta.getName());
 		attrMetaCopy.setDataType(attrMeta.getDataType());
 		attrMetaCopy.setRefEntity(attrMeta.getRefEntity()); // do not deep-copy
+		attrMetaCopy.setMappedBy(attrMeta.getMappedBy()); // do not deep-copy
 		attrMetaCopy.setExpression(attrMeta.getExpression());
 		attrMetaCopy.setNillable(attrMeta.isNillable());
 		attrMetaCopy.setAuto(attrMeta.isAuto());
@@ -245,6 +247,25 @@ public class AttributeMetaData extends StaticEntity
 	{
 		set(REF_ENTITY, refEntity);
 		return this;
+	}
+
+	public AttributeMetaData getMappedBy()
+	{
+		return getEntity(MAPPED_BY, AttributeMetaData.class);
+	}
+
+	public AttributeMetaData setMappedBy(AttributeMetaData mappedByAttr)
+	{
+		set(MAPPED_BY, mappedByAttr);
+		return this;
+	}
+
+	/**
+	 * Indicates if this attribute is the one-to-many back-reference of a bidirectionally navigable relationship.
+	 */
+	public boolean isMappedBy()
+	{
+		return getMappedBy() != null;
 	}
 
 	/**
@@ -577,5 +598,34 @@ public class AttributeMetaData extends StaticEntity
 	public String toString()
 	{
 		return "AttributeMetaData{" + "name=" + getName() + '}';
+	}
+
+	/**
+	 * For a reference type attribute, searches the referenced entity for its inversed attribute.
+	 * This is the one-to-many attribute that has "mappedBy" set to this attribute.
+	 * Returns null if this is not a reference type attribute, or no inverse attribute exists.
+	 */
+	public AttributeMetaData getInversedBy()
+	{
+		// FIXME besides checking mappedBy attr name also check attr.getRefEntity().getName
+		if (isReferenceType(this))
+		{
+			return stream(getRefEntity().getAtomicAttributes().spliterator(), false)
+					.filter(AttributeMetaData::isMappedBy)
+					.filter(attr -> getName().equals(attr.getMappedBy().getName())).findFirst().orElse(null);
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * Determines if this is a reference type attribute whose refEntity has an attribute that has mappedBy set to this
+	 * attribute.
+	 */
+	public boolean isInversedBy()
+	{
+		return getInversedBy() != null;
 	}
 }

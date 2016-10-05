@@ -5,6 +5,7 @@ import com.google.common.collect.Iterables;
 import org.apache.commons.lang3.StringUtils;
 import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
+import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.I18nString;
 import org.molgenis.data.i18n.model.I18nStringFactory;
 import org.molgenis.data.i18n.model.Language;
@@ -1192,7 +1193,7 @@ public class EmxMetaDataParser implements MetaDataParser
 		i18nString.setMessageId(emxI18nStringEntity.getString(EMX_I18N_STRING_MSGID));
 		i18nString.setDescription(emxI18nStringEntity.getString(EMX_I18N_STRING_DESCRIPTION));
 
-		dataService.getMeta().getLanguageCodes()
+		LanguageService.getLanguageCodes()
 				.forEach(lang -> i18nString.set(lang, emxI18nStringEntity.getString(lang)));
 		return i18nString;
 	}

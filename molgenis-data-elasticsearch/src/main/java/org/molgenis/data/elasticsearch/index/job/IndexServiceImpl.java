@@ -21,11 +21,11 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 import static org.molgenis.data.elasticsearch.index.job.IndexJobExecutionMeta.INDEX_JOB_EXECUTION;
+import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
+import static org.molgenis.data.index.meta.IndexActionMetaData.*;
 import static org.molgenis.data.jobs.model.JobExecution.Status.SUCCESS;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.END_DATE;
 import static org.molgenis.data.jobs.model.JobExecutionMetaData.STATUS;
-import static org.molgenis.data.index.meta.IndexActionGroupMetaData.INDEX_ACTION_GROUP;
-import static org.molgenis.data.index.meta.IndexActionMetaData.*;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 public class IndexServiceImpl implements IndexService

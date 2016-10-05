@@ -1,6 +1,5 @@
 package org.molgenis.util;
 
-import com.google.common.collect.Lists;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityType;
@@ -9,17 +8,46 @@ import org.testng.annotations.Test;
 
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.common.collect.Sets.newLinkedHashSet;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.testng.Assert.assertEquals;
 
 public class DependencyResolverTest
 {
+	@Test
+	public void resolveOneToMany()
+	{
+		EntityType oneToManyEntityType = when(mock(EntityType.class).getName()).thenReturn("entity").getMock();
+		EntityType xrefEntityType = when(mock(EntityType.class).getName()).thenReturn("refEntity")
+				.getMock();
+
+		AttributeMetaData oneToManyAttr = mock(AttributeMetaData.class);
+		when(oneToManyAttr.getName()).thenReturn("oneToManyAttr");
+		when(oneToManyAttr.getDataType()).thenReturn(ONE_TO_MANY);
+		when(oneToManyAttr.getRefEntity()).thenReturn(xrefEntityType);
+
+
+		AttributeMetaData xrefAttr = mock(AttributeMetaData.class);
+		when(xrefAttr.getName()).thenReturn("xrefAttr");
+		when(xrefAttr.getDataType()).thenReturn(XREF);
+		when(xrefAttr.getRefEntity()).thenReturn(oneToManyEntityType);
+		when(xrefAttr.getInversedBy()).thenReturn(oneToManyAttr);
+
+		when(oneToManyAttr.getMappedBy()).thenReturn(xrefAttr);
+
+		when(oneToManyEntityType.getAtomicAttributes()).thenReturn(singleton(oneToManyAttr));
+		when(xrefEntityType.getAtomicAttributes()).thenReturn(singleton(xrefAttr));
+		assertEquals(DependencyResolver.resolve(newLinkedHashSet(newArrayList(xrefEntityType, oneToManyEntityType))),
+				newArrayList(oneToManyEntityType, xrefEntityType));
+	}
+
 	@Test
 	public void resolve()
 	{
@@ -28,6 +56,12 @@ public class DependencyResolverTest
 		EntityType e3 = when(mock(EntityType.class).getName()).thenReturn("e3").getMock();
 		EntityType e4 = when(mock(EntityType.class).getName()).thenReturn("e4").getMock();
 		EntityType e5 = when(mock(EntityType.class).getName()).thenReturn("e5").getMock();
+
+		when(e1.toString()).thenReturn("e1");
+		when(e2.toString()).thenReturn("e2");
+		when(e3.toString()).thenReturn("e3");
+		when(e4.toString()).thenReturn("e4");
+		when(e5.toString()).thenReturn("e5");
 
 		AttributeMetaData e1RefAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("ref").getMock();
 		when(e1RefAttr.getDataType()).thenReturn(XREF);
@@ -100,6 +134,6 @@ public class DependencyResolverTest
 		Iterable<Entity> entities = asList(piet, klaas, jan, katrijn, marie);
 
 		Iterable<Entity> sorted = new DependencyResolver().resolveSelfReferences(entities, emd);
-		assertEquals(Lists.newArrayList(sorted), asList(marie, piet, jan, katrijn, klaas));
+		assertEquals(newArrayList(sorted), asList(marie, piet, jan, katrijn, klaas));
 	}
 }

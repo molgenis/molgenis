@@ -108,10 +108,4 @@ class RepositoryCollectionDecorator implements RepositoryCollection
 	{
 		decoratedRepositoryCollection.deleteAttribute(entityType, attr);
 	}
-
-	@Override
-	public Stream<String> getLanguageCodes()
-	{
-		return decoratedRepositoryCollection.getLanguageCodes();
-	}
 }

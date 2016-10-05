@@ -1,6 +1,5 @@
 package org.molgenis.integrationtest.platform;
 
-import org.apache.commons.io.FileUtils;
 import org.molgenis.data.*;
 import org.molgenis.data.cache.l2.L2Cache;
 import org.molgenis.data.elasticsearch.SearchService;
@@ -13,10 +12,7 @@ import org.molgenis.data.i18n.model.LanguageMetaData;
 import org.molgenis.data.listeners.EntityListener;
 import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.MetaDataServiceImpl;
-import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityType;
-import org.molgenis.data.meta.model.EntityTypeMetadata;
+import org.molgenis.data.meta.model.*;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.data.EntitySelfXrefTestHarness;
@@ -28,23 +24,27 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.security.authentication.TestingAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
-import java.io.File;
-import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -53,7 +53,9 @@ import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
+import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.test.data.EntityTestHarness.*;
@@ -66,11 +68,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 {
 	private final Logger LOG = LoggerFactory.getLogger(PlatformIT.class);
 
-	private EntityType entityTypeStatic;
-	private EntityType refEntityTypeStatic;
-	private EntityType entityTypeDynamic;
-	private EntityType refEntityTypeDynamic;
-	private EntityType selfXrefEntityType;
+	private static EntityType entityTypeStatic;
+	private static EntityType refEntityTypeStatic;
+	private static EntityType entityTypeDynamic;
+	private static EntityType refEntityTypeDynamic;
+	private static EntityType selfXrefEntityType;
 
 	@Autowired
 	private IndexService indexService;
@@ -91,8 +93,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private L2Cache l2Cache;
 	@Autowired
-	private LanguageFactory languageFactory;
-	@Autowired
 	private LanguageService languageService;
 	@Autowired
 	private I18nStringMetaData i18nStringMetaData;
@@ -102,6 +102,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private EntityTypeMetadata entityTypeMetadata;
 	@Autowired
 	private AttributeMetaDataMetaData attributeMetaDataMetaData;
+	@Autowired
+	private LanguageFactory languageFactory;
+	@Autowired
+	private AttributeMetaDataFactory attributeMetaDataFactory;
 
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
@@ -156,119 +160,38 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 			metaDataService.addEntityType(refEntityTypeDynamic);
 			metaDataService.addEntityType(entityTypeDynamic);
 			metaDataService.addEntityType(selfXrefEntityType);
-		});
-		setAuthentication();
-		createLanguages();
+		}); setAuthentication();
 		waitForWorkToBeFinished(indexService, LOG);
+	}
+
+	static List<GrantedAuthority> makeAuthorities(String entityName, boolean write, boolean read, boolean count)
+	{
+		List<GrantedAuthority> authorities = newArrayList();
+		if (write) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + entityName.toUpperCase()));
+		if (read) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_" + entityName.toUpperCase()));
+		if (count) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_COUNT_" + entityName.toUpperCase()));
+		return authorities;
 	}
 
 	private void setAuthentication()
 	{
-		// Permissions refEntityTypeStatic.getName()
-		String writeTestRefEntityStatic = "ROLE_ENTITY_WRITE_" + refEntityTypeStatic.getName().toUpperCase();
-		String readTestRefEntityStatic = "ROLE_ENTITY_READ_" + refEntityTypeStatic.getName().toUpperCase();
-		String countTestRefEntityStatic = "ROLE_ENTITY_COUNT_" + refEntityTypeStatic.getName().toUpperCase();
+		List<GrantedAuthority> authorities = newArrayList();
 
-		// Permissions entityTypeStatic.getName()
-		String writeTestEntityStatic = "ROLE_ENTITY_WRITE_" + entityTypeStatic.getName().toUpperCase();
-		String readTestEntityStatic = "ROLE_ENTITY_READ_" + entityTypeStatic.getName().toUpperCase();
-		String countTestEntityStatic = "ROLE_ENTITY_COUNT_" + entityTypeStatic.getName().toUpperCase();
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_SYS_MD_ENTITIES"));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES"));
+		authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
+		authorities.addAll(makeAuthorities(refEntityTypeStatic.getName(), true, true, true));
+		authorities.addAll(makeAuthorities(entityTypeStatic.getName(), true, true, true));
+		authorities.addAll(makeAuthorities(entityTypeDynamic.getName(), true, true, true));
+		authorities.addAll(makeAuthorities(refEntityTypeDynamic.getName(), false, true, true));
+		authorities.addAll(makeAuthorities(selfXrefEntityType.getName(), true, true, true));
+		authorities.addAll(makeAuthorities(languageMetaData.getName(), true, true, true));
+		authorities.addAll(makeAuthorities(attributeMetaDataMetaData.getName(), true, true, true));
+		authorities.addAll(makeAuthorities(i18nStringMetaData.getName(), true, false, false));
+		authorities.addAll(makeAuthorities(entityTypeMetadata.getName(), true, true, true));
 
-		// Permissions entityTypeDynamic.getName()
-		String writeTestEntity = "ROLE_ENTITY_WRITE_" + entityTypeDynamic.getName().toUpperCase();
-		String readTestEntity = "ROLE_ENTITY_READ_" + entityTypeDynamic.getName().toUpperCase();
-		String countTestEntity = "ROLE_ENTITY_COUNT_" + entityTypeDynamic.getName().toUpperCase();
-
-		// Permissions refEntityTypeDynamic.getName()
-		String readTestRefEntity = "ROLE_ENTITY_READ_" + refEntityTypeDynamic.getName().toUpperCase();
-		String countTestRefEntity = "ROLE_ENTITY_COUNT_" + refEntityTypeDynamic.getName().toUpperCase();
-
-		// Permissions selfXrefEntityType.getName()
-		String writeSelfXrefEntity = "ROLE_ENTITY_WRITE_" + selfXrefEntityType.getName().toUpperCase();
-		String readSelfXrefEntity = "ROLE_ENTITY_READ_" + selfXrefEntityType.getName().toUpperCase();
-		String countSelfXrefEntity = "ROLE_ENTITY_COUNT_" + selfXrefEntityType.getName().toUpperCase();
-
-		// Permissions languageMetaData
-		String writeLanguageMetaData = "ROLE_ENTITY_WRITE_" + languageMetaData.getName().toUpperCase();
-		String readLanguageMetaData = "ROLE_ENTITY_READ_" + languageMetaData.getName().toUpperCase();
-		String countLanguageMetaData = "ROLE_ENTITY_COUNT_" + languageMetaData.getName().toUpperCase();
-
-		// Permissions attributeMetaDataMetaData
-		String writeAttributeMetaDataMetaData =
-				"ROLE_ENTITY_WRITE_" + attributeMetaDataMetaData.getName().toUpperCase();
-		String readAttributeMetaDataMetaData = "ROLE_ENTITY_READ_" + attributeMetaDataMetaData.getName().toUpperCase();
-		String countAttributeMetaDataMetaData =
-				"ROLE_ENTITY_COUNT_" + attributeMetaDataMetaData.getName().toUpperCase();
-
-		// Permissions i18nStringMetaData
-		String writeI18nStringMetaData = "ROLE_ENTITY_WRITE_" + i18nStringMetaData.getName().toUpperCase();
-
-		// EntityTypeMetadata
-		String writeEntityTypeMetaData = "ROLE_ENTITY_WRITE_" + entityTypeMetadata.getName().toUpperCase();
-		String readEntityTypeMetaData = "ROLE_ENTITY_READ_" + entityTypeMetadata.getName().toUpperCase();
-		String countEntityTypeMetaData = "ROLE_ENTITY_COUNT_" + entityTypeMetadata.getName().toUpperCase();
-
-		SecurityContextHolder.getContext().setAuthentication(
-				new TestingAuthenticationToken("user", "user", writeTestEntity, readTestEntity, readTestRefEntity,
-						countTestEntity, countTestRefEntity, writeSelfXrefEntity, readSelfXrefEntity,
-						countSelfXrefEntity, writeTestEntityStatic, readTestEntityStatic, countTestEntityStatic,
-						writeTestRefEntityStatic, readTestRefEntityStatic, countTestRefEntityStatic,
-						writeLanguageMetaData, readLanguageMetaData, countLanguageMetaData,
-						writeAttributeMetaDataMetaData, readAttributeMetaDataMetaData, countAttributeMetaDataMetaData,
-						writeI18nStringMetaData, writeEntityTypeMetaData, readEntityTypeMetaData,
-						countEntityTypeMetaData, "ROLE_ENTITY_READ_SYS_MD_ENTITIES",
-						"ROLE_ENTITY_READ_SYS_MD_ATTRIBUTES", "ROLE_ENTITY_READ_SYS_MD_PACKAGES"));
-	}
-
-	private void createLanguages()
-	{
-		dataService.add(LanguageMetaData.LANGUAGE, languageFactory.create("en", "English"));
-		dataService.add(LanguageMetaData.LANGUAGE, languageFactory.create("nl", "Nederlands"));
-	}
-
-	@AfterClass
-	public void cleanUp() throws InterruptedException
-	{
-		// Give asyncTransactionLog time to stop gracefully
-		TimeUnit.SECONDS.sleep(1);
-
-		applicationContext.close();
-		SecurityContextHolder.getContext().setAuthentication(null);
-
-		try
-		{
-			// Delete molgenis home folder
-			FileUtils.deleteDirectory(new File(System.getProperty("molgenis.home")));
-		}
-		catch (IOException e)
-		{
-			LOG.error("Error removing molgenis home directory", e);
-		}
-		l2Cache.logStatistics();
-		cleanUpLanguages();
-	}
-
-	private void cleanUpLanguages()
-	{
-		List<AttributeMetaData> languageAttrs = new ArrayList<>();
-		for (AttributeMetaData attr : attributeMetaDataMetaData.getAttributes())
-		{
-			if (I18nUtils.isI18n(attr.getName()))
-			{
-				languageAttrs.add(attr);
-			}
-		}
-		languageAttrs.forEach(attributeMetaDataMetaData::removeAttribute);
-
-		languageAttrs.clear();
-		for (AttributeMetaData attr : entityTypeMetadata.getAttributes())
-		{
-			if (I18nUtils.isI18n(attr.getName()))
-			{
-				languageAttrs.add(attr);
-			}
-		}
-		languageAttrs.forEach(entityTypeMetadata::removeAttribute);
+		SecurityContextHolder.getContext()
+				.setAuthentication(new TestingAuthenticationToken("user", "user", authorities));
 	}
 
 	@AfterMethod
@@ -289,11 +212,42 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForIndexToBeStable(selfXrefEntityType.getName(), indexService, LOG);
 	}
 
-	@Test
+	private void addDefaultLanguages()
+	{
+		dataService.add(LANGUAGE, languageFactory
+				.create(LanguageService.DEFAULT_LANGUAGE_CODE, LanguageService.DEFAULT_LANGUAGE_NAME, true));
+		dataService
+				.add(LANGUAGE, languageFactory.create("nl", new Locale("nl").getDisplayName(new Locale("nl")), false));
+		dataService
+				.add(LANGUAGE, languageFactory.create("pt", new Locale("pt").getDisplayName(new Locale("pt")), false));
+		dataService
+				.add(LANGUAGE, languageFactory.create("es", new Locale("es").getDisplayName(new Locale("es")), false));
+		dataService
+				.add(LANGUAGE, languageFactory.create("de", new Locale("de").getDisplayName(new Locale("de")), false));
+		dataService
+				.add(LANGUAGE, languageFactory.create("it", new Locale("it").getDisplayName(new Locale("it")), false));
+		dataService
+				.add(LANGUAGE, languageFactory.create("fr", new Locale("fr").getDisplayName(new Locale("fr")), false));
+		dataService.add(LANGUAGE, languageFactory.create("xx", "My language", false));
+	}
+
+	@Test(singleThreaded = true)
 	public void testLanguageService()
 	{
+		assertEquals(dataService.getMeta().getEntityType(ENTITY_META_DATA).getAttribute("label-en").getName(),
+				"label-en");
+		assertEquals(dataService.getMeta().getEntityType(ENTITY_META_DATA).getLabelAttribute("en").getName(),
+				"simpleName");
+		assertEquals(dataService.getMeta().getEntityType(ENTITY_META_DATA).getLabelAttribute("pt").getName(),
+				"simpleName");
+		assertEquals(dataService.getMeta().getEntityType(ENTITY_META_DATA).getLabelAttribute("nl").getName(),
+				"simpleName");
+		assertEquals(dataService.getMeta().getEntityType(ENTITY_META_DATA).getLabelAttribute().getName(),
+				"simpleName");
+
 		assertEquals(languageService.getCurrentUserLanguageCode(), "en");
-		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(), new String[] { "en", "nl" });
+		assertEqualsNoOrder(languageService.getLanguageCodes().toArray(),
+				new String[] { "en", "nl", "de", "es", "it", "pt", "fr", "xx" });
 
 		// NL
 		assertNotNull(dataService.getEntityType(I18N_STRING).getAttribute("nl"));
@@ -321,7 +275,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(languageService.getBundle().getString("car"), "car");
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testEntityListener()
 	{
 		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 6);
@@ -371,7 +325,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testAdd()
 	{
 		List<Entity> entities = createDynamic(2).collect(toList());
@@ -383,7 +337,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertPresent(entityTypeDynamic, entities);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testCount()
 	{
 		List<Entity> entities = createDynamic(2).collect(toList());
@@ -394,7 +348,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertPresent(entityTypeDynamic, entities);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testDelete()
 	{
 		Entity entity = createDynamic(1).findFirst().get();
@@ -407,7 +361,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertNotPresent(entity);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testDeleteById()
 	{
 		Entity entity = createDynamic(1).findFirst().get();
@@ -420,7 +374,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertNotPresent(entity);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testDeleteStream()
 	{
 		List<Entity> entities = createDynamic(2).collect(toList());
@@ -433,7 +387,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(dataService.count(entityTypeDynamic.getName(), new QueryImpl<>()), 0);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testDeleteAll()
 	{
 		List<Entity> entities = createDynamic(5).collect(toList());
@@ -446,14 +400,14 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(dataService.count(entityTypeDynamic.getName(), new QueryImpl<>()), 0);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindAllEmpty()
 	{
 		Stream<Entity> retrieved = dataService.findAll(entityTypeDynamic.getName());
 		assertEquals(retrieved.count(), 0);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindAll()
 	{
 		List<Entity> entities = createDynamic(5).collect(toList());
@@ -463,7 +417,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(retrieved.count(), entities.size());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindAllTyped()
 	{
 		List<Entity> entities = createDynamic(1).collect(toList());
@@ -474,7 +428,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(retrieved.get().iterator().next().getIdValue(), entities.get(0).getIdValue());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindAllByIds()
 	{
 		List<Entity> entities = createDynamic(5).collect(toList());
@@ -485,7 +439,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(retrieved.count(), entities.size());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindAllByIdsTyped()
 	{
 		List<Entity> entities = createStatic(5).collect(toList());
@@ -499,15 +453,14 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(retrieved.get().iterator().next().getIdValue(), entities.get(0).getIdValue());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindAllStreamFetch()
 	{
 		List<Entity> entities = createDynamic(5).collect(toList());
 		dataService.add(entityTypeDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
 		Stream<Object> ids = concat(entities.stream().map(Entity::getIdValue), of("bogus"));
-		Stream<Entity> retrieved = dataService
-				.findAll(entityTypeDynamic.getName(), ids, new Fetch().field(ATTR_ID));
+		Stream<Entity> retrieved = dataService.findAll(entityTypeDynamic.getName(), ids, new Fetch().field(ATTR_ID));
 		assertEquals(retrieved.count(), entities.size());
 	}
 
@@ -533,7 +486,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ ATTR_EMAIL, null, emptyList() }, { ATTR_XREF, null, emptyList() }, { ATTR_MREF, null, emptyList() } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorEq")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorEq")
 	public void testFindQueryOperatorEq(String attrName, Object value, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(3).collect(toList());
@@ -556,7 +509,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ asList("0", "1"), asList(0, 1) }, { asList("1", "2"), singletonList(1) } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorIn")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorIn")
 	public void testFindQueryOperatorIn(List<String> ids, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(2).collect(toList());
@@ -579,7 +532,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ 13, asList(0, 1, 2) } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorLess")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorLess")
 	public void testFindQueryOperatorLess(int value, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(5).collect(toList());
@@ -602,7 +555,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ 12, asList(0, 1, 2) }, { 13, asList(0, 1, 2, 3) } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorLessEqual")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorLessEqual")
 	public void testFindQueryOperatorLessEqual(int value, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(5).collect(toList());
@@ -625,7 +578,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ 12, emptyList() } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorGreater")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorGreater")
 	public void testFindQueryOperatorGreater(int value, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(3).collect(toList());
@@ -648,7 +601,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ 12, singletonList(2) }, { 13, emptyList() } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorGreaterEqual")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorGreaterEqual")
 	public void testFindQueryOperatorGreaterEqual(int value, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(3).collect(toList());
@@ -671,14 +624,14 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ 10, 11, asList(0, 1) }, { 10, 12, asList(0, 1, 2) }, { 12, 20, asList(2) } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorRange")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorRange")
 	public void testFindQueryOperatorRange(int low, int high, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(3).collect(toList());
 		dataService.add(entityTypeDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getName())
-				.rng(ATTR_INT, low, high).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getName()).rng(ATTR_INT, low, high)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -693,14 +646,14 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		return new Object[][] { { "ring", asList(0, 1) }, { "Ring", emptyList() }, { "nomatch", emptyList() } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorLike")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorLike")
 	public void testFindQueryOperatorLike(String likeStr, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(2).collect(toList());
 		dataService.add(entityTypeDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getName())
-				.like(ATTR_STRING, likeStr).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getName()).like(ATTR_STRING, likeStr)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -716,14 +669,14 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ 12, asList(0, 1) }, { 13, asList(0, 1, 2) } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorNot")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorNot")
 	public void testFindQueryOperatorNot(int value, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(3).collect(toList());
 		dataService.add(entityTypeDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getName()).not()
-				.eq(ATTR_INT, value).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getName()).not().eq(ATTR_INT, value)
+				.findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -735,7 +688,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	/**
 	 * Test used as a caching benchmark
 	 */
-	@Test(enabled = false)
+	@Test(singleThreaded = true, enabled = false)
 	public void cachePerformanceTest()
 	{
 		List<Entity> entities = createDynamic(10000).collect(toList());
@@ -768,14 +721,14 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ "string1", -1, emptyList() }, { "unknownString", -1, emptyList() } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorAnd")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorAnd")
 	public void testFindQueryOperatorAnd(String strValue, int value, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(3).collect(toList());
 		dataService.add(entityTypeDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getName())
-				.eq(ATTR_STRING, strValue).and().eq(ATTR_INT, value).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getName()).eq(ATTR_STRING, strValue)
+				.and().eq(ATTR_INT, value).findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -791,14 +744,14 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ "string1", -1, asList(0, 1, 2) }, { "unknownString", -1, emptyList() } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorOr")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorOr")
 	public void testFindQueryOperatorOr(String strValue, int value, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(3).collect(toList());
 		dataService.add(entityTypeDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getName())
-				.eq(ATTR_STRING, strValue).or().eq(ATTR_INT, value).findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getName()).eq(ATTR_STRING, strValue)
+				.or().eq(ATTR_INT, value).findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -816,16 +769,15 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ false, "string1", -1, asList(1) }, { false, "unknownString", -1, emptyList() } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorNested")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorNested")
 	public void testFindQueryOperatorNested(boolean boolValue, String strValue, int value,
 			List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(3).collect(toList());
 		dataService.add(entityTypeDynamic.getName(), entities.stream());
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
-		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getName())
-				.eq(ATTR_BOOL, boolValue).and().nest().eq(ATTR_STRING, strValue).or().eq(ATTR_INT, value).unnest()
-				.findAll();
+		Supplier<Stream<Entity>> found = () -> dataService.query(entityTypeDynamic.getName()).eq(ATTR_BOOL, boolValue)
+				.and().nest().eq(ATTR_STRING, strValue).or().eq(ATTR_INT, value).unnest().findAll();
 		List<Entity> foundAsList = found.get().collect(toList());
 		assertEquals(foundAsList.size(), expectedEntityIndices.size());
 		for (int i = 0; i < expectedEntityIndices.size(); ++i)
@@ -840,7 +792,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		return new Object[][] { { "body", asList(1) }, { "head", asList(1) }, { "unknownString", emptyList() } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorSearch")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorSearch")
 	public void testFindQueryOperatorSearch(String searchStr, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(2).collect(toList());
@@ -856,7 +808,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindQueryLimit2_Offset2_sortOnInt()
 	{
 		List<Entity> testRefEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 6);
@@ -877,7 +829,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertTrue(EntityUtils.equals(foundAsList.get(1), testEntities.get(6)));
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindQueryTypedStatic()
 	{
 		List<Entity> entities = createStatic(5).collect(toList());
@@ -889,7 +841,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(found.get().findFirst().get().getId(), entities.get(0).getIdValue());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindOne()
 	{
 		Entity entity = createDynamic(1).findFirst().get();
@@ -898,7 +850,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertNotNull(dataService.findOneById(entityTypeDynamic.getName(), entity.getIdValue()));
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindOneTypedStatic()
 	{
 		Entity entity = createStatic(1).findFirst().get();
@@ -910,17 +862,17 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(testEntityStatic.getId(), entity.getIdValue());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindOneFetch()
 	{
 		Entity entity = createDynamic(1).findFirst().get();
 		dataService.add(entityTypeDynamic.getName(), Stream.of(entity));
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
-		assertNotNull(dataService
-				.findOneById(entityTypeDynamic.getName(), entity.getIdValue(), new Fetch().field(ATTR_ID)));
+		assertNotNull(
+				dataService.findOneById(entityTypeDynamic.getName(), entity.getIdValue(), new Fetch().field(ATTR_ID)));
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindOneFetchTypedStatic()
 	{
 		TestEntityStatic entity = new TestEntityStatic(entityTypeStatic);
@@ -937,30 +889,30 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(testEntityStatic.getIdValue(), entity.getIdValue());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindOneQuery()
 	{
 		Entity entity = createDynamic(1).findFirst().get();
 		dataService.add(entityTypeDynamic.getName(), entity);
 		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
-		entity = dataService
-				.findOne(entityTypeDynamic.getName(), new QueryImpl<>().eq(ATTR_ID, entity.getIdValue()));
+		entity = dataService.findOne(entityTypeDynamic.getName(), new QueryImpl<>().eq(ATTR_ID, entity.getIdValue()));
 		assertNotNull(entity);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindOneQueryTypedStatic()
 	{
 		Entity entity = createStatic(1).findFirst().get();
 		dataService.add(entityTypeStatic.getName(), entity);
 		waitForIndexToBeStable(entityTypeStatic.getName(), indexService, LOG);
-		TestEntityStatic testEntityStatic = dataService.findOne(entityTypeStatic.getName(),
-				new QueryImpl<TestEntityStatic>().eq(ATTR_ID, entity.getIdValue()), TestEntityStatic.class);
+		TestEntityStatic testEntityStatic = dataService
+				.findOne(entityTypeStatic.getName(), new QueryImpl<TestEntityStatic>().eq(ATTR_ID, entity.getIdValue()),
+						TestEntityStatic.class);
 		assertNotNull(testEntityStatic);
 		assertEquals(testEntityStatic.getId(), entity.getIdValue());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testGetCapabilities()
 	{
 		Set<RepositoryCapability> capabilities = dataService.getCapabilities(entityTypeDynamic.getName());
@@ -968,7 +920,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertTrue(capabilities.containsAll(asList(MANAGABLE, QUERYABLE, WRITABLE, VALIDATE_REFERENCE_CONSTRAINT)));
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testGetEntityType()
 	{
 		EntityType entityType = dataService.getEntityType(entityTypeDynamic.getName());
@@ -976,7 +928,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertTrue(EntityUtils.equals(entityType, entityTypeDynamic));
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testGetEntityNames()
 	{
 		Stream<String> names = dataService.getEntityNames();
@@ -984,13 +936,13 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertTrue(names.filter(entityTypeDynamic.getName()::equals).findFirst().isPresent());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testGetMeta()
 	{
 		assertNotNull(dataService.getMeta());
 	}
 
-	@Test()
+	@Test(singleThreaded = true)
 	public void testGetKnownRepository()
 	{
 		Repository<Entity> repo = dataService.getRepository(entityTypeDynamic.getName());
@@ -998,20 +950,20 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(repo.getName(), entityTypeDynamic.getName());
 	}
 
-	@Test(expectedExceptions = UnknownEntityException.class)
+	@Test(singleThreaded = true, expectedExceptions = UnknownEntityException.class)
 	public void testGetUnknownRepository()
 	{
 		dataService.getRepository("bogus");
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testHasRepository()
 	{
 		assertTrue(dataService.hasRepository(entityTypeDynamic.getName()));
 		assertFalse(dataService.hasRepository("bogus"));
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testIterator()
 	{
 		assertNotNull(dataService.iterator());
@@ -1026,7 +978,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				.anyMatch(e -> repo.getName().equals(e.getName())));
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testQuery()
 	{
 		assertNotNull(dataService.query(entityTypeDynamic.getName()));
@@ -1041,7 +993,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testUpdate()
 	{
 		Entity entity = createDynamic(1).findFirst().get();
@@ -1068,7 +1020,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(entity.get(ATTR_STRING), "qwerty");
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testUpdateSingleRefEntityIndexesReferencingEntities()
 	{
 		dataService.add(entityTypeDynamic.getName(), createDynamic(30));
@@ -1086,7 +1038,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(searchService.count(new QueryImpl<>().search("qwerty"), entityTypeDynamic), 5);
 	}
 
-	@Test(enabled = false) //FIXME: sys_md_attributes spam
+	@Test(singleThreaded = true, enabled = false) //FIXME: sys_md_attributes spam
 	public void testUpdateSingleRefEntityIndexesLargeAmountOfReferencingEntities()
 	{
 		dataService.add(entityTypeDynamic.getName(), createDynamic(10000));
@@ -1109,7 +1061,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(searchService.count(new QueryImpl<>().search("qwerty"), entityTypeDynamic), 3333);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testUpdateStream()
 	{
 		Entity entity = createDynamic(1).findFirst().get();
@@ -1180,11 +1132,11 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(searchService.count(q, entityTypeDynamic), 0);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testCreateSelfXref()
 	{
-		Entity entitySelfXref = entitySelfXrefTestHarness.createTestEntities(selfXrefEntityType, 1)
-				.collect(toList()).get(0);
+		Entity entitySelfXref = entitySelfXrefTestHarness.createTestEntities(selfXrefEntityType, 1).collect(toList())
+				.get(0);
 
 		//Create
 		dataService.add(selfXrefEntityType.getName(), entitySelfXref);
@@ -1220,22 +1172,21 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(entity.getEntity(ATTR_XREF).getIdValue(), entity.getIdValue());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testIndexCreateMetaData()
 	{
 		IndexMetadataCUDOperationsPlatformIT
 				.testIndexCreateMetaData(searchService, entityTypeStatic, entityTypeDynamic, metaDataService);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testIndexDeleteMetaData()
 	{
 		IndexMetadataCUDOperationsPlatformIT
-				.testIndexDeleteMetaData(searchService, dataService, entityTypeDynamic, metaDataService,
-						indexService);
+				.testIndexDeleteMetaData(searchService, dataService, entityTypeDynamic, metaDataService, indexService);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testIndexUpdateMetaDataUpdateAttribute()
 	{
 		IndexMetadataCUDOperationsPlatformIT
@@ -1243,7 +1194,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 						indexService);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testIndexUpdateMetaDataRemoveAttribute()
 	{
 		IndexMetadataCUDOperationsPlatformIT
@@ -1251,16 +1202,16 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 						searchService, metaDataService, indexService);
 
 		IndexMetadataCUDOperationsPlatformIT
-				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_BOOL,
-						searchService, metaDataService, indexService);
+				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_BOOL, searchService,
+						metaDataService, indexService);
 
 		IndexMetadataCUDOperationsPlatformIT
-				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_DATE,
-						searchService, metaDataService, indexService);
+				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_DATE, searchService,
+						metaDataService, indexService);
 
 		IndexMetadataCUDOperationsPlatformIT
-				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_XREF,
-						searchService, metaDataService, indexService);
+				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_XREF, searchService,
+						metaDataService, indexService);
 
 		IndexMetadataCUDOperationsPlatformIT
 				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_DATETIME,
@@ -1271,16 +1222,16 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 						searchService, metaDataService, indexService);
 
 		IndexMetadataCUDOperationsPlatformIT
-				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_EMAIL,
-						searchService, metaDataService, indexService);
+				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_EMAIL, searchService,
+						metaDataService, indexService);
 
 		IndexMetadataCUDOperationsPlatformIT
-				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_HTML,
-						searchService, metaDataService, indexService);
+				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_HTML, searchService,
+						metaDataService, indexService);
 
 		IndexMetadataCUDOperationsPlatformIT
-				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_INT,
-						searchService, metaDataService, indexService);
+				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_INT, searchService,
+						metaDataService, indexService);
 
 		IndexMetadataCUDOperationsPlatformIT
 				.testIndexUpdateMetaDataRemoveAttribute(entityTypeDynamic, EntityTestHarness.ATTR_HYPERLINK,
@@ -1288,7 +1239,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	}
 
 	// Derived from fix: https://github.com/molgenis/molgenis/issues/5227
-	@Test
+	@Test(singleThreaded = true)
 	public void testIndexBatchUpdate()
 	{
 		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
@@ -1346,6 +1297,53 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		q6.search("searchTestBatchUpdate");
 		Stream<Entity> result6 = searchService.searchAsStream(q6, entityTypeDynamic);
 		assertEquals(result6.count(), 1);
+	}
+
+	@Test(singleThreaded = true)
+	public void l3CacheTest()
+	{
+		String COUNTRY = "Country";
+		final EntityType entityType = EntityType
+				.newInstance(dataService.getEntityType(entityTypeDynamic.getName()), DEEP_COPY_ATTRS);
+		final AttributeMetaData newAttr = attributeMetaDataFactory.create().setName(COUNTRY);
+
+		runAsSystem(() ->
+		{
+			entityType.addAttribute(newAttr);
+			dataService.getMeta().updateEntityType(entityType);
+
+			List<Entity> refEntities = testHarness.createTestRefEntities(refEntityTypeDynamic, 2);
+			List<Entity> entities = testHarness.createTestEntities(entityTypeDynamic, 2, refEntities)
+					.collect(toList());
+
+			dataService.add(refEntityTypeDynamic.getName(), refEntities.stream());
+			dataService.add(entityTypeDynamic.getName(), entities.stream());
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+
+			dataService.update(entityType.getName(),
+					StreamSupport.stream(dataService.findAll(entityType.getName()).spliterator(), false).filter(e ->
+					{
+						e.set(COUNTRY, "NL" + e.getIdValue());
+						return true;
+					}));
+		});
+		waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+
+		Query<Entity> q0 = new QueryImpl<>().eq(COUNTRY, "NL0").or().eq(COUNTRY, "NL1");
+		q0.pageSize(10); // The only reason to be cached l3, important!
+		q0.sort(new Sort().on(COUNTRY));
+
+		Repository repoQ0 = dataService.getRepository(entityTypeDynamic.getName());
+		runAsSystem(() ->
+		{
+			List expected = dataService.findAll(repoQ0.getName(), q0).map(e -> e.getIdValue()).collect(toList());
+			assertEquals(expected, Arrays.asList("0", "1"));
+
+			// Remove added attribute
+			entityType.removeAttribute(newAttr);
+			dataService.getMeta().updateEntityType(entityType);
+			waitForIndexToBeStable(entityTypeDynamic.getName(), indexService, LOG);
+		});
 	}
 }
 

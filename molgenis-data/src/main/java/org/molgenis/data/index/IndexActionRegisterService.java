@@ -21,8 +21,7 @@ public interface IndexActionRegisterService
 	 * @param entityFullName the fully qualified name of the {@link org.molgenis.data.Repository}
 	 * @param entityId       the ID of the entity, may be null to indicate change to entire repository
 	 */
-	void register(String entityFullName,
-			String entityId);
+	void register(String entityFullName, String entityId);
 
 	/**
 	 * Stores the index actions in the repository.

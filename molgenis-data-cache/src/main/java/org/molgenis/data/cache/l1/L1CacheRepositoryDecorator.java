@@ -3,6 +3,7 @@ package org.molgenis.data.cache.l1;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.molgenis.data.*;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityType;
 
 import java.util.Iterator;
@@ -53,6 +54,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	@Override
 	public Integer add(Stream<Entity> entities)
 	{
+		evictBiDiReferencedEntityTypes();
 		if (cacheable)
 		{
 			String entityName = getName();
@@ -64,6 +66,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	@Override
 	public void add(Entity entity)
 	{
+		evictBiDiReferencedEntities(entity);
 		if (cacheable) l1Cache.put(getName(), entity);
 		delegate().add(entity);
 	}
@@ -126,6 +129,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	@Override
 	public void update(Entity entity)
 	{
+		evictBiDiReferencedEntityTypes();
 		if (cacheable) l1Cache.put(getName(), entity);
 		delegate().update(entity);
 	}
@@ -133,6 +137,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	@Override
 	public void update(Stream<Entity> entities)
 	{
+		evictBiDiReferencedEntityTypes();
 		if (cacheable)
 		{
 			entities = entities.filter(entity ->
@@ -147,6 +152,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	@Override
 	public void delete(Entity entity)
 	{
+		evictBiDiReferencedEntities(entity);
 		if (cacheable) l1Cache.putDeletion(EntityKey.create(entity));
 		delegate().delete(entity);
 	}
@@ -154,6 +160,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	@Override
 	public void delete(Stream<Entity> entities)
 	{
+		evictBiDiReferencedEntityTypes();
 		if (cacheable) entities = entities.peek(entity -> l1Cache.putDeletion(EntityKey.create(entity)));
 		delegate().delete(entities);
 	}
@@ -161,6 +168,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	@Override
 	public void deleteById(Object id)
 	{
+		evictBiDiReferencedEntityTypes();
 		if (cacheable) l1Cache.putDeletion(EntityKey.create(getName(), id));
 		delegate().deleteById(id);
 	}
@@ -168,6 +176,7 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
+		evictBiDiReferencedEntityTypes();
 		if (cacheable)
 		{
 			String entityName = getName();
@@ -179,8 +188,37 @@ public class L1CacheRepositoryDecorator extends AbstractRepositoryDecorator<Enti
 	@Override
 	public void deleteAll()
 	{
+		evictBiDiReferencedEntityTypes();
 		if (cacheable) l1Cache.evictAll(getName());
 		delegate().deleteAll();
+	}
+
+	/**
+	 * Evict all entries for entity types referred to by this entity type through a bidirectional relation.
+	 */
+	private void evictBiDiReferencedEntityTypes()
+	{
+		getEntityType().getMappedByAttributes().map(AttributeMetaData::getRefEntity).map(EntityType::getName)
+				.forEach(l1Cache::evictAll);
+		getEntityType().getInversedByAttributes().map(AttributeMetaData::getRefEntity).map(EntityType::getName)
+				.forEach(l1Cache::evictAll);
+	}
+
+	/**
+	 * Evict all entity instances referenced by this entity instance through a bidirectional relation.
+	 *
+	 * @param entity the entity whose references need to be evicted
+	 */
+	private void evictBiDiReferencedEntities(Entity entity)
+	{
+		Stream<EntityKey> backreffingEntities = getEntityType().getMappedByAttributes()
+				.flatMap(mappedByAttr -> stream(entity.getEntities(mappedByAttr.getName()).spliterator(), false))
+				.map(EntityKey::create);
+		Stream<EntityKey> manyToOneEntities = getEntityType().getInversedByAttributes()
+				.map(inversedByAttr -> entity.getEntity(inversedByAttr.getName()))
+				.filter(refEntity -> refEntity != null).map(EntityKey::create);
+
+		l1Cache.evict(Stream.concat(backreffingEntities, manyToOneEntities));
 	}
 
 }

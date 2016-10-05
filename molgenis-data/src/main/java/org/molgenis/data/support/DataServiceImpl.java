@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.meta.model.EntityType.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.security.core.utils.SecurityUtils.getCurrentUsername;
@@ -274,6 +275,13 @@ public class DataServiceImpl implements DataService
 	public Repository<Entity> copyRepository(Repository<Entity> repository, String simpleName, Package pack,
 			String label, Query<Entity> query)
 	{
+		if (repository.getEntityType().hasMappedByAttributes())
+		{
+			throw new MolgenisDataException(
+					format("Copy not possible because entity [%s] contains one or more bidirectional one-to-many attributes",
+							repository.getName()));
+		}
+
 		LOG.info("Creating a copy of {} repository, with simpleName: {}, package: {} and label: {}",
 				repository.getName(), simpleName, pack, label);
 
