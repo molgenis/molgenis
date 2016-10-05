@@ -1,6 +1,6 @@
 package org.molgenis.auth;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
-public class UserAuthorityMetaData extends SystemEntityMetaData
+public class UserAuthorityMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "UserAuthority";
 	public static final String USER_AUTHORITY = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -49,7 +49,7 @@ public class UserAuthorityMetaData extends SystemEntityMetaData
 	}
 
 	@Override
-	public Set<SystemEntityMetaData> getDependencies()
+	public Set<SystemEntityType> getDependencies()
 	{
 		return singleton(authorityMetaData);
 	}

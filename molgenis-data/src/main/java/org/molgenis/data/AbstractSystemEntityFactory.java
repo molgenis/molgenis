@@ -1,6 +1,6 @@
 package org.molgenis.data;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.populate.EntityPopulator;
 import org.slf4j.Logger;
@@ -18,7 +18,7 @@ import static java.util.Objects.requireNonNull;
  * @param <M> entity meta data type
  * @param <P> entity id type
  */
-public abstract class AbstractSystemEntityFactory<E extends Entity, M extends SystemEntityMetaData, P>
+public abstract class AbstractSystemEntityFactory<E extends Entity, M extends SystemEntityType, P>
 		implements EntityFactory<E, P>
 {
 	private static final Logger LOG = LoggerFactory.getLogger(AbstractSystemEntityFactory.class);

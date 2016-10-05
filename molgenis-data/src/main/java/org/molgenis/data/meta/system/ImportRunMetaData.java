@@ -1,6 +1,6 @@
 package org.molgenis.data.meta.system;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
@@ -11,7 +11,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
-public class ImportRunMetaData extends SystemEntityMetaData
+public class ImportRunMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "ImportRun";
 	public static final String IMPORT_RUN = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;

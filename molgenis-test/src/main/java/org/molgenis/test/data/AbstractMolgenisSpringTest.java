@@ -1,6 +1,6 @@
 package org.molgenis.test.data;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.util.GenericDependencyResolver;
@@ -22,9 +22,9 @@ public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringCon
 		// bootstrap meta data
 		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
 		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityTypeMeta);
-		Map<String, SystemEntityMetaData> systemEntityMetaDataMap = applicationContext
-				.getBeansOfType(SystemEntityMetaData.class);
-		new GenericDependencyResolver().resolve(systemEntityMetaDataMap.values(), SystemEntityMetaData::getDependencies)
+		Map<String, SystemEntityType> systemEntityMetaDataMap = applicationContext
+				.getBeansOfType(SystemEntityType.class);
+		new GenericDependencyResolver().resolve(systemEntityMetaDataMap.values(), SystemEntityType::getDependencies)
 				.stream().forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityTypeMeta));
 
 	}

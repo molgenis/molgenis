@@ -1,7 +1,7 @@
 package org.molgenis.data.meta.system;
 
 import com.google.common.collect.Maps;
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,26 +15,26 @@ import static java.lang.String.format;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 
 /**
- * Registry containing all {@link SystemEntityMetaData}.
+ * Registry containing all {@link SystemEntityType}.
  */
 @Component
 public class SystemEntityMetaDataRegistry
 {
 	private final Logger LOG = LoggerFactory.getLogger(SystemEntityMetaDataRegistry.class);
 
-	private final Map<String, SystemEntityMetaData> systemEntityMetaDataMap;
+	private final Map<String, SystemEntityType> systemEntityMetaDataMap;
 
 	public SystemEntityMetaDataRegistry()
 	{
 		systemEntityMetaDataMap = Maps.newHashMap();
 	}
 
-	public SystemEntityMetaData getSystemEntityMetaData(String entityName)
+	public SystemEntityType getSystemEntityMetaData(String entityName)
 	{
 		return systemEntityMetaDataMap.get(entityName);
 	}
 
-	public Stream<SystemEntityMetaData> getSystemEntityMetaDatas()
+	public Stream<SystemEntityType> getSystemEntityMetaDatas()
 	{
 		return systemEntityMetaDataMap.values().stream();
 	}
@@ -44,17 +44,17 @@ public class SystemEntityMetaDataRegistry
 		return systemEntityMetaDataMap.containsKey(entityName);
 	}
 
-	public void addSystemEntityMetaData(SystemEntityMetaData systemEntityMetaData)
+	public void addSystemEntityMetaData(SystemEntityType systemEntityType)
 	{
-		String systemEntityMetaDataName = systemEntityMetaData.getName();
+		String systemEntityMetaDataName = systemEntityType.getName();
 		if (systemEntityMetaDataName == null)
 		{
 			throw new IllegalArgumentException(format("[%s] is missing name, did you forget to call setName()?",
-					systemEntityMetaData.getClass().getSimpleName()));
+					systemEntityType.getClass().getSimpleName()));
 		}
 
 		LOG.trace("Registering system entity [{}] ...", systemEntityMetaDataName);
-		systemEntityMetaDataMap.put(systemEntityMetaDataName, systemEntityMetaData);
+		systemEntityMetaDataMap.put(systemEntityMetaDataName, systemEntityType);
 	}
 
 	public boolean hasSystemAttributeMetaData(String attrIdentifier)
@@ -69,10 +69,10 @@ public class SystemEntityMetaDataRegistry
 				.filter(Objects::nonNull).findFirst().orElse(null);
 	}
 
-	private static AttributeMetaData getSystemAttributeMetaData(SystemEntityMetaData systemEntityMetaData,
+	private static AttributeMetaData getSystemAttributeMetaData(SystemEntityType systemEntityType,
 			String attrIdentifier)
 	{
-		return getSystemAttributeMetaDataRec(systemEntityMetaData.getAllAttributes(), attrIdentifier);
+		return getSystemAttributeMetaDataRec(systemEntityType.getAllAttributes(), attrIdentifier);
 	}
 
 	private static AttributeMetaData getSystemAttributeMetaDataRec(Iterable<AttributeMetaData> attrs,

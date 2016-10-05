@@ -1,7 +1,7 @@
 package org.molgenis.data.meta.model;
 
 import org.molgenis.MolgenisFieldTypes.AttributeType;
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,7 +12,7 @@ import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
-public class AttributeMetaDataMetaData extends SystemEntityMetaData
+public class AttributeMetaDataMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "attributes";
 	public static final String ATTRIBUTE_META_DATA = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME;

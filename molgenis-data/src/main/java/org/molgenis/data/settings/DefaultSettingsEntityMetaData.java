@@ -3,7 +3,7 @@ package org.molgenis.data.settings;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 import static org.molgenis.util.EntityUtils.getTypedValue;
 
-public abstract class DefaultSettingsEntityMetaData extends SystemEntityMetaData
+public abstract class DefaultSettingsEntityMetaData extends SystemEntityType
 {
 	public static final String ATTR_ID = "id";
 

@@ -1,6 +1,6 @@
 package org.molgenis.questionnaires;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.security.owned.OwnedEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -17,7 +17,7 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
  * Base EntityMetaData for 'questionnaire' entities
  */
 @Component
-public class QuestionnaireMetaData extends SystemEntityMetaData
+public class QuestionnaireMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "Questionnaire";
 	public static final String QUESTIONNAIRE = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;

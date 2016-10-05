@@ -1,6 +1,6 @@
 package org.molgenis.auth;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,7 @@ import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
-public class MolgenisGroupMemberMetaData extends SystemEntityMetaData
+public class MolgenisGroupMemberMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "MolgenisGroupMember";
 	public static final String MOLGENIS_GROUP_MEMBER = PACKAGE_SECURITY + PACKAGE_SEPARATOR + SIMPLE_NAME;

@@ -1,6 +1,6 @@
 package org.molgenis.script;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,7 +10,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.script.ScriptPackage.PACKAGE_SCRIPT;
 
 @Component
-public class ScriptTypeMetaData extends SystemEntityMetaData
+public class ScriptTypeMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "ScriptType";
 	public static final String SCRIPT_TYPE = PACKAGE_SCRIPT + PACKAGE_SEPARATOR + SIMPLE_NAME;

@@ -2,7 +2,7 @@ package org.molgenis.jobs.test;
 
 import java.util.Map;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import EntityTypeMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ public abstract class AbstractMolgenisSpringTest extends AbstractTestNGSpringCon
 		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityTypeMeta);
 		Map<String, SystemEntityMetaData> systemEntityMetaMap = applicationContext
 				.getBeansOfType(SystemEntityMetaData.class);
-		systemEntityMetaMap.values().forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityTypeMeta));
+		systemEntityMetaMap.values().forEach(systemEntityType -> systemEntityType.bootstrap(entityTypeMeta));
 	}
 
 	@Configuration

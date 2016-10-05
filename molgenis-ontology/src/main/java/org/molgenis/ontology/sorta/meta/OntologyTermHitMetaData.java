@@ -1,6 +1,6 @@
 package org.molgenis.ontology.sorta.meta;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.ontology.core.model.OntologyPackage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,7 +12,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.ontology.core.model.OntologyPackage.PACKAGE_ONTOLOGY;
 
 @Component
-public class OntologyTermHitMetaData extends SystemEntityMetaData
+public class OntologyTermHitMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "OntologyTermHit";
 	public static final String ONTOLOGY_TERM_HIT = PACKAGE_ONTOLOGY + PACKAGE_SEPARATOR + SIMPLE_NAME;

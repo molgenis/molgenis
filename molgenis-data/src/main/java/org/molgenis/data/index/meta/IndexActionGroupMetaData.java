@@ -1,6 +1,6 @@
 package org.molgenis.data.index.meta;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,7 +14,7 @@ import static org.molgenis.data.index.meta.IndexPackage.PACKAGE_INDEX;
  * This entity is used to group the index actions.
  */
 @Component
-public class IndexActionGroupMetaData extends SystemEntityMetaData
+public class IndexActionGroupMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "IndexActionGroup";
 	public static final String INDEX_ACTION_GROUP = PACKAGE_INDEX + PACKAGE_SEPARATOR + SIMPLE_NAME;

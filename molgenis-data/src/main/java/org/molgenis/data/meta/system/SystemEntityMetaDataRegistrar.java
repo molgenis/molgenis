@@ -1,6 +1,6 @@
 package org.molgenis.data.meta.system;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -13,7 +13,7 @@ import static java.util.Objects.requireNonNull;
 /**
  * Discovers and registers system entity meta data with the system entity meta data registry.
  *
- * @see SystemEntityMetaData
+ * @see SystemEntityType
  * @see SystemEntityMetaDataRegistry
  */
 @Component
@@ -30,12 +30,12 @@ public class SystemEntityMetaDataRegistrar
 	public void register(ContextRefreshedEvent event)
 	{
 		ApplicationContext ctx = event.getApplicationContext();
-		Map<String, SystemEntityMetaData> systemEntityMetaDataMap = ctx.getBeansOfType(SystemEntityMetaData.class);
+		Map<String, SystemEntityType> systemEntityMetaDataMap = ctx.getBeansOfType(SystemEntityType.class);
 		systemEntityMetaDataMap.values().forEach(this::register);
 	}
 
-	private void register(SystemEntityMetaData systemEntityMetaData)
+	private void register(SystemEntityType systemEntityType)
 	{
-		systemEntityMetaDataRegistry.addSystemEntityMetaData(systemEntityMetaData);
+		systemEntityMetaDataRegistry.addSystemEntityMetaData(systemEntityType);
 	}
 }

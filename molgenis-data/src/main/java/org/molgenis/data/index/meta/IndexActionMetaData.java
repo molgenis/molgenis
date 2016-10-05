@@ -1,6 +1,6 @@
 package org.molgenis.data.index.meta;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -15,7 +15,7 @@ import static org.molgenis.data.index.meta.IndexPackage.PACKAGE_INDEX;
  * {@link org.molgenis.data.Repository}'s index consistent again.
  */
 @Component
-public class IndexActionMetaData extends SystemEntityMetaData
+public class IndexActionMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "IndexAction";
 	public static final String INDEX_ACTION = PACKAGE_INDEX + PACKAGE_SEPARATOR + SIMPLE_NAME;

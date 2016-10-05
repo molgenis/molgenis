@@ -20,7 +20,7 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 /**
  * Base class for all system entity meta data.
  */
-public abstract class SystemEntityMetaData extends EntityMetaData
+public abstract class SystemEntityType extends EntityMetaData
 {
 	private AttributeMetaDataFactory attributeMetaDataFactory;
 	private IdGenerator idGenerator;
@@ -33,7 +33,7 @@ public abstract class SystemEntityMetaData extends EntityMetaData
 	 *
 	 * @param entityName entity name
 	 */
-	public SystemEntityMetaData(String entityName)
+	public SystemEntityType(String entityName)
 	{
 		this(entityName, PACKAGE_SYSTEM);
 	}
@@ -44,7 +44,7 @@ public abstract class SystemEntityMetaData extends EntityMetaData
 	 * @param entityName        entity name
 	 * @param systemPackageName system package name
 	 */
-	public SystemEntityMetaData(String entityName, String systemPackageName)
+	public SystemEntityType(String entityName, String systemPackageName)
 	{
 		this.entityName = requireNonNull(entityName);
 		this.systemPackageName = requireNonNull(systemPackageName);
@@ -121,9 +121,9 @@ public abstract class SystemEntityMetaData extends EntityMetaData
 	/**
 	 * Used to determine the order of bootstrapping.
 	 *
-	 * @return Set containing the {@link SystemEntityMetaData}s that this {@link SystemEntityMetaData}'s definition depends upon.
+	 * @return Set containing the {@link SystemEntityType}s that this {@link SystemEntityType}'s definition depends upon.
 	 */
-	public Set<SystemEntityMetaData> getDependencies()
+	public Set<SystemEntityType> getDependencies()
 	{
 		return Collections.emptySet();
 	}

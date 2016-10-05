@@ -10,7 +10,7 @@ import org.molgenis.data.i18n.model.I18nStringFactory;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.i18n.model.LanguageFactory;
 import org.molgenis.data.meta.MetaValidationUtils;
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.semantic.SemanticTag;
@@ -1126,10 +1126,10 @@ public class EmxMetaDataParser implements MetaDataParser
 		{
 			if (!allEntityMetaDataMap.containsKey(emd.getName())) allEntityMetaDataMap.put(emd.getName(), emd);
 			else if ((!EntityUtils.equals(emd, allEntityMetaDataMap.get(emd.getName())))
-					&& emd instanceof SystemEntityMetaData)
+					&& emd instanceof SystemEntityType)
 			{
 				throw new MolgenisDataException(
-						"SystemEntityMetaData in the database conflicts with the metadata for this import");
+						"SystemEntityType in the database conflicts with the metadata for this import");
 			}
 		});
 	}

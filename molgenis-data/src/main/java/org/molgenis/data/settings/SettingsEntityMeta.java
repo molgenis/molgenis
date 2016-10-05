@@ -1,6 +1,6 @@
 package org.molgenis.data.settings;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -9,7 +9,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.settings.SettingsPackage.PACKAGE_SETTINGS;
 
 @Component
-public class SettingsEntityMeta extends SystemEntityMetaData
+public class SettingsEntityMeta extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "settings";
 	public static final String SETTINGS = PACKAGE_SETTINGS + PACKAGE_SEPARATOR + SIMPLE_NAME;

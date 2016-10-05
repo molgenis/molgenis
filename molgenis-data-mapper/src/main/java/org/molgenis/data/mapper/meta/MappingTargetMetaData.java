@@ -1,6 +1,6 @@
 package org.molgenis.data.mapper.meta;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,7 @@ import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.ROLE_ID;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
-public class MappingTargetMetaData extends SystemEntityMetaData
+public class MappingTargetMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "MappingTarget";
 	public static final String MAPPING_TARGET = PACKAGE_MAPPER + PACKAGE_SEPARATOR + SIMPLE_NAME;

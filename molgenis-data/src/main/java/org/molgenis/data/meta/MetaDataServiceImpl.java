@@ -100,7 +100,7 @@ public class MetaDataServiceImpl implements MetaDataService
 	@Override
 	public boolean hasRepository(String entityName)
 	{
-		SystemEntityMetaData systemEntityMeta = systemEntityMetaRegistry.getSystemEntityMetaData(entityName);
+		SystemEntityType systemEntityMeta = systemEntityMetaRegistry.getSystemEntityMetaData(entityName);
 		if (systemEntityMeta != null)
 		{
 			return !systemEntityMeta.isAbstract();

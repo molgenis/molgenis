@@ -1,7 +1,7 @@
 package org.molgenis.data.meta.system;
 
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.SystemPackage;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
@@ -19,7 +19,7 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 /**
- * Discovers and initializes {@link SystemEntityMetaData} beans.
+ * Discovers and initializes {@link SystemEntityType} beans.
  */
 @Component
 public class SystemEntityMetaDataInitializer
@@ -49,48 +49,48 @@ public class SystemEntityMetaDataInitializer
 		ctx.getBean(AttributeMetaDataMetaData.class).bootstrap(entityTypeMetadata);
 		//TODO: doesn't this mean all attributes get added twice?
 
-		Map<String, SystemEntityMetaData> systemEntityMetaDataMap = ctx.getBeansOfType(SystemEntityMetaData.class);
-		genericDependencyResolver.resolve(systemEntityMetaDataMap.values(), SystemEntityMetaData::getDependencies)
+		Map<String, SystemEntityType> systemEntityMetaDataMap = ctx.getBeansOfType(SystemEntityType.class);
+		genericDependencyResolver.resolve(systemEntityMetaDataMap.values(), SystemEntityType::getDependencies)
 				.stream().forEach(systemEntityMetaData -> initialize(systemEntityMetaData, entityTypeMetadata));
 	}
 
-	private void initialize(SystemEntityMetaData systemEntityMetaData, EntityTypeMetadata entityTypeMetadata)
+	private void initialize(SystemEntityType systemEntityType, EntityTypeMetadata entityTypeMetadata)
 	{
-		systemEntityMetaData.bootstrap(entityTypeMetadata);
-		setDefaultBackend(systemEntityMetaData);
-		setPackage(systemEntityMetaData);
-		checkPackage(systemEntityMetaData);
+		systemEntityType.bootstrap(entityTypeMetadata);
+		setDefaultBackend(systemEntityType);
+		setPackage(systemEntityType);
+		checkPackage(systemEntityType);
 	}
 
-	private void setDefaultBackend(SystemEntityMetaData systemEntityMetaData)
+	private void setDefaultBackend(SystemEntityType systemEntityType)
 	{
-		if (systemEntityMetaData.getBackend() == null)
+		if (systemEntityType.getBackend() == null)
 		{
-			systemEntityMetaData.setBackend(metaDataService.getDefaultBackend().getName());
+			systemEntityType.setBackend(metaDataService.getDefaultBackend().getName());
 		}
 	}
 
-	private void checkPackage(SystemEntityMetaData systemEntityMetaData)
+	private void checkPackage(SystemEntityType systemEntityType)
 	{
-		if (!systemEntityMetaData.getPackage().getRootPackage().getName().equals(rootSystemPackage.getName()))
+		if (!systemEntityType.getPackage().getRootPackage().getName().equals(rootSystemPackage.getName()))
 		{
 			throw new RuntimeException(
-					format("System entity [%s] must be in package [%s]", systemEntityMetaData.getName(),
+					format("System entity [%s] must be in package [%s]", systemEntityType.getName(),
 							rootSystemPackage.getName()));
 		}
 	}
 
-	private void setPackage(SystemEntityMetaData systemEntityMetaData)
+	private void setPackage(SystemEntityType systemEntityType)
 	{
-		if (systemEntityMetaData.getPackage() == null)
+		if (systemEntityType.getPackage() == null)
 		{
-			if (metaDataService.isMetaEntityMetaData(systemEntityMetaData))
+			if (metaDataService.isMetaEntityMetaData(systemEntityType))
 			{
-				systemEntityMetaData.setPackage(metaPackage);
+				systemEntityType.setPackage(metaPackage);
 			}
 			else
 			{
-				systemEntityMetaData.setPackage(rootSystemPackage);
+				systemEntityType.setPackage(rootSystemPackage);
 			}
 		}
 	}

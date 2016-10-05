@@ -16,7 +16,7 @@ import static org.mockito.Mockito.when;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
 import static org.testng.Assert.assertEquals;
 
-public class SystemEntityMetaDataTest
+public class SystemEntityTypeTest
 {
 	AttributeMetaDataFactory metaDataFactory;
 	EntityTypeMetadata metaDataMetaData;
@@ -60,7 +60,7 @@ public class SystemEntityMetaDataTest
 		assertEquals(lookupAttributes, newHashSet("lookupAttr1", "lookupAttr2"));
 	}
 
-	private class TestNestedCompoundEMD extends SystemEntityMetaData
+	private class TestNestedCompoundEMD extends SystemEntityType
 	{
 
 		TestNestedCompoundEMD(String entityName)
@@ -82,7 +82,7 @@ public class SystemEntityMetaDataTest
 		}
 	}
 
-	private class TestCompoundEMD extends SystemEntityMetaData
+	private class TestCompoundEMD extends SystemEntityType
 	{
 
 		TestCompoundEMD(String entityName)

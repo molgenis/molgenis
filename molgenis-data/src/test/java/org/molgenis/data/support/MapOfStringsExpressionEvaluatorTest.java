@@ -3,7 +3,7 @@ package org.molgenis.data.support;
 import com.google.gson.JsonSyntaxException;
 import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -200,8 +200,8 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 		// bootstrap meta data
 		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
 		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityTypeMeta);
-		Map<String, SystemEntityMetaData> systemEntityMetaMap = applicationContext
-				.getBeansOfType(SystemEntityMetaData.class);
+		Map<String, SystemEntityType> systemEntityMetaMap = applicationContext
+				.getBeansOfType(SystemEntityType.class);
 		systemEntityMetaMap.values().forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityTypeMeta));
 	}
 

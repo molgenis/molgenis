@@ -2,7 +2,7 @@ package org.molgenis.data.i18n;
 
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +18,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.TEXT;
 /**
  * Enriches system entity meta data with internationalization attributes.
  *
- * @see SystemEntityMetaData
+ * @see SystemEntityType
  */
 @Component
 public class SystemEntityMetaDataI18nInitializer

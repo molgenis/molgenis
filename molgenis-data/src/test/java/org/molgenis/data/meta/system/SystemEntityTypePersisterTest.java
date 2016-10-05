@@ -30,7 +30,7 @@ import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 import static org.testng.Assert.assertEquals;
 
-public class SystemEntityMetaDataPersisterTest
+public class SystemEntityTypePersisterTest
 {
 	private DataService dataService;
 	private SystemEntityMetaDataRegistry systemEntityMetaRegistry;

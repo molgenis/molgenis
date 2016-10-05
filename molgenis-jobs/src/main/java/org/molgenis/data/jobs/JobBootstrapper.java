@@ -2,7 +2,7 @@ package org.molgenis.data.jobs;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,9 +34,9 @@ public class JobBootstrapper
 		systemEntityMetaDataRegistry.getSystemEntityMetaDatas().filter(this::isJobExecution).forEach(this::bootstrap);
 	}
 
-	private void bootstrap(SystemEntityMetaData systemEntityMetaData)
+	private void bootstrap(SystemEntityType systemEntityType)
 	{
-		dataService.query(systemEntityMetaData.getName()).eq(STATUS, RUNNING).or().eq(STATUS, PENDING).findAll().forEach(this::setFailed);
+		dataService.query(systemEntityType.getName()).eq(STATUS, RUNNING).or().eq(STATUS, PENDING).findAll().forEach(this::setFailed);
 	}
 
 	private void setFailed(Entity jobExecutionEntity)

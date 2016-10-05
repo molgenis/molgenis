@@ -5,7 +5,7 @@ import org.molgenis.data.*;
 import org.molgenis.data.annotation.core.utils.JarRunnerImpl;
 import org.molgenis.data.convert.DateToStringConverter;
 import org.molgenis.data.convert.StringToDateConverter;
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.populate.EntityPopulator;
@@ -41,8 +41,8 @@ public class CommandLineAnnotatorConfig
 	{
 		EntityTypeMetadata entityTypeMeta = applicationContext.getBean(EntityTypeMetadata.class);
 		applicationContext.getBean(AttributeMetaDataMetaData.class).bootstrap(entityTypeMeta);
-		Map<String, SystemEntityMetaData> systemEntityMetaMap = applicationContext
-				.getBeansOfType(SystemEntityMetaData.class);
+		Map<String, SystemEntityType> systemEntityMetaMap = applicationContext
+				.getBeansOfType(SystemEntityType.class);
 		systemEntityMetaMap.values().forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityTypeMeta));
 	}
 

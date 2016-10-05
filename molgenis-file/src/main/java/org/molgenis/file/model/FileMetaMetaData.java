@@ -1,6 +1,6 @@
 package org.molgenis.file.model;
 
-import org.molgenis.data.meta.SystemEntityMetaData;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.security.owned.OwnedEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -15,7 +15,7 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 @Component
-public class FileMetaMetaData extends SystemEntityMetaData
+public class FileMetaMetaData extends SystemEntityType
 {
 	private static final String SIMPLE_NAME = "FileMeta";
 	public static final String FILE_META = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -48,7 +48,7 @@ public class FileMetaMetaData extends SystemEntityMetaData
 	}
 
 	@Override
-	public Set<SystemEntityMetaData> getDependencies()
+	public Set<SystemEntityType> getDependencies()
 	{
 		return singleton(ownedEntityMetaData);
 	}

@@ -3,6 +3,7 @@ package org.molgenis.data.meta.system;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.RepositoryCollection;
+import org.molgenis.data.meta.SystemEntityType;
 import org.molgenis.data.meta.model.*;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.util.DependencyResolver;
@@ -29,7 +30,7 @@ import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 /**
- * Persists {@link org.molgenis.data.meta.SystemEntityMetaData} in the meta data {@link org.molgenis.data.RepositoryCollection}.
+ * Persists {@link SystemEntityType} in the meta data {@link org.molgenis.data.RepositoryCollection}.
  */
 @Component
 public class SystemEntityMetaDataPersister

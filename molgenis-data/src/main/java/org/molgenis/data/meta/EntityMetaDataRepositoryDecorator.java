@@ -425,7 +425,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		String entityName = entityMetaData.getName();
 		validatePermission(entityName, Permission.WRITEMETA);
 
-		SystemEntityMetaData systemEntityMeta = systemEntityMetaDataRegistry.getSystemEntityMetaData(entityName);
+		SystemEntityType systemEntityMeta = systemEntityMetaDataRegistry.getSystemEntityMetaData(entityName);
 		if (systemEntityMeta != null && !currentUserisSystem())
 		{
 			throw new MolgenisDataException(format("Updating system entity meta data [%s] is not allowed", entityName));
