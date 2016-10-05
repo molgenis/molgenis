@@ -28,19 +28,6 @@ public class PostgreSqlQueryUtilsTest
 		assertEquals(PostgreSqlQueryUtils.getJunctionTableName(entityMeta, attr), "\"entity_attr\"");
 	}
 
-	@Test
-	public void getJunctionTableNameMappedBy() throws Exception
-	{
-		EntityMetaData entityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("entity").getMock();
-		AttributeMetaData attr = when(mock(AttributeMetaData.class).getName()).thenReturn("attr").getMock();
-		when(attr.isMappedBy()).thenReturn(true);
-		EntityMetaData refEntityMeta = when(mock(EntityMetaData.class).getName()).thenReturn("refEntity").getMock();
-		when(attr.getRefEntity()).thenReturn(refEntityMeta);
-		AttributeMetaData refAttr = when(mock(AttributeMetaData.class).getName()).thenReturn("refAttr").getMock();
-		when(attr.getMappedBy()).thenReturn(refAttr);
-		assertEquals(PostgreSqlQueryUtils.getJunctionTableName(entityMeta, attr), "\"refEntity_refAttr\"");
-	}
-
 	@DataProvider(name = "getPersistedAttributesProvider")
 	public static Iterator<Object[]> getPersistedAttributesProvider()
 	{
@@ -90,7 +77,7 @@ public class PostgreSqlQueryUtilsTest
 		when(xrefAttrInversedBy.getInversedBy()).thenReturn(refAttr);
 		when(entityMeta.getAtomicAttributes())
 				.thenReturn(newArrayList(stringAttr, mrefAttr, mrefAttrWithExpression, xrefAttr, xrefAttrInversedBy));
-		List<AttributeMetaData> junctionTableAttrs = newArrayList(mrefAttr, xrefAttrInversedBy);
+		List<AttributeMetaData> junctionTableAttrs = newArrayList(mrefAttr);
 		assertEquals(PostgreSqlQueryUtils.getJunctionTableAttributes(entityMeta).collect(toList()), junctionTableAttrs);
 	}
 
@@ -115,7 +102,7 @@ public class PostgreSqlQueryUtilsTest
 		when(xrefAttrInversedBy.getInversedBy()).thenReturn(refAttr);
 		when(entityMeta.getAtomicAttributes())
 				.thenReturn(newArrayList(stringAttr, mrefAttr, mrefAttrWithExpression, xrefAttr, xrefAttrInversedBy));
-		List<AttributeMetaData> junctionTableAttrs = newArrayList(stringAttr, xrefAttr);
+		List<AttributeMetaData> junctionTableAttrs = newArrayList(stringAttr, xrefAttr, xrefAttrInversedBy);
 		assertEquals(PostgreSqlQueryUtils.getTableAttributes(entityMeta).collect(toList()), junctionTableAttrs);
 	}
 

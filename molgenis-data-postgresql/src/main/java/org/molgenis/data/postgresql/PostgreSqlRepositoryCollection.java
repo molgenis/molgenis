@@ -16,7 +16,6 @@ import java.sql.ResultSet;
 import java.util.Iterator;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static com.google.common.collect.Sets.immutableEnumSet;
 import static java.lang.String.format;
@@ -24,7 +23,6 @@ import static java.util.EnumSet.of;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.RepositoryCollectionCapability.*;
-import static org.molgenis.data.i18n.model.LanguageMetaData.*;
 import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
@@ -71,7 +69,6 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	{
 		throw new UnsupportedOperationException();
 	}
-
 
 	@Override
 	public Repository<Entity> createRepository(EntityMetaData entityMeta)
@@ -198,14 +195,16 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		}
 		else
 		{
-			boolean bidirectionalOneToMany = attr.getDataType() == ONE_TO_MANY && attr.isMappedBy();
-			if (isMultipleReferenceType(attr) && !bidirectionalOneToMany)
+			if (!(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()))
 			{
-				createJunctionTable(entityMeta, attr);
-			}
-			else
-			{
-				createColumn(entityMeta, attr);
+				if (isMultipleReferenceType(attr))
+				{
+					createJunctionTable(entityMeta, attr);
+				}
+				else
+				{
+					createColumn(entityMeta, attr);
+				}
 			}
 		}
 	}
@@ -290,32 +289,6 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		if (!Objects.equals(attr.getEnumOptions(), updatedAttr.getEnumOptions()))
 		{
 			updateEnumOptions(entityMeta, attr, updatedAttr);
-		}
-
-		// orderBy change
-		if (!Objects.equals(attr.getOrderBy(), updatedAttr.getOrderBy()))
-		{
-			updateOrderBy(attr, updatedAttr);
-		}
-	}
-
-	/**
-	 * Creates/removes order column associated with a one-to-many attribute.
-	 *
-	 * @param attr        one-to-many attribute
-	 * @param updatedAttr updated one-to-many attribute
-	 */
-	private void updateOrderBy(AttributeMetaData attr, AttributeMetaData updatedAttr)
-	{
-		if (attr.getOrderBy() == null && updatedAttr.getOrderBy() != null)
-		{
-			// remove order column
-			dropColumn(attr.getRefEntity(), attr);
-		}
-		else if (attr.getOrderBy() != null && updatedAttr.getOrderBy() == null)
-		{
-			// create order column
-			createColumn(updatedAttr.getRefEntity(), updatedAttr);
 		}
 	}
 
@@ -474,14 +447,16 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		}
 		else
 		{
-			boolean bidirectionalOneToMany = attr.getDataType() == ONE_TO_MANY && attr.isMappedBy();
-			if (isMultipleReferenceType(attr) && !bidirectionalOneToMany)
+			if (!(attr.getDataType() == ONE_TO_MANY && attr.isMappedBy()))
 			{
-				dropJunctionTable(entityMeta, attr);
-			}
-			else
-			{
-				dropColumn(entityMeta, attr);
+				if (isMultipleReferenceType(attr))
+				{
+					dropJunctionTable(entityMeta, attr);
+				}
+				else
+				{
+					dropColumn(entityMeta, attr);
+				}
 			}
 		}
 	}
@@ -593,10 +568,7 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 
 	private void createJunctionTables(EntityMetaData entityMeta)
 	{
-		getJunctionTableAttributes(entityMeta).filter(attr -> !attr.isInversedBy())
-				.forEach(attr -> createJunctionTable(entityMeta, attr));
-		getJunctionTableAttributes(entityMeta).filter(AttributeMetaData::isInversedBy)
-				.forEach(attr -> createJunctionTable(entityMeta, attr));
+		getJunctionTableAttributes(entityMeta).forEach(attr -> createJunctionTable(entityMeta, attr));
 	}
 
 	private void createForeignKey(EntityMetaData entityMeta, AttributeMetaData attr)
@@ -686,19 +658,16 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 	private void createColumn(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
 		String addColumnSql = getSqlAddColumn(entityMeta, attr);
-		if (addColumnSql != null)
+		if (LOG.isDebugEnabled())
 		{
-			if (LOG.isDebugEnabled())
+			LOG.debug("Creating column for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
+			if (LOG.isTraceEnabled())
 			{
-				LOG.debug("Creating column for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("SQL: {}", addColumnSql);
-				}
+				LOG.trace("SQL: {}", addColumnSql);
 			}
-			jdbcTemplate.execute(addColumnSql);
 		}
-	}
+		jdbcTemplate.execute(addColumnSql);
+		}
 
 	private void dropColumn(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
@@ -731,36 +700,28 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 
 	private void createJunctionTable(EntityMetaData entityMeta, AttributeMetaData attr)
 	{
-		if (attr.isInversedBy())
+		String createJunctionTableSql = getSqlCreateJunctionTable(entityMeta, attr);
+		if (LOG.isDebugEnabled())
 		{
-			createForeignKey(attr.getRefEntity(), attr.getInversedBy());
-		}
-		else
-		{
-			String createJunctionTableSql = getSqlCreateJunctionTable(entityMeta, attr);
-			if (LOG.isDebugEnabled())
+			LOG.debug("Creating junction table for entity [{}] attribute [{}]", entityMeta.getName(), attr.getName());
+			if (LOG.isTraceEnabled())
 			{
-				LOG.debug("Creating junction table for entity [{}] attribute [{}]", entityMeta.getName(),
-						attr.getName());
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("SQL: {}", createJunctionTableSql);
-				}
+				LOG.trace("SQL: {}", createJunctionTableSql);
 			}
-			jdbcTemplate.execute(createJunctionTableSql);
+		}
+		jdbcTemplate.execute(createJunctionTableSql);
 
-			String createJunctionTableIndexSql = getSqlCreateJunctionTableIndex(entityMeta, attr);
-			if (LOG.isDebugEnabled())
+		String createJunctionTableIndexSql = getSqlCreateJunctionTableIndex(entityMeta, attr);
+		if (LOG.isDebugEnabled())
+		{
+			LOG.debug("Creating junction table index for entity [{}] attribute [{}]", entityMeta.getName(),
+					attr.getName());
+			if (LOG.isTraceEnabled())
 			{
-				LOG.debug("Creating junction table index for entity [{}] attribute [{}]", entityMeta.getName(),
-						attr.getName());
-				if (LOG.isTraceEnabled())
-				{
-					LOG.trace("SQL: {}", createJunctionTableIndexSql);
-				}
+				LOG.trace("SQL: {}", createJunctionTableIndexSql);
 			}
-			jdbcTemplate.execute(createJunctionTableIndexSql);
 		}
+		jdbcTemplate.execute(createJunctionTableIndexSql);
 	}
 
 	private void dropJunctionTable(EntityMetaData entityMeta, AttributeMetaData mrefAttr)

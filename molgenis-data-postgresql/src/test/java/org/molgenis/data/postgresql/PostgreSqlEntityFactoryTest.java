@@ -47,7 +47,7 @@ public class PostgreSqlEntityFactoryTest
 		when(entityMeta.getAtomicAttributes()).thenReturn(singleton(oneToManyAttr));
 		ResultSet rs = mock(ResultSet.class);
 		Array oneToManyArray = mock(Array.class);
-		when(oneToManyArray.getArray()).thenReturn(new String[][] { { "1", "id0" }, { "0", "id1" } });
+		when(oneToManyArray.getArray()).thenReturn(new String[] { "id0", "id1" });
 		when(rs.getArray(oneToManyAttrName)).thenReturn(oneToManyArray);
 		int rowNum = 0;
 
@@ -55,10 +55,10 @@ public class PostgreSqlEntityFactoryTest
 		when(entityManager.create(entityMeta, null)).thenReturn(entity);
 		Entity refEntity1 = mock(Entity.class);
 		Entity refEntity0 = mock(Entity.class);
-		when(entityManager.getReferences(refEntityMeta, newArrayList("id1", "id0")))
-				.thenReturn(newArrayList(refEntity1, refEntity0));
+		when(entityManager.getReferences(refEntityMeta, newArrayList("id0", "id1")))
+				.thenReturn(newArrayList(refEntity0, refEntity1));
 		assertEquals(postgreSqlEntityFactory.createRowMapper(entityMeta, null).mapRow(rs, rowNum), entity);
-		verify(entity).set(oneToManyAttrName, newArrayList(refEntity1, refEntity0));
+		verify(entity).set(oneToManyAttrName, newArrayList(refEntity0, refEntity1));
 	}
 
 	@Test
