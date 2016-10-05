@@ -2,6 +2,7 @@ package org.molgenis.data;
 
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.populate.EntityPopulator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,14 +27,15 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
 	private final Constructor<E> entityConstructorWithEntity;
 	private final Constructor<E> entityConstructorWithEntityMeta;
 	private final M systemEntityMetaData;
+	private final EntityPopulator entityPopulator;
 
 	/**
 	 * Constructs a new entity factory that creates entities of the given type, meta data type and id type
-	 *
-	 * @param entityClass      entity type
+	 *  @param entityClass      entity type
 	 * @param systemEntityMeta entity meta data type
+	 * @param entityPopulator
 	 */
-	protected AbstractSystemEntityFactory(Class<E> entityClass, M systemEntityMeta)
+	protected AbstractSystemEntityFactory(Class<E> entityClass, M systemEntityMeta, EntityPopulator entityPopulator)
 	{
 		this.entityClass = requireNonNull(entityClass);
 
@@ -41,6 +43,7 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
 		this.entityConstructorWithEntity = getConstructorEntity(entityClass);
 		this.entityConstructorWithEntityMeta = getConstructorEntityMeta(entityClass);
 		this.systemEntityMetaData = systemEntityMeta;
+		this.entityPopulator = requireNonNull(entityPopulator);
 	}
 
 	public M getEntityMetaData()
@@ -57,14 +60,17 @@ public abstract class AbstractSystemEntityFactory<E extends Entity, M extends Sy
 	@Override
 	public E create()
 	{
+		E entity;
 		try
 		{
-			return entityConstructorWithEntityMeta.newInstance(systemEntityMetaData);
+			entity = entityConstructorWithEntityMeta.newInstance(systemEntityMetaData);
 		}
 		catch (InstantiationException | IllegalAccessException | InvocationTargetException e)
 		{
 			throw new RuntimeException(e);
 		}
+		entityPopulator.populate(entity);
+		return entity;
 	}
 
 	@Override

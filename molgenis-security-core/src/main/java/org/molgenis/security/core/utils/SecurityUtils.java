@@ -130,7 +130,7 @@ public class SecurityUtils
 	/**
 	 * Returns the default (su, read, write) roles related to a plugin
 	 *
-	 * @param pluginId
+	 * @param pluginIds
 	 * @return
 	 */
 	public static String[] defaultPluginAuthorities(String... pluginIds)

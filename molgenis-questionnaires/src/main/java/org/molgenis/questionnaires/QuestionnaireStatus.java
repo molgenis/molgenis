@@ -2,5 +2,5 @@ package org.molgenis.questionnaires;
 
 public enum QuestionnaireStatus
 {
-	NOT_STARTED, OPEN, SUBMITTED;
+	NOT_STARTED, OPEN, SUBMITTED
 }

@@ -7,5 +7,5 @@ import java.util.Map;
  */
 public interface MultiResourceConfig
 {
-	public Map<String, ResourceConfig> getConfigs();
+	Map<String, ResourceConfig> getConfigs();
 }

@@ -1,6 +1,7 @@
 package org.molgenis.test.data.staticentity;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
+import org.molgenis.data.populate.EntityPopulator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -9,8 +10,8 @@ public class TestRefEntityStaticFactory
 		extends AbstractSystemEntityFactory<TestRefEntityStatic, TestRefEntityStaticMetaData, String>
 {
 	@Autowired
-	TestRefEntityStaticFactory(TestRefEntityStaticMetaData testRefEntityStaticMetaData)
+	TestRefEntityStaticFactory(TestRefEntityStaticMetaData testRefEntityStaticMetaData, EntityPopulator entityPopulator)
 	{
-		super(TestRefEntityStatic.class, testRefEntityStaticMetaData);
+		super(TestRefEntityStatic.class, testRefEntityStaticMetaData, entityPopulator);
 	}
 }

@@ -7,5 +7,5 @@ import java.io.File;
  */
 public interface ResourceConfig
 {
-	public File getFile();
+	File getFile();
 }

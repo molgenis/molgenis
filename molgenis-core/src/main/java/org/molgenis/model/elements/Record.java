@@ -22,29 +22,29 @@ public interface Record
 	/**
 	 *
 	 */
-	public String getName();
+	String getName();
 
 	/**
 	 *
 	 */
-	public String getLabel();
+	String getLabel();
 
 	/**
 	 * @throws MolgenisModelException
 	 */
-	public List<Field> getFields() throws MolgenisModelException;
+	List<Field> getFields() throws MolgenisModelException;
 
 	/**
 	 *
 	 */
-	public Vector<String> getParents();
+	Vector<String> getParents();
 
 	// small utility methods
 
 	/**
 	 *
 	 */
-	public boolean hasXRefs();
+	boolean hasXRefs();
 
 	// public List<Field> getAllFields(Record e, String type);
 }

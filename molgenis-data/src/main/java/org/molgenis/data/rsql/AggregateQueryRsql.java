@@ -11,7 +11,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Create MOLGENIS aggregation query from RSQL node.
  *
- * @see https://github.com/jirutka/rsql-parser
+ * @see <a href="https://github.com/jirutka/rsql-parser">https://github.com/jirutka/rsql-parser</a>
  */
 public class AggregateQueryRsql
 {

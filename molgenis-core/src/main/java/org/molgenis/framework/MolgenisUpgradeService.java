@@ -4,5 +4,5 @@ public interface MolgenisUpgradeService
 {
 	boolean upgrade();
 
-	public void addUpgrade(MolgenisUpgrade upgrade);
+	void addUpgrade(MolgenisUpgrade upgrade);
 }

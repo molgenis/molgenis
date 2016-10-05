@@ -208,8 +208,6 @@ public class UISchema extends SimpleTree<UISchema>
 		UNKNOWN, FORM, TREE, MENU, PLUGIN
 	}
 
-	;
-
 	public Type getType()
 	{
 		return Type.UNKNOWN;

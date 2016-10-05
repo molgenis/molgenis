@@ -1,7 +1,6 @@
-package org.molgenis.data.support;
+package org.molgenis.data.populate;
 
 import com.google.common.io.BaseEncoding;
-import org.molgenis.data.IdGenerator;
 import org.molgenis.util.UniqueId;
 import org.springframework.stereotype.Component;
 

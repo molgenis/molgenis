@@ -14,7 +14,7 @@ import static java.util.stream.Collectors.toList;
 /**
  * RSQLVisitor implementation that creates {@link Query} objects for an RSQL tree.
  *
- * @see https://github.com/jirutka/rsql-parser
+ * @see <a href="https://github.com/jirutka/rsql-parser">https://github.com/jirutka/rsql-parser</a>
  */
 public class MolgenisRSQLVisitor extends NoArgRSQLVisitorAdapter<Query<Entity>>
 {

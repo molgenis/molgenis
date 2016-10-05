@@ -1,7 +1,7 @@
 package org.molgenis.data.semanticsearch.repository;
 
 import org.molgenis.data.DataService;
-import org.molgenis.data.IdGenerator;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.Tag;

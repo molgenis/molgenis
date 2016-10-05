@@ -3,7 +3,7 @@ package org.molgenis.ontology.importer.repository;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.molgenis.data.Entity;
-import org.molgenis.data.IdGenerator;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.Repository;
 import org.molgenis.ontology.core.meta.*;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;

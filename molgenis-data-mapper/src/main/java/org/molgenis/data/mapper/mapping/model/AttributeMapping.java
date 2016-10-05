@@ -54,7 +54,7 @@ public class AttributeMapping
 	/**
 	 * Creates a new empty AttributeMapping
 	 *
-	 * @param targetAttributeMetaData2
+	 * @param target mapping target attribute
 	 */
 	public AttributeMapping(AttributeMetaData target)
 	{

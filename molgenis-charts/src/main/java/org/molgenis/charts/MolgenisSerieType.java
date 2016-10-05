@@ -4,7 +4,7 @@ public enum MolgenisSerieType
 {
 	SCATTER, BOXPLOT, LINE;
 
-	private MolgenisSerieType()
+	MolgenisSerieType()
 	{
 	}
 }

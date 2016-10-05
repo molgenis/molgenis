@@ -105,7 +105,7 @@ public class AnnotatorController
 		AnnotationJobExecution annotationJobExecution = annotationJobExecutionFactory.create();
 		annotationJobExecution.setUser(userAccountService.getCurrentUser());
 		annotationJobExecution.setTargetName(entityName);
-		annotationJobExecution.setAnnotators(String.join(",", annotatorNames));
+		annotationJobExecution.setAnnotators(String.join(",", (CharSequence[]) annotatorNames));
 		annotationJobExecution.setResultUrl("/menu/main/dataexplorer?entity=" + entityName);
 		AnnotationJob job = annotationJobFactory.createJob(annotationJobExecution);
 		taskExecutor.submit(job);

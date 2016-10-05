@@ -61,7 +61,7 @@ public class Unique implements Serializable
 	 * unique.
 	 *
 	 * @param entity The entity this unique is associated with.
-	 * @param field  The field that makes up this unique.
+	 * @param fieldName  The field that makes up this unique.
 	 */
 	public Unique(Entity entity, String fieldName, boolean subclass, String description)
 	{
@@ -89,7 +89,7 @@ public class Unique implements Serializable
 	 * the unique.
 	 *
 	 * @param entity The entity this unique is associated with.
-	 * @param fields The fields that make up this unique.
+	 * @param fieldNames The fields that make up this unique.
 	 */
 	public Unique(Entity entity, List<String> fieldNames, boolean subclass, String description)
 	{

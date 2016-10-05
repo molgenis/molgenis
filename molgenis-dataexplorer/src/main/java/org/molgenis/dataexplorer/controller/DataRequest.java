@@ -8,17 +8,17 @@ import java.util.List;
 
 public class DataRequest
 {
-	public static enum ColNames
+	public enum ColNames
 	{
 		ATTRIBUTE_NAMES, ATTRIBUTE_LABELS
 	}
 
-	public static enum EntityValues
+	public enum EntityValues
 	{
 		ENTITY_LABELS, ENTITY_IDS
 	}
 
-	public static enum DownloadType
+	public enum DownloadType
 	{
 		DOWNLOAD_TYPE_CSV, DOWNLOAD_TYPE_XLSX
 	}

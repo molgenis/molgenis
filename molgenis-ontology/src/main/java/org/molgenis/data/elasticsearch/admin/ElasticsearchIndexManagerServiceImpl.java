@@ -23,7 +23,7 @@ public class ElasticsearchIndexManagerServiceImpl implements ElasticsearchIndexM
 	private final ElasticsearchService elasticsearchService;
 
 	@Autowired
-	public ElasticsearchIndexManagerServiceImpl(DataService dataService, ElasticsearchService elasticsearchService)
+	public ElasticsearchIndexManagerServiceImpl(DataService dataService, @SuppressWarnings("SpringJavaAutowiringInspection") ElasticsearchService elasticsearchService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.elasticsearchService = requireNonNull(elasticsearchService);
