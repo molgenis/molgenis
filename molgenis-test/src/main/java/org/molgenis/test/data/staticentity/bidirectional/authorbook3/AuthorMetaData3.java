@@ -1,4 +1,4 @@
-package org.molgenis.test.data.staticentity.bidirectional.test2;
+package org.molgenis.test.data.staticentity.bidirectional.authorbook3;
 
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
@@ -16,21 +16,21 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 /**
- * AuthorMetaData2 and BookMetaData2 define two entities with a OneToMany relation of which the Xref part (Book.author) is required.
+ * AuthorMetaData3 and BookMetaData3 define two entities with a OneToMany relation of which the OneToMany part (Author.books) is required.
  */
 @Component
-public class AuthorMetaData2 extends SystemEntityMetaData
+public class AuthorMetaData3 extends SystemEntityMetaData
 {
-	private static final String SIMPLE_NAME = "Author2";
+	private static final String SIMPLE_NAME = "Author3";
 	public static final String MY_ENTITY = PACKAGE_SYSTEM + PACKAGE_SEPARATOR + SIMPLE_NAME;
 
 	public static final String ID = "id";
 	public static final String LABEL = "label";
 	public static final String ATTR_BOOKS = "books";
 
-	private BookMetaData2 bookMetaData;
+	private BookMetaData3 bookMetaData;
 
-	AuthorMetaData2()
+	AuthorMetaData3()
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
 	}
@@ -42,12 +42,13 @@ public class AuthorMetaData2 extends SystemEntityMetaData
 
 		addAttribute(ID, ROLE_ID).setAuto(true).setLabel("Identifier");
 		addAttribute(LABEL, ROLE_LABEL).setNillable(true).setLabel("Label");
-		AttributeMetaData attribute = bookMetaData.getAttribute(BookMetaData2.AUTHOR);
-		addAttribute(ATTR_BOOKS).setDataType(ONE_TO_MANY).setRefEntity(bookMetaData).setMappedBy(attribute);
+		AttributeMetaData attribute = bookMetaData.getAttribute(BookMetaData3.AUTHOR);
+		addAttribute(ATTR_BOOKS).setDataType(ONE_TO_MANY).setRefEntity(bookMetaData).setMappedBy(attribute)
+				.setNillable(false);
 	}
 
 	@Autowired
-	public void setBookMetaData(BookMetaData2 bookMetaData)
+	public void setBookMetaData(BookMetaData3 bookMetaData)
 	{
 		this.bookMetaData = requireNonNull(bookMetaData);
 	}

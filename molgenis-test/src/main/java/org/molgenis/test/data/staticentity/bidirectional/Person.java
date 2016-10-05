@@ -3,34 +3,34 @@ package org.molgenis.test.data.staticentity.bidirectional;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
-import org.molgenis.test.data.staticentity.bidirectional.authorbook1.AuthorMetaData1;
+import org.molgenis.test.data.staticentity.bidirectional.person1.PersonMetaData1;
 
-public class Author extends StaticEntity
+public class Person extends StaticEntity
 {
-	public Author(Entity entity)
+	public Person(Entity entity)
 	{
 		super(entity);
 	}
 
-	public Author(EntityMetaData entityMeta)
+	public Person(EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 	}
 
-	public Author(String name, EntityMetaData entityMeta)
+	public Person(String name, EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 		setId(name);
 	}
 
-	public Author setId(String id)
+	public Person setId(String id)
 	{
-		set(AuthorMetaData1.ID, id);
+		set(PersonMetaData1.ID, id);
 		return this;
 	}
 
 	public String getId()
 	{
-		return getString(AuthorMetaData1.ID);
+		return getString(PersonMetaData1.ID);
 	}
 }

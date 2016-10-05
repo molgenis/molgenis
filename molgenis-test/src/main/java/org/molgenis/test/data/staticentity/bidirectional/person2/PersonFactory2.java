@@ -1,0 +1,16 @@
+package org.molgenis.test.data.staticentity.bidirectional.person2;
+
+import org.molgenis.data.AbstractSystemEntityFactory;
+import org.molgenis.test.data.staticentity.bidirectional.Person;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+@Component
+public class PersonFactory2 extends AbstractSystemEntityFactory<Person, PersonMetaData2, String>
+{
+	@Autowired
+	PersonFactory2(PersonMetaData2 personMeta)
+	{
+		super(Person.class, personMeta);
+	}
+}

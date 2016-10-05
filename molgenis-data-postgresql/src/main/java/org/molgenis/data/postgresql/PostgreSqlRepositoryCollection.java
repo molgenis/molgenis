@@ -543,7 +543,6 @@ public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 		}
 	}
 
-	// @Transactional FIXME enable when bootstrapping transaction issue has been resolved
 	private void createTable(EntityMetaData entityMeta)
 	{
 		// create table

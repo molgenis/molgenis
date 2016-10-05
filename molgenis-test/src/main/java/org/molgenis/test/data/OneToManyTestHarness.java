@@ -3,22 +3,30 @@ package org.molgenis.test.data;
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.test.data.staticentity.bidirectional.test1.AuthorFactory1;
-import org.molgenis.test.data.staticentity.bidirectional.test1.AuthorMetaData1;
-import org.molgenis.test.data.staticentity.bidirectional.test1.BookFactory1;
-import org.molgenis.test.data.staticentity.bidirectional.test1.BookMetaData1;
-import org.molgenis.test.data.staticentity.bidirectional.test2.AuthorFactory2;
-import org.molgenis.test.data.staticentity.bidirectional.test2.AuthorMetaData2;
-import org.molgenis.test.data.staticentity.bidirectional.test2.BookFactory2;
-import org.molgenis.test.data.staticentity.bidirectional.test2.BookMetaData2;
-import org.molgenis.test.data.staticentity.bidirectional.test3.AuthorFactory3;
-import org.molgenis.test.data.staticentity.bidirectional.test3.AuthorMetaData3;
-import org.molgenis.test.data.staticentity.bidirectional.test3.BookFactory3;
-import org.molgenis.test.data.staticentity.bidirectional.test3.BookMetaData3;
-import org.molgenis.test.data.staticentity.bidirectional.test4.AuthorFactory4;
-import org.molgenis.test.data.staticentity.bidirectional.test4.AuthorMetaData4;
-import org.molgenis.test.data.staticentity.bidirectional.test4.BookFactory4;
-import org.molgenis.test.data.staticentity.bidirectional.test4.BookMetaData4;
+import org.molgenis.test.data.staticentity.bidirectional.person1.PersonFactory1;
+import org.molgenis.test.data.staticentity.bidirectional.person1.PersonMetaData1;
+import org.molgenis.test.data.staticentity.bidirectional.person2.PersonFactory2;
+import org.molgenis.test.data.staticentity.bidirectional.person2.PersonMetaData2;
+import org.molgenis.test.data.staticentity.bidirectional.person3.PersonFactory3;
+import org.molgenis.test.data.staticentity.bidirectional.person3.PersonMetaData3;
+import org.molgenis.test.data.staticentity.bidirectional.person4.PersonFactory4;
+import org.molgenis.test.data.staticentity.bidirectional.person4.PersonMetaData4;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook1.AuthorFactory1;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook1.AuthorMetaData1;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook1.BookFactory1;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook1.BookMetaData1;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook2.AuthorFactory2;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook2.AuthorMetaData2;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook2.BookFactory2;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook2.BookMetaData2;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook3.AuthorFactory3;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook3.AuthorMetaData3;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook3.BookFactory3;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook3.BookMetaData3;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook4.AuthorFactory4;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook4.AuthorMetaData4;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook4.BookFactory4;
+import org.molgenis.test.data.staticentity.bidirectional.authorbook4.BookMetaData4;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -66,6 +74,23 @@ public class OneToManyTestHarness
 	@Autowired
 	BookMetaData4 bookMetaData4;
 
+	@Autowired
+	PersonFactory1 personFactory1;
+	@Autowired
+	PersonFactory2 personFactory2;
+	@Autowired
+	PersonFactory3 personFactory3;
+	@Autowired
+	PersonFactory4 personFactory4;
+	@Autowired
+	PersonMetaData1 personMetaData1;
+	@Autowired
+	PersonMetaData2 personMetaData2;
+	@Autowired
+	PersonMetaData3 personMetaData3;
+	@Autowired
+	PersonMetaData4 personMetaData4;
+
 	public static final int ONE_TO_MANY_CASES = 4;
 
 	public static final String BOOK_1 = "book1";
@@ -79,13 +104,24 @@ public class OneToManyTestHarness
 	public static final String ATTR_BOOKS = "books";
 	public static final String ATTR_AUTHOR = "author";
 
+	public static final String PERSON_1 = "person1";
+	public static final String PERSON_2 = "person2";
+	public static final String PERSON_3 = "person3";
+
+	public static final String ATTR_PARENT = "parent";
+	public static final String ATTR_CHILDREN = "children";
+
+	public enum TestCaseType{
+		BOTH_NULLABLE, XREF_REQUIRED, ONE_TO_MANY_REQUIRED, BOTH_REQUIRED;
+	}
+
 	@PostConstruct
 	public void postConstruct()
 	{
 	}
 
 	/**
-	 * Creates Author and Book entity test sets for a specific use case. Entities are always linked up as follows (when
+	 * Creates Author and Book entity test sets for a specific use case. Entities are always linked as follows (when
 	 * imported): author1 -> book1, author2 -> book2, author3 -> book3, and vice versa.
 	 * <p>
 	 * Case 1: Author.books = nillable, Book.author = nillable | no ordering
@@ -95,18 +131,44 @@ public class OneToManyTestHarness
 	 * Case 5: Author.books = nillable, Book.author = nillable | ascending order
 	 * Case 6: Author.books = nillable, Book.author = nillable | descending order
 	 */
-	public AuthorsAndBooks createAuthorAndBookEntities(int testCase)
+	public AuthorsAndBooks createAuthorAndBookEntities(TestCaseType testCase)
 	{
 		switch (testCase)
 		{
-			case 1:
+			case BOTH_NULLABLE:
 				return createTestEntitiesSetAuthorField(authorFactory1, bookFactory1, authorMetaData1, bookMetaData1);
-			case 2:
+			case XREF_REQUIRED:
 				return createTestEntitiesSetBooksField(authorFactory2, bookFactory2, authorMetaData2, bookMetaData2);
-			case 3:
+			case ONE_TO_MANY_REQUIRED:
 				return createTestEntitiesSetAuthorField(authorFactory3, bookFactory3, authorMetaData3, bookMetaData3);
-			case 4:
+			case BOTH_REQUIRED:
 				return createTestEntitiesSetAuthorField(authorFactory4, bookFactory4, authorMetaData4, bookMetaData4);
+			default:
+				throw new IllegalArgumentException("Unknown test case " + testCase);
+		}
+	}
+
+	/**
+	 * Creates Person entity test sets for a specific use case. Entities are always linked as folows (when imported):
+	 * person1 -> person2, person2 -> person3, person3 -> person1
+	 * <p>
+	 * Case 1: Person.parent = nillable, Person.children = nillable
+	 * Case 2: Person.parent = nillable, Person.children = required
+	 * Case 3: Person.parent = required, Person.children = nillable
+	 * Case 4: Person.parent = required, Person.children = required
+	 */
+	public List<Entity> createPersonEntities(TestCaseType testCase)
+	{
+		switch (testCase)
+		{
+			case BOTH_NULLABLE:
+				return createPersonEntities(personFactory1);
+			case XREF_REQUIRED:
+				return createPersonEntities(personFactory2);
+			case ONE_TO_MANY_REQUIRED:
+				return createPersonEntities(personFactory3);
+			case BOTH_REQUIRED:
+				return createPersonEntities(personFactory4);
 			default:
 				throw new IllegalArgumentException("Unknown test case " + testCase);
 		}
@@ -173,6 +235,30 @@ public class OneToManyTestHarness
 		book3.set(BookMetaData1.LABEL, "Do you know where MOLGENIS?");
 
 		return newArrayList(book1, book2, book3);
+	}
+
+	/**
+	 * Create Person entities and set the Person.children field.
+	 */
+	private List<Entity> createPersonEntities(AbstractSystemEntityFactory personFactory)
+	{
+		Entity person1 = personFactory.create();
+		person1.set(PersonMetaData1.ID, PERSON_1);
+		person1.set(PersonMetaData1.LABEL, "Roderique");
+
+		Entity person2 = personFactory.create();
+		person2.set(PersonMetaData1.ID, PERSON_2);
+		person2.set(PersonMetaData1.LABEL, "Sjonny");
+
+		Entity person3 = personFactory.create();
+		person3.set(PersonMetaData1.ID, PERSON_3);
+		person3.set(PersonMetaData1.LABEL, "Klaas");
+
+		person1.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person2));
+		person2.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person3));
+		person3.set(PersonMetaData1.ATTR_CHILDREN, newArrayList(person1));
+
+		return newArrayList(person1, person2, person3);
 	}
 
 	/**
