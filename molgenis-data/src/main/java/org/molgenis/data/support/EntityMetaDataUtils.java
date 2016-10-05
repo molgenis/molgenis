@@ -45,6 +45,7 @@ public class EntityMetaDataUtils
 			case INT:
 			case LONG:
 			case MREF:
+			case ONE_TO_MANY:
 			case SCRIPT:
 			case STRING:
 			case TEXT:
@@ -67,6 +68,7 @@ public class EntityMetaDataUtils
 		{
 			case CATEGORICAL_MREF:
 			case MREF:
+			case ONE_TO_MANY:
 				return true;
 			case BOOL:
 			case CATEGORICAL:
@@ -92,20 +94,31 @@ public class EntityMetaDataUtils
 	}
 
 	/**
-	 * Returns whether the attribute type references other entities (e.g. is 'XREF' or 'MREF').
+	 * Returns whether the attribute references other entities (e.g. is 'XREF' or 'MREF').
 	 *
 	 * @param attr attribute
 	 * @return true if the attribute references other entities
 	 */
 	public static boolean isReferenceType(Attribute attr)
 	{
-		AttributeType attrType = attr.getDataType();
+		return isReferenceType(attr.getDataType());
+	}
+
+	/**
+	 * Returns whether the attribute type references other entities (e.g. is 'XREF' or 'MREF').
+	 *
+	 * @param attrType attribute type
+	 * @return true if the attribute type references other entities
+	 */
+	public static boolean isReferenceType(AttributeType attrType)
+	{
 		switch (attrType)
 		{
 			case CATEGORICAL:
 			case CATEGORICAL_MREF:
 			case FILE:
 			case MREF:
+			case ONE_TO_MANY:
 			case XREF:
 				return true;
 			case BOOL:

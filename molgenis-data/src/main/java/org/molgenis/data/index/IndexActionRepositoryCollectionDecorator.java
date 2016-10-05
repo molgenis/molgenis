@@ -69,12 +69,6 @@ public class IndexActionRepositoryCollectionDecorator implements RepositoryColle
 	}
 
 	@Override
-	public Stream<String> getLanguageCodes()
-	{
-		return this.decorated.getLanguageCodes();
-	}
-
-	@Override
 	public Iterator<Repository<Entity>> iterator()
 	{
 		return this.decorated.iterator();

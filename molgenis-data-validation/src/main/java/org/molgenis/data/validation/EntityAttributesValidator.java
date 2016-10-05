@@ -3,6 +3,7 @@ package org.molgenis.data.validation;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.validator.constraints.impl.EmailValidator;
 import org.molgenis.MolgenisFieldTypes;
+import org.molgenis.MolgenisFieldTypes.*;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Range;
 import org.molgenis.data.meta.model.Attribute;
@@ -20,7 +21,7 @@ import java.util.Set;
 import static com.google.api.client.util.Lists.newArrayList;
 import static java.lang.String.format;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.getValueString;
-import static org.molgenis.MolgenisFieldTypes.getType;
+import static org.molgenis.MolgenisFieldTypes.*;
 
 /**
  * Attribute data type validator.
@@ -40,7 +41,8 @@ public class EntityAttributesValidator
 		{
 			ConstraintViolation violation = null;
 
-			switch (attr.getDataType())
+			AttributeType attrType = attr.getDataType();
+			switch (attrType)
 			{
 				case EMAIL:
 					violation = checkEmail(entity, attr, meta);
@@ -78,16 +80,16 @@ public class EntityAttributesValidator
 					violation = checkEnum(entity, attr, meta);
 					break;
 				case HTML:
-					violation = checkText(entity, attr, meta, MolgenisFieldTypes.HTML);
+					violation = checkText(entity, attr, meta, HTML);
 					break;
 				case SCRIPT:
-					violation = checkText(entity, attr, meta, MolgenisFieldTypes.SCRIPT);
+					violation = checkText(entity, attr, meta, SCRIPT);
 					break;
 				case TEXT:
-					violation = checkText(entity, attr, meta, MolgenisFieldTypes.TEXT);
+					violation = checkText(entity, attr, meta, TEXT);
 					break;
 				case STRING:
-					violation = checkText(entity, attr, meta, MolgenisFieldTypes.STRING);
+					violation = checkText(entity, attr, meta, STRING);
 					break;
 				case CATEGORICAL:
 				case FILE:
@@ -96,13 +98,14 @@ public class EntityAttributesValidator
 					break;
 				case CATEGORICAL_MREF:
 				case MREF:
+				case ONE_TO_MANY:
 					violation = checkMref(entity, attr, meta);
 					break;
 				case COMPOUND:
 					// no op
 					break;
 				default:
-					break;
+					throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 			}
 
 			if (violation != null)

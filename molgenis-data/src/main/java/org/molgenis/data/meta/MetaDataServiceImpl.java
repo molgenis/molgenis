@@ -6,13 +6,16 @@ import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
+import org.molgenis.data.meta.model.Tag;
 import org.molgenis.data.meta.system.SystemEntityMetaDataRegistry;
-import org.molgenis.util.DependencyResolver;
 import org.molgenis.util.EntityUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.sql.Timestamp;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -22,11 +25,10 @@ import static com.google.common.collect.Lists.reverse;
 import static com.google.common.collect.Maps.newLinkedHashMap;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toMap;
+import static java.util.stream.Collectors.*;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.*;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.data.meta.model.PackageMetaData.PARENT;
@@ -38,23 +40,22 @@ import static org.molgenis.data.meta.model.TagMetaData.TAG;
 @Component
 public class MetaDataServiceImpl implements MetaDataService
 {
+	private static final Logger LOG = LoggerFactory.getLogger(MetaDataServiceImpl.class);
+
 	private final DataService dataService;
 	private final RepositoryCollectionRegistry repoCollectionRegistry;
 	private final SystemEntityMetaDataRegistry systemEntityMetaRegistry;
+	private final EntityMetaDataDependencyResolver entityMetaDependencyResolver;
 
 	@Autowired
 	public MetaDataServiceImpl(DataService dataService, RepositoryCollectionRegistry repoCollectionRegistry,
-			SystemEntityMetaDataRegistry systemEntityMetaRegistry)
+			SystemEntityMetaDataRegistry systemEntityMetaRegistry,
+			EntityMetaDataDependencyResolver entityMetaDependencyResolver)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.repoCollectionRegistry = requireNonNull(repoCollectionRegistry);
 		this.systemEntityMetaRegistry = requireNonNull(systemEntityMetaRegistry);
-	}
-
-	@Override
-	public Stream<String> getLanguageCodes()
-	{
-		return getDefaultBackend().getLanguageCodes();
+		this.entityMetaDependencyResolver = requireNonNull(entityMetaDependencyResolver);
 	}
 
 	@Override
@@ -153,14 +154,34 @@ public class MetaDataServiceImpl implements MetaDataService
 	public void deleteEntityMeta(String entityName)
 	{
 		dataService.deleteById(ENTITY_META_DATA, entityName);
+
+		LOG.info("Removed entity [{}]", entityName);
 	}
 
 	@Transactional
 	@Override
-	public void delete(List<EntityMetaData> entities)
+	public void deleteEntityMeta(Collection<EntityMetaData> entityMetas)
 	{
-		List<EntityMetaData> orderedEntities = DependencyResolver.resolve(Sets.newHashSet(entities));
-		reverse(orderedEntities).stream().map(EntityMetaData::getName).forEach(this::deleteEntityMeta);
+		if (entityMetas.isEmpty())
+		{
+			return;
+		}
+
+		List<EntityMetaData> resolvedEntityMetas = reverse(entityMetaDependencyResolver.resolve(entityMetas));
+
+		// 1st pass: remove mappedBy attributes
+		List<EntityMetaData> mappedByEntityMetas = resolvedEntityMetas.stream()
+				.filter(EntityMetaData::hasMappedByAttributes).map(EntityMetaDataWithoutMappedByAttributes::new)
+				.collect(toList());
+		if (!mappedByEntityMetas.isEmpty())
+		{
+			dataService.update(ENTITY_META_DATA, mappedByEntityMetas.stream());
+		}
+
+		// 2nd pass: delete entities
+		dataService.deleteAll(ENTITY_META_DATA, resolvedEntityMetas.stream().map(EntityMetaData::getName));
+
+		LOG.info("Removed entities [{}]", entityMetas.stream().map(EntityMetaData::getName).collect(joining(",")));
 	}
 
 	@Transactional
@@ -190,6 +211,216 @@ public class MetaDataServiceImpl implements MetaDataService
 
 		// create entity
 		dataService.add(ENTITY_META_DATA, entityMeta);
+	}
+
+	@Transactional
+	@Override
+	public void addEntityMeta(Collection<EntityMetaData> entityMetas)
+	{
+		if (entityMetas.isEmpty())
+		{
+			return;
+		}
+
+		List<EntityMetaData> resolvedEntityMetas = entityMetaDependencyResolver.resolve(entityMetas);
+
+		// 1st pass: create entities and attributes except for mappedBy attributes
+		resolvedEntityMetas.forEach(entityMeta ->
+		{
+			if (entityMeta.hasMappedByAttributes())
+			{
+				entityMeta = new EntityMetaDataWithoutMappedByAttributes(entityMeta);
+			}
+
+			addEntityMeta(entityMeta);
+		});
+
+		// 2nd pass: create mappedBy attributes and update entity
+		resolvedEntityMetas.forEach(entityMeta ->
+		{
+			if (entityMeta.hasMappedByAttributes())
+			{
+				updateEntityMeta(entityMeta, new EntityMetaDataWithoutMappedByAttributes(entityMeta));
+			}
+		});
+	}
+
+	@Transactional
+	@Override
+	public void updateEntityMeta(EntityMetaData entityMeta)
+	{
+		EntityMetaData existingEntityMeta = dataService.query(ENTITY_META_DATA, EntityMetaData.class)
+				.eq(FULL_NAME, entityMeta.getName()).fetch(getEntityMetaDataFetch()).findOne();
+		if (existingEntityMeta == null)
+		{
+			throw new UnknownEntityException(format("Unknown entity [%s]", entityMeta.getName()));
+		}
+
+		updateEntityMeta(entityMeta, existingEntityMeta);
+	}
+
+	@Transactional
+	@Override
+	public void upsertEntityMeta(EntityMetaData entityMeta)
+	{
+		EntityMetaData existingEntityMeta = dataService.query(ENTITY_META_DATA, EntityMetaData.class)
+				.eq(FULL_NAME, entityMeta.getName()).fetch(getEntityMetaDataFetch()).findOne();
+		if (existingEntityMeta != null)
+		{
+			updateEntityMeta(entityMeta);
+		}
+		else
+		{
+			addEntityMeta(entityMeta);
+		}
+	}
+
+	@Transactional
+	@Override
+	public void updateEntityMeta(Collection<EntityMetaData> entityMetas)
+	{
+		if (entityMetas.isEmpty())
+		{
+			return;
+		}
+
+		List<EntityMetaData> resolvedEntityMeta = entityMetaDependencyResolver.resolve(entityMetas);
+
+		Map<String, EntityMetaData> existingEntityMetaMap = dataService
+				.findAll(ENTITY_META_DATA, entityMetas.stream().map(EntityMetaData::getName), EntityMetaData.class)
+				.collect(toMap(EntityMetaData::getName, Function.identity()));
+
+		// 1st pass: create entities and attributes except for mappedBy attributes
+		resolvedEntityMeta.forEach(entityMeta ->
+		{
+			EntityMetaData existingEntityMeta = existingEntityMetaMap.get(entityMeta.getName());
+			if (existingEntityMeta == null)
+			{
+				throw new UnknownEntityException(format("Unknown entity [%s]", entityMeta.getName()));
+			}
+			if (hasNewMappedByAttrs(entityMeta, existingEntityMeta))
+			{
+				entityMeta = new EntityMetaDataWithoutMappedByAttributes(entityMeta, existingEntityMeta);
+			}
+
+			updateEntityMeta(entityMeta, existingEntityMeta);
+		});
+
+		// 2nd pass: create mappedBy attributes and update entity
+		resolvedEntityMeta.forEach(entityMeta ->
+		{
+			EntityMetaData existingEntityMeta = existingEntityMetaMap.get(entityMeta.getName());
+			if (hasNewMappedByAttrs(entityMeta, existingEntityMeta))
+			{
+				updateEntityMeta(entityMeta, existingEntityMeta);
+			}
+		});
+	}
+
+	/**
+	 * Returns true if entity meta contains mapped by attributes that do not exist in the existing entity meta.
+	 *
+	 * @param entityMeta         entity meta data
+	 * @param existingEntityMeta existing entity meta data
+	 * @return true if entity meta contains mapped by attributes that do not exist in the existing entity meta.
+	 */
+	private static boolean hasNewMappedByAttrs(EntityMetaData entityMeta, EntityMetaData existingEntityMeta)
+	{
+		Set<String> mappedByAttrs = entityMeta.getOwnMappedByAttributes().map(Attribute::getName)
+				.collect(toSet());
+		Set<String> existingMappedByAttrs = existingEntityMeta.getOwnMappedByAttributes()
+				.map(Attribute::getName).collect(toSet());
+		return !mappedByAttrs.equals(existingMappedByAttrs);
+	}
+
+	@Transactional
+	@Override
+	public void upsertEntityMeta(Collection<EntityMetaData> entityMetas)
+	{
+		if (entityMetas.isEmpty())
+		{
+			return;
+		}
+
+		List<EntityMetaData> resolvedEntityMeta = entityMetaDependencyResolver.resolve(entityMetas);
+
+		Map<String, EntityMetaData> existingEntityMetaMap = dataService
+				.findAll(ENTITY_META_DATA, entityMetas.stream().map(EntityMetaData::getName), EntityMetaData.class)
+				.collect(toMap(EntityMetaData::getName, Function.identity()));
+
+		// 1st pass: create entities and attributes except for mappedBy attributes
+		resolvedEntityMeta.forEach(entityMeta ->
+		{
+			EntityMetaData existingEntityMeta = existingEntityMetaMap.get(entityMeta.getName());
+			if (existingEntityMeta == null)
+			{
+				if (entityMeta.hasMappedByAttributes())
+				{
+					entityMeta = new EntityMetaDataWithoutMappedByAttributes(entityMeta);
+				}
+
+				addEntityMeta(entityMeta);
+			}
+			else
+			{
+				if (hasNewMappedByAttrs(entityMeta, existingEntityMeta))
+				{
+					entityMeta = new EntityMetaDataWithoutMappedByAttributes(entityMeta, existingEntityMeta);
+				}
+
+				updateEntityMeta(entityMeta, existingEntityMeta);
+			}
+		});
+
+		// 2nd pass: create mappedBy attributes and update entity
+		resolvedEntityMeta.forEach(entityMeta ->
+		{
+			EntityMetaData existingEntityMeta = existingEntityMetaMap.get(entityMeta.getName());
+			if (existingEntityMeta == null)
+			{
+				if (entityMeta.hasMappedByAttributes())
+				{
+					updateEntityMeta(entityMeta, new EntityMetaDataWithoutMappedByAttributes(entityMeta));
+				}
+			}
+			else
+			{
+				if (hasNewMappedByAttrs(entityMeta, existingEntityMeta))
+				{
+					updateEntityMeta(entityMeta, existingEntityMeta);
+				}
+			}
+		});
+	}
+
+	private void updateEntityMeta(EntityMetaData entityMeta, EntityMetaData existingEntityMeta)
+	{
+		populateAutoAttributeValues(existingEntityMeta, entityMeta);
+
+		// add new attributes, update modified attributes
+		upsertAttributes(entityMeta, existingEntityMeta);
+
+		// update entity
+		if (!EntityUtils.equals(entityMeta, existingEntityMeta))
+		{
+			// note: leave it up to the data service to decided what to do with attributes removed from entity meta data
+			dataService.update(ENTITY_META_DATA, entityMeta);
+		}
+	}
+
+	private static void populateAutoAttributeValues(EntityMetaData existingEntityMeta, EntityMetaData entityMeta)
+	{
+		// inject existing auto-generated identifiers in system entity meta data
+		Map<String, String> attrMap = stream(existingEntityMeta.getOwnAllAttributes().spliterator(), false)
+				.collect(toMap(Attribute::getName, Attribute::getIdentifier));
+		entityMeta.getOwnAllAttributes().forEach(attr ->
+		{
+			String attrIdentifier = attrMap.get(attr.getName());
+			if (attrIdentifier != null)
+			{
+				attr.setIdentifier(attrIdentifier);
+			}
+		});
 	}
 
 	@Transactional
@@ -272,28 +503,6 @@ public class MetaDataServiceImpl implements MetaDataService
 	{
 		return dataService.query(ENTITY_META_DATA, EntityMetaData.class).eq(ABSTRACT, false)
 				.fetch(getEntityMetaDataFetch()).findAll().map(this::getRepository);
-	}
-
-	@Transactional
-	@Override
-	public void updateEntityMeta(EntityMetaData entityMeta)
-	{
-		EntityMetaData existingEntityMeta = dataService.query(ENTITY_META_DATA, EntityMetaData.class)
-				.eq(FULL_NAME, entityMeta.getName()).fetch(getEntityMetaDataFetch()).findOne();
-		if (existingEntityMeta == null)
-		{
-			throw new UnknownEntityException(format("Unknown entity [%s]", entityMeta.getName()));
-		}
-
-		// add new attributes, update modified attributes
-		upsertAttributes(entityMeta, existingEntityMeta);
-
-		// update entity
-		if (!EntityUtils.equals(entityMeta, existingEntityMeta))
-		{
-			// note: leave it up to the data service to decided what to do with attributes removed from entity meta data
-			dataService.update(ENTITY_META_DATA, entityMeta);
-		}
 	}
 
 	/**
@@ -391,6 +600,549 @@ public class MetaDataServiceImpl implements MetaDataService
 				return true;
 			default:
 				return false;
+		}
+	}
+
+	/**
+	 * Entity meta data that wraps a entity meta data and hides the mappedBy attributes. In code both a new and an existing
+	 * entity meta data are provided only the new mappedBy attributes are hidden.
+	 */
+	private static class EntityMetaDataWithoutMappedByAttributes extends EntityMetaData
+	{
+		private final EntityMetaData entityMeta;
+		private final EntityMetaData existingEntityMeta;
+
+		EntityMetaDataWithoutMappedByAttributes(EntityMetaData entityMeta)
+		{
+			this(entityMeta, null);
+		}
+
+		EntityMetaDataWithoutMappedByAttributes(EntityMetaData entityMeta, EntityMetaData existingEntityMeta)
+		{
+			this.entityMeta = requireNonNull(entityMeta);
+			this.existingEntityMeta = existingEntityMeta;
+		}
+
+		@Override
+		public void init(Entity entity)
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public Object get(String attributeName)
+		{
+			return entityMeta.get(attributeName);
+		}
+
+		@Override
+		public Boolean getBoolean(String attributeName)
+		{
+			return entityMeta.getBoolean(attributeName);
+		}
+
+		@Override
+		public java.sql.Date getDate(String attributeName)
+		{
+			return entityMeta.getDate(attributeName);
+		}
+
+		@Override
+		public Double getDouble(String attributeName)
+		{
+			return entityMeta.getDouble(attributeName);
+		}
+
+		@Override
+		public Iterable<Entity> getEntities(String attributeName)
+		{
+			Iterable<Entity> entities = entityMeta.getEntities(attributeName);
+			if (attributeName.equals(ATTRIBUTES))
+			{
+				return () -> stream(entities.spliterator(), false).filter(entity ->
+				{
+					if (existingEntityMeta != null)
+					{
+						return entity.getEntity(MAPPED_BY) == null
+								|| existingEntityMeta.getAttribute(entity.getString(NAME)) != null;
+					}
+					else
+					{
+						return entity.getEntity(MAPPED_BY) == null;
+					}
+				}).iterator();
+			}
+			return entities;
+		}
+
+		@Override
+		public <E extends Entity> Iterable<E> getEntities(String attributeName, Class<E> clazz)
+		{
+			return entityMeta.getEntities(attributeName, clazz);
+		}
+
+		@Override
+		public Entity getEntity(String attributeName)
+		{
+			return entityMeta.getEntity(attributeName);
+		}
+
+		@Override
+		public <E extends Entity> E getEntity(String attributeName, Class<E> clazz)
+		{
+			return entityMeta.getEntity(attributeName, clazz);
+		}
+
+		@Override
+		public EntityMetaData getEntityMetaData()
+		{
+			return entityMeta.getEntityMetaData();
+		}
+
+		@Override
+		public Object getIdValue()
+		{
+			return entityMeta.getIdValue();
+		}
+
+		@Override
+		public Integer getInt(String attributeName)
+		{
+			return entityMeta.getInt(attributeName);
+		}
+
+		@Override
+		public Object getLabelValue()
+		{
+			return entityMeta.getLabelValue();
+		}
+
+		@Override
+		public Long getLong(String attributeName)
+		{
+			return entityMeta.getLong(attributeName);
+		}
+
+		@Override
+		public String getString(String attributeName)
+		{
+			return entityMeta.getString(attributeName);
+		}
+
+		@Override
+		public Timestamp getTimestamp(String attributeName)
+		{
+			return entityMeta.getTimestamp(attributeName);
+		}
+
+		@Override
+		public Date getUtilDate(String attributeName)
+		{
+			return entityMeta.getUtilDate(attributeName);
+		}
+
+		@Override
+		public void set(Entity values)
+		{
+			entityMeta.set(values);
+		}
+
+		@Override
+		public void setIdValue(Object id)
+		{
+			entityMeta.setIdValue(id);
+		}
+
+		public static EntityMetaData newInstance(EntityMetaData entityMeta, AttributeCopyMode attrCopyMode)
+		{
+			return EntityMetaData.newInstance(entityMeta, attrCopyMode);
+		}
+
+		@Override
+		public Iterable<String> getAttributeNames()
+		{
+			return entityMeta.getAttributeNames();
+		}
+
+		@Override
+		public String getName()
+		{
+			return entityMeta.getName();
+		}
+
+		@Override
+		public EntityMetaData setName(String fullName)
+		{
+			return entityMeta.setName(fullName);
+		}
+
+		@Override
+		public String getSimpleName()
+		{
+			return entityMeta.getSimpleName();
+		}
+
+		@Override
+		public EntityMetaData setSimpleName(String simpleName)
+		{
+			return entityMeta.setSimpleName(simpleName);
+		}
+
+		@Override
+		public String getLabel()
+		{
+			return entityMeta.getLabel();
+		}
+
+		@Override
+		public String getLabel(String languageCode)
+		{
+			return entityMeta.getLabel(languageCode);
+		}
+
+		@Override
+		public EntityMetaData setLabel(String label)
+		{
+			return entityMeta.setLabel(label);
+		}
+
+		@Override
+		public EntityMetaData setLabel(String languageCode, String label)
+		{
+			return entityMeta.setLabel(languageCode, label);
+		}
+
+		@Override
+		public String getDescription()
+		{
+			return entityMeta.getDescription();
+		}
+
+		@Override
+		public String getDescription(String languageCode)
+		{
+			return entityMeta.getDescription(languageCode);
+		}
+
+		@Override
+		public EntityMetaData setDescription(String description)
+		{
+			return entityMeta.setDescription(description);
+		}
+
+		@Override
+		public EntityMetaData setDescription(String languageCode, String description)
+		{
+			return entityMeta.setDescription(languageCode, description);
+		}
+
+		@Override
+		public String getBackend()
+		{
+			return entityMeta.getBackend();
+		}
+
+		@Override
+		public EntityMetaData setBackend(String backend)
+		{
+			return entityMeta.setBackend(backend);
+		}
+
+		@Override
+		public Package getPackage()
+		{
+			return entityMeta.getPackage();
+		}
+
+		@Override
+		public EntityMetaData setPackage(Package package_)
+		{
+			return entityMeta.setPackage(package_);
+		}
+
+		@Override
+		public Attribute getIdAttribute()
+		{
+			return entityMeta.getIdAttribute();
+		}
+
+		@Override
+		public Attribute getOwnIdAttribute()
+		{
+			return entityMeta.getOwnIdAttribute();
+		}
+
+		@Override
+		public EntityMetaData setIdAttribute(Attribute idAttr)
+		{
+			return entityMeta.setIdAttribute(idAttr);
+		}
+
+		@Override
+		public Attribute getLabelAttribute()
+		{
+			return entityMeta.getLabelAttribute();
+		}
+
+		@Override
+		public Attribute getLabelAttribute(String langCode)
+		{
+			return entityMeta.getLabelAttribute(langCode);
+		}
+
+		@Override
+		public Attribute getOwnLabelAttribute()
+		{
+			return entityMeta.getOwnLabelAttribute();
+		}
+
+		@Override
+		public Attribute getOwnLabelAttribute(String languageCode)
+		{
+			return entityMeta.getOwnLabelAttribute(languageCode);
+		}
+
+		@Override
+		public EntityMetaData setLabelAttribute(Attribute labelAttr)
+		{
+			return entityMeta.setLabelAttribute(labelAttr);
+		}
+
+		@Override
+		public Attribute getLookupAttribute(String lookupAttrName)
+		{
+			return entityMeta.getLookupAttribute(lookupAttrName);
+		}
+
+		@Override
+		public Iterable<Attribute> getLookupAttributes()
+		{
+			return entityMeta.getLookupAttributes();
+		}
+
+		@Override
+		public Iterable<Attribute> getOwnLookupAttributes()
+		{
+			return entityMeta.getOwnLookupAttributes();
+		}
+
+		@Override
+		public EntityMetaData setLookupAttributes(Iterable<Attribute> lookupAttrs)
+		{
+			return entityMeta.setLookupAttributes(lookupAttrs);
+		}
+
+		@Override
+		public boolean isAbstract()
+		{
+			return entityMeta.isAbstract();
+		}
+
+		@Override
+		public EntityMetaData setAbstract(boolean abstract_)
+		{
+			return entityMeta.setAbstract(abstract_);
+		}
+
+		@Override
+		public EntityMetaData getExtends()
+		{
+			return entityMeta.getExtends();
+		}
+
+		@Override
+		public EntityMetaData setExtends(EntityMetaData extends_)
+		{
+			return entityMeta.setExtends(extends_);
+		}
+
+		@Override
+		public Iterable<Attribute> getOwnAttributes()
+		{
+			// FIXME mappedBy attribute in compound not removed
+			return () -> stream(entityMeta.getOwnAttributes().spliterator(), false).filter(attr ->
+			{
+				if (existingEntityMeta != null)
+				{
+					return !attr.isMappedBy() || existingEntityMeta.getAttribute(attr.getName()) != null;
+				}
+				else
+				{
+					return !attr.isMappedBy();
+				}
+			}).iterator();
+		}
+
+		@Override
+		public LinkedHashSet<Attribute> getCompoundOrderedAttributes()
+		{
+			return entityMeta.getCompoundOrderedAttributes();
+		}
+
+		@Override
+		public EntityMetaData setOwnAttributes(Iterable<Attribute> attrs)
+		{
+			return entityMeta.setOwnAttributes(attrs);
+		}
+
+		@Override
+		public Iterable<Attribute> getAttributes()
+		{
+			return entityMeta.getAttributes();
+		}
+
+		@Override
+		public Iterable<Attribute> getAtomicAttributes()
+		{
+			return entityMeta.getAtomicAttributes();
+		}
+
+		@Override
+		public Iterable<Attribute> getAllAttributes()
+		{
+			return entityMeta.getAllAttributes();
+		}
+
+		@Override
+		public Iterable<Attribute> getOwnAllAttributes()
+		{
+			return () -> stream(entityMeta.getOwnAllAttributes().spliterator(), false).filter(attr ->
+			{
+				if (existingEntityMeta != null)
+				{
+					return !attr.isMappedBy() || existingEntityMeta.getAttribute(attr.getName()) != null;
+				}
+				else
+				{
+					return !attr.isMappedBy();
+				}
+			}).iterator();
+		}
+
+		@Override
+		public Attribute getAttribute(String attrName)
+		{
+			return entityMeta.getAttribute(attrName);
+		}
+
+		@Override
+		public EntityMetaData addAttribute(Attribute attr, AttributeRole... attrTypes)
+		{
+			return entityMeta.addAttribute(attr, attrTypes);
+		}
+
+		@Override
+		public void addAttributes(Iterable<Attribute> attrs)
+		{
+			entityMeta.addAttributes(attrs);
+		}
+
+		@Override
+		public void setAttributeRoles(Attribute attr, AttributeRole... attrTypes)
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean hasAttributeWithExpression()
+		{
+			return entityMeta.hasAttributeWithExpression();
+		}
+
+		@Override
+		public void removeAttribute(Attribute attr)
+		{
+			entityMeta.removeAttribute(attr);
+		}
+
+		@Override
+		public void addLookupAttribute(Attribute lookupAttr)
+		{
+			entityMeta.addLookupAttribute(lookupAttr);
+		}
+
+		@Override
+		public Iterable<Tag> getTags()
+		{
+			return entityMeta.getTags();
+		}
+
+		@Override
+		public EntityMetaData setTags(Iterable<Tag> tags)
+		{
+			return entityMeta.setTags(tags);
+		}
+
+		@Override
+		public void addTag(Tag tag)
+		{
+			entityMeta.addTag(tag);
+		}
+
+		@Override
+		public void removeTag(Tag tag)
+		{
+			entityMeta.removeTag(tag);
+		}
+
+		@Override
+		public Iterable<Attribute> getOwnAtomicAttributes()
+		{
+			return entityMeta.getOwnAtomicAttributes();
+		}
+
+		@Override
+		public boolean hasBidirectionalAttributes()
+		{
+			return entityMeta.hasBidirectionalAttributes();
+		}
+
+		@Override
+		public boolean hasMappedByAttributes()
+		{
+			return entityMeta.hasMappedByAttributes();
+		}
+
+		@Override
+		public Stream<Attribute> getOwnMappedByAttributes()
+		{
+			return entityMeta.getOwnMappedByAttributes();
+		}
+
+		@Override
+		public Stream<Attribute> getMappedByAttributes()
+		{
+			return entityMeta.getMappedByAttributes();
+		}
+
+		@Override
+		public boolean hasInversedByAttributes()
+		{
+			return entityMeta.hasInversedByAttributes();
+		}
+
+		@Override
+		public Stream<Attribute> getInversedByAttributes()
+		{
+			return entityMeta.getInversedByAttributes();
+		}
+
+		@Override
+		public void set(String attributeName, Object value)
+		{
+			entityMeta.set(attributeName, value);
+		}
+
+		@Override
+		public void setDefaultValues()
+		{
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public String toString()
+		{
+			return entityMeta.toString();
 		}
 	}
 }

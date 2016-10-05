@@ -24,6 +24,7 @@ import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_M
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.PARTS;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
@@ -275,6 +276,8 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	public void delete(Attribute attr)
 	{
 		validateDeleteAllowed(attr);
+
+		// remove this attribute
 		decoratedRepo.delete(attr);
 	}
 
@@ -290,38 +293,43 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	@Override
 	public void deleteById(Object id)
 	{
-		validateDeleteAllowed(findOneById(id));
-		decoratedRepo.deleteById(id);
+		Attribute attr = findOneById(id);
+		delete(attr);
 	}
 
 	@Override
 	public void deleteAll(Stream<Object> ids)
 	{
-		decoratedRepo.deleteAll(ids.filter(id ->
-		{
-			validateDeleteAllowed(findOneById(id));
-			return true;
-		}));
+		delete(findAll(ids));
 	}
 
 	@Override
 	public void deleteAll()
 	{
-		iterator().forEachRemaining(this::validateDeleteAllowed);
-		decoratedRepo.deleteAll();
+		delete(this.query().findAll());
 	}
 
 	@Override
 	public void add(Attribute attr)
 	{
-		// FIXME validate name
+		validateAdd(attr);
 		decoratedRepo.add(attr);
 	}
 
 	@Override
 	public Integer add(Stream<Attribute> attrs)
 	{
-		return decoratedRepo.add(attrs);
+		return decoratedRepo.add(attrs.filter(attr ->
+		{
+			this.validateAdd(attr);
+			return true;
+		}));
+	}
+
+	private void validateAdd(Attribute newAttr)
+	{
+		// mappedBy
+		validateMappedBy(newAttr, newAttr.getMappedBy());
 	}
 
 	private void validateUpdate(Attribute currentAttr, Attribute newAttr)
@@ -332,6 +340,13 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 		if (!Objects.equals(currentDataType, newDataType))
 		{
 			validateUpdateDataType(currentDataType, newDataType);
+
+			if (newAttr.isInversedBy())
+			{
+				throw new MolgenisDataException(
+						format("Attribute data type change not allowed for bidirectional attribute [%s]",
+								newAttr.getName()));
+			}
 		}
 
 		// expression
@@ -342,6 +357,7 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 			validateUpdateExpression(currentExpression, newExpression);
 		}
 
+		// validation expression
 		String currentValidationExpression = currentAttr.getValidationExpression();
 		String newValidationExpression = newAttr.getValidationExpression();
 		if (!Objects.equals(currentValidationExpression, newValidationExpression))
@@ -349,12 +365,15 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 			validateUpdateExpression(currentValidationExpression, newValidationExpression);
 		}
 
+		// visible expression
 		String currentVisibleExpression = currentAttr.getVisibleExpression();
 		String newVisibleExpression = newAttr.getVisibleExpression();
 		if (!Objects.equals(currentVisibleExpression, newVisibleExpression))
 		{
 			validateUpdateExpression(currentVisibleExpression, newVisibleExpression);
 		}
+
+		// note: mappedBy is a readOnly attribute, no need to verify for updates
 	}
 
 	private static EnumMap<AttributeType, EnumSet<AttributeType>> DATA_TYPE_DISALLOWED_TRANSITIONS;
@@ -365,25 +384,40 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 		// transitions to CATEGORICAL_MREF and MREF not allowed because junction tables updated not implemented
 		// transitions to FILE not allowed because associated file in FileStore not created/removed
 		DATA_TYPE_DISALLOWED_TRANSITIONS = new EnumMap<>(AttributeType.class);
-		DATA_TYPE_DISALLOWED_TRANSITIONS.put(BOOL, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
-		DATA_TYPE_DISALLOWED_TRANSITIONS.put(CATEGORICAL, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS
+				.put(BOOL, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS
+				.put(CATEGORICAL, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
 		DATA_TYPE_DISALLOWED_TRANSITIONS.put(CATEGORICAL_MREF, EnumSet.complementOf(EnumSet.of(MREF)));
-		DATA_TYPE_DISALLOWED_TRANSITIONS.put(COMPOUND, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
-		DATA_TYPE_DISALLOWED_TRANSITIONS.put(DATE, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
-		DATA_TYPE_DISALLOWED_TRANSITIONS.put(DATE_TIME, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
-		DATA_TYPE_DISALLOWED_TRANSITIONS.put(DECIMAL, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
-		DATA_TYPE_DISALLOWED_TRANSITIONS.put(EMAIL, EnumSet.of(CATEGORICAL_MREF, MREF, HYPERLINK, FILE));
-		DATA_TYPE_DISALLOWED_TRANSITIONS.put(ENUM, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS
+				.put(COMPOUND, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS
+				.put(DATE, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS
+				.put(DATE_TIME, EnumSet.of(CATEGORICAL_MREF, ONE_TO_MANY, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS
+				.put(DECIMAL, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(EMAIL, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS
+				.put(ENUM, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
 		DATA_TYPE_DISALLOWED_TRANSITIONS.put(FILE, EnumSet.allOf(AttributeType.class));
-		DATA_TYPE_DISALLOWED_TRANSITIONS.put(HTML, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
-		DATA_TYPE_DISALLOWED_TRANSITIONS.put(HYPERLINK, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, FILE));
-		DATA_TYPE_DISALLOWED_TRANSITIONS.put(INT, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
-		DATA_TYPE_DISALLOWED_TRANSITIONS.put(LONG, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS
+				.put(HTML, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(HYPERLINK, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS
+				.put(INT, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS
+				.put(LONG, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
 		DATA_TYPE_DISALLOWED_TRANSITIONS.put(MREF, EnumSet.complementOf(EnumSet.of(CATEGORICAL_MREF)));
-		DATA_TYPE_DISALLOWED_TRANSITIONS.put(SCRIPT, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
-		DATA_TYPE_DISALLOWED_TRANSITIONS.put(STRING, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
-		DATA_TYPE_DISALLOWED_TRANSITIONS.put(TEXT, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
-		DATA_TYPE_DISALLOWED_TRANSITIONS.put(XREF, EnumSet.of(CATEGORICAL_MREF, MREF, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS.put(ONE_TO_MANY, EnumSet.allOf(AttributeType.class));
+		DATA_TYPE_DISALLOWED_TRANSITIONS
+				.put(SCRIPT, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS
+				.put(STRING, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS
+				.put(TEXT, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
+		DATA_TYPE_DISALLOWED_TRANSITIONS
+				.put(XREF, EnumSet.of(CATEGORICAL_MREF, MREF, ONE_TO_MANY, EMAIL, HYPERLINK, FILE));
 	}
 
 	private static void validateUpdateDataType(AttributeType currentDataType, AttributeType newDataType)
@@ -402,6 +436,34 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	{
 		// TODO validate with script evaluator
 		// how to get access to expression validator here since it is located in molgenis-data-validation?
+	}
+
+	/**
+	 * Validate whether the mappedBy attribute is part of the referenced entity.
+	 *
+	 * @param attr         attribute
+	 * @param mappedByAttr mappedBy attribute
+	 * @throws MolgenisDataException if mappedBy is an attribute that is not part of the referenced entity
+	 */
+	private static void validateMappedBy(Attribute attr, Attribute mappedByAttr)
+	{
+		if (mappedByAttr != null)
+		{
+			if (!isSingleReferenceType(mappedByAttr))
+			{
+				throw new MolgenisDataException(
+						format("Invalid mappedBy attribute [%s] data type [%s].", mappedByAttr.getName(),
+								mappedByAttr.getDataType()));
+			}
+
+			Attribute refAttr = attr.getRefEntity().getAttribute(mappedByAttr.getName());
+			if (refAttr == null)
+			{
+				throw new MolgenisDataException(
+						format("mappedBy attribute [%s] is not part of entity [%s].", mappedByAttr.getName(),
+								attr.getRefEntity().getName()));
+			}
+		}
 	}
 
 	/**

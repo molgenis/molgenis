@@ -32,6 +32,7 @@ class AttributeMetaDataResponseV2
 	private final List<String> enumOptions;
 	private final Long maxLength;
 	private final Object refEntity;
+	private final String mappedBy;
 	private final Boolean auto;
 	private final Boolean nillable;
 	private final Boolean readOnly;
@@ -78,6 +79,8 @@ class AttributeMetaDataResponseV2
 		{
 			this.refEntity = null;
 		}
+		Attribute mappedByAttr = attr.getMappedBy();
+		this.mappedBy = mappedByAttr != null ? mappedByAttr.getName() : null;
 
 		Iterable<Attribute> attrParts = attr.getAttributeParts();
 		if (attrParts != null)

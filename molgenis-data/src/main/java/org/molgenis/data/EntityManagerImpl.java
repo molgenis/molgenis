@@ -54,7 +54,7 @@ public class EntityManagerImpl implements EntityManager
 	}
 
 	@Override
-	public Entity create(EntityMetaData entityMeta, Fetch fetch)
+	public Entity createFetch(EntityMetaData entityMeta, Fetch fetch)
 	{
 		return create(entityMeta, fetch, NO_POPULATE);
 	}

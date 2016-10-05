@@ -7,6 +7,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.i18n.model.Language;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.data.support.DynamicEntity;
 import org.springframework.security.authentication.TestingAuthenticationToken;

@@ -1,5 +1,6 @@
 package org.molgenis.data.rest.service;
 
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -8,11 +9,14 @@ import org.molgenis.file.FileStore;
 import org.molgenis.file.model.FileMetaFactory;
 import org.molgenis.util.MolgenisDateFormat;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Iterator;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static java.util.Collections.emptyList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -44,8 +48,14 @@ public class RestServiceTest
 	}
 
 	// https://github.com/molgenis/molgenis/issues/4725
-	@Test
-	public void toEntityValueMrefToIntAttr()
+	@DataProvider(name = "toEntityValueMrefProvider")
+	public static Iterator<Object[]> toEntityValueMrefProvider()
+	{
+		return newArrayList(new Object[] { MREF }, new Object[] { ONE_TO_MANY }).iterator();
+	}
+
+	@Test(dataProvider = "toEntityValueMrefProvider")
+	public void toEntityValueMrefToIntAttr(AttributeType attrType)
 	{
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
@@ -56,7 +66,7 @@ public class RestServiceTest
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 		Attribute attr = mock(Attribute.class);
-		when(attr.getDataType()).thenReturn(MREF);
+		when(attr.getDataType()).thenReturn(attrType);
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
 		when(entityManager.getReference(refEntityMeta, 0)).thenReturn(entity0);
 		when(entityManager.getReference(refEntityMeta, 1)).thenReturn(entity1);
@@ -64,8 +74,8 @@ public class RestServiceTest
 		assertEquals(entityValue, Arrays.asList(entity0, entity1));
 	}
 
-	@Test
-	public void toEntityValueMrefToStringAttr()
+	@Test(dataProvider = "toEntityValueMrefProvider")
+	public void toEntityValueMrefToStringAttr(AttributeType attrType)
 	{
 		Entity entity0 = mock(Entity.class);
 		Entity entity1 = mock(Entity.class);
@@ -76,12 +86,29 @@ public class RestServiceTest
 		when(refEntityMeta.getName()).thenReturn(refEntityName);
 		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
 		Attribute attr = mock(Attribute.class);
-		when(attr.getDataType()).thenReturn(MREF);
+		when(attr.getDataType()).thenReturn(attrType);
 		when(attr.getRefEntity()).thenReturn(refEntityMeta);
 		when(entityManager.getReference(refEntityMeta, "0")).thenReturn(entity0);
 		when(entityManager.getReference(refEntityMeta, "1")).thenReturn(entity1);
 		Object entityValue = restService.toEntityValue(attr, "0,1"); // string
 		assertEquals(entityValue, Arrays.asList(entity0, entity1));
+	}
+
+	@Test
+	public void toEntityValueXref()
+	{
+		Entity entity0 = mock(Entity.class);
+		String refEntityName = "refEntity";
+		Attribute refIdAttr = mock(Attribute.class);
+		when(refIdAttr.getDataType()).thenReturn(STRING);
+		EntityMetaData refEntityMeta = mock(EntityMetaData.class);
+		when(refEntityMeta.getName()).thenReturn(refEntityName);
+		when(refEntityMeta.getIdAttribute()).thenReturn(refIdAttr);
+		Attribute attr = mock(Attribute.class);
+		when(attr.getDataType()).thenReturn(XREF);
+		when(attr.getRefEntity()).thenReturn(refEntityMeta);
+		when(entityManager.getReference(refEntityMeta, "0")).thenReturn(entity0);
+		assertEquals(restService.toEntityValue(attr, "0"), entity0);
 	}
 
 	@Test

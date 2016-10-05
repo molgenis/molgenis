@@ -1,5 +1,6 @@
 package org.molgenis.data.postgresql;
 
+import org.molgenis.MolgenisFieldTypes.AttributeType;
 import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.Fetch;
@@ -16,6 +17,7 @@ import java.sql.Array;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Arrays;
 
 import static java.lang.String.format;
 import static java.util.Arrays.asList;
@@ -61,7 +63,7 @@ public class PostgreSqlEntityFactory
 		@Override
 		public Entity mapRow(ResultSet resultSet, int i) throws SQLException
 		{
-			Entity e = entityManager.create(entityMetaData, fetch);
+			Entity e = entityManager.createFetch(entityMetaData, fetch);
 
 			// TODO performance, iterate over fetch if available
 			for (Attribute attr : entityMetaData.getAtomicAttributes())
@@ -122,8 +124,13 @@ public class PostgreSqlEntityFactory
 				case CATEGORICAL_MREF:
 				case MREF:
 					EntityMetaData mrefEntityMeta = attr.getRefEntity();
-					Array arrayValue = resultSet.getArray(colName);
-					value = resultSet.wasNull() ? null : mapValueMref(arrayValue, mrefEntityMeta);
+					Array mrefArrayValue = resultSet.getArray(colName);
+					value = resultSet.wasNull() ? null : mapValueMref(mrefArrayValue, mrefEntityMeta);
+					break;
+				case ONE_TO_MANY:
+
+					Array oneToManyArrayValue = resultSet.getArray(colName);
+					value = resultSet.wasNull() ? null : mapValueOneToMany(oneToManyArrayValue, attr);
 					break;
 				case COMPOUND:
 					throw new RuntimeException(
@@ -159,6 +166,43 @@ public class PostgreSqlEntityFactory
 					break;
 				default:
 					throw new RuntimeException(format("Unknown attribute type [%s]", attr.getDataType().toString()));
+			}
+			return value;
+		}
+
+		/**
+		 * Maps a single results set array value to an entity value for one-to-many attributes.
+		 *
+		 * @param arrayValue result set array value
+		 * @param attr       attribute meta data
+		 * @return mapped value
+		 * @throws SQLException if an error occurs while attempting to access the array
+		 */
+		private Object mapValueOneToMany(Array arrayValue, Attribute attr) throws SQLException
+		{
+			EntityMetaData entityMeta = attr.getRefEntity();
+			Object value;
+			String[][] mrefIdsAndOrder = (String[][]) arrayValue.getArray();
+			if (mrefIdsAndOrder.length > 0 && mrefIdsAndOrder[0][0] != null)
+			{
+				Arrays.sort(mrefIdsAndOrder, (arr0, arr1) -> Integer.compare(Integer.valueOf(arr0[0]), Integer.valueOf(arr1[0])));
+
+				Attribute idAttr = entityMeta.getIdAttribute();
+				Object[] mrefIds = new Object[mrefIdsAndOrder.length];
+				for (int i = 0; i < mrefIdsAndOrder.length; ++i)
+				{
+					String[] mrefIdAndOrder = mrefIdsAndOrder[i];
+					String mrefIdStr = mrefIdAndOrder[1];
+					Object mrefId = mrefIdStr != null ? convertMrefIdValue(mrefIdStr, idAttr) : null;
+					mrefIds[i] = mrefId;
+				}
+
+				// convert ids to (lazy) entities
+				value = entityManager.getReferences(entityMeta, asList(mrefIds));
+			}
+			else
+			{
+				value = null;
 			}
 			return value;
 		}
@@ -213,7 +257,8 @@ public class PostgreSqlEntityFactory
 			// use iteration instead of tail recursion
 			while (true)
 			{
-				switch (idAttr.getDataType())
+				AttributeType attrType = idAttr.getDataType();
+				switch (attrType)
 				{
 					case BOOL:
 						return Boolean.valueOf(idValueStr);
@@ -222,11 +267,6 @@ public class PostgreSqlEntityFactory
 					case XREF:
 						idAttr = idAttr.getRefEntity().getIdAttribute();
 						continue;
-					case CATEGORICAL_MREF:
-					case COMPOUND:
-					case MREF:
-						throw new RuntimeException(
-								format("Invalid id attribute type [%s]", idAttr.getDataType().toString()));
 					case DATE:
 					case DATE_TIME:
 						return Date.valueOf(idValueStr);
@@ -244,9 +284,13 @@ public class PostgreSqlEntityFactory
 						return Integer.valueOf(idValueStr);
 					case LONG:
 						return Long.valueOf(idValueStr);
+					case CATEGORICAL_MREF:
+					case COMPOUND:
+					case MREF:
+					case ONE_TO_MANY:
+						throw new RuntimeException(format("Illegal attribute type [%s]", attrType.toString()));
 					default:
-						throw new RuntimeException(
-								format("Unknown attribute type [%s]", idAttr.getDataType().toString()));
+						throw new RuntimeException(format("Unknown attribute type [%s]", attrType.toString()));
 				}
 			}
 		}

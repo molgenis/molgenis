@@ -1,16 +1,19 @@
 package org.molgenis.data;
 
+import org.molgenis.MolgenisFieldTypes;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.util.MolgenisDateFormat;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.text.ParseException;
 import java.util.Arrays;
+import java.util.Iterator;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.DATE;
-import static org.molgenis.MolgenisFieldTypes.AttributeType.DATE_TIME;
+import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.testng.Assert.assertEquals;
 
 public class DataConverterTest
@@ -28,6 +31,23 @@ public class DataConverterTest
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn("attr").getMock();
 		when(attr.getDataType()).thenReturn(DATE);
 		assertEquals(DataConverter.convert("2015-06-04", attr), MolgenisDateFormat.getDateFormat().parse("2015-06-04"));
+	}
+
+	@DataProvider(name = "convertObjectAttributeMetaDataProvider")
+	public static Iterator<Object[]> convertObjectAttributeMetaDataProvider()
+	{
+		Object object = mock(Object.class);
+		return newArrayList(new Object[] { object, ONE_TO_MANY, object }, new Object[] { object, XREF, object })
+				.iterator();
+	}
+
+	@Test(dataProvider = "convertObjectAttributeMetaDataProvider")
+	public void convertObjectAttributeMetaData(Object source, MolgenisFieldTypes.AttributeType attrType, Object convertedValue)
+			throws ParseException
+	{
+		Attribute attr = mock(Attribute.class);
+		when(attr.getDataType()).thenReturn(attrType);
+		assertEquals(DataConverter.convert(source, attr), convertedValue);
 	}
 
 	@Test

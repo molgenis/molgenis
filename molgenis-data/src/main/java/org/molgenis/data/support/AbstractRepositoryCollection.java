@@ -60,10 +60,4 @@ public abstract class AbstractRepositoryCollection implements RepositoryCollecti
 	{
 		return getRepository(entityMetaData.getName());
 	}
-
-	@Override
-	public Stream<String> getLanguageCodes()
-	{
-		throw new UnsupportedOperationException();
-	}
 }

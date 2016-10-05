@@ -140,6 +140,7 @@ var Form = React.createClass({
                     break;
                 case 'MREF':
                 case 'CATEGORICAL_MREF':
+                case 'ONE_TO_MANY':
                     entityInstance[attr.name] = {
                         href: attr.refEntity.hrefCollection,
                         items: attr.defaultValue.split(',').map(function (idValue) {
@@ -380,6 +381,7 @@ var Form = React.createClass({
                 break;
             case 'CATEGORICAL_MREF':
             case 'MREF':
+            case 'ONE_TO_MANY':
                 val = _.map(value.items, function (item) {
                     return item[attr.refEntity.idAttribute];
                 });
@@ -445,6 +447,7 @@ var Form = React.createClass({
                     case 'ENUM':
                     case 'MREF':
                     case 'XREF':
+                    case 'ONE_TO_MANY':
                     case 'DATE':
                     case 'DATE_TIME':
                         this._persistAttributeValue(attr, value);
@@ -631,6 +634,7 @@ var Form = React.createClass({
                         break;
                     case 'CATEGORICAL_MREF':
                     case 'MREF':
+                    case 'ONE_TO_MANY':
                         queryValue = _.map(value, function (item) {
                             return item[attr.refEntity.idAttribute];
                         });
@@ -681,6 +685,7 @@ var Form = React.createClass({
                         break;
                     case 'CATEGORICAL_MREF':
                     case 'MREF':
+                    case 'ONE_TO_MANY':
                         form[attr.name] = _.map(value.items, function (item) {
                             return item[attr.refEntity.idAttribute];
                         }).join();

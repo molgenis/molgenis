@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
 
 public class EntityAggregatesResponse extends EntityCollectionResponseV2
 {
@@ -101,18 +102,9 @@ public class EntityAggregatesResponse extends EntityCollectionResponseV2
 					Entity entity = (Entity) xLabel;
 					for (Attribute attr : entity.getEntityMetaData().getAtomicAttributes())
 					{
-						switch (attr.getDataType())
+						if (!isReferenceType(attr))
 						{
-							case XREF:
-							case CATEGORICAL:
-							case MREF:
-							case CATEGORICAL_MREF:
-							case COMPOUND:
-							case FILE:
-								break;
-							// $CASES-OMITTED$
-							default:
-								valueMap.put(attr.getName(), entity.getString(attr.getName()));
+							valueMap.put(attr.getName(), entity.getString(attr.getName()));
 						}
 					}
 					value = valueMap;
