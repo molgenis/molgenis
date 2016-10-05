@@ -19,8 +19,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Objects.requireNonNull;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
-import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
-import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 
 /**
  * Hydrates and dehydrates entities.

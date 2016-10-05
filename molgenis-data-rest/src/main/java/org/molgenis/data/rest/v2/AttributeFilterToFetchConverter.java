@@ -9,7 +9,7 @@ import org.molgenis.file.model.FileMetaMetaData;
 
 import static java.lang.String.format;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.FILE;
-import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 
 /**
  * Converts {@link AttributeFilter} to {@link Fetch}.

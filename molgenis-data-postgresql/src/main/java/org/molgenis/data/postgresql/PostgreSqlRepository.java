@@ -16,7 +16,7 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.BatchingQueryResult;
-import org.molgenis.data.support.EntityMetaDataUtils;
+import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.fieldtypes.FieldType;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ import static org.molgenis.data.QueryRule.Operator.*;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
-import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
 
 /**
  * Repository that persists entities in a PostgreSQL database
@@ -425,7 +425,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		final List<AttributeMetaData> persistedNonMrefAttrs = persistedAttrs.stream()
 				.filter(attr -> !isMultipleReferenceType(attr)).collect(toList());
 		final List<AttributeMetaData> persistedMrefAttrs = persistedAttrs.stream()
-				.filter(EntityMetaDataUtils::isMultipleReferenceType).collect(toList());
+				.filter(EntityTypeUtils::isMultipleReferenceType).collect(toList());
 		final String insertSql = getSqlInsert(metaData);
 
 		Iterators.partition(entities, BATCH_SIZE).forEachRemaining(entitiesBatch ->
@@ -513,7 +513,7 @@ public class PostgreSqlRepository extends AbstractRepository
 		final List<AttributeMetaData> persistedNonMrefAttrs = persistedAttrs.stream()
 				.filter(attr -> !isMultipleReferenceType(attr)).collect(toList());
 		final List<AttributeMetaData> persistedMrefAttrs = persistedAttrs.stream()
-				.filter(EntityMetaDataUtils::isMultipleReferenceType).collect(toList());
+				.filter(EntityTypeUtils::isMultipleReferenceType).collect(toList());
 		final String updateSql = getSqlUpdate(metaData);
 
 		// update values in entity table

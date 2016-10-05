@@ -49,7 +49,7 @@ public class LazyEntity implements Entity
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
-		return EntityMetaDataUtils.getAttributeNames(entityMetaData.getAtomicAttributes());
+		return EntityTypeUtils.getAttributeNames(entityMetaData.getAtomicAttributes());
 	}
 
 	@Override

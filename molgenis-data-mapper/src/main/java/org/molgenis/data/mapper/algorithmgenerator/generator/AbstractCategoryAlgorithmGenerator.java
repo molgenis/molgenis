@@ -11,7 +11,7 @@ import org.molgenis.data.meta.model.EntityMetaData;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 
 public abstract class AbstractCategoryAlgorithmGenerator implements AlgorithmGenerator
 {

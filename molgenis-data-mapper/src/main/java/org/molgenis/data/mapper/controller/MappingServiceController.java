@@ -19,7 +19,7 @@ import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.AggregateQueryImpl;
-import org.molgenis.data.support.EntityMetaDataUtils;
+import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.dataexplorer.controller.DataExplorerController;
 import org.molgenis.ontology.core.model.OntologyTerm;
@@ -682,7 +682,7 @@ public class MappingServiceController extends MolgenisPluginController
 		String targetAttributeIdAttribute = null;
 		String targetAttributeLabelAttribute = null;
 
-		if (EntityMetaDataUtils.isMultipleReferenceType(targetAttr))
+		if (EntityTypeUtils.isMultipleReferenceType(targetAttr))
 		{
 			targetAttributeEntities = dataService.findAll(
 					dataService.getEntityMetaData(target).getAttribute(targetAttribute).getRefEntity().getName());
@@ -718,7 +718,7 @@ public class MappingServiceController extends MolgenisPluginController
 		String sourceAttributeIdAttribute = null;
 		String sourceAttributeLabelAttribute = null;
 
-		if (EntityMetaDataUtils.isMultipleReferenceType(sourceAttr))
+		if (EntityTypeUtils.isMultipleReferenceType(sourceAttr))
 		{
 			sourceAttributeEntities = dataService.findAll(
 					dataService.getEntityMetaData(source).getAttribute(sourceAttribute).getRefEntity().getName());

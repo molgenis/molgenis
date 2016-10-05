@@ -34,7 +34,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
 import static org.molgenis.data.mapper.meta.MappingProjectMetaData.NAME;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
-import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.util.DependencyResolver.hasSelfReferences;
 import static org.springframework.security.core.context.SecurityContextHolder.getContext;

@@ -22,7 +22,7 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.BOOL;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.ENUM;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.*;
-import static org.molgenis.data.support.EntityMetaDataUtils.*;
+import static org.molgenis.data.support.EntityTypeUtils.*;
 
 /**
  * Utility class that generates the SQL used by {@link PostgreSqlRepository} and {@link PostgreSqlRepositoryCollection}

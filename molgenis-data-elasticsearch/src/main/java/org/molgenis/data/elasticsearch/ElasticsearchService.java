@@ -40,7 +40,7 @@ import static org.molgenis.data.DataConverter.convert;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchId;
 import static org.molgenis.data.elasticsearch.util.ElasticsearchEntityUtils.toElasticsearchIds;
 import static org.molgenis.data.elasticsearch.util.MapperTypeSanitizer.sanitizeMapperType;
-import static org.molgenis.data.support.EntityMetaDataUtils.createFetchForReindexing;
+import static org.molgenis.data.support.EntityTypeUtils.createFetchForReindexing;
 
 /**
  * ElasticSearch implementation of the SearchService interface.

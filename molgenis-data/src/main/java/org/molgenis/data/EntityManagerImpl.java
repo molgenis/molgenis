@@ -23,8 +23,8 @@ import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
-import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
-import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isSingleReferenceType;
 
 /**
  * Entity manager responsible for creating entities, entity references and resolving references of reference attributes.
@@ -368,7 +368,7 @@ public class EntityManagerImpl implements EntityManager
 	private static List<AttributeMetaData> getResolvableAttrs(EntityMetaData entityMeta, Fetch fetch)
 	{
 		return stream(entityMeta.getAtomicAttributes().spliterator(), false)
-				.filter(EntityMetaDataUtils::isReferenceType).filter(attr -> attr.getExpression() == null)
+				.filter(EntityTypeUtils::isReferenceType).filter(attr -> attr.getExpression() == null)
 				.filter(attr -> fetch.hasField(attr.getName())).collect(Collectors.toList());
 	}
 

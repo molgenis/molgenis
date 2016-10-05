@@ -42,8 +42,8 @@ import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.model.TagMetaData.TAG;
 import static org.molgenis.data.semantic.SemanticTag.asTag;
 import static org.molgenis.data.support.AttributeMetaDataUtils.isIdAttributeTypeAllowed;
-import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
-import static org.molgenis.data.support.EntityMetaDataUtils.isStringType;
+import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isStringType;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
 import static org.molgenis.util.DependencyResolver.resolve;
 

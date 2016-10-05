@@ -31,7 +31,7 @@ import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributesMref;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableName;
-import static org.molgenis.data.support.EntityMetaDataUtils.*;
+import static org.molgenis.data.support.EntityTypeUtils.*;
 
 public class PostgreSqlRepositoryCollection extends AbstractRepositoryCollection
 {

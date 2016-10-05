@@ -9,7 +9,7 @@ import org.molgenis.data.elasticsearch.request.SearchRequestGenerator;
 import org.molgenis.data.elasticsearch.util.ElasticsearchUtils;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.BatchingQueryResult;
-import org.molgenis.data.support.EntityMetaDataUtils;
+import org.molgenis.data.support.EntityTypeUtils;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -64,7 +64,7 @@ class ElasticsearchEntityIterable extends BatchingQueryResult<Entity> implements
 	@Override
 	public Iterable<String> getAttributeNames()
 	{
-		return EntityMetaDataUtils.getAttributeNames(entityMeta.getAtomicAttributes());
+		return EntityTypeUtils.getAttributeNames(entityMeta.getAtomicAttributes());
 	}
 
 	@Override

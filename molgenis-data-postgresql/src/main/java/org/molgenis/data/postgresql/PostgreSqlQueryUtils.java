@@ -3,12 +3,12 @@ package org.molgenis.data.postgresql;
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.support.EntityMetaDataUtils;
+import org.molgenis.data.support.EntityTypeUtils;
 
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isMultipleReferenceType;
 import static org.molgenis.util.ApplicationContextProvider.getApplicationContext;
 
 /**
@@ -99,7 +99,7 @@ class PostgreSqlQueryUtils
 	 */
 	static Stream<AttributeMetaData> getPersistedAttributesMref(EntityMetaData entityMeta)
 	{
-		return getPersistedAttributes(entityMeta).filter(EntityMetaDataUtils::isMultipleReferenceType);
+		return getPersistedAttributes(entityMeta).filter(EntityTypeUtils::isMultipleReferenceType);
 	}
 
 	/**

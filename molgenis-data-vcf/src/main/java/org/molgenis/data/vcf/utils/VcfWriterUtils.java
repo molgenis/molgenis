@@ -21,7 +21,7 @@ import static com.google.common.base.Joiner.on;
 import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.google.common.collect.Iterables.transform;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.BOOL;
-import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
+import static org.molgenis.data.support.EntityTypeUtils.isReferenceType;
 import static org.molgenis.data.vcf.VcfRepository.DEFAULT_ATTRIBUTE_DESCRIPTION;
 import static org.molgenis.data.vcf.model.VcfAttributes.*;
 

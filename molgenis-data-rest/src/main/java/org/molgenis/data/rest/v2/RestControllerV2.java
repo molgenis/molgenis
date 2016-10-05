@@ -10,7 +10,7 @@ import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.rest.EntityPager;
 import org.molgenis.data.rest.Href;
 import org.molgenis.data.rest.service.RestService;
-import org.molgenis.data.support.EntityMetaDataUtils;
+import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.core.Permission;
@@ -324,7 +324,7 @@ class RestControllerV2
 		MetaValidationUtils.validateName(request.getNewEntityName());
 
 		// Check if the entity already exists
-		String newFullName = EntityMetaDataUtils
+		String newFullName = EntityTypeUtils
 				.buildFullName(repositoryToCopyFrom.getEntityMetaData().getPackage(), request.getNewEntityName());
 		if (dataService.hasRepository(newFullName)) throw createDuplicateEntityException(newFullName);
 

@@ -11,9 +11,9 @@ import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
-public class EntityMetaDataUtils
+public class EntityTypeUtils
 {
-	private EntityMetaDataUtils()
+	private EntityTypeUtils()
 	{
 	}
 

@@ -21,7 +21,7 @@ import static java.util.Collections.*;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.data.RepositoryCapability.*;
-import static org.molgenis.data.support.EntityMetaDataUtils.*;
+import static org.molgenis.data.support.EntityTypeUtils.*;
 
 public class RepositoryValidationDecorator implements Repository<Entity>
 {

@@ -7,7 +7,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.datastructures.Location;
 import org.molgenis.data.annotation.core.entity.ResultFilter;
 import org.molgenis.data.meta.model.AttributeMetaData;
-import org.molgenis.data.support.EntityMetaDataUtils;
+import org.molgenis.data.support.EntityTypeUtils;
 import org.molgenis.data.vcf.model.VcfAttributes;
 
 import java.util.*;
@@ -140,7 +140,7 @@ public class MultiAllelicResultFilter implements ResultFilter
 			{
 				AttributeMetaData sourceAttr = sourceEntity.getEntityMetaData()
 						.getAttribute(attributeMetaData.getName());
-				if (EntityMetaDataUtils.isTextType(sourceAttr) || EntityMetaDataUtils.isStringType(sourceAttr))
+				if (EntityTypeUtils.isTextType(sourceAttr) || EntityTypeUtils.isStringType(sourceAttr))
 				{
 					String[] sourceValues = sourceEntity.getString(attributeMetaData.getName()).split(",", -1);
 					for (int i = 0; i < sourceAlts.length; i++)
