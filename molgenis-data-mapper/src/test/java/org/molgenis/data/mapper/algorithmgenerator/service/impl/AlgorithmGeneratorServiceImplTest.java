@@ -14,7 +14,7 @@ import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.js.magma.JsMagmaScriptRunner;
@@ -93,10 +93,10 @@ public class AlgorithmGeneratorServiceImplTest extends AbstractMolgenisSpringTes
 		sourceEntityMetaData.addAttribute(heightSourceAttribute);
 		sourceEntityMetaData.addAttribute(weightSourceAttribute);
 
-		Map<Attribute, ExplainedAttributeMetaData> sourceAttributes = ImmutableMap.of(heightSourceAttribute,
-				ExplainedAttributeMetaData.create(heightSourceAttribute,
+		Map<Attribute, ExplainedAttribute> sourceAttributes = ImmutableMap.of(heightSourceAttribute,
+				ExplainedAttribute.create(heightSourceAttribute,
 						singletonList(ExplainedQueryString.create("height", "height", "height", 100)), true),
-				weightSourceAttribute, ExplainedAttributeMetaData.create(heightSourceAttribute,
+				weightSourceAttribute, ExplainedAttribute.create(heightSourceAttribute,
 						Collections.singletonList(ExplainedQueryString.create("weight", "weight", "weight", 100)),
 						true));
 

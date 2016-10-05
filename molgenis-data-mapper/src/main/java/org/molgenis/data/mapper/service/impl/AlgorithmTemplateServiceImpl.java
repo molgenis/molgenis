@@ -2,7 +2,7 @@ package org.molgenis.data.mapper.service.impl;
 
 import org.molgenis.data.DataService;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.js.magma.JsMagmaScriptRunner;
 import org.molgenis.script.Script;
@@ -31,7 +31,7 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	}
 
 	@Override
-	public Stream<AlgorithmTemplate> find(Map<Attribute, ExplainedAttributeMetaData> attrMatches)
+	public Stream<AlgorithmTemplate> find(Map<Attribute, ExplainedAttribute> attrMatches)
 	{
 		// get all algorithm templates
 		Stream<Script> jsScripts = dataService
@@ -42,7 +42,7 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	}
 
 	private Stream<AlgorithmTemplate> toAlgorithmTemplate(Script script,
-			Map<Attribute, ExplainedAttributeMetaData> attrMatches)
+			Map<Attribute, ExplainedAttribute> attrMatches)
 	{
 		// find attribute for each parameter
 		boolean paramMatch = true;
@@ -68,7 +68,7 @@ public class AlgorithmTemplateServiceImpl implements AlgorithmTemplateService
 	}
 
 	private Attribute mapParamToAttribute(ScriptParameter param,
-			Map<Attribute, ExplainedAttributeMetaData> attrMatches)
+			Map<Attribute, ExplainedAttribute> attrMatches)
 	{
 
 		return attrMatches.entrySet().stream().filter(entry -> !entry.getValue().getExplainedQueryStrings().isEmpty())

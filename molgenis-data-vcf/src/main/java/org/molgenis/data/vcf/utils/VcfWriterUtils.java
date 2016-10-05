@@ -265,7 +265,7 @@ public class VcfWriterUtils
 			List<String> attributesToInclude)
 	{
 		Iterable<Attribute> attributes = StreamSupport.stream(atomicAttributes.spliterator(), false)
-				.filter(attributeMetaData -> (attributeMetaData.isVisible() && isOutputAttribute(attributeMetaData,
+				.filter(attribute -> (attribute.isVisible() && isOutputAttribute(attribute,
 						Lists.newArrayList(atomicAttributes), attributesToInclude))).collect(Collectors.toList());
 		return on(SPACE_PIPE_SEPERATOR).join(transform(attributes, Attribute::getName));
 	}

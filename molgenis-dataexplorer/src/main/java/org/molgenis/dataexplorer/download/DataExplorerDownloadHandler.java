@@ -49,7 +49,7 @@ public class DataExplorerDownloadHandler
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 			final Set<String> attributeNames = new LinkedHashSet<String>(dataRequest.getAttributeNames());
 			Iterable<Attribute> attributes = filter(entityMetaData.getAtomicAttributes(),
-					attributeMetaData -> attributeNames.contains(attributeMetaData.getName()));
+					attribute -> attributeNames.contains(attribute.getName()));
 
 			switch (dataRequest.getColNames())
 			{
@@ -110,7 +110,7 @@ public class DataExplorerDownloadHandler
 			EntityMetaData entityMetaData = dataService.getEntityMetaData(entityName);
 			final Set<String> attributeNames = new HashSet<String>(dataRequest.getAttributeNames());
 			Iterable<Attribute> attributes = filter(entityMetaData.getAtomicAttributes(),
-					attributeMetaData -> attributeNames.contains(attributeMetaData.getName()));
+					attribute -> attributeNames.contains(attribute.getName()));
 
 			switch (dataRequest.getColNames())
 			{

@@ -24,7 +24,7 @@ import org.molgenis.data.meta.model.AttributeFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataFactory;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.repository.TagRepository;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
@@ -387,8 +387,8 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		Map<Attribute, ExplainedAttributeMetaData> matches = ImmutableMap.of(sourceAttribute,
-				ExplainedAttributeMetaData.create(sourceAttribute,
+		Map<Attribute, ExplainedAttribute> matches = ImmutableMap.of(sourceAttribute,
+				ExplainedAttribute.create(sourceAttribute,
 						singletonList(ExplainedQueryString.create("height", "height", "height", 100)), true));
 
 		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap.create();
@@ -473,9 +473,9 @@ public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 
 		EntityMapping mapping = project.getMappingTarget("target").addSource(sourceEntityMetaData);
 
-		Map<Attribute, ExplainedAttributeMetaData> mappings = ImmutableMap
-				.of(sourceAttribute1, ExplainedAttributeMetaData.create(sourceAttribute1), sourceAttribute2,
-						ExplainedAttributeMetaData.create(sourceAttribute2));
+		Map<Attribute, ExplainedAttribute> mappings = ImmutableMap
+				.of(sourceAttribute1, ExplainedAttribute.create(sourceAttribute1), sourceAttribute2,
+						ExplainedAttribute.create(sourceAttribute2));
 
 		LinkedHashMultimap<Relation, OntologyTerm> ontologyTermTags = LinkedHashMultimap.create();
 

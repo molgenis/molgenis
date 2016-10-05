@@ -115,7 +115,7 @@ public class TagRepositoryTest extends AbstractMolgenisSpringTest
 		}
 
 		@Bean
-		Attribute attributeMetaData()
+		Attribute attribute()
 		{
 			return mock(Attribute.class);
 		}

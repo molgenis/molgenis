@@ -19,7 +19,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
 import org.molgenis.data.semanticsearch.explain.service.ElasticSearchExplainService;
 import org.molgenis.data.semanticsearch.semantic.Hit;
@@ -74,7 +74,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	}
 
 	@Override
-	public Map<Attribute, ExplainedAttributeMetaData> findAttributes(EntityMetaData sourceEntityMetaData,
+	public Map<Attribute, ExplainedAttribute> findAttributes(EntityMetaData sourceEntityMetaData,
 			Set<String> queryTerms, Collection<OntologyTerm> ontologyTerms)
 	{
 		Iterable<String> attributeIdentifiers = semanticSearchServiceHelper
@@ -98,7 +98,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 				.collectExpandedQueryMap(queryTerms, ontologyTerms);
 
 		// Because the explain-API can be computationally expensive we limit the explanation to the top 10 attributes
-		Map<Attribute, ExplainedAttributeMetaData> explainedAttributes = new LinkedHashMap<>();
+		Map<Attribute, ExplainedAttribute> explainedAttributes = new LinkedHashMap<>();
 		AtomicInteger count = new AtomicInteger(0);
 		attributeMetaDataEntities.forEach(attributeEntity ->
 				// for (Entity attributeEntity : attributeMetaDataEntities)
@@ -114,11 +114,11 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 						Sets.newHashSet(collectExpanedQueryMap.values()), explanations);
 
 				explainedAttributes.put(attribute,
-						ExplainedAttributeMetaData.create(attribute, explanations, singleMatchHighQuality));
+						ExplainedAttribute.create(attribute, explanations, singleMatchHighQuality));
 			}
 			else
 			{
-				explainedAttributes.put(attribute, ExplainedAttributeMetaData.create(attribute));
+				explainedAttributes.put(attribute, ExplainedAttribute.create(attribute));
 			}
 			count.incrementAndGet();
 		});
@@ -156,7 +156,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	}
 
 	@Override
-	public Map<Attribute, ExplainedAttributeMetaData> decisionTreeToFindRelevantAttributes(
+	public Map<Attribute, ExplainedAttribute> decisionTreeToFindRelevantAttributes(
 			EntityMetaData sourceEntityMetaData, Attribute targetAttribute,
 			Collection<OntologyTerm> ontologyTermsFromTags, Set<String> searchTerms)
 	{
@@ -240,7 +240,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		if (attribute == null)
 		{
 			throw new MolgenisDataAccessException(
-					"The attributeMetaData : " + attributeName + " does not exsit in EntityMetaData : "
+					"The attribute : " + attributeName + " does not exsit in EntityMetaData : "
 							+ sourceEntityMetaData.getName());
 		}
 		Explanation explanation = elasticSearchExplainService

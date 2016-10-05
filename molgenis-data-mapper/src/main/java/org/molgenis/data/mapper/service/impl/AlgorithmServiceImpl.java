@@ -14,7 +14,7 @@ import org.molgenis.data.mapper.service.AlgorithmService;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.DynamicEntity;
@@ -80,7 +80,7 @@ public class AlgorithmServiceImpl implements AlgorithmService
 		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService
 				.getTagsForAttribute(targetEntityMetaData, targetAttribute);
 
-		Map<Attribute, ExplainedAttributeMetaData> relevantAttributes = semanticSearchService
+		Map<Attribute, ExplainedAttribute> relevantAttributes = semanticSearchService
 				.decisionTreeToFindRelevantAttributes(sourceEntityMetaData, targetAttribute, tagsForAttribute.values(),
 						null);
 		GeneratedAlgorithm generatedAlgorithm = algorithmGeneratorService

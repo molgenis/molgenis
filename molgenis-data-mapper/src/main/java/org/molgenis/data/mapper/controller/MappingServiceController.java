@@ -15,7 +15,7 @@ import org.molgenis.data.mapper.service.impl.AlgorithmEvaluation;
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semantic.Relation;
-import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
+import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.service.OntologyTagService;
 import org.molgenis.data.semanticsearch.service.SemanticSearchService;
 import org.molgenis.data.support.AggregateQueryImpl;
@@ -445,7 +445,7 @@ public class MappingServiceController extends MolgenisPluginController
 	 */
 	@RequestMapping(method = RequestMethod.POST, value = "/attributeMapping/semanticsearch", consumes = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public List<ExplainedAttributeMetaData> getSemanticSearchAttributeMapping(
+	public List<ExplainedAttribute> getSemanticSearchAttributeMapping(
 			@RequestBody Map<String, String> requestBody)
 	{
 		String mappingProjectId = requestBody.get("mappingProjectId");
@@ -472,7 +472,7 @@ public class MappingServiceController extends MolgenisPluginController
 		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService
 				.getTagsForAttribute(entityMapping.getTargetEntityMetaData(), targetAttributeMetaData);
 
-		Map<Attribute, ExplainedAttributeMetaData> relevantAttributes = semanticSearchService
+		Map<Attribute, ExplainedAttribute> relevantAttributes = semanticSearchService
 				.decisionTreeToFindRelevantAttributes(entityMapping.getSourceEntityMetaData(), targetAttributeMetaData,
 						tagsForAttribute.values(), searchTerms);
 

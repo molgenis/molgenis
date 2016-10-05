@@ -480,7 +480,7 @@ public class RestController
 
 		// Check attribute names
 		Iterable<String> attributesIterable = Iterables
-				.transform(meta.getAtomicAttributes(), attributeMetaData -> attributeMetaData.getName().toLowerCase());
+				.transform(meta.getAtomicAttributes(), attribute -> attribute.getName().toLowerCase());
 
 		if (attributesSet != null)
 		{

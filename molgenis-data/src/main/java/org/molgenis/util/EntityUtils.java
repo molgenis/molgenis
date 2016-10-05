@@ -177,7 +177,7 @@ public class EntityUtils
 
 		// compound
 		Iterable<String> compoundAttributes = transform(filter(entityMetaData.getAttributes(),
-				attributeMetaData -> attributeMetaData.getDataType() == COMPOUND), Attribute::getName);
+				attribute -> attribute.getDataType() == COMPOUND), Attribute::getName);
 
 		// all = atomic + compound
 		return concat(atomicAttributes, compoundAttributes);

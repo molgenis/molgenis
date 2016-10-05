@@ -203,9 +203,9 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 		List<String> inputAttributeNames = FluentIterable.from(csvRepository.getEntityMetaData().getAtomicAttributes())
 				.transform(new Function<Attribute, String>()
 				{
-					public String apply(Attribute attributeMetaData)
+					public String apply(Attribute attribute)
 					{
-						return attributeMetaData.getName();
+						return attribute.getName();
 					}
 				}).filter(attrName -> !StringUtils.equalsIgnoreCase(attrName, SortaCsvRepository.ALLOWED_IDENTIFIER))
 				.toList();

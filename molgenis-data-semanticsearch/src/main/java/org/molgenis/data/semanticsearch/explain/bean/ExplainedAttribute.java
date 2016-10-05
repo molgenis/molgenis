@@ -12,19 +12,19 @@ import java.util.Map;
 import java.util.Set;
 
 @AutoValue
-@AutoGson(autoValueClass = AutoValue_ExplainedAttributeMetaData.class)
-public abstract class ExplainedAttributeMetaData
+@AutoGson(autoValueClass = AutoValue_ExplainedAttribute.class)
+public abstract class ExplainedAttribute
 {
-	public static ExplainedAttributeMetaData create(Attribute attribute)
+	public static ExplainedAttribute create(Attribute attribute)
 	{
-		return new AutoValue_ExplainedAttributeMetaData(attributeToMap(attribute), Collections.emptySet(),
+		return new AutoValue_ExplainedAttribute(attributeToMap(attribute), Collections.emptySet(),
 				false);
 	}
 
-	public static ExplainedAttributeMetaData create(Attribute attribute,
+	public static ExplainedAttribute create(Attribute attribute,
 			Iterable<ExplainedQueryString> explainedQueryStrings, boolean highQuality)
 	{
-		return new AutoValue_ExplainedAttributeMetaData(attributeToMap(attribute),
+		return new AutoValue_ExplainedAttribute(attributeToMap(attribute),
 				Sets.newHashSet(explainedQueryStrings), highQuality);
 	}
 
