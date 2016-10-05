@@ -15,7 +15,7 @@ import org.molgenis.security.core.Permission;
 
 import java.util.*;
 
-public class EntityMetaDataResponse
+public class EntityTypeResponse
 {
 	private final String href;
 	private final String hrefCollection;
@@ -37,7 +37,7 @@ public class EntityMetaDataResponse
 	/**
 	 * @param meta
 	 */
-	public EntityMetaDataResponse(EntityMetaData meta, MolgenisPermissionService permissionService,
+	public EntityTypeResponse(EntityMetaData meta, MolgenisPermissionService permissionService,
 			DataService dataService, LanguageService languageService)
 	{
 		this(meta, null, null, permissionService, dataService, languageService);
@@ -48,7 +48,7 @@ public class EntityMetaDataResponse
 	 * @param attributesSet       set of lowercase attribute names to include in response
 	 * @param attributeExpandsSet set of lowercase attribute names to expand in response
 	 */
-	public EntityMetaDataResponse(EntityMetaData meta, Set<String> attributesSet,
+	public EntityTypeResponse(EntityMetaData meta, Set<String> attributesSet,
 			Map<String, Set<String>> attributeExpandsSet, MolgenisPermissionService permissionService,
 			DataService dataService, LanguageService languageService)
 	{

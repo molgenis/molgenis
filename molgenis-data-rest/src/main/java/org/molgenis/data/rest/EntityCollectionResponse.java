@@ -11,7 +11,7 @@ import java.util.Map;
 public class EntityCollectionResponse
 {
 	private final String href;
-	private final EntityMetaDataResponse meta;
+	private final EntityTypeResponse meta;
 	private final int start;
 	private final int num;
 	private final long total;
@@ -25,7 +25,7 @@ public class EntityCollectionResponse
 	{
 		this.href = href;
 		this.meta =
-				meta != null ? new EntityMetaDataResponse(meta, permissionService, dataService, languageService) : null;
+				meta != null ? new EntityTypeResponse(meta, permissionService, dataService, languageService) : null;
 		this.start = entityPager.getStart();
 		this.num = entityPager.getNum();
 		this.total = entityPager.getTotal();
@@ -44,7 +44,7 @@ public class EntityCollectionResponse
 		return href;
 	}
 
-	public EntityMetaDataResponse getMeta()
+	public EntityTypeResponse getMeta()
 	{
 		return meta;
 	}

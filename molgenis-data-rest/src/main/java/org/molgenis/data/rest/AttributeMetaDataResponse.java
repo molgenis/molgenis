@@ -111,7 +111,7 @@ public class AttributeMetaDataResponse
 			if (attributeExpandsSet != null && attributeExpandsSet.containsKey("refEntity".toLowerCase()))
 			{
 				Set<String> subAttributesSet = attributeExpandsSet.get("refEntity".toLowerCase());
-				this.refEntity = refEntity != null ? new EntityMetaDataResponse(refEntity, subAttributesSet,
+				this.refEntity = refEntity != null ? new EntityTypeResponse(refEntity, subAttributesSet,
 						Collections.singletonMap("attributes".toLowerCase(), null), permissionService, dataService,
 						languageService) : null;
 			}

@@ -139,7 +139,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityMetaDataResponse retrieveEntityMeta(@PathVariable("entityName") String entityName,
+	public EntityTypeResponse retrieveEntityMeta(@PathVariable("entityName") String entityName,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
 	{
@@ -147,7 +147,7 @@ public class RestController
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		return new EntityMetaDataResponse(meta, attributeSet, attributeExpandSet, molgenisPermissionService,
+		return new EntityTypeResponse(meta, attributeSet, attributeExpandSet, molgenisPermissionService,
 				dataService, languageService);
 	}
 
@@ -161,14 +161,14 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public EntityMetaDataResponse retrieveEntityMetaPost(@PathVariable("entityName") String entityName,
+	public EntityTypeResponse retrieveEntityMetaPost(@PathVariable("entityName") String entityName,
 			@Valid @RequestBody EntityMetaRequest request)
 	{
 		Set<String> attributesSet = toAttributeSet(request != null ? request.getAttributes() : null);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
 
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
-		return new EntityMetaDataResponse(meta, attributesSet, attributeExpandSet, molgenisPermissionService,
+		return new EntityTypeResponse(meta, attributesSet, attributeExpandSet, molgenisPermissionService,
 				dataService, languageService);
 	}
 
