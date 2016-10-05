@@ -239,7 +239,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	private EntitiesValidationReport buildValidationReport(RepositoryCollection source,
 			MyEntitiesValidationReport report, Map<String, EntityMetaData> metaDataMap)
 	{
-		// FIXME use EntityMetaDataValidator and validate attributes separately
+		// FIXME use EntityTypeValidator and validate attributes separately
 		metaDataMap.values().forEach(MetaValidationUtils::validateEntityMetaData);
 		report = generateEntityValidationReport(source, report, metaDataMap);
 

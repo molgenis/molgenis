@@ -16,16 +16,16 @@ public class EntityTypeRepositoryValidationDecoratorTest
 {
 	private EntityTypeRepositoryValidationDecorator entityMetaRepoValidationDecorator;
 	private Repository<EntityMetaData> decoratedRepo;
-	private EntityMetaDataValidator entityMetaDataValidator;
+	private EntityTypeValidator entityTypeValidator;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
 		//noinspection unchecked
 		decoratedRepo = mock(Repository.class);
-		entityMetaDataValidator = mock(EntityMetaDataValidator.class);
+		entityTypeValidator = mock(EntityTypeValidator.class);
 		entityMetaRepoValidationDecorator = new EntityTypeRepositoryValidationDecorator(decoratedRepo,
-				entityMetaDataValidator);
+				entityTypeValidator);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
@@ -44,7 +44,7 @@ public class EntityTypeRepositoryValidationDecoratorTest
 	public void updateEntityValid()
 	{
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		doNothing().when(entityMetaDataValidator).validate(entityMeta);
+		doNothing().when(entityTypeValidator).validate(entityMeta);
 		entityMetaRepoValidationDecorator.update(entityMeta);
 	}
 
@@ -52,7 +52,7 @@ public class EntityTypeRepositoryValidationDecoratorTest
 	public void updateEntityInvalid() throws Exception
 	{
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		doThrow(mock(MolgenisValidationException.class)).when(entityMetaDataValidator).validate(entityMeta);
+		doThrow(mock(MolgenisValidationException.class)).when(entityTypeValidator).validate(entityMeta);
 		entityMetaRepoValidationDecorator.update(entityMeta);
 	}
 
@@ -61,8 +61,8 @@ public class EntityTypeRepositoryValidationDecoratorTest
 	{
 		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
 		EntityMetaData entityMeta1 = mock(EntityMetaData.class);
-		doNothing().when(entityMetaDataValidator).validate(entityMeta0);
-		doNothing().when(entityMetaDataValidator).validate(entityMeta1);
+		doNothing().when(entityTypeValidator).validate(entityMeta0);
+		doNothing().when(entityTypeValidator).validate(entityMeta1);
 		entityMetaRepoValidationDecorator.update(Stream.of(entityMeta0, entityMeta1));
 		//noinspection unchecked
 		ArgumentCaptor<Stream<EntityMetaData>> captor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -75,8 +75,8 @@ public class EntityTypeRepositoryValidationDecoratorTest
 	{
 		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
 		EntityMetaData entityMeta1 = mock(EntityMetaData.class);
-		doNothing().when(entityMetaDataValidator).validate(entityMeta0);
-		doThrow(mock(MolgenisValidationException.class)).when(entityMetaDataValidator).validate(entityMeta1);
+		doNothing().when(entityTypeValidator).validate(entityMeta0);
+		doThrow(mock(MolgenisValidationException.class)).when(entityTypeValidator).validate(entityMeta1);
 		entityMetaRepoValidationDecorator.update(Stream.of(entityMeta0, entityMeta1));
 		//noinspection unchecked
 		ArgumentCaptor<Stream<EntityMetaData>> captor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -88,7 +88,7 @@ public class EntityTypeRepositoryValidationDecoratorTest
 	public void addEntityValid()
 	{
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		doNothing().when(entityMetaDataValidator).validate(entityMeta);
+		doNothing().when(entityTypeValidator).validate(entityMeta);
 		entityMetaRepoValidationDecorator.add(entityMeta);
 	}
 
@@ -96,7 +96,7 @@ public class EntityTypeRepositoryValidationDecoratorTest
 	public void addEntityInvalid()
 	{
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		doThrow(mock(MolgenisValidationException.class)).when(entityMetaDataValidator).validate(entityMeta);
+		doThrow(mock(MolgenisValidationException.class)).when(entityTypeValidator).validate(entityMeta);
 		entityMetaRepoValidationDecorator.add(entityMeta);
 	}
 
@@ -105,8 +105,8 @@ public class EntityTypeRepositoryValidationDecoratorTest
 	{
 		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
 		EntityMetaData entityMeta1 = mock(EntityMetaData.class);
-		doNothing().when(entityMetaDataValidator).validate(entityMeta0);
-		doNothing().when(entityMetaDataValidator).validate(entityMeta1);
+		doNothing().when(entityTypeValidator).validate(entityMeta0);
+		doNothing().when(entityTypeValidator).validate(entityMeta1);
 		entityMetaRepoValidationDecorator.add(Stream.of(entityMeta0, entityMeta1));
 		//noinspection unchecked
 		ArgumentCaptor<Stream<EntityMetaData>> captor = ArgumentCaptor.forClass((Class) Stream.class);
@@ -119,8 +119,8 @@ public class EntityTypeRepositoryValidationDecoratorTest
 	{
 		EntityMetaData entityMeta0 = mock(EntityMetaData.class);
 		EntityMetaData entityMeta1 = mock(EntityMetaData.class);
-		doNothing().when(entityMetaDataValidator).validate(entityMeta0);
-		doThrow(mock(MolgenisValidationException.class)).when(entityMetaDataValidator).validate(entityMeta1);
+		doNothing().when(entityTypeValidator).validate(entityMeta0);
+		doThrow(mock(MolgenisValidationException.class)).when(entityTypeValidator).validate(entityMeta1);
 		entityMetaRepoValidationDecorator.add(Stream.of(entityMeta0, entityMeta1));
 		//noinspection unchecked
 		ArgumentCaptor<Stream<EntityMetaData>> captor = ArgumentCaptor.forClass((Class) Stream.class);

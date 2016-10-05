@@ -14,13 +14,13 @@ import static java.util.Objects.requireNonNull;
 public class EntityTypeRepositoryValidationDecorator extends AbstractRepositoryDecorator<EntityMetaData>
 {
 	private final Repository<EntityMetaData> decoratedRepo;
-	private final EntityMetaDataValidator entityMetaDataValidator;
+	private final EntityTypeValidator entityTypeValidator;
 
 	public EntityTypeRepositoryValidationDecorator(Repository<EntityMetaData> decoratedRepo,
-			EntityMetaDataValidator entityMetaDataValidator)
+			EntityTypeValidator entityTypeValidator)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);
-		this.entityMetaDataValidator = requireNonNull(entityMetaDataValidator);
+		this.entityTypeValidator = requireNonNull(entityTypeValidator);
 	}
 
 	@Override
@@ -32,7 +32,7 @@ public class EntityTypeRepositoryValidationDecorator extends AbstractRepositoryD
 	@Override
 	public void update(EntityMetaData entityMeta)
 	{
-		entityMetaDataValidator.validate(entityMeta);
+		entityTypeValidator.validate(entityMeta);
 		decoratedRepo.update(entityMeta);
 	}
 
@@ -41,7 +41,7 @@ public class EntityTypeRepositoryValidationDecorator extends AbstractRepositoryD
 	{
 		decoratedRepo.update(entities.filter(entityMeta ->
 		{
-			entityMetaDataValidator.validate(entityMeta);
+			entityTypeValidator.validate(entityMeta);
 			return true;
 		}));
 	}
@@ -49,7 +49,7 @@ public class EntityTypeRepositoryValidationDecorator extends AbstractRepositoryD
 	@Override
 	public void add(EntityMetaData entityMeta)
 	{
-		entityMetaDataValidator.validate(entityMeta);
+		entityTypeValidator.validate(entityMeta);
 		decoratedRepo.add(entityMeta);
 	}
 
@@ -58,7 +58,7 @@ public class EntityTypeRepositoryValidationDecorator extends AbstractRepositoryD
 	{
 		return decoratedRepo.add(entities.filter(entityMeta ->
 		{
-			entityMetaDataValidator.validate(entityMeta);
+			entityTypeValidator.validate(entityMeta);
 			return true;
 		}));
 	}

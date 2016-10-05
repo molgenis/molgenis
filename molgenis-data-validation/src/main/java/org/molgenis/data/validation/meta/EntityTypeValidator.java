@@ -31,12 +31,12 @@ import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
  * Entity meta data validator
  */
 @Component
-public class EntityMetaDataValidator
+public class EntityTypeValidator
 {
 	private final DataService dataService;
 
 	@Autowired
-	public EntityMetaDataValidator(DataService dataService)
+	public EntityTypeValidator(DataService dataService)
 	{
 		this.dataService = requireNonNull(dataService);
 	}
