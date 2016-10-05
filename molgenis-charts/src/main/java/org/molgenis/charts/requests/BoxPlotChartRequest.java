@@ -19,7 +19,7 @@ public class BoxPlotChartRequest extends ChartRequest
 	}
 
 	/**
-	 * @param multiply the IQR with scale
+	 * @param scale the IQR with scale
 	 */
 	public void setScale(Double scale)
 	{

@@ -34,13 +34,13 @@ public class IdCardIndexerDbSettings extends DefaultSettingsEntity implements Id
 
 		private static final String BIOBANK_INDEXING_FREQUENCY = "biobankIndexingFrequency";
 		private static final String DEFAULT_API_BASE_URI = "http://catalogue.rd-connect.eu/api/jsonws/BiBBoxCommonServices-portlet.logapi";
-		private static final long DEFAULT_API_TIMEOUT = 5000l;
+		private static final long DEFAULT_API_TIMEOUT = 5000L;
 		private static final String DEFAULT_BIOBANK_RESOURCE = "regbb/organization-id";
 		private static final String DEFAULT_BIOBANK_COLLECTIONS_RESOURCE = "regbbs";
 		private static final String DEFAULT_BIOBANK_COLLECTIONS_SELECTION_RESOURCE =
 				DEFAULT_BIOBANK_COLLECTIONS_RESOURCE + "/data";
 		private static final boolean DEFAULT_BIOBANK_INDEXING_ENABLED = false;
-		private static final long DEFAULT_BIOBANK_INDEXING_TIMEOUT = 60000l;
+		private static final long DEFAULT_BIOBANK_INDEXING_TIMEOUT = 60000L;
 		private static final String DEFAULT_BIOBANK_INDEXING_FREQUENCY = "0 4 * * * ?";
 		private static final String DEFAULT_NOTIFICATION_EMAIL = "molgenis+idcard@gmail.com";
 

@@ -1,5 +1,6 @@
 package org.molgenis.data.support;
 
+import org.molgenis.data.populate.UuidGenerator;
 import org.testng.annotations.Test;
 
 import java.util.HashSet;

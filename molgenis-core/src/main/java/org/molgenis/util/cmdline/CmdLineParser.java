@@ -84,9 +84,7 @@ public class CmdLineParser
 	 * annotated variables and functions, which are saved for the parse-function. After successful completion of this
 	 * constructor, the parse-function has the information it needs to deal with the command-line options.
 	 *
-	 * @param o           The options-object with the annotated variables and functions.
-	 * @param description The program description. throws NullPointerException When either of the parameters has been set to
-	 *                    null.
+	 * @param options           The options-object with the annotated variables and functions.
 	 * @throws CmdLineException
 	 */
 	public CmdLineParser(final Object options) throws NullPointerException, CmdLineException
@@ -490,7 +488,6 @@ public class CmdLineParser
 			}
 			catch (Exception e)
 			{
-				;
 			}
 
 			stream.print(option.name());

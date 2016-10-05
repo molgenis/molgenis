@@ -176,7 +176,7 @@ public class WikiPathwaysController extends MolgenisPluginController
 	 * Parses the impact from an effect attribute. Recognizes the strings HIGH, MODERATE, and LOW.
 	 *
 	 * @param eff String value of the effect attribute
-	 * @return the highest {@link Impact} found in the effect attribute, or {@value Impact#NONE} if none found
+	 * @return the highest {@link Impact} found in the effect attribute, or {@link Impact#NONE} if none found
 	 */
 	private static Impact getImpactFromEffect(String eff)
 	{

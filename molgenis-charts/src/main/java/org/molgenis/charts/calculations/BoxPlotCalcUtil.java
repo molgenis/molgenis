@@ -18,7 +18,7 @@ public class BoxPlotCalcUtil
 	 * @param sortedDataAscendingOrder
 	 * @return Double[]
 	 */
-	public final static Double[] calcBoxPlotValues(List<Double> sortedDataAscendingOrder)
+	public static Double[] calcBoxPlotValues(List<Double> sortedDataAscendingOrder)
 	{
 		if (null == sortedDataAscendingOrder)
 		{
@@ -47,7 +47,7 @@ public class BoxPlotCalcUtil
 	 * @param firstQuantile
 	 * @return
 	 */
-	public final static double iqr(double thirdQuantile, double firstQuantile)
+	public static double iqr(double thirdQuantile, double firstQuantile)
 	{
 		return thirdQuantile - firstQuantile;
 	}
@@ -58,7 +58,7 @@ public class BoxPlotCalcUtil
 	 * @param sortedDataAscendingOrder
 	 * @return Double
 	 */
-	public final static Double minimum(List<Double> sortedDataAscendingOrder)
+	public static Double minimum(List<Double> sortedDataAscendingOrder)
 	{
 		return interpolateLinearlyQuantile(sortedDataAscendingOrder, (double) 0);
 	}
@@ -69,7 +69,7 @@ public class BoxPlotCalcUtil
 	 * @param sortedDataAscendingOrder
 	 * @return Double
 	 */
-	public final static Double maximum(List<Double> sortedDataAscendingOrder)
+	public static Double maximum(List<Double> sortedDataAscendingOrder)
 	{
 		return interpolateLinearlyQuantile(sortedDataAscendingOrder, (double) 1);
 	}
@@ -80,7 +80,7 @@ public class BoxPlotCalcUtil
 	 * @param sortedDataAscendingOrder
 	 * @return Double
 	 */
-	public final static Double median(List<Double> sortedDataAscendingOrder)
+	public static Double median(List<Double> sortedDataAscendingOrder)
 	{
 		return interpolateLinearlyQuantile(sortedDataAscendingOrder, 0.50);
 	}
@@ -91,7 +91,7 @@ public class BoxPlotCalcUtil
 	 * @param sortedDataAscendingOrder
 	 * @return Double
 	 */
-	public final static Double firstQuantile(List<Double> sortedDataAscendingOrder)
+	public static Double firstQuantile(List<Double> sortedDataAscendingOrder)
 	{
 		return interpolateLinearlyQuantile(sortedDataAscendingOrder, 0.25);
 	}
@@ -102,7 +102,7 @@ public class BoxPlotCalcUtil
 	 * @param sortedDataAscendingOrder
 	 * @return Double
 	 */
-	public final static Double thirdQuantile(List<Double> sortedDataAscendingOrder)
+	public static Double thirdQuantile(List<Double> sortedDataAscendingOrder)
 	{
 		return interpolateLinearlyQuantile(sortedDataAscendingOrder, 0.75);
 	}
@@ -116,7 +116,7 @@ public class BoxPlotCalcUtil
 	 * @param p                        percentage
 	 * @return Double interpolated linearly quantile
 	 */
-	private final static Double interpolateLinearlyQuantile(List<Double> sortedDataAscendingOrder, Double p)
+	private static Double interpolateLinearlyQuantile(List<Double> sortedDataAscendingOrder, Double p)
 	{
 		int n = sortedDataAscendingOrder.size();
 		double position = (1 + (p * (n - 1)));

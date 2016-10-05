@@ -8,7 +8,7 @@ public enum ChartType
 
 	private String type;
 
-	private ChartType(String type)
+	ChartType(String type)
 	{
 		this.type = type;
 	}

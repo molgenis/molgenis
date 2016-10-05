@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  * Annotation to allow {@link Gson} to construct @AutoValue annotated classes
  *
  * @author JakeWharton
- * @see https://gist.github.com/JakeWharton/0d67d01badcee0ae7bc9
+ * @see <a href="https://gist.github.com/JakeWharton/0d67d01badcee0ae7bc9">https://gist.github.com/JakeWharton/0d67d01badcee0ae7bc9</a>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
@@ -19,5 +19,5 @@ public @interface AutoGson
 {
 	// A reference to the AutoValue-generated class (e.g. AutoValue_MyClass). This is
 	// necessary to handle obfuscation of the class names.
-	public Class autoValueClass();
+	Class autoValueClass();
 }

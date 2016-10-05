@@ -153,7 +153,6 @@ public class RepositoryRangeHandlingDataSource extends RangeHandlingDataSource
 					else
 					{
 						type = new DasType("delete", "", "", "");
-						;
 					}
 				}
 				else if (patients.containsKey(valuePatient))

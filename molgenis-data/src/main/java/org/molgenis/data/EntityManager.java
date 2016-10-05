@@ -10,12 +10,18 @@ import java.util.stream.Stream;
 public interface EntityManager
 {
 	/**
+	 * Creation mode that defines whether or not to populate entities with auto generated ando/or default values.
+	 */
+	enum CreationMode { POPULATE, NO_POPULATE }
+
+	/**
 	 * Creates an entity.
 	 *
 	 * @param entityMeta entity meta data
+	 * @param creationMode entity creation mode that defines initial population mode
 	 * @return new entity
 	 */
-	Entity create(EntityMetaData entityMeta);
+	Entity create(EntityMetaData entityMeta, CreationMode creationMode);
 
 	/**
 	 * Creates an entity based on the given fetch.

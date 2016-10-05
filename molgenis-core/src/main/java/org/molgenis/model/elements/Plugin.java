@@ -24,7 +24,7 @@ public class Plugin extends UISchema
 
 		private String tag;
 
-		private Flavor(String tag)
+		Flavor(String tag)
 		{
 			this.tag = tag;
 		}
@@ -47,8 +47,6 @@ public class Plugin extends UISchema
 					"method='" + method + "' is UNKNOWN for plugin. Valid options: " + optionsBuilder.toString());
 		}
 	}
-
-	;
 
 	// constructor(s)
 

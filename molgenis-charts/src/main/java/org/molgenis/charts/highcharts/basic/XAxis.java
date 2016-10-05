@@ -10,8 +10,6 @@ public class XAxis extends Axis
 	{
 	}
 
-	;
-
 	public List<String> getCategories()
 	{
 		return categories;
