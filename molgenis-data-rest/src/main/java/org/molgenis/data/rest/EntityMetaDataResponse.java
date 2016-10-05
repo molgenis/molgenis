@@ -88,7 +88,7 @@ public class EntityMetaDataResponse
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get("attributes".toLowerCase());
 						this.attributes.put(attr.getName(),
-								new AttributeMetaDataResponse(name, meta, attr, subAttributesSet, Collections
+								new AttributeResponse(name, meta, attr, subAttributesSet, Collections
 										.singletonMap("refEntity".toLowerCase(), Sets.newHashSet("idattribute")),
 										permissionService, dataService, languageService));
 					}

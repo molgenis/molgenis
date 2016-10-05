@@ -53,7 +53,7 @@ public abstract class QueryAnnotatorImpl implements EntityAnnotator
 	}
 
 	@Override
-	public List<Attribute> getAnnotationAttributeMetaDatas()
+	public List<Attribute> getAnnotationAttributeMetadatas()
 	{
 		return getInfo().getOutputAttributes();
 	}

@@ -147,7 +147,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 	}
 
 	@Test
-	public void testRetrieveAttributeMetaDatasFromAlgorithm()
+	public void testRetrieveAttributesFromAlgorithm()
 	{
 		String algorithm = "$('attribute_1').value()$('attribute_2').value()";
 
@@ -163,7 +163,7 @@ public class AttributeMappingRepositoryImplTest extends AbstractMolgenisSpringTe
 		sourceAttributes.add(attr2);
 
 		assertEquals(
-				attributeMappingRepository.retrieveAttributeMetaDatasFromAlgorithm(algorithm, sourceEntityMetaData),
+				attributeMappingRepository.retrieveAttributesFromAlgorithm(algorithm, sourceEntityMetaData),
 				sourceAttributes);
 	}
 

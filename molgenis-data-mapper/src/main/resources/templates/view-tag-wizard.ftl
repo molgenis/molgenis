@@ -97,7 +97,7 @@
                     <p><i>${attribute.label!""}</i></p>
                     <p><i>${attribute.description!""}</i></p>
                 </td>
-                <#assign relationsAndTagsMap = taggedAttributeMetaDatas[attribute.name]>
+                <#assign relationsAndTagsMap = taggedAttributes[attribute.name]>
                 <#if relationsAndTagsMap.keySet()?has_content>
                     <#list relationsAndTagsMap.keySet() as relation>
                         <td class="tag-column" id="${attribute.name}-tag-column">

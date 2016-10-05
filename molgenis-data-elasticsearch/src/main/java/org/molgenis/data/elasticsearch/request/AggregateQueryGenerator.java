@@ -33,27 +33,27 @@ public class AggregateQueryGenerator
 		// validate request
 		if (aggAttr1 == null)
 		{
-			throw new IllegalArgumentException("Aggregation requires at least one aggregateable attribute");
+			throw new IllegalArgumentException("Aggregation requires at least one aggregatable attribute");
 		}
 		if (!aggAttr1.isAggregatable())
 		{
-			throw new IllegalArgumentException("Attribute is not aggregateable [ " + aggAttr1.getName() + "]");
+			throw new IllegalArgumentException("Attribute is not aggregatable [ " + aggAttr1.getName() + "]");
 		}
 		if (aggAttr2 != null && !aggAttr2.isAggregatable())
 		{
-			throw new IllegalArgumentException("Attribute is not aggregateable [ " + aggAttr2.getName() + "]");
+			throw new IllegalArgumentException("Attribute is not aggregatable [ " + aggAttr2.getName() + "]");
 		}
 		if (aggAttrDistinct != null && aggAttrDistinct.isNillable())
 		{
 			// see: https://github.com/molgenis/molgenis/issues/1938
-			throw new IllegalArgumentException("Distinct aggregateable attribute cannot be nillable");
+			throw new IllegalArgumentException("Distinct aggregatable attribute cannot be nillable");
 		}
 		AttributeType dataType1 = aggAttr1.getDataType();
 		if (aggAttr1.isNillable() && isReferenceType(aggAttr1))
 		{
 			// see: https://github.com/molgenis/molgenis/issues/1937
 			throw new IllegalArgumentException(
-					"Aggregateable attribute of type [" + dataType1 + "] cannot be nillable");
+					"Aggregatable attribute of type [" + dataType1 + "] cannot be nillable");
 		}
 		if (aggAttr2 != null)
 		{
@@ -62,7 +62,7 @@ public class AggregateQueryGenerator
 			if (aggAttr2.isNillable() && isReferenceType(aggAttr2))
 			{
 				throw new IllegalArgumentException(
-						"Aggregateable attribute of type [" + dataType2 + "] cannot be nillable");
+						"Aggregatable attribute of type [" + dataType2 + "] cannot be nillable");
 			}
 		}
 

@@ -19,9 +19,9 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.data.meta.model.AttributeMetaData.*;
+import static org.molgenis.data.meta.model.AttributeMetadata.*;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
-import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
+import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
 import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
 
 /**
@@ -350,12 +350,12 @@ public class Attribute extends StaticEntity
 	 */
 	public boolean isAggregatable()
 	{
-		return requireNonNull(getBoolean(AGGREGATEABLE));
+		return requireNonNull(getBoolean(AGGREGATABLE));
 	}
 
 	public Attribute setAggregatable(boolean aggregatable)
 	{
-		set(AGGREGATEABLE, aggregatable);
+		set(AGGREGATABLE, aggregatable);
 		return this;
 	}
 

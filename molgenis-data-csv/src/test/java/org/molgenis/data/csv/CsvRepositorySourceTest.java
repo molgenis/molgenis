@@ -35,7 +35,7 @@ public class CsvRepositorySourceTest extends AbstractMolgenisSpringTest
 
 		CsvRepositoryCollection repo = new CsvRepositoryCollection(csvFile);
 		repo.setEntityMetaDataFactory(entityMetaFactory);
-		repo.setAttributeMetaDataFactory(attrMetaFactory);
+		repo.setAttributeFactory(attrMetaFactory);
 		assertNotNull(repo.getEntityNames());
 		assertEquals(Iterables.size(repo.getEntityNames()), 1);
 		assertEquals(Iterables.get(repo.getEntityNames(), 0), "testdata");
@@ -85,7 +85,7 @@ public class CsvRepositorySourceTest extends AbstractMolgenisSpringTest
 
 		CsvRepositoryCollection repo = new CsvRepositoryCollection(zip);
 		repo.setEntityMetaDataFactory(entityMetaFactory);
-		repo.setAttributeMetaDataFactory(attrMetaFactory);
+		repo.setAttributeFactory(attrMetaFactory);
 		assertNotNull(repo.getEntityNames());
 		assertEquals(Iterables.size(repo.getEntityNames()), 3);
 		assertNotNull(repo.getRepository("0"));

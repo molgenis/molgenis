@@ -33,16 +33,16 @@ public class DataConverterTest
 		assertEquals(DataConverter.convert("2015-06-04", attr), MolgenisDateFormat.getDateFormat().parse("2015-06-04"));
 	}
 
-	@DataProvider(name = "convertObjectAttributeMetaDataProvider")
-	public static Iterator<Object[]> convertObjectAttributeMetaDataProvider()
+	@DataProvider(name = "convertObjectAttributeProvider")
+	public static Iterator<Object[]> convertObjectAttributeProvider()
 	{
 		Object object = mock(Object.class);
 		return newArrayList(new Object[] { object, ONE_TO_MANY, object }, new Object[] { object, XREF, object })
 				.iterator();
 	}
 
-	@Test(dataProvider = "convertObjectAttributeMetaDataProvider")
-	public void convertObjectAttributeMetaData(Object source, MolgenisFieldTypes.AttributeType attrType, Object convertedValue)
+	@Test(dataProvider = "convertObjectAttributeProvider")
+	public void convertObjectAttribute(Object source, MolgenisFieldTypes.AttributeType attrType, Object convertedValue)
 			throws ParseException
 	{
 		Attribute attr = mock(Attribute.class);

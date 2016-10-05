@@ -81,7 +81,7 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 	}
 
 	@Override
-	public List<Attribute> retrieveAttributeMetaDatasFromAlgorithm(String algorithm,
+	public List<Attribute> retrieveAttributesFromAlgorithm(String algorithm,
 			EntityMetaData sourceEntityMetaData)
 	{
 		List<Attribute> sourceAttributes = Lists.newArrayList();
@@ -109,7 +109,7 @@ public class AttributeMappingRepositoryImpl implements AttributeMappingRepositor
 		Attribute targetAttribute = targetEntityMetaData.getAttribute(targetAtributeName);
 		String algorithm = attributeMappingEntity.getString(ALGORITHM);
 		String algorithmState = attributeMappingEntity.getString(ALGORITHMSTATE);
-		List<Attribute> sourceAttributes = retrieveAttributeMetaDatasFromAlgorithm(algorithm,
+		List<Attribute> sourceAttributes = retrieveAttributesFromAlgorithm(algorithm,
 				sourceEntityMetaData);
 
 		return new AttributeMapping(identifier, targetAttribute, algorithm, sourceAttributes,

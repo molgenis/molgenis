@@ -199,7 +199,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	{
 		// bootstrap meta data
 		EntityMetaDataMetaData entityMetaMeta = applicationContext.getBean(EntityMetaDataMetaData.class);
-		applicationContext.getBean(AttributeMetaData.class).bootstrap(entityMetaMeta);
+		applicationContext.getBean(AttributeMetadata.class).bootstrap(entityMetaMeta);
 		Map<String, SystemEntityMetaData> systemEntityMetaMap = applicationContext
 				.getBeansOfType(SystemEntityMetaData.class);
 		systemEntityMetaMap.values().forEach(systemEntityMetaData -> systemEntityMetaData.bootstrap(entityMetaMeta));

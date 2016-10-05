@@ -23,5 +23,5 @@ public interface Annotator
 	/**
 	 * @return Compound {@link Attribute} for the attributes that get added by this {@link Annotator}
 	 */
-	List<Attribute> getAnnotationAttributeMetaDatas();
+	List<Attribute> getAnnotationAttributeMetadatas();
 }

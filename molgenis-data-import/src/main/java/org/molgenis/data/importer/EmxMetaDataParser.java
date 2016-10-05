@@ -37,12 +37,12 @@ import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.importer.MyEntitiesValidationReport.AttributeState.*;
 import static org.molgenis.data.meta.DefaultPackage.PACKAGE_DEFAULT;
-import static org.molgenis.data.meta.model.AttributeMetaData.*;
+import static org.molgenis.data.meta.model.AttributeMetadata.*;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 import static org.molgenis.data.meta.model.TagMetaData.TAG;
 import static org.molgenis.data.semantic.SemanticTag.asTag;
-import static org.molgenis.data.support.AttributeMetaDataUtils.isIdAttributeTypeAllowed;
+import static org.molgenis.data.support.AttributeUtils.isIdAttributeTypeAllowed;
 import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
 import static org.molgenis.data.support.EntityMetaDataUtils.isStringType;
 import static org.molgenis.file.model.FileMetaMetaData.FILE_META;
@@ -121,7 +121,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					EMX_ENTITIES_TAGS.toLowerCase());
 
 	private static final List<String> SUPPORTED_ATTRIBUTE_ATTRIBUTES = Arrays
-			.asList(AGGREGATEABLE.toLowerCase(), DATA_TYPE.toLowerCase(), DESCRIPTION.toLowerCase(),
+			.asList(AGGREGATABLE.toLowerCase(), DATA_TYPE.toLowerCase(), DESCRIPTION.toLowerCase(),
 					ENTITY.toLowerCase(), ENUM_OPTIONS.toLowerCase(), ID_ATTRIBUTE.toLowerCase(), LABEL.toLowerCase(),
 					LABEL_ATTRIBUTE.toLowerCase(), LOOKUP_ATTRIBUTE.toLowerCase(), NAME, NILLABLE.toLowerCase(),
 					PART_OF_ATTRIBUTE.toLowerCase(), RANGE_MAX.toLowerCase(), RANGE_MIN.toLowerCase(),
@@ -718,7 +718,7 @@ public class EmxMetaDataParser implements MetaDataParser
 			String emxAttrNillable = emxAttrEntity.getString(NILLABLE);
 			String emxIdAttrValue = emxAttrEntity.getString(ID_ATTRIBUTE);
 			String emxAttrVisible = emxAttrEntity.getString(VISIBLE);
-			String emxAggregateable = emxAttrEntity.getString(AGGREGATEABLE);
+			String emxAggregatable = emxAttrEntity.getString(AGGREGATABLE);
 			String emxIsLookupAttr = emxAttrEntity.getString(LOOKUP_ATTRIBUTE);
 			String emxIsLabelAttr = emxAttrEntity.getString(LABEL_ATTRIBUTE);
 			String emxReadOnly = emxAttrEntity.getString(READ_ONLY);
@@ -769,7 +769,7 @@ public class EmxMetaDataParser implements MetaDataParser
 					attr.setVisibleExpression(emxAttrVisible);
 				}
 			}
-			if (emxAggregateable != null) attr.setAggregatable(parseBoolean(emxAggregateable, rowIndex, AGGREGATEABLE));
+			if (emxAggregatable != null) attr.setAggregatable(parseBoolean(emxAggregatable, rowIndex, AGGREGATABLE));
 			if (emxReadOnly != null) attr.setReadOnly(parseBoolean(emxReadOnly, rowIndex, READ_ONLY));
 			if (emxUnique != null) attr.setUnique(parseBoolean(emxUnique, rowIndex, UNIQUE));
 			if (expression != null) attr.setExpression(expression);

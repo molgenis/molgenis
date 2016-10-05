@@ -20,8 +20,8 @@ import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toList;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.meta.model.AttributeMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.AttributeMetaData.PARTS;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.PARTS;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
@@ -32,20 +32,20 @@ import static org.molgenis.security.core.utils.SecurityUtils.currentUserIsSu;
 import static org.molgenis.security.core.utils.SecurityUtils.currentUserisSystem;
 
 /**
- * Decorator for the attribute meta data repository:
+ * Decorator for the attribute repository:
  * - filters requested entities based on the entity permissions of the current user.
  * - applies updates to the repository collection for attribute meta data adds/updates/deletes
  * <p>
  * TODO replace permission based entity filtering with generic row-level security once available
  */
-public class AttributeMetaDataRepositoryDecorator implements Repository<Attribute>
+public class AttributeRepositoryDecorator implements Repository<Attribute>
 {
 	private final Repository<Attribute> decoratedRepo;
 	private final SystemEntityMetaDataRegistry systemEntityMetaDataRegistry;
 	private final DataService dataService;
 	private final MolgenisPermissionService permissionService;
 
-	public AttributeMetaDataRepositoryDecorator(Repository<Attribute> decoratedRepo,
+	public AttributeRepositoryDecorator(Repository<Attribute> decoratedRepo,
 			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, DataService dataService,
 			MolgenisPermissionService permissionService)
 	{
@@ -476,7 +476,7 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	private void validateUpdateAllowed(Attribute attr)
 	{
 		String attrIdentifier = attr.getIdentifier();
-		Attribute systemAttr = systemEntityMetaDataRegistry.getSystemAttributeMetaData(attrIdentifier);
+		Attribute systemAttr = systemEntityMetaDataRegistry.getSystemAttribute(attrIdentifier);
 		if (systemAttr != null && !EntityUtils.equals(attr, systemAttr))
 		{
 			throw new MolgenisDataException(
@@ -492,7 +492,7 @@ public class AttributeMetaDataRepositoryDecorator implements Repository<Attribut
 	private void validateDeleteAllowed(Attribute attr)
 	{
 		String attrIdentifier = attr.getIdentifier();
-		if (systemEntityMetaDataRegistry.hasSystemAttributeMetaData(attrIdentifier))
+		if (systemEntityMetaDataRegistry.hasSystemAttribute(attrIdentifier))
 		{
 			throw new MolgenisDataException(
 					format("Deleting system entity attribute [%s] is not allowed", attr.getName()));

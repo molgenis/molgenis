@@ -31,7 +31,7 @@ import static com.google.common.collect.LinkedHashMultimap.create;
 import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.model.AttributeMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
@@ -64,9 +64,9 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	public void removeAttributeTag(String entity, String attribute, String relationIRI, String ontologyTermIRI)
 	{
 		Entity attributeEntity = findAttributeEntity(entity, attribute);
-		Iterable<Entity> tags = attributeEntity.getEntities(AttributeMetaData.TAGS);
+		Iterable<Entity> tags = attributeEntity.getEntities(AttributeMetadata.TAGS);
 		Iterable<Entity> newTags = Iterables.filter(tags, e -> !isSameTag(relationIRI, ontologyTermIRI, e));
-		attributeEntity.set(AttributeMetaData.TAGS, newTags);
+		attributeEntity.set(AttributeMetadata.TAGS, newTags);
 		dataService.update(ATTRIBUTE_META_DATA, attributeEntity);
 		updateEntityMetaDataEntityWithNewAttributeEntity(entity, attribute, attributeEntity);
 	}
@@ -78,7 +78,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		Attribute attribute = removeTag.getSubject();
 		Entity attributeEntity = findAttributeEntity(entityMetaData.getName(), attribute.getName());
 		List<Entity> tags = new ArrayList<Entity>();
-		for (Entity tagEntity : attributeEntity.getEntities(AttributeMetaData.TAGS))
+		for (Entity tagEntity : attributeEntity.getEntities(AttributeMetadata.TAGS))
 		{
 			SemanticTag<Attribute, OntologyTerm, Ontology> tag = asTag(attribute, tagEntity);
 			if (!removeTag.equals(tag))
@@ -86,7 +86,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 				tags.add(tagEntity);
 			}
 		}
-		attributeEntity.set(AttributeMetaData.TAGS, tags);
+		attributeEntity.set(AttributeMetadata.TAGS, tags);
 		dataService.update(ATTRIBUTE_META_DATA, attributeEntity);
 	}
 
@@ -102,7 +102,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 			LOG.warn("Cannot find attribute {}.{}", entityMetaData.getName(), attribute.getName());
 			return tags;
 		}
-		for (Entity tagEntity : entity.getEntities(AttributeMetaData.TAGS))
+		for (Entity tagEntity : entity.getEntities(AttributeMetadata.TAGS))
 		{
 			SemanticTag<Attribute, OntologyTerm, Ontology> tag = asTag(attribute, tagEntity);
 			tags.put(tag.getRelation(), tag.getObject());
@@ -135,12 +135,12 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	{
 		Entity entity = findAttributeEntity(entityMetaData.getName(), tag.getSubject().getName());
 		List<Entity> tags = new ArrayList<Entity>();
-		for (Entity tagEntity : entity.getEntities(AttributeMetaData.TAGS))
+		for (Entity tagEntity : entity.getEntities(AttributeMetadata.TAGS))
 		{
 			tags.add(tagEntity);
 		}
 		tags.add(getTagEntity(tag));
-		entity.set(AttributeMetaData.TAGS, tags);
+		entity.set(AttributeMetadata.TAGS, tags);
 		dataService.update(ATTRIBUTE_META_DATA, entity);
 	}
 
@@ -163,7 +163,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		dataService.add(TAG, tag);
 
 		Map<String, Entity> tags = Maps.newHashMap();
-		for (Entity attrTag : attributeEntity.getEntities(AttributeMetaData.TAGS))
+		for (Entity attrTag : attributeEntity.getEntities(AttributeMetadata.TAGS))
 		{
 			tags.put(attrTag.get(TagMetaData.OBJECT_IRI).toString(), attrTag);
 		}
@@ -172,7 +172,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 			tags.put(tag.get(TagMetaData.OBJECT_IRI).toString(), tag);
 			added = true;
 		}
-		attributeEntity.set(AttributeMetaData.TAGS, tags.values());
+		attributeEntity.set(AttributeMetadata.TAGS, tags.values());
 		dataService.update(ATTRIBUTE_META_DATA, attributeEntity);
 		updateEntityMetaDataEntityWithNewAttributeEntity(entity, attribute, attributeEntity);
 		return added ? OntologyTag.create(combinedOntologyTerm, relation) : null;
@@ -188,12 +188,12 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	public void removeAllTagsFromEntity(String entityName)
 	{
 		EntityMetaData entityMetadata = dataService.getEntityMetaData(entityName);
-		Iterable<Attribute> attributeMetaDatas = entityMetadata.getAtomicAttributes();
+		Iterable<Attribute> attributes = entityMetadata.getAtomicAttributes();
 
-		for (Attribute attribute : attributeMetaDatas)
+		for (Attribute attribute : attributes)
 		{
 			Entity attributeEntity = findAttributeEntity(entityName, attribute.getName());
-			attributeEntity.set(AttributeMetaData.TAGS, emptyList());
+			attributeEntity.set(AttributeMetadata.TAGS, emptyList());
 			dataService.update(ATTRIBUTE_META_DATA, attributeEntity);
 			updateEntityMetaDataEntityWithNewAttributeEntity(entityName, attribute.getName(), attributeEntity);
 		}
@@ -250,7 +250,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		Entity entityEntity = dataService.findOneById(ENTITY_META_DATA, entity);
 		Iterable<Entity> attributes = entityEntity.getEntities(ATTRIBUTES);
 		entityEntity.set(ATTRIBUTES, Iterables.transform(attributes,
-				att -> att.getString(AttributeMetaData.NAME).equals(attribute) ? attributeEntity : att));
+				att -> att.getString(AttributeMetadata.NAME).equals(attribute) ? attributeEntity : att));
 		dataService.update(ENTITY_META_DATA, entityEntity);
 	}
 
@@ -265,7 +265,7 @@ public class OntologyTagServiceImpl implements OntologyTagService
 	{
 		Entity entityMetaDataEntity = dataService.findOneById(ENTITY_META_DATA, entityName);
 		Optional<Entity> result = stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false)
-				.filter(att -> attributeName.equals(att.getString(AttributeMetaData.NAME))).findFirst();
+				.filter(att -> attributeName.equals(att.getString(AttributeMetadata.NAME))).findFirst();
 
 		if (!result.isPresent() && entityMetaDataEntity.get(EntityMetaDataMetaData.EXTENDS) != null)
 		{

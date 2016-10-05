@@ -17,11 +17,11 @@ import static org.molgenis.data.support.EntityMetaDataUtils.isReferenceType;
 public class EntityAggregatesResponse extends EntityCollectionResponseV2
 {
 	private final AggregateResultResponse aggs;
-	private final AttributeMetaDataResponseV2 xAttr;
-	private final AttributeMetaDataResponseV2 yAttr;
+	private final AttributeResponseV2 xAttr;
+	private final AttributeResponseV2 yAttr;
 
-	public EntityAggregatesResponse(AggregateResult aggs, AttributeMetaDataResponseV2 xAttr,
-			AttributeMetaDataResponseV2 yAttr, String href)
+	public EntityAggregatesResponse(AggregateResult aggs, AttributeResponseV2 xAttr,
+			AttributeResponseV2 yAttr, String href)
 	{
 		super(href);
 		this.aggs = checkNotNull(AggregateResultResponse.toResponse(aggs));
@@ -34,12 +34,12 @@ public class EntityAggregatesResponse extends EntityCollectionResponseV2
 		return aggs;
 	}
 
-	public AttributeMetaDataResponseV2 getXAttr()
+	public AttributeResponseV2 getXAttr()
 	{
 		return xAttr;
 	}
 
-	public AttributeMetaDataResponseV2 getYAttr()
+	public AttributeResponseV2 getYAttr()
 	{
 		return yAttr;
 	}

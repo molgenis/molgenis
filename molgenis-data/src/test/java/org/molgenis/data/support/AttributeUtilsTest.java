@@ -31,6 +31,6 @@ public class AttributeUtilsTest
 	public void isIdAttributeTypeAllowed(AttributeType attrType, boolean validIdAttrType) throws Exception
 	{
 		Attribute attr = when(mock(Attribute.class).getDataType()).thenReturn(attrType).getMock();
-		assertEquals(AttributeMetaDataUtils.isIdAttributeTypeAllowed(attr), validIdAttrType);
+		assertEquals(AttributeUtils.isIdAttributeTypeAllowed(attr), validIdAttrType);
 	}
 }

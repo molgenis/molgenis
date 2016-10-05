@@ -21,7 +21,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.getValueString;
 import static org.molgenis.MolgenisFieldTypes.getType;
 
-class AttributeMetaDataResponseV2
+class AttributeResponseV2
 {
 	private final String href;
 	private final AttributeType fieldType;
@@ -41,7 +41,7 @@ class AttributeMetaDataResponseV2
 	private final Boolean unique;
 	private final Boolean visible;
 	private Boolean lookupAttribute;
-	private Boolean aggregateable;
+	private Boolean aggregatable;
 	private Range range;
 	private String expression;
 	private String visibleExpression;
@@ -54,7 +54,7 @@ class AttributeMetaDataResponseV2
 	 * @param fetch             set of lowercase attribute names to include in response
 	 * @param permissionService
 	 */
-	public AttributeMetaDataResponseV2(final String entityParentName, EntityMetaData entityMeta, Attribute attr,
+	public AttributeResponseV2(final String entityParentName, EntityMetaData entityMeta, Attribute attr,
 			Fetch fetch, MolgenisPermissionService permissionService, DataService dataService,
 			LanguageService languageService)
 	{
@@ -90,10 +90,10 @@ class AttributeMetaDataResponseV2
 
 			// create attribute response
 			this.attributes = Lists.newArrayList(
-					Iterables.transform(attrParts, new Function<Attribute, AttributeMetaDataResponseV2>()
+					Iterables.transform(attrParts, new Function<Attribute, AttributeResponseV2>()
 					{
 						@Override
-						public AttributeMetaDataResponseV2 apply(Attribute attr)
+						public AttributeResponseV2 apply(Attribute attr)
 						{
 							Fetch subAttrFetch;
 							if (fetch != null)
@@ -116,7 +116,7 @@ class AttributeMetaDataResponseV2
 							{
 								subAttrFetch = null;
 							}
-							return new AttributeMetaDataResponseV2(entityParentName, entityMeta, attr, subAttrFetch,
+							return new AttributeResponseV2(entityParentName, entityMeta, attr, subAttrFetch,
 									permissionService, dataService, languageService);
 						}
 					}));
@@ -133,7 +133,7 @@ class AttributeMetaDataResponseV2
 		this.labelAttribute = attr.equals(entityMeta.getLabelAttribute());
 		this.unique = attr.isUnique();
 		this.lookupAttribute = entityMeta.getLookupAttribute(attr.getName()) != null;
-		this.aggregateable = attr.isAggregatable();
+		this.aggregatable = attr.isAggregatable();
 		this.range = attr.getRange();
 		this.visible = attr.isVisible();
 		this.visibleExpression = attr.getVisibleExpression();
@@ -263,9 +263,9 @@ class AttributeMetaDataResponseV2
 		return lookupAttribute;
 	}
 
-	public Boolean isAggregateable()
+	public Boolean isAggregatable()
 	{
-		return aggregateable;
+		return aggregatable;
 	}
 
 	public Boolean getNillable()
@@ -288,9 +288,9 @@ class AttributeMetaDataResponseV2
 		return unique;
 	}
 
-	public Boolean getAggregateable()
+	public Boolean getAggregatable()
 	{
-		return aggregateable;
+		return aggregatable;
 	}
 
 	public Range getRange()

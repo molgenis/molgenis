@@ -57,25 +57,25 @@ public class SystemEntityMetaDataRegistry
 		systemEntityMetaDataMap.put(systemEntityMetaDataName, systemEntityMetaData);
 	}
 
-	public boolean hasSystemAttributeMetaData(String attrIdentifier)
+	public boolean hasSystemAttribute(String attrIdentifier)
 	{
-		return getSystemAttributeMetaData(attrIdentifier) != null;
+		return getSystemAttribute(attrIdentifier) != null;
 	}
 
-	public Attribute getSystemAttributeMetaData(String attrIdentifier)
+	public Attribute getSystemAttribute(String attrIdentifier)
 	{
 		return getSystemEntityMetaDatas()
-				.map(systemEntityMetaData -> getSystemAttributeMetaData(systemEntityMetaData, attrIdentifier))
+				.map(systemEntityMetaData -> getSystemAttribute(systemEntityMetaData, attrIdentifier))
 				.filter(Objects::nonNull).findFirst().orElse(null);
 	}
 
-	private static Attribute getSystemAttributeMetaData(SystemEntityMetaData systemEntityMetaData,
+	private static Attribute getSystemAttribute(SystemEntityMetaData systemEntityMetaData,
 			String attrIdentifier)
 	{
-		return getSystemAttributeMetaDataRec(systemEntityMetaData.getAllAttributes(), attrIdentifier);
+		return getSystemAttributeRec(systemEntityMetaData.getAllAttributes(), attrIdentifier);
 	}
 
-	private static Attribute getSystemAttributeMetaDataRec(Iterable<Attribute> attrs,
+	private static Attribute getSystemAttributeRec(Iterable<Attribute> attrs,
 			String attrIdentifier)
 	{
 		for (Attribute attr : attrs)
@@ -88,7 +88,7 @@ public class SystemEntityMetaDataRegistry
 			{
 				if (attr.getDataType() == COMPOUND)
 				{
-					return getSystemAttributeMetaDataRec(attr.getAttributeParts(), attrIdentifier);
+					return getSystemAttributeRec(attr.getAttributeParts(), attrIdentifier);
 				}
 			}
 		}

@@ -17,7 +17,7 @@ import static java.util.Objects.requireNonNull;
 public class AttributeFactory implements EntityFactory<Attribute, String>
 {
 	private final EntityPopulator entityPopulator;
-	private AttributeMetaData attrMetaMeta;
+	private AttributeMetadata attributeMetadata;
 
 	@Autowired
 	public AttributeFactory(EntityPopulator entityPopulator) {
@@ -27,13 +27,13 @@ public class AttributeFactory implements EntityFactory<Attribute, String>
 	@Override
 	public String getEntityName()
 	{
-		return AttributeMetaData.ATTRIBUTE_META_DATA;
+		return AttributeMetadata.ATTRIBUTE_META_DATA;
 	}
 
 	@Override
 	public Attribute create()
 	{
-		Attribute attrMeta = new Attribute(attrMetaMeta);
+		Attribute attrMeta = new Attribute(attributeMetadata);
 		entityPopulator.populate(attrMeta);
 		return attrMeta;
 	}
@@ -42,7 +42,7 @@ public class AttributeFactory implements EntityFactory<Attribute, String>
 	public Attribute create(String entityId)
 	{
 		Attribute attrMeta = create();
-		attrMeta.set(AttributeMetaData.IDENTIFIER, entityId);
+		attrMeta.set(AttributeMetadata.IDENTIFIER, entityId);
 		return attrMeta;
 	}
 
@@ -54,13 +54,13 @@ public class AttributeFactory implements EntityFactory<Attribute, String>
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
 	@Autowired
-	public void setAttributeMetaData(AttributeMetaData attrMetaMeta)
+	public void setAttributeMetadata(AttributeMetadata attributeMetadata)
 	{
-		this.attrMetaMeta = requireNonNull(attrMetaMeta);
+		this.attributeMetadata = requireNonNull(attributeMetadata);
 	}
 
-	public AttributeMetaData getAttributeMetaData()
+	public AttributeMetadata getAttributeMetadata()
 	{
-		return attrMetaMeta;
+		return attributeMetadata;
 	}
 }

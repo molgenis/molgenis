@@ -28,8 +28,8 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.data.QueryRule.Operator.EQUALS;
 import static org.molgenis.data.RepositoryCapability.WRITABLE;
-import static org.molgenis.data.meta.model.AttributeMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.AttributeMetaData.PARTS;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.PARTS;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.security.core.Permission.COUNT;
@@ -42,7 +42,7 @@ import static org.testng.Assert.assertNull;
 
 public class AttributeRepositoryDecoratorTest
 {
-	private AttributeMetaDataRepositoryDecorator repo;
+	private AttributeRepositoryDecorator repo;
 	private Repository<Attribute> decoratedRepo;
 	private DataService dataService;
 	private SystemEntityMetaDataRegistry systemEntityMetaRegistry;
@@ -55,7 +55,7 @@ public class AttributeRepositoryDecoratorTest
 		dataService = mock(DataService.class);
 		systemEntityMetaRegistry = mock(SystemEntityMetaDataRegistry.class);
 		permissionService = mock(MolgenisPermissionService.class);
-		repo = new AttributeMetaDataRepositoryDecorator(decoratedRepo, systemEntityMetaRegistry, dataService,
+		repo = new AttributeRepositoryDecorator(decoratedRepo, systemEntityMetaRegistry, dataService,
 				permissionService);
 	}
 
@@ -850,7 +850,7 @@ public class AttributeRepositoryDecoratorTest
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		String attrIdentifier = "id";
 		when(attr.getIdentifier()).thenReturn(attrIdentifier);
-		when(systemEntityMetaRegistry.hasSystemAttributeMetaData(attrIdentifier)).thenReturn(false);
+		when(systemEntityMetaRegistry.hasSystemAttribute(attrIdentifier)).thenReturn(false);
 
 		//noinspection unchecked
 		Query<EntityMetaData> entityQ = mock(Query.class);
@@ -876,7 +876,7 @@ public class AttributeRepositoryDecoratorTest
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		String attrIdentifier = "id";
 		when(attr.getIdentifier()).thenReturn(attrIdentifier);
-		when(systemEntityMetaRegistry.hasSystemAttributeMetaData(attrIdentifier)).thenReturn(true);
+		when(systemEntityMetaRegistry.hasSystemAttribute(attrIdentifier)).thenReturn(true);
 		repo.delete(attr);
 	}
 
@@ -887,7 +887,7 @@ public class AttributeRepositoryDecoratorTest
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		String attrIdentifier = "id";
 		when(attr.getIdentifier()).thenReturn(attrIdentifier);
-		when(systemEntityMetaRegistry.hasSystemAttributeMetaData(attrIdentifier)).thenReturn(false);
+		when(systemEntityMetaRegistry.hasSystemAttribute(attrIdentifier)).thenReturn(false);
 		//noinspection unchecked
 		Query<EntityMetaData> entityQ = mock(Query.class);
 		when(entityQ.eq(ATTRIBUTES, attr)).thenReturn(entityQ);
@@ -904,7 +904,7 @@ public class AttributeRepositoryDecoratorTest
 		Attribute attr = when(mock(Attribute.class).getName()).thenReturn(attrName).getMock();
 		String attrIdentifier = "id";
 		when(attr.getIdentifier()).thenReturn(attrIdentifier);
-		when(systemEntityMetaRegistry.hasSystemAttributeMetaData(attrIdentifier)).thenReturn(false);
+		when(systemEntityMetaRegistry.hasSystemAttribute(attrIdentifier)).thenReturn(false);
 
 		//noinspection unchecked
 		Query<EntityMetaData> entityQ = mock(Query.class);
@@ -925,7 +925,7 @@ public class AttributeRepositoryDecoratorTest
 	@Test
 	public void deleteStream()
 	{
-		AttributeMetaDataRepositoryDecorator repoSpy = spy(repo);
+		AttributeRepositoryDecorator repoSpy = spy(repo);
 		doNothing().when(repoSpy).delete(any(Attribute.class));
 		Attribute attr0 = mock(Attribute.class);
 		Attribute attr1 = mock(Attribute.class);

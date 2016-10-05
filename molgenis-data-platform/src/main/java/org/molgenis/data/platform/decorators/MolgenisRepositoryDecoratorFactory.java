@@ -21,7 +21,7 @@ import org.molgenis.data.index.IndexActionRegisterService;
 import org.molgenis.data.index.IndexActionRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenerRepositoryDecorator;
 import org.molgenis.data.listeners.EntityListenersService;
-import org.molgenis.data.meta.AttributeMetaDataRepositoryDecorator;
+import org.molgenis.data.meta.AttributeRepositoryDecorator;
 import org.molgenis.data.meta.EntityMetaDataRepositoryDecorator;
 import org.molgenis.data.meta.PackageRepositoryDecorator;
 import org.molgenis.data.meta.model.*;
@@ -45,7 +45,7 @@ import static java.util.Objects.requireNonNull;
 import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
-import static org.molgenis.data.meta.model.AttributeMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.security.owned.OwnedEntityMetaData.OWNED;
@@ -173,7 +173,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		}
 		else if (repo.getName().equals(ATTRIBUTE_META_DATA))
 		{
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new AttributeMetaDataRepositoryDecorator(
+			repo = (Repository<Entity>) (Repository<? extends Entity>) new AttributeRepositoryDecorator(
 					(Repository<Attribute>) (Repository<? extends Entity>) repo, systemEntityMetaDataRegistry,
 					dataService, permissionService);
 		}

@@ -101,14 +101,14 @@ public class TagWizardController extends MolgenisPluginController
 		List<Ontology> ontologies = ontologyService.getOntologies();
 		EntityMetaData emd = dataService.getEntityMetaData(target);
 		List<Attribute> attributes = newArrayList(emd.getAttributes());
-		Map<String, Multimap<Relation, OntologyTerm>> taggedAttributeMetaDatas = attributes.stream()
+		Map<String, Multimap<Relation, OntologyTerm>> taggedAttributes = attributes.stream()
 				.collect(toMap((x -> x.getName()), (x -> ontologyTagService.getTagsForAttribute(emd, x))));
 
 		model.addAttribute("entity", emd);
 		model.addAttribute("entityNames", entityNames);
 		model.addAttribute("attributes", attributes);
 		model.addAttribute("ontologies", ontologies);
-		model.addAttribute("taggedAttributeMetaDatas", taggedAttributeMetaDatas);
+		model.addAttribute("taggedAttributes", taggedAttributes);
 		model.addAttribute("relations", Relation.values());
 
 		return VIEW_TAG_WIZARD;

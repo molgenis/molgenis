@@ -5,9 +5,9 @@ import org.molgenis.data.meta.model.Attribute;
 
 import static java.lang.String.format;
 
-public class AttributeMetaDataUtils
+public class AttributeUtils
 {
-	private AttributeMetaDataUtils()
+	private AttributeUtils()
 	{
 	}
 

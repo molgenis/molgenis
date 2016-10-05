@@ -40,7 +40,7 @@ public class EntityUtils
 		if (EntityMetaDataUtils.isReferenceType(attr))
 		{
 			throw new MolgenisDataException(
-					"getTypedValue(String, AttributeMetaData) can't be used for attributes referencing entities");
+					"getTypedValue(String, AttributeMetadata) can't be used for attributes referencing entities");
 		}
 		return getTypedValue(valueStr, attr, null);
 	}

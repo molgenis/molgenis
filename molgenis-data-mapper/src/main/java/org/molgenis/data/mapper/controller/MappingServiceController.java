@@ -451,7 +451,7 @@ public class MappingServiceController extends MolgenisPluginController
 		String mappingProjectId = requestBody.get("mappingProjectId");
 		String target = requestBody.get("target");
 		String source = requestBody.get("source");
-		String targetAttribute = requestBody.get("targetAttribute");
+		String targetAttributeName = requestBody.get("targetAttribute");
 		String searchTermsString = requestBody.get("searchTerms");
 		Set<String> searchTerms = new HashSet<String>();
 
@@ -465,15 +465,15 @@ public class MappingServiceController extends MolgenisPluginController
 		MappingTarget mappingTarget = project.getMappingTarget(target);
 		EntityMapping entityMapping = mappingTarget.getMappingForSource(source);
 
-		Attribute targetAttributeMetaData = entityMapping.getTargetEntityMetaData()
-				.getAttribute(targetAttribute);
+		Attribute targetAttribute = entityMapping.getTargetEntityMetaData()
+				.getAttribute(targetAttributeName);
 
 		// Find relevant attributes base on tags
 		Multimap<Relation, OntologyTerm> tagsForAttribute = ontologyTagService
-				.getTagsForAttribute(entityMapping.getTargetEntityMetaData(), targetAttributeMetaData);
+				.getTagsForAttribute(entityMapping.getTargetEntityMetaData(), targetAttribute);
 
 		Map<Attribute, ExplainedAttribute> relevantAttributes = semanticSearchService
-				.decisionTreeToFindRelevantAttributes(entityMapping.getSourceEntityMetaData(), targetAttributeMetaData,
+				.decisionTreeToFindRelevantAttributes(entityMapping.getSourceEntityMetaData(), targetAttribute,
 						tagsForAttribute.values(), searchTerms);
 
 		return newArrayList(relevantAttributes.values());
@@ -743,7 +743,7 @@ public class MappingServiceController extends MolgenisPluginController
 		model.addAttribute("sourceAttributeIdAttribute", sourceAttributeIdAttribute);
 		model.addAttribute("sourceAttributeLabelAttribute", sourceAttributeLabelAttribute);
 
-		// Check if the selected source attribute is aggregateable
+		// Check if the selected source attribute is aggregatable
 		Attribute sourceAttributeAttribute = dataService.getEntityMetaData(source)
 				.getAttribute(sourceAttribute);
 		if (sourceAttributeAttribute.isAggregatable())

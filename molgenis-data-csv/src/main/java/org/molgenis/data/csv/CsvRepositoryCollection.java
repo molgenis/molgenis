@@ -168,7 +168,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Autowired
-	public void setAttributeMetaDataFactory(AttributeFactory attrMetaFactory)
+	public void setAttributeFactory(AttributeFactory attrMetaFactory)
 	{
 		this.attrMetaFactory = attrMetaFactory;
 	}

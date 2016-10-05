@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.toMap;
-import static org.molgenis.data.meta.model.AttributeMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
 

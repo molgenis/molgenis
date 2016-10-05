@@ -37,7 +37,7 @@ public class ExcelRepositorySourceTest extends AbstractMolgenisSpringTest
 		is = getClass().getResourceAsStream("/test.xls");
 		excelRepositoryCollection = new ExcelRepositoryCollection("test.xls", is);
 		excelRepositoryCollection.setEntityMetaDataFactory(entityMetaFactory);
-		excelRepositoryCollection.setAttributeMetaDataFactory(attrMetaFactory);
+		excelRepositoryCollection.setAttributeFactory(attrMetaFactory);
 	}
 
 	@AfterMethod

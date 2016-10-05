@@ -184,7 +184,7 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AttributeMetaDataResponse retrieveEntityAttributeMeta(@PathVariable("entityName") String entityName,
+	public AttributeResponse retrieveEntityAttributeMeta(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName,
 			@RequestParam(value = "attributes", required = false) String[] attributes,
 			@RequestParam(value = "expand", required = false) String[] attributeExpands)
@@ -192,7 +192,7 @@ public class RestController
 		Set<String> attributeSet = toAttributeSet(attributes);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(attributeExpands);
 
-		return getAttributeMetaDataPostInternal(entityName, attributeName, attributeSet, attributeExpandSet);
+		return getAttributePostInternal(entityName, attributeName, attributeSet, attributeExpandSet);
 	}
 
 	/**
@@ -203,13 +203,13 @@ public class RestController
 	 */
 	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AttributeMetaDataResponse retrieveEntityAttributeMetaPost(@PathVariable("entityName") String entityName,
+	public AttributeResponse retrieveEntityAttributeMetaPost(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName, @Valid @RequestBody EntityMetaRequest request)
 	{
 		Set<String> attributeSet = toAttributeSet(request != null ? request.getAttributes() : null);
 		Map<String, Set<String>> attributeExpandSet = toExpandMap(request != null ? request.getExpand() : null);
 
-		return getAttributeMetaDataPostInternal(entityName, attributeName, attributeSet, attributeExpandSet);
+		return getAttributePostInternal(entityName, attributeName, attributeSet, attributeExpandSet);
 	}
 
 	/**
@@ -1081,14 +1081,14 @@ public class RestController
 		response.setStatus(HttpServletResponse.SC_CREATED);
 	}
 
-	private AttributeMetaDataResponse getAttributeMetaDataPostInternal(String entityName, String attributeName,
+	private AttributeResponse getAttributePostInternal(String entityName, String attributeName,
 			Set<String> attributeSet, Map<String, Set<String>> attributeExpandSet)
 	{
 		EntityMetaData meta = dataService.getEntityMetaData(entityName);
 		Attribute attribute = meta.getAttribute(attributeName);
 		if (attribute != null)
 		{
-			return new AttributeMetaDataResponse(entityName, meta, attribute, attributeSet, attributeExpandSet,
+			return new AttributeResponse(entityName, meta, attribute, attributeSet, attributeExpandSet,
 					molgenisPermissionService, dataService, languageService);
 		}
 		else
@@ -1237,7 +1237,7 @@ public class RestController
 					{
 						Set<String> subAttributesSet = attributeExpandsSet.get(attrName.toLowerCase());
 						entityMap.put(attrName,
-								new AttributeMetaDataResponse(meta.getName(), meta, attr, subAttributesSet, null,
+								new AttributeResponse(meta.getName(), meta, attr, subAttributesSet, null,
 										molgenisPermissionService, dataService, languageService));
 					}
 					else

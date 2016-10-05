@@ -17,7 +17,7 @@ import org.molgenis.security.core.Permission;
 import java.util.List;
 
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
-import static org.molgenis.data.rest.v2.AttributeMetaDataResponseV2.filterAttributes;
+import static org.molgenis.data.rest.v2.AttributeResponseV2.filterAttributes;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 
 class EntityMetaDataResponseV2
@@ -27,7 +27,7 @@ class EntityMetaDataResponseV2
 	private final String name;
 	private final String label;
 	private final String description;
-	private final List<AttributeMetaDataResponseV2> attributes;
+	private final List<AttributeResponseV2> attributes;
 	private final String labelAttribute;
 	private final String idAttribute;
 	private final List<String> lookupAttributes;
@@ -66,10 +66,10 @@ class EntityMetaDataResponseV2
 		Iterable<Attribute> filteredAttrs = filterAttributes(fetch, meta.getAttributes());
 
 		this.attributes = Lists.newArrayList(
-				Iterables.transform(filteredAttrs, new Function<Attribute, AttributeMetaDataResponseV2>()
+				Iterables.transform(filteredAttrs, new Function<Attribute, AttributeResponseV2>()
 				{
 					@Override
-					public AttributeMetaDataResponseV2 apply(Attribute attr)
+					public AttributeResponseV2 apply(Attribute attr)
 					{
 						Fetch subAttrFetch;
 						if (fetch != null)
@@ -92,7 +92,7 @@ class EntityMetaDataResponseV2
 						{
 							subAttrFetch = null;
 						}
-						return new AttributeMetaDataResponseV2(name, meta, attr, subAttrFetch, permissionService,
+						return new AttributeResponseV2(name, meta, attr, subAttrFetch, permissionService,
 								dataService, languageService);
 					}
 				}));
@@ -158,7 +158,7 @@ class EntityMetaDataResponseV2
 		return lookupAttributes;
 	}
 
-	public List<AttributeMetaDataResponseV2> getAttributes()
+	public List<AttributeResponseV2> getAttributes()
 	{
 		return attributes;
 	}

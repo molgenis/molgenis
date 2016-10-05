@@ -53,7 +53,7 @@ import static java.util.stream.Stream.of;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
-import static org.molgenis.data.meta.model.AttributeMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
@@ -100,7 +100,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private EntityMetaDataMetaData entityMetaDataMetaData;
 	@Autowired
-	private AttributeMetaData attributeMetaData;
+	private AttributeMetadata attributeMetadata;
 	@Autowired
 	private LanguageFactory languageFactory;
 	@Autowired
@@ -188,7 +188,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		authorities.addAll(makeAuthorities(refEntityMetaDataDynamic.getName(), false, true, true));
 		authorities.addAll(makeAuthorities(selfXrefEntityMetaData.getName(), true, true, true));
 		authorities.addAll(makeAuthorities(languageMetaData.getName(), true, true, true));
-		authorities.addAll(makeAuthorities(attributeMetaData.getName(), true, true, true));
+		authorities.addAll(makeAuthorities(attributeMetadata.getName(), true, true, true));
 		authorities.addAll(makeAuthorities(i18nStringMetaData.getName(), true, false, false));
 		authorities.addAll(makeAuthorities(entityMetaDataMetaData.getName(), true, true, true));
 

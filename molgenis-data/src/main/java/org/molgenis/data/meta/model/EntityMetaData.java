@@ -20,12 +20,12 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
-import static org.molgenis.data.meta.model.AttributeMetaData.DESCRIPTION;
-import static org.molgenis.data.meta.model.AttributeMetaData.LABEL;
+import static org.molgenis.data.meta.model.AttributeMetadata.DESCRIPTION;
+import static org.molgenis.data.meta.model.AttributeMetadata.LABEL;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP_COPY_ATTRS;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
-import static org.molgenis.data.support.AttributeMetaDataUtils.getI18nAttributeName;
+import static org.molgenis.data.support.AttributeUtils.getI18nAttributeName;
 
 /**
  * EntityMetaData defines the structure and attributes of an Entity. Attributes are unique. Other software components

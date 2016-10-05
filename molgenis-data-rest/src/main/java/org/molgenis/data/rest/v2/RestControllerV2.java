@@ -237,18 +237,18 @@ class RestControllerV2
 	 */
 	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = GET, produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AttributeMetaDataResponseV2 retrieveEntityAttributeMeta(@PathVariable("entityName") String entityName,
+	public AttributeResponseV2 retrieveEntityAttributeMeta(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName)
 	{
-		return createAttributeMetaDataResponse(entityName, attributeName);
+		return createAttributeResponse(entityName, attributeName);
 	}
 
 	@RequestMapping(value = "/{entityName}/meta/{attributeName}", method = POST, params = "_method=GET", produces = APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public AttributeMetaDataResponseV2 retrieveEntityAttributeMetaPost(@PathVariable("entityName") String entityName,
+	public AttributeResponseV2 retrieveEntityAttributeMetaPost(@PathVariable("entityName") String entityName,
 			@PathVariable("attributeName") String attributeName)
 	{
-		return createAttributeMetaDataResponse(entityName, attributeName);
+		return createAttributeResponse(entityName, attributeName);
 	}
 
 	/**
@@ -543,7 +543,7 @@ class RestControllerV2
 		return new ErrorMessageResponse(new ErrorMessage(e.getMessage()));
 	}
 
-	private AttributeMetaDataResponseV2 createAttributeMetaDataResponse(String entityName, String attributeName)
+	private AttributeResponseV2 createAttributeResponse(String entityName, String attributeName)
 	{
 		EntityMetaData entity = dataService.getEntityMetaData(entityName);
 		if (entity == null)
@@ -557,7 +557,7 @@ class RestControllerV2
 			throw new RuntimeException("attribute : " + attributeName + " does not exist!");
 		}
 
-		return new AttributeMetaDataResponseV2(entityName, entity, attribute, null, permissionService, dataService,
+		return new AttributeResponseV2(entityName, entity, attribute, null, permissionService, dataService,
 				languageService);
 	}
 
@@ -586,11 +586,11 @@ class RestControllerV2
 				throw new MolgenisQueryException("Aggregate query is missing 'x' or 'y' attribute");
 			}
 			AggregateResult aggs = dataService.aggregate(entityName, aggsQ);
-			AttributeMetaDataResponseV2 xAttrResponse =
-					xAttr != null ? new AttributeMetaDataResponseV2(entityName, meta, xAttr, fetch, permissionService,
+			AttributeResponseV2 xAttrResponse =
+					xAttr != null ? new AttributeResponseV2(entityName, meta, xAttr, fetch, permissionService,
 							dataService, languageService) : null;
-			AttributeMetaDataResponseV2 yAttrResponse =
-					yAttr != null ? new AttributeMetaDataResponseV2(entityName, meta, yAttr, fetch, permissionService,
+			AttributeResponseV2 yAttrResponse =
+					yAttr != null ? new AttributeResponseV2(entityName, meta, yAttr, fetch, permissionService,
 							dataService, languageService) : null;
 			return new EntityAggregatesResponse(aggs, xAttrResponse, yAttrResponse, BASE_URI + '/' + entityName);
 		}

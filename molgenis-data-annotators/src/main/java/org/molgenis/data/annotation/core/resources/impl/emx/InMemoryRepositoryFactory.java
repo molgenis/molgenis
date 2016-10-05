@@ -45,7 +45,7 @@ public class InMemoryRepositoryFactory implements RepositoryFactory
 		try
 		{
 			repositoryCollection = new ExcelRepositoryCollection(file);
-			repositoryCollection.setAttributeMetaDataFactory(attributeFactory);
+			repositoryCollection.setAttributeFactory(attributeFactory);
 			repositoryCollection.setEntityMetaDataFactory(entityMetaDataFactory);
 		}
 		catch (Exception e)

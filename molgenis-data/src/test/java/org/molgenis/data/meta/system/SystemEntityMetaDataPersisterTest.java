@@ -7,7 +7,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.Package;
 import org.springframework.context.ApplicationContext;
@@ -23,7 +23,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.meta.model.AttributeMetaData.REF_ENTITY;
+import static org.molgenis.data.meta.model.AttributeMetadata.REF_ENTITY;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
@@ -34,13 +34,13 @@ public class SystemEntityMetaDataPersisterTest
 	private DataService dataService;
 	private SystemEntityMetaDataRegistry systemEntityMetaRegistry;
 	private SystemEntityMetaDataPersister systemEntityMetaDataPersister;
-	private AttributeMetaData attrMetaMeta;
+	private AttributeMetadata attrMetaMeta;
 	private MetaDataService metaDataService;
 
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		attrMetaMeta = mock(AttributeMetaData.class);
+		attrMetaMeta = mock(AttributeMetadata.class);
 		metaDataService = mock(MetaDataService.class);
 		RepositoryCollection defaultRepoCollection = mock(RepositoryCollection.class);
 		when(metaDataService.getDefaultBackend()).thenReturn(defaultRepoCollection);
@@ -48,7 +48,7 @@ public class SystemEntityMetaDataPersisterTest
 		when(dataService.getMeta()).thenReturn(metaDataService);
 		systemEntityMetaRegistry = mock(SystemEntityMetaDataRegistry.class);
 		systemEntityMetaDataPersister = new SystemEntityMetaDataPersister(dataService, systemEntityMetaRegistry);
-		systemEntityMetaDataPersister.setAttributeMetaData(attrMetaMeta);
+		systemEntityMetaDataPersister.setAttributeMetadata(attrMetaMeta);
 	}
 
 	@Test

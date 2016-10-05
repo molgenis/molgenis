@@ -31,7 +31,7 @@ public class EntityMetaDataMetaData extends SystemEntityMetaData
 	public static final String TAGS = "tags";
 	public static final String BACKEND = "backend";
 
-	private AttributeMetaData attrMetaMeta;
+	private AttributeMetadata attributeMetadata;
 	private PackageMetaData packageMetaData;
 	private TagMetaData tagMetaData;
 
@@ -51,11 +51,11 @@ public class EntityMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(PACKAGE).setDataType(XREF).setRefEntity(packageMetaData).setLabel("Package").setReadOnly(true);
 		addAttribute(LABEL, ROLE_LOOKUP).setNillable(false).setLabel("Label");
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description");
-		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(attrMetaMeta).setNillable(false).setLabel("Attributes");
-		addAttribute(ID_ATTRIBUTE).setDataType(XREF).setRefEntity(attrMetaMeta).setReadOnly(true)
+		addAttribute(ATTRIBUTES).setDataType(MREF).setRefEntity(attributeMetadata).setNillable(false).setLabel("Attributes");
+		addAttribute(ID_ATTRIBUTE).setDataType(XREF).setRefEntity(attributeMetadata).setReadOnly(true)
 				.setLabel("ID attribute");
-		addAttribute(LABEL_ATTRIBUTE).setDataType(XREF).setRefEntity(attrMetaMeta).setLabel("Label attribute");
-		addAttribute(LOOKUP_ATTRIBUTES).setDataType(MREF).setRefEntity(attrMetaMeta).setLabel("Lookup attributes");
+		addAttribute(LABEL_ATTRIBUTE).setDataType(XREF).setRefEntity(attributeMetadata).setLabel("Label attribute");
+		addAttribute(LOOKUP_ATTRIBUTES).setDataType(MREF).setRefEntity(attributeMetadata).setLabel("Lookup attributes");
 		addAttribute(ABSTRACT).setDataType(BOOL).setNillable(false).setReadOnly(true).setLabel("Abstract")
 				.setReadOnly(true)
 				.setDefaultValue(FALSE.toString());
@@ -68,9 +68,9 @@ public class EntityMetaDataMetaData extends SystemEntityMetaData
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
 	@Autowired
-	public void setAttributeMetaData(AttributeMetaData attrMetaMeta)
+	public void setAttributeMetadata(AttributeMetadata attributeMetadata)
 	{
-		this.attrMetaMeta = requireNonNull(attrMetaMeta);
+		this.attributeMetadata = requireNonNull(attributeMetadata);
 	}
 
 	@Autowired

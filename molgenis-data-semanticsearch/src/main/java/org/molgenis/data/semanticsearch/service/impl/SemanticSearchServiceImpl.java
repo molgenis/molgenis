@@ -17,7 +17,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaData;
+import org.molgenis.data.meta.model.AttributeMetadata;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.AttributeMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
 
 public class SemanticSearchServiceImpl implements SemanticSearchService
 {
@@ -52,7 +52,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	private final SemanticSearchServiceHelper semanticSearchServiceHelper;
 	private final ElasticSearchExplainService elasticSearchExplainService;
 
-	public static final int MAX_NUM_TAGS = 100;
+	private static final int MAX_NUM_TAGS = 100;
 	private static final float CUTOFF = 0.4f;
 	private Splitter termSplitter = Splitter.onPattern("[^\\p{IsAlphabetic}]+");
 	private Joiner termJoiner = Joiner.on(' ');
@@ -84,14 +84,14 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 				.createDisMaxQueryRuleForAttribute(queryTerms, ontologyTerms);
 
 		List<QueryRule> finalQueryRules = Lists
-				.newArrayList(new QueryRule(AttributeMetaData.IDENTIFIER, Operator.IN, attributeIdentifiers));
+				.newArrayList(new QueryRule(AttributeMetadata.IDENTIFIER, Operator.IN, attributeIdentifiers));
 
 		if (disMaxQueryRule.getNestedRules().size() > 0)
 		{
 			finalQueryRules.addAll(Arrays.asList(new QueryRule(Operator.AND), disMaxQueryRule));
 		}
 
-		Stream<Entity> attributeMetaDataEntities = dataService
+		Stream<Entity> attributeEntities = dataService
 				.findAll(ATTRIBUTE_META_DATA, new QueryImpl<>(finalQueryRules));
 
 		Map<String, String> collectExpanedQueryMap = semanticSearchServiceHelper
@@ -100,11 +100,10 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		// Because the explain-API can be computationally expensive we limit the explanation to the top 10 attributes
 		Map<Attribute, ExplainedAttribute> explainedAttributes = new LinkedHashMap<>();
 		AtomicInteger count = new AtomicInteger(0);
-		attributeMetaDataEntities.forEach(attributeEntity ->
-				// for (Entity attributeEntity : attributeMetaDataEntities)
+		attributeEntities.forEach(attributeEntity ->
 		{
 			Attribute attribute = sourceEntityMetaData
-					.getAttribute(attributeEntity.getString(AttributeMetaData.NAME));
+					.getAttribute(attributeEntity.getString(AttributeMetadata.NAME));
 			if (count.get() < MAX_NUMBER_EXPLAINED_ATTRIBUTES)
 			{
 				Set<ExplainedQueryString> explanations = convertAttributeEntityToExplainedAttribute(attributeEntity,
@@ -234,8 +233,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			EntityMetaData sourceEntityMetaData, Map<String, String> collectExpanedQueryMap,
 			List<QueryRule> finalQueryRules)
 	{
-		String attributeId = attributeEntity.getString(AttributeMetaData.IDENTIFIER);
-		String attributeName = attributeEntity.getString(AttributeMetaData.NAME);
+		String attributeId = attributeEntity.getString(AttributeMetadata.IDENTIFIER);
+		String attributeName = attributeEntity.getString(AttributeMetadata.NAME);
 		Attribute attribute = sourceEntityMetaData.getAttribute(attributeName);
 		if (attribute == null)
 		{

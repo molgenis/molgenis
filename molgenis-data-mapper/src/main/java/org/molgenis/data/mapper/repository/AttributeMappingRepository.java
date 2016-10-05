@@ -45,7 +45,7 @@ public interface AttributeMappingRepository
 	 * @param sourceEntityMetaData
 	 * @return a list of {@link Attribute}
 	 */
-	List<Attribute> retrieveAttributeMetaDatasFromAlgorithm(String algorithm,
+	List<Attribute> retrieveAttributesFromAlgorithm(String algorithm,
 			EntityMetaData sourceEntityMetaData);
 
 }

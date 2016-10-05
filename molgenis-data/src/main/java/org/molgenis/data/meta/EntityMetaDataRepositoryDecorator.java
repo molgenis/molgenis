@@ -32,8 +32,8 @@ import static java.util.stream.Collectors.toMap;
 import static org.molgenis.auth.AuthorityMetaData.ROLE;
 import static org.molgenis.auth.GroupAuthorityMetaData.GROUP_AUTHORITY;
 import static org.molgenis.auth.UserAuthorityMetaData.USER_AUTHORITY;
-import static org.molgenis.data.meta.model.AttributeMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.AttributeMetaData.NAME;
+import static org.molgenis.data.meta.model.AttributeMetadata.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetadata.NAME;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
 import static org.molgenis.security.core.Permission.COUNT;
 import static org.molgenis.security.core.Permission.READ;
@@ -469,7 +469,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		Iterable<Attribute> rootAttrs = entityMetaData.getOwnAttributes();
 		Stream<Attribute> allAttrs = StreamSupport.stream(rootAttrs.spliterator(), false).flatMap(
 				attrEntity -> StreamSupport
-						.stream(new AttributeMetaDataTreeTraverser().preOrderTraversal(attrEntity).spliterator(),
+						.stream(new AttributeTreeTraverser().preOrderTraversal(attrEntity).spliterator(),
 								false));
 		dataService.delete(ATTRIBUTE_META_DATA, allAttrs);
 	}
@@ -501,7 +501,7 @@ public class EntityMetaDataRepositoryDecorator implements Repository<EntityMetaD
 		}
 	}
 
-	private static class AttributeMetaDataTreeTraverser extends TreeTraverser<Attribute>
+	private static class AttributeTreeTraverser extends TreeTraverser<Attribute>
 	{
 
 		@Override

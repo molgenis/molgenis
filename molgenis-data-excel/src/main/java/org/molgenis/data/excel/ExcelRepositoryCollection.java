@@ -37,7 +37,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	private final Workbook workbook;
 
 	private EntityMetaDataFactory entityMetaFactory;
-	private AttributeFactory attrMetaFactory;
+	private AttributeFactory attributeFactory;
 
 	public ExcelRepositoryCollection(File file) throws IOException, MolgenisInvalidFormatException
 	{
@@ -94,7 +94,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 			return null;
 		}
 
-		return new ExcelRepository(name, poiSheet, entityMetaFactory, attrMetaFactory, cellProcessors);
+		return new ExcelRepository(name, poiSheet, entityMetaFactory, attributeFactory, cellProcessors);
 	}
 
 	public int getNumberOfSheets()
@@ -115,7 +115,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 			return null;
 		}
 
-		return new ExcelRepository(name, poiSheet, entityMetaFactory, attrMetaFactory, cellProcessors);
+		return new ExcelRepository(name, poiSheet, entityMetaFactory, attributeFactory, cellProcessors);
 	}
 
 	public ExcelSheetWriter createWritable(String entityName, List<Attribute> attributes,
@@ -128,7 +128,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	public ExcelSheetWriter createWritable(String entityName, List<String> attributeNames)
 	{
 		List<Attribute> attributes = attributeNames != null ? attributeNames.stream().<Attribute>map(
-				attrName -> attrMetaFactory.create().setName(attrName)).collect(Collectors.toList()) : null;
+				attrName -> attributeFactory.create().setName(attrName)).collect(Collectors.toList()) : null;
 
 		return createWritable(entityName, attributes, AttributeWriteMode.ATTRIBUTE_NAMES);
 	}
@@ -191,8 +191,8 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Autowired
-	public void setAttributeMetaDataFactory(AttributeFactory attrMetaFactory)
+	public void setAttributeFactory(AttributeFactory attributeFactory)
 	{
-		this.attrMetaFactory = attrMetaFactory;
+		this.attributeFactory = attributeFactory;
 	}
 }

@@ -92,7 +92,7 @@ class TestStringMethods(unittest.TestCase):
     s = molgenis.Session(self.api_url)
     s.login('admin', 'admin')
     meta = s.get_attribute_meta_data('MolgenisUser', 'username')
-    self.assertEqual({'aggregateable': False, 'attributes': [], 'auto': False, 'description': '',
+    self.assertEqual({'aggregatable': False, 'attributes': [], 'auto': False, 'description': '',
       'fieldType': 'STRING', 'href': '/api/v1/MolgenisUser/meta/username', 'label': 'Username', 
       'labelAttribute': True, 'lookupAttribute': True, 'maxLength': 255, 'nillable': False, 
       'readOnly': False, 'unique': True, 'visible': True, 'name': 'username'}, meta)

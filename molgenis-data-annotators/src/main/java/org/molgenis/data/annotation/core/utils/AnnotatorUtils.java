@@ -140,7 +140,7 @@ public class AnnotatorUtils
 						entityMetaDataFactory, attributeFactory))
 		{
 
-			List<Attribute> outputMetaData = getOutputAttributeMetaDatasForAnnotator(annotator,
+			List<Attribute> outputMetaData = getOutputAttributeMetadatasForAnnotator(annotator,
 					entityMetaDataFactory, attributeFactory, attributesToInclude, vcfRepo);
 
 			VcfWriterUtils
@@ -220,7 +220,7 @@ public class AnnotatorUtils
 		}
 	}
 
-	private static List<Attribute> getOutputAttributeMetaDatasForAnnotator(RepositoryAnnotator annotator,
+	private static List<Attribute> getOutputAttributeMetadatasForAnnotator(RepositoryAnnotator annotator,
 			EntityMetaDataFactory entityMetaDataFactory, AttributeFactory attributeFactory,
 			List<String> attributesToInclude, VcfRepository vcfRepo)
 	{

@@ -63,7 +63,7 @@ public class EntityUtilsTest
 	}
 
 	@Test
-	public void getTypedValueStringAttributeMetaDataEntityManagerOneToMany()
+	public void getTypedValueStringAttributeEntityManagerOneToMany()
 	{
 		String valueStr = "0,1,2";
 		Attribute attr = mock(Attribute.class);
@@ -84,7 +84,7 @@ public class EntityUtilsTest
 	}
 
 	@Test
-	public void getTypedValueStringAttributeMetaDataEntityManagerXref()
+	public void getTypedValueStringAttributeEntityManagerXref()
 	{
 		String valueStr = "0";
 		Attribute attr = mock(Attribute.class);
