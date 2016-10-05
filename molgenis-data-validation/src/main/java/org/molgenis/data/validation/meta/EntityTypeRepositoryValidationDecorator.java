@@ -11,12 +11,12 @@ import static java.util.Objects.requireNonNull;
 /**
  * Validates entity meta before adding or updating the delegated repository
  */
-public class EntityMetaDataRepositoryValidationDecorator extends AbstractRepositoryDecorator<EntityMetaData>
+public class EntityTypeRepositoryValidationDecorator extends AbstractRepositoryDecorator<EntityMetaData>
 {
 	private final Repository<EntityMetaData> decoratedRepo;
 	private final EntityMetaDataValidator entityMetaDataValidator;
 
-	public EntityMetaDataRepositoryValidationDecorator(Repository<EntityMetaData> decoratedRepo,
+	public EntityTypeRepositoryValidationDecorator(Repository<EntityMetaData> decoratedRepo,
 			EntityMetaDataValidator entityMetaDataValidator)
 	{
 		this.decoratedRepo = requireNonNull(decoratedRepo);

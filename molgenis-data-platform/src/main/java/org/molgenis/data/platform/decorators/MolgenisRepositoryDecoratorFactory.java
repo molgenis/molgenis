@@ -31,7 +31,7 @@ import org.molgenis.data.transaction.TransactionInformation;
 import org.molgenis.data.validation.EntityAttributesValidator;
 import org.molgenis.data.validation.ExpressionValidator;
 import org.molgenis.data.validation.RepositoryValidationDecorator;
-import org.molgenis.data.validation.meta.EntityMetaDataRepositoryValidationDecorator;
+import org.molgenis.data.validation.meta.EntityTypeRepositoryValidationDecorator;
 import org.molgenis.data.validation.meta.EntityMetaDataValidator;
 import org.molgenis.security.core.MolgenisPermissionService;
 import org.molgenis.security.owned.OwnedEntityRepositoryDecorator;
@@ -177,7 +177,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		}
 		else if (repo.getName().equals(ENTITY_META_DATA))
 		{
-			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityMetaDataRepositoryValidationDecorator(
+			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityTypeRepositoryValidationDecorator(
 					(Repository<EntityMetaData>) (Repository<? extends Entity>) repo, entityMetaDataValidator);
 
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new EntityTypeRepositoryDecorator(

@@ -12,9 +12,9 @@ import java.util.stream.Stream;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
 
-public class EntityMetaDataRepositoryValidationDecoratorTest
+public class EntityTypeRepositoryValidationDecoratorTest
 {
-	private EntityMetaDataRepositoryValidationDecorator entityMetaRepoValidationDecorator;
+	private EntityTypeRepositoryValidationDecorator entityMetaRepoValidationDecorator;
 	private Repository<EntityMetaData> decoratedRepo;
 	private EntityMetaDataValidator entityMetaDataValidator;
 
@@ -24,14 +24,14 @@ public class EntityMetaDataRepositoryValidationDecoratorTest
 		//noinspection unchecked
 		decoratedRepo = mock(Repository.class);
 		entityMetaDataValidator = mock(EntityMetaDataValidator.class);
-		entityMetaRepoValidationDecorator = new EntityMetaDataRepositoryValidationDecorator(decoratedRepo,
+		entityMetaRepoValidationDecorator = new EntityTypeRepositoryValidationDecorator(decoratedRepo,
 				entityMetaDataValidator);
 	}
 
 	@Test(expectedExceptions = NullPointerException.class)
 	public void EntityMetaDataRepositoryValidationDecorator()
 	{
-		new EntityMetaDataRepositoryValidationDecorator(null, null);
+		new EntityTypeRepositoryValidationDecorator(null, null);
 	}
 
 	@Test
