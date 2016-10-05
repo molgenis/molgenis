@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetaData.ATTRIBUTE_META_DATA;
 import static org.testng.Assert.*;
 
 @ContextConfiguration(classes = SemanticSearchServiceImplTest.Config.class)
@@ -208,13 +208,13 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 
 		// Mock the createDisMaxQueryRule method
 		List<QueryRule> rules = new ArrayList<QueryRule>();
-		QueryRule targetQueryRuleLabel = new QueryRule(AttributeMetaDataMetaData.LABEL, QueryRule.Operator.FUZZY_MATCH,
+		QueryRule targetQueryRuleLabel = new QueryRule(AttributeMetaData.LABEL, QueryRule.Operator.FUZZY_MATCH,
 				"height");
 		rules.add(targetQueryRuleLabel);
-		QueryRule targetQueryRuleOntologyTermTag = new QueryRule(AttributeMetaDataMetaData.LABEL,
+		QueryRule targetQueryRuleOntologyTermTag = new QueryRule(AttributeMetaData.LABEL,
 				QueryRule.Operator.FUZZY_MATCH, "standing height");
 		rules.add(targetQueryRuleOntologyTermTag);
-		QueryRule targetQueryRuleOntologyTermTagSyn = new QueryRule(AttributeMetaDataMetaData.LABEL,
+		QueryRule targetQueryRuleOntologyTermTagSyn = new QueryRule(AttributeMetaData.LABEL,
 				QueryRule.Operator.FUZZY_MATCH, "length");
 		rules.add(targetQueryRuleOntologyTermTagSyn);
 		QueryRule disMaxQueryRule = new QueryRule(rules);
@@ -225,12 +225,12 @@ public class SemanticSearchServiceImplTest extends AbstractMolgenisSpringTest
 				.thenReturn(disMaxQueryRule);
 
 		Entity entity1 = mock(Entity.class);
-		when(entity1.getString(AttributeMetaDataMetaData.NAME)).thenReturn("height_0");
-		when(entity1.getString(AttributeMetaDataMetaData.LABEL)).thenReturn("height");
-		when(entity1.getString(AttributeMetaDataMetaData.DESCRIPTION)).thenReturn("this is a height measurement in m!");
+		when(entity1.getString(AttributeMetaData.NAME)).thenReturn("height_0");
+		when(entity1.getString(AttributeMetaData.LABEL)).thenReturn("height");
+		when(entity1.getString(AttributeMetaData.DESCRIPTION)).thenReturn("this is a height measurement in m!");
 
 		List<QueryRule> disMaxQueryRules = Lists.newArrayList(
-				new QueryRule(AttributeMetaDataMetaData.IDENTIFIER, QueryRule.Operator.IN, attributeIdentifiers),
+				new QueryRule(AttributeMetaData.IDENTIFIER, QueryRule.Operator.IN, attributeIdentifiers),
 				new QueryRule(QueryRule.Operator.AND), disMaxQueryRule);
 
 		Attribute attributeHeight = attrMetaDataFactory.create().setName("height_0");

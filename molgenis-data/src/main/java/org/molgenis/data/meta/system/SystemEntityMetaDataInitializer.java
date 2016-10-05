@@ -3,7 +3,7 @@ package org.molgenis.data.meta.system;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.SystemPackage;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.meta.model.MetaPackage;
 import org.molgenis.data.system.model.RootSystemPackage;
@@ -46,7 +46,7 @@ public class SystemEntityMetaDataInitializer
 		ctx.getBeansOfType(SystemPackage.class).values().forEach(SystemPackage::bootstrap);
 
 		EntityMetaDataMetaData entityMetaDataMetaData = ctx.getBean(EntityMetaDataMetaData.class);
-		ctx.getBean(AttributeMetaDataMetaData.class).bootstrap(entityMetaDataMetaData);
+		ctx.getBean(AttributeMetaData.class).bootstrap(entityMetaDataMetaData);
 		//TODO: doesn't this mean all attributes get added twice?
 
 		Map<String, SystemEntityMetaData> systemEntityMetaDataMap = ctx.getBeansOfType(SystemEntityMetaData.class);

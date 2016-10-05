@@ -31,7 +31,7 @@ public class EntityMetaDataMetaData extends SystemEntityMetaData
 	public static final String TAGS = "tags";
 	public static final String BACKEND = "backend";
 
-	private AttributeMetaDataMetaData attrMetaMeta;
+	private AttributeMetaData attrMetaMeta;
 	private PackageMetaData packageMetaData;
 	private TagMetaData tagMetaData;
 
@@ -68,7 +68,7 @@ public class EntityMetaDataMetaData extends SystemEntityMetaData
 
 	// setter injection instead of constructor injection to avoid unresolvable circular dependencies
 	@Autowired
-	public void setAttributeMetaDataMetaData(AttributeMetaDataMetaData attrMetaMeta)
+	public void setAttributeMetaData(AttributeMetaData attrMetaMeta)
 	{
 		this.attrMetaMeta = requireNonNull(attrMetaMeta);
 	}

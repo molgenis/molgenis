@@ -23,7 +23,7 @@ import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.data.meta.model.PackageMetaData.PARENT;

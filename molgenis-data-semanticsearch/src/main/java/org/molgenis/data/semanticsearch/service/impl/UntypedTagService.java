@@ -24,7 +24,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
@@ -49,7 +49,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	{
 		Entity entityMetaDataEntity = dataService.findOneById(ENTITY_META_DATA, entityMetaData.getName());
 		Optional<Entity> result = stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false)
-				.filter(att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst();
+				.filter(att -> attributeName.equals(att.getString(AttributeMetaData.NAME))).findFirst();
 		return result.isPresent() ? result.get() : null;
 	}
 
@@ -65,7 +65,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		Attribute attribute = removeTag.getSubject();
 		Entity attributeEntity = findAttributeEntity(entityMetaData, attribute.getName());
 		List<Entity> tags = new ArrayList<Entity>();
-		for (Entity tagEntity : attributeEntity.getEntities(AttributeMetaDataMetaData.TAGS))
+		for (Entity tagEntity : attributeEntity.getEntities(AttributeMetaData.TAGS))
 		{
 			SemanticTag<Attribute, LabeledResource, LabeledResource> tag = SemanticTag
 					.asTag(attribute, tagEntity);
@@ -74,7 +74,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 				tags.add(tagEntity);
 			}
 		}
-		attributeEntity.set(AttributeMetaDataMetaData.TAGS, tags);
+		attributeEntity.set(AttributeMetaData.TAGS, tags);
 		dataService.update(ATTRIBUTE_META_DATA, attributeEntity);
 	}
 
@@ -87,7 +87,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		if (entity == null) return ArrayListMultimap.<Relation, LabeledResource>create();
 
 		Multimap<Relation, LabeledResource> tags = ArrayListMultimap.<Relation, LabeledResource>create();
-		for (Entity tagEntity : entity.getEntities(AttributeMetaDataMetaData.TAGS))
+		for (Entity tagEntity : entity.getEntities(AttributeMetaData.TAGS))
 		{
 			SemanticTag<Attribute, LabeledResource, LabeledResource> tag = SemanticTag
 					.asTag(attribute, tagEntity);
@@ -123,12 +123,12 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 	{
 		Entity entity = findAttributeEntity(entityMetaData, tag.getSubject().getName());
 		List<Entity> tags = new ArrayList<Entity>();
-		for (Entity tagEntity : entity.getEntities(AttributeMetaDataMetaData.TAGS))
+		for (Entity tagEntity : entity.getEntities(AttributeMetaData.TAGS))
 		{
 			tags.add(tagEntity);
 		}
 		tags.add(getTagEntity(tag));
-		entity.set(AttributeMetaDataMetaData.TAGS, tags);
+		entity.set(AttributeMetaData.TAGS, tags);
 		dataService.update(ATTRIBUTE_META_DATA, entity);
 	}
 

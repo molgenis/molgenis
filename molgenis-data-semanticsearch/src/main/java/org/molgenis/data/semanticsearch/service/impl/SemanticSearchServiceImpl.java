@@ -17,7 +17,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttribute;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetaData.ATTRIBUTE_META_DATA;
 
 public class SemanticSearchServiceImpl implements SemanticSearchService
 {
@@ -84,7 +84,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 				.createDisMaxQueryRuleForAttribute(queryTerms, ontologyTerms);
 
 		List<QueryRule> finalQueryRules = Lists
-				.newArrayList(new QueryRule(AttributeMetaDataMetaData.IDENTIFIER, Operator.IN, attributeIdentifiers));
+				.newArrayList(new QueryRule(AttributeMetaData.IDENTIFIER, Operator.IN, attributeIdentifiers));
 
 		if (disMaxQueryRule.getNestedRules().size() > 0)
 		{
@@ -104,7 +104,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 				// for (Entity attributeEntity : attributeMetaDataEntities)
 		{
 			Attribute attribute = sourceEntityMetaData
-					.getAttribute(attributeEntity.getString(AttributeMetaDataMetaData.NAME));
+					.getAttribute(attributeEntity.getString(AttributeMetaData.NAME));
 			if (count.get() < MAX_NUMBER_EXPLAINED_ATTRIBUTES)
 			{
 				Set<ExplainedQueryString> explanations = convertAttributeEntityToExplainedAttribute(attributeEntity,
@@ -234,8 +234,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			EntityMetaData sourceEntityMetaData, Map<String, String> collectExpanedQueryMap,
 			List<QueryRule> finalQueryRules)
 	{
-		String attributeId = attributeEntity.getString(AttributeMetaDataMetaData.IDENTIFIER);
-		String attributeName = attributeEntity.getString(AttributeMetaDataMetaData.NAME);
+		String attributeId = attributeEntity.getString(AttributeMetaData.IDENTIFIER);
+		String attributeName = attributeEntity.getString(AttributeMetaData.NAME);
 		Attribute attribute = sourceEntityMetaData.getAttribute(attributeName);
 		if (attribute == null)
 		{

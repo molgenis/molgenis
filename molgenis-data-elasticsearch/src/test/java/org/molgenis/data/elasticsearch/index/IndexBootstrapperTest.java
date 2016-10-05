@@ -14,7 +14,7 @@ import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,6 @@ import org.testng.annotations.Test;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
@@ -72,7 +71,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 
 		List<Repository<Entity>> repos = Arrays.asList(repo1, repo2, repo3);
 
-		when(searchService.hasMapping(AttributeMetaDataMetaData.ATTRIBUTE_META_DATA)).thenReturn(false);
+		when(searchService.hasMapping(AttributeMetaData.ATTRIBUTE_META_DATA)).thenReturn(false);
 		when(metaDataService.getRepositories()).thenReturn(repos.stream());
 		indexBootstrapper.bootstrap();
 
@@ -85,7 +84,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testStartupFailedIndexJobs()
 	{
-		when(searchService.hasMapping(AttributeMetaDataMetaData.ATTRIBUTE_META_DATA)).thenReturn(true);
+		when(searchService.hasMapping(AttributeMetaData.ATTRIBUTE_META_DATA)).thenReturn(true);
 		IndexJobExecution indexJobExecution = mock(IndexJobExecution.class);
 		when(indexJobExecution.getIndexActionJobID()).thenReturn("id");
 		IndexAction action = mock(IndexAction.class);
@@ -110,7 +109,7 @@ public class IndexBootstrapperTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testStartupAllIsFine()
 	{
-		when(searchService.hasMapping(AttributeMetaDataMetaData.ATTRIBUTE_META_DATA)).thenReturn(true);
+		when(searchService.hasMapping(AttributeMetaData.ATTRIBUTE_META_DATA)).thenReturn(true);
 
 		when(dataService.findAll(IndexJobExecutionMeta.INDEX_JOB_EXECUTION,
 				new QueryImpl<IndexJobExecution>().eq(JobExecutionMetaData.STATUS, FAILED),

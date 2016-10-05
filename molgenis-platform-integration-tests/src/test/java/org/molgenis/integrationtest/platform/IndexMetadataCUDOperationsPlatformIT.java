@@ -8,7 +8,7 @@ import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.support.QueryImpl;
@@ -98,10 +98,10 @@ public class IndexMetadataCUDOperationsPlatformIT
 
 		// Verify metadata changed
 		Query<Entity> q2 = new QueryImpl<>();
-		EntityMetaData emdActual = metaDataService.getEntityMetaData(AttributeMetaDataMetaData.ATTRIBUTE_META_DATA);
-		q2.eq(AttributeMetaDataMetaData.IDENTIFIER, toUpdateAttributeId);
+		EntityMetaData emdActual = metaDataService.getEntityMetaData(AttributeMetaData.ATTRIBUTE_META_DATA);
+		q2.eq(AttributeMetaData.IDENTIFIER, toUpdateAttributeId);
 		q2.and();
-		q2.eq(AttributeMetaDataMetaData.DATA_TYPE, MolgenisFieldTypes.STRING);
+		q2.eq(AttributeMetaData.DATA_TYPE, MolgenisFieldTypes.STRING);
 		assertEquals(searchService.count(q2, emdActual), 1);
 
 		// Reset context
@@ -140,8 +140,8 @@ public class IndexMetadataCUDOperationsPlatformIT
 
 		// 4. Verify metadata changed
 		Query<Entity> q2 = new QueryImpl<>();
-		EntityMetaData emdActual = metaDataService.getEntityMetaData(AttributeMetaDataMetaData.ATTRIBUTE_META_DATA);
-		q2.eq(AttributeMetaDataMetaData.IDENTIFIER, toRemoveAttribute.getIdValue());
+		EntityMetaData emdActual = metaDataService.getEntityMetaData(AttributeMetaData.ATTRIBUTE_META_DATA);
+		q2.eq(AttributeMetaData.IDENTIFIER, toRemoveAttribute.getIdValue());
 		assertEquals(searchService.count(q2, emdActual), 0);
 
 		// Reset context

@@ -32,7 +32,7 @@ import static java.util.Collections.singleton;
 import static java.util.Collections.singletonList;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.*;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.AttributeMetaData.ATTRIBUTE_META_DATA;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
@@ -119,7 +119,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 
 		Attribute attributeEntity = attrFactory.create();
 		attributeEntity.setTags(asList(chromosomeNameTagEntity, geneAnnotationTagEntity));
-		attributeEntity.set(AttributeMetaDataMetaData.NAME, "Chr");
+		attributeEntity.set(AttributeMetaData.NAME, "Chr");
 
 		EntityMetaData entityMetaDataEntity = entityMetaFactory.create();
 		entityMetaDataEntity.setOwnAttributes(singleton(attributeEntity));
@@ -258,7 +258,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 		Entity att = mock(Entity.class);
 
 		when(entityMetaDataEntity.getEntities(ATTRIBUTES)).thenReturn(singletonList(att));
-		when(att.getString(AttributeMetaDataMetaData.NAME)).thenReturn("Chr");
+		when(att.getString(AttributeMetaData.NAME)).thenReturn("Chr");
 
 		when(dataService.findOneById(ENTITY_META_DATA, "test")).thenReturn(entityMetaDataEntity);
 		ontologyTagService.removeAllTagsFromEntity("test");

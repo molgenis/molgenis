@@ -2,7 +2,7 @@ package org.molgenis.data.meta;
 
 import org.molgenis.data.meta.model.Attribute;
 import org.molgenis.data.meta.model.AttributeFactory;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.populate.IdGenerator;
 import org.testng.annotations.BeforeMethod;
@@ -27,7 +27,7 @@ public class SystemEntityMetaDataTest
 		metaDataFactory = mock(AttributeFactory.class);
 		metaDataMetaData = mock(EntityMetaDataMetaData.class);
 
-		when(metaDataFactory.getAttributeMetaDataMetaData()).thenReturn(mock(AttributeMetaDataMetaData.class));
+		when(metaDataFactory.getAttributeMetaData()).thenReturn(mock(AttributeMetaData.class));
 	}
 
 	@Test

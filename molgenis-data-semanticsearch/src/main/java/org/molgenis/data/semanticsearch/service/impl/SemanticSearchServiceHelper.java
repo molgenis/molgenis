@@ -9,7 +9,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
@@ -100,8 +100,8 @@ public class SemanticSearchServiceHelper
 		List<QueryRule> rules = new ArrayList<QueryRule>();
 		queryTerms.stream().filter(StringUtils::isNotEmpty).map(this::escapeCharsExcludingCaretChar).forEach(query ->
 		{
-			rules.add(new QueryRule(AttributeMetaDataMetaData.LABEL, Operator.FUZZY_MATCH, query));
-			rules.add(new QueryRule(AttributeMetaDataMetaData.DESCRIPTION, Operator.FUZZY_MATCH, query));
+			rules.add(new QueryRule(AttributeMetaData.LABEL, Operator.FUZZY_MATCH, query));
+			rules.add(new QueryRule(AttributeMetaData.DESCRIPTION, Operator.FUZZY_MATCH, query));
 		});
 		QueryRule finalDisMaxQuery = new QueryRule(rules);
 		finalDisMaxQuery.setOperator(Operator.DIS_MAX);
@@ -245,12 +245,12 @@ public class SemanticSearchServiceHelper
 	{
 		for (Entity attributeEntity : attributeEntities)
 		{
-			if (!attributeEntity.getString(AttributeMetaDataMetaData.DATA_TYPE)
+			if (!attributeEntity.getString(AttributeMetaData.DATA_TYPE)
 					.equals(MolgenisFieldTypes.COMPOUND.toString()))
 			{
-				attributeIdentifiers.add(attributeEntity.getString(AttributeMetaDataMetaData.IDENTIFIER));
+				attributeIdentifiers.add(attributeEntity.getString(AttributeMetaData.IDENTIFIER));
 			}
-			Iterable<Entity> entities = attributeEntity.getEntities(AttributeMetaDataMetaData.PARTS);
+			Iterable<Entity> entities = attributeEntity.getEntities(AttributeMetaData.PARTS);
 
 			if (entities != null)
 			{

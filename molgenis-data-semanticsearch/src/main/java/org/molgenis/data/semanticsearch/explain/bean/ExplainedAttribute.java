@@ -3,7 +3,7 @@ package org.molgenis.data.semanticsearch.explain.bean;
 import com.google.auto.value.AutoValue;
 import com.google.common.collect.Sets;
 import org.molgenis.data.meta.model.Attribute;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.gson.AutoGson;
 
 import java.util.Collections;
@@ -37,15 +37,15 @@ public abstract class ExplainedAttribute
 	private static Map<String, Object> attributeToMap(Attribute attribute)
 	{
 		Map<String, Object> map = new HashMap<String, Object>();
-		map.put(AttributeMetaDataMetaData.NAME, attribute.getName());
-		map.put(AttributeMetaDataMetaData.LABEL, attribute.getLabel());
-		map.put(AttributeMetaDataMetaData.DESCRIPTION, attribute.getDescription());
-		map.put(AttributeMetaDataMetaData.DATA_TYPE, attribute.getDataType().toString());
-		map.put(AttributeMetaDataMetaData.NILLABLE, attribute.isNillable());
-		map.put(AttributeMetaDataMetaData.UNIQUE, attribute.isUnique());
+		map.put(AttributeMetaData.NAME, attribute.getName());
+		map.put(AttributeMetaData.LABEL, attribute.getLabel());
+		map.put(AttributeMetaData.DESCRIPTION, attribute.getDescription());
+		map.put(AttributeMetaData.DATA_TYPE, attribute.getDataType().toString());
+		map.put(AttributeMetaData.NILLABLE, attribute.isNillable());
+		map.put(AttributeMetaData.UNIQUE, attribute.isUnique());
 		if (attribute.getRefEntity() != null)
 		{
-			map.put(AttributeMetaDataMetaData.REF_ENTITY, attribute.getRefEntity().getName());
+			map.put(AttributeMetaData.REF_ENTITY, attribute.getRefEntity().getName());
 		}
 		return map;
 	}

@@ -16,7 +16,7 @@ import static org.molgenis.data.meta.model.MetaPackage.PACKAGE_META;
 import static org.molgenis.data.meta.model.Package.PACKAGE_SEPARATOR;
 
 @Component
-public class AttributeMetaDataMetaData extends SystemEntityMetaData
+public class AttributeMetaData extends SystemEntityMetaData
 {
 	private static final String SIMPLE_NAME = "attributes";
 	public static final String ATTRIBUTE_META_DATA = PACKAGE_META + PACKAGE_SEPARATOR + SIMPLE_NAME;
@@ -50,7 +50,7 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 	private TagMetaData tagMetaData;
 	private EntityMetaDataMetaData entityMetaMeta;
 
-	public AttributeMetaDataMetaData()
+	public AttributeMetaData()
 	{
 		super(SIMPLE_NAME, PACKAGE_META);
 	}

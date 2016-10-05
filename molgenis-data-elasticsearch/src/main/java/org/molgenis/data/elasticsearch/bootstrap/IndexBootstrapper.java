@@ -9,7 +9,7 @@ import org.molgenis.data.index.meta.IndexAction;
 import org.molgenis.data.index.meta.IndexActionMetaData;
 import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.MetaDataService;
-import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
+import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.support.QueryImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +44,7 @@ public class IndexBootstrapper
 
 	public void bootstrap()
 	{
-		if (!searchService.hasMapping(AttributeMetaDataMetaData.ATTRIBUTE_META_DATA))
+		if (!searchService.hasMapping(AttributeMetaData.ATTRIBUTE_META_DATA))
 		{
 			LOG.debug(
 					"No index for Attribute found, asuming missing index, schedule (re)index for all entities");

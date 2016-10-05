@@ -89,7 +89,7 @@ public abstract class SystemEntityMetaData extends EntityMetaData
 
 	public Attribute addAttribute(String attrName, Attribute parentAttr, AttributeRole... attrTypes)
 	{
-		Attribute attr = new SystemAttribute(attributeFactory.getAttributeMetaDataMetaData());
+		Attribute attr = new SystemAttribute(attributeFactory.getAttributeMetaData());
 		attr.setIdentifier(idGenerator.generateId());
 		attr.setDefaultValues();
 		attr.setName(attrName);
