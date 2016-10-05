@@ -71,7 +71,7 @@ class AttributeMetaDataResponseV2
 		EntityMetaData refEntity = attr.getRefEntity();
 		if (refEntity != null)
 		{
-			this.refEntity = new EntityMetaDataResponseV2(refEntity, fetch, permissionService, dataService,
+			this.refEntity = new EntityTypeResponseV2(refEntity, fetch, permissionService, dataService,
 					languageService);
 		}
 		else

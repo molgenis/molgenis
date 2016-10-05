@@ -20,7 +20,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.COMPOUND;
 import static org.molgenis.data.rest.v2.AttributeMetaDataResponseV2.filterAttributes;
 import static org.molgenis.data.rest.v2.RestControllerV2.BASE_URI;
 
-class EntityMetaDataResponseV2
+class EntityTypeResponseV2
 {
 	private final String href;
 	private final String hrefCollection;
@@ -41,7 +41,7 @@ class EntityMetaDataResponseV2
 	/**
 	 * @param meta
 	 */
-	public EntityMetaDataResponseV2(EntityMetaData meta, MolgenisPermissionService permissionService,
+	public EntityTypeResponseV2(EntityMetaData meta, MolgenisPermissionService permissionService,
 			DataService dataService, LanguageService languageService)
 	{
 		this(meta, null, permissionService, dataService, languageService);
@@ -51,7 +51,7 @@ class EntityMetaDataResponseV2
 	 * @param meta
 	 * @param fetch set of lowercase attribute names to include in response
 	 */
-	public EntityMetaDataResponseV2(EntityMetaData meta, Fetch fetch, MolgenisPermissionService permissionService,
+	public EntityTypeResponseV2(EntityMetaData meta, Fetch fetch, MolgenisPermissionService permissionService,
 			DataService dataService, LanguageService languageService)
 	{
 		String name = meta.getName();

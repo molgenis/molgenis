@@ -665,7 +665,7 @@ class RestControllerV2
 	private void createEntityMetaResponse(EntityMetaData entityMetaData, Fetch fetch, Map<String, Object> responseData)
 	{
 		responseData.put("_meta",
-				new EntityMetaDataResponseV2(entityMetaData, fetch, permissionService, dataService, languageService));
+				new EntityTypeResponseV2(entityMetaData, fetch, permissionService, dataService, languageService));
 	}
 
 	private void createEntityValuesResponse(Entity entity, Fetch fetch, Map<String, Object> responseData)

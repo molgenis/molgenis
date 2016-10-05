@@ -15,7 +15,7 @@ import static java.util.Objects.requireNonNull;
 class EntityCollectionResponseV2
 {
 	private final String href;
-	private final EntityMetaDataResponseV2 meta;
+	private final EntityTypeResponseV2 meta;
 	private final Integer start;
 	private final Integer num;
 	private final Long total;
@@ -40,7 +40,7 @@ class EntityCollectionResponseV2
 			LanguageService languageService, String prevHref, String nextHref)
 	{
 		this.href = href;
-		this.meta = new EntityMetaDataResponseV2(meta, fetch, permissionService, dataService, languageService);
+		this.meta = new EntityTypeResponseV2(meta, fetch, permissionService, dataService, languageService);
 		this.start = entityPager.getStart();
 		this.num = entityPager.getNum();
 		this.total = entityPager.getTotal();
@@ -54,7 +54,7 @@ class EntityCollectionResponseV2
 		return href;
 	}
 
-	public EntityMetaDataResponseV2 getMeta()
+	public EntityTypeResponseV2 getMeta()
 	{
 		return meta;
 	}
