@@ -11,7 +11,7 @@ import static com.google.common.collect.Iterables.removeAll;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 
 /**
  * Package defines the structure and attributes of a Package. Attributes are unique. Other software components can use
@@ -205,7 +205,7 @@ public class Package extends StaticEntity
 		// TODO Use one-to-many relationship for EntityMetaData.package
 		DataService dataService = ApplicationContextProvider.getApplicationContext().getBean(DataService.class);
 		Query<EntityMetaData> query = dataService.query(ENTITY_META_DATA, EntityMetaData.class)
-				.eq(EntityMetaDataMetaData.PACKAGE, getName());
+				.eq(EntityTypeMetadata.PACKAGE, getName());
 		return () -> query.findAll().iterator();
 	}
 

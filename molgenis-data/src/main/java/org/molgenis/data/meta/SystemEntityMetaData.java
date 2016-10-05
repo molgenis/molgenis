@@ -4,7 +4,7 @@ import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.system.SystemAttributeMetaData;
 import org.molgenis.data.support.BootstrapEntity;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,9 +56,9 @@ public abstract class SystemEntityMetaData extends EntityMetaData
 		}
 	}
 
-	public void bootstrap(EntityMetaDataMetaData entityMetaDataMetaData)
+	public void bootstrap(EntityTypeMetadata entityTypeMetadata)
 	{
-		super.init(new BootstrapEntity(entityMetaDataMetaData));
+		super.init(new BootstrapEntity(entityTypeMetadata));
 		setName(systemPackageName + PACKAGE_SEPARATOR + entityName);
 		setSimpleName(entityName);
 		setDefaultValues();

@@ -3,7 +3,7 @@ package org.molgenis.data.meta;
 import com.google.common.collect.TreeTraverser;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetaData;
 import org.molgenis.util.DependencyResolver;
@@ -21,7 +21,7 @@ import java.util.stream.StreamSupport;
 import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.toSet;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
 public class PackageRepositoryDecorator implements Repository<Package>
@@ -209,7 +209,7 @@ public class PackageRepositoryDecorator implements Repository<Package>
 		if (existingEntity != null)
 		{
 			throw new MolgenisDataException(format("Adding existing package [%s] is not allowed",
-					package_.getString(EntityMetaDataMetaData.FULL_NAME)));
+					package_.getString(EntityTypeMetadata.FULL_NAME)));
 		}
 	}
 
@@ -233,7 +233,7 @@ public class PackageRepositoryDecorator implements Repository<Package>
 	{
 		// delete entities in package
 		Repository<EntityMetaData> entityRepo = getEntityRepository();
-		Set<EntityMetaData> entities = entityRepo.query().eq(EntityMetaDataMetaData.PACKAGE, package_).findAll()
+		Set<EntityMetaData> entities = entityRepo.query().eq(EntityTypeMetadata.PACKAGE, package_).findAll()
 				.collect(toSet());
 		entityRepo.delete(DependencyResolver.resolve(entities).stream());
 

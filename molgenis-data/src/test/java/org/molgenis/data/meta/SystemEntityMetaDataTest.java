@@ -3,7 +3,7 @@ package org.molgenis.data.meta;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.populate.IdGenerator;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -19,13 +19,13 @@ import static org.testng.Assert.assertEquals;
 public class SystemEntityMetaDataTest
 {
 	AttributeMetaDataFactory metaDataFactory;
-	EntityMetaDataMetaData metaDataMetaData;
+	EntityTypeMetadata metaDataMetaData;
 
 	@BeforeMethod
 	public void beforeMethod()
 	{
 		metaDataFactory = mock(AttributeMetaDataFactory.class);
-		metaDataMetaData = mock(EntityMetaDataMetaData.class);
+		metaDataMetaData = mock(EntityTypeMetadata.class);
 
 		when(metaDataFactory.getAttributeMetaDataMetaData()).thenReturn(mock(AttributeMetaDataMetaData.class));
 	}

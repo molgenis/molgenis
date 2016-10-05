@@ -40,7 +40,7 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 	public static final String DEFAULT_VALUE = "defaultValue";
 
 	private TagMetaData tagMetaData;
-	private EntityMetaDataMetaData entityMetaMeta;
+	private EntityTypeMetadata entityMetaMeta;
 
 	public AttributeMetaDataMetaData()
 	{
@@ -88,7 +88,7 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 	}
 
 	@Autowired
-	public void setEntityMetaDataMetaData(EntityMetaDataMetaData entityMetaMeta)
+	public void setEntityMetaDataMetaData(EntityTypeMetadata entityMetaMeta)
 	{
 		this.entityMetaMeta = requireNonNull(entityMetaMeta);
 	}

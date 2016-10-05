@@ -2,7 +2,7 @@ package org.molgenis.file.ingest.meta;
 
 import com.google.common.collect.ImmutableList;
 import org.molgenis.data.meta.SystemEntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.fieldtypes.StringField;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -29,13 +29,13 @@ public class FileIngestMetaData extends SystemEntityMetaData
 	public static final String FAILURE_EMAIL = "failureEmail";
 
 	public static final ImmutableList<String> LOADERS = ImmutableList.of("CSV");
-	private final EntityMetaDataMetaData entityMetaDataMetaData;
+	private final EntityTypeMetadata entityTypeMetadata;
 
 	@Autowired
-	public FileIngestMetaData(EntityMetaDataMetaData entityMetaDataMetaData)
+	public FileIngestMetaData(EntityTypeMetadata entityTypeMetadata)
 	{
 		super(SIMPLE_NAME, PACKAGE_SYSTEM);
-		this.entityMetaDataMetaData = entityMetaDataMetaData;
+		this.entityTypeMetadata = entityTypeMetadata;
 	}
 
 	@Override
@@ -47,7 +47,7 @@ public class FileIngestMetaData extends SystemEntityMetaData
 		addAttribute(DESCRIPTION).setDataType(TEXT).setLabel("Description").setNillable(true);
 		addAttribute(URL).setLabel("Url").setDescription("Url of the file to download.").setNillable(false);
 		addAttribute(LOADER).setDataType(ENUM).setEnumOptions(LOADERS).setLabel("Loader type").setNillable(false);
-		addAttribute(ENTITY_META_DATA).setDataType(XREF).setRefEntity(entityMetaDataMetaData)
+		addAttribute(ENTITY_META_DATA).setDataType(XREF).setRefEntity(entityTypeMetadata)
 				.setLabel("Target EntityMetaData").setNillable(false);
 		addAttribute(CRONEXPRESSION).setLabel("Cronexpression").setNillable(false)
 				.setValidationExpression("$('" + CRONEXPRESSION + "').matches(" + StringField.CRON_REGEX + ").value()");

@@ -45,7 +45,7 @@ import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.security.owned.OwnedEntityMetaData.OWNED;
 
@@ -64,7 +64,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final SearchService searchService;
 	private final AttributeMetaDataFactory attrMetaFactory;
 	private final PasswordEncoder passwordEncoder;
-	private final EntityMetaDataMetaData entityMetaMeta;
+	private final EntityTypeMetadata entityMetaMeta;
 	private final I18nStringMetaData i18nStringMeta;
 	private final L1Cache l1Cache;
 	private final EntityListenersService entityListenersService;
@@ -81,7 +81,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, UserAuthorityFactory userAuthorityFactory,
 			IndexActionRegisterService indexActionRegisterService, SearchService searchService,
 			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder,
-			EntityMetaDataMetaData entityMetaMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache,
+			EntityTypeMetadata entityMetaMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
 			MolgenisPermissionService permissionService, EntityMetaDataValidator entityMetaDataValidator,
 			L3Cache l3Cache)

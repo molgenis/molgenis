@@ -12,7 +12,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
@@ -31,7 +31,7 @@ import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { LanguageRepositoryDecoratorTest.Config.class })
@@ -41,7 +41,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	private AttributeMetaDataMetaData attrMetaMeta;
 
 	@Autowired
-	private EntityMetaDataMetaData entityMetaMeta;
+	private EntityTypeMetadata entityMetaMeta;
 
 	@Autowired
 	private I18nStringMetaData i18nStringMetaData;
@@ -114,16 +114,16 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		i18nStringMetaData.addAttribute(attrMetaFactory.create().setName(de));
 
 		// Add language NL attributes for entity meta data
-		AttributeMetaData entityLabelNL = attrMetaFactory.create().setName(EntityMetaDataMetaData.LABEL + '-' + nl);
+		AttributeMetaData entityLabelNL = attrMetaFactory.create().setName(EntityTypeMetadata.LABEL + '-' + nl);
 		AttributeMetaData entityDescriptionNL = attrMetaFactory.create()
-				.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + nl);
+				.setName(EntityTypeMetadata.DESCRIPTION + '-' + nl);
 		entityMetaMeta.addAttribute(entityLabelNL);
 		entityMetaMeta.addAttribute(entityDescriptionNL);
 
 		// Add language DE attributes for entity meta data
-		AttributeMetaData entityLabelDE = attrMetaFactory.create().setName(EntityMetaDataMetaData.LABEL + '-' + de);
+		AttributeMetaData entityLabelDE = attrMetaFactory.create().setName(EntityTypeMetadata.LABEL + '-' + de);
 		AttributeMetaData entityDescriptionDE = attrMetaFactory.create()
-				.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + de);
+				.setName(EntityTypeMetadata.DESCRIPTION + '-' + de);
 		entityMetaMeta.addAttribute(entityLabelDE);
 		entityMetaMeta.addAttribute(entityDescriptionDE);
 

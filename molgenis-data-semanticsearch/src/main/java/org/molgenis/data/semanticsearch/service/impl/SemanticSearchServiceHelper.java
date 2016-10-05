@@ -11,7 +11,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.semanticsearch.string.NGramDistanceAlgorithm;
 import org.molgenis.data.semanticsearch.string.Stemmer;
 import org.molgenis.data.support.QueryImpl;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Arrays.stream;
 import static java.util.Objects.requireNonNull;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 
 public class SemanticSearchServiceHelper
 {
@@ -227,14 +227,14 @@ public class SemanticSearchServiceHelper
 	public List<String> getAttributeIdentifiers(EntityMetaData sourceEntityMetaData)
 	{
 		Entity entityMetaDataEntity = dataService.findOne(ENTITY_META_DATA,
-				new QueryImpl<Entity>().eq(EntityMetaDataMetaData.FULL_NAME, sourceEntityMetaData.getName()));
+				new QueryImpl<Entity>().eq(EntityTypeMetadata.FULL_NAME, sourceEntityMetaData.getName()));
 
 		if (entityMetaDataEntity == null) throw new MolgenisDataAccessException(
 				"Could not find EntityMetaDataEntity by the name of " + sourceEntityMetaData.getName());
 
 		List<String> attributeIdentifiers = new ArrayList<String>();
 
-		recursivelyCollectAttributeIdentifiers(entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES),
+		recursivelyCollectAttributeIdentifiers(entityMetaDataEntity.getEntities(EntityTypeMetadata.ATTRIBUTES),
 				attributeIdentifiers);
 
 		return attributeIdentifiers;

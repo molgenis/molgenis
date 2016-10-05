@@ -25,8 +25,8 @@ import java.util.Optional;
 
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 
 /**
@@ -109,7 +109,7 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		}
 		else
 		{
-			for (Entity tagEntity : entity.getEntities(EntityMetaDataMetaData.TAGS))
+			for (Entity tagEntity : entity.getEntities(EntityTypeMetadata.TAGS))
 			{
 				result.add(SemanticTag.asTag(entityMetaData, tagEntity));
 			}
@@ -149,9 +149,9 @@ public class UntypedTagService implements TagService<LabeledResource, LabeledRes
 		}
 
 		ImmutableList.Builder<Entity> builder = ImmutableList.<Entity>builder();
-		builder.addAll(entity.getEntities(EntityMetaDataMetaData.TAGS));
+		builder.addAll(entity.getEntities(EntityTypeMetadata.TAGS));
 		builder.add(getTagEntity(tag));
-		entity.set(EntityMetaDataMetaData.TAGS, builder.build());
+		entity.set(EntityTypeMetadata.TAGS, builder.build());
 		dataService.update(ENTITY_META_DATA, entity);
 	}
 

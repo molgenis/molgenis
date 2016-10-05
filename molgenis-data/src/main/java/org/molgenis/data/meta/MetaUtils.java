@@ -2,7 +2,7 @@ package org.molgenis.data.meta;
 
 import org.molgenis.data.Fetch;
 
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 
 public class MetaUtils
 {

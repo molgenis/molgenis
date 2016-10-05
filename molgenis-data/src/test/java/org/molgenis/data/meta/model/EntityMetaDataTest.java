@@ -14,7 +14,7 @@ import static java.util.Arrays.asList;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.testng.Assert.*;
 
 public class EntityMetaDataTest
@@ -263,19 +263,19 @@ public class EntityMetaDataTest
 		AttributeMetaData boolAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(BOOL).getMock();
 		AttributeMetaData xrefAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(XREF).getMock();
 		AttributeMetaData mrefAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(MREF).getMock();
-		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.FULL_NAME)).thenReturn(strAttr);
-		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.SIMPLE_NAME)).thenReturn(strAttr);
-		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.PACKAGE)).thenReturn(xrefAttr);
+		when(entityMetaMeta.getAttribute(EntityTypeMetadata.FULL_NAME)).thenReturn(strAttr);
+		when(entityMetaMeta.getAttribute(EntityTypeMetadata.SIMPLE_NAME)).thenReturn(strAttr);
+		when(entityMetaMeta.getAttribute(EntityTypeMetadata.PACKAGE)).thenReturn(xrefAttr);
 		when(entityMetaMeta.getAttribute(LABEL)).thenReturn(strAttr);
-		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.DESCRIPTION)).thenReturn(strAttr);
-		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.ATTRIBUTES)).thenReturn(mrefAttr);
-		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.ID_ATTRIBUTE)).thenReturn(xrefAttr);
-		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.LABEL_ATTRIBUTE)).thenReturn(xrefAttr);
-		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.LOOKUP_ATTRIBUTES)).thenReturn(mrefAttr);
-		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.ABSTRACT)).thenReturn(boolAttr);
-		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.EXTENDS)).thenReturn(xrefAttr);
-		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.TAGS)).thenReturn(mrefAttr);
-		when(entityMetaMeta.getAttribute(EntityMetaDataMetaData.BACKEND)).thenReturn(strAttr);
+		when(entityMetaMeta.getAttribute(EntityTypeMetadata.DESCRIPTION)).thenReturn(strAttr);
+		when(entityMetaMeta.getAttribute(EntityTypeMetadata.ATTRIBUTES)).thenReturn(mrefAttr);
+		when(entityMetaMeta.getAttribute(EntityTypeMetadata.ID_ATTRIBUTE)).thenReturn(xrefAttr);
+		when(entityMetaMeta.getAttribute(EntityTypeMetadata.LABEL_ATTRIBUTE)).thenReturn(xrefAttr);
+		when(entityMetaMeta.getAttribute(EntityTypeMetadata.LOOKUP_ATTRIBUTES)).thenReturn(mrefAttr);
+		when(entityMetaMeta.getAttribute(EntityTypeMetadata.ABSTRACT)).thenReturn(boolAttr);
+		when(entityMetaMeta.getAttribute(EntityTypeMetadata.EXTENDS)).thenReturn(xrefAttr);
+		when(entityMetaMeta.getAttribute(EntityTypeMetadata.TAGS)).thenReturn(mrefAttr);
+		when(entityMetaMeta.getAttribute(EntityTypeMetadata.BACKEND)).thenReturn(strAttr);
 		return entityMetaMeta;
 	}
 }

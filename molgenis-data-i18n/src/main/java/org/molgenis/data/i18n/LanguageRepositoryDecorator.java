@@ -8,7 +8,7 @@ import org.molgenis.data.i18n.model.LanguageMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 
 import java.io.IOException;
 import java.util.Iterator;
@@ -24,7 +24,7 @@ import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.DEFAULT_LANGUAGE_CODE;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.*;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.SHALLOW_COPY_ATTRS;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 
 public class LanguageRepositoryDecorator implements Repository<Language>
@@ -32,11 +32,11 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	private final Repository<Language> decorated;
 	private final DataService dataService;
 	private final AttributeMetaDataFactory attrMetaFactory;
-	private final EntityMetaDataMetaData entityMetaMeta;
+	private final EntityTypeMetadata entityMetaMeta;
 	private final I18nStringMetaData i18nStringMeta;
 
 	public LanguageRepositoryDecorator(Repository<Language> decorated, DataService dataService,
-			AttributeMetaDataFactory attrMetaFactory, EntityMetaDataMetaData entityMetaMeta,
+			AttributeMetaDataFactory attrMetaFactory, EntityTypeMetadata entityMetaMeta,
 			I18nStringMetaData i18nStringMeta)
 	{
 		this.decorated = requireNonNull(decorated);
@@ -296,10 +296,10 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	{
 		// Add language attributes for entity meta data
 		AttributeMetaData entityLabel = attrMetaFactory.create()
-				.setName(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true)
+				.setName(EntityTypeMetadata.LABEL + '-' + languageCode).setNillable(true)
 				.setLabel("Label (" + languageCode + ')');
 		AttributeMetaData entityDescription = attrMetaFactory.create()
-				.setName(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true)
+				.setName(EntityTypeMetadata.DESCRIPTION + '-' + languageCode).setNillable(true)
 				.setLabel("Description (" + languageCode + ')');
 		dataService.add(ATTRIBUTE_META_DATA, Stream.of(entityLabel, entityDescription));
 

@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EntityMetaDataFactory extends AbstractSystemEntityFactory<EntityMetaData, EntityMetaDataMetaData, String>
+public class EntityMetaDataFactory extends AbstractSystemEntityFactory<EntityMetaData, EntityTypeMetadata, String>
 {
 	@Autowired
-	EntityMetaDataFactory(EntityMetaDataMetaData entityMetaMeta, EntityPopulator entityPopulator)
+	EntityMetaDataFactory(EntityTypeMetadata entityMetaMeta, EntityPopulator entityPopulator)
 	{
 		super(EntityMetaData.class, entityMetaMeta, entityPopulator);
 	}

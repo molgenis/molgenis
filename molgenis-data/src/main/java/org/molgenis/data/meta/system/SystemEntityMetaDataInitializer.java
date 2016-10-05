@@ -4,7 +4,7 @@ import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.SystemPackage;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.MetaPackage;
 import org.molgenis.data.system.model.RootSystemPackage;
 import org.molgenis.util.GenericDependencyResolver;
@@ -45,18 +45,18 @@ public class SystemEntityMetaDataInitializer
 
 		ctx.getBeansOfType(SystemPackage.class).values().forEach(SystemPackage::bootstrap);
 
-		EntityMetaDataMetaData entityMetaDataMetaData = ctx.getBean(EntityMetaDataMetaData.class);
-		ctx.getBean(AttributeMetaDataMetaData.class).bootstrap(entityMetaDataMetaData);
+		EntityTypeMetadata entityTypeMetadata = ctx.getBean(EntityTypeMetadata.class);
+		ctx.getBean(AttributeMetaDataMetaData.class).bootstrap(entityTypeMetadata);
 		//TODO: doesn't this mean all attributes get added twice?
 
 		Map<String, SystemEntityMetaData> systemEntityMetaDataMap = ctx.getBeansOfType(SystemEntityMetaData.class);
 		genericDependencyResolver.resolve(systemEntityMetaDataMap.values(), SystemEntityMetaData::getDependencies)
-				.stream().forEach(systemEntityMetaData -> initialize(systemEntityMetaData, entityMetaDataMetaData));
+				.stream().forEach(systemEntityMetaData -> initialize(systemEntityMetaData, entityTypeMetadata));
 	}
 
-	private void initialize(SystemEntityMetaData systemEntityMetaData, EntityMetaDataMetaData entityMetaDataMetaData)
+	private void initialize(SystemEntityMetaData systemEntityMetaData, EntityTypeMetadata entityTypeMetadata)
 	{
-		systemEntityMetaData.bootstrap(entityMetaDataMetaData);
+		systemEntityMetaData.bootstrap(entityTypeMetadata);
 		setDefaultBackend(systemEntityMetaData);
 		setPackage(systemEntityMetaData);
 		checkPackage(systemEntityMetaData);

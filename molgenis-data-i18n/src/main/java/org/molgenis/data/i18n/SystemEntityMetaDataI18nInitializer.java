@@ -4,7 +4,7 @@ import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
@@ -41,15 +41,15 @@ public class SystemEntityMetaDataI18nInitializer
 		ApplicationContext ctx = event.getApplicationContext();
 		Stream<String> languageCodes = metaDataService.getDefaultBackend().getLanguageCodes();
 
-		EntityMetaDataMetaData entityMetaMeta = ctx.getBean(EntityMetaDataMetaData.class);
+		EntityTypeMetadata entityMetaMeta = ctx.getBean(EntityTypeMetadata.class);
 		AttributeMetaDataMetaData attrMetaMeta = ctx.getBean(AttributeMetaDataMetaData.class);
 		I18nStringMetaData i18nStringMeta = ctx.getBean(I18nStringMetaData.class);
 
 		languageCodes.forEach(languageCode ->
 		{
-			entityMetaMeta.addAttribute(EntityMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true)
+			entityMetaMeta.addAttribute(EntityTypeMetadata.LABEL + '-' + languageCode).setNillable(true)
 					.setLabel("Label (" + languageCode + ')');
-			entityMetaMeta.addAttribute(EntityMetaDataMetaData.DESCRIPTION + '-' + languageCode).setNillable(true)
+			entityMetaMeta.addAttribute(EntityTypeMetadata.DESCRIPTION + '-' + languageCode).setNillable(true)
 					.setLabel("Description (" + languageCode + ')');
 			attrMetaMeta.addAttribute(AttributeMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true)
 					.setLabel("Label (" + languageCode + ')');

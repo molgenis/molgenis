@@ -5,7 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.EntityManager;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.security.core.utils.SecurityUtils;
 import org.molgenis.security.owned.OwnedEntityMetaData;
 import org.molgenis.ui.MolgenisPluginController;
@@ -57,7 +57,7 @@ public class QuestionnairePluginController extends MolgenisPluginController
 				() -> QuestionnaireUtils.findQuestionnairesMetaData(dataService).collect(Collectors.toList()));
 
 		List<Questionnaire> questionnaires = questionnaireMeta.stream()
-				.map(e -> e.getString(EntityMetaDataMetaData.FULL_NAME))
+				.map(e -> e.getString(EntityTypeMetadata.FULL_NAME))
 				.filter(name -> SecurityUtils.currentUserIsSu() || SecurityUtils
 						.currentUserHasRole(AUTHORITY_ENTITY_WRITE_PREFIX + name.toUpperCase())).map(name ->
 				{

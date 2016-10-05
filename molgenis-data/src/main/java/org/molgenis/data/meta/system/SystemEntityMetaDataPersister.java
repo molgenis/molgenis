@@ -24,7 +24,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.XREF;
 import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.REF_ENTITY;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 
@@ -39,7 +39,7 @@ public class SystemEntityMetaDataPersister
 	private TagMetaData tagMeta;
 	private AttributeMetaDataMetaData attrMetaMeta;
 	private PackageMetaData packageMeta;
-	private EntityMetaDataMetaData entityMetaMeta;
+	private EntityTypeMetadata entityMetaMeta;
 
 	@Autowired
 	public SystemEntityMetaDataPersister(DataService dataService, SystemEntityMetaDataRegistry systemEntityMetaRegistry)
@@ -118,7 +118,7 @@ public class SystemEntityMetaDataPersister
 	}
 
 	@Autowired
-	public void setEntityMetaDataMetaData(EntityMetaDataMetaData entityMetaMeta)
+	public void setEntityMetaDataMetaData(EntityTypeMetadata entityMetaMeta)
 	{
 		this.entityMetaMeta = requireNonNull(entityMetaMeta);
 	}

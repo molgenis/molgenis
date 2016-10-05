@@ -33,7 +33,7 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -166,7 +166,7 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 		Entity entityMetaDataEntity = mock(Entity.class);
 
 		when(dataService.findOne(ENTITY_META_DATA,
-				new QueryImpl<>().eq(EntityMetaDataMetaData.FULL_NAME, sourceEntityMetaData.getName())))
+				new QueryImpl<>().eq(EntityTypeMetadata.FULL_NAME, sourceEntityMetaData.getName())))
 				.thenReturn(entityMetaDataEntity);
 
 		AttributeMetaData attributeEntity1 = attrMetaFactory.create();
@@ -175,7 +175,7 @@ public class SemanticSearchServiceHelperTest extends AbstractMolgenisSpringTest
 		AttributeMetaData attributeEntity2 = attrMetaFactory.create();
 		attributeEntity2.setIdentifier("2");
 		attributeEntity2.setDataType(STRING);
-		when(entityMetaDataEntity.getEntities(EntityMetaDataMetaData.ATTRIBUTES))
+		when(entityMetaDataEntity.getEntities(EntityTypeMetadata.ATTRIBUTES))
 				.thenReturn(asList(attributeEntity1, attributeEntity2));
 
 		List<String> expactedAttributeIdentifiers = asList("1", "2");

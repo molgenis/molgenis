@@ -6,7 +6,7 @@ import org.molgenis.data.RepositoryCollection;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 
 import java.util.LinkedHashMap;
@@ -230,7 +230,7 @@ public interface MetaDataService extends Iterable<RepositoryCollection>
 	LinkedHashMap<String, Boolean> determineImportableEntities(RepositoryCollection repositoryCollection);
 
 	/**
-	 * Returns whether the given {@link EntityMetaData} defines a meta entity such as {@link EntityMetaDataMetaData} or
+	 * Returns whether the given {@link EntityMetaData} defines a meta entity such as {@link EntityTypeMetadata} or
 	 * {@link AttributeMetaData}.
 	 *
 	 * @param entityMetaData

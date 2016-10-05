@@ -32,8 +32,8 @@ import static java.util.Collections.emptyList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ATTRIBUTES;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ATTRIBUTES;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 import static org.molgenis.data.meta.model.TagMetaData.TAG;
 
@@ -267,10 +267,10 @@ public class OntologyTagServiceImpl implements OntologyTagService
 		Optional<Entity> result = stream(entityMetaDataEntity.getEntities(ATTRIBUTES).spliterator(), false)
 				.filter(att -> attributeName.equals(att.getString(AttributeMetaDataMetaData.NAME))).findFirst();
 
-		if (!result.isPresent() && entityMetaDataEntity.get(EntityMetaDataMetaData.EXTENDS) != null)
+		if (!result.isPresent() && entityMetaDataEntity.get(EntityTypeMetadata.EXTENDS) != null)
 		{
-			return findAttributeEntity(entityMetaDataEntity.getEntity(EntityMetaDataMetaData.EXTENDS)
-					.getString(EntityMetaDataMetaData.FULL_NAME), attributeName);
+			return findAttributeEntity(entityMetaDataEntity.getEntity(EntityTypeMetadata.EXTENDS)
+					.getString(EntityTypeMetadata.FULL_NAME), attributeName);
 		}
 
 		return result.isPresent() ? result.get() : null;

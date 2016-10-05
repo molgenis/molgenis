@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
 import org.molgenis.data.Query;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.meta.model.Package;
 import org.molgenis.data.meta.model.PackageMetaData;
 import org.molgenis.data.support.QueryImpl;
@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 import java.util.ListIterator;
 
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.molgenis.data.meta.model.PackageMetaData.PACKAGE;
 
 @Component
@@ -67,7 +67,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 				if (p != null)
 				{
 					String matchDesc =
-							"Matched: entity '" + entityMetaData.getString(EntityMetaDataMetaData.SIMPLE_NAME) + "'";
+							"Matched: entity '" + entityMetaData.getString(EntityTypeMetadata.SIMPLE_NAME) + "'";
 					PackageSearchResultItem item = new PackageSearchResultItem(p.getRootPackage(), matchDesc);
 					if ((p != null) && !results.contains(item)) results.add(item);
 				}
@@ -95,7 +95,7 @@ public class MetaDataSearchServiceImpl implements MetaDataSearchService
 	// Get the root package of an entity
 	private Package getRootPackage(Entity entityMetaData)
 	{
-		Entity packageEntity = entityMetaData.getEntity(EntityMetaDataMetaData.PACKAGE);
+		Entity packageEntity = entityMetaData.getEntity(EntityTypeMetadata.PACKAGE);
 		if (packageEntity != null)
 		{
 			String packageName = packageEntity.getString(PackageMetaData.FULL_NAME);

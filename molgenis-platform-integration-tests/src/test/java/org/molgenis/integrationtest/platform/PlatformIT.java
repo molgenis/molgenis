@@ -16,7 +16,7 @@ import org.molgenis.data.meta.MetaDataServiceImpl;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.data.EntitySelfXrefTestHarness;
@@ -54,7 +54,7 @@ import static java.util.stream.Stream.of;
 import static org.molgenis.data.RepositoryCapability.*;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.test.data.EntityTestHarness.*;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
@@ -99,7 +99,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private LanguageMetaData languageMetaData;
 	@Autowired
-	private EntityMetaDataMetaData entityMetaDataMetaData;
+	private EntityTypeMetadata entityTypeMetadata;
 	@Autowired
 	private AttributeMetaDataMetaData attributeMetaDataMetaData;
 
@@ -203,10 +203,10 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		// Permissions i18nStringMetaData
 		String writeI18nStringMetaData = "ROLE_ENTITY_WRITE_" + i18nStringMetaData.getName().toUpperCase();
 
-		// EntityMetaDataMetaData
-		String writeEntityMetaDataMetaData = "ROLE_ENTITY_WRITE_" + entityMetaDataMetaData.getName().toUpperCase();
-		String readEntityMetaDataMetaData = "ROLE_ENTITY_READ_" + entityMetaDataMetaData.getName().toUpperCase();
-		String countEntityMetaDataMetaData = "ROLE_ENTITY_COUNT_" + entityMetaDataMetaData.getName().toUpperCase();
+		// EntityTypeMetadata
+		String writeEntityMetaDataMetaData = "ROLE_ENTITY_WRITE_" + entityTypeMetadata.getName().toUpperCase();
+		String readEntityMetaDataMetaData = "ROLE_ENTITY_READ_" + entityTypeMetadata.getName().toUpperCase();
+		String countEntityMetaDataMetaData = "ROLE_ENTITY_COUNT_" + entityTypeMetadata.getName().toUpperCase();
 
 		SecurityContextHolder.getContext().setAuthentication(
 				new TestingAuthenticationToken("user", "user", writeTestEntity, readTestEntity, readTestRefEntity,
@@ -261,14 +261,14 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		languageAttrs.forEach(attributeMetaDataMetaData::removeAttribute);
 
 		languageAttrs.clear();
-		for (AttributeMetaData attr : entityMetaDataMetaData.getAttributes())
+		for (AttributeMetaData attr : entityTypeMetadata.getAttributes())
 		{
 			if (I18nUtils.isI18n(attr.getName()))
 			{
 				languageAttrs.add(attr);
 			}
 		}
-		languageAttrs.forEach(entityMetaDataMetaData::removeAttribute);
+		languageAttrs.forEach(entityTypeMetadata::removeAttribute);
 	}
 
 	@AfterMethod

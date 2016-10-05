@@ -12,7 +12,7 @@ import org.molgenis.data.mapper.data.request.GetOntologyTermRequest;
 import org.molgenis.data.mapper.data.request.RemoveTagRequest;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.semantic.Hit;
 import org.molgenis.data.semanticsearch.semantic.OntologyTag;
@@ -41,7 +41,7 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.elasticsearch.common.collect.ImmutableSet.of;
 import static org.molgenis.data.mapper.controller.TagWizardController.URI;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.ENTITY_META_DATA;
 
 @Controller
 @RequestMapping(URI)
@@ -82,7 +82,7 @@ public class TagWizardController extends MolgenisPluginController
 	public String viewTagWizard(@RequestParam(required = false, value = "selectedTarget") String target, Model model)
 	{
 		List<String> entityNames = dataService.findAll(ENTITY_META_DATA)
-				.map(e -> e.getString(EntityMetaDataMetaData.FULL_NAME)).collect(toList());
+				.map(e -> e.getString(EntityTypeMetadata.FULL_NAME)).collect(toList());
 
 		if (StringUtils.isEmpty(target))
 		{

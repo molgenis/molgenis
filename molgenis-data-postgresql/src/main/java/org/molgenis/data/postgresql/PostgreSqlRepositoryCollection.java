@@ -27,7 +27,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.ENUM;
 import static org.molgenis.data.RepositoryCollectionCapability.*;
 import static org.molgenis.data.i18n.model.LanguageMetaData.*;
 import static org.molgenis.data.meta.MetaUtils.getEntityMetaDataFetch;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.*;
+import static org.molgenis.data.meta.model.EntityTypeMetadata.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryGenerator.*;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getPersistedAttributesMref;
 import static org.molgenis.data.postgresql.PostgreSqlQueryUtils.getTableName;

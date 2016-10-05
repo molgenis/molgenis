@@ -5,7 +5,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.Progress;
 import org.molgenis.data.jobs.ProgressImpl;
-import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.meta.model.EntityTypeMetadata;
 import org.molgenis.file.ingest.meta.FileIngestJobExecution;
 import org.molgenis.file.ingest.meta.FileIngestMetaData;
 import org.molgenis.security.core.runas.RunAsSystem;
@@ -54,7 +54,7 @@ public class FileIngestJobFactory
 				userDetailsService.loadUserByUsername(username).getAuthorities(), null);
 		Entity fileIngestEntity = fileIngestJobExecution.getFileIngest();
 		Entity targetEntityEntity = fileIngestEntity.getEntity(FileIngestMetaData.ENTITY_META_DATA);
-		String targetEntityName = targetEntityEntity.getString(EntityMetaDataMetaData.FULL_NAME);
+		String targetEntityName = targetEntityEntity.getString(EntityTypeMetadata.FULL_NAME);
 		String url = fileIngestEntity.getString(FileIngestMetaData.URL);
 		String loader = fileIngestEntity.getString(FileIngestMetaData.LOADER);
 		String failureEmail = fileIngestEntity.getString(FileIngestMetaData.FAILURE_EMAIL);
