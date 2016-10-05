@@ -40,7 +40,7 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 	public static final String DEFAULT_VALUE = "defaultValue";
 
 	private TagMetaData tagMetaData;
-	private EntityTypeMetadata entityMetaMeta;
+	private EntityTypeMetadata entityTypeMeta;
 
 	public AttributeMetaDataMetaData()
 	{
@@ -57,7 +57,7 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 		addAttribute(DATA_TYPE).setDataType(ENUM).setEnumOptions(AttributeType.getOptionsLowercase()).setNillable(false)
 				.setLabel("Data type");
 		addAttribute(PARTS).setDataType(MREF).setRefEntity(this).setLabel("Attribute parts");
-		addAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityMetaMeta).setLabel("Referenced entity")
+		addAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityTypeMeta).setLabel("Referenced entity")
 				.setValidationExpression(getRefEntityValidationExpression());
 		addAttribute(EXPRESSION).setNillable(true).setLabel("Expression")
 				.setDescription("Computed value expression in Magma JavaScript");
@@ -88,9 +88,9 @@ public class AttributeMetaDataMetaData extends SystemEntityMetaData
 	}
 
 	@Autowired
-	public void setEntityMetaDataMetaData(EntityTypeMetadata entityMetaMeta)
+	public void setEntityMetaDataMetaData(EntityTypeMetadata entityTypeMeta)
 	{
-		this.entityMetaMeta = requireNonNull(entityMetaMeta);
+		this.entityTypeMeta = requireNonNull(entityTypeMeta);
 	}
 
 	private static String getEnumOptionsValidationExpression()

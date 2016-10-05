@@ -41,15 +41,15 @@ public class SystemEntityMetaDataI18nInitializer
 		ApplicationContext ctx = event.getApplicationContext();
 		Stream<String> languageCodes = metaDataService.getDefaultBackend().getLanguageCodes();
 
-		EntityTypeMetadata entityMetaMeta = ctx.getBean(EntityTypeMetadata.class);
+		EntityTypeMetadata entityTypeMeta = ctx.getBean(EntityTypeMetadata.class);
 		AttributeMetaDataMetaData attrMetaMeta = ctx.getBean(AttributeMetaDataMetaData.class);
 		I18nStringMetaData i18nStringMeta = ctx.getBean(I18nStringMetaData.class);
 
 		languageCodes.forEach(languageCode ->
 		{
-			entityMetaMeta.addAttribute(EntityTypeMetadata.LABEL + '-' + languageCode).setNillable(true)
+			entityTypeMeta.addAttribute(EntityTypeMetadata.LABEL + '-' + languageCode).setNillable(true)
 					.setLabel("Label (" + languageCode + ')');
-			entityMetaMeta.addAttribute(EntityTypeMetadata.DESCRIPTION + '-' + languageCode).setNillable(true)
+			entityTypeMeta.addAttribute(EntityTypeMetadata.DESCRIPTION + '-' + languageCode).setNillable(true)
 					.setLabel("Description (" + languageCode + ')');
 			attrMetaMeta.addAttribute(AttributeMetaDataMetaData.LABEL + '-' + languageCode).setNillable(true)
 					.setLabel("Label (" + languageCode + ')');

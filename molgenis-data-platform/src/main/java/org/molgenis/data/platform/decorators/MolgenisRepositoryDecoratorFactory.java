@@ -64,7 +64,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 	private final SearchService searchService;
 	private final AttributeMetaDataFactory attrMetaFactory;
 	private final PasswordEncoder passwordEncoder;
-	private final EntityTypeMetadata entityMetaMeta;
+	private final EntityTypeMetadata entityTypeMeta;
 	private final I18nStringMetaData i18nStringMeta;
 	private final L1Cache l1Cache;
 	private final EntityListenersService entityListenersService;
@@ -81,7 +81,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 			SystemEntityMetaDataRegistry systemEntityMetaDataRegistry, UserAuthorityFactory userAuthorityFactory,
 			IndexActionRegisterService indexActionRegisterService, SearchService searchService,
 			AttributeMetaDataFactory attrMetaFactory, PasswordEncoder passwordEncoder,
-			EntityTypeMetadata entityMetaMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache,
+			EntityTypeMetadata entityTypeMeta, I18nStringMetaData i18nStringMeta, L1Cache l1Cache, L2Cache l2Cache,
 			TransactionInformation transactionInformation, EntityListenersService entityListenersService,
 			MolgenisPermissionService permissionService, EntityMetaDataValidator entityMetaDataValidator,
 			L3Cache l3Cache)
@@ -99,7 +99,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		this.searchService = requireNonNull(searchService);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
 		this.passwordEncoder = requireNonNull(passwordEncoder);
-		this.entityMetaMeta = requireNonNull(entityMetaMeta);
+		this.entityTypeMeta = requireNonNull(entityTypeMeta);
 		this.i18nStringMeta = requireNonNull(i18nStringMeta);
 		this.l1Cache = requireNonNull(l1Cache);
 		this.entityListenersService = requireNonNull(entityListenersService);
@@ -193,7 +193,7 @@ public class MolgenisRepositoryDecoratorFactory implements RepositoryDecoratorFa
 		{
 			repo = (Repository<Entity>) (Repository<? extends Entity>) new LanguageRepositoryDecorator(
 					(Repository<Language>) (Repository<? extends Entity>) repo, dataService, attrMetaFactory,
-					entityMetaMeta, i18nStringMeta);
+					entityTypeMeta, i18nStringMeta);
 		}
 		else if (repo.getName().equals(I18N_STRING))
 		{

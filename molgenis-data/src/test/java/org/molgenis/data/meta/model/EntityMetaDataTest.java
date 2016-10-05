@@ -71,7 +71,7 @@ public class EntityMetaDataTest
 	@Test
 	public void setNameNoSimpleNameNoLabel()
 	{
-		EntityMetaData entityMeta = new EntityMetaData(createEntityMetaMeta());
+		EntityMetaData entityMeta = new EntityMetaData(createentityTypeMeta());
 		String name = "name";
 		entityMeta.setName(name);
 		assertEquals(entityMeta.getName(), name);
@@ -82,7 +82,7 @@ public class EntityMetaDataTest
 	@Test
 	public void setNameExistingSimpleNameExistingLabel()
 	{
-		EntityMetaData entityMeta = new EntityMetaData(createEntityMetaMeta());
+		EntityMetaData entityMeta = new EntityMetaData(createentityTypeMeta());
 		String label = "label";
 		String simpleName = "simpleName";
 		String name = "name";
@@ -97,7 +97,7 @@ public class EntityMetaDataTest
 	@Test
 	public void setSimpleNameNoNameNoLabel()
 	{
-		EntityMetaData entityMeta = new EntityMetaData(createEntityMetaMeta());
+		EntityMetaData entityMeta = new EntityMetaData(createentityTypeMeta());
 		String simpleName = "simpleName";
 		entityMeta.setSimpleName(simpleName);
 		assertEquals(entityMeta.getSimpleName(), simpleName);
@@ -111,7 +111,7 @@ public class EntityMetaDataTest
 	@Test
 	public void setSimpleNameExistingNameExistingLabel()
 	{
-		EntityMetaData entityMeta = new EntityMetaData(createEntityMetaMeta());
+		EntityMetaData entityMeta = new EntityMetaData(createentityTypeMeta());
 		String label = "label";
 		String simpleName = "simpleName";
 		entityMeta.setName("name");
@@ -128,7 +128,7 @@ public class EntityMetaDataTest
 	@Test
 	public void setLabel()
 	{
-		EntityMetaData entityMeta = new EntityMetaData(createEntityMetaMeta());
+		EntityMetaData entityMeta = new EntityMetaData(createentityTypeMeta());
 		String label = "label";
 		entityMeta.setLabel(label);
 		assertEquals(entityMeta.getLabel(), label);
@@ -138,7 +138,7 @@ public class EntityMetaDataTest
 	@Test
 	public void setLabelNull()
 	{
-		EntityMetaData entityMeta = new EntityMetaData(createEntityMetaMeta());
+		EntityMetaData entityMeta = new EntityMetaData(createentityTypeMeta());
 		String simpleName = "simpleName";
 		entityMeta.setSimpleName(simpleName);
 		entityMeta.setLabel(null);
@@ -193,7 +193,7 @@ public class EntityMetaDataTest
 	@Test
 	public void newInstanceShallowCopy()
 	{
-		EntityMetaData entityMetaMeta = createEntityMetaMeta();
+		EntityMetaData entityTypeMeta = createentityTypeMeta();
 
 		Package package_ = mock(Package.class);
 		when(package_.getName()).thenReturn("myPackage");
@@ -208,7 +208,7 @@ public class EntityMetaDataTest
 		Tag tag1 = mock(Tag.class);
 
 		EntityMetaData entityMeta = mock(EntityMetaData.class);
-		when(entityMeta.getEntityMetaData()).thenReturn(entityMetaMeta);
+		when(entityMeta.getEntityMetaData()).thenReturn(entityTypeMeta);
 		when(entityMeta.getSimpleName()).thenReturn("myEntity");
 		when(entityMeta.getName()).thenReturn("myPackage_myEntity");
 		when(entityMeta.getPackage()).thenReturn(package_);
@@ -226,7 +226,7 @@ public class EntityMetaDataTest
 
 		EntityMetaData entityMetaCopy = EntityMetaData
 				.newInstance(entityMeta, EntityMetaData.AttributeCopyMode.SHALLOW_COPY_ATTRS);
-		assertSame(entityMetaCopy.getEntityMetaData(), entityMetaMeta);
+		assertSame(entityMetaCopy.getEntityMetaData(), entityTypeMeta);
 		assertEquals(entityMetaCopy.getSimpleName(), "myEntity");
 		assertEquals(entityMetaCopy.getName(), "myPackage_myEntity");
 		assertSame(entityMetaCopy.getPackage(), package_);
@@ -256,26 +256,26 @@ public class EntityMetaDataTest
 		assertEquals(entityMetaCopy.getBackend(), "backend");
 	}
 
-	private static EntityMetaData createEntityMetaMeta()
+	private static EntityMetaData createentityTypeMeta()
 	{
-		EntityMetaData entityMetaMeta = mock(EntityMetaData.class);
+		EntityMetaData entityTypeMeta = mock(EntityMetaData.class);
 		AttributeMetaData strAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(STRING).getMock();
 		AttributeMetaData boolAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(BOOL).getMock();
 		AttributeMetaData xrefAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(XREF).getMock();
 		AttributeMetaData mrefAttr = when(mock(AttributeMetaData.class).getDataType()).thenReturn(MREF).getMock();
-		when(entityMetaMeta.getAttribute(EntityTypeMetadata.FULL_NAME)).thenReturn(strAttr);
-		when(entityMetaMeta.getAttribute(EntityTypeMetadata.SIMPLE_NAME)).thenReturn(strAttr);
-		when(entityMetaMeta.getAttribute(EntityTypeMetadata.PACKAGE)).thenReturn(xrefAttr);
-		when(entityMetaMeta.getAttribute(LABEL)).thenReturn(strAttr);
-		when(entityMetaMeta.getAttribute(EntityTypeMetadata.DESCRIPTION)).thenReturn(strAttr);
-		when(entityMetaMeta.getAttribute(EntityTypeMetadata.ATTRIBUTES)).thenReturn(mrefAttr);
-		when(entityMetaMeta.getAttribute(EntityTypeMetadata.ID_ATTRIBUTE)).thenReturn(xrefAttr);
-		when(entityMetaMeta.getAttribute(EntityTypeMetadata.LABEL_ATTRIBUTE)).thenReturn(xrefAttr);
-		when(entityMetaMeta.getAttribute(EntityTypeMetadata.LOOKUP_ATTRIBUTES)).thenReturn(mrefAttr);
-		when(entityMetaMeta.getAttribute(EntityTypeMetadata.ABSTRACT)).thenReturn(boolAttr);
-		when(entityMetaMeta.getAttribute(EntityTypeMetadata.EXTENDS)).thenReturn(xrefAttr);
-		when(entityMetaMeta.getAttribute(EntityTypeMetadata.TAGS)).thenReturn(mrefAttr);
-		when(entityMetaMeta.getAttribute(EntityTypeMetadata.BACKEND)).thenReturn(strAttr);
-		return entityMetaMeta;
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.FULL_NAME)).thenReturn(strAttr);
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.SIMPLE_NAME)).thenReturn(strAttr);
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.PACKAGE)).thenReturn(xrefAttr);
+		when(entityTypeMeta.getAttribute(LABEL)).thenReturn(strAttr);
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.DESCRIPTION)).thenReturn(strAttr);
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.ATTRIBUTES)).thenReturn(mrefAttr);
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.ID_ATTRIBUTE)).thenReturn(xrefAttr);
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.LABEL_ATTRIBUTE)).thenReturn(xrefAttr);
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.LOOKUP_ATTRIBUTES)).thenReturn(mrefAttr);
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.ABSTRACT)).thenReturn(boolAttr);
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.EXTENDS)).thenReturn(xrefAttr);
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.TAGS)).thenReturn(mrefAttr);
+		when(entityTypeMeta.getAttribute(EntityTypeMetadata.BACKEND)).thenReturn(strAttr);
+		return entityTypeMeta;
 	}
 }

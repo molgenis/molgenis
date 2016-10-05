@@ -41,7 +41,7 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 	private AttributeMetaDataMetaData attrMetaMeta;
 
 	@Autowired
-	private EntityTypeMetadata entityMetaMeta;
+	private EntityTypeMetadata entityTypeMeta;
 
 	@Autowired
 	private I18nStringMetaData i18nStringMetaData;
@@ -71,11 +71,11 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		MockitoAnnotations.initMocks(this);
 		when(metaDataService.getDefaultBackend()).thenReturn(defaultBackend);
 		when(dataService.getMeta()).thenReturn(metaDataService);
-		when(dataService.getEntityMetaData(ENTITY_META_DATA)).thenReturn(entityMetaMeta);
+		when(dataService.getEntityMetaData(ENTITY_META_DATA)).thenReturn(entityTypeMeta);
 		when(dataService.getEntityMetaData(ATTRIBUTE_META_DATA)).thenReturn(attrMetaMeta);
 		when(dataService.getEntityMetaData(I18N_STRING)).thenReturn(i18nStringMetaData);
 		languageRepositoryDecorator = new LanguageRepositoryDecorator(decoratedRepo, dataService, attrMetaFactory,
-				entityMetaMeta, i18nStringMetaData);
+				entityTypeMeta, i18nStringMetaData);
 	}
 
 	@Test
@@ -117,15 +117,15 @@ public class LanguageRepositoryDecoratorTest extends AbstractMolgenisSpringTest
 		AttributeMetaData entityLabelNL = attrMetaFactory.create().setName(EntityTypeMetadata.LABEL + '-' + nl);
 		AttributeMetaData entityDescriptionNL = attrMetaFactory.create()
 				.setName(EntityTypeMetadata.DESCRIPTION + '-' + nl);
-		entityMetaMeta.addAttribute(entityLabelNL);
-		entityMetaMeta.addAttribute(entityDescriptionNL);
+		entityTypeMeta.addAttribute(entityLabelNL);
+		entityTypeMeta.addAttribute(entityDescriptionNL);
 
 		// Add language DE attributes for entity meta data
 		AttributeMetaData entityLabelDE = attrMetaFactory.create().setName(EntityTypeMetadata.LABEL + '-' + de);
 		AttributeMetaData entityDescriptionDE = attrMetaFactory.create()
 				.setName(EntityTypeMetadata.DESCRIPTION + '-' + de);
-		entityMetaMeta.addAttribute(entityLabelDE);
-		entityMetaMeta.addAttribute(entityDescriptionDE);
+		entityTypeMeta.addAttribute(entityLabelDE);
+		entityTypeMeta.addAttribute(entityDescriptionDE);
 
 		// Add language NL attributes for attribute meta data
 		AttributeMetaData attributeLabelNL = attrMetaFactory.create()

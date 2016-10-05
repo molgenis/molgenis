@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component;
 public class EntityMetaDataFactory extends AbstractSystemEntityFactory<EntityMetaData, EntityTypeMetadata, String>
 {
 	@Autowired
-	EntityMetaDataFactory(EntityTypeMetadata entityMetaMeta, EntityPopulator entityPopulator)
+	EntityMetaDataFactory(EntityTypeMetadata entityTypeMeta, EntityPopulator entityPopulator)
 	{
-		super(EntityMetaData.class, entityMetaMeta, entityPopulator);
+		super(EntityMetaData.class, entityTypeMeta, entityPopulator);
 	}
 }

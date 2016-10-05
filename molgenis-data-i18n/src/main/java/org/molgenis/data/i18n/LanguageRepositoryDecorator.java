@@ -32,17 +32,17 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 	private final Repository<Language> decorated;
 	private final DataService dataService;
 	private final AttributeMetaDataFactory attrMetaFactory;
-	private final EntityTypeMetadata entityMetaMeta;
+	private final EntityTypeMetadata entityTypeMeta;
 	private final I18nStringMetaData i18nStringMeta;
 
 	public LanguageRepositoryDecorator(Repository<Language> decorated, DataService dataService,
-			AttributeMetaDataFactory attrMetaFactory, EntityTypeMetadata entityMetaMeta,
+			AttributeMetaDataFactory attrMetaFactory, EntityTypeMetadata entityTypeMeta,
 			I18nStringMetaData i18nStringMeta)
 	{
 		this.decorated = requireNonNull(decorated);
 		this.dataService = requireNonNull(dataService);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
-		this.entityMetaMeta = requireNonNull(entityMetaMeta);
+		this.entityTypeMeta = requireNonNull(entityTypeMeta);
 		this.i18nStringMeta = requireNonNull(i18nStringMeta);
 	}
 
@@ -186,8 +186,8 @@ public class LanguageRepositoryDecorator implements Repository<Language>
 		i18nMetaUpdated.removeAttribute(attrLanguageCode);
 
 		// remove i18n attributes from entity meta data
-		AttributeMetaData entityLabel = entityMetaMeta.getAttribute(LABEL + '-' + languageCode);
-		AttributeMetaData entityDescription = entityMetaMeta.getAttribute(DESCRIPTION + '-' + languageCode);
+		AttributeMetaData entityLabel = entityTypeMeta.getAttribute(LABEL + '-' + languageCode);
+		AttributeMetaData entityDescription = entityTypeMeta.getAttribute(DESCRIPTION + '-' + languageCode);
 
 		EntityMetaData entityMeta = EntityMetaData
 				.newInstance(dataService.getEntityMetaData(ENTITY_META_DATA), SHALLOW_COPY_ATTRS);

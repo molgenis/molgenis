@@ -39,7 +39,7 @@ public class SystemEntityMetaDataPersister
 	private TagMetaData tagMeta;
 	private AttributeMetaDataMetaData attrMetaMeta;
 	private PackageMetaData packageMeta;
-	private EntityTypeMetadata entityMetaMeta;
+	private EntityTypeMetadata entityTypeMeta;
 
 	@Autowired
 	public SystemEntityMetaDataPersister(DataService dataService, SystemEntityMetaDataRegistry systemEntityMetaRegistry)
@@ -71,15 +71,15 @@ public class SystemEntityMetaDataPersister
 		{
 			repositoryCollection.createRepository(packageMeta);
 		}
-		if (!repositoryCollection.hasRepository(entityMetaMeta))
+		if (!repositoryCollection.hasRepository(entityTypeMeta))
 		{
-			repositoryCollection.createRepository(entityMetaMeta);
+			repositoryCollection.createRepository(entityTypeMeta);
 		}
 
 		// workaround for a cyclic dependency entity meta <--> attribute meta:
 		// first create attribute meta and entity meta table, then change data type.
 		// see the note in AttributeMetaDataMetaData and the exception in DependencyResolver
-		attrMetaMeta.getAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityMetaMeta);
+		attrMetaMeta.getAttribute(REF_ENTITY).setDataType(XREF).setRefEntity(entityTypeMeta);
 
 		// add default meta entities
 		ApplicationContext ctx = event.getApplicationContext();
@@ -118,9 +118,9 @@ public class SystemEntityMetaDataPersister
 	}
 
 	@Autowired
-	public void setEntityMetaDataMetaData(EntityTypeMetadata entityMetaMeta)
+	public void setEntityMetaDataMetaData(EntityTypeMetadata entityTypeMeta)
 	{
-		this.entityMetaMeta = requireNonNull(entityMetaMeta);
+		this.entityTypeMeta = requireNonNull(entityTypeMeta);
 	}
 
 	private static void populateAutoAttributeValues(EntityMetaData existingEntityMeta, EntityMetaData entityMeta)
