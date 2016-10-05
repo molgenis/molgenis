@@ -2,6 +2,7 @@ package org.molgenis.integrationtest.platform;
 
 import com.google.common.io.Files;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
+import org.apache.commons.io.FileUtils;
 import org.molgenis.DatabaseConfig;
 import org.molgenis.data.EntityFactoryRegistrar;
 import org.molgenis.data.RepositoryCollectionBootstrapper;
@@ -45,6 +46,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import javax.annotation.PreDestroy;
 import javax.sql.DataSource;
+import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -112,6 +114,16 @@ public class PlatformITConfig implements ApplicationListener<ContextRefreshedEve
 	{
 		((ComboPooledDataSource) dataSource).close();
 		PostgreSqlDatabase.dropDatabase();
+
+		try
+		{
+			// Delete molgenis home folder
+			FileUtils.deleteDirectory(new File(System.getProperty("molgenis.home")));
+		}
+		catch (IOException e)
+		{
+			LOG.error("Error removing molgenis home directory", e);
+		}
 	}
 
 	public PlatformITConfig()

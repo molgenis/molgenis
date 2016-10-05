@@ -1,4 +1,4 @@
-package org.molgenis.test.data.staticentity.bidirectional.test4;
+package org.molgenis.test.data.staticentity.bidirectional.authorbook4;
 
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;

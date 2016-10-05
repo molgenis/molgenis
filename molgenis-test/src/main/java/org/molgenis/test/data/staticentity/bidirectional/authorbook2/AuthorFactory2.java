@@ -1,4 +1,4 @@
-package org.molgenis.test.data.staticentity.bidirectional.test3;
+package org.molgenis.test.data.staticentity.bidirectional.authorbook2;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.test.data.staticentity.bidirectional.Author;
@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
-public class AuthorFactory3 extends AbstractSystemEntityFactory<Author, AuthorMetaData3, String>
+public class AuthorFactory2 extends AbstractSystemEntityFactory<Author, AuthorMetaData2, String>
 {
 	@Autowired
-	AuthorFactory3(AuthorMetaData3 myEntityMeta)
+	AuthorFactory2(AuthorMetaData2 myEntityMeta)
 	{
 		super(Author.class, myEntityMeta);
 	}

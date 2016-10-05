@@ -1,4 +1,4 @@
-package org.molgenis.test.data.staticentity.bidirectional.test2;
+package org.molgenis.test.data.staticentity.bidirectional.authorbook2;
 
 import org.molgenis.data.meta.SystemEntityMetaData;
 import org.springframework.beans.factory.annotation.Autowired;

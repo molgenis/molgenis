@@ -1,14 +1,10 @@
 package org.molgenis.integrationtest.platform;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.*;
 import org.molgenis.data.cache.l2.L2Cache;
-import org.molgenis.data.cache.l3.L3Cache;
 import org.molgenis.data.elasticsearch.SearchService;
 import org.molgenis.data.elasticsearch.index.job.IndexService;
-import org.molgenis.data.i18n.I18nUtils;
 import org.molgenis.data.i18n.LanguageService;
 import org.molgenis.data.i18n.model.I18nStringMetaData;
 import org.molgenis.data.i18n.model.LanguageFactory;
@@ -21,10 +17,7 @@ import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.data.EntitySelfXrefTestHarness;
 import org.molgenis.test.data.EntityTestHarness;
-import org.molgenis.test.data.OneToManyTestHarness;
 import org.molgenis.test.data.staticentity.TestEntityStatic;
-import org.molgenis.test.data.staticentity.bidirectional.test1.AuthorMetaData1;
-import org.molgenis.test.data.staticentity.bidirectional.test1.BookMetaData1;
 import org.molgenis.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,13 +29,19 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.springframework.transaction.annotation.Transactional;
-import org.testng.annotations.*;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
+import org.testng.annotations.Test;
 
+import javax.annotation.PreDestroy;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Supplier;
@@ -50,12 +49,10 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Sets.newHashSet;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 import static java.util.stream.Stream.concat;
 import static java.util.stream.Stream.of;
 import static org.molgenis.data.RepositoryCapability.*;
@@ -66,7 +63,6 @@ import static org.molgenis.data.meta.model.EntityMetaData.AttributeCopyMode.DEEP
 import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
 import static org.molgenis.test.data.EntityTestHarness.*;
-import static org.molgenis.test.data.OneToManyTestHarness.*;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
 import static org.molgenis.util.MolgenisDateFormat.getDateTimeFormat;
 import static org.testng.Assert.*;
@@ -75,7 +71,6 @@ import static org.testng.Assert.*;
 public class PlatformIT extends AbstractTestNGSpringContextTests
 {
 	private final Logger LOG = LoggerFactory.getLogger(PlatformIT.class);
-	private final String GROUPS_ONE_TO_MANY = "oneToMany";
 
 	private EntityMetaData entityMetaDataStatic;
 	private EntityMetaData refEntityMetaDataStatic;
@@ -89,8 +84,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	private EntityTestHarness testHarness;
 	@Autowired
 	private EntitySelfXrefTestHarness entitySelfXrefTestHarness;
-	@Autowired
-	private OneToManyTestHarness oneToManyTestHarness;
 	@Autowired
 	private DataService dataService;
 	@Autowired
@@ -116,13 +109,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	@Autowired
 	private LanguageFactory languageFactory;
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
-	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
-	@Autowired
-	private EntityManager entityManager;
-	@Autowired
-	private L3Cache l3Cache;
 
 	/**
 	 * Wait till the whole index is stable. Index job is done a-synchronized.
@@ -184,7 +171,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForWorkToBeFinished(indexService, LOG);
 	}
 
-	private List<GrantedAuthority> makeAuthorities(String entityName, boolean write, boolean read, boolean count)
+	static List<GrantedAuthority> makeAuthorities(String entityName, boolean write, boolean read, boolean count)
 	{
 		List<GrantedAuthority> authorities = newArrayList();
 		if (write) authorities.add(new SimpleGrantedAuthority("ROLE_ENTITY_WRITE_" + entityName.toUpperCase()));
@@ -210,59 +197,8 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		authorities.addAll(makeAuthorities(i18nStringMetaData.getName(), true, false, false));
 		authorities.addAll(makeAuthorities(entityMetaDataMetaData.getName(), true, true, true));
 
-		for (int i = 1; i <= ONE_TO_MANY_CASES; i++)
-		{
-			authorities.addAll(makeAuthorities("sys_Author" + i, true, true, true));
-			authorities.addAll(makeAuthorities("sys_Book" + i, true, true, true));
-		}
-
 		SecurityContextHolder.getContext()
 				.setAuthentication(new TestingAuthenticationToken("user", "user", authorities));
-	}
-
-	@AfterClass
-	public void cleanUp() throws InterruptedException
-	{
-		// Give asyncTransactionLog time to stop gracefully
-		TimeUnit.SECONDS.sleep(1);
-
-		applicationContext.close();
-		SecurityContextHolder.getContext().setAuthentication(null);
-
-		try
-		{
-			// Delete molgenis home folder
-			FileUtils.deleteDirectory(new File(System.getProperty("molgenis.home")));
-		}
-		catch (IOException e)
-		{
-			LOG.error("Error removing molgenis home directory", e);
-		}
-		l2Cache.logStatistics();
-		cleanUpLanguages();
-	}
-
-	private void cleanUpLanguages()
-	{
-		List<AttributeMetaData> languageAttrs = new ArrayList<>();
-		for (AttributeMetaData attr : attributeMetaDataMetaData.getAttributes())
-		{
-			if (I18nUtils.isI18n(attr.getName()))
-			{
-				languageAttrs.add(attr);
-			}
-		}
-		languageAttrs.forEach(attributeMetaDataMetaData::removeAttribute);
-
-		languageAttrs.clear();
-		for (AttributeMetaData attr : entityMetaDataMetaData.getAttributes())
-		{
-			if (I18nUtils.isI18n(attr.getName()))
-			{
-				languageAttrs.add(attr);
-			}
-		}
-		languageAttrs.forEach(entityMetaDataMetaData::removeAttribute);
 	}
 
 	@AfterMethod
@@ -281,21 +217,6 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		waitForIndexToBeStable(entityMetaDataDynamic.getName(), indexService, LOG);
 		waitForIndexToBeStable(refEntityMetaDataDynamic.getName(), indexService, LOG);
 		waitForIndexToBeStable(selfXrefEntityMetaData.getName(), indexService, LOG);
-	}
-
-	@AfterMethod(groups = GROUPS_ONE_TO_MANY)
-	public void afterGroupsOneToMany()
-	{
-		runAsSystem(() ->
-		{
-			deleteAuthorsThenBooks(1);
-			deleteBooksThenAuthors(2);
-			deleteAuthorsThenBooks(3);
-			deleteAuthorsThenBooks(4);
-			deleteAuthorsThenBooks(5);
-			deleteAuthorsThenBooks(6);
-		});
-		waitForWorkToBeFinished(indexService, LOG);
 	}
 
 	private void addDefaultLanguages()
@@ -317,7 +238,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		dataService.add(LANGUAGE, languageFactory.create("xx", "My language", false));
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testLanguageService()
 	{
 		assertEquals(dataService.getMeta().getEntityMetaData(ENTITY_META_DATA).getAttribute("label-en").getName(),
@@ -361,7 +282,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(languageService.getBundle().getString("car"), "car");
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testEntityListener()
 	{
 		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityMetaDataDynamic, 6);
@@ -411,7 +332,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testAdd()
 	{
 		List<Entity> entities = createDynamic(2).collect(toList());
@@ -423,7 +344,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertPresent(entityMetaDataDynamic, entities);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testCount()
 	{
 		List<Entity> entities = createDynamic(2).collect(toList());
@@ -434,7 +355,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertPresent(entityMetaDataDynamic, entities);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testDelete()
 	{
 		Entity entity = createDynamic(1).findFirst().get();
@@ -447,7 +368,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertNotPresent(entity);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testDeleteById()
 	{
 		Entity entity = createDynamic(1).findFirst().get();
@@ -460,7 +381,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertNotPresent(entity);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testDeleteStream()
 	{
 		List<Entity> entities = createDynamic(2).collect(toList());
@@ -473,7 +394,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(dataService.count(entityMetaDataDynamic.getName(), new QueryImpl<>()), 0);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testDeleteAll()
 	{
 		List<Entity> entities = createDynamic(5).collect(toList());
@@ -486,14 +407,14 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(dataService.count(entityMetaDataDynamic.getName(), new QueryImpl<>()), 0);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindAllEmpty()
 	{
 		Stream<Entity> retrieved = dataService.findAll(entityMetaDataDynamic.getName());
 		assertEquals(retrieved.count(), 0);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindAll()
 	{
 		List<Entity> entities = createDynamic(5).collect(toList());
@@ -503,7 +424,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(retrieved.count(), entities.size());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindAllTyped()
 	{
 		List<Entity> entities = createDynamic(1).collect(toList());
@@ -514,7 +435,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(retrieved.get().iterator().next().getIdValue(), entities.get(0).getIdValue());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindAllByIds()
 	{
 		List<Entity> entities = createDynamic(5).collect(toList());
@@ -525,7 +446,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(retrieved.count(), entities.size());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindAllByIdsTyped()
 	{
 		List<Entity> entities = createStatic(5).collect(toList());
@@ -539,7 +460,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(retrieved.get().iterator().next().getIdValue(), entities.get(0).getIdValue());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindAllStreamFetch()
 	{
 		List<Entity> entities = createDynamic(5).collect(toList());
@@ -573,7 +494,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ ATTR_EMAIL, null, emptyList() }, { ATTR_XREF, null, emptyList() }, { ATTR_MREF, null, emptyList() } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorEq")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorEq")
 	public void testFindQueryOperatorEq(String attrName, Object value, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(3).collect(toList());
@@ -596,7 +517,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ asList("0", "1"), asList(0, 1) }, { asList("1", "2"), singletonList(1) } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorIn")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorIn")
 	public void testFindQueryOperatorIn(List<String> ids, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(2).collect(toList());
@@ -619,7 +540,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ 13, asList(0, 1, 2) } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorLess")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorLess")
 	public void testFindQueryOperatorLess(int value, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(5).collect(toList());
@@ -642,7 +563,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ 12, asList(0, 1, 2) }, { 13, asList(0, 1, 2, 3) } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorLessEqual")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorLessEqual")
 	public void testFindQueryOperatorLessEqual(int value, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(5).collect(toList());
@@ -665,7 +586,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ 12, emptyList() } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorGreater")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorGreater")
 	public void testFindQueryOperatorGreater(int value, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(3).collect(toList());
@@ -688,7 +609,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ 12, singletonList(2) }, { 13, emptyList() } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorGreaterEqual")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorGreaterEqual")
 	public void testFindQueryOperatorGreaterEqual(int value, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(3).collect(toList());
@@ -711,7 +632,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ 10, 11, asList(0, 1) }, { 10, 12, asList(0, 1, 2) }, { 12, 20, asList(2) } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorRange")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorRange")
 	public void testFindQueryOperatorRange(int low, int high, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(3).collect(toList());
@@ -733,7 +654,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		return new Object[][] { { "ring", asList(0, 1) }, { "Ring", emptyList() }, { "nomatch", emptyList() } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorLike")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorLike")
 	public void testFindQueryOperatorLike(String likeStr, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(2).collect(toList());
@@ -756,7 +677,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ 12, asList(0, 1) }, { 13, asList(0, 1, 2) } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorNot")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorNot")
 	public void testFindQueryOperatorNot(int value, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(3).collect(toList());
@@ -775,7 +696,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	/**
 	 * Test used as a caching benchmark
 	 */
-	@Test(enabled = false)
+	@Test(singleThreaded = true, enabled = false)
 	public void cachePerformanceTest()
 	{
 		List<Entity> entities = createDynamic(10000).collect(toList());
@@ -808,7 +729,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ "string1", -1, emptyList() }, { "unknownString", -1, emptyList() } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorAnd")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorAnd")
 	public void testFindQueryOperatorAnd(String strValue, int value, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(3).collect(toList());
@@ -831,7 +752,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ "string1", -1, asList(0, 1, 2) }, { "unknownString", -1, emptyList() } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorOr")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorOr")
 	public void testFindQueryOperatorOr(String strValue, int value, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(3).collect(toList());
@@ -856,7 +777,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				{ false, "string1", -1, asList(1) }, { false, "unknownString", -1, emptyList() } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorNested")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorNested")
 	public void testFindQueryOperatorNested(boolean boolValue, String strValue, int value,
 			List<Integer> expectedEntityIndices)
 	{
@@ -880,7 +801,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		return new Object[][] { { "body", asList(1) }, { "head", asList(1) }, { "unknownString", emptyList() } };
 	}
 
-	@Test(dataProvider = "findQueryOperatorSearch")
+	@Test(singleThreaded = true, dataProvider = "findQueryOperatorSearch")
 	public void testFindQueryOperatorSearch(String searchStr, List<Integer> expectedEntityIndices)
 	{
 		List<Entity> entities = createDynamic(2).collect(toList());
@@ -896,7 +817,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindQueryLimit2_Offset2_sortOnInt()
 	{
 		List<Entity> testRefEntities = testHarness.createTestRefEntities(refEntityMetaDataDynamic, 6);
@@ -917,7 +838,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertTrue(EntityUtils.equals(foundAsList.get(1), testEntities.get(6)));
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindQueryTypedStatic()
 	{
 		List<Entity> entities = createStatic(5).collect(toList());
@@ -929,7 +850,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(found.get().findFirst().get().getId(), entities.get(0).getIdValue());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindOne()
 	{
 		Entity entity = createDynamic(1).findFirst().get();
@@ -938,7 +859,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertNotNull(dataService.findOneById(entityMetaDataDynamic.getName(), entity.getIdValue()));
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindOneTypedStatic()
 	{
 		Entity entity = createStatic(1).findFirst().get();
@@ -950,7 +871,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(testEntityStatic.getId(), entity.getIdValue());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindOneFetch()
 	{
 		Entity entity = createDynamic(1).findFirst().get();
@@ -960,7 +881,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				.findOneById(entityMetaDataDynamic.getName(), entity.getIdValue(), new Fetch().field(ATTR_ID)));
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindOneFetchTypedStatic()
 	{
 		TestEntityStatic entity = new TestEntityStatic(entityMetaDataStatic);
@@ -977,7 +898,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(testEntityStatic.getIdValue(), entity.getIdValue());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindOneQuery()
 	{
 		Entity entity = createDynamic(1).findFirst().get();
@@ -988,7 +909,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertNotNull(entity);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testFindOneQueryTypedStatic()
 	{
 		Entity entity = createStatic(1).findFirst().get();
@@ -1000,7 +921,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(testEntityStatic.getId(), entity.getIdValue());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testGetCapabilities()
 	{
 		Set<RepositoryCapability> capabilities = dataService.getCapabilities(entityMetaDataDynamic.getName());
@@ -1008,7 +929,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertTrue(capabilities.containsAll(asList(MANAGABLE, QUERYABLE, WRITABLE, VALIDATE_REFERENCE_CONSTRAINT)));
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testGetEntityMetaData()
 	{
 		EntityMetaData emd = dataService.getEntityMetaData(entityMetaDataDynamic.getName());
@@ -1016,7 +937,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertTrue(EntityUtils.equals(emd, entityMetaDataDynamic));
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testGetEntityNames()
 	{
 		Stream<String> names = dataService.getEntityNames();
@@ -1024,13 +945,13 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertTrue(names.filter(entityMetaDataDynamic.getName()::equals).findFirst().isPresent());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testGetMeta()
 	{
 		assertNotNull(dataService.getMeta());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testGetKnownRepository()
 	{
 		Repository<Entity> repo = dataService.getRepository(entityMetaDataDynamic.getName());
@@ -1038,20 +959,20 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(repo.getName(), entityMetaDataDynamic.getName());
 	}
 
-	@Test(expectedExceptions = UnknownEntityException.class)
+	@Test(singleThreaded = true, expectedExceptions = UnknownEntityException.class)
 	public void testGetUnknownRepository()
 	{
 		dataService.getRepository("bogus");
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testHasRepository()
 	{
 		assertTrue(dataService.hasRepository(entityMetaDataDynamic.getName()));
 		assertFalse(dataService.hasRepository("bogus"));
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testIterator()
 	{
 		assertNotNull(dataService.iterator());
@@ -1066,7 +987,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 				.anyMatch(e -> repo.getName().equals(e.getName())));
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testQuery()
 	{
 		assertNotNull(dataService.query(entityMetaDataDynamic.getName()));
@@ -1081,7 +1002,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		}
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testUpdate()
 	{
 		Entity entity = createDynamic(1).findFirst().get();
@@ -1108,7 +1029,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(entity.get(ATTR_STRING), "qwerty");
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testUpdateSingleRefEntityIndexesReferencingEntities()
 	{
 		dataService.add(entityMetaDataDynamic.getName(), createDynamic(30));
@@ -1126,7 +1047,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(searchService.count(new QueryImpl<>().search("qwerty"), entityMetaDataDynamic), 5);
 	}
 
-	@Test(enabled = false) //FIXME: sys_md_attributes spam
+	@Test(singleThreaded = true, enabled = false) //FIXME: sys_md_attributes spam
 	public void testUpdateSingleRefEntityIndexesLargeAmountOfReferencingEntities()
 	{
 		dataService.add(entityMetaDataDynamic.getName(), createDynamic(10000));
@@ -1149,7 +1070,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(searchService.count(new QueryImpl<>().search("qwerty"), entityMetaDataDynamic), 3333);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testUpdateStream()
 	{
 		Entity entity = createDynamic(1).findFirst().get();
@@ -1220,7 +1141,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(searchService.count(q, entityMetaDataDynamic), 0);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testCreateSelfXref()
 	{
 		Entity entitySelfXref = entitySelfXrefTestHarness.createTestEntities(selfXrefEntityMetaData, 1)
@@ -1260,14 +1181,14 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(entity.getEntity(ATTR_XREF).getIdValue(), entity.getIdValue());
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testIndexCreateMetaData()
 	{
 		IndexMetadataCUDOperationsPlatformIT
 				.testIndexCreateMetaData(searchService, entityMetaDataStatic, entityMetaDataDynamic, metaDataService);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testIndexDeleteMetaData()
 	{
 		IndexMetadataCUDOperationsPlatformIT
@@ -1275,7 +1196,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 						indexService);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testIndexUpdateMetaDataUpdateAttribute()
 	{
 		IndexMetadataCUDOperationsPlatformIT
@@ -1283,7 +1204,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 						indexService);
 	}
 
-	@Test
+	@Test(singleThreaded = true)
 	public void testIndexUpdateMetaDataRemoveAttribute()
 	{
 		IndexMetadataCUDOperationsPlatformIT
@@ -1328,7 +1249,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 	}
 
 	// Derived from fix: https://github.com/molgenis/molgenis/issues/5227
-	@Test
+	@Test(singleThreaded = true)
 	public void testIndexBatchUpdate()
 	{
 		List<Entity> refEntities = testHarness.createTestRefEntities(refEntityMetaDataDynamic, 2);
@@ -1388,471 +1309,7 @@ public class PlatformIT extends AbstractTestNGSpringContextTests
 		assertEquals(result6.count(), 1);
 	}
 
-	@Test(groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyInsert()
-	{
-		for (int i = 1; i <= ONE_TO_MANY_CASES; i++)
-		{
-			importAuthorsAndBooks(i);
-
-			String book = "sys_Book" + i;
-			assertEquals(dataService.findOneById(book, BOOK_1).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_1);
-			assertEquals(dataService.findOneById(book, BOOK_2).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_2);
-			assertEquals(dataService.findOneById(book, BOOK_3).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_3);
-
-			String author = "sys_Author" + i;
-			assertEquals(
-					dataService.findOneById(author, AUTHOR_1).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
-					BOOK_1);
-			assertEquals(
-					dataService.findOneById(author, AUTHOR_2).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
-					BOOK_2);
-			assertEquals(
-					dataService.findOneById(author, AUTHOR_3).getEntities(ATTR_BOOKS).iterator().next().getIdValue(),
-					BOOK_3);
-		}
-	}
-
-	private void importBooksThenAuthors(OneToManyTestHarness.AuthorsAndBooks authorsAndBooks)
-	{
-		runAsSystem(() ->
-		{
-			dataService.add(authorsAndBooks.getBookMetaData().getName(), authorsAndBooks.getBooks().stream());
-			dataService.add(authorsAndBooks.getAuthorMetaData().getName(), authorsAndBooks.getAuthors().stream());
-			waitForIndexToBeStable(authorsAndBooks.getAuthorMetaData().getName(), indexService, LOG);
-			waitForIndexToBeStable(authorsAndBooks.getBookMetaData().getName(), indexService, LOG);
-		});
-	}
-
-	private void importAuthorsThenBooks(OneToManyTestHarness.AuthorsAndBooks authorsAndBooks)
-	{
-		runAsSystem(() ->
-		{
-			dataService.add(authorsAndBooks.getAuthorMetaData().getName(), authorsAndBooks.getAuthors().stream());
-			dataService.add(authorsAndBooks.getBookMetaData().getName(), authorsAndBooks.getBooks().stream());
-			waitForIndexToBeStable(authorsAndBooks.getAuthorMetaData().getName(), indexService, LOG);
-			waitForIndexToBeStable(authorsAndBooks.getBookMetaData().getName(), indexService, LOG);
-		});
-	}
-
-	private void deleteBooksThenAuthors(int testCase)
-	{
-		dataService.deleteAll("sys_Book" + testCase);
-		dataService.deleteAll("sys_Author" + testCase);
-	}
-
-	private void deleteAuthorsThenBooks(int testCase)
-	{
-		dataService.deleteAll("sys_Author" + testCase);
-		dataService.deleteAll("sys_Book" + testCase);
-	}
-
-	private OneToManyTestHarness.AuthorsAndBooks importAuthorsAndBooks(int testCase)
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks;
-		switch (testCase)
-		{
-			case 1:
-				// case 1: books/authors both nillable, order of import not important
-				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(1);
-				importBooksThenAuthors(authorsAndBooks);
-				return authorsAndBooks;
-			case 2:
-				// case 2: book.author required so add Author entities first
-				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(2);
-				importAuthorsThenBooks(authorsAndBooks);
-				return authorsAndBooks;
-			case 3:
-				// case 3: author.books required so add Book entities first
-				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(3);
-				importBooksThenAuthors(authorsAndBooks);
-				return authorsAndBooks;
-			case 4:
-				// case 4: books/authors both required
-				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(4);
-				importBooksThenAuthors(authorsAndBooks);
-				return authorsAndBooks;
-			case 5:
-				// case 5: books/authors both nillable, ascending order
-				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(5);
-				importBooksThenAuthors(authorsAndBooks);
-				return authorsAndBooks;
-			case 6:
-				// case 6: books/authors both nillable, descending order
-				authorsAndBooks = oneToManyTestHarness.createAuthorAndBookEntities(6);
-				importBooksThenAuthors(authorsAndBooks);
-				return authorsAndBooks;
-			default:
-				return null;
-		}
-	}
-
-	@Test(groups = GROUPS_ONE_TO_MANY)
-	@Transactional
-	public void testL1OneToManySingleEntityUpdate()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(1);
-		try
-		{
-			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), BOOK_1);
-			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), AUTHOR_1);
-			Entity author2 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), AUTHOR_2);
-
-			book1.set(BookMetaData1.AUTHOR, author2);
-			dataService.update(book1.getEntityMetaData().getName(), book1);
-
-			Entity author1RetrievedAgain = dataService
-					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author1.getIdValue());
-			assertEquals(Collections.emptyList(),
-					Lists.newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)));
-
-			Entity author2Retrieved = dataService
-					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author2.getIdValue());
-			Iterable<Entity> author2Books = author2Retrieved.getEntities(AuthorMetaData1.ATTR_BOOKS);
-
-			// expected behavior: book.author changed, new author.books order is undefined
-			Set<Object> retrievedAuthor2BookIds = StreamSupport.stream(author2Books.spliterator(), false)
-					.map(Entity::getIdValue).collect(toSet());
-			assertEquals(retrievedAuthor2BookIds, newHashSet(BOOK_2, BOOK_1));
-		}
-		finally
-		{
-			dataService.deleteAll(authorsAndBooks.getBookMetaData().getName());
-			dataService.deleteAll(authorsAndBooks.getAuthorMetaData().getName());
-		}
-	}
-
-	@Test(groups = GROUPS_ONE_TO_MANY)
-	@Transactional
-	public void testL1OneToManyStreamingEntityUpdate()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(1);
-		try
-		{
-			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), BOOK_1);
-			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), AUTHOR_1);
-			Entity author2 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), AUTHOR_2);
-
-			book1.set(BookMetaData1.AUTHOR, author2);
-			dataService.update(book1.getEntityMetaData().getName(), Stream.of(book1));
-
-			Entity author1RetrievedAgain = dataService
-					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author1.getIdValue());
-			assertEquals(Collections.emptyList(),
-					Lists.newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)));
-
-			Entity author2Retrieved = dataService
-					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author2.getIdValue());
-			Iterable<Entity> author2Books = author2Retrieved.getEntities(AuthorMetaData1.ATTR_BOOKS);
-
-			// expected behavior: book.author changed, new author.books order is undefined
-			Set<Object> retrievedAuthor2BookIds = StreamSupport.stream(author2Books.spliterator(), false)
-					.map(Entity::getIdValue).collect(toSet());
-			assertEquals(retrievedAuthor2BookIds, newHashSet(BOOK_2, BOOK_1));
-		}
-		finally
-		{
-			dataService.deleteAll(authorsAndBooks.getBookMetaData().getName());
-			dataService.deleteAll(authorsAndBooks.getAuthorMetaData().getName());
-		}
-	}
-
-	@Test(groups = GROUPS_ONE_TO_MANY)
-	@Transactional
-	public void testL1OneToManyEntitySingleEntityDelete()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(1);
-		Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), BOOK_1);
-		Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), AUTHOR_1);
-
-		dataService.delete(book1.getEntityMetaData().getName(), book1);
-
-		Entity author1RetrievedAgain = dataService
-				.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author1.getIdValue());
-		assertEquals(Collections.emptyList(),
-				Lists.newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)));
-
-		dataService.deleteAll(authorsAndBooks.getBookMetaData().getName());
-		dataService.deleteAll(authorsAndBooks.getAuthorMetaData().getName());
-	}
-
-	@Test(groups = GROUPS_ONE_TO_MANY)
-	@Transactional
-	public void testL1OneToManyEntityStreamingEntityDelete()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(1);
-		try
-		{
-			Entity book1 = dataService.findOneById(authorsAndBooks.getBookMetaData().getName(), BOOK_1);
-			Entity author1 = dataService.findOneById(authorsAndBooks.getAuthorMetaData().getName(), AUTHOR_1);
-
-			dataService.delete(book1.getEntityMetaData().getName(), Stream.of(book1));
-
-			Entity author1RetrievedAgain = dataService
-					.findOneById(authorsAndBooks.getAuthorMetaData().getName(), author1.getIdValue());
-			assertEquals(Collections.emptyList(),
-					Lists.newArrayList(author1RetrievedAgain.getEntities(AuthorMetaData1.ATTR_BOOKS)));
-		}
-		finally
-		{
-			dataService.deleteAll(authorsAndBooks.getBookMetaData().getName());
-			dataService.deleteAll(authorsAndBooks.getAuthorMetaData().getName());
-		}
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyAuthorRequiredSetBooksNull()
-	{
-		// FIXME doesn't throw exception
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
-		Entity author = authorsAndBooks.getAuthors().get(0);
-		author.set(ATTR_BOOKS, null);
-		dataService.update(authorsAndBooks.getAuthorMetaData().getName(), author);
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyAuthorRequiredSetAuthorsNull()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
-		Entity book = authorsAndBooks.getBooks().get(0);
-		book.set(ATTR_AUTHOR, null);
-		dataService.update(authorsAndBooks.getBookMetaData().getName(), book);
-	}
-
-	@Test(groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyAuthorRequiredUpdateValue()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(2); // book.author required
-		String bookName = authorsAndBooks.getBookMetaData().getName();
-		String authorName = authorsAndBooks.getAuthorMetaData().getName();
-
-		Entity book = dataService.findOneById(bookName, BOOK_1);
-		book.set(ATTR_AUTHOR, dataService.findOneById(authorName, AUTHOR_2));
-		dataService.update(bookName, book);
-
-		Entity updatedBook = dataService.findOneById(bookName, BOOK_1);
-		assertEquals(updatedBook.getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_2);
-
-		// expected behavior: book.author changed, new author.books order is undefined
-		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
-		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
-				.map(Entity::getIdValue).collect(toSet()), newHashSet());
-
-		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
-		assertEquals(StreamSupport.stream(updatedAuthor2.getEntities(ATTR_BOOKS).spliterator(), false)
-				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_2, BOOK_1));
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyBooksRequiredSetAuthorNull()
-	{
-		// FIXME doesn't throw exception
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(3); // author.books required
-		String bookName = authorsAndBooks.getBookMetaData().getName();
-
-		Entity book = dataService.findOneById(bookName, BOOK_1);
-		book.set(ATTR_AUTHOR, null);
-		dataService.update(bookName, book);
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyBooksRequiredSetBooksNull()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(3); // author.books required
-		String authorName = authorsAndBooks.getAuthorMetaData().getName();
-
-		Entity author = dataService.findOneById(authorName, AUTHOR_1);
-		author.set(ATTR_BOOKS, null);
-		dataService.update(authorName, author);
-	}
-
-	@Test(groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyBookRequiredUpdateValue()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(3); // book.author required
-		String bookName = authorsAndBooks.getBookMetaData().getName();
-		String authorName = authorsAndBooks.getAuthorMetaData().getName();
-
-		Entity author = dataService.findOneById(authorName, AUTHOR_1);
-		author.set(ATTR_BOOKS, newArrayList(dataService.findOneById(bookName, BOOK_2)));
-		dataService.update(authorName, author); //FIXME duplicate value 'book2'
-
-		Entity updatedAuthor = dataService.findOneById(authorName, AUTHOR_1);
-		assertEquals(updatedAuthor.getEntities(ATTR_BOOKS).iterator().next().getIdValue(), BOOK_2);
-
-		Entity updatedBook1 = dataService.findOneById(bookName, BOOK_1);
-		assertEquals(updatedBook1.getEntity(ATTR_AUTHOR).getIdValue(), null);
-
-		Entity updatedBook2 = dataService.findOneById(bookName, BOOK_2);
-		assertEquals(updatedBook2.getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_1);
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyBookAndAuthorRequiredSetAuthorNull()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
-		String bookName = authorsAndBooks.getBookMetaData().getName();
-
-		Entity book = dataService.findOneById(bookName, BOOK_1);
-		book.set(ATTR_AUTHOR, null);
-		dataService.update(bookName, book);
-	}
-
-	@Test(expectedExceptions = MolgenisDataException.class, groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyBookAndAuthorRequiredSetBooksNull()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
-		String authorName = authorsAndBooks.getAuthorMetaData().getName();
-
-		Entity author = dataService.findOneById(authorName, AUTHOR_1);
-		author.set(ATTR_BOOKS, null);
-		dataService.update(authorName, author);
-	}
-
-	@Test(groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyBookAndAuthorRequiredUpdateValue()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(4);
-		String bookName = authorsAndBooks.getBookMetaData().getName();
-		String authorName = authorsAndBooks.getAuthorMetaData().getName();
-
-		Entity author1 = dataService.findOneById(authorName, AUTHOR_1);
-		Entity author2 = dataService.findOneById(authorName, AUTHOR_2);
-		Entity book1 = dataService.findOneById(bookName, BOOK_1);
-		Entity book2 = dataService.findOneById(bookName, BOOK_2);
-		book1.set(ATTR_AUTHOR, author2); // switch authors
-		book2.set(ATTR_AUTHOR, author1);
-
-		dataService.update(bookName, Stream.of(book1, book2));
-
-		assertEquals(dataService.findOneById(bookName, BOOK_1).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_2);
-		assertEquals(dataService.findOneById(bookName, BOOK_2).getEntity(ATTR_AUTHOR).getIdValue(), AUTHOR_1);
-
-		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
-		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
-				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_2));
-
-		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
-		assertEquals(StreamSupport.stream(updatedAuthor2.getEntities(ATTR_BOOKS).spliterator(), false)
-				.map(Entity::getIdValue).collect(toSet()), newHashSet(BOOK_1));
-	}
-
-	@Test(groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyAscendingOrderUpdateAuthorValue()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(5);
-		String bookName = authorsAndBooks.getBookMetaData().getName();
-		String authorName = authorsAndBooks.getAuthorMetaData().getName();
-
-		Entity book3 = dataService.findOneById(bookName, BOOK_3);
-		book3.set(ATTR_AUTHOR, dataService.findOneById(authorName, AUTHOR_1));
-		dataService.update(bookName, book3);
-
-		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
-		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
-				.map(Entity::getIdValue).collect(toList()), newArrayList(BOOK_1, BOOK_3));
-
-		Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
-		assertEquals(Iterables.size(updatedAuthor3.getEntities(ATTR_BOOKS)), 0);
-
-		Entity book2 = dataService.findOneById(bookName, BOOK_2);
-		book2.set(ATTR_AUTHOR, updatedAuthor1);
-		dataService.update(bookName, book2);
-
-		updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
-		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
-				.map(Entity::getIdValue).collect(toList()), newArrayList(BOOK_1, BOOK_2, BOOK_3));
-
-		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
-		assertEquals(Iterables.size(updatedAuthor2.getEntities(ATTR_BOOKS)), 0);
-	}
-
-	@Test(groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyAscendingOrderUpdateBooksValue()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(5);
-		String bookName = authorsAndBooks.getBookMetaData().getName();
-		String authorName = authorsAndBooks.getAuthorMetaData().getName();
-
-		Entity book1 = dataService.findOneById(bookName, BOOK_1);
-		Entity book2 = dataService.findOneById(bookName, BOOK_2);
-
-		Entity author3 = dataService.findOneById(authorName, AUTHOR_3);
-		author3.set(ATTR_BOOKS, newArrayList(book2, book1));
-		dataService.update(authorName, author3); //FIXME duplicate value 'book2'
-
-		Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
-		assertEquals(StreamSupport.stream(updatedAuthor3.getEntities(ATTR_BOOKS).spliterator(), false)
-				.map(Entity::getIdValue).collect(toList()), newArrayList(BOOK_1, BOOK_2));
-
-		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
-		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
-		assertEquals(Iterables.size(updatedAuthor1.getEntities(ATTR_BOOKS)), 0);
-		assertEquals(Iterables.size(updatedAuthor2.getEntities(ATTR_BOOKS)), 0);
-
-		Entity updatedBook3 = dataService.findOneById(bookName, BOOK_3);
-		assertEquals(updatedBook3.getEntity(ATTR_AUTHOR), null);
-	}
-
-	@Test(groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyDescendingOrderUpdateAuthorValue()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(6);
-		String bookName = authorsAndBooks.getBookMetaData().getName();
-		String authorName = authorsAndBooks.getAuthorMetaData().getName();
-
-		Entity book3 = dataService.findOneById(bookName, BOOK_3);
-		book3.set(ATTR_AUTHOR, dataService.findOneById(authorName, AUTHOR_1));
-		dataService.update(bookName, book3);
-
-		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
-		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
-						.map(Entity::getIdValue).collect(toList()),
-				newArrayList(BOOK_3, BOOK_1)); // FIXME expected book3 but found book1 at index 0
-
-		Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
-		assertEquals(Iterables.size(updatedAuthor3.getEntities(ATTR_BOOKS)), 0);
-
-		Entity book2 = dataService.findOneById(bookName, BOOK_2);
-		book2.set(ATTR_AUTHOR, updatedAuthor1);
-		dataService.update(bookName, book2);
-
-		updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
-		assertEquals(StreamSupport.stream(updatedAuthor1.getEntities(ATTR_BOOKS).spliterator(), false)
-				.map(Entity::getIdValue).collect(toList()), newArrayList(BOOK_3, BOOK_2, BOOK_1));
-
-		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
-		assertEquals(Iterables.size(updatedAuthor2.getEntities(ATTR_BOOKS)), 0);
-	}
-
-	@Test(groups = GROUPS_ONE_TO_MANY)
-	public void testOneToManyDescendingOrderUpdateBooksValue()
-	{
-		OneToManyTestHarness.AuthorsAndBooks authorsAndBooks = importAuthorsAndBooks(6);
-		String bookName = authorsAndBooks.getBookMetaData().getName();
-		String authorName = authorsAndBooks.getAuthorMetaData().getName();
-
-		Entity book1 = dataService.findOneById(bookName, BOOK_1);
-		Entity book2 = dataService.findOneById(bookName, BOOK_2);
-
-		Entity author3 = dataService.findOneById(authorName, AUTHOR_3);
-		author3.set(ATTR_BOOKS, newArrayList(book2, book1));
-		dataService.update(authorName, author3); // FIXME duplicate value 'book2'
-
-		Entity updatedAuthor3 = dataService.findOneById(authorName, AUTHOR_3);
-		assertEquals(StreamSupport.stream(updatedAuthor3.getEntities(ATTR_BOOKS).spliterator(), false)
-				.map(Entity::getIdValue).collect(toList()), newArrayList(BOOK_2, BOOK_1));
-
-		Entity updatedAuthor1 = dataService.findOneById(authorName, AUTHOR_1);
-		Entity updatedAuthor2 = dataService.findOneById(authorName, AUTHOR_2);
-		assertEquals(Iterables.size(updatedAuthor1.getEntities(ATTR_BOOKS)), 0);
-		assertEquals(Iterables.size(updatedAuthor2.getEntities(ATTR_BOOKS)), 0);
-
-		Entity updatedBook3 = dataService.findOneById(bookName, BOOK_3);
-		assertEquals(updatedBook3.getEntity(ATTR_AUTHOR), null);
-	}
-
-	@Test
+	@Test(singleThreaded = true)
 	public void l3CacheTest()
 	{
 		String COUNTRY = "Country";

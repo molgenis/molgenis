@@ -1,4 +1,4 @@
-package org.molgenis.test.data.staticentity.bidirectional.test3;
+package org.molgenis.test.data.staticentity.bidirectional.authorbook3;
 
 import org.molgenis.data.AbstractSystemEntityFactory;
 import org.molgenis.test.data.staticentity.bidirectional.Book;
