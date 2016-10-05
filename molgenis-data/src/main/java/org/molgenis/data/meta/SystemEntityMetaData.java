@@ -1,5 +1,6 @@
 package org.molgenis.data.meta;
 
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -22,6 +23,7 @@ import static org.molgenis.data.system.model.RootSystemPackage.PACKAGE_SYSTEM;
 public abstract class SystemEntityMetaData extends EntityMetaData
 {
 	private AttributeMetaDataFactory attributeMetaDataFactory;
+	private IdGenerator idGenerator;
 
 	private final String entityName;
 	private final String systemPackageName;
@@ -88,6 +90,7 @@ public abstract class SystemEntityMetaData extends EntityMetaData
 	public AttributeMetaData addAttribute(String attrName, AttributeMetaData parentAttr, AttributeRole... attrTypes)
 	{
 		AttributeMetaData attr = new SystemAttributeMetaData(attributeMetaDataFactory.getAttributeMetaDataMetaData());
+		attr.setIdentifier(idGenerator.generateId());
 		attr.setDefaultValues();
 		attr.setName(attrName);
 		if (parentAttr != null)
@@ -107,6 +110,12 @@ public abstract class SystemEntityMetaData extends EntityMetaData
 	public void setAttributeMetaDataFactory(AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		this.attributeMetaDataFactory = requireNonNull(attributeMetaDataFactory);
+	}
+
+	@Autowired
+	public void setIdGenerator(IdGenerator idGenerator)
+	{
+		this.idGenerator = requireNonNull(idGenerator);
 	}
 
 	/**

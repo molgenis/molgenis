@@ -92,18 +92,22 @@ public class IndexActionMetaData extends SystemEntityMetaData
 		/**
 		 * index action is finished
 		 */
-		FINISHED, /**
-	 * index action is canceled
-	 */
-	CANCELED, /**
-	 * index action failed
-	 */
-	FAILED, /**
-	 * index action is started
-	 */
-	STARTED, /**
-	 * index action is just created and is not yet processed
-	 */
-	PENDING;
+		FINISHED,
+		/**
+		 * index action is canceled
+		 */
+		CANCELED,
+		/**
+		 * index action failed
+		 */
+		FAILED,
+		/**
+		 * index action is started
+		 */
+		STARTED,
+		/**
+		 * index action is just created and is not yet processed
+		 */
+		PENDING
 	}
 }

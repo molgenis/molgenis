@@ -36,7 +36,7 @@ public class IdCardBiobankRepository extends AbstractRepository
 
 	@Autowired
 	public IdCardBiobankRepository(IdCardBiobankMetaData idCardBiobankMetaData, IdCardClient idCardClient,
-			ElasticsearchService elasticsearchService, DataService dataService,
+			@SuppressWarnings("SpringJavaAutowiringInspection") ElasticsearchService elasticsearchService, DataService dataService,
 			IdCardIndexerSettings idCardIndexerSettings, IdCardBiobankFactory idCardBiobankFactory)
 	{
 		this.idCardBiobankMetaData = idCardBiobankMetaData;

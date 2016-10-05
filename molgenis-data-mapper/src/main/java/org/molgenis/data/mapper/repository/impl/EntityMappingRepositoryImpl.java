@@ -3,7 +3,7 @@ package org.molgenis.data.mapper.repository.impl;
 import com.google.common.collect.Lists;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Entity;
-import org.molgenis.data.IdGenerator;
+import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.UnknownEntityException;
 import org.molgenis.data.mapper.controller.MappingServiceController;
 import org.molgenis.data.mapper.mapping.model.AttributeMapping;

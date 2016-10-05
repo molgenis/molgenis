@@ -11,7 +11,7 @@ public interface TokenService
 	/**
 	 * Generates a token and associates it with a user. Token expires after 2 hours.
 	 *
-	 * @param user
+	 * @param username
 	 * @return
 	 */
 	String generateAndStoreToken(String username, String description);

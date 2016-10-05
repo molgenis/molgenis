@@ -100,7 +100,7 @@ public class CGDAnnotator implements AnnotatorConfig
 		// Mapping from attribute dataType to cgd dataType
 		private static Map<String, String> mappings = new HashMap<String, String>();
 
-		private CGDAttributeName(String cgdName, String attributeName)
+		CGDAttributeName(String cgdName, String attributeName)
 		{
 			this.cgdName = cgdName;
 			this.attributeName = attributeName;

@@ -10,10 +10,10 @@ import java.util.Map;
 
 public interface AlgorithmGeneratorService
 {
-	abstract String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
+	String generate(AttributeMetaData targetAttribute, List<AttributeMetaData> sourceAttributes,
 			EntityMetaData targetEntityMetaData, EntityMetaData sourceEntityMetaData);
 
-	abstract GeneratedAlgorithm generate(AttributeMetaData targetAttribute,
+	GeneratedAlgorithm generate(AttributeMetaData targetAttribute,
 			Map<AttributeMetaData, ExplainedAttributeMetaData> sourceAttributes, EntityMetaData targetEntityMetaData,
 			EntityMetaData sourceEntityMetaData);
 }

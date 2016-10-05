@@ -4,6 +4,7 @@ import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaDataMetaData;
+import org.molgenis.data.populate.IdGenerator;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -65,6 +66,7 @@ public class SystemEntityMetaDataTest
 		TestNestedCompoundEMD(String entityName)
 		{
 			super(entityName);
+			setIdGenerator(mock(IdGenerator.class));
 		}
 
 		@Override
@@ -86,6 +88,7 @@ public class SystemEntityMetaDataTest
 		TestCompoundEMD(String entityName)
 		{
 			super(entityName);
+			setIdGenerator(mock(IdGenerator.class));
 		}
 
 		@Override

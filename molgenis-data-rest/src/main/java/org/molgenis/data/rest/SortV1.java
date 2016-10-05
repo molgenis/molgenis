@@ -24,10 +24,10 @@ import java.util.*;
  * Copy of org.springframework.data.domain.Sort for backwards compatibility
  * <p>
  * Sort option for queries. You have to provide at least a list of properties to sort for that must not include
- * {@literal null} or empty strings. The direction defaults to {@value SortV1#DEFAULT_DIRECTION}.
+ * {@literal null} or empty strings. The direction defaults to {@link SortV1#DEFAULT_DIRECTION}.
  *
  * @author Oliver Gierke
- * @deprecated use {@link #org.molgenis.data.Sort} instead.
+ * @deprecated use {@link org.molgenis.data.Sort} instead.
  */
 public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 {
@@ -64,7 +64,7 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 	}
 
 	/**
-	 * Creates a new {@link SortV1} instance. Order defaults to {@value DirectionV1#ASC}.
+	 * Creates a new {@link SortV1} instance. Order defaults to {@link DirectionV1#ASC}.
 	 *
 	 * @param properties must not be {@literal null} or contain {@literal null} or empty strings
 	 */
@@ -76,7 +76,7 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 	/**
 	 * Creates a new {@link SortV1} instance.
 	 *
-	 * @param direction  defaults to {@value SortV1#DEFAULT_DIRECTION} (for {@literal null} cases, too)
+	 * @param direction  defaults to {@link SortV1#DEFAULT_DIRECTION} (for {@literal null} cases, too)
 	 * @param properties must not be {@literal null} or contain {@literal null} or empty strings
 	 */
 	public SortV1(DirectionV1 direction, String... properties)
@@ -215,7 +215,7 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 	 *
 	 * @author Oliver Gierke
 	 */
-	public static enum DirectionV1
+	public enum DirectionV1
 	{
 
 		ASC, DESC;
@@ -258,9 +258,9 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 
 		/**
 		 * Creates a new {@link OrderV1} instance. if order is {@literal null} then order defaults to
-		 * {@value SortV1#DEFAULT_DIRECTION}
+		 * {@link SortV1#DEFAULT_DIRECTION}
 		 *
-		 * @param direction can be {@literal null}, will default to {@value SortV1#DEFAULT_DIRECTION}
+		 * @param direction can be {@literal null}, will default to {@link SortV1#DEFAULT_DIRECTION}
 		 * @param property  must not be {@literal null} or empty.
 		 */
 		public OrderV1(DirectionV1 direction, String property)
@@ -277,7 +277,7 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 
 		/**
 		 * Creates a new {@link OrderV1} instance. Takes a single property. Direction defaults to
-		 * {@value SortV1#DEFAULT_DIRECTION}.
+		 * {@link SortV1#DEFAULT_DIRECTION}.
 		 *
 		 * @param property must not be {@literal null} or empty.
 		 */
@@ -287,7 +287,7 @@ public class SortV1 implements Iterable<SortV1.OrderV1>, Serializable
 		}
 
 		/**
-		 * @deprecated use {@link SortV1#Sort(DirectionV1, List)} instead.
+		 * @deprecated use {@link SortV1#SortV1(DirectionV1, List)} instead.
 		 */
 		@Deprecated
 		public static List<OrderV1> create(DirectionV1 direction, Iterable<String> properties)

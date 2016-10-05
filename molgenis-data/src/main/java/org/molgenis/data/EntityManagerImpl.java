@@ -5,6 +5,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.SetMultimap;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.populate.EntityPopulator;
 import org.molgenis.data.support.*;
 import org.molgenis.util.BatchingIterable;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,8 @@ import java.util.stream.StreamSupport;
 import static java.util.Collections.singletonList;
 import static java.util.Objects.requireNonNull;
 import static java.util.stream.StreamSupport.stream;
+import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
+import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.support.EntityMetaDataUtils.isMultipleReferenceType;
 import static org.molgenis.data.support.EntityMetaDataUtils.isSingleReferenceType;
 
@@ -33,22 +36,30 @@ public class EntityManagerImpl implements EntityManager
 
 	private final DataService dataService;
 	private final EntityFactoryRegistry entityFactoryRegistry;
+	private final EntityPopulator entityPopulator;
 
 	@Autowired
-	public EntityManagerImpl(DataService dataService, EntityFactoryRegistry entityFactoryRegistry)
+	public EntityManagerImpl(DataService dataService, EntityFactoryRegistry entityFactoryRegistry,
+			EntityPopulator entityPopulator)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.entityFactoryRegistry = requireNonNull(entityFactoryRegistry);
+		this.entityPopulator = requireNonNull(entityPopulator);
 	}
 
 	@Override
-	public Entity create(EntityMetaData entityMeta)
+	public Entity create(EntityMetaData entityMeta, CreationMode creationMode)
 	{
-		return create(entityMeta, null);
+		return create(entityMeta, null, creationMode);
 	}
 
 	@Override
 	public Entity create(EntityMetaData entityMeta, Fetch fetch)
+	{
+		return create(entityMeta, fetch, NO_POPULATE);
+	}
+
+	private Entity create(EntityMetaData entityMeta, Fetch fetch, CreationMode creationMode)
 	{
 		Entity entity = new DynamicEntity(entityMeta);
 		if (fetch != null)
@@ -61,6 +72,11 @@ public class EntityManagerImpl implements EntityManager
 		{
 			// create entity that computed values based on expressions defined in meta data
 			entity = new EntityWithComputedAttributes(entity);
+		}
+
+		if (creationMode == POPULATE)
+		{
+			entityPopulator.populate(entity);
 		}
 
 		EntityFactory<? extends Entity, ?> entityFactory = entityFactoryRegistry.getEntityFactory(entityMeta);
