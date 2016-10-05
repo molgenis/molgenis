@@ -35,7 +35,7 @@ public class VcfToEntityTest extends AbstractMolgenisSpringTest
 	private VcfAttributes vcfAttrs;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityMetaFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;

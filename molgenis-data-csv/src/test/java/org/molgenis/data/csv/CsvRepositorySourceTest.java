@@ -4,7 +4,7 @@ import com.google.common.collect.Iterables;
 import org.apache.commons.io.FileUtils;
 import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.FileCopyUtils;
@@ -21,7 +21,7 @@ import static org.testng.Assert.assertNotNull;
 public class CsvRepositorySourceTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityMetaFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;

@@ -62,7 +62,6 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 import static org.molgenis.MolgenisFieldTypes.AttributeType.*;
-import static org.molgenis.data.EntityManager.CreationMode.NO_POPULATE;
 import static org.molgenis.data.EntityManager.CreationMode.POPULATE;
 import static org.molgenis.data.meta.model.EntityMetaData.AttributeRole.*;
 import static org.molgenis.util.MolgenisDateFormat.getDateFormat;
@@ -96,7 +95,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	private static final String HREF_ENTITY_ID = HREF_ENTITY_COLLECTION + '/' + ENTITY_ID;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
@@ -139,12 +138,12 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 	{
 		reset(dataService);
 
-		EntityMetaData refRefEntityMeta = entityMetaDataFactory.create().setName(REF_REF_ENTITY_NAME)
+		EntityMetaData refRefEntityMeta = entityTypeFactory.create().setName(REF_REF_ENTITY_NAME)
 				.setLabel(REF_REF_ENTITY_NAME)
 				.addAttribute(attributeMetaDataFactory.create().setName(REF_REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL,
 						ROLE_LOOKUP).addAttribute(attributeMetaDataFactory.create().setName(REF_REF_ATTR_VALUE_NAME));
 
-		EntityMetaData selfRefEntityMeta = entityMetaDataFactory.create().setName(SELF_REF_ENTITY_NAME)
+		EntityMetaData selfRefEntityMeta = entityTypeFactory.create().setName(SELF_REF_ENTITY_NAME)
 				.setLabel(SELF_REF_ENTITY_NAME)
 				.addAttribute(attributeMetaDataFactory.create().setName("id"), ROLE_ID, ROLE_LABEL, ROLE_LOOKUP);
 		selfRefEntityMeta.addAttribute(
@@ -154,7 +153,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		selfRefEntity.set("id", "0");
 		selfRefEntity.set("selfRef", selfRefEntity);
 
-		EntityMetaData refEntityMeta = entityMetaDataFactory.create().setName(REF_ENTITY_NAME).setLabel(REF_ENTITY_NAME)
+		EntityMetaData refEntityMeta = entityTypeFactory.create().setName(REF_ENTITY_NAME).setLabel(REF_ENTITY_NAME)
 				.addAttribute(attributeMetaDataFactory.create().setName(REF_ATTR_ID_NAME), ROLE_ID, ROLE_LABEL,
 						ROLE_LOOKUP).addAttribute(attributeMetaDataFactory.create().setName(REF_ATTR_VALUE_NAME))
 				.addAttribute(attributeMetaDataFactory.create().setName(REF_ATTR_REF_NAME).setDataType(XREF)
@@ -208,7 +207,7 @@ public class RestControllerV2Test extends AbstractMolgenisSpringTest
 		String enum2 = "enum2";
 
 		// required
-		EntityMetaData entityMeta = entityMetaDataFactory.create().setName(ENTITY_NAME).setLabel(ENTITY_NAME);
+		EntityMetaData entityMeta = entityTypeFactory.create().setName(ENTITY_NAME).setLabel(ENTITY_NAME);
 		AttributeMetaData attrId = attributeMetaDataFactory.create().setName(attrIdName);
 		entityMeta.addAttribute(attrId, ROLE_ID, ROLE_LABEL, ROLE_LOOKUP);
 		AttributeMetaData attrBool = createAttributeMeta(entityMeta, attrBoolName, BOOL).setNillable(false);

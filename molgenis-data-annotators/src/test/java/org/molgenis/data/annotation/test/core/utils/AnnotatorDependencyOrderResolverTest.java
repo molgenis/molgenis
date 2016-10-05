@@ -10,7 +10,7 @@ import org.molgenis.data.annotation.core.exception.UnresolvedAnnotatorDependency
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +36,7 @@ public class AnnotatorDependencyOrderResolverTest extends AbstractMolgenisSpring
 	AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -68,7 +68,7 @@ public class AnnotatorDependencyOrderResolverTest extends AbstractMolgenisSpring
 		AttributeMetaData attri = attributeMetaDataFactory.create().setName("I").setDataType(STRING);
 		AttributeMetaData attrj = attributeMetaDataFactory.create().setName("J").setDataType(STRING);
 
-		EntityMetaData emd = entityMetaDataFactory.create().setName("test");
+		EntityMetaData emd = entityTypeFactory.create().setName("test");
 		emd.addAttributes(Arrays.asList(attra, attrb));
 		when(repo.getEntityMetaData()).thenReturn(emd);
 
@@ -115,7 +115,7 @@ public class AnnotatorDependencyOrderResolverTest extends AbstractMolgenisSpring
 		available.add(annotator5);
 
 		Queue<RepositoryAnnotator> result = resolver
-				.getAnnotatorSelectionDependencyList(available, requested, repo, entityMetaDataFactory);
+				.getAnnotatorSelectionDependencyList(available, requested, repo, entityTypeFactory);
 
 		assertEquals(result.size(), 4);
 		assertEquals(result.poll().getSimpleName(), "annotator4");
@@ -140,7 +140,7 @@ public class AnnotatorDependencyOrderResolverTest extends AbstractMolgenisSpring
 		available.add(annotator5);
 
 		Queue<RepositoryAnnotator> result = resolver
-				.getAnnotatorSelectionDependencyList(available, requested, repo, entityMetaDataFactory);
+				.getAnnotatorSelectionDependencyList(available, requested, repo, entityTypeFactory);
 	}
 
 	@Configuration

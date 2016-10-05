@@ -3,7 +3,7 @@ package org.molgenis.data.csv;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -22,7 +22,7 @@ import static org.testng.Assert.assertEquals;
 public class CsvWriterTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityMetaFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;

@@ -11,7 +11,7 @@ import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -65,7 +65,7 @@ public class QueryGeneratorTest extends AbstractMolgenisSpringTest
 	private EntityMetaData refEntityMeta;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaFactory;
+	EntityTypeFactory entityMetaFactory;
 
 	@Autowired
 	AttributeMetaDataFactory attrFactory;

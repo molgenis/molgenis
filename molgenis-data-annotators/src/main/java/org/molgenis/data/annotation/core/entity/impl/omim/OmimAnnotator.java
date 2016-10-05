@@ -18,7 +18,7 @@ import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -60,7 +60,7 @@ public class OmimAnnotator implements AnnotatorConfig
 	private VcfAttributes vcfAttributes;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
@@ -130,7 +130,7 @@ public class OmimAnnotator implements AnnotatorConfig
 						outputAttributes);
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(OMIM_RESOURCE, omimInfo, geneNameQueryCreator,
-				new OmimResultFilter(entityMetaDataFactory, attributeMetaDataFactory, this), dataService, resources,
+				new OmimResultFilter(entityTypeFactory, attributeMetaDataFactory, this), dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(OMIM_LOCATION, omimAnnotatorSettings));
 
 		annotator.init(entityAnnotator);
@@ -149,7 +149,7 @@ public class OmimAnnotator implements AnnotatorConfig
 					@Override
 					public Repository<Entity> createRepository(File file) throws IOException
 					{
-						return new OmimRepository(file, entityMetaDataFactory, attributeMetaDataFactory);
+						return new OmimRepository(file, entityTypeFactory, attributeMetaDataFactory);
 					}
 				};
 			}

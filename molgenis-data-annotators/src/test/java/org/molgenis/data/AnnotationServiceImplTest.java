@@ -6,7 +6,7 @@ import org.molgenis.data.annotation.web.AnnotationServiceImpl;
 import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +27,7 @@ public class AnnotationServiceImplTest extends AbstractMolgenisSpringTest
 	AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;

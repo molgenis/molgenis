@@ -7,7 +7,7 @@ import org.molgenis.data.annotation.web.CrudRepositoryAnnotator;
 import org.molgenis.data.jobs.JobExecutionUpdater;
 import org.molgenis.data.jobs.ProgressImpl;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
 import org.molgenis.file.FileStore;
@@ -45,7 +45,7 @@ public class GavinJobFactory
 	private VcfAttributes vcfAttributes;
 	private VcfUtils vcfUtils;
 	private AttributeMetaDataFactory attributeMetaDataFactory;
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	public GavinJobFactory(CrudRepositoryAnnotator crudRepositoryAnnotator, DataService dataService,
@@ -53,7 +53,7 @@ public class GavinJobFactory
 			JobExecutionUpdater jobExecutionUpdater, MailSender mailSender, FileStore fileStore,
 			RepositoryAnnotator cadd, RepositoryAnnotator exac, RepositoryAnnotator snpEff, EffectsAnnotator gavin,
 			MenuReaderService menuReaderService, VcfAttributes vcfAttributes, VcfUtils vcfUtils,
-			AttributeMetaDataFactory attributeMetaDataFactory, EntityMetaDataFactory entityMetaDataFactory)
+			AttributeMetaDataFactory attributeMetaDataFactory, EntityTypeFactory entityTypeFactory)
 	{
 		this.crudRepositoryAnnotator = requireNonNull(crudRepositoryAnnotator);
 		this.dataService = requireNonNull(dataService);
@@ -70,7 +70,7 @@ public class GavinJobFactory
 		this.vcfAttributes = requireNonNull(vcfAttributes);
 		this.vcfUtils = requireNonNull(vcfUtils);
 		this.attributeMetaDataFactory = requireNonNull(attributeMetaDataFactory);
-		this.entityMetaDataFactory = requireNonNull(entityMetaDataFactory);
+		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 	}
 
 	@RunAsSystem
@@ -85,7 +85,7 @@ public class GavinJobFactory
 
 		return new GavinJob(new ProgressImpl(gavinJobExecution, jobExecutionUpdater, mailSender),
 				new TransactionTemplate(transactionManager), runAsAuthentication, gavinJobExecution.getIdentifier(),
-				fileStore, menuReaderService, cadd, exac, snpEff, gavin, vcfAttributes, vcfUtils, entityMetaDataFactory,
+				fileStore, menuReaderService, cadd, exac, snpEff, gavin, vcfAttributes, vcfUtils, entityTypeFactory,
 				attributeMetaDataFactory);
 	}
 

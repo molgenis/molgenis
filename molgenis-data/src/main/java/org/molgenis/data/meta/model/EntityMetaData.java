@@ -49,7 +49,7 @@ public class EntityMetaData extends StaticEntity
 	}
 
 	/**
-	 * Creates a new entity meta data. Normally called by its {@link EntityMetaDataFactory entity factory}.
+	 * Creates a new entity meta data. Normally called by its {@link EntityTypeFactory entity factory}.
 	 *
 	 * @param entityMeta entity meta data
 	 */
@@ -60,7 +60,7 @@ public class EntityMetaData extends StaticEntity
 	}
 
 	/**
-	 * Creates a new entity meta data with the given identifier. Normally called by its {@link EntityMetaDataFactory entity factory}.
+	 * Creates a new entity meta data with the given identifier. Normally called by its {@link EntityTypeFactory entity factory}.
 	 *
 	 * @param entityId   entity identifier (fully qualified entity name)
 	 * @param entityMeta entity meta data

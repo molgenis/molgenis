@@ -9,7 +9,7 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DynamicEntity;
 
@@ -37,17 +37,17 @@ public class OmimRepository extends AbstractRepository
 	public static final String OMIM_ENTRY_COL_NAME = "OmimEntry";
 	public static final String OMIM_TYPE_COL_NAME = "OmimType";
 	private final AttributeMetaDataFactory attributeMetaDataFactory;
-	private final EntityMetaDataFactory entityMetaDataFactory;
+	private final EntityTypeFactory entityTypeFactory;
 
 	private Map<String, List<Entity>> entitiesByGeneSymbol;
 
 	private final File file;
 
-	public OmimRepository(File file, EntityMetaDataFactory entityMetaDataFactory,
+	public OmimRepository(File file, EntityTypeFactory entityTypeFactory,
 			AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		this.file = file;
-		this.entityMetaDataFactory = entityMetaDataFactory;
+		this.entityTypeFactory = entityTypeFactory;
 		this.attributeMetaDataFactory = attributeMetaDataFactory;
 	}
 
@@ -60,7 +60,7 @@ public class OmimRepository extends AbstractRepository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		EntityMetaData entityMeta = entityMetaDataFactory.create().setSimpleName(NAME);
+		EntityMetaData entityMeta = entityTypeFactory.create().setSimpleName(NAME);
 		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME), ROLE_ID);
 		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(OMIM_PHENOTYPE_COL_NAME));
 		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(OMIM_MIM_NUMBER_COL_NAME));

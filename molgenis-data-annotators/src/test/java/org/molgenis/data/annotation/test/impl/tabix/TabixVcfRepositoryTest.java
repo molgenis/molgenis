@@ -6,7 +6,7 @@ import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepository
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -37,7 +37,7 @@ public class TabixVcfRepositoryTest extends AbstractMolgenisSpringTest
 	AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -48,7 +48,7 @@ public class TabixVcfRepositoryTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void before() throws IOException
 	{
-		repoMetaData = entityMetaDataFactory.create().setSimpleName("TabixTest");
+		repoMetaData = entityTypeFactory.create().setSimpleName("TabixTest");
 		repoMetaData.addAttribute(vcfAttributes.getChromAttribute());
 		repoMetaData.addAttribute(vcfAttributes.getAltAttribute());
 		repoMetaData.addAttribute(vcfAttributes.getPosAttribute());
@@ -62,7 +62,7 @@ public class TabixVcfRepositoryTest extends AbstractMolgenisSpringTest
 		repoMetaData.addAttribute(attributeMetaDataFactory.create().setName("INFO").setDataType(COMPOUND));
 
 		File file = ResourceUtils.getFile(getClass(), "/tabixtest.vcf.gz");
-		tabixVcfRepository = new TabixVcfRepository(file, "TabixTest", vcfAttributes, entityMetaDataFactory,
+		tabixVcfRepository = new TabixVcfRepository(file, "TabixTest", vcfAttributes, entityTypeFactory,
 				attributeMetaDataFactory);
 	}
 

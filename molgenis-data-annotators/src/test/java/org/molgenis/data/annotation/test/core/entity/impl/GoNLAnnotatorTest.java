@@ -11,7 +11,7 @@ import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.GoNLAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -45,7 +45,7 @@ public class GoNLAnnotatorTest extends AbstractMolgenisSpringTest
 	AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -65,7 +65,7 @@ public class GoNLAnnotatorTest extends AbstractMolgenisSpringTest
 		AnnotatorConfig annotatorConfig = context.getBean(AnnotatorConfig.class);
 		annotatorConfig.init();
 
-		emd = entityMetaDataFactory.create().setName("gonl");
+		emd = entityTypeFactory.create().setName("gonl");
 		emd.addAttribute(vcfAttributes.getChromAttribute());
 		emd.addAttribute(vcfAttributes.getPosAttribute());
 		emd.addAttribute(vcfAttributes.getRefAttribute());

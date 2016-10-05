@@ -11,7 +11,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.datastructures.Sample;
@@ -38,7 +38,7 @@ import static org.molgenis.data.vcf.utils.VcfWriterUtils.VARIANT;
 public class VcfUtils
 {
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
@@ -156,7 +156,7 @@ public class VcfUtils
 				if (resultEMD == null || effectsEMD == null)
 				{
 					effectsEMD = effect.getEntityMetaData();
-					resultEMD = entityMetaDataFactory.create(variantEMD);
+					resultEMD = entityTypeFactory.create(variantEMD);
 					resultEMD.addAttribute(attributeMetaDataFactory.create().setName(VcfWriterUtils.EFFECT)
 							.setDataType(MolgenisFieldTypes.AttributeType.MREF).setRefEntity(effectsEMD));
 				}
@@ -265,7 +265,7 @@ public class VcfUtils
 
 	private EntityMetaData getXrefEntityMetaData(Map<Integer, AttributeMetaData> metadataMap, String entityName)
 	{
-		EntityMetaData xrefMetaData = entityMetaDataFactory.create().setName(entityName);
+		EntityMetaData xrefMetaData = entityTypeFactory.create().setName(entityName);
 		xrefMetaData
 				.addAttribute(attributeMetaDataFactory.create().setName("identifier").setAuto(true).setVisible(false),
 						EntityMetaData.AttributeRole.ROLE_ID);

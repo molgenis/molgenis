@@ -71,7 +71,7 @@ public class GavinAnnotator implements AnnotatorConfig
 	private PackageFactory packageFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
@@ -92,8 +92,8 @@ public class GavinAnnotator implements AnnotatorConfig
 			public RepositoryFactory getRepositoryFactory()
 			{
 				return new InMemoryRepositoryFactory(RESOURCE_ENTITY_NAME,
-						new EmxMetaDataParser(packageFactory, attributeMetaDataFactory, entityMetaDataFactory),
-						entityMetaDataFactory, attributeMetaDataFactory);
+						new EmxMetaDataParser(packageFactory, attributeMetaDataFactory, entityTypeFactory),
+						entityTypeFactory, attributeMetaDataFactory);
 			}
 		};
 
@@ -138,7 +138,7 @@ public class GavinAnnotator implements AnnotatorConfig
 			public List<AttributeMetaData> getRequiredAttributes()
 			{
 				List<AttributeMetaData> requiredAttributes = new ArrayList<>();
-				EntityMetaData entityMetaData = entityMetaDataFactory.create().setName(VARIANT);
+				EntityMetaData entityMetaData = entityTypeFactory.create().setName(VARIANT);
 				List<AttributeMetaData> refAttributesList = Arrays
 						.asList(CaddAnnotator.getCaddScaledAttr(attributeMetaDataFactory),
 								ExacAnnotator.getExacAFAttr(attributeMetaDataFactory), vcfAttributes.getAltAttribute());

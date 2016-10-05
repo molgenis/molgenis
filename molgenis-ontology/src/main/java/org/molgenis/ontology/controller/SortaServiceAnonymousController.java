@@ -12,7 +12,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.csv.CsvWriter;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.file.FileStore;
 import org.molgenis.ontology.core.meta.OntologyTermMetaData;
@@ -61,7 +61,7 @@ public class SortaServiceAnonymousController extends MolgenisPluginController
 	private FileStore fileStore;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityMetaFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;

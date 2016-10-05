@@ -8,7 +8,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.vcf.format.VcfToEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -43,18 +43,18 @@ public class VcfRepository extends AbstractRepository
 	private final VcfReaderFactory vcfReaderFactory;
 	private final String entityName;
 	private final VcfAttributes vcfAttributes;
-	private final EntityMetaDataFactory entityMetaFactory;
+	private final EntityTypeFactory entityMetaFactory;
 	private final AttributeMetaDataFactory attrMetaFactory;
 	protected final Supplier<VcfToEntity> vcfToEntitySupplier;
 
 	public VcfRepository(File file, String entityName, VcfAttributes vcfAttributes,
-			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory) throws IOException
+			EntityTypeFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory) throws IOException
 	{
 		this(new VcfReaderFactoryImpl(file), entityName, vcfAttributes, entityMetaFactory, attrMetaFactory);
 	}
 
 	protected VcfRepository(VcfReaderFactory vcfReaderFactory, String entityName, VcfAttributes vcfAttributes,
-			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
+			EntityTypeFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
 	{
 		this.vcfReaderFactory = requireNonNull(vcfReaderFactory);
 		this.entityName = requireNonNull(entityName);

@@ -10,7 +10,7 @@ import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DynamicEntity;
 
@@ -27,16 +27,16 @@ public class HPORepository extends AbstractRepository
 	public static final String HPO_GENE_SYMBOL_COL_NAME = "gene-symbol";
 	public static final String HPO_ID_COL_NAME = "HPO-ID";
 	public static final String HPO_TERM_COL_NAME = "HPO-term-name";
-	private final EntityMetaDataFactory entityMetaDataFactory;
+	private final EntityTypeFactory entityTypeFactory;
 	private final AttributeMetaDataFactory attributeMetaDataFactory;
 	private Map<String, List<Entity>> entitiesByGeneSymbol;
 	private final File file;
 
-	public HPORepository(File file, EntityMetaDataFactory entityMetaDataFactory,
+	public HPORepository(File file, EntityTypeFactory entityTypeFactory,
 			AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		this.file = file;
-		this.entityMetaDataFactory = entityMetaDataFactory;
+		this.entityTypeFactory = entityTypeFactory;
 		this.attributeMetaDataFactory = attributeMetaDataFactory;
 	}
 
@@ -49,7 +49,7 @@ public class HPORepository extends AbstractRepository
 	@Override
 	public EntityMetaData getEntityMetaData()
 	{
-		EntityMetaData entityMeta = entityMetaDataFactory.create().setSimpleName("HPO");
+		EntityMetaData entityMeta = entityTypeFactory.create().setSimpleName("HPO");
 		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(HPO_DISEASE_ID_COL_NAME));
 		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(HPO_GENE_SYMBOL_COL_NAME));
 		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(HPO_ID_COL_NAME), ROLE_ID);

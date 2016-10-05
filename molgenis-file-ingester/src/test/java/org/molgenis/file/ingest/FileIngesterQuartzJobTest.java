@@ -8,7 +8,7 @@ import org.molgenis.auth.MolgenisUserMetaData;
 import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.file.ingest.execution.FileIngestJob;
 import org.molgenis.file.ingest.execution.FileIngestJobFactory;
 import org.molgenis.file.ingest.meta.FileIngest;
@@ -43,7 +43,7 @@ public class FileIngesterQuartzJobTest extends AbstractMolgenisSpringTest
 	private FileIngestJobFactory fileIngestJobFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private FileIngestFactory fileIngestFactory;
@@ -66,7 +66,7 @@ public class FileIngesterQuartzJobTest extends AbstractMolgenisSpringTest
 		jobDataMap.put(FileIngesterQuartzJob.ENTITY_KEY, "abcde");
 		when(contextMock.getMergedJobDataMap()).thenReturn(jobDataMap);
 
-		EntityMetaData targetEntity = entityMetaDataFactory.create();
+		EntityMetaData targetEntity = entityTypeFactory.create();
 		targetEntity.setName("org_molgenis_test_TypeTest");
 
 		FileIngest fileIngest = fileIngestFactory.create();

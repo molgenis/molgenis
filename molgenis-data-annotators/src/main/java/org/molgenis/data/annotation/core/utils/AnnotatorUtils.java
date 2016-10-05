@@ -11,7 +11,7 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
@@ -117,7 +117,7 @@ public class AnnotatorUtils
 	 *
 	 * @param annotator                the annotator to be runned
 	 * @param vcfAttributes            utility class for vcf metadata
-	 * @param entityMetaDataFactory    factory for molgenis entityMetaData
+	 * @param entityTypeFactory    factory for molgenis entityMetaData
 	 * @param attributeMetaDataFactory factory for molgenis entityMetaData
 	 * @param vcfUtils                 utility class for working with vcf data in molgenis
 	 * @param inputVcfFile             the vcf file to be annotated
@@ -129,7 +129,7 @@ public class AnnotatorUtils
 	 * @throws MolgenisInvalidFormatException
 	 */
 	public static String annotate(RepositoryAnnotator annotator, VcfAttributes vcfAttributes,
-			EntityMetaDataFactory entityMetaDataFactory, AttributeMetaDataFactory attributeMetaDataFactory,
+			EntityTypeFactory entityTypeFactory, AttributeMetaDataFactory attributeMetaDataFactory,
 			VcfUtils vcfUtils, File inputVcfFile, File outputVCFFile, List<String> attributesToInclude, boolean update)
 			throws IOException, MolgenisInvalidFormatException
 	{
@@ -137,11 +137,11 @@ public class AnnotatorUtils
 		try (BufferedWriter outputVCFWriter = new BufferedWriter(
 				new OutputStreamWriter(new FileOutputStream(outputVCFFile), UTF_8));
 				VcfRepository vcfRepo = new VcfRepository(inputVcfFile, inputVcfFile.getName(), vcfAttributes,
-						entityMetaDataFactory, attributeMetaDataFactory))
+						entityTypeFactory, attributeMetaDataFactory))
 		{
 
 			List<AttributeMetaData> outputMetaData = getOutputAttributeMetaDatasForAnnotator(annotator,
-					entityMetaDataFactory, attributeMetaDataFactory, attributesToInclude, vcfRepo);
+					entityTypeFactory, attributeMetaDataFactory, attributesToInclude, vcfRepo);
 
 			VcfWriterUtils
 					.writeVcfHeader(inputVcfFile, outputVCFWriter, VcfUtils.getAtomicAttributesFromList(outputMetaData),
@@ -221,7 +221,7 @@ public class AnnotatorUtils
 	}
 
 	private static List<AttributeMetaData> getOutputAttributeMetaDatasForAnnotator(RepositoryAnnotator annotator,
-			EntityMetaDataFactory entityMetaDataFactory, AttributeMetaDataFactory attributeMetaDataFactory,
+			EntityTypeFactory entityTypeFactory, AttributeMetaDataFactory attributeMetaDataFactory,
 			List<String> attributesToInclude, VcfRepository vcfRepo)
 	{
 		if (!attributesToInclude.isEmpty())
@@ -234,7 +234,7 @@ public class AnnotatorUtils
 		List<AttributeMetaData> outputMetaData = newArrayList();
 		if (annotator instanceof RefEntityAnnotator || annotator instanceof EffectsAnnotator)
 		{
-			EntityMetaData effectRefEntity = entityMetaDataFactory.create()
+			EntityMetaData effectRefEntity = entityTypeFactory.create()
 					.setName(annotator.getSimpleName() + "_EFFECTS");
 			for (AttributeMetaData outputAttribute : annotator.getOutputAttributes())
 			{

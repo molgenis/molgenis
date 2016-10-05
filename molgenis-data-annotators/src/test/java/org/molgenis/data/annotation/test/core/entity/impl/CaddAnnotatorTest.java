@@ -12,7 +12,7 @@ import org.molgenis.data.annotation.web.settings.CaddAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -43,7 +43,7 @@ public class CaddAnnotatorTest extends AbstractMolgenisSpringTest
 	AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -82,8 +82,8 @@ public class CaddAnnotatorTest extends AbstractMolgenisSpringTest
 
 	public void setValues()
 	{
-		metaDataCanAnnotate = entityMetaDataFactory.create().setName("test");
-		metaDataCantAnnotate = entityMetaDataFactory.create().setName("test");
+		metaDataCanAnnotate = entityTypeFactory.create().setName("test");
+		metaDataCantAnnotate = entityTypeFactory.create().setName("test");
 
 		AttributeMetaData attributeMetaDataChrom = attributeMetaDataFactory.create().setName(CHROM).setDataType(STRING);
 		AttributeMetaData attributeMetaDataPos = attributeMetaDataFactory.create().setName(POS).setDataType(INT);

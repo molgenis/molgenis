@@ -87,7 +87,7 @@ public class MappingServiceImplTest extends AbstractMolgenisSpringTest
 	private MolgenisUserFactory molgenisUserFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityMetaFactory;
 
 	@Autowired
 	private PackageFactory packageFactory;

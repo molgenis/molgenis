@@ -17,7 +17,7 @@ import org.molgenis.data.listeners.EntityListenersService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfWriterUtils;
@@ -60,7 +60,7 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 	AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -79,8 +79,8 @@ public class GavinAnnotatorTest extends AbstractMolgenisSpringTest
 	{
 		AnnotatorConfig annotatorConfig = context.getBean(AnnotatorConfig.class);
 		annotatorConfig.init();
-		emd = entityMetaDataFactory.create().setName("gavin");
-		entityMetaData = entityMetaDataFactory.create().setName("test_variant");
+		emd = entityTypeFactory.create().setName("gavin");
+		entityMetaData = entityTypeFactory.create().setName("test_variant");
 		List<AttributeMetaData> refAttributesList = Arrays
 				.asList(CaddAnnotator.getCaddScaledAttr(attributeMetaDataFactory),
 						ExacAnnotator.getExacAFAttr(attributeMetaDataFactory), vcfAttributes.getAltAttribute());

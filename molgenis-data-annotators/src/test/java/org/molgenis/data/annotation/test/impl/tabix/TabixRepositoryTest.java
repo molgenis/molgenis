@@ -5,7 +5,7 @@ import org.molgenis.data.Query;
 import org.molgenis.data.annotation.core.resources.impl.tabix.TabixRepository;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -36,7 +36,7 @@ public class TabixRepositoryTest extends AbstractMolgenisSpringTest
 	private AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private VcfAttributes vcfAttributes;
@@ -47,7 +47,7 @@ public class TabixRepositoryTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void beforeClass() throws IOException
 	{
-		repoMetaData = entityMetaDataFactory.create().setName("CaddTest");
+		repoMetaData = entityTypeFactory.create().setName("CaddTest");
 		repoMetaData.addAttribute(vcfAttributes.getChromAttribute());
 		repoMetaData.addAttribute(vcfAttributes.getPosAttribute());
 		repoMetaData.addAttribute(vcfAttributes.getRefAttribute());

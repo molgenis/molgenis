@@ -9,7 +9,7 @@ import org.molgenis.data.meta.MetaValidationUtils;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -41,13 +41,13 @@ public class VcfToEntity
 {
 	private final VcfMeta vcfMeta;
 	private final VcfAttributes vcfAttributes;
-	private final EntityMetaDataFactory entityMetaFactory;
+	private final EntityTypeFactory entityMetaFactory;
 	private final AttributeMetaDataFactory attrMetaFactory;
 	private final EntityMetaData entityMetaData;
 	private final EntityMetaData sampleEntityMetaData;
 
 	public VcfToEntity(String entityName, VcfMeta vcfMeta, VcfAttributes vcfAttributes,
-			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
+			EntityTypeFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
 	{
 		this.vcfMeta = requireNonNull(vcfMeta);
 		this.vcfAttributes = requireNonNull(vcfAttributes);

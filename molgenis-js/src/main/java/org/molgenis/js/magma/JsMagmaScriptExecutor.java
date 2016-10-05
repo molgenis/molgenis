@@ -3,7 +3,7 @@ package org.molgenis.js.magma;
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.js.ScriptEvaluator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,11 +19,11 @@ import static java.util.Objects.requireNonNull;
 @Service
 public class JsMagmaScriptExecutor
 {
-	private final EntityMetaDataFactory entityMetaFactory;
+	private final EntityTypeFactory entityMetaFactory;
 	private final AttributeMetaDataFactory attrMetaFactory;
 
 	@Autowired
-	public JsMagmaScriptExecutor(EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
+	public JsMagmaScriptExecutor(EntityTypeFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
 	{
 		this.entityMetaFactory = requireNonNull(entityMetaFactory);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);

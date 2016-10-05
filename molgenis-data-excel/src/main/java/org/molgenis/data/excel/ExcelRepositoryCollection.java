@@ -11,7 +11,7 @@ import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.processor.TrimProcessor;
 import org.molgenis.data.support.AbstractWritable.AttributeWriteMode;
@@ -36,7 +36,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	private final String name;
 	private final Workbook workbook;
 
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityMetaFactory;
 	private AttributeMetaDataFactory attrMetaFactory;
 
 	public ExcelRepositoryCollection(File file) throws IOException, MolgenisInvalidFormatException
@@ -185,7 +185,7 @@ public class ExcelRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Autowired
-	public void setEntityMetaDataFactory(EntityMetaDataFactory entityMetaFactory)
+	public void setEntityMetaDataFactory(EntityTypeFactory entityMetaFactory)
 	{
 		this.entityMetaFactory = entityMetaFactory;
 	}

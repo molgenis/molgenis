@@ -32,13 +32,13 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 	private EntityMetaData refEmd;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
 
 	private EntityMetaData createDynamicLocationMetaData()
 	{
-		return entityMetaDataFactory.create().setSimpleName("Location")
+		return entityTypeFactory.create().setSimpleName("Location")
 				.addAttribute(attributeMetaDataFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
 				.addAttribute(attributeMetaDataFactory.create().setName("Chromosome").setDataType(STRING))
 				.addAttribute(attributeMetaDataFactory.create().setName("Position").setDataType(STRING));
@@ -46,7 +46,7 @@ public class MapOfStringsExpressionEvaluatorTest extends AbstractTestNGSpringCon
 
 	private EntityMetaData createDynamicSourceMetaData()
 	{
-		return entityMetaDataFactory.create().setSimpleName("Source")
+		return entityTypeFactory.create().setSimpleName("Source")
 				.addAttribute(attributeMetaDataFactory.create().setName("Identifier").setDataType(STRING), ROLE_ID)
 				.addAttribute(attributeMetaDataFactory.create().setName("Int").setDataType(INT))
 				.addAttribute(attributeMetaDataFactory.create().setName("String").setDataType(STRING))

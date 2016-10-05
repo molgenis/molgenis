@@ -11,7 +11,7 @@ import org.molgenis.data.mapper.meta.MappingTargetMetaData;
 import org.molgenis.data.mapper.repository.MappingTargetRepository;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
@@ -41,7 +41,7 @@ import static org.testng.Assert.*;
 public class MappingProjectRepositoryImplTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityMetaFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;

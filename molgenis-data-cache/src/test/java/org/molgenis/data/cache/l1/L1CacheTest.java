@@ -7,7 +7,7 @@ import org.molgenis.data.EntityManager;
 import org.molgenis.data.cache.utils.EntityHydration;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -42,7 +42,7 @@ public class L1CacheTest extends AbstractMolgenisSpringTest
 	private final String entityID = "1";
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
@@ -61,7 +61,7 @@ public class L1CacheTest extends AbstractMolgenisSpringTest
 	{
 		initMocks(this);
 
-		entityMetaData = entityMetaDataFactory.create(repository);
+		entityMetaData = entityTypeFactory.create(repository);
 		entityMetaData.addAttribute(attributeMetaDataFactory.create().setName("ID"), ROLE_ID);
 		entityMetaData.addAttribute(attributeMetaDataFactory.create().setName("ATTRIBUTE_1"));
 

@@ -11,7 +11,7 @@ import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.ThousendGenomesAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -47,7 +47,7 @@ public class ThousandGenomesAnnotatorTest extends AbstractMolgenisSpringTest
 	AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -69,7 +69,7 @@ public class ThousandGenomesAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testAnnotate()
 	{
-		EntityMetaData emdIn = entityMetaDataFactory.create().setName("test");
+		EntityMetaData emdIn = entityTypeFactory.create().setName("test");
 		emdIn.addAttribute(vcfAttributes.getChromAttribute(), ROLE_ID);
 		emdIn.addAttribute(vcfAttributes.getPosAttribute());
 		emdIn.addAttribute(vcfAttributes.getRefAttribute());
@@ -100,7 +100,7 @@ public class ThousandGenomesAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testAnnotateNegative()
 	{
-		EntityMetaData emdIn = entityMetaDataFactory.create().setName("test");
+		EntityMetaData emdIn = entityTypeFactory.create().setName("test");
 		emdIn.addAttribute(vcfAttributes.getChromAttribute(), ROLE_ID);
 		emdIn.addAttribute(vcfAttributes.getPosAttribute());
 		emdIn.addAttribute(vcfAttributes.getRefAttribute());

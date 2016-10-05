@@ -22,7 +22,7 @@ import org.molgenis.data.mapper.service.UnitResolver;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.semantic.Relation;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedAttributeMetaData;
 import org.molgenis.data.semanticsearch.explain.bean.ExplainedQueryString;
@@ -65,7 +65,7 @@ import static org.testng.Assert.assertNull;
 public class AlgorithmServiceImplTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityMetaFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;

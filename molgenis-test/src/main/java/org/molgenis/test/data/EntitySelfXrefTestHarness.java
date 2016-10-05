@@ -27,7 +27,7 @@ public class EntitySelfXrefTestHarness
 	private PackageFactory packageFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
@@ -42,7 +42,7 @@ public class EntitySelfXrefTestHarness
 
 	public EntityMetaData createDynamicEntityMetaData()
 	{
-		return entityMetaDataFactory.create().setPackage(testPackage).setSimpleName("SelfRef").setBackend("PostgreSQL")
+		return entityTypeFactory.create().setPackage(testPackage).setSimpleName("SelfRef").setBackend("PostgreSQL")
 				.addAttribute(createAttribute(ATTR_ID, STRING), ROLE_ID).addAttribute(createAttribute(ATTR_XREF, XREF))
 				.addAttribute(createAttribute(ATTR_STRING, STRING), ROLE_LABEL);
 	}

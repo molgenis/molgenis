@@ -6,7 +6,7 @@ import org.molgenis.data.UnknownAttributeException;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.system.model.RootSystemPackage;
 import org.molgenis.file.model.FileMetaMetaData;
 import org.molgenis.security.owned.OwnedEntityMetaData;
@@ -71,7 +71,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	private EntityMetaData selfRefEntityMetaData;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
 	@Autowired
@@ -80,7 +80,7 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 	@BeforeMethod
 	public void setUpBeforeMethod()
 	{
-		selfRefEntityMetaData = entityMetaDataFactory.create().setName("SelfRefEntity");
+		selfRefEntityMetaData = entityTypeFactory.create().setName("SelfRefEntity");
 		AttributeMetaData selfRefIdAttr = attributeMetaDataFactory.create().setName("id");
 		selfRefEntityMetaData.addAttribute(selfRefIdAttr, ROLE_ID)
 				.addAttribute(attributeMetaDataFactory.create().setName("label"), ROLE_LABEL).addAttribute(
@@ -88,12 +88,12 @@ public class AttributeFilterToFetchConverterTest extends AbstractMolgenisSpringT
 						.setRefEntity(selfRefEntityMetaData));
 
 		labelAttr = attributeMetaDataFactory.create().setName(REF_LABEL_ATTR_NAME);
-		xrefEntityMeta = entityMetaDataFactory.create().setName("xrefEntity")
+		xrefEntityMeta = entityTypeFactory.create().setName("xrefEntity")
 				.addAttribute(attributeMetaDataFactory.create().setName(REF_ID_ATTR_NAME), ROLE_ID)
 				.addAttribute(labelAttr, ROLE_LABEL)
 				.addAttribute(attributeMetaDataFactory.create().setName(REF_ATTR_NAME));
 
-		entityMeta = entityMetaDataFactory.create().setName("entity")
+		entityMeta = entityTypeFactory.create().setName("entity")
 				.addAttribute(attributeMetaDataFactory.create().setName(ID_ATTR_NAME), ROLE_ID)
 				.addAttribute(attributeMetaDataFactory.create().setName(LABEL_ATTR_NAME), ROLE_LABEL);
 

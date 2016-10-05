@@ -60,7 +60,7 @@ public class OntologyTagServiceTest extends AbstractMolgenisSpringTest
 	private TagFactory tagFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityMetaFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrFactory;

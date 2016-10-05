@@ -6,7 +6,7 @@ import org.mockito.Mock;
 import org.molgenis.data.*;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.data.transaction.MolgenisTransactionManager;
@@ -53,7 +53,7 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 	private MolgenisTransactionManager molgenisTransactionManager;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attributeMetaDataFactory;
@@ -63,7 +63,7 @@ public class L3CacheTest extends AbstractMolgenisSpringTest
 	{
 		initMocks(this);
 
-		entityMetaData = entityMetaDataFactory.create(repositoryName);
+		entityMetaData = entityTypeFactory.create(repositoryName);
 		entityMetaData.addAttribute(attributeMetaDataFactory.create().setDataType(INT).setName(ID), ROLE_ID);
 		entityMetaData.addAttribute(attributeMetaDataFactory.create().setName(COUNTRY));
 

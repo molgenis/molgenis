@@ -11,7 +11,7 @@ import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.settings.ClinvarAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -48,7 +48,7 @@ public class ClinvarAnnotatorTest extends AbstractMolgenisSpringTest
 	AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -65,7 +65,7 @@ public class ClinvarAnnotatorTest extends AbstractMolgenisSpringTest
 	@Test
 	public void annotateIterable()
 	{
-		EntityMetaData sourceMeta = entityMetaDataFactory.create().setName("clinvar");
+		EntityMetaData sourceMeta = entityTypeFactory.create().setName("clinvar");
 		sourceMeta.addAttribute(vcfAttributes.getChromAttribute(), ROLE_ID);
 		sourceMeta.addAttribute(vcfAttributes.getPosAttribute());
 		sourceMeta.addAttribute(vcfAttributes.getRefAttribute());

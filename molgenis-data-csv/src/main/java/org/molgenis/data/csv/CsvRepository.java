@@ -6,7 +6,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
 import org.springframework.util.StringUtils;
@@ -26,32 +26,32 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 public class CsvRepository extends AbstractRepository
 {
 	private final File file;
-	private final EntityMetaDataFactory entityMetaFactory;
+	private final EntityTypeFactory entityMetaFactory;
 	private final AttributeMetaDataFactory attrMetaFactory;
 	private final String sheetName;
 	private List<CellProcessor> cellProcessors;
 	private EntityMetaData entityMetaData;
 	private Character separator = null;
 
-	public CsvRepository(String file, EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
+	public CsvRepository(String file, EntityTypeFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
 	{
 		this(new File(file), entityMetaFactory, attrMetaFactory, null);
 	}
 
-	public CsvRepository(File file, EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory,
+	public CsvRepository(File file, EntityTypeFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory,
 			@Nullable List<CellProcessor> cellProcessors, Character separator)
 	{
 		this(file, entityMetaFactory, attrMetaFactory, StringUtils.stripFilenameExtension(file.getName()), null);
 		this.separator = separator;
 	}
 
-	public CsvRepository(File file, EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory,
+	public CsvRepository(File file, EntityTypeFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory,
 			@Nullable List<CellProcessor> cellProcessors)
 	{
 		this(file, entityMetaFactory, attrMetaFactory, StringUtils.stripFilenameExtension(file.getName()), null);
 	}
 
-	public CsvRepository(File file, EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory,
+	public CsvRepository(File file, EntityTypeFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory,
 			String sheetName, @Nullable List<CellProcessor> cellProcessors)
 	{
 		this.file = file;

@@ -20,7 +20,7 @@ import org.molgenis.data.annotation.core.resources.impl.tabix.TabixVcfRepository
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -60,7 +60,7 @@ public class ClinvarAnnotator implements AnnotatorConfig
 	private AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	private RepositoryAnnotatorImpl annotator;
 
@@ -142,7 +142,7 @@ public class ClinvarAnnotator implements AnnotatorConfig
 			@Override
 			public RepositoryFactory getRepositoryFactory()
 			{
-				return new TabixVcfRepositoryFactory(CLINVAR_TABIX_RESOURCE, vcfAttributes, entityMetaDataFactory,
+				return new TabixVcfRepositoryFactory(CLINVAR_TABIX_RESOURCE, vcfAttributes, entityTypeFactory,
 						attributeMetaDataFactory);
 			}
 		};

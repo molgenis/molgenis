@@ -11,7 +11,7 @@ import org.molgenis.data.elasticsearch.index.MappingsBuilder;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.molgenis.util.MolgenisDateFormat;
@@ -69,7 +69,7 @@ public class QueryGeneratorReferencesTest extends AbstractMolgenisSpringTest
 	private final String PREFIX = REF_ENTITY_ATT + QueryGenerator.ATTRIBUTE_SEPARATOR;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaFactory;
+	EntityTypeFactory entityMetaFactory;
 
 	@Autowired
 	AttributeMetaDataFactory attrFactory;

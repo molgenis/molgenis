@@ -133,31 +133,31 @@ public class EmxMetaDataParser implements MetaDataParser
 	private final DataService dataService;
 	private final PackageFactory packageFactory;
 	private final AttributeMetaDataFactory attrMetaFactory;
-	private final EntityMetaDataFactory entityMetaDataFactory;
+	private final EntityTypeFactory entityTypeFactory;
 	private final TagFactory tagFactory;
 	private final LanguageFactory languageFactory;
 	private final I18nStringFactory i18nStringFactory;
 
 	public EmxMetaDataParser(PackageFactory packageFactory, AttributeMetaDataFactory attrMetaFactory,
-			EntityMetaDataFactory entityMetaDataFactory)
+			EntityTypeFactory entityTypeFactory)
 	{
 		this.dataService = null;
 		this.packageFactory = requireNonNull(packageFactory);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
-		this.entityMetaDataFactory = requireNonNull(entityMetaDataFactory);
+		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.tagFactory = null;
 		this.languageFactory = null;
 		this.i18nStringFactory = null;
 	}
 
 	public EmxMetaDataParser(DataService dataService, PackageFactory packageFactory,
-			AttributeMetaDataFactory attrMetaFactory, EntityMetaDataFactory entityMetaDataFactory,
+			AttributeMetaDataFactory attrMetaFactory, EntityTypeFactory entityTypeFactory,
 			TagFactory tagFactory, LanguageFactory languageFactory, I18nStringFactory i18nStringFactory)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.packageFactory = requireNonNull(packageFactory);
 		this.attrMetaFactory = requireNonNull(attrMetaFactory);
-		this.entityMetaDataFactory = requireNonNull(entityMetaDataFactory);
+		this.entityTypeFactory = requireNonNull(entityTypeFactory);
 		this.tagFactory = requireNonNull(tagFactory);
 		this.languageFactory = requireNonNull(languageFactory);
 		this.i18nStringFactory = requireNonNull(i18nStringFactory);
@@ -287,7 +287,7 @@ public class EmxMetaDataParser implements MetaDataParser
 	 */
 	private IntermediateParseResults parseTagsSheet(Repository<Entity> tagRepository)
 	{
-		IntermediateParseResults intermediateParseResults = new IntermediateParseResults(entityMetaDataFactory);
+		IntermediateParseResults intermediateParseResults = new IntermediateParseResults(entityTypeFactory);
 		if (tagRepository != null)
 		{
 			for (Entity tagEntity : tagRepository)

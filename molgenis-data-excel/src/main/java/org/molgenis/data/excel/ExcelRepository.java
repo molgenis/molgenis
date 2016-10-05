@@ -11,7 +11,7 @@ import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.processor.AbstractCellProcessor;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.AbstractRepository;
@@ -35,7 +35,7 @@ import static org.molgenis.MolgenisFieldTypes.AttributeType.STRING;
 public class ExcelRepository extends AbstractRepository
 {
 	private final Sheet sheet;
-	private final EntityMetaDataFactory entityMetaFactory;
+	private final EntityTypeFactory entityMetaFactory;
 	private final AttributeMetaDataFactory attrMetaFactory;
 
 	/**
@@ -48,13 +48,13 @@ public class ExcelRepository extends AbstractRepository
 	private Map<String, Integer> colNamesMap;
 	private EntityMetaData entityMetaData;
 
-	public ExcelRepository(String fileName, Sheet sheet, EntityMetaDataFactory entityMetaFactory,
+	public ExcelRepository(String fileName, Sheet sheet, EntityTypeFactory entityMetaFactory,
 			AttributeMetaDataFactory attrMetaFactory)
 	{
 		this(fileName, sheet, entityMetaFactory, attrMetaFactory, null);
 	}
 
-	public ExcelRepository(String fileName, Sheet sheet, EntityMetaDataFactory entityMetaFactory,
+	public ExcelRepository(String fileName, Sheet sheet, EntityTypeFactory entityMetaFactory,
 			AttributeMetaDataFactory attrMetaFactory, List<CellProcessor> cellProcessors)
 	{
 		this.sheet = requireNonNull(sheet);

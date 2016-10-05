@@ -12,7 +12,7 @@ import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.annotation.web.settings.OmimAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -53,7 +53,7 @@ public class OmimAnnotatorTest extends AbstractMolgenisSpringTest
 	AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -85,7 +85,7 @@ public class OmimAnnotatorTest extends AbstractMolgenisSpringTest
 	{
 		List<Entity> entitiesToAnnotate = newArrayList();
 
-		EntityMetaData inputEntityMetaData = entityMetaDataFactory.create().setName("Test");
+		EntityMetaData inputEntityMetaData = entityTypeFactory.create().setName("Test");
 		inputEntityMetaData.addAttribute(attributeMetaDataFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME));
 		inputEntityMetaData.addAttributes(
 				Arrays.asList(omimAnnotator.getPhenotypeAttr(), omimAnnotator.getMimNumberAttr(),
@@ -98,7 +98,7 @@ public class OmimAnnotatorTest extends AbstractMolgenisSpringTest
 		entitiesToAnnotate.add(inputEntity);
 		Iterator<Entity> results = annotator.annotate(entitiesToAnnotate);
 
-		EntityMetaData expectedEntityMetaData = entityMetaDataFactory.create().setName("Test");
+		EntityMetaData expectedEntityMetaData = entityTypeFactory.create().setName("Test");
 		expectedEntityMetaData.addAttribute(attributeMetaDataFactory.create().setName(OMIM_GENE_SYMBOLS_COL_NAME));
 		expectedEntityMetaData.addAttribute(omimAnnotator.getPhenotypeAttr());
 		expectedEntityMetaData.addAttribute(omimAnnotator.getMimNumberAttr());

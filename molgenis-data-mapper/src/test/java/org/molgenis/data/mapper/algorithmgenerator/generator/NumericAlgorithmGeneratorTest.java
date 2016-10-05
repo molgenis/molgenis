@@ -5,7 +5,7 @@ import org.molgenis.data.mapper.service.impl.UnitResolverImpl;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.ontology.core.model.Ontology;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
@@ -27,7 +27,7 @@ import static org.testng.Assert.*;
 public class NumericAlgorithmGeneratorTest extends AbstractMolgenisSpringTest
 {
 	@Autowired
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityMetaFactory;
 
 	@Autowired
 	private AttributeMetaDataFactory attrMetaFactory;

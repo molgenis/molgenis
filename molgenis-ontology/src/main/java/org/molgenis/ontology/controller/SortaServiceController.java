@@ -12,7 +12,7 @@ import org.molgenis.data.jobs.model.JobExecutionMetaData;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.populate.IdGenerator;
 import org.molgenis.data.rest.EntityCollectionResponse;
 import org.molgenis.data.rest.EntityPager;
@@ -102,7 +102,7 @@ public class SortaServiceController extends MolgenisPluginController
 	private final SortaJobExecutionMetaData sortaJobExecutionMetaData;
 	private final OntologyTermMetaData ontologyTermMetaData;
 	private final SortaJobExecutionFactory sortaJobExecutionFactory;
-	private final EntityMetaDataFactory entityMetaFactory;
+	private final EntityTypeFactory entityMetaFactory;
 	private final AttributeMetaDataFactory attrMetaFactory;
 
 	public static final String MATCH_VIEW_NAME = "sorta-match-view";
@@ -119,7 +119,7 @@ public class SortaServiceController extends MolgenisPluginController
 			LanguageService languageService, MenuReaderService menuReaderService, IdGenerator idGenerator,
 			PermissionSystemService permissionSystemService, MatchingTaskContentMetaData matchingTaskContentMetaData,
 			SortaJobExecutionMetaData sortaJobExecutionMetaData, OntologyTermMetaData ontologyTermMetaData,
-			SortaJobExecutionFactory sortaJobExecutionFactory, EntityMetaDataFactory entityMetaFactory,
+			SortaJobExecutionFactory sortaJobExecutionFactory, EntityTypeFactory entityMetaFactory,
 			AttributeMetaDataFactory attrMetaFactory)
 	{
 		super(URI);

@@ -8,7 +8,7 @@ import org.molgenis.data.annotation.core.RepositoryAnnotator;
 import org.molgenis.data.annotation.core.exception.UnresolvedAnnotatorDependencyException;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 
 import java.util.Collections;
 import java.util.LinkedList;
@@ -25,7 +25,7 @@ public class AnnotatorDependencyOrderResolver
 
 	public Queue<RepositoryAnnotator> getAnnotatorSelectionDependencyList(
 			List<RepositoryAnnotator> availableAnnotatorList, List<RepositoryAnnotator> requestedAnnotatorList,
-			Repository<Entity> repo, EntityMetaDataFactory entityMetaDataFactory)
+			Repository<Entity> repo, EntityTypeFactory entityTypeFactory)
 	{
 		Queue<RepositoryAnnotator> sortedList = new LinkedList<>();
 		for (RepositoryAnnotator annotator : requestedAnnotatorList)
@@ -39,7 +39,7 @@ public class AnnotatorDependencyOrderResolver
 			{
 				requestedAnnotator = annotator;
 				sortedList = getSingleAnnotatorDependencyList(annotator, availableAnnotatorList, sortedList,
-						repo.getEntityMetaData(), entityMetaDataFactory);
+						repo.getEntityMetaData(), entityTypeFactory);
 			}
 		}
 		return sortedList;
@@ -47,9 +47,9 @@ public class AnnotatorDependencyOrderResolver
 
 	private Queue<RepositoryAnnotator> getSingleAnnotatorDependencyList(RepositoryAnnotator selectedAnnotator,
 			List<RepositoryAnnotator> annotatorList, Queue<RepositoryAnnotator> queue, EntityMetaData emd,
-			EntityMetaDataFactory entityMetaDataFactory)
+			EntityTypeFactory entityTypeFactory)
 	{
-		EntityMetaData entityMetaData = entityMetaDataFactory.create(emd);
+		EntityMetaData entityMetaData = entityTypeFactory.create(emd);
 		resolveAnnotatorDependencies(selectedAnnotator, annotatorList, queue, entityMetaData);
 		return queue;
 	}

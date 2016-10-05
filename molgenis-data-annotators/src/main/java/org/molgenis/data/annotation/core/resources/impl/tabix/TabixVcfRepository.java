@@ -8,7 +8,7 @@ import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
 import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.VcfReaderFactory;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -32,14 +32,14 @@ public class TabixVcfRepository extends VcfRepository
 	private final TabixReader tabixReader;
 
 	public TabixVcfRepository(File file, String entityName, VcfAttributes vcfAttributes,
-			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory) throws IOException
+			EntityTypeFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory) throws IOException
 	{
 		super(file, entityName, vcfAttributes, entityMetaFactory, attrMetaFactory);
 		tabixReader = new TabixReader(file.getCanonicalPath());
 	}
 
 	TabixVcfRepository(VcfReaderFactory readerFactory, TabixReader tabixReader, String entityName,
-			VcfAttributes vcfAttributes, EntityMetaDataFactory entityMetaFactory,
+			VcfAttributes vcfAttributes, EntityTypeFactory entityMetaFactory,
 			AttributeMetaDataFactory attrMetaFactory)
 	{
 		super(readerFactory, entityName, vcfAttributes, entityMetaFactory, attrMetaFactory);

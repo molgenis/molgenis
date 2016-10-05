@@ -10,7 +10,7 @@ import org.molgenis.data.annotation.core.entity.impl.ThousandGenomesAnnotator;
 import org.molgenis.data.annotation.core.utils.AnnotatorUtils;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
 import org.molgenis.data.vcf.utils.VcfUtils;
@@ -45,7 +45,7 @@ public class AnnotatorChainingIT extends AbstractMolgenisSpringTest
 	VcfUtils vcfUtils;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	AttributeMetaDataFactory attributeMetaDataFactory;
@@ -55,7 +55,7 @@ public class AnnotatorChainingIT extends AbstractMolgenisSpringTest
 	{
 		File vcf = ResourceUtils.getFile(getClass(), "/gonl/test_gonl_and_1000g.vcf");
 
-		try (VcfRepository repo = new VcfRepository(vcf, "vcf", vcfAttributes, entityMetaDataFactory,
+		try (VcfRepository repo = new VcfRepository(vcf, "vcf", vcfAttributes, entityTypeFactory,
 				attributeMetaDataFactory))
 		{
 			try (AnnotationConfigApplicationContext ctx = new AnnotationConfigApplicationContext(

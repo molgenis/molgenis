@@ -7,7 +7,7 @@ import org.molgenis.data.annotation.core.entity.ResultFilter;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 
 import java.util.Arrays;
@@ -22,14 +22,14 @@ import static org.molgenis.data.annotation.core.entity.impl.hpo.HPORepository.HP
 
 public class HpoResultFilter implements ResultFilter
 {
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 	private AttributeMetaDataFactory attributeMetaDataFactory;
 	private HPOAnnotator hpoAnnotator;
 
-	public HpoResultFilter(EntityMetaDataFactory entityMetaDataFactory,
+	public HpoResultFilter(EntityTypeFactory entityTypeFactory,
 			AttributeMetaDataFactory attributeMetaDataFactory, HPOAnnotator hpoAnnotator)
 	{
-		this.entityMetaDataFactory = entityMetaDataFactory;
+		this.entityTypeFactory = entityTypeFactory;
 		this.attributeMetaDataFactory = attributeMetaDataFactory;
 		this.hpoAnnotator = hpoAnnotator;
 	}
@@ -67,7 +67,7 @@ public class HpoResultFilter implements ResultFilter
 			terms.append(hpoTerm);
 		}
 
-		EntityMetaData emd = entityMetaDataFactory.create().setName(HPOAnnotator.NAME);
+		EntityMetaData emd = entityTypeFactory.create().setName(HPOAnnotator.NAME);
 		emd.addAttributes(Arrays.asList(hpoAnnotator.getIdsAttr(), hpoAnnotator.getTermsAttr()));
 		AttributeMetaData id = attributeMetaDataFactory.create().setName("ID").setAuto(true);
 		emd.setIdAttribute(id);

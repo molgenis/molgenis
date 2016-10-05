@@ -11,7 +11,7 @@ import org.molgenis.data.annotation.core.resources.impl.ResourcesImpl;
 import org.molgenis.data.annotation.web.AnnotationService;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.test.data.AbstractMolgenisSpringTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,7 +40,7 @@ public class HPOResultFilterTest extends AbstractMolgenisSpringTest
 	AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	HPOAnnotator hpoAnnotator;
@@ -48,13 +48,13 @@ public class HPOResultFilterTest extends AbstractMolgenisSpringTest
 	@Test
 	public void filterResults()
 	{
-		HpoResultFilter filter = new HpoResultFilter(entityMetaDataFactory, attributeMetaDataFactory, hpoAnnotator);
+		HpoResultFilter filter = new HpoResultFilter(entityTypeFactory, attributeMetaDataFactory, hpoAnnotator);
 
-		EntityMetaData resultEntityMeta = entityMetaDataFactory.create().setSimpleName("result");
+		EntityMetaData resultEntityMeta = entityTypeFactory.create().setSimpleName("result");
 		resultEntityMeta.addAttribute(hpoAnnotator.getIdsAttr());
 		resultEntityMeta.addAttribute(hpoAnnotator.getTermsAttr());
 
-		EntityMetaData entityMeta = entityMetaDataFactory.create().setSimpleName("HPO");
+		EntityMetaData entityMeta = entityTypeFactory.create().setSimpleName("HPO");
 		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(HPO_DISEASE_ID_COL_NAME));
 		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(HPO_GENE_SYMBOL_COL_NAME));
 		entityMeta.addAttribute(attributeMetaDataFactory.create().setName(HPO_ID_COL_NAME), ROLE_ID);

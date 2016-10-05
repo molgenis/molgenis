@@ -12,7 +12,7 @@ import org.molgenis.data.annotation.web.settings.SnpEffAnnotatorSettings;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -37,7 +37,7 @@ import static org.molgenis.data.annotation.core.effects.EffectsMetaData.*;
 @Component
 public class SnpEffRunner
 {
-	private final EntityMetaDataFactory entityMetaDataFactory;
+	private final EntityTypeFactory entityTypeFactory;
 	private final AttributeMetaDataFactory attributeMetaDataFactory;
 	private final VcfAttributes vcfAttributes;
 
@@ -61,7 +61,7 @@ public class SnpEffRunner
 
 	@Autowired
 	public SnpEffRunner(JarRunner jarRunner, Entity snpEffAnnotatorSettings, IdGenerator idGenerator,
-			VcfAttributes vcfAttributes, EffectsMetaData effectsMetaData, EntityMetaDataFactory entityMetaDataFactory,
+			VcfAttributes vcfAttributes, EffectsMetaData effectsMetaData, EntityTypeFactory entityTypeFactory,
 			AttributeMetaDataFactory attributeMetaDataFactory)
 	{
 		this.jarRunner = jarRunner;
@@ -69,7 +69,7 @@ public class SnpEffRunner
 		this.idGenerator = idGenerator;
 		this.vcfAttributes = vcfAttributes;
 		this.effectsMetaData = effectsMetaData;
-		this.entityMetaDataFactory = entityMetaDataFactory;
+		this.entityTypeFactory = entityTypeFactory;
 		this.attributeMetaDataFactory = attributeMetaDataFactory;
 	}
 
@@ -103,7 +103,7 @@ public class SnpEffRunner
 			File outputVcf = jarRunner.runJar(NAME, params, inputVcf);
 
 			VcfRepository repo = new VcfRepository(outputVcf, "SNPEFF_OUTPUT_VCF_" + inputVcf.getName(), vcfAttributes,
-					entityMetaDataFactory, attributeMetaDataFactory);
+					entityTypeFactory, attributeMetaDataFactory);
 
 			PeekingIterator<Entity> snpEffResultIterator = peekingIterator(repo.iterator());
 
@@ -329,7 +329,7 @@ public class SnpEffRunner
 	 */
 	public EntityMetaData getTargetEntityMetaData(EntityMetaData sourceEMD)
 	{
-		EntityMetaData emd = entityMetaDataFactory.create()
+		EntityMetaData emd = entityTypeFactory.create()
 				.setSimpleName(sourceEMD.getSimpleName() + ENTITY_NAME_SUFFIX).setPackage(sourceEMD.getPackage());
 		emd.setBackend(sourceEMD.getBackend());
 		AttributeMetaData id = attributeMetaDataFactory.create().setName(EffectsMetaData.ID).setAuto(true)

@@ -52,7 +52,7 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	AttributeMetaDataFactory attributeMetaDataFactory;
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	VcfAttributes vcfAttributes;
@@ -94,9 +94,9 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 		IdGenerator idGenerator = new UuidGenerator();
 
 		snpEffRunner = new SnpEffRunner(jarRunner, snpEffAnnotatorSettings, idGenerator, vcfAttributes, effectsMetaData,
-				entityMetaDataFactory, attributeMetaDataFactory);
+				entityTypeFactory, attributeMetaDataFactory);
 
-		metaDataCanAnnotate = entityMetaDataFactory.create().setName("test").setSimpleName("test");
+		metaDataCanAnnotate = entityTypeFactory.create().setName("test").setSimpleName("test");
 		AttributeMetaData attributeMetaDataChrom = vcfAttributes.getChromAttribute();
 		AttributeMetaData attributeMetaDataPos = vcfAttributes.getPosAttribute();
 		AttributeMetaData attributeMetaDataRef = vcfAttributes.getRefAttribute();
@@ -107,7 +107,7 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 		metaDataCanAnnotate.addAttribute(attributeMetaDataRef);
 		metaDataCanAnnotate.addAttribute(attributeMetaDataAlt);
 
-		effectsEMD = entityMetaDataFactory.create().setSimpleName("test_EFFECTS");
+		effectsEMD = entityTypeFactory.create().setSimpleName("test_EFFECTS");
 		effectsEMD.addAttribute(attributeMetaDataFactory.create().setName("ID").setAuto(true).setVisible(false));
 		effectsEMD.addAttribute(effectsMetaData.getAltAttr());
 		effectsEMD.addAttribute(effectsMetaData.getGeneNameAttr());
@@ -899,7 +899,7 @@ public class SnpEffRunnerTest extends AbstractMolgenisSpringTest
 	@Test
 	public void testGetOutputMetaData()
 	{
-		EntityMetaData sourceEMD = entityMetaDataFactory.create().setSimpleName("source");
+		EntityMetaData sourceEMD = entityTypeFactory.create().setSimpleName("source");
 		sourceEMD.setPackage(packageFactory.create("package").setName("package"));
 		sourceEMD.setBackend("TestBackend");
 

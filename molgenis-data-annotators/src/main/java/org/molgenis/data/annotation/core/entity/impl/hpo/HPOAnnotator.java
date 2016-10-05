@@ -18,7 +18,7 @@ import org.molgenis.data.annotation.core.resources.impl.SingleResourceConfig;
 import org.molgenis.data.annotation.web.settings.SingleFileLocationCmdLineAnnotatorSettingsConfigurer;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,7 +58,7 @@ public class HPOAnnotator implements AnnotatorConfig
 	private Resources resources;
 
 	@Autowired
-	private EntityMetaDataFactory entityMetaDataFactory;
+	private EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	GeneNameQueryCreator geneNameQueryCreator;
@@ -99,7 +99,7 @@ public class HPOAnnotator implements AnnotatorConfig
 						attributes);
 
 		EntityAnnotator entityAnnotator = new AnnotatorImpl(HPO_RESOURCE, info, geneNameQueryCreator,
-				new HpoResultFilter(entityMetaDataFactory, attributeMetaDataFactory, this), dataService, resources,
+				new HpoResultFilter(entityTypeFactory, attributeMetaDataFactory, this), dataService, resources,
 				new SingleFileLocationCmdLineAnnotatorSettingsConfigurer(HPO_LOCATION, HPOAnnotatorSettings));
 
 		annotator.init(entityAnnotator);
@@ -118,7 +118,7 @@ public class HPOAnnotator implements AnnotatorConfig
 					@Override
 					public Repository<Entity> createRepository(File file) throws IOException
 					{
-						return new HPORepository(file, entityMetaDataFactory, attributeMetaDataFactory);
+						return new HPORepository(file, entityTypeFactory, attributeMetaDataFactory);
 					}
 				};
 			}

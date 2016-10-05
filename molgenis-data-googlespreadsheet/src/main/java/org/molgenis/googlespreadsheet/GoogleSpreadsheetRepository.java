@@ -10,7 +10,7 @@ import org.molgenis.data.RepositoryCapability;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.AbstractRepository;
 import org.molgenis.data.support.DynamicEntity;
 
@@ -39,21 +39,21 @@ public class GoogleSpreadsheetRepository extends AbstractRepository
 	private final SpreadsheetService spreadsheetService;
 	private final String spreadsheetKey;
 	private final String worksheetId;
-	private final EntityMetaDataFactory entityMetaFactory;
+	private final EntityTypeFactory entityMetaFactory;
 	private final AttributeMetaDataFactory attrMetaFactory;
 	private final Visibility visibility;
 
 	private EntityMetaData entityMetaData;
 
 	public GoogleSpreadsheetRepository(SpreadsheetService spreadsheetService, String spreadsheetKey, String worksheetId,
-			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
+			EntityTypeFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory)
 			throws IOException, ServiceException
 	{
 		this(spreadsheetService, spreadsheetKey, worksheetId, entityMetaFactory, attrMetaFactory, Visibility.PUBLIC);
 	}
 
 	public GoogleSpreadsheetRepository(SpreadsheetService spreadsheetService, String spreadsheetKey, String worksheetId,
-			EntityMetaDataFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory, Visibility visibility)
+			EntityTypeFactory entityMetaFactory, AttributeMetaDataFactory attrMetaFactory, Visibility visibility)
 			throws IOException, ServiceException
 	{
 		this.spreadsheetService = requireNonNull(spreadsheetService);

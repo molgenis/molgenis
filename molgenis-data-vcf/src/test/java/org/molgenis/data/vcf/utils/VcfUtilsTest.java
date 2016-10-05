@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.support.DynamicEntity;
 import org.molgenis.data.vcf.VcfRepository;
 import org.molgenis.data.vcf.model.VcfAttributes;
@@ -29,7 +29,7 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 {
 
 	@Autowired
-	EntityMetaDataFactory entityMetaDataFactory;
+	EntityTypeFactory entityTypeFactory;
 
 	@Autowired
 	AttributeMetaDataFactory attributeMetaDataFactory;
@@ -59,9 +59,9 @@ public class VcfUtilsTest extends AbstractMolgenisSpringTest
 	@BeforeClass
 	public void beforeClass()
 	{
-		annotatedEntityMetadata = entityMetaDataFactory.create().setName("test");
-		metaDataCanAnnotate = entityMetaDataFactory.create().setName("test");
-		metaDataCantAnnotate = entityMetaDataFactory.create().setName("test");
+		annotatedEntityMetadata = entityTypeFactory.create().setName("test");
+		metaDataCanAnnotate = entityTypeFactory.create().setName("test");
+		metaDataCantAnnotate = entityTypeFactory.create().setName("test");
 
 		attributeMetaDataChrom = attributeMetaDataFactory.create().setName(CHROM).setDataType(STRING);
 		attributeMetaDataPos = attributeMetaDataFactory.create().setName(POS).setDataType(LONG);

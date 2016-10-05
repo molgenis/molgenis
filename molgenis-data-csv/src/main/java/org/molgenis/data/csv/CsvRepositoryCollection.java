@@ -8,7 +8,7 @@ import org.molgenis.data.MolgenisInvalidFormatException;
 import org.molgenis.data.Repository;
 import org.molgenis.data.meta.model.AttributeMetaDataFactory;
 import org.molgenis.data.meta.model.EntityMetaData;
-import org.molgenis.data.meta.model.EntityMetaDataFactory;
+import org.molgenis.data.meta.model.EntityTypeFactory;
 import org.molgenis.data.processor.CellProcessor;
 import org.molgenis.data.support.FileRepositoryCollection;
 import org.molgenis.data.support.GenericImporterExtensions;
@@ -34,7 +34,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	public static final String NAME = "CSV";
 	private static final String MAC_ZIP = "__MACOSX";
 	private final File file;
-	private EntityMetaDataFactory entityMetaFactory;
+	private EntityTypeFactory entityMetaFactory;
 	private AttributeMetaDataFactory attrMetaFactory;
 	private List<String> entityNames;
 	private List<String> entityNamesLowerCase;
@@ -162,7 +162,7 @@ public class CsvRepositoryCollection extends FileRepositoryCollection
 	}
 
 	@Autowired
-	public void setEntityMetaDataFactory(EntityMetaDataFactory entityMetaFactory)
+	public void setEntityMetaDataFactory(EntityTypeFactory entityMetaFactory)
 	{
 		this.entityMetaFactory = entityMetaFactory;
 	}
