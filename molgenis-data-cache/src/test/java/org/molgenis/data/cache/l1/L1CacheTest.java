@@ -72,9 +72,13 @@ public class L1CacheTest extends AbstractMolgenisSpringTest
 
 		Mockito.when(entityManager.create(entityMetaData, NO_POPULATE)).thenReturn(new DynamicEntity(entityMetaData));
 
-		mockEntity = entityManager.create(entityMetaData, NO_POPULATE);
-		mockEntity.set("ID", entityID);
-		mockEntity.set("ATTRIBUTE_1", "test_value_1");
+		entity1 = new DynamicEntity(entityMetaData);
+		entity1.set("ID", entityID1);
+		entity1.set("ATTRIBUTE_1", "test_value_1");
+
+		entity2 = new DynamicEntity(entityMetaData);
+		entity2.set("ID", entityID2);
+		entity2.set("ATTRIBUTE_1", "test_value_2");
 	}
 
 	@BeforeMethod
