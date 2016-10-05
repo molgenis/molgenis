@@ -3,7 +3,7 @@ package org.molgenis.gavin.controller;
 import com.google.common.collect.ImmutableMap;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.User;
 import org.molgenis.data.DataService;
 import org.molgenis.data.MolgenisDataException;
 import org.molgenis.data.annotation.core.EffectsAnnotator;
@@ -109,7 +109,7 @@ public class GavinControllerTest extends AbstractMolgenisSpringTest
 		GavinJob job = mock(GavinJob.class);
 		File inputFile = mock(File.class);
 		File parentDir = mock(File.class);
-		MolgenisUser user = mock(MolgenisUser.class);
+		User user = mock(User.class);
 		when(user.getUsername()).thenReturn("tommy");
 
 		// Job Factory sets the Identifier in the JobExecution object.

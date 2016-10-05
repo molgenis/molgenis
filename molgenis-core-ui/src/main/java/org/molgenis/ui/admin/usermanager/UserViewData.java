@@ -1,12 +1,12 @@
 package org.molgenis.ui.admin.usermanager;
 
-import org.molgenis.auth.MolgenisGroup;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.Group;
+import org.molgenis.auth.User;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MolgenisUserViewData
+public class UserViewData
 {
 	private final String id;
 	private final String username;
@@ -18,7 +18,7 @@ public class MolgenisUserViewData
 	private Boolean superuser;
 	private final List<String> groupList = new ArrayList<>();
 
-	MolgenisUserViewData(MolgenisUser mu, List<MolgenisGroup> molgenisGroups)
+	UserViewData(User mu, List<Group> groups)
 	{
 		this(mu.getId(), mu.getUsername());
 		firstName = (null == mu.getFirstName() ? "" : mu.getFirstName());
@@ -30,13 +30,13 @@ public class MolgenisUserViewData
 		this.active = mu.isActive();
 		this.superuser = mu.isSuperuser();
 
-		for (MolgenisGroup mg : molgenisGroups)
+		for (Group mg : groups)
 		{
 			this.groupList.add(mg.getId());
 		}
 	}
 
-	MolgenisUserViewData(String id, final String username)
+	UserViewData(String id, final String username)
 	{
 		if (null == id)
 		{
@@ -103,7 +103,7 @@ public class MolgenisUserViewData
 		if (this == obj) return true;
 		if (obj == null) return false;
 		if (getClass() != obj.getClass()) return false;
-		MolgenisUserViewData other = (MolgenisUserViewData) obj;
+		UserViewData other = (UserViewData) obj;
 		if (active == null)
 		{
 			if (other.active != null) return false;

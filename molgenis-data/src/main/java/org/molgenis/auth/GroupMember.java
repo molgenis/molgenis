@@ -2,23 +2,23 @@ package org.molgenis.auth;
 
 import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
+import org.molgenis.data.support.StaticEntity;
 
-import static org.molgenis.auth.GroupAuthorityMetaData.ID;
-import static org.molgenis.auth.GroupAuthorityMetaData.GROUP;
+import static org.molgenis.auth.GroupMemberMetaData.*;
 
-public class GroupAuthority extends Authority
+public class GroupMember extends StaticEntity
 {
-	public GroupAuthority(Entity entity)
+	public GroupMember(Entity entity)
 	{
 		super(entity);
 	}
 
-	public GroupAuthority(EntityMetaData entityMeta)
+	public GroupMember(EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 	}
 
-	public GroupAuthority(String id, EntityMetaData entityMeta)
+	public GroupMember(String id, EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 		setId(id);
@@ -32,6 +32,16 @@ public class GroupAuthority extends Authority
 	public void setId(String id)
 	{
 		set(ID, id);
+	}
+
+	public User getUser()
+	{
+		return getEntity(USER, User.class);
+	}
+
+	public void setUser(User user)
+	{
+		set(USER, user);
 	}
 
 	public Group getGroup()

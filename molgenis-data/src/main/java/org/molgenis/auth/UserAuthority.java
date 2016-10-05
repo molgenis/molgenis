@@ -4,7 +4,7 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 
 import static org.molgenis.auth.UserAuthorityMetaData.ID;
-import static org.molgenis.auth.UserAuthorityMetaData.MOLGENIS_USER;
+import static org.molgenis.auth.UserAuthorityMetaData.USER;
 
 public class UserAuthority extends Authority
 {
@@ -34,13 +34,13 @@ public class UserAuthority extends Authority
 		set(ID, id);
 	}
 
-	public MolgenisUser getMolgenisUser()
+	public User getUser()
 	{
-		return getEntity(MOLGENIS_USER, MolgenisUser.class);
+		return getEntity(USER, User.class);
 	}
 
-	public void setMolgenisUser(MolgenisUser molgenisUser)
+	public void setUser(User user)
 	{
-		set(MOLGENIS_USER, molgenisUser);
+		set(USER, user);
 	}
 }

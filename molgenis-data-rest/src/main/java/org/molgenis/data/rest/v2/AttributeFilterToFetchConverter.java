@@ -153,7 +153,7 @@ public class AttributeFilterToFetchConverter
 	{
 		boolean hasRefAttr = false;
 		Fetch fetch = new Fetch();
-		for (AttributeMetaData attr : entityMeta.getAtomicAttributes())
+		try{for (AttributeMetaData attr : entityMeta.getAtomicAttributes())
 		{
 			Fetch subFetch = createDefaultAttributeFetch(attr, languageCode);
 			if (subFetch != null)
@@ -161,6 +161,8 @@ public class AttributeFilterToFetchConverter
 				hasRefAttr = true;
 			}
 			fetch.field(attr.getName(), subFetch);
+		}   }catch(Exception e){
+			System.out.print("DEBUG");
 		}
 		return hasRefAttr ? fetch : null;
 	}

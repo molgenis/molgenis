@@ -4,21 +4,21 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.meta.model.EntityMetaData;
 import org.molgenis.data.support.StaticEntity;
 
-import static org.molgenis.auth.MolgenisUserMetaData.*;
+import static org.molgenis.auth.UserMetaData.*;
 
-public class MolgenisUser extends StaticEntity
+public class User extends StaticEntity
 {
-	public MolgenisUser(Entity entity)
+	public User(Entity entity)
 	{
 		super(entity);
 	}
 
-	public MolgenisUser(EntityMetaData entityMeta)
+	public User(EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 	}
 
-	public MolgenisUser(String id, EntityMetaData entityMeta)
+	public User(String id, EntityMetaData entityMeta)
 	{
 		super(entityMeta);
 		setId(id);

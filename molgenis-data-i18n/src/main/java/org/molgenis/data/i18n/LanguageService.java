@@ -11,7 +11,8 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.stream.Stream;
 
-import static org.molgenis.auth.MolgenisUserMetaData.MOLGENIS_USER;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.auth.UserMetaData.USER;
 import static org.molgenis.data.i18n.model.I18nStringMetaData.I18N_STRING;
 import static org.molgenis.data.i18n.model.LanguageMetaData.LANGUAGE;
 import static org.molgenis.security.core.runas.RunAsSystemProxy.runAsSystem;
@@ -73,7 +74,7 @@ public class LanguageService
 
 			if (currentUserName != null)
 			{
-				Entity user = dataService.query(MOLGENIS_USER).eq("username", currentUserName).findOne();
+				Entity user = dataService.query(USER).eq("username", currentUserName).findOne();
 				if (user != null)
 				{
 					languageCode = user.getString("languageCode");

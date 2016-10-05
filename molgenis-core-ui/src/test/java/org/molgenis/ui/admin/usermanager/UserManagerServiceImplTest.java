@@ -7,7 +7,7 @@ import org.molgenis.data.DataService;
 import org.molgenis.data.Query;
 import org.molgenis.data.support.QueryImpl;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.user.MolgenisUserDetailsService;
+import org.molgenis.security.user.UserDetailsService;
 import org.molgenis.ui.admin.usermanager.UserManagerServiceImplTest.Config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -23,7 +23,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.AfterClass;
@@ -38,7 +37,7 @@ import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static org.mockito.Mockito.*;
-import static org.molgenis.auth.MolgenisGroupMemberMetaData.MOLGENIS_GROUP_MEMBER;
+import static org.molgenis.auth.GroupMemberMetaData.GROUP_MEMBER;
 import static org.testng.Assert.assertEquals;
 
 @ContextConfiguration(classes = { Config.class })
@@ -64,14 +63,14 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Override
-		protected UserDetailsService userDetailsService()
+		protected org.springframework.security.core.userdetails.UserDetailsService userDetailsService()
 		{
-			return mock(MolgenisUserDetailsService.class);
+			return mock(UserDetailsService.class);
 		}
 
 		@Bean
 		@Override
-		public UserDetailsService userDetailsServiceBean() throws Exception
+		public org.springframework.security.core.userdetails.UserDetailsService userDetailsServiceBean() throws Exception
 		{
 			return userDetailsService();
 		}
@@ -91,14 +90,14 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 		}
 
 		@Bean
-		MolgenisGroupMemberFactory molgenisGroupMemberFactory()
+		GroupMemberFactory molgenisGroupMemberFactory()
 		{
-			return mock(MolgenisGroupMemberFactory.class);
+			return mock(GroupMemberFactory.class);
 		}
 	}
 
 	@Autowired
-	private MolgenisGroupMemberFactory molgenisGroupMemberFactory;
+	private GroupMemberFactory groupMemberFactory;
 
 	@Autowired
 	private UserManagerService userManagerService;
@@ -121,7 +120,7 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	@Test(expectedExceptions = NullPointerException.class)
 	public void userManagerServiceImpl()
 	{
-		new UserManagerServiceImpl(null, molgenisGroupMemberFactory);
+		new UserManagerServiceImpl(null, groupMemberFactory);
 	}
 
 	@Test
@@ -129,61 +128,61 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		String molgenisUserId0 = "id0";
 		String molgenisUserName0 = "user0";
-		MolgenisUser molgenisUser0 = when(mock(MolgenisUser.class).getId()).thenReturn(molgenisUserId0).getMock();
-		when(molgenisUser0.getIdValue()).thenReturn(molgenisUserId0);
-		when(molgenisUser0.getUsername()).thenReturn(molgenisUserName0);
+		User user0 = when(mock(User.class).getId()).thenReturn(molgenisUserId0).getMock();
+		when(user0.getIdValue()).thenReturn(molgenisUserId0);
+		when(user0.getUsername()).thenReturn(molgenisUserName0);
 		String molgenisUserId1 = "id1";
 		String molgenisUserName1 = "user1";
-		MolgenisUser molgenisUser1 = when(mock(MolgenisUser.class).getId()).thenReturn(molgenisUserId1).getMock();
-		when(molgenisUser1.getIdValue()).thenReturn(molgenisUserId1);
-		when(molgenisUser1.getUsername()).thenReturn(molgenisUserName1);
-		when(dataService.findOneById(MolgenisUserMetaData.MOLGENIS_USER, molgenisUserId0, MolgenisUser.class))
-				.thenReturn(molgenisUser0);
-		when(dataService.findOneById(MolgenisUserMetaData.MOLGENIS_USER, molgenisUserId1, MolgenisUser.class))
-				.thenReturn(molgenisUser1);
-		when(dataService.findAll(MolgenisUserMetaData.MOLGENIS_USER, MolgenisUser.class))
-				.thenReturn(Stream.of(molgenisUser0, molgenisUser1));
-		MolgenisGroupMember molgenisGroupMember0 = mock(MolgenisGroupMember.class);
-		MolgenisGroup molgenisGroup0 = mock(MolgenisGroup.class);
-		when(molgenisGroupMember0.getMolgenisGroup()).thenReturn(molgenisGroup0);
-		MolgenisGroupMember molgenisGroupMember1 = mock(MolgenisGroupMember.class);
-		MolgenisGroup molgenisGroup1 = mock(MolgenisGroup.class);
-		when(molgenisGroupMember1.getMolgenisGroup()).thenReturn(molgenisGroup1);
-		when(dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser0),
-				MolgenisGroupMember.class)).thenReturn(Stream.of(molgenisGroupMember0));
-		when(dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, molgenisUser1),
-				MolgenisGroupMember.class)).thenReturn(Stream.of(molgenisGroupMember1));
+		User user1 = when(mock(User.class).getId()).thenReturn(molgenisUserId1).getMock();
+		when(user1.getIdValue()).thenReturn(molgenisUserId1);
+		when(user1.getUsername()).thenReturn(molgenisUserName1);
+		when(dataService.findOneById(UserMetaData.USER, molgenisUserId0, User.class))
+				.thenReturn(user0);
+		when(dataService.findOneById(UserMetaData.USER, molgenisUserId1, User.class))
+				.thenReturn(user1);
+		when(dataService.findAll(UserMetaData.USER, User.class))
+				.thenReturn(Stream.of(user0, user1));
+		GroupMember groupMember0 = mock(GroupMember.class);
+		Group group0 = mock(Group.class);
+		when(groupMember0.getGroup()).thenReturn(group0);
+		GroupMember groupMember1 = mock(GroupMember.class);
+		Group group1 = mock(Group.class);
+		when(groupMember1.getGroup()).thenReturn(group1);
+		when(dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user0),
+				GroupMember.class)).thenReturn(Stream.of(groupMember0));
+		when(dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
+				GroupMember.class)).thenReturn(Stream.of(groupMember1));
 		this.setSecurityContextSuperUser();
-		assertEquals(userManagerService.getAllMolgenisUsers(),
-				Arrays.asList(new MolgenisUserViewData(molgenisUser0, singletonList(molgenisGroup0)),
-						new MolgenisUserViewData(molgenisUser1, singletonList(molgenisGroup1))));
+		assertEquals(userManagerService.getAllUsers(),
+				Arrays.asList(new UserViewData(user0, singletonList(group0)),
+						new UserViewData(user1, singletonList(group1))));
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
 	public void getAllMolgenisUsersNonSu()
 	{
 		this.setSecurityContextNonSuperUserWrite();
-		this.userManagerService.getAllMolgenisUsers();
+		this.userManagerService.getAllUsers();
 	}
 
 	@Test
 	public void getAllMolgenisGroupsSu()
 	{
-		MolgenisGroup molgenisGroup0 = mock(MolgenisGroup.class);
-		MolgenisGroup molgenisGroup1 = mock(MolgenisGroup.class);
-		when(dataService.findAll(MolgenisGroupMetaData.MOLGENIS_GROUP, MolgenisGroup.class))
-				.thenReturn(Stream.of(molgenisGroup0, molgenisGroup1));
+		Group group0 = mock(Group.class);
+		Group group1 = mock(Group.class);
+		when(dataService.findAll(GroupMetaData.GROUP, Group.class))
+				.thenReturn(Stream.of(group0, group1));
 		this.setSecurityContextSuperUser();
-		assertEquals(userManagerService.getAllMolgenisGroups(), Arrays.asList(molgenisGroup0, molgenisGroup1));
+		assertEquals(userManagerService.getAllGroups(), Arrays.asList(group0, group1));
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
 	public void getAllMolgenisGroups_Non_SU()
 	{
 		this.setSecurityContextNonSuperUserWrite();
-		this.userManagerService.getAllMolgenisGroups();
+		this.userManagerService.getAllGroups();
 	}
 
 	@Test(expectedExceptions = AccessDeniedException.class)
@@ -198,23 +197,23 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		this.setSecurityContextSuperUser();
 
-		MolgenisUser user1 = when(mock(MolgenisUser.class).getId()).thenReturn("1").getMock();
-		MolgenisGroup group20 = mock(MolgenisGroup.class);
-		MolgenisGroup group21 = mock(MolgenisGroup.class);
+		User user1 = when(mock(User.class).getId()).thenReturn("1").getMock();
+		Group group20 = mock(Group.class);
+		Group group21 = mock(Group.class);
 
-		final MolgenisGroupMember molgenisGroupMemberOne = mock(MolgenisGroupMember.class);
-		molgenisGroupMemberOne.setMolgenisGroup(group20);
-		molgenisGroupMemberOne.setMolgenisUser(user1);
+		final GroupMember groupMemberOne = mock(GroupMember.class);
+		groupMemberOne.setGroup(group20);
+		groupMemberOne.setUser(user1);
 
-		final MolgenisGroupMember molgenisGroupMemberTwo = mock(MolgenisGroupMember.class);
-		molgenisGroupMemberTwo.setMolgenisGroup(group21);
-		molgenisGroupMemberTwo.setMolgenisUser(user1);
+		final GroupMember groupMemberTwo = mock(GroupMember.class);
+		groupMemberTwo.setGroup(group21);
+		groupMemberTwo.setUser(user1);
 
-		when(dataService.findOneById(MolgenisUserMetaData.MOLGENIS_USER, "1", MolgenisUser.class)).thenReturn(user1);
-		when(dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user1),
-				MolgenisGroupMember.class)).thenReturn(Stream.of(molgenisGroupMemberOne, molgenisGroupMemberTwo));
-		List<MolgenisGroup> groups = this.userManagerService.getGroupsWhereUserIsMember("1");
+		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
+		when(dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
+				GroupMember.class)).thenReturn(Stream.of(groupMemberOne, groupMemberTwo));
+		List<Group> groups = this.userManagerService.getGroupsWhereUserIsMember("1");
 
 		assertEquals(groups.size(), 2);
 	}
@@ -233,43 +232,43 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 
 		this.setSecurityContextSuperUser();
 
-		MolgenisUser user1 = mock(MolgenisUser.class);
+		User user1 = mock(User.class);
 		when(user1.getId()).thenReturn("1");
 		when(user1.getUsername()).thenReturn("Jonathan");
 
-		MolgenisGroup group22 = when(mock(MolgenisGroup.class).getId()).thenReturn("22").getMock();
+		Group group22 = when(mock(Group.class).getId()).thenReturn("22").getMock();
 
-		MolgenisGroupMember molgenisGroupMember = mock(MolgenisGroupMember.class);
-		when(molgenisGroupMember.getMolgenisUser()).thenReturn(user1);
-		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
+		GroupMember groupMember = mock(GroupMember.class);
+		when(groupMember.getUser()).thenReturn(user1);
+		when(groupMember.getGroup()).thenReturn(group22);
 
-		when(dataService.findOneById(MolgenisUserMetaData.MOLGENIS_USER, "1", MolgenisUser.class)).thenReturn(user1);
-		when(dataService.findOneById(MolgenisGroupMetaData.MOLGENIS_GROUP, "22", MolgenisGroup.class))
+		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
+		when(dataService.findOneById(GroupMetaData.GROUP, "22", Group.class))
 				.thenReturn(group22);
 
-		when(dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user1),
-				MolgenisGroupMember.class)).thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
+		when(dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
+				GroupMember.class)).thenAnswer(new Answer<Stream<GroupMember>>()
 		{
 			@Override
-			public Stream<MolgenisGroupMember> answer(InvocationOnMock invocation) throws Throwable
+			public Stream<GroupMember> answer(InvocationOnMock invocation) throws Throwable
 			{
-				return Stream.of(molgenisGroupMember);
+				return Stream.of(groupMember);
 			}
 		});
 
-		when(dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_GROUP, group22),
-				MolgenisGroupMember.class)).thenAnswer(new Answer<Stream<MolgenisGroupMember>>()
+		when(dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.GROUP, group22),
+				GroupMember.class)).thenAnswer(new Answer<Stream<GroupMember>>()
 		{
 			@Override
-			public Stream<MolgenisGroupMember> answer(InvocationOnMock invocation) throws Throwable
+			public Stream<GroupMember> answer(InvocationOnMock invocation) throws Throwable
 			{
-				return Stream.of(molgenisGroupMember);
+				return Stream.of(groupMember);
 			}
 		});
 
-		List<MolgenisUserViewData> users = this.userManagerService.getUsersMemberInGroup("22");
+		List<UserViewData> users = this.userManagerService.getUsersMemberInGroup("22");
 		assertEquals(users.size(), 1);
 	}
 
@@ -285,41 +284,41 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		setSecurityContextSuperUser();
 
-		MolgenisUser user1 = when(mock(MolgenisUser.class).getId()).thenReturn("1").getMock();
-		MolgenisGroup group22 = when(mock(MolgenisGroup.class).getId()).thenReturn("22").getMock();
-		MolgenisGroup group33 = when(mock(MolgenisGroup.class).getId()).thenReturn("33").getMock();
-		MolgenisGroup group44 = when(mock(MolgenisGroup.class).getId()).thenReturn("44").getMock();
+		User user1 = when(mock(User.class).getId()).thenReturn("1").getMock();
+		Group group22 = when(mock(Group.class).getId()).thenReturn("22").getMock();
+		Group group33 = when(mock(Group.class).getId()).thenReturn("33").getMock();
+		Group group44 = when(mock(Group.class).getId()).thenReturn("44").getMock();
 
-		MolgenisGroupMember molgenisGroupMember = mock(MolgenisGroupMember.class);
-		when(molgenisGroupMember.getMolgenisUser()).thenReturn(user1);
-		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
+		GroupMember groupMember = mock(GroupMember.class);
+		when(groupMember.getUser()).thenReturn(user1);
+		when(groupMember.getGroup()).thenReturn(group22);
 
-		when(dataService.findOneById(MolgenisUserMetaData.MOLGENIS_USER, "1", MolgenisUser.class)).thenReturn(user1);
+		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
 
-		when(dataService.findAll(MolgenisGroupMemberMetaData.MOLGENIS_USER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user1),
-				MolgenisGroupMember.class)).thenReturn(Stream.of(molgenisGroupMember));
-		when(dataService.findAll(MolgenisGroupMetaData.MOLGENIS_GROUP, MolgenisGroup.class))
+		when(dataService.findAll(GroupMemberMetaData.USER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
+				GroupMember.class)).thenReturn(Stream.of(groupMember));
+		when(dataService.findAll(GroupMetaData.GROUP, Group.class))
 				.thenReturn(Stream.of(group22, group33, group44));
 
-		molgenisGroupMember = mock(MolgenisGroupMember.class);
-		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
+		groupMember = mock(GroupMember.class);
+		when(groupMember.getGroup()).thenReturn(group22);
 
-		List groupMemberships = new ArrayList<MolgenisGroupMember>();
-		groupMemberships.add(molgenisGroupMember);
+		List groupMemberships = new ArrayList<GroupMember>();
+		groupMemberships.add(groupMember);
 
-		when(dataService.findAll(MOLGENIS_GROUP_MEMBER,
-				new QueryImpl<MolgenisGroupMember>().eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user1),
-				MolgenisGroupMember.class)).thenReturn(groupMemberships.stream());
+		when(dataService.findAll(GROUP_MEMBER,
+				new QueryImpl<GroupMember>().eq(GroupMemberMetaData.USER, user1),
+				GroupMember.class)).thenReturn(groupMemberships.stream());
 
-		List<MolgenisGroup> groups = this.userManagerService.getGroupsWhereUserIsNotMember("1");
+		List<Group> groups = this.userManagerService.getGroupsWhereUserIsNotMember("1");
 		assertEquals(groups.size(), 2);
 	}
 
 	@Test
 	public void addUserToGroupSu() throws NumberFormatException
 	{
-		when(molgenisGroupMemberFactory.create()).thenReturn(mock(MolgenisGroupMember.class));
+		when(groupMemberFactory.create()).thenReturn(mock(GroupMember.class));
 		setSecurityContextSuperUser();
 		this.userManagerService.addUserToGroup("22", "1");
 	}
@@ -336,22 +335,22 @@ public class UserManagerServiceImplTest extends AbstractTestNGSpringContextTests
 	{
 		setSecurityContextSuperUser();
 
-		MolgenisUser user1 = when(mock(MolgenisUser.class).getId()).thenReturn("1").getMock();
-		MolgenisGroup group22 = when(mock(MolgenisGroup.class).getId()).thenReturn("22").getMock();
-		MolgenisGroupMember molgenisGroupMember = mock(MolgenisGroupMember.class);
-		when(molgenisGroupMember.getMolgenisUser()).thenReturn(user1);
-		when(molgenisGroupMember.getMolgenisGroup()).thenReturn(group22);
+		User user1 = when(mock(User.class).getId()).thenReturn("1").getMock();
+		Group group22 = when(mock(Group.class).getId()).thenReturn("22").getMock();
+		GroupMember groupMember = mock(GroupMember.class);
+		when(groupMember.getUser()).thenReturn(user1);
+		when(groupMember.getGroup()).thenReturn(group22);
 
-		when(dataService.findOneById(MolgenisUserMetaData.MOLGENIS_USER, "1", MolgenisUser.class)).thenReturn(user1);
-		when(dataService.findOneById(MolgenisGroupMetaData.MOLGENIS_GROUP, "22", MolgenisGroup.class))
+		when(dataService.findOneById(UserMetaData.USER, "1", User.class)).thenReturn(user1);
+		when(dataService.findOneById(GroupMetaData.GROUP, "22", Group.class))
 				.thenReturn(group22);
 
-		Query<MolgenisGroupMember> q = new QueryImpl<MolgenisGroupMember>()
-				.eq(MolgenisGroupMemberMetaData.MOLGENIS_USER, user1).and()
-				.eq(MolgenisGroupMemberMetaData.MOLGENIS_GROUP, group22);
+		Query<GroupMember> q = new QueryImpl<GroupMember>()
+				.eq(GroupMemberMetaData.USER, user1).and()
+				.eq(GroupMemberMetaData.GROUP, group22);
 
-		when(dataService.findAll(MOLGENIS_GROUP_MEMBER, q, MolgenisGroupMember.class))
-				.thenReturn(Stream.of(molgenisGroupMember));
+		when(dataService.findAll(GROUP_MEMBER, q, GroupMember.class))
+				.thenReturn(Stream.of(groupMember));
 
 		this.userManagerService.removeUserFromGroup("22", "1");
 	}

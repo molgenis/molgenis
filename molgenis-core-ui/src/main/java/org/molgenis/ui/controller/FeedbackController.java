@@ -2,13 +2,13 @@ package org.molgenis.ui.controller;
 
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.NotBlank;
-import org.molgenis.auth.MolgenisUser;
+import org.molgenis.auth.User;
 import org.molgenis.data.settings.AppSettings;
 import org.molgenis.security.captcha.CaptchaException;
 import org.molgenis.security.captcha.CaptchaRequest;
 import org.molgenis.security.captcha.CaptchaService;
 import org.molgenis.security.core.utils.SecurityUtils;
-import org.molgenis.security.user.MolgenisUserService;
+import org.molgenis.security.user.UserService;
 import org.molgenis.ui.MolgenisPluginController;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,17 +48,17 @@ public class FeedbackController extends AbstractStaticContentController
 	private static final String MAIL_AUTHENTICATION_EXCEPTION_MESSAGE = "Unfortunately, we were unable to send the mail containing your feedback. Please contact the administrator.";
 	private static final String MAIL_SEND_EXCEPTION_MESSAGE = MAIL_AUTHENTICATION_EXCEPTION_MESSAGE;
 
-	private final MolgenisUserService molgenisUserService;
+	private final UserService userService;
 	private final AppSettings appSettings;
 	private final CaptchaService captchaService;
 	private final JavaMailSender mailSender;
 
 	@Autowired
-	public FeedbackController(MolgenisUserService molgenisUserService, AppSettings appSettings,
+	public FeedbackController(UserService userService, AppSettings appSettings,
 			CaptchaService captchaService, JavaMailSender mailSender)
 	{
 		super(ID, URI);
-		this.molgenisUserService = requireNonNull(molgenisUserService);
+		this.userService = requireNonNull(userService);
 		this.appSettings = requireNonNull(appSettings);
 		this.captchaService = requireNonNull(captchaService);
 		this.mailSender = requireNonNull(mailSender);
@@ -72,10 +72,10 @@ public class FeedbackController extends AbstractStaticContentController
 	public String init(final Model model)
 	{
 		super.init(model);
-		model.addAttribute("adminEmails", molgenisUserService.getSuEmailAddresses());
+		model.addAttribute("adminEmails", userService.getSuEmailAddresses());
 		if (SecurityUtils.currentUserIsAuthenticated())
 		{
-			MolgenisUser currentUser = molgenisUserService.getUser(SecurityUtils.getCurrentUsername());
+			User currentUser = userService.getUser(SecurityUtils.getCurrentUsername());
 			model.addAttribute("userName", getFormattedName(currentUser));
 			model.addAttribute("userEmail", currentUser.getEmail());
 		}
@@ -129,7 +129,7 @@ public class FeedbackController extends AbstractStaticContentController
 	{
 		MimeMessage message = mailSender.createMimeMessage();
 		MimeMessageHelper helper = new MimeMessageHelper(message, false);
-		helper.setTo(molgenisUserService.getSuEmailAddresses().toArray(new String[0]));
+		helper.setTo(userService.getSuEmailAddresses().toArray(new String[0]));
 		if (form.hasEmail())
 		{
 			helper.setCc(form.getEmail());
@@ -150,7 +150,7 @@ public class FeedbackController extends AbstractStaticContentController
 	 *
 	 * @return String containing the user's first name, middle names and last name.
 	 */
-	private static String getFormattedName(MolgenisUser user)
+	private static String getFormattedName(User user)
 	{
 		List<String> parts = new ArrayList<String>();
 		if (user.getTitle() != null)
