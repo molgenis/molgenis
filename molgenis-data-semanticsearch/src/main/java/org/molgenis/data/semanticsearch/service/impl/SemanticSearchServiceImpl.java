@@ -1,22 +1,5 @@
 package org.molgenis.data.semanticsearch.service.impl;
 
-import static java.util.Objects.isNull;
-import static java.util.Objects.requireNonNull;
-import static java.util.stream.Collectors.toList;
-import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
-import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
-
 import org.apache.commons.lang3.StringUtils;
 import org.elasticsearch.common.collect.Lists;
 import org.molgenis.MolgenisFieldTypes;
@@ -25,7 +8,6 @@ import org.molgenis.data.Entity;
 import org.molgenis.data.MolgenisDataAccessException;
 import org.molgenis.data.QueryRule;
 import org.molgenis.data.QueryRule.Operator;
-import org.molgenis.data.meta.MetaDataService;
 import org.molgenis.data.meta.model.AttributeMetaData;
 import org.molgenis.data.meta.model.AttributeMetaDataMetaData;
 import org.molgenis.data.meta.model.EntityMetaData;
@@ -44,11 +26,20 @@ import org.molgenis.ontology.core.model.OntologyTerm;
 import org.molgenis.ontology.core.service.OntologyService;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Stream;
+
+import static java.util.Objects.isNull;
+import static java.util.Objects.requireNonNull;
+import static java.util.stream.Collectors.toList;
+import static org.molgenis.data.meta.model.AttributeMetaDataMetaData.ATTRIBUTE_META_DATA;
+import static org.molgenis.data.meta.model.EntityMetaDataMetaData.ENTITY_META_DATA;
+
 public class SemanticSearchServiceImpl implements SemanticSearchService
 {
 	private final DataService dataService;
 	private final OntologyService ontologyService;
-	private final MetaDataService metaDataService;
 	private final TagGroupGenerator tagGroupGenerator;
 	private final QueryExpansionService queryExpansionService;
 	private final ExplainMappingService explainMappingService;
@@ -60,12 +51,11 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 
 	@Autowired
 	public SemanticSearchServiceImpl(DataService dataService, OntologyService ontologyService,
-			MetaDataService metaDataService, TagGroupGenerator tagGroupGenerator,
-			QueryExpansionService queryExpansionService, ExplainMappingService explainMappingService)
+			TagGroupGenerator tagGroupGenerator, QueryExpansionService queryExpansionService,
+			ExplainMappingService explainMappingService)
 	{
 		this.dataService = requireNonNull(dataService);
 		this.ontologyService = requireNonNull(ontologyService);
-		this.metaDataService = requireNonNull(metaDataService);
 		this.tagGroupGenerator = requireNonNull(tagGroupGenerator);
 		this.queryExpansionService = requireNonNull(queryExpansionService);
 		this.explainMappingService = requireNonNull(explainMappingService);
@@ -89,23 +79,26 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 			finalQueryRules.addAll(Arrays.asList(new QueryRule(Operator.AND), disMaxQueryRule));
 		}
 
-		Stream<AttributeMetaData> attributeMetaDataEntities = dataService.findAll(ATTRIBUTE_META_DATA,
-				new QueryImpl<AttributeMetaData>(finalQueryRules), AttributeMetaData.class);
+		Stream<AttributeMetaData> attributeMetaDataEntities = dataService
+				.findAll(ATTRIBUTE_META_DATA, new QueryImpl<AttributeMetaData>(finalQueryRules),
+						AttributeMetaData.class);
 
 		// Because the explain-API can be computationally expensive we limit the explanation to the top 10 attributes
 		Map<AttributeMetaData, ExplainedMatchCandidate<AttributeMetaData>> explainedAttributes = new LinkedHashMap<>();
 
 		AtomicInteger count = new AtomicInteger(0);
 
-		attributeMetaDataEntities.forEach(attribute -> {
+		attributeMetaDataEntities.forEach(attribute ->
+		{
 
 			if (count.get() < MAX_NUMBER_EXPLAINED_ATTRIBUTES)
 			{
-				ExplainedMatchCandidate<String> explainedCandidate = explainMappingService.explainMapping(searchParam,
-						attribute.getLabel());
+				ExplainedMatchCandidate<String> explainedCandidate = explainMappingService
+						.explainMapping(searchParam, attribute.getLabel());
 
-				explainedAttributes.put(attribute, ExplainedMatchCandidate.create(attribute,
-						explainedCandidate.getExplainedQueryStrings(), explainedCandidate.isHighQuality()));
+				explainedAttributes.put(attribute, ExplainedMatchCandidate
+						.create(attribute, explainedCandidate.getExplainedQueryStrings(),
+								explainedCandidate.isHighQuality()));
 			}
 			else
 			{
@@ -145,8 +138,8 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 		}
 		else
 		{
-			tagGroups = ontologyTermsFromTags.stream().map(
-					ot -> TagGroup.create(ontologyService.getOntologyTerms(ot.getAtomicIRIs()), ot.getLabel(), 1.0f))
+			tagGroups = ontologyTermsFromTags.stream().map(ot -> TagGroup
+					.create(ontologyService.getOntologyTerms(ot.getAtomicIRIs()), ot.getLabel(), 1.0f))
 					.collect(toList());
 		}
 
@@ -191,7 +184,7 @@ public class SemanticSearchServiceImpl implements SemanticSearchService
 	public Map<AttributeMetaData, Hit<OntologyTerm>> findTags(String entity, List<String> ontologyIds)
 	{
 		Map<AttributeMetaData, Hit<OntologyTerm>> result = new LinkedHashMap<AttributeMetaData, Hit<OntologyTerm>>();
-		EntityMetaData emd = metaDataService.getEntityMetaData(entity);
+		EntityMetaData emd = dataService.getEntityMetaData(entity);
 		for (AttributeMetaData amd : emd.getAtomicAttributes())
 		{
 			List<TagGroup> generateTagGroups = tagGroupGenerator.generateTagGroups(amd.getLabel(), ontologyIds);
